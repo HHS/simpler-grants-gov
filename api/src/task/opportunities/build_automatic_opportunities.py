@@ -34,13 +34,23 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.form_schema.forms import (
+    AttachmentForm_v1_2,
     BudgetNarrativeAttachment_v1_2,
+    CD511_v1_1,
+    EPA_FORM_4700_4_v5_0,
+    EPA_KEY_CONTACT_v2_0,
+    GG_LobbyingForm_v1_1,
+    OtherNarrativeAttachment_v1_2,
+    ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
+    ProjectPerformanceSiteLocation_v4_0,
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
+    SF424d_v1_1,
     SFLLL_v2_0,
+    SupplementaryNEHCoverSheet_v3_0,
 )
 from src.services.opportunity_attachments.attachment_util import get_s3_attachment_path
 from src.task.ecs_background_task import ecs_background_task
@@ -516,6 +526,312 @@ class BuildAutomaticOpportunitiesTask(Task):
                 CompetitionContainer(
                     competition_title="TEST-PRINT-ORG-IND-CT01",
                     required_form_ids=[ProjectAbstractSummary_v2_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # --- Isolated Print View opportunities: one per form ---
+
+        # Opportunity with static OpportunityID for attachment_form Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-ATT-ORG-IND-OT01",
+                opportunity_number="TEST-ATT-ORG-IND-01",
+                opportunity_id=uuid.UUID("97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-ATT-ORG-IND-CT01",
+                    required_form_ids=[AttachmentForm_v1_2.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for budget_narrative_attachment Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-BNA-ORG-IND-OT01",
+                opportunity_number="TEST-BNA-ORG-IND-01",
+                opportunity_id=uuid.UUID("caea0f33-b356-4fcd-aae3-c0244e11da1e"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-BNA-ORG-IND-CT01",
+                    required_form_ids=[BudgetNarrativeAttachment_v1_2.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for cd511 Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-CD511-ORG-IND-OT01",
+                opportunity_number="TEST-CD511-ORG-IND-01",
+                opportunity_id=uuid.UUID("5b890089-2bb2-4123-82cd-3d321ca62efe"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-CD511-ORG-IND-CT01",
+                    required_form_ids=[CD511_v1_1.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for epa_form_4700_4 Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-EPA4700-ORG-IND-OT01",
+                opportunity_number="TEST-EPA4700-ORG-IND-01",
+                opportunity_id=uuid.UUID("95f80b3b-c119-4a89-a50f-1b47b95a9191"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-EPA4700-ORG-IND-CT01",
+                    required_form_ids=[EPA_FORM_4700_4_v5_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for epa_key_contacts Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-EPAKC-ORG-IND-OT01",
+                opportunity_number="TEST-EPAKC-ORG-IND-01",
+                opportunity_id=uuid.UUID("1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-EPAKC-ORG-IND-CT01",
+                    required_form_ids=[EPA_KEY_CONTACT_v2_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for gg_lobbying_form Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-GGLOB-ORG-IND-OT01",
+                opportunity_number="TEST-GGLOB-ORG-IND-01",
+                opportunity_id=uuid.UUID("552d5866-501a-40b6-b1ce-2efc7a2d3aa5"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-GGLOB-ORG-IND-CT01",
+                    required_form_ids=[GG_LobbyingForm_v1_1.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for other_narrative_attachment Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-ONA-ORG-IND-OT01",
+                opportunity_number="TEST-ONA-ORG-IND-01",
+                opportunity_id=uuid.UUID("717b7f78-52f2-49f9-b1b8-5d7118313d2a"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-ONA-ORG-IND-CT01",
+                    required_form_ids=[OtherNarrativeAttachment_v1_2.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for project_abstract Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-PABS-ORG-IND-OT01",
+                opportunity_number="TEST-PABS-ORG-IND-01",
+                opportunity_id=uuid.UUID("d3081452-2cf8-4817-9abf-812e5d794485"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-PABS-ORG-IND-CT01",
+                    required_form_ids=[ProjectAbstract_v1_2.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for project_abstract_summary Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-PABSS-ORG-IND-OT01",
+                opportunity_number="TEST-PABSS-ORG-IND-01",
+                opportunity_id=uuid.UUID("e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-PABSS-ORG-IND-CT01",
+                    required_form_ids=[ProjectAbstractSummary_v2_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for project_narrative_attachment Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-PNA-ORG-IND-OT01",
+                opportunity_number="TEST-PNA-ORG-IND-01",
+                opportunity_id=uuid.UUID("6bdc2df3-6e51-4aea-89af-bade326feba1"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-PNA-ORG-IND-CT01",
+                    required_form_ids=[ProjectNarrativeAttachment_v1_2.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for project_performance_site_location Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-PPSL-ORG-IND-OT01",
+                opportunity_number="TEST-PPSL-ORG-IND-01",
+                opportunity_id=uuid.UUID("8a30cbe2-f297-49b7-b996-fc22982a3eb5"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-PPSL-ORG-IND-CT01",
+                    required_form_ids=[ProjectPerformanceSiteLocation_v4_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for sf424a Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-SF424A-ORG-IND-OT01",
+                opportunity_number="TEST-SF424A-ORG-IND-01",
+                opportunity_id=uuid.UUID("6c25cd41-660e-473f-abff-654083b7795d"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-SF424A-ORG-IND-CT01",
+                    required_form_ids=[SF424a_v1_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for sf424b Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-SF424B-ORG-IND-OT01",
+                opportunity_number="TEST-SF424B-ORG-IND-01",
+                opportunity_id=uuid.UUID("dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-SF424B-ORG-IND-CT01",
+                    required_form_ids=[SF424b_v1_1.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for sf424d Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-SF424D-ORG-IND-OT01",
+                opportunity_number="TEST-SF424D-ORG-IND-01",
+                opportunity_id=uuid.UUID("abd9bce9-2b9b-46b8-b814-2c5cb7c5e88b"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-SF424D-ORG-IND-CT01",
+                    required_form_ids=[SF424d_v1_1.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for sflll Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-SFLLL-ORG-IND-OT01",
+                opportunity_number="TEST-SFLLL-ORG-IND-01",
+                opportunity_id=uuid.UUID("f3e438ee-ff4c-475b-a058-8049aee9abda"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-SFLLL-ORG-IND-CT01",
+                    required_form_ids=[SFLLL_v2_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
+        # Opportunity with static OpportunityID for supplementary_neh_cover_sheet Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-NEHS-ORG-IND-OT01",
+                opportunity_number="TEST-NEHS-ORG-IND-01",
+                opportunity_id=uuid.UUID("b88287e2-7e2a-4c99-8ffe-30ab50c388ef"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-NEHS-ORG-IND-CT01",
+                    required_form_ids=[SupplementaryNEHCoverSheet_v3_0.form_id],
                     open_to_applicants=[
                         CompetitionOpenToApplicant.INDIVIDUAL,
                         CompetitionOpenToApplicant.ORGANIZATION,
