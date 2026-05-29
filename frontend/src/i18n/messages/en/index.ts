@@ -94,12 +94,6 @@ export const messages = {
       link: "Read about the Spring 2025 Coding Challenge",
     },
   },
-  BetaAlert: {
-    alertTitle:
-      "This site is a work in progress, with new features and updates based on your feedback.",
-    alert:
-      "Search for grants here. To use more advanced features or to apply, go to <LinkToGrants>Grants.gov</LinkToGrants>.",
-  },
   OpportunityListing: {
     pageTitle: "Opportunity Listing",
     metaDescription:
@@ -2339,5 +2333,10 @@ export const messages = {
     preferencesNotSavedError:
       "Your notification preference was not saved. Refresh the page to try again.",
     srPendingSave: "Saving notification preference...",
+  },
+  FeatureFlagsAdmin: {
+    heading: "Refresh your page",
+    alertMessage:
+      "Hard refresh your page when done changing Flags for the changes to fully apply.",
   },
 };
