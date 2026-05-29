@@ -9,6 +9,7 @@ import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import ApplicationStatus, LegacyUserStatus, OpportunityStatus
 from src.constants.static_role_values import (
+    INTERNAL_S3_SCANNER_ROLE,
     INTERNAL_WORKFLOW_USER_ROLE,
     NAVA_INTERNAL_ROLE,
     ORG_ADMIN,
@@ -125,6 +126,27 @@ def create_internal_users(db_session: db.Session) -> None:
 
     user_scenarios.append(
         "Internal workflow user that can send events - capable of sending events at the workflow API"
+    )
+
+    ###############################
+    # Local file-scanner user
+    # Used by the local virus-scanner background thread to authenticate
+    # against the file-scan callback service. Must match LOCAL_FILE_SCANNER_USER_ID.
+    ###############################
+    (
+        UserBuilder(
+            uuid.UUID("bc7a4d76-39d4-4f4f-9c64-c11b7c2a7c0a"),
+            db_session,
+            "Local file scanner user",
+        )
+        .with_api_key("local_file_scanner_user_key")
+        .with_internal_role(INTERNAL_S3_SCANNER_ROLE)
+        .build()
+    )
+
+    user_scenarios.append(
+        "Local file scanner user - has INTERNAL_S3_SCAN privilege so the local "
+        "scanner background thread can call the file-scan callback service"
     )
 
     ##############################################################

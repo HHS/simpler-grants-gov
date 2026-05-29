@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import cast
 from uuid import UUID
 
+from grants_shared.util import datetime_util
 from sqlalchemy import and_, desc, exists, func, select, tuple_, update
 from sqlalchemy.orm import aliased, selectinload
 
@@ -27,7 +28,6 @@ from src.task.notifications.constants import (
     UserEmailNotification,
     UserOpportunityUpdateContent,
 )
-from src.util import datetime_util
 from src.util.dict_util import diff_nested_dicts
 from src.util.string_utils import truncate_html_inline
 

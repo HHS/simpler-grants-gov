@@ -94,12 +94,6 @@ export const messages = {
       link: "Read about the Spring 2025 Coding Challenge",
     },
   },
-  BetaAlert: {
-    alertTitle:
-      "This site is a work in progress, with new features and updates based on your feedback.",
-    alert:
-      "Search for grants here. To use more advanced features or to apply, go to <LinkToGrants>Grants.gov</LinkToGrants>.",
-  },
   OpportunityListing: {
     pageTitle: "Opportunity Listing",
     metaDescription:
@@ -2063,6 +2057,10 @@ export const messages = {
     breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
+    summary: {
+      showDescription: "Show full description",
+      hideSummaryDescription: "Hide full description",
+    },
     awardRecs: "Award Recs",
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",
@@ -2202,6 +2200,8 @@ export const messages = {
         description:
           "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
         noFundingStrategyProvided: "No funding strategy provided.",
+        showDescription: "Show full description",
+        hideSummaryDescription: "Hide full description",
       },
     },
   },
@@ -2339,5 +2339,10 @@ export const messages = {
     preferencesNotSavedError:
       "Your notification preference was not saved. Refresh the page to try again.",
     srPendingSave: "Saving notification preference...",
+  },
+  FeatureFlagsAdmin: {
+    heading: "Refresh your page",
+    alertMessage:
+      "Hard refresh your page when done changing Flags for the changes to fully apply.",
   },
 };

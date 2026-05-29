@@ -16,7 +16,7 @@ dependencies = [
     "botocore>=1.31.62,<2",
     "boto3>=1.28.62,<2",
     "smart-open>=7.0.0,<8",
-    "pytz>=2023.3.post1,<2024",
+    "pytz>=2026.2,<2027",
     "APIFlask>=3.1.0,<4",
     "marshmallow-dataclass>=8.5.8,<9",
     "marshmallow>=3.20.1,<4",
@@ -26,7 +26,7 @@ dependencies = [
     "flask-cors>=6.0.0,<7",
     "opensearch-py>=2.5.0,<3",
     "pyjwt[crypto]>=2.9.0,<3",
-    "newrelic==11.5.0",
+    "newrelic>=12.1.0,<13",
     "jinja2>=3.1.5",
     "tenacity>=8.0,<9",
     "jsonschema[format-nongpl]>=4.23.0,<5",
@@ -46,6 +46,7 @@ dependencies = [
     "urllib3>=2.7.0,<3",
     "python-statemachine>=3.0.0,<4",
     "beautifulsoup4>=4.14.3,<5",
+    "grants-shared>=0.2.1",
 ]
 
 [project.scripts]
@@ -68,7 +69,7 @@ seed-local-soap-certificate = "tests.lib.seed_local_soap_certificate:seed_local_
 dev = [
     "black>=24.0.0,<25",
     "isort>=5.12.0,<6",
-    "mypy>=1.8.0,<2",
+    "mypy>=2.1.0,<3.0.0",
     "moto[s3]>=5.0.0,<6",
     "types-pytz>=2023.3.1.1,<2024",
     "coverage>=7.3.2,<8",
@@ -87,6 +88,7 @@ dev = [
     "types-requests>=2.31,<3",
     "graphviz>=0.21,<0.22",
     "eralchemy>=1.5.0,<2",
+    "watchfiles>=1.0.0,<2",
 ]
 
 [tool.uv]
@@ -249,10 +251,6 @@ exclude = [
     "src/form_schema/forms/[^/]+/[0-9]+/[0-9]+/form_json\\.py",
 ]
 
-[tool.bandit]
-# Ignore audit logging test file since test audit logging requires a lot of operations that trigger bandit warnings
-exclude_dirs = ["./tests/src/logging/test_audit.py"]
-
 [[tool.mypy.overrides]]
 # Migrations are generated without "-> None"
 # for the returns. Rather than require manually
@@ -270,15 +268,12 @@ filterwarnings = [
 ]
 
 markers = [
-  "audit: mark a test as a security audit log test, to be run isolated from other tests",
   "xml_validation: mark a test as an XML generation/validation test, to be run isolated from other tests",
   "sf424: mark a test as SF-424 form specific",
 ]
 
 [tool.coverage.run]
 omit = [
-  # Decodelog is only used for formatting logs locally
-  "src/logging/decodelog.py",
   # app_config only runs via the gunicorn script which doens't happen locally
   "src/app_config.py",
   # Migrations aren't run in tests
