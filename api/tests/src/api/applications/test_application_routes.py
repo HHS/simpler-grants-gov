@@ -7,7 +7,6 @@ from grants_shared.util import datetime_util
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 from sqlalchemy import select
 
-import src.adapters.db as db
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.constants.lookup_constants import (
@@ -16,7 +15,6 @@ from src.constants.lookup_constants import (
     CompetitionOpenToApplicant,
     Privilege,
 )
-from src.db.models import competition_models
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
 from src.validation.validation_constants import ValidationErrorType
@@ -30,6 +28,7 @@ from tests.src.db.models.factories import (
     ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
+    FormFactory,
     OpportunityFactory,
     OrganizationFactory,
     OrganizationUserFactory,
@@ -38,23 +37,6 @@ from tests.src.db.models.factories import (
     SamGovEntityFactory,
     UserFactory,
 )
-
-
-def _make_form(db_session: db.Session, **kwargs) -> competition_models.Form:
-    """Create and persist a Form with required-field defaults."""
-    defaults: dict = {
-        "form_name": "Test form",
-        "short_form_name": "TST_1_0",
-        "form_version": "1.0",
-        "agency_code": "TEST",
-        "form_json_schema": {},
-        "form_ui_schema": [],
-    }
-    defaults.update(kwargs)
-    form = competition_models.Form(**defaults)
-    db_session.add(form)
-    db_session.flush()
-    return form
 
 
 # Simple JSON schema used for tests below
@@ -511,7 +493,7 @@ def test_application_form_update_success_update(
     user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
         competition=application.competition,
@@ -597,7 +579,7 @@ def test_application_form_update_with_validation_warnings(
     user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
         competition=application.competition,
@@ -646,8 +628,7 @@ def test_application_form_update_with_rule_validation_issues(
     user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
-    form = _make_form(
-        db_session,
+    form = FormFactory.create(
         form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
         form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
     )
@@ -710,7 +691,7 @@ def test_application_form_update_with_invalid_schema_500(
     _, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
-    form = _make_form(db_session, form_json_schema={"properties": ["bad"]})
+    form = FormFactory.create(form_json_schema={"properties": ["bad"]})
 
     competition_form = CompetitionFormFactory.create(
         competition=application.competition,
@@ -1063,7 +1044,7 @@ def test_application_form_update_existing_form_preserves_is_included_in_submissi
     _, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
         competition=application.competition,
@@ -1106,7 +1087,7 @@ def test_application_form_update_existing_form_updates_is_included_in_submission
     _, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
         competition=application.competition,
@@ -1421,8 +1402,8 @@ def test_application_get_success_with_validation_issues(
 ):
 
     # Create a competition with two forms
-    form_a = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
-    form_b = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form_a = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form_b = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition = CompetitionFactory.create(competition_forms=[])
     competition_form_a = CompetitionFormFactory.create(competition=competition, form=form_a)
     competition_form_b = CompetitionFormFactory.create(competition=competition, form=form_b)
@@ -1513,13 +1494,11 @@ def test_application_get_success_with_rule_validation_issue(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
     # Create a competition with two forms
-    form_a = _make_form(
-        db_session,
+    form_a = FormFactory.create(
         form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
         form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
     )
-    form_b = _make_form(
-        db_session,
+    form_b = FormFactory.create(
         form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
         form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
     )
@@ -1683,7 +1662,7 @@ def test_application_form_get_with_validation_warnings(
 ):
     """Test that GET application form endpoint includes schema validation warnings"""
     # Create a form with our test schema
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     # Create application with the form
     application = ApplicationFactory.create()
@@ -1729,8 +1708,7 @@ def test_application_form_get_with_rule_validation_issue(
     user_auth_token,
 ):
     # Create a form with our test schema
-    form = _make_form(
-        db_session,
+    form = FormFactory.create(
         form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
         form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
     )
@@ -1786,7 +1764,7 @@ def test_application_form_get_with_invalid_schema(
 ):
     """Test behavior when form has an invalid JSON schema"""
     # Create a form with intentionally invalid schema
-    form = _make_form(db_session, form_json_schema={"properties": ["bad"]})
+    form = FormFactory.create(form_json_schema={"properties": ["bad"]})
 
     # Create application with the form
     application = ApplicationFactory.create()
@@ -1829,7 +1807,7 @@ def test_application_submit_success(
     future_date = today + timedelta(days=10)
     competition = CompetitionFactory.create(closing_date=future_date, competition_forms=[])
 
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
         competition=competition,
@@ -1890,7 +1868,7 @@ def test_application_submit_logging_enhancement(
         closing_date=future_date, competition_forms=[], opportunity=opportunity
     )
 
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
         competition=competition,
@@ -1966,7 +1944,7 @@ def test_application_submit_validation_issues(
     future_date = today + timedelta(days=10)
     competition = CompetitionFactory.create(closing_date=future_date, competition_forms=[])
 
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
         competition=competition,
@@ -2035,8 +2013,7 @@ def test_application_submit_rule_validation_issue(
     user_auth_token,
 ):
     # Create a form with our test schema
-    form = _make_form(
-        db_session,
+    form = FormFactory.create(
         form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
         form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
     )
@@ -2112,7 +2089,7 @@ def test_application_submit_invalid_required_form(
     future_date = today + timedelta(days=10)
     competition = CompetitionFactory.create(closing_date=future_date, competition_forms=[])
 
-    form = _make_form(db_session, form_name="ExampleForm-ABC", form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_name="ExampleForm-ABC", form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
         competition=competition, form=form, is_required=True
@@ -2172,7 +2149,7 @@ def test_application_form_update_forbidden_not_in_progress(
         db_session, privileges=[Privilege.MODIFY_APPLICATION], status=initial_status
     )
 
-    form = _make_form(db_session)
+    form = FormFactory.create()
     CompetitionFormFactory.create(competition=application.competition, form=form)
 
     request_data = {"application_response": {"name": "John Doe"}}
@@ -2386,7 +2363,7 @@ def test_application_form_update_forbidden_if_not_associated(
 ):
     """Test application form update fails when user is not associated with the application"""
     application = ApplicationFactory.create()
-    form = _make_form(db_session)
+    form = FormFactory.create()
     CompetitionFormFactory.create(competition=application.competition, form=form)
 
     request_data = {"application_response": {"name": "John Doe"}}
@@ -2516,7 +2493,7 @@ def test_application_submit_success_when_associated(
     competition = CompetitionFactory.create(closing_date=future_date, competition_forms=[])
 
     # Create a form and make it required for the competition
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(
         competition=competition, form=form, is_required=True
     )
@@ -3349,7 +3326,7 @@ def test_application_form_inclusion_update_success_true(
     user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with some data but no inclusion flag set
@@ -3581,7 +3558,7 @@ def test_application_form_inclusion_update_success_false(
     user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with inclusion initially set to true
@@ -3725,7 +3702,7 @@ def test_application_form_inclusion_update_application_form_not_found(
     _, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
-    form = _make_form(db_session)
+    form = FormFactory.create()
     CompetitionFormFactory.create(competition=application.competition, form=form)
     application_id = str(application.application_id)
     form_id = str(form.form_id)
@@ -3784,7 +3761,7 @@ def test_application_start_with_pre_population(
         "opportunity_title_field": {"gg_pre_population": {"rule": "opportunity_title"}},
     }
 
-    form = _make_form(db_session, form_rule_schema=form_rule_schema)
+    form = FormFactory.create(form_rule_schema=form_rule_schema)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     competition_id = str(competition.competition_id)
@@ -3836,8 +3813,8 @@ def test_application_form_update_with_pre_population(
         },
     }
 
-    form = _make_form(
-        db_session, form_json_schema=SIMPLE_JSON_SCHEMA, form_rule_schema=form_rule_schema
+    form = FormFactory.create(
+        form_json_schema=SIMPLE_JSON_SCHEMA, form_rule_schema=form_rule_schema
     )
 
     competition_form = CompetitionFormFactory.create(
@@ -3905,7 +3882,7 @@ def test_application_form_update_overwrites_user_changes_with_pre_population(
         "opportunity_number_field": {"gg_pre_population": {"rule": "opportunity_number"}}
     }
 
-    form = _make_form(db_session, form_rule_schema=form_rule_schema)
+    form = FormFactory.create(form_rule_schema=form_rule_schema)
 
     competition_form = CompetitionFormFactory.create(
         competition=application.competition,
@@ -4037,7 +4014,7 @@ def test_application_form_inclusion_update_403_access(
     """Test forbidden setting form inclusion to true"""
     # Create application with a form
     application = ApplicationFactory.create()
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with some data but no inclusion flag set
@@ -4369,7 +4346,7 @@ def test_application_submit_fails_with_expired_org(client, enable_factory_create
 
     # Create a simple competition with a form
     competition = CompetitionFactory.create()
-    form = _make_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(
         competition=competition, form=form, is_required=True
     )
