@@ -140,6 +140,9 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    # Populated at read time for API responses; not persisted.
+    award_recommendation_summary: dict[str, int | Decimal] | None = None
+
 
 class AwardRecommendationAttachment(ApiSchemaTable, TimestampMixin):
     __tablename__ = "award_recommendation_attachment"
