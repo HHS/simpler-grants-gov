@@ -130,7 +130,6 @@ def setup_logging(app: APIFlask) -> None:
 
 def register_db_client(app: APIFlask) -> None:
     db_client = db.PostgresDBClient()
-    db_client.check_db_connection()
     flask_db.register_db_client(db_client, app)
 
 
