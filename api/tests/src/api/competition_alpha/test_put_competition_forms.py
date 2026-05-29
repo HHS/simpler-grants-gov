@@ -3,7 +3,6 @@ from uuid import uuid4
 from src.db.models.competition_models import Form
 from src.form_schema.forms import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
-from tests.lib.data_factories import _make_form
 from tests.src.api.competition_alpha.test_competition_update_flag import (
     add_manage_competition_privilege,
 )
@@ -190,7 +189,7 @@ def test_put_competition_forms_form_deprecated(
 
     competition = factories.CompetitionFactory.create(competition_forms=[])
     existing_form = db_session.get(Form, SF424_v4_0.form_id)
-    deprecated_form = _make_form(
+    deprecated_form = factories.FormFactory.create(
         form_name="Deprecated Form",
         short_form_name="DEPR_1_0",
         is_deprecated=True,
