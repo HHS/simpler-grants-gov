@@ -23,7 +23,7 @@ def get_ses_client(session: boto3.Session | None = None) -> botocore.client.Base
     if session is None:
         session = get_boto_session()
 
-    return session.client("ses")
+    return session.client("sesv2")
 
 
 def send_email(
@@ -33,16 +33,16 @@ def send_email(
     ses_client: botocore.client.BaseClient | None = None,
 ) -> str:
     """
-    Send an email using AWS SES.
+    Send an email using AWS SESv2.
 
     Args:
         to_address: Email address to send to
         subject: Email subject line
         message: Email body (supports both HTML and plain text)
-        ses_client: Optional SES client (for testing)
+        ses_client: Optional SESv2 client (for testing)
 
     Returns:
-        Message ID from SES
+        Message ID from SESv2
 
     Raises:
         Exception: If email fails to send
@@ -65,7 +65,7 @@ def send_email(
 
     try:
         logger.info(
-            "Sending email via SES",
+            "Sending email via SESv2",
             extra={
                 "to_address": to_address,
                 "subject": subject,
@@ -74,14 +74,16 @@ def send_email(
         )
 
         response = ses_client.send_email(
-            Source=config.aws_ses_from_email,
+            FromEmailAddress=config.aws_ses_from_email,
             Destination={"ToAddresses": [to_address]},
-            Message={
-                "Subject": {"Data": subject, "Charset": "UTF-8"},
-                "Body": {
-                    "Text": {"Data": message, "Charset": "UTF-8"},
-                    "Html": {"Data": message, "Charset": "UTF-8"},
-                },
+            Content={
+                "Simple": {
+                    "Subject": {"Data": subject, "Charset": "UTF-8"},
+                    "Body": {
+                        "Text": {"Data": message, "Charset": "UTF-8"},
+                        "Html": {"Data": message, "Charset": "UTF-8"},
+                    },
+                }
             },
         )
 
@@ -89,7 +91,7 @@ def send_email(
         message_id = response_object.message_id
 
         logger.info(
-            "Successfully sent email via SES",
+            "Successfully sent email via SESv2",
             extra={
                 "message_id": message_id,
                 "to_address": to_address,
@@ -98,20 +100,18 @@ def send_email(
 
         return message_id
 
-    except ClientError as e:
+    except ClientError:
         logger.exception(
-            "Failed to send email via SES",
+            "Failed to send email via SESv2",
             extra={
                 "to_address": to_address,
                 "subject": subject,
-                "error_code": e.response.get("Error", {}).get("Code"),
-                "error_message": e.response.get("Error", {}).get("Message"),
             },
         )
-        raise Exception("Failed to send email via SES") from e
+        raise
     except Exception:
         logger.exception(
-            "Unexpected error sending email via SES",
+            "Unexpected error sending email via SESv2",
             extra={
                 "to_address": to_address,
                 "subject": subject,

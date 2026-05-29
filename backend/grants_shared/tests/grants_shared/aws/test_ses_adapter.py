@@ -8,14 +8,11 @@ import grants_shared.aws.aws_session as aws_session_module
 from grants_shared.aws import send_email
 
 
-def test_send_email_success(ses_client, monkeypatch):
+def test_send_email_success(ses_client):
     """Test successfully sending an email via SES"""
-    from_email = os.getenv("AWS_SES_FROM_EMAIL")
     to_email = "recipient@example.com"
     message_subject = "Test Subject"
     message_body = "This is a test email message"
-
-    ses_client.verify_email_identity(EmailAddress=from_email)
 
     message_id = send_email(
         to_address=to_email,
@@ -30,19 +27,15 @@ def test_send_email_success(ses_client, monkeypatch):
     assert len(ses_backend.sent_messages) == 1
 
     sent_email = ses_backend.sent_messages[0]
-    assert sent_email.source == from_email
+    assert sent_email.source == os.getenv("AWS_SES_FROM_EMAIL")
     assert to_email in sent_email.destinations["ToAddresses"]
     assert sent_email.subject == message_subject
     assert sent_email.body == message_body
 
 
-def test_send_email_html_special_characters(ses_client, monkeypatch):
+def test_send_email_html_special_characters(ses_client):
     """Test sending emails with HTML content and special characters in subject and body"""
-    from_email = os.getenv("AWS_SES_FROM_EMAIL")
     to_email = "recipient@example.com"
-
-    ses_client.verify_email_identity(EmailAddress=from_email)
-
     subject = "Test with émojis 🎉 and spëcial çharacters"
     message = """<html>
                     <body>
@@ -87,11 +80,14 @@ def test_send_email_html_special_characters(ses_client, monkeypatch):
     assert "©" in sent_email.body
 
 
-def test_send_email_unverified_sender(ses_client, monkeypatch):
+def test_send_email_unverified_sender(ses_client):
     """Test that sending from an unverified email address fails"""
     to_email = "recipient@example.com"
     message_subject = "Test Subject"
     message_body = "This is a test email message"
+
+    # Delete the verified email identity to simulate unverified sender
+    ses_client.delete_email_identity(EmailIdentity=os.getenv("AWS_SES_FROM_EMAIL"))
 
     with pytest.raises(Exception) as exc_info:
         send_email(
@@ -101,17 +97,18 @@ def test_send_email_unverified_sender(ses_client, monkeypatch):
             ses_client=ses_client,
         )
 
-    assert "Failed to send email" in str(exc_info.value)
+    # "Email address not verified" is partial of the error message
+    assert "Email address not verified" in str(exc_info.value)
 
 
-def test_send_email_multiple_recipients(ses_client, monkeypatch):
+def test_send_email_multiple_recipients(ses_client):
     """Test sending emails to multiple recipients sequentially"""
     from_email = os.getenv("AWS_SES_FROM_EMAIL")
     recipients = ["recipient1@example.com", "recipient2@example.com", "recipient3@example.com"]
     message_subject = "Test Subject"
     message_body = "This is a test email message"
 
-    ses_client.verify_email_identity(EmailAddress=from_email)
+    ses_client.create_email_identity(EmailIdentity=from_email)
 
     message_ids = []
     for recipient in recipients:
