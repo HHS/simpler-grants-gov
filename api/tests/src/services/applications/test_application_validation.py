@@ -6,7 +6,6 @@ from freezegun import freeze_time
 
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant
-from src.db.models.competition_models import Form
 from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
@@ -700,14 +699,10 @@ def test_validate_is_included_in_submission_behavior(
 
 
 @freeze_time("2023-02-20 12:00:00", tz_offset=0)
-def test_validate_application_form_submit_post_population(enable_factory_create, db_session):
+def test_validate_application_form_submit_post_population(enable_factory_create):
     """Test that post-population occurs and updates application_response during submit action"""
     # Create a form with post-population rules
-    form = Form(
-        form_name="Post-population form",
-        short_form_name="POST_1_0",
-        form_version="1.0",
-        agency_code="TEST",
+    form = FormFactory.create(
         form_json_schema={
             "type": "object",
             "properties": {
@@ -716,14 +711,11 @@ def test_validate_application_form_submit_post_population(enable_factory_create,
                 "existing_field": {"type": "string"},
             },
         },
-        form_ui_schema=[],
         form_rule_schema={
             "signature_field": {"gg_post_population": {"rule": "signature"}},
             "date_field": {"gg_post_population": {"rule": "current_date"}},
         },
     )
-    db_session.add(form)
-    db_session.flush()
 
     # Create application and form
     application = ApplicationFactory.create()
@@ -759,14 +751,10 @@ def test_validate_application_form_submit_post_population(enable_factory_create,
     assert application_form.application_response["date_field"] == "2023-02-20"
 
 
-def test_validate_application_form_get_no_post_population(enable_factory_create, db_session):
+def test_validate_application_form_get_no_post_population(enable_factory_create):
     """Test that post-population does NOT occur during GET action"""
     # Create a form with post-population rules
-    form = Form(
-        form_name="Post-population form",
-        short_form_name="POST_1_0",
-        form_version="1.0",
-        agency_code="TEST",
+    form = FormFactory.create(
         form_json_schema={
             "type": "object",
             "properties": {
@@ -775,14 +763,11 @@ def test_validate_application_form_get_no_post_population(enable_factory_create,
                 "existing_field": {"type": "string"},
             },
         },
-        form_ui_schema=[],
         form_rule_schema={
             "signature_field": {"gg_post_population": {"rule": "signature"}},
             "date_field": {"gg_post_population": {"rule": "current_date"}},
         },
     )
-    db_session.add(form)
-    db_session.flush()
 
     # Create application and form
     application = ApplicationFactory.create()
@@ -811,14 +796,10 @@ def test_validate_application_form_get_no_post_population(enable_factory_create,
     assert "date_field" not in application_form.application_response
 
 
-def test_validate_application_form_modify_no_post_population(enable_factory_create, db_session):
+def test_validate_application_form_modify_no_post_population(enable_factory_create):
     """Test that post-population does NOT occur during MODIFY action"""
     # Create a form with post-population rules
-    form = Form(
-        form_name="Post-population form",
-        short_form_name="POST_1_0",
-        form_version="1.0",
-        agency_code="TEST",
+    form = FormFactory.create(
         form_json_schema={
             "type": "object",
             "properties": {
@@ -827,14 +808,11 @@ def test_validate_application_form_modify_no_post_population(enable_factory_crea
                 "existing_field": {"type": "string"},
             },
         },
-        form_ui_schema=[],
         form_rule_schema={
             "signature_field": {"gg_post_population": {"rule": "signature"}},
             "date_field": {"gg_post_population": {"rule": "current_date"}},
         },
     )
-    db_session.add(form)
-    db_session.flush()
 
     # Create application and form
     application = ApplicationFactory.create()
