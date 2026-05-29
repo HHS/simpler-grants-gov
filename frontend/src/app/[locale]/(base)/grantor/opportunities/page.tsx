@@ -1,4 +1,5 @@
 import TopLevelError from "src/app/[locale]/(base)/error/page";
+import { AgencySelector } from "src/app/[locale]/(base)/grantor/opportunities/_components/AgencySelector";
 import { UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
@@ -27,7 +28,6 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
-import { AgencySelector } from "src/components/workspace/AgencySelector";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");

@@ -2,12 +2,11 @@
 
 import { createPortal } from "react-dom";
 import { submitOpportunityAction } from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/actions";
+import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
 
 import { useTranslations } from "next-intl";
 import { startTransition, useActionState, useEffect, useState } from "react";
 import { Alert, Button } from "@trussworks/react-uswds";
-
-import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
 
 type OpportunityEditHeaderProps = {
   initialValues: OpportunityEditFormValues;

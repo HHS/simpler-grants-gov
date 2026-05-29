@@ -1,5 +1,6 @@
 "use client";
 
+import { OpportunityAttachmentUploadInput } from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/_components/OpportunityAttachmentUploadInput";
 import {
   saveOpportunityEditAction,
   type OpportunityEditValidationErrors,
@@ -13,6 +14,7 @@ import {
 } from "src/constants/opportunity";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 import { getNumericAmountFromString } from "src/utils/formatCurrencyUtil";
+import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
 
 import { useTranslations } from "next-intl";
 import { startTransition, useActionState, useEffect, useState } from "react";
@@ -30,8 +32,6 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
-import { OpportunityAttachmentUploadInput } from "src/components/opportunity/OpportunityAttachmentUploadInput";
-import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
 
 function formatNumber(value: string): string {
   const raw = value.replace(/,/g, "");

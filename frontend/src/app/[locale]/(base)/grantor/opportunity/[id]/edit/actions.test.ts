@@ -7,8 +7,8 @@ import {
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { UserSession } from "src/types/authTypes";
+import { buildOpportunitySummaryUpdateRequest } from "src/utils/opportunityEditFormConfig";
 
-import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 import {
   saveOpportunityEditAction,
   submitOpportunityAction,

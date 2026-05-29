@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
+import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
 
 import OpportunityEditForm from "./OpportunityEditForm";
-import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
 
 const mockUseActionState = jest.fn();
 

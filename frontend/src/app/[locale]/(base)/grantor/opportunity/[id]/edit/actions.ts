@@ -8,12 +8,11 @@ import {
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
+import { buildOpportunitySummaryUpdateRequest } from "src/utils/opportunityEditFormConfig";
 import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-
-import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 
 export type OpportunityEditValidationErrors = {
   title?: string[];
