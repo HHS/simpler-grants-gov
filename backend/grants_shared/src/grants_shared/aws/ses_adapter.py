@@ -50,6 +50,7 @@ def send_email(
     config = SESConfig()
 
     if is_local_aws():
+        # the local logger has the email details for debugging
         logger.info(
             "Local environment detected - not sending actual email",
             extra={
@@ -64,14 +65,7 @@ def send_email(
         ses_client = get_ses_client()
 
     try:
-        logger.info(
-            "Sending email via SESv2",
-            extra={
-                "to_address": to_address,
-                "subject": subject,
-                "from_address": config.aws_ses_from_email,
-            },
-        )
+        logger.info("Sending email via SESv2")
 
         response = ses_client.send_email(
             FromEmailAddress=config.aws_ses_from_email,
@@ -94,27 +88,11 @@ def send_email(
             "Successfully sent email via SESv2",
             extra={
                 "message_id": message_id,
-                "to_address": to_address,
             },
         )
 
         return message_id
 
     except ClientError:
-        logger.exception(
-            "Failed to send email via SESv2",
-            extra={
-                "to_address": to_address,
-                "subject": subject,
-            },
-        )
-        raise
-    except Exception:
-        logger.exception(
-            "Unexpected error sending email via SESv2",
-            extra={
-                "to_address": to_address,
-                "subject": subject,
-            },
-        )
+        logger.exception("Failed to send email via SESv2")
         raise
