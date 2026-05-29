@@ -87,6 +87,7 @@ dev = [
     "types-requests>=2.31,<3",
     "graphviz>=0.21,<0.22",
     "eralchemy>=1.5.0,<2",
+    "watchfiles>=1.0.0,<2",
 ]
 
 [tool.uv]

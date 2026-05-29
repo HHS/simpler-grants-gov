@@ -133,6 +133,9 @@ def set_env_var_defaults(monkeypatch_session):
     # We will set this to false so we skip logs during unit tests and keep enabled during dev.
     monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
 
+    # Stops the local file-scan watcher from spawning a thread per app fixture.
+    monkeypatch_session.setenv("ENABLE_LOCAL_FILE_SCANNER", "FALSE")
+
 
 @pytest.fixture(scope="session", autouse=True)
 def init_new_relic_app():
@@ -692,6 +695,28 @@ def load_active_forms(db_session, enable_factory_create) -> None:
         copied_form = copy.deepcopy(form)
         copied_form.form_json_schema = resolve_jsonschema(form.form_json_schema)
         db_session.merge(copied_form, load=True)
+
+
+@pytest.fixture
+def s3_scanner_user(db_session, monkeypatch) -> User:
+    """Create the local file-scanner user with the INTERNAL_S3_SCAN privilege
+    and point LOCAL_FILE_SCANNER_USER_ID at them.
+
+    Mirrors the workflow_user fixture pattern but skips enable_factory_create
+    so it can compose with a test-local moto context. enable_factory_create
+    pulls in mock_s3_bucket -> mock_s3, whose s3-only whitelist would block
+    the DynamoDB calls these tests also need.
+    """
+    monkeypatch.setattr(factories, "_db_session", db_session)
+    user = UserFactory.create()
+    role = RoleFactory.create(
+        privileges=[Privilege.INTERNAL_S3_SCAN], role_types=[RoleType.INTERNAL]
+    )
+    InternalUserRoleFactory.create(user=user, role=role)
+
+    monkeypatch.setenv("LOCAL_FILE_SCANNER_USER_ID", str(user.user_id))
+
+    return user
 
 
 @pytest.fixture
