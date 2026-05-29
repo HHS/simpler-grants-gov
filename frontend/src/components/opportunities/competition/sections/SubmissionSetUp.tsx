@@ -53,7 +53,6 @@ export function SubmissionSetUp() {
           individuals_only: t("sections.whoCanApplyIndividualsOnly"),
           both: t("sections.whoCanApplyBoth"),
         }}
-        pleaseSelectText={"Select applicant type"}
       />
       <div className="grid-row grid-gap-2">
         <div className="tablet:grid-col">

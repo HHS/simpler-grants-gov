@@ -30,7 +30,8 @@ export async function generateMetadata({
   };
 }
 
-async function OpportunityCompetitionPage({ params: _params }: PageProps) {
+async function OpportunityCompetitionPage({ params }: PageProps) {
+  const { id: _id, locale: _locale } = await params;
   const session = await getSession();
   if (!session || !session.token) {
     return <UnauthorizedMessage />;
