@@ -5,11 +5,11 @@ import hashlib
 import logging
 from datetime import date
 
+from grants_shared.util.datetime_util import utcnow
 from lxml import etree as lxml_etree
 
 from src.db.models.competition_models import Application, ApplicationSubmission
 from src.services.xml_generation.constants import FOOTER_NAMESPACES, HEADER_NAMESPACES
-from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
 

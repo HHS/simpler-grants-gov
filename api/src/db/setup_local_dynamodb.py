@@ -1,17 +1,17 @@
 import logging
 
 import boto3
+import grants_shared.logs
+from grants_shared.util.local import error_if_not_local
 
-import src.logging
 from src.adapters.aws.dynamodb_adapter import DynamoDBConfig
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
 
 def setup_local_dynamodb() -> None:
     """Set up local DynamoDB tables for development"""
-    with src.logging.init(__package__):
+    with grants_shared.logs.init(__package__):
         error_if_not_local()
 
         dynamodb_config = DynamoDBConfig()
@@ -40,10 +40,10 @@ def _create_virus_scan_table(
         table = dynamodb.create_table(
             TableName=file_scan_cache_table_name,
             KeySchema=[
-                {"AttributeName": "attachment_id", "KeyType": "HASH"},  # Partition key
+                {"AttributeName": "file_id", "KeyType": "HASH"},  # Partition key
             ],
             AttributeDefinitions=[
-                {"AttributeName": "attachment_id", "AttributeType": "S"},  # String type
+                {"AttributeName": "file_id", "AttributeType": "S"},  # String type
             ],
             BillingMode="PAY_PER_REQUEST",  # On-demand billing for local development
         )

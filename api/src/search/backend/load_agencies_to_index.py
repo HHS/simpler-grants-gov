@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 from enum import StrEnum
 
+from grants_shared.util.datetime_util import get_now_us_eastern_datetime
 from pydantic import Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -11,7 +12,6 @@ from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.services.agencies_v1.get_agencies import _construct_active_inner_query
 from src.task.task import Task, logger
-from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
 
 SCHEMA = AgencyV1Schema()

@@ -1,0 +1,99 @@
+name: Release Grants Shared Package to PyPi
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./backend/grants_shared
+
+jobs:
+  build-grants-shared:
+    name: Build grants_shared for PyPi
+    runs-on: ubuntu-22.04
+    env:
+      PY_RUN_APPROACH: "local"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+           ref: "main"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install Python 3.14
+        run: uv python install 3.14
+
+      - name: Init
+        run: make setup-local
+
+      - name: Run format check
+        run: make format-check
+
+      - name: Run linting
+        run: make lint
+
+      - name: Run security linting
+        run: make lint-security
+
+      - name: Start tests
+        run: make test-coverage
+
+      - name: Build
+        run: uv build
+
+      - name: Get Project Version
+        id: get-version
+        run: |
+          PROJECT_VERSION=$(grep '^version' pyproject.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
+          echo "grants_shared project version is currently: ${PROJECT_VERSION}"
+          echo "project_version=$PROJECT_VERSION" >> "$GITHUB_OUTPUT"
+
+      # Verify we built the package in the right shape to use as a module
+      - name: Smoke Test (wheel)
+        run: |
+          uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}-py3-none-any.whl tests/grants_shared/smoke_test.py
+
+      - name: Smoke Test (source distribution)
+        run: |
+          uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}.tar.gz tests/grants_shared/smoke_test.py
+
+      # Upload the dist so the PyPi integration is isolated from the build.
+      - name: Upload dist
+        uses: actions/upload-artifact@v7
+        with:
+          name: grants-shared-dist
+          path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/backend/grants_shared/dist
+          if-no-files-found: error
+          retention-days: 1
+          overwrite: true
+
+  publish-grants-shared:
+    # Separate dedicated job as we have to grant this one additional write
+    # privileges against our repo for the id-token, want to isolate that.
+    # This uses trusted publishing which relies on an OIDC connection
+    # between Github and PyPi. The PyPi package is configured to only
+    # allow publishing in this way from exactly this workflow.
+    #
+    # https://docs.astral.sh/uv/guides/integration/github/#publishing-to-pypi
+    # https://docs.pypi.org/trusted-publishers/
+    name: Publish grants_shared to PyPi
+    runs-on: ubuntu-22.04
+    needs:
+      - build-grants-shared
+    # The PyPi configuration setup will only allow this environment
+    # to publish to PyPi, any others, including the default will be blocked.
+    environment: pypi-publish
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Retrieve dist
+        uses: actions/download-artifact@v7
+        with:
+          name: grants-shared-dist
+          path: dist/
+
+      # https://github.com/pypa/gh-action-pypi-publish
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

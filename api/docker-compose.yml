@@ -1,16 +1,4 @@
 services:
-  grants-db:
-    image: postgres:17.5-alpine
-    container_name: grants-db
-    command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
-    env_file: ./local.env
-    ports:
-      - "5432:5432"
-    volumes:
-      - grantsdbdata:/var/lib/postgresql/data
-    networks:
-      - default
-
   opensearch-node:
     image: opensearchproject/opensearch:2
     container_name: opensearch-node
@@ -57,7 +45,7 @@ services:
     environment:
       - COM_ADOBE_TESTING_S3MOCK_STORE_ROOT=containers3root
       - COM_ADOBE_TESTING_S3MOCK_STORE_RETAIN_FILES_ON_EXIT=true
-      - COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS=local-mock-public-bucket,local-mock-draft-bucket
+      - COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS=local-mock-public-bucket,local-mock-draft-bucket,local-mock-file-scan-bucket
     ports:
       - 9090:9090
     volumes:
@@ -116,7 +104,6 @@ services:
     volumes:
       - .:/api
     depends_on:
-      - grants-db
       - opensearch-node
       - s3mock
       - sqsmock
@@ -125,6 +112,7 @@ services:
       - mock-applicants-soap-api
     networks:
       - grants_backend
+      - local_db
       - default
 
   mock-oauth2-server:
@@ -179,3 +167,8 @@ volumes:
 networks:
   grants_backend:
     driver: bridge
+  local_db:
+    # NOTE: This network is created by starting the shared DB
+    # defined in /backend/docker-compose.db.yml
+    external: true
+    name: local_db

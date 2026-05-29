@@ -11,7 +11,7 @@ from src.db.models.award_recommendation_models import (
     AwardRecommendationRiskSubmission,
 )
 from src.db.models.user_models import User
-from src.services.award_recommendations.create_award_recommendation_risk import (
+from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_for_update,
 )
 from src.services.award_recommendations.utils import validate_all_submissions_exist
@@ -101,5 +101,12 @@ def update_award_recommendation_risk(
     }
 
     _sync_risk_submissions(risk, validated_by_id)
+    db_session.flush()
+
+    # Eagerly load relationships needed for the applications property by accessing them
+    for rs in risk.award_recommendation_risk_submissions:
+        _ = (
+            rs.award_recommendation_application_submission.application_submission.application_submission_number
+        )
 
     return risk

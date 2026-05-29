@@ -12,13 +12,14 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
+import AwardRecommendationAttachments from "src/components/award-recommendation/AwardRecommendationAttachments";
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
 import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
-import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
+import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
+import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { submitAwardRecommendationForReview } from "./actions";
 
 export async function generateMetadata({
@@ -85,8 +86,10 @@ const OpportunitySection = ({
         <p className="text-bold margin-bottom-2">{t("opportunitySummary")}</p>
         <div className="margin-bottom-3">
           {hasSummary ? (
-            <SummaryDescriptionDisplay
-              summaryDescription={summaryDescription || ""}
+            <ExpandableTextContent
+              textContent={summaryDescription || ""}
+              showCallToAction={t("summary.showDescription")}
+              hideCallToAction={t("summary.hideSummaryDescription")}
             />
           ) : (
             <div>{t("noSummaryAvailable")}</div>
@@ -95,8 +98,10 @@ const OpportunitySection = ({
         <p className="text-bold margin-bottom-2">
           {t("otherOpportunityInfo.label")}
         </p>
-        <SummaryDescriptionDisplay
-          summaryDescription={awardRecommendationDetails.additional_info || ""}
+        <ExpandableTextContent
+          textContent={awardRecommendationDetails.additional_info || ""}
+          showCallToAction={t("summary.showDescription")}
+          hideCallToAction={t("summary.hideSummaryDescription")}
         />
       </div>
     </div>
@@ -169,6 +174,7 @@ async function AwardRecommendationPageContent({
   const navigationItems = [
     { text: t("opportunity"), href: "opportunity" },
     { text: t("recommendations.heading"), href: "recommendations" },
+    { text: t("attachments.heading"), href: "attachments" },
   ];
 
   return (
@@ -193,7 +199,10 @@ async function AwardRecommendationPageContent({
               tablet={{ col: 3 }}
               className="display-none desktop:display-block"
             >
-              <ApplyFormNav title={t("onThisPage")} fields={navigationItems} />
+              <LeftHandFormNav
+                title={t("onThisPage")}
+                fields={navigationItems}
+              />
             </Grid>
             <Grid col={12} desktop={{ col: 9 }}>
               <div id="opportunity" className="seg-scroll-margin-top--header">
@@ -230,6 +239,13 @@ async function AwardRecommendationPageContent({
                     }
                     viewMode={true}
                   />
+                </div>
+                <div id="attachments" className="seg-scroll-margin-top--header">
+                  {awardRecommendationId && (
+                    <AwardRecommendationAttachments
+                      awardRecommendationId={awardRecommendationId}
+                    />
+                  )}
                 </div>
               </div>
             </Grid>

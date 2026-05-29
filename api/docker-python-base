@@ -141,13 +141,13 @@ RUN dnf install -y \
       libffi-devel && \
     # Update packages with security vulnerabilities
     dnf update -y \
-      libcap-2.73-1.amzn2023.0.4 \
+      libcap-2.73-1.amzn2023.0.7 \
       lz4-libs-1.9.4-1.amzn2023.0.3 \
       binutils-2.41-50.amzn2023.0.5 \
       glib2-2.82.2-767.amzn2023 \
       curl-minimal-8.17.0-1.amzn2023.0.3 \
       libcurl-minimal-8.17.0-1.amzn2023.0.3 \
-      kernel6.18-headers-6.18.25-57.109.amzn2023 \
+      kernel6.18-headers-6.18.30-61.116.amzn2023 \
       glibc-2.34-231.amzn2023.0.4 \
       glibc-common-2.34-231.amzn2023.0.4 \
       glibc-devel-2.34-231.amzn2023.0.4 \
@@ -157,7 +157,8 @@ RUN dnf install -y \
       python3-pip-wheel-21.3.1-2.amzn2023.0.19 \
       krb5-libs-1.21.3-7.amzn2023.0.1 \
       rust-toolset-srpm-macros-1.95.0-1.amzn2023.0.2 \
-      libgcrypt-1.10.2-1.amzn2023.0.3 && \
+      libgcrypt-1.10.2-1.amzn2023.0.3 \
+      gnutls-3.8.3-8.amzn2023.0.3 && \
     # CVE-2026-1757: libxml2 memory leak in xmllint (ALAS2023-2026-1446)
     dnf update -y --releasever=2023.10.20260302 \
       libxml2-2.10.4-1.amzn2023.0.18 \

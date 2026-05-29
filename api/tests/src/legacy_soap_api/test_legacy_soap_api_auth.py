@@ -1,9 +1,9 @@
 import logging
 from datetime import date, timedelta
 
+import grants_shared.util.datetime_util as datetime_util
 import pytest
 
-import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import Privilege
 from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPAuth,
@@ -291,13 +291,34 @@ def test_get_soap_auth_when_tcertificate_is_expired(
 ) -> None:
     caplog.set_level(logging.INFO)
     mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
-    StagingTcertificatesFactory(serial_num=serial_number, expirationdate=date(2000, 1, 1))
+    tcert = StagingTcertificatesFactory(serial_num=serial_number, expirationdate=date(2000, 1, 1))
     with pytest.raises(SOAPClientCertificateIsExpired):
         get_soap_auth(mtls_cert, db_session)
-    records = [
+    record = next(
         r for r in caplog.records if "soap_client_certificate: tcertificate is expired" in r.message
-    ]
-    assert len(records) == 1
+    )
+    assert record is not None
+    assert record.tcertificates_id == tcert.tcertificates_id
+
+
+def test_get_soap_auth_logs_tcertificate(enable_factory_create, db_session, caplog) -> None:
+    caplog.set_level(logging.INFO)
+    mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
+    tcert = StagingTcertificatesFactory.create(
+        serial_num=serial_number, expirationdate=(UTC_NOW + timedelta(days=100)).date()
+    )
+    LegacyAgencyCertificateFactory.create(
+        serial_number=tcert.serial_num, expiration_date=date(2000, 1, 1)
+    )
+    with pytest.raises(SOAPClientCertificateIsExpired):
+        get_soap_auth(mtls_cert, db_session)
+    record = next(
+        r
+        for r in caplog.records
+        if "soap_client_certificate: valid tcertificate located" in r.message
+    )
+    assert record is not None
+    assert record.tcertificates_id == tcert.tcertificates_id
 
 
 def test_get_soap_auth_when_legacy_certificate_is_expired(
