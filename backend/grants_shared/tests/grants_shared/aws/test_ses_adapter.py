@@ -103,12 +103,9 @@ def test_send_email_unverified_sender(ses_client):
 
 def test_send_email_multiple_recipients(ses_client):
     """Test sending emails to multiple recipients sequentially"""
-    from_email = os.getenv("AWS_SES_FROM_EMAIL")
     recipients = ["recipient1@example.com", "recipient2@example.com", "recipient3@example.com"]
     message_subject = "Test Subject"
     message_body = "This is a test email message"
-
-    ses_client.create_email_identity(EmailIdentity=from_email)
 
     message_ids = []
     for recipient in recipients:
@@ -127,7 +124,6 @@ def test_send_email_multiple_recipients(ses_client):
 
 def test_send_email_local_environment(monkeypatch):
     """Test that in local environment, emails are not actually sent"""
-
     monkeypatch.setenv("IS_LOCAL_AWS", "1")
 
     # Clear the cached config so it picks up the new environment variable
