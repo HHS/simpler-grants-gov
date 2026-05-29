@@ -1,4 +1,3 @@
-import path from "path";
 import type { Page } from "@playwright/test";
 import type { fieldDefinitionsProjectAbstractSummary } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
