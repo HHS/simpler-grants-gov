@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import EventsDemo from "src/app/[locale]/(base)/events/EventsDemo";
+import EventsDemo from "src/app/[locale]/(base)/events/_components/EventsDemo";
 
 describe("Events demo Content", () => {
   it("Renders without errors", () => {

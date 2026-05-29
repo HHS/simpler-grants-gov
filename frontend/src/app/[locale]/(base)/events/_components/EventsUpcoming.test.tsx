@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import EventsUpcoming from "src/app/[locale]/(base)/events/EventsUpcoming";
+import EventsUpcoming from "src/app/[locale]/(base)/events/_components/EventsUpcoming";
 
 describe("Events Upcoming Content", () => {
   it("Renders without errors", () => {

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import EventsHero from "src/app/[locale]/(base)/events/EventsHero";
+import EventsHero from "src/app/[locale]/(base)/events/_components/EventsHero";
 
 describe("Events Hero Content", () => {
   it("Renders without errors", () => {
