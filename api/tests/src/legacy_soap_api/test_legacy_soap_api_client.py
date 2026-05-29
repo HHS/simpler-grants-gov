@@ -9,6 +9,7 @@ import pytest
 import pytz
 import requests
 from botocore.exceptions import ClientError
+from grants_shared.util.datetime_util import make_timezone_aware, parse_grants_gov_date
 from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
@@ -29,7 +30,6 @@ from src.legacy_soap_api.legacy_soap_api_client import (
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
-from src.util.datetime_util import make_timezone_aware, parse_grants_gov_date
 from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (

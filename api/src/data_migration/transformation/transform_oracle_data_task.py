@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+from grants_shared.util import datetime_util
 from pydantic_settings import SettingsConfigDict
 
 import src.data_migration.transformation.transform_constants as transform_constants
@@ -37,7 +38,6 @@ from src.data_migration.transformation.subtask.transform_opportunity_summary imp
     TransformOpportunitySummary,
 )
 from src.task.task import Task
-from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)

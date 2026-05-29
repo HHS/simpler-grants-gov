@@ -3,6 +3,7 @@ import uuid
 from collections.abc import Iterator
 
 from flask import Response, stream_with_context
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -12,7 +13,6 @@ from src.adapters.aws.dynamodb_adapter import DynamoDBClient
 from src.api.files_v1.file_blueprint import file_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.files.stream_file_scan_results import stream_file_scan_results
 from src.services.files.update_pending_file_scan_status import update_pending_file_scan_status
 
