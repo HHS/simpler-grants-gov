@@ -9,7 +9,7 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock(
-  "src/app/[locale]/(base)/opportunity/[id]/_components/RecommendationSummaryDisplay",
+  "src/components/award-recommendation/RecommendationSummaryDisplay",
   () => ({
     RecommendationSummaryDisplay: () => (
       <div data-testid="recommendation-summary-display">Summary Display</div>
@@ -22,17 +22,6 @@ jest.mock("src/components/core/ExpandableTextContent", () => ({
     <div>{textContent}</div>
   ),
 }));
-
-jest.mock(
-  "src/app/[locale]/(base)/opportunity/[id]/_components/OpportunityDescription",
-  () => ({
-    SummaryDescriptionDisplay: ({
-      summaryDescription,
-    }: {
-      summaryDescription: string;
-    }) => <div>{summaryDescription}</div>,
-  }),
-);
 
 describe("RecommendationSummarySection", () => {
   const mockSummary: AwardRecommendationSummary = {
