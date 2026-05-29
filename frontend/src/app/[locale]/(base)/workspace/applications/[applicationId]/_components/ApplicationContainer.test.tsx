@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
+import ApplicationContainer from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationContainer";
 import {
   ApplicationDetail,
   ApplicationHistory,
@@ -11,8 +12,6 @@ import { mockApplicationSubmission } from "src/utils/testing/fixtures";
 import applicationMock from "stories/components/application/application.mock.json";
 import historyMock from "stories/components/application/history.mock.json";
 import opportunityMock from "stories/components/application/opportunity.mock.json";
-
-import ApplicationContainer from "src/components/application/ApplicationContainer";
 
 // Mock dependencies
 const mockRefresh = jest.fn();
@@ -35,46 +34,62 @@ jest.mock("src/services/auth/useUser", () => ({
   }),
 }));
 
-jest.mock("src/components/application/ApplicationFormsTable", () => ({
-  ApplicationFormsTable: () => <div data-testid="forms-table">Forms Table</div>,
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationFormsTable",
+  () => ({
+    ApplicationFormsTable: () => (
+      <div data-testid="forms-table">Forms Table</div>
+    ),
+  }),
+);
 
-jest.mock("src/components/application/OpportunityCard", () => ({
-  OpportunityCard: () => <div data-testid="opportunity-card">Opportunity</div>,
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/OpportunityCard",
+  () => ({
+    OpportunityCard: () => (
+      <div data-testid="opportunity-card">Opportunity</div>
+    ),
+  }),
+);
 
-jest.mock("src/components/application/ApplicationValidationAlert", () => ({
-  __esModule: true,
-  default: () => <div data-testid="validation-alert">Validation</div>,
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationValidationAlert",
+  () => ({
+    __esModule: true,
+    default: () => <div data-testid="validation-alert">Validation</div>,
+  }),
+);
 
 // Mock InformationCard to test props
-jest.mock("src/components/application/InformationCard", () => ({
-  InformationCard: jest.fn(
-    ({
-      applicationSubmitted,
-      applicationSubmitHandler,
-      submissionLoading,
-    }: {
-      applicationSubmitted: boolean;
-      applicationSubmitHandler: () => void;
-      submissionLoading: boolean;
-    }) => (
-      <div data-testid="information-card">
-        <div data-testid="application-submitted">
-          {String(applicationSubmitted)}
+jest.mock(
+  "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/InformationCard",
+  () => ({
+    InformationCard: jest.fn(
+      ({
+        applicationSubmitted,
+        applicationSubmitHandler,
+        submissionLoading,
+      }: {
+        applicationSubmitted: boolean;
+        applicationSubmitHandler: () => void;
+        submissionLoading: boolean;
+      }) => (
+        <div data-testid="information-card">
+          <div data-testid="application-submitted">
+            {String(applicationSubmitted)}
+          </div>
+          <button
+            onClick={applicationSubmitHandler}
+            disabled={submissionLoading}
+            data-testid="mock-submit-button"
+          >
+            {submissionLoading ? "Loading" : "Submit"}
+          </button>
         </div>
-        <button
-          onClick={applicationSubmitHandler}
-          disabled={submissionLoading}
-          data-testid="mock-submit-button"
-        >
-          {submissionLoading ? "Loading" : "Submit"}
-        </button>
-      </div>
+      ),
     ),
-  ),
-}));
+  }),
+);
 
 // Mock the fetch for submitApplication
 global.fetch = jest.fn();

@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  updateAppFilingNameAction,
+  UpdateAppFilingNameActionState,
+} from "src/app/[locale]/(base)/workspace/applications/[applicationId]/actions";
+
 import { useTranslations } from "next-intl";
 import { RefObject, useActionState, useEffect, useRef } from "react";
 import {
@@ -10,11 +15,6 @@ import {
   ModalToggleButton,
   TextInput,
 } from "@trussworks/react-uswds";
-
-import {
-  updateAppFilingNameAction,
-  UpdateAppFilingNameActionState,
-} from "./actions";
 
 export const EditAppFilingNameModalForm = ({
   applicationId,

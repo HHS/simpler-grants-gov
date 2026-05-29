@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { InformationCard } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/InformationCard";
 import {
   ApplicationDetail,
   ApplicationStatus,
@@ -9,8 +10,6 @@ import { mockApplicationSubmission } from "src/utils/testing/fixtures";
 import applicationMock from "stories/components/application/application.mock.json";
 
 import React from "react";
-
-import { InformationCard } from "src/components/application/InformationCard";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => {
@@ -50,14 +49,14 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock(
-  "src/components/application/editAppFilingName/EditAppFilingName",
+  "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/editAppFilingName/EditAppFilingName",
   () => ({
     EditAppFilingName: () => <button>buttonText</button>,
   }),
 );
 
 jest.mock(
-  "src/components/application/transferOwnership/TransferOwnershipModal",
+  "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/transferOwnership/TransferOwnershipModal",
   () => ({
     TransferOwnershipModal: ({
       onAfterClose,
@@ -74,7 +73,7 @@ jest.mock(
 );
 
 jest.mock(
-  "src/components/application/transferOwnership/TransferOwnershipButton",
+  "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/transferOwnership/TransferOwnershipButton",
   () => ({
     TransferOwnershipButton: ({ onClick }: { onClick: () => void }) => (
       <button
