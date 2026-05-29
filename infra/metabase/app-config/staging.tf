@@ -9,7 +9,7 @@ module "staging_config" {
   # Analytics database that Metabase connects to
   analytics_database_cluster_name = "analytics-staging"
 
-  domain_name  = "metabase.staging.simpler.grants.gov"
+  domain_name  = "data.staging.simpler.grants.gov" # Match existing ACM certificate
   enable_https = true
 
   # Scaled down resources for staging environment (Issue #10239)

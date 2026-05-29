@@ -9,7 +9,7 @@ module "training_config" {
   # Analytics database that Metabase connects to
   analytics_database_cluster_name = "analytics-training"
 
-  domain_name  = "metabase.training.simpler.grants.gov"
+  domain_name  = "data.training.simpler.grants.gov" # Match existing ACM certificate
   enable_https = true
 
   # Similar to staging

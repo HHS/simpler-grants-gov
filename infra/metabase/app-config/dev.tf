@@ -9,8 +9,8 @@ module "dev_config" {
   # Analytics database that Metabase connects to
   analytics_database_cluster_name = "analytics-dev"
 
-  domain_name  = "metabase.dev.simpler.grants.gov"
-  enable_https = false # Certificate not provisioned in dev yet
+  domain_name  = "data.dev.simpler.grants.gov" # Match naming convention (cert expired, will need renewal)
+  enable_https = false # Certificate expired - needs to be renewed before enabling HTTPS
 
   # Scaled down resources for dev environment (Issue #10239)
   service_cpu    = 512  # Down from 2048

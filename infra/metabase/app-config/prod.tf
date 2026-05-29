@@ -9,7 +9,7 @@ module "prod_config" {
   # Analytics database that Metabase connects to
   analytics_database_cluster_name = "analytics-prod"
 
-  domain_name  = "metabase.simpler.grants.gov"
+  domain_name  = "data.simpler.grants.gov" # Match existing ACM certificate
   enable_https = true
 
   # Full resources for production

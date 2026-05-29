@@ -9,7 +9,7 @@ module "grantee1_config" {
   # Analytics database that Metabase connects to
   analytics_database_cluster_name = "analytics-grantee1"
 
-  domain_name  = "metabase.grantee1.simpler.grants.gov"
+  domain_name  = "data.grantee1.simpler.grants.gov" # Match naming convention
   enable_https = true
 
   # Similar to prod
