@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import cast
 from uuid import UUID
 
+from grants_shared.util import datetime_util
 from sqlalchemy import and_, desc, exists, func, select, tuple_, update
 from sqlalchemy.orm import aliased, selectinload
 
@@ -27,7 +28,6 @@ from src.task.notifications.constants import (
     UserEmailNotification,
     UserOpportunityUpdateContent,
 )
-from src.util import datetime_util
 from src.util.dict_util import diff_nested_dicts
 from src.util.string_utils import truncate_html_inline
 
@@ -113,7 +113,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         logger.info("Processing opportunity versions to determine notifications")
         for user_saved_opp, latest_opp_ver in results:
             if latest_opp_ver is None:
-                logger.error(
+                logger.warning(
                     "No prior version recorded for this opportunity;",
                     extra={"opportunity_id": user_saved_opp.opportunity_id},
                 )

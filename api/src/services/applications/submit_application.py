@@ -1,6 +1,8 @@
 import logging
 from uuid import UUID
 
+from grants_shared.util.datetime_util import utcnow
+
 import src.adapters.db as db
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus, Privilege
@@ -15,7 +17,6 @@ from src.services.applications.application_validation import (
     validate_forms,
 )
 from src.services.applications.get_application import get_application
-from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
 

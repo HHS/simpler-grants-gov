@@ -7,16 +7,16 @@ from dataclasses import dataclass, field
 from urllib.parse import quote
 
 import click
+import grants_shared.logs
 import requests
+from grants_shared.util.local import error_if_not_local
 from lxml import etree
 from pydantic import Field
 
 import src.adapters.db as db
-import src.logging
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
@@ -318,7 +318,7 @@ VALIDATIONS = [
 @click.command()
 def validate_simpler_endpoints() -> None:
     with ExitStack() as stack:
-        stack.enter_context(src.logging.init("validate_simpler_endpoints"))
+        stack.enter_context(grants_shared.logs.init("validate_simpler_endpoints"))
         logger.info("Running validation for SOAP endpoints")
 
         error_if_not_local()

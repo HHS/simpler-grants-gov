@@ -4,10 +4,10 @@ from datetime import date
 from enum import StrEnum
 
 import click
+import grants_shared.util.datetime_util as datetime_util
 from sqlalchemy import select
 
 import src.adapters.db.flask_db as flask_db
-import src.util.datetime_util as datetime_util
 from src.adapters import db
 from src.constants.lookup_constants import JobType, UserType
 from src.db.models import staging

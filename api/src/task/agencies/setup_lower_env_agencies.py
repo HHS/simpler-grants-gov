@@ -5,6 +5,7 @@ import string
 from collections.abc import Sequence
 from datetime import date
 
+from grants_shared.util import datetime_util
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -17,7 +18,6 @@ from src.db.models.user_models import AgencyUser, AgencyUserRole, Role, User, Us
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
-from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 

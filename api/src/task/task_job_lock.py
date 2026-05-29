@@ -4,11 +4,11 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any
 
+from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 from src.adapters import db
 from src.db.models.task_models import JobLock
-from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)

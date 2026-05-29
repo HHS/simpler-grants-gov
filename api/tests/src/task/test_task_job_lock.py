@@ -3,10 +3,10 @@ import uuid
 from datetime import timedelta
 from unittest import mock
 
+import grants_shared.util.datetime_util as datetime_util
 import pytest
 from sqlalchemy import delete, select
 
-import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import JobType
 from src.db.models.task_models import JobLock
 from src.task.task_job_lock import (

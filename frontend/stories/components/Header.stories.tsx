@@ -1,4 +1,4 @@
-import Header from "src/components/Header";
+import Header from "src/components/core/header/Header";
 
 const meta = {
   title: "Components/Layout/Header",

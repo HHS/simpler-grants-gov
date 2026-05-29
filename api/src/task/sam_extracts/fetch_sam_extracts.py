@@ -6,6 +6,7 @@ from datetime import date, timedelta
 from enum import StrEnum
 
 from botocore.client import BaseClient
+from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 import src.adapters.db as db
@@ -16,7 +17,6 @@ from src.adapters.sam_gov.models import SamExtractRequest
 from src.constants.lookup_constants import SamGovExtractType, SamGovProcessingStatus
 from src.db.models.sam_extract_models import SamExtractFile
 from src.task.task import Task
-from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 

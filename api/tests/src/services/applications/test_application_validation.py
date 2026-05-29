@@ -3,6 +3,7 @@ from datetime import date, timedelta
 import apiflask
 import pytest
 from freezegun import freeze_time
+from grants_shared.util.datetime_util import get_now_us_eastern_date
 
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant
@@ -14,7 +15,6 @@ from src.services.applications.application_validation import (
     validate_application_in_progress,
     validate_competition_open,
 )
-from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
     ApplicationFactory,

@@ -6,12 +6,12 @@ from datetime import timedelta
 
 import flask
 import jwt
+from grants_shared.util import datetime_util
 from pydantic import BaseModel, Field
 
 from src.adapters import db
 from src.auth.auth_errors import JwtValidationError
 from src.db.models.user_models import LoginGovState
-from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
