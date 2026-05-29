@@ -1,4 +1,4 @@
-name: Release Grants Shared Package to PyPi
+name: Publish Grants Shared Package to PyPi
 on:
   workflow_dispatch:
 
@@ -26,6 +26,9 @@ jobs:
 
       - name: Init
         run: make setup-local
+
+      - name: Init DB
+        run: make init-db
 
       - name: Run format check
         run: make format-check
