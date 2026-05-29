@@ -1,3 +1,5 @@
+import { InviteLegacyUsersErrorPage } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/legacy/_components/InviteLegacyUsersErrorPage";
+import { InviteLegacyUsersPageContent } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/legacy/_components/InviteLegacyUsersPageContent";
 import {
   getOrganizationDetails,
   getOrganizationLegacyUsers,
@@ -6,8 +8,6 @@ import { Organization } from "src/types/applicationResponseTypes";
 import { AuthorizedData, FetchedResource } from "src/types/authTypes";
 import { OrganizationLegacyUser } from "src/types/userTypes";
 
-import { InviteLegacyUsersErrorPage } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersErrorPage";
-import { InviteLegacyUsersPageContent } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersPageContent";
 import { AuthorizationGate } from "src/components/user/AuthorizationGate";
 import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 

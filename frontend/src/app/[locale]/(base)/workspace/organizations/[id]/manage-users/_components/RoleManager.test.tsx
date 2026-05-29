@@ -2,17 +2,20 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
 
-import type { RoleChangeModalProps } from "src/components/manageUsers/RoleChangeModal";
-import { RoleManager } from "src/components/manageUsers/RoleManager";
+import type { RoleChangeModalProps } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RoleChangeModal";
+import { RoleManager } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RoleManager";
 
 let lastModalProps: RoleChangeModalProps | null = null;
 
-jest.mock("src/components/manageUsers/RoleChangeModal", () => ({
-  RoleChangeModal: (props: RoleChangeModalProps) => {
-    lastModalProps = props;
-    return <div data-testid="role-change-modal" />;
-  },
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RoleChangeModal",
+  () => ({
+    RoleChangeModal: (props: RoleChangeModalProps) => {
+      lastModalProps = props;
+      return <div data-testid="role-change-modal" />;
+    },
+  }),
+);
 
 type ClientFetchArgs = [string, { method: string; body: string }];
 

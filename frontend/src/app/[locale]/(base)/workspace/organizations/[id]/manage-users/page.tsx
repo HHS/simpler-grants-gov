@@ -1,3 +1,4 @@
+import { ManageUsersPageContent } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/ManageUsersPageContent";
 import {
   getOrganizationPendingInvitations,
   getOrganizationRoles,
@@ -6,7 +7,6 @@ import {
 
 import { getTranslations } from "next-intl/server";
 
-import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 import { AuthorizationGate } from "src/components/user/AuthorizationGate";
 import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 

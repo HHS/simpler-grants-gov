@@ -5,9 +5,8 @@ import React from "react";
 import "@testing-library/jest-dom";
 
 import { axe } from "jest-axe";
+import { InviteLegacyUsersButton } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/InviteLegacyUsersButton";
 import { mockUseTranslations } from "src/utils/testing/intlMocks";
-
-import { InviteLegacyUsersButton } from "src/components/manageUsers/InviteLegacyUsersButton";
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => mockUseTranslations,

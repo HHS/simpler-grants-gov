@@ -1,13 +1,12 @@
 "use client";
 
+import { RemoveUserModal } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RemoveUserModal";
 import { useClientFetch } from "src/hooks/useClientFetch";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { Button, type ModalRef } from "@trussworks/react-uswds";
-
-import { RemoveUserModal } from "src/components/manageUsers/RemoveUserModal";
 
 interface RemoveUserButtonProps {
   organizationId: string;

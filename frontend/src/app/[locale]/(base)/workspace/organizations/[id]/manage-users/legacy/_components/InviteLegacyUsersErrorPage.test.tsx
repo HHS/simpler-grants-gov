@@ -3,8 +3,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import { axe } from "jest-axe";
-
-import { InviteLegacyUsersErrorPage } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersErrorPage";
+import { InviteLegacyUsersErrorPage } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/legacy/_components/InviteLegacyUsersErrorPage";
 
 type Breadcrumb = { title: string; path: string };
 type BreadcrumbsProps = { breadcrumbList: Breadcrumb[] };

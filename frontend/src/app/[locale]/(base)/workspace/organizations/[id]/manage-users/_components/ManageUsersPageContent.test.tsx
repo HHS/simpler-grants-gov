@@ -4,10 +4,9 @@ import React from "react";
 
 import "@testing-library/jest-dom";
 
+import { ManageUsersPageContent } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/ManageUsersPageContent";
 import type { AuthorizedData } from "src/types/authTypes";
 import { mockUseTranslations } from "src/utils/testing/intlMocks";
-
-import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => mockUseTranslations,
@@ -40,16 +39,22 @@ type PageHeaderProps = { organizationName?: string };
 
 const PageHeaderMock = jest.fn<void, [PageHeaderProps]>();
 
-jest.mock("src/components/manageUsers/PageHeader", () => ({
-  PageHeader: (props: unknown) => {
-    PageHeaderMock(props as PageHeaderProps);
-    return <div data-testid="page-header" />;
-  },
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/PageHeader",
+  () => ({
+    PageHeader: (props: unknown) => {
+      PageHeaderMock(props as PageHeaderProps);
+      return <div data-testid="page-header" />;
+    },
+  }),
+);
 
-jest.mock("src/components/manageUsers/InviteLegacyUsersButton", () => ({
-  InviteLegacyUsersButton: () => <button>InviteLegacyUsersButton</button>,
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/InviteLegacyUsersButton",
+  () => ({
+    InviteLegacyUsersButton: () => <button>InviteLegacyUsersButton</button>,
+  }),
+);
 
 type UserOrganizationInviteProps = { organizationId: string };
 
@@ -58,12 +63,15 @@ const UserOrganizationInviteMock = jest.fn<
   [UserOrganizationInviteProps]
 >();
 
-jest.mock("src/components/manageUsers/UserOrganizationInvite", () => ({
-  UserOrganizationInvite: (props: unknown) => {
-    UserOrganizationInviteMock(props as UserOrganizationInviteProps);
-    return <div data-testid="user-org-invite" />;
-  },
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/UserOrganizationInvite",
+  () => ({
+    UserOrganizationInvite: (props: unknown) => {
+      UserOrganizationInviteMock(props as UserOrganizationInviteProps);
+      return <div data-testid="user-org-invite" />;
+    },
+  }),
+);
 
 const authorizedDataStub: AuthorizedData = {
   fetchedResources: {

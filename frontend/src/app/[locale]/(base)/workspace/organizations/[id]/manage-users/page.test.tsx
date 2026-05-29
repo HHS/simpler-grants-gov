@@ -20,17 +20,20 @@ const ManageUsersPageContentMock = jest.fn<
   [ManageUsersPageContentMinimalProps]
 >();
 
-jest.mock("src/components/manageUsers/ManageUsersPageContent", () => ({
-  ManageUsersPageContent: (props: unknown) => {
-    const typedProps = props as ManageUsersPageContentMinimalProps;
-    ManageUsersPageContentMock(typedProps);
-    return (
-      <div data-testid="manage-users-page-content">
-        org-id: {typedProps.organizationId}
-      </div>
-    );
-  },
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/ManageUsersPageContent",
+  () => ({
+    ManageUsersPageContent: (props: unknown) => {
+      const typedProps = props as ManageUsersPageContentMinimalProps;
+      ManageUsersPageContentMock(typedProps);
+      return (
+        <div data-testid="manage-users-page-content">
+          org-id: {typedProps.organizationId}
+        </div>
+      );
+    },
+  }),
+);
 
 type PageFn = (args: { params: Promise<Params> }) => Promise<JSX.Element>;
 

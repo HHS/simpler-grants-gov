@@ -1,3 +1,4 @@
+import { PageHeader } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/PageHeader";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
 import { AuthorizedData, FetchedResource } from "src/types/authTypes";
@@ -6,7 +7,6 @@ import { getTranslations } from "next-intl/server";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
-import { PageHeader } from "src/components/manageUsers/PageHeader";
 import { ActiveUsersSection } from "./ActiveUsersSection";
 import { InvitedUsersSection } from "./InvitedUsersSection";
 import { InviteLegacyUsersButton } from "./InviteLegacyUsersButton";
