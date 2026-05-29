@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OrganizationDetail } from "src/app/[locale]/(base)/workspace/organizations/[id]/_components/OrganizationDetail";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
@@ -6,7 +7,6 @@ import { getOrganizationDetails } from "src/services/fetch/fetchers/organization
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-import { OrganizationDetail } from "src/components/organization/OrganizationDetail";
 import { AuthorizationGate } from "src/components/user/AuthorizationGate";
 import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 

@@ -1,3 +1,8 @@
+import { OrganizationInfo } from "src/app/[locale]/(base)/workspace/organizations/[id]/_components/OrganizationInfo";
+import {
+  OrganizationRoster,
+  OrganizationRosterSkeleton,
+} from "src/app/[locale]/(base)/workspace/organizations/[id]/_components/OrganizationRoster";
 import { Organization } from "src/types/applicationResponseTypes";
 import { AuthorizedData } from "src/types/authTypes";
 
@@ -6,11 +11,6 @@ import { Suspense } from "react";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
-import { OrganizationInfo } from "src/components/organization/OrganizationInfo";
-import {
-  OrganizationRoster,
-  OrganizationRosterSkeleton,
-} from "src/components/organization/OrganizationRoster";
 
 export const OrganizationDetail = ({
   organizationId,
