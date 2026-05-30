@@ -1,5 +1,10 @@
-import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import { PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-abstract-summary-data";
+import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
+import {
+  SF424_SGG_OPPORTUNITY_DATA,
+  SF424_TEST_OPPORTUNITY_DATA,
+} from "tests/e2e/apply/fixtures/sf424-data";
+import { SF424_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424-field-definitions";
 import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
 
 import type {
@@ -14,6 +19,8 @@ import type {
  */
 const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
+  SF424_SGG_OPPORTUNITY_DATA,
+  SF424_TEST_OPPORTUNITY_DATA,
 ];
 
 /**
@@ -22,6 +29,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
  */
 const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   projectAbstractSummary: PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,
+  sf424: SF424_FORM_CONFIG,
 };
 
 /**
@@ -78,6 +86,7 @@ export function loadOpportunityConfig(
     return {
       formKey: entry.formKey,
       formConfig,
+      buildTestData: entry.buildTestData,
       expectedPrepopulatedFields: entry.expectedPrepopulatedFields,
       userEnteredFieldTestIds,
     };

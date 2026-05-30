@@ -13,6 +13,7 @@ import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.constants.lookup_constants import CompetitionOpenToApplicant
+from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import get_active_forms, init_form_registry
@@ -492,6 +493,31 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             CompetitionOpenToApplicant.ORGANIZATION,
         ],
     )
+
+    # Isolated scenario for testing SF-424 Print View
+    sf424_print_competition = _build_seeded_competition_for_form(
+        db_session,
+        forms["SF424_4_0"],
+        opportunity_id=uuid.UUID("284c3eee-0686-453a-800e-9dce80079369"),
+        opportunity_number="TEST-SF424-ORG-IND-01",
+        opportunity_title="TEST-SF424-ORG-IND-OT01",
+        competition_id=uuid.UUID("86ac630b-2ca6-4115-81af-7eaa8b6db283"),
+        competition_title="TEST-SF424-ORG-IND-CT01",
+        is_required=True,
+        open_to_applicants=[
+            CompetitionOpenToApplicant.INDIVIDUAL,
+            CompetitionOpenToApplicant.ORGANIZATION,
+        ],
+    )
+    # Pin agency and ALN values to match print-view-opportunities.json assertions
+    sgg_agency = db_session.scalar(select(Agency).where(Agency.agency_code == "SGG"))
+    if sgg_agency:
+        sf424_print_competition.opportunity.agency_code = "SGG"
+        sf424_print_competition.opportunity.agency_id = sgg_agency.agency_id
+    for aln in sf424_print_competition.opportunity.opportunity_assistance_listings:
+        aln.assistance_listing_number = "10.960"
+        aln.program_title = "Technical Agricultural Assistance"
+    db_session.flush()
 
 
 def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:

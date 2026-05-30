@@ -525,6 +525,25 @@ class BuildAutomaticOpportunitiesTask(Task):
             ],
         )
 
+        # Opportunity with static OpportunityID for SF-424 Print View testing
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-SF424-ORG-IND-OT01",
+                opportunity_number="TEST-SF424-ORG-IND-01",
+                opportunity_id=uuid.UUID("284c3eee-0686-453a-800e-9dce80079369"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-SF424-ORG-IND-CT01",
+                    required_form_ids=[SF424_v4_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
     def create_opportunity(
         self,
         data: OpportunityContainer,

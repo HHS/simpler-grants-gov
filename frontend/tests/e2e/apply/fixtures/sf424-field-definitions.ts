@@ -8,23 +8,34 @@ export const SF424_FORM_MATCHER =
 export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   submission_type: {
     selector: "#submission_type",
+    printTestId: "submission_type",
     type: "dropdown",
     section: "Section 1",
     field: "Submission Type",
   },
   application_type: {
     selector: "#application_type",
+    printTestId: "application_type",
     type: "dropdown",
     section: "Section 2",
     field: "Application Type",
   },
   revision_type: {
+    dependsOn: {
+      field: "application_type",
+      value: "Revision",
+    },
     selector: "#revision_type",
+    printTestId: "revision_type",
     type: "dropdown",
     section: "Section 2",
     field: "Revision Type",
   },
   revision_other_specify: {
+    dependsOn: {
+      field: "revision_type",
+      value: "E: Other (specify)",
+    },
     testId: "revision_other_specify",
     type: "text",
     section: "Section 2",
@@ -80,12 +91,14 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   },
   applicant_state: {
     selector: "#applicant--state",
+    printTestId: "applicant--state",
     type: "dropdown",
     section: "Section 8",
     field: "Applicant State",
   },
   applicant_country: {
     selector: "#applicant--country",
+    printTestId: "applicant--country",
     type: "dropdown",
     section: "Section 8",
     field: "Applicant Country",
@@ -170,6 +183,7 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   },
   applicant_type_code__combobox: {
     testId: "combo-box-toggle",
+    printTestId: "applicant_type_code",
     optionTestIdPrefix: "combo-box-option-",
     type: "combo-box-input",
     section: "Section 9",
@@ -279,6 +293,7 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   },
   application_subject_to: {
     selector: "#state_review",
+    printTestId: "state_review",
     type: "dropdown",
     section: "Section 19",
     field:
@@ -292,6 +307,7 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   },
   delinquent_federal_debt: {
     useDataAsText: true,
+    printTestId: "delinquent_federal_debt",
     type: "radiobutton",
     section: "Section 20",
     field: "Applicant Delinquent on Federal Debt",

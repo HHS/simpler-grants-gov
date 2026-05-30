@@ -14,12 +14,20 @@ export interface PrintViewFormData {
   formKey: string;
   /** Values may be exact strings or RegExp for format-only validation. */
   expectedPrepopulatedFields: Record<string, string | RegExp>;
+  /**
+   * Form-specific happy-path test data builder.
+   * Lives in the form's data fixture file alongside the opportunity metadata.
+   * Called by buildHappyPathTestData() in print-view-utils.ts.
+   */
+  buildTestData: (suffix: number) => Record<string, string>;
 }
 
 // Resolved form returned by the loader after mapping formKey → FillFormConfig
 export interface ResolvedPrintViewForm {
   formKey: string;
   formConfig: FillFormConfig;
+  /** Form-specific happy-path builder, passed through from PrintViewFormData. */
+  buildTestData: (suffix: number) => Record<string, string>;
   /** String values are exact matches; RegExp values validate format only. */
   expectedPrepopulatedFields: Record<string, string | RegExp>;
   /**
