@@ -38,7 +38,6 @@ from tests.src.db.models.factories import (
     UserFactory,
 )
 
-
 # Simple JSON schema used for tests below
 SIMPLE_JSON_SCHEMA = {
     "type": "object",
