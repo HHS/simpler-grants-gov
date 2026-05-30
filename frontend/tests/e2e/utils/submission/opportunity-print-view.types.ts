@@ -1,26 +1,20 @@
 import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
 
-// Shape of each form entry in print-view-opportunities.json
-export interface PrintViewFormEntry {
-  formKey: string;
-  /**
-   * Values may be exact strings or regex patterns encoded as strings (e.g. "/\\d{2}\\.[A-Z0-9]{3}/i").
-   * The loader converts pattern strings to RegExp at load time.
-   */
-  expectedPrepopulatedFields: Record<string, string>;
-}
-
-// Shape of each opportunity entry in print-view-opportunities.json
-export interface PrintViewOpportunityEntry {
+/**
+ * Per-form print view configuration, exported from each form's data file.
+ * Contains all opportunity metadata and expected prepopulated field values
+ * so that all form-specific data lives in one place.
+ *
+ * Add one of these exports to the form's fill-data file when introducing a new
+ * print-view-testable form, then register it in load-opportunity-config.ts.
+ */
+export interface PrintViewFormData {
   opportunityId: string;
-  forms: PrintViewFormEntry[];
+  opportunityNumber: string;
+  formKey: string;
+  /** Values may be exact strings or RegExp for format-only validation. */
+  expectedPrepopulatedFields: Record<string, string | RegExp>;
 }
-
-// The full registry: opportunityNumber → opportunity entry
-export type PrintViewOpportunityRegistry = Record<
-  string,
-  PrintViewOpportunityEntry
->;
 
 // Resolved form returned by the loader after mapping formKey → FillFormConfig
 export interface ResolvedPrintViewForm {

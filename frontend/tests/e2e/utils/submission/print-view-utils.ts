@@ -35,14 +35,16 @@ export async function navigateToPrintView(
 }
 
 /**
- * Per-form test data builders, keyed by formKey (matches print-view-opportunities.json).
+ * Happy-path test data builders, keyed by formKey.
  *
- * Each builder returns a Record whose keys match the `userEnteredFields` keys in the JSON,
- * so the spec can look up both the filled value and the print view testId generically.
+ * Each builder generates valid values within field length limits using a numeric
+ * suffix to ensure uniqueness across concurrent test runs.
+ * Values are automatically truncated to respect each field's maxLength.
  *
- * Add a new entry here when a new form is introduced in print-view-opportunities.json.
+ * Add a new entry here when a new form is introduced.
+ * For failure-scenario data, add a separate buildFailPathTestData builder.
  */
-const PRINT_VIEW_TEST_DATA_BUILDERS: Record<
+const HAPPY_PATH_TEST_DATA_BUILDERS: Record<
   string,
   (suffix: number) => Record<string, string>
 > = {
@@ -57,29 +59,39 @@ const PRINT_VIEW_TEST_DATA_BUILDERS: Record<
 };
 
 /**
- * Builds unique test data for the given form's user-entered fields.
+ * Truncates a string to fit within a field's maxLength, preserving the suffix.
+ * If the full value fits, it is returned unchanged.
+ */
+function truncateToMaxLength(value: string, maxLength: number): string {
+  return value.length <= maxLength ? value : value.slice(0, maxLength);
+}
+
+/**
+ * Builds unique happy-path test data for the given form's user-entered fields.
+ * Each generated value is truncated to respect the field's maxLength if defined.
  * The timestamp suffix prevents collisions across concurrent test runs.
  *
- * Keys in the returned Record match the `userEnteredFields` keys in
- * print-view-opportunities.json so the spec can resolve print testIds generically.
+ * Keys in the returned Record match the fill-data field keys
+ * so the spec can resolve print testIds generically.
  *
  * @param formKey - The form key (e.g. "projectAbstractSummary").
  * @param suffix  - A numeric suffix appended to each value (e.g. Date.now()).
+ * @param formConfig - The form's FillFormConfig, used for completeness + maxLength checks.
  * @throws if no builder is registered for the given formKey.
  */
-export function buildPrintViewTestData(
+export function buildHappyPathTestData(
   formKey: string,
   suffix: number,
   formConfig: FillFormConfig,
 ): Record<string, string> {
-  const builder = PRINT_VIEW_TEST_DATA_BUILDERS[formKey];
+  const builder = HAPPY_PATH_TEST_DATA_BUILDERS[formKey];
   if (!builder) {
     throw new Error(
-      `No test data builder registered for formKey: "${formKey}". ` +
-        `Add it to PRINT_VIEW_TEST_DATA_BUILDERS in print-view-utils.ts.`,
+      `No happy-path test data builder registered for formKey: "${formKey}". ` +
+        `Add it to HAPPY_PATH_TEST_DATA_BUILDERS in print-view-utils.ts.`,
     );
   }
-  const testData = builder(suffix);
+  const rawData = builder(suffix);
 
   // Completeness check: every non-attachment, non-conditional field in the form
   // definition must have a value in the test data. This ensures the builder stays
@@ -87,16 +99,25 @@ export function buildPrintViewTestData(
   const missingKeys = Object.entries(formConfig.fields)
     .filter(
       ([key, def]) =>
-        def.type !== "file" && !def.dependsOn && testData[key] === undefined,
+        def.type !== "file" && !def.dependsOn && rawData[key] === undefined,
     )
     .map(([key, def]) => `${key} (${def.field})`);
 
   if (missingKeys.length > 0) {
     throw new Error(
-      `Test data builder for "${formKey}" is missing values for: ${missingKeys.join(", ")}. ` +
-        `Add them to PRINT_VIEW_TEST_DATA_BUILDERS["${formKey}"] in print-view-utils.ts.`,
+      `Happy-path test data builder for "${formKey}" is missing values for: ${missingKeys.join(", ")}. ` +
+        `Add them to HAPPY_PATH_TEST_DATA_BUILDERS["${formKey}"] in print-view-utils.ts.`,
     );
   }
 
-  return testData;
+  // Truncate each value to its field's maxLength to prevent validation failures.
+  return Object.fromEntries(
+    Object.entries(rawData).map(([key, value]) => {
+      const maxLength = formConfig.fields[key]?.maxLength;
+      return [
+        key,
+        maxLength !== undefined ? truncateToMaxLength(value, maxLength) : value,
+      ];
+    }),
+  );
 }

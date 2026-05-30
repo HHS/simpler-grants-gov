@@ -1,25 +1,21 @@
-import opportunityRegistry from "tests/e2e/apply/fixtures/print-view-opportunities.json";
 import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
+import { PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-abstract-summary-data";
 import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
 
 import type {
-  PrintViewOpportunityRegistry,
+  PrintViewFormData,
   ResolvedPrintViewForm,
   ResolvedPrintViewOpportunityConfig,
 } from "./opportunity-print-view.types";
 
 /**
- * Converts a string value to a RegExp if it is encoded as a regex literal
- * (e.g. "/\\d{2}\\.[A-Z0-9]{3}/i"), otherwise returns the string as-is.
- * This lets JSON entries express format-only assertions without pinning exact values.
+ * Registry of all print view form data, imported from per-form data files.
+ * Add a new entry here when a new form type is introduced.
  */
-function parseFieldValue(value: string): string | RegExp {
-  const match = value.match(/^\/(.+)\/([gimsuy]*)$/);
-  if (match) {
-    return new RegExp(match[1], match[2]);
-  }
-  return value;
-}
+const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
+  PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
+];
+
 /**
  * Maps formKey -> FillFormConfig (from form fixture).
  * Add a new entry here when a new form type is introduced.
@@ -31,7 +27,6 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
 /**
  * Resolves a print view opportunity config by opportunityNumber.
  *
- * The JSON is keyed directly by opportunityNumber, so lookup is O(1).
  * Each form's userEnteredFieldTestIds is derived from formConfig.fields using
  * printTestId ?? testId - no separate print-fields registry needed.
  *
@@ -41,28 +36,30 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
 export function loadOpportunityConfig(
   opportunityNumber: string,
 ): ResolvedPrintViewOpportunityConfig {
-  const registry =
-    opportunityRegistry as unknown as PrintViewOpportunityRegistry;
-  const entry = registry[opportunityNumber];
+  const entries = PRINT_VIEW_FORM_DATA.filter(
+    (e) => e.opportunityNumber === opportunityNumber,
+  );
 
-  if (!entry) {
+  if (entries.length === 0) {
     throw new Error(
       `No print view opportunity registered for opportunityNumber: "${opportunityNumber}". ` +
-        `Add it to tests/e2e/apply/fixtures/print-view-opportunities.json.`,
+        `Add an entry to PRINT_VIEW_FORM_DATA in tests/e2e/utils/submission/load-opportunity-config.ts.`,
     );
   }
 
-  const forms: ResolvedPrintViewForm[] = entry.forms.map((form) => {
-    const formConfig = FORM_CONFIG_REGISTRY[form.formKey];
+  const opportunityId = entries[0].opportunityId;
+
+  const forms: ResolvedPrintViewForm[] = entries.map((entry) => {
+    const formConfig = FORM_CONFIG_REGISTRY[entry.formKey];
     if (!formConfig) {
       throw new Error(
-        `No FillFormConfig registered for formKey: "${form.formKey}". ` +
+        `No FillFormConfig registered for formKey: "${entry.formKey}". ` +
           `Add it to FORM_CONFIG_REGISTRY in tests/e2e/utils/submission/load-opportunity-config.ts.`,
       );
     }
 
     const prepopulatedFieldKeys = new Set(
-      Object.keys(form.expectedPrepopulatedFields),
+      Object.keys(entry.expectedPrepopulatedFields),
     );
 
     const userEnteredFieldTestIds = Object.fromEntries(
@@ -78,25 +75,18 @@ export function loadOpportunityConfig(
         .filter((pair): pair is [string, string] => pair[1] !== undefined),
     );
 
-    const expectedPrepopulatedFields = Object.fromEntries(
-      Object.entries(form.expectedPrepopulatedFields).map(([key, value]) => [
-        key,
-        parseFieldValue(value),
-      ]),
-    );
-
     return {
-      formKey: form.formKey,
+      formKey: entry.formKey,
       formConfig,
-      expectedPrepopulatedFields,
+      expectedPrepopulatedFields: entry.expectedPrepopulatedFields,
       userEnteredFieldTestIds,
     };
   });
 
   return {
-    opportunityId: entry.opportunityId,
+    opportunityId,
     opportunityNumber,
-    opportunityUrl: `/opportunity/${entry.opportunityId}`,
+    opportunityUrl: `/opportunity/${opportunityId}`,
     forms,
   };
 }

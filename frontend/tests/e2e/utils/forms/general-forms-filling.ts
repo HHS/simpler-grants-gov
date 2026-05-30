@@ -13,6 +13,12 @@ export interface FillFieldDefinition {
    * Example: abstract input has testId "textarea" but prints as "project_abstract".
    */
   printTestId?: string;
+  /**
+   * Maximum character length for this field, sourced from the form's
+   * FORM_JSON_SCHEMA in api/src/form_schema/forms/. Used by happy-path
+   * test data builders to ensure generated values stay within field limits.
+   */
+  maxLength?: number;
   selector?: string;
   optionTestIdPrefix?: string;
   hasTextRegex?: string;
