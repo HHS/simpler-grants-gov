@@ -494,10 +494,10 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         ],
     )
 
-    # --- Isolated Print View competitions: one per form ---
+    # --- Isolated Forms testing competitions: one per form ---
     sgg_agency = db_session.scalar(select(Agency).where(Agency.agency_code == "SGG"))
 
-    # Isolated scenario for testing attachment_form Print View
+    # Isolated scenario for testing attachment_form 
     attachment_form_competition = _build_seeded_competition_for_form(
         db_session,
         forms["AttachmentForm_1_2"],
@@ -520,7 +520,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing budget_narrative_attachment Print View
+    # Isolated scenario for testing budget_narrative_attachment 
     budget_narrative_attachment_competition = _build_seeded_competition_for_form(
         db_session,
         forms["BudgetNarrativeAttachments_1_2"],
@@ -543,7 +543,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing cd511 Print View
+    # Isolated scenario for testing cd511 
     cd511_competition = _build_seeded_competition_for_form(
         db_session,
         forms["CD511"],
@@ -566,7 +566,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing epa_form_4700_4 Print View
+    # Isolated scenario for testing epa_form_4700_4 
     epa_form_4700_4_competition = _build_seeded_competition_for_form(
         db_session,
         forms["EPA4700_4"],
@@ -589,7 +589,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing epa_key_contacts Print View
+    # Isolated scenario for testing epa_key_contacts 
     epa_key_contacts_competition = _build_seeded_competition_for_form(
         db_session,
         forms["EPA_KeyContacts"],
@@ -612,7 +612,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing gg_lobbying_form Print View
+    # Isolated scenario for testing gg_lobbying_form 
     gg_lobbying_form_competition = _build_seeded_competition_for_form(
         db_session,
         forms["GG_LobbyingForm"],
@@ -635,7 +635,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing other_narrative_attachment Print View
+    # Isolated scenario for testing other_narrative_attachment 
     other_narrative_attachment_competition = _build_seeded_competition_for_form(
         db_session,
         forms["OtherNarrativeAttachments"],
@@ -658,7 +658,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing project_abstract Print View
+    # Isolated scenario for testing project_abstract 
     project_abstract_competition = _build_seeded_competition_for_form(
         db_session,
         forms["Project_Abstract"],
@@ -681,7 +681,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing project_abstract_summary Print View
+    # Isolated scenario for testing project_abstract_summary 
     project_abstract_summary_competition = _build_seeded_competition_for_form(
         db_session,
         forms["Project_AbstractSummary_2_0"],
@@ -704,7 +704,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing project_narrative_attachment Print View
+    # Isolated scenario for testing project_narrative_attachment 
     project_narrative_attachment_competition = _build_seeded_competition_for_form(
         db_session,
         forms["ProjectNarrativeAttachments_1_2"],
@@ -727,7 +727,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing project_performance_site_location Print View
+    # Isolated scenario for testing project_performance_site_location 
     project_performance_site_location_competition = _build_seeded_competition_for_form(
         db_session,
         forms["PerformanceSite"],
@@ -750,7 +750,30 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing sf424a Print View
+    # Isolated scenario for testing sf424
+    sf424_competition = _build_seeded_competition_for_form(
+        db_session,
+        forms["SF424_4_0"],
+        opportunity_id=uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+        opportunity_number="TEST-SF424-ORG-IND-01",
+        opportunity_title="TEST-SF424-ORG-IND-OT01",
+        competition_id=uuid.UUID("f0a1b2c3-d4e5-6789-0abc-def123456789"),
+        competition_title="TEST-SF424-ORG-IND-CT01",
+        is_required=True,
+        open_to_applicants=[
+            CompetitionOpenToApplicant.INDIVIDUAL,
+            CompetitionOpenToApplicant.ORGANIZATION,
+        ],
+    )
+    if sgg_agency:
+        sf424_competition.opportunity.agency_code = "SGG"
+        sf424_competition.opportunity.agency_id = sgg_agency.agency_id
+    for aln in sf424_competition.opportunity.opportunity_assistance_listings:
+        aln.assistance_listing_number = "10.960"
+        aln.program_title = "Technical Agricultural Assistance"
+    db_session.flush()
+
+    # Isolated scenario for testing sf424a 
     sf424a_competition = _build_seeded_competition_for_form(
         db_session,
         forms["SF424A"],
@@ -773,7 +796,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing sf424b Print View
+    # Isolated scenario for testing sf424b 
     sf424b_competition = _build_seeded_competition_for_form(
         db_session,
         forms["SF424B"],
@@ -796,7 +819,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing sf424d Print View
+    # Isolated scenario for testing sf424d 
     sf424d_competition = _build_seeded_competition_for_form(
         db_session,
         forms["SF424D"],
@@ -819,7 +842,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing sflll Print View
+    # Isolated scenario for testing sflll 
     sflll_competition = _build_seeded_competition_for_form(
         db_session,
         forms["SFLLL_2_0"],
@@ -842,7 +865,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         aln.program_title = "Technical Agricultural Assistance"
     db_session.flush()
 
-    # Isolated scenario for testing supplementary_neh_cover_sheet Print View
+    # Isolated scenario for testing supplementary_neh_cover_sheet 
     supplementary_neh_cover_sheet_competition = _build_seeded_competition_for_form(
         db_session,
         forms["SupplementaryCoverSheetforNEHGrantPrograms"],
