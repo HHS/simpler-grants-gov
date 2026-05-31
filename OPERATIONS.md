@@ -295,6 +295,45 @@ export NEW_RELIC_REGION="US" # Always "US".
 
 You will then be able to interact with New Relic via Terraform. There's some New Relic Terraform configuration inside of the `infra/accounts/` folder for example. From this point you can use normal Terraform CLI commands to interact with New Relic, `terraform init` `terraform apply` etc.
 
+## Health Check Endpoint
+
+The API exposes a `GET /health` endpoint that operators can use to verify both the application layer and its database connection are functioning. The endpoint is suitable for load-balancer target group health checks, container orchestrator liveness/readiness probes, and ad-hoc incident diagnosis.
+
+**Path:** `/health` (same path in all environments)
+
+### Local development
+
+```bash
+curl http://localhost:8080/health
+```
+
+### Response codes
+
+| Code | Condition | Meaning |
+|---|---|---|
+| `200 OK` | Application is up **and** `SELECT 1` succeeds against the database | Service is healthy |
+| `503 Service Unavailable` | Application is up but the database query fails | Database connectivity issue |
+
+### Response body (200)
+
+```json
+{
+  "message": "Service healthy",
+  "data": {
+    "commit_sha": "ffaca647223e0b6e54344122eefa73401f5ec131",
+    "commit_link": "https://github.com/HHS/simpler-grants-gov/commit/ffaca647223e0b6e54344122eefa73401f5ec131",
+    "release_notes_link": "https://github.com/HHS/simpler-grants-gov/releases",
+    "last_deploy_time": "2025-06-01T10:00:00",
+    "deploy_whoami": "runner"
+  },
+  "status_code": 200
+}
+```
+
+### Using for readiness/liveness checks
+
+When configuring a load balancer target group or a Kubernetes liveness probe, use `GET /health` and expect HTTP 200. A 503 response indicates the database is unreachable and the instance should be considered unhealthy.
+
 ### Metabase Version Upgrade steps are below: 
 
 #### To Note: We do not push any new image into ecr for the metabase upgrade as the images are pulled directly from Metabase's docker hub repository. 

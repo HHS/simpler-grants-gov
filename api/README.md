@@ -83,6 +83,48 @@ CLI commands are of the form `<task group> <task name> <any other params>`. So i
    bin/run-command api <env> '["flask", "task", "generate-notifications"]'
    ```
 
+## Endpoints
+
+### Health Check
+
+`GET /health`
+
+Verifies that the application and its database connection are functioning. Useful for confirming your local stack is running:
+
+```bash
+curl http://localhost:8080/health
+```
+
+#### Success response — `200 OK`
+
+```json
+{
+  "message": "Service healthy",
+  "data": {
+    "commit_sha": "ffaca647223e0b6e54344122eefa73401f5ec131",
+    "commit_link": "https://github.com/HHS/simpler-grants-gov/commit/ffaca647223e0b6e54344122eefa73401f5ec131",
+    "release_notes_link": "https://github.com/HHS/simpler-grants-gov/releases",
+    "last_deploy_time": "2025-06-01T10:00:00",
+    "deploy_whoami": "runner"
+  },
+  "status_code": 200
+}
+```
+
+#### Failure response — `503 Service Unavailable`
+
+Returned when the database connectivity check (`SELECT 1`) fails. The response body contains a generic error message.
+
+#### Response fields
+
+| Field | Description |
+|---|---|
+| `commit_sha` | GitHub commit SHA for the latest deployed commit |
+| `commit_link` | GitHub link to the latest deployed commit |
+| `release_notes_link` | Link to the release notes |
+| `last_deploy_time` | Latest deploy time (US/Eastern) |
+| `deploy_whoami` | The user or identity that performed the deploy |
+
 ## Technical Information
 
 * [API Technical Overview](../documentation/api/technical-overview.md)
