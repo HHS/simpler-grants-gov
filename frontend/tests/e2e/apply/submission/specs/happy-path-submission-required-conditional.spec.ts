@@ -29,7 +29,7 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
-import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
+import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
 
 const { APPLY, SMOKE, GRANTEE } = VALID_TAGS;
 
