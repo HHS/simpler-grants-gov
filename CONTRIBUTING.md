@@ -49,6 +49,52 @@ To contribute to documentation you find in this repository, feel free to use the
 
 📧 Reach out for support directly using [simpler@grants.gov](mailto:simpler@grants.gov)
 
+### Bounty Program
+
+We offer bounties for certain contributions to help improve the Simpler Grants project. Bounties are monetary rewards for completing specific tasks or fixing issues labeled with `bounty`.
+
+#### What are Bounties?
+
+Bounties are paid opportunities to contribute to the Simpler Grants project. They range from documentation improvements to code enhancements and are designed to incentivize community participation in areas that need attention.
+
+#### Where to Find Bounties
+
+- Browse [open bounty issues](https://github.com/HHS/simpler-grants-gov/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) on GitHub
+- Check the `bounty` label for available opportunities
+- Bounties vary in difficulty and reward amount
+
+#### How to Claim a Bounty
+
+1. **Find an available bounty**: Look for issues labeled `bounty` that are not already assigned
+2. **Comment on the issue**: Express your interest and ask any clarifying questions
+3. **Wait for assignment**: A maintainer will assign the issue to you
+4. **Complete the work**: Follow the standard contribution workflow (fork, branch, PR)
+5. **Submit your PR**: Reference the issue number in your pull request
+6. **Get reviewed**: Work with maintainers to address any feedback
+7. **Receive payment**: Once merged, payment will be processed
+
+#### Payment Information
+
+- **Payment Method**: Bounties are paid via [Tremendous](https://www.tremendous.com/)
+- **Eligibility**: Currently, bounty payments are only available to U.S. citizens
+- **Tax Reporting**: If you receive $600 or more in bounty payments in a calendar year, you will need to complete a W-9 form for tax reporting purposes
+- **Processing Time**: Payments are typically processed within 2-4 weeks after PR merge
+
+#### Terms of Service
+
+By participating in the bounty program, you agree to our [Terms of Service](https://github.com/HHS/simpler-grants-gov/blob/main/TERMS_OF_SERVICE.md). Please review the full terms before claiming a bounty.
+
+#### Code of Conduct
+
+All bounty participants are expected to follow our [Code of Conduct](https://github.com/HHS/simpler-grants-gov/blob/main/CODE_OF_CONDUCT.md). We are committed to maintaining a welcoming and inclusive community.
+
+#### Questions?
+
+If you have questions about the bounty program, please:
+- Comment on the specific bounty issue
+- Reach out to the designated maintainers listed below
+- Email us at [simpler@grants.gov](mailto:simpler@grants.gov)
+
 ### Sharing your story
 
 Sharing how you or your organization have used the Simpler Grants project is an important way for us to raise awareness about the project and its impact. Please tell us your story by [sending us an email at `simpler-grants-gov@hhs.gov`](mailto:simpler-grants-gov@hhs.gov).
