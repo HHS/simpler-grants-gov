@@ -1,5 +1,5 @@
 import { Page, TestInfo } from "@playwright/test";
-import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
+import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
 
 import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";
 import { clickSaveButton } from "./save-form-utils";

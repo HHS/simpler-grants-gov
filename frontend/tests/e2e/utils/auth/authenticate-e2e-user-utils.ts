@@ -14,9 +14,9 @@
 import { expect, type BrowserContext, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav } from "tests/e2e/playwrightUtils";
-import { createSpoofedSessionCookie } from "tests/e2e/utils/loginUtils";
-import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
-import { selectLocalTestUser } from "tests/e2e/utils/select-local-test-user-utils";
+import { createSpoofedSessionCookie } from "tests/e2e/utils/auth/loginUtils";
+import { performStagingLogin } from "tests/e2e/utils/auth/perform-login-utils";
+import { selectLocalTestUser } from "tests/e2e/utils/auth/select-local-test-user-utils";
 
 const { baseUrl, targetEnv, testUserLabel } = playwrightEnv;
 
