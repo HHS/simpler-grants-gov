@@ -77,7 +77,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
       const baseSuffix = Date.now();
 
       // --- Login ---
-      // Given the user is logged in
       await authenticateE2eUser(page, context, !!isMobile);
 
       // --- Navigate to Opportunity page and start a new application ---
