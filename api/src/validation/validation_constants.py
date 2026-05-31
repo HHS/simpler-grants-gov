@@ -54,3 +54,5 @@ class ValidationErrorType(StrEnum):
     ORGANIZATION_NO_SAM_GOV_ENTITY = "organization_no_sam_gov_entity"
     ORGANIZATION_INACTIVE_IN_SAM_GOV = "organization_inactive_in_sam_gov"
     ORGANIZATION_SAM_GOV_EXPIRED = "organization_sam_gov_expired"
+
+    SAVED_ITEM_NOT_FOUND = "saved_item_not_found"
