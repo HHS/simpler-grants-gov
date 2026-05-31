@@ -1,5 +1,4 @@
 import type { Page } from "@playwright/test";
-import type { fieldDefinitionsProjectAbstractSummary } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
 
 /**
@@ -35,28 +34,13 @@ export async function navigateToPrintView(
 }
 
 /**
- * Happy-path test data builders, keyed by formKey.
- *
- * Each builder generates valid values within field length limits using a numeric
- * suffix to ensure uniqueness across concurrent test runs.
- * Values are automatically truncated to respect each field's maxLength.
- *
- * Add a new entry here when a new form is introduced.
- * For failure-scenario data, add a separate buildFailPathTestData builder.
+ * Truncates a suffix to its last 6 digits, keeping dynamic values within
+ * field max lengths defined in the form JSON schema.
+ * Use this in form builders for fields that have tight character limits.
  */
-const HAPPY_PATH_TEST_DATA_BUILDERS: Record<
-  string,
-  (suffix: number) => Record<string, string>
-> = {
-  projectAbstractSummary: (suffix) =>
-    ({
-      applicantName: `TESTER BR ${suffix}`,
-      projectTitle: `TESTING ${suffix}`,
-      abstract: `This is a print view automation test ${suffix}`,
-    }) satisfies Partial<
-      Record<keyof typeof fieldDefinitionsProjectAbstractSummary, string>
-    >,
-};
+export function toHappyPathSuffix(suffix: number): string {
+  return String(suffix).slice(-6);
+}
 
 /**
  * Truncates a string to fit within a field's maxLength, preserving the suffix.
@@ -74,23 +58,15 @@ function truncateToMaxLength(value: string, maxLength: number): string {
  * Keys in the returned Record match the fill-data field keys
  * so the spec can resolve print testIds generically.
  *
- * @param formKey - The form key (e.g. "projectAbstractSummary").
- * @param suffix  - A numeric suffix appended to each value (e.g. Date.now()).
+ * @param builder    - The form's test data builder function.
+ * @param suffix     - A numeric suffix appended to each value (e.g. Date.now()).
  * @param formConfig - The form's FillFormConfig, used for completeness + maxLength checks.
- * @throws if no builder is registered for the given formKey.
  */
 export function buildHappyPathTestData(
-  formKey: string,
+  builder: (suffix: number) => Record<string, string>,
   suffix: number,
   formConfig: FillFormConfig,
 ): Record<string, string> {
-  const builder = HAPPY_PATH_TEST_DATA_BUILDERS[formKey];
-  if (!builder) {
-    throw new Error(
-      `No happy-path test data builder registered for formKey: "${formKey}". ` +
-        `Add it to HAPPY_PATH_TEST_DATA_BUILDERS in print-view-utils.ts.`,
-    );
-  }
   const rawData = builder(suffix);
 
   // Completeness check: every non-attachment, non-conditional field in the form
@@ -105,8 +81,7 @@ export function buildHappyPathTestData(
 
   if (missingKeys.length > 0) {
     throw new Error(
-      `Happy-path test data builder for "${formKey}" is missing values for: ${missingKeys.join(", ")}. ` +
-        `Add them to HAPPY_PATH_TEST_DATA_BUILDERS["${formKey}"] in print-view-utils.ts.`,
+      `Happy-path test data builder is missing values for: ${missingKeys.join(", ")}.`,
     );
   }
 

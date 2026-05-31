@@ -1,5 +1,5 @@
-import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import { PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-abstract-summary-data";
+import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
 
 import type {
@@ -78,6 +78,7 @@ export function loadOpportunityConfig(
     return {
       formKey: entry.formKey,
       formConfig,
+      buildTestData: entry.buildTestData,
       expectedPrepopulatedFields: entry.expectedPrepopulatedFields,
       userEnteredFieldTestIds,
     };
