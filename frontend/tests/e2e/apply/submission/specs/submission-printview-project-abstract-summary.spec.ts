@@ -97,10 +97,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
         // --- Fill the form with generated unique data ---
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
-        // Verify save succeeded while still on the form page
+        // --- Verify save succeeded while still on the form page ---
         await verifyFormStatusAfterSave(page, "complete");
 
-        // Capture the form URL now - verifyFormStatusOnApplication navigates away
+        // --- Capture the form URL ---
         const formUrl = page.url();
 
         // --- Verify form status on the application page ---
@@ -122,7 +122,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         });
       }
 
-      // Return to application landing page before submitting
+      // --- Return to application landing page before submitting ---
       await page.goto(applicationUrl);
       await page.waitForLoadState("domcontentloaded");
 
@@ -151,15 +151,15 @@ for (const { testName, orgLabel } of applicantScenarios) {
       } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
-        // Form title heading is visible
+        // --- Form title heading is visible ---
         await expect(page.locator("h1")).toContainText(formName);
 
-        // Section heading contains the form name (section number is positional and not asserted)
+        // --- Section heading contains the form name ---
         await expect(
           page.getByTestId("fieldset").getByRole("heading"),
         ).toContainText(formName);
 
-        // Pre-populated fields (API-injected from opportunity record)
+        // --- Pre-populated fields (Data injected from opportunity record) ---
         for (const [testId, expectedValue] of Object.entries(
           expectedPrepopulatedFields,
         )) {
@@ -167,7 +167,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
           await expect(page.getByTestId(testId)).toContainText(expectedValue);
         }
 
-        // User-entered fields — testIds derived from formConfig.fields (printTestId ?? testId)
+        // --- User-entered fields ---
         for (const [dataKey, testId] of Object.entries(
           userEnteredFieldTestIds,
         )) {
