@@ -6,7 +6,7 @@ import {
 } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
+import { SavedSearchesList } from "./SavedSearchesList";
 
 const getSessionMock = jest.fn();
 

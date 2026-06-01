@@ -3,22 +3,25 @@ import { axe } from "jest-axe";
 import { completeStatuses, OrganizationInvitation } from "src/types/userTypes";
 import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
 
-import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
+import { OrganizationInvitationReplies } from "./OrganizationInvitationReplies";
 
 jest.mock("src/hooks/useFeatureFlags");
 jest.mock("src/services/auth/useUser");
 
-jest.mock("src/components/workspace/OrganizationInvitationReply", () => ({
-  OrganizationInvitationReply: ({
-    userInvitation,
-  }: {
-    userInvitation: OrganizationInvitation;
-  }) => (
-    <li data-testid={`invite-${userInvitation.organization_invitation_id}`}>
-      {userInvitation.organization_invitation_id} - {userInvitation.status}
-    </li>
-  ),
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/_components/OrganizationInvitationReply",
+  () => ({
+    OrganizationInvitationReply: ({
+      userInvitation,
+    }: {
+      userInvitation: OrganizationInvitation;
+    }) => (
+      <li data-testid={`invite-${userInvitation.organization_invitation_id}`}>
+        {userInvitation.organization_invitation_id} - {userInvitation.status}
+      </li>
+    ),
+  }),
+);
 
 const makeInvitation = (overrides: Partial<OrganizationInvitation>) => ({
   ...fakeOrganizationInvitation,

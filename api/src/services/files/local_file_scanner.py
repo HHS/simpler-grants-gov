@@ -181,12 +181,17 @@ def process_metadata_change(metadata_file_path: str, db_client: db.DBClient) -> 
         extra={**log_extra, "scenario": scenario},
     )
 
+    bucket_path = S3Config().file_scan_bucket_path
+    unscanned_location = f"{bucket_path}/{s3_key}"
+
     if scenario == SCENARIO_WAIT_10S:
-        _apply_status(db_client, pending_file_id, FileScanStatus.IN_PROGRESS, log_extra)
+        _apply_status(
+            db_client, pending_file_id, FileScanStatus.IN_PROGRESS, unscanned_location, log_extra
+        )
         time.sleep(LocalFileScannerConfig().wait_scenario_delay_seconds)
 
-    _move_to_terminal_prefix(s3_key, final_status)
-    _apply_status(db_client, pending_file_id, final_status, log_extra)
+    terminal_location = _move_to_terminal_prefix(bucket_path, s3_key, final_status)
+    _apply_status(db_client, pending_file_id, final_status, terminal_location, log_extra)
 
     logger.info(
         "Local file scanner finished scanning file",
@@ -231,9 +236,12 @@ def _apply_status(
     db_client: db.DBClient,
     pending_file_id: uuid.UUID,
     status: FileScanStatus,
+    file_location: str,
     log_extra: dict[str, Any],
 ) -> None:
-    user_id = _update_pending_file_status(db_client, pending_file_id, status, log_extra)
+    user_id = _update_pending_file_status(
+        db_client, pending_file_id, status, file_location, log_extra
+    )
     if user_id is None:
         return
     _write_dynamodb_status(pending_file_id, user_id, status)
@@ -247,6 +255,7 @@ def _update_pending_file_status(
     db_client: db.DBClient,
     pending_file_id: uuid.UUID,
     status: FileScanStatus,
+    file_location: str,
     log_extra: dict[str, Any],
 ) -> uuid.UUID | None:
     """Update the pending_file row via the shared service function.
@@ -279,7 +288,9 @@ def _update_pending_file_status(
             return None
 
         uploader_user_id = pending_file.user_id
-        update_pending_file_scan_status(db_session, pending_file_id, status, scanner_user)
+        update_pending_file_scan_status(
+            db_session, pending_file_id, status, file_location, scanner_user
+        )
     return uploader_user_id
 
 
@@ -298,7 +309,8 @@ def _write_dynamodb_status(
     )
 
 
-def _move_to_terminal_prefix(s3_key: str, status: FileScanStatus) -> None:
-    bucket_path = S3Config().file_scan_bucket_path
+def _move_to_terminal_prefix(bucket_path: str, s3_key: str, status: FileScanStatus) -> str:
     destination_key = TERMINAL_STATUS_PREFIX[status] + s3_key[len(UNSCANNED_PREFIX) :]
-    file_util.move_file(f"{bucket_path}/{s3_key}", f"{bucket_path}/{destination_key}")
+    destination_path = f"{bucket_path}/{destination_key}"
+    file_util.move_file(f"{bucket_path}/{s3_key}", destination_path)
+    return destination_path
