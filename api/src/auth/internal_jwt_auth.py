@@ -4,11 +4,11 @@ from datetime import datetime
 
 import grants_shared.util.datetime_util as datetime_util
 import jwt
+from grants_shared.adapters import db
+from grants_shared.adapters.db import flask_db
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from sqlalchemy import select
 
-from src.adapters import db
-from src.adapters.db import flask_db
 from src.api.route_utils import raise_flask_error
 from src.auth.api_jwt_auth import ApiJwtConfig, get_config
 from src.auth.auth_errors import JwtValidationError

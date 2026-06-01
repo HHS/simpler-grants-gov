@@ -1,7 +1,8 @@
 import logging
 import os
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 from src.api.route_utils import raise_flask_error
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.endpoint_access_util import verify_access

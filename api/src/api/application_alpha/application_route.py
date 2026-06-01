@@ -2,11 +2,11 @@ import logging
 from typing import Never
 from uuid import UUID
 
+import grants_shared.adapters.db as db
 from apiflask.exceptions import HTTPError
+from grants_shared.adapters.db import flask_db
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
 from src.api import response
 from src.api.application_alpha.application_blueprint import application_blueprint
 from src.api.application_alpha.application_schemas import (

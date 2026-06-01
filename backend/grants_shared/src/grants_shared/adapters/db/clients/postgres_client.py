@@ -6,8 +6,8 @@ import psycopg
 import sqlalchemy
 import sqlalchemy.pool as pool
 
-from src.adapters.db.client import DBClient
-from src.adapters.db.clients.postgres_config import PostgresDBConfig, get_db_config
+from grants_shared.adapters.db.client import DBClient
+from grants_shared.adapters.db.clients.postgres_config import PostgresDBConfig, get_db_config
 
 logger = logging.getLogger(__name__)
 

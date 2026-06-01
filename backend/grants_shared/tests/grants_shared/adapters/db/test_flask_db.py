@@ -2,8 +2,8 @@ import pytest
 from flask import Flask, current_app
 from sqlalchemy import text
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 
 
 # Define an isolated example Flask app fixture specific to this test module

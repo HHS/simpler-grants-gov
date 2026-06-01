@@ -1,10 +1,10 @@
 import logging
 from uuid import UUID, uuid4
 
+from grants_shared.adapters import db
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from src.adapters import db
 from src.db.models.user_models import UserProfile
 
 logger = logging.getLogger(__name__)

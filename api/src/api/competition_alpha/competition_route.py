@@ -1,10 +1,10 @@
 import logging
 import uuid
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.api.competition_alpha.competition_schema as competition_schema
 import src.api.response as response
 from src.api.competition_alpha.competition_blueprint import competition_blueprint

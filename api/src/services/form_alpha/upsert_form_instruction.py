@@ -1,9 +1,9 @@
 import logging
 import uuid
 
+import grants_shared.adapters.db as db
 from werkzeug.datastructures import FileStorage
 
-import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
