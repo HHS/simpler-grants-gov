@@ -1,6 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 
-import { DeleteSavedSearchModal } from "src/components/workspace/DeleteSavedSearchModal";
+import { DeleteSavedSearchModal } from "./DeleteSavedSearchModal";
 
 const mockUseUser = jest.fn(() => ({
   user: {
