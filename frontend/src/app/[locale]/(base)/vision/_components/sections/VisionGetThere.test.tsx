@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
-
-import VisionGetThere from "src/components/vision/sections/VisionGetThere";
+import VisionGetThere from "src/app/[locale]/(base)/vision/_components/sections/VisionGetThere";
 
 describe("Vision Get There Content", () => {
   it("Renders without errors", () => {

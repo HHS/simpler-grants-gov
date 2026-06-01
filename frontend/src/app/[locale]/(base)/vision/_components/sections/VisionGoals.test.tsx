@@ -1,10 +1,9 @@
 import { render, screen } from "@testing-library/react";
+import VisionGoals from "src/app/[locale]/(base)/vision/_components/sections/VisionGoals";
 
-import VisionMission from "src/components/vision/sections/VisionMission";
-
-describe("Vision Mission Content", () => {
+describe("Vision Goals Content", () => {
   it("Renders without errors", () => {
-    render(<VisionMission />);
+    render(<VisionGoals />);
     const ProcessH1 = screen.getByRole("heading", {
       name: "title",
     });

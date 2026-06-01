@@ -1,12 +1,11 @@
 import { render, screen } from "@testing-library/react";
+import VisionMission from "src/app/[locale]/(base)/vision/_components/sections/VisionMission";
 
-import VisionHeader from "src/components/vision/sections/VisionHeader";
-
-describe("Vision Header Content", () => {
+describe("Vision Mission Content", () => {
   it("Renders without errors", () => {
-    render(<VisionHeader />);
+    render(<VisionMission />);
     const ProcessH1 = screen.getByRole("heading", {
-      name: "pageHeaderTitle",
+      name: "title",
     });
 
     expect(ProcessH1).toBeInTheDocument();

@@ -1,8 +1,7 @@
+import VisionPageSection from "src/app/[locale]/(base)/vision/_components/visionPageSection";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { useTranslations } from "next-intl";
-
-import VisionPageSection from "src/components/vision/visionPageSection";
 
 export default function VisionGetThere() {
   const t = useTranslations("Vision.sections.getThere");
