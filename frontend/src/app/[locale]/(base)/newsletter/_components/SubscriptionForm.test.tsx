@@ -1,6 +1,5 @@
 import { act, render, screen } from "@testing-library/react";
-
-import SubscriptionForm from "src/components/newsletter/SubscriptionForm";
+import SubscriptionForm from "src/app/[locale]/(base)/newsletter/_components/SubscriptionForm";
 
 const mockSubscribeEmail = jest.fn();
 
