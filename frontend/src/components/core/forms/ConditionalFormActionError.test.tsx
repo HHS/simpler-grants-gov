@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { ConditionalFormActionError } from "src/components/ConditionalFormActionError";
+import { ConditionalFormActionError } from "src/components/core/forms/ConditionalFormActionError";
 
 const TypedConditionalFormActionError = ConditionalFormActionError<{
   someFieldName?: string[];
