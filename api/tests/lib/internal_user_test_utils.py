@@ -1,4 +1,5 @@
-from src.adapters import db
+from grants_shared.adapters import db
+
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege
 from src.db.models.user_models import Role, User

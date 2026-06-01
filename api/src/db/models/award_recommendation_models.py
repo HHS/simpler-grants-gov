@@ -4,6 +4,7 @@ import uuid
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
+from grants_shared.db.models.base import TimestampMixin
 from sqlalchemy import ForeignKey, Numeric, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -18,7 +19,7 @@ from src.constants.lookup_constants import (
     AwardRecommendationType,
     AwardSelectionMethod,
 )
-from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.lookup_models import (
     LkAwardRecommendationAttachmentType,
     LkAwardRecommendationAuditEvent,

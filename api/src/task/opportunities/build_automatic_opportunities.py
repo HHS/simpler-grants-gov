@@ -6,12 +6,12 @@ import uuid
 from datetime import date
 from enum import StrEnum
 
+from grants_shared.adapters import db
+from grants_shared.adapters.db import flask_db
 from grants_shared.util import datetime_util
 from sqlalchemy import select
 
-from src.adapters import db
 from src.adapters.aws import S3Config
-from src.adapters.db import flask_db
 from src.constants.lookup_constants import (
     ApplicantType,
     CompetitionOpenToApplicant,

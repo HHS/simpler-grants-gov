@@ -1,8 +1,8 @@
 import logging
 
+from grants_shared.adapters import db
 from statemachine.event_data import EventData
 
-from src.adapters import db
 from src.db.models.workflow_models import WorkflowAudit
 from src.workflow.config.workflow_service_config import WorkflowServiceConfig
 from src.workflow.event.state_machine_event import StateMachineEvent
