@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+from grants_shared.db.models.base import TimestampMixin
 from grants_shared.util import datetime_util
 
 from src.constants.lookup_constants import (
@@ -15,7 +16,6 @@ from src.data_migration.transformation.transform_constants import (
     SourceFundingInstrument,
     SourceSummary,
 )
-from src.db.models.base import TimestampMixin
 from src.db.models.opportunity_models import (
     LinkOpportunitySummaryApplicantType,
     LinkOpportunitySummaryFundingCategory,

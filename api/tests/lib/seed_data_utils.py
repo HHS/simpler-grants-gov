@@ -3,7 +3,8 @@ import logging
 import uuid
 from typing import Self
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 import tests.src.db.models.factories as factories
 from src.auth.api_jwt_auth import ApiJwtConfig, create_jwt_for_user
 from src.db.models.agency_models import Agency

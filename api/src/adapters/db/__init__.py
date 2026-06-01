@@ -7,7 +7,7 @@ This module can be used on it's own or with an application framework such as Fla
 To use this module with Flask, use the flask_db module.
 
 Usage:
-    import src.adapters.db as db
+    import grants_shared.adapters.db as db
 
     db_client = db.PostgresDBClient()
 
@@ -23,9 +23,9 @@ Usage:
 """
 
 # Re-export for convenience
-from src.adapters.db.client import Connection, DBClient, Session
-from src.adapters.db.clients.postgres_client import PostgresDBClient
-from src.adapters.db.clients.postgres_config import PostgresDBConfig
+from grants_shared.adapters.db.client import Connection, DBClient, Session
+from grants_shared.adapters.db.clients.postgres_client import PostgresDBClient
+from grants_shared.adapters.db.clients.postgres_config import PostgresDBConfig
 
 # Do not import flask_db here, because this module is not dependent on any specific framework.
 # Code can choose to use this module on its own or with the flask_db module depending on needs.

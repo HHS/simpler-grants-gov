@@ -6,10 +6,10 @@ against expected structure and content.
 
 from datetime import date
 
+import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
 from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (

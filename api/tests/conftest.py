@@ -6,6 +6,7 @@ from os import path
 import _pytest.monkeypatch
 import boto3
 import flask.testing
+import grants_shared.adapters.db as db
 import moto
 import pytest
 from apiflask import APIFlask
@@ -14,7 +15,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from grants_shared.util.local import load_local_env_vars
 from sqlalchemy import select, text
 
-import src.adapters.db as db
 import src.app as app_entry
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
