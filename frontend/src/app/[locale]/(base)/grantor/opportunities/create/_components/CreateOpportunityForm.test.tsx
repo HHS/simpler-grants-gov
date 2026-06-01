@@ -1,8 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { noop } from "lodash";
-
-import { CreateOpportunityForm } from "src/components/opportunities/create/CreateOpportunityForm";
+import { CreateOpportunityForm } from "src/app/[locale]/(base)/grantor/opportunities/create/_components/CreateOpportunityForm";
 
 const mockUseActionState = jest.fn();
 
