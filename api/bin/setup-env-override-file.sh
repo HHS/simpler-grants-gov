@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 # setup-env-override-file.sh
 #
 # Generate an override.env file

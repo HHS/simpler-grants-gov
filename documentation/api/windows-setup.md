@@ -7,11 +7,9 @@ This guide will help you set up the Simpler Grants.gov API for local development
 1. Install WSL 2 with Ubuntu (not docker-desktop)
 2. Install Docker Desktop and enable Ubuntu integration
 3. Install `make` and `postgresql-client` in Ubuntu
-4. Navigate to the `api` directory
-5. Fix shell script line endings: `sed -i 's/\r$//' bin/*.sh && chmod +x bin/*.sh`
-6. Run `make init` (takes 5-10 minutes first time)
-7. Run `make start`
-8. Verify with `curl http://localhost:8080/health`
+4. Run `make init` (takes 5-10 minutes first time)
+5. Run `make start`
+6. Verify with `curl http://localhost:8080/health`
 
 See detailed steps below.
 
@@ -119,19 +117,7 @@ cd ~/simpler-grants-gov/api
 - Use quotes around paths with spaces
 - You can also access Windows files from WSL using the `/mnt/` prefix
 
-### 2. Fix Shell Script Line Endings (Important!)
-
-**Important:** If you cloned the repository on Windows, the shell scripts may have Windows line endings (CRLF) which will cause errors in WSL. Fix them before proceeding:
-
-```bash
-# Fix line endings for all shell scripts
-sed -i 's/\r$//' bin/*.sh
-
-# Make scripts executable
-chmod +x bin/*.sh
-```
-
-### 3. Initialize the Development Environment
+### 2. Initialize the Development Environment
 
 Run the initialization command which will:
 - Generate environment override files with JWT keys (`override.env`)
@@ -157,7 +143,7 @@ This may take several minutes the first time as it downloads and builds Docker i
 
 **Note:** If you see errors about `pg_isready: command not found`, ensure you installed `postgresql-client` in step 4 of prerequisites. The database will still start, but the wait script won't work properly without it.
 
-### 4. Start the API Services
+### 3. Start the API Services
 
 After initialization completes, start all services:
 
@@ -171,7 +157,7 @@ Or to start and watch the logs:
 make run-logs
 ```
 
-### 5. Verify Services are Running
+### 4. Verify Services are Running
 
 Check that all containers are running:
 
@@ -193,7 +179,7 @@ If any containers show "Exited" or errors, check the logs:
 docker compose logs <container-name>
 ```
 
-### 6. Verify API is Accessible
+### 5. Verify API is Accessible
 
 Test that the API is responding:
 
@@ -211,7 +197,7 @@ You should see a JSON response from the health endpoint. If you get connection e
 - Health: http://localhost:8080/health
 - API Documentation: http://localhost:8080/docs
 
-### 7. Seed the Database (Optional but Recommended)
+### 6. Seed the Database (Optional but Recommended)
 
 To populate the database with sample data:
 
@@ -223,7 +209,7 @@ This will:
 - Seed the database with sample opportunities and agencies
 - Populate the OpenSearch index with searchable data
 
-### 8. Access the API
+### 7. Access the API
 
 Once everything is running, you can access:
 
@@ -314,16 +300,6 @@ If you get errors about ports being in use:
    netstat -ano | findstr :8080
    ```
 2. Stop the conflicting service or change the port in `docker-compose.yml`
-
-### Shell Script Errors (Line Endings)
-
-If you see errors like `/usr/bin/env: 'bash\r': No such file or directory`:
-
-```bash
-# Fix line endings
-sed -i 's/\r$//' bin/*.sh
-chmod +x bin/*.sh
-```
 
 ### Database Connection Issues
 
