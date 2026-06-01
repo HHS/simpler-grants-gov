@@ -486,7 +486,9 @@ class TestLoadOracleData(BaseTestClass):
 
         # Create a record in the foreign table with specific values
         # 'is_selfsigned' should be excluded
-        source_record = ForeignTcertificatesFactory.create(is_selfsigned="Y")
+        source_record = ForeignTcertificatesFactory.create(
+            is_selfsigned="Y", serial_num="ABCDEF", certemail="TEST@TEST.COM"
+        )
 
         # Run the task with column exclusions
         task = load_oracle_data_task.LoadOracleDataTask(
@@ -508,10 +510,10 @@ class TestLoadOracleData(BaseTestClass):
         ).first()
 
         # Verify regular columns were inserted
-        assert inserted_record.certemail == source_record.certemail
+        assert inserted_record.certemail == "test@test.com"
         assert inserted_record.creator_id == source_record.creator_id
         assert inserted_record.created_date == source_record.created_date
-        assert inserted_record.serial_num == source_record.serial_num
+        assert inserted_record.serial_num == "abcdef"
         assert inserted_record.agencyid == source_record.agencyid
 
         # Verify excluded column was not copied (should be None)

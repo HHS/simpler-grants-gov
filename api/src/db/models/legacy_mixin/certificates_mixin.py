@@ -7,7 +7,7 @@
 
 from datetime import date, datetime
 
-from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
+from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column, validates
 
 
 @declarative_mixin
@@ -30,3 +30,11 @@ class TcertificatesMixin:
     is_selfsigned: Mapped[str | None]
     serial_num: Mapped[str | None]
     system_name: Mapped[str | None]
+
+    @validates("serial_num")
+    def validate_serial_num(self, key: str, value: str | None) -> str | None:
+        return value.lower() if value else value
+
+    @validates("certemail")
+    def validate_certemail(self, key: str, value: str) -> str:
+        return value.lower()

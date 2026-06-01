@@ -6,7 +6,7 @@ from grants_shared.util import datetime_util
 from sqlalchemy import ForeignKey, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from sqlalchemy.sql.functions import now as sqlnow
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
@@ -526,3 +526,7 @@ class LegacyCertificate(ApiSchemaTable, TimestampMixin):
         UUID, ForeignKey(Organization.organization_id)
     )
     organization: Mapped[Organization | None] = relationship(Organization)
+
+    @validates("serial_number")
+    def validate_serial_number(self, key: str, val: str) -> str:
+        return val.lower()
