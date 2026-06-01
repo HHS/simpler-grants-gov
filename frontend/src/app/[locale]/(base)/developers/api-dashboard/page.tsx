@@ -1,11 +1,11 @@
+import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
+import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
 import { fetchApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 
 import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
-import ApiKeyTable from "src/components/developers/apiDashboard/ApiKeyTable";
-import { CreateApiKeyButton } from "src/components/developers/apiDashboard/CreateApiKeyButton";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
