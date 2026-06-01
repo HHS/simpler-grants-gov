@@ -1,9 +1,9 @@
 import logging
 
+import grants_shared.adapters.db as db
 from flask import request
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.adapters.db as db
 from src.legacy_soap_api.legacy_soap_api_auth import (
     ENABLE_SIMPLER_ROUTE_KEY,
     MTLS_CERT_HEADER_KEY,

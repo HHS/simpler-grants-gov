@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime, timedelta
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
 from src.adapters.aws.sesv2_adapter import BaseSESV2Client, get_sesv2_client
 from src.db.models.user_models import LinkExternalUser, SuppressedEmail
 from src.task.notifications import constants

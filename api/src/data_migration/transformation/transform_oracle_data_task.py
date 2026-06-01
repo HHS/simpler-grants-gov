@@ -1,11 +1,11 @@
 import logging
 from datetime import datetime
 
+from grants_shared.adapters import db
 from grants_shared.util import datetime_util
 from pydantic_settings import SettingsConfigDict
 
 import src.data_migration.transformation.transform_constants as transform_constants
-from src.adapters import db
 from src.data_migration.transformation.subtask.transform_agency import (
     TransformAgency,
     TransformAgencyHierarchy,

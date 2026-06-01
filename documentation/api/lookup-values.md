@@ -84,7 +84,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 import src.constants.lookup_constants as lookup_constants
 from src.db.models.lookup import Lookup, LookupRegistry, LookupTable
-from src.db.models.base import TimestampMixin
+from grants_shared.db.models.base import TimestampMixin
 
 @LookupRegistry.register_lookup(lookup_constants.EXAMPLE_CONFIG)
 class LkExample(LookupTable, TimestampMixin):
@@ -112,9 +112,9 @@ import uuid
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.db.models.base import TimestampMixin
+from grants_shared.db.models.base import TimestampMixin
 from src.db.models.lookup_models import LkExample
-from src.db.models.base import Base
+from grants_shared.db.models.base import Base
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import Example
 

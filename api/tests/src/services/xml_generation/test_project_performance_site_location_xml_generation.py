@@ -6,10 +6,10 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/PerformanceSite_4_
 from datetime import date
 from pathlib import Path
 
+import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
 from src.db.models.competition_models import Form
 from src.form_schema.forms.project_performance_site_location import (
     FORM_XML_TRANSFORM_RULES as PERFORMANCE_SITE_TRANSFORM_RULES,

@@ -1,10 +1,10 @@
 import logging
 import uuid
 
+import grants_shared.adapters.db as db
+from grants_shared.adapters.db import flask_db
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
 from src.api import response
 from src.api.workflows.workflow_blueprint import workflow_blueprint
 from src.api.workflows.workflow_schemas import (

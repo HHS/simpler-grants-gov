@@ -9,10 +9,10 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd
 from datetime import date
 from pathlib import Path
 
+import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
 from src.db.models.competition_models import Form
 from src.form_schema.forms.sf424b import FORM_XML_TRANSFORM_RULES as SF424B_TRANSFORM_RULES
 from src.form_schema.forms.sf424b import SF424b_v1_1

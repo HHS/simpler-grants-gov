@@ -1,9 +1,9 @@
 import logging
 import uuid
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 
-import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import (
     ApplicationStatus,

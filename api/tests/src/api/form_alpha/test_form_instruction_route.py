@@ -1,10 +1,10 @@
 import io
 import uuid
 
+import grants_shared.adapters.db as db
 import pytest
 from werkzeug.datastructures import FileStorage
 
-import src.adapters.db as db
 import src.util.file_util as file_util
 from src.db.models.competition_models import Form, FormInstruction
 from src.form_schema.forms import SF424_v4_0

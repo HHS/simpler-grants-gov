@@ -1,5 +1,6 @@
 import uuid
 
+from grants_shared.db.models.base import TimestampMixin
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -10,7 +11,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
 )
-from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.lookup_models import (
     LkAgencyDownloadFileType,
     LkAgencySubmissionNotificationSetting,

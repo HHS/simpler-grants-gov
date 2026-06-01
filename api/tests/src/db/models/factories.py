@@ -16,12 +16,12 @@ from datetime import datetime, timedelta, timezone
 import factory
 import factory.fuzzy
 import faker
+import grants_shared.adapters.db as db
 import grants_shared.util.datetime_util as datetime_util
 from faker.providers import BaseProvider
 from sqlalchemy import func, select
 from sqlalchemy.orm import scoped_session
 
-import src.adapters.db as db
 import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models

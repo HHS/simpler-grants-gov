@@ -3,8 +3,8 @@ from datetime import timedelta
 import apiflask.exceptions
 import grants_shared.util.datetime_util as datetime_util
 import pytest
+from grants_shared.adapters import db
 
-from src.adapters import db
 from src.services.users.get_user_api_keys import get_user_api_key, get_user_api_keys
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 

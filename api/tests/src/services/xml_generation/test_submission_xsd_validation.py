@@ -6,10 +6,10 @@ using SubmissionXMLAssembler, and validate the output against XSD schemas.
 
 from datetime import date
 
+import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
 from src.db.models.competition_models import Form
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0

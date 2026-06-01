@@ -1,6 +1,7 @@
 from uuid import UUID
 
-from src.adapters import db
+from grants_shared.adapters import db
+
 from src.db.models.user_models import User
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_for_update,

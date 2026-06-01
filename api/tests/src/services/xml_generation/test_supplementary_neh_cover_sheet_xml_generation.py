@@ -3,10 +3,10 @@
 from datetime import date
 from pathlib import Path
 
+import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
 from src.db.models.competition_models import Form
 from src.form_schema.forms.supplementary_neh_cover_sheet import (
     FORM_XML_TRANSFORM_RULES as NEH_COVER_SHEET_TRANSFORM_RULES,

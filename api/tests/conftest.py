@@ -5,6 +5,7 @@ from os import path
 import _pytest.monkeypatch
 import boto3
 import flask.testing
+import grants_shared.adapters.db as db
 import moto
 import pytest
 from apiflask import APIFlask
@@ -13,7 +14,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from grants_shared.util.local import load_local_env_vars
 from sqlalchemy import select, text
 
-import src.adapters.db as db
 import src.app as app_entry
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
@@ -492,10 +492,23 @@ def other_mock_s3_bucket(other_mock_s3_bucket_resource):
 
 
 @pytest.fixture
-def s3_config(mock_s3_bucket, other_mock_s3_bucket):
+def mock_file_scan_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("local-mock-file-scan-bucket")
+    bucket.create()
+    return bucket
+
+
+@pytest.fixture
+def mock_file_scan_s3_bucket(mock_file_scan_s3_bucket_resource):
+    return mock_file_scan_s3_bucket_resource.name
+
+
+@pytest.fixture
+def s3_config(mock_s3_bucket, other_mock_s3_bucket, mock_file_scan_s3_bucket):
     return S3Config(
         PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
         DRAFT_FILES_BUCKET=f"s3://{other_mock_s3_bucket}",
+        FILE_SCAN_BUCKET=f"s3://{mock_file_scan_s3_bucket}",
     )
 
 

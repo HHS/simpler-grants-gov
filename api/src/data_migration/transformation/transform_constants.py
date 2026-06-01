@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import TypeVar
 
-from src.db.models.base import ApiSchemaTable
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.staging.forecast import (
     TapplicanttypesForecast,
     TapplicanttypesForecastHist,
