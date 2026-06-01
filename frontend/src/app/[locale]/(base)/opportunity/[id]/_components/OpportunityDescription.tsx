@@ -7,7 +7,7 @@ import {
 import { useTranslations } from "next-intl";
 
 import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
-import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
+import OpportunityDownload from "./OpportunityDownload";
 import { OpportunityEligibility } from "./OpportunityEligibility";
 
 type OpportunityDescriptionProps = {

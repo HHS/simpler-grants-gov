@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import OpportunityAwardGridRow from "src/components/opportunity/OpportunityAwardGridRow";
+import OpportunityAwardGridRow from "./OpportunityAwardGridRow";
 
 const mockTranslations: { [key: string]: string } = {
   yes: "Yes",

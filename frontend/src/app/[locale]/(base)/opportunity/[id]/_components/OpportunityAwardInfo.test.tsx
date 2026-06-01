@@ -4,7 +4,7 @@ import {
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
 
-import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
+import OpportunityAwardInfo from "./OpportunityAwardInfo";
 
 // Mock `useTranslations`
 jest.mock("next-intl", () => ({

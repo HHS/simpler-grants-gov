@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
-import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
+import OpportunityIntro from "./OpportunityIntro";
 
 jest.mock("next-intl", () => ({
   useTranslations: jest.fn().mockReturnValue((key: string) => {

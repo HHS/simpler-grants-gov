@@ -1,4 +1,4 @@
-import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
+import OpportunityDocuments from "src/app/[locale]/(base)/opportunity/[id]/_components/OpportunityDocuments";
 
 const meta = {
   title: "Components/OpportunityDocuments",
