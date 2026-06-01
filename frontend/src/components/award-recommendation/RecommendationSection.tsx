@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { CharacterCount, Radio } from "@trussworks/react-uswds";
 
-import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
+import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
 
 type RecommendationSectionProps = {
   mode: "view" | "edit";
@@ -111,8 +111,10 @@ export const RecommendationSection = ({
           <p className="text-bold margin-bottom-2">
             {t("recommendationMethodDetails.label")}
           </p>
-          <SummaryDescriptionDisplay
-            summaryDescription={recommendationMethodDetails || ""}
+          <ExpandableTextContent
+            textContent={recommendationMethodDetails || ""}
+            showCallToAction={t("summary.showDescription")}
+            hideCallToAction={t("summary.hideSummaryDescription")}
           />
         </div>
         <div className="border-top border-base-lighter margin-top-2 margin-bottom-2" />
@@ -120,8 +122,10 @@ export const RecommendationSection = ({
           <p className="text-bold margin-bottom-2">
             {t("otherKeyInformation.label")}
           </p>
-          <SummaryDescriptionDisplay
-            summaryDescription={otherKeyInformation || ""}
+          <ExpandableTextContent
+            textContent={otherKeyInformation || ""}
+            showCallToAction={t("summary.showDescription")}
+            hideCallToAction={t("summary.hideSummaryDescription")}
           />
         </div>
       </div>
