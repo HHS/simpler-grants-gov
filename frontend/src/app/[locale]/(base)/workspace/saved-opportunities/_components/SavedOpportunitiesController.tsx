@@ -1,14 +1,14 @@
 "use client";
 
+import { ShareOpportunityToOrganizationsModal } from "src/app/[locale]/(base)/workspace/saved-opportunities/_components/ShareOpportunityToOrganizationsModal";
 import { Organization } from "src/types/applicationResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
-import SearchResultsListItem from "src/components/search/SearchResultsListItem";
-import { ShareOpportunityToOrganizationsModal } from "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal";
-import { buildSavedOpportunityTags } from "./buildSavedOpportunityTags";
+import { buildSavedOpportunityTags } from "src/components/saved-opportunities/buildSavedOpportunityTags";
+import SearchResultsListItem from "./SearchResultsListItem";
 
 interface SavedOpportunitiesControllerProps {
   opportunities: BaseOpportunity[];

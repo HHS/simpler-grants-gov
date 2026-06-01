@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 
-import { SavedOpportunityTag } from "./buildSavedOpportunityTags";
+import { SavedOpportunityTag } from "src/components/saved-opportunities/buildSavedOpportunityTags";
 import { SavedOpportunityTagPill } from "./SavedOpportunityTagPill";
 
 interface SavedOpportunityTagsProps {

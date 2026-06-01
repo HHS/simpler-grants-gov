@@ -1,5 +1,5 @@
 import { USWDSIcon } from "src/components/core/USWDSIcon";
-import { SavedOpportunityTag } from "./buildSavedOpportunityTags";
+import { SavedOpportunityTag } from "src/components/saved-opportunities/buildSavedOpportunityTags";
 
 interface SavedOpportunityTagPillProps {
   tag: SavedOpportunityTag;
