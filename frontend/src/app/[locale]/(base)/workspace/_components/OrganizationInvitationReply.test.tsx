@@ -6,7 +6,7 @@ import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
 import {
   InvitationReplyForm,
   OrganizationInvitationReply,
-} from "src/components/workspace/OrganizationInvitationReply";
+} from "./OrganizationInvitationReply";
 
 const clientFetchMock = jest.fn();
 

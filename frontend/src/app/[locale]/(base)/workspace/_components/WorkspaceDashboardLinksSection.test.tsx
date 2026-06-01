@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { WorkspaceDashboardLinksSection } from "src/app/[locale]/(base)/workspace/_components/WorkspaceDashboardLinksSection";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
-
-import { WorkspaceDashboardLinksSection } from "src/components/workspace/WorkspaceDashboardLinksSection";
 
 jest.mock("next-intl/server", () => ({
   // eslint-disable-next-line react-hooks/rules-of-hooks
