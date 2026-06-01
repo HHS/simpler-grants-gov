@@ -6,8 +6,10 @@ import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applica
 import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import { ApplicationResponseDetail } from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
-
-import { processFormSchema, shapeFormData } from "./utils";
+import {
+  processFormSchema,
+  shapeFormData,
+} from "src/utils/applyForm/applyFormUtils";
 
 type ApplyFormResponse = {
   applicationId: string;

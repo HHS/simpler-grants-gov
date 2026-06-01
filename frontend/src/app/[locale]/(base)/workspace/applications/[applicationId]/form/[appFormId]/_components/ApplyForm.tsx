@@ -10,6 +10,7 @@ import {
   UiSchema,
 } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
+import { getFieldsForNav } from "src/utils/applyForm/applyFormUtils";
 import { rebaseFieldListWarningsAfterDelete } from "src/utils/applyForm/rebaseFieldListWarningsAfterDelete";
 
 import { useTranslations } from "next-intl";
@@ -19,7 +20,6 @@ import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "src/components/applyForm/actions";
 import { FormFields } from "src/components/applyForm/FormFields";
-import { getFieldsForNav } from "src/components/applyForm/utils";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 

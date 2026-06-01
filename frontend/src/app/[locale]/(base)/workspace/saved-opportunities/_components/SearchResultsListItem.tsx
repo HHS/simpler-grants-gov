@@ -2,6 +2,7 @@
 
 import { SavedOpportunityTags } from "src/app/[locale]/(base)/workspace/saved-opportunities/_components/SavedOpportunityTags";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { SavedOpportunityTag } from "src/utils/buildSavedOpportunityTags";
 import { formatDate } from "src/utils/dateUtil";
 import { getAgencyDisplayName } from "src/utils/search/filterUtils";
 
@@ -9,7 +10,6 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ReactElement } from "react";
 
-import { SavedOpportunityTag } from "src/components/saved-opportunities/buildSavedOpportunityTags";
 import SearchResultsListItemStatus from "./SearchResultsListItemStatus";
 
 interface SearchResultsListItemProps {

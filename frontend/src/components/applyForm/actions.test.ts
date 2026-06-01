@@ -11,7 +11,7 @@ jest.mock("src/services/auth/session", () => ({
   getSession: () => mockGetSession() as unknown,
 }));
 
-jest.mock("src/components/applyForm/utils", () => ({
+jest.mock("src/utils/applyForm/applyFormUtils", () => ({
   processFormSchema: (schema: RJSFSchema) =>
     mockProcessFormSchema(schema) as unknown,
   shapeFormData: (data: FormData, schema: RJSFSchema) =>
