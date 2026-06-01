@@ -1,6 +1,5 @@
-import uuid
-
 import os
+import uuid
 
 import _pytest.monkeypatch
 import boto3
