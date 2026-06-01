@@ -15,8 +15,8 @@ import {
 import Link from "next/link";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { DeleteSavedSearchModal } from "src/components/workspace/DeleteSavedSearchModal";
-import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
+import { DeleteSavedSearchModal } from "./DeleteSavedSearchModal";
+import { EditSavedSearchModal } from "./EditSavedSearchModal";
 
 type ParamMapping = { [key in ValidSearchQueryParam]: string };
 

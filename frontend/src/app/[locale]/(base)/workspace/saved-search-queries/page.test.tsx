@@ -49,11 +49,14 @@ jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
 }));
 
-jest.mock("src/components/workspace/SavedSearchesList", () => ({
-  SavedSearchesList: ({ savedSearches }: { savedSearches: [] }) => (
-    <span data-testid="fakeSavedSearchList">{savedSearches.length}</span>
-  ),
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/saved-search-queries/_components/SavedSearchesList",
+  () => ({
+    SavedSearchesList: ({ savedSearches }: { savedSearches: [] }) => (
+      <span data-testid="fakeSavedSearchList">{savedSearches.length}</span>
+    ),
+  }),
+);
 
 describe("Saved Searches page", () => {
   beforeEach(() => {
