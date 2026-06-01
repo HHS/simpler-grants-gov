@@ -83,8 +83,8 @@ module "service" {
   image_tag                = local.image_tag
   network_name             = local.environment_config.network_name
   project_name             = module.project_config.project_name
-  fargate_cpu              = 2048
-  fargate_memory           = 4096
+  fargate_cpu              = local.service_config.cpu
+  fargate_memory           = local.service_config.memory
   container_port           = 3000
   readonly_root_filesystem = false
   drop_linux_capabilities  = false
@@ -109,10 +109,14 @@ module "service" {
     }],
   )
 
+  # Metabase connects to the existing analytics database. The values come from the
+  # read-only database/data module (see database.tf), which looks up the existing
+  # cluster and its IAM access policies. This wires up the security-group ingress rule
+  # and IAM access the service needs to reach the analytics database.
   db_vars = {
-    security_group_ids         = module.database[0].security_group_ids
-    app_access_policy_arn      = module.database[0].app_access_policy_arn
-    migrator_access_policy_arn = module.database[0].migrator_access_policy_arn
+    security_group_ids         = module.database.security_group_ids
+    app_access_policy_arn      = module.database.app_access_policy_arn
+    migrator_access_policy_arn = module.database.migrator_access_policy_arn
     connection_info = {
       host        = data.aws_rds_cluster.db_cluster.endpoint
       port        = data.aws_rds_cluster.db_cluster.port
