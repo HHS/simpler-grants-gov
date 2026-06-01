@@ -8,11 +8,11 @@ import { SFLLL_TEST_DATA } from "tests/e2e/apply/fixtures/sfLLL-field-definition
 import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sfLLL-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
+import { getOpportunityId } from "tests/e2e/utils/application/get-opportunityId-utils";
+import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
-import { getOpportunityId } from "tests/e2e/utils/application/get-opportunityId-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 
