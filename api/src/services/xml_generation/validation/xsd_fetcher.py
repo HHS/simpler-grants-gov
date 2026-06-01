@@ -17,23 +17,45 @@ class XSDFetchError(Exception):
 
 KNOWN_XSD_DEPENDENCIES = {
     "SF424_4_0-V4.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
     ],
     "SF424A-V1.0.xsd": [
-        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
     ],
     "SF424B-V1.1.xsd": [
-        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
     ],
     "SF424D-V1.1.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+    ],
+    "SFLLL_2_0-V2.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+    ],
+    "Project_AbstractSummary_2_0-V2.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
+    ],
+    "Project_Abstract_1_2-V1.2.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+    ],
+    "BudgetNarrativeAttachments_1_2-V1.2.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
     ],
-    "SFLLL_2_0-V2.0.xsd": [
+    "ProjectNarrativeAttachments_1_2-V1.2.xsd": [],
+    "OtherNarrativeAttachments_1_2-V1.2.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
     ],
@@ -42,37 +64,15 @@ KNOWN_XSD_DEPENDENCIES = {
         "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
     ],
-    "BudgetNarrativeAttachments_1_2-V1.2.xsd": [
-        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
-    ],
-    "ProjectNarrativeAttachments_1_2-V1.2.xsd": [
-        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
-    ],
-    "OtherNarrativeAttachments_1_2-V1.2.xsd": [
-        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
-    ],
-    "Project_Abstract_1_2-V1.2.xsd": [
-        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
-    ],
-    "Project_AbstractSummary_2_0-V2.0.xsd": [
-        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
-    ],
     "CD511-V1.1.xsd": [
         "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
     ],
+    "SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0.xsd": [],
     "GG_LobbyingForm-V1.1.xsd": [
-        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
     ],
     "EPA4700_4_5_0-V5.0.xsd": [
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
@@ -82,11 +82,6 @@ KNOWN_XSD_DEPENDENCIES = {
     "EPA_KeyContacts_2_0-V2.0.xsd": [
         "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
-    ],
-    "SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0.xsd": [
-        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
-        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
     ],
 }
 
