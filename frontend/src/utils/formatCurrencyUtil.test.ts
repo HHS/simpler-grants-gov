@@ -1,4 +1,8 @@
-import { formatCurrency, formatCurrencyString, getNumericAmountFromString } from "src/utils/formatCurrencyUtil";
+import {
+  formatCurrency,
+  formatCurrencyString,
+  getNumericAmountFromString,
+} from "src/utils/formatCurrencyUtil";
 
 describe("formatCurrency", () => {
   it("returns empty string when null is passed", () => {
@@ -22,7 +26,7 @@ describe("formatCurrency", () => {
   });
 
   it("formats decimal values", () => {
-    expect(formatCurrency(1234.56)).toBe("$1,235");
+    expect(formatCurrency(1234.56)).toBe("$1,234.56");
   });
 });
 
