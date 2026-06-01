@@ -258,7 +258,7 @@ start-mock-oauth2:
 ##################################################
 
 test: ## Run all tests
-	$(PY_RUN_CMD) pytest -m  $(args)
+	$(PY_RUN_CMD) pytest $(args)
 
 
 test-coverage: ## Run tests and generate coverage report
@@ -414,7 +414,6 @@ validate-xml-generation: ## Run XML generation validation tests
 
 run-xml-validator: ## Run XML validator tool directly
 	$(PY_RUN_CMD) python tool/xml_validator.py
-
 
 #####################
 # Workflow State Machine
