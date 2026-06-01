@@ -54,3 +54,6 @@ class ValidationErrorType(StrEnum):
     ORGANIZATION_NO_SAM_GOV_ENTITY = "organization_no_sam_gov_entity"
     ORGANIZATION_INACTIVE_IN_SAM_GOV = "organization_inactive_in_sam_gov"
     ORGANIZATION_SAM_GOV_EXPIRED = "organization_sam_gov_expired"
+
+    # File upload validation error types
+    PENDING_FILE_UPLOAD_LIMIT_EXCEEDED = "pending_file_upload_limit_exceeded"
