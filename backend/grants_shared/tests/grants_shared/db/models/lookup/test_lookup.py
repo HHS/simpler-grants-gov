@@ -3,7 +3,7 @@ from enum import StrEnum
 import pytest
 
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from grants_shared.db.models import metadata
+from grants_shared.db.models.base import metadata
 from grants_shared.db.models.lookup import LookupConfig, LookupStr
 
 

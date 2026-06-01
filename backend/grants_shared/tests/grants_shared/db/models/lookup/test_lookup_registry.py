@@ -3,7 +3,13 @@ from enum import StrEnum
 import pytest
 from sqlalchemy import Column, Integer
 
-from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
+from grants_shared.db.models.lookup import (
+    Lookup,
+    LookupConfig,
+    LookupRegistry,
+    LookupStr,
+    LookupTable,
+)
 
 
 class TmpEnum(StrEnum):
@@ -27,7 +33,7 @@ TMP_LOOKUP_CONFIG = LookupConfig(
 
 
 class LkTmp(LookupTable):
-    __abstract__ = True  # Mark it abstract so SQLAlchemy and Alembic ignore it
+    __abstract__ = True  # Mark it abstract so SQLAlchemy won't create it
     __tablename__ = "lk_tmp"
 
     tmp_id: int = Column(Integer, primary_key=True)
