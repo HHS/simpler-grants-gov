@@ -31,7 +31,9 @@ export const fetchAwardRecommendationEndpoint = {
   requiresAuth: true,
 };
 
-export const toDynamicAwardRecommendationEndpoint = (type: "POST" | "PUT") => {
+export const toDynamicAwardRecommendationEndpoint = (
+  type: "POST" | "PUT" | "DELETE",
+) => {
   return {
     basePath: environment.API_URL,
     version: "alpha",
@@ -125,7 +127,7 @@ export const toDynamicGrantorsEndpoint = (type: "POST") => {
 };
 
 export const toDynamicGrantorOpportunityEndpoint = (
-  type: "POST" | "DELETE" | "GET",
+  type: "POST" | "DELETE" | "GET" | "PUT",
 ) => {
   return {
     basePath: environment.API_URL,
@@ -141,34 +143,6 @@ export const getLocalUsersEndpoint = {
   version: "",
   namespace: "local/local-users",
   method: "GET" as ApiMethod,
-};
-
-export const getGrantorOpportunityEndpoint = {
-  basePath: environment.API_URL,
-  version: "v1",
-  namespace: "grantors/opportunities",
-  method: "GET" as ApiMethod,
-};
-
-export const updateGrantorOpportunitySummaryEndpoint = {
-  basePath: environment.API_URL,
-  version: "v1",
-  namespace: "grantors/opportunities",
-  method: "PUT" as ApiMethod,
-};
-
-export const createGrantorOpportunitySummaryEndpoint = {
-  basePath: environment.API_URL,
-  version: "v1",
-  namespace: "grantors/opportunities",
-  method: "POST" as ApiMethod,
-};
-
-export const publishGrantorOpportunityEndpoint = {
-  basePath: environment.API_URL,
-  version: "v1",
-  namespace: "grantors/opportunities",
-  method: "POST" as ApiMethod,
 };
 
 // opting out of traditional X-SGG based auth since these requests will use the

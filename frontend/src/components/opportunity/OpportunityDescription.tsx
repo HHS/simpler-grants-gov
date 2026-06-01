@@ -3,72 +3,16 @@ import {
   OpportunityDocument,
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
-import { splitMarkup } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
 import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
 import { OpportunityEligibility } from "./OpportunityEligibility";
 
 type OpportunityDescriptionProps = {
   summary: Summary;
   attachments: OpportunityDocument[];
-};
-
-export const SummaryDescriptionDisplay = ({
-  summaryDescription = "",
-}: {
-  summaryDescription: string;
-}) => {
-  const t = useTranslations("OpportunityListing.description");
-  if (summaryDescription?.length < 750) {
-    return (
-      <div
-        dangerouslySetInnerHTML={{
-          __html: summaryDescription
-            ? DOMPurify.sanitize(summaryDescription)
-            : "--",
-        }}
-      />
-    );
-  }
-
-  const purifiedSummary = DOMPurify.sanitize(summaryDescription);
-
-  const { preSplit, postSplit } = splitMarkup(purifiedSummary, 600);
-
-  if (!postSplit) {
-    return (
-      <div
-        dangerouslySetInnerHTML={{
-          __html: summaryDescription
-            ? DOMPurify.sanitize(summaryDescription)
-            : "--",
-        }}
-      />
-    );
-  }
-  return (
-    <>
-      <div
-        dangerouslySetInnerHTML={{
-          __html: preSplit + "...",
-        }}
-      />
-      <ContentDisplayToggle
-        showCallToAction={t("showDescription")}
-        hideCallToAction={t("hideSummaryDescription")}
-        positionButtonBelowContent={false}
-      >
-        <div
-          dangerouslySetInnerHTML={{
-            __html: postSplit,
-          }}
-        />
-      </ContentDisplayToggle>
-    </>
-  );
 };
 
 const OpportunityDescription = ({
@@ -93,8 +37,10 @@ const OpportunityDescription = ({
         <h2 className="flex-1">{t("title")}</h2>
         <OpportunityDownload attachments={attachments} />
       </div>
-      <SummaryDescriptionDisplay
-        summaryDescription={summary.summary_description || ""}
+      <ExpandableTextContent
+        textContent={summary.summary_description || ""}
+        showCallToAction={t("showDescription")}
+        hideCallToAction={t("hideSummaryDescription")}
       />
       <h2>{t("eligibility")}</h2>
       <h3>{t("eligibleApplicants")}</h3>

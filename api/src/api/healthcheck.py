@@ -1,16 +1,16 @@
 import logging
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 from apiflask import APIBlueprint
+from grants_shared.util.deploy_metadata import get_deploy_metadata_config
 from sqlalchemy import text
 from werkzeug.exceptions import ServiceUnavailable
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 from src.api import response
 from src.api.route_utils import raise_flask_error
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
-from src.util.deploy_metadata import get_deploy_metadata_config
 
 logger = logging.getLogger(__name__)
 

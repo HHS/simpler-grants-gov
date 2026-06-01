@@ -2,7 +2,8 @@ import logging
 import os
 import uuid
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 from src.constants.static_role_values import E2E_TEST_USER_ROLE
 from src.util.file_util import write_to_file
 from tests.lib.seed_data_utils import UserBuilder

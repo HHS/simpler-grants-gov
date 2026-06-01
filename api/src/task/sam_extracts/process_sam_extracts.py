@@ -8,9 +8,9 @@ from datetime import date, datetime
 from enum import StrEnum
 from typing import IO
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 
-import src.adapters.db as db
 from src.constants.lookup_constants import (
     SamGovExtractType,
     SamGovImportType,

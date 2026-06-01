@@ -1,9 +1,9 @@
 import logging
 from typing import cast
 
+import grants_shared.adapters.db as db
 from apiflask.exceptions import HTTPError
 
-import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import ApplicationSubmissionRetrieved

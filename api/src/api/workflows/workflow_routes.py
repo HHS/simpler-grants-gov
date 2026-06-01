@@ -1,8 +1,10 @@
 import logging
 import uuid
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
+import grants_shared.adapters.db as db
+from grants_shared.adapters.db import flask_db
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+
 from src.api import response
 from src.api.workflows.workflow_blueprint import workflow_blueprint
 from src.api.workflows.workflow_schemas import (
@@ -13,7 +15,6 @@ from src.api.workflows.workflow_schemas import (
     WorkflowGetResponseSchema,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.workflows.get_workflow import (
     get_workflow_and_verify_access,
     get_workflow_by_event_id_and_verify_access,

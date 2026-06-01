@@ -9,7 +9,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { Alert, Button, GridContainer } from "@trussworks/react-uswds";
 
-import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
+import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import OpportunityEditForm from "src/components/opportunity/OpportunityEditForm";
 import { buildOpportunityEditInitialValues } from "src/components/opportunity/opportunityEditFormConfig";
 import OpportunityEditHeader from "src/components/opportunity/OpportunityEditHeader";
@@ -34,7 +34,7 @@ export async function generateMetadata({
   try {
     const session = await getSession();
     if (session?.token) {
-      const { data } = await getOpportunityForGrantor(id, session.token);
+      const { data } = await getOpportunityForGrantor(id);
       title = `${t("OpportunityEdit.pageTitle")} - ${data.opportunity_title || ""}`;
     }
   } catch {
@@ -66,7 +66,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   let opportunityData: GrantorOpportunityDetail;
   let opportunitySummaryId: string;
   try {
-    const response = await getOpportunityForGrantor(id, session.token);
+    const response = await getOpportunityForGrantor(id);
     opportunityData = response.data;
     opportunitySummaryId =
       response.data.forecast_summary?.opportunity_summary_id ??
@@ -210,7 +210,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
 
       <div className="grid-container padding-bottom-4">
         <div className="usa-in-page-nav-container">
-          <ApplyFormNav
+          <LeftHandFormNav
             title={tEdit("header.navTitle")}
             fields={navigationItems}
           />

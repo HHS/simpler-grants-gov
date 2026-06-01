@@ -1,17 +1,17 @@
 import logging
 
 import boto3
+import grants_shared.logs
+from grants_shared.util.local import error_if_not_local
 
-import src.logging
 from src.adapters.aws.dynamodb_adapter import DynamoDBConfig
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
 
 def setup_local_dynamodb() -> None:
     """Set up local DynamoDB tables for development"""
-    with src.logging.init(__package__):
+    with grants_shared.logs.init(__package__):
         error_if_not_local()
 
         dynamodb_config = DynamoDBConfig()

@@ -4,7 +4,8 @@ import time
 from enum import StrEnum
 from typing import Any
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 from src.db.models.task_models import JobLog, JobStatus
 
 logger = logging.getLogger(__name__)

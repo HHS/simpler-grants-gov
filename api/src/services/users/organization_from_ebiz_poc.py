@@ -1,9 +1,9 @@
 import logging
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
 from src.db.models.entity_models import SamGovEntity
 from src.db.models.user_models import OrganizationUser, User
 from src.util.sam_gov_utils import link_sam_gov_entity_if_not_exists
