@@ -17,11 +17,11 @@ import { useNavigationGuard } from "next-navigation-guard";
 import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
+import { handleFormAction } from "src/components/applyForm/actions";
+import { FormFields } from "src/components/applyForm/FormFields";
+import { getFieldsForNav } from "src/components/applyForm/utils";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
-import { handleFormAction } from "./actions";
 import { ApplyFormMessage } from "./ApplyFormMessage";
-import { FormFields } from "./FormFields";
-import { getFieldsForNav } from "./utils";
 
 type Translator = ((
   key: string,
