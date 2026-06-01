@@ -227,8 +227,7 @@ class TestCreatePresignedUpload429:
     ):
         # Use a smaller limit so the test stays fast
         monkeypatch.setenv("PENDING_FILE_UPLOAD_RATE_LIMIT", "3")
-        for _ in range(3):
-            factories.PendingFileFactory.create(user=user)
+        factories.PendingFileFactory.create_batch(size=3, user=user)
 
         resp = client.post(
             URL,
@@ -248,16 +247,15 @@ class TestCreatePresignedUpload429:
         user,
         user_auth_token,
         aws_mocks,
-        db_session,
         monkeypatch,
     ):
         monkeypatch.setenv("PENDING_FILE_UPLOAD_RATE_LIMIT", "2")
         monkeypatch.setenv("PENDING_FILE_UPLOAD_RATE_WINDOW_HOURS", "1")
 
-        old_pending_file = factories.PendingFileFactory.create(user=user)
-        # Backdate the row past the rate-limit window so it doesn't count
-        old_pending_file.created_at = datetime_util.utcnow() - timedelta(hours=2)
-        db_session.commit()
+        # Backdate this row past the rate-limit window so it doesn't count
+        factories.PendingFileFactory.create(
+            user=user, created_at=datetime_util.utcnow() - timedelta(hours=2)
+        )
 
         # One recent pending file -- still under the limit of 2
         factories.PendingFileFactory.create(user=user)
@@ -279,8 +277,7 @@ class TestCreatePresignedUpload429:
     ):
         monkeypatch.setenv("PENDING_FILE_UPLOAD_RATE_LIMIT", "2")
         other_user = factories.UserFactory.create()
-        for _ in range(5):
-            factories.PendingFileFactory.create(user=other_user)
+        factories.PendingFileFactory.create_batch(size=5, user=other_user)
 
         resp = client.post(
             URL,

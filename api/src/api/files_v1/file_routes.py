@@ -46,7 +46,6 @@ def create_presigned_upload_route(db_session: db.Session, json_data: dict) -> re
             db_session=db_session,
             user=user,
             request_data=json_data,
-            dynamodb_client=DynamoDBClient(),
         )
 
     add_extra_data_to_current_request_logs({"pending_file_id": result.pending_file_id})

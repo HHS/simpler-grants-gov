@@ -10,7 +10,7 @@ from sqlalchemy import func, select
 
 import src.adapters.db as db
 import src.util.file_util as file_util
-from src.adapters.aws import S3Config, get_boto_session, get_s3_client
+from src.adapters.aws import S3Config
 from src.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
@@ -21,12 +21,6 @@ from src.util.env_config import PydanticBaseEnvConfig
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
-
-
-# 2 GB - max file size we allow for uploads. The presigned POST policy enforces
-# this at the s3 layer so the user can't bypass it by sending a larger file.
-_MAX_FILE_UPLOAD_SIZE_BYTES = 2 * 1024 * 1024 * 1024
-_MIN_FILE_UPLOAD_SIZE_BYTES = 1
 
 
 class PresignedUploadConfig(PydanticBaseEnvConfig):
@@ -64,41 +58,6 @@ def _build_s3_file_location(s3_config: S3Config, pending_file_id: uuid.UUID, fil
     )
 
 
-def _generate_presigned_post(
-    s3_config: S3Config,
-    s3_file_location: str,
-    pending_file_id: uuid.UUID,
-    user_id: uuid.UUID,
-    mime_type: str,
-) -> dict[str, Any]:
-    """Generate a presigned POST URL + body for uploading a single file to s3.
-
-    The returned dict has ``url`` and ``fields`` keys per boto3's
-    ``generate_presigned_post``. We pass ``IfNoneMatch=*`` to ensure callers
-    can't reuse a presigned URL to overwrite an existing s3 object.
-    """
-    s3_client = get_s3_client(s3_config, get_boto_session())
-    bucket, key = file_util.split_s3_url(s3_file_location)
-
-    return s3_client.generate_presigned_post(
-        Bucket=bucket,
-        Key=key,
-        Fields={
-            "Content-Type": mime_type,
-            "x-amz-meta-file-id": str(pending_file_id),
-            "x-amz-meta-user-id": str(user_id),
-        },
-        Conditions=[
-            ["content-length-range", _MIN_FILE_UPLOAD_SIZE_BYTES, _MAX_FILE_UPLOAD_SIZE_BYTES],
-            {"Content-Type": mime_type},
-            {"x-amz-meta-file-id": str(pending_file_id)},
-            {"x-amz-meta-user-id": str(user_id)},
-            {"IfNoneMatch": "*"},
-        ],
-        ExpiresIn=s3_config.presigned_s3_duration,
-    )
-
-
 def _write_scan_record(
     dynamodb_client: DynamoDBClient,
     dynamodb_config: DynamoDBConfig,
@@ -119,13 +78,15 @@ def create_presigned_upload(
     db_session: db.Session,
     user: User,
     request_data: dict,
-    dynamodb_client: DynamoDBClient,
     s3_config: S3Config | None = None,
+    dynamodb_client: DynamoDBClient | None = None,
     dynamodb_config: DynamoDBConfig | None = None,
     config: PresignedUploadConfig | None = None,
 ) -> PresignedUploadResult:
     if s3_config is None:
         s3_config = S3Config()
+    if dynamodb_client is None:
+        dynamodb_client = DynamoDBClient()
     if dynamodb_config is None:
         dynamodb_config = DynamoDBConfig()
     if config is None:
@@ -180,15 +141,15 @@ def create_presigned_upload(
         file_scan_status=FileScanStatus.PENDING,
     )
     db_session.add(pending_file)
-    # Flush so the row is in place before we write to DynamoDB.
-    db_session.flush()
 
-    presigned = _generate_presigned_post(
+    presigned = file_util.pre_sign_upload(
+        file_path=s3_file_location,
+        content_type=mime_type,
+        metadata={
+            "file-id": str(pending_file_id),
+            "user-id": str(user.user_id),
+        },
         s3_config=s3_config,
-        s3_file_location=s3_file_location,
-        pending_file_id=pending_file_id,
-        user_id=user.user_id,
-        mime_type=mime_type,
     )
 
     _write_scan_record(
