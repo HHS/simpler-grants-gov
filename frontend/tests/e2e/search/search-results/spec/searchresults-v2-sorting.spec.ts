@@ -238,6 +238,11 @@ test.describe("Search results sorting", () => {
       // Then results on page 1 should be correctly ordered (first title ≤ last title alphabetically)
       const firstTitlePage1 = await getFirstSearchResultTitle(page);
       const lastTitlePage1 = await getLastSearchResultTitle(page);
+      if (!firstTitlePage1 || !lastTitlePage1) {
+        test.fail();
+        return;
+      }
+
       expect(
         firstTitlePage1.toLowerCase() <= lastTitlePage1.toLowerCase(),
         `Expected "${firstTitlePage1}" to be alphabetically ≤ "${lastTitlePage1}"`,
@@ -248,6 +253,11 @@ test.describe("Search results sorting", () => {
       await clickPaginationPageNumber(page, 2);
       expectURLQueryParamValue(page, "sortby", "opportunityTitleAsc");
       const firstTitlePage2 = await getFirstSearchResultTitle(page);
+      if (!lastTitlePage1 || !firstTitlePage2) {
+        test.fail();
+        return;
+      }
+
       expect(
         lastTitlePage1.toLowerCase() <= firstTitlePage2.toLowerCase(),
         `Expected last title on page 1 "${lastTitlePage1}" to be alphabetically ≤ first title on page 2 "${firstTitlePage2}"`,
