@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { noop } from "lodash";
+import { UserProfileForm } from "src/app/[locale]/(base)/settings/_components/UserProfileForm";
 import { fakeUserWithProfile } from "src/utils/testing/fixtures";
-
-import { UserProfileForm } from "src/components/user/UserProfileForm";
 
 const mockUseActionState = jest.fn();
 
