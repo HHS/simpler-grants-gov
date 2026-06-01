@@ -2,9 +2,9 @@ import secrets
 import string
 import uuid
 
+import grants_shared.adapters.db as db
 from sqlalchemy import exists, select
 
-import src.adapters.db as db
 from src.db.models.award_recommendation_models import (
     AwardRecommendationApplicationSubmission,
     AwardRecommendationRisk,

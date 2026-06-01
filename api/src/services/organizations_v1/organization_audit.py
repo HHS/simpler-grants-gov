@@ -1,6 +1,7 @@
 import logging
 
-from src.adapters import db
+from grants_shared.adapters import db
+
 from src.constants.lookup_constants import OrganizationAuditEvent
 from src.db.models.entity_models import Organization, OrganizationAudit
 from src.db.models.user_models import User

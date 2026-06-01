@@ -2,8 +2,7 @@ import logging
 
 from pydantic import Field
 
-from src.constants.schema import Schemas
-from src.util.env_config import PydanticBaseEnvConfig
+from grants_shared.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +18,9 @@ class PostgresDBConfig(PydanticBaseEnvConfig):
     hide_sql_parameter_logs: bool = Field(True, alias="HIDE_SQL_PARAMETER_LOGS")
     ssl_mode: str = Field("require", alias="DB_SSL_MODE")
 
+    # TODO - need to set on the API side for this to work
+    all_db_schemas: str = Field(alias="ALL_DB_SCHEMAS")
+
     schema_prefix_override: str | None = Field(None)
 
     def get_schema_translate_map(self) -> dict[str, str]:
@@ -26,7 +28,10 @@ class PostgresDBConfig(PydanticBaseEnvConfig):
         if self.schema_prefix_override is not None:
             prefix = self.schema_prefix_override
 
-        return {schema: f"{prefix}{schema}" for schema in Schemas}
+        # TODO - test this
+        schemas = self.all_db_schemas.split(",")
+
+        return {schema: f"{prefix}{schema}" for schema in schemas}
 
 
 def get_db_config() -> PostgresDBConfig:

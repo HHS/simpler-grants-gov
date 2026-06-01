@@ -1,7 +1,8 @@
 # Called by seed_local_db when running `make seed-db-local`
 import logging
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 import tests.src.db.models.factories as factories
 from src.db.models.agency_models import Agency
 

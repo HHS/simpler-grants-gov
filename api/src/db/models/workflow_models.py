@@ -2,14 +2,15 @@ import uuid
 from datetime import datetime
 from typing import Any
 
+from grants_shared.db.models.base import TimestampMixin
 from sqlalchemy import CheckConstraint, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ApprovalResponseType, ApprovalType, WorkflowType
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.award_recommendation_models import AwardRecommendation
-from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.competition_models import Application, ApplicationSubmission
 from src.db.models.lookup_models import LkApprovalResponseType, LkApprovalType, LkWorkflowType
 from src.db.models.opportunity_models import Opportunity

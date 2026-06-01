@@ -5,9 +5,9 @@
 import logging
 
 import click
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.db.models.foreign
 import src.db.models.staging
 from src.constants.lookup_constants import JobType
