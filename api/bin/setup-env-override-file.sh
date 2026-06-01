@@ -9,7 +9,7 @@
 #   ./setup-env-override-file.sh --recreate
 #
 
-set -o errexit -o pipefail
+set -o errexit
 
 PROGRAM_NAME=$(basename "$0")
 
