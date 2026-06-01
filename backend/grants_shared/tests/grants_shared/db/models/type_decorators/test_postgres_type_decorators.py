@@ -5,11 +5,12 @@ from sqlalchemy import select, text
 
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from tests.grants_shared.db.models.factories import ExampleTableFactory, FriendTableFactory
-
 from tests.grants_shared.db_test_models.db_test_models import (
     ExampleTable,
     ExampleType,
-    LkExampleType, FriendType, FriendTable,
+    FriendTable,
+    FriendType,
+    LkExampleType,
 )
 
 
@@ -40,6 +41,7 @@ def test_lookup_column_conversion(
     ).scalar()
     assert raw_db_value == db_value
 
+
 def test_lookup_column_conversion_through_association_proxy(db_session, enable_factory_create):
     """Test that we can use an association proxy with the lookup values to make them act like a simple python set"""
 
@@ -64,6 +66,7 @@ def test_lookup_column_conversion_through_association_proxy(db_session, enable_f
         select(FriendTable).where(FriendTable.friend_id == friend.friend_id)
     ).scalar_one_or_none()
     assert set(example_db.friend_types) == {FriendType.FRIEND_OF_FRIEND, FriendType.ACQUAINTANCE}
+
 
 def test_lookup_column_bind_type_invalid():
     lookup_column = LookupColumn(LkExampleType)
