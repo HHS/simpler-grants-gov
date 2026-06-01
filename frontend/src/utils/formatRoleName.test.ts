@@ -1,7 +1,7 @@
 import type { UserRole } from "src/types/userTypes";
 import { formatRoleNames } from "src/utils/formatRoleName";
 
-const role = (name: string): UserRole => ({ role_name: name } as UserRole);
+const role = (name: string): UserRole => ({ role_name: name }) as UserRole;
 
 describe("formatRoleNames", () => {
   it("returns empty string when roles is undefined", () => {
