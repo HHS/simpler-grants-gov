@@ -1,10 +1,10 @@
+import { gitHubLinkForIssue } from "src/app/[locale]/(base)/roadmap/_components/GithubLink";
 import RoadmapPageSection from "src/app/[locale]/(base)/roadmap/_components/RoadmapPageSection";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
 
-import { gitHubLinkForIssue } from "src/components/GithubLink";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 export default function RoadmapWhatWereWorkingOn() {
