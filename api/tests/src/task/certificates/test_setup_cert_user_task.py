@@ -4,7 +4,6 @@ from datetime import date
 
 from sqlalchemy import func, select
 
-import src.db.models.staging as staging
 from src.db.models.user_models import AgencyUser, AgencyUserRole, LegacyCertificate
 from src.task.certificates.setup_cert_user_task import (
     FUTURE_DATE,
@@ -17,7 +16,6 @@ from tests.src.db.models.factories import (
     LegacyAgencyCertificateFactory,
     RoleFactory,
     StagingTcertificatesFactory,
-    UserFactory,
 )
 
 
@@ -49,38 +47,6 @@ class TestSetupCertUserTask(BaseTestClass):
         assert result == SetupCertUserTaskStatus.TCERTIFICATE_NOT_FOUND
         warning_messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         assert "Tcertificate not found" in warning_messages
-
-    def test_creating_legacy_certificate_automatically_lowers_serial_number(
-        self, enable_factory_create, db_session, caplog
-    ):
-        SERIAL_NUM = "ABC"
-        agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
-        legacy_certificate = LegacyCertificate(
-            legacy_certificate_id=uuid.uuid4(),
-            agency=agency,
-            cert_id="12345",
-            expiration_date=date(2024, 12, 31),
-            serial_number=SERIAL_NUM.upper(),
-            user=UserFactory.create(),
-        )
-        assert legacy_certificate.serial_number == SERIAL_NUM.lower()
-
-    def test_creating_tcertificate_automatically_lowers_serial_number_and_certemail(
-        self, enable_factory_create, db_session, caplog
-    ):
-        SERIAL_NUM = "ABC"
-        CERTEMAIL = "XYZ@TEST.COM"
-        tcert = staging.certificates.Tcertificates(
-            currentcertid="1234",
-            expirationdate=date(2024, 12, 31),
-            serial_num=SERIAL_NUM.upper(),
-            created_date=date(2024, 12, 30),
-            creator_id="1235",
-            certemail=CERTEMAIL.upper(),
-        )
-        assert tcert
-        assert tcert.serial_num == SERIAL_NUM.lower()
-        assert tcert.certemail == CERTEMAIL.lower()
 
     def test_setup_cert_user_if_cert_is_expired(self, enable_factory_create, db_session, caplog):
         role = RoleFactory.create(is_agency_role=True)
@@ -157,7 +123,7 @@ class TestSetupCertUserTask(BaseTestClass):
         role = RoleFactory.create(is_agency_role=True)
         agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
         tcertificate = StagingTcertificatesFactory.create(
-            agencyid=agency.agency_code, expirationdate=date(2070, 12, 31)
+            agencyid=agency.agency_code, expirationdate=date(2070, 12, 31), serial_num="AAAAAA"
         )
         tcert_id = str(tcertificate.tcertificates_id)
         result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).setup_cert()
@@ -168,7 +134,7 @@ class TestSetupCertUserTask(BaseTestClass):
         assert legacy_certificate
         assert legacy_certificate.agency == agency
         assert legacy_certificate.user
-        assert legacy_certificate.serial_number == tcertificate.serial_num.lower()
+        assert legacy_certificate.serial_number == "aaaaaa"
         assert legacy_certificate.expiration_date == tcertificate.expirationdate
 
     def test_setup_cert_user_assigns_an_expiration_date_if_tcertificate_does_not_have_one(

@@ -91,7 +91,9 @@ def test_build_select_updated_rows_sql_with_cutoff(source_table, destination_tab
 
 
 def test_build_insert_select_sql(source_table, destination_table):
-    insert = sql.build_insert_select_sql(source_table, destination_table, [(1, 2), (3, 4), (5, 6)])
+    insert = sql.build_insert_select_sql(
+        source_table, destination_table, [(1, 2), (3, 4), (5, 6)], None
+    )
     assert str(insert) == (
         "INSERT INTO test_destination_table (id1, id2, x, last_upd_date, created_date, is_deleted) "
         "SELECT test_source_table.id1, test_source_table.id2, test_source_table.x, "

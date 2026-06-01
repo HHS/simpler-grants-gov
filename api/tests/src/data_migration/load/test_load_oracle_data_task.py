@@ -474,7 +474,7 @@ class TestLoadOracleData(BaseTestClass):
         )
         assert task.metrics["count.insert.total"] == 1
 
-    def test_load_data_excludes_tcertificates_column_is_selfsigned_by_default(
+    def test_load_data_excludes_tcertificates_column_is_selfsignedand_lowers_certemail_and_serial_num_by_default(
         self, db_session, foreign_tables, staging_tables, enable_factory_create
     ):
         """Test that excluded columns are not copied from foreign to staging tables."""
@@ -486,6 +486,7 @@ class TestLoadOracleData(BaseTestClass):
 
         # Create a record in the foreign table with specific values
         # 'is_selfsigned' should be excluded
+        # Have serial_num and certemail be upper cased
         source_record = ForeignTcertificatesFactory.create(
             is_selfsigned="Y", serial_num="ABCDEF", certemail="TEST@TEST.COM"
         )
@@ -510,11 +511,12 @@ class TestLoadOracleData(BaseTestClass):
         ).first()
 
         # Verify regular columns were inserted
-        assert inserted_record.certemail == "test@test.com"
         assert inserted_record.creator_id == source_record.creator_id
         assert inserted_record.created_date == source_record.created_date
-        assert inserted_record.serial_num == "abcdef"
         assert inserted_record.agencyid == source_record.agencyid
+        # Verify these fields have been lowered
+        assert inserted_record.certemail == "test@test.com"
+        assert inserted_record.serial_num == "abcdef"
 
         # Verify excluded column was not copied (should be None)
         assert inserted_record.is_selfsigned is None
