@@ -11,6 +11,7 @@ from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
     opportunity_grantor_blueprint,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
+from src.services.opportunities_grantor_v1.competition_creation import create_competition
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 from src.services.opportunities_grantor_v1.get_opportunity_list import (
     get_opportunity_list_for_grantors,
