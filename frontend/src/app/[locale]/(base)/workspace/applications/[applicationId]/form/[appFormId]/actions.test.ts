@@ -1,11 +1,16 @@
 import { RJSFSchema } from "@rjsf/utils";
 
-import { handleFormAction } from "src/components/applyForm/actions";
+import { handleFormAction } from "./actions";
 
 const mockGetSession = jest.fn();
 const mockProcessFormSchema = jest.fn();
 const mockShapeFormData = jest.fn();
 const mockGetFormDetails = jest.fn();
+const mockRevalidateTag = jest.fn();
+
+jest.mock("next/cache", () => ({
+  revalidateTag: (tag: string) => mockRevalidateTag(tag) as unknown,
+}));
 
 jest.mock("src/services/auth/session", () => ({
   getSession: () => mockGetSession() as unknown,

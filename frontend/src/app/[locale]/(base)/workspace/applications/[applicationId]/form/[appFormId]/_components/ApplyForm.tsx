@@ -3,6 +3,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
+import { handleFormAction } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/actions";
 import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 import {
   FormattedFormValidationWarning,
@@ -18,7 +19,6 @@ import { useNavigationGuard } from "next-navigation-guard";
 import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
-import { handleFormAction } from "src/components/applyForm/actions";
 import { FormFields } from "src/components/applyForm/FormFields";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { ApplyFormMessage } from "./ApplyFormMessage";

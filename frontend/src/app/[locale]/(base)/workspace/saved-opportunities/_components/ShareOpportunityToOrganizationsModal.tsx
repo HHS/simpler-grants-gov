@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  deleteSavedOpportunityForOrganizationAction,
+  saveOpportunityForOrganizationAction,
+} from "src/app/[locale]/(base)/workspace/saved-opportunities/actions";
 import { Organization } from "src/types/applicationResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
@@ -15,10 +19,6 @@ import {
 } from "@trussworks/react-uswds";
 
 import { SimplerModal } from "src/components/core/SimplerModal";
-import {
-  deleteSavedOpportunityForOrganizationAction,
-  saveOpportunityForOrganizationAction,
-} from "src/components/shareOpportunityToOrganizations/actions";
 
 const MODAL_ID = "share-opportunity-to-organizations";
 
