@@ -1,9 +1,9 @@
 import logging
 
-import src.adapters.db as db
-from src.adapters.db import PostgresDBClient
-from src.adapters.db.clients.postgres_config import get_db_config
-from src.db.models.lookup import Lookup, LookupRegistry, LookupTable
+import grants_shared.adapters.db as db
+from grants_shared.adapters.db import PostgresDBClient
+from grants_shared.adapters.db.clients.postgres_config import get_db_config
+from grants_shared.db.models.lookup import Lookup, LookupRegistry, LookupTable
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +28,6 @@ def sync_lookup_values(db_client: PostgresDBClient | None = None) -> None:
 
         for table, lookup_config in sync_values.items():
             _sync_lookup_for_table(table, lookup_config.get_lookups(), db_session)
-
-        # TODO - need to move this somewhere else
-        _sync_roles(db_session)
 
 
 def _sync_lookup_for_table(
@@ -61,23 +58,3 @@ def _sync_lookup_for_table(
         )
     else:
         logger.info("Updated lookup values for table %s", table.get_table_name(), extra=log_extra)
-
-
-def _sync_roles(
-    db_session: db.Session,
-) -> None:
-    # Import placed here to avoid circular dependencies
-    from src.constants.static_role_values import CORE_ROLES
-
-    logger.info("Syncing static core roles")
-    updated_role_count = 0
-    for role in CORE_ROLES:
-        instance = db_session.merge(role)
-        role_name = role.role_name
-        if db_session.is_modified(instance):
-            logger.info("Updated role: %s", role_name)
-            updated_role_count += 1
-        else:
-            logger.info("No modified values for role `%s`", role_name)
-
-    logger.info("Finished updating roles", extra={"updated_role_count": updated_role_count})

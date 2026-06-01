@@ -31,6 +31,7 @@ class WarningMixinSchema(Schema):
         dump_default=[],
     )
 
+
 # TODO - https://github.com/HHS/simpler-grants-gov/issues/10619
 # This depends on some pagination utils we'll move in a later ticket
 # class PaginationMixinSchema(Schema):

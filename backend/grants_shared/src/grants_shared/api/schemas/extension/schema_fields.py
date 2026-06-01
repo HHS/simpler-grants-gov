@@ -5,11 +5,10 @@ import typing
 from apiflask import fields as original_fields  # noqa: TID251
 from marshmallow import ValidationError
 
-from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
 from grants_shared.api.schemas.extension.field_validators import URL as CustomURL
 from grants_shared.api.schemas.extension.field_validators import Range
 from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
-
+from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
 
 
 class MixinField(original_fields.Field):
@@ -129,7 +128,9 @@ class Decimal(original_fields.Decimal, MixinField):
 class UUID(original_fields.UUID, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid UUID."),
-        "invalid_uuid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid UUID."),
+        "invalid_uuid": MarshmallowErrorContainer(
+            SchemaValidationError.INVALID, "Not a valid UUID."
+        ),
     }
 
     def __init__(self, **kwargs: typing.Any):
@@ -153,7 +154,9 @@ class Date(original_fields.Date, MixinField):
 
 class DateTime(original_fields.DateTime, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid datetime."),
+        "invalid": MarshmallowErrorContainer(
+            SchemaValidationError.INVALID, "Not a valid datetime."
+        ),
         "invalid_awareness": MarshmallowErrorContainer(
             SchemaValidationError.INVALID, "Not a valid datetime."
         ),

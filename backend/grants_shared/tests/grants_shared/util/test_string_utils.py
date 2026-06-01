@@ -98,10 +98,7 @@ def test_is_valid_uuid(value, is_valid):
             '<div>First block with enough content to exceed fifty ch<a href="http://testhost:3000/opportunity/1" style="color:blue;">...Read full description</a></div><div>Second block</div>',
         ),
         # No truncation needed
-        (
-            "hello",
-            "hello"
-        ),
+        ("hello", "hello"),
     ],
 )
 def test_truncate_html_inline(

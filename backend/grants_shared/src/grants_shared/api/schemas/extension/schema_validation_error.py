@@ -3,6 +3,7 @@ from enum import StrEnum
 
 class SchemaValidationError(StrEnum):
     """Contains error type codes that we can return from our schemas."""
+
     REQUIRED = "required"
     NOT_NULL = "not_null"
     UNKNOWN = "unknown"

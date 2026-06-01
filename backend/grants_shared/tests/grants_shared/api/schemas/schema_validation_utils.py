@@ -2,7 +2,13 @@ from enum import Enum, StrEnum
 from random import choice
 from string import ascii_uppercase
 
-from grants_shared.api.schemas.extension import MarshmallowErrorContainer, Schema, fields, validators, SchemaValidationError
+from grants_shared.api.schemas.extension import (
+    MarshmallowErrorContainer,
+    Schema,
+    SchemaValidationError,
+    fields,
+    validators,
+)
 
 #############################
 # Validation Error Messages
@@ -38,7 +44,9 @@ INVALID_SPECIAL_DECIMAL = MarshmallowErrorContainer(
     SchemaValidationError.SPECIAL_NUMERIC,
     "Special numeric values (nan or infinity) are not permitted.",
 )
-INVALID_EMAIL = MarshmallowErrorContainer(SchemaValidationError.FORMAT, "Not a valid email address.")
+INVALID_EMAIL = MarshmallowErrorContainer(
+    SchemaValidationError.FORMAT, "Not a valid email address."
+)
 INVALID_FILE = MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid file.")
 UNKNOWN_FIELD = MarshmallowErrorContainer(SchemaValidationError.UNKNOWN, "Unknown field.")
 
@@ -89,11 +97,18 @@ def get_length_range_error_msg(min: int, max: int):
 def get_length_equal_error_msg(equal: int):
     return MarshmallowErrorContainer(SchemaValidationError.EQUALS, f"Length must be {equal}.")
 
+
 def get_min_value_error_msg(min: int):
-    return MarshmallowErrorContainer(SchemaValidationError.MIN_VALUE, f"Must be greater than or equal to {min}.")
+    return MarshmallowErrorContainer(
+        SchemaValidationError.MIN_VALUE, f"Must be greater than or equal to {min}."
+    )
+
 
 def get_max_value_error_msg(max: int):
-    return MarshmallowErrorContainer(SchemaValidationError.MAX_VALUE, f"Must be less than or equal to {max}.")
+    return MarshmallowErrorContainer(
+        SchemaValidationError.MAX_VALUE, f"Must be less than or equal to {max}."
+    )
+
 
 def get_max_or_min_value_error_msg(min: int = -2147483648, max: int = 2147483647):
     # defaults are the 32-bit integer min/max
@@ -163,7 +178,9 @@ class FieldTestSchema(Schema):
     field_int_min = fields.Integer(validate=[validators.Range(min=10)])
     field_int_max = fields.Integer(validate=[validators.Range(max=99)])
     field_int_min_max = fields.Integer(validate=[validators.Range(min=40, max=60)])
-    field_int_min_max_with_32bit = fields.Integer(restrict_to_32bit_int=True, validate=[validators.Range(min=1, max=10)])
+    field_int_min_max_with_32bit = fields.Integer(
+        restrict_to_32bit_int=True, validate=[validators.Range(min=1, max=10)]
+    )
 
     field_bool = fields.Boolean()
     field_bool_required = fields.Boolean(required=True)

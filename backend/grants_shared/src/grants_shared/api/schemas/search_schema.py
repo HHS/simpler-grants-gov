@@ -5,7 +5,12 @@ from typing import Any
 
 from marshmallow import ValidationError, validates_schema
 
-from grants_shared.api.schemas.extension import MarshmallowErrorContainer, Schema, fields, validators
+from grants_shared.api.schemas.extension import (
+    MarshmallowErrorContainer,
+    Schema,
+    fields,
+    validators,
+)
 from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
 
 
