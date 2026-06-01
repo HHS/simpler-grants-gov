@@ -18,9 +18,9 @@ describe("formatRoleNames", () => {
   });
 
   it("formats multiple roles separated by comma and space", () => {
-    expect(formatRoleNames([role("Admin"), role("Editor"), role("Viewer")])).toBe(
-      "Admin, Editor, Viewer"
-    );
+    expect(
+      formatRoleNames([role("Admin"), role("Editor"), role("Viewer")]),
+    ).toBe("Admin, Editor, Viewer");
   });
 
   it("formats two roles", () => {
