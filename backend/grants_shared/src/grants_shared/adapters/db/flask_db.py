@@ -5,8 +5,8 @@ To initialize this flask extension, call register_db_client() with an instance
 of a Flask app and an instance of a DBClient.
 
 Example:
-    import src.adapters.db as db
-    import src.adapters.db.flask_db as flask_db
+    import grants_shared.adapters.db as db
+    import grants_shared.adapters.db.flask_db as flask_db
 
     db_client = db.PostgresDBClient()
     app = APIFlask(__name__)
@@ -16,8 +16,8 @@ Then, in a request handler, use the with_db_session decorator to get a
 new database session that lasts for the duration of the request.
 
 Example:
-    import src.adapters.db as db
-    import src.adapters.db.flask_db as flask_db
+    import grants_shared.adapters.db as db
+    import grants_shared.adapters.db.flask_db as flask_db
 
     @app.route("/health")
     @flask_db.with_db_session
@@ -31,7 +31,7 @@ function.
 
 Example:
     from flask import current_app
-    import src.adapters.db.flask_db as flask_db
+    import grants_shared.adapters.db.flask_db as flask_db
 
     @app.route("/health")
     def health():
@@ -45,8 +45,8 @@ from typing import Concatenate, ParamSpec, TypeVar
 
 from flask import Flask, current_app
 
-import src.adapters.db as db
-from src.adapters.db.client import DBClient
+import grants_shared.adapters.db as db
+from grants_shared.adapters.db.client import DBClient
 
 _FLASK_EXTENSION_KEY_PREFIX = "db"
 _DEFAULT_CLIENT_NAME = "default"
@@ -78,7 +78,7 @@ def get_db(app: Flask, client_name: str = _DEFAULT_CLIENT_NAME) -> DBClient:
 
     Example:
         from flask import current_app
-        import src.adapters.db.flask_db as flask_db
+        import grants_shared.adapters.db.flask_db as flask_db
 
         @app.route("/health")
         def health():

@@ -1,10 +1,10 @@
 import logging
 from uuid import UUID
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.api.opportunities_grantor_v1.opportunity_grantor_schemas as opportunity_grantor_schemas
 import src.api.response as response
 from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (

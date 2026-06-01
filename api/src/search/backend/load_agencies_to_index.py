@@ -1,12 +1,13 @@
 from collections.abc import Sequence
 from enum import StrEnum
 
+from grants_shared.adapters import db
 from grants_shared.util.datetime_util import get_now_us_eastern_datetime
 from pydantic import Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.adapters import db, search
+from src.adapters import search
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency

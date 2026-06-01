@@ -1,10 +1,10 @@
 import io
 import uuid
 
+import grants_shared.adapters.db as db
 import pytest
 from werkzeug.datastructures import FileStorage
 
-import src.adapters.db as db
 import src.util.file_util as file_util
 from src.db.models.competition_models import FormInstruction
 from tests.src.db.models.factories import FormFactory, FormInstructionFactory

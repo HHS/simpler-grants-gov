@@ -4,11 +4,11 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
+from grants_shared.adapters import db
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.sql import Select
 
-from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import LegacyProfileType, LegacyUserStatus, Privilege
 from src.db.models.entity_models import IgnoredLegacyOrganizationUser, OrganizationInvitation

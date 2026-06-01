@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import text
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
 
 
 def test_db_connection(db_client):

@@ -1,7 +1,8 @@
 import logging
 import uuid
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.opportunity_models import Opportunity

@@ -1,7 +1,8 @@
 import logging
 from uuid import UUID
 
-from src.adapters import db
+from grants_shared.adapters import db
+
 from src.db.models.user_models import UserApiKey
 from src.services.users.get_user_api_keys import get_user_api_key
 
