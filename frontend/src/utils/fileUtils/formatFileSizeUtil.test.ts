@@ -34,7 +34,8 @@ describe("formatFileSize", () => {
   });
 
   it("respects custom decimal places", () => {
-    expect(formatFileSize(1536, 2)).toBe("1.50 KB");
+    expect(formatFileSize(1380, 2)).toBe("1.35 KB");
+    expect(formatFileSize(1380)).toBe("1.3 KB");
   });
 
   it("handles 1 byte", () => {
