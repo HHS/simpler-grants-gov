@@ -188,7 +188,8 @@ class TestUpdateFileScanStatus422:
         assert resp.status_code == 422
 
     @pytest.mark.parametrize(
-        "bad_value", ["", "not-an-s3-path", "/tmp/local/path.txt", "s3:///missing-bucket.txt"]
+        "bad_value",
+        ["", "not-an-s3-path", "http://example.com/path.txt", "s3:///missing-bucket.txt"],
     )
     def test_invalid_file_location_format(self, client, db_session, s3_scan_user_key, bad_value):
         pending_file = factories.PendingFileFactory.create()
