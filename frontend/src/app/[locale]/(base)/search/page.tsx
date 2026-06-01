@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { AndOrPanel } from "src/app/[locale]/(base)/search/_components/AndOrPanel";
 import { ClassicSearchBanner } from "src/app/[locale]/(base)/search/_components/ClassicSearchBanner";
 import { FilterPillPanel } from "src/app/[locale]/(base)/search/_components/FilterPillPanel";
+import Loading from "src/app/[locale]/(base)/search/_components/Loading";
 import { PillListSkeleton } from "src/app/[locale]/(base)/search/_components/PillList";
 import { SaveSearchPanel } from "src/app/[locale]/(base)/search/_components/SaveSearchPanel";
 import SearchAnalytics from "src/app/[locale]/(base)/search/_components/SearchAnalytics";
@@ -25,7 +26,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Suspense, use } from "react";
 
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
-import Loading from "src/components/Loading";
 
 type SearchPageProps = {
   searchParams: Promise<OptionalStringDict>;

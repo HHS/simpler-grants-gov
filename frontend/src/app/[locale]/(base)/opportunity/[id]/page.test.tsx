@@ -76,9 +76,12 @@ jest.mock("./_components/OpportunityHistory", () => ({
   default: () => <div />,
 }));
 
-jest.mock("src/components/user/OpportunityCompetitionStart", () => ({
-  OpportunityCompetitionStart: () => <div />,
-}));
+jest.mock(
+  "src/app/[locale]/(base)/opportunity/[id]/_components/OpportunityCompetitionStart",
+  () => ({
+    OpportunityCompetitionStart: () => <div />,
+  }),
+);
 
 jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
   OpportunitySaveUserControl: () => <div />,

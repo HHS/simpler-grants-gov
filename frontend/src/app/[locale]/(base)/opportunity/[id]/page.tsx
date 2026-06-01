@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OpportunityCompetitionStart } from "src/app/[locale]/(base)/opportunity/[id]/_components/OpportunityCompetitionStart";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
@@ -10,7 +11,6 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect, RedirectType } from "next/navigation";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import { OpportunityCompetitionStart } from "src/components/user/OpportunityCompetitionStart";
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 import OpportunityAwardInfo from "./_components/OpportunityAwardInfo";
 import OpportunityCTA from "./_components/OpportunityCTA";
