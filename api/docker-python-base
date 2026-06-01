@@ -62,7 +62,9 @@ RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
 
 # Install UV
 # https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
-COPY --from=ghcr.io/astral-sh/uv:0.11.9 /uv /uvx /bin/
+# Pinned to 0.11.15 to fix bundled Rust crate vulnerabilities:
+# uv (GHSA-4gg8-gxpx-9rph), astral-tokio-tar (GHSA-3cv2-h65g-fgmm), tar (GHSA-3pv8-6f4r-ffg2)
+COPY --from=ghcr.io/astral-sh/uv:0.11.15 /uv /uvx /bin/
 
 # Upgrade urllib3 to fix security vulnerabilities (GHSA-2xpw-w6gg-jr37, GHSA-gm62-xv2j-4w53)
 RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
