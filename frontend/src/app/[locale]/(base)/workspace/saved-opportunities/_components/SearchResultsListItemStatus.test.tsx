@@ -3,7 +3,7 @@ import { axe } from "jest-axe";
 
 import SearchResultListItemStatus, {
   SearchResultListItemStatusProps,
-} from "src/components/search/SearchResultListItemStatus";
+} from "./SearchResultListItemStatus";
 
 const defaultProps: SearchResultListItemStatusProps = {
   status: "posted",

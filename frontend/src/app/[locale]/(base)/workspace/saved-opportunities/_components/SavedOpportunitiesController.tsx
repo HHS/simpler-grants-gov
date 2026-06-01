@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
 import { buildSavedOpportunityTags } from "src/components/saved-opportunities/buildSavedOpportunityTags";
-import SearchResultsListItem from "src/components/search/SearchResultsListItem";
+import SearchResultsListItem from "./SearchResultsListItem";
 
 interface SavedOpportunitiesControllerProps {
   opportunities: BaseOpportunity[];
