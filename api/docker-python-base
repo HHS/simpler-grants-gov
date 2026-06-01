@@ -6,6 +6,7 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 ARG PYTHON_VERSION=3.14.5
 ARG PY_MM=3.14
 ARG PIP_VERSION=26.0
+ARG UV_VERSION=0.11.15
 
 SHELL ["/bin/bash", "-eux", "-c"]
 
@@ -62,9 +63,8 @@ RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
 
 # Install UV
 # https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
-# Pinned to 0.11.15 to fix bundled Rust crate vulnerabilities:
-# uv (GHSA-4gg8-gxpx-9rph), astral-tokio-tar (GHSA-3cv2-h65g-fgmm), tar (GHSA-3pv8-6f4r-ffg2)
-COPY --from=ghcr.io/astral-sh/uv:0.11.15 /uv /uvx /bin/
+# Version is pinned via the UV_VERSION build arg at the top of this file.
+COPY --from=ghcr.io/astral-sh/uv:${UV_VERSION} /uv /uvx /bin/
 
 # Upgrade urllib3 to fix security vulnerabilities (GHSA-2xpw-w6gg-jr37, GHSA-gm62-xv2j-4w53)
 RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
