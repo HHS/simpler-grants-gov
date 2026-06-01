@@ -149,7 +149,7 @@ class FriendTable(OtherSchemaTable, TimestampMixin):
     friend_types: AssociationProxy[set[FriendType]] = association_proxy(
         "link_friend_types",
         "friend_type",
-        creator=lambda obj: LinkFriendType(friend=obj),
+        creator=lambda obj: LinkFriendType(friend_type=obj),
     )
 
 

@@ -9,7 +9,7 @@ from tests.grants_shared.db.models.factories import ExampleTableFactory, FriendT
 from tests.grants_shared.db_test_models.db_test_models import (
     ExampleTable,
     ExampleType,
-    LkExampleType, FriendType,
+    LkExampleType, FriendType, FriendTable,
 )
 
 
@@ -45,8 +45,25 @@ def test_lookup_column_conversion_through_association_proxy(db_session, enable_f
 
     friend = FriendTableFactory.create(friend_types=[FriendType.BEST, FriendType.ACQUAINTANCE])
 
-    assert friend.friend_types == {FriendType.BEST, FriendType.ACQUAINTANCE}
+    assert set(friend.friend_types) == {FriendType.BEST, FriendType.ACQUAINTANCE}
 
+    # Verify fetching from the DB works
+    db_session.expire_all()
+
+    example_db = db_session.execute(
+        select(FriendTable).where(FriendTable.friend_id == friend.friend_id)
+    ).scalar_one_or_none()
+    assert set(example_db.friend_types) == {FriendType.BEST, FriendType.ACQUAINTANCE}
+
+    # We can update it
+    friend.friend_types = {FriendType.ACQUAINTANCE, FriendType.FRIEND_OF_FRIEND}
+    db_session.commit()
+    db_session.expire_all()
+
+    example_db = db_session.execute(
+        select(FriendTable).where(FriendTable.friend_id == friend.friend_id)
+    ).scalar_one_or_none()
+    assert set(example_db.friend_types) == {FriendType.FRIEND_OF_FRIEND, FriendType.ACQUAINTANCE}
 
 def test_lookup_column_bind_type_invalid():
     lookup_column = LookupColumn(LkExampleType)
