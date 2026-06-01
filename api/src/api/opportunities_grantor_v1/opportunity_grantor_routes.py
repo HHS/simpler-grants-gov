@@ -11,6 +11,7 @@ from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
     opportunity_grantor_blueprint,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
+from src.services.opportunities_grantor_v1.competition_creation import create_competition
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 from src.services.opportunities_grantor_v1.get_opportunity_list import (
     get_opportunity_list_for_grantors,
@@ -263,3 +264,27 @@ def opportunity_publish(db_session: db.Session, opportunity_id: UUID) -> respons
         opportunity = publish_opportunity(db_session, user, opportunity_id)
 
     return response.ApiResponse(message="Success", data=opportunity)
+
+
+@opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/competitions")
+@opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.CompetitionCreateRequestSchema(), location="json"
+)
+@opportunity_grantor_blueprint.output(opportunity_grantor_schemas.CompetitionCreateResponseSchema())
+@opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
+@flask_db.with_db_session()
+def competition_create(
+    db_session: db.Session, opportunity_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Create a new competition for an opportunity"""
+    add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
+    logger.info(f"POST /v1/grantors/opportunities/{opportunity_id}/competitions")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        competition = create_competition(db_session, user, json_data, opportunity_id)
+
+    return response.ApiResponse(message="Success", data=competition)
