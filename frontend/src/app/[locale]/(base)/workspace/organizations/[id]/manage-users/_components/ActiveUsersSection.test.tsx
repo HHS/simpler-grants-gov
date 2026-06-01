@@ -4,10 +4,9 @@ import React from "react";
 
 import "@testing-library/jest-dom";
 
+import { ActiveUsersSection } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/ActiveUsersSection";
 import type { FetchedResource } from "src/types/authTypes";
 import type { UserDetail, UserRole } from "src/types/userTypes";
-
-import { ActiveUsersSection } from "src/components/manageUsers/ActiveUsersSection";
 
 type TranslationFn = (key: string) => string;
 

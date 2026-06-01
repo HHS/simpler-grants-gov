@@ -3,13 +3,12 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import { axe } from "jest-axe";
+import { InviteLegacyUsersPageContent } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/legacy/_components/InviteLegacyUsersPageContent";
 import {
   OrganizationLegacyUser,
   OrganizationLegacyUserStatus,
 } from "src/types/userTypes";
 import { fakeOrganizationDetailsResponse } from "src/utils/testing/fixtures";
-
-import { InviteLegacyUsersPageContent } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersPageContent";
 
 type Breadcrumb = { title: string; path: string };
 type BreadcrumbsProps = { breadcrumbList: Breadcrumb[] };
@@ -25,7 +24,7 @@ jest.mock("src/components/core/Breadcrumbs", () => ({
 }));
 
 jest.mock(
-  "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersTable",
+  "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/legacy/_components/InviteLegacyUsersTable",
   () => ({
     InviteLegacyUsersTable: () => <div>InviteLegacyUsersTable</div>,
   }),

@@ -4,9 +4,9 @@ import { type RefObject } from "react";
 
 import "@testing-library/jest-dom";
 
-import type { ModalRef } from "@trussworks/react-uswds";
+import { RemoveUserModal } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RemoveUserModal";
 
-import { RemoveUserModal } from "src/components/manageUsers/RemoveUserModal";
+import type { ModalRef } from "@trussworks/react-uswds";
 
 type TranslationFunction = (key: string, values?: { name?: string }) => string;
 

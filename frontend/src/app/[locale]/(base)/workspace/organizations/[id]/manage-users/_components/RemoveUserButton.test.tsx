@@ -4,7 +4,7 @@ import React from "react";
 
 import "@testing-library/jest-dom";
 
-import { RemoveUserButton } from "src/components/manageUsers/RemoveUserButton";
+import { RemoveUserButton } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RemoveUserButton";
 
 type TranslationFunction = (key: string, values?: { name?: string }) => string;
 
@@ -53,25 +53,28 @@ type RemoveUserModalProps = {
 const removeUserModalPropsMock = jest.fn<void, [RemoveUserModalProps]>();
 const modalToggleMock = jest.fn();
 
-jest.mock("src/components/manageUsers/RemoveUserModal", () => ({
-  RemoveUserModal: (props: RemoveUserModalProps) => {
-    removeUserModalPropsMock(props);
+jest.mock(
+  "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RemoveUserModal",
+  () => ({
+    RemoveUserModal: (props: RemoveUserModalProps) => {
+      removeUserModalPropsMock(props);
 
-    const { isSubmitting, userName, onConfirm, onCancel } = props;
-    if (isSubmitting && userName === "__never__") {
-      onConfirm();
-      onCancel();
-    }
+      const { isSubmitting, userName, onConfirm, onCancel } = props;
+      if (isSubmitting && userName === "__never__") {
+        onConfirm();
+        onCancel();
+      }
 
-    if (!props.modalRef.current) {
-      props.modalRef.current = {
-        toggleModal: modalToggleMock,
-      };
-    }
+      if (!props.modalRef.current) {
+        props.modalRef.current = {
+          toggleModal: modalToggleMock,
+        };
+      }
 
-    return <div data-testid="remove-user-modal" />;
-  },
-}));
+      return <div data-testid="remove-user-modal" />;
+    },
+  }),
+);
 
 describe("RemoveUserButton", () => {
   beforeEach(() => {

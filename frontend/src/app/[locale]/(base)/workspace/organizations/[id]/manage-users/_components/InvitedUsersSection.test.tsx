@@ -4,13 +4,12 @@ import React from "react";
 
 import "@testing-library/jest-dom";
 
+import { InvitedUsersSection } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/InvitedUsersSection";
 import type { FetchedResource } from "src/types/authTypes";
 import {
   OrganizationInvitationStatus,
   type OrganizationPendingInvitation,
 } from "src/types/userTypes";
-
-import { InvitedUsersSection } from "src/components/manageUsers/InvitedUsersSection";
 
 type TranslationFn = (key: string) => string;
 
