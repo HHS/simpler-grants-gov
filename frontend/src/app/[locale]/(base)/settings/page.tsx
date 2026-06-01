@@ -1,12 +1,11 @@
 import { Metadata } from "next";
+import { UserProfileForm } from "src/app/[locale]/(base)/settings/_components/UserProfileForm";
 import { getSession } from "src/services/auth/session";
 import { getUserDetails } from "src/services/fetch/fetchers/userFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
-
-import { UserProfileForm } from "src/components/user/UserProfileForm";
 
 export async function generateMetadata({
   params,
