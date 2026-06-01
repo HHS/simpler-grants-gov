@@ -40,3 +40,4 @@ describe("getRisksForAwardRecommendation", () => {
     expect(json.pagination_info).toEqual(mockPaginationInfo);
   });
 });
+g;

@@ -38,11 +38,7 @@ describe("deleteRiskForAwardRecommendation", () => {
     jest.clearAllMocks();
   });
 
-<<<<<<< HEAD
   it("returns success response when delete is successful", async () => {
-=======
-  it("deletes risk successfully", async () => {
->>>>>>> 98cb39983 (fix typing, tests and lint)
     (
       fetcherModule.deleteAwardRecommendationRisk as jest.Mock
     ).mockResolvedValue({ success: true, message: "Risk deleted" });
