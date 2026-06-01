@@ -4,7 +4,7 @@ module "training_config" {
   app_name       = local.app_name
   default_region = module.project_config.default_region
   environment    = "training"
-  network_name   = "prod"
+  network_name   = "training"
 
   # Analytics database that Metabase connects to
   analytics_database_cluster_name = "analytics-training"

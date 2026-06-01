@@ -4,7 +4,7 @@ module "grantee1_config" {
   app_name       = local.app_name
   default_region = module.project_config.default_region
   environment    = "grantee1"
-  network_name   = "prod"
+  network_name   = "grantee1"
 
   # Analytics database that Metabase connects to
   analytics_database_cluster_name = "analytics-grantee1"
