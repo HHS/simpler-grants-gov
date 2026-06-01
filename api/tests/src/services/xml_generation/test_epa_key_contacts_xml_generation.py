@@ -9,10 +9,10 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_
 from datetime import date
 from pathlib import Path
 
+import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
 from src.form_schema.forms.epa_key_contacts import (
     FORM_XML_TRANSFORM_RULES as EPA_KEY_CONTACTS_TRANSFORM_RULES,
 )

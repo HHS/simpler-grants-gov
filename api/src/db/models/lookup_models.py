@@ -1,3 +1,4 @@
+from grants_shared.db.models.base import TimestampMixin
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.constants.lookup_constants import (
@@ -36,7 +37,6 @@ from src.constants.lookup_constants import (
     UserType,
     WorkflowType,
 )
-from src.db.models.base import TimestampMixin
 from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
 
 OPPORTUNITY_STATUS_CONFIG: LookupConfig[OpportunityStatus] = LookupConfig(

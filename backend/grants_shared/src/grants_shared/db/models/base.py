@@ -5,13 +5,12 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from grants_shared.util import datetime_util
 from sqlalchemy import TIMESTAMP, MetaData, Text, inspect
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import DeclarativeBase, Mapped, declarative_mixin, mapped_column
 from sqlalchemy.sql.functions import now as sqlnow
 
-from src.constants.schema import Schemas
+from grants_shared.util import datetime_util
 
 # Override the default naming of constraints
 # to use suffixes instead:
@@ -72,16 +71,6 @@ class Base(DeclarativeBase):
 
         return json_valid_dict
 
-    def copy(self, **kwargs: dict[str, Any]) -> Base:
-        table = self.__table__
-        non_pk_columns = [
-            k for k in table.columns.keys() if k not in table.primary_key.columns.keys()  # type: ignore
-        ]
-        data = {c: getattr(self, c) for c in non_pk_columns}
-        data.update(kwargs)
-        copy = self.__class__(**data)
-        return copy
-
     def __repr__(self) -> str:
         values = []
         for k, v in self.for_json().items():
@@ -95,21 +84,6 @@ class Base(DeclarativeBase):
         See https://rich.readthedocs.io/en/latest/pretty.html#rich-repr-protocol
         """
         return self._dict().items()
-
-
-class ApiSchemaTable(Base):
-    __abstract__ = True
-
-    __table_args__: Any = {"schema": Schemas.API}
-
-
-@declarative_mixin
-class IdMixin:
-    """Mixin to add a UUID id primary key column to a model
-    https://docs.sqlalchemy.org/en/20/orm/declarative_mixins.html
-    """
-
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
 
 
 def same_as_created_at(context: Any) -> Any:

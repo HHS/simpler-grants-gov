@@ -2,11 +2,11 @@ import logging
 import uuid
 from collections.abc import Iterator
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 from flask import Response, stream_with_context
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.api.files_v1.file_schemas as file_schemas
 import src.api.response as response
 from src.adapters.aws.dynamodb_adapter import DynamoDBClient

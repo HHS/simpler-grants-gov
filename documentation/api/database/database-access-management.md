@@ -16,7 +16,7 @@ For example, **do this**
 ### right way ###
 
 from flask import current_app
-import src.adapters.db as db
+import grants_shared.adapters.db as db
 
 def some_service_func(session: db.Session)
     with db_session.begin(): # start transaction
@@ -35,7 +35,7 @@ and **don't do this**
 ### wrong way ###
 
 from flask import current_app
-import src.adapters.db as db
+import grants_shared.adapters.db as db
 
 def some_service_func()
     db_client = db.get_db(current_app)
