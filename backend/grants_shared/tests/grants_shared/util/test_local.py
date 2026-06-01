@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from grants_shared.util.local import error_if_not_local, load_local_env_vars
@@ -12,8 +14,6 @@ class TestLoadLocalEnvVars:
 
         load_local_env_vars(str(env_file))
 
-        import os
-
         assert os.getenv("TEST_VAR") == "hello"
 
     def test_loads_dotenv_when_environment_is_unset(self, monkeypatch, tmp_path):
@@ -23,8 +23,6 @@ class TestLoadLocalEnvVars:
         monkeypatch.delenv("TEST_VAR2", raising=False)
 
         load_local_env_vars(str(env_file))
-
-        import os
 
         assert os.getenv("TEST_VAR2") == "world"
 
@@ -36,8 +34,6 @@ class TestLoadLocalEnvVars:
 
         load_local_env_vars(str(env_file))
 
-        import os
-
         assert os.getenv("TEST_VAR3") is None
 
     @pytest.mark.parametrize("env", ["staging", "prod", "production", "test"])
@@ -48,8 +44,6 @@ class TestLoadLocalEnvVars:
         monkeypatch.delenv("SKIP_VAR", raising=False)
 
         load_local_env_vars(str(env_file))
-
-        import os
 
         assert os.getenv("SKIP_VAR") is None
 
