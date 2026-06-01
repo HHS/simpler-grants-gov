@@ -9,10 +9,10 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1
 from datetime import date
 from pathlib import Path
 
+import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
 from src.form_schema.forms.gg_lobbying_form import (
     FORM_XML_TRANSFORM_RULES as GG_LOBBYING_FORM_TRANSFORM_RULES,
 )

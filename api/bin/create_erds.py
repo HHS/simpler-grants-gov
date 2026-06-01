@@ -6,7 +6,7 @@ import grants_shared.logs
 from eralchemy import render_er
 from sqlalchemy import MetaData
 
-from src.db.models.base import ApiSchemaTable
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.staging.staging_base import StagingBase
 
 logger = logging.getLogger(__name__)

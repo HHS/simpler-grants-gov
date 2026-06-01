@@ -6,10 +6,10 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+import grants_shared.adapters.db as db
 from pydantic import Field
 from sqlalchemy import select
 
-import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
 from src.adapters.aws.s3_adapter import S3Config

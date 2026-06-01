@@ -3,6 +3,8 @@ import logging
 import os
 from typing import Any
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 import grants_shared.logs
 import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
@@ -11,8 +13,6 @@ from flask_cors import CORS
 from grants_shared.util.local import error_if_not_local
 from pydantic import Field
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config

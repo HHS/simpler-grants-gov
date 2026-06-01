@@ -1,10 +1,10 @@
 import logging
 import uuid
 
+import grants_shared.adapters.db as db
 from faker import Faker
 from sqlalchemy import select
 
-import src.adapters.db as db
 from src.constants.static_role_values import OPPORTUNITY_EDITOR, OPPORTUNITY_PUBLISHER
 from src.db.models.agency_models import Agency
 from tests.lib.seed_data_utils import UserBuilder

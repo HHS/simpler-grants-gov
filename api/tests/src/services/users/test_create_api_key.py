@@ -2,8 +2,8 @@ import string
 from unittest.mock import patch
 
 import pytest
+from grants_shared.adapters import db
 
-from src.adapters import db
 from src.services.users.create_api_key import (
     MAX_KEY_GENERATION_RETRIES,
     KeyGenerationError,

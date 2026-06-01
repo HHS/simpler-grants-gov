@@ -1,9 +1,9 @@
 import uuid
 
+import grants_shared.adapters.db as db
 from sqlalchemy import ColumnExpressionArgument, select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, CompetitionForm, Form

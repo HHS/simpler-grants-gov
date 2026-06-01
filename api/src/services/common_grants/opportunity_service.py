@@ -3,6 +3,7 @@
 import logging
 from uuid import UUID
 
+import grants_shared.adapters.db as db
 from common_grants_sdk.schemas.pydantic import (
     OppFilters,
     OpportunityBase,
@@ -13,7 +14,6 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedResultsInfo,
 )
 
-import src.adapters.db as db
 import src.adapters.search as search
 from src.services.opportunities_v1.get_opportunity import get_opportunity
 from src.services.opportunities_v1.search_opportunities import search_opportunities

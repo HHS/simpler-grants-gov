@@ -68,13 +68,35 @@ setup-local:
 	uv sync --all-groups --locked
 
 ##################################################
-# API Build & Run
+# Build & Run
 ##################################################
 
 build:
 	docker compose build
 
-init: build
+init: build init-db
+
+clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
+	docker compose down --volumes
+	docker compose -f ../docker-compose.db.yml down --volumes
+
+volume-recreate: clean-volumes init ## Destroy current volumes, setup new ones - will remove all existing data
+
+stop: ## Stop the docker containers
+	docker compose down
+	docker compose -f ../docker-compose.db.yml down
+
+#########################
+# DB running / setup
+#########################
+
+init-db: start-db ## Initialize the DB - includes any extra setup
+
+# Docker starts the image for the DB but it's not quite
+# ready to accept connections so we add a brief wait script
+start-db: ## Start the DB and wait for it to be available
+	docker compose -f ../docker-compose.db.yml up --detach grants-db
+	../scripts/wait-for-local-db.sh
 
 ##################################################
 # Testing

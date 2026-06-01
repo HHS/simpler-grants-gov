@@ -1,7 +1,7 @@
 import apiflask.exceptions
 import pytest
+from grants_shared.adapters import db
 
-from src.adapters import db
 from src.services.users.rename_api_key import rename_api_key
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
