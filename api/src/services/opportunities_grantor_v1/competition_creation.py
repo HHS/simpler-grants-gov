@@ -31,9 +31,15 @@ def create_competition(
 
     # Explicitly initialize all relationships that will be serialized
     competition.open_to_applicants = set(competition_data["open_to_applicants"])
+
+    # Auto-set assistance listing from opportunity (currently one per opportunity)
+    if opportunity.opportunity_assistance_listings:
+        competition.opportunity_assistance_listing = opportunity.opportunity_assistance_listings[0]
+    else:
+        competition.opportunity_assistance_listing = None
+
     competition.competition_forms = []
     competition.competition_instructions = []
-    competition.opportunity_assistance_listing = None
 
     db_session.add(competition)
     db_session.flush()

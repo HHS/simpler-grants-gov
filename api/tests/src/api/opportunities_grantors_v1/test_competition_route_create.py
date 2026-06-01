@@ -89,6 +89,11 @@ def test_competition_create_successful_creation(
     assert set(competition_data["open_to_applicants"]) == set(
         competition_request["open_to_applicants"]
     )
+    assert competition_data["opportunity_assistance_listing"] is not None
+    assert (
+        competition_data["opportunity_assistance_listing"]["assistance_listing_number"] is not None
+    )
+    assert competition_data["opportunity_assistance_listing"]["program_title"] is not None
 
 
 def test_competition_create_with_invalid_jwt_token(client, opportunity_for_competition):
@@ -244,3 +249,30 @@ def test_competition_create_with_null_dates(client, grantor_auth_data, opportuni
     competition_data = response.get_json()["data"]
     assert competition_data["opening_date"] is None
     assert competition_data["closing_date"] is None
+
+
+def test_competition_create_without_assistance_listing(
+    client, grantor_auth_data, enable_factory_create
+):
+    """Test competition creation when opportunity has no assistance listing"""
+    _, agency, token, _ = grantor_auth_data
+
+    opportunity = OpportunityFactory.create(
+        agency_id=agency.agency_id,
+        agency_code=agency.agency_code,
+        opportunity_assistance_listings=None,  # Explicitly no ALNs
+    )
+
+    competition_request = create_competition_request()
+
+    response = client.post(
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
+        json=competition_request,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    competition_data = response.get_json()["data"]
+
+    # Verify assistance listing is None when opportunity has no ALNs
+    assert competition_data["opportunity_assistance_listing"] is None
