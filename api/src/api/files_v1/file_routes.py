@@ -77,7 +77,11 @@ def update_file_scan_status(
         db_session.add(user)
 
         update_pending_file_scan_status(
-            db_session, pending_file_id, json_data["file_scan_status"], user
+            db_session,
+            pending_file_id,
+            json_data["file_scan_status"],
+            json_data["file_location"],
+            user,
         )
 
     return response.ApiResponse(message="Success")
