@@ -1,6 +1,6 @@
 // index.ts
-// Dispatcher for all supported field types and shared helpers.
-// Usage: import { fieldHandlerDispatcher } from '../index';
+// Dispatches each page field to a handler by field type.
+// Usage: import { fieldHandlerDispatcher } from "tests/e2e/utils/common/index";
 
 import { checkboxHandler } from "./checkbox-handler";
 import { comboBoxInputHandler } from "./combo-box-input-handler";

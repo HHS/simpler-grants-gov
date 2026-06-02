@@ -1,5 +1,5 @@
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
-import { FormFillFieldDefinitions } from "tests/e2e/utils/types";
+import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 
 // Regex matcher for SF-LLL: matches both "SF-LLL" and "Disclosure of Lobbying Activities"
 export const SFLLL_FORM_MATCHER =

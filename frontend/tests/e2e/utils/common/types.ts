@@ -1,6 +1,7 @@
 // types.ts
-// Shared handler contract types for E2E field handlers.
-// Usage: Import these types in all field handler files and the dispatcher.
+// Shared contracts for field types, field properties, and E2E handlers.
+// Usage: import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
+// Usage: import { type FillFormConfig } from "tests/e2e/utils/common/types";
 
 import { Page, TestInfo } from "@playwright/test";
 
@@ -13,6 +14,7 @@ export type FieldType =
   | "combo-box-input";
 
 export interface FillFieldDefinition {
+  // Field metadata used by type-specific handlers to locate and fill page fields.
   field: string;
   type: FieldType;
   testId?: string;
@@ -39,9 +41,9 @@ export interface FillFormConfig {
   saveButtonTestId: string;
   noErrorsText?: string;
   /**
-   * Optional form-specific hook called before the save button is clicked.
+   * Optional page-specific hook called before the save button is clicked.
    * Use for pre-save interactions that cannot be expressed as a field definition.
-   * e.g. SF-424A confirmation checkbox that only appears in this form.
+   * e.g. SF-424A confirmation checkbox that only appears on this page.
    */
   beforeSave?: (page: Page) => Promise<void>;
 }

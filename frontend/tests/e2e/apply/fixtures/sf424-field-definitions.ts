@@ -1,6 +1,6 @@
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
-import { FormFillFieldDefinitions } from "tests/e2e/utils/types";
+import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 
 export const SF424_FORM_MATCHER =
   /SF\s*[-‑–—]?\s*424(?![A-Za-z0-9])|Application\s+for\s+Federal\s+Assistance/i;

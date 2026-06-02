@@ -1,11 +1,12 @@
+// Orchestrates page-field filling by dispatching handlers from each field type and properties.
 import type { Page, TestInfo } from "@playwright/test";
-import { fieldHandlerDispatcher } from "tests/e2e/utils/index";
+import { fieldHandlerDispatcher } from "tests/e2e/utils/common/index";
 import {
   FillFieldDefinition,
   FillFormConfig,
   FormFillFieldDefinitions,
   shouldFillField,
-} from "tests/e2e/utils/types";
+} from "tests/e2e/utils/common/types";
 
 import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";
 import { clickSaveButton } from "./save-form-utils";

@@ -1,6 +1,6 @@
 // radio-button-handler.ts
-// Handles radio button fields for E2E form filling.
-// Usage: import { radioButtonHandler } from './radio-button-handler';
+// Handles radio-button page fields using choice-locator field properties.
+// Usage: import { radioButtonHandler } from "tests/e2e/utils/common/radio-button-handler";
 
 import { shouldActivateField } from "./activation";
 import { getChoiceLocator } from "./choice-locator";

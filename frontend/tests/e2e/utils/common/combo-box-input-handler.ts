@@ -1,6 +1,6 @@
 // combo-box-input-handler.ts
-// Handles combo box input controls for E2E form filling.
-// Usage: import { comboBoxInputHandler } from './combo-box-input-handler';
+// Handles combo-box page fields using test ID and option-prefix properties.
+// Usage: import { comboBoxInputHandler } from "tests/e2e/utils/common/combo-box-input-handler";
 
 import { FieldHandler } from "./types";
 

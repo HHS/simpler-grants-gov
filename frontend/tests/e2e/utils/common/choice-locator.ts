@@ -1,6 +1,6 @@
 // choice-locator.ts
 // Resolves locator strategy for selector, testId, getByText, and data-text fallback.
-// Usage: import { getChoiceLocator } from './choice-locator';
+// Usage: import { getChoiceLocator } from "tests/e2e/utils/common/choice-locator";
 
 import { Page } from "@playwright/test";
 

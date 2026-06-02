@@ -1,6 +1,6 @@
 // file-handler.ts
-// Handles file upload fields for E2E form filling.
-// Usage: import { fileHandler } from './file-handler';
+// Handles file-upload page fields using selector and test ID properties.
+// Usage: import { fileHandler } from "tests/e2e/utils/common/file-handler";
 
 import { FieldHandler } from "./types";
 

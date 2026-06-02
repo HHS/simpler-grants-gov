@@ -1,6 +1,6 @@
 // checkbox-handler.ts
-// Handles checkbox fields for E2E form filling.
-// Usage: import { checkboxHandler } from './checkbox-handler';
+// Handles checkbox page fields using checkbox field properties.
+// Usage: import { checkboxHandler } from "tests/e2e/utils/common/checkbox-handler";
 
 import { shouldActivateField } from "./activation";
 import { getChoiceLocator } from "./choice-locator";

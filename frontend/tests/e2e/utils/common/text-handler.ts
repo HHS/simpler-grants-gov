@@ -1,6 +1,6 @@
 // text-handler.ts
-// Handles text input fields for E2E form filling.
-// Usage: import { textHandler } from './text-handler';
+// Handles text page fields using text-input field properties.
+// Usage: import { textHandler } from "tests/e2e/utils/common/text-handler";
 
 import { FieldHandler } from "./types";
 

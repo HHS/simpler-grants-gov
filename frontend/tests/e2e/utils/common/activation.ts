@@ -1,6 +1,6 @@
 // activation.ts
 // Shared activation logic for boolean-like values used by radio and checkbox handlers.
-// Usage: import { shouldActivateField } from './activation';
+// Usage: import { shouldActivateField } from "tests/e2e/utils/common/activation";
 
 /**
  * Determines whether a radio button or checkbox field should be activated (checked/selected).

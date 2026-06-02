@@ -1,8 +1,9 @@
 // dropdown-handler.ts
-// Handles native select and custom dropdowns for E2E form filling.
-// Usage: import { dropdownHandler } from './dropdown-handler';
+// Handles dropdown page fields using selector and test ID properties.
+// Usage: import { dropdownHandler } from "tests/e2e/utils/common/dropdown-handler";
 
-import { selectDropdownByValueOrLabel } from "./select-dropdown-utils";
+import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
+
 import { FieldHandler } from "./types";
 
 export const dropdownHandler: FieldHandler = async (
