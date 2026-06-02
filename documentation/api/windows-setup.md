@@ -7,9 +7,10 @@ This guide will help you set up the Simpler Grants.gov API for local development
 1. Install WSL 2 with Ubuntu (not docker-desktop)
 2. Install Docker Desktop and enable Ubuntu integration
 3. Install `make` and `postgresql-client` in Ubuntu
-4. Run `make init` (takes 5-10 minutes first time)
-5. Run `make start`
-6. Verify with `curl http://localhost:8080/health`
+4. Naviate to the `api` directory
+5. Run `make init` (takes 5-10 minutes first time)
+6. Run `make start`
+7. Verify with `curl http://localhost:8080/health`
 
 See detailed steps below.
 
