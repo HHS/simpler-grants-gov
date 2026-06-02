@@ -1,6 +1,6 @@
 import { numberToTwoDecimalString } from "tests/e2e/utils/forms/form-number-utils";
-import { type FillFormConfig } from "tests/e2e/utils/types";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
+import { type FillFormConfig } from "tests/e2e/utils/types";
 
 // RegExp matcher tolerant of hyphen/dash variants for SF-424A,
 // compatible with both local and staging environments.

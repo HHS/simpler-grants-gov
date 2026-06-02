@@ -1,10 +1,10 @@
 import type { Page, TestInfo } from "@playwright/test";
 import { fieldHandlerDispatcher } from "tests/e2e/utils/index";
 import {
-  shouldFillField,
   FillFieldDefinition,
   FillFormConfig,
   FormFillFieldDefinitions,
+  shouldFillField,
 } from "tests/e2e/utils/types";
 
 import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";
