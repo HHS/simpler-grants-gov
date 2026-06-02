@@ -6,7 +6,7 @@ import { DatePicker, FormGroup, Radio } from "@trussworks/react-uswds";
 import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
 
 export function OpenAndCloseDates() {
-  const t = useTranslations("OpportunityCompetition");
+  const t = useTranslations("OpportunityCompetition.sections");
 
   return (
     <div
@@ -14,22 +14,22 @@ export function OpenAndCloseDates() {
       className="padding-bottom-4 border-bottom border-base-lighter margin-top-4 simpler-page-anchor-offset"
     >
       <h2 className="font-heading-lg margin-top-0 margin-bottom-1">
-        {t("sections.openAndCloseDates")}
+        {t("openAndCloseDates")}
       </h2>
       <FormGroup>
         <DynamicFieldLabel
           idFor="how-does-this-close"
-          title={t("sections.howDoesThisClose")}
+          title={t("howDoesThisClose")}
           required={true}
-          description={t("sections.howDoesThisCloseHint")}
+          description={t("howDoesThisCloseHint")}
         />
         <div className="grid-row grid-gap-2">
           <div className="tablet:grid-col">
             <Radio
               id="hard-deadline"
               name="howDoesThisClose"
-              label={t("sections.hardDeadline")}
-              labelDescription={t("sections.hardDeadlineHint")}
+              label={t("hardDeadline")}
+              labelDescription={t("hardDeadlineHint")}
               value="hard_deadline"
             />
           </div>
@@ -37,8 +37,8 @@ export function OpenAndCloseDates() {
             <Radio
               id="rolling-deadline"
               name="howDoesThisClose"
-              label={t("sections.rollingDeadline")}
-              labelDescription={t("sections.rollingDeadlineHint")}
+              label={t("rollingDeadline")}
+              labelDescription={t("rollingDeadlineHint")}
               value="rolling_deadline"
             />
           </div>
@@ -46,8 +46,8 @@ export function OpenAndCloseDates() {
             <Radio
               id="continuous-review"
               name="howDoesThisClose"
-              label={t("sections.continuousReview")}
-              labelDescription={t("sections.continuousReviewHint")}
+              label={t("continuousReview")}
+              labelDescription={t("continuousReviewHint")}
               value="continuous_review"
             />
           </div>
@@ -58,8 +58,8 @@ export function OpenAndCloseDates() {
           <FormGroup>
             <DynamicFieldLabel
               idFor="open-date"
-              title={t("sections.openDate")}
-              description={t("sections.openDateHint")}
+              title={t("openDate")}
+              description={t("openDateHint")}
             />
             <DatePicker
               id="open-date"
@@ -73,8 +73,8 @@ export function OpenAndCloseDates() {
           <FormGroup>
             <DynamicFieldLabel
               idFor="close-date"
-              title={t("sections.closeDate")}
-              description={t("sections.closeDateHint")}
+              title={t("closeDate")}
+              description={t("closeDateHint")}
             />
             <DatePicker
               id="close-date"

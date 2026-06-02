@@ -2384,6 +2384,7 @@ export const messages = {
       openAndCloseDates: "Open and close dates",
       applicationChecklist: "Application checklist",
       narrativeFormatInstructions: "Narrative format instructions",
+      navTitle: "On this page",
     },
   },
   FeatureFlagsAdmin: {

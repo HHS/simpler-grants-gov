@@ -168,6 +168,7 @@ export const CommonSelectInput = ({
   defaultSelection,
   onSelectionChange,
   rawErrors = [],
+  selectClassName = "maxw-mobile-lg",
 }: {
   labelText: string;
   description: string;
@@ -178,6 +179,7 @@ export const CommonSelectInput = ({
   defaultSelection?: string; // optional: default selection key
   onSelectionChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   rawErrors?: string[];
+  selectClassName?: string;
 }) => {
   const error = rawErrors.length ? true : undefined;
   const [selectedValue, setSelectedValue] = useState<string>(
@@ -205,7 +207,7 @@ export const CommonSelectInput = ({
           name={fieldId}
           onChange={handleChange}
           value={selectedValue}
-          className="maxw-mobile-lg"
+          className={selectClassName}
         >
           {/* Default option */}
           <option key={""} value={""} disabled>
