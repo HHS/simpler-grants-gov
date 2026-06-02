@@ -2,7 +2,9 @@ import re
 from pathlib import Path
 
 import pytest
+from flask import Flask
 
+from src.task import task_blueprint
 from src.task.forms.lock_form_version_task import compute_version_hash, get_version_dir
 
 _FORMS_ROOT = Path(__file__).parents[4] / "src" / "form_schema" / "forms"
@@ -106,3 +108,17 @@ def test_get_version_dir_rejects_unknown_form() -> None:
     """get_version_dir raises ValueError for a form that does not exist."""
     with pytest.raises(ValueError, match="no form directory"):
         get_version_dir("nonexistent_form_xyz", "1.0")
+
+
+def test_lock_form_version_blocked_in_non_local_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """lock-form-version must exit non-zero when ENVIRONMENT is not 'local'."""
+    monkeypatch.setenv("ENVIRONMENT", "dev")
+    app = Flask("test_lock_form_version")
+    app.register_blueprint(task_blueprint)
+    result = app.test_cli_runner().invoke(
+        args=["task", "lock-form-version", "--form=sf424", "--version=1.0"]
+    )
+    assert result.exit_code != 0
+    assert "non-local" in str(result.exception).lower()
