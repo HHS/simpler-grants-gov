@@ -130,7 +130,7 @@ def test_add_extra_log_data_for_current_request(app: Flask, caplog: pytest.LogCa
 
 
 def test_correlation_id_in_logs_when_header_present(app: Flask, caplog: pytest.LogCaptureFixture):
-    app.test_client().get("/hello/jane", headers={"X-Correlation-ID": "abc-123"})
+    app.test_client().get("/hello/jane", headers={"X-Correlation-Id": "abc-123"})
 
     assert len(caplog.records) > 0
     for record in caplog.records:

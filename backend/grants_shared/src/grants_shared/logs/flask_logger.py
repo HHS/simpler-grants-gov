@@ -198,7 +198,7 @@ def _get_request_context_info(request: flask.Request) -> dict:
         "request.internal_id": internal_request_id,
     }
 
-    correlation_id = request.headers.get("X-Correlation-ID")
+    correlation_id = request.headers.get("X-Correlation-Id")
     if correlation_id is not None:
         data["request.correlation_id"] = correlation_id
 
