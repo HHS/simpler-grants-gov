@@ -134,4 +134,16 @@ describe("TextWidget", () => {
     fireEvent.change(input, { target: { value: "123" } });
     expect(mockOnChange).toHaveBeenCalled();
   });
+  it("renders an empty controlled input when updateOnInput is enabled", () => {
+    render(
+      <TextWidget
+        id="test"
+        schema={{ type: "string" }}
+        value={undefined}
+        updateOnInput
+      />,
+    );
+
+    expect(screen.getByRole("textbox")).toHaveValue("");
+  });
 });

@@ -542,6 +542,10 @@ const getFieldListConfig = ({
       rawErrors: errors ?? [],
       requiredFields,
       value: fieldListValue as GeneralRecord[] | undefined,
+      minItemsHeading: uiFieldObject.minItemsHeading,
+      minItemsHelperText: uiFieldObject.minItemsHelperText,
+      maxItemsHeading: uiFieldObject.maxItemsHeading,
+      maxItemsHelperText: uiFieldObject.maxItemsHelperText,
     },
   };
 };
