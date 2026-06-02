@@ -1,7 +1,7 @@
 import type { Page, TestInfo } from "@playwright/test";
 import { fieldHandlerDispatcher } from "tests/e2e/utils/index";
 import {
-  fieldDependsOn,
+  shouldFillField,
   FillFieldDefinition,
   FormFillFieldDefinitions,
 } from "tests/e2e/utils/types";
@@ -105,7 +105,7 @@ export async function fillForm(
       if (dataForField === undefined) {
         continue;
       }
-      if (!fieldDependsOn(fieldConfig, data)) {
+      if (!shouldFillField(fieldConfig, data)) {
         await testInfo.attach(`fillField-${fieldIdentifier}-skipped`, {
           body: `Skipped ${fieldIdentifier}: dependency ${fieldConfig.dependsOn?.field} did not match ${fieldConfig.dependsOn?.value}`,
           contentType: "text/plain",

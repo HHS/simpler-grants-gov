@@ -40,8 +40,8 @@ export type FieldHandler = (
   data: string | boolean | undefined,
 ) => Promise<void>;
 
-// Helper function to check if a field depends on another field
-export function fieldDependsOn(
+// Returns true if the field has no dependency, or if its dependency is satisfied.
+export function shouldFillField(
   field: FillFieldDefinition,
   formData: Record<string, unknown>,
 ): boolean {
