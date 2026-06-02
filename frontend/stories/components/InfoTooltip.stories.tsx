@@ -1,6 +1,6 @@
 import React, { ElementType } from "react";
 
-import InfoTooltip from "src/components/InfoTooltip";
+import InfoTooltip from "src/components/core/tooltip/InfoTooltip";
 
 const meta = {
   title: "Components/InfoTooltip",

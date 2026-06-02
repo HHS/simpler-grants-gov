@@ -23,7 +23,7 @@ import {
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
 import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { TransferOwnershipButton } from "./transferOwnership/TransferOwnershipButton";
 
 type CompetitionDetails = { competition: Competition };

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 import { OrganizationInfo } from "src/components/organization/OrganizationInfo";
 import {
   OrganizationRoster,

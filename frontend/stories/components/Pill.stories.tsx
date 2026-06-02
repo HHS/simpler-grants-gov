@@ -1,4 +1,4 @@
-import { Pill } from "src/components/Pill";
+import { Pill } from "src/components/core/Pill";
 
 const meta = {
   title: "Components/Pill",

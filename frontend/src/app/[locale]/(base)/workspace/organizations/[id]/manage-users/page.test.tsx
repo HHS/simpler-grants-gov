@@ -81,7 +81,7 @@ type RequiredPrivilege = {
 
 const AuthorizationGateMock = jest.fn<void, [unknown]>();
 
-jest.mock("src/components/user/AuthorizationGate", () => ({
+jest.mock("src/components/core/AuthorizationGate", () => ({
   AuthorizationGate: (props: unknown) => {
     AuthorizationGateMock(props);
     const { children } = props as { children: React.ReactNode };
