@@ -132,6 +132,7 @@ def enable_factory_create(monkeypatch, db_session) -> db.Session:
     monkeypatch.setattr(factories, "_db_session", db_session)
     return db_session
 
+
 #################
 # AWS Mocking
 #################
