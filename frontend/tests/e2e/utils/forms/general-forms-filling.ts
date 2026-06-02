@@ -94,6 +94,10 @@ export async function fillForm(
     body: `Application URL: ${applicationURL}`,
     contentType: "text/plain",
   });
+  
+  // Derive a regex matcher for openForm. For plain strings (e.g. "SF-424 (Form)"),
+  // use buildFlexibleFormNameRegex so special chars like () are properly escaped
+  // and hyphens/spaces become flexible. For RegExp formNames, pass through directly.
   const formMatcher =
     formName instanceof RegExp
       ? formName
