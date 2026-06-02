@@ -1,37 +1,17 @@
-import * as fetcherModule from "src/services/fetch/fetchers/awardRecommendationFetcher";
+/**
+ * @jest-environment node
+ */
 
 import { NextRequest } from "next/server";
 
 import { getRisksForAwardRecommendation } from "./handler";
 
-jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher");
+const mockGetAwardRecommendationRisks = jest.fn();
 
-jest.mock("src/services/auth/sessionUtils", () => ({
-  decrypt: jest.fn(),
-  encrypt: jest.fn(),
-  CLIENT_JWT_ENCRYPTION_ALGORITHM: "HS256",
-  API_JWT_ENCRYPTION_ALGORITHM: "RS256",
-  newExpirationDate: () => new Date(0),
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
+  getAwardRecommendationRisks: () =>
+    mockGetAwardRecommendationRisks() as unknown,
 }));
-
-interface MockResponse {
-  json: () => Promise<unknown>;
-  status: number;
-}
-
-global.Response = class Response {
-  constructor(
-    public body: unknown,
-    public init?: ResponseInit,
-  ) {}
-  static json(data: unknown, init?: ResponseInit): MockResponse {
-    return {
-      json: jest.fn().mockResolvedValue(data),
-      status: init?.status || 200,
-      ...init,
-    } as MockResponse;
-  }
-} as unknown as typeof globalThis.Response;
 
 const mockPagination = { page_offset: 1, page_size: 10, sort_order: [] };
 const mockRisks = [{ id: 1, type: "ADD_MONITORING" }];
@@ -43,7 +23,7 @@ describe("getRisksForAwardRecommendation", () => {
   });
 
   it("returns risks and pagination info on success", async () => {
-    (fetcherModule.getAwardRecommendationRisks as jest.Mock).mockResolvedValue({
+    mockGetAwardRecommendationRisks.mockResolvedValue({
       risks: mockRisks,
       paginationInfo: mockPaginationInfo,
     });
@@ -60,3 +40,4 @@ describe("getRisksForAwardRecommendation", () => {
     expect(json.pagination_info).toEqual(mockPaginationInfo);
   });
 });
+g;

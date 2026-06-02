@@ -1,4 +1,4 @@
-import { getSession } from "src/services/auth/session";
+import { MissingAuthError } from "src/errors";
 import { getOrganizationUsers } from "src/services/fetch/fetchers/organizationsFetcher";
 import { UserDetail } from "src/types/userTypes";
 
@@ -73,19 +73,18 @@ export const OrganizationRoster = async ({
   organizationId: string;
 }) => {
   const t = await getTranslations("OrganizationDetail.rosterTable");
-  const session = await getSession();
-  if (!session?.token) {
-    return (
-      <Alert headingLevel="h3" type="error">
-        not logged in
-      </Alert>
-    );
-  }
 
   let organizationUsers;
   try {
     organizationUsers = await getOrganizationUsers(organizationId);
   } catch (e) {
+    if (e instanceof MissingAuthError) {
+      return (
+        <Alert headingLevel="h3" type="error">
+          not logged in
+        </Alert>
+      );
+    }
     console.error(e);
     return <GeneralErrorAlert />;
   }

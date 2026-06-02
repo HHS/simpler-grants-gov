@@ -1,6 +1,6 @@
 "use client";
 
-import { UserAgency } from "src/services/fetch/fetchers/userAgenciesFetcher";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,7 @@ export const AgencySelector = ({
   currentAgencyId,
   className,
 }: {
-  agencies: UserAgency[];
+  agencies: RelevantAgencyRecord[];
   currentAgencyId: string;
   className?: string;
 }) => {
