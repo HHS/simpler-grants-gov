@@ -4,7 +4,7 @@ import { findFirstWhitespace } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import ContentDisplayToggle from "src/components/core/ContentDisplayToggle";
 import { ForecastOpportunityItem } from "./ForecastOpportunityItem";
 
 type Props = {

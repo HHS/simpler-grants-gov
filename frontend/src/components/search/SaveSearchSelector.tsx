@@ -19,8 +19,8 @@ import {
 } from "react";
 import { Select } from "@trussworks/react-uswds";
 
-import SimplerAlert from "src/components/SimplerAlert";
-import Spinner from "src/components/Spinner";
+import SimplerAlert from "src/components/core/SimplerAlert";
+import Spinner from "src/components/core/Spinner";
 
 export const SaveSearchSelector = ({
   newSavedSearches,

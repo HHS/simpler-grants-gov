@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
 import { Button } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 export const OpportunityContentBox = ({
   title,

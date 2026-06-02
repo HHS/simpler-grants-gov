@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { ReactElement } from "react";
 import { Checkbox } from "@trussworks/react-uswds";
 
-import Spinner from "src/components/Spinner";
+import Spinner from "src/components/core/Spinner";
 
 export interface NotificationPreferenceCardProps {
   checkboxId: string;

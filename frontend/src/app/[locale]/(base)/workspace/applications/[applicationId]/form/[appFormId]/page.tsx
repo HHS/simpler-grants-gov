@@ -14,7 +14,7 @@ import {
   buildWarningTree,
   pointerToFieldName,
 } from "src/components/applyForm/utils";
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 

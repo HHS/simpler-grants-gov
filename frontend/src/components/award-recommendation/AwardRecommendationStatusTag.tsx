@@ -2,7 +2,7 @@ import { AwardRecommendationStatus } from "src/types/awardRecommendationTypes";
 
 import { useTranslations } from "next-intl";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type Props = {
   status: AwardRecommendationStatus;

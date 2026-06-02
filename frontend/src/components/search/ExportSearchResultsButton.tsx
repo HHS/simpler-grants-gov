@@ -9,7 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { Button } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 export function ExportSearchResultsButton({
   className,
