@@ -103,6 +103,11 @@ export async function fillForm(
       ? formName
       : buildFlexibleFormNameRegex(formName);
   try {
+      // ── Navigation ──────────────────────────────────────────────────────────
+    // Delegate to openForm, which owns all navigation reliability:
+    // table-scoped row lookup, scroll-to-reveal, testId/href/button/global
+    // fallback selectors, trial-click check, force-click retry, direct href
+    // goto last resort, and URL pattern + load-state verification.
     const opened = await openForm(page, formMatcher);
     if (!opened) {
       throw new Error(`Could not find or open form: ${formMatcher}`);
