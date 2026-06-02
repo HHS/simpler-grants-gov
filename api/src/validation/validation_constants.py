@@ -37,7 +37,7 @@ class ValidationErrorType(StrEnum):
     COMPETITION_NOT_OPEN = "competition_not_open"
 
     # Application access validation error type
-    UNAUTHORIZED_APPLICATION_ACCESS = "unauthorized_application_access"
+    UNAUTHORIZED_APPLICATION_ACCESS="unauth...cess"
     MISSING_REQUIRED_FORM = "missing_required_form"
     APPLICATION_FORM_VALIDATION = "application_form_validation"
     MISSING_APPLICATION_FORM = "missing_application_form"
@@ -54,3 +54,10 @@ class ValidationErrorType(StrEnum):
     ORGANIZATION_NO_SAM_GOV_ENTITY = "organization_no_sam_gov_entity"
     ORGANIZATION_INACTIVE_IN_SAM_GOV = "organization_inactive_in_sam_gov"
     ORGANIZATION_SAM_GOV_EXPIRED = "organization_sam_gov_expired"
+
+    # File upload validation error types
+    PENDING_FILE_UPLOAD_LIMIT_EXCEEDED = "pending_file_upload_limit_exceeded"
+    FILE_NOT_FOUND_AT_LOCATION = "file_not_found_at_location"
+
+    # Saved item error types
+    SAVED_ITEM_NOT_FOUND = "saved_item_not_found"

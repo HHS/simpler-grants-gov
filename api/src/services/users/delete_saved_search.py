@@ -1,10 +1,12 @@
 from uuid import UUID
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
+from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.db.models.user_models import UserSavedSearch
+from src.validation.validation_constants import ValidationErrorType
 
 
 def delete_saved_search(db_session: db.Session, user_id: UUID, saved_search_id: UUID) -> None:
@@ -15,6 +17,15 @@ def delete_saved_search(db_session: db.Session, user_id: UUID, saved_search_id: 
     ).scalar_one_or_none()
 
     if not saved_search:
-        raise_flask_error(404, "Saved search not found")
+        raise_flask_error(
+            404,
+            "Saved search not found",
+            validation_issues=[
+                ValidationErrorDetail(
+                    type=ValidationErrorType.SAVED_ITEM_NOT_FOUND,
+                    message="Saved search not found",
+                )
+            ],
+        )
 
     saved_search.is_deleted = True
