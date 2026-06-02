@@ -2,11 +2,12 @@ import logging
 from uuid import UUID
 
 import flask
+from grants_shared.adapters import db
+from grants_shared.adapters.db import flask_db
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 import src.adapters.search.flask_opensearch as flask_opensearch
-from src.adapters import db, search
-from src.adapters.db import flask_db
+from src.adapters import search
 from src.api import response
 from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas

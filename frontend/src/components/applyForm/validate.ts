@@ -152,6 +152,10 @@ export const UiJsonSchema: RJSFSchema = {
         label: {
           type: "string",
         },
+        minItemsHeading: { type: "string" },
+        minItemsHelperText: { type: "string" },
+        maxItemsHeading: { type: "string" },
+        maxItemsHelperText: { type: "string" },
         name: {
           type: "string",
         },

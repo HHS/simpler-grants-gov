@@ -2,9 +2,9 @@ import uuid
 
 import apiflask.exceptions
 import pytest
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
 from src.db.models.user_models import UserApiKey
 from src.services.users.delete_api_key import delete_api_key
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory

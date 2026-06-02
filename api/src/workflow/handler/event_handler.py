@@ -1,9 +1,9 @@
 import logging
 import uuid
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
 from src.constants.lookup_constants import WorkflowEventType, WorkflowType
 from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow

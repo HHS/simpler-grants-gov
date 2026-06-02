@@ -21,7 +21,7 @@ jest.mock("next-intl/server", () => ({
 
 const tableWithResponsiveHeaderMock = jest.fn<void, [unknown]>();
 
-jest.mock("src/components/TableWithResponsiveHeader", () => ({
+jest.mock("src/components/core/TableWithResponsiveHeader", () => ({
   TableWithResponsiveHeader: (props: unknown) => {
     tableWithResponsiveHeaderMock(props);
     return <div data-testid="active-users-table" />;

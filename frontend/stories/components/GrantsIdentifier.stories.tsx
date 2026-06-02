@@ -1,4 +1,4 @@
-import GrantsIdentifier from "src/components/GrantsIdentifier";
+import GrantsIdentifier from "src/components/core/GrantsIdentifier";
 
 const meta = {
   title: "Components/Layout/Identifier",

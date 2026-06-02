@@ -2,9 +2,9 @@ import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 
-import src.adapters.db as db
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.db.models.staging.instructions import Tinstructions

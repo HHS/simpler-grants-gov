@@ -2,7 +2,8 @@ import logging
 import uuid
 from abc import abstractmethod
 
-from src.adapters import db
+from grants_shared.adapters import db
+
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.user_models import UserNotificationLog
 from src.task.notifications import constants

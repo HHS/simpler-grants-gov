@@ -4,14 +4,14 @@ import uuid
 from datetime import timedelta
 
 import click
+import grants_shared.adapters.db as db
 import grants_shared.logs
 import grants_shared.util.datetime_util as datetime_util
+from grants_shared.adapters.db import PostgresDBClient
 from grants_shared.util.local import error_if_not_local
 from sqlalchemy import select
 
-import src.adapters.db as db
 import tests.src.db.models.factories as factories
-from src.adapters.db import PostgresDBClient
 from src.constants.lookup_constants import CompetitionOpenToApplicant
 from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
