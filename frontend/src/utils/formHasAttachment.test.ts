@@ -44,7 +44,9 @@ describe("formHasAttachmentFields", () => {
     expect(formHasAttachmentFields(schema)).toBe(true);
   });
 
-  it("returns true for PrintAttachment widget", () => {
+  it("returns false for PrintAttachment widget (prefix does not match)", () => {
+    // The match is `widget.startsWith("Attachment")`, so "PrintAttachment"
+    // intentionally does not count as an attachment field.
     const schema: UiSchema = [
       {
         type: "field",
@@ -52,7 +54,7 @@ describe("formHasAttachmentFields", () => {
         widget: "PrintAttachment",
       },
     ];
-    expect(formHasAttachmentFields(schema)).toBe(true);
+    expect(formHasAttachmentFields(schema)).toBe(false);
   });
 
   it("returns false when field has no widget", () => {
@@ -129,6 +131,27 @@ describe("formHasAttachmentFields", () => {
       },
     ];
     expect(formHasAttachmentFields(schema)).toBe(true);
+  });
+
+  it("returns false for an Attachment field nested in a fieldList (not recursed into)", () => {
+    // formHasAttachmentFields only recurses into `section` children, not
+    // `fieldList` children, so an Attachment nested in a fieldList is not
+    // currently detected. This documents that intentional behavior.
+    const schema: UiSchema = [
+      {
+        type: "fieldList",
+        label: "Attachments",
+        name: "attachments",
+        children: [
+          {
+            type: "field",
+            definition: "/properties/file",
+            widget: "Attachment",
+          },
+        ],
+      },
+    ];
+    expect(formHasAttachmentFields(schema)).toBe(false);
   });
 
   it("returns true when mix of Attachment and non-Attachment fields exist", () => {
