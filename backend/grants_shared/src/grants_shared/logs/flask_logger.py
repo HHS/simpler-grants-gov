@@ -198,6 +198,10 @@ def _get_request_context_info(request: flask.Request) -> dict:
         "request.internal_id": internal_request_id,
     }
 
+    correlation_id = request.headers.get("X-Correlation-ID")
+    if correlation_id is not None:
+        data["request.correlation_id"] = correlation_id
+
     # Add query parameter data in the format request.query.<key> = <value>
     # For example, the query string ?foo=bar&baz=qux would be added as
     # request.query.foo = bar and request.query.baz = qux
