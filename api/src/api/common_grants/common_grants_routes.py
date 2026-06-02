@@ -18,6 +18,7 @@ from common_grants_sdk.schemas.pydantic import (
     SortedResultsInfo,
 )
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.util.dict_util import flatten_dict
 
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
@@ -41,7 +42,6 @@ from src.api.common_grants.schemas.marshmallow.schemas import (
 from src.auth.api_user_key_auth import api_user_key_auth
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
 from src.services.common_grants.transformation import build_filter_info
-from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 
