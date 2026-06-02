@@ -56,12 +56,16 @@ class TestErrorIfNotLocal:
 
     def test_raises_when_environment_is_not_local(self, monkeypatch):
         monkeypatch.setenv("ENVIRONMENT", "dev")
-        with pytest.raises(Exception, match="Local-only process called when environment was set to non-local"):
+        with pytest.raises(
+            Exception, match="Local-only process called when environment was set to non-local"
+        ):
             error_if_not_local()
 
     def test_raises_when_environment_is_unset(self, monkeypatch):
         monkeypatch.delenv("ENVIRONMENT", raising=False)
-        with pytest.raises(Exception, match="Local-only process called when environment was set to non-local"):
+        with pytest.raises(
+            Exception, match="Local-only process called when environment was set to non-local"
+        ):
             error_if_not_local()
 
     @pytest.mark.parametrize("env", ["staging", "prod", "production", "test"])
