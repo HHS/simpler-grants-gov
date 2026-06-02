@@ -51,7 +51,12 @@ export async function fillField(
     );
   }
 }
-
+/**
+ * Fills a subset of fields on the current form page without navigating or saving.
+ * Use when the form is already open and only some fields should be filled
+ * (e.g. failure-path tests that intentionally leave required fields empty).
+ * Does NOT perform assertions - those are done in the test.
+ */
 export async function fillFormPartial(
   testInfo: TestInfo,
   page: Page,
