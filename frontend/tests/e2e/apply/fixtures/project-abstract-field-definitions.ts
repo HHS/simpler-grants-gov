@@ -1,6 +1,6 @@
+import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
-import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 
 export const PROJECT_ABSTRACT_FORM_MATCHER =
   /Project\s+Abstract(?!\s+Summary)/i;

@@ -1,6 +1,6 @@
+import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
-import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 
 // Matches the NEH Supplementary Cover Sheet link/heading on the application page
 export const SUPP_COVER_SHEET_NEH_FORM_MATCHER =

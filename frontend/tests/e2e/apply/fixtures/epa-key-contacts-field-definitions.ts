@@ -1,6 +1,6 @@
+import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
-import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 
 // Regex matcher for the EPA Key Contacts form link in the forms table.
 export const EPA_KEY_CONTACTS_FORM_MATCHER = "EPA KEY CONTACTS FORM";
