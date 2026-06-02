@@ -129,9 +129,7 @@ def test_add_extra_log_data_for_current_request(app: Flask, caplog: pytest.LogCa
     assert_dict_contains(last_record.__dict__, {"pet.name": "kitty"})
 
 
-def test_correlation_id_in_logs_when_header_present(
-    app: Flask, caplog: pytest.LogCaptureFixture
-):
+def test_correlation_id_in_logs_when_header_present(app: Flask, caplog: pytest.LogCaptureFixture):
     app.test_client().get("/hello/jane", headers={"X-Correlation-ID": "abc-123"})
 
     assert len(caplog.records) > 0
