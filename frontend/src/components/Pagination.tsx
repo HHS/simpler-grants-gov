@@ -49,12 +49,10 @@ export default function UswdsPagination({
           e.preventDefault();
           handlePageClick(page);
         }}
-        onClickNext={(e) => {
-          (e as React.MouseEvent<HTMLButtonElement>).preventDefault();
+        onClickNext={() => {
           handlePageClick(currentPage + 1);
         }}
-        onClickPrevious={(e) => {
-          (e as React.MouseEvent<HTMLButtonElement>).preventDefault();
+        onClickPrevious={() => {
           handlePageClick(currentPage - 1);
         }}
       />
