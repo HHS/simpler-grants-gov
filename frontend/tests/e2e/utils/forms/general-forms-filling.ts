@@ -125,6 +125,8 @@ export async function fillForm(
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
     for (const [fieldIdentifier, fieldConfig] of Object.entries(fields)) {
+
+    // ── Fill fields ────────────────────────────────────────────────────────
       const dataForField = data[fieldIdentifier];
       if (dataForField === undefined) {
         continue;
