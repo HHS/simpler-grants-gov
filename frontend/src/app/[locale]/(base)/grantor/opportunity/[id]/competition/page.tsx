@@ -5,8 +5,8 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { CompetitionForm } from "src/components/opportunities/competition/CompetitionForm";
-import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
