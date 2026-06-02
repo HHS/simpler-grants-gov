@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import {
   CommonSelectInput,
   CommonTextInput,
-} from "src/components/grantor/CommonFormFields";
+} from "src/components/core/forms/CommonFormFields";
 
 export function SubmissionSetUp() {
   const t = useTranslations("OpportunityCompetition.sections");

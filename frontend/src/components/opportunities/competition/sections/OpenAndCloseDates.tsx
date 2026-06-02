@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { DatePicker, FormGroup, Radio } from "@trussworks/react-uswds";
 
-import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
+import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 
 export function OpenAndCloseDates() {
   const t = useTranslations("OpportunityCompetition.sections");
