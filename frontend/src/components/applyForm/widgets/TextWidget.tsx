@@ -132,7 +132,7 @@ function TextWidget<
         onBlur={updateOnInput ? _onBlur : undefined}
         onFocus={updateOnInput ? _onFocus : undefined}
         defaultValue={updateOnInput ? undefined : inputValue}
-        value={updateOnInput ? inputValue : undefined}
+        value={updateOnInput ? (inputValue ?? "") : undefined}
         validationStatus={error ? "error" : undefined}
         pattern={pattern || undefined}
       />

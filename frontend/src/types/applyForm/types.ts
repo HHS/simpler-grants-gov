@@ -142,6 +142,10 @@ export type FieldListWidgetProps = {
   description?: string;
   name: string;
   minItems?: number;
+  minItemsHeading?: string;
+  minItemsHelperText?: string;
+  maxItemsHeading?: string;
+  maxItemsHelperText?: string;
   maxItems?: number;
   groupDefinition: FieldListGroupItem[];
   rawErrors?: FormattedFormValidationWarning[];
@@ -206,6 +210,10 @@ export interface UiSchemaSection {
 export interface UiSchemaFieldList {
   type: "fieldList";
   label: string;
+  minItemsHeading?: string;
+  minItemsHelperText?: string;
+  maxItemsHeading?: string;
+  maxItemsHelperText?: string;
   name: string;
   description?: string;
   children: UiSchemaField[];
