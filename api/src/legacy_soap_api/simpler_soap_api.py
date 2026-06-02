@@ -19,7 +19,7 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerGrantorsS2SClient,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, get_soap_config
-from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent, SimplerRequests
 from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response as get_legacy_response
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPInvalidEnvelope,
@@ -35,13 +35,12 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_invalid_path_response,
     get_soap_error_response,
     get_soap_fault_error_response,
+    write_debug_data_to_s3,
 )
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
 
 logger = logging.getLogger(__name__)
 
-GET_SUBMISSION_LIST_REQUEST = "GetSubmissionListRequest"
-GET_SUBMISSION_LIST_EXPANDED_REQUEST = "GetSubmissionListExpandedRequest"
 GET_OPPORTUNITY_LIST_REQUEST = "GetOpportunityListRequest"
 
 
@@ -163,7 +162,6 @@ def process_simpler_request(
             return get_soap_error_response(
                 faultstring="Certificate is expired. (Authorization Failure)"
             ).to_flask_response()
-
     try:
         soap_request = SOAPRequest(
             api_name=api_name,
@@ -205,7 +203,11 @@ def process_simpler_request(
         # GetSubmissionListExpanded will call both if use_simpler is true
         # handled in the get_simpler_response
         elif (
-            operation_name in [GET_SUBMISSION_LIST_EXPANDED_REQUEST, GET_SUBMISSION_LIST_REQUEST]
+            operation_name
+            in [
+                SimplerRequests.GET_SUBMISSION_LIST_EXPANDED_REQUEST,
+                SimplerRequests.GET_SUBMISSION_LIST_REQUEST,
+            ]
             and api_name == SimplerSoapAPI.GRANTORS
         ):
             soap_legacy_response = get_legacy_response(soap_request)
@@ -222,7 +224,6 @@ def process_simpler_request(
             },
         )
         return get_soap_error_response().to_flask_response()
-
     if auth and auth.certificate.legacy_certificate:
         try:
             return get_simpler_soap_response(
@@ -258,4 +259,5 @@ def process_simpler_request(
                     "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
                 },
             )
+            write_debug_data_to_s3(operation_name, soap_request, soap_legacy_response)
     return soap_legacy_response.to_flask_response()

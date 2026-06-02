@@ -1,7 +1,10 @@
 import logging
+import os
 from datetime import datetime
 from unittest import mock
 
+import boto3
+import moto
 from lxml import etree
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
@@ -123,6 +126,97 @@ def test_successful_confirm_application_delivery_request(
         .all()
     )
     assert len(retrieved) == 1
+
+
+@mock.patch("uuid.uuid4")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_true_and_operation_name_is_one_of_the_valid_operations(
+    mock_get_simpler_soap_response,
+    mock_uuid,
+    monkeypatch,
+    mock_s3_bucket,
+    db_session,
+    client,
+    enable_factory_create,
+    caplog,
+) -> None:
+    mock_uuid.return_value = TEST_UUID
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
+    monkeypatch.setenv("DRAFT_FILES_BUCKET", f"s3://{mock_s3_bucket}")
+    s3_client = boto3.client("s3", region_name="us-east-1")
+    mock_get_simpler_soap_response.side_effect = Exception()
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+        cert_id=soap_client_certificate.legacy_certificate.cert_id,
+    )
+    with moto.mock_aws():
+        with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+            mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+            response = client.post(
+                full_path,
+                data=mock_data,
+                headers={
+                    "Use-Simpler-Override": "1",
+                    MTLS_CERT_HEADER_KEY: mtls_cert,
+                },
+            )
+            assert response.status_code == 500
+            expected_response = (
+                "--uuid:00000000-aaaa-0000-bbbb-000000000000\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\n'
+                "Content-ID: <root.message@cxf.apache.org>\r\n"
+                '\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+                "<soap:Body><soap:Fault><faultcode>soap:Server</faultcode><faultstring>Failed to confirm application delivery.(Authorization Failure)</faultstring></soap:Fault>"
+                "</soap:Body>"
+                "</soap:Envelope>\r\n"
+                "--uuid:00000000-aaaa-0000-bbbb-000000000000--"
+            ).encode()
+            assert response.data == expected_response
+        record = next(
+            r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
+        )
+        assert record
+        get_request = s3_client.get_object(
+            Bucket=mock_s3_bucket,
+            Key=f"soap/{os.getenv('ENVIRONMENT')}/{record.debug_identifier}/request.txt",
+        )
+        request_contents = get_request["Body"].read()
+        get_response = s3_client.get_object(
+            Bucket=mock_s3_bucket,
+            Key=f"soap/{os.getenv('ENVIRONMENT')}/{record.debug_identifier}/response.txt",
+        )
+        response_contents = get_response["Body"].read()
+        assert request_contents == mock_data
+        assert response_contents == expected_response
 
 
 @mock.patch("uuid.uuid4")
