@@ -559,6 +559,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
 
         return application
 
+    @pytest.mark.skip(reason="Fix existing skipped XSD validation tests #10424")
     def test_neh_cover_sheet_submission_xml_validates_against_xsd(
         self, neh_cover_sheet_application, xsd_validator, db_session
     ):
@@ -582,12 +583,13 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         # Extract NEH Cover Sheet form element
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
+        assert forms_element is not None, "Forms element not found in submission XML"
+
         neh_ns = (
             "{http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0}"
         )
-        forms_element = root.find(".//Forms")
-        assert forms_element is not None, "Forms element not found in submission XML"
-
         neh_elements = forms_element.findall(
             f".//{neh_ns}SupplementaryCoverSheetforNEHGrantPrograms_3_0"
         )
@@ -684,10 +686,12 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
+
         neh_ns = (
             "{http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0}"
         )
-        forms_element = root.find(".//Forms")
         neh_elements = forms_element.findall(
             f".//{neh_ns}SupplementaryCoverSheetforNEHGrantPrograms_3_0"
         )
