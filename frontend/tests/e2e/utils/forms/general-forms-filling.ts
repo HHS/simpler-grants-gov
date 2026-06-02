@@ -70,7 +70,17 @@ export async function fillFormPartial(
     }
   }
 }
-
+/**
+ * Opens and fills a form from the application page, then saves it.
+ * Delegates navigation to `openForm`, which owns all navigation reliability:
+ * table-scoped row lookup, scroll-to-reveal, testId/href/button/global
+ * fallback selectors, trial-click check, force-click retry, direct href
+ * goto last resort, and URL pattern + load-state verification.
+ *
+ * Does NOT perform assertions - those are done in the test.
+ * Assumes the current page is already an application page where the forms
+ * table is reachable.
+ */
 export async function fillForm(
   testInfo: TestInfo,
   page: Page,
