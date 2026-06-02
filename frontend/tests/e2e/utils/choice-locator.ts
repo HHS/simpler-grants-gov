@@ -15,6 +15,17 @@ export function getChoiceLocator(
   field: FillFieldDefinition,
   data: string | boolean | undefined,
 ) {
+  const hasConfiguredLocator = Boolean(
+    field.getByText || field.selector || field.testId,
+  );
+  if (!hasConfiguredLocator && typeof data !== "string") {
+    throw new Error(
+      `Choice field ${field.field} is missing locator config (testId, selector, or getByText), and data cannot be used as text locator: ${String(
+        data,
+      )}`,
+    );
+  }
+
   let locator = field.getByText
     ? page.getByText(field.getByText, { exact: field.textExact ?? false })
     : field.selector

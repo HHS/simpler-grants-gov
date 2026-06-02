@@ -12,7 +12,8 @@ export const radioButtonHandler: FieldHandler = async (
   field,
   data,
 ) => {
-  if (field.getByText !== undefined || shouldActivateField(data)) {
+  // Match checkbox behavior: only act when the field should be activated.
+  if (shouldActivateField(data)) {
     const locator = getChoiceLocator(page, field, data);
     await locator.waitFor({ state: "visible", timeout: 5000 });
     await locator.click();
