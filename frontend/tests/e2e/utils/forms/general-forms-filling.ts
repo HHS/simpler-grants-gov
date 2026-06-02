@@ -140,6 +140,9 @@ export async function fillForm(
       }
       await fillField(testInfo, page, fieldConfig, dataForField);
     }
+
+    // Run form-specific pre-save hook if defined.
+    // Optional - existing forms without this property are unaffected.
     if (config.beforeSave) {
       await config.beforeSave(page);
     }
