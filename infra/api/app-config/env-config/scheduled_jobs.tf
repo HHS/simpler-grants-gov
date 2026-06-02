@@ -117,6 +117,26 @@ locals {
     grantee2 = "ENABLED"
     prod     = "ENABLED"
   }
+  # Only enable the job lock in dev/staging so we can validate it before
+  # turning it on in training/prod.
+  load-transform-environment-vars = {
+    dev = [
+      {
+        Name  = "ENABLE_JOB_LOCK"
+        Value = "true"
+      }
+    ]
+    staging = [
+      {
+        Name  = "ENABLE_JOB_LOCK"
+        Value = "true"
+      }
+    ]
+    training = null
+    grantee1 = null
+    grantee2 = null
+    prod     = null
+  }
   sam-extracts-state = {
     dev      = "ENABLED"
     staging  = "ENABLED"
@@ -149,7 +169,7 @@ locals {
       state               = local.load-transform-state[var.environment]
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
-      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
+      environment_vars    = local.load-transform-environment-vars[var.environment]
     }
     load-search-opportunity-data = {
       task_command = ["flask", "load-search-data", "load-opportunity-data"]
