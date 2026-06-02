@@ -41,8 +41,8 @@ For example, if we wanted to define an endpoint with a request like:
 We would define the Marshmallow schema in-python like so:
 ```py
 from enum import StrEnum
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
 
 class Suffix(StrEnum):
     SENIOR = "SR"
