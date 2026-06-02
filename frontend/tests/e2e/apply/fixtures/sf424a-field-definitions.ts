@@ -1,5 +1,5 @@
 import { numberToTwoDecimalString } from "tests/e2e/utils/forms/form-number-utils";
-import { type FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
+import { type FillFormConfig } from "tests/e2e/utils/types";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 // RegExp matcher tolerant of hyphen/dash variants for SF-424A,
@@ -62,7 +62,7 @@ export const SF424A_EXPECTED = {
 
 /**
  * SF-424A form configuration.
- * Matches the FillFormConfig interface from general-forms-filling.ts
+ * Matches the FillFormConfig interface from tests/e2e/utils/types.ts
  * Field keys must match the keys in sf424aHappyPathTestData().
  */
 export const SF424A_FORM_CONFIG: FillFormConfig = {

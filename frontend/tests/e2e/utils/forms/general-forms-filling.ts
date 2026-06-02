@@ -3,6 +3,7 @@ import { fieldHandlerDispatcher } from "tests/e2e/utils/index";
 import {
   shouldFillField,
   FillFieldDefinition,
+  FillFormConfig,
   FormFillFieldDefinitions,
 } from "tests/e2e/utils/types";
 
@@ -67,13 +68,7 @@ export async function fillFormPartial(
 export async function fillForm(
   testInfo: TestInfo,
   page: Page,
-  config: {
-    formName: string | RegExp;
-    fields: FormFillFieldDefinitions;
-    saveButtonTestId: string;
-    noErrorsText?: string;
-    beforeSave?: (page: Page) => Promise<void>;
-  },
+  config: FillFormConfig,
   data: Record<string, string | boolean>,
   returnToApplication = true,
 ): Promise<void> {
@@ -128,16 +123,4 @@ export async function fillForm(
     });
     throw error;
   }
-}
-export interface FillFormConfig {
-  formName: string | RegExp;
-  fields: FormFillFieldDefinitions;
-  saveButtonTestId: string;
-  noErrorsText?: string;
-  /**
-   * Optional form-specific hook called before the save button is clicked.
-   * Use for pre-save interactions that cannot be expressed as a field definition.
-   * e.g. SF-424A confirmation checkbox that only appears in this form.
-   */
-  beforeSave?: (page: Page) => Promise<void>;
 }
