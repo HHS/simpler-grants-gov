@@ -12,10 +12,17 @@ export const radioButtonHandler: FieldHandler = async (
   field,
   data,
 ) => {
-  // Match checkbox behavior: only act when the field should be activated.
-  if (shouldActivateField(data)) {
-    const locator = getChoiceLocator(page, field, data);
-    await locator.waitFor({ state: "visible", timeout: 5000 });
-    await locator.click();
+  const hasExplicitChoiceLocator = Boolean(
+    field.getByText || field.selector || field.testId,
+  );
+
+  // Radio groups may represent the negative branch with false-like data while
+  // still requiring a click on an explicitly configured "No" option.
+  if (!hasExplicitChoiceLocator && !shouldActivateField(data)) {
+    return;
   }
+
+  const locator = getChoiceLocator(page, field, data);
+  await locator.waitFor({ state: "visible", timeout: 5000 });
+  await locator.click();
 };
