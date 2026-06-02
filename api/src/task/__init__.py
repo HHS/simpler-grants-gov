@@ -12,6 +12,7 @@ import src.task.forms.update_form_task  # noqa: F401 isort:skip
 import src.task.forms.update_form_instruction_task  # noqa: F401 isort:skip
 import src.task.certificates.setup_cert_user_task  # noqa: F401 isort:skip
 import src.task.forms.list_forms_task  # noqa: F401 isort:skip
+import src.task.forms.lock_form_version_task  # noqa: F401 isort:skip
 import src.task.opportunities.build_automatic_opportunities  # noqa: F401 isort:skip
 import src.cli.xml_generation_cli  # noqa: F401 isort:skip
 import src.task.agencies.setup_lower_env_agencies  # noqa: F401 isort:skip

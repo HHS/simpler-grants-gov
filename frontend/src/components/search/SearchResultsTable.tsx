@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
+} from "src/components/core/TableWithResponsiveHeader";
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 import { FilterSearchNoResults } from "./Filters/FilterSearchNoResults";
 

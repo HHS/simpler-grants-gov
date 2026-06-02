@@ -2,9 +2,9 @@ import logging
 from collections.abc import Sequence
 from uuid import UUID
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import OrganizationAuditEvent, Privilege, RoleType

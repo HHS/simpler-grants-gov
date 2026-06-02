@@ -9,7 +9,7 @@ import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
+} from "src/components/core/TableWithResponsiveHeader";
 
 interface InvitedUsersSectionProps {
   invitedUsers: FetchedResource;

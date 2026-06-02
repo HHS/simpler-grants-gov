@@ -29,7 +29,7 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
+import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { OpportunityAttachmentUploadInput } from "src/components/opportunity/OpportunityAttachmentUploadInput";
 import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
 

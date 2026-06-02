@@ -12,9 +12,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
-import { LoginModal } from "src/components/LoginModal";
-import Spinner from "src/components/Spinner";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { LoginModal } from "src/components/core/loginModal/LoginModal";
+import Spinner from "src/components/core/Spinner";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { StartApplicationModal } from "src/components/workspace/StartApplicationModal/StartApplicationModal";
 
 type StartApplicationModalControlProps = {

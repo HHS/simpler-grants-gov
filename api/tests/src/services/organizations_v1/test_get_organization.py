@@ -1,7 +1,7 @@
 import apiflask.exceptions
 import pytest
+from grants_shared.adapters import db
 
-from src.adapters import db
 from src.constants.lookup_constants import Privilege
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 from tests.lib.organization_test_utils import create_user_in_org

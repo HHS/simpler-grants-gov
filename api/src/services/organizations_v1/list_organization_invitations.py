@@ -3,11 +3,11 @@ import uuid
 from collections.abc import Sequence
 from typing import Any
 
+import grants_shared.adapters.db as db
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,

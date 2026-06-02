@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
+from grants_shared.db.models.base import TimestampMixin
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -17,7 +18,7 @@ from src.constants.lookup_constants import (
     FormFamily,
     FormType,
 )
-from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import (
     LkApplicationAuditEvent,

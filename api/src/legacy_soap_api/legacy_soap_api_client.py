@@ -3,9 +3,9 @@ import uuid
 from collections.abc import Iterator
 from typing import Any, BinaryIO
 
+import grants_shared.adapters.db as db
 from pydantic import ValidationError
 
-import src.adapters.db as db
 from src.legacy_soap_api.applicants import schemas as applicants_schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
 from src.legacy_soap_api.grantors import schemas as grantors_schemas

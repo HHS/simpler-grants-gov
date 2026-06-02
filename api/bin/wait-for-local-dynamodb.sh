@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 # wait-for-local-dynamodb
 
 set -e

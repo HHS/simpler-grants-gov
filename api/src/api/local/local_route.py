@@ -1,10 +1,10 @@
 import logging
 
+import grants_shared.adapters.db as db
+from grants_shared.adapters.db import flask_db
 from grants_shared.util.local import error_if_not_local
 
-import src.adapters.db as db
 import src.api.response as response
-from src.adapters.db import flask_db
 from src.api.local.local_blueprint import local_blueprint
 from src.api.local.local_schema import LocalUserTokenResponseSchema
 from src.services.local.get_local_users import get_local_users

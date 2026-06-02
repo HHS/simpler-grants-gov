@@ -7,12 +7,12 @@ from collections.abc import Callable, Iterator
 from enum import StrEnum
 from typing import Any
 
+import grants_shared.adapters.db as db
 import requests
 from defusedxml import minidom
 from lxml import etree
 from sqlalchemy import exists, select
 
-import src.adapters.db as db
 from src.db.models.competition_models import (
     ApplicationSubmission,
     ApplicationSubmissionRetrieved,
