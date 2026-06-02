@@ -247,9 +247,7 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(
-      screen.getByText("First Name is required"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("First Name is required")).toBeInTheDocument();
   });
 
   it("marks the form dirty when a FieldList child field changes", async () => {

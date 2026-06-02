@@ -17,8 +17,8 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 import { isFieldRequired } from "src/components/applyForm/utils";
-import { renderWidget } from "./WidgetRenderers";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
+import { renderWidget } from "./WidgetRenderers";
 
 /**
  * Params for updating a specific field within a FieldList entry.
@@ -313,7 +313,7 @@ function FieldListEntry({
           className="button--danger margin-left-auto"
           outline
         >
-          <USWDSIcon name="delete" /> 
+          <USWDSIcon name="delete" />
           {t("deleteEntry")}
         </Button>
       </div>
@@ -574,7 +574,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
           disabled={!canAddEntry}
           outline
         >
-          <USWDSIcon name="add" /> 
+          <USWDSIcon name="add" />
           {t("addEntry")}
         </Button>
       </div>
