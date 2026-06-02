@@ -1,7 +1,10 @@
+import os
 import uuid
 
 import _pytest.monkeypatch
+import boto3
 import pytest
+from moto import mock_aws
 
 import tests.grants_shared.db.models.factories as factories
 from grants_shared.adapters import db
@@ -128,3 +131,20 @@ def enable_factory_create(monkeypatch, db_session) -> db.Session:
     """
     monkeypatch.setattr(factories, "_db_session", db_session)
     return db_session
+
+#################
+# AWS Mocking
+#################
+
+
+@pytest.fixture
+def ses_client(monkeypatch):
+    """
+    Create a mocked SESv2 client using moto. The mock is automatically cleaned up after the test.
+    """
+    monkeypatch.setenv("IS_LOCAL_AWS", "0")
+
+    with mock_aws():
+        ses_client = boto3.client("sesv2", region_name="us-east-1")
+        ses_client.create_email_identity(EmailIdentity=os.getenv("AWS_SES_FROM_EMAIL"))
+        yield ses_client
