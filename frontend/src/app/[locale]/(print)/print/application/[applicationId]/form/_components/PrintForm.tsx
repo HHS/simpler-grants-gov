@@ -5,7 +5,7 @@ import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 import { UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 
-import { FormFields } from "./FormFields";
+import { FormFields } from "src/components/applyForm/FormFields";
 
 export default function PrintForm({
   attachments,
