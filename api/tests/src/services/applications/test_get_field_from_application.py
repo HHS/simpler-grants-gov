@@ -1,6 +1,7 @@
 from decimal import Decimal
 
-from src.adapters import db
+from grants_shared.adapters import db
+
 from src.db.models.competition_models import Application, ApplicationForm, Form
 from src.form_schema.forms import (
     ProjectAbstractSummary_v2_0,

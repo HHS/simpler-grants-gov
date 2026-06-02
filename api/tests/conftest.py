@@ -6,14 +6,15 @@ from os import path
 import _pytest.monkeypatch
 import boto3
 import flask.testing
+import grants_shared.adapters.db as db
 import moto
 import pytest
 from apiflask import APIFlask
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from grants_shared.util.local import load_local_env_vars
 from sqlalchemy import select, text
 
-import src.adapters.db as db
 import src.app as app_entry
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
@@ -34,7 +35,6 @@ from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
-from src.util.local import load_local_env_vars
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
     init_workflow_client_registry,
@@ -132,6 +132,9 @@ def set_env_var_defaults(monkeypatch_session):
 
     # We will set this to false so we skip logs during unit tests and keep enabled during dev.
     monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
+
+    # Stops the local file-scan watcher from spawning a thread per app fixture.
+    monkeypatch_session.setenv("ENABLE_LOCAL_FILE_SCANNER", "FALSE")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -491,10 +494,23 @@ def other_mock_s3_bucket(other_mock_s3_bucket_resource):
 
 
 @pytest.fixture
-def s3_config(mock_s3_bucket, other_mock_s3_bucket):
+def mock_file_scan_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("local-mock-file-scan-bucket")
+    bucket.create()
+    return bucket
+
+
+@pytest.fixture
+def mock_file_scan_s3_bucket(mock_file_scan_s3_bucket_resource):
+    return mock_file_scan_s3_bucket_resource.name
+
+
+@pytest.fixture
+def s3_config(mock_s3_bucket, other_mock_s3_bucket, mock_file_scan_s3_bucket):
     return S3Config(
         PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
         DRAFT_FILES_BUCKET=f"s3://{other_mock_s3_bucket}",
+        FILE_SCAN_BUCKET=f"s3://{mock_file_scan_s3_bucket}",
     )
 
 
@@ -692,6 +708,28 @@ def load_active_forms(db_session, enable_factory_create) -> None:
         copied_form = copy.deepcopy(form)
         copied_form.form_json_schema = resolve_jsonschema(form.form_json_schema)
         db_session.merge(copied_form, load=True)
+
+
+@pytest.fixture
+def s3_scanner_user(db_session, monkeypatch) -> User:
+    """Create the local file-scanner user with the INTERNAL_S3_SCAN privilege
+    and point LOCAL_FILE_SCANNER_USER_ID at them.
+
+    Mirrors the workflow_user fixture pattern but skips enable_factory_create
+    so it can compose with a test-local moto context. enable_factory_create
+    pulls in mock_s3_bucket -> mock_s3, whose s3-only whitelist would block
+    the DynamoDB calls these tests also need.
+    """
+    monkeypatch.setattr(factories, "_db_session", db_session)
+    user = UserFactory.create()
+    role = RoleFactory.create(
+        privileges=[Privilege.INTERNAL_S3_SCAN], role_types=[RoleType.INTERNAL]
+    )
+    InternalUserRoleFactory.create(user=user, role=role)
+
+    monkeypatch.setenv("LOCAL_FILE_SCANNER_USER_ID", str(user.user_id))
+
+    return user
 
 
 @pytest.fixture

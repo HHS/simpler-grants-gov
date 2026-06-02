@@ -16,7 +16,7 @@ type BreadcrumbsProps = { breadcrumbList: Breadcrumb[] };
 
 const BreadcrumbsMock = jest.fn<void, [BreadcrumbsProps]>();
 
-jest.mock("src/components/Breadcrumbs", () => ({
+jest.mock("src/components/core/Breadcrumbs", () => ({
   __esModule: true,
   default: (props: BreadcrumbsProps) => {
     BreadcrumbsMock(props);

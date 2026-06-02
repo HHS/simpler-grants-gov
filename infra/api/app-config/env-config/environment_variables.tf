@@ -9,7 +9,6 @@ locals {
     # LOG_LEVEL               = "info"
     # DB_CONNECTION_POOL_SIZE = 5
 
-
     # Login.gov OAuth
     # Default values point to the IDP integration environment
     # which all non-prod environments should use
@@ -42,6 +41,9 @@ locals {
 
     # OpenSearch explanation logging (kill switch if explain queries cause latency issues)
     OPENSEARCH_EXPLAIN_ENABLED = "true"
+
+    # DB Schemas
+    ALL_DB_SCHEMAS = "api,legacy,staging"
   }
 
   # Configuration for secrets

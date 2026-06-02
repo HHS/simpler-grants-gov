@@ -2,10 +2,10 @@ import logging
 import uuid
 from typing import cast
 
+import grants_shared.adapters.db as db
 from sqlalchemy import func, select
 from werkzeug.datastructures import FileStorage
 
-import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error

@@ -1,15 +1,17 @@
 import logging
 from collections.abc import Generator, Iterator
 from datetime import datetime, timezone
+from enum import StrEnum
 
+import grants_shared.adapters.db as db
 import xmltodict
+from grants_shared.util.datetime_util import adjust_timezone
 from lxml import etree
 from pydantic import ValidationError as PydanticValidationError
 from sqlalchemy import or_, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select
 
-import src.adapters.db as db
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
@@ -24,7 +26,6 @@ from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
-from src.util.datetime_util import adjust_timezone
 
 logger = logging.getLogger(__name__)
 GRANTS_APPLICATION_STATUSES = {
@@ -43,6 +44,17 @@ STATUS_TRANSFORM = {
 }
 
 
+class GetSubmissionListFilter(StrEnum):
+    STATUS = "Status"
+    GRANTS_GOV_TRACKING_NUMBER = "GrantsGovTrackingNumber"
+    CFDA_NUMBER = "CFDANumber"
+    FUNDING_OPPORTUNITY_NUMBER = "FundingOpportunityNumber"
+    OPPORTUNITY_ID = "OpportunityID"
+    COMPETITION_ID = "CompetitionID"
+    PACKAGE_ID = "PackageID"
+    SUBMISSION_TITLE = "SubmissionTitle"
+
+
 def get_grants_gov_application_status(submission: ApplicationSubmission) -> str | None:
     """
     This method gets the GrantsGovTrackingNumber
@@ -59,6 +71,12 @@ def get_grants_gov_application_status(submission: ApplicationSubmission) -> str 
     elif len(submission.application_submission_retrievals) > 0:
         grants_gov_application_status = RECEIVED_BY_AGENCY_STATUS
     return grants_gov_application_status
+
+
+def get_filter_values(
+    submission_filters: list[schemas.ExpandedApplicationFilter], filter_type: str
+) -> list[str | int]:
+    return [d.filter_value for d in submission_filters if d.filter_type == filter_type]
 
 
 def transform_submission(submission: ApplicationSubmission) -> dict[str, str | datetime | None]:
@@ -131,9 +149,9 @@ def get_submissions(
 
     if request.expanded_application_filter and request.expanded_application_filter.filters:
         submission_filters = request.expanded_application_filter.filters
-        if status := submission_filters.get("Status"):
-            # If more than one status in filter then just return nothing
-            if status and len(status) > 1:
+        status = get_filter_values(submission_filters, GetSubmissionListFilter.STATUS)
+        if status:
+            if len(status) > 1:
                 return []
             status_value = str(status[0])
             # GrantsGovTrackingNumber comes from three different places with a hierarchy
@@ -158,28 +176,38 @@ def get_submissions(
                         Application.application_status == simpler_status,
                     )
         # Each one of these filters is Last One Wins so if multiple of the same type are entered the last one is the only one that matters
-        if grants_gov_tracking_numbers := submission_filters.get("GrantsGovTrackingNumber"):
+        grants_gov_tracking_numbers = get_filter_values(
+            submission_filters, GetSubmissionListFilter.GRANTS_GOV_TRACKING_NUMBER
+        )
+        if grants_gov_tracking_numbers:
             stmt = stmt.where(
                 [
                     ApplicationSubmission.legacy_tracking_number == tracking_number
                     for tracking_number in grants_gov_tracking_numbers
                 ][-1]
             )
-        if cfda_numbers := submission_filters.get("CFDANumber"):
+        cfda_numbers = get_filter_values(submission_filters, GetSubmissionListFilter.CFDA_NUMBER)
+        if cfda_numbers:
             stmt = stmt.where(
                 [
                     OpportunityAssistanceListing.assistance_listing_number == cfda
                     for cfda in cfda_numbers
                 ][-1]
             )
-        if funding_opportunity_numbers := submission_filters.get("FundingOpportunityNumber"):
+        funding_opportunity_numbers = get_filter_values(
+            submission_filters, GetSubmissionListFilter.FUNDING_OPPORTUNITY_NUMBER
+        )
+        if funding_opportunity_numbers:
             stmt = stmt.where(
                 [
                     Opportunity.opportunity_number == opportunity_number
                     for opportunity_number in funding_opportunity_numbers
                 ][-1]
             )
-        if opportunity_ids := submission_filters.get("OpportunityID"):
+        opportunity_ids = get_filter_values(
+            submission_filters, GetSubmissionListFilter.OPPORTUNITY_ID
+        )
+        if opportunity_ids:
             stmt = stmt.where(
                 [Opportunity.legacy_opportunity_id == int(oid) for oid in opportunity_ids if oid][
                     -1
@@ -187,21 +215,24 @@ def get_submissions(
             )
 
         # Unsupported but logged
-        if competition_ids := submission_filters.get("CompetitionID"):
-            extra = {
-                "competition_ids": str(competition_ids),
-            }
-            logger.info("GetSubmissionListExpanded Filter: CompetitionIDs", extra=extra)
-        if package_ids := submission_filters.get("PackageID"):
-            extra = {
-                "package_ids": str(package_ids),
-            }
-            logger.info("GetSubmissionListExpanded Filter: PackageIDs", extra=extra)
-        if submission_titles := submission_filters.get("SubmissionTitle"):
-            extra = {
-                "submission_titles": str(submission_titles),
-            }
-            logger.info("GetSubmissionListExpanded Filter: SubmissionTitles", extra=extra)
+        unsupported_filters = {
+            "competition_id": get_filter_values(
+                submission_filters, GetSubmissionListFilter.COMPETITION_ID
+            ),
+            "package_id": get_filter_values(submission_filters, GetSubmissionListFilter.PACKAGE_ID),
+            "submission_title": get_filter_values(
+                submission_filters, GetSubmissionListFilter.SUBMISSION_TITLE
+            ),
+        }
+        for filter_type, filter_values in unsupported_filters.items():
+            if filter_values:
+                extra = {
+                    f"{filter_type}s": str(filter_values),
+                }
+                logger.info(
+                    f"GetSubmissionListExpanded Filter: {GetSubmissionListFilter[filter_type.upper()]}s",
+                    extra=extra,
+                )
 
     certificate = validate_certificate(db_session, soap_request.auth, soap_request.api_name)
     verify_certificate_access(certificate, soap_config, certificate.agency)

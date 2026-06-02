@@ -18,7 +18,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 import ApplicationContainer from "src/components/application/ApplicationContainer";
 import { ApplicationHistoryCardProps } from "src/components/application/ApplicationHistoryTable";
 import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 

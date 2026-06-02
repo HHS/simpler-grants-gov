@@ -8,13 +8,13 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
-import { PopoverMenu } from "src/components/PopoverMenu";
-import SimplerAlert from "src/components/SimplerAlert";
-import Spinner from "src/components/Spinner";
+import { PopoverMenu } from "src/components/core/PopoverMenu";
+import SimplerAlert from "src/components/core/SimplerAlert";
+import Spinner from "src/components/core/Spinner";
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
+} from "src/components/core/TableWithResponsiveHeader";
 
 interface AwardRecommendationAttachmentsProps {
   awardRecommendationId: string;

@@ -5,7 +5,7 @@ import { useAuthorizedData } from "src/hooks/useAuthorizedData";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 export const OrganizationRosterInfo = ({
   organizationId,

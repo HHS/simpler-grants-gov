@@ -5,9 +5,9 @@ from collections.abc import Sequence
 from datetime import date, timedelta
 from enum import StrEnum
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 
-import src.adapters.db as db
 from src.constants.lookup_constants import SamGovProcessingStatus
 from src.db.models.sam_extract_models import SamExtractFile
 from src.task.task import Task

@@ -93,7 +93,7 @@ jest.mock("src/hooks/useClientFetch", () => ({
   }),
 }));
 
-jest.mock("src/components/SimplerModal", () => ({
+jest.mock("src/components/core/SimplerModal", () => ({
   SimplerModal: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="simpler-modal">{children}</div>
   ),
