@@ -23,6 +23,7 @@ import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
+import UswdsPagination from "src/components/Pagination";
 import {
   TableCellData,
   TableWithResponsiveHeader,
@@ -312,6 +313,36 @@ const parseUserPrivileges = (
 };
 
 // --------------------------------------------------
+// Fetch function: get the list of opportunities for this agency
+// Note: if the user does not have read_opportunity privilege for this agency,
+// this API will return an error
+// --------------------------------------------------
+// this is set on the very first call and is used for subsequent pages
+let currentAgency: string = "";
+const fetchOpportunities = async (agencyId: string, page: number) => {
+  currentAgency = agencyId;
+  const pageRequest: PaginationRequestBody = {
+    page_offset: page,
+    page_size: 5,
+    sort_order: [
+      {
+        order_by: "created_at",
+        sort_direction: "descending",
+      },
+    ],
+  };
+  const { data, pagination_info } = await searchOpportunitiesByAgency(
+    agencyId,
+    pageRequest,
+  );
+  return {
+    opportunities: data,
+    totalRecords: pagination_info.total_records,
+    totalPages: pagination_info.total_pages,
+  };
+};
+
+// --------------------------------------------------
 // The Main Page
 // --------------------------------------------------
 type OpportunitiesListProps = LocalizedPageProps & WithFeatureFlagProps;
@@ -326,6 +357,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   )
     ? selectedAgencyParam[0]
     : selectedAgencyParam;
+  const currentPage = Number(resolvedSearchParams.page) || 1;
 
   // A. Check the user's session
   const userSession = await getSession();
@@ -382,26 +414,19 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   }
   const agencyUserAcccess = parseUserPrivileges(userPrivilegeResult);
 
-  // E. Get the list of opportunities for this agency
-  // Note: if the user does not have read_opportunity privilege for this agency,
-  // this API will return an error
+  // E. Load the first page of data
+  let totalRecords: number = 0;
+  let totalPages: number = 0;
   let userOpportunities: BaseOpportunity[] = [];
   if (agencyUserAcccess.canView) {
-    const pageRequest: PaginationRequestBody = {
-      page_offset: 1,
-      page_size: 5000,
-      sort_order: [
-        {
-          order_by: "created_at",
-          sort_direction: "descending",
-        },
-      ],
-    };
     try {
-      userOpportunities = await searchOpportunitiesByAgency(
+      const data = await fetchOpportunities(
         selectedAgency.agency_id,
-        pageRequest,
+        currentPage,
       );
+      userOpportunities = data.opportunities;
+      totalRecords = data.totalRecords;
+      totalPages = data.totalPages;
     } catch (error) {
       console.error("Error fetching Opportunities", error);
       if (error instanceof UnauthorizedError) {
@@ -411,11 +436,26 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
     }
   }
 
-  // F. Render the page
+  // F. On page change, load page data
+  // NOTE: this is called from the client-side UswdsPagination component
+  async function handlePageChange(targetPage: number) {
+    "use server";
+    try {
+      await fetchOpportunities(currentAgency, targetPage);
+    } catch (error) {
+      console.error("Error fetching Opportunities", error);
+      if (error instanceof UnauthorizedError) {
+        throw error;
+      }
+      return <OpportunitiesErrorPage />;
+    }
+  }
+
+  // G. Render the page
   return (
     <OpportunitiesPageWrapper>
       <OpportunitiesHeader
-        userOpportunitiesCount={userOpportunities.length}
+        userOpportunitiesCount={totalRecords}
         agencyName={selectedAgency.agency_name}
         agencies={sortedUserAgencies}
         currentAgencyId={selectedAgencyId}
@@ -429,10 +469,16 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       )}
 
       {agencyUserAcccess.canView && userOpportunities.length > 0 && (
-        <OpportunitiesTable
-          userOpportunities={userOpportunities}
-          canUpdate={agencyUserAcccess.canUpdate}
-        />
+        <div>
+          <OpportunitiesTable
+            userOpportunities={userOpportunities}
+            canUpdate={agencyUserAcccess.canUpdate}
+          />
+          <UswdsPagination
+            totalPages={totalPages}
+            onPageChangeAction={handlePageChange}
+          />
+        </div>
       )}
     </OpportunitiesPageWrapper>
   );

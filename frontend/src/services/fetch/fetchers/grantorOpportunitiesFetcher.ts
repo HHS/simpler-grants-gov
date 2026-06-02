@@ -1,10 +1,12 @@
 "server-only";
 
 import { fetchGrantorWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { PaginationInfo } from "src/types/apiResponseTypes";
 import { CreateOpportunityRecord } from "src/types/grantor/createOpportunityTypes";
 import {
   PaginationRequestBody,
   SearchAPIResponse,
+  SearchResponseData,
 } from "src/types/search/searchRequestTypes";
 
 type PaginationBody = {
@@ -14,7 +16,7 @@ type PaginationBody = {
 export const searchOpportunitiesByAgency = async (
   agencyId: string,
   pageInputs: PaginationRequestBody,
-) => {
+): Promise<{ data: SearchResponseData; pagination_info: PaginationInfo }> => {
   const pagination = pageInputs;
   const pageBody: PaginationBody = { pagination };
 
@@ -23,7 +25,7 @@ export const searchOpportunitiesByAgency = async (
     body: pageBody,
   });
   const json = (await response.json()) as SearchAPIResponse;
-  return json.data;
+  return { data: json.data, pagination_info: json.pagination_info };
 };
 
 export const createOpportunity = async (
