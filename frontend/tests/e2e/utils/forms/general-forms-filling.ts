@@ -112,6 +112,10 @@ export async function fillForm(
     if (!opened) {
       throw new Error(`Could not find or open form: ${formMatcher}`);
     }
+    // ── Form ready check ───────────────────────────────────────────────────
+    // Confirm the form heading is visible before filling any fields.
+    // Use buildFlexibleFormNameRegex for plain strings so special chars (parens,
+    // hyphens) are properly escaped rather than treated as regex syntax.
     const formReadyMatcher =
       formName instanceof RegExp
         ? formName
