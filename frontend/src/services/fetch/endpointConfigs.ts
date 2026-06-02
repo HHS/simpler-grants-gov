@@ -31,7 +31,9 @@ export const fetchAwardRecommendationEndpoint = {
   requiresAuth: true,
 };
 
-export const toDynamicAwardRecommendationEndpoint = (type: "POST" | "PUT") => {
+export const toDynamicAwardRecommendationEndpoint = (
+  type: "POST" | "PUT" | "DELETE",
+) => {
   return {
     basePath: environment.API_URL,
     version: "alpha",

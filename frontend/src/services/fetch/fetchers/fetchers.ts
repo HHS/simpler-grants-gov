@@ -103,7 +103,8 @@ export function requesterForEndpoint({
           `bad Json from error response at ${url} with status code ${response.status}`,
         );
       }
-      return throwError(jsonBody, url);
+
+      return throwError(jsonBody, url, response);
     } else if (
       !response.ok &&
       !allowedErrorStatuses.includes(response.status)
@@ -140,8 +141,9 @@ export const fetchAwardRecommendation = cache(
   requesterForEndpoint(fetchAwardRecommendationEndpoint),
 );
 
-export const fetchAwardRecommendationWithMethod = (type: "POST" | "PUT") =>
-  requesterForEndpoint(toDynamicAwardRecommendationEndpoint(type));
+export const fetchAwardRecommendationWithMethod = (
+  type: "POST" | "PUT" | "DELETE",
+) => requesterForEndpoint(toDynamicAwardRecommendationEndpoint(type));
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 

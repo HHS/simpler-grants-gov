@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { EditAppFilingNameModal } from "./EditAppFilingNameModal";
 
 interface EditAppFilingNameProps {

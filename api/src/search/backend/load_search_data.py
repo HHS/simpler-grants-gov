@@ -1,6 +1,7 @@
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+from grants_shared.adapters.db import flask_db
+
 import src.adapters.search as search
-from src.adapters.db import flask_db
 from src.adapters.search import flask_opensearch
 from src.constants.lookup_constants import JobType
 from src.search.backend.load_agencies_to_index import LoadAgenciesToIndex

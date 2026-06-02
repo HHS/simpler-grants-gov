@@ -1,8 +1,10 @@
 import logging
 import uuid
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
+import grants_shared.adapters.db as db
+from grants_shared.adapters.db import flask_db
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+
 from src.api import response
 from src.api.award_recommendations_alpha.award_recommendation_blueprint import (
     award_recommendation_blueprint,
@@ -12,6 +14,7 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationAuditRequestSchema,
     AwardRecommendationAuditResponseSchema,
     AwardRecommendationCreateRequestSchema,
+    AwardRecommendationDeleteResponseSchema,
     AwardRecommendationGetResponseSchema,
     AwardRecommendationListRequestSchema,
     AwardRecommendationListResponseSchema,
@@ -29,12 +32,14 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationUpdateRequestSchema,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.award_recommendations.create_award_recommendation import (
     create_award_recommendation,
 )
 from src.services.award_recommendations.create_award_recommendation_risk import (
     create_award_recommendation_risk,
+)
+from src.services.award_recommendations.delete_award_recommendation import (
+    delete_award_recommendation,
 )
 from src.services.award_recommendations.delete_award_recommendation_attachment import (
     delete_award_recommendation_attachment,
@@ -516,5 +521,29 @@ def award_recommendation_attachment_delete(
             award_recommendation_id,
             award_recommendation_attachment_id,
         )
+
+    return response.ApiResponse(message="Success", data=None)
+
+
+@award_recommendation_blueprint.delete("/award-recommendations/<uuid:award_recommendation_id>")
+@award_recommendation_blueprint.output(AwardRecommendationDeleteResponseSchema)
+@award_recommendation_blueprint.doc(
+    summary="Delete Award Recommendation",
+    description="Soft delete an award recommendation for auditing purposes.",
+    responses=[200, 401, 403, 404],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_delete(
+    db_session: db.Session, award_recommendation_id: uuid.UUID
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"award_recommendation_id": award_recommendation_id})
+    logger.info("DELETE /alpha/award-recommendations/:award_recommendation_id")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        delete_award_recommendation(db_session, user, award_recommendation_id)
 
     return response.ApiResponse(message="Success", data=None)

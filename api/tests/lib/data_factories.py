@@ -8,12 +8,12 @@ import io
 from datetime import timedelta
 from urllib import parse
 
+import grants_shared.util.datetime_util as datetime_util
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 
-import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import ApplicationForm

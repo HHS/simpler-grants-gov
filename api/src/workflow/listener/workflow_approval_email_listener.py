@@ -1,8 +1,8 @@
 import logging
 
+from grants_shared.adapters import db
 from statemachine.event_data import EventData
 
-from src.adapters import db
 from src.auth.endpoint_access_util import get_users_with_privileges_for_agency
 from src.db.models.user_models import User
 from src.task.notifications.config import get_email_config

@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 import { CreateOpportunityForm } from "src/components/opportunities/create/CreateOpportunityForm";
 
 // Error Message for failed backend calls on page load

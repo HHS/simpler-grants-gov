@@ -6,11 +6,11 @@ import { toShortMonthDate } from "src/utils/dateUtil";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
-import CopyIcon from "src/components/CopyIcon";
+import CopyIcon from "src/components/core/CopyIcon";
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
+} from "src/components/core/TableWithResponsiveHeader";
 import ApiKeyModal from "./ApiKeyModal";
 
 interface ApiKeyTableClientProps {

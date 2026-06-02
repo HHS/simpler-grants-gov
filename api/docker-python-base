@@ -1,4 +1,10 @@
 #==============================================
+# Stage 0: UV binary source
+#==============================================
+ARG UV_VERSION=0.11.15
+FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
+
+#==============================================
 # Stage 1: Build Python base from Amazon Linux
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
@@ -62,7 +68,8 @@ RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
 
 # Install UV
 # https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
-COPY --from=ghcr.io/astral-sh/uv:0.11.9 /uv /uvx /bin/
+# Version is pinned via the UV_VERSION build arg / uv stage at the top of this file.
+COPY --from=uv /uv /uvx /bin/
 
 # Upgrade urllib3 to fix security vulnerabilities (GHSA-2xpw-w6gg-jr37, GHSA-gm62-xv2j-4w53)
 RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"

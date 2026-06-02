@@ -5,12 +5,12 @@ import { formatFullName } from "src/utils/userNameUtils";
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
-import { RemoveUserButton } from "src/components/manageUsers/RemoveUserButton";
-import { RoleManager } from "src/components/manageUsers/RoleManager";
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
+} from "src/components/core/TableWithResponsiveHeader";
+import { RemoveUserButton } from "src/components/manageUsers/RemoveUserButton";
+import { RoleManager } from "src/components/manageUsers/RoleManager";
 
 interface ActiveUsersSectionProps {
   organizationId: string;

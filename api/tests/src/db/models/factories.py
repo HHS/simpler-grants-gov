@@ -15,11 +15,12 @@ from datetime import datetime, timedelta, timezone
 import factory
 import factory.fuzzy
 import faker
+import grants_shared.adapters.db as db
+import grants_shared.util.datetime_util as datetime_util
 from faker.providers import BaseProvider
 from sqlalchemy import func, select
 from sqlalchemy.orm import scoped_session
 
-import src.adapters.db as db
 import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models
@@ -33,7 +34,6 @@ import src.db.models.staging as staging
 import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
 import src.db.models.workflow_models as workflow_models
-import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,

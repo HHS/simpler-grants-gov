@@ -1,18 +1,18 @@
 import logging
 
+import grants_shared.adapters.db as db
+import grants_shared.logs
 import sqlalchemy
+from grants_shared.adapters.db import PostgresDBClient
+from grants_shared.util.local import error_if_not_local
 
-import src.adapters.db as db
-import src.logging
-from src.adapters.db import PostgresDBClient
 from src.constants.schema import Schemas
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
 
 def setup_local_postgres_db() -> None:
-    with src.logging.init(__package__):
+    with grants_shared.logs.init(__package__):
         error_if_not_local()
 
         db_client = PostgresDBClient()

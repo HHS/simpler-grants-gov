@@ -17,14 +17,14 @@ import logging
 from datetime import timedelta
 
 import click
+import grants_shared.adapters.db as db
+import grants_shared.util.datetime_util as datetime_util
+from grants_shared.adapters.db import flask_db
+from grants_shared.util.local import error_if_not_local
 
-import src.adapters.db as db
-import src.util.datetime_util as datetime_util
-from src.adapters.db import flask_db
 from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.task.task_blueprint import task_blueprint
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 

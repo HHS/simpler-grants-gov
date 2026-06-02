@@ -2,11 +2,11 @@ import logging
 from collections.abc import Sequence
 from uuid import UUID
 
+import grants_shared.adapters.db as db
 from pydantic import BaseModel
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import Application, Competition
 from src.db.models.entity_models import Organization

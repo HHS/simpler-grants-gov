@@ -1,14 +1,15 @@
 import logging
 import uuid
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+
 import src.api.competition_alpha.competition_schema as competition_schema
 import src.api.response as response
 from src.api.competition_alpha.competition_blueprint import competition_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.competition_alpha.get_competition import get_competition
 from src.services.competition_alpha.put_competition_forms import set_competition_forms
 from src.services.competition_alpha.update_competition_flag import update_competition_flag

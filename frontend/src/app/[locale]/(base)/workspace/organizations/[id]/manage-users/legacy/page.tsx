@@ -6,10 +6,10 @@ import { Organization } from "src/types/applicationResponseTypes";
 import { AuthorizedData, FetchedResource } from "src/types/authTypes";
 import { OrganizationLegacyUser } from "src/types/userTypes";
 
+import { AuthorizationGate } from "src/components/core/AuthorizationGate";
+import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { InviteLegacyUsersErrorPage } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersErrorPage";
 import { InviteLegacyUsersPageContent } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersPageContent";
-import { AuthorizationGate } from "src/components/user/AuthorizationGate";
-import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 
 type InviteLegacyUsersPageProps = {
   params: Promise<{ locale: string; id: string }>;

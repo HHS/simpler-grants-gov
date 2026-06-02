@@ -2,6 +2,8 @@ import uuid
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
+from grants_shared.db.models.base import TimestampMixin
+from grants_shared.util.datetime_util import utcnow
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -12,10 +14,9 @@ from src.constants.lookup_constants import (
     OrganizationInvitationStatus,
     SamGovImportType,
 )
-from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.lookup_models import LkOrganizationAuditEvent, LkSamGovImportType
 from src.db.models.opportunity_models import Opportunity
-from src.util.datetime_util import utcnow
 
 # Add conditional import for type checking to avoid circular imports
 if TYPE_CHECKING:
