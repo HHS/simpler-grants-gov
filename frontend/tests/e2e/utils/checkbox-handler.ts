@@ -12,23 +12,30 @@ export const checkboxHandler: FieldHandler = async (
   field,
   data,
 ) => {
-  if (shouldActivateField(data)) {
-    const locator = getChoiceLocator(page, field, data);
-    await locator.waitFor({ state: "visible", timeout: 5000 });
-    try {
-      if (!(await locator.isChecked())) {
-        await locator.check();
-      }
-    } catch {
-      const nestedCheckbox = locator.locator('input[type="checkbox"]').first();
-      if ((await nestedCheckbox.count()) === 0) {
-        throw new Error(
-          `Checkbox field ${field.field} is not checkable; map to the checkbox input testId`,
-        );
-      }
-      if (!(await nestedCheckbox.isChecked())) {
-        await nestedCheckbox.check();
-      }
+  const shouldBeChecked = shouldActivateField(data);
+  const locator = getChoiceLocator(page, field, data);
+  await locator.waitFor({ state: "visible", timeout: 5000 });
+  try {
+    const isChecked = await locator.isChecked();
+    if (shouldBeChecked && !isChecked) {
+      await locator.check();
+    }
+    if (!shouldBeChecked && isChecked) {
+      await locator.uncheck();
+    }
+  } catch {
+    const nestedCheckbox = locator.locator('input[type="checkbox"]').first();
+    if ((await nestedCheckbox.count()) === 0) {
+      throw new Error(
+        `Checkbox field ${field.field} is not checkable; map to the checkbox input testId`,
+      );
+    }
+    const isChecked = await nestedCheckbox.isChecked();
+    if (shouldBeChecked && !isChecked) {
+      await nestedCheckbox.check();
+    }
+    if (!shouldBeChecked && isChecked) {
+      await nestedCheckbox.uncheck();
     }
   }
 };
