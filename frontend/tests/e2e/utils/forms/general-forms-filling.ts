@@ -102,7 +102,7 @@ export async function fillForm(
       ? formName
       : buildFlexibleFormNameRegex(formName);
   try {
-     // ── Navigation ──────────────────────────────────────────────────────────
+    // ── Navigation ──────────────────────────────────────────────────────────
     // Delegate to openForm, which owns all navigation reliability:
     // table-scoped row lookup, scroll-to-reveal, testId/href/button/global
     // fallback selectors, trial-click check, force-click retry, direct href
@@ -124,8 +124,7 @@ export async function fillForm(
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
     for (const [fieldIdentifier, fieldConfig] of Object.entries(fields)) {
-
-    // ── Fill fields ────────────────────────────────────────────────────────
+      // ── Fill fields ────────────────────────────────────────────────────────
       const dataForField = data[fieldIdentifier];
       if (dataForField === undefined) {
         continue;
