@@ -9,7 +9,7 @@ jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-jest.mock("src/components/USWDSIcon", () => ({
+jest.mock("src/components/core/USWDSIcon", () => ({
   USWDSIcon: () => <span aria-hidden="true" />,
 }));
 

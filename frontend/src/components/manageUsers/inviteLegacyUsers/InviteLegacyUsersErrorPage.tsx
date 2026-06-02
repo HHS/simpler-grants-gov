@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 
 const PageBreadcrumbs = ({ organizationId }: { organizationId: string }) => {
   const t = useTranslations();

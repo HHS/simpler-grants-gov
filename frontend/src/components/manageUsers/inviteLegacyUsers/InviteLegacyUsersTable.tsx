@@ -8,7 +8,7 @@ import {
   SummaryBoxHeading,
 } from "@trussworks/react-uswds";
 
-import { TableWithResponsiveHeader } from "src/components/TableWithResponsiveHeader";
+import { TableWithResponsiveHeader } from "src/components/core/TableWithResponsiveHeader";
 
 export const InviteLegacyUsersTable = ({
   organizationLegacyUsers,

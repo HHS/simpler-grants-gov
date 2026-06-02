@@ -8,7 +8,7 @@ import { agenciesToSortedAndNestedFilterOptions } from "src/utils/search/filterU
 import { useState } from "react";
 import { TextInput } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { AgencyFilterBody } from "./AgencyFilterBody";
 import { FilterSearchNoResults } from "./FilterSearchNoResults";
 

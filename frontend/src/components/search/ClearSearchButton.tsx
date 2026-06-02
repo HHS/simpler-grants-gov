@@ -4,7 +4,7 @@ import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 import { Button } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 export function ClearSearchButton({
   buttonText,

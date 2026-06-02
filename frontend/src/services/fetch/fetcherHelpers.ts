@@ -15,6 +15,7 @@ import {
   ValidationError,
 } from "src/errors";
 import { getSession } from "src/services/auth/session";
+import { getCorrelationId } from "src/services/correlationId/correlationId";
 import { APIResponse } from "src/types/apiResponseTypes";
 import { ApiMethod } from "src/types/generalTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
@@ -37,6 +38,11 @@ export async function getDefaultHeaders({
 
   if (addContentType) {
     headers["Content-Type"] = "application/json";
+  }
+
+  const correlationId = await getCorrelationId();
+  if (correlationId) {
+    headers["X-Correlation-Id"] = correlationId;
   }
 
   if (requiresUserAuthToken) {

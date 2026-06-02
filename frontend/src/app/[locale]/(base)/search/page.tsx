@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Suspense, use } from "react";
 
-import { DrawerUnit } from "src/components/drawer/DrawerUnit";
+import { DrawerUnit } from "src/components/core/drawer/DrawerUnit";
 import Loading from "src/components/Loading";
 import { AndOrPanel } from "src/components/search/AndOrPanel";
 import { ClassicSearchBanner } from "src/components/search/ClassicSearchBanner";
