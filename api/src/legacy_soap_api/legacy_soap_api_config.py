@@ -35,6 +35,7 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     soap_applicants_path: str = Field("", alias="SOAP_APPLICANTS_PATH")
     enable_simpler_route: bool = Field(True, alias="ENABLE_SIMPLER_ROUTE")
     save_soap_messages_to_s3: bool = Field(False, alias="SAVE_SOAP_MESSAGES_TO_S3")
+    environment: str = Field(alias="ENVIRONMENT")
 
     @property
     def gg_url(self) -> str:

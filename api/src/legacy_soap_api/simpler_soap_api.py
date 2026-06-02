@@ -259,5 +259,11 @@ def process_simpler_request(
                     "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
                 },
             )
-            write_debug_data_to_s3(operation_name, soap_request, soap_legacy_response)
+            try:
+                write_debug_data_to_s3(operation_name, soap_request, soap_legacy_response)
+            except Exception:
+                logger.exception(
+                    "soap_client: failed to upload debug info to s3",
+                    extra={"soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER},
+                )
     return soap_legacy_response.to_flask_response()

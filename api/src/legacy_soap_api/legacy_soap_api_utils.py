@@ -1,7 +1,6 @@
 import io
 import json
 import logging
-import os
 import re
 import uuid
 from collections.abc import Callable, Iterator
@@ -532,16 +531,13 @@ def write_debug_data_to_s3(
     operation_name: str, soap_request: SOAPRequest, soap_legacy_response: SOAPResponse
 ) -> None:
     if get_soap_config().save_soap_messages_to_s3 and operation_name in SimplerRequests:
+        config = get_soap_config()
         s3_config = S3Config()
         debug_identifier = uuid.uuid4()
-        logger.info(
-            "soap_client: debug info uploaded to s3",
-            extra={"debug_identifier": debug_identifier},
-        )
         base_path = file_util.join(
             s3_config.draft_files_bucket_path,
             "soap",
-            os.getenv("ENVIRONMENT") or "local",
+            config.environment,
             f"{debug_identifier}",
         )
         request_s3_path = file_util.join(
@@ -554,3 +550,7 @@ def write_debug_data_to_s3(
             "response.txt",
         )
         file_util.write_to_file(response_s3_path, soap_legacy_response.to_bytes().decode("utf-8"))
+        logger.info(
+            "soap_client: debug info uploaded to s3",
+            extra={"debug_identifier": debug_identifier},
+        )
