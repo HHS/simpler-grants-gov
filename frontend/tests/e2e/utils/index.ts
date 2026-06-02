@@ -1,6 +1,6 @@
 // index.ts
 // Dispatcher for all supported field types and shared helpers.
-// Usage: import { fieldHandlerDispatcher, requiresStringData } from '../index';
+// Usage: import { fieldHandlerDispatcher } from '../index';
 
 import { checkboxHandler } from "./checkbox-handler";
 import { comboBoxInputHandler } from "./combo-box-input-handler";
@@ -18,7 +18,3 @@ export const fieldHandlerDispatcher: Record<FieldType, FieldHandler> = {
   checkbox: checkboxHandler,
   "combo-box-input": comboBoxInputHandler,
 };
-
-export function requiresStringData(type: FieldType): boolean {
-  return ["text", "dropdown", "file", "combo-box-input"].includes(type);
-}
