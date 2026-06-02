@@ -1,9 +1,9 @@
 from uuid import UUID
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.adapters import db
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,
     Organization,

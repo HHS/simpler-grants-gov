@@ -3,6 +3,7 @@
 import logging
 from datetime import date, datetime
 
+import grants_shared.util.datetime_util as datetime_util
 from common_grants_sdk.schemas.pydantic import (
     CustomField,
     FilterInfo,
@@ -21,7 +22,6 @@ from common_grants_sdk.schemas.pydantic import (
 )
 from pydantic import ValidationError
 
-import src.util.datetime_util as datetime_util
 from src.api.common_grants.schemas.pydantic.custom_fields import (
     AdditionalInfoField,
     AgencyField,

@@ -2,9 +2,9 @@ import logging
 import uuid
 from uuid import UUID
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
 from src.adapters.aws.api_gateway_adapter import ApiGatewayConfig, import_api_key
 from src.db.models.user_models import UserApiKey
 from src.util.api_key_gen import generate_api_key_id

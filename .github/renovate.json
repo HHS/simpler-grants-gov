@@ -41,6 +41,23 @@
       ]
     },
     {
+      "description": "Group all dependencies from the grants_shared directory",
+      "matchFileNames": [
+        "backend/grants_shared/**"
+      ],
+      "groupName": "Grants Shared",
+      "reviewers": [
+        "chouinar",
+        "mdragon",
+        "joshtonava",
+        "jakobpederson",
+        "chay-REIsys",
+        "hao10282025-sudo",
+        "kkrug",
+        "dghazvini"
+      ]
+    },
+    {
       "description": "Group all dependencies from the frontend directory",
       "matchFileNames": [
         "frontend/**"
@@ -200,8 +217,7 @@
       "description": "Leave Postgres Docker version alone - we want it to match our AWS version",
       "enabled": false,
       "matchFileNames": [
-        "analytics/docker-compose.yml",
-        "api/docker-compose.yml"
+        "backend/docker-compose.db.yml"
       ],
       "matchPackagePatterns": ["postgres"]
     },
@@ -220,8 +236,8 @@
       "matchFileNames": [
         "analytics/pyproject.toml",
         "api/pyproject.toml",
-        "api/Dockerfile",
-        "analytics/Dockerfile"
+        "backend/grants_shared/pyproject.toml",
+        "api/docker-python-base"
       ],
       "matchPackagePatterns": ["python"]
     }

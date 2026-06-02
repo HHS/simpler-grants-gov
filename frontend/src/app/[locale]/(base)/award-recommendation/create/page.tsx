@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import { CreateRecommendationContent } from "src/components/award-recommendation/CreateRecommendationContent";
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 
 export async function generateMetadata({
   params,

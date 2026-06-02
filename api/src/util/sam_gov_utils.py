@@ -2,7 +2,8 @@ import logging
 import uuid
 from collections.abc import Callable
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 from src.constants.static_role_values import ORG_ADMIN
 from src.db.models.entity_models import Organization, SamGovEntity
 from src.db.models.user_models import OrganizationUser, OrganizationUserRole, User

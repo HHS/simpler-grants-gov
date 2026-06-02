@@ -2,9 +2,10 @@ import logging
 from datetime import timedelta
 from uuid import UUID, uuid4
 
+from grants_shared.adapters import db
+from grants_shared.util import datetime_util
 from sqlalchemy import desc, select
 
-from src.adapters import db
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
@@ -19,7 +20,6 @@ from src.services.organizations_v1.get_organization import get_organization
 from src.services.organizations_v1.invitation_email import build_invitation_email
 from src.services.organizations_v1.update_user_organization_roles import validate_roles
 from src.task.notifications.config import get_email_config
-from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 

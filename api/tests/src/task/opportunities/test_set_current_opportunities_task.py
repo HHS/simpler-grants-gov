@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 
 import pytest
+from grants_shared.util.datetime_util import get_now_us_eastern_date
 
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
-from src.util.datetime_util import get_now_us_eastern_date
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,

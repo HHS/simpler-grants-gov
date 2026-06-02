@@ -1,9 +1,9 @@
 import logging
 import uuid
 
+import grants_shared.adapters.db as db
 from botocore.exceptions import ClientError
 
-import src.adapters.db as db
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, verify_certificate_access
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig

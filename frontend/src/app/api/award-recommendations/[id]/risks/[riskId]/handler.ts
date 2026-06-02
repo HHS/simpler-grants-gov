@@ -1,6 +1,5 @@
-import { readError, UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
-import { deleteAwardRecommendationRisk } from "src/services/fetch/fetchers/awardRecommendationFetcherClient";
+import { readError } from "src/errors";
+import { deleteAwardRecommendationRisk } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 
 import { NextRequest } from "next/server";
 
@@ -11,13 +10,6 @@ export async function deleteRiskForAwardRecommendation(
   const { id, riskId } = await params;
 
   try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      throw new UnauthorizedError(
-        "No active session to delete award recommendation risk",
-      );
-    }
-
     if (!id) {
       throw new Error("Award recommendation ID is required");
     }
@@ -25,11 +17,7 @@ export async function deleteRiskForAwardRecommendation(
       throw new Error("Risk ID is required");
     }
 
-    const result = await deleteAwardRecommendationRisk(
-      id,
-      riskId,
-      session.token,
-    );
+    const result = await deleteAwardRecommendationRisk(id, riskId);
 
     return Response.json({
       message: result.message || "Risk deleted successfully",

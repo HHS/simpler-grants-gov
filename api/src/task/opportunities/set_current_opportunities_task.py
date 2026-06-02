@@ -3,11 +3,12 @@ from datetime import date
 from enum import StrEnum
 from typing import Any, cast
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
+from grants_shared.util.datetime_util import get_now_us_eastern_date
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
@@ -20,7 +21,6 @@ from src.services.current_opportunity.determine_current_opportunity_summary impo
 )
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
-from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
 

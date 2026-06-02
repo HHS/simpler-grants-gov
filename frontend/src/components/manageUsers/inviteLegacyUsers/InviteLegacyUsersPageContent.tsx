@@ -4,7 +4,7 @@ import { OrganizationLegacyUser } from "src/types/userTypes";
 import { useTranslations } from "next-intl";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 import { InviteLegacyUsersTable } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersTable";
 
 const PageBreadcrumbs = ({

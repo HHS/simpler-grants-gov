@@ -17,12 +17,10 @@ jest.mock(
   }),
 );
 
-jest.mock("src/components/opportunity/OpportunityDescription", () => ({
-  SummaryDescriptionDisplay: ({
-    summaryDescription,
-  }: {
-    summaryDescription: string;
-  }) => <div>{summaryDescription}</div>,
+jest.mock("src/components/core/ExpandableTextContent", () => ({
+  ExpandableTextContent: ({ textContent }: { textContent: string }) => (
+    <div>{textContent}</div>
+  ),
 }));
 
 describe("RecommendationSummarySection", () => {
@@ -148,7 +146,7 @@ describe("RecommendationSummarySection", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("renders funding strategy with SummaryDescriptionDisplay in view mode", () => {
+    it("renders funding strategy with ExpandableTextContent in view mode", () => {
       render(
         <RecommendationSummarySection
           summary={mockSummary}
