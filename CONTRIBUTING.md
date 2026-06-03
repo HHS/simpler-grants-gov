@@ -82,7 +82,7 @@ Current designated maintainers:
 - @mdragon
 - @KevinJBoyer
 
-### <a id="PaidContributions"/>Paid contributions
+### Paid contributions
 The Simpler Grants team is excited to offer bounties on key issues. Full terms of service are available in the [paid contributor program Terms of Service](/documentation/bounties/paid-contributor-TOS.md). Some key facts:
 
 * Only US citizens 18 or over can collect bounties. You must not be a current or former employee of Nava PBC, HHS, and must meet other eligibility requirements documented in the [terms of service](/documentation/bounties/paid-contributor-TOS.md).
