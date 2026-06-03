@@ -1,5 +1,7 @@
 # [Simpler.Grants.gov](https://simpler.grants.gov/)
-!(A badge which reads "We pay for contributions")[https://img.shields.io/badge/We%20pay%20for%20contributions-8A2BE2]
+
+!(A badge which reads We pay for contributions)[https://img.shields.io/badge/We%20pay%20for%20contributions-8A2BE2]
+
 A modernization effort for [Grants.gov](https://grants.gov/)
 
 ## About the Project
