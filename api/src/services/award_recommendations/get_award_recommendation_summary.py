@@ -1,9 +1,9 @@
 import uuid
 
+import grants_shared.adapters.db as db
 from sqlalchemy import case, func, select
 from sqlalchemy.sql.elements import Label
 
-import grants_shared.adapters.db as db
 from src.constants.lookup_constants import AwardRecommendationType
 from src.db.models.award_recommendation_models import (
     AwardRecommendationApplicationSubmission,

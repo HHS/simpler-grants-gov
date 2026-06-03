@@ -4,7 +4,6 @@ import grants_shared.adapters.db as db
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import grants_shared.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
