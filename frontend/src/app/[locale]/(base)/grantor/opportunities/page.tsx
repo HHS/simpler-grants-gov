@@ -27,7 +27,7 @@ import UswdsPagination from "src/components/Pagination";
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
+} from "src/components/core/TableWithResponsiveHeader";
 import { AgencySelector } from "src/components/workspace/AgencySelector";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {

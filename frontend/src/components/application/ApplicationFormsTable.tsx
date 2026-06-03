@@ -10,7 +10,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Table } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { IncludeFormInSubmissionRadio } from "./IncludeFormInSubmissionRadio";
 
 export const selectApplicationFormsByRequired = ({

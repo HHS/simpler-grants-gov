@@ -15,7 +15,7 @@ jest.mock("react", () => ({
 jest.mock(
   "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/actions",
   () => ({
-    saveOpportunityEditAction: jest.fn(),
+    opportunityEditFormAction: jest.fn(),
   }),
 );
 
@@ -73,6 +73,14 @@ const testOpportunityKeyInformation = {
   awardSelectionMethodExplanation: "Standard review",
 };
 
+const emptyInitialValues: OpportunityEditFormValues = {
+  ...initialValues,
+  publishDate: "",
+  fundingType: "",
+  fundingCategories: "",
+  eligibleApplicants: [],
+};
+
 const renderOpportunityEditForm = (
   props: Partial<React.ComponentProps<typeof OpportunityEditForm>> = {},
 ) =>
@@ -83,6 +91,9 @@ const renderOpportunityEditForm = (
       initialValues={initialValues}
       isDraft
       opportunityKeyInformation={testOpportunityKeyInformation}
+      saveLabel="Save"
+      previewLabel="Preview"
+      publishLabel="Publish"
       {...props}
     />,
   );
@@ -874,6 +885,92 @@ describe("OpportunityEditForm — number formatting edge cases", () => {
 
     // formatNumber("") → !raw branch → returns ""
     expect(input).toHaveValue("");
+  });
+});
+
+// ─── Action buttons ───────────────────────────────────────────────────────────
+// Save, Preview, and Publish buttons are rendered at the top of the form.
+// Publish is enabled only when all four required fields are populated.
+describe("OpportunityEditForm — action buttons", () => {
+  beforeEach(() => {
+    mockUseActionState.mockReturnValue([
+      { validationErrors: {} },
+      jest.fn(),
+      false,
+    ]);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it("renders Save, Preview, and Publish buttons", () => {
+    renderOpportunityEditForm();
+
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Preview" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Publish" })).toBeInTheDocument();
+  });
+
+  it("enables the Publish button when all required fields are populated", () => {
+    renderOpportunityEditForm();
+
+    expect(screen.getByRole("button", { name: "Publish" })).toBeEnabled();
+  });
+
+  it("disables the Publish button when required fields are missing", () => {
+    renderOpportunityEditForm({ initialValues: emptyInitialValues });
+
+    expect(screen.getByRole("button", { name: "Publish" })).toBeDisabled();
+  });
+
+  it("disables Save and Publish while isPending is true", () => {
+    mockUseActionState.mockReturnValue([
+      { validationErrors: {} },
+      jest.fn(),
+      true,
+    ]);
+
+    renderOpportunityEditForm();
+
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Publish" })).toBeDisabled();
+  });
+
+  it("Preview button is always disabled", () => {
+    renderOpportunityEditForm();
+
+    expect(screen.getByRole("button", { name: "Preview" })).toBeDisabled();
+  });
+
+  it("calls the form action when Save is clicked", () => {
+    const mockFormAction = jest.fn();
+    mockUseActionState.mockReturnValue([
+      { validationErrors: {} },
+      mockFormAction,
+      false,
+    ]);
+
+    renderOpportunityEditForm();
+
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(mockFormAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls the form action when Publish is clicked", () => {
+    const mockFormAction = jest.fn();
+    mockUseActionState.mockReturnValue([
+      { validationErrors: {} },
+      mockFormAction,
+      false,
+    ]);
+
+    renderOpportunityEditForm();
+
+    fireEvent.click(screen.getByRole("button", { name: "Publish" }));
+
+    expect(mockFormAction).toHaveBeenCalledTimes(1);
   });
 });
 
