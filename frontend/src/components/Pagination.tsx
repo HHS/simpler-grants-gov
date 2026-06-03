@@ -3,13 +3,15 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { useTransition, type ReactElement } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
 interface UswdsPaginationProps {
   totalPages: number;
   // The server action function passed from the server-side page
-  onPageChangeAction: (page: number) => Promise<void>;
+  onPageChangeAction: (
+    page: number,
+  ) => Promise<void | undefined | ReactElement>;
 }
 
 export default function UswdsPagination({

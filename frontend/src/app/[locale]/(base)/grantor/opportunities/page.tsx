@@ -447,7 +447,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       if (error instanceof UnauthorizedError) {
         throw error;
       }
-      return;
+      return <OpportunitiesErrorPage />;
     }
   }
 
