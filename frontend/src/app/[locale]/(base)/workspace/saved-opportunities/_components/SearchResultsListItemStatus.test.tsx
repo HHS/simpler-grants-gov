@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 
-import SearchResultListItemStatus, {
-  SearchResultListItemStatusProps,
-} from "src/components/search/SearchResultListItemStatus";
+import SearchResultsListItemStatus, {
+  SearchResultsListItemStatusProps,
+} from "./SearchResultsListItemStatus";
 
-const defaultProps: SearchResultListItemStatusProps = {
+const defaultProps: SearchResultsListItemStatusProps = {
   status: "posted",
   archivedString: "archived",
   closedString: "closed",
@@ -18,10 +18,10 @@ const defaultProps: SearchResultListItemStatusProps = {
 const renderWithDl = (props = defaultProps) =>
   render(
     <dl>
-      <SearchResultListItemStatus {...props} />
+      <SearchResultsListItemStatus {...props} />
     </dl>,
   );
-describe("SearchResultListItemStatus", () => {
+describe("SearchResultsListItemStatus", () => {
   it("renders component without violations", async () => {
     const { container } = renderWithDl();
     const results = await waitFor(() => axe(container));

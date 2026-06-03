@@ -35,7 +35,7 @@ const StatusItem = ({
   );
 };
 
-export interface SearchResultListItemStatusProps {
+export interface SearchResultsListItemStatusProps {
   status: string | null;
   archivedString: string;
   closedString: string;
@@ -45,7 +45,7 @@ export interface SearchResultListItemStatusProps {
   closedDate: string | null;
 }
 
-const SearchResultListItemStatus = ({
+const SearchResultsListItemStatus = ({
   status,
   archiveDate,
   closedDate,
@@ -53,7 +53,7 @@ const SearchResultListItemStatus = ({
   closedString,
   forecastedString,
   postedString,
-}: SearchResultListItemStatusProps): ReactElement => {
+}: SearchResultsListItemStatusProps): ReactElement => {
   return (
     <>
       {status === "archived" ? (
@@ -81,4 +81,4 @@ const SearchResultListItemStatus = ({
   );
 };
 
-export default SearchResultListItemStatus;
+export default SearchResultsListItemStatus;

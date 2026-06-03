@@ -16,62 +16,60 @@ interface MockShareOpportunityToOrganizationsModalProps {
   organizations: Organization[];
 }
 
-jest.mock("src/components/search/SearchResultsListItem", () => ({
-  __esModule: true,
-  default: ({
-    opportunity,
-    showShareButton,
-    onShareClick,
-  }: MockSearchResultsListItemProps) => (
-    <div>
-      <div data-testid={`organizations-${opportunity.opportunity_id}`}>
-        {JSON.stringify(opportunity.saved_to_organizations ?? [])}
-      </div>
-
-      <div data-testid={`show-share-button-${opportunity.opportunity_id}`}>
-        {String(showShareButton)}
-      </div>
-
-      {showShareButton ? (
-        <button
-          type="button"
-          onClick={(event) =>
-            onShareClick?.(event.currentTarget as HTMLButtonElement)
-          }
-        >
-          Open share modal
-        </button>
-      ) : null}
-    </div>
-  ),
-}));
-
 jest.mock(
-  "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal",
+  "src/app/[locale]/(base)/workspace/saved-opportunities/_components/SearchResultsListItem",
   () => ({
     __esModule: true,
-    ShareOpportunityToOrganizationsModal: ({
-      onSavedOrganizationsChange,
-      organizations,
-    }: MockShareOpportunityToOrganizationsModalProps) => (
+    default: ({
+      opportunity,
+      showShareButton,
+      onShareClick,
+    }: MockSearchResultsListItemProps) => (
       <div>
-        <div data-testid="modal-organizations">
-          {organizations
-            .map((organization) => organization.organization_id)
-            .join(",")}
+        <div data-testid={`organizations-${opportunity.opportunity_id}`}>
+          {JSON.stringify(opportunity.saved_to_organizations ?? [])}
         </div>
-        <button
-          type="button"
-          onClick={() =>
-            onSavedOrganizationsChange(new Set(["organization-1"]))
-          }
-        >
-          Save organizations
-        </button>
+
+        <div data-testid={`show-share-button-${opportunity.opportunity_id}`}>
+          {String(showShareButton)}
+        </div>
+
+        {showShareButton ? (
+          <button
+            type="button"
+            onClick={(event) =>
+              onShareClick?.(event.currentTarget as HTMLButtonElement)
+            }
+          >
+            Open share modal
+          </button>
+        ) : null}
       </div>
     ),
   }),
 );
+
+jest.mock("./ShareOpportunityToOrganizationsModal", () => ({
+  __esModule: true,
+  ShareOpportunityToOrganizationsModal: ({
+    onSavedOrganizationsChange,
+    organizations,
+  }: MockShareOpportunityToOrganizationsModalProps) => (
+    <div>
+      <div data-testid="modal-organizations">
+        {organizations
+          .map((organization) => organization.organization_id)
+          .join(",")}
+      </div>
+      <button
+        type="button"
+        onClick={() => onSavedOrganizationsChange(new Set(["organization-1"]))}
+      >
+        Save organizations
+      </button>
+    </div>
+  ),
+}));
 
 describe("SavedOpportunitiesController", () => {
   it("passes showShareButton as false when the user has no organizations", async () => {
