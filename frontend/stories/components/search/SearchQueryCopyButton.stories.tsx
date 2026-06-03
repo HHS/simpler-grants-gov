@@ -1,4 +1,4 @@
-import SearchQueryCopyButton from "src/components/search/SearchQueryCopyButton";
+import SearchQueryCopyButton from "src/app/[locale]/(base)/search/_components/SearchQueryCopyButton";
 
 const meta = {
   title: "Components/Search/SavedSearchQuery",
