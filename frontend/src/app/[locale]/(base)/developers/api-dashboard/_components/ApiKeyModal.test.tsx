@@ -1,12 +1,11 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
+import ApiKeyModal from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyModal";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { baseApiKey } from "src/utils/testing/fixtures";
-
-import ApiKeyModal from "src/components/developers/apiDashboard/ApiKeyModal";
 
 // Mock dependencies
 const mockClientFetch = jest.fn();

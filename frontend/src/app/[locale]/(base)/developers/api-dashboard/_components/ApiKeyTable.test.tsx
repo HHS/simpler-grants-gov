@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
+import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import { ApiKey } from "src/types/apiKeyTypes";
@@ -9,8 +10,6 @@ import {
   longNameApiKey,
   specialCharApiKey,
 } from "src/utils/testing/fixtures";
-
-import ApiKeyTable from "src/components/developers/apiDashboard/ApiKeyTable";
 
 // Mock dependencies
 const mockClientFetch = jest.fn();
