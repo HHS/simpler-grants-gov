@@ -1,5 +1,6 @@
 import uuid
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 

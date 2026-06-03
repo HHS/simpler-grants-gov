@@ -1,7 +1,6 @@
 "use server";
 
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import {
   createOpportunitySummaryForGrantor,
   publishOpportunityForGrantor,
@@ -216,11 +215,6 @@ export async function saveOpportunityEditAction(
     };
   }
 
-  const session = await getSession();
-  if (!session?.token) {
-    return { errorMessage: alerts("unauthenticated") };
-  }
-
   const validatedFields = await validateOpportunityEditForm(formData);
 
   if (!validatedFields.success) {
@@ -259,6 +253,12 @@ export async function saveOpportunityEditAction(
     const status =
       error instanceof ApiRequestError ? parseErrorStatus(error) : null;
 
+    if (status === 401) {
+      return {
+        errorMessage: alerts("unauthenticated"),
+      };
+    }
+
     if (status === 403) {
       return {
         errorMessage: alerts("forbidden"),
@@ -288,23 +288,24 @@ async function publishOpportunityAction(
 ): Promise<OpportunityEditActionState> {
   const alerts = await getTranslations("OpportunityEdit.content.alerts");
 
-  const session = await getSession();
-  if (!session?.token) {
-    return { errorMessage: alerts("unauthenticated") };
-  }
-
   try {
     await publishOpportunityForGrantor(opportunityId);
   } catch (error) {
     const status =
       error instanceof ApiRequestError ? parseErrorStatus(error) : null;
 
+    if (status === 401) {
+      return { errorMessage: alerts("unauthenticated") };
+    }
+
     if (status === 403) {
       return { errorMessage: alerts("forbidden") };
     }
+
     if (status === 404) {
       return { errorMessage: alerts("notFound") };
     }
+
     return { errorMessage: alerts("genericError") };
   }
 
@@ -331,4 +332,14 @@ export async function submitOpportunityAction(
   }
 
   redirect("/grantor/opportunities");
+}
+
+export async function opportunityEditFormAction(
+  prevState: OpportunityEditActionState,
+  formData: FormData,
+): Promise<OpportunityEditActionState> {
+  if (readStringValue(formData.get("submitType")) === "publish") {
+    return submitOpportunityAction(prevState, formData);
+  }
+  return saveOpportunityEditAction(prevState, formData);
 }

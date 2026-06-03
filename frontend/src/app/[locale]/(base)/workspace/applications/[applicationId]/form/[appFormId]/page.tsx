@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
+import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyForm";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
@@ -9,12 +10,11 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import ApplyForm from "src/components/applyForm/ApplyForm";
 import {
   buildWarningTree,
   pointerToFieldName,
 } from "src/components/applyForm/utils";
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 

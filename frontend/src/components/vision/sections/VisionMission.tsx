@@ -1,6 +1,6 @@
 import { useMessages, useTranslations } from "next-intl";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import VisionPageSection from "src/components/vision/visionPageSection";
 
 export default function VisionMission() {

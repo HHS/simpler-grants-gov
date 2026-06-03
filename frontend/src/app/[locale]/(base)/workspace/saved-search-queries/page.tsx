@@ -14,10 +14,10 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
-import { USWDSIcon } from "src/components/USWDSIcon";
-import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
+import { SavedSearchesList } from "./_components/SavedSearchesList";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

@@ -1,4 +1,4 @@
-name: Release Grants Shared Package to PyPi
+name: Publish Grants Shared Package to PyPi
 on:
   workflow_dispatch:
 
@@ -12,11 +12,10 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       PY_RUN_APPROACH: "local"
+      DB_HOST: "localhost"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-           ref: "main"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
@@ -26,6 +25,9 @@ jobs:
 
       - name: Init
         run: make setup-local
+
+      - name: Init DB
+        run: make init-db
 
       - name: Run format check
         run: make format-check

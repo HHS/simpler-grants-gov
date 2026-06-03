@@ -2,10 +2,10 @@ import logging
 import uuid
 from enum import StrEnum
 
+import grants_shared.adapters.db as db
 import pytest
 from sqlalchemy import inspect
 
-import src.adapters.db as db
 import src.db.models as db_models
 from src.constants.lookup_constants import Privilege, RoleType
 from src.constants.static_role_values import APPLICATION_CONTRIBUTOR, CORE_ROLES, ORG_MEMBER

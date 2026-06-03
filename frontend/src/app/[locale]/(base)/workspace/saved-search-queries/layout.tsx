@@ -4,7 +4,7 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 
-import { AuthenticationGate } from "src/components/user/AuthenticationGate";
+import { AuthenticationGate } from "src/components/core/AuthenticationGate";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;

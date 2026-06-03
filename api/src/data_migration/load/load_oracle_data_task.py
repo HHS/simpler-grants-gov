@@ -6,10 +6,10 @@ import logging
 import time
 
 import sqlalchemy
+from grants_shared.adapters import db
 from grants_shared.util import datetime_util
 
 import src.task.task
-from src.adapters import db
 
 from . import sql
 

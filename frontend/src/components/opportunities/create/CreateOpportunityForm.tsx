@@ -10,7 +10,7 @@ import { Alert, Button, Link } from "@trussworks/react-uswds";
 import {
   CommonCharacterCount,
   CommonSelectInput,
-} from "src/components/grantor/CommonFormFields";
+} from "src/components/core/forms/CommonFormFields";
 
 // Category options
 const categoryList = {

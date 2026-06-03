@@ -5,7 +5,7 @@ import { downloadAttachmentsZip } from "src/utils/opportunity/zipDownloadUtils";
 import { useTranslations } from "next-intl";
 import { Button } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type ZipDownloadProps = {
   opportunityId: string;

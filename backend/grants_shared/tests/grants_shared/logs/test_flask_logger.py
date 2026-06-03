@@ -129,6 +129,24 @@ def test_add_extra_log_data_for_current_request(app: Flask, caplog: pytest.LogCa
     assert_dict_contains(last_record.__dict__, {"pet.name": "kitty"})
 
 
+def test_correlation_id_in_logs_when_header_present(app: Flask, caplog: pytest.LogCaptureFixture):
+    app.test_client().get("/hello/jane", headers={"X-Correlation-Id": "abc-123"})
+
+    assert len(caplog.records) > 0
+    for record in caplog.records:
+        assert_dict_contains(record.__dict__, {"request.correlation_id": "abc-123"})
+
+
+def test_correlation_id_absent_from_logs_when_header_missing(
+    app: Flask, caplog: pytest.LogCaptureFixture
+):
+    app.test_client().get("/hello/jane")
+
+    assert len(caplog.records) > 0
+    for record in caplog.records:
+        assert "request.correlation_id" not in record.__dict__
+
+
 def test_log_response_time(app: Flask, caplog: pytest.LogCaptureFixture):
     @app.get("/sleep")
     def sleep():

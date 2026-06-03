@@ -16,7 +16,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
 

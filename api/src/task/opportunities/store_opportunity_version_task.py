@@ -1,10 +1,10 @@
 import logging
 from enum import StrEnum
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, selectinload
 
-import src.adapters.db as db
 from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit
 from src.services.opportunities_v1.opportunity_version import save_opportunity_version
 from src.task.task import Task

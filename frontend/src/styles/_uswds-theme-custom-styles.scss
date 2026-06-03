@@ -248,6 +248,27 @@ h6 {
   padding: units(1) units(2);
 }
 
+.button--danger {
+  &.usa-button--outline,
+  &.usa-button--outline:visited {
+    box-shadow: inset 0 0 0 2px color("red-60");
+    border-bottom: 5px solid color("red-60");
+    color: color("red-60");
+  }
+
+  &.usa-button--outline:hover {
+    box-shadow: inset 0 0 0 2px color("red-70");
+    border-bottom: 5px solid color("red-70");
+    color: color("red-70");
+  }
+
+  &.usa-button--outline:disabled {
+    box-shadow: inset 0 0 0 2px color("base-light");
+    border-bottom: 5px solid color("base-light");
+    color: color("base-light");
+  }
+}
+
 .button-icon-large {
   transform: scale(2);
   margin: 0 units(0.5) 0 0;
@@ -717,6 +738,25 @@ dl {
 
 .apply-form-print-preview .field-list-widget__controls {
   display: none !important;
+}
+
+.field-list-widget {
+  &__entry-controls {
+    border-top: 1px solid color("base-lighter");
+    border-bottom: 1px solid color("base-lighter");
+    padding-bottom: units(2);
+  }
+
+  &__controls {
+    border-top: 1px solid color("base-lighter");
+  }
+
+  &__entry:has(+ .field-list-widget__controls) {
+    .field-list-widget__entry-controls {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+  }
 }
 
 @media print {
