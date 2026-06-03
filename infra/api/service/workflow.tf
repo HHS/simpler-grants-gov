@@ -2,9 +2,6 @@ locals {
   workflow_service_config = local.environment_config.workflow_service_config
   enable_workflow_service = local.workflow_service_config.enable
   workflow_service_name   = "${local.service_name}-workflow"
-
-  workflow_fluent_bit_cpu    = 256
-  workflow_fluent_bit_memory = 256
 }
 
 #-------------------------------
@@ -21,22 +18,11 @@ resource "aws_cloudwatch_log_group" "workflow" {
   # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
 }
 
-resource "aws_cloudwatch_log_group" "workflow_fluentbit" {
-  count = local.enable_workflow_service ? 1 : 0
-
-  name = "service/${local.workflow_service_name}-fluentbit"
-
-  retention_in_days = 365
-
-  # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
-}
-
 #-------------------------------
 # Workflow ECS Task Definition
 #-------------------------------
 
 resource "aws_ecs_task_definition" "workflow" {
-  # checkov:skip=CKV_AWS_336:Fluent Bit sidecar requires a writable root filesystem
   count = local.enable_workflow_service ? 1 : 0
 
   family             = local.workflow_service_name
@@ -47,8 +33,8 @@ resource "aws_ecs_task_definition" "workflow" {
     {
       name                   = local.workflow_service_name,
       image                  = module.service.image_url,
-      memory                 = local.workflow_service_config.memory - local.workflow_fluent_bit_memory,
-      cpu                    = local.workflow_service_config.cpu - local.workflow_fluent_bit_cpu,
+      memory                 = local.workflow_service_config.memory,
+      cpu                    = local.workflow_service_config.cpu,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = true,
@@ -82,48 +68,15 @@ resource "aws_ecs_task_definition" "workflow" {
       },
 
       logConfiguration = {
-        logDriver = "awsfirelens",
-      }
-      systemControls = []
-      volumesFrom    = []
-    },
-    {
-      name                   = "${local.workflow_service_name}-fluentbit"
-      image                  = module.service.fluent_bit_image_url,
-      memory                 = local.workflow_fluent_bit_memory,
-      cpu                    = local.workflow_fluent_bit_cpu,
-      networkMode            = "awsvpc",
-      essential              = true,
-      readonlyRootFilesystem = false,
-      healthCheck            = null,
-      firelensConfiguration = {
-        type = "fluentbit",
-        options = {
-          enable-ecs-log-metadata = "true"
-          config-file-type        = "file"
-          config-file-value       = "/fluent-bit/etc/fluent-bit-custom.yml"
-        }
-      }
-      logConfiguration = {
         logDriver = "awslogs",
         options = {
-          "awslogs-group"         = "service/${local.workflow_service_name}-fluentbit",
+          "awslogs-group"         = "service/${local.workflow_service_name}",
           "awslogs-region"        = data.aws_region.current.name,
           "awslogs-stream-prefix" = local.workflow_service_name
         }
       }
-      secrets = [
-        {
-          name      = "licenseKey",
-          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
-        }
-      ]
-      environment = [
-        { name : "aws_region", value : data.aws_region.current.name },
-        { name : "container_name", value : local.workflow_service_name },
-        { name : "log_group_name", value : "service/${local.workflow_service_name}" },
-        { name : "NR_DIRECT_LOGS_MATCH", value : "nr_direct_disabled" },
-      ],
+      systemControls = []
+      volumesFrom    = []
     },
   ])
 
@@ -136,7 +89,6 @@ resource "aws_ecs_task_definition" "workflow" {
 
   depends_on = [
     aws_cloudwatch_log_group.workflow,
-    aws_cloudwatch_log_group.workflow_fluentbit,
   ]
 }
 
