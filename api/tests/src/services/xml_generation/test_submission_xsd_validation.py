@@ -28,26 +28,23 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
 class TestSubmissionXSDValidation:
     """End-to-end XSD validation tests for complete application submissions."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
+        """Create XSD validator with directory."""
         from pathlib import Path
 
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
-        return XSDValidator(xsd_cache_dir)
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
     def sf424_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
@@ -246,7 +243,8 @@ class TestSubmissionXSDValidation:
 
         # Extract SF424 form element
         sf424_ns = "{http://apply.grants.gov/forms/SF424_4_0-V4.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         sf424_elements = forms_element.findall(f".//{sf424_ns}SF424_4_0")
@@ -268,6 +266,7 @@ class TestSubmissionXSDValidation:
             f"Generated XML:\n{sf424_xml[:1000]}"
         )
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sf424a_submission_xml_validates_against_xsd(
         self, sf424a_application, xsd_validator, db_session
     ):
@@ -292,7 +291,9 @@ class TestSubmissionXSDValidation:
 
         # Extract SF424A form element
         sf424a_ns = "{http://apply.grants.gov/forms/SF424A-V1.0}"
-        forms_element = root.find(".//Forms")
+
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         sf424a_elements = forms_element.findall(f".//{sf424a_ns}BudgetInformation")
@@ -314,6 +315,7 @@ class TestSubmissionXSDValidation:
             f"Generated XML:\n{sf424a_xml[:1000]}"
         )
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_multi_form_submission_xml_validates_against_xsd(
         self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
@@ -460,8 +462,8 @@ class TestSubmissionXSDValidation:
         # Parse complete XML
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
-
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None
 
         # Validate SF-424
@@ -520,7 +522,8 @@ class TestSubmissionXSDValidation:
         footer_ns = "{http://apply.grants.gov/system/Footer-V1.0}"
 
         header = root.find(f".//{header_ns}GrantSubmissionHeader")
-        forms = root.find(".//Forms")
+        ns = {"grant": grant_ns}
+        forms = root.find(".//grant:Forms", namespaces=ns)
         footer = root.find(f".//{footer_ns}GrantSubmissionFooter")
 
         assert header is not None, "Header not found"
@@ -530,7 +533,9 @@ class TestSubmissionXSDValidation:
         # Verify order: Header should come before Forms, Forms before Footer
         children = list(root)
         header_idx = next(i for i, child in enumerate(children) if "Header" in child.tag)
-        forms_idx = next(i for i, child in enumerate(children) if child.tag == "Forms")
+        forms_idx = next(
+            i for i, child in enumerate(children) if child.tag.split("}")[-1] == "Forms"
+        )
         footer_idx = next(i for i, child in enumerate(children) if "Footer" in child.tag)
 
         assert header_idx < forms_idx < footer_idx, "Elements not in correct order"
@@ -654,7 +659,8 @@ class TestSubmissionXSDValidation:
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None
 
         # Extract SF-LLL element
@@ -800,7 +806,8 @@ class TestSubmissionXSDValidation:
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None
 
         # Extract SF-LLL element

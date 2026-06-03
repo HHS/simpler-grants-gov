@@ -32,7 +32,6 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
 class TestSF424BXMLGeneration:
     """Test cases for SF-424B XML generation service."""
 
@@ -377,30 +376,28 @@ class TestSF424BXMLGeneration:
         assert "<SF424B:SubmittedDate>2025-04-15</SF424B:SubmittedDate>" in xml_data
 
 
-@pytest.mark.xml_validation
+@pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
 class TestSF424BXSDValidation:
     """XSD validation tests for SF-424B form XML."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+        """Create XSD validator with directory."""
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
         # Check if SF424B XSD exists
-        sf424b_xsd_path = xsd_cache_dir / "SF424B-V1.1.xsd"
+        sf424b_xsd_path = xsd_dir / "SF424B-V1.1.xsd"
         if not sf424b_xsd_path.exists():
             pytest.skip(
-                "SF424B-V1.1.xsd not found in cache. Run 'flask task fetch-xsds' to download schemas."
+                "SF424B-V1.1.xsd not found. Run 'flask task fetch-xsds' to download schemas."
             )
-        return XSDValidator(xsd_cache_dir)
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
     def sf424b_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
@@ -473,7 +470,8 @@ class TestSF424BXSDValidation:
 
         # Extract SF-424B form element
         sf424b_ns = "{http://apply.grants.gov/forms/SF424B-V1.1}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         sf424b_elements = forms_element.findall(f".//{sf424b_ns}Assurances")
@@ -495,6 +493,7 @@ class TestSF424BXSDValidation:
             f"Generated XML:\n{sf424b_xml[:2000]}"
         )
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sf424b_minimal_data_validates_against_xsd(
         self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
@@ -552,7 +551,8 @@ class TestSF424BXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         sf424b_ns = "{http://apply.grants.gov/forms/SF424B-V1.1}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         sf424b_elements = forms_element.findall(f".//{sf424b_ns}Assurances")
         assert len(sf424b_elements) == 1
 

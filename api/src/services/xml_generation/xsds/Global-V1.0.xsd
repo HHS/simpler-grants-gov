@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--************************************************************************-->
+<!-- TITLE:    	Global Schema	       		                            -->
+<!-- DATE:    	October 17, 2003				   		        -->
+<!-- VERSION:    1.0	 				   		                            -->
+<!--   								   	                                   -->
+<!-- COMMENTS: This schema contains general XML data          -->
+<!--                      datatypes   that are used by all the schemas   -->
+<!--   								   	                                  -->
+<!--************************************************************************-->
+<xsd:schema targetNamespace="http://apply.grants.gov/system/Global-V1.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="qualified" version="1.0">
+    <!-- ELEMENTS -->
+    <xsd:element name="FormVersionIdentifier" type="glob:StringMin1Max30Type"/>
+    <xsd:annotation>
+        <xsd:documentation>OMB form ID</xsd:documentation>
+    </xsd:annotation>
+    <xsd:element name="HashValue">
+        <xsd:annotation>
+            <xsd:documentation>Hash value used in Header and Footer schemas</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:simpleContent>
+                <xsd:extension base="xsd:base64Binary">
+                    <xsd:attribute ref="glob:hashAlgorithm" use="required"/>
+                </xsd:extension>
+            </xsd:simpleContent>
+        </xsd:complexType>
+    </xsd:element>
+    <!-- ATTRIBUTES -->
+    <xsd:attribute name="agencySchemaVersion" type="xsd:string"/>
+    <xsd:annotation>
+        <xsd:documentation>Used to reflect schema version in root element of XML instance documents</xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="coreSchemaVersion" type="xsd:string"/>
+    <xsd:annotation>
+        <xsd:documentation>Used to reflect schema version in root element of XML instance documents</xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="hashAlgorithm" type="xsd:string"/>
+    <xsd:annotation>
+        <xsd:documentation>Used to identify the algorithm (ex:SHA-1) used to calculate the "HashValue" element value</xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="schemaVersion" type="xsd:string"/>
+    <xsd:annotation>
+        <xsd:documentation>Used to reflect schema version in root element of header/footer XML documents</xsd:documentation>
+    </xsd:annotation>
+    <!-- DATATYPES -->
+    <!-- SIMPLE DATATYPES -->
+    <!-- STRING DATATYPES -->
+    <xsd:simpleType name="StringMin1Max2Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 2</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="2"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max3Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 3</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="3"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max10Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 10</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="10"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max13Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 13</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="13"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max15Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 15</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="15"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max25Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 25</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="25"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max30Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 30</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="30"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max35Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 35</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="35"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max45Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 45</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="45"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max50Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 50</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="50"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max55Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 55</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="55"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max60Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 60</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="60"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max80Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 80</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="80"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max100Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 100</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="100"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max110Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 110</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="110"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max120Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 120</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="120"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max144Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 144</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="144"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max200Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 200</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="200"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max240Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 240</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="240"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max250Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 250</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="250"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max255Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 255</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="255"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="StringMin1Max4096Type">
+        <xsd:annotation>
+            <xsd:documentation>String - Min length 1, max length 4096</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="4096"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <!-- INTEGER DATATYPES -->
+    <xsd:simpleType name="IntegerMin1Max2Type">
+        <xsd:annotation>
+            <xsd:documentation>Integer - Min length 1, max length 2</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:integer">
+            <xsd:minInclusive value="0"/>
+            <xsd:maxInclusive value="99"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="IntegerMin1Max3Type">
+        <xsd:annotation>
+            <xsd:documentation>Integer - Min length 1, max length 3</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:integer">
+            <xsd:minInclusive value="0"/>
+            <xsd:maxInclusive value="999"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <!-- DECIMAL DATATYPES -->
+    <xsd:simpleType name="DecimalMin1Max4Places2Type">
+        <xsd:annotation>
+            <xsd:documentation>Decimal - Min length 1, max length 4, 2 places after decimal</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:decimal">
+            <xsd:totalDigits value="4"/>
+            <xsd:fractionDigits value="2"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="DecimalMin1Max14Places2Type">
+        <xsd:annotation>
+            <xsd:documentation>Decimal - Min length 1, max length 14, 2 places after decimal</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:decimal">
+            <xsd:totalDigits value="14"/>
+            <xsd:fractionDigits value="2"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="DecimalMin1Max15Places2Type">
+        <xsd:annotation>
+            <xsd:documentation>Decimal - Min length 1, max length 15, 2 places after decimal</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:decimal">
+            <xsd:totalDigits value="15"/>
+            <xsd:fractionDigits value="2"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <!-- ENUMERATED DATATYPES -->
+    <xsd:simpleType name="YesNoType">
+        <xsd:annotation>
+            <xsd:documentation>Y - Yes</xsd:documentation>
+            <xsd:documentation>N - No</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Y"/>
+            <xsd:enumeration value="N"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>
