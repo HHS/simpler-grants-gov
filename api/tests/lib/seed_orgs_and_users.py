@@ -2,10 +2,10 @@ import logging
 import uuid
 import zipfile
 
+import grants_shared.adapters.db as db
 from faker import Faker
 from sqlalchemy import select
 
-import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import ApplicationStatus, LegacyUserStatus, OpportunityStatus
 from src.constants.static_role_values import (

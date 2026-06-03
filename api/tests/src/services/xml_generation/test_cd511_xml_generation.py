@@ -9,11 +9,13 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd
 from datetime import date
 from pathlib import Path
 
+import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
+from src.db.models.competition_models import Form
 from src.form_schema.forms.cd511 import FORM_XML_TRANSFORM_RULES as CD511_TRANSFORM_RULES
+from src.form_schema.forms.cd511 import CD511_v1_1
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -25,13 +27,11 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
 
 
-@pytest.mark.xml_validation
 class TestCD511XMLGeneration:
     """Test cases for CD511 XML generation service."""
 
@@ -240,33 +240,30 @@ class TestCD511XMLGeneration:
         assert org_pos < award_pos < project_pos < contact_pos < title_pos < sig_pos < date_pos
 
 
-@pytest.mark.xml_validation
 class TestCD511XSDValidation:
     """XSD validation tests for CD511 form XML."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+        """Create XSD validator."""
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
         # Check if CD511 XSD exists
-        cd511_xsd_path = xsd_cache_dir / "CD511-V1.1.xsd"
+        cd511_xsd_path = xsd_dir / "CD511-V1.1.xsd"
         if not cd511_xsd_path.exists():
             pytest.skip(
-                "CD511-V1.1.xsd not found in cache. Run 'flask task fetch-xsds' to download schemas."
+                "CD511-V1.1.xsd not found. Run 'flask task fetch-xsds' to download schemas."
             )
-        return XSDValidator(xsd_cache_dir)
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to xsd file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def cd511_application(self, enable_factory_create, db_session: db.Session):
+    def cd511_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
         """Create an application with CD511 form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -286,15 +283,10 @@ class TestCD511XSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create CD511 form with XML transform config
-        cd511_form = FormFactory.create(
-            form_name="CD511",
-            short_form_name="CD511",
-            form_version="1.1",
-            json_to_xml_schema=CD511_TRANSFORM_RULES,
-        )
+        cd511_form = db_session.get(Form, CD511_v1_1.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="CD511 Test Application"
@@ -373,7 +365,7 @@ class TestCD511XSDValidation:
         )
 
     def test_cd511_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
         """Test that CD511 with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -394,14 +386,10 @@ class TestCD511XSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        cd511_form = FormFactory.create(
-            form_name="CD511",
-            short_form_name="CD511",
-            form_version="1.1",
-            json_to_xml_schema=CD511_TRANSFORM_RULES,
-        )
+        cd511_form = db_session.get(Form, CD511_v1_1.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="CD511 Minimal Test Application"

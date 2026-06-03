@@ -66,7 +66,7 @@ describe("FieldListWidget", () => {
 
     expect(screen.getByText("Contacts")).toBeInTheDocument();
     expect(screen.getByText("Add contacts")).toBeInTheDocument();
-    expect(screen.getByText(/entry\s+1/i)).toBeInTheDocument();
+    expect(screen.getByText(/contacts\s+1/i)).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
@@ -85,7 +85,7 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.queryByText(/entry\s+1/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/contacts\s+1/i)).not.toBeInTheDocument();
     expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
   });
 
@@ -103,7 +103,7 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.queryByText(/entry\s+1/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/contacts\s+1/i)).not.toBeInTheDocument();
     expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
   });
 
@@ -122,8 +122,8 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.getByText(/entry\s+1/i)).toBeInTheDocument();
-    expect(screen.getByText(/entry\s+2/i)).toBeInTheDocument();
+    expect(screen.getByText(/contacts\s+1/i)).toBeInTheDocument();
+    expect(screen.getByText(/contacts\s+2/i)).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
   });
 
@@ -144,9 +144,9 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
+    await user.click(screen.getByRole("button", { name: /addEntry/i }));
 
-    expect(screen.getByText(/entry\s+2/i)).toBeInTheDocument();
+    expect(screen.getByText(/contacts\s+2/i)).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
   });
 
@@ -166,7 +166,7 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /\+\s*add/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /addEntry/i })).toBeDisabled();
   });
 
   it("removes a row without going below minItems", async () => {
@@ -187,10 +187,12 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    const deleteButtons = screen.getAllByRole("button", {
+      name: /deleteEntry/i,
+    });
     await user.click(deleteButtons[0]);
 
-    expect(screen.queryByText(/entry\s+2/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/contacts\s+2/i)).not.toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
@@ -209,7 +211,7 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /delete/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /deleteEntry/i })).toBeDisabled();
   });
 
   it("marks the form dirty when a FieldList child field changes", async () => {
@@ -262,7 +264,7 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
+    await user.click(screen.getByRole("button", { name: /addEntry/i }));
 
     expect(markFormDirtyMock).toHaveBeenCalledTimes(1);
   });
@@ -286,10 +288,12 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
+    await user.click(screen.getByRole("button", { name: /addEntry/i }));
     await user.type(screen.getByLabelText("contacts[2]--first_name"), "Three");
 
-    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    const deleteButtons = screen.getAllByRole("button", {
+      name: /deleteEntry/i,
+    });
     await user.click(deleteButtons[1]);
 
     expect(screen.getByLabelText("contacts[1]--first_name")).toHaveValue(
@@ -321,7 +325,9 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    const deleteButtons = screen.getAllByRole("button", {
+      name: /deleteEntry/i,
+    });
     await user.click(deleteButtons[0]);
 
     expect(markFormDirtyMock).toHaveBeenCalledTimes(1);

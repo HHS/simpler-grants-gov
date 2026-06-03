@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--************************************************************************-->
+<!-- TITLE:          Attachement Schema  	       		              -->
+<!-- DATE:    	October 17, 2003				   		        -->
+<!-- VERSION:    1.0	 				   		                            -->
+<!--   								   	                                   -->
+<!-- COMMENTS: This schema contains Attachement data          -->
+<!--                      constructs that are used by all the schemas   -->
+<!--   								   	                                  -->
+<!--************************************************************************-->
+<xs:schema targetNamespace="http://apply.grants.gov/system/Attachments-V1.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="qualified" version="1.0">
+    <xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+    <!-- DATATYPES -->
+    <!-- COMPLEX DATATYPES -->
+    <xs:complexType name="AttachedFileDataType">
+        <xs:annotation>
+            <xs:documentation>Datatype describing a single attached file.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="FileName" type="glob:StringMin1Max255Type"/>
+            <xs:element name="MimeType" type="glob:StringMin1Max255Type"/>
+            <xs:element name="FileLocation">
+                <xs:complexType>
+                    <xs:attribute name="href" type="xs:anyURI"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element ref="glob:HashValue"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="AttachmentGroupMin0Max100DataType">
+        <xs:annotation>
+            <xs:documentation>Datatype describing a set of attached files, which contains 0 to 100 files.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="AttachedFile" type="att:AttachedFileDataType" minOccurs="0" maxOccurs="100"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="AttachmentGroupMin1Max100DataType">
+        <xs:annotation>
+            <xs:documentation>Datatype describing a set of attached files,  which contains 1 to 100 files.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="AttachedFile" type="att:AttachedFileDataType" maxOccurs="100"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

@@ -3,7 +3,7 @@ import { UswdsIconNames } from "src/types/generalTypes";
 import Link from "next/link";
 import { JSX } from "react";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type Props = {
   description: string;

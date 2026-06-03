@@ -1,9 +1,9 @@
 import logging
 
 import click
+import grants_shared.adapters.db as db
+from grants_shared.adapters.db import flask_db
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
 from src.adapters.sam_gov import create_sam_gov_client
 from src.constants.lookup_constants import JobType
 from src.task.ecs_background_task import ecs_background_task

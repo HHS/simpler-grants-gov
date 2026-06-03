@@ -4,6 +4,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 import click
+import grants_shared.adapters.db as db
 import grants_shared.logs
 import grants_shared.util.datetime_util as datetime_util
 from cryptography import x509
@@ -13,7 +14,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 from sqlalchemy import select
 
-import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency

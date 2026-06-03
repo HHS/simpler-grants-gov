@@ -6,7 +6,8 @@ including setting up data and validation.
 import uuid
 from typing import Any
 
-from src.adapters import db
+from grants_shared.adapters import db
+
 from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User

@@ -1,4 +1,4 @@
-import Spinner from "src/components/Spinner";
+import Spinner from "src/components/core/Spinner";
 
 export interface LoadingProps {
   message?: string;

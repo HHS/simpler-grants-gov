@@ -1,9 +1,8 @@
 import { Metadata } from "next";
+import VisionPageSections from "src/app/[locale]/(base)/vision/_components/VisionSections";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
-
-import VisionPageSections from "src/components/vision/VisionSections";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;

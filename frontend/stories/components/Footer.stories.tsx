@@ -1,4 +1,4 @@
-import Footer from "src/components/Footer";
+import Footer from "src/components/core/Footer";
 
 const meta = {
   title: "Components/Layout/Footer",
