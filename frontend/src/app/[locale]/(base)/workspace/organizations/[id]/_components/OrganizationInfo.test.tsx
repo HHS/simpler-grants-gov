@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { OrganizationInfo } from "src/app/[locale]/(base)/workspace/organizations/[id]/_components/OrganizationInfo";
 import { fakeOrganizationDetailsResponse } from "src/utils/testing/fixtures";
 
-describe("OragnizationInfo", () => {
+describe("OrganizationInfo", () => {
   it("displays all necessary organization data", () => {
     render(
       <OrganizationInfo
