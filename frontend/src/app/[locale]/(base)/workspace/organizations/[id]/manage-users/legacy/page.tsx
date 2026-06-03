@@ -1,3 +1,5 @@
+import { InviteLegacyUsersErrorPage } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/legacy/_components/InviteLegacyUsersErrorPage";
+import { InviteLegacyUsersPageContent } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/legacy/_components/InviteLegacyUsersPageContent";
 import {
   getOrganizationDetails,
   getOrganizationLegacyUsers,
@@ -8,8 +10,6 @@ import { OrganizationLegacyUser } from "src/types/userTypes";
 
 import { AuthorizationGate } from "src/components/core/AuthorizationGate";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
-import { InviteLegacyUsersErrorPage } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersErrorPage";
-import { InviteLegacyUsersPageContent } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersPageContent";
 
 type InviteLegacyUsersPageProps = {
   params: Promise<{ locale: string; id: string }>;

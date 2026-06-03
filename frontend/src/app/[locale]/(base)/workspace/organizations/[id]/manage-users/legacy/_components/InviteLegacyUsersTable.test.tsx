@@ -7,8 +7,7 @@ import {
 import "@testing-library/jest-dom";
 
 import { axe } from "jest-axe";
-
-import { InviteLegacyUsersTable } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersTable";
+import { InviteLegacyUsersTable } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/legacy/_components/InviteLegacyUsersTable";
 
 const legacyUsers: OrganizationLegacyUser[] = [
   {

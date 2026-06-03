@@ -1,3 +1,5 @@
+import { RemoveUserButton } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RemoveUserButton";
+import { RoleManager } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RoleManager";
 import type { FetchedResource } from "src/types/authTypes";
 import type { UserDetail, UserRole } from "src/types/userTypes";
 import { formatFullName } from "src/utils/userNameUtils";
@@ -9,8 +11,6 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
-import { RemoveUserButton } from "src/components/manageUsers/RemoveUserButton";
-import { RoleManager } from "src/components/manageUsers/RoleManager";
 
 interface ActiveUsersSectionProps {
   organizationId: string;

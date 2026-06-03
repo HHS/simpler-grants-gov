@@ -1,9 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { noop } from "lodash";
+import { UserInviteForm } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/UserInviteForm";
 import { fakeUserRole } from "src/utils/testing/fixtures";
-
-import { UserInviteForm } from "src/components/manageUsers/UserInviteForm";
 
 const mockUseActionState = jest.fn();
 
