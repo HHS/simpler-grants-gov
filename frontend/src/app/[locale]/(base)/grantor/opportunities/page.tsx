@@ -323,7 +323,7 @@ const fetchOpportunities = async (agencyId: string, page: number) => {
   currentAgency = agencyId;
   const pageRequest: PaginationRequestBody = {
     page_offset: page,
-    page_size: 5,
+    page_size: 25,
     sort_order: [
       {
         order_by: "created_at",
