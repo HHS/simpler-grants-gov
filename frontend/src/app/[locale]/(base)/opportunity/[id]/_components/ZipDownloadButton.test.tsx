@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { buildPathToZipDownload as orgBuiltPathToZipDownload } from "src/utils/opportunity/zipDownloadUtils";
 
-import ZipDownloadButton from "src/components/opportunity/ZipDownloadButton";
+import ZipDownloadButton from "./ZipDownloadButton";
 
 const ZipDownloadButtonProps = {
   opportunityId: "63588df8-f2d1-44ed-a201-5804abba696a",

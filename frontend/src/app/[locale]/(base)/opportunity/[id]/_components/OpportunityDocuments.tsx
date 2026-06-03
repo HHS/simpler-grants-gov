@@ -4,7 +4,7 @@ import { getConfiguredDayJs } from "src/utils/dateUtil";
 import { useTranslations } from "next-intl";
 import { Grid, Link, Table } from "@trussworks/react-uswds";
 
-import ZipDownloadButton from "src/components/opportunity/ZipDownloadButton";
+import ZipDownloadButton from "./ZipDownloadButton";
 
 interface OpportunityDocumentsProps {
   documents: OpportunityDocument[];

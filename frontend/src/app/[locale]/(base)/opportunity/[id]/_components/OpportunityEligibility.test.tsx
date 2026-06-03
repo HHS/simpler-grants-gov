@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import {
   applicantTypesToGroups,
   OpportunityEligibility,
-} from "src/components/opportunity/OpportunityEligibility";
+} from "./OpportunityEligibility";
 
 const fakeApplicantTypes = [
   "state_governments",

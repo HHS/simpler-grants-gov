@@ -1,9 +1,8 @@
 "use client";
 
+import { StartApplicationModalControl } from "src/app/[locale]/(base)/opportunity/[id]/_components/StartApplicationModal/StartApplicationModalControl";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { Competition } from "src/types/competitionsResponseTypes";
-
-import { StartApplicationModalControl } from "src/components/workspace/StartApplicationModal/StartApplicationModalControl";
 
 export const OpportunityCompetitionStart = ({
   competitions,

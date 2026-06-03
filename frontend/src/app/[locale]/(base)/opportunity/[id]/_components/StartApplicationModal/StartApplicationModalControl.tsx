@@ -15,7 +15,7 @@ import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 import { LoginModal } from "src/components/core/loginModal/LoginModal";
 import Spinner from "src/components/core/Spinner";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
-import { StartApplicationModal } from "src/components/workspace/StartApplicationModal/StartApplicationModal";
+import { StartApplicationModal } from "./StartApplicationModal";
 
 type StartApplicationModalControlProps = {
   competitionId: string;

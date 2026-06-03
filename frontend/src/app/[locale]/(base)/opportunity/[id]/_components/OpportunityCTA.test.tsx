@@ -1,8 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import OpportunityCTA, {
-  OpportunityContentBox,
-} from "src/components/opportunity/OpportunityCTA";
+import OpportunityCTA, { OpportunityContentBox } from "./OpportunityCTA";
 
 describe("OpportunityCTA", () => {
   it("renders the expected content and title", () => {
