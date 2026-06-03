@@ -13,7 +13,8 @@ export type FileUploadErrorStatus =
   | "post-upload-error";
 
 export type FileUploadStatus = FileUploadErrorStatus | FileUploadProcessStatus;
-export type PostUploadAction = (fileId: string) => Promise<boolean | undefined>;
+// maybe we can dynamically type this later
+export type PostUploadAction = (fileId: string) => Promise<unknown>;
 export type UploadFileMetadata = {
   id: string;
   fileName: string;
