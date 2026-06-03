@@ -4,7 +4,7 @@ import React, { ReactNode } from "react";
 
 import "@testing-library/jest-dom";
 
-import { RoleChangeModal } from "src/components/manageUsers/RoleChangeModal";
+import { RoleChangeModal } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/RoleChangeModal";
 
 interface ModalFooterProps {
   children: ReactNode;
