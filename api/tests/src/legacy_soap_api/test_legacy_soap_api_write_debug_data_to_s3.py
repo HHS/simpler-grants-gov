@@ -1,12 +1,11 @@
 import logging
-import os
 
 import boto3
-import moto
 
 from src.legacy_soap_api import legacy_soap_api_config as soap_api_config
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import write_debug_data_to_s3
+from src.util import file_util
 from tests.lib.data_factories import create_soap_request
 
 NSMAP = {
@@ -57,80 +56,63 @@ SOAP_LEGACY_RESPONSE_PAYLOAD = (
 
 
 def test_write_debug_data_to_s3(
-    caplog, db_session, enable_factory_create, monkeypatch, mock_s3_bucket
+    caplog, db_session, enable_factory_create, monkeypatch, mock_s3_bucket, s3_config, mock_s3
 ) -> None:
     caplog.set_level(logging.INFO)
     soap_api_config.get_soap_config.cache_clear()
-    monkeypatch.setenv("DRAFT_FILES_BUCKET", f"s3://{mock_s3_bucket}")
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
-    s3_client = boto3.client("s3", region_name="us-east-1")
-    with moto.mock_aws():
-        soap_legacy_response = SOAPResponse(
-            data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
-        )
-        soap_request = create_soap_request(SOAP_PAYLOAD)
-        write_debug_data_to_s3(
-            "GetSubmissionListExpandedRequest", soap_request, soap_legacy_response
-        )
-        record = next(
-            r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
-        )
-        get_request = s3_client.get_object(
-            Bucket=mock_s3_bucket,
-            Key=f"soap/{os.getenv('ENVIRONMENT')}/{record.debug_identifier}/request.txt",
-        )
-        request_contents = get_request["Body"].read()
-        get_response = s3_client.get_object(
-            Bucket=mock_s3_bucket,
-            Key=f"soap/{os.getenv('ENVIRONMENT')}/{record.debug_identifier}/response.txt",
-        )
-        response_contents = get_response["Body"].read()
-        assert request_contents == SOAP_PAYLOAD
-        assert response_contents == SOAP_LEGACY_RESPONSE_PAYLOAD
+    soap_legacy_response = SOAPResponse(
+        data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
+    )
+    soap_request = create_soap_request(SOAP_PAYLOAD)
+    write_debug_data_to_s3("GetSubmissionListExpandedRequest", soap_request, soap_legacy_response)
+    record = next(
+        r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
+    )
+    request_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/request.txt"
+    )
+    response_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/response.txt"
+    )
+    assert request_contents.replace("\n", "") == SOAP_PAYLOAD.decode().replace("\n", "")
+    assert response_contents.replace("\r", "") == SOAP_LEGACY_RESPONSE_PAYLOAD.decode().replace(
+        "\r", ""
+    )
 
 
 def test_write_debug_data_to_s3_does_not_run_if_flag_is_set_to_false(
-    db_session, enable_factory_create, monkeypatch, mock_s3_bucket
+    db_session, enable_factory_create, monkeypatch, mock_s3_bucket, s3_config, mock_s3
 ) -> None:
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "false")
-    monkeypatch.setenv("DRAFT_FILES_BUCKET", f"s3://{mock_s3_bucket}")
     s3_client = boto3.client("s3", region_name="us-east-1")
-    with moto.mock_aws():
-        soap_legacy_response = SOAPResponse(
-            data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
-        )
-        soap_request = create_soap_request(SOAP_PAYLOAD)
-        write_debug_data_to_s3(
-            "GetSubmissionListExpandedRequest", soap_request, soap_legacy_response
-        )
-        objects = s3_client.list_objects_v2(Bucket=mock_s3_bucket)
-        assert objects.get("Contents", None) is None
+    soap_legacy_response = SOAPResponse(
+        data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
+    )
+    soap_request = create_soap_request(SOAP_PAYLOAD)
+    write_debug_data_to_s3("GetSubmissionListExpandedRequest", soap_request, soap_legacy_response)
+    objects = s3_client.list_objects_v2(Bucket="local-mock-draft-bucket")
+    assert objects.get("Contents", None) is None
 
 
 def test_write_debug_data_to_s3_does_not_run_if_not_in_specified_operations(
-    db_session, enable_factory_create, monkeypatch, mock_s3_bucket
+    db_session, enable_factory_create, monkeypatch, mock_s3_bucket, s3_config, mock_s3
 ) -> None:
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
-    monkeypatch.setenv("DRAFT_FILES_BUCKET", f"s3://{mock_s3_bucket}")
     s3_client = boto3.client("s3", region_name="us-east-1")
-    with moto.mock_aws():
-        soap_legacy_response = SOAPResponse(
-            data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
-        )
-        soap_request = create_soap_request(SOAP_PAYLOAD)
-        write_debug_data_to_s3(
-            "GetSubmissionListExpandedRequest", soap_request, soap_legacy_response
-        )
-        write_debug_data_to_s3("GetSubmissionListRequest", soap_request, soap_legacy_response)
-        write_debug_data_to_s3("GetApplicationZipRequest", soap_request, soap_legacy_response)
-        write_debug_data_to_s3(
-            "ConfirmApplicationDeliveryRequest", soap_request, soap_legacy_response
-        )
-        write_debug_data_to_s3("UpdateApplicationInfoRequest", soap_request, soap_legacy_response)
-        write_debug_data_to_s3("X", soap_request, soap_legacy_response)
-        write_debug_data_to_s3("Y", soap_request, soap_legacy_response)
-        objects = s3_client.list_objects_v2(Bucket=mock_s3_bucket)
-        # If it triggered on everything it should be 14
-        assert len(objects.get("Contents")) == 10
+    soap_legacy_response = SOAPResponse(
+        data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
+    )
+    soap_request = create_soap_request(SOAP_PAYLOAD)
+    write_debug_data_to_s3("GetSubmissionListExpandedRequest", soap_request, soap_legacy_response)
+    write_debug_data_to_s3("GetSubmissionListRequest", soap_request, soap_legacy_response)
+    write_debug_data_to_s3("GetApplicationZipRequest", soap_request, soap_legacy_response)
+    write_debug_data_to_s3("ConfirmApplicationDeliveryRequest", soap_request, soap_legacy_response)
+    write_debug_data_to_s3("UpdateApplicationInfoRequest", soap_request, soap_legacy_response)
+    write_debug_data_to_s3("X", soap_request, soap_legacy_response)
+    write_debug_data_to_s3("Y", soap_request, soap_legacy_response)
+    objects = s3_client.list_objects_v2(Bucket="local-mock-draft-bucket")
+    # If it triggered on everything it should be 14
+    assert len(objects.get("Contents")) == 10

@@ -1,10 +1,7 @@
 import logging
-import os
 from datetime import datetime
 from unittest import mock
 
-import boto3
-import moto
 from lxml import etree
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
@@ -18,6 +15,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
 )
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
+from src.util import file_util
 from tests.lib.data_factories import get_mtls_urlencoded_str_and_serial_number, setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -139,12 +137,12 @@ def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_
     client,
     enable_factory_create,
     caplog,
+    s3_config,
+    mock_s3,
 ) -> None:
     mock_uuid.return_value = TEST_UUID
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
-    monkeypatch.setenv("DRAFT_FILES_BUCKET", f"s3://{mock_s3_bucket}")
-    s3_client = boto3.client("s3", region_name="us-east-1")
     mock_get_simpler_soap_response.side_effect = Exception()
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
@@ -178,45 +176,40 @@ def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_
         legacy_certificate=soap_client_certificate.legacy_certificate,
         cert_id=soap_client_certificate.legacy_certificate.cert_id,
     )
-    with moto.mock_aws():
-        with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
-            mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
-            response = client.post(
-                full_path,
-                data=mock_data,
-                headers={
-                    "Use-Simpler-Override": "1",
-                    MTLS_CERT_HEADER_KEY: mtls_cert,
-                },
-            )
-            assert response.status_code == 500
-            expected_response = (
-                "--uuid:00000000-aaaa-0000-bbbb-000000000000\r\n"
-                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\n'
-                "Content-ID: <root.message@cxf.apache.org>\r\n"
-                '\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
-                "<soap:Body><soap:Fault><faultcode>soap:Server</faultcode><faultstring>Failed to confirm application delivery.(Authorization Failure)</faultstring></soap:Fault>"
-                "</soap:Body>"
-                "</soap:Envelope>\r\n"
-                "--uuid:00000000-aaaa-0000-bbbb-000000000000--"
-            ).encode()
-            assert response.data == expected_response
-        record = next(
-            r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        response = client.post(
+            full_path,
+            data=mock_data,
+            headers={
+                "Use-Simpler-Override": "1",
+                MTLS_CERT_HEADER_KEY: mtls_cert,
+            },
         )
-        assert record
-        get_request = s3_client.get_object(
-            Bucket=mock_s3_bucket,
-            Key=f"soap/{os.getenv('ENVIRONMENT')}/{record.debug_identifier}/request.txt",
-        )
-        request_contents = get_request["Body"].read()
-        get_response = s3_client.get_object(
-            Bucket=mock_s3_bucket,
-            Key=f"soap/{os.getenv('ENVIRONMENT')}/{record.debug_identifier}/response.txt",
-        )
-        response_contents = get_response["Body"].read()
-        assert request_contents == mock_data
-        assert response_contents == expected_response
+        assert response.status_code == 500
+        expected_response = (
+            "--uuid:00000000-aaaa-0000-bbbb-000000000000\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\n'
+            "Content-ID: <root.message@cxf.apache.org>\r\n"
+            '\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+            "<soap:Body><soap:Fault><faultcode>soap:Server</faultcode><faultstring>Failed to confirm application delivery.(Authorization Failure)</faultstring></soap:Fault>"
+            "</soap:Body>"
+            "</soap:Envelope>\r\n"
+            "--uuid:00000000-aaaa-0000-bbbb-000000000000--"
+        ).encode()
+        assert response.data == expected_response
+    record = next(
+        r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
+    )
+    assert record
+    request_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/request.txt"
+    )
+    response_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/response.txt"
+    )
+    assert request_contents.replace("\n", "") == mock_data.decode().replace("\n", "")
+    assert response_contents.replace("\r", "") == expected_response.decode().replace("\r", "")
 
 
 @mock.patch("uuid.uuid4")

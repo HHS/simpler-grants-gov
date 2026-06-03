@@ -531,14 +531,12 @@ def write_debug_data_to_s3(
     operation_name: str, soap_request: SOAPRequest, soap_legacy_response: SOAPResponse
 ) -> None:
     if get_soap_config().save_soap_messages_to_s3 and operation_name in SimplerRequests:
-        config = get_soap_config()
         s3_config = S3Config()
         debug_identifier = uuid.uuid4()
         base_path = file_util.join(
             s3_config.draft_files_bucket_path,
             "soap",
-            config.environment,
-            f"{debug_identifier}",
+            str(debug_identifier),
         )
         request_s3_path = file_util.join(
             base_path,
