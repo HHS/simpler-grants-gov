@@ -41,11 +41,20 @@ export const getWarningLinkText = (
     return baseText;
   }
 
-  if (fieldListLabel) {
-    return `${baseText} (${fieldListLabel}, Entry ${entryIndex + 1})`;
+  const entryNumber = entryIndex + 1;
+  const requiredMatch = baseText.match(/^(.*)\s+is required$/i);
+
+  if (fieldListLabel && requiredMatch) {
+    const fieldName = requiredMatch[1];
+
+    return `${fieldName} in ${fieldListLabel}, Entry ${entryNumber} is required`;
   }
 
-  return `${baseText} (Entry ${entryIndex + 1})`;
+  if (fieldListLabel) {
+    return `${baseText} (${fieldListLabel}, Entry ${entryNumber})`;
+  }
+
+  return `${baseText} (Entry ${entryNumber})`;
 };
 
 export const ApplyFormMessage = ({
