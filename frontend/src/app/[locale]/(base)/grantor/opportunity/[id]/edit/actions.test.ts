@@ -5,8 +5,8 @@ import {
   publishOpportunityForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+import { buildOpportunitySummaryUpdateRequest } from "src/utils/opportunityEditFormConfig";
 
-import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 import {
   opportunityEditFormAction,
   saveOpportunityEditAction,

@@ -1,6 +1,7 @@
 "use server";
 
 import { isEmpty } from "lodash";
+import { ValidationErrors } from "src/app/[locale]/(base)/newsletter/_components/SubscriptionForm";
 import { environment } from "src/constants/environments";
 import { TFn } from "src/types/intl";
 import { z } from "zod";
@@ -8,8 +9,6 @@ import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
-
-import { ValidationErrors } from "src/components/newsletter/SubscriptionForm";
 
 type sendyResponse = {
   validationErrors: ValidationErrors;
