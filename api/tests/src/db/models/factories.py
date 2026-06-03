@@ -18,6 +18,7 @@ import faker
 import grants_shared.adapters.db as db
 import grants_shared.util.datetime_util as datetime_util
 from faker.providers import BaseProvider
+from grants_shared.db.models.lookup.lookup_registry import LookupRegistry
 from sqlalchemy import func, select
 from sqlalchemy.orm import scoped_session
 
@@ -81,7 +82,6 @@ from src.constants.static_role_values import (
 )
 from src.db.models import agency_models
 from src.db.models.agency_models import Agency
-from src.db.models.lookup.lookup_registry import LookupRegistry
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.util import file_util
 

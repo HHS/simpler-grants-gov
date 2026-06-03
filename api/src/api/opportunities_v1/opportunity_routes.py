@@ -8,6 +8,7 @@ import grants_shared.adapters.db.flask_db as flask_db
 import grants_shared.util.datetime_util as datetime_util
 from flask import Response
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.util.dict_util import flatten_dict
 
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
@@ -24,7 +25,6 @@ from src.services.opportunities_v1.search_opportunities import (
     search_opportunities,
     search_opportunities_csv,
 )
-from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 

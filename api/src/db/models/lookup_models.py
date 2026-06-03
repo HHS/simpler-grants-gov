@@ -1,4 +1,11 @@
 from grants_shared.db.models.base import TimestampMixin
+from grants_shared.db.models.lookup import (
+    Lookup,
+    LookupConfig,
+    LookupRegistry,
+    LookupStr,
+    LookupTable,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.constants.lookup_constants import (
@@ -37,7 +44,7 @@ from src.constants.lookup_constants import (
     UserType,
     WorkflowType,
 )
-from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
+from src.db.models.api_schema_table import ApiSchemaTable
 
 OPPORTUNITY_STATUS_CONFIG: LookupConfig[OpportunityStatus] = LookupConfig(
     [
@@ -444,8 +451,17 @@ JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
 )
 
 
+class ApiLookupTable(LookupTable, ApiSchemaTable):
+    """
+    Base lookup table class that includes the ApiSchemaTable as well
+    so that the tables end up in the api schema.
+    """
+
+    __abstract__ = True
+
+
 @LookupRegistry.register_lookup(OPPORTUNITY_CATEGORY_CONFIG)
-class LkOpportunityCategory(LookupTable, TimestampMixin):
+class LkOpportunityCategory(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_opportunity_category"
 
     opportunity_category_id: Mapped[int] = mapped_column(primary_key=True)
@@ -459,7 +475,7 @@ class LkOpportunityCategory(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(APPLICANT_TYPE_CONFIG)
-class LkApplicantType(LookupTable, TimestampMixin):
+class LkApplicantType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_applicant_type"
 
     applicant_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -473,7 +489,7 @@ class LkApplicantType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(FUNDING_CATEGORY_CONFIG)
-class LkFundingCategory(LookupTable, TimestampMixin):
+class LkFundingCategory(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_funding_category"
 
     funding_category_id: Mapped[int] = mapped_column(primary_key=True)
@@ -487,7 +503,7 @@ class LkFundingCategory(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(FUNDING_INSTRUMENT_CONFIG)
-class LkFundingInstrument(LookupTable, TimestampMixin):
+class LkFundingInstrument(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_funding_instrument"
 
     funding_instrument_id: Mapped[int] = mapped_column(primary_key=True)
@@ -501,7 +517,7 @@ class LkFundingInstrument(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(AWARD_SELECTION_METHOD_CONFIG)
-class LkAwardSelectionMethod(LookupTable, TimestampMixin):
+class LkAwardSelectionMethod(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_award_selection_method"
 
     award_selection_method_id: Mapped[int] = mapped_column(primary_key=True)
@@ -515,7 +531,7 @@ class LkAwardSelectionMethod(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(OPPORTUNITY_STATUS_CONFIG)
-class LkOpportunityStatus(LookupTable, TimestampMixin):
+class LkOpportunityStatus(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_opportunity_status"
 
     opportunity_status_id: Mapped[int] = mapped_column(primary_key=True)
@@ -529,7 +545,7 @@ class LkOpportunityStatus(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(AGENCY_DOWNLOAD_FILE_TYPE_CONFIG)
-class LkAgencyDownloadFileType(LookupTable, TimestampMixin):
+class LkAgencyDownloadFileType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_agency_download_file_type"
 
     agency_download_file_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -543,7 +559,7 @@ class LkAgencyDownloadFileType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG)
-class LkAgencySubmissionNotificationSetting(LookupTable, TimestampMixin):
+class LkAgencySubmissionNotificationSetting(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_agency_submission_notification_setting"
 
     agency_submission_notification_setting_id: Mapped[int] = mapped_column(primary_key=True)
@@ -558,7 +574,7 @@ class LkAgencySubmissionNotificationSetting(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(EXTERNAL_USER_TYPE_CONFIG)
-class LkExternalUserType(LookupTable, TimestampMixin):
+class LkExternalUserType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_external_user_type"
 
     external_user_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -572,7 +588,7 @@ class LkExternalUserType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(EXTRACT_TYPE_CONFIG)
-class LkExtractType(LookupTable, TimestampMixin):
+class LkExtractType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_extract_type"
 
     extract_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -586,7 +602,7 @@ class LkExtractType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(JOB_STATUS_CONFIG)
-class LkJobStatus(LookupTable, TimestampMixin):
+class LkJobStatus(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_job_status"
 
     job_status_id: Mapped[int] = mapped_column(primary_key=True)
@@ -598,7 +614,7 @@ class LkJobStatus(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(FORM_FAMILY_CONFIG)
-class LkFormFamily(LookupTable, TimestampMixin):
+class LkFormFamily(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_form_family"
 
     form_family_id: Mapped[int] = mapped_column(primary_key=True)
@@ -610,7 +626,7 @@ class LkFormFamily(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(FORM_TYPE_CONFIG)
-class LkFormType(LookupTable, TimestampMixin):
+class LkFormType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_form_type"
 
     form_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -622,7 +638,7 @@ class LkFormType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(COMPETITION_OPEN_TO_APPLICANT_CONFIG)
-class LkCompetitionOpenToApplicant(LookupTable, TimestampMixin):
+class LkCompetitionOpenToApplicant(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_competition_open_to_applicant"
 
     competition_open_to_applicant_id: Mapped[int] = mapped_column(primary_key=True)
@@ -636,7 +652,7 @@ class LkCompetitionOpenToApplicant(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(SAM_GOV_PROCESSING_STATUS_CONFIG)
-class LkSamGovProcessingStatus(LookupTable, TimestampMixin):
+class LkSamGovProcessingStatus(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_sam_gov_processing_status"
 
     sam_gov_processing_status_id: Mapped[int] = mapped_column(primary_key=True)
@@ -650,7 +666,7 @@ class LkSamGovProcessingStatus(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(SAM_GOV_EXTRACT_TYPE_CONFIG)
-class LkSamGovExtractType(LookupTable, TimestampMixin):
+class LkSamGovExtractType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_sam_gov_extract_type"
 
     sam_gov_extract_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -664,7 +680,7 @@ class LkSamGovExtractType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(SAM_GOV_IMPORT_TYPE_CONFIG)
-class LkSamGovImportType(LookupTable, TimestampMixin):
+class LkSamGovImportType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_sam_gov_import_type"
 
     sam_gov_import_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -678,7 +694,7 @@ class LkSamGovImportType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(APPLICATION_STATUS_CONFIG)
-class LkApplicationStatus(LookupTable, TimestampMixin):
+class LkApplicationStatus(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_application_status"
 
     application_status_id: Mapped[int] = mapped_column(primary_key=True)
@@ -692,7 +708,7 @@ class LkApplicationStatus(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(AWARD_RECOMMENDATION_ATTACHMENT_TYPE_CONFIG)
-class LkAwardRecommendationAttachmentType(LookupTable, TimestampMixin):
+class LkAwardRecommendationAttachmentType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_award_recommendation_attachment_type"
 
     award_recommendation_attachment_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -707,7 +723,7 @@ class LkAwardRecommendationAttachmentType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(AWARD_RECOMMENDATION_STATUS_CONFIG)
-class LkAwardRecommendationStatus(LookupTable, TimestampMixin):
+class LkAwardRecommendationStatus(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_award_recommendation_status"
 
     award_recommendation_status_id: Mapped[int] = mapped_column(primary_key=True)
@@ -722,7 +738,7 @@ class LkAwardRecommendationStatus(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(AWARD_RECOMMENDATION_TYPE_CONFIG)
-class LkAwardRecommendationType(LookupTable, TimestampMixin):
+class LkAwardRecommendationType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_award_recommendation_type"
 
     award_recommendation_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -737,7 +753,7 @@ class LkAwardRecommendationType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(AWARD_RECOMMENDATION_REVIEW_TYPE_CONFIG)
-class LkAwardRecommendationReviewType(LookupTable, TimestampMixin):
+class LkAwardRecommendationReviewType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_award_recommendation_review_type"
 
     award_recommendation_review_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -752,7 +768,7 @@ class LkAwardRecommendationReviewType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(AWARD_RECOMMENDATION_RISK_TYPE_CONFIG)
-class LkAwardRecommendationRiskType(LookupTable, TimestampMixin):
+class LkAwardRecommendationRiskType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_award_recommendation_risk_type"
 
     award_recommendation_risk_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -767,7 +783,7 @@ class LkAwardRecommendationRiskType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(AWARD_RECOMMENDATION_AUDIT_EVENT_CONFIG)
-class LkAwardRecommendationAuditEvent(LookupTable, TimestampMixin):
+class LkAwardRecommendationAuditEvent(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_award_recommendation_audit_event"
 
     award_recommendation_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
@@ -782,7 +798,7 @@ class LkAwardRecommendationAuditEvent(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(PRIVILEGE_CONFIG)
-class LkPrivilege(LookupTable, TimestampMixin):
+class LkPrivilege(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_privilege"
 
     privilege_id: Mapped[int] = mapped_column(primary_key=True)
@@ -794,7 +810,7 @@ class LkPrivilege(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(ROLE_TYPE_CONFIG)
-class LkRoleType(LookupTable, TimestampMixin):
+class LkRoleType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_role_type"
 
     role_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -806,7 +822,7 @@ class LkRoleType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(APPLICATION_AUDIT_EVENT_CONFIG)
-class LkApplicationAuditEvent(LookupTable, TimestampMixin):
+class LkApplicationAuditEvent(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_application_audit_event"
 
     application_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
@@ -820,7 +836,7 @@ class LkApplicationAuditEvent(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(USER_TYPE_CONFIG)
-class LkUserType(LookupTable, TimestampMixin):
+class LkUserType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_user_type"
 
     user_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -832,7 +848,7 @@ class LkUserType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(ORGANIZATION_AUDIT_EVENT_CONFIG)
-class LkOrganizationAuditEvent(LookupTable, TimestampMixin):
+class LkOrganizationAuditEvent(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_organization_audit_event"
 
     organization_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
@@ -846,7 +862,7 @@ class LkOrganizationAuditEvent(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(WORKFLOW_TYPE_CONFIG)
-class LkWorkflowType(LookupTable, TimestampMixin):
+class LkWorkflowType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_workflow_type"
 
     workflow_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -860,7 +876,7 @@ class LkWorkflowType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(APPROVAL_TYPE_CONFIG)
-class LkApprovalType(LookupTable, TimestampMixin):
+class LkApprovalType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_approval_type"
 
     approval_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -874,7 +890,7 @@ class LkApprovalType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(APPROVAL_RESPONSE_TYPE_CONFIG)
-class LkApprovalResponseType(LookupTable, TimestampMixin):
+class LkApprovalResponseType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_approval_response_type"
 
     approval_response_type_id: Mapped[int] = mapped_column(primary_key=True)
@@ -888,7 +904,7 @@ class LkApprovalResponseType(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(FILE_SCAN_STATUS_CONFIG)
-class LkFileScanStatus(LookupTable, TimestampMixin):
+class LkFileScanStatus(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_file_scan_status"
 
     file_scan_status_id: Mapped[int] = mapped_column(primary_key=True)
@@ -902,7 +918,7 @@ class LkFileScanStatus(LookupTable, TimestampMixin):
 
 
 @LookupRegistry.register_lookup(JOB_TYPE_CONFIG)
-class LkJobType(LookupTable, TimestampMixin):
+class LkJobType(ApiLookupTable, TimestampMixin):
     __tablename__ = "lk_job_type"
 
     job_type_id: Mapped[int] = mapped_column(primary_key=True)
