@@ -99,7 +99,7 @@ def test_successful_task_completion(db_session):
 def test_task_log_metrics_small_count(db_session, caplog):
     caplog.set_level(logging.INFO)
 
-    metrics_to_set = {str(f"filler_metric_{i}"): i for i in range(35)}
+    metrics_to_set = {f"filler_metric_{i}": i for i in range(35)}
 
     SimpleTask(db_session, metrics_to_add=metrics_to_set).run()
 
@@ -120,12 +120,15 @@ def test_task_log_metrics_small_count(db_session, caplog):
 def test_task_log_metrics_large_count(db_session, caplog):
     caplog.set_level(logging.INFO)
 
-    metrics_to_set = {str(f"filler_metric_{i}"): i for i in range(250)}
+    metrics_to_set = {f"filler_metric_{i}": i for i in range(250)}
 
     SimpleTask(db_session, metrics_to_add=metrics_to_set).run()
 
     # Make sure the warning complaining about the problem is logged
-    assert "A large number of metrics is being added for this task" in caplog.messages
+    assert (
+        "A large number of metrics are being added for this task - batching them together"
+        in caplog.messages
+    )
 
     # Want to make sure there are at least 3 batches of logs for this
     records = [

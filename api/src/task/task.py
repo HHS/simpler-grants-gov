@@ -102,8 +102,8 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             # add a warning, we should probably refactor something if this is regularly
             # happening, but we'll account for it below.
             logger.warning(
-                "A large number of metrics is being added for this task",
-                extra={TASK_CLASS_KEY: self.cls_name()},
+                "A large number of metrics are being added for this task - batching them together",
+                extra={TASK_CLASS_KEY: self.cls_name(), "metric_count": len(self.metrics)},
             )
 
             metric_batches: list[dict[str, Any]] = []
@@ -112,7 +112,7 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             # make sure that's included in every batch automatically.
             iter_metrics = {k: v for k, v in self.metrics.items() if k != TASK_CLASS_KEY}
             for batch in itertools.batched(iter_metrics.items(), n=100, strict=False):
-                metric_batch = {k: v for k, v in batch}
+                metric_batch = dict(batch)
                 metric_batch[TASK_CLASS_KEY] = self.cls_name()
                 metric_batches.append(metric_batch)
 
