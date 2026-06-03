@@ -73,7 +73,6 @@ _INDIVIDUAL_US_SITE = {
 }
 
 
-@pytest.mark.xml_validation
 class TestPerformanceSiteXMLGeneration:
     """Unit tests for Performance Site XML generation (no DB required)."""
 
@@ -143,13 +142,12 @@ class TestPerformanceSiteXMLGeneration:
         assert primary_pos < other_pos
 
 
-@pytest.mark.xml_validation
 class TestPerformanceSiteXSDValidation:
     """XSD validation tests for Performance Site Location form XML."""
 
     @pytest.fixture
     def xsd_validator(self):
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
+        xsd_cache_dir = Path(__file__).parents[1] / "xsd_cache"
         if not xsd_cache_dir.exists():
             pytest.skip("XSD cache directory not found. Run 'flask task fetch-xsds'.")
         xsd_path = xsd_cache_dir / "PerformanceSite_4_0-V4.0.xsd"

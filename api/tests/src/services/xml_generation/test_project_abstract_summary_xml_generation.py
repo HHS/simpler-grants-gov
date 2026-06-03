@@ -34,7 +34,6 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
 class TestProjectAbstractSummaryXMLGeneration:
     """Test cases for Project Abstract Summary XML generation service."""
 
@@ -216,31 +215,28 @@ class TestProjectAbstractSummaryXMLGeneration:
         assert "</Project_AbstractSummary_2_0:ProjectAbstract>" in xml_data
 
 
-@pytest.mark.xml_validation
 class TestProjectAbstractSummaryXSDValidation:
     """XSD validation tests for Project Abstract Summary form XML."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+        """Create XSD validator with directory."""
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
         # Check if Project Abstract Summary XSD exists
-        xsd_path = xsd_cache_dir / "Project_AbstractSummary_2_0-V2.0.xsd"
+        xsd_path = xsd_dir / "Project_AbstractSummary_2_0-V2.0.xsd"
         if not xsd_path.exists():
             pytest.skip(
-                "Project_AbstractSummary_2_0-V2.0.xsd not found in cache. "
+                "Project_AbstractSummary_2_0-V2.0.xsd not found. "
                 "Run 'flask task fetch-xsds' to download schemas."
             )
-        return XSDValidator(xsd_cache_dir)
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
     def project_abstract_summary_application(
@@ -324,7 +320,8 @@ class TestProjectAbstractSummaryXSDValidation:
 
         # Extract Project Abstract Summary form element
         pas_ns = "{http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         pas_elements = forms_element.findall(f".//{pas_ns}Project_AbstractSummary_2_0")
@@ -407,7 +404,8 @@ class TestProjectAbstractSummaryXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         pas_ns = "{http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         pas_elements = forms_element.findall(f".//{pas_ns}Project_AbstractSummary_2_0")
         assert len(pas_elements) == 1
 
