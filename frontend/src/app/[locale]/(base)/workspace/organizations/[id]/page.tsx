@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OrganizationDetail } from "src/app/[locale]/(base)/workspace/organizations/[id]/_components/OrganizationDetail";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
@@ -8,7 +9,6 @@ import { notFound } from "next/navigation";
 
 import { AuthorizationGate } from "src/components/core/AuthorizationGate";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
-import { OrganizationDetail } from "src/components/organization/OrganizationDetail";
 
 type OrganizationDetailPageProps = {
   params: Promise<{ id: string }>;
