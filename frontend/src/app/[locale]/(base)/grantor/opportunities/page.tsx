@@ -23,11 +23,11 @@ import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
-import UswdsPagination from "src/components/Pagination";
 import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
+import UswdsPagination from "src/components/Pagination";
 import { AgencySelector } from "src/components/workspace/AgencySelector";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
