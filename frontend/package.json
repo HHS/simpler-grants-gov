@@ -12,7 +12,7 @@
     "local": "ENVIRONMENT=local NEW_RELIC_ENABLED=false next dev",
     "debug": "NODE_OPTIONS='--inspect' next dev",
     "format": "prettier --write '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
-    "format-check": "prettier --check '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
+    "format-check": "prettier --check '**/*.{js,json,md,ts,tsx,scss,yaml,yml}' --log-level=debug",
     "lint": "next typegen && eslint",
     "lint-fix": "next typegen && npm run lint -- --fix",
     "postinstall": "node ./scripts/postinstall.js",
