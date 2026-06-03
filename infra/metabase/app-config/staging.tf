@@ -12,7 +12,7 @@ module "staging_config" {
   domain_name  = "data.staging.simpler.grants.gov" # Match existing ACM certificate
   enable_https = true
 
-  service_cpu    = 2048
+  service_cpu    = 1024
   service_memory = 4096
 
   service_desired_instance_count = 1

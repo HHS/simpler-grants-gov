@@ -13,7 +13,7 @@ module "dev_config" {
   enable_https = true                          # Certificate expired - needs to be renewed before enabling HTTPS
 
   # When we set memory at 1024 and 2048 metabase is intermittently running into oom.
-  service_cpu    = 2048
+  service_cpu    = 1024
   service_memory = 4096
 
   service_desired_instance_count = 1
