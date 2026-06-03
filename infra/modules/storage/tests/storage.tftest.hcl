@@ -1,4 +1,14 @@
-mock_provider "aws" {}
+mock_provider "aws" {
+  # aws_iam_policy_document.kms_key_policy is used as the policy for
+  # aws_kms_key.storage, which validates the value as JSON. The default
+  # mock_provider value is not valid JSON, so provide a valid stub.
+  override_data {
+    target = data.aws_iam_policy_document.kms_key_policy
+    values = {
+      json = "{}"
+    }
+  }
+}
 
 variables {
   name = "my-test-bucket-12345"
