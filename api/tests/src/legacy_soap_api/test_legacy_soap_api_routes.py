@@ -213,6 +213,79 @@ def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_
 
 
 @mock.patch("uuid.uuid4")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_if_write_debug_data_to_s3_fails_the_exception_is_logged(
+    mock_get_simpler_soap_response,
+    mock_uuid,
+    monkeypatch,
+    mock_s3_bucket,
+    db_session,
+    client,
+    enable_factory_create,
+    caplog,
+    s3_config,
+    mock_s3,
+) -> None:
+    mock_uuid.return_value = TEST_UUID
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
+    mock_get_simpler_soap_response.side_effect = Exception()
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+        cert_id=soap_client_certificate.legacy_certificate.cert_id,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        with mock.patch(
+            "src.legacy_soap_api.simpler_soap_api.write_debug_data_to_s3"
+        ) as mock_write_debug:
+            mock_write_debug.side_effect = Exception()
+            response = client.post(
+                full_path,
+                data=mock_data,
+                headers={
+                    "Use-Simpler-Override": "1",
+                    MTLS_CERT_HEADER_KEY: mtls_cert,
+                },
+            )
+            assert response.status_code == 500
+        record = next(
+            r
+            for r in caplog.records
+            if r.message == "soap_client: failed to upload debug info to s3"
+        )
+        assert record
+
+
+@mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_received_by_agency_status(
     mock_uuid, db_session, client, enable_factory_create, caplog
 ) -> None:

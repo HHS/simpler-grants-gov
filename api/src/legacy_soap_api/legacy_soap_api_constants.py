@@ -38,6 +38,7 @@ class LegacySoapApiEvent(StrEnum):
     RETURNING_SIMPLER_RESPONSE = "returning_simpler_response"
     RETURNING_LEGACY_SOAP_RESPONSE = "returning_legacy_soap_response"
     SIMPLER_ROUTE_DISABLED = "simpler_route_disabled"
+    ERROR_UPLOADING_DEBUG_DATA = "error_uploading_debug_data"
 
 
 class SimplerRequests(StrEnum):
