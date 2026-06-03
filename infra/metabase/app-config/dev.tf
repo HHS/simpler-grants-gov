@@ -12,10 +12,9 @@ module "dev_config" {
   domain_name  = "data.dev.simpler.grants.gov" # Match naming convention (cert expired, will need renewal)
   enable_https = true                          # Certificate expired - needs to be renewed before enabling HTTPS
 
-  # When we set memory at 1024 metabase is intermittently running into oom.
-  # The recommend min config for memory is at 2GB
-  service_cpu    = 1024
-  service_memory = 2048
+  # When we set memory at 1024 and 2096 metabase is intermittently running into oom.
+  service_cpu    = 2048
+  service_memory = 4096
 
   service_desired_instance_count = 1
   instance_scaling_min_capacity  = 1
