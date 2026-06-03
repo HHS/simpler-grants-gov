@@ -12,9 +12,8 @@ module "staging_config" {
   domain_name  = "data.staging.simpler.grants.gov" # Match existing ACM certificate
   enable_https = true
 
-  # Scaled down resources for staging environment (Issue #10239)
-  service_cpu    = 1024 # Down from 2048
-  service_memory = 2048 # Down from 4096
+  service_cpu    = 1024
+  service_memory = 4096
 
   service_desired_instance_count = 1
   instance_scaling_min_capacity  = 1
