@@ -42,8 +42,6 @@ export const FileUploadStatusDisplay = ({
   };
 
   if (status) {
-    // const adjustedStatus =
-    //   status === "error" ? errorStatuses.get(status) || "error" : status;
     const adjustedStatus = error
       ? (errorStatuses.get(status) as FileUploadStatus) || "error"
       : status;

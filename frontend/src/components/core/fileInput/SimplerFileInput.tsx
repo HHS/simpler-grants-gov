@@ -40,7 +40,7 @@ things this needs to do
 * call onStart on start [x]
 * call postUploadAction on successful upload [x]
 
-* hide the native progress indicator
+* hide the native progress indicator [x]
 
 * display existing files as expected
 

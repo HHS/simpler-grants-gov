@@ -3,6 +3,7 @@
  */
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { wait } from "@testing-library/user-event/dist/cjs/utils/index.js";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
@@ -97,19 +98,21 @@ describe("SimplerFileInput", () => {
       );
       // this id looks wrong but that's what Trussworks called it
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       expect(
         await screen.findByTestId("file-upload-status-display"),
       ).toBeInTheDocument();
     });
     it("displays a 'queued' message when queued", async () => {
-      clientFetchMock.mockResolvedValue(new Response());
+      const trigger = createAdvanceStreamTrigger();
+      clientFetchMock.mockResolvedValue(
+        new Response(makeStream(["uploading", "scanning"], trigger)),
+      );
       render(
         <SimplerFileInput
           onDelete={() => Promise.resolve()}
@@ -122,13 +125,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       expect(
         await screen.findByTestId("file-upload-status-display"),
       ).toHaveTextContent("queued");
@@ -151,13 +153,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       trigger.advance();
       await waitFor(async () =>
         expect(
@@ -194,13 +195,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       trigger.advance();
       await waitFor(async () =>
         expect(
@@ -224,13 +224,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       trigger.advance();
       await waitFor(async () =>
         expect(
@@ -255,13 +254,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       await waitFor(async () =>
         expect(
           await screen.findByTestId("file-upload-status-display"),
@@ -286,13 +284,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       trigger.advance();
       // this needs to be here to allow the "uploading" state to take effect
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -321,13 +318,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       trigger.advance();
       await new Promise((resolve) => setTimeout(resolve, 10));
       trigger.advance();
@@ -361,13 +357,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       trigger.advance();
       await waitFor(async () =>
         expect(
@@ -393,13 +388,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       expect(mockOnStart).toHaveBeenCalled();
     });
     it("calls postUploadAction on completed upload", async () => {
@@ -419,13 +413,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       trigger.advance();
       await waitFor(() => expect(mockPostUploadAction).toHaveBeenCalled());
     });
@@ -448,13 +441,12 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       trigger.advance();
       await waitFor(() =>
         expect(mockOnSuccess).toHaveBeenCalledWith("arbitrary return value"),
@@ -479,14 +471,46 @@ describe("SimplerFileInput", () => {
         />,
       );
       const input = await screen.findByTestId("file-input-input");
-      fireEvent.change(input, {
-        target: {
-          files: new File(["test content"], "test.txt", {
-            type: "text/plain",
-          }),
-        },
-      });
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
       await waitFor(() => expect(mockOnError).toHaveBeenCalledWith(fakeError));
+    });
+  });
+  describe("User Interface", () => {
+    it("does not display the Trussworks file preview", async () => {
+      const trigger = createAdvanceStreamTrigger();
+      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          postUploadActionSuccessMessage="post upload action success"
+          postUploadActionErrorMessage="post upload action error"
+          id="file-input-test"
+          labelId="file-input-label"
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
+      screen.debug();
+      const trussworksPreviewImages = screen.queryByTestId(
+        "file-input-preview-image",
+      );
+      const trussworksPreviews = screen.queryByTestId("file-input-preview");
+      // aria-hidden seems to be the way to do this for testing, but is that possible?
+      // or do we just remove it? use mutation observer? not worry about testing, and rely on the css?
+      expect(trussworksPreviewImages).not.toBeVisible();
+      expect(trussworksPreviews).not.toBeVisible();
     });
   });
 });
