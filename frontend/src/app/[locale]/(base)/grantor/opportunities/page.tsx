@@ -29,7 +29,6 @@ import {
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
 import UswdsPagination from "src/components/Pagination";
-import { AgencySelector } from "src/components/workspace/AgencySelector";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");
