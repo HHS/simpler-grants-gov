@@ -114,7 +114,7 @@ Additionally when a request ends, the following will always be logged:
 
 ## PII Masking
 
-The [src.logging.pii](/api/src/logging/pii.py) module defines a filter that applies to all logs that automatically masks data fields that look like social security numbers.
+The [src.logging.pii](/backend/grants_shared/src/grants_shared/logs/pii.py) module defines a filter that applies to all logs that automatically masks data fields that look like social security numbers.
 
 ## Audit Logging
 
