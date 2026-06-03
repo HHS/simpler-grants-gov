@@ -33,6 +33,7 @@ def test_header_generation_example_output(enable_factory_create, db_session: db.
         opening_date=date(2025, 9, 2),
         closing_date=date(2025, 9, 30),
         opportunity_assistance_listing=assistance_listing,
+        competition_forms=[],
     )
 
     application = ApplicationFactory.create(competition=competition, application_name="Test App")

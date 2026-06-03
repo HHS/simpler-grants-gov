@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Revision:   1.1  $ -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:SupplementaryCoverSheetforNEHGrantPrograms_3_0="http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0" targetNamespace="http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="3.0">
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<!--Root element definition-->
+	<xs:element name="SupplementaryCoverSheetforNEHGrantPrograms_3_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PDMajorField">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="117"/>
+							<xs:enumeration value="142"/>
+							<xs:enumeration value="110"/>
+							<xs:enumeration value="112"/>
+							<xs:enumeration value="113"/>
+							<xs:enumeration value="2868"/>
+							<xs:enumeration value="114"/>
+							<xs:enumeration value="111"/>
+							<xs:enumeration value="2869"/>
+							<xs:enumeration value="124"/>
+							<xs:enumeration value="123"/>
+							<xs:enumeration value="126"/>
+							<xs:enumeration value="1245"/>
+							<xs:enumeration value="2836"/>
+							<xs:enumeration value="1246"/>
+							<xs:enumeration value="13"/>
+							<xs:enumeration value="1247"/>
+							<xs:enumeration value="6"/>
+							<xs:enumeration value="2837"/>
+							<xs:enumeration value="2838"/>
+							<xs:enumeration value="8"/>
+							<xs:enumeration value="2839"/>
+							<xs:enumeration value="7"/>
+							<xs:enumeration value="2835"/>
+							<xs:enumeration value="2840"/>
+							<xs:enumeration value="2841"/>
+							<xs:enumeration value="2842"/>
+							<xs:enumeration value="9"/>
+							<xs:enumeration value="2843"/>
+							<xs:enumeration value="2833"/>
+							<xs:enumeration value="2844"/>
+							<xs:enumeration value="10"/>
+							<xs:enumeration value="2845"/>
+							<xs:enumeration value="2846"/>
+							<xs:enumeration value="2834"/>
+							<xs:enumeration value="11"/>
+							<xs:enumeration value="12"/>
+							<xs:enumeration value="4"/>
+							<xs:enumeration value="2847"/>
+							<xs:enumeration value="2848"/>
+							<xs:enumeration value="2849"/>
+							<xs:enumeration value="140"/>
+							<xs:enumeration value="104"/>
+							<xs:enumeration value="89"/>
+							<xs:enumeration value="76"/>
+							<xs:enumeration value="88"/>
+							<xs:enumeration value="105"/>
+							<xs:enumeration value="80"/>
+							<xs:enumeration value="2859"/>
+							<xs:enumeration value="101"/>
+							<xs:enumeration value="129"/>
+							<xs:enumeration value="74"/>
+							<xs:enumeration value="103"/>
+							<xs:enumeration value="83"/>
+							<xs:enumeration value="87"/>
+							<xs:enumeration value="106"/>
+							<xs:enumeration value="77"/>
+							<xs:enumeration value="90"/>
+							<xs:enumeration value="125"/>
+							<xs:enumeration value="81"/>
+							<xs:enumeration value="102"/>
+							<xs:enumeration value="82"/>
+							<xs:enumeration value="85"/>
+							<xs:enumeration value="2860"/>
+							<xs:enumeration value="79"/>
+							<xs:enumeration value="86"/>
+							<xs:enumeration value="75"/>
+							<xs:enumeration value="84"/>
+							<xs:enumeration value="2861"/>
+							<xs:enumeration value="27"/>
+							<xs:enumeration value="38"/>
+							<xs:enumeration value="2851"/>
+							<xs:enumeration value="36"/>
+							<xs:enumeration value="28"/>
+							<xs:enumeration value="35"/>
+							<xs:enumeration value="2852"/>
+							<xs:enumeration value="40"/>
+							<xs:enumeration value="29"/>
+							<xs:enumeration value="30"/>
+							<xs:enumeration value="31"/>
+							<xs:enumeration value="32"/>
+							<xs:enumeration value="99"/>
+							<xs:enumeration value="37"/>
+							<xs:enumeration value="39"/>
+							<xs:enumeration value="33"/>
+							<xs:enumeration value="34"/>
+							<xs:enumeration value="2853"/>
+							<xs:enumeration value="127"/>
+							<xs:enumeration value="2870"/>
+							<xs:enumeration value="42"/>
+							<xs:enumeration value="61"/>
+							<xs:enumeration value="55"/>
+							<xs:enumeration value="53"/>
+							<xs:enumeration value="57"/>
+							<xs:enumeration value="54"/>
+							<xs:enumeration value="43"/>
+							<xs:enumeration value="50"/>
+							<xs:enumeration value="2854"/>
+							<xs:enumeration value="44"/>
+							<xs:enumeration value="45"/>
+							<xs:enumeration value="46"/>
+							<xs:enumeration value="47"/>
+							<xs:enumeration value="59"/>
+							<xs:enumeration value="52"/>
+							<xs:enumeration value="56"/>
+							<xs:enumeration value="48"/>
+							<xs:enumeration value="2855"/>
+							<xs:enumeration value="49"/>
+							<xs:enumeration value="60"/>
+							<xs:enumeration value="15"/>
+							<xs:enumeration value="16"/>
+							<xs:enumeration value="1248"/>
+							<xs:enumeration value="1249"/>
+							<xs:enumeration value="19"/>
+							<xs:enumeration value="20"/>
+							<xs:enumeration value="21"/>
+							<xs:enumeration value="22"/>
+							<xs:enumeration value="24"/>
+							<xs:enumeration value="23"/>
+							<xs:enumeration value="65"/>
+							<xs:enumeration value="25"/>
+							<xs:enumeration value="2850"/>
+							<xs:enumeration value="69"/>
+							<xs:enumeration value="70"/>
+							<xs:enumeration value="2856"/>
+							<xs:enumeration value="71"/>
+							<xs:enumeration value="2857"/>
+							<xs:enumeration value="2858"/>
+							<xs:enumeration value="63"/>
+							<xs:enumeration value="67"/>
+							<xs:enumeration value="64"/>
+							<xs:enumeration value="66"/>
+							<xs:enumeration value="2882"/>
+							<xs:enumeration value="141"/>
+							<xs:enumeration value="108"/>
+							<xs:enumeration value="145"/>
+							<xs:enumeration value="2863"/>
+							<xs:enumeration value="2862"/>
+							<xs:enumeration value="119"/>
+							<xs:enumeration value="2865"/>
+							<xs:enumeration value="146"/>
+							<xs:enumeration value="2864"/>
+							<xs:enumeration value="144"/>
+							<xs:enumeration value="130"/>
+							<xs:enumeration value="2866"/>
+							<xs:enumeration value="96"/>
+							<xs:enumeration value="120"/>
+							<xs:enumeration value="2832"/>
+							<xs:enumeration value="2871"/>
+							<xs:enumeration value="2872"/>
+							<xs:enumeration value="2873"/>
+							<xs:enumeration value="92"/>
+							<xs:enumeration value="2874"/>
+							<xs:enumeration value="2875"/>
+							<xs:enumeration value="2876"/>
+							<xs:enumeration value="2877"/>
+							<xs:enumeration value="94"/>
+							<xs:enumeration value="2878"/>
+							<xs:enumeration value="97"/>
+							<xs:enumeration value="132"/>
+							<xs:enumeration value="72"/>
+							<xs:enumeration value="2880"/>
+							<xs:enumeration value="2881"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="OrganizationType">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="1326: Center For Advanced Study/Research Institute"/>
+							<xs:enumeration value="1327: Publishing"/>
+							<xs:enumeration value="1328: Two-Year College"/>
+							<xs:enumeration value="1329: Four-Year College"/>
+							<xs:enumeration value="1330: University"/>
+							<xs:enumeration value="1331: Professional School"/>
+							<xs:enumeration value="1332: Elementary/Middle School"/>
+							<xs:enumeration value="1333: Secondary School"/>
+							<xs:enumeration value="1334: School District"/>
+							<xs:enumeration value="1335: State Department of Education"/>
+							<xs:enumeration value="1336: Non-Profit Educational Center"/>
+							<xs:enumeration value="1337: Educational Consortium"/>
+							<xs:enumeration value="1338: Philanthropic Foundation"/>
+							<xs:enumeration value="1339: State/Local/Federal Government"/>
+							<xs:enumeration value="1340: Historical Society"/>
+							<xs:enumeration value="1341: Archives"/>
+							<xs:enumeration value="1342: Historical Site/House"/>
+							<xs:enumeration value="1343: Historic Preservation Organization"/>
+							<xs:enumeration value="1344: Public Library"/>
+							<xs:enumeration value="1345: Academic Library"/>
+							<xs:enumeration value="1346: Independent Research Library"/>
+							<xs:enumeration value="1347: History Museum"/>
+							<xs:enumeration value="1348: Natural History Museum"/>
+							<xs:enumeration value="1349: Art Museum"/>
+							<xs:enumeration value="1350: University Museum"/>
+							<xs:enumeration value="1351: Anthropology/Archaeology Museum"/>
+							<xs:enumeration value="1352: Science and Technology Museum"/>
+							<xs:enumeration value="1353: General Museum"/>
+							<xs:enumeration value="1354: Nature Center/Botanical Garden/Arboretum"/>
+							<xs:enumeration value="1355: National Organization"/>
+							<xs:enumeration value="1356: State Humanities Council"/>
+							<xs:enumeration value="1357: Community-Level Organization"/>
+							<xs:enumeration value="1358: Indian Tribal Organization"/>
+							<xs:enumeration value="1359: Professional Association"/>
+							<xs:enumeration value="1360: Arts Related Organizations"/>
+							<xs:enumeration value="1361: Television/Station"/>
+							<xs:enumeration value="1362: Radio Station"/>
+							<xs:enumeration value="1363: Independent Production Company"/>
+							<xs:enumeration value="1364: Press"/>
+							<xs:enumeration value="2786: Museums"/>
+							<xs:enumeration value="2787: Libraries"/>
+							<xs:enumeration value="2819: Unknown"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="ProjectFundingGroup" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="ReqOutrightAmount" minOccurs="0" type="globLib:BudgetAmountDataType"/>
+							<xs:element name="ReqMatchAmount" minOccurs="0" type="globLib:BudgetAmountDataType"/>
+							<xs:element name="TotalFromNEH" minOccurs="0" type="globLib:BudgetTotalAmountDataType"/>
+							<xs:element name="CostSharing" minOccurs="0" type="globLib:BudgetAmountDataType"/>
+							<xs:element name="TotalProjectCosts" minOccurs="0" type="globLib:BudgetTotalAmountDataType"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="ApplicationInfoGroup">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="AdditionalFunding">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="Yes"/>
+										<xs:enumeration value="No"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="AddFundingExplanation" minOccurs="0">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="0"/>
+										<xs:maxLength value="50"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="TypeofApplication">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="New"/>
+										<xs:enumeration value="Supplement"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="SupGrantNumber" minOccurs="0">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="0"/>
+										<xs:maxLength value="50"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="ProjFieldCode" type="SupplementaryCoverSheetforNEHGrantPrograms_3_0:ProjFieldCodeType"/>
+							<xs:element name="ProjFieldCode2" type="SupplementaryCoverSheetforNEHGrantPrograms_3_0:ProjFieldCodeType" minOccurs="0"/>
+							<xs:element name="ProjFieldCode3" type="SupplementaryCoverSheetforNEHGrantPrograms_3_0:ProjFieldCodeType" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="3.0"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="ProjFieldCodeType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value=""/>
+			<xs:enumeration value="117"/>
+			<xs:enumeration value="142"/>
+			<xs:enumeration value="110"/>
+			<xs:enumeration value="112"/>
+			<xs:enumeration value="113"/>
+			<xs:enumeration value="2868"/>
+			<xs:enumeration value="114"/>
+			<xs:enumeration value="111"/>
+			<xs:enumeration value="2869"/>
+			<xs:enumeration value="124"/>
+			<xs:enumeration value="123"/>
+			<xs:enumeration value="126"/>
+			<xs:enumeration value="1245"/>
+			<xs:enumeration value="2836"/>
+			<xs:enumeration value="1246"/>
+			<xs:enumeration value="13"/>
+			<xs:enumeration value="1247"/>
+			<xs:enumeration value="6"/>
+			<xs:enumeration value="2837"/>
+			<xs:enumeration value="2838"/>
+			<xs:enumeration value="8"/>
+			<xs:enumeration value="2839"/>
+			<xs:enumeration value="7"/>
+			<xs:enumeration value="2835"/>
+			<xs:enumeration value="2840"/>
+			<xs:enumeration value="2841"/>
+			<xs:enumeration value="2842"/>
+			<xs:enumeration value="9"/>
+			<xs:enumeration value="2843"/>
+			<xs:enumeration value="2833"/>
+			<xs:enumeration value="2844"/>
+			<xs:enumeration value="10"/>
+			<xs:enumeration value="2845"/>
+			<xs:enumeration value="2846"/>
+			<xs:enumeration value="2834"/>
+			<xs:enumeration value="11"/>
+			<xs:enumeration value="12"/>
+			<xs:enumeration value="4"/>
+			<xs:enumeration value="2847"/>
+			<xs:enumeration value="2848"/>
+			<xs:enumeration value="2849"/>
+			<xs:enumeration value="140"/>
+			<xs:enumeration value="104"/>
+			<xs:enumeration value="89"/>
+			<xs:enumeration value="76"/>
+			<xs:enumeration value="88"/>
+			<xs:enumeration value="105"/>
+			<xs:enumeration value="80"/>
+			<xs:enumeration value="2859"/>
+			<xs:enumeration value="101"/>
+			<xs:enumeration value="129"/>
+			<xs:enumeration value="74"/>
+			<xs:enumeration value="103"/>
+			<xs:enumeration value="83"/>
+			<xs:enumeration value="87"/>
+			<xs:enumeration value="106"/>
+			<xs:enumeration value="77"/>
+			<xs:enumeration value="90"/>
+			<xs:enumeration value="125"/>
+			<xs:enumeration value="81"/>
+			<xs:enumeration value="102"/>
+			<xs:enumeration value="82"/>
+			<xs:enumeration value="85"/>
+			<xs:enumeration value="2860"/>
+			<xs:enumeration value="79"/>
+			<xs:enumeration value="86"/>
+			<xs:enumeration value="75"/>
+			<xs:enumeration value="84"/>
+			<xs:enumeration value="2861"/>
+			<xs:enumeration value="27"/>
+			<xs:enumeration value="38"/>
+			<xs:enumeration value="2851"/>
+			<xs:enumeration value="36"/>
+			<xs:enumeration value="28"/>
+			<xs:enumeration value="35"/>
+			<xs:enumeration value="2852"/>
+			<xs:enumeration value="40"/>
+			<xs:enumeration value="29"/>
+			<xs:enumeration value="30"/>
+			<xs:enumeration value="31"/>
+			<xs:enumeration value="32"/>
+			<xs:enumeration value="99"/>
+			<xs:enumeration value="37"/>
+			<xs:enumeration value="39"/>
+			<xs:enumeration value="33"/>
+			<xs:enumeration value="34"/>
+			<xs:enumeration value="2853"/>
+			<xs:enumeration value="127"/>
+			<xs:enumeration value="2870"/>
+			<xs:enumeration value="42"/>
+			<xs:enumeration value="61"/>
+			<xs:enumeration value="55"/>
+			<xs:enumeration value="53"/>
+			<xs:enumeration value="57"/>
+			<xs:enumeration value="54"/>
+			<xs:enumeration value="43"/>
+			<xs:enumeration value="50"/>
+			<xs:enumeration value="2854"/>
+			<xs:enumeration value="44"/>
+			<xs:enumeration value="45"/>
+			<xs:enumeration value="46"/>
+			<xs:enumeration value="47"/>
+			<xs:enumeration value="59"/>
+			<xs:enumeration value="52"/>
+			<xs:enumeration value="56"/>
+			<xs:enumeration value="48"/>
+			<xs:enumeration value="2855"/>
+			<xs:enumeration value="49"/>
+			<xs:enumeration value="60"/>
+			<xs:enumeration value="15"/>
+			<xs:enumeration value="16"/>
+			<xs:enumeration value="1248"/>
+			<xs:enumeration value="1249"/>
+			<xs:enumeration value="19"/>
+			<xs:enumeration value="20"/>
+			<xs:enumeration value="21"/>
+			<xs:enumeration value="22"/>
+			<xs:enumeration value="24"/>
+			<xs:enumeration value="23"/>
+			<xs:enumeration value="65"/>
+			<xs:enumeration value="25"/>
+			<xs:enumeration value="2850"/>
+			<xs:enumeration value="69"/>
+			<xs:enumeration value="70"/>
+			<xs:enumeration value="2856"/>
+			<xs:enumeration value="71"/>
+			<xs:enumeration value="2857"/>
+			<xs:enumeration value="2858"/>
+			<xs:enumeration value="63"/>
+			<xs:enumeration value="67"/>
+			<xs:enumeration value="64"/>
+			<xs:enumeration value="66"/>
+			<xs:enumeration value="2882"/>
+			<xs:enumeration value="141"/>
+			<xs:enumeration value="108"/>
+			<xs:enumeration value="145"/>
+			<xs:enumeration value="2863"/>
+			<xs:enumeration value="2862"/>
+			<xs:enumeration value="119"/>
+			<xs:enumeration value="2865"/>
+			<xs:enumeration value="146"/>
+			<xs:enumeration value="2864"/>
+			<xs:enumeration value="144"/>
+			<xs:enumeration value="130"/>
+			<xs:enumeration value="2866"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

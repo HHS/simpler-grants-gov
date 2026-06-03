@@ -1,3 +1,4 @@
+import { ManageUsersPageContent } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/ManageUsersPageContent";
 import {
   getOrganizationPendingInvitations,
   getOrganizationRoles,
@@ -8,7 +9,6 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthorizationGate } from "src/components/core/AuthorizationGate";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
-import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 
 interface ManageUsersPageProps {
   params: Promise<{ locale: string; id: string }>;

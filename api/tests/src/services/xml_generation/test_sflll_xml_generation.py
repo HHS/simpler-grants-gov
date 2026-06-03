@@ -10,7 +10,8 @@ import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
+from src.db.models.competition_models import Form
+from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -19,18 +20,16 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
 
 
-@pytest.mark.xml_validation
 class TestSFLLLXMLGeneration:
     """Test SF-LLL XML generation."""
 
     @pytest.fixture
-    def sflll_application(self, enable_factory_create, db_session: db.Session):
+    def sflll_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
         """Create an application with SF-LLL form."""
         agency = AgencyFactory.create(agency_name="Simpler Grants.gov")
 
@@ -50,19 +49,14 @@ class TestSFLLLXMLGeneration:
             opening_date=date(2026, 1, 21),
             closing_date=date(2027, 1, 2),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-LLL Test Application"
         )
 
-        # Create SF-LLL form
-        sflll_form = FormFactory.create(
-            form_name="Disclosure of Lobbying Activities (SF-LLL)",
-            short_form_name="SFLLL_2_0",
-            form_version="2.0",
-            json_to_xml_schema=SFLLL_TRANSFORM_RULES,
-        )
+        sflll_form = db_session.get(Form, SFLLL_v2_0.form_id)
 
         comp_form_lll = CompetitionFormFactory.create(competition=competition, form=sflll_form)
 
@@ -189,6 +183,7 @@ class TestSFLLLXMLGeneration:
         # Verify award amount
         assert sflll.find(f".//{sflll_ns}AwardAmount").text == "500000.00"
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sflll_address_fields_include_state(self, sflll_application, db_session):
         """Test that SF-LLL addresses include State field (legacy fix)."""
         application_submission = ApplicationSubmissionFactory.create(

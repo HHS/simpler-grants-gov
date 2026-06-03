@@ -46,6 +46,7 @@ class TestSubmissionXMLAssembler:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         # Create SF424 form with XML transform config
@@ -434,6 +435,7 @@ class TestSubmissionXMLAssembler:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         # Create an UNSUPPORTED form (SF-424A doesn't have XML transform config)
@@ -608,7 +610,7 @@ class TestSubmissionXMLAssembler:
         assert Namespace.GLOB in root.nsmap.values()
 
     def test_get_supported_forms_filters_non_required_not_included(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self, sample_application, sample_application_submission, enable_factory_create, db_session
     ):
         """Test that non-required forms with is_included_in_submission=False are filtered out."""
         # Create a non-required form with XML support
@@ -642,7 +644,7 @@ class TestSubmissionXMLAssembler:
         assert supported_forms[0].form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_includes_non_required_when_included(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self, sample_application, sample_application_submission, enable_factory_create, db_session
     ):
         """Test that non-required forms with is_included_in_submission=True are included."""
         # Create a non-required form with XML support
@@ -694,7 +696,7 @@ class TestSubmissionXMLAssembler:
         assert supported_forms[0].form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_filters_non_required_null_is_included(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self, sample_application, sample_application_submission, enable_factory_create, db_session
     ):
         """Test that non-required forms with is_included_in_submission=None are filtered out."""
         # Create a non-required form with XML support

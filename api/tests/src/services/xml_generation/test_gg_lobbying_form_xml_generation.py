@@ -13,9 +13,11 @@ import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
+from src.db.models.competition_models import Form
 from src.form_schema.forms.gg_lobbying_form import (
     FORM_XML_TRANSFORM_RULES as GG_LOBBYING_FORM_TRANSFORM_RULES,
 )
+from src.form_schema.forms.gg_lobbying_form import GG_LobbyingForm_v1_1
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -27,13 +29,11 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
 
 
-@pytest.mark.xml_validation
 class TestGGLobbyingFormXMLGeneration:
     """Test cases for GG_LobbyingForm XML generation service."""
 
@@ -194,33 +194,32 @@ class TestGGLobbyingFormXMLGeneration:
         ), "Elements not in XSD sequence order"
 
 
-@pytest.mark.xml_validation
 class TestGGLobbyingFormXSDValidation:
     """XSD validation tests for GG_LobbyingForm XML."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+        """Create XSD validator with directory."""
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
         # Check if GG_LobbyingForm XSD exists
-        gg_lobbying_form_xsd_path = xsd_cache_dir / "GG_LobbyingForm-V1.1.xsd"
+        gg_lobbying_form_xsd_path = xsd_dir / "GG_LobbyingForm-V1.1.xsd"
         if not gg_lobbying_form_xsd_path.exists():
             pytest.skip(
-                "GG_LobbyingForm-V1.1.xsd not found in cache. Run 'flask task fetch-xsds' to download schemas."
+                "GG_LobbyingForm-V1.1.xsd not found. Run 'flask task fetch-xsds' to download schemas."
             )
-        return XSDValidator(xsd_cache_dir)
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def gg_lobbying_form_application(self, enable_factory_create, db_session: db.Session):
+    def gg_lobbying_form_application(
+        self, enable_factory_create, db_session: db.Session, seed_form_registry
+    ):
         """Create an application with GG_LobbyingForm form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -240,15 +239,10 @@ class TestGGLobbyingFormXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create GG_LobbyingForm form with XML transform config
-        gg_lobbying_form = FormFactory.create(
-            form_name="Grants.gov Lobbying Form",
-            short_form_name="GG_LobbyingForm",
-            form_version="1.1",
-            json_to_xml_schema=GG_LOBBYING_FORM_TRANSFORM_RULES,
-        )
+        gg_lobbying_form = db_session.get(Form, GG_LobbyingForm_v1_1.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="GG_LobbyingForm Test Application"
@@ -304,7 +298,8 @@ class TestGGLobbyingFormXSDValidation:
 
         # Extract GG_LobbyingForm form element
         gg_lobbying_ns = "{http://apply.grants.gov/forms/GG_LobbyingForm-V1.1}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         gg_lobbying_elements = forms_element.findall(f".//{gg_lobbying_ns}LobbyingForm")
@@ -327,7 +322,7 @@ class TestGGLobbyingFormXSDValidation:
         )
 
     def test_gg_lobbying_form_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
         """Test that GG_LobbyingForm with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -348,14 +343,10 @@ class TestGGLobbyingFormXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        gg_lobbying_form = FormFactory.create(
-            form_name="Grants.gov Lobbying Form",
-            short_form_name="GG_LobbyingForm",
-            form_version="1.1",
-            json_to_xml_schema=GG_LOBBYING_FORM_TRANSFORM_RULES,
-        )
+        gg_lobbying_form = db_session.get(Form, GG_LobbyingForm_v1_1.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="GG_LobbyingForm Minimal Test Application"
@@ -395,7 +386,8 @@ class TestGGLobbyingFormXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         gg_lobbying_ns = "{http://apply.grants.gov/forms/GG_LobbyingForm-V1.1}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         gg_lobbying_elements = forms_element.findall(f".//{gg_lobbying_ns}LobbyingForm")
         assert len(gg_lobbying_elements) == 1
 
