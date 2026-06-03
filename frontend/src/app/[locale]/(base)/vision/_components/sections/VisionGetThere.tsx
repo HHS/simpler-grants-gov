@@ -1,4 +1,4 @@
-import VisionPageSection from "src/app/[locale]/(base)/vision/_components/visionPageSection";
+import VisionPageSection from "src/app/[locale]/(base)/vision/_components/VisionPageSection";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { useTranslations } from "next-intl";
