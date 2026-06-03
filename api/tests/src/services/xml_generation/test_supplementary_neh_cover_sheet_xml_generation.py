@@ -7,9 +7,11 @@ import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
+from src.db.models.competition_models import Form
 from src.form_schema.forms.supplementary_neh_cover_sheet import (
     FORM_XML_TRANSFORM_RULES as NEH_COVER_SHEET_TRANSFORM_RULES,
 )
+from src.form_schema.forms.supplementary_neh_cover_sheet import SupplementaryNEHCoverSheet_v3_0
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -21,7 +23,6 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
@@ -500,7 +501,9 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
         return xsd_validator.xsd_cache_dir / xsd_filename
 
     @pytest.fixture
-    def neh_cover_sheet_application(self, enable_factory_create, db_session: db.Session):
+    def neh_cover_sheet_application(
+        self, enable_factory_create, db_session: db.Session, seed_form_registry
+    ):
         """Create an application with NEH Cover Sheet form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -520,15 +523,10 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create NEH Cover Sheet form with XML transform config
-        neh_form = FormFactory.create(
-            form_name="Supplementary Cover Sheet for NEH Grant Programs",
-            short_form_name="SupplementaryCoverSheetforNEHGrantPrograms",
-            form_version="3.0",
-            json_to_xml_schema=NEH_COVER_SHEET_TRANSFORM_RULES,
-        )
+        neh_form = db_session.get(Form, SupplementaryNEHCoverSheet_v3_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="NEH Cover Sheet Test Application"
@@ -618,7 +616,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
         )
 
     def test_neh_cover_sheet_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
         """Test that NEH Cover Sheet with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -639,14 +637,10 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        neh_form = FormFactory.create(
-            form_name="Supplementary Cover Sheet for NEH Grant Programs",
-            short_form_name="SupplementaryCoverSheetforNEHGrantPrograms",
-            form_version="3.0",
-            json_to_xml_schema=NEH_COVER_SHEET_TRANSFORM_RULES,
-        )
+        neh_form = db_session.get(Form, SupplementaryNEHCoverSheet_v3_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition,

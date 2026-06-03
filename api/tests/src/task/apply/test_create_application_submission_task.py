@@ -330,8 +330,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         """Test that project title and requested amount are set from values in application forms."""
         application = ApplicationFactory.create(
             application_status=ApplicationStatus.SUBMITTED,
-            # Add some other forms that we won't use for this
-            with_forms=True,
+            competition__competition_forms=[],
         )
 
         sf424 = db_session.merge(SF424_v4_0, load=True)

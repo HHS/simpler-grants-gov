@@ -10,6 +10,7 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 
 import random
 import uuid
+import warnings
 from datetime import datetime, timedelta, timezone
 
 import factory
@@ -83,6 +84,7 @@ from src.constants.static_role_values import (
 from src.db.models import agency_models
 from src.db.models.agency_models import Agency
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
+from src.form_schema.forms import SF424_v4_0
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -346,6 +348,7 @@ fake.add_provider(CustomProvider)
 factory.Faker.add_provider(CustomProvider)
 
 _db_session: db.Session | None = None
+_seed_form_registry_active: bool = False
 
 
 def get_db_session() -> db.Session:
@@ -1633,6 +1636,7 @@ class FormFactory(BaseFactory):
 
     form_id = Generators.UuidObj
     form_name = "Test form"
+
     # short_form_name will look like AB123A_1_2
     short_form_name = factory.LazyAttribute(
         lambda f: f"{fake.pystr_format(string_format="??###?")}_{f.form_version.replace('.', '_')}"
@@ -1722,6 +1726,52 @@ class FormFactory(BaseFactory):
             ),
         )
 
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        warnings.warn(
+            "FormFactory is deprecated. Use seed_form_registry + registry forms "
+            "or direct Form(...) instantiation instead.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        return super()._create(model_class, *args, **kwargs)
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        warnings.warn(
+            "FormFactory is deprecated. Use Form(...) instantiation instead.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        return super()._build(model_class, *args, **kwargs)
+
+
+def _get_default_competition_form() -> competition_models.Form:
+    """Return SF424 from the DB if seed_form_registry is active, else fall back to FormFactory."""
+    if _db_session is None:
+        return FormFactory.build()
+
+    if not _seed_form_registry_active:
+        warnings.warn(
+            "CompetitionFormFactory: SF424 not in DB — add seed_form_registry to your test. "
+            "Falling back to FormFactory (deprecated).",
+            DeprecationWarning,
+            stacklevel=4,
+        )
+        return FormFactory.create()
+
+    session = get_db_session()
+    form = session.get(competition_models.Form, SF424_v4_0.form_id)
+    if form is None:
+        warnings.warn(
+            "CompetitionFormFactory: SF424 not in DB — add seed_form_registry to your test. "
+            "Falling back to FormFactory (deprecated).",
+            DeprecationWarning,
+            stacklevel=4,
+        )
+        return FormFactory.create()
+    return form
+
 
 class CompetitionFormFactory(BaseFactory):
     class Meta:
@@ -1730,7 +1780,7 @@ class CompetitionFormFactory(BaseFactory):
     competition = factory.SubFactory(CompetitionFactory, competition_forms=[])
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
 
-    form = factory.SubFactory(FormFactory)
+    form = factory.LazyFunction(_get_default_competition_form)
     form_id = factory.LazyAttribute(lambda o: o.form.form_id)
 
     is_required = True
