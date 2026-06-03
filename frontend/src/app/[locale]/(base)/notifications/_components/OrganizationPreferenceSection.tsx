@@ -1,8 +1,9 @@
+import { NotificationOrganization } from "src/types/NotificationTypes";
+
 import { useTranslations } from "next-intl";
 import { ReactElement } from "react";
 
 import { NotificationPreferenceCard } from "./NotificationPreferenceCard";
-import { NotificationOrganization } from "./NotificationTypes";
 
 export interface OrganizationPreferenceSectionProps {
   organization: NotificationOrganization;
