@@ -66,7 +66,7 @@ We have two separate ways of formatting the logs which are controlled by the `LO
 
 ## Logging Extra Data in a Request
 
-The [src.logging.flask_logger](/api/src/logging/flask_logger.py) module adds logging functionality to Flask applications. It automatically adds useful data from the Flask request object to logs, logs the start and end of requests, and provides a mechanism for developers to dynamically add extra data to all subsequent logs for the current request.
+The [src.logging.flask_logger](/backend/grants_shared/src/grants_shared/logs/flask_logger.py) module adds logging functionality to Flask applications. It automatically adds useful data from the Flask request object to logs, logs the start and end of requests, and provides a mechanism for developers to dynamically add extra data to all subsequent logs for the current request.
 
 For example, if you would like to add the `opportunity_id` to every log message during the lifecycle of a request, then you can do:
 ```py
@@ -98,7 +98,7 @@ the code, or
 ## Automatic request log details
 
 Several fields are automatically attached to every log message of a request regardless
-of what you configure in the [flask_logger](/api/src/logging/flask_logger.py). This includes:
+of what you configure in the [flask_logger](/backend/grants_shared/src/grants_shared/logs/flask_logger.py). This includes:
 * Request ID
 * Request method (eg. `POST` or `PATCH`)
 * Request path
