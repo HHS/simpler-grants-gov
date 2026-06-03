@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import case, func, select
 from sqlalchemy.sql.elements import Label
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
 from src.constants.lookup_constants import AwardRecommendationType
 from src.db.models.award_recommendation_models import (
     AwardRecommendationApplicationSubmission,
