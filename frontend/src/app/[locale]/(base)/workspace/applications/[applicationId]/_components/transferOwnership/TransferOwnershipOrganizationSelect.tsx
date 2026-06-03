@@ -1,8 +1,7 @@
+import { LabeledSelect } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/LabeledSelect";
 import type { UserOrganization } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
-
-import { LabeledSelect } from "src/components/LabeledSelect";
 
 type TransferOwnershipOrganizationSelectProps = {
   onOrganizationChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;

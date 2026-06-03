@@ -1,9 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { ApplicationHistoryTable } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationHistoryTable";
 import { ApplicationHistory } from "src/types/applicationResponseTypes";
 import historyMock from "stories/components/application/history.mock.json";
-
-import { ApplicationHistoryTable } from "src/components/application/ApplicationHistoryTable";
 
 const applicationHistory = historyMock as ApplicationHistory[];
 

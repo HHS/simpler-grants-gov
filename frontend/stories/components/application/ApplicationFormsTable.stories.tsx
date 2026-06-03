@@ -1,9 +1,9 @@
+import { ApplicationFormsTable } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationFormsTable";
 import {
   ApplicationDetail,
   ApplicationStatus,
 } from "src/types/applicationResponseTypes";
 
-import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
 import competitionMock from "./competition.mock.json";
 
 const applicationDetailsObject: ApplicationDetail = {
