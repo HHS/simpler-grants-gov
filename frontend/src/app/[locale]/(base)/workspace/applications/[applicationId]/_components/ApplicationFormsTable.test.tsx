@@ -1,13 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { ApplicationFormsTable } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationFormsTable";
 import {
   ApplicationDetail,
   ApplicationFormDetail,
   ApplicationStatus,
 } from "src/types/applicationResponseTypes";
 import competitionMock from "stories/components/application/competition.mock.json";
-
-import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
 
 const clientFetchMock = jest.fn();
 

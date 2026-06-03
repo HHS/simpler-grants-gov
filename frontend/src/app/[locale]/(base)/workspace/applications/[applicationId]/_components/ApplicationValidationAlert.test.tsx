@@ -1,11 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import ApplicationValidationAlert from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationValidationAlert";
 import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import competitionMock from "stories/components/application/competition.mock.json";
-
-import ApplicationValidationAlert from "src/components/application/ApplicationValidationAlert";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),

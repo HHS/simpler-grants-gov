@@ -1,5 +1,7 @@
 "use client";
 
+import { EditAppFilingName } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/editAppFilingName/EditAppFilingName";
+import { TransferOwnershipModal } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/transferOwnership/TransferOwnershipModal";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationDetail,
@@ -21,8 +23,6 @@ import {
   SummaryBoxHeading,
 } from "@trussworks/react-uswds";
 
-import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
-import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { TransferOwnershipButton } from "./transferOwnership/TransferOwnershipButton";
 

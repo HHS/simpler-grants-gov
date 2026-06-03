@@ -7,46 +7,49 @@ jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-jest.mock("src/components/LabeledSelect", () => ({
-  LabeledSelect: ({
-    label,
-    placeholderLabel,
-    value,
-    onChange,
-    options,
-    getOptionValue,
-    getOptionLabel,
-    isDisabled,
-  }: {
-    label: string;
-    placeholderLabel: string;
-    value: string;
-    onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-    options: UserOrganization[];
-    getOptionValue: (option: UserOrganization) => string;
-    getOptionLabel: (option: UserOrganization) => string;
-    isDisabled?: boolean;
-  }) => (
-    <>
-      <label>{label}</label>
-      <select
-        aria-label={label}
-        value={value}
-        onChange={onChange}
-        disabled={isDisabled}
-      >
-        <option value="" disabled>
-          {placeholderLabel}
-        </option>
-        {options.map((option) => (
-          <option key={getOptionValue(option)} value={getOptionValue(option)}>
-            {getOptionLabel(option)}
+jest.mock(
+  "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/LabeledSelect.tsx",
+  () => ({
+    LabeledSelect: ({
+      label,
+      placeholderLabel,
+      value,
+      onChange,
+      options,
+      getOptionValue,
+      getOptionLabel,
+      isDisabled,
+    }: {
+      label: string;
+      placeholderLabel: string;
+      value: string;
+      onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+      options: UserOrganization[];
+      getOptionValue: (option: UserOrganization) => string;
+      getOptionLabel: (option: UserOrganization) => string;
+      isDisabled?: boolean;
+    }) => (
+      <>
+        <label>{label}</label>
+        <select
+          aria-label={label}
+          value={value}
+          onChange={onChange}
+          disabled={isDisabled}
+        >
+          <option value="" disabled>
+            {placeholderLabel}
           </option>
-        ))}
-      </select>
-    </>
-  ),
-}));
+          {options.map((option) => (
+            <option key={getOptionValue(option)} value={getOptionValue(option)}>
+              {getOptionLabel(option)}
+            </option>
+          ))}
+        </select>
+      </>
+    ),
+  }),
+);
 
 function buildOrganization(id: string, name: string): UserOrganization {
   return {
