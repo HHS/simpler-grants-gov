@@ -71,5 +71,7 @@ class TestErrorIfNotLocal:
     @pytest.mark.parametrize("env", ["staging", "prod", "production", "test"])
     def test_raises_for_non_local_environments(self, monkeypatch, env):
         monkeypatch.setenv("ENVIRONMENT", env)
-        with pytest.raises(Exception):
+        with pytest.raises(
+            Exception, match="Local-only process called when environment was set to non-local"
+        ):
             error_if_not_local()
