@@ -14,8 +14,15 @@ from grants_shared.adapters.db import PostgresDBClient
 from grants_shared.util.local import error_if_not_local
 from lxml import etree
 from pydantic import Field
+from sqlalchemy import delete, select
 
 import tests.src.db.models.factories as factories
+from src.constants.lookup_constants import ApplicationStatus
+from src.db.models.competition_models import (
+    Application,
+    ApplicationSubmission,
+    ApplicationSubmissionRetrieved,
+)
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -26,6 +33,7 @@ Add following to local.env
 CERT_DATA =
 KEY_DATA =
 SOAP_URI =
+SOAP_PARTNER_GATEWAY_URI=https://trainingws.grants.gov/
 For cert and key use awk command to replace newlines
 `awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;} bps_grantors.crt`
 `awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;} bps_grantors.key`
@@ -57,7 +65,7 @@ class ValidateSoapContext:
 
 
 def get_response(soap_context: ValidateSoapContext, request_operation: str) -> requests.Response:
-    cert = _config.cert_data
+    cert = _config.cert_data.replace("\\n", "\n")
     encoded = quote(cert, safe="")
     headers = {"X-Amzn-Mtls-Clientcert": encoded, **HEADERS}
     data = REQUEST_BODY[request_operation]
@@ -117,6 +125,21 @@ def get_grantors_get_submission_list_expanded_request_body() -> bytes:
     """.encode()
 
 
+def get_grantors_get_submission_list_request_body() -> bytes:
+    return """
+        <soapenv:Envelope
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+        xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0"
+        xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:GetSubmissionListRequest>
+        </agen:GetSubmissionListRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """.encode()
+
+
 def get_grantors_get_confirm_application_delivery_body() -> bytes:
     return """
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
@@ -147,6 +170,7 @@ def get_update_application_info_body() -> bytes:
 
 REQUEST_BODY = {
     "GetSubmissionListExpandedRequest": get_grantors_get_submission_list_expanded_request_body(),
+    "GetSubmissionListRequest": get_grantors_get_submission_list_request_body(),
     "GetApplicationZipRequest": get_grantors_get_application_zip_request_body(),
     "ConfirmApplicationDeliveryRequest": get_grantors_get_confirm_application_delivery_body(),
     "UpdateApplicationInfoRequest": get_update_application_info_body(),
@@ -265,9 +289,36 @@ def validate_grantors_get_submission_list_expanded_request(
     logger.info("Validation: GetSubmissionListExpanded is validated")
 
 
+def validate_grantors_get_submission_list_request(
+    soap_context: ValidateSoapContext,
+) -> None:
+    resp = get_response(soap_context, "GetSubmissionListRequest")
+    assert resp.status_code == 200
+    fixed_bytes = clean_xml_namespaces(resp.content)
+    validate_response_xml(fixed_bytes, "GetSubmissionListResponse", soap_context)
+    logger.info("Validation: GetSubmissionListResponse is validated")
+
+
 def validate_confirm_application_delivery_request(
     soap_context: ValidateSoapContext,
 ) -> None:
+    # Reset the application_status to get a successful response
+    with soap_context.db_session.begin():
+        application_submission = soap_context.db_session.execute(
+            select(ApplicationSubmission)
+            .join(Application)
+            .where(ApplicationSubmission.legacy_tracking_number == 80000000)
+        ).scalar_one_or_none()
+        application_submission.has_tracking = False
+        soap_context.db_session.execute(
+            delete(ApplicationSubmissionRetrieved).where(
+                ApplicationSubmissionRetrieved.application_submission_id
+                == application_submission.application_submission_id
+            )
+        )
+        application = application_submission.application
+        application.application_status = ApplicationStatus.ACCEPTED
+
     resp = get_response(soap_context, "ConfirmApplicationDeliveryRequest")
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
@@ -310,6 +361,7 @@ def get_credentials(stack: ExitStack) -> tuple:
 VALIDATIONS = [
     validate_grantors_get_application_zip_request,
     validate_grantors_get_submission_list_expanded_request,
+    validate_grantors_get_submission_list_request,
     validate_confirm_application_delivery_request,
     validate_update_application_info_request,
 ]
