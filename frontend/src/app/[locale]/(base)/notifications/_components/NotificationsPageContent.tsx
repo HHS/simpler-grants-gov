@@ -1,15 +1,16 @@
 "use client";
 
-import { ReactElement, startTransition, useState } from "react";
-import { Alert, GridContainer } from "@trussworks/react-uswds";
-
-import { updateSavedOpportunityNotificationPreferenceAction } from "./actions";
-import { NotificationPreferenceCard } from "./NotificationPreferenceCard";
+import { updateSavedOpportunityNotificationPreferenceAction } from "src/app/[locale]/(base)/notifications/actions";
 import {
   NotificationOrganization,
   NotificationPreferenceKey,
   NotificationPreferenceValues,
-} from "./NotificationTypes";
+} from "src/types/NotificationTypes";
+
+import { ReactElement, startTransition, useState } from "react";
+import { Alert, GridContainer } from "@trussworks/react-uswds";
+
+import { NotificationPreferenceCard } from "./NotificationPreferenceCard";
 import { OrganizationPreferenceSection } from "./OrganizationPreferenceSection";
 
 export interface NotificationsPageContentProps {
