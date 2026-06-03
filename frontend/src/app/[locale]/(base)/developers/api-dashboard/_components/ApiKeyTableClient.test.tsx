@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import ApiKeyTableClient from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTableClient";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import { ApiKey } from "src/types/apiKeyTypes";
@@ -9,8 +10,6 @@ import {
   inactiveApiKey,
   usedApiKey,
 } from "src/utils/testing/fixtures";
-
-import ApiKeyTableClient from "src/components/developers/apiDashboard/ApiKeyTableClient";
 
 const mockClientFetch = jest.fn();
 const mockWriteText = jest.fn(() => Promise.resolve());

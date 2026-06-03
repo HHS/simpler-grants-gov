@@ -1,9 +1,9 @@
+import DevelopersPageSection from "src/app/[locale]/(base)/developers/_components/DevelopersPageSection";
 import { UswdsIconNames } from "src/types/generalTypes";
 
 import { useMessages, useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
 
-import DevelopersPageSection from "src/components/developers/DevelopersPageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
 
 interface DevelopersInfoServerProps {
