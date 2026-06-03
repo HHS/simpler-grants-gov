@@ -15,8 +15,8 @@ import {
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
-import { SimplerModal } from "src/components/SimplerModal";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { SimplerModal } from "src/components/core/SimplerModal";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { StartApplicationDescription } from "./StartApplicationDescription";
 import { StartApplicationInfoBanner } from "./StartApplicationInfoBanner";
 import {

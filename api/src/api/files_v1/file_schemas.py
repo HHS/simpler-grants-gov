@@ -12,6 +12,17 @@ class FileScanStatusUpdateRequestSchema(Schema):
             "example": FileScanStatus.COMPLETE,
         },
     )
+    file_location = fields.String(
+        required=True,
+        validate=validators.Regexp(
+            r"^s3://[^/]+/.+",
+            error_message="file_location must be an s3:// path",
+        ),
+        metadata={
+            "description": "The s3 path where the scanned file now lives",
+            "example": "s3://example-bucket/scanned/abc/example.txt",
+        },
+    )
 
 
 class FileScanStatusUpdateResponseSchema(AbstractResponseSchema):

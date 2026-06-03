@@ -57,3 +57,4 @@ class ValidationErrorType(StrEnum):
 
     # File upload validation error types
     PENDING_FILE_UPLOAD_LIMIT_EXCEEDED = "pending_file_upload_limit_exceeded"
+    FILE_NOT_FOUND_AT_LOCATION = "file_not_found_at_location"

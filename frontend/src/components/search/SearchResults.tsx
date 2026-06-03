@@ -6,7 +6,7 @@ import {
 
 import { Suspense } from "react";
 
-import { ClientSideUrlUpdater } from "src/components/ClientSideUrlUpdater";
+import { ClientSideUrlUpdater } from "src/components/core/ClientSideUrlUpdater";
 import { SearchError } from "./SearchError";
 import { SearchResultsSkeleton, SearchResultsView } from "./SearchResultsView";
 

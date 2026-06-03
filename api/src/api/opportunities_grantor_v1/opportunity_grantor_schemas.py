@@ -14,6 +14,7 @@ from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMi
 from src.api.schemas.search_schema import BoolSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicantType,
+    CompetitionOpenToApplicant,
     FundingCategory,
     FundingInstrument,
     OpportunityCategory,
@@ -621,3 +622,50 @@ class DeleteAttachmentResponseV1Schema(ResponseWithErrorsSchema):
 
 class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunityGrantorSchema())
+
+
+class CompetitionCreateRequestSchema(Schema):
+    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ request"""
+
+    competition_title = fields.String(
+        required=True,
+        metadata={
+            "description": "The title of the competition",
+            "example": "Proposal for Advanced Research",
+        },
+    )
+    opening_date = fields.Date(
+        required=True,
+        allow_none=True,
+        metadata={"description": "The opening date of the competition", "example": "2026-05-11"},
+    )
+    closing_date = fields.Date(
+        required=True,
+        allow_none=True,
+        metadata={"description": "The closing date of the competition", "example": "2026-05-11"},
+    )
+    contact_info = fields.String(
+        required=True,
+        metadata={
+            "description": "Contact information for the competition",
+            "example": "Bob Smith\nFakeMail@fake.com",
+        },
+    )
+    open_to_applicants = fields.List(
+        fields.Enum(CompetitionOpenToApplicant),
+        required=True,
+        validate=validators.Length(min=1),
+        metadata={
+            "description": "List of applicant types eligible for this competition",
+            "example": [
+                CompetitionOpenToApplicant.INDIVIDUAL,
+                CompetitionOpenToApplicant.ORGANIZATION,
+            ],
+        },
+    )
+
+
+class CompetitionCreateResponseSchema(AbstractResponseSchema):
+    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ response"""
+
+    data = fields.Nested(CompetitionAlphaSchema())

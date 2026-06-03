@@ -84,7 +84,7 @@ interface SimplerModalProps {
 
 const simplerModalMock = jest.fn<void, [SimplerModalProps]>();
 
-jest.mock("src/components/SimplerModal", () => ({
+jest.mock("src/components/core/SimplerModal", () => ({
   SimplerModal: (props: SimplerModalProps) => {
     simplerModalMock(props);
     return <div data-testid="simpler-modal">{props.children}</div>;

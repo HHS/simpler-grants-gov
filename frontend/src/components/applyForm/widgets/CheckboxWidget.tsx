@@ -3,11 +3,11 @@
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 
-import React, { ChangeEvent, FocusEvent, useCallback } from "react";
+import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { Checkbox, FormGroup } from "@trussworks/react-uswds";
 
-import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
+import { FieldErrors } from "src/components/core/forms/FieldErrors";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 function CheckboxWidget<

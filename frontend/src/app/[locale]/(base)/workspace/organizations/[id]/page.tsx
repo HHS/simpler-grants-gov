@@ -6,9 +6,9 @@ import { getOrganizationDetails } from "src/services/fetch/fetchers/organization
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
+import { AuthorizationGate } from "src/components/core/AuthorizationGate";
+import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { OrganizationDetail } from "src/components/organization/OrganizationDetail";
-import { AuthorizationGate } from "src/components/user/AuthorizationGate";
-import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 
 type OrganizationDetailPageProps = {
   params: Promise<{ id: string }>;
