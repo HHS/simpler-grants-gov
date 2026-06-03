@@ -257,11 +257,12 @@ start-mock-oauth2:
 # Testing
 ##################################################
 
-test: ## Run all tests except for XML validation tests
-	$(PY_RUN_CMD) pytest -m "not xml_validation" $(args)
+test: ## Run all tests
+	$(PY_RUN_CMD) pytest $(args)
+
 
 test-coverage: ## Run tests and generate coverage report
-	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not xml_validation" $(args)
+	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest $(args)
 	$(PY_RUN_CMD) coverage report
 
 test-coverage-report: ## Open HTML test coverage report
@@ -369,8 +370,8 @@ help: ## Prints the help documentation and info about each command
 test-xml-validation: ## Run XML validation tests against XSD schemas (usage: make test-xml-validation form=SF424_4_0)
 	$(PY_RUN_CMD) flask task validate-xml-generation $(if $(form),--form $(form)) $(args)
 
-fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds cache_dir=./xsd_cache)
-	$(PY_RUN_CMD) flask task fetch-xsds $(if $(cache_dir),--cache-dir $(cache_dir)) $(if $(form),--form $(form)) $(args)
+fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds xsd_dir=../services/xml_generation/xsds/)
+	$(PY_RUN_CMD) flask task fetch-xsds $(if $(cache_dir),--xsd-dir $(xsd_dir)) $(if $(form),--form $(form)) $(args)
 
 ##################################################
 # Load testing
@@ -413,7 +414,6 @@ validate-xml-generation: ## Run XML generation validation tests
 
 run-xml-validator: ## Run XML validator tool directly
 	$(PY_RUN_CMD) python tool/xml_validator.py
-
 
 #####################
 # Workflow State Machine

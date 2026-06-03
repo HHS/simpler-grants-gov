@@ -68,32 +68,38 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams("page=1"),
 }));
 
-jest.mock("src/components/workspace/AgencySelector", () => ({
-  AgencySelector: ({
-    agencies,
-    className,
-  }: {
-    agencies: UserAgency[];
-    className?: string;
-  }) => (
-    <div>
-      <label htmlFor="agency-selector-mock" data-testid="agency-selector-label">
-        Select Agency
-      </label>
-      <select
-        id="agency-selector-mock"
-        data-testid="agency-selector"
-        data-classname={className}
-      >
-        {agencies.map((a) => (
-          <option key={a.agency_id} value={a.agency_id}>
-            {a.agency_name}
-          </option>
-        ))}
-      </select>
-    </div>
-  ),
-}));
+jest.mock(
+  "src/app/[locale]/(base)/grantor/opportunities/_components/AgencySelector",
+  () => ({
+    AgencySelector: ({
+      agencies,
+      className,
+    }: {
+      agencies: UserAgency[];
+      className?: string;
+    }) => (
+      <div>
+        <label
+          htmlFor="agency-selector-mock"
+          data-testid="agency-selector-label"
+        >
+          Select Agency
+        </label>
+        <select
+          id="agency-selector-mock"
+          data-testid="agency-selector"
+          data-classname={className}
+        >
+          {agencies.map((a) => (
+            <option key={a.agency_id} value={a.agency_id}>
+              {a.agency_name}
+            </option>
+          ))}
+        </select>
+      </div>
+    ),
+  }),
+);
 
 const userSession: UserSession = {
   token: "fake token",

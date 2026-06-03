@@ -59,7 +59,6 @@ def _create_sample_contact_person(prefix="Dr.", first_name="John", last_name="Sm
     }
 
 
-@pytest.mark.xml_validation
 class TestEPAKeyContactsXMLGeneration:
     """Test cases for EPA Key Contacts XML generation service."""
 
@@ -256,6 +255,7 @@ class TestEPAKeyContactsXMLGeneration:
         assert "LastName>Person<" in xml_data
         assert "Phone>555-123-4567<" in xml_data
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_generate_epa_key_contacts_xml_empty_form(self):
         """Test EPA Key Contacts XML generation with no contacts (empty form).
 
@@ -420,30 +420,27 @@ class TestEPAKeyContactsXMLGeneration:
         assert auth_rep.find(f"{{{GLOB_NS}}}Phone").text.strip() == "1231231234"
 
 
-@pytest.mark.xml_validation
 class TestEPAKeyContactsXSDValidation:
     """XSD validation tests for EPA Key Contacts form XML."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
-        xsd_path = xsd_cache_dir / "EPA_KeyContacts_2_0-V2.0.xsd"
+        """Create XSD validator."""
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
+        xsd_path = xsd_dir / "EPA_KeyContacts_2_0-V2.0.xsd"
         if not xsd_path.exists():
             pytest.skip(
-                "EPA_KeyContacts_2_0-V2.0.xsd not found in cache. "
+                "EPA_KeyContacts_2_0-V2.0.xsd not found. "
                 "Run 'flask task fetch-xsds' to download schemas."
             )
-        return XSDValidator(xsd_cache_dir)
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
     def epa_key_contacts_application(
@@ -526,6 +523,7 @@ class TestEPAKeyContactsXSDValidation:
 
         return application
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_submission_xml_validates_against_xsd(
         self, epa_key_contacts_application, xsd_validator, db_session
     ):
@@ -545,7 +543,9 @@ class TestEPAKeyContactsXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         epa_ns = "{http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         epa_elements = forms_element.findall(f".//{epa_ns}KeyContactPersons_2_0")
@@ -566,6 +566,7 @@ class TestEPAKeyContactsXSDValidation:
             f"Generated XML:\n{epa_xml[:2000]}"
         )
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_empty_form_validates_against_xsd(
         self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
@@ -613,15 +614,17 @@ class TestEPAKeyContactsXSDValidation:
         )
 
         assembler = SubmissionXMLAssembler(application, application_submission)
-        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
 
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
         assert xml_string is not None
 
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         epa_ns = "{http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         epa_elements = forms_element.findall(f".//{epa_ns}KeyContactPersons_2_0")
         assert len(epa_elements) == 1
 

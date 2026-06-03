@@ -10,7 +10,7 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import {
   findSignOutButton,
   performStagingLogin,
-} from "tests/e2e/utils/perform-login-utils";
+} from "tests/e2e/utils/auth/perform-login-utils";
 
 const { SMOKE, AUTH } = VALID_TAGS;
 

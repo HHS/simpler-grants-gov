@@ -1,5 +1,8 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
+import ApplicationContainer from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationContainer";
+import { ApplicationHistoryCardProps } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationHistoryTable";
+import { ApplicationDetailsCardProps } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/InformationCard";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
@@ -15,9 +18,6 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import ApplicationContainer from "src/components/application/ApplicationContainer";
-import { ApplicationHistoryCardProps } from "src/components/application/ApplicationHistoryTable";
-import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
 import Breadcrumbs from "src/components/core/Breadcrumbs";
 
 export const dynamic = "force-dynamic";

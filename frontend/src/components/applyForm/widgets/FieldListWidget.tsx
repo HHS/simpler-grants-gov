@@ -17,6 +17,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 import { isFieldRequired } from "src/components/applyForm/utils";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { renderWidget } from "./WidgetRenderers";
 
 /**
@@ -312,6 +313,7 @@ function FieldListEntry({
           className="button--danger margin-left-auto"
           outline
         >
+          <USWDSIcon name="delete" />
           {t("deleteEntry")}
         </Button>
       </div>
@@ -502,7 +504,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   return (
     <div
       id={id}
-      className="field-list-widget border border-base-lighter radius-md padding-2 margin-bottom-2"
+      className="field-list-widget border border-base-lighter radius-md padding-2 margin-y-2"
     >
       {label ? <h3>{label}</h3> : null}
       {description ? <p>{description}</p> : null}
@@ -572,6 +574,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
           disabled={!canAddEntry}
           outline
         >
+          <USWDSIcon name="add" />
           {t("addEntry")}
         </Button>
       </div>
