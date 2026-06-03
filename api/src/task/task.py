@@ -1,4 +1,5 @@
 import abc
+import itertools
 import logging
 import time
 from enum import StrEnum
@@ -9,6 +10,8 @@ import grants_shared.adapters.db as db
 from src.db.models.task_models import JobLog, JobStatus
 
 logger = logging.getLogger(__name__)
+
+TASK_CLASS_KEY = "task_class"
 
 
 class Task(abc.ABC, metaclass=abc.ABCMeta):
@@ -56,7 +59,7 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             duration = round((end - start), 3)
             self.set_metrics({"task_duration_sec": duration})
 
-            logger.info("Completed %s in %s seconds", self.cls_name(), duration, extra=self.metrics)
+            self._log_metrics(duration)
         except Exception:
             job_succeeded = False
             raise
@@ -71,7 +74,7 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
     def initialize_metrics(self) -> None:
         zero_metrics_dict: dict[str, Any] = {metric: 0 for metric in self.Metrics}
-        zero_metrics_dict["task_class"] = self.cls_name()
+        zero_metrics_dict[TASK_CLASS_KEY] = self.cls_name()
         self.set_metrics(zero_metrics_dict)
 
     def set_metrics(self, metrics: dict[str, Any]) -> None:
@@ -86,6 +89,38 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
         if prefix is not None:
             # Rather than re-implement the above, just re-use the function without a prefix
             self.increment(f"{prefix}.{name}", value, prefix=None)
+
+    def _log_metrics(self, duration: float) -> None:
+        """Log metrics out, handling metrics if they exceed the maximum number of reportable metrics."""
+
+        # New Relic has a limit of 255 metrics maximum. It won't ingest the logs
+        # if there are more than that number of key-value pairs. In addition to the metrics
+        # we've added, we add various other attributes to the logs (environment, ecs info),
+        # so we should assume a chunk of that 255 is already reserved. For simplicity,
+        # if there are more than 100 metrics, we'll be careful and batch the log message.
+        if len(self.metrics) > 100:
+            # add a warning, we should probably refactor something if this is regularly
+            # happening, but we'll account for it below.
+            logger.warning(
+                "A large number of metrics is being added for this task",
+                extra={TASK_CLASS_KEY: self.cls_name()},
+            )
+
+            metric_batches: list[dict[str, Any]] = []
+
+            # Since a lot of our dashboards depend on pulling values out by the task_class
+            # make sure that's included in every batch automatically.
+            iter_metrics = {k: v for k, v in self.metrics.items() if k != TASK_CLASS_KEY}
+            for batch in itertools.batched(iter_metrics.items(), n=100, strict=False):
+                metric_batch = {k: v for k, v in batch}
+                metric_batch[TASK_CLASS_KEY] = self.cls_name()
+                metric_batches.append(metric_batch)
+
+        else:  # By default, batch of 1 of everything
+            metric_batches = [self.metrics]
+
+        for metric_batch in metric_batches:
+            logger.info("Completed %s in %s seconds", self.cls_name(), duration, extra=metric_batch)
 
     def cls_name(self) -> str:
         return self.__class__.__name__
