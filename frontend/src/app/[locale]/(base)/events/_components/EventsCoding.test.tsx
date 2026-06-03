@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import EventsCoding from "src/app/[locale]/(base)/events/_components/EventsCoding";
+
+import EventsCoding from "./EventsCoding";
 
 describe("Events coding Content", () => {
   it("Renders without errors", () => {
