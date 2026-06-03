@@ -6,8 +6,7 @@ import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Form
-from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES, SF424_v4_0
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.services.xml_generation.constants import Namespace
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
@@ -27,7 +26,7 @@ class TestSubmissionXMLAssembler:
     """Test cases for SubmissionXMLAssembler."""
 
     @pytest.fixture
-    def sample_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
+    def sample_application(self, enable_factory_create, db_session: db.Session):
         """Create a sample application with SF424 form for testing."""
         agency = AgencyFactory.create()
 
@@ -50,7 +49,13 @@ class TestSubmissionXMLAssembler:
             competition_forms=[],
         )
 
-        sf424_form = db_session.get(Form, SF424_v4_0.form_id)
+        # Create SF424 form with XML transform config
+        sf424_form = FormFactory.create(
+            form_name="Application for Federal Assistance (SF-424)",
+            short_form_name="SF424_4_0",
+            form_version="4.0",
+            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
+        )
 
         application = ApplicationFactory.create(
             competition=competition, application_name="Test Application"
