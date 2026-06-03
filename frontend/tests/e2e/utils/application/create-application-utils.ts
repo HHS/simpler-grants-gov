@@ -2,8 +2,7 @@
 // Usage: await createApplication(page, opportunityUrl, orgLabel);
 import { expect, type Locator, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
-
-import { gotoWithRetry } from "./lifecycle-utils";
+import { gotoWithRetry } from "tests/e2e/utils/common/lifecycle-utils";
 
 const { baseUrl } = playwrightEnv;
 

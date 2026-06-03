@@ -2,7 +2,7 @@
 // Handles dropdown page fields using selector and test ID properties.
 // Usage: import { dropdownHandler } from "tests/e2e/utils/common/dropdown-handler";
 
-import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
+import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
 
 import { FieldHandler } from "./types";
 

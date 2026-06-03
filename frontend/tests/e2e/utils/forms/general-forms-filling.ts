@@ -1,5 +1,5 @@
+import { Page, TestInfo } from "@playwright/test";
 // Orchestrates page-field filling by dispatching handlers from each field type and properties.
-import type { Page, TestInfo } from "@playwright/test";
 import { fieldHandlerDispatcher } from "tests/e2e/utils/common/index";
 import {
   FillFieldDefinition,
