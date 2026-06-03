@@ -10,7 +10,7 @@ import Link from "next/link";
 import { ReactElement } from "react";
 
 import { SavedOpportunityTag } from "src/components/saved-opportunities/buildSavedOpportunityTags";
-import SearchResultListItemStatus from "./SearchResultListItemStatus";
+import SearchResultsListItemStatus from "./SearchResultsListItemStatus";
 
 interface SearchResultsListItemProps {
   opportunity: BaseOpportunity;
@@ -62,7 +62,7 @@ export default function SearchResultsListItem({
       </h2>
       <div className="saved-opportunity-card__status-row">
         <dl className="search-result-status">
-          <SearchResultListItemStatus
+          <SearchResultsListItemStatus
             archiveDate={opportunity.summary?.archive_date}
             archivedString={t("resultsListItem.status.archived")}
             closedDate={opportunity.summary?.close_date}
