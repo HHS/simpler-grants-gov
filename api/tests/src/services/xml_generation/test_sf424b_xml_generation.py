@@ -13,7 +13,9 @@ import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
+from src.db.models.competition_models import Form
 from src.form_schema.forms.sf424b import FORM_XML_TRANSFORM_RULES as SF424B_TRANSFORM_RULES
+from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -25,7 +27,6 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
@@ -402,7 +403,7 @@ class TestSF424BXSDValidation:
         return xsd_validator.xsd_cache_dir / xsd_filename
 
     @pytest.fixture
-    def sf424b_application(self, enable_factory_create, db_session: db.Session):
+    def sf424b_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
         """Create an application with SF-424B form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -422,15 +423,10 @@ class TestSF424BXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create SF-424B form with XML transform config
-        sf424b_form = FormFactory.create(
-            form_name="SF424B",
-            short_form_name="SF424B",
-            form_version="1.1",
-            json_to_xml_schema=SF424B_TRANSFORM_RULES,
-        )
+        sf424b_form = db_session.get(Form, SF424b_v1_1.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-424B Test Application"
@@ -500,7 +496,7 @@ class TestSF424BXSDValidation:
         )
 
     def test_sf424b_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
         """Test that SF-424B with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -521,14 +517,10 @@ class TestSF424BXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        sf424b_form = FormFactory.create(
-            form_name="SF424B",
-            short_form_name="SF424B",
-            form_version="1.1",
-            json_to_xml_schema=SF424B_TRANSFORM_RULES,
-        )
+        sf424b_form = db_session.get(Form, SF424b_v1_1.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-424B Minimal Test Application"
