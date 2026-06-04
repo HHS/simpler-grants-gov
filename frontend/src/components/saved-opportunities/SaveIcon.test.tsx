@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import SaveIcon from "src/components/SaveIcon";
+import SaveIcon from "src/components/saved-opportunities/SaveIcon";
 
 describe("SaveIcon", () => {
   it("renders without errors", () => {
