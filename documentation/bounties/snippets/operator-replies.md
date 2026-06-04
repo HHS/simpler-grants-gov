@@ -24,6 +24,7 @@ drives most of these; escalations are noted per snippet. Replace every placehold
 Thanks @handle — your claim is confirmed and you've been added to the tracking table. 🎉
 
 A few reminders:
+- Please email me, nicamellifera@navapbc.com, with your github handle and a link to the issue, so I can contact you privately during the claim process. (if you can beleive it, none of the messages you get here are automatic, and right now bounties run off a single person processing them with copy/paste 😅)
 - This claim stays active for **14 days**. Keep it alive with a commit, comment, or push; otherwise it goes stale and reopens to others.
 - Need more time? Comment a substantive progress update before the 14-day mark and you can request **one 7-day extension**.
 - When you open your PR, include `Closes #NNN` in the description so it links back here.
@@ -39,7 +40,7 @@ Questions about scope or acceptance criteria? Just ask here. Happy building!
 > Contributor already holds 3 active claims (SOP Rule 3). Governance: OS Associate.
 
 ```markdown
-Thanks for your interest, @handle! You currently hold the maximum of **3 active claims** across the bounty program, so I can't add this one yet.
+Thanks for your interest, @handle! You currently hold the maximum of **3 active claims** across the bounty program, so I can't add this one.
 
 Once you close one out — by submitting a PR, withdrawing with `/withdraw`, or letting a claim lapse — comment `/claim` here again and I'll get you added.
 ```
@@ -211,13 +212,12 @@ Hi <name>,
 
 Congratulations on your merged contribution to #NNN — the $AMOUNT bounty is approved and ready to pay.
 
-One step first: with this payment, your total bounty payments from the program this calendar year will reach or exceed $600. US tax rules require us to collect an IRS Form W-9 before releasing a payment that crosses that threshold. (At year end, Nava issues a Form 1099-NEC to any contributor paid $600 or more.)
+One more step: with this payment, your total bounty payments from the program this calendar year will reach or exceed $600. US tax rules require us to collect an IRS Form W-9 before releasing a payment that crosses that threshold. (At year end, Nava issues a Form 1099-NEC to any contributor paid $600 or more.)
 
 Please complete and return a W-9 by <date — 14 days out>:
 - Blank form and instructions: https://www.irs.gov/forms-pubs/about-form-w-9
-- Return it securely via: <secure return method — do NOT ask for it in a GitHub comment or plain email reply>
-
-Your payment is on hold until we receive the completed form. If it isn't returned by <date>, the payment is forfeited to the program reserve under the Terms of Service — though your contribution remains merged either way, and you can reach out anytime to sort it out.
+- Return it securely via a google drive or drop-box link sent to nicamellifera@navapbc.com
+Your payment is on hold until we receive the completed form. If it isn't returned within 14 days from the sending of this email, the payment is forfeited to the program reserve under the Terms of Service — though your contribution remains merged either way, and you can reach out anytime to sort it out.
 
 Questions are welcome. Thanks for your work on Simpler Grants.
 
@@ -266,8 +266,8 @@ the paid banner + status:paid.
 🎉 Paid! @handle, your $AMOUNT bounty for #NNN was sent via Tremendous on <date> — check the email on your GitHub account.
 
 Thank you for contributing to Simpler Grants. Two quick things:
-- We'd love 2 minutes of your feedback on how this went: **<survey link>**
-- This isn't a one-time thing — browse the [open bounties](../blob/main/README.md#bounty-board) anytime, and unpaid contributions are just as welcome.
+- [We'd love 2 minutes of your feedback on how this went](https://docs.google.com/forms/d/e/1FAIpQLSe0r5sFEXpWL6HxglPAEkj9s4ktMELJ3pi6m_BCntZ_7ucpKA/viewform?usp=dialog)
+- This isn't a one-time thing — browse the [open bounties](README.md#bounty-board) anytime, and unpaid contributions are just as welcome.
 
 Hope to see you on the next one. 🙌
 ```
