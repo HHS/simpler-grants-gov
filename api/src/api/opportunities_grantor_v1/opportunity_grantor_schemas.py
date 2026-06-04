@@ -669,3 +669,45 @@ class CompetitionCreateResponseSchema(AbstractResponseSchema):
     """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ response"""
 
     data = fields.Nested(CompetitionAlphaSchema())
+
+
+class CompetitionUpdateRequestSchema(Schema):
+    """Schema for PUT /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id request"""
+
+    competition_title = fields.String(
+        required=True,
+        metadata={
+            "description": "The title of the competition",
+            "example": "Updated Proposal for Advanced Research",
+        },
+    )
+    closing_date = fields.Date(
+        required=True,
+        allow_none=True,
+        metadata={"description": "The closing date of the competition", "example": "2026-05-11"},
+    )
+    contact_info = fields.String(
+        required=True,
+        metadata={
+            "description": "Contact information for the competition",
+            "example": "Bob Smith\nFakeMail@fake.com",
+        },
+    )
+    open_to_applicants = fields.List(
+        fields.Enum(CompetitionOpenToApplicant),
+        required=True,
+        validate=validators.Length(min=1),
+        metadata={
+            "description": "List of applicant types eligible for this competition",
+            "example": [
+                CompetitionOpenToApplicant.INDIVIDUAL,
+                CompetitionOpenToApplicant.ORGANIZATION,
+            ],
+        },
+    )
+
+
+class CompetitionUpdateResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id response"""
+
+    data = fields.Nested(CompetitionAlphaSchema())
