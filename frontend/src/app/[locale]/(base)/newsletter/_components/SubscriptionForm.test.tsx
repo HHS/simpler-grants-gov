@@ -1,13 +1,22 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import SubscriptionForm from "src/app/[locale]/(base)/newsletter/_components/SubscriptionForm";
 
-const mockSubscribeEmail = jest.fn();
-
-jest.mock("src/app/[locale]/(base)/newsletter/actions", () => ({
-  subscribeEmail: (...args: unknown[]): unknown => mockSubscribeEmail(...args),
+const mockRouterPush = jest.fn();
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockRouterPush }),
 }));
 
 describe("SubscriptionForm", () => {
+  let originalFetch: typeof global.fetch;
+
+  beforeAll(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterAll(() => {
+    global.fetch = originalFetch;
+  });
+
   it("renders", () => {
     render(<SubscriptionForm />);
 
@@ -16,8 +25,13 @@ describe("SubscriptionForm", () => {
     expect(button).toBeInTheDocument();
   });
 
-  it("calls subscribeEmail action on submit", () => {
-    mockSubscribeEmail.mockImplementation(() => Promise.resolve());
+  it("calls /api/newsletter/subscribe on submit", async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({ success: true }),
+      }),
+    ) as jest.Mock;
+
     render(<SubscriptionForm />);
 
     const button = screen.getByRole("button", { name: "form.button" });
@@ -25,42 +39,50 @@ describe("SubscriptionForm", () => {
       button.click();
     });
 
-    expect(mockSubscribeEmail).toHaveBeenCalledWith(
-      { errorMessage: "", validationErrors: {} },
-      expect.any(FormData),
-    );
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/newsletter/subscribe",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
   });
 
-  // unclear why, but React server actions are still not working with Jest here
-  // action function is replaced with `javascript:throw new Error('A React form was unexpectedly submitted')`
-  // See also https://github.com/facebook/react/blob/f83903bfcc5a61811bd1b69b14f0ebbac4754462/packages/react-dom-bindings/src/client/ReactDOMComponent.js#L468
-  // - DWS 2-12-25
-  // eslint-disable-next-line jest/no-disabled-tests
-  it.skip("shows relevant errors returned by action", () => {
-    mockSubscribeEmail.mockImplementation(() =>
+  it("redirects to confirmation page on success", async () => {
+    global.fetch = jest.fn(() =>
       Promise.resolve({
-        errorMessage: "an error message",
-        validationErrors: {
-          name: "bad name, sorry",
-          email: "this really was not a valid email",
-        },
+         json: () => Promise.resolve({ success: true }),
       }),
-    );
-    const { rerender } = render(<SubscriptionForm />);
+     ) as jest.Mock;
+
+    render(<SubscriptionForm />);
 
     const button = screen.getByRole("button", { name: "form.button" });
     act(() => {
       button.click();
     });
 
-    rerender(<SubscriptionForm />);
+    await waitFor(() => {
+      expect(mockRouterPush).toHaveBeenCalledWith("/newsletter/confirmation");
+    });
+  });
 
-    const errorAlerts = screen.getAllByRole("alert");
+  it("shows server error message on failure", async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({ success: false, errorCode: "server" }),
+      }),
+    ) as jest.Mock;
 
-    expect(errorAlerts).toHaveLength(2);
-    expect(errorAlerts[0]).toHaveTextContent("bad name, sorry");
-    expect(errorAlerts[1]).toHaveTextContent(
-      "this really was not a valid email",
-    );
+    render(<SubscriptionForm />);
+
+    const button = screen.getByRole("button", { name: "form.button" });
+    act(() => {
+      button.click();
+    });
+
+    await waitFor(() => {
+      const errorAlerts = screen.getAllByRole("alert");
+      expect(errorAlerts.length).toBeGreaterThanOrEqual(1);
+    });
   });
 });
