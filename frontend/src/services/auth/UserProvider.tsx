@@ -51,6 +51,10 @@ export default function UserProvider({
       if (fetchedUser) {
         if (localUser?.token && !fetchedUser.token) {
           setHasBeenLoggedOut(true);
+
+          // Invoke the logout endpoint for explicit logout. This will ensure
+          // the correlation_id cookie is properly removed.
+          await fetch("/api/auth/logout", { method: "POST" }).catch(noop);
         }
         setLocalUser(fetchedUser);
         setUserFetchError(undefined);
