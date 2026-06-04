@@ -46,7 +46,7 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,
 }));
 
-jest.mock("src/components/user/AuthenticationGate", () => ({
+jest.mock("src/components/core/AuthenticationGate", () => ({
   AuthenticationGate: ({ children }: PropsWithChildren) => children,
 }));
 

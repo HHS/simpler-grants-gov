@@ -1,4 +1,3 @@
-import copy
 import logging
 import uuid
 from os import path
@@ -6,6 +5,7 @@ from os import path
 import _pytest.monkeypatch
 import boto3
 import flask.testing
+import grants_shared.adapters.db as db
 import moto
 import pytest
 from apiflask import APIFlask
@@ -14,7 +14,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from grants_shared.util.local import load_local_env_vars
 from sqlalchemy import select, text
 
-import src.adapters.db as db
 import src.app as app_entry
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
@@ -34,7 +33,6 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
-from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
     init_workflow_client_registry,
@@ -704,10 +702,21 @@ def load_active_forms(db_session, enable_factory_create) -> None:
                 file_name=f"{form.short_form_name}.txt",
             )
 
-        # do a copy so we aren't modifying a global form object
-        copied_form = copy.deepcopy(form)
-        copied_form.form_json_schema = resolve_jsonschema(form.form_json_schema)
-        db_session.merge(copied_form, load=True)
+        # Session.merge() does not modify the source object; schemas are already
+        # resolved by init_form_registry() so no deepcopy or re-resolve needed.
+        db_session.merge(form, load=True)
+
+
+@pytest.fixture
+def seed_form_registry(load_active_forms) -> None:
+    """Populate the test DB with all registry forms.
+
+    Preferred alias for load_active_forms in new tests. After this fixture runs,
+    any registered form (e.g. SF424_v4_0) can be retrieved via db_session.get().
+    """
+    factories._seed_form_registry_active = True
+    yield
+    factories._seed_form_registry_active = False
 
 
 @pytest.fixture

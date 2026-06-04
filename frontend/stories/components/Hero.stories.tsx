@@ -1,8 +1,8 @@
-import Hero from "src/components/homepage/sections/HomepageHero";
+import HomepageHero from "src/app/[locale]/(base)/_components/sections/HomepageHero";
 
 const meta = {
-  title: "Components/Hero",
-  component: Hero,
+  title: "Components/HomepageHero",
+  component: HomepageHero,
 };
 export default meta;
 

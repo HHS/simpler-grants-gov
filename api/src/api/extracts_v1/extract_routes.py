@@ -1,9 +1,9 @@
 import logging
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.api.extracts_v1.extract_schema as extract_schema
 import src.api.response as response
 from src.api.extracts_v1.extract_blueprint import extract_blueprint

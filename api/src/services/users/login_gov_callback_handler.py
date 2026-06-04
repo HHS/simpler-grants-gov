@@ -1,11 +1,11 @@
 import logging
 from dataclasses import dataclass
 
+import grants_shared.adapters.db as db
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
 from src.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
 from src.adapters.oauth.oauth_client_models import OauthTokenRequest
 from src.api.route_utils import raise_flask_error

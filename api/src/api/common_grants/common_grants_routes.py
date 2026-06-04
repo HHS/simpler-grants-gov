@@ -4,6 +4,8 @@ import logging
 from http import HTTPStatus
 from uuid import UUID
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 from common_grants_sdk.schemas.pydantic import (
     OppFilters,
     OpportunitiesListResponse,
@@ -17,8 +19,6 @@ from common_grants_sdk.schemas.pydantic import (
 )
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint

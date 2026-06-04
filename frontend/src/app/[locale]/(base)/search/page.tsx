@@ -1,4 +1,15 @@
 import { Metadata } from "next";
+import { AndOrPanel } from "src/app/[locale]/(base)/search/_components/AndOrPanel";
+import { ClassicSearchBanner } from "src/app/[locale]/(base)/search/_components/ClassicSearchBanner";
+import { FilterPillPanel } from "src/app/[locale]/(base)/search/_components/FilterPillPanel";
+import Loading from "src/app/[locale]/(base)/search/_components/Loading";
+import { PillListSkeleton } from "src/app/[locale]/(base)/search/_components/PillList";
+import { SaveSearchPanel } from "src/app/[locale]/(base)/search/_components/SaveSearchPanel";
+import SearchAnalytics from "src/app/[locale]/(base)/search/_components/SearchAnalytics";
+import { SearchBarWithLabel } from "src/app/[locale]/(base)/search/_components/SearchBarWithLabel";
+import { SearchDrawerFilters } from "src/app/[locale]/(base)/search/_components/SearchDrawerFilters";
+import { SearchDrawerHeading } from "src/app/[locale]/(base)/search/_components/SearchDrawerHeading";
+import SearchResults from "src/app/[locale]/(base)/search/_components/SearchResults";
 import { environment } from "src/constants/environments";
 import { getSession } from "src/services/auth/session";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
@@ -14,18 +25,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Suspense, use } from "react";
 
-import { DrawerUnit } from "src/components/drawer/DrawerUnit";
-import Loading from "src/components/Loading";
-import { AndOrPanel } from "src/components/search/AndOrPanel";
-import { ClassicSearchBanner } from "src/components/search/ClassicSearchBanner";
-import { FilterPillPanel } from "src/components/search/FilterPillPanel";
-import { PillListSkeleton } from "src/components/search/PillList";
-import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
-import SearchAnalytics from "src/components/search/SearchAnalytics";
-import { SearchBarWithLabel } from "src/components/search/SearchBarWithLabel";
-import { SearchDrawerFilters } from "src/components/search/SearchDrawerFilters";
-import { SearchDrawerHeading } from "src/components/search/SearchDrawerHeading";
-import SearchResults from "src/components/search/SearchResults";
+import { DrawerUnit } from "src/components/core/drawer/DrawerUnit";
 
 type SearchPageProps = {
   searchParams: Promise<OptionalStringDict>;

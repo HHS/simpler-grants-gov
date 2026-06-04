@@ -1,9 +1,9 @@
 import logging
 from uuid import UUID
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import IgnoredLegacyOrganizationUser

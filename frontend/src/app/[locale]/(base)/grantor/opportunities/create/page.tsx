@@ -1,4 +1,5 @@
 import TopLevelError from "src/app/[locale]/(base)/error/page";
+import { CreateOpportunityForm } from "src/app/[locale]/(base)/grantor/opportunities/create/_components/CreateOpportunityForm";
 import { UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
@@ -10,8 +11,7 @@ import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
-import { CreateOpportunityForm } from "src/components/opportunities/create/CreateOpportunityForm";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 
 // Error Message for failed backend calls on page load
 const ErrorMsgWrapper = ({ children }: PropsWithChildren) => {

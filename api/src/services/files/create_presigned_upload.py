@@ -4,11 +4,11 @@ from dataclasses import dataclass
 from datetime import timedelta
 from typing import Any
 
+import grants_shared.adapters.db as db
 from grants_shared.util import datetime_util
 from pydantic import Field
 from sqlalchemy import func, select
 
-import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from src.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig

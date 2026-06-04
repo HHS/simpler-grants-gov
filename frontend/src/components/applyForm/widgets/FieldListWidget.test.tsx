@@ -11,6 +11,7 @@ jest.mock("src/components/applyForm/widgets/WidgetRenderers", () => ({
       props: {
         id: string;
         value?: unknown;
+        rawErrors?: string[];
         onChange?: (value: unknown) => void;
       };
     }) => {
@@ -22,13 +23,18 @@ jest.mock("src/components/applyForm/widgets/WidgetRenderers", () => ({
           : "";
 
       return (
-        <input
-          data-testid="mock-widget"
-          data-widget-id={props.id}
-          aria-label={props.id}
-          value={displayValue}
-          onChange={(event) => props.onChange?.(event.target.value)}
-        />
+        <div>
+          <input
+            data-testid="mock-widget"
+            data-widget-id={props.id}
+            aria-label={props.id}
+            value={displayValue}
+            onChange={(event) => props.onChange?.(event.target.value)}
+          />
+          {props.rawErrors?.map((error) => (
+            <p key={error}>{error}</p>
+          ))}
+        </div>
       );
     },
   ),
@@ -66,7 +72,7 @@ describe("FieldListWidget", () => {
 
     expect(screen.getByText("Contacts")).toBeInTheDocument();
     expect(screen.getByText("Add contacts")).toBeInTheDocument();
-    expect(screen.getByText(/entry\s+1/i)).toBeInTheDocument();
+    expect(screen.getByText(/contacts\s+1/i)).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
@@ -85,7 +91,7 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.queryByText(/entry\s+1/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/contacts\s+1/i)).not.toBeInTheDocument();
     expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
   });
 
@@ -103,7 +109,7 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.queryByText(/entry\s+1/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/contacts\s+1/i)).not.toBeInTheDocument();
     expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
   });
 
@@ -122,8 +128,8 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.getByText(/entry\s+1/i)).toBeInTheDocument();
-    expect(screen.getByText(/entry\s+2/i)).toBeInTheDocument();
+    expect(screen.getByText(/contacts\s+1/i)).toBeInTheDocument();
+    expect(screen.getByText(/contacts\s+2/i)).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
   });
 
@@ -144,9 +150,9 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
+    await user.click(screen.getByRole("button", { name: /addEntry/i }));
 
-    expect(screen.getByText(/entry\s+2/i)).toBeInTheDocument();
+    expect(screen.getByText(/contacts\s+2/i)).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
   });
 
@@ -166,7 +172,7 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /\+\s*add/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /addEntry/i })).toBeDisabled();
   });
 
   it("removes a row without going below minItems", async () => {
@@ -187,10 +193,13 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    const deleteButtons = screen.getAllByRole("button", {
+      name: /deleteEntry/i,
+    });
+
     await user.click(deleteButtons[0]);
 
-    expect(screen.queryByText(/entry\s+2/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/contacts\s+2/i)).not.toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
@@ -209,7 +218,36 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /delete/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /deleteEntry/i })).toBeDisabled();
+  });
+
+  it("renders FieldList child errors inline", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={1}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[
+          {
+            type: "required",
+            field: "$.contacts[0].first_name",
+            message: "first_name is required",
+            value: null,
+            formatted: "First Name is required",
+            definition:
+              "/properties/contact_people_test/items/properties/first_name",
+            htmlField: "contacts[0]--first_name",
+          },
+        ]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.getByText("First Name is required")).toBeInTheDocument();
   });
 
   it("marks the form dirty when a FieldList child field changes", async () => {
@@ -262,7 +300,7 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
+    await user.click(screen.getByRole("button", { name: /addEntry/i }));
 
     expect(markFormDirtyMock).toHaveBeenCalledTimes(1);
   });
@@ -286,10 +324,13 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
+    await user.click(screen.getByRole("button", { name: /addEntry/i }));
     await user.type(screen.getByLabelText("contacts[2]--first_name"), "Three");
 
-    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    const deleteButtons = screen.getAllByRole("button", {
+      name: /deleteEntry/i,
+    });
+
     await user.click(deleteButtons[1]);
 
     expect(screen.getByLabelText("contacts[1]--first_name")).toHaveValue(
@@ -321,7 +362,10 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    const deleteButtons = screen.getAllByRole("button", {
+      name: /deleteEntry/i,
+    });
+
     await user.click(deleteButtons[0]);
 
     expect(markFormDirtyMock).toHaveBeenCalledTimes(1);

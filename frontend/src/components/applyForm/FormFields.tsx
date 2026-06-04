@@ -10,8 +10,11 @@ import { getFieldConfig } from "src/utils/applyForm/getFieldConfig";
 import React, { JSX } from "react";
 import { Alert } from "@trussworks/react-uswds";
 
+import {
+  renderWidget,
+  wrapSection,
+} from "src/components/applyForm/widgets/WidgetRenderers";
 import { getRequiredProperties, isFieldRequired } from "./utils";
-import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
 
 type RootBudgetFormContext = {
   rootSchema: RJSFSchema;

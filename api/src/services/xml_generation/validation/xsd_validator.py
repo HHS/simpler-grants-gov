@@ -19,32 +19,32 @@ class XSDValidationError(Exception):
 class XSDValidator:
     """Validates XML against XSD schemas.
 
-    This validator assumes XSD files are already downloaded and cached locally.
+    This validator assumes XSD files are already downloaded and stored locally.
     Run the fetch-xsds CLI command first to download XSD files before validation.
     """
 
-    def __init__(self, xsd_cache_dir: str | Path):
-        """Initialize XSD validator with cache directory.
+    def __init__(self, xsd_dir: str | Path):
+        """Initialize XSD validator.
 
         Args:
-            xsd_cache_dir: Directory containing cached XSD files.
+            xsd_dir: Directory containing stored XSD files.
                           XSD files must be pre-downloaded using the fetch-xsds command.
 
         Raises:
-            XSDValidationError: If cache directory doesn't exist
+            XSDValidationError: If directory doesn't exist
         """
-        self.xsd_cache_dir = Path(xsd_cache_dir)
+        self.xsd_dir = Path(xsd_dir)
 
-        if not self.xsd_cache_dir.exists():
+        if not self.xsd_dir.exists():
             raise XSDValidationError(
-                f"XSD cache directory does not exist: {xsd_cache_dir}. "
+                f"XSD directory does not exist: {xsd_dir}. "
                 "Run 'flask task fetch-xsds' to download XSD files first."
             )
 
         self._schemas: dict[str, xmlschema.XMLSchema] = {}
 
     def get_xsd_path(self, form_name: str) -> Path:
-        """Get the path to a cached XSD file.
+        """Get the path to a stored XSD file.
 
         Args:
             form_name: The form name (e.g., "SF424_4_0")
@@ -56,7 +56,7 @@ class XSDValidator:
             XSDValidationError: If XSD file doesn't exist
         """
         xsd_filename = f"{form_name}.xsd"
-        xsd_path = self.xsd_cache_dir / xsd_filename
+        xsd_path = self.xsd_dir / xsd_filename
 
         if not xsd_path.exists():
             raise XSDValidationError(

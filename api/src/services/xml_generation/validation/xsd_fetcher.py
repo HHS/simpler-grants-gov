@@ -1,4 +1,4 @@
-"""Utility for fetching and caching XSD files."""
+"""Utility for fetching and storing XSD files."""
 
 import logging
 from pathlib import Path
@@ -17,28 +17,90 @@ class XSDFetchError(Exception):
 
 KNOWN_XSD_DEPENDENCIES = {
     "SF424_4_0-V4.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
+    ],
+    "SF424A-V1.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+    ],
+    "SF424B-V1.1.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+    ],
+    "SF424D-V1.1.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+    ],
+    "SFLLL_2_0-V2.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+    ],
+    "Project_AbstractSummary_2_0-V2.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
     ],
-    # Add other form dependencies as needed
+    "Project_Abstract_1_2-V1.2.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+    ],
+    "BudgetNarrativeAttachments_1_2-V1.2.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+    ],
+    "ProjectNarrativeAttachments_1_2-V1.2.xsd": [],
+    "OtherNarrativeAttachments_1_2-V1.2.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+    ],
+    "AttachmentForm_1_2-V1.2.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+    ],
+    "CD511-V1.1.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+    ],
+    "SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0.xsd": [],
+    "GG_LobbyingForm-V1.1.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+    ],
+    "EPA4700_4_5_0-V5.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
+    ],
+    "EPA_KeyContacts_2_0-V2.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
+    ],
 }
 
 
 class XSDFetcher:
     """Fetches XSD files and their dependencies for offline validation.
 
-    This utility downloads XSD schema files and caches them
+    This utility downloads XSD schema files and stores them
     locally for use during validation testing.
     """
 
-    def __init__(self, cache_dir: str | Path):
+    def __init__(self, xsd_dir: str | Path):
         """Initialize XSD fetcher.
 
         Args:
-            cache_dir: Directory to cache downloaded XSD files
+            xsd_dir: Directory to store downloaded XSD files
         """
-        self.cache_dir = Path(cache_dir)
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.xsd_dir = Path(xsd_dir)
+        self.xsd_dir.mkdir(parents=True, exist_ok=True)
 
     def fetch_xsd_with_dependencies(
         self, xsd_url: str, visited: set[str] | None = None
@@ -47,7 +109,7 @@ class XSDFetcher:
         if visited is None:
             visited = set()
 
-        result: dict[str, Any] = {"fetched": [], "cached": [], "errors": []}
+        result: dict[str, Any] = {"fetched": [], "stored": [], "errors": []}
 
         # Skip if already processed
         if xsd_url in visited:
@@ -58,11 +120,11 @@ class XSDFetcher:
         try:
             # Download the main XSD if needed
             xsd_filename = xsd_url.split("/")[-1]
-            xsd_path = self.cache_dir / xsd_filename
+            xsd_path = self.xsd_dir / xsd_filename
 
             if xsd_path.exists():
-                logger.debug(f"Using cached XSD: {xsd_path}")
-                result["cached"].append(xsd_url)
+                logger.debug(f"Using existing XSD: {xsd_path}")
+                result["stored"].append(xsd_url)
             else:
                 logger.info(f"Downloading XSD: {xsd_url}")
                 response = requests.get(xsd_url, timeout=30)
@@ -71,7 +133,7 @@ class XSDFetcher:
                 with open(xsd_path, "wb") as f:
                     f.write(response.content)
 
-                logger.info(f"Downloaded and cached: {xsd_path}")
+                logger.info(f"Downloaded and stored: {xsd_path}")
                 result["fetched"].append(xsd_url)
 
             # Fetch known dependencies
@@ -81,7 +143,7 @@ class XSDFetcher:
                 try:
                     dep_result = self.fetch_xsd_with_dependencies(dep_url, visited)
                     result["fetched"].extend(dep_result["fetched"])
-                    result["cached"].extend(dep_result["cached"])
+                    result["stored"].extend(dep_result["stored"])
                     result["errors"].extend(dep_result["errors"])
                 except Exception as e:
                     error_msg = f"Failed to fetch dependency {dep_url}: {e}"
