@@ -1,11 +1,13 @@
-import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 
-// Ensure the client fetch used by the component delegates to `global.fetch`,
-// which the tests mock below. Must mock before importing the component.
+// Mock useClientFetch to delegate to the already-mocked `global.fetch` in tests.
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
     clientFetch: async (url: string, options?: RequestInit) => {
-      const res = await (global.fetch as unknown as jest.Mock)(url, options);
+      const fn = global.fetch as unknown as jest.MockedFunction<typeof fetch>;
+      const res = await fn(url, options);
+      // `Response.json()` returns `any`; allow this in the test mock
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return res.json();
     },
   }),
@@ -42,22 +44,19 @@ describe("SubscriptionForm", () => {
       Promise.resolve({
         json: () => Promise.resolve({ success: true }),
       }),
-    ) as jest.Mock;
+    );
 
-    const { container } = render(<SubscriptionForm />);
+    render(<SubscriptionForm />);
 
-    const nameInput = container.querySelector('#name') as HTMLInputElement;
-    const emailInput = container.querySelector('#email') as HTMLInputElement;
+    const inputs = screen.getAllByTestId("textInput");
+    const nameInput = inputs.find((i) => i.id === "name")!;
+    const emailInput = inputs.find((i) => i.id === "email")!;
     const button = screen.getByRole("button", { name: "form.button" });
 
-    act(() => {
-      fireEvent.change(nameInput, { target: { value: "Test User" } });
-      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
-    });
+    fireEvent.change(nameInput, { target: { value: "Test User" } });
+    fireEvent.change(emailInput, { target: { value: "test@example.com" } });
 
-    act(() => {
-      button.click();
-    });
+    fireEvent.click(button);
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -72,22 +71,19 @@ describe("SubscriptionForm", () => {
       Promise.resolve({
         json: () => Promise.resolve({ success: true }),
       }),
-    ) as jest.Mock;
+    );
 
-    const { container } = render(<SubscriptionForm />);
+    render(<SubscriptionForm />);
 
-    const nameInput = container.querySelector('#name') as HTMLInputElement;
-    const emailInput = container.querySelector('#email') as HTMLInputElement;
+    const inputs = screen.getAllByTestId("textInput");
+    const nameInput = inputs.find((i) => i.id === "name")!;
+    const emailInput = inputs.find((i) => i.id === "email")!;
     const button = screen.getByRole("button", { name: "form.button" });
 
-    act(() => {
-      fireEvent.change(nameInput, { target: { value: "Test User" } });
-      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
-    });
+    fireEvent.change(nameInput, { target: { value: "Test User" } });
+    fireEvent.change(emailInput, { target: { value: "test@example.com" } });
 
-    act(() => {
-      button.click();
-    });
+    fireEvent.click(button);
 
     await waitFor(() => {
       expect(mockRouterPush).toHaveBeenCalledWith("/newsletter/confirmation");
@@ -99,22 +95,19 @@ describe("SubscriptionForm", () => {
       Promise.resolve({
         json: () => Promise.resolve({ success: false, errorCode: "server" }),
       }),
-    ) as jest.Mock;
+    );
 
-    const { container } = render(<SubscriptionForm />);
+    render(<SubscriptionForm />);
 
-    const nameInput = container.querySelector('#name') as HTMLInputElement;
-    const emailInput = container.querySelector('#email') as HTMLInputElement;
+    const inputs = screen.getAllByTestId("textInput");
+    const nameInput = inputs.find((i) => i.id === "name")!;
+    const emailInput = inputs.find((i) => i.id === "email")!;
     const button = screen.getByRole("button", { name: "form.button" });
 
-    act(() => {
-      fireEvent.change(nameInput, { target: { value: "Test User" } });
-      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
-    });
+    fireEvent.change(nameInput, { target: { value: "Test User" } });
+    fireEvent.change(emailInput, { target: { value: "test@example.com" } });
 
-    act(() => {
-      button.click();
-    });
+    fireEvent.click(button);
 
     await waitFor(() => {
       const errorAlerts = screen.getAllByRole("alert");
