@@ -1,6 +1,9 @@
 import logging
 from datetime import datetime
 
+from grants_shared.db.models.base import TimestampMixin
+from grants_shared.util import datetime_util
+
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -13,7 +16,6 @@ from src.data_migration.transformation.transform_constants import (
     SourceFundingInstrument,
     SourceSummary,
 )
-from src.db.models.base import TimestampMixin
 from src.db.models.opportunity_models import (
     LinkOpportunitySummaryApplicantType,
     LinkOpportunitySummaryFundingCategory,
@@ -26,7 +28,6 @@ from src.db.models.staging.attachment import TsynopsisAttachment
 from src.db.models.staging.instructions import Tinstructions
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase
-from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 

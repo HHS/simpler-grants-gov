@@ -30,7 +30,7 @@ jest.mock("src/services/fetch/fetchers/applicationsFetcher", () => ({
 
 const mockBreadcrumbs = jest.fn();
 
-jest.mock("src/components/Breadcrumbs", () => ({
+jest.mock("src/components/core/Breadcrumbs", () => ({
   __esModule: true,
   default: (props: { breadcrumbList: { title: string; path: string }[] }) => {
     mockBreadcrumbs(props);

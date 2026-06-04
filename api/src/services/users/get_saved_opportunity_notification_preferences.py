@@ -1,9 +1,9 @@
 import logging
 import uuid
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.user_models import User, UserSavedOpportunityNotification

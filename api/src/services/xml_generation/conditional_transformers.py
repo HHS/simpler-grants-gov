@@ -7,7 +7,7 @@ including if/then/else rules, field dependencies, and computed fields.
 import logging
 from typing import Any
 
-from src.util.dict_util import get_nested_value
+from grants_shared.util.dict_util import get_nested_value
 
 logger = logging.getLogger(__name__)
 

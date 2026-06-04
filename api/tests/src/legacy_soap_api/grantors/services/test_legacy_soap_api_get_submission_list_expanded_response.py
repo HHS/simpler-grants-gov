@@ -4,6 +4,7 @@ from datetime import datetime
 
 import pytest
 import pytz
+from grants_shared.util.datetime_util import make_timezone_aware
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.legacy_soap_api.grantors import schemas
@@ -18,7 +19,6 @@ from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOpera
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPInvalidEnvelope, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_dict
-from src.util.datetime_util import make_timezone_aware
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,

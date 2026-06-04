@@ -1,4 +1,5 @@
 import pytest
+from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
@@ -10,7 +11,6 @@ from src.task.notifications.constants import NotificationReason
 from src.task.notifications.org_saved_opportunity_notification import (
     OrgSavedOpportunityNotificationTask,
 )
-from src.util import datetime_util
 from tests.lib.db_testing import cascade_delete_from_db_table
 
 

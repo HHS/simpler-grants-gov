@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:EPA4700_4_5_0="http://apply.grants.gov/forms/EPA4700_4_5_0-V5.0" targetNamespace="http://apply.grants.gov/forms/EPA4700_4_5_0-V5.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="5.0">
+	<xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<!--Root element definition-->
+	<xs:element name="EPA4700_4_5_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ApplicantInfo">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="ApplicantName" type="globLib:OrganizationNameDataType"/>
+							<xs:element name="ApplicantAddress" type="EPA4700_4_5_0:AddressDataType"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="SAMUEI" type="globLib:SAMUEIDataType"/>	
+				<xs:element name="POCName">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="1"/>
+							<xs:maxLength value="100"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="Phone" type="globLib:TelephoneNumberDataType"/>
+				<xs:element name="Email" type="globLib:EmailDataType"/>
+				<xs:element name="Title" type="globLib:HumanTitleDataType"/>
+				<xs:element name="FederalFinancialAssistanceQuestion" type="globLib:YesNoDataType" minOccurs="0"/>				
+				<xs:element name="CivilRightsLawSuits1" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="4000"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="CivilRightsLawSuits2" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="4000"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="CivilRightsLawSuits3" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="4000"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="ConstructionFederalAssistance" type="globLib:YesNoDataType" minOccurs="0"/>				
+				<xs:element name="Construction" type="globLib:YesNoDataType" minOccurs="0"/>				
+				<xs:element name="Construction2" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="500"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="Notice1" type="globLib:YesNoDataType" minOccurs="0"/>				
+				<xs:element name="Notice2" type="globLib:YesNoDataType" minOccurs="0"/>				
+				<xs:element name="Notice3" type="globLib:YesNoDataType" minOccurs="0"/>				
+				<xs:element name="Notice4" type="globLib:YesNoDataType" minOccurs="0"/>				
+				<xs:element name="Demographic" type="globLib:YesNoDataType" minOccurs="0"/>				
+				<xs:element name="Policy1" type="globLib:YesNoDataType" minOccurs="0"/>				
+				<xs:element name="Policy2" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="1000"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="Program" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="1000"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="ApplicantSignature">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="AORSignature" type="globLib:SignatureDataType"/>
+							<xs:element name="PersonTitle" type="globLib:HumanTitleDataType"/>
+							<xs:element name="SubmittedDate" type="xs:date"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="5.0"/>
+		</xs:complexType>
+	</xs:element>
+	<!-- ****************************************************  -->
+	<!--   Custom types definitions                             -->
+	<!--   CityStateDataType                                      -->
+	<!-- ****************************************************  -->
+	<xs:complexType name="AddressDataType">
+		<xs:sequence>
+				<xs:element name="Address">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="110"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="City" type="globLib:CityDataType"/>
+				<xs:element name="State" type="codes:StateCodeDataTypeV3"/>
+				<xs:element name="ZipCode" type="globLib:ZipPostalCodeDataType"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

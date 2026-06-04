@@ -1,7 +1,8 @@
 import {
   ApplicationDetailsCardProps,
   InformationCard,
-} from "src/components/application/InformationCard";
+} from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/InformationCard";
+
 import applicationMock from "./application.mock.json";
 
 const meta = {

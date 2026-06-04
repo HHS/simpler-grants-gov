@@ -40,6 +40,8 @@ class TestGetBotoDynamoDBClient:
             "dynamodb",
             region_name="us-east-1",
             endpoint_url=DynamoDBConfig().aws_dynamodb_endpoint_url,
+            aws_access_key_id="local",
+            aws_secret_access_key="local",
         )
 
     def test_uses_provided_session(self):
@@ -50,6 +52,8 @@ class TestGetBotoDynamoDBClient:
             "dynamodb",
             region_name="us-east-1",
             endpoint_url=DynamoDBConfig().aws_dynamodb_endpoint_url,
+            aws_access_key_id="local",
+            aws_secret_access_key="local",
         )
 
 

@@ -1,8 +1,8 @@
-import Item from "src/components/search/SearchResultsListItem";
+import SearchResultsListItem from "src/app/[locale]/(base)/workspace/saved-opportunities/_components/SearchResultsListItem";
 
 const meta = {
   title: "Components/Search/SearchListItem",
-  component: Item,
+  component: SearchResultsListItem,
   args: {
     saved: true,
     opportunity: {
