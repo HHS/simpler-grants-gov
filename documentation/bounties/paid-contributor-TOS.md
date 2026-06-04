@@ -13,11 +13,11 @@ To claim and receive payment for a bounty in the Simpler Grants Funded Open Sour
 
 ## 4.2 How Bounties Work
 
-1. Claim by commenting /claim on a bounty-labeled issue after posting the ToS acknowledgment.  
+1. Claim by commenting /claim on a bounty-labeled issue **and** posting the [ToS acknowledgment](./snippets/tos-acknowledgment.md).  
 2. You may hold up to three active claims at any time.  
 3. A claim expires after 14 days of no activity. You may request one 7-day extension by posting a progress update before expiration.  
-4. A claim does not guarantee payment. Payment is contingent on your pull request being merged and meeting all acceptance criteria and verification requirements.  
-5. When multiple valid pull requests are submitted for the same bounty, the first valid PR (by timestamp) is paid the full bounty. Other contributors with valid-but-unselected PRs receive a $50 runner-up courtesy payment, subject to program reserve availability.  
+4. A claim does not guarantee payment. Payment is contingent on your pull request being merged and meeting all acceptance criteria and verification requirements.
+5. When multiple valid pull requests are submitted for the same bounty, the first valid PR (by timestamp) is paid the full bounty. Other contributors with valid-but-unselected PRs receive a $50 runner-up courtesy payment, subject to program reserve availability.
 6. US Department of Health and Human Services reserves the right to decline payment for contributions found to be made in bad faith, to contain plagiarized or improperly licensed code, or to violate these Terms.
 
 ## 4.3 Payment
