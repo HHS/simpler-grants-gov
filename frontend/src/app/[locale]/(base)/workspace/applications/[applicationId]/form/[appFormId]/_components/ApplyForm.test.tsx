@@ -24,10 +24,13 @@ type FormActionResult = Promise<{
 
 const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
 
-jest.mock("src/components/applyForm/actions", () => ({
-  handleFormAction: (...args: [...FormActionArgs]) =>
-    mockHandleFormAction(...args),
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/actions",
+  () => ({
+    handleFormAction: (...args: [...FormActionArgs]) =>
+      mockHandleFormAction(...args),
+  }),
+);
 
 const mockRevalidateTag = jest.fn<void, [string]>();
 const getSessionMock = jest.fn();

@@ -22,7 +22,7 @@ import {
   processFormSchema,
   pruneEmptyNestedFields,
   shapeFormData,
-} from "src/components/applyForm/utils";
+} from "./applyFormUtils";
 
 const mockMergeAllOf = jest.fn();
 const mockExtricateConditionalValidationRules = jest.fn();

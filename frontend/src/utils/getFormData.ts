@@ -13,8 +13,8 @@ import { FormValidationWarning, UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
-import { processFormSchema } from "src/components/applyForm/utils";
-import { validateUiSchema } from "src/components/applyForm/validate";
+import { processFormSchema } from "./applyForm/applyFormUtils";
+import { validateUiSchema } from "./applyForm/validateUiSchema";
 
 // either return error or data, not both
 type FormDataResult =

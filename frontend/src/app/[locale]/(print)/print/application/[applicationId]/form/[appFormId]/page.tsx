@@ -1,12 +1,11 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
 import PrintForm from "src/app/[locale]/(print)/print/application/[applicationId]/form/_components/PrintForm";
+import { addPrintWidgetToFields } from "src/utils/applyForm/applyFormUtils";
 import getFormData from "src/utils/getFormData";
 
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-
-import { addPrintWidgetToFields } from "src/components/applyForm/utils";
 
 export const dynamic = "force-dynamic";
 
