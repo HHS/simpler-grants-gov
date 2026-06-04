@@ -1,6 +1,6 @@
 import logging
-import uuid
 import os
+import uuid
 from os import path
 
 import _pytest.monkeypatch
