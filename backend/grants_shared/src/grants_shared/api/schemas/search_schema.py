@@ -5,8 +5,13 @@ from typing import Any
 
 from marshmallow import ValidationError, validates_schema
 
-from src.api.schemas.extension import MarshmallowErrorContainer, Schema, fields, validators
-from src.validation.validation_constants import ValidationErrorType
+from grants_shared.api.schemas.extension import (
+    MarshmallowErrorContainer,
+    Schema,
+    fields,
+    validators,
+)
+from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
 
 
 class BaseSearchSchema(Schema):
@@ -31,7 +36,7 @@ class BaseSearchSchema(Schema):
             raise ValidationError(
                 [
                     MarshmallowErrorContainer(
-                        ValidationErrorType.INVALID, "At least one filter rule must be provided."
+                        SchemaValidationError.INVALID, "At least one filter rule must be provided."
                     )
                 ]
             )
@@ -211,7 +216,7 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
                 raise ValidationError(
                     [
                         MarshmallowErrorContainer(
-                            ValidationErrorType.REQUIRED,
+                            SchemaValidationError.REQUIRED,
                             "At least one of min or max must be provided.",
                         )
                     ]
@@ -325,7 +330,7 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
                 raise ValidationError(
                     [
                         MarshmallowErrorContainer(
-                            ValidationErrorType.INVALID,
+                            SchemaValidationError.INVALID,
                             "Cannot have both absolute and relative start/end date.",
                         )
                     ]
@@ -341,7 +346,7 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
                 raise ValidationError(
                     [
                         MarshmallowErrorContainer(
-                            ValidationErrorType.REQUIRED,
+                            SchemaValidationError.REQUIRED,
                             "At least one of start_date/start_date_relative or end_date/end_date_relative must be provided.",
                         )
                     ]

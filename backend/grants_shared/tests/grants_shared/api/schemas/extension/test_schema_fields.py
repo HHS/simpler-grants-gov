@@ -3,8 +3,8 @@ import inspect
 import pytest
 from marshmallow import ValidationError
 
-from src.api.schemas.extension import fields
-from tests.src.schemas.schema_validation_utils import (
+from grants_shared.api.schemas.extension import fields
+from tests.grants_shared.api.schemas.schema_validation_utils import (
     DummySchema,
     EnumA,
     EnumB,

@@ -1,7 +1,7 @@
 import string
 from unittest.mock import patch
 
-from src.util.api_key_gen import generate_api_key_id
+from grants_shared.util.api_key_gen import generate_api_key_id
 
 
 class TestGenerateApiKeyId:
@@ -50,7 +50,7 @@ class TestGenerateApiKeyId:
         key_id = generate_api_key_id(length=1000)
         assert len(key_id) == 1000
 
-    @patch("src.util.api_key_gen.secrets.choice")
+    @patch("grants_shared.util.api_key_gen.secrets.choice")
     def test_generate_api_key_id_uses_secrets(self, mock_choice):
         """Test generate_api_key_id uses secrets module for cryptographic randomness."""
         mock_choice.return_value = "A"

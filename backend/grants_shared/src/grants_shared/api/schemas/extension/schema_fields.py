@@ -5,10 +5,10 @@ import typing
 from apiflask import fields as original_fields  # noqa: TID251
 from marshmallow import ValidationError
 
-from src.api.schemas.extension.field_validators import URL as CustomURL
-from src.api.schemas.extension.field_validators import Range
-from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from src.validation.validation_constants import ValidationErrorType
+from grants_shared.api.schemas.extension.field_validators import URL as CustomURL
+from grants_shared.api.schemas.extension.field_validators import Range
+from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
 
 
 class MixinField(original_fields.Field):
@@ -28,13 +28,13 @@ class MixinField(original_fields.Field):
     # and it will be used / override the defaults here
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "required": MarshmallowErrorContainer(
-            ValidationErrorType.REQUIRED, "Missing data for required field."
+            SchemaValidationError.REQUIRED, "Missing data for required field."
         ),
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Invalid value."),
-        "null": MarshmallowErrorContainer(ValidationErrorType.NOT_NULL, "Field may not be null."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Invalid value."),
+        "null": MarshmallowErrorContainer(SchemaValidationError.NOT_NULL, "Field may not be null."),
         # not sure when this one gets hit, a failed validator uses the validator message
         "validator_failed": MarshmallowErrorContainer(
-            ValidationErrorType.INVALID, "Invalid value."
+            SchemaValidationError.INVALID, "Invalid value."
         ),
     }
 
@@ -76,20 +76,20 @@ class MixinField(original_fields.Field):
 
 class String(original_fields.String, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid string."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid string."),
         "invalid_utf8": MarshmallowErrorContainer(
-            ValidationErrorType.INVALID, "Not a valid utf-8 string."
+            SchemaValidationError.INVALID, "Not a valid utf-8 string."
         ),
     }
 
 
 class Integer(original_fields.Integer, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid integer."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid integer."),
     }
 
     def __init__(self, restrict_to_32bit_int: bool = False, **kwargs: typing.Any):
-        # By default, we'll restrict all integer values to 32-bits so that they can be stored in
+        # Restrict all integer values to 32-bits so that they can be stored in
         # Postgres' integer column. If you wish to process a larger value, simply set this to false or specify
         # your own min/max Range.
         if restrict_to_32bit_int:
@@ -111,15 +111,15 @@ class Integer(original_fields.Integer, MixinField):
 
 class Boolean(original_fields.Boolean, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid boolean."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid boolean."),
     }
 
 
 class Decimal(original_fields.Decimal, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid decimal."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid decimal."),
         "special": MarshmallowErrorContainer(
-            ValidationErrorType.SPECIAL_NUMERIC,
+            SchemaValidationError.SPECIAL_NUMERIC,
             "Special numeric values (nan or infinity) are not permitted.",
         ),
     }
@@ -127,8 +127,10 @@ class Decimal(original_fields.Decimal, MixinField):
 
 class UUID(original_fields.UUID, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid UUID."),
-        "invalid_uuid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid UUID."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid UUID."),
+        "invalid_uuid": MarshmallowErrorContainer(
+            SchemaValidationError.INVALID, "Not a valid UUID."
+        ),
     }
 
     def __init__(self, **kwargs: typing.Any):
@@ -143,34 +145,36 @@ class UUID(original_fields.UUID, MixinField):
 
 class Date(original_fields.Date, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid date."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid date."),
         "format": MarshmallowErrorContainer(
-            ValidationErrorType.FORMAT, "'{input}' cannot be formatted as a date."
+            SchemaValidationError.FORMAT, "'{input}' cannot be formatted as a date."
         ),
     }
 
 
 class DateTime(original_fields.DateTime, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid datetime."),
+        "invalid": MarshmallowErrorContainer(
+            SchemaValidationError.INVALID, "Not a valid datetime."
+        ),
         "invalid_awareness": MarshmallowErrorContainer(
-            ValidationErrorType.INVALID, "Not a valid datetime."
+            SchemaValidationError.INVALID, "Not a valid datetime."
         ),
         "format": MarshmallowErrorContainer(
-            ValidationErrorType.FORMAT, "'{input}' cannot be formatted as a datetime."
+            SchemaValidationError.FORMAT, "'{input}' cannot be formatted as a datetime."
         ),
     }
 
 
 class List(original_fields.List, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid list."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid list."),
     }
 
 
 class Nested(original_fields.Nested, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "type": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Invalid type."),
+        "type": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Invalid type."),
     }
 
     def __init__(self, nested: typing.Any, **kwargs: typing.Any):
@@ -190,7 +194,7 @@ class Raw(original_fields.Raw, MixinField):
 
 class Dict(original_fields.Dict, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid dict."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid dict."),
     }
 
 
@@ -206,7 +210,7 @@ class Enum(MixinField):
 
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "unknown": MarshmallowErrorContainer(
-            ValidationErrorType.INVALID_CHOICE, "Must be one of: {choices}."
+            SchemaValidationError.INVALID_CHOICE, "Must be one of: {choices}."
         ),
     }
 
@@ -276,25 +280,25 @@ class File(original_fields.File, MixinField):
     """
 
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid file."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid file."),
     }
 
 
 class Time(MixinField, original_fields.Time):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid time."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid time."),
         "invalid_awareness": MarshmallowErrorContainer(
-            ValidationErrorType.INVALID, "Not a valid time."
+            SchemaValidationError.INVALID, "Not a valid time."
         ),
         "format": MarshmallowErrorContainer(
-            ValidationErrorType.FORMAT, "'{input}' cannot be formatted as a time."
+            SchemaValidationError.FORMAT, "'{input}' cannot be formatted as a time."
         ),
     }
 
 
 class URL(MixinField, original_fields.URL):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid URL."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid URL."),
     }
 
     def __init__(self, **kwargs: typing.Any):
@@ -306,9 +310,9 @@ class URL(MixinField, original_fields.URL):
 
 class Float(MixinField, original_fields.Float):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
-        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid number."),
+        "invalid": MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid number."),
         "special": MarshmallowErrorContainer(
-            ValidationErrorType.SPECIAL_NUMERIC,
+            SchemaValidationError.SPECIAL_NUMERIC,
             "Special numeric values (nan or infinity) are not permitted.",
         ),
     }

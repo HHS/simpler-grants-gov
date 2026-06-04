@@ -3,8 +3,8 @@ from collections.abc import Callable
 from enum import Enum, IntEnum, StrEnum
 from typing import Any, TypeVar
 
-from src.db.models.lookup.lookup import LookupConfig
-from src.db.models.lookup.lookup_table import LookupTable
+from grants_shared.db.models.lookup.lookup import LookupConfig
+from grants_shared.db.models.lookup.lookup_table import LookupTable
 
 logger = logging.getLogger(__name__)
 

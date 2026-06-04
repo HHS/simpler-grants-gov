@@ -5,8 +5,8 @@ from apiflask import validators  # noqa: TID251
 from marshmallow import ValidationError
 from marshmallow.validate import _SizedT  # noqa: TID251
 
-from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from src.validation.validation_constants import ValidationErrorType
+from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
 
 Validator = validators.Validator  # re-export
 
@@ -38,7 +38,7 @@ class Regexp(validators.Regexp):
     def __call__(self, value: str | bytes) -> str | bytes:
         if self.regex.match(value) is None:  # type: ignore
             raise ValidationError(
-                [MarshmallowErrorContainer(ValidationErrorType.FORMAT, self.error)]
+                [MarshmallowErrorContainer(SchemaValidationError.FORMAT, self.error)]
             )
 
         return value
@@ -61,16 +61,16 @@ class Length(validators.Length):
 
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "message_min": MarshmallowErrorContainer(
-            ValidationErrorType.MIN_LENGTH, "Shorter than minimum length {min}."
+            SchemaValidationError.MIN_LENGTH, "Shorter than minimum length {min}."
         ),
         "message_max": MarshmallowErrorContainer(
-            ValidationErrorType.MAX_LENGTH, "Longer than maximum length {max}."
+            SchemaValidationError.MAX_LENGTH, "Longer than maximum length {max}."
         ),
         "message_all": MarshmallowErrorContainer(
-            ValidationErrorType.MIN_OR_MAX_LENGTH, "Length must be between {min} and {max}."
+            SchemaValidationError.MIN_OR_MAX_LENGTH, "Length must be between {min} and {max}."
         ),
         "message_equal": MarshmallowErrorContainer(
-            ValidationErrorType.EQUALS, "Length must be {equal}."
+            SchemaValidationError.EQUALS, "Length must be {equal}."
         ),
     }
 
@@ -114,7 +114,7 @@ class Length(validators.Length):
 
 class Email(validators.Email):
     EMAIL_ERROR = MarshmallowErrorContainer(
-        ValidationErrorType.FORMAT, "Not a valid email address."
+        SchemaValidationError.FORMAT, "Not a valid email address."
     )
 
     def __call__(self, value: str) -> str:
@@ -126,7 +126,7 @@ class Email(validators.Email):
 
 
 class URL(validators.URL):
-    URL_ERROR = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid URL.")
+    URL_ERROR = MarshmallowErrorContainer(SchemaValidationError.INVALID, "Not a valid URL.")
 
     def __call__(self, value: str) -> str:
         try:
@@ -143,7 +143,7 @@ class OneOf(validators.OneOf):
     """
 
     CONTAINS_ONLY_ERROR = MarshmallowErrorContainer(
-        ValidationErrorType.INVALID_CHOICE, "Value must be one of: {choices_text}"
+        SchemaValidationError.INVALID_CHOICE, "Value must be one of: {choices_text}"
     )
 
     def __call__(self, value: typing.Any) -> typing.Any:
@@ -163,18 +163,14 @@ class Range(validators.Range):
         # The method this overrides returns a string, but we'll modify it to return one of
         # our error containers instead which works, but MyPy doesn't like.
 
-        is_min = False
-        is_max = False
-        if self.min is not None or self.max_inclusive is not None:
-            is_min = True
-        if self.max is not None or self.max_inclusive is not None:
-            is_max = True
+        is_min = self.min is not None
+        is_max = self.max is not None
 
         if is_min and is_max:
-            error_type = ValidationErrorType.MIN_OR_MAX_VALUE
+            error_type = SchemaValidationError.MIN_OR_MAX_VALUE
         elif is_min:
-            error_type = ValidationErrorType.MIN_VALUE
+            error_type = SchemaValidationError.MIN_VALUE
         else:  # must be max, init requires you set something
-            error_type = ValidationErrorType.MAX_VALUE
+            error_type = SchemaValidationError.MAX_VALUE
 
         return [MarshmallowErrorContainer(error_type, super()._format_error(value, message))]

@@ -3,7 +3,7 @@ from typing import Any
 from sqlalchemy import Integer
 from sqlalchemy.types import TypeDecorator
 
-from src.db.models.lookup import LookupRegistry, LookupTable
+from grants_shared.db.models.lookup import LookupRegistry, LookupTable
 
 
 class LookupColumn(TypeDecorator):

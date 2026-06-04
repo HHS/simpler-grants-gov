@@ -2,9 +2,9 @@ from enum import StrEnum
 
 import pytest
 
-from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.db.models import metadata
-from src.db.models.lookup import LookupConfig, LookupStr
+from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from grants_shared.db.models.base import metadata
+from grants_shared.db.models.lookup import LookupConfig, LookupStr
 
 
 class EnumX(StrEnum):

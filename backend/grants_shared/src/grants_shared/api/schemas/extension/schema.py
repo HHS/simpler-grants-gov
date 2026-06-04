@@ -3,8 +3,8 @@ from typing import Any, cast
 import apiflask
 from marshmallow import EXCLUDE
 
-from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from src.validation.validation_constants import ValidationErrorType
+from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
 
 
 class Schema(apiflask.Schema):  # noqa: TID251
@@ -17,10 +17,10 @@ class Schema(apiflask.Schema):  # noqa: TID251
         dict[str, str],
         {
             "type": MarshmallowErrorContainer(
-                key=ValidationErrorType.INVALID, message="Invalid input type."
+                key=SchemaValidationError.INVALID, message="Invalid input type."
             ),
             "unknown": MarshmallowErrorContainer(
-                key=ValidationErrorType.UNKNOWN, message="Unknown field."
+                key=SchemaValidationError.UNKNOWN, message="Unknown field."
             ),
         },
     )

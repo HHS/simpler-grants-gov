@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 
-from src.util.decimal_util import ZERO_DECIMAL, convert_monetary_field, quantize_decimal
+from grants_shared.util.decimal_util import ZERO_DECIMAL, convert_monetary_field, quantize_decimal
 
 
 def test_convert_monetary_field():

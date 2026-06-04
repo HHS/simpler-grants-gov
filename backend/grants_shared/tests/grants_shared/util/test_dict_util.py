@@ -1,6 +1,6 @@
 import pytest
 
-from src.util.dict_util import diff_nested_dicts, flatten_dict, get_nested_value
+from grants_shared.util.dict_util import diff_nested_dicts, flatten_dict, get_nested_value
 
 
 @pytest.mark.parametrize(

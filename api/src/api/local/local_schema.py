@@ -1,5 +1,5 @@
-from src.api.schemas.extension import Schema, fields
-from src.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.extension import Schema, fields
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
 
 
 class LocalUserTokenSchema(Schema):
