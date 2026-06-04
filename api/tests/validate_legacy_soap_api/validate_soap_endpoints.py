@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import tempfile
+from collections.abc import Callable
 from contextlib import ExitStack
 from dataclasses import dataclass, field
 from urllib.parse import quote
@@ -14,15 +15,11 @@ from grants_shared.adapters.db import PostgresDBClient
 from grants_shared.util.local import error_if_not_local
 from lxml import etree
 from pydantic import Field
-from sqlalchemy import delete, select
+from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import (
-    Application,
-    ApplicationSubmission,
-    ApplicationSubmissionRetrieved,
-)
+from src.db.models.competition_models import ApplicationSubmission
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -64,11 +61,13 @@ class ValidateSoapContext:
         self.cert, self.key = get_credentials(self.stack)
 
 
-def get_response(soap_context: ValidateSoapContext, request_operation: str) -> requests.Response:
+def get_response(
+    soap_context: ValidateSoapContext, request_operation: str, tracking_number: int
+) -> requests.Response:
     cert = _config.cert_data.replace("\\n", "\n")
     encoded = quote(cert, safe="")
     headers = {"X-Amzn-Mtls-Clientcert": encoded, **HEADERS}
-    data = REQUEST_BODY[request_operation]
+    data = REQUEST_BODY[request_operation](tracking_number)
     return requests.post(
         _config.soap_uri,
         data=data,
@@ -97,21 +96,21 @@ def get_temp_files(stack: ExitStack) -> dict:
     return temp_files
 
 
-def get_grantors_get_application_zip_request_body() -> bytes:
+def get_grantors_get_application_zip_request_body(tracking_number: int) -> bytes:
     return (
         '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
         "<soapenv:Header/>"
         "<soapenv:Body>"
         "<agen:GetApplicationZipRequest>"
-        "<gran:GrantsGovTrackingNumber>GRANT80000000</gran:GrantsGovTrackingNumber>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{tracking_number}</gran:GrantsGovTrackingNumber>"
         "</agen:GetApplicationZipRequest>"
         "</soapenv:Body>"
         "</soapenv:Envelope>"
     ).encode("utf-8")
 
 
-def get_grantors_get_submission_list_expanded_request_body() -> bytes:
-    return """
+def get_grantors_get_submission_list_expanded_request_body(tracking_number: int) -> bytes:
+    return f"""
         <soapenv:Envelope
         xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
         xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0"
@@ -119,14 +118,18 @@ def get_grantors_get_submission_list_expanded_request_body() -> bytes:
         <soapenv:Header/>
         <soapenv:Body>
         <agen:GetSubmissionListExpandedRequest>
+            <gran:ExpandedApplicationFilter>
+                <gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>
+                <gran:FilterValue>GRANT{tracking_number}</gran:FilterValue>
+             </gran:ExpandedApplicationFilter>
         </agen:GetSubmissionListExpandedRequest>
         </soapenv:Body>
         </soapenv:Envelope>
     """.encode()
 
 
-def get_grantors_get_submission_list_request_body() -> bytes:
-    return """
+def get_grantors_get_submission_list_request_body(tracking_number: int) -> bytes:
+    return f"""
         <soapenv:Envelope
         xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
         xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0"
@@ -134,32 +137,36 @@ def get_grantors_get_submission_list_request_body() -> bytes:
         <soapenv:Header/>
         <soapenv:Body>
         <agen:GetSubmissionListRequest>
+            <gran:ExpandedApplicationFilter>
+                <gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>
+                <gran:FilterValue>GRANT{tracking_number}</gran:FilterValue>
+             </gran:ExpandedApplicationFilter>
         </agen:GetSubmissionListRequest>
         </soapenv:Body>
         </soapenv:Envelope>
     """.encode()
 
 
-def get_grantors_get_confirm_application_delivery_body() -> bytes:
-    return """
+def get_grantors_get_confirm_application_delivery_body(tracking_number: int) -> bytes:
+    return f"""
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
         <soapenv:Header/>
         <soapenv:Body>
         <agen:ConfirmApplicationDeliveryRequest>
-        <gran:GrantsGovTrackingNumber>GRANT80000000</gran:GrantsGovTrackingNumber>
+        <gran:GrantsGovTrackingNumber>GRANT{tracking_number}</gran:GrantsGovTrackingNumber>
         </agen:ConfirmApplicationDeliveryRequest>
         </soapenv:Body>
         </soapenv:Envelope>
     """.encode()
 
 
-def get_update_application_info_body() -> bytes:
-    return """
+def get_update_application_info_body(tracking_number: int) -> bytes:
+    return f"""
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:agen1="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0">
         <soapenv:Header/>
         <soapenv:Body>
         <agen:UpdateApplicationInfoRequest>
-        <gran:GrantsGovTrackingNumber>GRANT80000000</gran:GrantsGovTrackingNumber>
+        <gran:GrantsGovTrackingNumber>GRANT{tracking_number}</gran:GrantsGovTrackingNumber>
         <agen1:AssignAgencyTrackingNumber>TEST1234</agen1:AssignAgencyTrackingNumber>
         <agen1:SaveAgencyNotes>Test Note</agen1:SaveAgencyNotes>
         </agen:UpdateApplicationInfoRequest>
@@ -168,12 +175,12 @@ def get_update_application_info_body() -> bytes:
     """.encode()
 
 
-REQUEST_BODY = {
-    "GetSubmissionListExpandedRequest": get_grantors_get_submission_list_expanded_request_body(),
-    "GetSubmissionListRequest": get_grantors_get_submission_list_request_body(),
-    "GetApplicationZipRequest": get_grantors_get_application_zip_request_body(),
-    "ConfirmApplicationDeliveryRequest": get_grantors_get_confirm_application_delivery_body(),
-    "UpdateApplicationInfoRequest": get_update_application_info_body(),
+REQUEST_BODY: dict[str, Callable[[int], bytes]] = {
+    "GetSubmissionListExpandedRequest": get_grantors_get_submission_list_expanded_request_body,
+    "GetSubmissionListRequest": get_grantors_get_submission_list_request_body,
+    "GetApplicationZipRequest": get_grantors_get_application_zip_request_body,
+    "ConfirmApplicationDeliveryRequest": get_grantors_get_confirm_application_delivery_body,
+    "UpdateApplicationInfoRequest": get_update_application_info_body,
 }
 
 
@@ -270,8 +277,10 @@ def clean_xml_namespaces(content: bytes) -> bytes:
     return content.replace(wrong_ns, right_ns)
 
 
-def validate_grantors_get_application_zip_request(soap_context: ValidateSoapContext) -> None:
-    resp = get_response(soap_context, "GetApplicationZipRequest")
+def validate_grantors_get_application_zip_request(
+    soap_context: ValidateSoapContext, legacy_tracking_number: int
+) -> None:
+    resp = get_response(soap_context, "GetApplicationZipRequest", legacy_tracking_number)
     assert resp.status_code == 200
     # The xml namespaces here do not need to be cleaned because there are no
     # blank namepsaces to default to the wrong url here
@@ -280,9 +289,9 @@ def validate_grantors_get_application_zip_request(soap_context: ValidateSoapCont
 
 
 def validate_grantors_get_submission_list_expanded_request(
-    soap_context: ValidateSoapContext,
+    soap_context: ValidateSoapContext, legacy_tracking_number: int
 ) -> None:
-    resp = get_response(soap_context, "GetSubmissionListExpandedRequest")
+    resp = get_response(soap_context, "GetSubmissionListExpandedRequest", legacy_tracking_number)
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "GetSubmissionListExpandedResponse", soap_context)
@@ -290,9 +299,9 @@ def validate_grantors_get_submission_list_expanded_request(
 
 
 def validate_grantors_get_submission_list_request(
-    soap_context: ValidateSoapContext,
+    soap_context: ValidateSoapContext, legacy_tracking_number: int
 ) -> None:
-    resp = get_response(soap_context, "GetSubmissionListRequest")
+    resp = get_response(soap_context, "GetSubmissionListRequest", legacy_tracking_number)
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "GetSubmissionListResponse", soap_context)
@@ -300,26 +309,9 @@ def validate_grantors_get_submission_list_request(
 
 
 def validate_confirm_application_delivery_request(
-    soap_context: ValidateSoapContext,
+    soap_context: ValidateSoapContext, legacy_tracking_number
 ) -> None:
-    # Reset the application_status to get a successful response
-    with soap_context.db_session.begin():
-        application_submission = soap_context.db_session.execute(
-            select(ApplicationSubmission)
-            .join(Application)
-            .where(ApplicationSubmission.legacy_tracking_number == 80000000)
-        ).scalar_one_or_none()
-        application_submission.has_tracking = False
-        soap_context.db_session.execute(
-            delete(ApplicationSubmissionRetrieved).where(
-                ApplicationSubmissionRetrieved.application_submission_id
-                == application_submission.application_submission_id
-            )
-        )
-        application = application_submission.application
-        application.application_status = ApplicationStatus.ACCEPTED
-
-    resp = get_response(soap_context, "ConfirmApplicationDeliveryRequest")
+    resp = get_response(soap_context, "ConfirmApplicationDeliveryRequest", legacy_tracking_number)
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "ConfirmApplicationDeliveryResponse", soap_context)
@@ -327,9 +319,9 @@ def validate_confirm_application_delivery_request(
 
 
 def validate_update_application_info_request(
-    soap_context: ValidateSoapContext,
+    soap_context: ValidateSoapContext, legacy_tracking_number
 ) -> None:
-    resp = get_response(soap_context, "UpdateApplicationInfoRequest")
+    resp = get_response(soap_context, "UpdateApplicationInfoRequest", legacy_tracking_number)
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "UpdateApplicationInfoResponse", soap_context)
@@ -362,6 +354,7 @@ VALIDATIONS = [
     validate_grantors_get_application_zip_request,
     validate_grantors_get_submission_list_expanded_request,
     validate_grantors_get_submission_list_request,
+    # Do ConfirmApplicationDelivery BEFORE UpdatApplicationInfo in order to get successful responses from both
     validate_confirm_application_delivery_request,
     validate_update_application_info_request,
 ]
@@ -378,10 +371,26 @@ def validate_simpler_endpoints() -> None:
         db_session = stack.enter_context(db_client.get_session())
         soap_context = ValidateSoapContext(stack=stack, db_session=db_session)
         factories._db_session = db_session
+
+        # Reset the application_status to get a successful response for ConfirmApplicationDelivery & UpdateApplicationInfo
+        with soap_context.db_session.begin():
+            application_submission = (
+                soap_context.db_session.execute(select(ApplicationSubmission)).scalars().first()
+            )
+            if not application_submission:
+                raise Exception(
+                    "Not ApplicationSubmission found, you probably need to run the seed-local-db-with-agencies command"
+                )
+            application_submission.has_tracking = False
+            application_submission.application_submission_retrievals = []
+            application_submission.application_submission_tracking_numbers = []
+            application = application_submission.application
+            application.application_status = ApplicationStatus.ACCEPTED
+
         for validation in VALIDATIONS:
             test_name = validation.__name__
             try:
-                validation(soap_context)
+                validation(soap_context, application_submission.legacy_tracking_number)
                 logger.info(f"{test_name} passed")
             except Exception as e:
                 logger.exception(f"{test_name} failed: {e}")
