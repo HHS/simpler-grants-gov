@@ -1,0 +1,117 @@
+import { useCallback, useEffect, useState } from "react";
+import SessionStorage from "src/services/sessionStorage/sessionStorage";
+import { AwardRecommendationSubmission } from "src/types/awardRecommendationTypes";
+
+const STORAGE_KEY_PREFIX = "selected-submissions-";
+
+export interface UseSelectedSubmissionsReturn {
+  selectedSubmissionIds: Set<string>;
+  selectedSubmissions: AwardRecommendationSubmission[];
+  setSelectedSubmissionIds: (ids: Set<string>) => void;
+  addSubmission: (submission: AwardRecommendationSubmission) => void;
+  removeSubmission: (id: string) => void;
+  clearSelections: () => void;
+  hasSelections: boolean;
+}
+
+export function useSelectedSubmissions(
+  awardRecommendationId: string,
+): UseSelectedSubmissionsReturn {
+  const storageKey = `${STORAGE_KEY_PREFIX}${awardRecommendationId}`;
+
+  const [selectedSubmissionIds, setSelectedSubmissionIdsState] =
+    useState<Set<string>>(new Set());
+  const [selectedSubmissions, setSelectedSubmissions] = useState<
+    AwardRecommendationSubmission[]
+  >([]);
+
+  useEffect(() => {
+    const stored = SessionStorage.getItem(storageKey);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setSelectedSubmissionIdsState(new Set(parsed.ids || []));
+        setSelectedSubmissions(parsed.submissions || []);
+      } catch (e) {
+        console.error("Error parsing stored selections:", e);
+      }
+    }
+  }, [storageKey]);
+
+  const persistToStorage = useCallback(
+    (ids: Set<string>, submissions: AwardRecommendationSubmission[]) => {
+      SessionStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          ids: Array.from(ids),
+          submissions,
+        }),
+      );
+    },
+    [storageKey],
+  );
+
+  const setSelectedSubmissionIds = useCallback(
+    (ids: Set<string>) => {
+      setSelectedSubmissionIdsState(ids);
+      const updatedSubmissions = selectedSubmissions.filter((s) =>
+        ids.has(s.award_recommendation_application_submission_id),
+      );
+      setSelectedSubmissions(updatedSubmissions);
+      persistToStorage(ids, updatedSubmissions);
+    },
+    [selectedSubmissions, persistToStorage],
+  );
+
+  const addSubmission = useCallback(
+    (submission: AwardRecommendationSubmission) => {
+      const id = submission.award_recommendation_application_submission_id;
+      const newIds = new Set(selectedSubmissionIds);
+      newIds.add(id);
+
+      const exists = selectedSubmissions.some(
+        (s) => s.award_recommendation_application_submission_id === id,
+      );
+      const newSubmissions = exists
+        ? selectedSubmissions
+        : [...selectedSubmissions, submission];
+
+      setSelectedSubmissionIdsState(newIds);
+      setSelectedSubmissions(newSubmissions);
+      persistToStorage(newIds, newSubmissions);
+    },
+    [selectedSubmissionIds, selectedSubmissions, persistToStorage],
+  );
+
+  const removeSubmission = useCallback(
+    (id: string) => {
+      const newIds = new Set(selectedSubmissionIds);
+      newIds.delete(id);
+
+      const newSubmissions = selectedSubmissions.filter(
+        (s) => s.award_recommendation_application_submission_id !== id,
+      );
+
+      setSelectedSubmissionIdsState(newIds);
+      setSelectedSubmissions(newSubmissions);
+      persistToStorage(newIds, newSubmissions);
+    },
+    [selectedSubmissionIds, selectedSubmissions, persistToStorage],
+  );
+
+  const clearSelections = useCallback(() => {
+    setSelectedSubmissionIdsState(new Set());
+    setSelectedSubmissions([]);
+    SessionStorage.removeItem(storageKey);
+  }, [storageKey]);
+
+  return {
+    selectedSubmissionIds,
+    selectedSubmissions,
+    setSelectedSubmissionIds,
+    addSubmission,
+    removeSubmission,
+    clearSelections,
+    hasSelections: selectedSubmissionIds.size > 0,
+  };
+}
