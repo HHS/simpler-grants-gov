@@ -50,9 +50,9 @@ describe("SubscriptionForm", () => {
   it("redirects to confirmation page on success", async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
-         json: () => Promise.resolve({ success: true }),
+        json: () => Promise.resolve({ success: true }),
       }),
-     ) as jest.Mock;
+    ) as jest.Mock;
 
     render(<SubscriptionForm />);
 
