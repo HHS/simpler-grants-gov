@@ -41,10 +41,12 @@ describe("SubscriptionForm", () => {
 
   it("calls /api/newsletter/subscribe on submit", async () => {
     global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({ success: true }),
-      }),
-    );
+      Promise.resolve(
+        ({
+          json: () => Promise.resolve({ success: true }),
+        } as unknown) as Response,
+      ),
+    ) as unknown as typeof global.fetch;
 
     render(<SubscriptionForm />);
 
@@ -68,10 +70,12 @@ describe("SubscriptionForm", () => {
 
   it("redirects to confirmation page on success", async () => {
     global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({ success: true }),
-      }),
-    );
+      Promise.resolve(
+        ({
+          json: () => Promise.resolve({ success: true }),
+        } as unknown) as Response,
+      ),
+    ) as unknown as typeof global.fetch;
 
     render(<SubscriptionForm />);
 
@@ -92,10 +96,12 @@ describe("SubscriptionForm", () => {
 
   it("shows server error message on failure", async () => {
     global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({ success: false, errorCode: "server" }),
-      }),
-    );
+      Promise.resolve(
+        ({
+          json: () => Promise.resolve({ success: false, errorCode: "server" }),
+        } as unknown) as Response,
+      ),
+    ) as unknown as typeof global.fetch;
 
     render(<SubscriptionForm />);
 
