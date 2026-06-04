@@ -4,11 +4,12 @@ import uuid
 from decimal import Decimal
 from typing import Any
 
+from grants_shared.util.decimal_util import convert_monetary_field, quantize_decimal
+from grants_shared.util.dict_util import get_nested_value
+
 from src.db.models.competition_models import Application
 from src.form_schema.forms import ProjectAbstractSummary_v2_0, SF424_v4_0, SF424a_v1_0
 from src.services.applications.application_validation import is_form_required
-from src.util.decimal_util import convert_monetary_field, quantize_decimal
-from src.util.dict_util import get_nested_value
 
 logger = logging.getLogger(__name__)
 

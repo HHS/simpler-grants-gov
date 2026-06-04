@@ -5,8 +5,8 @@ import { AwardRecommendationSummary } from "src/types/awardRecommendationTypes";
 import { useTranslations } from "next-intl";
 import { CharacterCount } from "@trussworks/react-uswds";
 
-import { RecommendationSummaryDisplay } from "src/components/award-recommendation/RecommendationSummaryDisplay";
 import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
+import { RecommendationSummaryDisplay } from "./RecommendationSummaryDisplay";
 
 type RecommendationSummarySectionProps = {
   summary?: AwardRecommendationSummary;

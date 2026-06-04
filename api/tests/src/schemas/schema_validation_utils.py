@@ -2,7 +2,13 @@ from enum import Enum, StrEnum
 from random import choice
 from string import ascii_uppercase
 
-from src.api.schemas.extension import MarshmallowErrorContainer, Schema, fields, validators
+from grants_shared.api.schemas.extension import (
+    MarshmallowErrorContainer,
+    Schema,
+    fields,
+    validators,
+)
+
 from src.validation.validation_constants import ValidationErrorType
 
 #############################

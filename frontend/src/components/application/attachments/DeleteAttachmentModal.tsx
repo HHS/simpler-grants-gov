@@ -10,8 +10,8 @@ import {
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
-import { SimplerModal } from "src/components/SimplerModal";
-import Spinner from "src/components/Spinner";
+import { SimplerModal } from "src/components/core/SimplerModal";
+import Spinner from "src/components/core/Spinner";
 
 interface Props {
   deletePending: boolean;

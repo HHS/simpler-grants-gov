@@ -17,6 +17,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 import { isFieldRequired } from "src/components/applyForm/utils";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { renderWidget } from "./WidgetRenderers";
 
 /**
@@ -38,6 +39,14 @@ type FieldListEntry = {
 };
 
 const FIELD_LIST_INDEX_TOKEN = "~~index~~";
+
+let fieldListEntryValueIdCounter = 0;
+
+const createFieldListEntryValueId = (): string => {
+  fieldListEntryValueIdCounter += 1;
+
+  return `field-list-entry-${fieldListEntryValueIdCounter}`;
+};
 
 /**
  * Builds the initial entries rendered by FieldList.
@@ -83,14 +92,6 @@ const normalizeFieldListEntries = ({
       value: {},
     })),
   ];
-};
-
-let fieldListEntryValueIdCounter = 0;
-
-const createFieldListEntryValueId = (): string => {
-  fieldListEntryValueIdCounter += 1;
-
-  return `${Date.now()}-${fieldListEntryValueIdCounter}`;
 };
 
 /**
@@ -196,6 +197,7 @@ const getFieldListValues = (entries: FieldListEntry[]): GeneralRecord[] => {
 function FieldListEntry({
   entryId,
   entryIndex,
+  entryLabel,
   entryValue,
   canDeleteEntry,
   handleDeleteEntry,
@@ -204,9 +206,12 @@ function FieldListEntry({
   fieldListPath,
   groupDefinition,
   requiredFields,
+  minItemsHeading,
+  minItemsHelperText,
 }: {
   entryId: string;
   entryIndex: number;
+  entryLabel: string;
   entryValue: GeneralRecord;
   canDeleteEntry: boolean;
   handleDeleteEntry: (entryId: string) => void;
@@ -215,22 +220,17 @@ function FieldListEntry({
   fieldListPath: string;
   groupDefinition: FieldListGroupItem[];
   requiredFields?: string[];
+  minItemsHeading?: string;
+  minItemsHelperText?: string;
 }) {
   const t = useTranslations("Application.applyForm.fieldListWidget");
 
   return (
-    <div className="field-list-widget__entry border radius-md border-base-lighter padding-2 margin-2">
-      <div className="field-list-widget__controls display-flex flex-align-center flex-justify margin-bottom-2">
+    <div className="field-list-widget__entry padding-y-2 padding-bottom-3">
+      <div className="field-list-widget__entry-header margin-bottom-2">
         <strong>
-          {t("entry")} {entryIndex + 1}
+          {entryLabel} {entryIndex + 1}
         </strong>
-        <Button
-          type="button"
-          onClick={() => handleDeleteEntry(entryId)}
-          disabled={!canDeleteEntry}
-        >
-          {t("delete")}
-        </Button>
       </div>
 
       {groupDefinition.map((groupItem: FieldListGroupItem) => {
@@ -289,6 +289,34 @@ function FieldListEntry({
           props: childWidgetProps,
         });
       })}
+
+      <div className="field-list-widget__entry-controls margin-top-2 padding-top-2 display-flex flex-align-start flex-justify-between">
+        {!canDeleteEntry && (minItemsHeading || minItemsHelperText) ? (
+          <div>
+            {minItemsHeading ? (
+              <p className="text-bold margin-bottom-05">{minItemsHeading}</p>
+            ) : null}
+            {minItemsHelperText ? (
+              <p className="usa-hint margin-top-0 margin-bottom-0">
+                {minItemsHelperText}
+              </p>
+            ) : null}
+          </div>
+        ) : (
+          <div />
+        )}
+
+        <Button
+          type="button"
+          onClick={() => handleDeleteEntry(entryId)}
+          disabled={!canDeleteEntry}
+          className="button--danger margin-left-auto"
+          outline
+        >
+          <USWDSIcon name="delete" />
+          {t("deleteEntry")}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -300,7 +328,11 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
     description,
     name,
     minItems,
+    minItemsHeading,
+    minItemsHelperText,
     maxItems,
+    maxItemsHeading,
+    maxItemsHelperText,
     groupDefinition,
     value,
     onChange,
@@ -352,6 +384,21 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
 
   const canAddEntry = !isInteractionDisabled && !isAtMaximumEntryCount;
   const canDeleteEntry = !isInteractionDisabled && !isAtMinimumEntryCount;
+
+  const resolvedMinItemsHeading =
+    minItemsHeading ?? "Would you like to delete this field?";
+
+  const resolvedMinItemsHelperText =
+    minItemsHelperText ?? `There is a minimum count of ${minimumEntryCount}.`;
+
+  const resolvedEntryLabel = label ?? "entry";
+
+  const resolvedMaxItemsHeading =
+    maxItemsHeading ?? "Do you have another entry to add?";
+
+  const resolvedMaxItemsHelperText =
+    maxItemsHelperText ??
+    `You have reached the maximum count of ${maximumEntryCount} entries.`;
 
   /**
    * Applies updates to FieldList entries.
@@ -455,7 +502,10 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   );
 
   return (
-    <div id={id} className="field-list-widget">
+    <div
+      id={id}
+      className="field-list-widget border border-base-lighter radius-md padding-2 margin-y-2"
+    >
       {label ? <h3>{label}</h3> : null}
       {description ? <p>{description}</p> : null}
 
@@ -474,6 +524,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
           <FieldListEntry
             key={entry.entryId}
             entryId={entry.entryId}
+            entryLabel={resolvedEntryLabel}
             entryValue={entry.value}
             entryIndex={entryIndex}
             canDeleteEntry={canDeleteEntry}
@@ -483,17 +534,48 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
             rawErrors={rawErrors}
             fieldListPath={fieldListPath}
             requiredFields={widgetProps.requiredFields}
+            minItemsHeading={resolvedMinItemsHeading}
+            minItemsHelperText={resolvedMinItemsHelperText}
           />
         );
       })}
-      {isAtMaximumEntryCount ? (
-        <p className="usa-hint margin-top-1">
-          Maximum of {maximumEntryCount} entries reached.
-        </p>
+
+      {isAtMaximumEntryCount && (maxItemsHeading || maxItemsHelperText) ? (
+        <div className="margin-top-1">
+          {maxItemsHeading ? (
+            <p className="text-bold margin-bottom-05">
+              {resolvedMaxItemsHeading}
+            </p>
+          ) : null}
+          {maxItemsHelperText ? (
+            <p className="usa-hint margin-top-0">
+              {resolvedMaxItemsHelperText}
+            </p>
+          ) : null}
+        </div>
       ) : null}
-      <div className="field-list-widget__controls display-flex flex-align-center flex-justify-between margin-bottom-2">
-        <Button type="button" onClick={handleAddEntry} disabled={!canAddEntry}>
-          + {t("add")}
+
+      <div className="field-list-widget__controls padding-top-2 display-flex flex-align-start flex-justify-between">
+        <div>
+          <p className="text-bold margin-bottom-05">
+            {resolvedMaxItemsHeading}
+          </p>
+          {isAtMaximumEntryCount ? (
+            <p className="usa-hint margin-top-0 margin-bottom-0">
+              {resolvedMaxItemsHelperText}
+            </p>
+          ) : null}
+        </div>
+
+        <Button
+          className="margin-left-auto"
+          type="button"
+          onClick={handleAddEntry}
+          disabled={!canAddEntry}
+          outline
+        >
+          <USWDSIcon name="add" />
+          {t("addEntry")}
         </Button>
       </div>
     </div>

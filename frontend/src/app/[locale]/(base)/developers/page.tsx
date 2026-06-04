@@ -1,11 +1,10 @@
 import { Metadata } from "next";
+import DevelopersPageSections from "src/app/[locale]/(base)/developers/_components/DevelopersSections";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { GridContainer } from "@trussworks/react-uswds";
-
-import DevelopersPageSections from "src/components/developers/DevelopersSections";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;

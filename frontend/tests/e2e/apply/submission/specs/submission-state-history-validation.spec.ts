@@ -15,8 +15,8 @@ import {
 } from "tests/e2e/apply/fixtures/sf424b-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
-import { createApplication } from "tests/e2e/utils/create-application-utils";
+import { createApplication } from "tests/e2e/utils/application/create-application-utils";
+import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
@@ -28,11 +28,11 @@ import {
 import {
   verifyFormFieldsAreReadonlyAfterSubmission,
   verifyPostSubmission,
-} from "tests/e2e/utils/post-submission-utils";
+} from "tests/e2e/utils/submission/post-submission-utils";
 import {
   submitApplicationAndVerify,
   type SubmitOutcome,
-} from "tests/e2e/utils/submit-application-utils";
+} from "tests/e2e/utils/submission/submit-application-utils";
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01

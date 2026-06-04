@@ -1,6 +1,7 @@
 import uuid
 from datetime import date, datetime
 
+from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from grants_shared.db.models.base import TimestampMixin
 from grants_shared.util import datetime_util
 from sqlalchemy import ForeignKey, UniqueConstraint, and_
@@ -9,7 +10,6 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
 
-from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType, UserType
 from src.db.models.agency_models import Agency
 from src.db.models.api_schema_table import ApiSchemaTable

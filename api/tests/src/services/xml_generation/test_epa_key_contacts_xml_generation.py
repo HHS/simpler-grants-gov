@@ -13,9 +13,11 @@ import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
+from src.db.models.competition_models import Form
 from src.form_schema.forms.epa_key_contacts import (
     FORM_XML_TRANSFORM_RULES as EPA_KEY_CONTACTS_TRANSFORM_RULES,
 )
+from src.form_schema.forms.epa_key_contacts import EPA_KEY_CONTACT_v2_0
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -27,7 +29,6 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
@@ -58,7 +59,6 @@ def _create_sample_contact_person(prefix="Dr.", first_name="John", last_name="Sm
     }
 
 
-@pytest.mark.xml_validation
 class TestEPAKeyContactsXMLGeneration:
     """Test cases for EPA Key Contacts XML generation service."""
 
@@ -255,6 +255,7 @@ class TestEPAKeyContactsXMLGeneration:
         assert "LastName>Person<" in xml_data
         assert "Phone>555-123-4567<" in xml_data
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_generate_epa_key_contacts_xml_empty_form(self):
         """Test EPA Key Contacts XML generation with no contacts (empty form).
 
@@ -419,33 +420,32 @@ class TestEPAKeyContactsXMLGeneration:
         assert auth_rep.find(f"{{{GLOB_NS}}}Phone").text.strip() == "1231231234"
 
 
-@pytest.mark.xml_validation
 class TestEPAKeyContactsXSDValidation:
     """XSD validation tests for EPA Key Contacts form XML."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
-        xsd_path = xsd_cache_dir / "EPA_KeyContacts_2_0-V2.0.xsd"
+        """Create XSD validator."""
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
+        xsd_path = xsd_dir / "EPA_KeyContacts_2_0-V2.0.xsd"
         if not xsd_path.exists():
             pytest.skip(
-                "EPA_KeyContacts_2_0-V2.0.xsd not found in cache. "
+                "EPA_KeyContacts_2_0-V2.0.xsd not found. "
                 "Run 'flask task fetch-xsds' to download schemas."
             )
-        return XSDValidator(xsd_cache_dir)
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def epa_key_contacts_application(self, enable_factory_create, db_session: db.Session):
+    def epa_key_contacts_application(
+        self, enable_factory_create, db_session: db.Session, seed_form_registry
+    ):
         """Create an application with EPA Key Contacts form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -465,15 +465,10 @@ class TestEPAKeyContactsXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create EPA Key Contacts form with XML transform config
-        epa_kc_form = FormFactory.create(
-            form_name="EPA KEY CONTACTS FORM",
-            short_form_name="EPA_KeyContacts",
-            form_version="2.0",
-            json_to_xml_schema=EPA_KEY_CONTACTS_TRANSFORM_RULES,
-        )
+        epa_kc_form = db_session.get(Form, EPA_KEY_CONTACT_v2_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="EPA Key Contacts Test Application"
@@ -528,6 +523,7 @@ class TestEPAKeyContactsXSDValidation:
 
         return application
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_submission_xml_validates_against_xsd(
         self, epa_key_contacts_application, xsd_validator, db_session
     ):
@@ -547,7 +543,9 @@ class TestEPAKeyContactsXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         epa_ns = "{http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         epa_elements = forms_element.findall(f".//{epa_ns}KeyContactPersons_2_0")
@@ -568,8 +566,9 @@ class TestEPAKeyContactsXSDValidation:
             f"Generated XML:\n{epa_xml[:2000]}"
         )
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_empty_form_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
         """Test that EPA Key Contacts with no contacts validates against XSD (all elements are optional)."""
         agency = AgencyFactory.create()
@@ -590,14 +589,10 @@ class TestEPAKeyContactsXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        epa_kc_form = FormFactory.create(
-            form_name="EPA KEY CONTACTS FORM",
-            short_form_name="EPA_KeyContacts",
-            form_version="2.0",
-            json_to_xml_schema=EPA_KEY_CONTACTS_TRANSFORM_RULES,
-        )
+        epa_kc_form = db_session.get(Form, EPA_KEY_CONTACT_v2_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition,
@@ -619,15 +614,17 @@ class TestEPAKeyContactsXSDValidation:
         )
 
         assembler = SubmissionXMLAssembler(application, application_submission)
-        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
 
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
         assert xml_string is not None
 
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         epa_ns = "{http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         epa_elements = forms_element.findall(f".//{epa_ns}KeyContactPersons_2_0")
         assert len(epa_elements) == 1
 

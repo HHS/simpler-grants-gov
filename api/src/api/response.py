@@ -4,10 +4,10 @@ from typing import Any, cast
 
 import apiflask
 import flask
+from grants_shared.api.schemas.extension import MarshmallowErrorContainer
+from grants_shared.util.dict_util import flatten_dict
 
-from src.api.schemas.extension import MarshmallowErrorContainer
 from src.pagination.pagination_models import PaginationInfo
-from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 

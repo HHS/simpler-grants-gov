@@ -24,10 +24,10 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import NavDropdown from "src/components/NavDropdown";
-import { RouteChangeWatcher } from "src/components/RouteChangeWatcher";
-import { TestUserSelect } from "src/components/TestUserSelect";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import NavDropdown from "src/components/core/header/NavDropdown";
+import { RouteChangeWatcher } from "src/components/core/header/RouteChangeWatcher";
+import { TestUserSelect } from "src/components/core/header/TestUserSelect";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { SignOutNavLink } from "./SignOutNavLink";
 import { TestApplicationLink } from "./TestApplicationLink";
 

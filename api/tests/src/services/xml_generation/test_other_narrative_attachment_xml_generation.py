@@ -38,7 +38,6 @@ def _build_attachment(uuid_str, filename, mime, location, hash_value):
     )
 
 
-@pytest.mark.xml_validation
 class TestOtherNarrativeAttachmentsXMLGeneration:
     """Test cases for Other Narrative Attachments XML generation service."""
 
@@ -135,24 +134,23 @@ class TestOtherNarrativeAttachmentsXMLGeneration:
         assert file_name_pos < mime_pos < location_pos < hash_pos
 
 
-@pytest.mark.xml_validation
 class TestOtherNarrativeAttachmentsXSDValidation:
     """XSD validation tests for Other Narrative Attachments XML."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cached schemas."""
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
+        """Create XSD validator with schemas."""
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
 
-        if not xsd_cache_dir.exists():
-            pytest.skip("XSD cache directory not found. Run 'flask task fetch-xsds'.")
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds'.")
 
-        xsd_path = xsd_cache_dir / "OtherNarrativeAttachments_1_2-V1.2.xsd"
+        xsd_path = xsd_dir / "OtherNarrativeAttachments_1_2-V1.2.xsd"
 
         if not xsd_path.exists():
-            pytest.skip("OtherNarrativeAttachments_1_2-V1.2.xsd not found in cache.")
+            pytest.skip("OtherNarrativeAttachments_1_2-V1.2.xsd not found.")
 
-        return XSDValidator(xsd_cache_dir)
+        return XSDValidator(xsd_dir)
 
     def test_other_narrative_attachments_xml_validates_against_xsd(self, xsd_validator):
         """Test that generated XML validates against official XSD schema."""
@@ -181,7 +179,7 @@ class TestOtherNarrativeAttachmentsXSDValidation:
 
         xml_data = response.xml_data
 
-        xsd_path = xsd_validator.xsd_cache_dir / "OtherNarrativeAttachments_1_2-V1.2.xsd"
+        xsd_path = xsd_validator.xsd_dir / "OtherNarrativeAttachments_1_2-V1.2.xsd"
 
         validation_result = xsd_validator.validate_xml(xml_data, xsd_path)
 
@@ -234,7 +232,7 @@ class TestOtherNarrativeAttachmentsXSDValidation:
         assert len(attachments) == 1
 
         # Validate against XSD
-        xsd_path = xsd_validator.xsd_cache_dir / "OtherNarrativeAttachments_1_2-V1.2.xsd"
+        xsd_path = xsd_validator.xsd_dir / "OtherNarrativeAttachments_1_2-V1.2.xsd"
 
         validation_result = xsd_validator.validate_xml(xml_data, xsd_path)
 

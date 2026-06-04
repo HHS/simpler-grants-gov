@@ -17,7 +17,7 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
+import { RequiredFieldIndicator } from "src/components/core/RequiredFieldIndicator";
 
 const exceptionEligibleRecommendationTypes: AwardRecommendationType[] = [
   "recommended_without_funding",
