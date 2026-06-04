@@ -5,7 +5,6 @@ import {
   SF424_TEST_OPPORTUNITY_DATA,
 } from "tests/e2e/apply/fixtures/sf424-data";
 import { SF424_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424-field-definitions";
-import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
 import type { FillFormConfig } from "tests/e2e/utils/common/types";
 
 import type {
