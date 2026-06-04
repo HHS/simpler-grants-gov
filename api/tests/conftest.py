@@ -1,5 +1,6 @@
 import logging
 import uuid
+import os
 from os import path
 
 import _pytest.monkeypatch
@@ -550,6 +551,18 @@ def file_scan_dynamodb_table(mock_dynamodb, monkeypatch):
     )
     monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
     return table_name
+
+
+@pytest.fixture
+def ses_client(reset_aws_env_vars, monkeypatch):
+    """Create a mocked SESv2 client using moto3."""
+    monkeypatch.setenv("IS_LOCAL_AWS", "0")
+
+    # to access ses_backends, need to add ses to the whitelist
+    with moto.mock_aws(config={"core": {"service_whitelist": ["ses", "sesv2"]}}):
+        ses_client = boto3.client("sesv2", region_name="us-east-1")
+        ses_client.create_email_identity(EmailIdentity=os.getenv("AWS_SES_FROM_EMAIL"))
+        yield ses_client
 
 
 ####################
