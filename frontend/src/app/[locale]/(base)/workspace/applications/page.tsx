@@ -12,11 +12,11 @@ import { setRequestLocale } from "next-intl/server";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
+} from "src/components/core/TableWithResponsiveHeader";
 
 const ApplicationsPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Applications");

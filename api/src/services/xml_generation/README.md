@@ -115,13 +115,13 @@ make validate-xml-generation
 make test-xml-validation form=SF424_4_0
 ```
 
-**Note:** The first run will download and cache XSD files from Grants.gov. Subsequent runs use the cached files from `xsd_cache/`.
+**Note:** The first run will download XSD files from Grants.gov. Subsequent runs use the downloaded files from `services/xml_generation/xsds/`.
 
 The validation tests:
 1. Generate XML from test data (see `src/services/xml_generation/validation/test_cases.py`)
 2. Download XSD schemas from Grants.gov if not cached
 3. Validate generated XML against the official XSD
-4. Save results to `xsd_cache/validation_results.json`
+4. Save results to `services/xml_generation/xsds/validation_results.json`
 
 ### Validation Test Cases
 

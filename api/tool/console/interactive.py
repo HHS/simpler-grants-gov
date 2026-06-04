@@ -13,14 +13,14 @@ import rich  # noqa: F401 isort:skip
 import rich.panel  # noqa: F401 isort:skip
 import rich.pretty
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
 import src.db  # noqa: F401 isort:skip
 import src.db.models
 import grants_shared.logs
 import src.util
 import tests.src.db.models.factories
-from src.adapters.db.clients.postgres_client import PostgresDBClient
-from src.adapters.db.clients.postgres_config import get_db_config
+from grants_shared.adapters.db.clients.postgres_client import PostgresDBClient
+from grants_shared.adapters.db.clients.postgres_config import get_db_config
 
 INTRO = """
 Simpler Grants Gov Python console

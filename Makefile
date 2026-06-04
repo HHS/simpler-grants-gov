@@ -189,13 +189,6 @@ infra-update-app-service: ## Create or update $APP_NAME's web service module
 	terraform -chdir="infra/$(APP_NAME)/service" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
 	terraform -chdir="infra/$(APP_NAME)/service" apply -var="environment_name=$(ENVIRONMENT)"
 
-infra-update-metabase-service: ## Create or update $APP_NAME's web service module
-	# APP_NAME has a default value defined above, but check anyways in case the default is ever removed
-	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
-	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
-	terraform -chdir="infra/analytics/metabase" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
-	terraform -chdir="infra/analytics/metabase" apply -var="environment_name=$(ENVIRONMENT)"
-
 # The prerequisite for this rule is obtained by
 # prefixing each module with the string "infra-validate-module-"
 infra-validate-modules: ## Run terraform validate on reusable child modules
@@ -335,11 +328,6 @@ release-deploy: ## Deploy release to $APP_NAME's web service in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
 	./bin/deploy-release $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
-
-metabase-deploy: ## Deploy metabase to $APP_NAME's web service in $ENVIRONMENT
-	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
-	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/deploy-metabase $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
 
 invalidate-cloudfront-cache: ## Invalidate CloudFront cache for $ENVIRONMENT
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")

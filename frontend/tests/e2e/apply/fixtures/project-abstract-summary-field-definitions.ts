@@ -1,5 +1,5 @@
+import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
-import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-filling";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 export const PROJECT_ABSTRACT_SUMMARY_FORM_MATCHER =

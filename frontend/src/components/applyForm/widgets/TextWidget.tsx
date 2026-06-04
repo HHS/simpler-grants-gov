@@ -11,8 +11,8 @@ import { TextTypes, UswdsWidgetProps } from "src/types/applyForm/types";
 import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { FormGroup, TextInput } from "@trussworks/react-uswds";
 
-import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
+import { FieldErrors } from "src/components/core/forms/FieldErrors";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.
@@ -132,7 +132,7 @@ function TextWidget<
         onBlur={updateOnInput ? _onBlur : undefined}
         onFocus={updateOnInput ? _onFocus : undefined}
         defaultValue={updateOnInput ? undefined : inputValue}
-        value={updateOnInput ? inputValue : undefined}
+        value={updateOnInput ? (inputValue ?? "") : undefined}
         validationStatus={error ? "error" : undefined}
         pattern={pattern || undefined}
       />

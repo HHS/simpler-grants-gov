@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: secret123
-      POSTGRES_MULTIPLE_DATABASES: "app,app:analytics,analytics"
+      POSTGRES_MULTIPLE_DATABASES: "app,app:analytics,analytics:grants_shared,grants_shared"
     ports:
       - "5432:5432"
     volumes:

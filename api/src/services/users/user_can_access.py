@@ -1,9 +1,9 @@
 from typing import cast
 from uuid import UUID
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.api.users.user_schemas import ResourceSchema
 from src.auth.endpoint_access_util import check_user_access

@@ -1,5 +1,5 @@
+import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
-import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-filling";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 // Matches "Other Narrative Attachments" link/heading on the application page

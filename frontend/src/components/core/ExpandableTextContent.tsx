@@ -1,7 +1,7 @@
 import DOMPurify from "isomorphic-dompurify";
 import { splitMarkup } from "src/utils/generalUtils";
 
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import ContentDisplayToggle from "src/components/core/ContentDisplayToggle";
 
 export const ExpandableTextContent = ({
   textContent = "",

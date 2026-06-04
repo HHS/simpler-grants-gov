@@ -16,11 +16,11 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { SavedOpportunitiesController } from "src/components/saved-opportunities/SavedOpportunitiesController";
 import SavedOpportunityOwnershipFilter from "src/components/saved-opportunities/SavedOpportunityOwnershipFilter";
 import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

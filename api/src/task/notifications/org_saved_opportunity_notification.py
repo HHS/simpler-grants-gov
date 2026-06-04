@@ -3,11 +3,11 @@ import logging
 from dataclasses import dataclass
 from uuid import UUID
 
+from grants_shared.adapters import db
 from grants_shared.util import datetime_util
 from sqlalchemy import and_, exists, select, update
 from sqlalchemy.orm import selectinload
 
-from src.adapters import db
 from src.db.models.entity_models import Organization, OrganizationSavedOpportunity
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (

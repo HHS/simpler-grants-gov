@@ -1,5 +1,5 @@
 import { expect, Page } from "@playwright/test";
-import { UUID_REGEX } from "tests/e2e/utils/regex-utils";
+import { UUID_REGEX } from "tests/e2e/utils/common/regex-utils";
 
 export type SubmitOutcome = "success" | "validationError";
 

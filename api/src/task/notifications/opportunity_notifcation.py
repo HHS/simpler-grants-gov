@@ -5,11 +5,11 @@ from datetime import datetime
 from typing import cast
 from uuid import UUID
 
+from grants_shared.adapters import db
 from grants_shared.util import datetime_util
 from sqlalchemy import and_, desc, exists, func, select, tuple_, update
 from sqlalchemy.orm import aliased, selectinload
 
-from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionV1Schema
 from src.constants.lookup_constants import FundingCategory, OpportunityCategory, OpportunityStatus
 from src.db.models.opportunity_models import OpportunityVersion

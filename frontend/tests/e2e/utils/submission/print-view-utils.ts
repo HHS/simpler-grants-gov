@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
+import type { FillFormConfig } from "tests/e2e/utils/common/types";
 
 /**
  * Converts a workspace application form URL to its corresponding print view URL.

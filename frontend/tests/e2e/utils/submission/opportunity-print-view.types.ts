@@ -1,4 +1,4 @@
-import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
+import type { FillFormConfig } from "tests/e2e/utils/common/types";
 
 /**
  * Per-form print view configuration, exported from each form's data file.
