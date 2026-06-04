@@ -1,7 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { UiSchema } from "src/types/applyForm/types";
 
-import sflllSchema from "src/components/applyForm/sflll.mock.json";
 import {
   addPrintWidgetToFields,
   buildWarningTree,
@@ -23,6 +22,7 @@ import {
   pruneEmptyNestedFields,
   shapeFormData,
 } from "./applyFormUtils";
+import sflllSchema from "./sflll.mock.json";
 
 const mockMergeAllOf = jest.fn();
 const mockExtricateConditionalValidationRules = jest.fn();
