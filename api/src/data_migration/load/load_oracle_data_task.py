@@ -143,7 +143,7 @@ class LoadOracleDataTask(src.task.task.Task):
             )
 
         lowercase_columns = self.lowercase_columns.get(foreign_table.name, [])
-        if excluded_columns:
+        if lowercase_columns:
             logger.info(
                 "Lowercase columns during insert",
                 extra=log_extra | {"lowercase_columns": lowercase_columns},
