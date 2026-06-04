@@ -1,10 +1,11 @@
 from typing import Any
 
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
 from marshmallow import ValidationError, validates_schema
 
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.api.schemas.response_schema import PaginationMixinSchema
 from src.constants.lookup_constants import (
     ApprovalResponseType,
     ApprovalType,

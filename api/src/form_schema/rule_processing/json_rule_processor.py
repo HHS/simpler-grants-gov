@@ -1,6 +1,8 @@
 import logging
 from collections.abc import Callable
 
+from grants_shared.util.dict_util import get_nested_value
+
 from src.form_schema.rule_processing.json_rule_context import JsonRule, JsonRuleContext
 from src.form_schema.rule_processing.json_rule_field_population import (
     POST_POPULATION_MAPPER,
@@ -9,7 +11,6 @@ from src.form_schema.rule_processing.json_rule_field_population import (
 )
 from src.form_schema.rule_processing.json_rule_util import build_path_str
 from src.form_schema.rule_processing.json_rule_validator import handle_validation
-from src.util.dict_util import get_nested_value
 
 logger = logging.getLogger(__name__)
 

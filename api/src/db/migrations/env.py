@@ -9,7 +9,10 @@ from src.constants.schema import Schemas
 from src.db.models import metadata
 from src.db.models.staging import metadata as staging_metadata
 
-from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn  # isort:skip
+from grants_shared.adapters.db.type_decorators.postgres_type_decorators import (  # isort:skip
+    LookupColumn,
+)
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

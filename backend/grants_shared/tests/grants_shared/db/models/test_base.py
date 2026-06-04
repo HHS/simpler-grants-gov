@@ -1,6 +1,6 @@
 import uuid
 
-from tests.grants_shared.db_test_models.db_test_models import ExampleTable, FriendTable
+from tests.grants_shared.db_test_models.db_test_models import ExampleTable, ExampleType, FriendTable
 
 
 def test_get_table_name():
@@ -18,6 +18,7 @@ def test_for_json_example():
         "example_id": "41fe3ffe-b211-415c-8f35-2250462e791d",
         "description": "my description",
         "my_count": None,
+        "example_type": None,
         # Haven't flushed to DB yet, these aren't set
         "created_at": None,
         "updated_at": None,
@@ -25,11 +26,13 @@ def test_for_json_example():
 
     example.my_count = 5
     example.description = "something else"
+    example.example_type = ExampleType.ANECDOTE
 
     assert example.for_json() == {
         "example_id": "41fe3ffe-b211-415c-8f35-2250462e791d",
         "description": "something else",
         "my_count": 5,
+        "example_type": ExampleType.ANECDOTE,
         # Haven't flushed to DB yet, these aren't set
         "created_at": None,
         "updated_at": None,
@@ -37,7 +40,7 @@ def test_for_json_example():
 
     assert (
         repr(example)
-        == "<ExampleTable(example_id='41fe3ffe-b211-415c-8f35-2250462e791d',description='something else',my_count=5,created_at=None,updated_at=None)"
+        == "<ExampleTable(example_id='41fe3ffe-b211-415c-8f35-2250462e791d',description='something else',my_count=5,example_type=<ExampleType.ANECDOTE: 'anecdote'>,created_at=None,updated_at=None)"
     )
 
 

@@ -14,8 +14,8 @@ import { BUDGET_NARRATIVE_ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixture
 import { budgetNarrativeAttachmentHappyPathTestData } from "tests/e2e/apply/fixtures/budget-narrative-attachment-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
-import { createApplication } from "tests/e2e/utils/create-application-utils";
+import { createApplication } from "tests/e2e/utils/application/create-application-utils";
+import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
