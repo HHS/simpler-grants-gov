@@ -42,7 +42,7 @@ Questions about scope or acceptance criteria? Just ask here. Happy building!
 ```markdown
 Thanks for your interest, @handle! You currently hold the maximum of **3 active claims** across the bounty program, so I can't add this one.
 
-Once you close one out — by submitting a PR, withdrawing with `/withdraw`, or letting a claim lapse — comment `/claim` here again and I'll get you added.
+Once you close one out — by submitting a PR or withdrawing with `/withdraw`, comment `/claim` here again and I'll get you added.
 ```
 
 ---
@@ -57,7 +57,7 @@ Once you close one out — by submitting a PR, withdrawing with `/withdraw`, or 
 ```markdown
 Thanks @handle. I'm not able to accept new claims from you at this time — your account is in a temporary cooldown on new claims, ending **<date>**.
 
-Any claim you already have in progress continues to its normal resolution. After the cooldown ends you're welcome to claim again. If you'd like to understand the reason or discuss it, email the program owners and we'll follow up privately.
+Any claim you already have in progress continues to its normal resolution. After the cooldown ends you're welcome to claim again. If you'd like to understand the reason or discuss it, email me at nicamellifera@navapbc.com and we'll follow up privately.
 ```
 
 ---
@@ -85,7 +85,7 @@ Heads up: for tiebreaker purposes your claim timestamp is set to the time of a *
 ```markdown
 Hi @handle — this claim has had no activity for 14 days, so I've marked it **stale** and reopened the bounty for other contributors.
 
-This isn't a penalty, and you're not locked out: you can still submit a PR. Just note that if another contributor now claims and submits a valid PR first, the [tiebreaker rules](/documentation/bounties/paid-contributor-TOS.md) apply. If you're actively working and just went quiet, reply here with a progress update and we'll sort it out.
+You can still submit a PR. Just note that if another contributor now claims and submits a valid PR first, the [tiebreaker rules](/documentation/bounties/paid-contributor-TOS.md) apply. If you're actively working and just went quiet, reply here with a progress update and we'll sort it out.
 ```
 
 ---
@@ -96,7 +96,7 @@ This isn't a penalty, and you're not locked out: you can still submit a PR. Just
 > Governance: OS Associate grants; OS Lead reviews denials on request.
 
 ```markdown
-Thanks for the update, @handle — extension granted. Your claim is now active through **<date>** (7 additional days). This is the one extension available per claim, so the 14-day activity expectation resumes after this. Looking forward to the PR!
+Thanks for the update, @handle — extension granted. Your claim is now active for 7 additional days. This is the one extension available per claim, so the 14-day activity expectation resumes after this. Looking forward to the PR!
 ```
 
 ---
@@ -240,7 +240,6 @@ Contributor email:   <payment email — verified against GitHub account>
 Amount (USD):        $AMOUNT
 Bounty issue:        <full issue URL>
 Internal ref ID:     <tracker reference ID>
-Tier:                <XL / L / M>
 
 Verification (complete before submitting):
 - [ ] PR merged; two maintainer approvals + acceptance-criteria PASS comment on file
@@ -258,7 +257,7 @@ the paid banner + status:paid.
 
 ## Post-payout thank-you
 
-> Public comment (or short email) once the payment is confirmed sent and the issue
+> Public comment once the payment is confirmed sent and the issue
 > is closed with the paid banner (SOP Part 2.6). Include the survey link.
 > Governance: OS Associate.
 
