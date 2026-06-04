@@ -1,4 +1,16 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
+
+// Ensure the client fetch used by the component delegates to `global.fetch`,
+// which the tests mock below. Must mock before importing the component.
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: async (url: string, options?: RequestInit) => {
+      const res = await (global.fetch as unknown as jest.Mock)(url, options);
+      return res.json();
+    },
+  }),
+}));
+
 import SubscriptionForm from "src/app/[locale]/(base)/newsletter/_components/SubscriptionForm";
 
 const mockRouterPush = jest.fn();
@@ -32,9 +44,17 @@ describe("SubscriptionForm", () => {
       }),
     ) as jest.Mock;
 
-    render(<SubscriptionForm />);
+    const { container } = render(<SubscriptionForm />);
 
+    const nameInput = container.querySelector('#name') as HTMLInputElement;
+    const emailInput = container.querySelector('#email') as HTMLInputElement;
     const button = screen.getByRole("button", { name: "form.button" });
+
+    act(() => {
+      fireEvent.change(nameInput, { target: { value: "Test User" } });
+      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+    });
+
     act(() => {
       button.click();
     });
@@ -54,9 +74,17 @@ describe("SubscriptionForm", () => {
       }),
     ) as jest.Mock;
 
-    render(<SubscriptionForm />);
+    const { container } = render(<SubscriptionForm />);
 
+    const nameInput = container.querySelector('#name') as HTMLInputElement;
+    const emailInput = container.querySelector('#email') as HTMLInputElement;
     const button = screen.getByRole("button", { name: "form.button" });
+
+    act(() => {
+      fireEvent.change(nameInput, { target: { value: "Test User" } });
+      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+    });
+
     act(() => {
       button.click();
     });
@@ -73,9 +101,17 @@ describe("SubscriptionForm", () => {
       }),
     ) as jest.Mock;
 
-    render(<SubscriptionForm />);
+    const { container } = render(<SubscriptionForm />);
 
+    const nameInput = container.querySelector('#name') as HTMLInputElement;
+    const emailInput = container.querySelector('#email') as HTMLInputElement;
     const button = screen.getByRole("button", { name: "form.button" });
+
+    act(() => {
+      fireEvent.change(nameInput, { target: { value: "Test User" } });
+      fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+    });
+
     act(() => {
       button.click();
     });
