@@ -2078,6 +2078,7 @@ export const messages = {
       edit: "Edit",
       preview: "Preview",
       submitForReview: "Submit for review",
+      backToEdit: "Back to Edit",
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -2196,6 +2197,34 @@ export const messages = {
         showDescription: "Show full description",
         hideSummaryDescription: "Hide full description",
       },
+    },
+    risks: {
+      pageTitle: "Risks and Conditions",
+      metaDescription: "Manage risks and conditions for award recommendations",
+      heading: "Risks and Conditions",
+      description:
+        "Review and manage risks and conditions for application submissions",
+      selectAll: "Select all",
+      selectRow: "Select row for {appNumber}",
+      selectedCount:
+        "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      columns: {
+        appNumber: "App #",
+        projectTitle: "Project Title",
+        orgName: "Organization Name",
+        uei: "UEI",
+        recommendation: "Recommendation",
+        risk: "Risk",
+        condition: "Condition",
+      },
+      recommendationType: {
+        recommended_for_funding: "Recommended",
+      },
+      defaultNone: "None",
+      loading: "Loading submissions...",
+      errorLoading: "Error loading submissions. Please try again.",
+      showingRange: "Showing {start}-{end} of {total}",
+      editButton: "Edit",
     },
   },
   CreateAwardRecommendation: {

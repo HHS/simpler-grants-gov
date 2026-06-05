@@ -6,8 +6,9 @@ import { PaginationInfo } from "src/types/apiResponseTypes";
 import { AwardRecommendationSubmission } from "src/types/awardRecommendationTypes";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button, Table } from "@trussworks/react-uswds";
+import { Pagination, Table, Tag } from "@trussworks/react-uswds";
 
 interface RisksTableProps {
   awardRecommendationId: string;
@@ -18,6 +19,7 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
   const {
     selectedSubmissionIds,
     addSubmission,
+    addMultipleSubmissions,
     removeSubmission,
     setSelectedSubmissionIds,
     hasSelections,
@@ -82,8 +84,16 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      submissions.forEach((submission) => addSubmission(submission));
+      // Add all submissions on current page in a single batch operation
+      const submissionsToAdd = submissions.filter(
+        (s) =>
+          !selectedSubmissionIds.has(
+            s.award_recommendation_application_submission_id,
+          ),
+      );
+      addMultipleSubmissions(submissionsToAdd);
     } else {
+      // Remove all submissions on current page
       const currentPageIds = submissions.map(
         (s) => s.award_recommendation_application_submission_id,
       );
@@ -106,11 +116,14 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
     }
   };
 
+  // Calculate selection state for current page only
   const currentPageSelectedCount = submissions.filter((s) =>
     selectedSubmissionIds.has(s.award_recommendation_application_submission_id),
   ).length;
   const allSelected =
-    submissions.length > 0 && currentPageSelectedCount === submissions.length;
+    submissions.length > 0 &&
+    currentPageSelectedCount === submissions.length &&
+    currentPageSelectedCount > 0;
   const someSelected = currentPageSelectedCount > 0 && !allSelected;
 
   if (apiError) {
@@ -127,15 +140,37 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
     return <div className="text-center padding-4">{t("loading")}</div>;
   }
 
+  // Calculate showing range
+  const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const endRecord = Math.min(currentPage * pageSize, totalRecords);
+
   return (
     <div>
-      {hasSelections && (
-        <div className="bg-base-lightest padding-2 margin-bottom-2">
-          <span className="text-bold">
-            {t("selectedCount", { count: selectedSubmissionIds.size })}
-          </span>
-        </div>
-      )}
+      <div className="bg-base-lightest padding-2 margin-bottom-2 display-flex flex-justify">
+        <span className="text-bold">
+          {t("showingRange", {
+            start: startRecord,
+            end: endRecord,
+            total: totalRecords,
+          })}
+        </span>
+        {hasSelections && (
+          <div className="display-flex flex-align-center">
+            <span className="text-bold margin-right-1">
+              {t("selectedCount", { count: selectedSubmissionIds.size })}
+            </span>
+            <button
+              type="button"
+              className="usa-button"
+              onClick={() => {
+                /* TODO: Navigate to edit page */
+              }}
+            >
+              {t("editButton")}
+            </button>
+          </div>
+        )}
+      </div>
 
       <Table bordered fullWidth>
         <thead>
@@ -143,6 +178,7 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
             <th scope="col" className="width-5">
               <input
                 type="checkbox"
+                className="risks-table-checkbox"
                 checked={allSelected}
                 ref={(input) => {
                   if (input) {
@@ -175,6 +211,7 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
                 <td>
                   <input
                     type="checkbox"
+                    className="risks-table-checkbox"
                     checked={isSelected}
                     onChange={(e) =>
                       handleSelectRow(submission, e.target.checked)
@@ -185,16 +222,30 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
                     })}
                   />
                 </td>
-                <td>{appSubmission.application_submission_number || "—"}</td>
+                <td>
+                  {appSubmission.application_submission_number ? (
+                    <Link
+                      href={`/award-recommendation/${awardRecommendationId}/submissions/${id}`}
+                      className="usa-link"
+                    >
+                      {appSubmission.application_submission_number}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
+                </td>
                 <td>{appSubmission.project_title || "—"}</td>
                 <td>{"—"}</td>
                 <td>{"—"}</td>
                 <td>
-                  {detail?.award_recommendation_type
-                    ? t(
-                        `recommendationType.${detail.award_recommendation_type}`,
-                      )
-                    : "—"}
+                  {detail?.award_recommendation_type ===
+                  "recommended_for_funding" ? (
+                    <Tag className="bg-info-lighter text-info-dark radius-pill">
+                      {t("recommendationType.recommended_for_funding")}
+                    </Tag>
+                  ) : (
+                    "—"
+                  )}
                 </td>
                 <td>{t("defaultNone")}</td>
                 <td>{t("defaultNone")}</td>
@@ -205,37 +256,19 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
       </Table>
 
       {totalPages > 1 && (
-        <div className="margin-top-3 display-flex flex-justify-center gap-2">
-          <Button
-            type="button"
-            outline
-            disabled={currentPage === 1}
-            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-          >
-            {t("pagination.previous")}
-          </Button>
-          <span className="padding-2">
-            {t("pagination.pageInfo", {
-              current: currentPage,
-              total: totalPages,
-            })}
-          </span>
-          <Button
-            type="button"
-            outline
-            disabled={currentPage === totalPages}
-            onClick={() =>
-              handlePageChange(Math.min(totalPages, currentPage + 1))
-            }
-          >
-            {t("pagination.next")}
-          </Button>
-        </div>
+        <Pagination
+          pathname=""
+          totalPages={totalPages}
+          currentPage={currentPage}
+          maxSlots={7}
+          onClickNext={() => handlePageChange(currentPage + 1)}
+          onClickPrevious={() =>
+            handlePageChange(currentPage > 1 ? currentPage - 1 : 1)
+          }
+          onClickPageNumber={(_, page) => handlePageChange(page)}
+          aria-disabled={isLoading}
+        />
       )}
-
-      <div className="margin-top-2 text-base-dark">
-        {t("totalRecords", { count: totalRecords })}
-      </div>
     </div>
   );
 }

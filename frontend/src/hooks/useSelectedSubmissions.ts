@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
 import { AwardRecommendationSubmission } from "src/types/awardRecommendationTypes";
+
+import { useCallback, useEffect, useState } from "react";
 
 const STORAGE_KEY_PREFIX = "selected-submissions-";
 
@@ -10,6 +11,9 @@ export interface UseSelectedSubmissionsReturn {
   setSelectedSubmissionIds: (ids: Set<string>) => void;
   addSubmission: (submission: AwardRecommendationSubmission) => void;
   removeSubmission: (id: string) => void;
+  addMultipleSubmissions: (
+    submissions: AwardRecommendationSubmission[],
+  ) => void;
   clearSelections: () => void;
   hasSelections: boolean;
 }
@@ -19,8 +23,9 @@ export function useSelectedSubmissions(
 ): UseSelectedSubmissionsReturn {
   const storageKey = `${STORAGE_KEY_PREFIX}${awardRecommendationId}`;
 
-  const [selectedSubmissionIds, setSelectedSubmissionIdsState] =
-    useState<Set<string>>(new Set());
+  const [selectedSubmissionIds, setSelectedSubmissionIdsState] = useState<
+    Set<string>
+  >(new Set());
   const [selectedSubmissions, setSelectedSubmissions] = useState<
     AwardRecommendationSubmission[]
   >([]);
@@ -99,6 +104,33 @@ export function useSelectedSubmissions(
     [selectedSubmissionIds, selectedSubmissions, persistToStorage],
   );
 
+  const addMultipleSubmissions = useCallback(
+    (submissionsToAdd: AwardRecommendationSubmission[]) => {
+      const newIds = new Set(selectedSubmissionIds);
+      const existingIds = new Set(
+        selectedSubmissions.map(
+          (s) => s.award_recommendation_application_submission_id,
+        ),
+      );
+
+      const newSubmissionsToAdd = submissionsToAdd.filter((submission) => {
+        const id = submission.award_recommendation_application_submission_id;
+        newIds.add(id);
+        return !existingIds.has(id);
+      });
+
+      const updatedSubmissions = [
+        ...selectedSubmissions,
+        ...newSubmissionsToAdd,
+      ];
+
+      setSelectedSubmissionIdsState(newIds);
+      setSelectedSubmissions(updatedSubmissions);
+      persistToStorage(newIds, updatedSubmissions);
+    },
+    [selectedSubmissionIds, selectedSubmissions, persistToStorage],
+  );
+
   const clearSelections = useCallback(() => {
     setSelectedSubmissionIdsState(new Set());
     setSelectedSubmissions([]);
@@ -110,6 +142,7 @@ export function useSelectedSubmissions(
     selectedSubmissions,
     setSelectedSubmissionIds,
     addSubmission,
+    addMultipleSubmissions,
     removeSubmission,
     clearSelections,
     hasSelections: selectedSubmissionIds.size > 0,

@@ -8,6 +8,28 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
+jest.mock("@trussworks/react-uswds", () => ({
+  ...jest.requireActual("@trussworks/react-uswds"),
+  Pagination: ({
+    currentPage,
+    totalPages,
+    onClickNext,
+    onClickPrevious,
+  }: any) => (
+    <div data-testid="pagination">
+      <button onClick={onClickPrevious} disabled={currentPage === 1}>
+        Previous
+      </button>
+      <span>
+        Page {currentPage} of {totalPages}
+      </span>
+      <button onClick={onClickNext} disabled={currentPage === totalPages}>
+        Next
+      </button>
+    </div>
+  ),
+}));
+
 const mockSubmissions = [
   {
     award_recommendation_application_submission_id: "sub-1",
@@ -54,6 +76,16 @@ const mockAddSubmission = jest.fn((submission) => {
   mockHasSelections = true;
 });
 
+const mockAddMultipleSubmissions = jest.fn((submissions) => {
+  submissions.forEach((submission: any) => {
+    mockSelectedSubmissionIds.add(
+      submission.award_recommendation_application_submission_id,
+    );
+    mockSelectedSubmissions.push(submission);
+  });
+  mockHasSelections = mockSelectedSubmissionIds.size > 0;
+});
+
 const mockRemoveSubmission = jest.fn((id: string) => {
   mockSelectedSubmissionIds.delete(id);
   mockSelectedSubmissions = mockSelectedSubmissions.filter(
@@ -83,6 +115,7 @@ jest.mock("src/hooks/useSelectedSubmissions", () => ({
     },
     setSelectedSubmissionIds: mockSetSelectedSubmissionIds,
     addSubmission: mockAddSubmission,
+    addMultipleSubmissions: mockAddMultipleSubmissions,
     removeSubmission: mockRemoveSubmission,
     clearSelections: mockClearSelections,
     get hasSelections() {
@@ -149,9 +182,32 @@ describe("RisksTable", () => {
     await user.click(selectAllCheckbox);
 
     await waitFor(() => {
-      expect(mockAddSubmission).toHaveBeenCalledTimes(2);
-      expect(mockAddSubmission).toHaveBeenCalledWith(mockSubmissions[0]);
-      expect(mockAddSubmission).toHaveBeenCalledWith(mockSubmissions[1]);
+      expect(mockAddMultipleSubmissions).toHaveBeenCalledTimes(1);
+      expect(mockAddMultipleSubmissions).toHaveBeenCalledWith(mockSubmissions);
+    });
+  });
+
+  it("allows deselecting all rows", async () => {
+    const user = userEvent.setup();
+    mockSelectedSubmissionIds = new Set(["sub-1", "sub-2"]);
+    mockSelectedSubmissions = [...mockSubmissions];
+    mockHasSelections = true;
+
+    render(<RisksTable awardRecommendationId="test-award-id" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("APP-001")).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    const selectAllCheckbox = checkboxes[0];
+
+    await user.click(selectAllCheckbox);
+
+    await waitFor(() => {
+      expect(mockSetSelectedSubmissionIds).toHaveBeenCalled();
+      const callArg = mockSetSelectedSubmissionIds.mock.calls[0][0];
+      expect(callArg.size).toBe(0);
     });
   });
 
@@ -203,5 +259,156 @@ describe("RisksTable", () => {
         }),
       );
     });
+  });
+
+  it("renders application numbers as links", async () => {
+    render(<RisksTable awardRecommendationId="test-award-id" />);
+
+    await waitFor(() => {
+      const link = screen.getByRole("link", { name: "APP-001" });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute(
+        "href",
+        "/award-recommendation/test-award-id/submissions/sub-1",
+      );
+    });
+  });
+
+  it("applies blue styling to recommended badges", async () => {
+    render(<RisksTable awardRecommendationId="test-award-id" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("APP-001")).toBeInTheDocument();
+    });
+
+    const recommendedTag = screen.getByText(
+      "recommendationType.recommended_for_funding",
+    );
+    expect(recommendedTag).toHaveClass("bg-info-lighter");
+    expect(recommendedTag).toHaveClass("text-info-dark");
+  });
+
+  it("only shows Recommended tag for recommended_for_funding type", async () => {
+    render(<RisksTable awardRecommendationId="test-award-id" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("APP-001")).toBeInTheDocument();
+    });
+
+    // First submission has recommended_for_funding - should show tag
+    expect(
+      screen.getByText("recommendationType.recommended_for_funding"),
+    ).toBeInTheDocument();
+
+    // Second submission has not_recommended - should not show any tag text
+    expect(
+      screen.queryByText("recommendationType.not_recommended"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("applies teal checkbox styling class", async () => {
+    render(<RisksTable awardRecommendationId="test-award-id" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("APP-001")).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    checkboxes.forEach((checkbox) => {
+      expect(checkbox).toHaveClass("risks-table-checkbox");
+    });
+  });
+
+  it("shows indeterminate checkbox when only some rows are selected", async () => {
+    const user = userEvent.setup();
+    mockSelectedSubmissionIds = new Set(["sub-1"]);
+    mockSelectedSubmissions = [mockSubmissions[0]];
+    mockHasSelections = true;
+
+    render(<RisksTable awardRecommendationId="test-award-id" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("APP-001")).toBeInTheDocument();
+    });
+
+    const headerCheckbox = screen.getAllByRole(
+      "checkbox",
+    )[0] as HTMLInputElement;
+
+    // Should not be fully checked
+    expect(headerCheckbox.checked).toBe(false);
+    // Should be indeterminate
+    expect(headerCheckbox.indeterminate).toBe(true);
+  });
+
+  it("renders Pagination component when multiple pages exist", async () => {
+    mockClientFetch.mockResolvedValue({
+      data: mockSubmissions,
+      pagination_info: {
+        total_pages: 3,
+        total_records: 30,
+      },
+    });
+
+    render(<RisksTable awardRecommendationId="test-award-id" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("pagination")).toBeInTheDocument();
+      expect(screen.getByText("Page 1 of 3")).toBeInTheDocument();
+    });
+  });
+
+  it("does not render Pagination when only one page exists", async () => {
+    mockClientFetch.mockResolvedValue({
+      data: mockSubmissions,
+      pagination_info: {
+        total_pages: 1,
+        total_records: 2,
+      },
+    });
+
+    render(<RisksTable awardRecommendationId="test-award-id" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("APP-001")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId("pagination")).not.toBeInTheDocument();
+  });
+
+  it("shows banner with showing range and Edit button when selections exist", async () => {
+    mockSelectedSubmissionIds = new Set(["sub-1"]);
+    mockSelectedSubmissions = [mockSubmissions[0]];
+    mockHasSelections = true;
+
+    render(<RisksTable awardRecommendationId="test-award-id" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("APP-001")).toBeInTheDocument();
+    });
+
+    // Should show "Showing X-Y of Z"
+    expect(screen.getByText("showingRange")).toBeInTheDocument();
+
+    // Should show selection count
+    expect(screen.getByText(/selectedCount/)).toBeInTheDocument();
+
+    // Should show Edit button
+    expect(screen.getByText("editButton")).toBeInTheDocument();
+  });
+
+  it("hides Edit button when no selections", async () => {
+    render(<RisksTable awardRecommendationId="test-award-id" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("APP-001")).toBeInTheDocument();
+    });
+
+    // Should show "Showing X-Y of Z"
+    expect(screen.getByText("showingRange")).toBeInTheDocument();
+
+    // Should NOT show selection count or Edit button
+    expect(screen.queryByText(/selectedCount/)).not.toBeInTheDocument();
+    expect(screen.queryByText("editButton")).not.toBeInTheDocument();
   });
 });
