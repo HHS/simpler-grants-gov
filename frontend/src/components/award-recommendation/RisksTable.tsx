@@ -54,13 +54,21 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
       ],
     };
 
+    const filters = {
+      award_recommendation_type: {
+        one_of: ["recommended_for_funding"],
+      },
+    };
+
+    const requestBody = { pagination, filters };
+
     try {
       const responseBody = (await clientFetch(
         `/api/award-recommendations/${awardRecommendationId}/submissions/list`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pagination }),
+          body: JSON.stringify(requestBody),
         },
       )) as {
         data: AwardRecommendationSubmission[];
@@ -175,7 +183,7 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
         )}
       </div>
 
-      <Table bordered fullWidth>
+      <Table fullWidth>
         <thead>
           <tr>
             <th scope="col" className="width-5">
