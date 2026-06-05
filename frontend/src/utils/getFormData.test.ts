@@ -15,10 +15,10 @@ jest.mock("src/services/fetch/fetchers/applicationFetcher", () => ({
   getApplicationFormDetailsForPrint: (...args: unknown[]) =>
     mockGetApplicationFormDetailsForPrint(...args) as unknown,
 }));
-jest.mock("src/components/applyForm/utils", () => ({
+jest.mock("src/utils/applyForm/applyFormUtils", () => ({
   processFormSchema: () => mockProcessFormSchema() as unknown,
 }));
-jest.mock("src/components/applyForm/validate", () => ({
+jest.mock("src/utils/applyForm/validateUiSchema", () => ({
   validateUiSchema: () => mockValidateUISchema() as unknown,
 }));
 
