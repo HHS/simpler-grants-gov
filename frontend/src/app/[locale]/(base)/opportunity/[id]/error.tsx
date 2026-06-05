@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
-import ServerErrorAlert from "src/components/ServerErrorAlert";
+import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
 
 export default function OpportunityError({
   error,
@@ -16,7 +16,7 @@ export default function OpportunityError({
   }, [error]);
   return (
     <>
-      <ServerErrorAlert callToAction={t("genericErrorCta")} />
+      <GeneralErrorAlert callToAction={t("genericErrorCta")} />
     </>
   );
 }

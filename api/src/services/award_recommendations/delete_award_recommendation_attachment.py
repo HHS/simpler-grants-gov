@@ -1,7 +1,8 @@
 import logging
 import uuid
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 from src.constants.lookup_constants import AwardRecommendationAuditEvent
 from src.db.models.award_recommendation_models import AwardRecommendationAudit
 from src.db.models.user_models import User

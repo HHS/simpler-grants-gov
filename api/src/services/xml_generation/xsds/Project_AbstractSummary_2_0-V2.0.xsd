@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--*******************************************************************************************************************-->
+<!-- TITLE: Project Abstract Summary-->
+<!-- DESCRIPTION: -->
+<!-- FORM VERSION: 2.0-->
+<!-- SCHEMA VERSION: 2.0-->
+<!-- OMB NUMBER: 4040-0019-->
+<!-- FORM EXPIRATION DATE:  02/28/2022-->
+<!-- REVISION HISTORY:-->
+<!-- TO DO:-->
+<!--*******************************************************************************************************************-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:Project_AbstractSummary_2_0="http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0" targetNamespace="http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="2.0">
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/Attachments-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd"/>
+	<xs:element name="Project_AbstractSummary_2_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="FundingOpportunityNumber" type="globLib:OpportunityIDDataType"/>
+				<xs:element name="CFDANumber" type="globLib:CFDANumberDataType" minOccurs="0"/>
+				<xs:element name="OrganizationName" type="globLib:OrganizationNameDataType"/>
+				<xs:element name="ProjectTitle">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="1"/>
+							<xs:maxLength value="250"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="ProjectAbstract">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="1"/>
+							<xs:maxLength value="4000"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="2.0"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

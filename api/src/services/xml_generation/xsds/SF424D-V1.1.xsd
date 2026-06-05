@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by David Xia (Northrop Grumman IT) -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:SF424D="http://apply.grants.gov/forms/SF424D-V1.1" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" targetNamespace="http://apply.grants.gov/forms/SF424D-V1.1" elementFormDefault="qualified" attributeFormDefault="qualified" version="1.1">
+	<!-- IMPORT GLOBAL SCHEMA -->
+	<xsd:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<xsd:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<!-- ELEMENTS -->
+	<!-- MAIN ELEMENT GROUP -->
+	<xsd:element name="Assurances" type="SF424D:AssurancesType"/>
+	<!-- OTHER ELEMENTS -->
+	<xsd:element name="ApplicantOrganizationName" type="globLib:OrganizationNameDataType"/>
+	<xsd:annotation>
+		<xsd:documentation>Applicant Organization</xsd:documentation>
+	</xsd:annotation>
+	<xsd:element name="AuthorizedRepresentative">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="SF424D:RepresentativeName" minOccurs="0"/>
+				<xsd:element ref="SF424D:RepresentativeTitle" minOccurs="0"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="RepresentativeName" type="globLib:SignatureDataType"/>
+	<!-- NOTE: THIS ELEMENT IS BEING USED AS A PLACEHOLDER FOR THE AUTHORIZED SIGNATURE. IT IS POSSIBLE 
+                   THAT THE NAME OF THE AUTHORIZED REPRESENTATIVE MAY BE PASSED IN THIS ELEMENT, SINCE A 
+		   SIGNATURE CANNOT BE PASSED (UNLESS WE USE DIGITAL SIGNATURES) -->
+	<xsd:annotation>
+		<xsd:documentation>Signature of Authorized Certifying 	     Official</xsd:documentation>
+	</xsd:annotation>
+	<xsd:element name="RepresentativeTitle" type="globLib:HumanTitleDataType"/>
+	<xsd:annotation>
+		<xsd:documentation>Title</xsd:documentation>
+	</xsd:annotation>
+	<xsd:element name="SubmittedDate" type="xsd:date"/>
+	<xsd:annotation>
+		<xsd:documentation>Date Submitted</xsd:documentation>
+	</xsd:annotation>
+	<!-- DATATYPES -->
+	<!-- COMPLEX DATATYPES -->
+	<xsd:complexType name="AssurancesType">
+		<xsd:sequence>
+			<xsd:element ref="glob:FormVersionIdentifier"/>
+			<xsd:element ref="SF424D:AuthorizedRepresentative" minOccurs="0"/>
+			<xsd:element ref="SF424D:ApplicantOrganizationName" minOccurs="0"/>
+			<xsd:element ref="SF424D:SubmittedDate" minOccurs="0"/>
+		</xsd:sequence>
+		<xsd:attribute ref="SF424D:programType" use="required"/>
+		<xsd:attribute ref="glob:coreSchemaVersion" use="required" fixed="1.1"/>
+	</xsd:complexType>
+	<!-- ATTRIBUTES -->
+	<xsd:attribute name="programType" type="xsd:string" fixed="Construction"/>
+	<xsd:annotation>
+		<xsd:documentation>Signifies that this is a "Construction" 	     form</xsd:documentation>
+	</xsd:annotation>
+</xsd:schema>

@@ -1,5 +1,7 @@
 import {
+  deleteAwardRecommendationRisk,
   getAwardRecommendationDetails,
+  getAwardRecommendationRisks,
   getAwardRecommendationSubmission,
   listAwardRecommendationSubmissions,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
@@ -16,17 +18,24 @@ const mockJson = jest.fn().mockResolvedValue({
 const mockFetchAwardRecommendation = jest.fn().mockResolvedValue({
   json: mockJson,
 });
-const mockFetchAwardRecommendationWithMethod = jest.fn().mockResolvedValue({
-  json: jest.fn().mockResolvedValue({
-    data: mockAwardRecommendationSubmissions,
-  } as APIResponse),
-});
+const mockInnerFetch = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAwardRecommendation: (params: unknown): Promise<Response> =>
     mockFetchAwardRecommendation(params) as Promise<Response>,
-  fetchAwardRecommendationWithMethod: (_type: "POST" | "PUT") =>
-    mockFetchAwardRecommendationWithMethod,
+  fetchAwardRecommendationWithMethod: (
+    type: "POST" | "PUT" | "DELETE",
+  ): jest.Mock => {
+    mockInnerFetch.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        data: type === "POST" ? mockAwardRecommendationSubmissions : null,
+        pagination_info: type === "POST" ? { total_pages: 1 } : undefined,
+        message: type === "DELETE" ? "Success" : undefined,
+      } as APIResponse),
+    });
+    return mockInnerFetch;
+  },
 }));
 
 describe("getAwardRecommendationDetails", () => {
@@ -44,17 +53,7 @@ describe("getAwardRecommendationDetails", () => {
   it("returns the expected award recommendation details", async () => {
     const result = await getAwardRecommendationDetails("an id");
     expect(mockJson).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      ...mockAwardRecommendationDetails,
-      award_recommendation_summary:
-        mockAwardRecommendationDetails.award_recommendation_summary || {
-          total_received_count: 200,
-          recommended_for_funding_count: 150,
-          recommended_without_funding_count: 25,
-          not_recommended_count: 25,
-          total_recommended_amount: 250000,
-        },
-    });
+    expect(result).toEqual(mockAwardRecommendationDetails);
   });
 });
 
@@ -66,7 +65,7 @@ describe("listAwardRecommendationSubmissions", () => {
   it("calls fetchAwardRecommendationWithMethod with the correct arguments", async () => {
     await listAwardRecommendationSubmissions("an id");
 
-    expect(mockFetchAwardRecommendationWithMethod).toHaveBeenCalledWith({
+    expect(mockInnerFetch).toHaveBeenCalledWith({
       subPath: "an id/submissions/list",
       body: {
         pagination: {
@@ -112,5 +111,35 @@ describe("getAwardRecommendationSubmission", () => {
     );
 
     expect(result).toBeNull();
+  });
+});
+
+describe("getAwardRecommendationRisks", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("fetches and returns risks and pagination info", async () => {
+    const result = await getAwardRecommendationRisks("award-id", {
+      page_offset: 1,
+      page_size: 10,
+      sort_order: [],
+    });
+    expect(result.risks).toBeDefined();
+    expect(result.paginationInfo).toBeDefined();
+    expect(mockInnerFetch).toHaveBeenCalled();
+  });
+});
+
+describe("deleteAwardRecommendationRisk", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("deletes risk successfully", async () => {
+    const result = await deleteAwardRecommendationRisk("award-id", "risk-id");
+    expect(result.success).toBe(true);
+    expect(result.message).toBeDefined();
+    expect(mockInnerFetch).toHaveBeenCalled();
   });
 });

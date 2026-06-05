@@ -20,6 +20,7 @@ describe("getNextRoutes", () => {
       "/(base)/events",
       "/(base)/grantor/opportunities/create",
       "/(base)/grantor/opportunities",
+      "/(base)/grantor/opportunity/1/competition",
       "/(base)/grantor/opportunity/1/edit",
       "/(base)/login",
       "/(base)/maintenance",

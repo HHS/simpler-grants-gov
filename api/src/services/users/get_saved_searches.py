@@ -1,10 +1,10 @@
 from collections.abc import Sequence
 from uuid import UUID
 
+from grants_shared.adapters import db
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from src.adapters import db
 from src.db.models.user_models import UserSavedSearch
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator

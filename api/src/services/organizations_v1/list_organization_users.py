@@ -2,12 +2,12 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from uuid import UUID
 
+import grants_shared.adapters.db as db
 from pydantic import BaseModel
 from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.selectable import Select
 
-import src.adapters.db as db
 from src.constants.lookup_constants import ExternalUserType, Privilege
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import (

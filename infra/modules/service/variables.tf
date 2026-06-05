@@ -259,28 +259,16 @@ variable "is_temporary" {
   default     = false
 }
 
-variable "fluent_bit_memory" {
-  type        = number
-  default     = 256
-  description = "Amount (in MB) of memory used by the fluent bit container"
-}
-
-variable "fluent_bit_cpu" {
-  type        = number
-  default     = 256
-  description = "Amount of cpu used by the fluent bit container"
-}
-
 variable "fargate_cpu" {
   type        = number
   default     = 2048
-  description = "Total CPU for all the containers in the task definiton, must be equal to or less than the total cpu allocated for the app and fluentbit container"
+  description = "Total CPU for the app container in the task definition"
 }
 
 variable "fargate_memory" {
   type        = number
   default     = 4096
-  description = "Total memory for all the containers in the task definiton, must be equal to or less than the total memory allocated for the app and fluentbit container"
+  description = "Total memory (MB) for the app container in the task definition"
 }
 
 variable "network_name" {
@@ -414,8 +402,3 @@ variable "newrelic_host_entity_guid" {
   default     = null
 }
 
-variable "enable_nrlogs_direct" {
-  type        = bool
-  description = "Whether to enable direct Fluent Bit to New Relic log forwarding. Set to false when a CloudWatch subscription filter already forwards logs to New Relic to avoid duplicates."
-  default     = true
-}

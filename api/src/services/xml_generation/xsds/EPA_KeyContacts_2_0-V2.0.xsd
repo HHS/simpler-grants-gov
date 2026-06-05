@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:EPA_KeyContacts_2_0="http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" targetNamespace="http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="2.0">
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<xs:element name="KeyContactPersons_2_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AuthorizedRepresentative" type="globLib:ContactPersonDataTypeV3" minOccurs="0"/>
+				<xs:element name="Payee" type="globLib:ContactPersonDataTypeV3" minOccurs="0"/>
+				<xs:element name="AdminstrativeContact" type="globLib:ContactPersonDataTypeV3" minOccurs="0"/>
+				<xs:element name="ProjectManager" type="globLib:ContactPersonDataTypeV3" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="2.0"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

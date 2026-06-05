@@ -1,14 +1,15 @@
 import logging
 
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.util.dict_util import flatten_dict
+
 import src.api.agencies_v1.agency_schema as agency_schema
 import src.api.response as response
 from src.adapters import search
 from src.adapters.search import flask_opensearch
 from src.api.agencies_v1.agency_blueprint import agency_blueprint
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.agencies_v1.search_agencies import search_agencies
-from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 

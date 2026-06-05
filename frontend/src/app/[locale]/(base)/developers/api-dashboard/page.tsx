@@ -1,11 +1,11 @@
+import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
+import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
 import { fetchApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 
-import ApiKeyTable from "src/components/developers/apiDashboard/ApiKeyTable";
-import { CreateApiKeyButton } from "src/components/developers/apiDashboard/CreateApiKeyButton";
-import ServerErrorAlert from "src/components/ServerErrorAlert";
+import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -24,7 +24,7 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
         <div className="grid-container margin-y-5">
           <h1 className="margin-top-0">{t("heading")}</h1>
         </div>
-        <ServerErrorAlert callToAction={t("errorLoadingKeys")} />
+        <GeneralErrorAlert callToAction={t("errorLoadingKeys")} />
       </>
     );
   }

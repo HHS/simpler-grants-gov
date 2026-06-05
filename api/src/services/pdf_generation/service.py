@@ -4,7 +4,9 @@ import logging
 from datetime import timedelta
 from uuid import UUID
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+from grants_shared.util import datetime_util
+
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.services.pdf_generation.clients import (
     BaseDocRaptorClient,
@@ -16,7 +18,6 @@ from src.services.pdf_generation.clients import (
 )
 from src.services.pdf_generation.config import PdfGenerationConfig, get_config
 from src.services.pdf_generation.models import PdfGenerationRequest, PdfGenerationResponse
-from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 

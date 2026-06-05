@@ -9,13 +9,15 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSu
 from datetime import date
 from pathlib import Path
 
+import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
+from src.db.models.competition_models import Form
 from src.form_schema.forms.project_abstract_summary import (
     FORM_XML_TRANSFORM_RULES as PROJECT_ABSTRACT_SUMMARY_TRANSFORM_RULES,
 )
+from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -27,13 +29,11 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
 
 
-@pytest.mark.xml_validation
 class TestProjectAbstractSummaryXMLGeneration:
     """Test cases for Project Abstract Summary XML generation service."""
 
@@ -215,34 +215,33 @@ class TestProjectAbstractSummaryXMLGeneration:
         assert "</Project_AbstractSummary_2_0:ProjectAbstract>" in xml_data
 
 
-@pytest.mark.xml_validation
 class TestProjectAbstractSummaryXSDValidation:
     """XSD validation tests for Project Abstract Summary form XML."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+        """Create XSD validator with directory."""
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
         # Check if Project Abstract Summary XSD exists
-        xsd_path = xsd_cache_dir / "Project_AbstractSummary_2_0-V2.0.xsd"
+        xsd_path = xsd_dir / "Project_AbstractSummary_2_0-V2.0.xsd"
         if not xsd_path.exists():
             pytest.skip(
-                "Project_AbstractSummary_2_0-V2.0.xsd not found in cache. "
+                "Project_AbstractSummary_2_0-V2.0.xsd not found. "
                 "Run 'flask task fetch-xsds' to download schemas."
             )
-        return XSDValidator(xsd_cache_dir)
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def project_abstract_summary_application(self, enable_factory_create, db_session: db.Session):
+    def project_abstract_summary_application(
+        self, enable_factory_create, db_session: db.Session, seed_form_registry
+    ):
         """Create an application with Project Abstract Summary form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -262,15 +261,10 @@ class TestProjectAbstractSummaryXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create Project Abstract Summary form with XML transform config
-        pas_form = FormFactory.create(
-            form_name="Project Abstract Summary",
-            short_form_name="Project_AbstractSummary_2_0",
-            form_version="2.0",
-            json_to_xml_schema=PROJECT_ABSTRACT_SUMMARY_TRANSFORM_RULES,
-        )
+        pas_form = db_session.get(Form, ProjectAbstractSummary_v2_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="Project Abstract Summary Test Application"
@@ -326,7 +320,8 @@ class TestProjectAbstractSummaryXSDValidation:
 
         # Extract Project Abstract Summary form element
         pas_ns = "{http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         pas_elements = forms_element.findall(f".//{pas_ns}Project_AbstractSummary_2_0")
@@ -350,7 +345,7 @@ class TestProjectAbstractSummaryXSDValidation:
         )
 
     def test_project_abstract_summary_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
         """Test that Project Abstract Summary with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -371,14 +366,10 @@ class TestProjectAbstractSummaryXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        pas_form = FormFactory.create(
-            form_name="Project Abstract Summary",
-            short_form_name="Project_AbstractSummary_2_0",
-            form_version="2.0",
-            json_to_xml_schema=PROJECT_ABSTRACT_SUMMARY_TRANSFORM_RULES,
-        )
+        pas_form = db_session.get(Form, ProjectAbstractSummary_v2_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition,
@@ -413,7 +404,8 @@ class TestProjectAbstractSummaryXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         pas_ns = "{http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         pas_elements = forms_element.findall(f".//{pas_ns}Project_AbstractSummary_2_0")
         assert len(pas_elements) == 1
 

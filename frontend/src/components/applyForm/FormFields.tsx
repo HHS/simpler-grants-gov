@@ -5,13 +5,19 @@ import {
   UiSchemaField,
   UiSchemaFieldList,
 } from "src/types/applyForm/types";
+import {
+  getRequiredProperties,
+  isFieldRequired,
+} from "src/utils/applyForm/applyFormUtils";
 import { getFieldConfig } from "src/utils/applyForm/getFieldConfig";
 
 import React, { JSX } from "react";
 import { Alert } from "@trussworks/react-uswds";
 
-import { getRequiredProperties, isFieldRequired } from "./utils";
-import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
+import {
+  renderWidget,
+  wrapSection,
+} from "src/components/applyForm/widgets/WidgetRenderers";
 
 type RootBudgetFormContext = {
   rootSchema: RJSFSchema;

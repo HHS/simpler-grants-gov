@@ -3,10 +3,11 @@ import logging
 from dataclasses import dataclass
 from uuid import UUID
 
+from grants_shared.adapters import db
+from grants_shared.util import datetime_util
 from sqlalchemy import and_, exists, select, update
 from sqlalchemy.orm import selectinload
 
-from src.adapters import db
 from src.db.models.entity_models import Organization, OrganizationSavedOpportunity
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
@@ -18,7 +19,6 @@ from src.db.models.user_models import (
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
-from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,10 @@
 from uuid import UUID
 
+from grants_shared.adapters import db
+from grants_shared.util.datetime_util import utcnow
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import OrganizationAuditEvent, OrganizationInvitationStatus
 from src.db.models.entity_models import (
@@ -13,7 +14,6 @@ from src.db.models.entity_models import (
 )
 from src.db.models.user_models import OrganizationUser, OrganizationUserRole, User
 from src.services.organizations_v1.organization_audit import add_audit_event
-from src.util.datetime_util import utcnow
 
 
 def org_invitation_response(

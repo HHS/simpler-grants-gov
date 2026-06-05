@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { CreateRecommendationContent } from "src/app/[locale]/(base)/award-recommendation/create/_components/CreateRecommendationContent";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -6,8 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import { CreateRecommendationContent } from "src/components/award-recommendation/CreateRecommendationContent";
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 
 export async function generateMetadata({
   params,

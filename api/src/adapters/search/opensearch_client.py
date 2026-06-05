@@ -4,10 +4,10 @@ from typing import Any
 
 import boto3
 import opensearchpy
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
 from src.adapters.search.opensearch_response import SearchResponse
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 

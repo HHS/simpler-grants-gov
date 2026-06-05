@@ -1,8 +1,8 @@
 import logging
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import ApprovalResponseType, ApprovalType
 from src.db.models.agency_models import Agency

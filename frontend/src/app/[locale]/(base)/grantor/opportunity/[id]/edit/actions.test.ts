@@ -1,15 +1,14 @@
 import { identity } from "lodash";
 import { ApiRequestError } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import {
   createOpportunitySummaryForGrantor,
   publishOpportunityForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
-import { UserSession } from "src/types/authTypes";
+import { buildOpportunitySummaryUpdateRequest } from "src/utils/opportunityEditFormConfig";
 
-import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 import {
+  opportunityEditFormAction,
   saveOpportunityEditAction,
   submitOpportunityAction,
   type OpportunityEditActionState,
@@ -17,10 +16,6 @@ import {
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
-}));
-
-jest.mock("src/services/auth/session", () => ({
-  getSession: jest.fn(),
 }));
 
 jest.mock(
@@ -43,7 +38,6 @@ const initialState: OpportunityEditActionState = {
   validationErrors: {},
 };
 
-const mockGetSession = jest.mocked(getSession);
 const mockCreateOpportunitySummaryForGrantor = jest.mocked(
   createOpportunitySummaryForGrantor,
 );
@@ -124,7 +118,6 @@ function buildValidFormData() {
 describe("saveOpportunityEditAction", () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    mockGetSession.mockResolvedValue({ token: "test-token" } as UserSession);
   });
 
   it("returns validation errors only for API-required fields when form is empty", async () => {
@@ -360,6 +353,22 @@ describe("saveOpportunityEditAction", () => {
     });
   });
 
+  it("maps 401 to an unauthenticated error", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunityId", "opp-123");
+    formData.set("opportunitySummaryId", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockRejectedValue(
+      new ApiRequestError("unauthenticated", "APIRequestError", 401),
+    );
+
+    const result = await saveOpportunityEditAction(initialState, formData);
+
+    expect(result).toEqual({
+      errorMessage: "unauthenticated",
+    });
+  });
+
   it("maps unknown failures to a generic save error", async () => {
     const formData = buildValidFormData();
     formData.set("opportunityId", "opp-123");
@@ -428,7 +437,6 @@ describe("buildOpportunitySummaryUpdateRequest", () => {
 describe("submitOpportunityAction", () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    mockGetSession.mockResolvedValue({ token: "test-token" } as UserSession);
   });
 
   it("returns validation errors and does not publish when save has validation errors", async () => {
@@ -497,6 +505,23 @@ describe("submitOpportunityAction", () => {
     expect(result).toEqual({ errorMessage: "notFound" });
   });
 
+  it("maps 401 from publish to an unauthenticated error", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunityId", "opp-123");
+    formData.set("opportunitySummaryId", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+    mockPublishOpportunityForGrantor.mockRejectedValue(
+      new ApiRequestError("unauthenticated", "APIRequestError", 401),
+    );
+
+    const result = await submitOpportunityAction(initialState, formData);
+
+    expect(result).toEqual({ errorMessage: "unauthenticated" });
+  });
+
   it("redirects to /grantor/opportunities when save and publish both succeed", async () => {
     const formData = buildValidFormData();
     formData.set("opportunitySummaryId", "sum-456");
@@ -511,6 +536,49 @@ describe("submitOpportunityAction", () => {
 
     await submitOpportunityAction(initialState, formData);
 
+    expect(mockRedirect).toHaveBeenCalledWith("/grantor/opportunities");
+  });
+});
+
+describe("opportunityEditFormAction", () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it("delegates to saveOpportunityEditAction when submitType is 'save'", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunityId", "opp-123");
+    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("submitType", "save");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    const result = await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
+    expect(mockPublishOpportunityForGrantor).not.toHaveBeenCalled();
+    expect(result).toEqual({ successMessage: "success" });
+  });
+
+  it("delegates to submitOpportunityAction when submitType is 'publish'", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunityId", "opp-123");
+    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("submitType", "publish");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+    mockPublishOpportunityForGrantor.mockResolvedValue(
+      {} as Awaited<ReturnType<typeof publishOpportunityForGrantor>>,
+    );
+
+    await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
+    expect(mockPublishOpportunityForGrantor).toHaveBeenCalledTimes(1);
     expect(mockRedirect).toHaveBeenCalledWith("/grantor/opportunities");
   });
 });
