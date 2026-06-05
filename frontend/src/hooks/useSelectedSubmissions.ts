@@ -18,6 +18,30 @@ export interface UseSelectedSubmissionsReturn {
   hasSelections: boolean;
 }
 
+interface StoredSelections {
+  ids: string[];
+  submissions: AwardRecommendationSubmission[];
+}
+
+function getInitialState(storageKey: string): {
+  ids: Set<string>;
+  submissions: AwardRecommendationSubmission[];
+} {
+  const stored = SessionStorage.getItem(storageKey);
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored) as StoredSelections;
+      return {
+        ids: new Set(parsed.ids || []),
+        submissions: parsed.submissions || [],
+      };
+    } catch (e) {
+      console.error("Error parsing stored selections:", e);
+    }
+  }
+  return { ids: new Set(), submissions: [] };
+}
+
 export function useSelectedSubmissions(
   awardRecommendationId: string,
 ): UseSelectedSubmissionsReturn {
@@ -25,23 +49,10 @@ export function useSelectedSubmissions(
 
   const [selectedSubmissionIds, setSelectedSubmissionIdsState] = useState<
     Set<string>
-  >(new Set());
+  >(() => getInitialState(storageKey).ids);
   const [selectedSubmissions, setSelectedSubmissions] = useState<
     AwardRecommendationSubmission[]
-  >([]);
-
-  useEffect(() => {
-    const stored = SessionStorage.getItem(storageKey);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setSelectedSubmissionIdsState(new Set(parsed.ids || []));
-        setSelectedSubmissions(parsed.submissions || []);
-      } catch (e) {
-        console.error("Error parsing stored selections:", e);
-      }
-    }
-  }, [storageKey]);
+  >(() => getInitialState(storageKey).submissions);
 
   const persistToStorage = useCallback(
     (ids: Set<string>, submissions: AwardRecommendationSubmission[]) => {

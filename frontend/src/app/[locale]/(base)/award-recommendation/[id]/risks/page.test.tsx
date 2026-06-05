@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
-import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";

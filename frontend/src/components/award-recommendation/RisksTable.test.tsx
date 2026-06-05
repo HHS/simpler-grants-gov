@@ -15,7 +15,12 @@ jest.mock("@trussworks/react-uswds", () => ({
     totalPages,
     onClickNext,
     onClickPrevious,
-  }: any) => (
+  }: {
+    currentPage: number;
+    totalPages: number;
+    onClickNext: () => void;
+    onClickPrevious: () => void;
+  }) => (
     <div data-testid="pagination">
       <button onClick={onClickPrevious} disabled={currentPage === 1}>
         Previous
@@ -68,23 +73,27 @@ let mockSelectedSubmissionIds = new Set<string>();
 let mockSelectedSubmissions: typeof mockSubmissions = [];
 let mockHasSelections = false;
 
-const mockAddSubmission = jest.fn((submission) => {
-  mockSelectedSubmissionIds.add(
-    submission.award_recommendation_application_submission_id,
-  );
-  mockSelectedSubmissions.push(submission);
-  mockHasSelections = true;
-});
-
-const mockAddMultipleSubmissions = jest.fn((submissions) => {
-  submissions.forEach((submission: any) => {
+const mockAddSubmission = jest.fn(
+  (submission: (typeof mockSubmissions)[number]) => {
     mockSelectedSubmissionIds.add(
       submission.award_recommendation_application_submission_id,
     );
     mockSelectedSubmissions.push(submission);
-  });
-  mockHasSelections = mockSelectedSubmissionIds.size > 0;
-});
+    mockHasSelections = true;
+  },
+);
+
+const mockAddMultipleSubmissions = jest.fn(
+  (submissions: typeof mockSubmissions) => {
+    submissions.forEach((submission) => {
+      mockSelectedSubmissionIds.add(
+        submission.award_recommendation_application_submission_id,
+      );
+      mockSelectedSubmissions.push(submission);
+    });
+    mockHasSelections = mockSelectedSubmissionIds.size > 0;
+  },
+);
 
 const mockRemoveSubmission = jest.fn((id: string) => {
   mockSelectedSubmissionIds.delete(id);
@@ -183,8 +192,8 @@ describe("RisksTable", () => {
 
     await waitFor(() => {
       expect(mockAddMultipleSubmissions).toHaveBeenCalledTimes(1);
-      expect(mockAddMultipleSubmissions).toHaveBeenCalledWith(mockSubmissions);
     });
+    expect(mockAddMultipleSubmissions).toHaveBeenCalledWith(mockSubmissions);
   });
 
   it("allows deselecting all rows", async () => {
@@ -265,13 +274,13 @@ describe("RisksTable", () => {
     render(<RisksTable awardRecommendationId="test-award-id" />);
 
     await waitFor(() => {
-      const link = screen.getByRole("link", { name: "APP-001" });
-      expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute(
-        "href",
-        "/award-recommendation/test-award-id/submissions/sub-1",
-      );
+      expect(screen.getByRole("link", { name: "APP-001" })).toBeInTheDocument();
     });
+    const link = screen.getByRole("link", { name: "APP-001" });
+    expect(link).toHaveAttribute(
+      "href",
+      "/award-recommendation/test-award-id/submissions/sub-1",
+    );
   });
 
   it("applies blue styling to recommended badges", async () => {
@@ -320,7 +329,6 @@ describe("RisksTable", () => {
   });
 
   it("shows indeterminate checkbox when only some rows are selected", async () => {
-    const user = userEvent.setup();
     mockSelectedSubmissionIds = new Set(["sub-1"]);
     mockSelectedSubmissions = [mockSubmissions[0]];
     mockHasSelections = true;
@@ -335,9 +343,7 @@ describe("RisksTable", () => {
       "checkbox",
     )[0] as HTMLInputElement;
 
-    // Should not be fully checked
-    expect(headerCheckbox.checked).toBe(false);
-    // Should be indeterminate
+    expect(headerCheckbox).not.toBeChecked();
     expect(headerCheckbox.indeterminate).toBe(true);
   });
 
