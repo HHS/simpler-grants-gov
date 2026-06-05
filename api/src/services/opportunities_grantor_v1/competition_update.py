@@ -3,7 +3,7 @@ import uuid
 
 import grants_shared.adapters.db as db
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import selectinload
 
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
@@ -33,10 +33,10 @@ def update_competition(
         select(Competition)
         .where(Competition.competition_id == competition_id)
         .options(
-            joinedload(Competition.opportunity_assistance_listing),
+            selectinload(Competition.opportunity_assistance_listing),
             selectinload(Competition.competition_forms)
-            .joinedload(CompetitionForm.form)
-            .joinedload(Form.form_instruction),
+            .selectinload(CompetitionForm.form)
+            .selectinload(Form.form_instruction),
             selectinload(Competition.competition_instructions),
         )
     )
