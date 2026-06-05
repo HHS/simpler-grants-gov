@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
+import { identity } from "lodash";
 
 import RisksTable from "./RisksTable";
 
 jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
+  useTranslations: () => identity,
 }));
 
 jest.mock("@trussworks/react-uswds", () => ({
@@ -387,14 +387,15 @@ describe("RisksTable", () => {
       expect(screen.getByText("APP-001")).toBeInTheDocument();
     });
 
-    // Should show "Showing X-Y of Z"
+    // Should show showing range text
     expect(screen.getByText("showingRange")).toBeInTheDocument();
 
-    // Should show selection count
-    expect(screen.getByText(/selectedCount/)).toBeInTheDocument();
+    // Should show selection count text
+    expect(screen.getByText("selectedCount")).toBeInTheDocument();
 
     // Should show Edit button
-    expect(screen.getByText("editButton")).toBeInTheDocument();
+    const editButton = screen.getByRole("button", { name: "editButton" });
+    expect(editButton).toBeInTheDocument();
   });
 
   it("hides Edit button when no selections", async () => {
@@ -404,11 +405,13 @@ describe("RisksTable", () => {
       expect(screen.getByText("APP-001")).toBeInTheDocument();
     });
 
-    // Should show "Showing X-Y of Z"
+    // Should show showing range text
     expect(screen.getByText("showingRange")).toBeInTheDocument();
 
     // Should NOT show selection count or Edit button
-    expect(screen.queryByText(/selectedCount/)).not.toBeInTheDocument();
-    expect(screen.queryByText("editButton")).not.toBeInTheDocument();
+    expect(screen.queryByText("selectedCount")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "editButton" }),
+    ).not.toBeInTheDocument();
   });
 });
