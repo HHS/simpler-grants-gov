@@ -91,9 +91,9 @@ describe("listAwardRecommendationSubmissions", () => {
       pagination_info: { total_pages: number; total_records: number };
     };
 
-    expect(fetcherModule.listAwardRecommendationSubmissions).toHaveBeenCalledWith(
-      "award-id",
-    );
+    expect(
+      fetcherModule.listAwardRecommendationSubmissions,
+    ).toHaveBeenCalledWith("award-id");
     expect(json.data).toEqual(mockSubmissions);
     expect(json.pagination_info.total_records).toBe(2);
     expect(json.pagination_info.total_pages).toBe(1);
