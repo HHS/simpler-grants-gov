@@ -40,26 +40,18 @@ def build_insert_select_sql(
     destination_table: sqlalchemy.Table,
     ids: Iterable[tuple | sqlalchemy.Row],
     excluded_columns: list[str] | None = None,
-    lowercase_columns: list[str] | None = None,
 ) -> sqlalchemy.Insert:
     """Build an `INSERT INTO ... SELECT ... FROM ...` query for new rows."""
 
     if excluded_columns is None:
         excluded_columns = []
-    if lowercase_columns is None:
-        lowercase_columns = []
 
     columns_to_include = [c for c in source_table.columns if c.name not in excluded_columns]
     column_names = tuple(c.name for c in columns_to_include)
 
-    select_columns = [
-        sqlalchemy.func.lower(c).label(c.name) if c.name in lowercase_columns else c
-        for c in columns_to_include
-    ]
-
     # `SELECT col1, col2, ..., FALSE AS is_deleted FROM <source_table>`
     select_sql = sqlalchemy.select(
-        *select_columns, sqlalchemy.literal_column("FALSE").label("is_deleted")
+        *columns_to_include, sqlalchemy.literal_column("FALSE").label("is_deleted")
     ).where(
         # `WHERE (id1, id2, ...)
         #  IN ((a1, a2), (b1, b2), ...)`

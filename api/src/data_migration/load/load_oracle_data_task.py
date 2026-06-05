@@ -55,9 +55,6 @@ class LoadOracleDataTask(src.task.task.Task):
         # Note: This does not work on UPDATES and can cause errors because the fields won't be excluded
         # if the column has invalid data
         self.columns_to_exclude: dict[str, list[str]] = {"tcertificates": ["is_selfsigned"]}
-        self.lowercase_columns: dict[str, list[str]] = {
-            "tcertificates": ["certemail", "serial_num"]
-        }
 
         foreign_tables = {k: v for (k, v) in foreign_tables.items() if k in tables_to_load}
         staging_tables = {k: v for (k, v) in staging_tables.items() if k in tables_to_load}
@@ -142,13 +139,6 @@ class LoadOracleDataTask(src.task.task.Task):
                 extra=log_extra | {"excluded_columns": excluded_columns},
             )
 
-        lowercase_columns = self.lowercase_columns.get(foreign_table.name, [])
-        if lowercase_columns:
-            logger.info(
-                "Lowercase columns during insert",
-                extra=log_extra | {"lowercase_columns": lowercase_columns},
-            )
-
         logger.info("Fetching records to be inserted", extra=log_extra)
         select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table, self.batch_cutoff)
         with self.db_session.begin():
@@ -159,7 +149,7 @@ class LoadOracleDataTask(src.task.task.Task):
         logger.info("Fetched records to be inserted, beginning batches", extra=log_extra)
         for batch_of_new_ids in itertools.batched(new_ids, self.insert_chunk_size, strict=False):
             insert_from_select_sql = sql.build_insert_select_sql(
-                foreign_table, staging_table, batch_of_new_ids, excluded_columns, lowercase_columns
+                foreign_table, staging_table, batch_of_new_ids, excluded_columns
             )
 
             # Execute the INSERT.
