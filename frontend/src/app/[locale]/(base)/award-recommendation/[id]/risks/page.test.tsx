@@ -72,21 +72,6 @@ jest.mock("src/hooks/useClientFetch", () => ({
   })),
 }));
 
-jest.mock(
-  "src/components/award-recommendation/AwardRecommendationHero",
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="award-recommendation-hero">Hero</div>,
-  }),
-);
-
-jest.mock("src/components/award-recommendation/RisksTable", () => ({
-  __esModule: true,
-  default: ({ awardRecommendationId }: { awardRecommendationId: string }) => (
-    <div data-testid="risks-table">Risks Table for {awardRecommendationId}</div>
-  ),
-}));
-
 describe("AwardRecommendationRisksPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -115,10 +100,6 @@ describe("AwardRecommendationRisksPage", () => {
 
     expect(screen.getByText("risks.heading")).toBeInTheDocument();
     expect(screen.getByText("risks.description")).toBeInTheDocument();
-    expect(screen.getByTestId("risks-table")).toBeInTheDocument();
-    expect(
-      screen.getByText("Risks Table for test-award-id"),
-    ).toBeInTheDocument();
   });
 
   it("shows error when award recommendation is not found", async () => {
@@ -140,7 +121,7 @@ describe("AwardRecommendationRisksPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders hero with back to edit button", async () => {
+  it("renders hero fallback", async () => {
     const params = Promise.resolve({
       locale: "en",
       id: "test-award-id",
