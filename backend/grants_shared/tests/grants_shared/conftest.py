@@ -6,8 +6,10 @@ import boto3
 import pytest
 from moto import mock_aws
 
+import tests.grants_shared.db.models.factories as factories
 from grants_shared.adapters import db
 from grants_shared.db.models.base import metadata
+from grants_shared.db.models.lookup import sync_lookup_values
 from grants_shared.util.local import load_local_env_vars
 from tests.grants_shared.test_utils import db_testing
 
@@ -104,6 +106,8 @@ def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
         with db_client.get_connection() as conn, conn.begin():
             metadata.create_all(bind=conn)
 
+        sync_lookup_values(db_client)
+
         yield db_client
 
 
@@ -114,6 +118,19 @@ def db_session(db_client: db.DBClient) -> db.Session:
     """
     with db_client.get_session() as session:
         yield session
+
+
+@pytest.fixture
+def enable_factory_create(monkeypatch, db_session) -> db.Session:
+    """
+    Allows the create method of factories to be called. By default, the create
+    throws an exception to prevent accidental creation of database objects for tests
+    that do not need persistence. This fixture only allows the create method to be
+    called for the current test. Each test that needs to call Factory.create should pull in
+    this fixture.
+    """
+    monkeypatch.setattr(factories, "_db_session", db_session)
+    return db_session
 
 
 #################

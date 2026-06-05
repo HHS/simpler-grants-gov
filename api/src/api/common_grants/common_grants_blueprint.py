@@ -1,8 +1,7 @@
 import click
 import yaml
 from apiflask import APIBlueprint, APIFlask
-
-from src.api.schemas import response_schema
+from grants_shared.api.schemas import response_schema
 
 common_grants_blueprint = APIBlueprint(
     "common_grants",

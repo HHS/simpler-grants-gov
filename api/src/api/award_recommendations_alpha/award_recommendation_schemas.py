@@ -1,11 +1,13 @@
-from src.api.schemas.extension import Schema, fields
-from src.api.schemas.extension.field_validators import Length
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import (
+from grants_shared.api.schemas.extension import Schema, fields
+from grants_shared.api.schemas.extension.field_validators import Length
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     StrSearchSchemaBuilder,
     UuidSearchSchemaBuilder,
 )
+
+from src.api.schemas.response_schema import PaginationMixinSchema
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApprovalResponseType,

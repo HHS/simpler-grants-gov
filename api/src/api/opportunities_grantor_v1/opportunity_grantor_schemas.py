@@ -1,5 +1,9 @@
 from datetime import timedelta
 
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.search_schema import BoolSearchSchemaBuilder
 from marshmallow import ValidationError, validates_schema
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
@@ -8,10 +12,7 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySummaryV1Schema,
     OpportunityV1Schema,
 )
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import BoolSearchSchemaBuilder
+from src.api.schemas.response_schema import PaginationMixinSchema
 from src.constants.lookup_constants import (
     ApplicantType,
     CompetitionOpenToApplicant,

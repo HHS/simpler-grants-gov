@@ -1,7 +1,9 @@
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
+
 from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
+from src.api.schemas.response_schema import PaginationMixinSchema
 from src.constants.lookup_constants import OpportunityStatus
 from src.pagination.pagination_schema import generate_pagination_schema
 
