@@ -1,6 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { AwardValue, SearchResultsTable } from "src/app/[locale]/(base)/search/_components/SearchResultsTable";
+import {
+  AwardValue,
+  SearchResultsTable,
+} from "src/app/[locale]/(base)/search/_components/SearchResultsTable";
 import { mockOpportunity } from "src/utils/testing/fixtures";
 
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
