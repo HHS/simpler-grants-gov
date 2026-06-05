@@ -238,8 +238,11 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
                   )}
                 </td>
                 <td>{appSubmission.project_title || "—"}</td>
-                <td>{"—"}</td>
-                <td>{"—"}</td>
+                <td>
+                  {appSubmission.application?.organization?.organization_name ||
+                    "—"}
+                </td>
+                <td>{appSubmission.application?.organization?.uei || "—"}</td>
                 <td>
                   {detail?.award_recommendation_type ===
                   "recommended_for_funding" ? (
