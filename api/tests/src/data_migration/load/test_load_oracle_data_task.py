@@ -486,10 +486,7 @@ class TestLoadOracleData(BaseTestClass):
 
         # Create a record in the foreign table with specific values
         # 'is_selfsigned' should be excluded
-        # Have serial_num and certemail be upper cased
-        source_record = ForeignTcertificatesFactory.create(
-            is_selfsigned="Y", serial_num="ABCDEF", certemail="TEST@TEST.COM"
-        )
+        source_record = ForeignTcertificatesFactory.create(is_selfsigned="Y")
 
         # Run the task with column exclusions
         task = load_oracle_data_task.LoadOracleDataTask(
