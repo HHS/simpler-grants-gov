@@ -317,12 +317,14 @@ const parseUserPrivileges = (
 // Note: if the user does not have read_opportunity privilege for this agency,
 // this API will return an error
 // --------------------------------------------------
-// currentAgency is set when the user changes the agency selection (i.e. selectedAgencyParam)
-let currentAgency: string = "";
-const fetchOpportunities = async (page: number) => {
+// Note: _currentAgency is set on the very first call and is used for subsequent pages
+//       It will change when the user changes the agency selection (i.e. selectedAgencyParam)
+let _currentAgency: string = "";
+const fetchOpportunities = async (agencyId: string, page: number) => {
+  _currentAgency = agencyId; // note: must set here; it cannot be set within OpportunitiesListPage()
   const pageRequest: PaginationRequestBody = {
     page_offset: page,
-    page_size: 25, // hard coded for now
+    page_size: 25,
     sort_order: [
       {
         order_by: "created_at",
@@ -330,8 +332,9 @@ const fetchOpportunities = async (page: number) => {
       },
     ],
   };
+  // fetch a page of opportunities for this agency
   const { data, pagination_info } = await searchOpportunitiesByAgency(
-    currentAgency,
+    agencyId,
     pageRequest,
   );
   return {
@@ -419,8 +422,11 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   let userOpportunities: BaseOpportunity[] = [];
   if (agencyUserAcccess.canView) {
     try {
-      currentAgency = selectedAgency.agency_id;
-      const data = await fetchOpportunities(currentPage);
+      const data = await fetchOpportunities(
+        // this is the first call on page load and will set the _currentAgency global variable
+        selectedAgency.agency_id,
+        currentPage,
+      );
       userOpportunities = data.opportunities;
       totalRecords = data.totalRecords;
       totalPages = data.totalPages;
@@ -438,7 +444,8 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   async function handlePageChange(targetPage: number) {
     "use server";
     try {
-      await fetchOpportunities(targetPage);
+      // the _currentAgency is needed for fetchOpportunities
+      await fetchOpportunities(_currentAgency, targetPage);
     } catch (error) {
       console.error("Error fetching Opportunities", error);
       if (error instanceof UnauthorizedError) {
