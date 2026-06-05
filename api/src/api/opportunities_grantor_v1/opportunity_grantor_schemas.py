@@ -646,6 +646,7 @@ class CompetitionCreateRequestSchema(Schema):
     )
     contact_info = fields.String(
         required=True,
+        allow_none=True,
         metadata={
             "description": "Contact information for the competition",
             "example": "Bob Smith\nFakeMail@fake.com",
@@ -702,6 +703,7 @@ class CompetitionUpdateRequestSchema(Schema):
     )
     contact_info = fields.String(
         required=True,
+        allow_none=True,
         metadata={
             "description": "Contact information for the competition",
             "example": "Bob Smith\nFakeMail@fake.com",
