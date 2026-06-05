@@ -265,3 +265,24 @@ def test_competition_update_invalid_data_types(client, grantor_auth_data, existi
         "not a valid" in error.get("message", "").lower()
         for error in response_json.get("errors", [])
     )
+
+
+def test_competition_update_closing_before_opening(client, grantor_auth_data, existing_competition):
+    """Test competition update with closing_date before opening_date"""
+    _, _, token, _ = grantor_auth_data
+    opportunity, competition = existing_competition
+
+    # Set closing_date to be before the existing opening_date
+    update_request = create_competition_update_request(
+        closing_date=(date.today() - timedelta(days=1)).isoformat()
+    )
+
+    response = client.put(
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions/{competition.competition_id}",
+        json=update_request,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 422
+    response_json = response.get_json()
+    assert response_json["message"] == "Closing date must be on or after opening date"
