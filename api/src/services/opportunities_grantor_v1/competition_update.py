@@ -28,7 +28,6 @@ def update_competition(
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
-    # Get the competition
     # Get the competition with all relationships loaded
     stmt = (
         select(Competition)
@@ -56,10 +55,6 @@ def update_competition(
     competition.closing_date = competition_data["closing_date"]
     competition.contact_info = competition_data["contact_info"]
     competition.open_to_applicants = set(competition_data["open_to_applicants"])
-
-    # Initialize relationships for serialization
-    # competition.competition_forms = competition.competition_forms or []
-    # competition.competition_instructions = competition.competition_instructions or []
 
     logger.info(
         "Updated competition",
