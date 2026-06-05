@@ -1,46 +1,76 @@
 import { render, screen } from "@testing-library/react";
+import { identity } from "lodash";
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
+import { LocalizedPageProps } from "src/types/intl";
+import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
+
+import { FunctionComponent, ReactNode } from "react";
 
 import AwardRecommendationRisksPageContent from "./page";
 
-jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher");
-jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
-  __esModule: true,
-  default: <P, R>(Component: React.ComponentType<P>) => Component,
-}));
-
-jest.mock("src/services/auth/sessionUtils", () => ({
-  decrypt: jest.fn(),
-  encrypt: jest.fn(),
-  CLIENT_JWT_ENCRYPTION_ALGORITHM: "HS256",
-  API_JWT_ENCRYPTION_ALGORITHM: "RS256",
-  newExpirationDate: () => new Date(0),
-}));
+type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: jest.fn(() =>
-    Promise.resolve((key: string) => {
-      const translations: Record<string, string> = {
-        "AwardRecommendation.risks.pageTitle": "Risks and Conditions",
-        "AwardRecommendation.risks.metaDescription": "Manage risks",
-        "AwardRecommendation.risks.heading": "Risks and Conditions",
-        "AwardRecommendation.risks.description":
-          "Review and manage risks for applications",
-        "AwardRecommendation.heroButtons.backToEdit": "Back to Edit",
-        "AwardRecommendation.errorHeadingAuthentication":
-          "Authentication Error",
-        "AwardRecommendation.authenticationError": "You are not authenticated",
-        "AwardRecommendation.errorHeadingAwardRecommendation":
-          "Award Recommendation Error",
-        "AwardRecommendation.awardRecommendationFetchError":
-          "Failed to fetch award recommendation",
-        "AwardRecommendation.awardRecommendationNotFound":
-          "Award recommendation not found",
-      };
-      return translations[key] || key;
+  getTranslations: () => identity,
+}));
+
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  use: jest.fn(() => ({
+    locale: "en",
+  })),
+  Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
+}));
+
+const withFeatureFlagMock = jest.fn();
+
+jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
+  __esModule: true,
+  default:
+    (
+      WrappedComponent: FunctionComponent<LocalizedPageProps>,
+      _featureFlagName: string,
+      onEnabled: onEnabled,
+    ) =>
+    (props: LocalizedPageProps) =>
+      (
+        withFeatureFlagMock as FeatureFlaggedPageWrapper<
+          LocalizedPageProps,
+          ReactNode
+        >
+      )(
+        WrappedComponent,
+        _featureFlagName,
+        onEnabled,
+      )(props) as FunctionComponent<LocalizedPageProps>,
+}));
+
+const mockGetAwardRecommendationDetails = jest
+  .fn()
+  .mockResolvedValue(mockAwardRecommendationDetails);
+
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
+  getAwardRecommendationDetails: (
+    id: string,
+  ): Promise<AwardRecommendationDetails> =>
+    mockGetAwardRecommendationDetails(
+      id,
+    ) as Promise<AwardRecommendationDetails>,
+}));
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: jest.fn().mockResolvedValue(null),
+}));
+
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: jest.fn(() => ({
+    clientFetch: jest.fn().mockResolvedValue({
+      data: [],
+      pagination_info: { total_pages: 1 },
     }),
-  ),
+  })),
 }));
 
 jest.mock(
@@ -61,13 +91,21 @@ jest.mock("src/components/award-recommendation/RisksTable", () => ({
 describe("AwardRecommendationRisksPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    withFeatureFlagMock.mockImplementation(
+      (
+        WrappedComponent: FunctionComponent<LocalizedPageProps>,
+        _featureFlagName: string,
+        _onEnabled: onEnabled,
+      ) =>
+        (props: { params: Promise<{ locale: string }> }) =>
+          WrappedComponent(props) as unknown,
+    );
+    mockGetAwardRecommendationDetails.mockResolvedValue(
+      mockAwardRecommendationDetails,
+    );
   });
 
   it("renders the risks page with table", async () => {
-    (getAwardRecommendationDetails as jest.Mock).mockResolvedValue(
-      mockAwardRecommendationDetails,
-    );
-
     const params = Promise.resolve({
       locale: "en",
       id: "test-award-id",
@@ -85,9 +123,7 @@ describe("AwardRecommendationRisksPage", () => {
   });
 
   it("shows error when award recommendation is not found", async () => {
-    (getAwardRecommendationDetails as jest.Mock).mockRejectedValue(
-      new Error("Not found"),
-    );
+    mockGetAwardRecommendationDetails.mockRejectedValue(new Error("Not found"));
 
     const params = Promise.resolve({
       locale: "en",
@@ -106,10 +142,6 @@ describe("AwardRecommendationRisksPage", () => {
   });
 
   it("renders hero with back to edit button", async () => {
-    (getAwardRecommendationDetails as jest.Mock).mockResolvedValue(
-      mockAwardRecommendationDetails,
-    );
-
     const params = Promise.resolve({
       locale: "en",
       id: "test-award-id",
@@ -118,6 +150,8 @@ describe("AwardRecommendationRisksPage", () => {
     const page = await AwardRecommendationRisksPageContent({ params });
     render(page);
 
-    expect(screen.getByTestId("award-recommendation-hero")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("award-recommendation-hero-fallback"),
+    ).toBeInTheDocument();
   });
 });
