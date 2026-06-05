@@ -664,6 +664,20 @@ class CompetitionCreateRequestSchema(Schema):
         },
     )
 
+    @validates_schema
+    def validate_dates(self, data: dict, **kwargs: dict) -> None:
+        opening = data.get("opening_date")
+        closing = data.get("closing_date")
+        if opening and closing and closing < opening:
+            raise ValidationError(
+                [
+                    MarshmallowErrorContainer(
+                        ValidationErrorType.INVALID,
+                        "Closing date must be on or after opening date",
+                    )
+                ]
+            )
+
 
 class CompetitionCreateResponseSchema(AbstractResponseSchema):
     """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ response"""
