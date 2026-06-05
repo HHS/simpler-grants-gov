@@ -1,8 +1,5 @@
 import logging
 
-from moto.core import DEFAULT_ACCOUNT_ID
-from moto.ses.models import ses_backends
-
 from src.constants.lookup_constants import ApprovalResponseType, Privilege, WorkflowType
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import User
@@ -16,12 +13,6 @@ from tests.src.db.models.factories import (
 )
 from tests.src.workflow.state_machine.test_state_machines import BasicState
 from tests.src.workflow.workflow_test_util import send_process_event
-
-
-def get_sent_emails():
-    """Get all sent emails from the moto3 SES backend."""
-    ses_backend = ses_backends[DEFAULT_ACCOUNT_ID]["us-east-1"]
-    return ses_backend.sent_messages
 
 
 def verify_email(
@@ -49,7 +40,7 @@ def verify_email(
 
 
 def test_workflow_approval_email_listener_moving_into_budget_officer_state(
-    db_session, agency, budget_officer, opportunity, ses_client
+    db_session, agency, budget_officer, opportunity, ses_client, get_sent_emails
 ):
     """Verify that when we first enter the pending budget officer approval state, an email is sent"""
 
@@ -83,7 +74,7 @@ def test_workflow_approval_email_listener_moving_into_budget_officer_state(
 
 
 def test_workflow_approval_email_listener_moving_into_program_officer_state(
-    db_session, agency, program_officer, opportunity, ses_client
+    db_session, agency, program_officer, opportunity, ses_client, get_sent_emails
 ):
     """Verify that when we first enter the pending program officer approval state, an email is sent"""
 
@@ -117,7 +108,7 @@ def test_workflow_approval_email_listener_moving_into_program_officer_state(
 
 
 def test_workflow_approval_email_listener_multiple_users_can_approve(
-    db_session, agency, budget_officer, opportunity, ses_client
+    db_session, agency, budget_officer, opportunity, ses_client, get_sent_emails
 ):
     # Create a few additional budget officers
     budget_officer2, _ = create_user_in_agency(
@@ -189,7 +180,7 @@ def test_workflow_approval_email_listener_multiple_users_can_approve(
 
 
 def test_workflow_approval_email_listener_staying_in_budget_officer_state_no_email(
-    db_session, agency, program_officer, opportunity, caplog, ses_client
+    db_session, agency, program_officer, opportunity, caplog, ses_client, get_sent_emails
 ):
     """Verify that if a workflow re-enters an approval state that it's already in, no email is sent"""
 
@@ -234,7 +225,7 @@ def test_workflow_approval_email_listener_staying_in_budget_officer_state_no_ema
 
 
 def test_workflow_approval_email_listener_non_approval_states(
-    db_session, agency, opportunity, caplog, ses_client
+    db_session, agency, opportunity, caplog, ses_client, get_sent_emails
 ):
     """Test that if a state isn't an approval state, no emails are sent"""
 
@@ -276,7 +267,7 @@ def test_workflow_approval_email_listener_non_approval_states(
 
 
 def test_workflow_approval_email_listener_no_users(
-    db_session, agency, opportunity, caplog, ses_client
+    db_session, agency, opportunity, caplog, ses_client, get_sent_emails
 ):
     """Verify behavior if no users have the privilege"""
 
@@ -303,7 +294,9 @@ def test_workflow_approval_email_listener_no_users(
     assert caplog.messages.count("No users can do approval - cannot send email") == 1
 
 
-def test_workflow_approval_email_listener_no_agency_on_opportunity(db_session, caplog, ses_client):
+def test_workflow_approval_email_listener_no_agency_on_opportunity(
+    db_session, caplog, ses_client, get_sent_emails
+):
     """Verify behavior if opportunity has no agency"""
     # Note that there's half a dozen checks upstream that would prevent this
     # but test it just to be safe.
