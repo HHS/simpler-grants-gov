@@ -1,10 +1,10 @@
-import * as fetcherModule from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import * as fetchersModule from "src/services/fetch/fetchers/fetchers";
 
 import { NextRequest } from "next/server";
 
 import { listAwardRecommendationSubmissions } from "./handler";
 
-jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher");
+jest.mock("src/services/fetch/fetchers/fetchers");
 
 jest.mock("src/services/auth/sessionUtils", () => ({
   decrypt: jest.fn(),
@@ -59,6 +59,16 @@ const mockSubmissions = [
   },
 ];
 
+const mockApiResponse = {
+  data: mockSubmissions,
+  pagination_info: {
+    page_offset: 1,
+    page_size: 10,
+    total_pages: 1,
+    total_records: 2,
+  },
+};
+
 const mockPagination = {
   page_offset: 1,
   page_size: 10,
@@ -76,9 +86,12 @@ describe("listAwardRecommendationSubmissions", () => {
   });
 
   it("returns paginated submissions successfully", async () => {
+    const mockFetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue(mockApiResponse),
+    });
     (
-      fetcherModule.listAwardRecommendationSubmissions as jest.Mock
-    ).mockResolvedValue(mockSubmissions);
+      fetchersModule.fetchAwardRecommendationWithMethod as jest.Mock
+    ).mockReturnValue(mockFetch);
 
     const req = {
       json: jest.fn().mockResolvedValue({ pagination: mockPagination }),
@@ -92,15 +105,19 @@ describe("listAwardRecommendationSubmissions", () => {
     };
 
     expect(
-      fetcherModule.listAwardRecommendationSubmissions,
-    ).toHaveBeenCalledWith("award-id");
+      fetchersModule.fetchAwardRecommendationWithMethod,
+    ).toHaveBeenCalledWith("POST");
+    expect(mockFetch).toHaveBeenCalledWith({
+      subPath: "award-id/submissions/list",
+      body: { pagination: mockPagination },
+    });
     expect(json.data).toEqual(mockSubmissions);
     expect(json.pagination_info.total_records).toBe(2);
     expect(json.pagination_info.total_pages).toBe(1);
   });
 
   it("handles pagination correctly with multiple pages", async () => {
-    const manySubmissions = Array.from({ length: 25 }, (_, i) => ({
+    const manySubmissions = Array.from({ length: 10 }, (_, i) => ({
       award_recommendation_application_submission_id: `sub-${i}`,
       application_submission: {
         application_submission_id: `app-${i}`,
@@ -109,9 +126,22 @@ describe("listAwardRecommendationSubmissions", () => {
       },
     }));
 
+    const mockMultiPageResponse = {
+      data: manySubmissions,
+      pagination_info: {
+        page_offset: 1,
+        page_size: 10,
+        total_pages: 3,
+        total_records: 25,
+      },
+    };
+
+    const mockFetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue(mockMultiPageResponse),
+    });
     (
-      fetcherModule.listAwardRecommendationSubmissions as jest.Mock
-    ).mockResolvedValue(manySubmissions);
+      fetchersModule.fetchAwardRecommendationWithMethod as jest.Mock
+    ).mockReturnValue(mockFetch);
 
     const req = {
       json: jest.fn().mockResolvedValue({ pagination: mockPagination }),
@@ -130,18 +160,31 @@ describe("listAwardRecommendationSubmissions", () => {
   });
 
   it("returns second page of results", async () => {
-    const manySubmissions = Array.from({ length: 25 }, (_, i) => ({
-      award_recommendation_application_submission_id: `sub-${i}`,
+    const page2Submissions = Array.from({ length: 10 }, (_, i) => ({
+      award_recommendation_application_submission_id: `sub-${i + 10}`,
       application_submission: {
-        application_submission_id: `app-${i}`,
-        application_submission_number: `APP-${String(i).padStart(3, "0")}`,
-        project_title: `Project ${i}`,
+        application_submission_id: `app-${i + 10}`,
+        application_submission_number: `APP-${String(i + 10).padStart(3, "0")}`,
+        project_title: `Project ${i + 10}`,
       },
     }));
 
+    const mockPage2Response = {
+      data: page2Submissions,
+      pagination_info: {
+        page_offset: 2,
+        page_size: 10,
+        total_pages: 3,
+        total_records: 25,
+      },
+    };
+
+    const mockFetch = jest.fn().mockResolvedValue({
+      json: jest.fn().mockResolvedValue(mockPage2Response),
+    });
     (
-      fetcherModule.listAwardRecommendationSubmissions as jest.Mock
-    ).mockResolvedValue(manySubmissions);
+      fetchersModule.fetchAwardRecommendationWithMethod as jest.Mock
+    ).mockReturnValue(mockFetch);
 
     const page2Pagination = { ...mockPagination, page_offset: 2 };
     const req = {
@@ -154,6 +197,10 @@ describe("listAwardRecommendationSubmissions", () => {
       data: Array<{ award_recommendation_application_submission_id: string }>;
     };
 
+    expect(mockFetch).toHaveBeenCalledWith({
+      subPath: "award-id/submissions/list",
+      body: { pagination: page2Pagination },
+    });
     expect(json.data).toHaveLength(10);
     expect(json.data[0].award_recommendation_application_submission_id).toBe(
       "sub-10",
