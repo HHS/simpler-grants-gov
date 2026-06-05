@@ -155,7 +155,10 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
           })}
         </span>
         {hasSelections && (
-          <div className="display-flex flex-align-center">
+          <div
+            className="display-flex flex-align-center"
+            suppressHydrationWarning
+          >
             <span className="text-bold margin-right-1">
               {t("selectedCount", { count: selectedSubmissionIds.size })}
             </span>
