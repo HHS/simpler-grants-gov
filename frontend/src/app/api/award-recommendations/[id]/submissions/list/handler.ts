@@ -1,5 +1,6 @@
 import { readError } from "src/errors";
 import { fetchAwardRecommendationWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { APIResponse } from "src/types/apiResponseTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 
 import { NextRequest } from "next/server";
@@ -26,7 +27,7 @@ export async function listAwardRecommendationSubmissions(
       subPath: `${id}/submissions/list`,
       body: requestBody,
     });
-    const responseBody = await response.json();
+    const responseBody = (await response.json()) as APIResponse;
 
     return Response.json(responseBody);
   } catch (e) {
