@@ -245,13 +245,13 @@ def test_sort_order_invalid_json_returns_422(client):
             [
                 (
                     "pagination.page_offset",
-                    "min_or_max_value",
+                    "min_value",
                 )
             ],
         ),
         (
             {"page_offset": -1},
-            [("pagination.page_size", "required"), ("pagination.page_offset", "min_or_max_value")],
+            [("pagination.page_size", "required"), ("pagination.page_offset", "min_value")],
         ),
     ],
 )

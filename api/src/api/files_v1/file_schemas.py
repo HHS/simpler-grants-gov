@@ -1,5 +1,6 @@
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+
 from src.constants.lookup_constants import FileScanStatus
 
 

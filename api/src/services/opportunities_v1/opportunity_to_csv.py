@@ -4,7 +4,7 @@ import os
 from collections.abc import Sequence
 from typing import cast
 
-from src.util.dict_util import flatten_dict
+from grants_shared.util.dict_util import flatten_dict
 
 CSV_FIELDS = [
     "opportunity_id",

@@ -13,6 +13,9 @@ from src.db.models.award_recommendation_models import (
 )
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.db.models.user_models import User
+from src.services.award_recommendations.get_award_recommendation_summary import (
+    get_award_recommendation_summary,
+)
 
 
 def _get_award_recommendation(
@@ -54,6 +57,11 @@ def get_award_recommendation_and_verify_access(
         raise_flask_error(403, message="Forbidden")
 
     verify_access(user, {Privilege.VIEW_AWARD_RECOMMENDATION}, agency)
+
+    # Summary is computed in one aggregated query; monitor staging latency as data volume grows.
+    award_recommendation.award_recommendation_summary = get_award_recommendation_summary(  # type: ignore[attr-defined]
+        db_session, award_recommendation_id
+    )
 
     return award_recommendation
 

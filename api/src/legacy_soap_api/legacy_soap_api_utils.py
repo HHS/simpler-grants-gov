@@ -13,15 +13,18 @@ from defusedxml import minidom
 from lxml import etree
 from sqlalchemy import exists, select
 
+from src.adapters.aws import S3Config
 from src.db.models.competition_models import (
     ApplicationSubmission,
     ApplicationSubmissionRetrieved,
     ApplicationSubmissionTrackingNumber,
 )
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
+from src.legacy_soap_api.legacy_soap_api_constants import SimplerRequests
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.soap_payload_handler import extract_soap_xml
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -522,3 +525,30 @@ def to_snake_case(name: str) -> str:
     """
     sub = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", sub).lower()
+
+
+def write_debug_data_to_s3(
+    operation_name: str, soap_request: SOAPRequest, soap_legacy_response: SOAPResponse
+) -> None:
+    if get_soap_config().save_soap_messages_to_s3 and operation_name in SimplerRequests:
+        s3_config = S3Config()
+        debug_identifier = uuid.uuid4()
+        base_path = file_util.join(
+            s3_config.draft_files_bucket_path,
+            "soap",
+            str(debug_identifier),
+        )
+        request_s3_path = file_util.join(
+            base_path,
+            "request.txt",
+        )
+        file_util.write_to_file(request_s3_path, b"".join(soap_request.data).decode("utf-8"))
+        response_s3_path = file_util.join(
+            base_path,
+            "response.txt",
+        )
+        file_util.write_to_file(response_s3_path, soap_legacy_response.to_bytes().decode("utf-8"))
+        logger.info(
+            "soap_client: debug info uploaded to s3",
+            extra={"debug_identifier": debug_identifier},
+        )
