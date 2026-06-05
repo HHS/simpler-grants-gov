@@ -9,7 +9,9 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock("@trussworks/react-uswds", () => ({
-  ...jest.requireActual("@trussworks/react-uswds"),
+  ...jest.requireActual<typeof import("@trussworks/react-uswds")>(
+    "@trussworks/react-uswds",
+  ),
   Pagination: ({
     currentPage,
     totalPages,
