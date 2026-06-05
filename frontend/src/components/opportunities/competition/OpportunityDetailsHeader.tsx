@@ -2,7 +2,7 @@ import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityRespo
 
 import { useTranslations } from "next-intl";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type OpportunityDetailsHeaderProps = {
   opportunityData: GrantorOpportunityDetail;
