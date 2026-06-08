@@ -51,6 +51,9 @@ const formatCellValue = (value?: string) => {
   return formatted || EMPTY_CELL;
 };
 
+const recommendationTypeTagBaseClass =
+  "usa-tag font-sans-sm text-no-uppercase text-ink border-1px radius-pill";
+
 const RecommendationTypeTag = ({
   recommendationType,
 }: {
@@ -62,7 +65,9 @@ const RecommendationTypeTag = ({
 
   if (!recommendationType) {
     return (
-      <span className="usa-tag bg-base-lighter text-ink radius-2 font-sans-sm text-no-uppercase">
+      <span
+        className={`${recommendationTypeTagBaseClass} bg-base-lighter border-base-lighter`}
+      >
         {t("none")}
       </span>
     );
@@ -71,19 +76,25 @@ const RecommendationTypeTag = ({
   switch (recommendationType) {
     case "recommended_for_funding":
       return (
-        <span className="usa-tag bg-info-dark text-white radius-2 font-sans-sm text-no-uppercase">
+        <span
+          className={`${recommendationTypeTagBaseClass} border-accent-warm-darkest bg-accent-warm-lightest`}
+        >
           {t("recommended")}
         </span>
       );
     case "recommended_without_funding":
       return (
-        <span className="usa-tag bg-accent-cool-light text-ink radius-2 font-sans-sm text-no-uppercase">
+        <span
+          className={`${recommendationTypeTagBaseClass} border-accent-warm-darkest bg-accent-warm-lightest`}
+        >
           {t("recommendedWithoutFunding")}
         </span>
       );
     case "not_recommended":
       return (
-        <span className="usa-tag bg-accent-warm-light text-ink radius-2 font-sans-sm text-no-uppercase">
+        <span
+          className={`${recommendationTypeTagBaseClass} border-error-dark bg-error-lighter`}
+        >
           {t("notRecommended")}
         </span>
       );
@@ -99,9 +110,9 @@ const SubmissionTable = ({
   description,
 }: SubmissionTableProps) => {
   const t = useTranslations("AwardRecommendation.recommendations.submissions");
-  const [submissions, setSubmissions] = useState<AwardRecommendationSubmission[]>(
-    [],
-  );
+  const [submissions, setSubmissions] = useState<
+    AwardRecommendationSubmission[]
+  >([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -212,7 +223,9 @@ const SubmissionTable = ({
   return (
     <div className="margin-top-4 margin-bottom-4">
       <h3 className="margin-top-0 margin-bottom-2 font-sans-md">{heading}</h3>
-      <p className="text-base-dark margin-top-0 margin-bottom-3">{description}</p>
+      <p className="text-base-dark margin-top-0 margin-bottom-3">
+        {description}
+      </p>
       {apiError && (
         <SimplerAlert
           alertClick={() => setApiError(false)}
@@ -316,14 +329,10 @@ export const RecommendationSubmissionsSection = ({
     has_exception: { one_of: [true] },
   };
 
-  const {
-    isVisible: showRecommended,
-    loading: recommendedVisibilityLoading,
-  } = useSubmissionSectionVisibility(awardRecommendationId, "recommended");
-  const {
-    isVisible: showExceptions,
-    loading: exceptionsVisibilityLoading,
-  } = useSubmissionSectionVisibility(awardRecommendationId, "exceptions");
+  const { isVisible: showRecommended, loading: recommendedVisibilityLoading } =
+    useSubmissionSectionVisibility(awardRecommendationId, "recommended");
+  const { isVisible: showExceptions, loading: exceptionsVisibilityLoading } =
+    useSubmissionSectionVisibility(awardRecommendationId, "exceptions");
 
   if (!viewMode) {
     return (
