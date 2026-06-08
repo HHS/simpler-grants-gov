@@ -1,10 +1,5 @@
-import { listAwardRecommendationSubmissions } from "src/app/api/award-recommendations/[id]/submissions/list/handler";
+import { respondWithTraceAndLogs } from "src/utils/apiUtils";
 
-import { NextRequest } from "next/server";
+import { listAwardRecommendationSubmissions } from "./handler";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  return listAwardRecommendationSubmissions(request, { params });
-}
+export const POST = respondWithTraceAndLogs(listAwardRecommendationSubmissions);
