@@ -38,7 +38,7 @@ const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;
 
 // Only the opportunity number is declared here.
-// All opportunity/form details are resolved from print-view-opportunities.json.
+// All opportunity/form details are resolved from form specific fixtures.
 const OPPORTUNITY_NUMBER = "TEST-PRINT-ORG-IND-ON01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
