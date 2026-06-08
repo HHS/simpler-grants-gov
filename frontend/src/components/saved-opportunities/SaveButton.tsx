@@ -3,9 +3,9 @@ import clsx from "clsx";
 import { ReactNode } from "react";
 import { Button } from "@trussworks/react-uswds";
 
-import SimplerAlert from "./core/SimplerAlert";
-import Spinner from "./core/Spinner";
-import { USWDSIcon } from "./core/USWDSIcon";
+import SimplerAlert from "src/components/core/SimplerAlert";
+import Spinner from "src/components/core/Spinner";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 interface SaveButtonProps {
   buttonClick?: () => void;
