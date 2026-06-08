@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import { SelectFundingOpportunityContent } from "src/components/award-recommendation/SelectFundingOpportunityContent";
+import { SelectFundingOpportunityContent } from "src/app/[locale]/(base)/award-recommendation/select-opportunity/_components/SelectFundingOpportunityContent";
 import CreateAwardRecommendationHeroContent from "src/components/award-recommendation/CreateAwardRecommendationHero";
 
 
