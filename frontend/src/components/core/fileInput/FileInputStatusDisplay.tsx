@@ -14,14 +14,14 @@ const errorStatuses = new Map([
   // Next API will return a specific error and we can return that error status before dealing with this map
 ]);
 
-export const FileUploadStatusDisplay = ({
+export const FileInputStatusDisplay = ({
   status,
   error,
   postUploadActionProgressMessage,
   postUploadActionSuccessMessage,
   postUploadActionErrorMessage,
 }: {
-  status: FileUploadProcessStatus;
+  status?: FileUploadProcessStatus;
   error: boolean;
   postUploadActionProgressMessage: string;
   postUploadActionSuccessMessage?: string;

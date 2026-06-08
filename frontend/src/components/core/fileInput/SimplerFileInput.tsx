@@ -10,7 +10,7 @@ import { useCallback, useRef, useState } from "react";
 import { FileInput, FileInputRef } from "@trussworks/react-uswds";
 
 import { FileInputExistingFiles } from "./FileInputExistingFiles";
-import { FileUploadStatusDisplay } from "./FileUploadStatusDisplay";
+import { FileInputStatusDisplay } from "./FileInputStatusDisplay";
 
 type SimplerFileInputProps = {
   postUploadAction: PostUploadAction;
@@ -170,7 +170,7 @@ export const SimplerFileInput = ({
         aria-invalid={!!uploadError}
       />
       {currentStatus ? (
-        <FileUploadStatusDisplay
+        <FileInputStatusDisplay
           error={!!uploadError}
           status={currentStatus}
           postUploadActionProgressMessage={postUploadActionProgressMessage}
