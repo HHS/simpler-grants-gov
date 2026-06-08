@@ -1,32 +1,8 @@
 import { RJSFSchema } from "@rjsf/utils";
 
-import { formDataToObject } from "src/components/applyForm/formDataToJson";
+import { formDataToObject } from "./formDataToJson";
 
-const mockHandleFormAction = jest.fn();
-const mockRevalidateTag = jest.fn();
-const getSessionMock = jest.fn();
 const mockMergeAllOf = jest.fn();
-
-// all of these mocks should not be necessary but are currently because of cascading imports
-// of widgets and React based code within the imported utils file
-// mocks should be removed as part of https://github.com/HHS/simpler-grants-gov/pull/5963
-jest.mock("src/components/applyForm/actions", () => ({
-  handleFormAction: (...args: unknown[]) =>
-    mockHandleFormAction(...args) as unknown,
-}));
-
-jest.mock("next/cache", () => ({
-  revalidateTag: (tag: string) => mockRevalidateTag(tag) as unknown,
-}));
-
-jest.mock("react", () => ({
-  ...jest.requireActual<typeof import("react")>("react"),
-  useCallback: (fn: unknown) => fn,
-}));
-
-jest.mock("src/services/auth/session", () => ({
-  getSession: (): unknown => getSessionMock(),
-}));
 
 jest.mock("json-schema-merge-allof", () => ({
   __esModule: true,

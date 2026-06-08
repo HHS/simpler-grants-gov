@@ -11,10 +11,13 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-jest.mock("src/components/shareOpportunityToOrganizations/actions", () => ({
-  saveOpportunityForOrganizationAction: jest.fn(),
-  deleteSavedOpportunityForOrganizationAction: jest.fn(),
-}));
+jest.mock(
+  "src/app/[locale]/(base)/workspace/saved-opportunities/actions",
+  () => ({
+    saveOpportunityForOrganizationAction: jest.fn(),
+    deleteSavedOpportunityForOrganizationAction: jest.fn(),
+  }),
+);
 
 const modalRef: RefObject<ModalRef | null> = { current: null };
 const organizations: Organization[] = [

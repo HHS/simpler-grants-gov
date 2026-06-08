@@ -1,10 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { UiSchema } from "src/types/applyForm/types";
 
-import {
-  validateJsonBySchema,
-  validateUiSchema,
-} from "src/components/applyForm/validate";
+import { validateJsonBySchema, validateUiSchema } from "./validateUiSchema";
 
 describe("validateFormData", () => {
   it("should return false for valid form data", () => {

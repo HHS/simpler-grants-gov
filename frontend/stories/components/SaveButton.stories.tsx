@@ -1,4 +1,4 @@
-import SaveButton from "src/components/SaveButton";
+import SaveButton from "src/components/saved-opportunities/SaveButton";
 
 const meta = {
   title: "Components/SaveButton",

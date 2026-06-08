@@ -2,7 +2,7 @@
 
 import { RJSFSchema } from "@rjsf/utils";
 
-import { getByPointer, getFieldPathFromHtml } from "./utils";
+import { getByPointer, getFieldPathFromHtml } from "./applyFormUtils";
 
 // like, this is basically anything lol - DWS
 type NestedObject = {

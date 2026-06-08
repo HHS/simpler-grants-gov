@@ -7,6 +7,7 @@ import {
   BadRequestError,
   ForbiddenError,
   InternalServerError,
+  MissingAuthError,
   NetworkError,
   NotFoundError,
   RequestTimeoutError,
@@ -26,9 +27,11 @@ import { printAwsHeaders, printResponseInfo } from "src/utils/generalUtils";
 export async function getDefaultHeaders({
   addContentType = true,
   requiresUserAuthToken = false,
+  url,
 }: {
   addContentType?: boolean;
   requiresUserAuthToken?: boolean;
+  url?: string;
 }): Promise<Record<string, string>> {
   const headers: Record<string, string> = {};
 
@@ -48,11 +51,11 @@ export async function getDefaultHeaders({
   if (requiresUserAuthToken) {
     const session = await getSession();
     if (!session?.token) {
-      // May want to throw here
-      console.warn("no user token present for authorized endpoint call");
-    } else {
-      headers["X-SGG-Token"] = session.token;
+      throw new MissingAuthError(
+        `No user token present for call to authorized endpoint at ${url || "unknown url"}`,
+      );
     }
+    headers["X-SGG-Token"] = session.token;
   }
 
   return headers;

@@ -6,7 +6,7 @@ import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Grid } from "@trussworks/react-uswds";
 
-import IconInfo from "src/components/homepage/IconInfoSection";
+import IconInfo from "src/components/core/IconInfoSection";
 
 const HomepageExperimental = () => {
   const t = useTranslations("Homepage.sections.experimental");
