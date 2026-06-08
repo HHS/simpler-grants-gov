@@ -1556,3 +1556,9 @@ $simpler-switch-transition-easing: ease;
   background-color: #c3e8d8;
   height: calc(100% + 1rem);
 }
+
+// Character count: react-uswds sets color via inline style, so !important is required
+// to override it. base-dark (#76766A on white = 4.6:1) meets WCAG AA.
+.usa-character-count__status {
+  color: color("base-dark") !important;
+}
