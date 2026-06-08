@@ -36,7 +36,8 @@ export type PaginationOrderBy =
   | "top_level_agency_name"
   | "post_date"
   | "close_date"
-  | "created_at";
+  | "created_at"
+  | "application_submission_number";
 export type PaginationSortDirection = "ascending" | "descending";
 export type PaginationSortOrder = {
   order_by: PaginationOrderBy;

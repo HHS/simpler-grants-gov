@@ -254,14 +254,17 @@ async function AwardRecommendationEditPageContent({
                   id="recommendations"
                   className="seg-scroll-margin-top--header"
                 >
-                  <RecommendationSummarySection
-                    summary={
-                      awardRecommendationDetails.award_recommendation_summary
-                    }
-                    fundingStrategy={
-                      awardRecommendationDetails.funding_strategy
-                    }
-                  />
+                  {awardRecommendationId && (
+                    <RecommendationSummarySection
+                      awardRecommendationId={awardRecommendationId}
+                      summary={
+                        awardRecommendationDetails.award_recommendation_summary
+                      }
+                      fundingStrategy={
+                        awardRecommendationDetails.funding_strategy
+                      }
+                    />
+                  )}
                 </div>
                 <div id="attachments" className="seg-scroll-margin-top--header">
                   {awardRecommendationId && (
