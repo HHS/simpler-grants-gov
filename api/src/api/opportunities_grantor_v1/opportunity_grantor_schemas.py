@@ -624,8 +624,8 @@ class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunityGrantorSchema())
 
 
-class CompetitionCreateRequestSchema(Schema):
-    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ request"""
+class CompetitionRequestBaseSchema(Schema):
+    """Base schema for competition create/update requests"""
 
     competition_title = fields.String(
         required=True,
@@ -680,66 +680,22 @@ class CompetitionCreateRequestSchema(Schema):
             )
 
 
+class CompetitionCreateRequestSchema(CompetitionRequestBaseSchema):
+    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ request"""
+
+    pass
+
+
 class CompetitionCreateResponseSchema(AbstractResponseSchema):
     """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ response"""
 
     data = fields.Nested(CompetitionAlphaSchema())
 
 
-class CompetitionUpdateRequestSchema(Schema):
+class CompetitionUpdateRequestSchema(CompetitionRequestBaseSchema):
     """Schema for PUT /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id request"""
 
-    competition_title = fields.String(
-        required=True,
-        metadata={
-            "description": "The title of the competition",
-            "example": "Updated Proposal for Advanced Research",
-        },
-    )
-    opening_date = fields.Date(
-        required=True,
-        allow_none=True,
-        metadata={"description": "The opening date of the competition", "example": "2026-04-11"},
-    )
-    closing_date = fields.Date(
-        required=True,
-        allow_none=True,
-        metadata={"description": "The closing date of the competition", "example": "2026-05-11"},
-    )
-    contact_info = fields.String(
-        required=True,
-        allow_none=True,
-        metadata={
-            "description": "Contact information for the competition",
-            "example": "Bob Smith\nFakeMail@fake.com",
-        },
-    )
-    open_to_applicants = fields.List(
-        fields.Enum(CompetitionOpenToApplicant),
-        required=True,
-        validate=validators.Length(min=1),
-        metadata={
-            "description": "List of applicant types eligible for this competition",
-            "example": [
-                CompetitionOpenToApplicant.INDIVIDUAL,
-                CompetitionOpenToApplicant.ORGANIZATION,
-            ],
-        },
-    )
-
-    @validates_schema
-    def validate_dates(self, data: dict, **kwargs: dict) -> None:
-        opening = data.get("opening_date")
-        closing = data.get("closing_date")
-        if opening and closing and closing < opening:
-            raise ValidationError(
-                [
-                    MarshmallowErrorContainer(
-                        ValidationErrorType.INVALID_DATE_ORDER,
-                        "Closing date must be on or after opening date",
-                    )
-                ]
-            )
+    pass
 
 
 class CompetitionUpdateResponseSchema(AbstractResponseSchema):
