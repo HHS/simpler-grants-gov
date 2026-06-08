@@ -7,6 +7,7 @@ import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunit
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 
+import { UnauthenticatedMessage } from "src/components/core/UnauthenticatedMessage";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { CompetitionForm } from "src/components/opportunities/competition/CompetitionForm";
 import { OpportunityDetailsHeader } from "src/components/opportunities/competition/OpportunityDetailsHeader";
@@ -37,7 +38,7 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
   const { id, locale } = await params;
   const session = await getSession();
   if (!session || !session.token) {
-    return <UnauthorizedMessage />;
+    return <UnauthenticatedMessage />;
   }
 
   let opportunityData;
