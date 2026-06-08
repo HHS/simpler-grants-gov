@@ -156,15 +156,20 @@ describe("getDefaultHeaders", () => {
     const headers = await getDefaultHeaders({});
     expect(headers["X-SGG-Token"]).toEqual(undefined);
   });
-  it("does not include user auth token header if required but not available", async () => {
+  it("throws if auth token is required but not available", async () => {
     getSessionMock.mockResolvedValue(null);
-    const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
     const { getDefaultHeaders } = await import(
       "src/services/fetch/fetcherHelpers"
     );
-    const headers = await getDefaultHeaders({ requiresUserAuthToken: true });
-    expect(headers["X-SGG-Token"]).toEqual(undefined);
-    expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+    const err = await wrapForExpectedError(() =>
+      getDefaultHeaders({
+        requiresUserAuthToken: true,
+        url: "http://something.net",
+      }),
+    );
+    expect(err.message).toEqual(
+      "No user token present for call to authorized endpoint at http://something.net",
+    );
   });
   it("includes user auth token from session when present and required", async () => {
     getSessionMock.mockResolvedValue({ token: "a token" });
