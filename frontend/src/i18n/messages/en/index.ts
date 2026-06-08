@@ -2460,4 +2460,10 @@ export const messages = {
     whichFundingOpportunity: "Which funding opportunity is this for?",
     cancelButtonText: "Cancel",
   },
+  FileInput: {
+    existingFiles: {
+      savedOn: "Saved on",
+      delete: "Delete",
+    },
+  },
 };

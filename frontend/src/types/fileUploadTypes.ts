@@ -18,7 +18,8 @@ export type PostUploadAction = (fileId: string) => Promise<unknown>;
 export type UploadFileMetadata = {
   id: string;
   fileName: string;
-  size?: number;
+  fileSize?: number;
   mimeType?: string;
   downloadUrl?: string;
+  updatedAt: number; // ?? may come back as a string
 };

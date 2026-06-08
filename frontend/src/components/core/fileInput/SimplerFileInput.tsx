@@ -9,6 +9,7 @@ import {
 import { useCallback, useRef, useState } from "react";
 import { FileInput, FileInputRef } from "@trussworks/react-uswds";
 
+import { FileInputExistingFiles } from "./FileInputExistingFiles";
 import { FileUploadStatusDisplay } from "./FileUploadStatusDisplay";
 
 type SimplerFileInputProps = {
@@ -42,11 +43,11 @@ things this needs to do
 
 * hide the native progress indicator [x]
 
-* display existing files as expected
+* display existing files as expected [x]
 
 * cancel a download
 
-* delete a previously uploaded file
+* delete a previously uploaded file [x]
 
 */
 
@@ -57,8 +58,8 @@ export const SimplerFileInput = ({
   postUploadActionErrorMessage,
   id,
   labelId,
-  // existingFiles,
-  // onDelete,
+  existingFiles,
+  onDelete,
   onError = noop,
   onSuccess = noop,
   onStart = noop,
@@ -151,6 +152,7 @@ export const SimplerFileInput = ({
       handleError,
     ],
   );
+
   console.log("!!!", currentStatus);
   return (
     <>
@@ -167,7 +169,7 @@ export const SimplerFileInput = ({
         aria-describedby={labelId}
         aria-invalid={!!uploadError}
       />
-      {currentStatus && (
+      {currentStatus ? (
         <FileUploadStatusDisplay
           error={!!uploadError}
           status={currentStatus}
@@ -175,7 +177,11 @@ export const SimplerFileInput = ({
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
         />
-      )}
+      ) : null}
+      <FileInputExistingFiles
+        existingFiles={existingFiles}
+        onDelete={onDelete}
+      />
     </>
   );
 };
