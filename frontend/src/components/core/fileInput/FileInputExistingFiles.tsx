@@ -5,7 +5,7 @@ import { formatFileSize } from "src/utils/fileUtils/formatFileSizeUtil";
 import { useTranslations } from "next-intl";
 import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 export const FileInputExistingFiles = ({
   existingFiles,

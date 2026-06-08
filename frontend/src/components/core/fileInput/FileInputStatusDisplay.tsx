@@ -6,8 +6,8 @@ import {
 import { useTranslations } from "next-intl";
 import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import Spinner from "src/components/Spinner";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import Spinner from "src/components/core/Spinner";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 const errorStatuses = new Map([
   ["uploading", "upload-error"],
