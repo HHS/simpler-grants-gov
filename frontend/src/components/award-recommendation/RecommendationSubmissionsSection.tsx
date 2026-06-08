@@ -23,6 +23,17 @@ import {
 
 const EMPTY_CELL = "---";
 const PAGE_SIZE = 10;
+const NO_WRAP_CELL_CLASS = "text-no-wrap";
+
+const nowrapTableCell = (
+  cellData: TableCellData["cellData"],
+  className?: string,
+): TableCellData => ({
+  cellData,
+  className: className
+    ? `${NO_WRAP_CELL_CLASS} ${className}`
+    : NO_WRAP_CELL_CLASS,
+});
 
 type RecommendationSubmissionsSectionProps = {
   awardRecommendationId: string;
@@ -163,14 +174,14 @@ const SubmissionTable = ({
   }, [awardRecommendationId, page, clientFetch]);
 
   const headers: TableCellData[] = [
-    { cellData: t("columns.appNumber") },
-    { cellData: t("columns.projectTitle") },
-    { cellData: t("columns.orgName") },
-    { cellData: t("columns.uei") },
-    { cellData: t("columns.score") },
-    { cellData: t("columns.recommendation") },
-    { cellData: t("columns.requested"), className: "text-right" },
-    { cellData: t("columns.recommended"), className: "text-right" },
+    nowrapTableCell(t("columns.appNumber")),
+    nowrapTableCell(t("columns.projectTitle")),
+    nowrapTableCell(t("columns.orgName")),
+    nowrapTableCell(t("columns.uei")),
+    nowrapTableCell(t("columns.score")),
+    nowrapTableCell(t("columns.recommendation")),
+    nowrapTableCell(t("columns.requested"), "text-right"),
+    nowrapTableCell(t("columns.recommended"), "text-right"),
   ];
 
   const rows: TableCellData[][] = submissions.map((submission) => {
@@ -180,43 +191,36 @@ const SubmissionTable = ({
       applicationSubmission.application_submission_number || EMPTY_CELL;
 
     return [
-      {
-        cellData: (
-          <Link
-            href={getSubmissionDetailHref(
-              awardRecommendationId,
-              submission.award_recommendation_application_submission_id,
-            )}
-          >
-            {appNumber}
-          </Link>
-        ),
-      },
-      {
-        cellData: applicationSubmission.project_title || EMPTY_CELL,
-      },
-      {
-        cellData:
-          applicationSubmission.application?.organization?.organization_name ||
+      nowrapTableCell(
+        <Link
+          href={getSubmissionDetailHref(
+            awardRecommendationId,
+            submission.award_recommendation_application_submission_id,
+          )}
+        >
+          {appNumber}
+        </Link>,
+      ),
+      nowrapTableCell(applicationSubmission.project_title || EMPTY_CELL),
+      nowrapTableCell(
+        applicationSubmission.application?.organization?.organization_name ||
           EMPTY_CELL,
-      },
-      { cellData: EMPTY_CELL },
-      { cellData: EMPTY_CELL },
-      {
-        cellData: (
-          <RecommendationTypeTag
-            recommendationType={submissionDetail?.award_recommendation_type}
-          />
-        ),
-      },
-      {
-        cellData: formatCellValue(applicationSubmission.total_requested_amount),
-        className: "text-right",
-      },
-      {
-        cellData: formatCellValue(submissionDetail?.recommended_amount),
-        className: "text-right",
-      },
+      ),
+      nowrapTableCell(EMPTY_CELL),
+      nowrapTableCell(EMPTY_CELL),
+      nowrapTableCell(
+        <RecommendationTypeTag
+          recommendationType={submissionDetail?.award_recommendation_type}
+        />,
+      ),
+      nowrapTableCell(
+        formatCellValue(applicationSubmission.total_requested_amount),
+        "text-right",
+      ),
+      nowrapTableCell(
+        formatCellValue(submissionDetail?.recommended_amount),
+        "text-right",
+      ),
     ];
   });
 
@@ -238,10 +242,12 @@ const SubmissionTable = ({
         <Spinner />
       ) : (
         <>
-          <TableWithResponsiveHeader
-            headerContent={headers}
-            tableRowData={rows}
-          />
+          <div className="width-full minw-0 overflow-auto recommendation-submissions-table">
+            <TableWithResponsiveHeader
+              headerContent={headers}
+              tableRowData={rows}
+            />
+          </div>
           {submissions.length > 0 && (
             <Pagination
               pathname=""

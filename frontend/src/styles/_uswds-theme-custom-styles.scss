@@ -608,6 +608,15 @@ dl {
   }
 }
 
+.recommendation-submissions-table .simpler-responsive-table {
+  th,
+  tbody td {
+    white-space: nowrap;
+    word-wrap: normal;
+    overflow-wrap: normal;
+  }
+}
+
 .simpler-selected-filter {
   .usa-accordion__button {
     background-color: color($theme-color-secondary-lightest);
