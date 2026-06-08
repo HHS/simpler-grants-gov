@@ -141,8 +141,8 @@ const transformTableRowData = (
 ) => {
   return userOpportunities.map((opportunity: BaseOpportunity) => {
     const status = opportunity.is_draft
-      ? "Draft"
-      : opportunity.opportunity_status;
+      ? "draft"
+      : (opportunity.opportunity_status ?? "");
     const opportunityTitleUrl = opportunity.is_draft
       ? canUpdate
         ? `/grantor/opportunity/${opportunity.opportunity_id}/edit`
@@ -161,17 +161,22 @@ const transformTableRowData = (
         cellData: status,
       },
       {
-        cellData: opportunity.is_draft ? (
-          <span>
-            <EditAction
-              canUpdate={canUpdate}
-              opportunityId={opportunity.opportunity_id}
-            />
-            , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
-          </span>
-        ) : (
-          "" // Don't show any actions for published opportunities
-        ),
+        cellData:
+          // Only allow editing if the status is not closed or archived, and
+          status.toLowerCase() !== "closed" &&
+          status.toLowerCase() !== "archived" &&
+          // there is no grants.gov id (i.e. this is an SGM created opportunity)
+          !opportunity.legacy_opportunity_id ? (
+            <span>
+              <EditAction
+                canUpdate={canUpdate}
+                opportunityId={opportunity.opportunity_id}
+              />
+              , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
+            </span>
+          ) : (
+            "" // Don't show any actions for published opportunities
+          ),
       },
     ];
   });

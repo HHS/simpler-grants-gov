@@ -112,6 +112,7 @@ export interface BaseOpportunity extends MinimalOpportunity {
   updated_at: string;
   is_draft: boolean;
   saved_to_organizations?: SavedToOrganization[];
+  legacy_opportunity_id?: string; // this will be not null for opportunities from Grants.gov
 }
 
 export interface OpportunityDetail extends BaseOpportunity {
