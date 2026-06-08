@@ -22,10 +22,6 @@ data "external" "deploy_github_sha" {
   program = ["sh", "-c", "git rev-parse HEAD | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
 
-data "aws_ssm_parameter" "fluent_bit_image_sha" {
-  name = "/fluent-bit/${var.environment_name}/image-sha"
-}
-
 locals {
   alb_name                = var.service_name
   cluster_name            = var.service_name
@@ -34,8 +30,6 @@ locals {
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
   fluent_bit_repo_arn     = "arn:aws:ecr:us-east-1:${data.aws_caller_identity.current.account_id}:repository/simpler-grants-gov-fluentbit"
-  fluent_bit_repo_url     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/simpler-grants-gov-fluentbit"
-  fluent_bit_image_url    = "${local.fluent_bit_repo_url}:${data.aws_ssm_parameter.fluent_bit_image_sha.value}"
   image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 
@@ -145,8 +139,8 @@ resource "aws_ecs_task_definition" "app" {
     {
       name                   = local.container_name,
       image                  = local.image_url,
-      memory                 = var.fargate_memory - var.fluent_bit_memory,
-      cpu                    = var.fargate_cpu - var.fluent_bit_cpu,
+      memory                 = var.fargate_memory,
+      cpu                    = var.fargate_cpu,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = var.readonly_root_filesystem,
@@ -190,53 +184,15 @@ resource "aws_ecs_task_definition" "app" {
         }]
       },
       logConfiguration = {
-        logDriver = "awsfirelens",
-      }
-      systemControls = []
-      volumesFrom    = []
-    },
-    {
-      name                   = "${local.container_name}-fluentbit"
-      image                  = local.fluent_bit_image_url,
-      memory                 = var.fluent_bit_memory,
-      cpu                    = var.fluent_bit_cpu,
-      networkMode            = "awsvpc",
-      essential              = true,
-      readonlyRootFilesystem = false,
-      healthCheck = {
-        timeout     = 5,
-        interval    = 10,
-        startPeriod = 30,
-        command     = ["CMD-SHELL", "curl http://localhost:80/api/v1/health"]
-      },
-      firelensConfiguration = {
-        type = "fluentbit",
-        options = {
-          enable-ecs-log-metadata = "true"
-          config-file-type        = "file"
-          config-file-value       = "/fluent-bit/etc/fluent-bit-custom.yml"
-        }
-      }
-      logConfiguration = {
         logDriver = "awslogs",
         options = {
-          "awslogs-group"         = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit",
+          "awslogs-group"         = aws_cloudwatch_log_group.service_logs.name,
           "awslogs-region"        = data.aws_region.current.name,
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
       }
-      secrets = [
-        {
-          name      = "licenseKey",
-          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
-        }
-      ]
-      environment = [
-        { name : "aws_region", value : data.aws_region.current.name },
-        { name : "container_name", value : local.container_name },
-        { name : "log_group_name", value : local.log_group_name },
-        { name : "NR_DIRECT_LOGS_MATCH", value : var.enable_nrlogs_direct ? "**" : "nr_direct_disabled" },
-      ],
+      systemControls = []
+      volumesFrom    = []
     },
   ])
 
@@ -260,7 +216,6 @@ resource "aws_ecs_task_definition" "app" {
 
   depends_on = [
     aws_cloudwatch_log_group.service_logs,
-    aws_cloudwatch_log_group.fluentbit,
     aws_iam_role_policy.task_executor,
     aws_iam_role_policy_attachment.extra_policies,
   ]

@@ -1,13 +1,18 @@
-import * as sessionModule from "src/services/auth/session";
-import * as fetcherModule from "src/services/fetch/fetchers/awardRecommendationFetcherClient";
+import * as fetcherModule from "src/services/fetch/fetchers/awardRecommendationFetcher";
 
 import { NextRequest } from "next/server";
 
 import { getRisksForAwardRecommendation } from "./handler";
 
-jest.mock("src/services/auth/sessionUtils", () => ({}));
-jest.mock("src/services/auth/session");
-jest.mock("src/services/fetch/fetchers/awardRecommendationFetcherClient");
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher");
+
+jest.mock("src/services/auth/sessionUtils", () => ({
+  decrypt: jest.fn(),
+  encrypt: jest.fn(),
+  CLIENT_JWT_ENCRYPTION_ALGORITHM: "HS256",
+  API_JWT_ENCRYPTION_ALGORITHM: "RS256",
+  newExpirationDate: () => new Date(0),
+}));
 
 interface MockResponse {
   json: () => Promise<unknown>;
@@ -28,7 +33,6 @@ global.Response = class Response {
   }
 } as unknown as typeof globalThis.Response;
 
-const mockSession = { token: "test-token" };
 const mockPagination = { page_offset: 1, page_size: 10, sort_order: [] };
 const mockRisks = [{ id: 1, type: "ADD_MONITORING" }];
 const mockPaginationInfo = { total_pages: 1, total_records: 1 };
@@ -39,7 +43,6 @@ describe("getRisksForAwardRecommendation", () => {
   });
 
   it("returns risks and pagination info on success", async () => {
-    (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
     (fetcherModule.getAwardRecommendationRisks as jest.Mock).mockResolvedValue({
       risks: mockRisks,
       paginationInfo: mockPaginationInfo,
@@ -55,15 +58,5 @@ describe("getRisksForAwardRecommendation", () => {
     };
     expect(json.data).toEqual(mockRisks);
     expect(json.pagination_info).toEqual(mockPaginationInfo);
-  });
-
-  it("throws error if no session", async () => {
-    (sessionModule.getSession as jest.Mock).mockResolvedValue(null);
-    const req = {
-      json: jest.fn().mockResolvedValue({ pagination: mockPagination }),
-    } as unknown as NextRequest;
-    const params = Promise.resolve({ id: "award-id" });
-    const res = await getRisksForAwardRecommendation(req, { params });
-    expect(res.status).toBe(401);
   });
 });

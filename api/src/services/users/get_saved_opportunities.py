@@ -2,12 +2,12 @@ import logging
 import uuid
 from collections.abc import Sequence
 
+from grants_shared.adapters import db
 from pydantic import BaseModel
 from sqlalchemy import asc, desc, func, nulls_last, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select, Subquery
 
-from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access, check_user_access
 from src.constants.lookup_constants import Privilege

@@ -1,4 +1,4 @@
-import SimplerAlert from "src/components/SimplerAlert";
+import SimplerAlert from "src/components/core/SimplerAlert";
 
 const meta = {
   title: "Components/SimplerAlert",

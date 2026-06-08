@@ -1,19 +1,17 @@
 "use server";
 
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import {
   createOpportunitySummaryForGrantor,
   publishOpportunityForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
+import { buildOpportunitySummaryUpdateRequest } from "src/utils/opportunityEditFormConfig";
 import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-
-import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 
 export type OpportunityEditValidationErrors = {
   title?: string[];
@@ -110,24 +108,60 @@ async function validateOpportunityEditForm(formData: FormData) {
         });
       }
     })
-    .superRefine(({ awardMinimum, awardMaximum }, ctx) => {
-      const min = Number(awardMinimum.replace(/,/g, ""));
-      const max = Number(awardMaximum.replace(/,/g, ""));
-
-      if (
-        awardMinimum &&
-        awardMaximum &&
-        !isNaN(min) &&
-        !isNaN(max) &&
-        min > max
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["awardMaximum"],
-          message: validationErrors("awardMaximumOrder"),
-        });
-      }
-    });
+    .superRefine(
+      ({ awardMinimum, awardMaximum, estimatedTotalProgramFunding }, ctx) => {
+        const min = Number(awardMinimum.replace(/,/g, ""));
+        const max = Number(awardMaximum.replace(/,/g, ""));
+        const total = Number(estimatedTotalProgramFunding.replace(/,/g, ""));
+        // Award Minimum cannot exceed the Estimated Total Program Funding.
+        if (
+          awardMinimum &&
+          estimatedTotalProgramFunding &&
+          !isNaN(min) &&
+          !isNaN(total) &&
+          min > total
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["awardMinimum"],
+            message: validationErrors("awardMinLessThanTotal"),
+          });
+        }
+        // Award Maximum cannot exceed the Estimated Total Program Funding.
+        if (
+          awardMaximum &&
+          estimatedTotalProgramFunding &&
+          !isNaN(max) &&
+          !isNaN(total) &&
+          max > total
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["awardMaximum"],
+            message: validationErrors("awardMaxLessThanTotal"),
+          });
+        }
+        // Award Minimum cannot exceed Award Maximum.
+        if (
+          awardMinimum &&
+          awardMaximum &&
+          !isNaN(min) &&
+          !isNaN(max) &&
+          min > max
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["awardMinimum"],
+            message: validationErrors("awardMinLessThanMax"),
+          });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["awardMaximum"],
+            message: validationErrors("awardMinLessThanMax"),
+          });
+        }
+      },
+    );
 
   return reviewOpportunityEditSchema.safeParse({
     title: readStringValue(formData.get("title")),
@@ -180,11 +214,6 @@ export async function saveOpportunityEditAction(
     };
   }
 
-  const session = await getSession();
-  if (!session?.token) {
-    return { errorMessage: alerts("unauthenticated") };
-  }
-
   const validatedFields = await validateOpportunityEditForm(formData);
 
   if (!validatedFields.success) {
@@ -202,7 +231,6 @@ export async function saveOpportunityEditAction(
           ...buildOpportunitySummaryUpdateRequest(formData),
           is_forecast: isForecast,
         },
-        token: session.token,
       });
 
       return {
@@ -215,7 +243,6 @@ export async function saveOpportunityEditAction(
       opportunityId,
       opportunitySummaryId,
       body: buildOpportunitySummaryUpdateRequest(formData),
-      token: session.token,
     });
 
     return {
@@ -224,6 +251,12 @@ export async function saveOpportunityEditAction(
   } catch (error) {
     const status =
       error instanceof ApiRequestError ? parseErrorStatus(error) : null;
+
+    if (status === 401) {
+      return {
+        errorMessage: alerts("unauthenticated"),
+      };
+    }
 
     if (status === 403) {
       return {
@@ -254,23 +287,24 @@ async function publishOpportunityAction(
 ): Promise<OpportunityEditActionState> {
   const alerts = await getTranslations("OpportunityEdit.content.alerts");
 
-  const session = await getSession();
-  if (!session?.token) {
-    return { errorMessage: alerts("unauthenticated") };
-  }
-
   try {
-    await publishOpportunityForGrantor(opportunityId, session.token);
+    await publishOpportunityForGrantor(opportunityId);
   } catch (error) {
     const status =
       error instanceof ApiRequestError ? parseErrorStatus(error) : null;
 
+    if (status === 401) {
+      return { errorMessage: alerts("unauthenticated") };
+    }
+
     if (status === 403) {
       return { errorMessage: alerts("forbidden") };
     }
+
     if (status === 404) {
       return { errorMessage: alerts("notFound") };
     }
+
     return { errorMessage: alerts("genericError") };
   }
 
@@ -297,4 +331,14 @@ export async function submitOpportunityAction(
   }
 
   redirect("/grantor/opportunities");
+}
+
+export async function opportunityEditFormAction(
+  prevState: OpportunityEditActionState,
+  formData: FormData,
+): Promise<OpportunityEditActionState> {
+  if (readStringValue(formData.get("submitType")) === "publish") {
+    return submitOpportunityAction(prevState, formData);
+  }
+  return saveOpportunityEditAction(prevState, formData);
 }

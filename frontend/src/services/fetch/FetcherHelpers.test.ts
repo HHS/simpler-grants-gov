@@ -9,9 +9,14 @@ import {
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 const getSessionMock = jest.fn();
+const getCorrelationIdMock = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
+}));
+
+jest.mock("src/services/correlationId/correlationId", () => ({
+  getCorrelationId: (): unknown => getCorrelationIdMock(),
 }));
 
 describe("createRequestUrl", () => {
@@ -76,6 +81,9 @@ describe("throwError", () => {
           ],
         },
         "http://any.url",
+        {
+          headers: new Headers({ "x-amzn-requestid": "fake-x-amzn-requestid" }),
+        } as unknown as Response,
       );
     });
     expect(expectedError).toBeInstanceOf(UnauthorizedError);
@@ -131,7 +139,6 @@ describe("getDefaultHeaders", () => {
     expect(headers["X-API-KEY"]).toEqual("test-api-key");
     expect(headers["Content-Type"]).toEqual("application/json");
   });
-
   it("does not include X-API-KEY header when API_GW_AUTH is not set", async () => {
     mockEnvironment.API_GW_AUTH = "";
 
@@ -166,6 +173,23 @@ describe("getDefaultHeaders", () => {
     );
     const headers = await getDefaultHeaders({ requiresUserAuthToken: true });
     expect(headers["X-SGG-Token"]).toEqual("a token");
+  });
+  it("includes X-Correlation-Id header", async () => {
+    const correlationIdValue = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+    getCorrelationIdMock.mockResolvedValue(correlationIdValue);
+    const { getDefaultHeaders } = await import(
+      "src/services/fetch/fetcherHelpers"
+    );
+    const headers = await getDefaultHeaders({});
+    expect(headers["X-Correlation-Id"]).toEqual(correlationIdValue);
+  });
+  it("does not includes X-Correlation-Id header when cookie not set", async () => {
+    getCorrelationIdMock.mockResolvedValue(undefined);
+    const { getDefaultHeaders } = await import(
+      "src/services/fetch/fetcherHelpers"
+    );
+    const headers = await getDefaultHeaders({});
+    expect(headers["X-Correlation-Id"]).toEqual(undefined);
   });
 });
 

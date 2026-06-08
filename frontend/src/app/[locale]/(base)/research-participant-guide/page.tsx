@@ -1,9 +1,8 @@
 import { Metadata } from "next";
+import ResearchParticipantGuideContent from "src/app/[locale]/(base)/research-participant-guide/_components/ResearchParticipantGuide";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
-
-import ResearchParticipantGuideContent from "src/components/research-participant-guide/ResearchParticipantGuide";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;

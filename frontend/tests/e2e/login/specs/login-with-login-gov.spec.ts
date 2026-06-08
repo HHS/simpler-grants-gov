@@ -1,10 +1,16 @@
+/**
+ * @feature Sign in with Login.gov
+ * @featureFile e2e/login/features/login-with-login-gov.feature
+ * @scenario Login.gov authentication with MFA
+ */
+
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import {
   findSignOutButton,
   performStagingLogin,
-} from "tests/e2e/utils/perform-login-utils";
+} from "tests/e2e/utils/auth/perform-login-utils";
 
 const { SMOKE, AUTH } = VALID_TAGS;
 
@@ -32,6 +38,7 @@ test.describe("Login.gov based authentication tests", () => {
     !testUserAuthKey;
   test.skip(envMissing, "Login E2E env not configured; skipping spec");
 
+  // Scenario: signs in with Login.gov MFA and reaches an authenticated state
   test(
     "Login.gov authentication with MFA",
     { tag: [SMOKE, AUTH] },
@@ -47,13 +54,20 @@ test.describe("Login.gov based authentication tests", () => {
       }
 
       try {
+        // Given the user launches the application
         await page.goto(baseUrl, {
           waitUntil: "domcontentloaded",
           timeout: targetEnv === "staging" ? 180000 : 60000,
         });
 
+        // When the user clicks the "Sign in" button
+        // And the user enters a valid email and password
+        // And the user submits the login form
+        // And the user enters the authentication code
+        // And the user submits the MFA form
         await performStagingLogin(page, isMobileProject);
 
+        // Then the sign out button is visible — the user is successfully logged in
         // findSignOutButton opens the Account dropdown (and mobile nav if needed)
         // then returns the sign-out locator.
         // Use toHaveCount(1) rather than toBeVisible: the Sign out link lives

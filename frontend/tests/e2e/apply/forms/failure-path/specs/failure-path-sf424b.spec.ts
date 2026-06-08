@@ -16,8 +16,8 @@ import {
 } from "tests/e2e/apply/fixtures/sf424b-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
-import { createApplication } from "tests/e2e/utils/create-application-utils";
+import { createApplication } from "tests/e2e/utils/application/create-application-utils";
+import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import {
@@ -25,7 +25,7 @@ import {
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { APPLY, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
@@ -43,7 +43,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "SF-424B error validation - required fields and inline errors",
-  { tag: [APPLY, CORE_REGRESSION] },
+  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

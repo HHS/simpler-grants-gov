@@ -1,13 +1,15 @@
 [project]
 name = "grants-shared"
-version = "0.1.0"
+version = "0.2.5"
 description = "Shared code used by the Simpler Grants.gov repo"
 readme = "README.md"
+license = "CC0-1.0"
 authors = [{ name = "Nava Engineering", email = "engineering@navapbc.com" }]
 requires-python = ">=3.14,<3.15"
 classifiers = [
+    # See list of classifiers at https://pypi.org/classifiers
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.14"
 ]
 
 dependencies = [
@@ -29,7 +31,12 @@ dependencies = [
     "pandas-stubs>=2.0.3,<3",
     "newrelic>=12.1.0,<13",
     "python-dotenv>=1.2.2,<2",
+    "beautifulsoup4>=4.14.3,<5",
 ]
+
+[project.urls]
+Homepage = "https://github.com/HHS/simpler-grants-gov"
+Issues = "https://github.com/HHS/simpler-grants-gov/issues"
 
 [dependency-groups]
 dev = [

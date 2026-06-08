@@ -1,20 +1,19 @@
 import { Metadata } from "next";
+import OpportunityEditForm from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/_components/OpportunityEditForm";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+import { buildOpportunityEditInitialValues } from "src/utils/opportunityEditFormConfig";
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
-import { Alert, Button, GridContainer } from "@trussworks/react-uswds";
+import { Alert, GridContainer } from "@trussworks/react-uswds";
 
-import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
-import OpportunityEditForm from "src/components/opportunity/OpportunityEditForm";
-import { buildOpportunityEditInitialValues } from "src/components/opportunity/opportunityEditFormConfig";
-import OpportunityEditHeader from "src/components/opportunity/OpportunityEditHeader";
-import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
+import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
@@ -34,7 +33,7 @@ export async function generateMetadata({
   try {
     const session = await getSession();
     if (session?.token) {
-      const { data } = await getOpportunityForGrantor(id, session.token);
+      const { data } = await getOpportunityForGrantor(id);
       title = `${t("OpportunityEdit.pageTitle")} - ${data.opportunity_title || ""}`;
     }
   } catch {
@@ -66,7 +65,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   let opportunityData: GrantorOpportunityDetail;
   let opportunitySummaryId: string;
   try {
-    const response = await getOpportunityForGrantor(id, session.token);
+    const response = await getOpportunityForGrantor(id);
     opportunityData = response.data;
     opportunitySummaryId =
       response.data.forecast_summary?.opportunity_summary_id ??
@@ -188,21 +187,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
                   </span>
                 </div>
               </div>
-              <div className="display-flex flex-wrap flex-align-center margin-top-2 desktop:margin-top-0">
-                <Button
-                  type="submit"
-                  form="opportunity-edit-form"
-                  outline
-                  className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
-                >
-                  {tEdit("header.saveButton")}
-                </Button>
-                <OpportunityEditHeader
-                  initialValues={initialValues}
-                  previewLabel={tEdit("header.previewButton")}
-                  publishLabel={tEdit("header.publishButton")}
-                />
-              </div>
             </div>
           </div>
         </div>
@@ -210,7 +194,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
 
       <div className="grid-container padding-bottom-4">
         <div className="usa-in-page-nav-container">
-          <ApplyFormNav
+          <LeftHandFormNav
             title={tEdit("header.navTitle")}
             fields={navigationItems}
           />
@@ -225,6 +209,9 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
               initialAttachments={opportunityData.attachments ?? []}
               opportunityKeyInformation={opportunityKeyInformation}
               isNewlyCreated={isNewlyCreated}
+              saveLabel={tEdit("header.saveButton")}
+              previewLabel={tEdit("header.previewButton")}
+              publishLabel={tEdit("header.publishButton")}
             />
           </section>
         </div>

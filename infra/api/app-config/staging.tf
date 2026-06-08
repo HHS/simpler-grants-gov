@@ -63,6 +63,9 @@ module "staging_config" {
 
     # Workflow
     WORKFLOW_SERVICE_INTERNAL_USER_ID = "903bf2e6-b213-4744-9f95-66ccfd98a819"
+
+    # Job lock — only enabled in dev/staging while we validate it
+    ENABLE_JOB_LOCK = "true"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

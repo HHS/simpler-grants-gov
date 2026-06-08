@@ -1,4 +1,5 @@
 import TopLevelError from "src/app/[locale]/(base)/error/page";
+import { AgencySelector } from "src/app/[locale]/(base)/grantor/opportunities/_components/AgencySelector";
 import { UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
@@ -26,8 +27,7 @@ import { Alert, GridContainer } from "@trussworks/react-uswds";
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
-import { AgencySelector } from "src/components/workspace/AgencySelector";
+} from "src/components/core/TableWithResponsiveHeader";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");
@@ -330,6 +330,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   // A. Check the user's session
   const userSession = await getSession();
   if (!userSession || !userSession.token) {
+    console.error("Invalid session", userSession);
     return <TopLevelError />;
   }
 
@@ -338,6 +339,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   try {
     userAgencies = await fetchUserAgencies();
   } catch (error) {
+    console.error("Bad agencies", error);
     if (error instanceof UnauthorizedError) {
       throw error;
     }
@@ -372,6 +374,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       userPrivilegeDef,
     );
   } catch (error) {
+    console.error("Error fetching privileges", error);
     if (error instanceof UnauthorizedError) {
       throw error;
     }
@@ -400,6 +403,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
         pageRequest,
       );
     } catch (error) {
+      console.error("Error fetching Opportunities", error);
       if (error instanceof UnauthorizedError) {
         throw error;
       }

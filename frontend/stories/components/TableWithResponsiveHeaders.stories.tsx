@@ -3,7 +3,7 @@ import {
   fakeResponsiveTableRows,
 } from "src/utils/testing/fixtures";
 
-import { TableWithResponsiveHeader } from "src/components/TableWithResponsiveHeader";
+import { TableWithResponsiveHeader } from "src/components/core/TableWithResponsiveHeader";
 
 const meta = {
   title: "Components/TableWithResponsiveHeader",

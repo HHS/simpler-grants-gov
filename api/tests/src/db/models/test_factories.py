@@ -1,8 +1,8 @@
 from datetime import datetime
 
+import grants_shared.adapters.db as db
 import pytest
 
-import src.adapters.db as db
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.opportunity_models import Opportunity
 from tests.src.db.models.factories import OpportunityFactory

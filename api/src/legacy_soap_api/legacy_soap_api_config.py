@@ -34,6 +34,7 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     soap_grantors_path: str = Field("", alias="SOAP_GRANTORS_PATH")
     soap_applicants_path: str = Field("", alias="SOAP_APPLICANTS_PATH")
     enable_simpler_route: bool = Field(True, alias="ENABLE_SIMPLER_ROUTE")
+    save_soap_messages_to_s3: bool = Field(False, alias="SAVE_SOAP_MESSAGES_TO_S3")
 
     @property
     def gg_url(self) -> str:
@@ -83,6 +84,7 @@ class SOAPOperationConfig:
     always_call_simpler: bool = False
 
     # These are the privileges needed for these endpoints:
+    # GetSubmissionListRequest = {Privilege.LEGACY_AGENCY_VIEWER}
     # GetSubmissionListExpandedRequest = {Privilege.LEGACY_AGENCY_VIEWER}
     # GetApplicationRequest = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
     # GetApplicationZipRequest = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
@@ -145,6 +147,11 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             request_operation_name="GetApplicationZipRequest",
             response_operation_name="GetApplicationZipResponse",
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
+        ),
+        "GetSubmissionListRequest": SOAPOperationConfig(
+            request_operation_name="GetSubmissionListRequest",
+            response_operation_name="GetSubmissionListResponse",
+            privileges={Privilege.LEGACY_AGENCY_VIEWER},
         ),
         "GetSubmissionListExpandedRequest": SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",

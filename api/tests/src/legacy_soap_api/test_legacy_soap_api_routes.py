@@ -15,6 +15,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
 )
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
+from src.util import file_util
 from tests.lib.data_factories import get_mtls_urlencoded_str_and_serial_number, setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -123,6 +124,165 @@ def test_successful_confirm_application_delivery_request(
         .all()
     )
     assert len(retrieved) == 1
+
+
+@mock.patch("uuid.uuid4")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_true_and_operation_name_is_one_of_the_valid_operations(
+    mock_get_simpler_soap_response,
+    mock_uuid,
+    monkeypatch,
+    mock_s3_bucket,
+    db_session,
+    client,
+    enable_factory_create,
+    caplog,
+    s3_config,
+    mock_s3,
+) -> None:
+    mock_uuid.return_value = TEST_UUID
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
+    mock_get_simpler_soap_response.side_effect = Exception()
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+        cert_id=soap_client_certificate.legacy_certificate.cert_id,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        response = client.post(
+            full_path,
+            data=mock_data,
+            headers={
+                "Use-Simpler-Override": "1",
+                MTLS_CERT_HEADER_KEY: mtls_cert,
+            },
+        )
+        assert response.status_code == 500
+        expected_response = (
+            "--uuid:00000000-aaaa-0000-bbbb-000000000000\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\n'
+            "Content-ID: <root.message@cxf.apache.org>\r\n"
+            '\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+            "<soap:Body><soap:Fault><faultcode>soap:Server</faultcode><faultstring>Failed to confirm application delivery.(Authorization Failure)</faultstring></soap:Fault>"
+            "</soap:Body>"
+            "</soap:Envelope>\r\n"
+            "--uuid:00000000-aaaa-0000-bbbb-000000000000--"
+        ).encode()
+        assert response.data == expected_response
+    record = next(
+        r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
+    )
+    assert record
+    request_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/request.txt"
+    )
+    response_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/response.txt"
+    )
+    assert request_contents.replace("\n", "") == mock_data.decode().replace("\n", "")
+    assert response_contents.replace("\r", "") == expected_response.decode().replace("\r", "")
+
+
+@mock.patch("uuid.uuid4")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_if_write_debug_data_to_s3_fails_the_exception_is_logged(
+    mock_get_simpler_soap_response,
+    mock_uuid,
+    monkeypatch,
+    mock_s3_bucket,
+    db_session,
+    client,
+    enable_factory_create,
+    caplog,
+    s3_config,
+    mock_s3,
+) -> None:
+    mock_uuid.return_value = TEST_UUID
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
+    mock_get_simpler_soap_response.side_effect = Exception()
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+        cert_id=soap_client_certificate.legacy_certificate.cert_id,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        with mock.patch(
+            "src.legacy_soap_api.simpler_soap_api.write_debug_data_to_s3"
+        ) as mock_write_debug:
+            mock_write_debug.side_effect = Exception()
+            response = client.post(
+                full_path,
+                data=mock_data,
+                headers={
+                    "Use-Simpler-Override": "1",
+                    MTLS_CERT_HEADER_KEY: mtls_cert,
+                },
+            )
+            assert response.status_code == 500
+        record = next(
+            r
+            for r in caplog.records
+            if r.message == "soap_client: failed to upload debug info to s3"
+        )
+        assert record
 
 
 @mock.patch("uuid.uuid4")
@@ -1018,6 +1178,35 @@ def test_get_submission_list_expanded_always_calls_legacy_and_simpler(
         <soapenv:Body>
         <agen:GetSubmissionListExpandedRequest>
         </agen:GetSubmissionListExpandedRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path,
+        data=etree.tostring(envelope),
+        headers={MTLS_CERT_HEADER_KEY: mtls_cert},
+    )
+    assert response.status_code == 200
+    mock_get_soap_response.assert_called_once()
+    mock_get_simpler_soap_response.assert_called_once()
+
+
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_get_submission_list_always_calls_legacy_and_simpler(
+    mock_get_simpler_soap_response, mock_get_soap_response, client, enable_factory_create
+) -> None:
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:GetSubmissionListRequest>
+        </agen:GetSubmissionListRequest>
         </soapenv:Body>
         </soapenv:Envelope>
     """

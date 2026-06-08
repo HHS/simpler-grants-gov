@@ -16,16 +16,19 @@ jest.mock("next-intl/server", () => ({
 }));
 
 // Mock the DevelopersPageSections component
-jest.mock("src/components/developers/DevelopersSections", () => {
-  return function MockDevelopersPageSections() {
-    return (
-      <div data-testid="developer-sections">
-        <h1>Developers</h1>
-        <p>Welcome to the developer portal</p>
-      </div>
-    );
-  };
-});
+jest.mock(
+  "src/app/[locale]/(base)/developers/_components/DevelopersSections",
+  () => {
+    return function MockDevelopersPageSections() {
+      return (
+        <div data-testid="developer-sections">
+          <h1>Developers</h1>
+          <p>Welcome to the developer portal</p>
+        </div>
+      );
+    };
+  },
+);
 
 describe("Developer Page", () => {
   it("renders developer page sections", () => {

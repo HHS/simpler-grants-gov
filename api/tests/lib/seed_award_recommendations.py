@@ -1,9 +1,9 @@
 import logging
 import uuid
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 
-import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import (
     ApplicationStatus,
@@ -529,6 +529,7 @@ def _create_opportunity_ready_for_award_recommendation(
 
     competition = factories.CompetitionFactory.create(
         opportunity=opportunity,
+        competition_forms=[],
     )
 
     logger.info("Creating 5 organizations for applications")
@@ -609,6 +610,7 @@ def _create_competition_with_accepted_applications(
 
     competition = factories.CompetitionFactory.create(
         opportunity=opportunity,
+        competition_forms=[],
     )
     logger.info(f"Associating opportunity with agency: {agency.agency_code}")
 

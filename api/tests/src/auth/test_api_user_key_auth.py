@@ -1,8 +1,8 @@
+import grants_shared.logs
 import pytest
 from freezegun import freeze_time
 
 import src.app as app_entry
-import src.logging
 from src.auth.api_user_key_auth import (
     ApiKeyValidationError,
     api_user_key_auth,
@@ -30,7 +30,7 @@ def mini_app(monkeypatch_module):
 
         return {"message": "ok"}
 
-    with src.logging.init(__package__):
+    with grants_shared.logs.init(__package__):
         yield mini_app
 
 

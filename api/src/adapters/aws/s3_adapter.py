@@ -24,6 +24,7 @@ class S3Config(PydanticBaseEnvConfig):
     # Note these env vars get set as "s3://..."
     public_files_bucket_path: str = Field(alias="PUBLIC_FILES_BUCKET")
     draft_files_bucket_path: str = Field(alias="DRAFT_FILES_BUCKET")
+    file_scan_bucket_path: str = Field(alias="FILE_SCAN_BUCKET")
 
 
 def get_s3_client(

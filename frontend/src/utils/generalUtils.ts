@@ -170,3 +170,11 @@ export const getModifiedTimeDisplay = (
 
   return formatTimestamp(updated_at);
 };
+
+export const printAwsHeaders = (headers: Headers): string => {
+  return `requestid: ${headers.get("x-amzn-requestid") || "not set"}, apigw-id: ${headers.get("x-amz-apigw-id") || "not set"}, amzn-errortype: ${headers.get("x-amzn-errortype") || "not set"}, content-type: ${headers.get("Content-Type") || "not set"}`;
+};
+
+export const printResponseInfo = (response: Response): string => {
+  return `Ok?: ${response.ok ? "ok" : "no"}, status: ${response.status}`;
+};

@@ -1,10 +1,11 @@
 import logging
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+
 from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_blueprint
 from src.legacy_soap_api.simpler_soap_api import process_simpler_request
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 

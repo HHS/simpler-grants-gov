@@ -1,5 +1,9 @@
 from datetime import timedelta
 
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.search_schema import BoolSearchSchemaBuilder
 from marshmallow import ValidationError, validates_schema
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
@@ -8,12 +12,10 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySummaryV1Schema,
     OpportunityV1Schema,
 )
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import BoolSearchSchemaBuilder
+from src.api.schemas.response_schema import PaginationMixinSchema
 from src.constants.lookup_constants import (
     ApplicantType,
+    CompetitionOpenToApplicant,
     FundingCategory,
     FundingInstrument,
     OpportunityCategory,
@@ -621,3 +623,50 @@ class DeleteAttachmentResponseV1Schema(ResponseWithErrorsSchema):
 
 class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunityGrantorSchema())
+
+
+class CompetitionCreateRequestSchema(Schema):
+    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ request"""
+
+    competition_title = fields.String(
+        required=True,
+        metadata={
+            "description": "The title of the competition",
+            "example": "Proposal for Advanced Research",
+        },
+    )
+    opening_date = fields.Date(
+        required=True,
+        allow_none=True,
+        metadata={"description": "The opening date of the competition", "example": "2026-05-11"},
+    )
+    closing_date = fields.Date(
+        required=True,
+        allow_none=True,
+        metadata={"description": "The closing date of the competition", "example": "2026-05-11"},
+    )
+    contact_info = fields.String(
+        required=True,
+        metadata={
+            "description": "Contact information for the competition",
+            "example": "Bob Smith\nFakeMail@fake.com",
+        },
+    )
+    open_to_applicants = fields.List(
+        fields.Enum(CompetitionOpenToApplicant),
+        required=True,
+        validate=validators.Length(min=1),
+        metadata={
+            "description": "List of applicant types eligible for this competition",
+            "example": [
+                CompetitionOpenToApplicant.INDIVIDUAL,
+                CompetitionOpenToApplicant.ORGANIZATION,
+            ],
+        },
+    )
+
+
+class CompetitionCreateResponseSchema(AbstractResponseSchema):
+    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ response"""
+
+    data = fields.Nested(CompetitionAlphaSchema())
