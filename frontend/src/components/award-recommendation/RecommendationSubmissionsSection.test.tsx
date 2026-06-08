@@ -64,7 +64,7 @@ describe("RecommendationSubmissionsSection", () => {
 
   it("renders recommended table in view mode when recommended submissions exist", async () => {
     mockClientFetch.mockImplementation(
-      async (_url: string, options?: RequestInit) => {
+      (_url: string, options?: RequestInit) => {
         const body = JSON.parse((options?.body as string) || "{}") as {
           filters?: { award_recommendation_type?: { one_of: string[] } };
           pagination?: { page_size?: number };
@@ -104,7 +104,7 @@ describe("RecommendationSubmissionsSection", () => {
 
   it("renders exceptions table when exception submissions exist", async () => {
     mockClientFetch.mockImplementation(
-      async (_url: string, options?: RequestInit) => {
+      (_url: string, options?: RequestInit) => {
         const body = JSON.parse((options?.body as string) || "{}") as {
           filters?: {
             award_recommendation_type?: { one_of: string[] };

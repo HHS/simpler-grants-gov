@@ -34,7 +34,9 @@ global.Response = class Response {
 } as unknown as typeof globalThis.Response;
 
 const mockPagination = { page_offset: 1, page_size: 10, sort_order: [] };
-const mockSubmissions = [{ award_recommendation_application_submission_id: "sub-1" }];
+const mockSubmissions = [
+  { award_recommendation_application_submission_id: "sub-1" },
+];
 const mockPaginationInfo = { total_pages: 1, total_records: 1 };
 
 describe("getSubmissionsForAwardRecommendation", () => {
