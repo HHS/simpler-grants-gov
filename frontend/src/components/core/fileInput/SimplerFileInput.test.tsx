@@ -2,14 +2,14 @@
  * @jest-environment ./src/utils/testing/jsdomNodeEnvironment.ts
  */
 
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { wait } from "@testing-library/user-event/dist/cjs/utils/index.js";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SimplerFileInput } from "./SimplerFileInput";
 
 const clientFetchMock = jest.fn();
+const fakeAbortController = jest.fn();
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
@@ -52,7 +52,7 @@ const makeStream = (
         }
         const chunk = chunks[chunkIndex];
         if (chunk === "error") {
-          controller.error(new Error());
+          controller.error(new Error("fake error from test stream chunk"));
           return;
         }
         controller.enqueue(chunk);
@@ -62,8 +62,15 @@ const makeStream = (
   });
 };
 
+let originalAbortController: typeof AbortController;
+
 describe("SimplerFileInput", () => {
+  beforeEach(() => {
+    originalAbortController = global.AbortController;
+    global.AbortController = fakeAbortController;
+  });
   afterEach(() => {
+    global.AbortController = originalAbortController;
     jest.resetAllMocks();
   });
   describe("Status display", () => {
@@ -84,7 +91,8 @@ describe("SimplerFileInput", () => {
       ).not.toBeInTheDocument();
     });
     it("displays a custom progress indicator during upload", async () => {
-      clientFetchMock.mockResolvedValue(new Response());
+      const trigger = createAdvanceStreamTrigger();
+      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
       render(
         <SimplerFileInput
           onDelete={() => Promise.resolve()}
@@ -215,6 +223,17 @@ describe("SimplerFileInput", () => {
       render(
         <SimplerFileInput
           onDelete={() => Promise.resolve()}
+          onSuccess={() => {
+            screen
+              .findByTestId("file-upload-status-display")
+              .then((display) => {
+                // eslint-disable-next-line jest/no-conditional-expect
+                return expect(display).toHaveTextContent(
+                  "post upload action success",
+                );
+              })
+              .catch(() => {});
+          }}
           postUploadAction={() => Promise.resolve(undefined)}
           postUploadActionProgressMessage="post upload action in progress"
           postUploadActionSuccessMessage="post upload action success"
@@ -231,11 +250,6 @@ describe("SimplerFileInput", () => {
         }),
       );
       trigger.advance();
-      await waitFor(async () =>
-        expect(
-          await screen.findByTestId("file-upload-status-display"),
-        ).toHaveTextContent("post upload action success"),
-      );
     });
 
     it("displays a generic error if error occurs outside of upload process", async () => {
@@ -480,40 +494,135 @@ describe("SimplerFileInput", () => {
       await waitFor(() => expect(mockOnError).toHaveBeenCalledWith(fakeError));
     });
   });
-  describe("User Interface", () => {
-    // not able to test this since the only way to really hide this for now is with CSS, which is not
-    // testable using testing-library tools.
-    // aria-hidden seems to be the way to do this for testing, but is that possible?
-    // - not really without doing old school DOM element targeting - we have a ref but only to the input itself, not the previews
-    // or do we just remove it? use mutation observer? not worry about testing, and rely on the css?
-    it.skip("does not display the Trussworks file preview", async () => {
-      const trigger = createAdvanceStreamTrigger();
-      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
-      render(
-        <SimplerFileInput
-          onDelete={() => Promise.resolve()}
-          postUploadAction={() => Promise.resolve(undefined)}
-          postUploadActionProgressMessage="post upload action in progress"
-          postUploadActionSuccessMessage="post upload action success"
-          postUploadActionErrorMessage="post upload action error"
-          id="file-input-test"
-          labelId="file-input-label"
-        />,
-      );
-      const input = await screen.findByTestId("file-input-input");
-      await userEvent.upload(
-        input,
-        new File(["test content"], "test.txt", {
-          type: "text/plain",
-        }),
-      );
-      screen.debug();
-      const trussworksPreviewImages = screen.queryByTestId(
-        "file-input-preview-image",
-      );
-      const trussworksPreviews = screen.queryByTestId("file-input-preview");
-      expect(trussworksPreviewImages).not.toBeVisible();
-      expect(trussworksPreviews).not.toBeVisible();
+  it("cancels upload in progress on cancel button click", async () => {
+    const controllerAbortMock = jest.fn();
+    fakeAbortController.mockImplementation(() => ({
+      abort: controllerAbortMock,
+      signal: {
+        abort: jest.fn(),
+      },
+    }));
+    const trigger = createAdvanceStreamTrigger();
+    clientFetchMock.mockResolvedValue(
+      new Response(makeStream(["uploading"], trigger)),
+    );
+    render(
+      <SimplerFileInput
+        onDelete={() => Promise.resolve()}
+        postUploadAction={() => Promise.resolve(undefined)}
+        postUploadActionProgressMessage="post upload action in progress"
+        postUploadActionSuccessMessage="post upload action success"
+        postUploadActionErrorMessage="post upload action error"
+        id="file-input-test"
+        labelId="file-input-label"
+      />,
+    );
+    const input = await screen.findByTestId("file-input-input");
+    await userEvent.upload(
+      input,
+      new File(["test content"], "test.txt", {
+        type: "text/plain",
+      }),
+    );
+
+    trigger.advance();
+    await waitFor(async () => {
+      expect(
+        await screen.findByTestId("file-upload-status-display"),
+      ).toHaveTextContent("uploading");
     });
+    const cancelButton = screen.getByRole("button", { name: "cancel" });
+
+    expect(cancelButton).toBeInTheDocument();
+    await userEvent.click(cancelButton);
+    expect(controllerAbortMock).toHaveBeenCalledTimes(1);
+  });
+  it("cancels post-upload in progress on cancel button click during post-upload action", async () => {
+    const controllerAbortMock = jest.fn();
+    fakeAbortController
+      .mockImplementationOnce(() => ({
+        abort: jest.fn(),
+        signal: {
+          abort: jest.fn(),
+        },
+      }))
+      .mockImplementationOnce(() => ({
+        abort: controllerAbortMock,
+        signal: {
+          abort: jest.fn(),
+        },
+      }));
+    const trigger = createAdvanceStreamTrigger();
+    clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+    const delayedPostUploadAction = (): Promise<undefined> => {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(undefined), 1000);
+      });
+    };
+    render(
+      <SimplerFileInput
+        onDelete={() => Promise.resolve()}
+        postUploadAction={delayedPostUploadAction}
+        postUploadActionProgressMessage="post upload action in progress"
+        postUploadActionSuccessMessage="post upload action success"
+        postUploadActionErrorMessage="post upload action error"
+        id="file-input-test"
+        labelId="file-input-label"
+      />,
+    );
+    const input = await screen.findByTestId("file-input-input");
+    await userEvent.upload(
+      input,
+      new File(["test content"], "test.txt", {
+        type: "text/plain",
+      }),
+    );
+    trigger.advance();
+    await waitFor(async () => {
+      expect(
+        await screen.findByTestId("file-upload-status-display"),
+      ).toHaveTextContent("post upload action in progress");
+    });
+
+    const cancelButton = screen.getByRole("button", { name: "cancel" });
+
+    expect(cancelButton).toBeInTheDocument();
+    await userEvent.click(cancelButton);
+
+    expect(controllerAbortMock).toHaveBeenCalledTimes(1);
+  });
+  // not able to test this since the only way to really hide this for now is with CSS, which is not
+  // testable using testing-library tools.
+  // aria-hidden seems to be the way to do this for testing, but is that possible?
+  // - not really without doing old school DOM element targeting - we have a ref but only to the input itself, not the previews
+  // or do we just remove it? use mutation observer? not worry about testing, and rely on the css?
+  it.skip("does not display the Trussworks file preview", async () => {
+    const trigger = createAdvanceStreamTrigger();
+    clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+    render(
+      <SimplerFileInput
+        onDelete={() => Promise.resolve()}
+        postUploadAction={() => Promise.resolve(undefined)}
+        postUploadActionProgressMessage="post upload action in progress"
+        postUploadActionSuccessMessage="post upload action success"
+        postUploadActionErrorMessage="post upload action error"
+        id="file-input-test"
+        labelId="file-input-label"
+      />,
+    );
+    const input = await screen.findByTestId("file-input-input");
+    await userEvent.upload(
+      input,
+      new File(["test content"], "test.txt", {
+        type: "text/plain",
+      }),
+    );
+    screen.debug();
+    const trussworksPreviewImages = screen.queryByTestId(
+      "file-input-preview-image",
+    );
+    const trussworksPreviews = screen.queryByTestId("file-input-preview");
+    expect(trussworksPreviewImages).not.toBeVisible();
+    expect(trussworksPreviews).not.toBeVisible();
   });
 });

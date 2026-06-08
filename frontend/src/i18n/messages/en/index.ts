@@ -2465,5 +2465,9 @@ export const messages = {
       savedOn: "Saved on",
       delete: "Delete",
     },
+    statusDisplay: {
+      cancel: "Cancel",
+      dismiss: "Dismiss",
+    },
   },
 };

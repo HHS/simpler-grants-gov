@@ -6,7 +6,7 @@ import {
   UploadFileMetadata,
 } from "src/types/fileUploadTypes";
 
-import { useCallback, useRef, useState } from "react";
+import { ChangeEvent, useCallback, useRef, useState } from "react";
 import { FileInput, FileInputRef } from "@trussworks/react-uswds";
 
 import { FileInputExistingFiles } from "./FileInputExistingFiles";
@@ -32,22 +32,18 @@ type SimplerFileInputProps = {
 const UPLOAD_ENDPOINT = "something_fake_for_now";
 
 /*
-things this needs to do
+  things this needs to do
 
-* show the custom progress indicator [x]
-* show the correct progress based on what the API sends back [x]
-* call onError on error [x]
-* call onSuccess on success [x]
-* call onStart on start [x]
-* call postUploadAction on successful upload [x]
-
-* hide the native progress indicator [x]
-
-* display existing files as expected [x]
-
-* cancel a download
-
-* delete a previously uploaded file [x]
+  * show the custom progress indicator [x]
+  * show the correct progress based on what the API sends back [x]
+  * call onError on error [x]
+  * call onSuccess on success [x]
+  * call onStart on start [x]
+  * call postUploadAction on successful upload [x]
+  * hide the native progress indicator [x]
+  * display existing files as expected [x]
+  * cancel a download [x]
+  * delete a previously uploaded file [x]
 
 */
 
@@ -78,6 +74,24 @@ export const SimplerFileInput = ({
     { status: FileUploadProcessStatus | undefined; message: string } | undefined
   >();
   const [currentStatus, setCurrentStatus] = useState<FileUploadProcessStatus>();
+  const [fileName, setFileName] = useState<string>();
+  const [uploadController, setUploadController] = useState<AbortController>();
+  const [postUploadController, setPostUploadController] =
+    useState<AbortController>();
+  const [responseReader, setResponseReader] =
+    useState<ReadableStreamDefaultReader>();
+
+  const handleCancel = async () => {
+    setCurrentStatus(undefined);
+    uploadController?.abort();
+    postUploadController?.abort();
+    await responseReader?.cancel();
+  };
+
+  const handleDismiss = () => {
+    setCurrentStatus(undefined);
+    setUploadError(undefined);
+  };
 
   const handleError = useCallback(
     (e: Error) => {
@@ -110,8 +124,15 @@ export const SimplerFileInput = ({
   );
 
   const onFileSelect = useCallback(
-    (_changeEvent: unknown) => {
+    (changeEvent: ChangeEvent<HTMLInputElement>) => {
+      const fileName = changeEvent.target.files?.length
+        ? changeEvent.target.files[0].name
+        : "No Filename!";
+      const uploadAbortController = new AbortController();
+      setFileName(fileName);
       setCurrentStatus("queued");
+      setUploadController(uploadAbortController);
+
       try {
         onStart();
       } catch (e) {
@@ -120,26 +141,39 @@ export const SimplerFileInput = ({
       }
       // start upload
       return (
-        clientFetch(UPLOAD_ENDPOINT)
+        clientFetch(UPLOAD_ENDPOINT, { signal: uploadAbortController.signal })
           // process streaming response
           .then((response: Response) => {
             const reader =
               response.body?.getReader() as ReadableStreamDefaultReader;
+            setResponseReader(reader);
             return readResponseStream(reader);
           })
           // run post upload action
           .then((fileId) => {
+            const postUploadAbortController = new AbortController();
+            setUploadController(undefined);
+            setResponseReader(undefined);
             setCurrentStatus("post-upload");
-            return postUploadAction(fileId);
+            setPostUploadController(postUploadAbortController);
+            return postUploadAction(fileId, postUploadAbortController.signal);
           })
           // run complete actions
           .then((postUploadResult: unknown) => {
+            setPostUploadController(undefined);
+            // complete status will persist until refresh or form change
             setCurrentStatus("complete");
             onSuccess(postUploadResult);
             return;
           })
           .catch((e: Error) => {
             handleError(e);
+          })
+          .finally(() => {
+            setFileName("");
+            setPostUploadController(undefined);
+            setUploadController(undefined);
+            setResponseReader(undefined);
           })
       );
     },
@@ -153,7 +187,6 @@ export const SimplerFileInput = ({
     ],
   );
 
-  console.log("!!!", currentStatus);
   return (
     <>
       <FileInput
@@ -171,6 +204,9 @@ export const SimplerFileInput = ({
       />
       {currentStatus ? (
         <FileInputStatusDisplay
+          fileName={fileName || ""}
+          onCancel={() => void handleCancel()}
+          onDismiss={handleDismiss}
           error={!!uploadError}
           status={currentStatus}
           postUploadActionProgressMessage={postUploadActionProgressMessage}
