@@ -1,7 +1,7 @@
 import clsx from "clsx";
 
-import Spinner from "./core/Spinner";
-import { USWDSIcon } from "./core/USWDSIcon";
+import Spinner from "src/components/core/Spinner";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 interface SaveIconProps {
   onClick?: () => void;

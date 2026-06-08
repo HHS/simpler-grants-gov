@@ -25,7 +25,7 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import { ConditionalFormActionError } from "src/components/ConditionalFormActionError";
+import { ConditionalFormActionError } from "src/components/core/forms/ConditionalFormActionError";
 import { RequiredFieldIndicator } from "src/components/core/RequiredFieldIndicator";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 

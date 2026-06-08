@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import SaveButton from "src/components/SaveButton";
+import SaveButton from "src/components/saved-opportunities/SaveButton";
 
 const SaveButtonProps = {
   buttonClick: jest.fn(),

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { CompetitionForm } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/CompetitionForm";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 
@@ -6,7 +7,6 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
-import { CompetitionForm } from "src/components/opportunities/competition/CompetitionForm";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;

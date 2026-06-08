@@ -1,4 +1,4 @@
-import Layout from "src/components/Layout";
+import Layout from "src/components/core/Layout";
 
 const meta = {
   component: Layout,
