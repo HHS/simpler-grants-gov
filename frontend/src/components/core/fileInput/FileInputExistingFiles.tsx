@@ -20,7 +20,7 @@ export const FileInputExistingFiles = ({
       const fileSizeDisplay = existingFile.fileSize
         ? `${formatFileSize(existingFile.fileSize)} | `
         : "";
-      const timestampDisplay = `${t("savedOn")} ${formatDate(existingFile.updatedAt)}`;
+      const timestampDisplay = `${t("savedOn")} ${formatDate(existingFile.updatedAt.toString())}`;
       return (
         <GridContainer key={existingFile.id}>
           <Grid col={2}>

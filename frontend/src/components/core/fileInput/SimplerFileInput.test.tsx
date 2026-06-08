@@ -74,7 +74,7 @@ describe("SimplerFileInput", () => {
     jest.resetAllMocks();
   });
   describe("Status display", () => {
-    it("does not display a custom progress indicator when no files have been uploaded", async () => {
+    it("does not display a custom progress indicator when no files have been uploaded", () => {
       render(
         <SimplerFileInput
           onDelete={() => Promise.resolve()}

@@ -9,7 +9,9 @@ jest.mock("src/utils/fileUtils/formatFileSizeUtil", () => ({
 
 jest.mock("src/utils/dateUtil", () => ({
   // for ease of testing, this will take the epoch ms, and return the year
-  formatDate: (dateMs: number) => new Date(dateMs).getFullYear(),
+  formatDate: (dateMs: number | string) => {
+    return new Date(Number(dateMs)).getFullYear();
+  },
 }));
 
 describe("FileInputExistingFiles", () => {
@@ -33,14 +35,14 @@ describe("FileInputExistingFiles", () => {
             fileName: "file name 1",
             fileSize: 1,
             mimeType: "file",
-            updatedAt: dateOne.getTime().toString(),
+            updatedAt: dateOne.getTime(),
           },
           {
             id: "2",
             fileName: "file name 2",
             fileSize: 2,
             mimeType: "file",
-            updatedAt: dateTwo.getTime().toString(),
+            updatedAt: dateTwo.getTime(),
           },
         ]}
         onDelete={jest.fn()}
