@@ -2219,14 +2219,10 @@ export const messages = {
           heading: "Recommended awards",
           editDescription:
             "Select applications and use the drop-down box to apply your recommendation for the selected group.",
-          viewDescription:
-            "Applications recommended for funding on this award recommendation.",
           editLink: "Edit recommended awards",
         },
         exceptions: {
           heading: "Exceptions to selection method",
-          viewDescription:
-            "Applications with exceptions to the general selection method.",
         },
       },
     },

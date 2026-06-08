@@ -44,7 +44,6 @@ type SubmissionTableProps = {
   awardRecommendationId: string;
   filters: AwardRecommendationSubmissionListFilters;
   heading: string;
-  description: string;
 };
 
 const getSubmissionDetailHref = (
@@ -118,7 +117,6 @@ const SubmissionTable = ({
   awardRecommendationId,
   filters,
   heading,
-  description,
 }: SubmissionTableProps) => {
   const t = useTranslations("AwardRecommendation.recommendations.submissions");
   const [submissions, setSubmissions] = useState<
@@ -227,9 +225,6 @@ const SubmissionTable = ({
   return (
     <div className="margin-top-4 margin-bottom-4">
       <h3 className="margin-top-0 margin-bottom-2 font-sans-md">{heading}</h3>
-      <p className="text-base-dark margin-top-0 margin-bottom-3">
-        {description}
-      </p>
       {apiError && (
         <SimplerAlert
           alertClick={() => setApiError(false)}
@@ -380,7 +375,6 @@ export const RecommendationSubmissionsSection = ({
           awardRecommendationId={awardRecommendationId}
           filters={recommendedFilters}
           heading={t("recommendedAwards.heading")}
-          description={t("recommendedAwards.viewDescription")}
         />
       )}
       {showExceptions && (
@@ -388,7 +382,6 @@ export const RecommendationSubmissionsSection = ({
           awardRecommendationId={awardRecommendationId}
           filters={exceptionsFilters}
           heading={t("exceptions.heading")}
-          description={t("exceptions.viewDescription")}
         />
       )}
     </div>
