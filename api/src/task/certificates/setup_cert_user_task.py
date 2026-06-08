@@ -105,7 +105,7 @@ class SetupCertUserTask(Task):
             agency=agency,
             cert_id=tcertificate.currentcertid,
             expiration_date=valid_expiration_date,
-            serial_number=tcertificate.serial_num,
+            serial_number=tcertificate.serial_num.lower() if tcertificate.serial_num else None,
             user=user,
         )
         self.db_session.add(legacy_certificate)
