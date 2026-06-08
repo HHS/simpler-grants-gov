@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import TopLevelError from "src/app/[locale]/(base)/error/page";
 import OpportunityEditForm from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/_components/OpportunityEditForm";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
@@ -22,29 +22,6 @@ type PageProps = {
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string; locale: string }>;
-}): Promise<Metadata> {
-  const { id, locale } = await params;
-  const t = await getTranslations({ locale });
-  let title = t("OpportunityEdit.pageTitle");
-  try {
-    const session = await getSession();
-    if (session?.token) {
-      const { data } = await getOpportunityForGrantor(id);
-      title = `${t("OpportunityEdit.pageTitle")} - ${data.opportunity_title || ""}`;
-    }
-  } catch {
-    // fall back to static title
-  }
-  return {
-    title,
-    description: t("OpportunityEdit.metaDescription"),
-  };
-}
-
 async function OpportunityEditPage({ params, searchParams }: PageProps) {
   const { id, locale } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
@@ -54,7 +31,8 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
 
   const session = await getSession();
   if (!session || !session.token) {
-    return <UnauthorizedMessage />;
+    console.error("Invalid session", session);
+    return <TopLevelError />;
   }
 
   // TODO(#8601): Replace this fail-closed placeholder with a real grantor authorization
