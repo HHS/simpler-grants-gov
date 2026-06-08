@@ -430,6 +430,28 @@ def test_shared_common_v1_budget_monetary_total_non_negative_rejects_negative(va
     assert validation_issues[0].field == "$.my_field"
 
 
+@pytest.mark.parametrize(
+    "value",
+    ["not-money", "1.1", "10000.000", "+12", "1e12", "3.", "4.x0"],
+)
+def test_shared_common_v1_budget_monetary_total_non_negative_invalid_pattern(value):
+    schema = build_schema(COMMON_SHARED_V1, "budget_monetary_total_non_negative")
+
+    validation_issues = validate_json_schema({"my_field": value}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "pattern"
+    assert validation_issues[0].field == "$.my_field"
+
+
+def test_shared_common_v1_budget_monetary_total_non_negative_min_length():
+    schema = build_schema(COMMON_SHARED_V1, "budget_monetary_total_non_negative")
+
+    validation_issues = validate_json_schema({"my_field": ""}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "minLength"
+    assert validation_issues[0].field == "$.my_field"
+
+
 @pytest.mark.parametrize("value", ["100000000000000", "123456789000.00"])
 def test_shared_common_v1_budget_monetary_total_non_negative_max_length(value):
     schema = build_schema(COMMON_SHARED_V1, "budget_monetary_total_non_negative")
