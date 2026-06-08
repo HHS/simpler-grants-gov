@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { CreateRecommendationContent } from "src/app/[locale]/(base)/award-recommendation/create/_components/CreateRecommendationContent";
+import CreateAwardRecommendationHeroContent from "src/components/award-recommendation/CreateAwardRecommendationHero";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 

@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 
 export default async function CreateAwardRecommendationHeroContent() {
   const t = await getTranslations("AwardRecommendation");

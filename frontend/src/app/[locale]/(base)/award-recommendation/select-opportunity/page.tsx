@@ -35,10 +35,6 @@ async function SelectOpportunityPageContent({
 }: SelectOpportunityPageProps) {
   await params;
 
-  const t = await getTranslations(
-    "AwardRecommendationSelectFundingOpportunity",
-  );
-
   return (
     <>
       <CreateAwardRecommendationHeroContent />
