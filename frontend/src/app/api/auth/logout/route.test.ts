@@ -39,12 +39,13 @@ describe("/api/auth/logout POST handler", () => {
 
     expect(postLogoutMock).toHaveBeenCalledTimes(0);
     expect(response.status).toEqual(401);
+    expect(clearCorrelationIdMock).toHaveBeenCalledTimes(1);
     expect(clearCorrelationIdMock).toHaveBeenCalledWith(
-      "Clearing correlation id due to error on logout",
+      "Clearing correlation_id due to logout API error: Expired token or no active session to logout",
     );
     const json = (await response.json()) as { message: string };
     expect(json.message).toEqual(
-      "Error logging out: No active session to logout",
+      "Error logging out: Expired token or no active session to logout",
     );
   });
   it("calls postLogout with token from session", async () => {
@@ -66,8 +67,9 @@ describe("/api/auth/logout POST handler", () => {
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
     expect(response.status).toEqual(500);
+    expect(clearCorrelationIdMock).toHaveBeenCalledTimes(1);
     expect(clearCorrelationIdMock).toHaveBeenCalledWith(
-      "Clearing correlation id due to error on logout",
+      "Clearing correlation_id due to logout API error: the API threw this error",
     );
     const json = (await response.json()) as { message: string };
     expect(json.message).toEqual("Error logging out: the API threw this error");
@@ -81,8 +83,9 @@ describe("/api/auth/logout POST handler", () => {
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
     expect(response.status).toEqual(400);
+    expect(clearCorrelationIdMock).toHaveBeenCalledTimes(1);
     expect(clearCorrelationIdMock).toHaveBeenCalledWith(
-      "Clearing correlation id due to error on logout",
+      "Clearing correlation_id due to logout API error: No logout response from API",
     );
     const json = (await response.json()) as { message: string };
     // const message = JSON.parse(json) as FrontendErrorDetails;
@@ -108,7 +111,7 @@ describe("/api/auth/logout POST handler", () => {
 
     expect(clearCorrelationIdMock).toHaveBeenCalledTimes(1);
     expect(clearCorrelationIdMock).toHaveBeenCalledWith(
-      "Clearing correlation id on logout",
+      "Clearing correlation_id on logout",
     );
   });
   it("calls deleteSession if token expired", async () => {
@@ -125,7 +128,7 @@ describe("/api/auth/logout POST handler", () => {
     expect(deleteSessionMock).toHaveBeenCalledTimes(1);
     expect(clearCorrelationIdMock).toHaveBeenCalledTimes(1);
     expect(clearCorrelationIdMock).toHaveBeenCalledWith(
-      "Clearing correlation id for expired token on logout",
+      "Clearing correlation_id due to logout API error: Token expired",
     );
     const json = (await response.json()) as { message: string };
     expect(json.message).toEqual("session previously expired");

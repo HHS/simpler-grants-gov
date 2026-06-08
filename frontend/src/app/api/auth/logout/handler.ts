@@ -7,10 +7,13 @@ import { postUserLogout } from "src/services/fetch/fetchers/fetchers";
 import { NextResponse } from "next/server";
 
 export async function logoutUser() {
+  let clearCorrelationIdMessage = "Clearing correlation_id on logout";
   try {
     const session = await getSession();
     if (!session || !session.token) {
-      throw new UnauthorizedError("No active session to logout");
+      throw new UnauthorizedError(
+        "Expired token or no active session to logout",
+      );
     }
     // logout on API via /v1/users/token/logout
     const response = await postUserLogout();
@@ -19,28 +22,24 @@ export async function logoutUser() {
     }
     // delete session from current cookies
     await deleteSession();
-    await clearCorrelationId("Clearing correlation id on logout");
     return NextResponse.json({ message: "logout success" });
   } catch (e) {
     const { message, status, cause } = readError(e as Error, 500);
+    clearCorrelationIdMessage = `Clearing correlation_id due to logout API error: ${message}`;
     // if token expired, delete session and return 401
     if (status === 401 && cause?.message === "Token expired") {
       await deleteSession();
-      await clearCorrelationId(
-        "Clearing correlation id for expired token on logout",
-      );
       return NextResponse.json(
         { message: "session previously expired" },
         { status },
       );
     } else {
-      await clearCorrelationId(
-        "Clearing correlation id due to error on logout",
-      );
       return NextResponse.json(
         { message: `Error logging out: ${message}` },
         { status },
       );
     }
+  } finally {
+    await clearCorrelationId(clearCorrelationIdMessage);
   }
 }
