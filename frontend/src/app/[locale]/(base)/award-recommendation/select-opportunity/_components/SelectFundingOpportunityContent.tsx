@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Button } from "@trussworks/react-uswds";
 import { useRouter } from "next/navigation";
+import { Button } from "@trussworks/react-uswds";
 
 export const SelectFundingOpportunityContent = () => {
   const t = useTranslations("AwardRecommendationSelectFundingOpportunity");

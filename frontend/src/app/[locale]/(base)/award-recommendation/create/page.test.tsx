@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-
 import CreateAwardRecommendationPage, {
   generateMetadata,
 } from "src/app/[locale]/(base)/award-recommendation/create/page";
@@ -56,7 +55,9 @@ describe("CreateAwardRecommendationPage", () => {
       screen.getByTestId("create-award-recommendation-hero"),
     ).toBeInTheDocument();
 
-    expect(screen.getByTestId("create-recommendation-content")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("create-recommendation-content"),
+    ).toBeInTheDocument();
   });
 
   it("generates metadata", async () => {

@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-
 import SelectOpportunityPage, {
   generateMetadata,
 } from "src/app/[locale]/(base)/award-recommendation/select-opportunity/page";
