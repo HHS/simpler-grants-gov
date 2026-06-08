@@ -52,20 +52,10 @@ def update_competition(
 
     # Update fields
     competition.competition_title = competition_data["competition_title"]
+    competition.opening_date = competition_data["opening_date"]
     competition.closing_date = competition_data["closing_date"]
     competition.contact_info = competition_data["contact_info"]
     competition.open_to_applicants = set(competition_data["open_to_applicants"])
-
-    # Validate closing_date is after opening_date
-    if (
-        competition.opening_date is not None
-        and competition.closing_date is not None
-        and competition.closing_date < competition.opening_date
-    ):
-        raise_flask_error(
-            422,
-            message="Closing date must be on or after opening date",
-        )
 
     logger.info(
         "Updated competition",

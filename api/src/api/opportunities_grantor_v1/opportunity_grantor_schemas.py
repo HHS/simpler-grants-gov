@@ -673,7 +673,7 @@ class CompetitionCreateRequestSchema(Schema):
             raise ValidationError(
                 [
                     MarshmallowErrorContainer(
-                        ValidationErrorType.INVALID,
+                        ValidationErrorType.INVALID_DATE_ORDER,
                         "Closing date must be on or after opening date",
                     )
                 ]
@@ -695,6 +695,11 @@ class CompetitionUpdateRequestSchema(Schema):
             "description": "The title of the competition",
             "example": "Updated Proposal for Advanced Research",
         },
+    )
+    opening_date = fields.Date(
+        required=True,
+        allow_none=True,
+        metadata={"description": "The opening date of the competition", "example": "2026-04-11"},
     )
     closing_date = fields.Date(
         required=True,
@@ -721,6 +726,20 @@ class CompetitionUpdateRequestSchema(Schema):
             ],
         },
     )
+
+    @validates_schema
+    def validate_dates(self, data: dict, **kwargs: dict) -> None:
+        opening = data.get("opening_date")
+        closing = data.get("closing_date")
+        if opening and closing and closing < opening:
+            raise ValidationError(
+                [
+                    MarshmallowErrorContainer(
+                        ValidationErrorType.INVALID_DATE_ORDER,
+                        "Closing date must be on or after opening date",
+                    )
+                ]
+            )
 
 
 class CompetitionUpdateResponseSchema(AbstractResponseSchema):

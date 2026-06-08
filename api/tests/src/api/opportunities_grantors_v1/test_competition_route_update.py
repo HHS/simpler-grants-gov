@@ -10,11 +10,14 @@ from tests.src.db.models.factories import CompetitionFactory, OpportunityFactory
 
 def create_competition_update_request(
     competition_title="Updated Proposal for Advanced Research",
+    opening_date=None,
     closing_date=None,
     contact_info="Jane Doe\nUpdatedEmail@updated.com",
     open_to_applicants=None,
 ):
     """Create a valid competition update request"""
+    if opening_date is None:
+        opening_date = date.today().isoformat()
     if closing_date is None:
         closing_date = (date.today() + timedelta(days=60)).isoformat()
 
@@ -26,6 +29,7 @@ def create_competition_update_request(
 
     return {
         "competition_title": competition_title,
+        "opening_date": opening_date,
         "closing_date": closing_date,
         "contact_info": contact_info,
         "open_to_applicants": open_to_applicants,
@@ -285,4 +289,8 @@ def test_competition_update_closing_before_opening(client, grantor_auth_data, ex
 
     assert response.status_code == 422
     response_json = response.get_json()
-    assert response_json["message"] == "Closing date must be on or after opening date"
+    assert response_json["message"] == "Validation error"
+    assert any(
+        "closing date must be on or after opening date" in error.get("message", "").lower()
+        for error in response_json.get("errors", [])
+    )
