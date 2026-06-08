@@ -1,15 +1,16 @@
 import { render, screen } from "@testing-library/react";
-import CreateAwardRecommendationPage, {
+import SelectOpportunityPage, {
   generateMetadata,
-} from "src/app/[locale]/(base)/award-recommendation/create/page";
+} from "src/app/[locale]/(base)/award-recommendation/select-opportunity/page";
 
 jest.mock("next-intl/server", () => ({
   getTranslations: jest.fn(() =>
     Promise.resolve((key: string) => {
       const translations: Record<string, string> = {
-        "CreateAwardRecommendation.pageTitle": "Create Award Recommendation",
-        "CreateAwardRecommendation.metaDescription":
-          "Create an award recommendation",
+        "AwardRecommendationSelectFundingOpportunity.pageTitle":
+          "Select Funding Opportunity",
+        "AwardRecommendationSelectFundingOpportunity.metaDescription":
+          "Select a funding opportunity for an award recommendation",
       };
 
       return translations[key] ?? key;
@@ -35,18 +36,18 @@ jest.mock(
 );
 
 jest.mock(
-  "src/app/[locale]/(base)/award-recommendation/create/_components/CreateRecommendationContent",
+  "src/app/[locale]/(base)/award-recommendation/select-opportunity/_components/SelectFundingOpportunityContent",
   () => ({
-    CreateRecommendationContent: () => (
-      <div data-testid="create-recommendation-content" />
+    SelectFundingOpportunityContent: () => (
+      <div data-testid="select-funding-opportunity-content" />
     ),
   }),
 );
 
-describe("CreateAwardRecommendationPage", () => {
-  it("renders the hero and create recommendation content", async () => {
+describe("SelectOpportunityPage", () => {
+  it("renders the hero and select funding opportunity content", async () => {
     render(
-      await CreateAwardRecommendationPage({
+      await SelectOpportunityPage({
         params: Promise.resolve({ locale: "en" }),
       }),
     );
@@ -56,7 +57,7 @@ describe("CreateAwardRecommendationPage", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByTestId("create-recommendation-content"),
+      screen.getByTestId("select-funding-opportunity-content"),
     ).toBeInTheDocument();
   });
 
@@ -66,8 +67,8 @@ describe("CreateAwardRecommendationPage", () => {
     });
 
     expect(metadata).toEqual({
-      title: "Create Award Recommendation",
-      description: "Create an award recommendation",
+      title: "Select Funding Opportunity",
+      description: "Select a funding opportunity for an award recommendation",
     });
   });
 });

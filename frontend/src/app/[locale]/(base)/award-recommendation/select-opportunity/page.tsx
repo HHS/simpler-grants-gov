@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { CreateRecommendationContent } from "src/app/[locale]/(base)/award-recommendation/create/_components/CreateRecommendationContent";
+import { SelectFundingOpportunityContent } from "src/app/[locale]/(base)/award-recommendation/select-opportunity/_components/SelectFundingOpportunityContent";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -17,19 +17,21 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("CreateAwardRecommendation.pageTitle"),
-    description: t("CreateAwardRecommendation.metaDescription"),
+    title: t("AwardRecommendationSelectFundingOpportunity.pageTitle"),
+    description: t(
+      "AwardRecommendationSelectFundingOpportunity.metaDescription",
+    ),
   };
   return meta;
 }
 
-export type CreateAwardRecommendationPageProps = {
+export type SelectOpportunityPageProps = {
   params: Promise<{ locale: string }>;
 } & WithFeatureFlagProps;
 
-async function CreateAwardRecommendationPageContent({
+async function SelectOpportunityPageContent({
   params,
-}: CreateAwardRecommendationPageProps) {
+}: SelectOpportunityPageProps) {
   await params;
 
   return (
@@ -37,14 +39,14 @@ async function CreateAwardRecommendationPageContent({
       <CreateAwardRecommendationHeroContent />
 
       <GridContainer>
-        <CreateRecommendationContent />
+        <SelectFundingOpportunityContent />
       </GridContainer>
     </>
   );
 }
 
-export default withFeatureFlag<CreateAwardRecommendationPageProps, never>(
-  CreateAwardRecommendationPageContent,
+export default withFeatureFlag<SelectOpportunityPageProps, never>(
+  SelectOpportunityPageContent,
   "awardRecommendationOff",
   () => redirect("/maintenance"),
 );
