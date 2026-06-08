@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import RadioWidget from "src/components/applyForm/widgets/RadioWidget";
+import RadioWidget from "src/components/apply-form/widgets/RadioWidget";
 
 const WidgetProps = {
   id: "test",

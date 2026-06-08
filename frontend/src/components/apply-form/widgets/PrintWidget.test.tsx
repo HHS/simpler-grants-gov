@@ -1,7 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
 
-import PrintWidget from "src/components/applyForm/widgets/PrintWidget";
+import PrintWidget from "src/components/apply-form/widgets/PrintWidget";
 
 describe("PrintWidget", () => {
   const defaultProps = {

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { FieldsetWidget } from "src/components/applyForm/widgets/FieldsetWidget";
+import { FieldsetWidget } from "src/components/apply-form/widgets/FieldsetWidget";
 
 describe("FieldsetWidget", () => {
   it("renders the expected content and title", () => {

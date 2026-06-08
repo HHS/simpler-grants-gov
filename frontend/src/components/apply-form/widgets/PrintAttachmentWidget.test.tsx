@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 
-import PrintAttachmentWidget from "src/components/applyForm/widgets/PrintAttachmentWidget";
+import PrintAttachmentWidget from "src/components/apply-form/widgets/PrintAttachmentWidget";
 
 type UseApplicationAttachmentsResult = {
   attachments: Attachment[] | null;

@@ -8,9 +8,9 @@ import {
 
 import React, { JSX } from "react";
 
-import CheckboxWidget from "src/components/applyForm/widgets/CheckboxWidget";
-import TextAreaWidget from "src/components/applyForm/widgets/TextAreaWidget";
-import TextWidget from "src/components/applyForm/widgets/TextWidget";
+import CheckboxWidget from "src/components/apply-form/widgets/CheckboxWidget";
+import TextAreaWidget from "src/components/apply-form/widgets/TextAreaWidget";
+import TextWidget from "src/components/apply-form/widgets/TextWidget";
 import { getBudgetErrors } from "./budgetErrorLabels";
 import { getStringOrUndefined, isRecord } from "./budgetValueGuards";
 
