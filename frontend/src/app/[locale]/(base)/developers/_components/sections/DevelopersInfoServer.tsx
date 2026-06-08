@@ -4,7 +4,7 @@ import { UswdsIconNames } from "src/types/generalTypes";
 import { useMessages, useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
 
-import IconInfo from "src/components/homepage/IconInfoSection";
+import IconInfo from "src/components/core/IconInfoSection";
 
 interface DevelopersInfoServerProps {
   children?: React.ReactNode;
