@@ -308,16 +308,9 @@ def test_write_debug_data_if_s2s_client_throws_specific_errors(
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     mock_s2s_client.side_effect = [Exception, SOAPInvalidEnvelope, SOAPOperationNotSupported]
     agency = AgencyFactory.create()
-    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
-    competition = CompetitionFactory(
-        opportunity=opportunity,
-    )
     privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
     user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
-    application = ApplicationFactory.create(
-        competition=competition, application_status=ApplicationStatus.ACCEPTED
-    )
-    submission = ApplicationSubmissionFactory.create(application=application)
+    submission = ApplicationSubmissionFactory.create()
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
     mock_data = (
         "<soapenv:Envelope "
@@ -341,23 +334,15 @@ def test_write_debug_data_if_s2s_client_throws_specific_errors(
     )
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
-        response = client.post(
-            full_path,
-            data=mock_data,
-            headers={
-                "Use-Simpler-Override": "1",
-                MTLS_CERT_HEADER_KEY: mtls_cert,
-            },
-        )
-        assert response.status_code == 500
-        response = client.post(
-            full_path,
-            data=mock_data,
-            headers={
-                "Use-Simpler-Override": "1",
-                MTLS_CERT_HEADER_KEY: mtls_cert,
-            },
-        )
+        for _ in range(0, 3):
+            response = client.post(
+                full_path,
+                data=mock_data,
+                headers={
+                    "Use-Simpler-Override": "1",
+                    MTLS_CERT_HEADER_KEY: mtls_cert,
+                },
+            )
         assert response.status_code == 500
         records = [
             r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
