@@ -30,7 +30,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
 
   const session = await getSession();
   if (!session || !session.token) {
-    console.error("User is not signed in.");
     return; // the AuthenticationGate in layout.tsx will take care of this
   }
 
