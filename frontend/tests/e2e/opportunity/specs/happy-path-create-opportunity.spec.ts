@@ -208,7 +208,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
         message: 'Waiting for "posted" opportunity row to appear on list',
       });
 
-      // And "Edit", "Copy", and "Delete" links should not appear for "posted" rows.
+      // And link visibility should match the expected "posted" actions behavior.
       await assertActionsColumnLinksByStatus(matchingRow, {
         status: "posted",
         actionLinkVisibility: {

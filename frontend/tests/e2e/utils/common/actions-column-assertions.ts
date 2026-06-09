@@ -1,5 +1,5 @@
 // actions-column-assertions.ts
-// Asserts expected Actions-column links by row status on opportunities list views.
+// Asserts expected Actions-column links by row status on list views.
 // Usage: import { assertActionsColumnLinksByStatus } from "tests/e2e/utils/common/actions-column-assertions";
 
 import { expect, type Locator } from "@playwright/test";
@@ -11,8 +11,6 @@ type StatusActionRule = {
   visible?: string[];
   hidden?: string[];
 };
-
-const DEFAULT_ACTION_LINKS = ["Edit", "Copy", "Delete"];
 
 export const assertActionsColumnLinksByStatus = async (
   row: Locator,
@@ -57,7 +55,13 @@ export const assertActionsColumnLinksByStatus = async (
     return;
   }
 
-  const actionLinks = options.actionLinks ?? DEFAULT_ACTION_LINKS;
+  if (!options.actionLinks && !options.statusActionRules) {
+    throw new Error(
+      "No action links provided. Pass actionLinks or statusActionRules, or use actionLinkVisibility.",
+    );
+  }
+
+  const actionLinks = options.actionLinks ?? [];
   const defaultStatusActionRules: Record<string, StatusActionRule> = {
     posted: {
       hidden: actionLinks,
