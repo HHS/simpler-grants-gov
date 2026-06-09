@@ -13,7 +13,7 @@ import { Alert, GridContainer } from "@trussworks/react-uswds";
 
 import { AuthenticationGate } from "src/components/core/AuthenticationGate";
 import Breadcrumbs from "src/components/core/Breadcrumbs";
-import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
+import { UserOrganizationsList } from "src/components/organizations/UserOrganizationsList";
 
 const OrganizationsPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Organizations");

@@ -12,8 +12,8 @@ as a new property.
 
 from typing import Any
 
-from src.api.schemas.extension import Schema, fields
-from src.api.schemas.extension import validators as validate
+from grants_shared.api.schemas.extension import Schema, fields
+from grants_shared.api.schemas.extension import validators as validate
 
 
 class CustomFieldType(fields.String):

@@ -1,5 +1,9 @@
 from datetime import timedelta
 
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.search_schema import BoolSearchSchemaBuilder
 from marshmallow import ValidationError, validates_schema
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
@@ -8,10 +12,7 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySummaryV1Schema,
     OpportunityV1Schema,
 )
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import BoolSearchSchemaBuilder
+from src.api.schemas.response_schema import PaginationMixinSchema
 from src.constants.lookup_constants import (
     ApplicantType,
     CompetitionOpenToApplicant,
@@ -624,8 +625,8 @@ class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunityGrantorSchema())
 
 
-class CompetitionCreateRequestSchema(Schema):
-    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ request"""
+class CompetitionRequestBaseSchema(Schema):
+    """Base schema for competition create/update requests"""
 
     competition_title = fields.String(
         required=True,
@@ -646,6 +647,7 @@ class CompetitionCreateRequestSchema(Schema):
     )
     contact_info = fields.String(
         required=True,
+        allow_none=True,
         metadata={
             "description": "Contact information for the competition",
             "example": "Bob Smith\nFakeMail@fake.com",
@@ -664,8 +666,40 @@ class CompetitionCreateRequestSchema(Schema):
         },
     )
 
+    @validates_schema
+    def validate_dates(self, data: dict, **kwargs: dict) -> None:
+        opening = data.get("opening_date")
+        closing = data.get("closing_date")
+        if opening and closing and closing < opening:
+            raise ValidationError(
+                [
+                    MarshmallowErrorContainer(
+                        ValidationErrorType.INVALID_DATE_ORDER,
+                        "Closing date must be on or after opening date",
+                    )
+                ]
+            )
+
+
+class CompetitionCreateRequestSchema(CompetitionRequestBaseSchema):
+    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ request"""
+
+    pass
+
 
 class CompetitionCreateResponseSchema(AbstractResponseSchema):
     """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ response"""
+
+    data = fields.Nested(CompetitionAlphaSchema())
+
+
+class CompetitionUpdateRequestSchema(CompetitionRequestBaseSchema):
+    """Schema for PUT /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id request"""
+
+    pass
+
+
+class CompetitionUpdateResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id response"""
 
     data = fields.Nested(CompetitionAlphaSchema())

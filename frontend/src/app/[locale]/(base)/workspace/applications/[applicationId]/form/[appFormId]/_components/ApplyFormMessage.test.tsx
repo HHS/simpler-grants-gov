@@ -53,7 +53,7 @@ describe("getWarningLinkText", () => {
     };
 
     expect(getWarningLinkText(warning)).toBe(
-      "First Name is required (Contact People Test, Entry 2)",
+      "First Name in Contact People Test, Entry 2 is required",
     );
   });
 
@@ -178,13 +178,13 @@ describe("ApplyFormMessage", () => {
 
     expect(
       screen.getByRole("link", {
-        name: "First Name is required (Contact People Test, Entry 2)",
+        name: "First Name in Contact People Test, Entry 2 is required",
       }),
     ).toHaveAttribute("href", "#contact_people_test[1]--first_name");
 
     expect(
       screen.getByRole("link", {
-        name: "First Name is required (Contact People Test, Entry 3)",
+        name: "First Name in Contact People Test, Entry 3 is required",
       }),
     ).toHaveAttribute("href", "#contact_people_test[2]--first_name");
   });

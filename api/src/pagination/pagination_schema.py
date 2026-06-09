@@ -1,8 +1,8 @@
 from typing import Any
 
+from grants_shared.api.schemas.extension import Schema, fields, validators
 from marshmallow import pre_load
 
-from src.api.schemas.extension import Schema, fields, validators
 from src.pagination.pagination_models import SortDirection
 
 

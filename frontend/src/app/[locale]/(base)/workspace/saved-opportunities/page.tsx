@@ -1,3 +1,6 @@
+import { SavedOpportunitiesController } from "src/app/[locale]/(base)/workspace/saved-opportunities/_components/SavedOpportunitiesController";
+import SavedOpportunityOwnershipFilter from "src/app/[locale]/(base)/workspace/saved-opportunities/_components/SavedOpportunityOwnershipFilter";
+import SavedOpportunityStatusFilter from "src/app/[locale]/(base)/workspace/saved-opportunities/_components/SavedOpportunityStatusFilter";
 import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
@@ -18,9 +21,6 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/core/Breadcrumbs";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
-import { SavedOpportunitiesController } from "src/components/saved-opportunities/SavedOpportunitiesController";
-import SavedOpportunityOwnershipFilter from "src/components/saved-opportunities/SavedOpportunityOwnershipFilter";
-import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

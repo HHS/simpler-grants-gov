@@ -2063,6 +2063,7 @@ export const messages = {
       "Edit application submission details",
     pageHeading: "Award Recommendations",
     heroTitle: "Award Rec #",
+    createHeroTitle: "Create recommendation",
     datePrepared: "Date prepared",
     status: "Status",
     onThisPage: "On this page",
@@ -2392,5 +2393,13 @@ export const messages = {
     subAgency: "Sub-agency:",
     draft: "Draft",
     lastUpdated: "Last updated:",
+  },
+  AwardRecommendationSelectFundingOpportunity: {
+    pageTitle: "Select funding opportunity | Simpler.Grants.gov",
+    pageHeading: "Award Recommendations",
+    metaDescription:
+      "Select a funding opportunity for your award recommendation",
+    whichFundingOpportunity: "Which funding opportunity is this for?",
+    cancelButtonText: "Cancel",
   },
 };

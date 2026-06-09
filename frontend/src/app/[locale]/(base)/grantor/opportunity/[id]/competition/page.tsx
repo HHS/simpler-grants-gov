@@ -9,8 +9,8 @@ import { notFound, redirect } from "next/navigation";
 
 import { UnauthenticatedMessage } from "src/components/core/UnauthenticatedMessage";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
-import { CompetitionForm } from "src/components/opportunities/competition/CompetitionForm";
-import { OpportunityDetailsHeader } from "src/components/opportunities/competition/OpportunityDetailsHeader";
+import { CompetitionForm } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/CompetitionForm";
+import { OpportunityDetailsHeader } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/OpportunityDetailsHeader";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;

@@ -81,7 +81,7 @@ A mock Oauth2 server is defined and managed in the API's [docker-compose.yml](..
 
 Most configuration options are managed by environment variables.
 
-Environment variables for local development are stored in the [local.env](../../api/local.env) file. This file is automatically loaded when running. If running within Docker, this file is specified as an `env_file` in the [docker-compose](../../docker-compose.yml) file, and loaded [by a script](../../api/src/util/local.py) automatically when running most other components outside the container.
+Environment variables for local development are stored in the [local.env](../../api/local.env) file. This file is automatically loaded when running. If running within Docker, this file is specified as an `env_file` in the [docker-compose](../../docker-compose.yml) file, and loaded [by a script](../../backend/grants_shared/src/grants_shared/util/local.py) automatically when running most other components outside the container.
 
 Any environment variables specified directly in the [docker-compose](../../docker-compose.yml) file will take precedent over those specified in the [local.env](../../api/local.env) file.
 
