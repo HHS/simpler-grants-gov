@@ -1,7 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { UiSchema } from "src/types/applyForm/types";
+import sflllSchema from "src/utils/applyForm/sflll.mock.json";
 
-import sflllSchema from "src/components/applyForm/sflll.mock.json";
 import {
   addPrintWidgetToFields,
   buildWarningTree,

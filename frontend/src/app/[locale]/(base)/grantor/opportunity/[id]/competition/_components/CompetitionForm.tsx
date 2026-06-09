@@ -1,11 +1,12 @@
 "use client";
 
+import { OpenAndCloseDates } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/OpenAndCloseDates";
+import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
+
 import { useTranslations } from "next-intl";
 import { Button } from "@trussworks/react-uswds";
 
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
-import { OpenAndCloseDates } from "src/components/opportunities/competition/sections/OpenAndCloseDates";
-import { SubmissionSetUp } from "src/components/opportunities/competition/sections/SubmissionSetUp";
 
 export function CompetitionForm() {
   const t = useTranslations("OpportunityCompetition.sections");

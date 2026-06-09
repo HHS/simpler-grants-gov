@@ -7,7 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/core/Breadcrumbs";
+import CreateAwardRecommendationHeroContent from "src/components/award-recommendation/CreateAwardRecommendationHero";
 
 export async function generateMetadata({
   params,
@@ -32,31 +32,9 @@ async function CreateAwardRecommendationPageContent({
 }: CreateAwardRecommendationPageProps) {
   await params;
 
-  const t = await getTranslations("CreateAwardRecommendation");
-
   return (
     <>
-      <div className="bg-white">
-        <GridContainer>
-          <Breadcrumbs
-            breadcrumbList={[
-              { title: "home", path: "/" },
-              {
-                title: "Award Recommendations",
-                path: `/workspace`,
-              },
-              {
-                title: "Create",
-                path: `/award-recommendation/create`,
-              },
-            ]}
-          />
-
-          <h1 className="margin-top-4 margin-bottom-4 font-sans-2xl">
-            {t("pageTitle")}
-          </h1>
-        </GridContainer>
-      </div>
+      <CreateAwardRecommendationHeroContent />
 
       <GridContainer>
         <CreateRecommendationContent />

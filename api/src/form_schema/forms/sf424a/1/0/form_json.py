@@ -493,23 +493,11 @@ FORM_RULE_SCHEMA = {
             }
         },
         # Section A - Total Amount (Column G, Row 5)
-        # IMPORTANT:
-        # Previously this was described as "sum of Column G, Rows 1–4",
-        # but Column G (Rows 1–4) is now user-editable and not a reliable source of truth.
-        #
-        # Therefore, Row 5 must be derived from the underlying structured budget inputs
-        # in budget_summary rather than any precomputed or user-edited totals.
+        # is the sum of (Column G, Rows 1-4)
         "total_amount": {
             "gg_pre_population": {
                 "rule": "sum_monetary",
-                "fields": [
-                    "total_budget_summary.federal_estimated_unobligated_amount",
-                    "total_budget_summary.non_federal_estimated_unobligated_amount",
-                    "total_budget_summary.federal_new_or_revised_amount",
-                    "total_budget_summary.non_federal_new_or_revised_amount",
-                ],
-                # Run after line-item budget_summary values are finalized
-                "order": 2,
+                "fields": ["activity_line_items[*].budget_summary.total_amount"],
             }
         },
     },

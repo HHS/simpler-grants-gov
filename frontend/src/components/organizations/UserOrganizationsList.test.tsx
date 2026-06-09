@@ -5,7 +5,7 @@ import {
   fakeUserPrivilegesResponse,
 } from "src/utils/testing/fixtures";
 
-import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
+import { UserOrganizationsList } from "./UserOrganizationsList";
 
 // Mock the userRoleForOrganization helper so the component renders a predictable role string
 jest.mock("src/utils/userUtils", () => ({
