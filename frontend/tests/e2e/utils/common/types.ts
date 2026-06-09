@@ -25,6 +25,19 @@ export interface FillFieldDefinition {
   useDataAsText?: boolean;
   textExact?: boolean;
   section?: string;
+  /**
+   * Optional override for the testId used when asserting this field in a
+   * read-only/print view context. When present, the loader uses this instead
+   * of `testId` to locate the field in the print view output.
+   * Example: abstract input has testId "textarea" but prints as "project_abstract".
+   */
+  printTestId?: string;
+  /**
+   * Maximum character length for this field, sourced from the form's
+   * FORM_JSON_SCHEMA in api/src/form_schema/forms/. Used by happy-path
+   * test data builders to ensure generated values stay within field limits.
+   */
+  maxLength?: number;
   dependsOn?: {
     field: string;
     value: string | boolean;
