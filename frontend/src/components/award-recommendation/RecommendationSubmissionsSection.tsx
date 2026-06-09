@@ -87,7 +87,7 @@ const RecommendationTypeTag = ({
     case "recommended_for_funding":
       return (
         <span
-          className={`${recommendationTypeTagBaseClass} border-accent-warm-darkest bg-accent-warm-lightest`}
+          className={`${recommendationTypeTagBaseClass} border-info-dark bg-info-lighter`}
         >
           {t("recommended")}
         </span>
