@@ -206,19 +206,27 @@ export const waitForOpportunityRowByStatus = async (
 
   const statusPattern = normalizeOpportunityStatusPattern(status);
 
-  const row = page.locator(rowSelector).filter({
-    has: page.getByRole("link", { name: title, exact: true }),
-  }).first();
+  const row = page
+    .locator(rowSelector)
+    .filter({
+      has: page.getByRole("link", { name: title, exact: true }),
+    })
+    .first();
 
   await expect(row, `${message} (row not found by title)`).toBeVisible({
     timeout: timeoutMs,
   });
 
-  const statusCell = row.locator('td [data-testid^="responsive-data-"][data-testid$="-2"]');
-  await expect.poll(
-    async () => (await statusCell.textContent())?.trim() ?? "",
-    { message, timeout: timeoutMs, intervals: [1000, 2000, 5000] },
-  ).toMatch(statusPattern);
+  const statusCell = row.locator(
+    'td [data-testid^="responsive-data-"][data-testid$="-2"]',
+  );
+  await expect
+    .poll(async () => (await statusCell.textContent())?.trim() ?? "", {
+      message,
+      timeout: timeoutMs,
+      intervals: [1000, 2000, 5000],
+    })
+    .toMatch(statusPattern);
 
   return row;
 };
