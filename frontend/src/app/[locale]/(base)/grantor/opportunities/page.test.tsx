@@ -537,7 +537,7 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("Draft")).toBeVisible();
+      expect(await screen.findByText("draft")).toBeVisible();
       expect(
         await screen.findByRole("link", { name: "actionButtons.edit" }),
       ).toBeVisible();
@@ -561,7 +561,7 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("Draft")).toBeVisible();
+      expect(await screen.findByText("draft")).toBeVisible();
       // this is the span
       expect(screen.getByText("actionButtons.edit")).toBeInTheDocument();
       // the href link should not be displayed
