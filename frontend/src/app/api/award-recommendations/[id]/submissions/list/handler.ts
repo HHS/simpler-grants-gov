@@ -5,7 +5,7 @@ import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 
 import { NextRequest } from "next/server";
 
-export async function getSubmissionsForAwardRecommendation(
+export async function listAwardRecommendationSubmissions(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {

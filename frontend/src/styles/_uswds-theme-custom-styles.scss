@@ -72,7 +72,7 @@ h6 {
 
   &:disabled,
   &[aria-disabled="true"] {
-    color: color("gray-60");
+    color: color("gray-70");
     background-color: color("gray-20");
     border-bottom: 5px solid color("gray-10");
   }
@@ -1564,4 +1564,19 @@ $simpler-switch-transition-easing: ease;
 .award-recommendation-step-connector {
   background-color: #c3e8d8;
   height: calc(100% + 1rem);
+}
+
+// Teal green checkboxes for RisksTable
+.risks-table-checkbox {
+  accent-color: color("mint-50");
+
+  &:checked {
+    background-color: color("mint-50");
+    border-color: color("mint-50");
+  }
+
+  &:focus {
+    outline-color: color("mint-50");
+    box-shadow: 0 0 0 0.25rem rgba(color("mint-50"), 0.25);
+  }
 }

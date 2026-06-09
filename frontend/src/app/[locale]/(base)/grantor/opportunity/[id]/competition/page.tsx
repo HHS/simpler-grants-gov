@@ -1,10 +1,10 @@
-import { Metadata } from "next";
 import { CompetitionForm } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/CompetitionForm";
-import { getSession } from "src/services/auth/session";
+import { OpportunityDetailsHeader } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/OpportunityDetailsHeader";
+import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 
-import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 
@@ -14,31 +14,33 @@ type PageProps = {
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string; locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({
-    locale,
-    namespace: "OpportunityCompetition",
-  });
-  return {
-    title: t("pageTitle"),
-    description: t("metaDescription"),
-  };
-}
-
 async function OpportunityCompetitionPage({ params }: PageProps) {
-  // TODO(#10507): fetch opportunity by id, handle 403 with <UnauthorizedMessage />
-  const { id: _id, locale: _locale } = await params;
-  const session = await getSession();
-  if (!session || !session.token) {
-    return <UnauthorizedMessage />;
+  const { id, locale } = await params;
+
+  let opportunityData;
+  try {
+    const response = await getOpportunityForGrantor(id);
+    opportunityData = response.data;
+  } catch (error) {
+    const status = parseErrorStatus(error as ApiRequestError);
+    if (status === 404) {
+      notFound();
+    }
+    if (status === 403) {
+      return <UnauthorizedMessage />;
+    }
+    throw error;
   }
 
-  return <CompetitionForm />;
+  return (
+    <>
+      <OpportunityDetailsHeader
+        opportunityData={opportunityData}
+        locale={locale}
+      />
+      <CompetitionForm />
+    </>
+  );
 }
 
 export default withFeatureFlag<PageProps, never>(

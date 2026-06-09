@@ -92,6 +92,7 @@ export type AwardRecommendationDetails = {
 export type AwardRecommendationOrganization = {
   organization_id: string;
   organization_name?: string;
+  uei?: string;
 };
 
 export type AwardRecommendationApplication = {

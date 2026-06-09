@@ -2,7 +2,7 @@ import * as fetcherModule from "src/services/fetch/fetchers/awardRecommendationF
 
 import { NextRequest } from "next/server";
 
-import { getSubmissionsForAwardRecommendation } from "./handler";
+import { listAwardRecommendationSubmissions } from "./handler";
 
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher");
 
@@ -47,7 +47,7 @@ const createRequest = (body: Record<string, unknown>) =>
     json: jest.fn().mockResolvedValue(body),
   }) as unknown as NextRequest;
 
-describe("getSubmissionsForAwardRecommendation", () => {
+describe("listAwardRecommendationSubmissions", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -64,7 +64,7 @@ describe("getSubmissionsForAwardRecommendation", () => {
       filters: mockFilters,
     });
     const params = Promise.resolve({ id: "award-id" });
-    const res = await getSubmissionsForAwardRecommendation(req, { params });
+    const res = await listAwardRecommendationSubmissions(req, { params });
     const json = (await res.json()) as {
       data: unknown[];
       pagination_info: unknown;
@@ -85,7 +85,7 @@ describe("getSubmissionsForAwardRecommendation", () => {
       paginationInfo: mockPaginationInfo,
     });
 
-    const res = await getSubmissionsForAwardRecommendation(
+    const res = await listAwardRecommendationSubmissions(
       createRequest({ pagination: mockPagination, filters: exceptionFilters }),
       { params: Promise.resolve({ id: "award-id" }) },
     );
@@ -104,7 +104,7 @@ describe("getSubmissionsForAwardRecommendation", () => {
       paginationInfo: mockPaginationInfo,
     });
 
-    const res = await getSubmissionsForAwardRecommendation(
+    const res = await listAwardRecommendationSubmissions(
       createRequest({ pagination: mockPagination }),
       { params: Promise.resolve({ id: "award-id" }) },
     );
@@ -116,7 +116,7 @@ describe("getSubmissionsForAwardRecommendation", () => {
   });
 
   it("returns 500 when pagination is missing", async () => {
-    const res = await getSubmissionsForAwardRecommendation(createRequest({}), {
+    const res = await listAwardRecommendationSubmissions(createRequest({}), {
       params: Promise.resolve({ id: "award-id" }),
     });
     const json = (await res.json()) as { message: string };
@@ -135,7 +135,7 @@ describe("getSubmissionsForAwardRecommendation", () => {
       fetcherModule.listAwardRecommendationSubmissionsPaginated as jest.Mock
     ).mockRejectedValue(new Error("API failure"));
 
-    const res = await getSubmissionsForAwardRecommendation(
+    const res = await listAwardRecommendationSubmissions(
       createRequest({ pagination: mockPagination }),
       { params: Promise.resolve({ id: "award-id" }) },
     );

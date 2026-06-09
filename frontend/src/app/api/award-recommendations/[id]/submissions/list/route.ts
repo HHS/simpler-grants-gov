@@ -1,7 +1,5 @@
 import { respondWithTraceAndLogs } from "src/utils/apiUtils";
 
-import { getSubmissionsForAwardRecommendation } from "./handler";
+import { listAwardRecommendationSubmissions } from "./handler";
 
-export const POST = respondWithTraceAndLogs(
-  getSubmissionsForAwardRecommendation,
-);
+export const POST = respondWithTraceAndLogs(listAwardRecommendationSubmissions);

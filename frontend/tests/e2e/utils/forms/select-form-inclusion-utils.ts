@@ -44,9 +44,16 @@ export async function selectFormInclusionOption(
   formName: string,
   option: "Yes" | "No" = "Yes",
 ): Promise<void> {
-  const formRow = page.locator("tr", {
-    hasText: buildFlexibleFormNameRegex(formName),
-  });
+  const formRow = page
+    .locator("tr", {
+      hasText: buildFlexibleFormNameRegex(formName),
+    })
+    // Avoid matching history rows that contain the form name but no include radios.
+    .filter({
+      has: page.getByRole("radio", {
+        name: /^Yes$/i,
+      }),
+    });
 
   await expect(formRow).toBeVisible({ timeout: 12000 });
 
