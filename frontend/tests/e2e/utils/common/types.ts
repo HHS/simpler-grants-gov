@@ -1,14 +1,13 @@
 // types.ts
-// Shared contracts for field types, field properties, and E2E handlers.
+// Shared contracts for E2E field definitions, handlers, and form fill config.
 // Usage: import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
 // Usage: import { type FillFormConfig } from "tests/e2e/utils/common/types";
 
 import { Page, TestInfo } from "@playwright/test";
 
-type SharedFieldType = "text" | "checkbox";
-
 export type FieldType =
-  | SharedFieldType
+  | "text"
+  | "checkbox"
   | "textarea"
   | "email"
   | "select"

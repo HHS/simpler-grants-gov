@@ -1,3 +1,7 @@
+// choice-input-handlers.spec.ts
+// Unit-style tests for checkbox/radio handler fallback and state behavior.
+// Usage: npx playwright test tests/e2e/utils/common/choice-input-handlers.spec.ts
+
 import { expect, test, type Page } from "@playwright/test";
 
 import { checkboxHandler } from "./checkbox-handler";

@@ -1,5 +1,5 @@
 // opportunity-pages-fill-data.ts
-// Builds deterministic happy-path data for Opportunity create/publish E2E coverage.
+// Builds deterministic happy-path data for Opportunity create/publish coverage.
 // Usage: import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixtures/opportunity-pages-fill-data";
 
 import { OpportunityFieldValueKey } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";

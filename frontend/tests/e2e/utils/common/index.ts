@@ -1,5 +1,6 @@
 // index.ts
-// Shared common utilities and re-exports for E2E helper modules.
+// Shared re-exports for common E2E helper modules.
+// Usage: import { ... } from "tests/e2e/utils/common";
 import { formatNumberWithCommas } from "./number-formatters";
 
 export { fillTextareaByLabel } from "./text-handler";

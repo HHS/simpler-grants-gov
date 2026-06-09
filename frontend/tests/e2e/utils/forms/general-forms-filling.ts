@@ -1,6 +1,9 @@
+// general-forms-filling.ts
+// Generic form-filling helpers that open forms, fill fields, and save when needed.
+// Usage: import { fillField, fillFormPartial, fillForm } from "tests/e2e/utils/forms/general-forms-filling";
+
 import { Page, TestInfo } from "@playwright/test";
 import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
-// Orchestrates page-field filling by dispatching handlers from each field type and properties.
 import { runSharedFieldFill } from "tests/e2e/utils/common/index";
 import {
   shouldFillField,

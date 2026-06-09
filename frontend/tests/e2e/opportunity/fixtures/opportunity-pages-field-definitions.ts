@@ -1,5 +1,5 @@
 // opportunity-pages-field-definitions.ts
-// Opportunity-page field definitions and mapping utilities for happy-path form filling.
+// Opportunity field definitions and page-field mapping for happy-path filling.
 // Usage: import { buildPageFieldsFromDefinitions } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
 
 import { type FieldType } from "tests/e2e/utils/common/types";

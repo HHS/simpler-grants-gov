@@ -29,9 +29,9 @@ Feature: Opportunity happy path create and publish
 			| Create Opportunity page | Grant selection method    | select     | Discretionary              |
 			| Create Opportunity page | Assistance listing number | text       | 00.000                     |
 		And I click "Save and continue" button
-		Then I should be on the Opportunity edit page
+		Then I should be on the "Edit Opportunity" page
 		And the URL should include "fromCreate=true"
-		And I should see "Opportunity draft started"
+		And I should see "Opportunity draft started" confirmation message
 		And the "Save" button should be enabled
 		And the "Publish" button should be disabled
 		And the "Preview" button should be disabled
@@ -68,7 +68,7 @@ Feature: Opportunity happy path create and publish
 			| Opportunity edit page | Email display text             | text       | Contact Email                              |
 
 		And I click "Save" button
-		Then I should see "Opportunity draft started"
+		Then I should see "Opportunity draft started" confirmation message
 		And I should see the following values
 			| Page Name             | Label                        | Field Type | Value                                                                                     |
 			| Opportunity edit page | Save confirmation message    | text       | Your initial information has been saved. Complete the sections below to finish your opportunity details |
@@ -94,8 +94,8 @@ Feature: Opportunity happy path create and publish
         
 		And I click "Publish" button
 		Then I should be on the "Opportunities List" page
-		And I should see "posted" in the "Status" column for "Title-mm-dd-yyyy-hh-mm-sec"
-		And I should not see Edit, Copy, Delete under Actions column for "Title-mm-dd-yyyy-hh-mm-sec"
+		And I should see "posted" status in the "Status" column for "Title-mm-dd-yyyy-hh-mm-sec"
+		And I should not see "Edit", "Copy", "Delete" under Actions column for "Title-mm-dd-yyyy-hh-mm-sec"
 
 		When I click on "Title-mm-dd-yyyy-hh-mm-sec"
 		Then I should be on the "Title-mm-dd-yyyy-hh-mm-sec" page
