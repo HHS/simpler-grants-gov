@@ -320,7 +320,7 @@ const parseUserPrivileges = (
 const fetchOpportunities = async (agencyId: string, page: number) => {
   const pageRequest: PaginationRequestBody = {
     page_offset: page,
-    page_size: 3,
+    page_size: 25,
     sort_order: [
       {
         order_by: "created_at",
