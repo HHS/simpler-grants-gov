@@ -14,6 +14,7 @@ describe("getNextRoutes", () => {
       "/(base)/award-recommendation/1",
       "/(base)/award-recommendation/1/risks",
       "/(base)/award-recommendation/create",
+      "/(base)/award-recommendation/select-opportunity",
       "/(base)/dev/feature-flags",
       "/(base)/developers/api-dashboard",
       "/(base)/developers",

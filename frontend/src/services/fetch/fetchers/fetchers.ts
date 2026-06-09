@@ -69,6 +69,7 @@ export function requesterForEndpoint({
     const defaultHeaders = await getDefaultHeaders({
       addContentType,
       requiresUserAuthToken: requiresAuth,
+      url,
     });
     const headers = {
       ...defaultHeaders,

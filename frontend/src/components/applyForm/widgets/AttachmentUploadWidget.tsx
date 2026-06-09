@@ -15,7 +15,7 @@ import {
   ModalRef,
 } from "@trussworks/react-uswds";
 
-import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
+import { DeleteAttachmentModal } from "src/components/core/fileInput/DeleteAttachmentModal";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
