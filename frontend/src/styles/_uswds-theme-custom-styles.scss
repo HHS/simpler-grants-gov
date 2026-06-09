@@ -1556,10 +1556,3 @@ $simpler-switch-transition-easing: ease;
   background-color: #c3e8d8;
   height: calc(100% + 1rem);
 }
-
-// Character count: overrides low-contrast USWDS default color("base") on the status
-// message. base-dark (#76766A on white = 4.6:1) meets WCAG AA
-// (verified via WAVE accessibility tool per issue #10053).
-.usa-character-count__status {
-  color: color("base-dark");
-}
