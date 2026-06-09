@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 
 from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import Competition, CompetitionForm, Form
+from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -37,9 +37,7 @@ def _get_opportunity(
                 selectinload(Competition.competition_instructions),
                 selectinload(Competition.opportunity_assistance_listing),
                 selectinload(Competition.link_competition_open_to_applicant),
-                selectinload(Competition.competition_forms)
-                .selectinload(CompetitionForm.form)
-                .selectinload(Form.form_instruction),
+                selectinload(Competition.competition_forms),
             ),
             # Assistance listing number
             selectinload(Opportunity.opportunity_assistance_listings),

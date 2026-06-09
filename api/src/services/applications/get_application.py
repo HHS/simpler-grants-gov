@@ -9,13 +9,7 @@ from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege
-from src.db.models.competition_models import (
-    Application,
-    ApplicationForm,
-    Competition,
-    CompetitionForm,
-    Form,
-)
+from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, User
 from src.services.applications.application_logging import add_application_metadata_to_logs
@@ -43,11 +37,10 @@ def get_application(
             # Load organization and its sam_gov_entity
             selectinload(Application.organization).selectinload(Organization.sam_gov_entity),
             selectinload(Application.organization).selectinload(Organization.organization_users),
-            # Load Application forms through to the form instructions
-            selectinload(Application.application_forms)
-            .selectinload(ApplicationForm.competition_form)
-            .selectinload(CompetitionForm.form)
-            .selectinload(Form.form_instruction),
+            # Load Application forms through to the competition form
+            selectinload(Application.application_forms).selectinload(
+                ApplicationForm.competition_form
+            ),
             # Load application forms app (which is the app we're fetching) to make sure it's connected
             selectinload(Application.application_forms).selectinload(ApplicationForm.application),
             # Load attachments
@@ -56,11 +49,8 @@ def get_application(
             selectinload(Application.application_users)
             .selectinload(ApplicationUser.user)
             .selectinload(User.linked_login_gov_external_user),
-            # Load competition and its forms, instructions, assistance listing, and who can apply
-            selectinload(Application.competition)
-            .selectinload(Competition.competition_forms)
-            .selectinload(CompetitionForm.form)
-            .selectinload(Form.form_instruction),
+            # Load competition and its forms, assistance listing, and who can apply
+            selectinload(Application.competition).selectinload(Competition.competition_forms),
             selectinload(Application.competition).selectinload(
                 Competition.competition_instructions
             ),

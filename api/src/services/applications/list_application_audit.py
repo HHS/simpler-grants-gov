@@ -9,7 +9,7 @@ from sqlalchemy.sql import Select
 
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
-from src.db.models.competition_models import ApplicationAudit, ApplicationForm, CompetitionForm
+from src.db.models.competition_models import ApplicationAudit, ApplicationForm
 from src.db.models.user_models import User
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
@@ -68,10 +68,10 @@ def list_application_audit(
             selectinload(ApplicationAudit.target_user).options(
                 selectinload(User.profile), selectinload(User.linked_login_gov_external_user)
             ),
-            # Preload the application form + competition form + form
-            selectinload(ApplicationAudit.target_application_form)
-            .selectinload(ApplicationForm.competition_form)
-            .selectinload(CompetitionForm.form),
+            # Preload the application form + competition form
+            selectinload(ApplicationAudit.target_application_form).selectinload(
+                ApplicationForm.competition_form
+            ),
             # Preload the attachment
             selectinload(ApplicationAudit.target_attachment),
         )
