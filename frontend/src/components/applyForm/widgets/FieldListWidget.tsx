@@ -7,6 +7,7 @@ import {
   GeneralRecord,
   UswdsWidgetProps,
 } from "src/types/applyForm/types";
+import { isFieldRequired } from "src/utils/applyForm/applyFormUtils";
 import {
   getFieldListChildErrors,
   getFieldListGroupErrors,
@@ -16,7 +17,6 @@ import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
-import { isFieldRequired } from "src/components/applyForm/utils";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { renderWidget } from "./WidgetRenderers";
 

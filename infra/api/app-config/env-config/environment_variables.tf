@@ -126,6 +126,11 @@ locals {
       secret_store_name = "/api/${var.environment}/enable-simpler-route"
     }
 
+    SAVE_SOAP_MESSAGES_TO_S3 = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/save-soap-messages-to-s3"
+    }
+
     SAM_GOV_API_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/sam-gov-api-key"

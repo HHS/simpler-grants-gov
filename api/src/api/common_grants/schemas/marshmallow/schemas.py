@@ -7,6 +7,9 @@ organized by category for better maintainability.
 
 from typing import Any
 
+from grants_shared.api.schemas.extension import Schema, fields
+from grants_shared.api.schemas.extension import validators as validate
+
 from src.api.common_grants.schemas.marshmallow.custom_fields import (
     additionalInfo,
     agency,
@@ -19,8 +22,6 @@ from src.api.common_grants.schemas.marshmallow.custom_fields import (
     fiscalYear,
     legacySerialId,
 )
-from src.api.schemas.extension import Schema, fields
-from src.api.schemas.extension import validators as validate
 
 # =============================================================================
 # BASIC FIELD TYPES

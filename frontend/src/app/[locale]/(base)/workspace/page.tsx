@@ -12,7 +12,7 @@ import { OrganizationInvitation } from "src/types/userTypes";
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
-import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
+import { UserOrganizationsList } from "src/components/organizations/UserOrganizationsList";
 import { OrganizationInvitationReplies } from "./_components/OrganizationInvitationReplies";
 
 export async function generateMetadata({
