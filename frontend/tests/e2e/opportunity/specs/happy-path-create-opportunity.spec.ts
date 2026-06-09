@@ -26,7 +26,8 @@ import {
   assertActionsColumnLinksByStatus,
   assertButtonEnabledDisabledStates,
   assertLocatorVisible,
-  assertPageDetailsVisible,
+  assertPageHeadingAndTextsVisible,
+  assertTextsVisibleOnPage,
   assertTextVisible,
   clickRowTitle,
   formatNumberWithCommas,
@@ -161,9 +162,11 @@ test.describe("Grantor Opportunity Happy Path", () => {
       );
 
       // And I should see Opportunity title / Opportunity number / Grant selection method values
-      await assertTextVisible(page, opportunityTitle);
-      await assertTextVisible(page, opportunityNumber);
-      await assertTextVisible(page, grantSelectionMethod);
+      await assertTextsVisibleOnPage(page, [
+        opportunityTitle,
+        opportunityNumber,
+        grantSelectionMethod,
+      ]);
 
       // And the URL should include "fromCreate=true"
       await expect(page).toHaveURL(/fromCreate=true/);
@@ -245,7 +248,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
         fillData.emailDisplayText,
       ];
 
-      await assertPageDetailsVisible(page, {
+      await assertPageHeadingAndTextsVisible(page, {
         heading: opportunityTitle,
         texts: finalAssertions,
       });

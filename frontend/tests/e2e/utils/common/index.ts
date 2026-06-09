@@ -11,8 +11,10 @@ export { assertButtonEnabledDisabledStates } from "./button-state-assertions";
 export { assertActionsColumnLinksByStatus } from "./actions-column-assertions";
 export {
   assertLocatorVisible,
+  assertPageHeadingAndTextsVisible,
   assertPageDetailsVisible,
   assertTextVisible,
+  assertTextsVisibleOnPage,
 } from "./visibility-assertions";
 export { formatNumberWithCommas };
 export { runSharedFieldFill } from "./shared-field-filling";
