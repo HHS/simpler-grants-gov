@@ -3,21 +3,16 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition, type ReactElement } from "react";
+import { useTransition } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
-interface UswdsPaginationProps {
+type PaginationProps = {
   totalPages: number;
-  // The server action function passed from the server-side page
-  onPageChangeAction: (
-    page: number,
-  ) => Promise<void | undefined | ReactElement>;
-}
+};
 
-export default function UswdsPagination({
+export default function OpportunitiesPagination({
   totalPages,
-  onPageChangeAction,
-}: UswdsPaginationProps) {
+}: PaginationProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -27,11 +22,9 @@ export default function UswdsPagination({
   const currentPage = Number(searchParams.get("page")) || 1;
 
   const handlePageClick = (pageNumber: number) => {
-    // 1. Trigger the server-side action inside a transition
-    startTransition(async () => {
-      await onPageChangeAction(pageNumber);
-
-      // 2. Update the client-side URL parameters after server loads data
+    startTransition(() => {
+      // Update the client-side URL parameters
+      // this will trigger a page refresh and load another page of data
       const params = new URLSearchParams(searchParams.toString());
       params.set("page", pageNumber.toString());
       router.push(`${pathname}?${params.toString()}`);

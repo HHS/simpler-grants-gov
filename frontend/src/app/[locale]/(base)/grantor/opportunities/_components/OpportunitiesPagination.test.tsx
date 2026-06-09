@@ -6,7 +6,7 @@ import "@testing-library/jest-dom";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import UswdsPagination from "./Pagination";
+import OpportunitiesPagination from "./OpportunitiesPagination";
 
 // 1. Mock Next.js Navigation Hooks
 jest.mock("next/navigation", () => ({
@@ -15,9 +15,8 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
 }));
 
-describe("UswdsPagination Component", () => {
+describe("OpportunitiesPagination Component", () => {
   const mockPush = jest.fn();
-  const mockOnPageChangeAction = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,12 +33,7 @@ describe("UswdsPagination Component", () => {
   });
 
   it("renders the USWDS pagination element with the correct active page number", () => {
-    render(
-      <UswdsPagination
-        totalPages={5}
-        onPageChangeAction={mockOnPageChangeAction}
-      />,
-    );
+    render(<OpportunitiesPagination totalPages={5} />);
 
     // Verify page buttons exist
     expect(
@@ -58,19 +52,11 @@ describe("UswdsPagination Component", () => {
       toString: () => "page=1",
     });
 
-    render(
-      <UswdsPagination
-        totalPages={5}
-        onPageChangeAction={mockOnPageChangeAction}
-      />,
-    );
+    render(<OpportunitiesPagination totalPages={5} />);
 
     // Target the "Next" navigation item
     const nextButton = screen.getByRole("button", { name: /next page/i });
     fireEvent.click(nextButton);
-
-    // Verify it triggers the server action prop with target page 2
-    expect(mockOnPageChangeAction).toHaveBeenCalledWith(2);
 
     // Wait for the async React transition hook to execute the router update
     await waitFor(() => {
@@ -84,12 +70,7 @@ describe("UswdsPagination Component", () => {
       toString: () => "page=1",
     });
 
-    render(
-      <UswdsPagination
-        totalPages={5}
-        onPageChangeAction={mockOnPageChangeAction}
-      />,
-    );
+    render(<OpportunitiesPagination totalPages={5} />);
 
     // 1. Fetch all button elements currently rendered inside the component
     const allButtons = screen.queryAllByRole("button");
@@ -115,12 +96,7 @@ describe("UswdsPagination Component", () => {
       toString: () => "page=5",
     });
 
-    render(
-      <UswdsPagination
-        totalPages={5}
-        onPageChangeAction={mockOnPageChangeAction}
-      />,
-    );
+    render(<OpportunitiesPagination totalPages={5} />);
 
     // 1. Fetch all button elements currently rendered inside the component
     const allButtons = screen.queryAllByRole("button");
@@ -138,29 +114,5 @@ describe("UswdsPagination Component", () => {
 
     // 3. Assert that the button is completely hidden from the DOM
     expect(hasPreviousButton).toBe(false);
-  });
-
-  it("applies lower opacity visual styling while a transition is loading", () => {
-    // Delay Server Action execution artificially to check loading states
-    mockOnPageChangeAction.mockReturnValue(
-      new Promise((resolve) => setTimeout(resolve, 100)),
-    );
-
-    render(
-      <UswdsPagination
-        totalPages={5}
-        onPageChangeAction={mockOnPageChangeAction}
-      />,
-    );
-
-    const paginationWrapper = screen.getByTestId(
-      "pagination-transition-wrapper",
-    );
-
-    const targetPageButton = screen.getByRole("button", { name: /page 3/i });
-    fireEvent.click(targetPageButton);
-
-    // Wrapper element should visually fade instantly while waiting for mock action promise resolution
-    expect(paginationWrapper).toHaveStyle("opacity: 0.6");
   });
 });

@@ -28,7 +28,7 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
-import UswdsPagination from "src/components/Pagination";
+import OpportunitiesPagination from "./_components/OpportunitiesPagination";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");
@@ -317,14 +317,10 @@ const parseUserPrivileges = (
 // Note: if the user does not have read_opportunity privilege for this agency,
 // this API will return an error
 // --------------------------------------------------
-// Note: _currentAgency is set on the very first call and is used for subsequent pages
-//       It will change when the user changes the agency selection (i.e. selectedAgencyParam)
-let _currentAgency: string = "";
 const fetchOpportunities = async (agencyId: string, page: number) => {
-  _currentAgency = agencyId; // note: must set here; it cannot be set within OpportunitiesListPage()
   const pageRequest: PaginationRequestBody = {
     page_offset: page,
-    page_size: 25,
+    page_size: 3,
     sort_order: [
       {
         order_by: "created_at",
@@ -416,14 +412,14 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   }
   const agencyUserAcccess = parseUserPrivileges(userPrivilegeResult);
 
-  // E. Load the first page of data
+  // E. Load a page of data
+  // note: the current page number is in the URL
   let totalRecords: number = 0;
   let totalPages: number = 0;
   let userOpportunities: BaseOpportunity[] = [];
   if (agencyUserAcccess.canView) {
     try {
       const data = await fetchOpportunities(
-        // this is the first call on page load and will set the _currentAgency global variable
         selectedAgency.agency_id,
         currentPage,
       );
@@ -439,23 +435,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
     }
   }
 
-  // F. On page change, load page data
-  // NOTE: this is called from the client-side UswdsPagination component
-  async function handlePageChange(targetPage: number) {
-    "use server";
-    try {
-      // the _currentAgency is needed for fetchOpportunities
-      await fetchOpportunities(_currentAgency, targetPage);
-    } catch (error) {
-      console.error("Error fetching Opportunities", error);
-      if (error instanceof UnauthorizedError) {
-        throw error;
-      }
-      return <OpportunitiesErrorPage />;
-    }
-  }
-
-  // G. Render the page
+  // F. Render the page
   return (
     <OpportunitiesPageWrapper>
       <OpportunitiesHeader
@@ -478,10 +458,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
             userOpportunities={userOpportunities}
             canUpdate={agencyUserAcccess.canUpdate}
           />
-          <UswdsPagination
-            totalPages={totalPages}
-            onPageChangeAction={handlePageChange}
-          />
+          <OpportunitiesPagination totalPages={totalPages} />
         </div>
       )}
     </OpportunitiesPageWrapper>
