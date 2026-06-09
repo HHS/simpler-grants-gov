@@ -31,7 +31,7 @@ export const buildOpportunityHappyPathFillData = (
     fundingType: "Grant",
     fundingType_2: "Cooperative Agreement",
     category: "Recovery Act",
-    expectedNumberOfAwards: "10",
+    expectedNumberOfAwards: "20",
     estimatedTotalProgramFunding: "1000000",
     awardMinimum: "50000",
     awardMaximum: "100000",

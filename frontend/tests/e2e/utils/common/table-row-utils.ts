@@ -63,19 +63,26 @@ const isLikelyLoggedOut = async (page: Page): Promise<boolean> => {
     return true;
   }
 
+  const opportunitiesHeading = page
+    .getByRole("heading", { name: /opportunities list/i })
+    .first();
   const accountButton = page.getByRole("button", { name: /account/i }).first();
   const signInLink = page.getByRole("link", { name: /sign in/i }).first();
   const signInHeading = page
     .getByRole("heading", { name: /sign in to your account/i })
     .first();
 
-  const [hasAccountButton, hasSignInLink, hasSignInHeading] = await Promise.all(
-    [
+  const [hasOpportunitiesHeading, hasAccountButton, hasSignInLink, hasSignInHeading] =
+    await Promise.all([
+      opportunitiesHeading.isVisible().catch(() => false),
       accountButton.isVisible().catch(() => false),
       signInLink.isVisible().catch(() => false),
       signInHeading.isVisible().catch(() => false),
-    ],
-  );
+    ]);
+
+  if (hasOpportunitiesHeading) {
+    return false;
+  }
 
   return !hasAccountButton && (hasSignInLink || hasSignInHeading);
 };
@@ -94,6 +101,7 @@ export const waitForTableRow = async (
   } = options;
 
   let pollAttempt = 0;
+  let logoutSignalCount = 0;
 
   await expect
     .poll(
@@ -101,9 +109,14 @@ export const waitForTableRow = async (
         pollAttempt += 1;
 
         if (await isLikelyLoggedOut(page)) {
-          throw new Error(
-            "Authentication appears to be lost while waiting for table row",
-          );
+          logoutSignalCount += 1;
+          if (logoutSignalCount >= 2) {
+            throw new Error(
+              "Authentication appears to be lost while waiting for table row",
+            );
+          }
+        } else {
+          logoutSignalCount = 0;
         }
 
         const rowCount = await getMatchingRowLocator(
@@ -129,9 +142,14 @@ export const waitForTableRow = async (
             .catch(() => undefined);
 
           if (await isLikelyLoggedOut(page)) {
-            throw new Error(
-              "Authentication appears to be lost after reloading while waiting for table row",
-            );
+            logoutSignalCount += 1;
+            if (logoutSignalCount >= 2) {
+              throw new Error(
+                "Authentication appears to be lost after reloading while waiting for table row",
+              );
+            }
+          } else {
+            logoutSignalCount = 0;
           }
         }
 
