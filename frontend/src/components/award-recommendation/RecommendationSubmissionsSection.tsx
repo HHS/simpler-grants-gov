@@ -346,9 +346,8 @@ export const RecommendationSubmissionsSection = ({
         </p>
         <div className="bg-base-lighter radius-md padding-y-2 padding-x-3">
           <a
-            className="text-bold text-left display-block width-full"
+            className="text-bold text-left display-block width-full text-underline"
             href="#"
-            style={{ textDecoration: "underline" }}
             onClick={(event) => {
               event.preventDefault();
             }}
