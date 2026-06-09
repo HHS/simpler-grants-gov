@@ -19,6 +19,8 @@ export const checkboxHandler: FieldHandler = async (
   }
 
   const shouldBeChecked = shouldActivateField(data);
+  const usesRoleBasedCheckboxLocator =
+    !field.getByText && !field.selector && !field.testId && typeof data === "string";
   const locator = getChoiceLocator(page, field, data);
   await locator.waitFor({ state: "visible", timeout: 5000 });
   const toggleViaLabel = async () => {
@@ -40,11 +42,25 @@ export const checkboxHandler: FieldHandler = async (
       return;
     }
 
+    // Role-based checkbox locators can resolve to inputs that are visible to
+    // accessibility APIs but intermittently fail actionability checks.
+    if (usesRoleBasedCheckboxLocator) {
+      try {
+        await toggleViaLabel();
+        const labelToggledChecked = await locator.isChecked();
+        if (labelToggledChecked === shouldBeChecked) {
+          return;
+        }
+      } catch {
+        // Fall through to direct check/uncheck path.
+      }
+    }
+
     try {
       if (shouldBeChecked) {
-        await locator.check({ timeout: 5000 });
+        await locator.check({ timeout: 2000 });
       } else {
-        await locator.uncheck({ timeout: 5000 });
+        await locator.uncheck({ timeout: 2000 });
       }
     } catch {
       await toggleViaLabel();

@@ -59,17 +59,23 @@ const getMatchingRowLocator = (
 };
 
 const isLikelyLoggedOut = async (page: Page): Promise<boolean> => {
+  if (/\/(sign-in|login|auth)(?:\/|$|\?)/i.test(page.url())) {
+    return true;
+  }
+
+  const accountButton = page.getByRole("button", { name: /account/i }).first();
   const signInLink = page.getByRole("link", { name: /sign in/i }).first();
   const signInHeading = page
     .getByRole("heading", { name: /sign in to your account/i })
     .first();
 
-  const [hasSignInLink, hasSignInHeading] = await Promise.all([
+  const [hasAccountButton, hasSignInLink, hasSignInHeading] = await Promise.all([
+    accountButton.isVisible().catch(() => false),
     signInLink.isVisible().catch(() => false),
     signInHeading.isVisible().catch(() => false),
   ]);
 
-  return hasSignInLink || hasSignInHeading;
+  return !hasAccountButton && (hasSignInLink || hasSignInHeading);
 };
 
 export const waitForTableRow = async (
@@ -114,6 +120,11 @@ export const waitForTableRow = async (
         if (pollAttempt % 3 === 0) {
           await page.reload({ waitUntil: "domcontentloaded" });
           await page.waitForLoadState("load").catch(() => undefined);
+          await expect(
+            page.getByRole("heading", { name: /opportunities list/i }).first(),
+          )
+            .toBeVisible({ timeout: 10000 })
+            .catch(() => undefined);
 
           if (await isLikelyLoggedOut(page)) {
             throw new Error(
