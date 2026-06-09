@@ -28,7 +28,6 @@ import {
   assertLocatorVisible,
   assertPageHeadingAndTextsVisible,
   assertTextsVisibleOnPage,
-  assertTextVisible,
   clickRowTitle,
   formatNumberWithCommas,
   selectOptionByLabel,
