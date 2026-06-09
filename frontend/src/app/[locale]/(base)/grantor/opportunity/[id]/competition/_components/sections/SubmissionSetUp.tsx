@@ -18,7 +18,7 @@ export function SubmissionSetUp() {
       <h2 className="font-heading-lg margin-top-0 margin-bottom-1">
         {t("submissionSetUp")}
       </h2>
-      <p className="font-body-md text-base margin-top-0">
+      <p className="font-body-md text-base-dark margin-top-0">
         {t("submissionSetUpSubheader")}
       </p>
       <div className="grid-row grid-gap-2">
