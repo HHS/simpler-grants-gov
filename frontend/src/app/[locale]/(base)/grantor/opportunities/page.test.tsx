@@ -602,14 +602,32 @@ describe("Opportunities", () => {
     });
   });
 
-  describe("Non-draft opportunities", () => {
+  describe("different opportunity status", () => {
     beforeEach(() => {
       mockCheckUserPrivileges.mockResolvedValue(userPrivileges);
       mockFetchUserAgencies.mockResolvedValue([agency1]);
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
     });
 
-    it("renders link to view opportunity details and no Actions", async () => {
+    it("for SGM draft opportunities, render action buttons only", async () => {
+      basicOpportunity.is_draft = true;
+      basicOpportunity.opportunity_status = undefined;
+      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("draft")).toBeVisible();
+      expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
+      expect(screen.getByText(/actionButtons.copy/i)).toBeInTheDocument();
+      expect(screen.getByText(/actionButtons.delete/i)).toBeInTheDocument();
+    });
+
+    it("for SGM posted opportunities, render view opportunity link and action buttons", async () => {
+      basicOpportunity.is_draft = undefined;
+      basicOpportunity.opportunity_status = "posted";
+      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -622,9 +640,104 @@ describe("Opportunities", () => {
         name: "Test Opportunity",
       });
       expect(oppTitlelink).toHaveAttribute("href", viewLink);
-      expect(screen.queryByText("edit")).not.toBeInTheDocument();
-      expect(screen.queryByText("copy")).not.toBeInTheDocument();
-      expect(screen.queryByText("delete")).not.toBeInTheDocument();
+      expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
+      expect(screen.getByText(/actionButtons.copy/i)).toBeInTheDocument();
+      expect(screen.getByText(/actionButtons.delete/i)).toBeInTheDocument();
+    });
+
+    it("for SGM forecasted opportunities, render view opportunity link and action buttons", async () => {
+      basicOpportunity.is_draft = undefined;
+      basicOpportunity.opportunity_status = "forecasted";
+      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("forecasted")).toBeVisible();
+      const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
+      const oppTitlelink = screen.getByRole("link", {
+        name: "Test Opportunity",
+      });
+      expect(oppTitlelink).toHaveAttribute("href", viewLink);
+      expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
+      expect(screen.getByText(/actionButtons.copy/i)).toBeInTheDocument();
+      expect(screen.getByText(/actionButtons.delete/i)).toBeInTheDocument();
+    });
+
+    it("for SGM closed opportunities, render view opportunity link only", async () => {
+      basicOpportunity.is_draft = undefined;
+      basicOpportunity.opportunity_status = "closed";
+      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("closed")).toBeVisible();
+      const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
+      const oppTitlelink = screen.getByRole("link", {
+        name: "Test Opportunity",
+      });
+      expect(oppTitlelink).toHaveAttribute("href", viewLink);
+    });
+
+    it("for SGM archived opportunities, render view opportunity link only", async () => {
+      basicOpportunity.is_draft = undefined;
+      basicOpportunity.opportunity_status = "archived";
+      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("archived")).toBeVisible();
+      const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
+      const oppTitlelink = screen.getByRole("link", {
+        name: "Test Opportunity",
+      });
+      expect(oppTitlelink).toHaveAttribute("href", viewLink);
+    });
+
+    it("for Grants.gov posted opportunities, render view opportunity link only", async () => {
+      basicOpportunity.is_draft = undefined;
+      basicOpportunity.opportunity_status = "posted";
+      basicOpportunity.legacy_opportunity_id = 12345;
+      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("posted")).toBeVisible();
+      const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
+      const oppTitlelink = screen.getByRole("link", {
+        name: "Test Opportunity",
+      });
+      expect(oppTitlelink).toHaveAttribute("href", viewLink);
+    });
+
+    it("for Grants.gov forecasted opportunities, render view opportunity link only", async () => {
+      basicOpportunity.is_draft = undefined;
+      basicOpportunity.opportunity_status = "forecasted";
+      basicOpportunity.legacy_opportunity_id = 12345;
+      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("forecasted")).toBeVisible();
+      const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
+      const oppTitlelink = screen.getByRole("link", {
+        name: "Test Opportunity",
+      });
+      expect(oppTitlelink).toHaveAttribute("href", viewLink);
     });
   });
 });
