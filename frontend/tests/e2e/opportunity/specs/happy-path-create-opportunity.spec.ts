@@ -91,45 +91,44 @@ test.describe("Grantor Opportunity Happy Path", () => {
       // And I should be on the "Create Opportunity" page
       await expect(page).toHaveURL(/\/grantor\/opportunities\/create/);
 
-      // And I enter the following values: Opportunity number, Opportunity title, Grant selection method, Assistance listing number
+      // And I enter the required create-opportunity fields.
       await fillPageFields(page, createOpportunityPageFields, testInfo);
 
       // And I click "Save and continue" button
       await page.getByRole("button", { name: "Save and continue" }).click();
 
-      // Then I should be on the Opportunity edit page / And the URL should include "fromCreate=true"
+      // Then I should be on the "Edit Opportunity" page and the URL should include "fromCreate=true".
       await expect(page).toHaveURL(/fromCreate=true/);
-      // And I should see "Opportunity draft started"
+      // And I should see the "Opportunity draft started" confirmation message.
       await expect(page.getByText("Opportunity draft started", { exact: true })).toBeVisible();
 
-      // And I should see button states: Save enabled, Publish disabled, Preview disabled
+      // And "Save" should be enabled while "Publish" and "Preview" remain disabled.
       await assertButtonEnabledDisabledStates(page, {
         Save: true,
         Publish: false,
         Preview: false,
       });
 
-      // And I fill in the required fields in each section to enable the Publish button:
-      // When I update "Funding details" section / And I enter the following funding values
+      // Fill required Funding details values.
       await fillPageFields(page, fundingDetailsPageFields, testInfo);
 
-      // And I update "Eligibility" section / And I enter the following eligible applicants
+      // Fill required Eligibility and Additional information values.
       await fillPageFields(page, eligibilityPageFields, testInfo);
       await fillPageFields(page, additionalInformationPageFields, testInfo);
 
       // And I click "Save" button
       await page.getByRole("button", { name: "Save" }).click();
 
-      // Then I should see "Opportunity draft started"
+      // Then I should see the "Opportunity draft started" confirmation message.
       await expect(page.getByText("Opportunity draft started", { exact: true })).toBeVisible();
-      // And I should see the save confirmation message
+      // And I should see the save confirmation message "Your initial information has been saved...".
       await expect(
         page.getByText(
           "Your initial information has been saved. Complete the sections below to finish your opportunity details",
           { exact: true },
         ),
       ).toBeVisible();
-      // And I should see Opportunity status "Draft"
+      // And I should see "Draft" status.
       await assertLocatorVisible(
         page.locator("span.display-inline-flex", { hasText: "Draft" }).first(),
       );
@@ -140,25 +139,25 @@ test.describe("Grantor Opportunity Happy Path", () => {
 
       // And the URL should include "fromCreate=true"
       await expect(page).toHaveURL(/fromCreate=true/);
-      // And I should see button states: Save enabled, Publish enabled, Preview disabled
+      // And "Save" and "Publish" should be enabled while "Preview" remains disabled.
       await assertButtonEnabledDisabledStates(page, {
         Save: true,
         Publish: true,
         Preview: false,
       });
 
-      // When I select "Select" in "Funding type" to make the Publish button disabled
+      // When I set "Funding type" to "Select", "Publish" should become disabled.
       await selectOptionByLabel(page, "Funding type", "Select");
-      // Then I should see button states: Save enabled, Publish disabled, Preview disabled
+      // Then "Save" should remain enabled and "Publish" should be disabled.
       await assertButtonEnabledDisabledStates(page, {
         Save: true,
         Publish: false,
         Preview: false,
       });
 
-      // When I select "Cooperative Agreement" in "Funding type" to make the Publish button enabled again
+      // When I set "Funding type" to "Cooperative Agreement", "Publish" should be enabled again.
       await selectOptionByLabel(page, "Funding type", fillData.fundingType_2);
-      // Then I should see button states: Save enabled, Publish enabled, Preview disabled
+      // Then "Save" and "Publish" should be enabled while "Preview" remains disabled.
       await assertButtonEnabledDisabledStates(page, {
         Save: true,
         Publish: true,
@@ -168,16 +167,16 @@ test.describe("Grantor Opportunity Happy Path", () => {
       // And I click "Publish" button
       await page.getByRole("button", { name: "Publish" }).click();
 
-      // Then I should be on the "Opportunities List" page
+      // Then I should return to the "Opportunities List" page.
       await expect(page).toHaveURL(/\/grantor\/opportunities/);
 
-      // And I should see "posted" in the "Status" column for the opportunity title
+      // And I should see "posted" status for the created opportunity row.
       const matchingRow = await waitForOpportunityRowByStatus(page, {
         title: opportunityTitle,
         status: "posted",
-        message: "Waiting for posted opportunity row to appear on list",
+        message: "Waiting for \"posted\" opportunity row to appear on list",
       });
-      // And I should not see Edit, Copy, Delete links in the Actions column for the opportunity row
+      // And "Edit", "Copy", and "Delete" links should not appear for "posted" rows.
       await assertActionsColumnLinksByStatus(matchingRow, {
         status: "posted",
         actionLinkVisibility: {
@@ -187,7 +186,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
         },
       });
 
-      // When I click on the opportunity title
+      // When I open the "Opportunity details" page from the row title.
       await clickRowTitle(matchingRow, opportunityTitle);
 
       const finalAssertions = [
@@ -212,7 +211,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
         fillData.contactEmail,
         fillData.emailDisplayText,
       ];
-      // And I should see the opportunity details values displayed correctly on the page
+      // And I should see all expected values on the "Opportunity details" page.
       await assertPageDetailsVisible(page, {
         heading: opportunityTitle,
         texts: finalAssertions,
