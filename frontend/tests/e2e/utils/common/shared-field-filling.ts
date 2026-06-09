@@ -18,6 +18,7 @@ type SharedFillOptions = {
   field: FillFieldDefinition;
   data: string | boolean | undefined;
   fieldIdentifier: string;
+  attachReports?: boolean;
   attachmentNames?: SharedFillAttachmentNames;
   notFoundHandlerMessage: string;
   wrappedErrorPrefix: string;
@@ -38,6 +39,7 @@ export async function runSharedFieldFill(
     field,
     data,
     fieldIdentifier,
+    attachReports,
     notFoundHandlerMessage,
     wrappedErrorPrefix,
   } = options;
@@ -46,7 +48,7 @@ export async function runSharedFieldFill(
 
   try {
     if (data === undefined) {
-      if (testInfo) {
+      if (testInfo && attachReports) {
         await testInfo.attach(
           attachmentNames.skipped + "-" + fieldIdentifier + "-skipped",
           {
@@ -65,7 +67,7 @@ export async function runSharedFieldFill(
 
     await handler(testInfo, page, field, data);
 
-    if (testInfo) {
+    if (testInfo && attachReports) {
       await testInfo.attach(
         attachmentNames.success + "-" + fieldIdentifier + "-success",
         {
@@ -92,7 +94,7 @@ export async function runSharedFieldFill(
       throw error instanceof Error ? error : new Error(errorMessage);
     }
 
-    if (testInfo) {
+    if (testInfo && attachReports) {
       await testInfo.attach(
         attachmentNames.error + "-" + fieldIdentifier + "-error",
         {

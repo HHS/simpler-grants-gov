@@ -58,6 +58,7 @@ test.describe("runSharedFieldFill", () => {
         field,
         data: undefined,
         fieldIdentifier: "test-text",
+        attachReports: true,
         attachmentNames: {
           skipped: "fillField",
           success: "fillField",
@@ -91,6 +92,7 @@ test.describe("runSharedFieldFill", () => {
         field,
         data: "hello",
         fieldIdentifier: "test-text",
+        attachReports: true,
         attachmentNames: {
           skipped: "fillField",
           success: "fillField",
@@ -125,6 +127,7 @@ test.describe("runSharedFieldFill", () => {
           field,
           data: "hello",
           fieldIdentifier: "test-text",
+          attachReports: true,
           attachmentNames: {
             skipped: "fillField",
             success: "fillField",
