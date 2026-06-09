@@ -115,22 +115,6 @@ describe("getSubmissionsForAwardRecommendation", () => {
     ).toHaveBeenCalledWith("award-id", mockPagination, undefined);
   });
 
-  it("returns 500 when award recommendation ID is missing", async () => {
-    const res = await getSubmissionsForAwardRecommendation(
-      createRequest({ pagination: mockPagination }),
-      { params: Promise.resolve({ id: "" }) },
-    );
-    const json = (await res.json()) as { message: string };
-
-    expect(res.status).toBe(500);
-    expect(json.message).toBe(
-      "Error attempting to fetch award recommendation submissions: Award recommendation ID is required",
-    );
-    expect(
-      fetcherModule.listAwardRecommendationSubmissionsPaginated,
-    ).not.toHaveBeenCalled();
-  });
-
   it("returns 500 when pagination is missing", async () => {
     const res = await getSubmissionsForAwardRecommendation(createRequest({}), {
       params: Promise.resolve({ id: "award-id" }),

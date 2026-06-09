@@ -16,9 +16,6 @@ export async function getSubmissionsForAwardRecommendation(
   };
 
   try {
-    if (!id) {
-      throw new Error("Award recommendation ID is required");
-    }
     if (!pagination) {
       throw new Error("Pagination information is required");
     }
