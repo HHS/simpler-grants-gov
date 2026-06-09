@@ -199,34 +199,22 @@ export const waitForOpportunityRowByStatus = async (
   const {
     title,
     status,
-    rowSelector = "tbody tr",
-    timeoutMs = 180000, // allow backend indexing/propagation
+    rowSelector,
+    timeoutMs,
+    intervalsMs,
     message = `Waiting for ${status} opportunity row to appear on list`,
   } = options;
 
-  const statusPattern = normalizeOpportunityStatusPattern(status);
-
-  const row = page
-    .locator(rowSelector)
-    .filter({
-      has: page.getByRole("link", { name: title, exact: true }),
-    })
-    .first();
-
-  await expect(row, `${message} (row not found by title)`).toBeVisible({
-    timeout: timeoutMs,
+  const row = await waitForTableRow(page, {
+    linkText: title,
+    statusText: normalizeOpportunityStatusPattern(status),
+    rowSelector,
+    timeoutMs,
+    intervalsMs,
+    message,
   });
 
-  const statusCell = row.locator(
-    'td [data-testid^="responsive-data-"][data-testid$="-2"]',
-  );
-  await expect
-    .poll(async () => (await statusCell.textContent())?.trim() ?? "", {
-      message,
-      timeout: timeoutMs,
-      intervals: [1000, 2000, 5000],
-    })
-    .toMatch(statusPattern);
+  await expect(row).toBeVisible({ timeout: 30000 });
 
   return row;
 };
