@@ -11,6 +11,7 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+import src.form_schema.registry.form_template_registry as form_template_registry_module
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,
     ApplicationStatus,
@@ -238,9 +239,15 @@ class CompetitionForm(ApiSchemaTable, TimestampMixin):
     competition: Mapped[Competition] = relationship(Competition)
 
     form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id))
-    form: Mapped[Form] = relationship(Form)
 
     is_required: Mapped[bool]
+
+    @property
+    def form(self) -> Form:
+        """Return the Form from the in-memory registry."""
+        return form_template_registry_module.form_template_registry.get_by_id_and_major_version(
+            form_template_registry_module.FormTemplateKey(self.form_id, 1)
+        )
 
 
 class Application(ApiSchemaTable, TimestampMixin):
