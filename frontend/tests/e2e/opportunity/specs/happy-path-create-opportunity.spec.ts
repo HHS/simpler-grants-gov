@@ -57,48 +57,49 @@ test.describe("Grantor Opportunity Happy Path", () => {
     ) => {
       test.setTimeout(300_000);
 
-      const isMobile = testInfo.project.name.match(/[Mm]obile/);
-      await authenticateE2eUser(page, context, !!isMobile);
+      //--------------Test setup start here----------------
+      await authenticateE2eUser(
+        page,
+        context,
+        !!testInfo.project.name.match(/[Mm]obile/),
+      );
 
+      // Define commonly used values for assertions and form filling at the beginning of the test for better readability of the scenario steps.
       const fillData = buildOpportunityHappyPathFillData(new Date());
       const opportunityNumber = fillData.opportunityNumber;
       const opportunityTitle = fillData.opportunityTitle;
+      const grantSelectionMethod = fillData.grantSelectionMethod;
 
-      const createOpportunityPageFields = buildPageFieldsFromDefinitions(
-        CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
-        fillData,
-      );
-      const fundingDetailsPageFields = buildPageFieldsFromDefinitions(
-        FUNDING_DETAILS_FIELD_DEFINITIONS,
-        fillData,
-      );
-      const eligibilityPageFields = buildPageFieldsFromDefinitions(
-        ELIGIBILITY_FIELD_DEFINITIONS,
-        fillData,
-      );
-      const additionalInformationPageFields = buildPageFieldsFromDefinitions(
-        ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
-        fillData,
-      );
+      //--------------Scenario steps start here----------------
 
       // Given I use direct URL "/grantor/opportunities" to navigate to the "Opportunities List" page
       await page.goto("/grantor/opportunities");
+
       // And I should be on the "Opportunities List" page
       await expect(page).toHaveURL(/\/grantor\/opportunities/);
 
       // When I click "Create Opportunity"
       await page.getByRole("link", { name: "Create Opportunity" }).click();
+
       // And I should be on the "Create Opportunity" page
       await expect(page).toHaveURL(/\/grantor\/opportunities\/create/);
 
       // And I enter the required create-opportunity fields.
-      await fillPageFields(page, createOpportunityPageFields, testInfo);
+      await fillPageFields(
+        page,
+        buildPageFieldsFromDefinitions(
+          CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
+          fillData,
+        ),
+        testInfo,
+      );
 
       // And I click "Save and continue" button
       await page.getByRole("button", { name: "Save and continue" }).click();
 
       // Then I should be on the "Edit Opportunity" page and the URL should include "fromCreate=true".
       await expect(page).toHaveURL(/fromCreate=true/);
+
       // And I should see the "Opportunity draft started" confirmation message.
       await expect(
         page.getByText("Opportunity draft started", { exact: true }),
@@ -112,11 +113,31 @@ test.describe("Grantor Opportunity Happy Path", () => {
       });
 
       // Fill required Funding details values.
-      await fillPageFields(page, fundingDetailsPageFields, testInfo);
+      await fillPageFields(
+        page,
+        buildPageFieldsFromDefinitions(
+          FUNDING_DETAILS_FIELD_DEFINITIONS,
+          fillData,
+        ),
+        testInfo,
+      );
 
-      // Fill required Eligibility and Additional information values.
-      await fillPageFields(page, eligibilityPageFields, testInfo);
-      await fillPageFields(page, additionalInformationPageFields, testInfo);
+      // Fill required Eligibility values.
+      await fillPageFields(
+        page,
+        buildPageFieldsFromDefinitions(ELIGIBILITY_FIELD_DEFINITIONS, fillData),
+        testInfo,
+      );
+
+      // Fill optional Additional information values.
+      await fillPageFields(
+        page,
+        buildPageFieldsFromDefinitions(
+          ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
+          fillData,
+        ),
+        testInfo,
+      );
 
       // And I click "Save" button
       await page.getByRole("button", { name: "Save" }).click();
@@ -125,6 +146,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
       await expect(
         page.getByText("Opportunity draft started", { exact: true }),
       ).toBeVisible();
+
       // And I should see the save confirmation message "Your initial information has been saved...".
       await expect(
         page.getByText(
@@ -132,17 +154,20 @@ test.describe("Grantor Opportunity Happy Path", () => {
           { exact: true },
         ),
       ).toBeVisible();
+
       // And I should see "Draft" status.
       await assertLocatorVisible(
         page.locator("span.display-inline-flex", { hasText: "Draft" }).first(),
       );
+
       // And I should see Opportunity title / Opportunity number / Grant selection method values
       await assertTextVisible(page, opportunityTitle);
       await assertTextVisible(page, opportunityNumber);
-      await assertTextVisible(page, "Discretionary");
+      await assertTextVisible(page, grantSelectionMethod);
 
       // And the URL should include "fromCreate=true"
       await expect(page).toHaveURL(/fromCreate=true/);
+
       // And "Save" and "Publish" should be enabled while "Preview" remains disabled.
       await assertButtonEnabledDisabledStates(page, {
         Save: true,
@@ -152,6 +177,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
 
       // When I set "Funding type" to "Select", "Publish" should become disabled.
       await selectOptionByLabel(page, "Funding type", "Select");
+
       // Then "Save" should remain enabled and "Publish" should be disabled.
       await assertButtonEnabledDisabledStates(page, {
         Save: true,
@@ -161,6 +187,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
 
       // When I set "Funding type" to "Cooperative Agreement", "Publish" should be enabled again.
       await selectOptionByLabel(page, "Funding type", fillData.fundingType_2);
+
       // Then "Save" and "Publish" should be enabled while "Preview" remains disabled.
       await assertButtonEnabledDisabledStates(page, {
         Save: true,
@@ -180,6 +207,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
         status: "posted",
         message: 'Waiting for "posted" opportunity row to appear on list',
       });
+
       // And "Edit", "Copy", and "Delete" links should not appear for "posted" rows.
       await assertActionsColumnLinksByStatus(matchingRow, {
         status: "posted",
@@ -193,12 +221,13 @@ test.describe("Grantor Opportunity Happy Path", () => {
       // When I open the "Opportunity details" page from the row title.
       await clickRowTitle(matchingRow, opportunityTitle);
 
+      // And I should see all expected values on the "Opportunity details" page.
       const finalAssertions = [
         opportunityTitle,
         opportunityNumber,
         fillData.assistanceListingNumber,
         fillData.fundingType_2,
-        fillData.grantSelectionMethod,
+        grantSelectionMethod,
         fillData.category,
         fillData.expectedNumberOfAwards,
         formatNumberWithCommas(fillData.awardMinimum),
@@ -215,11 +244,13 @@ test.describe("Grantor Opportunity Happy Path", () => {
         fillData.contactEmail,
         fillData.emailDisplayText,
       ];
-      // And I should see all expected values on the "Opportunity details" page.
+
       await assertPageDetailsVisible(page, {
         heading: opportunityTitle,
         texts: finalAssertions,
       });
+
+      //--------------Scenario steps end here----------------
     },
   );
 });
