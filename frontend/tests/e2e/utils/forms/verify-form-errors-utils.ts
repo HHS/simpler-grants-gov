@@ -3,6 +3,7 @@ import { expect, type Page } from "@playwright/test";
 export interface FieldError {
   fieldId: string;
   message: string;
+  maxLength?: number;
 }
 
 function normalizeWhitespace(value: string): string {
