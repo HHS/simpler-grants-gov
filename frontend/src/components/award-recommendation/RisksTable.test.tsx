@@ -281,7 +281,7 @@ describe("RisksTable", () => {
     const link = screen.getByRole("link", { name: "APP-001" });
     expect(link).toHaveAttribute(
       "href",
-      "/award-recommendation/test-award-id/submissions/sub-1",
+      "/award-recommendation/test-award-id/application-submissions/sub-1/edit",
     );
   });
 
@@ -296,7 +296,7 @@ describe("RisksTable", () => {
       "recommendationType.recommended_for_funding",
     );
     expect(recommendedTag).toHaveClass("bg-info-lighter");
-    expect(recommendedTag).toHaveClass("text-info-dark");
+    expect(recommendedTag).toHaveClass("border-info-dark");
   });
 
   it("only shows Recommended tag for recommended_for_funding type", async () => {
