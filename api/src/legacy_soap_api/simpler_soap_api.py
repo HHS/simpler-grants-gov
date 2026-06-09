@@ -71,22 +71,16 @@ def get_simpler_soap_response(
                 "soap_response_operation": simpler_soap_client.operation_config.response_operation_name,
             }
         )
-    except (SOAPInvalidEnvelope, SOAPOperationNotSupported) as e:
+    except (SOAPInvalidEnvelope, SOAPOperationNotSupported):
         logger.info(
-            f"simpler_soap_api: {e}",
+            "simpler_soap_api: Initialization failed due to invalid request",
             exc_info=True,
             extra={
                 "soap_api_event": LegacySoapApiEvent.INVALID_REQUEST,
                 "used_simpler_response": use_simpler,
             },
         )
-        try:
-            write_debug_data_to_s3(soap_request.operation_name, soap_request, soap_legacy_response)
-        except Exception:
-            logger.exception(
-                "soap_client: failed to upload debug info to s3",
-                extra={"soap_api_event": LegacySoapApiEvent.ERROR_UPLOADING_DEBUG_DATA},
-            )
+        write_debug_data_to_s3(soap_request, soap_legacy_response)
         return soap_legacy_response
     except Exception:
         err = "Unable to initialize Simpler SOAP client: Unknown error"
@@ -98,13 +92,7 @@ def get_simpler_soap_response(
                 "used_simpler_response": use_simpler,
             },
         )
-        try:
-            write_debug_data_to_s3(soap_request.operation_name, soap_request, soap_legacy_response)
-        except Exception:
-            logger.exception(
-                "soap_client: failed to upload debug info to s3",
-                extra={"soap_api_event": LegacySoapApiEvent.ERROR_UPLOADING_DEBUG_DATA},
-            )
+        write_debug_data_to_s3(soap_request, soap_legacy_response)
         return soap_legacy_response
 
     if use_simpler or simpler_soap_client.operation_config.always_call_simpler:
@@ -131,6 +119,16 @@ def get_simpler_soap_response(
         },
     )
     return soap_legacy_response
+
+
+# def log_to_s3(soap_request: SOAPRequest, soap_legacy_response: SOAPResponse) -> None:
+#     try:
+#         write_debug_data_to_s3(soap_request.operation_name, soap_request, soap_legacy_response)
+#     except Exception:
+#         logger.exception(
+#             "soap_client: failed to upload debug info to s3",
+#             extra={"soap_api_event": LegacySoapApiEvent.ERROR_UPLOADING_DEBUG_DATA},
+#         )
 
 
 def process_simpler_request(
@@ -273,11 +271,5 @@ def process_simpler_request(
                     "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
                 },
             )
-            try:
-                write_debug_data_to_s3(operation_name, soap_request, soap_legacy_response)
-            except Exception:
-                logger.exception(
-                    "soap_client: failed to upload debug info to s3",
-                    extra={"soap_api_event": LegacySoapApiEvent.ERROR_UPLOADING_DEBUG_DATA},
-                )
+            write_debug_data_to_s3(soap_request, soap_legacy_response)
     return soap_legacy_response.to_flask_response()

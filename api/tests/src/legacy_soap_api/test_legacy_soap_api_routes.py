@@ -269,7 +269,7 @@ def test_if_write_debug_data_to_s3_fails_the_exception_is_logged(
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         with mock.patch(
-            "src.legacy_soap_api.simpler_soap_api.write_debug_data_to_s3"
+            "src.legacy_soap_api.legacy_soap_api_utils.file_util.join"
         ) as mock_write_debug:
             mock_write_debug.side_effect = Exception("test")
             response = client.post(
@@ -343,7 +343,7 @@ def test_write_debug_data_if_s2s_client_throws_specific_errors(
                     MTLS_CERT_HEADER_KEY: mtls_cert,
                 },
             )
-        assert response.status_code == 500
+            assert response.status_code == 500
         records = [
             r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
         ]
