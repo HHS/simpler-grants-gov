@@ -15,17 +15,24 @@ type PaginationBody = {
 
 export const searchOpportunitiesByAgency = async (
   agencyId: string,
-  pageInputs: PaginationRequestBody,
+  page: number,
 ): Promise<{ data: SearchResponseData; pagination_info: PaginationInfo }> => {
-  const pagination = pageInputs;
-  const pageBody: PaginationBody = { pagination };
+  const paginationDetails: PaginationRequestBody = {
+    page_offset: page,
+    page_size: 25,
+    sort_order: [
+      {
+        order_by: "created_at",
+        sort_direction: "descending",
+      },
+    ],
+  };
 
   const response = await fetchGrantorWithMethod("POST")({
     subPath: `agencies/` + agencyId + `/opportunities`,
-    body: pageBody,
+    body: { pagination: paginationDetails },
   });
-  const json = (await response.json()) as SearchAPIResponse;
-  return { data: json.data, pagination_info: json.pagination_info };
+  return (await response.json()) as SearchAPIResponse;
 };
 
 export const createOpportunity = async (

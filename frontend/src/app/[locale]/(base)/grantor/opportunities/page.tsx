@@ -313,34 +313,6 @@ const parseUserPrivileges = (
 };
 
 // --------------------------------------------------
-// Fetch function: get the list of opportunities for this agency
-// Note: if the user does not have read_opportunity privilege for this agency,
-// this API will return an error
-// --------------------------------------------------
-const fetchOpportunities = async (agencyId: string, page: number) => {
-  const pageRequest: PaginationRequestBody = {
-    page_offset: page,
-    page_size: 25,
-    sort_order: [
-      {
-        order_by: "created_at",
-        sort_direction: "descending",
-      },
-    ],
-  };
-  // fetch a page of opportunities for this agency
-  const { data, pagination_info } = await searchOpportunitiesByAgency(
-    agencyId,
-    pageRequest,
-  );
-  return {
-    opportunities: data,
-    totalRecords: pagination_info.total_records,
-    totalPages: pagination_info.total_pages,
-  };
-};
-
-// --------------------------------------------------
 // The Main Page
 // --------------------------------------------------
 type OpportunitiesListProps = LocalizedPageProps & WithFeatureFlagProps;
@@ -419,13 +391,14 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   let userOpportunities: BaseOpportunity[] = [];
   if (agencyUserAcccess.canView) {
     try {
-      const data = await fetchOpportunities(
+      const { data, pagination_info } = await searchOpportunitiesByAgency(
         selectedAgency.agency_id,
         currentPage,
       );
-      userOpportunities = data.opportunities;
-      totalRecords = data.totalRecords;
-      totalPages = data.totalPages;
+
+      userOpportunities = data;
+      totalRecords = pagination_info.total_records;
+      totalPages = pagination_info.total_pages;
     } catch (error) {
       console.error("Error fetching Opportunities", error);
       if (error instanceof UnauthorizedError) {
