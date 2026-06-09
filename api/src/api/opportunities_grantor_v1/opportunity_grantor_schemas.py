@@ -625,8 +625,8 @@ class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunityGrantorSchema())
 
 
-class CompetitionCreateRequestSchema(Schema):
-    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ request"""
+class CompetitionRequestBaseSchema(Schema):
+    """Base schema for competition create/update requests"""
 
     competition_title = fields.String(
         required=True,
@@ -647,6 +647,7 @@ class CompetitionCreateRequestSchema(Schema):
     )
     contact_info = fields.String(
         required=True,
+        allow_none=True,
         metadata={
             "description": "Contact information for the competition",
             "example": "Bob Smith\nFakeMail@fake.com",
@@ -665,8 +666,40 @@ class CompetitionCreateRequestSchema(Schema):
         },
     )
 
+    @validates_schema
+    def validate_dates(self, data: dict, **kwargs: dict) -> None:
+        opening = data.get("opening_date")
+        closing = data.get("closing_date")
+        if opening and closing and closing < opening:
+            raise ValidationError(
+                [
+                    MarshmallowErrorContainer(
+                        ValidationErrorType.INVALID_DATE_ORDER,
+                        "Closing date must be on or after opening date",
+                    )
+                ]
+            )
+
+
+class CompetitionCreateRequestSchema(CompetitionRequestBaseSchema):
+    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ request"""
+
+    pass
+
 
 class CompetitionCreateResponseSchema(AbstractResponseSchema):
     """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/ response"""
+
+    data = fields.Nested(CompetitionAlphaSchema())
+
+
+class CompetitionUpdateRequestSchema(CompetitionRequestBaseSchema):
+    """Schema for PUT /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id request"""
+
+    pass
+
+
+class CompetitionUpdateResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id response"""
 
     data = fields.Nested(CompetitionAlphaSchema())
