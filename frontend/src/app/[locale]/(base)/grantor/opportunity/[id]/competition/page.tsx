@@ -1,16 +1,12 @@
-import { Metadata } from "next";
+import { CompetitionForm } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/CompetitionForm";
+import { OpportunityDetailsHeader } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/OpportunityDetailsHeader";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 
-import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 
-import { UnauthenticatedMessage } from "src/components/core/UnauthenticatedMessage";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
-import { CompetitionForm } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/CompetitionForm";
-import { OpportunityDetailsHeader } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/OpportunityDetailsHeader";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
@@ -18,28 +14,8 @@ type PageProps = {
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string; locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({
-    locale,
-    namespace: "OpportunityCompetition",
-  });
-  return {
-    title: t("pageTitle"),
-    description: t("metaDescription"),
-  };
-}
-
 async function OpportunityCompetitionPage({ params }: PageProps) {
   const { id, locale } = await params;
-  const session = await getSession();
-  if (!session || !session.token) {
-    return <UnauthenticatedMessage />;
-  }
 
   let opportunityData;
   try {
