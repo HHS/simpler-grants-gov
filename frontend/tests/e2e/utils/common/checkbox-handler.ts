@@ -20,7 +20,10 @@ export const checkboxHandler: FieldHandler = async (
 
   const shouldBeChecked = shouldActivateField(data);
   const usesRoleBasedCheckboxLocator =
-    !field.getByText && !field.selector && !field.testId && typeof data === "string";
+    !field.getByText &&
+    !field.selector &&
+    !field.testId &&
+    typeof data === "string";
   const locator = getChoiceLocator(page, field, data);
   await locator.waitFor({ state: "visible", timeout: 5000 });
   const toggleViaLabel = async () => {
