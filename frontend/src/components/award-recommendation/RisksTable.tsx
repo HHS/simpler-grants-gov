@@ -8,7 +8,7 @@ import { AwardRecommendationSubmission } from "src/types/awardRecommendationType
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Pagination, Table, Tag } from "@trussworks/react-uswds";
+import { Pagination, Table } from "@trussworks/react-uswds";
 
 interface RisksTableProps {
   awardRecommendationId: string;
@@ -236,7 +236,7 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
                 <td>
                   {appSubmission.application_submission_number ? (
                     <Link
-                      href={`/award-recommendation/${awardRecommendationId}/submissions/${id}`}
+                      href={`/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
                       className="usa-link"
                     >
                       {appSubmission.application_submission_number}
@@ -254,9 +254,9 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
                 <td>
                   {detail?.award_recommendation_type ===
                   "recommended_for_funding" ? (
-                    <Tag className="bg-info-lighter text-info-dark radius-pill">
+                    <span className="usa-tag font-sans-sm text-no-uppercase text-ink border-1px radius-pill border-info-dark bg-info-lighter">
                       {t("recommendationType.recommended_for_funding")}
-                    </Tag>
+                    </span>
                   ) : (
                     "—"
                   )}
