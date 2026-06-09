@@ -2415,6 +2415,14 @@ export const messages = {
     alertMessage:
       "Hard refresh your page when done changing Flags for the changes to fully apply.",
   },
+  OpportunityDetailsHeader: {
+    opportunityNumber: "Opportunity #: {number}",
+    title: "Title:",
+    agency: "Agency:",
+    subAgency: "Sub-agency:",
+    draft: "Draft",
+    lastUpdated: "Last updated:",
+  },
   AwardRecommendationSelectFundingOpportunity: {
     pageTitle: "Select funding opportunity | Simpler.Grants.gov",
     pageHeading: "Award Recommendations",
