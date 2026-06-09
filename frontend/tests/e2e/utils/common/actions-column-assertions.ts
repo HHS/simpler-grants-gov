@@ -16,16 +16,24 @@ export const assertActionsColumnLinksByStatus = async (
   row: Locator,
   options: {
     status: string;
+    statusTextMatches?: string[];
     actionLinkVisibility?: Record<string, boolean>;
-    actionLinks?: string[];
     statusActionRules?: Record<string, StatusActionRule>;
   },
 ) => {
   const normalizedStatus = options.status.trim().toLowerCase();
-  const statusPattern =
-    normalizedStatus === "published" || normalizedStatus === "posted"
-      ? /^(published|posted)$/i
-      : new RegExp(`^${escapeRegex(options.status.trim())}$`, "i");
+  const statusTextMatches = (
+    options.statusTextMatches?.length
+      ? options.statusTextMatches
+      : [options.status]
+  )
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const statusPattern = new RegExp(
+    `^(${statusTextMatches.map(escapeRegex).join("|")})$`,
+    "i",
+  );
 
   const statusCell = row
     .locator('td [data-testid^="responsive-data-"][data-testid$="-2"]')
@@ -55,27 +63,13 @@ export const assertActionsColumnLinksByStatus = async (
     return;
   }
 
-  if (!options.actionLinks && !options.statusActionRules) {
+  if (!options.statusActionRules) {
     throw new Error(
-      "No action links provided. Pass actionLinks or statusActionRules, or use actionLinkVisibility.",
+      "No statusActionRules provided. Pass statusActionRules, or use actionLinkVisibility.",
     );
   }
 
-  const actionLinks = options.actionLinks ?? [];
-  const defaultStatusActionRules: Record<string, StatusActionRule> = {
-    posted: {
-      hidden: actionLinks,
-    },
-    draft: {
-      visible: actionLinks,
-    },
-  };
-
-  const statusActionRules = {
-    ...defaultStatusActionRules,
-    ...(options.statusActionRules ?? {}),
-  };
-  const statusRule = statusActionRules[normalizedStatus];
+  const statusRule = options.statusActionRules[normalizedStatus];
 
   if (!statusRule) {
     throw new Error(

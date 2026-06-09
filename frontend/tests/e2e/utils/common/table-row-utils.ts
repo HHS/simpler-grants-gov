@@ -28,11 +28,6 @@ const escapeRegex = (value: string) =>
 const normalizeOpportunityStatusPattern = (status: string): RegExp => {
   const trimmed = status.trim();
 
-  // UI status text is "posted" while product language often says "published".
-  if (/^(published|posted)$/i.test(trimmed)) {
-    return /\b(published|posted)\b/i;
-  }
-
   return new RegExp(`\\b${escapeRegex(trimmed)}\\b`, "i");
 };
 
