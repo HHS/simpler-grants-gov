@@ -1,4 +1,3 @@
-import TopLevelError from "src/app/[locale]/(base)/error/page";
 import OpportunityEditForm from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/_components/OpportunityEditForm";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
@@ -31,8 +30,8 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
 
   const session = await getSession();
   if (!session || !session.token) {
-    console.error("Invalid session", session);
-    return <TopLevelError />;
+    console.error("User is not signed in.");
+    return; // the AuthenticationGate in layout.tsx will take care of this
   }
 
   // TODO(#8601): Replace this fail-closed placeholder with a real grantor authorization
