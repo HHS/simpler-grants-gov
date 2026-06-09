@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import defusedxml.ElementTree as ET
 import xmlschema
 from lxml import etree
 
@@ -52,8 +53,6 @@ class XSDValidator:
         locations: dict[str, str] = {}
         for xsd_file in self.xsd_dir.glob("*.xsd"):
             try:
-                import xml.etree.ElementTree as ET
-
                 tree = ET.parse(str(xsd_file))
                 root = tree.getroot()
                 ns = root.get("targetNamespace")
