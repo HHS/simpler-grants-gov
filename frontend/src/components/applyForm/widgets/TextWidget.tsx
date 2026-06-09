@@ -26,6 +26,7 @@ function TextWidget<
 >({
   id,
   disabled,
+  fieldListEntryDescriptionId,
   readOnly,
   required,
   schema,
@@ -90,11 +91,12 @@ function TextWidget<
   );
   const error = rawErrors.length ? true : undefined;
 
-  const describedby = error
-    ? `error-for-${id}`
-    : title
-      ? `label-for-${id}`
-      : undefined;
+  const describedby = [
+    error ? `error-for-${id}` : undefined,
+    fieldListEntryDescriptionId,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <FormGroup

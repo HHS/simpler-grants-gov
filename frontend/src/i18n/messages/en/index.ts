@@ -604,7 +604,7 @@ export const messages = {
       unsavedChangesWarning:
         "You have unsaved changes or attachments that will be lost if you select OK.",
       fieldListWidget: {
-        deleteEntry: "Delete",
+        deleteEntry: "Delete this entry",
         addEntry: "Add another entry",
       },
     },

@@ -17,6 +17,7 @@ function CheckboxWidget<
 >({
   id,
   disabled,
+  fieldListEntryDescriptionId,
   options,
   value,
   required,
@@ -40,7 +41,12 @@ function CheckboxWidget<
     "") as string;
 
   // Match radio pattern: input points to the label+desc block (and error) explicitly
-  const describedby = error ? `error-for-${id}` : `label-for-${id}`;
+  const describedby = [
+    error ? `error-for-${id}` : undefined,
+    fieldListEntryDescriptionId,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const label =
     required || Boolean(description) ? (

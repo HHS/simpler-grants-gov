@@ -36,65 +36,69 @@ type FieldInfo<V extends BroadlyDefinedWidgetValue> = {
 const FIELD_LIST_INDEX_TOKEN = "~~index~~" as const;
 
 /**
- * Builds the "baseId" used by FieldList widgets for each child field.
+ * Builds the template id used by FieldList child widgets.
  *
- * FieldList rows represent an array of grouped field values, where each row
- * is stored as an object and each child field maps to a single property
- * within that object.
+ * FieldList entries are array items, so each rendered child needs an id that
+ * includes the entry index:
  *
- * Instead of generating a concrete id for a specific row (for example `[0]`),
- * we generate a template id containing an index placeholder:
+ *   additional_sites[0]--address--street1
  *
- *   contact_people_test[~~index~~]--first_name
+ * At config-build time we do not know the rendered entry index yet, so this
+ * helper creates a template id with a placeholder:
  *
- * The FieldList widget later replaces `~~index~~` with the actual row index
- * when rendering each row.
+ *   additional_sites[~~index~~]--address--street1
  *
- * If the child field id already contains the FieldList segment, this helper
- * replaces that segment with the indexed version.
- *
- * Example:
- *
- *   childId: "topField--contacts--firstName"
- *
- * becomes:
- *
- *   "topField--contacts[~~index~~]--firstName"
- *
- * If the FieldList segment is not present in the child id, the helper falls
- * back to building the id from the FieldList name and the final field key.
- *
- * Example fallback:
- *
- *   childId: "topField--firstName"
- *
- * becomes:
- *
- *   "contacts[~~index~~]--firstName"
+ * The FieldList widget replaces `~~index~~` with the actual entry index while
+ * rendering.
  */
 export function buildFieldListBaseId({
   fieldListName,
-  childId,
+  storagePath,
 }: {
   fieldListName: string;
-  childId: string;
+  storagePath: string[];
 }): string {
-  const token = `--${fieldListName}--`;
-
-  if (childId.includes(token)) {
-    return childId.replace(
-      token,
-      `--${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--`,
-    );
-  }
-
-  const childIdParts = childId.split("--");
-  const finalFieldKey = childIdParts[childIdParts.length - 1];
-
-  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
+  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${storagePath.join("--")}`;
 }
 
-// Assumes the FieldList field exists at the root of formSchema.properties.
+/**
+ * Converts a FieldList child definition into the path where that child value
+ * lives inside a single entry object.
+ *
+ * Example:
+ *
+ *   /properties/additional_sites/items/properties/address/properties/street1
+ *
+ * becomes:
+ *
+ *   ["address", "street1"]
+ *
+ * Flat children still become a one-part path:
+ *
+ *   /properties/additional_sites/items/properties/organization_name
+ *   -> ["organization_name"]
+ */
+export function buildFieldListStoragePath({
+  fieldListName,
+  childDefinition,
+}: {
+  fieldListName: string;
+  childDefinition: string;
+}): string[] {
+  const fieldListPrefix = `/properties/${fieldListName}/items/properties/`;
+
+  if (!childDefinition.startsWith(fieldListPrefix)) {
+    const childDefinitionParts = childDefinition.split("/");
+    return [childDefinitionParts[childDefinitionParts.length - 1]];
+  }
+
+  return childDefinition
+    .replace(fieldListPrefix, "")
+    .split("/properties/")
+    .filter((pathPart) => pathPart.length > 0);
+}
+
+// FieldList currently supports root-level array fields only.
 const getFieldListRequiredFields = ({
   formSchema,
   fieldListName,
@@ -138,7 +142,7 @@ type FieldListConfig = {
 
 type FieldConfig = FieldWidgetConfig | FieldListConfig;
 
-// json schema doesn't describe UI so types are infered if widget not supplied
+// JSON schema doesn't describe UI, so widget types are inferred when not supplied.
 export const determineFieldType = ({
   uiFieldObject,
   fieldSchema,
@@ -490,19 +494,22 @@ const getFieldListConfig = ({
         throw new Error("nested fieldList is not supported");
       }
 
-      const {
-        id: childId,
-        value: _value,
-        key: _key,
-        ...rest
-      } = childWidgetConfig.props;
+      const { value: _value, key: _key, ...rest } = childWidgetConfig.props;
+
+      // Build once so the renderer can use the same path for id generation,
+      // value lookup, and nested value updates.
+      const storagePath = buildFieldListStoragePath({
+        fieldListName: uiFieldObject.name,
+        childDefinition: childNode.definition,
+      });
 
       return {
         widget: childWidgetConfig.type,
         baseId: buildFieldListBaseId({
           fieldListName: uiFieldObject.name,
-          childId,
+          storagePath,
         }),
+        storagePath,
         generalProps: rest,
         definition: childNode.definition,
       };

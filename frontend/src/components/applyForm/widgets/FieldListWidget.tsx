@@ -29,7 +29,7 @@ import { renderWidget } from "./WidgetRenderers";
  */
 type FieldListChangeParams = {
   entryId: string;
-  storageKey: string;
+  storagePath: string[];
   nextValue: unknown;
 };
 
@@ -114,13 +114,11 @@ const replaceFieldListIndexPlaceholder = ({
 };
 
 /**
- * Extracts the field key used to store a child value within an entry object.
+ * Extracts the final field segment from a FieldList base id.
  *
- * Example:
- *   contact_people_test[~~index~~]--first_name
- *
- * yields:
- *   first_name
+ * This is used only to build stable React keys for child widgets. Value lookup
+ * and updates use `storagePath` so nested fields like address.street1 are
+ * preserved correctly.
  */
 const getFieldListStorageKey = ({ baseId }: { baseId: string }): string => {
   const baseIdParts = baseId.split("--");
@@ -194,6 +192,74 @@ const getFieldListValues = (entries: FieldListEntry[]): GeneralRecord[] => {
   return entries.map((entry) => entry.value);
 };
 
+/**
+ * Reads a nested value from a FieldList entry using the storage path generated
+ * from the child field definition.
+ */
+const getValueAtPath = ({
+  value,
+  path,
+}: {
+  value: GeneralRecord;
+  path: string[];
+}): unknown => {
+  return path.reduce<unknown>((currentValue, pathPart) => {
+    if (
+      typeof currentValue === "object" &&
+      currentValue !== null &&
+      !Array.isArray(currentValue)
+    ) {
+      return (currentValue as GeneralRecord)[pathPart];
+    }
+
+    return undefined;
+  }, value);
+};
+
+/**
+ * Writes a child value into a FieldList entry while preserving nested object
+ * structure, for example address.street1.
+ */
+const setValueAtPath = ({
+  value,
+  path,
+  nextValue,
+}: {
+  value: GeneralRecord;
+  path: string[];
+  nextValue: BroadlyDefinedWidgetValue | undefined;
+}): GeneralRecord => {
+  const [currentPathPart, ...remainingPathParts] = path;
+
+  if (!currentPathPart) {
+    return value;
+  }
+
+  if (remainingPathParts.length === 0) {
+    return {
+      ...value,
+      [currentPathPart]: nextValue,
+    };
+  }
+
+  const currentNestedValue = value[currentPathPart];
+  const nestedValue =
+    typeof currentNestedValue === "object" &&
+    currentNestedValue !== null &&
+    !Array.isArray(currentNestedValue)
+      ? (currentNestedValue as GeneralRecord)
+      : {};
+
+  return {
+    ...value,
+    [currentPathPart]: setValueAtPath({
+      value: nestedValue,
+      path: remainingPathParts,
+      nextValue,
+    }),
+  };
+};
+
 function FieldListEntry({
   entryId,
   entryIndex,
@@ -224,13 +290,14 @@ function FieldListEntry({
   minItemsHelperText?: string;
 }) {
   const t = useTranslations("Application.applyForm.fieldListWidget");
+  const entryHeadingId = `${entryId}-heading`;
 
   return (
     <div className="field-list-widget__entry padding-y-2 padding-bottom-3">
       <div className="field-list-widget__entry-header margin-bottom-2">
-        <strong>
+        <h4 id={entryHeadingId} className="margin-bottom-2">
           {entryLabel} {entryIndex + 1}
-        </strong>
+        </h4>
       </div>
 
       {groupDefinition.map((groupItem: FieldListGroupItem) => {
@@ -252,20 +319,17 @@ function FieldListEntry({
           rawErrors,
           fieldListPath,
           entryIndex,
-          storageKey,
+          storagePath: groupItem.storagePath,
           childDefinition: groupItem.definition,
         });
 
         const currentValue = toBroadlyDefinedWidgetValue(
-          entryValue[storageKey],
+          getValueAtPath({
+            value: entryValue,
+            path: groupItem.storagePath,
+          }),
         );
 
-        /**
-         * FieldList children need to be reactive so local entry state stays in sync
-         * while users type. Standard form fields can remain non-reactive, but FieldList
-         * must update local state before add/delete operations so unsaved entry values
-         * are not lost when indexes shift.
-         */
         const childWidgetProps: UswdsWidgetProps = {
           ...groupItem.generalProps,
           schema: groupItem.generalProps.schema as RJSFSchema,
@@ -276,14 +340,16 @@ function FieldListEntry({
           rawErrors: childErrors,
           required: isRequired,
           updateOnInput: true,
+          fieldListEntryDescriptionId: entryHeadingId,
           onChange: (nextValue) => {
             handleFieldChange({
               entryId,
-              storageKey,
+              storagePath: groupItem.storagePath,
               nextValue,
             });
           },
         };
+
         return renderWidget({
           type: groupItem.widget,
           props: childWidgetProps,
@@ -312,6 +378,7 @@ function FieldListEntry({
           disabled={!canDeleteEntry}
           className="button--danger margin-left-auto"
           outline
+          aria-describedby={entryHeadingId}
         >
           <USWDSIcon name="delete" />
           {t("deleteEntry")}
@@ -479,7 +546,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    * row and field, and preserves immutability of the entries array.
    */
   const handleFieldChange = useCallback(
-    ({ entryId, storageKey, nextValue }: FieldListChangeParams): void => {
+    ({ entryId, storagePath, nextValue }: FieldListChangeParams): void => {
       const normalizedNextValue = toBroadlyDefinedWidgetValue(nextValue);
 
       handleEntriesChange((previousEntries) =>
@@ -490,10 +557,11 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
 
           return {
             ...previousEntry,
-            value: {
-              ...previousEntry.value,
-              [storageKey]: normalizedNextValue,
-            },
+            value: setValueAtPath({
+              value: previousEntry.value,
+              path: storagePath,
+              nextValue: normalizedNextValue,
+            }),
           };
         }),
       );
