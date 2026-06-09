@@ -1,4 +1,3 @@
-import TopLevelError from "src/app/[locale]/(base)/error/page";
 import { AgencySelector } from "src/app/[locale]/(base)/grantor/opportunities/_components/AgencySelector";
 import { UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
@@ -335,8 +334,8 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   // A. Check the user's session
   const userSession = await getSession();
   if (!userSession || !userSession.token) {
-    console.error("Invalid session", userSession);
-    return <TopLevelError />;
+    console.error("User is not signed in.");
+    return; // the AuthenticationGate in layout.tsx will take care of this
   }
 
   // B. Get all Agencies this user belongs to
