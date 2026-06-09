@@ -529,7 +529,7 @@ def test_sf424a_v_1_0_auto_summation_full_data(
             "non_federal_estimated_unobligated_amount": "-9.98",
             "federal_new_or_revised_amount": "51.05",
             "non_federal_new_or_revised_amount": "47.04",
-            "total_amount": "113.13",
+            "total_amount": "86.10",
         },
         "total_budget_categories": {
             "personnel_amount": "113.04",
@@ -584,7 +584,8 @@ def test_sf424a_v_1_0_auto_summation_full_data(
     }
 
 
-def test_sf424a_v_1_0_total_budget_summary_sums_cf_not_row_g(enable_factory_create, sf424a_v1_0):
+def test_sf424a_v_1_0_total_budget_summary_sums_column_g(enable_factory_create, sf424a_v1_0):
+    """Row 5 Column G should sum Column G (rows 1-4), not Row 5 Columns C-F."""
     data = {
         "activity_line_items": [
             {
@@ -593,7 +594,7 @@ def test_sf424a_v_1_0_total_budget_summary_sums_cf_not_row_g(enable_factory_crea
                     "non_federal_estimated_unobligated_amount": "2.00",
                     "federal_new_or_revised_amount": "3.00",
                     "non_federal_new_or_revised_amount": "4.00",
-                    "total_amount": "999.00",  # should NOT matter
+                    "total_amount": "10.00",
                 }
             },
             {
@@ -602,7 +603,7 @@ def test_sf424a_v_1_0_total_budget_summary_sums_cf_not_row_g(enable_factory_crea
                     "non_federal_estimated_unobligated_amount": "20.00",
                     "federal_new_or_revised_amount": "30.00",
                     "non_federal_new_or_revised_amount": "40.00",
-                    "total_amount": "888.00",  # should NOT matter
+                    "total_amount": "40.00",
                 }
             },
         ],
@@ -618,17 +619,18 @@ def test_sf424a_v_1_0_total_budget_summary_sums_cf_not_row_g(enable_factory_crea
     validate_application_form(app, ApplicationAction.MODIFY)
     app_json = app.application_response
 
-    # G ignored everywhere
-    assert app_json["activity_line_items"][0]["budget_summary"]["total_amount"] == "999.00"
-    assert app_json["activity_line_items"][1]["budget_summary"]["total_amount"] == "888.00"
+    # Individual row G values are preserved unchanged
+    assert app_json["activity_line_items"][0]["budget_summary"]["total_amount"] == "10.00"
+    assert app_json["activity_line_items"][1]["budget_summary"]["total_amount"] == "40.00"
 
-    # ONLY C–F used
-    assert app_json["total_budget_summary"]["total_amount"] == "110.00"
+    # Row 5 G = sum of Column G rows 1-4 (10 + 40 = 50), NOT sum of C-F (1+2+3+4 + 10+20+30+40 = 110)
+    assert app_json["total_budget_summary"]["total_amount"] == "50.00"
 
 
-def test_sf424a_v_1_0_row_g_is_never_used_in_total_budget_summary(
+def test_sf424a_v_1_0_total_budget_summary_column_g_differs_from_cf_sum(
     enable_factory_create, sf424a_v1_0
 ):
+    """For supplemental grants Column G per row is NOT the sum of C-F; Row 5 G must still sum Column G."""
     data = {
         "activity_line_items": [
             {
@@ -637,7 +639,7 @@ def test_sf424a_v_1_0_row_g_is_never_used_in_total_budget_summary(
                     "non_federal_estimated_unobligated_amount": "0.00",
                     "federal_new_or_revised_amount": "0.00",
                     "non_federal_new_or_revised_amount": "0.00",
-                    "total_amount": "999999.00",  # extreme value
+                    "total_amount": "999999.00",  # user-entered value unrelated to C-F
                 }
             }
         ],
@@ -653,4 +655,5 @@ def test_sf424a_v_1_0_row_g_is_never_used_in_total_budget_summary(
     validate_application_form(app, ApplicationAction.MODIFY)
     app_json = app.application_response
 
-    assert app_json["total_budget_summary"]["total_amount"] == "0.00"
+    # Row 5 G = sum of Column G rows 1-4, which is 999999.00 (not 0.00 from C-F)
+    assert app_json["total_budget_summary"]["total_amount"] == "999999.00"
