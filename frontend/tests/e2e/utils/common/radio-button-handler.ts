@@ -24,5 +24,31 @@ export const radioButtonHandler: FieldHandler = async (
 
   const locator = getChoiceLocator(page, field, data);
   await locator.waitFor({ state: "visible", timeout: 5000 });
-  await locator.click();
+
+  if (await locator.isChecked()) {
+    return;
+  }
+
+  const checkViaLabel = async () => {
+    const inputId = await locator.getAttribute("id");
+    if (!inputId) {
+      throw new Error(
+        `Radio field ${field.field} is offscreen and has no id for label fallback`,
+      );
+    }
+
+    const label = page.locator(`label[for="${inputId}"]`).first();
+    await label.waitFor({ state: "visible", timeout: 5000 });
+    await label.click();
+  };
+
+  try {
+    await locator.check({ timeout: 5000 });
+  } catch {
+    await checkViaLabel();
+  }
+
+  if (!(await locator.isChecked())) {
+    throw new Error(`Radio field ${field.field} did not reach checked state`);
+  }
 };

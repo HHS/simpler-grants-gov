@@ -1,10 +1,11 @@
 import { Page, TestInfo } from "@playwright/test";
 // Orchestrates page-field filling by dispatching handlers from each field type and properties.
-import { fieldHandlerDispatcher } from "tests/e2e/utils/common/index";
+import { runSharedFieldFill } from "tests/e2e/utils/common/index";
+import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
 import {
-  FillFieldDefinition,
-  FillFormConfig,
-  FormFillFieldDefinitions,
+  type FillFieldDefinition,
+  type FillFormConfig,
+  type FormFillFieldDefinitions,
   shouldFillField,
 } from "tests/e2e/utils/common/types";
 
@@ -17,39 +18,21 @@ export async function fillField(
   field: FillFieldDefinition,
   data: string | boolean | undefined,
 ): Promise<void> {
-  const fieldIdentifier = field.section
-    ? `${field.section}-${field.field}`
-    : field.field;
-  try {
-    if (data === undefined) {
-      await testInfo.attach(`fillField-${fieldIdentifier}-skipped`, {
-        body: `Skipped ${fieldIdentifier}: no data provided`,
-        contentType: "text/plain",
-      });
-      return;
-    }
-    const handler = fieldHandlerDispatcher[field.type];
-    if (!handler) {
-      throw new Error(`No handler found for field type: ${field.type}`);
-    }
-    await handler(testInfo, page, field, data);
-    await testInfo.attach(`fillField-${fieldIdentifier}-success`, {
-      body: `Successfully filled ${fieldIdentifier}: "${data}"`,
-      contentType: "text/plain",
-    });
-  } catch (error) {
-    await testInfo.attach(`fillField-${fieldIdentifier}-error`, {
-      body: `Failed to fill ${fieldIdentifier}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-      contentType: "text/plain",
-    });
-    throw new Error(
-      `Failed to fill ${field.field}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-  }
+  const fieldIdentifier = buildFieldIdentifier(field);
+  await runSharedFieldFill({
+    testInfo,
+    page,
+    field,
+    data,
+    fieldIdentifier,
+    attachmentNames: {
+      skipped: "fillField",
+      success: "fillField",
+      error: "fillField",
+    },
+    notFoundHandlerMessage: `No handler found for field type: ${field.type}`,
+    wrappedErrorPrefix: `Failed to fill ${field.field}`,
+  });
 }
 /**
  * Fills a subset of fields on the current form page without navigating or saving.
@@ -65,9 +48,15 @@ export async function fillFormPartial(
 ): Promise<void> {
   for (const key of Object.keys(data)) {
     const fieldDef = fieldDefinitions[key as keyof FormFillFieldDefinitions];
-    if (fieldDef) {
-      await fillField(testInfo, page, fieldDef, data[key]);
+    if (!fieldDef) {
+      await testInfo.attach(`fillFormPartial-${key}-unknown-key`, {
+        body: `Skipped ${key}: no matching field definition found`,
+        contentType: "text/plain",
+      });
+      continue;
     }
+
+    await fillField(testInfo, page, fieldDef, data[key]);
   }
 }
 /**

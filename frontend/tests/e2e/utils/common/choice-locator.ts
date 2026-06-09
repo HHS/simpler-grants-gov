@@ -32,9 +32,19 @@ export function getChoiceLocator(
       ? page.locator(field.selector)
       : field.testId
         ? page.getByTestId(field.testId)
-        : page.getByText(String(data), {
-            exact: field.textExact ?? field.useDataAsText ?? false,
-          });
+        : field.type === "checkbox" && typeof data === "string"
+          ? page.getByRole("checkbox", {
+              name: data,
+              exact: field.textExact ?? true,
+            })
+          : field.type === "radiobutton" && typeof data === "string"
+            ? page.getByRole("radio", {
+                name: data,
+                exact: field.textExact ?? true,
+              })
+            : page.getByText(String(data), {
+                exact: field.textExact ?? field.useDataAsText ?? false,
+              });
   if (field.hasTextRegex) {
     locator = locator.filter({ hasText: new RegExp(field.hasTextRegex) });
   }

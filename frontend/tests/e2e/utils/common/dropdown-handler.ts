@@ -6,6 +6,9 @@ import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropd
 
 import { FieldHandler } from "./types";
 
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export const dropdownHandler: FieldHandler = async (
   testInfo,
   page,
@@ -27,7 +30,35 @@ export const dropdownHandler: FieldHandler = async (
     await locator.click();
     return;
   }
+  if (field.label) {
+    const control = page
+      .getByLabel(field.label, { exact: field.labelExact })
+      .first();
+    await control.waitFor({ state: "visible", timeout: 5000 });
+
+    const tagName = await control.evaluate((node) => node.tagName.toLowerCase());
+    if (tagName === "select") {
+      await control.selectOption({ label: data });
+      return;
+    }
+
+    await control.click();
+    const option = page
+      .getByRole("option", {
+        name: new RegExp(`^${escapeRegex(data)}$`, "i"),
+      })
+      .first();
+
+    if (await option.isVisible().catch(() => false)) {
+      await option.click();
+      return;
+    }
+
+    await control.fill(data);
+    await control.press("Enter");
+    return;
+  }
   throw new Error(
-    `Dropdown field ${field.field} is missing selector or testId`,
+    `Dropdown field ${field.field} is missing selector, testId, or label`,
   );
 };

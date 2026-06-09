@@ -5,12 +5,17 @@
 
 import { Page, TestInfo } from "@playwright/test";
 
+type SharedFieldType = "text" | "checkbox";
+
 export type FieldType =
-  | "text"
+  | SharedFieldType
+  | "textarea"
+  | "email"
+  | "select"
+  | "date"
   | "dropdown"
   | "file"
   | "radiobutton"
-  | "checkbox"
   | "combo-box-input";
 
 export interface FillFieldDefinition {
@@ -19,6 +24,8 @@ export interface FillFieldDefinition {
   type: FieldType;
   testId?: string;
   selector?: string;
+  label?: string;
+  labelExact?: boolean;
   optionTestIdPrefix?: string;
   hasTextRegex?: string;
   getByText?: string;
@@ -48,8 +55,12 @@ export interface FillFormConfig {
   beforeSave?: (page: Page) => Promise<void>;
 }
 
+export type FillPageFieldsOptions = {
+  continueOnError?: boolean;
+};
+
 export type FieldHandler = (
-  testInfo: TestInfo,
+  testInfo: TestInfo | undefined,
   page: Page,
   field: FillFieldDefinition,
   data: string | boolean | undefined,
