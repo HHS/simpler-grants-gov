@@ -100,7 +100,9 @@ test.describe("Grantor Opportunity Happy Path", () => {
       // Then I should be on the "Edit Opportunity" page and the URL should include "fromCreate=true".
       await expect(page).toHaveURL(/fromCreate=true/);
       // And I should see the "Opportunity draft started" confirmation message.
-      await expect(page.getByText("Opportunity draft started", { exact: true })).toBeVisible();
+      await expect(
+        page.getByText("Opportunity draft started", { exact: true }),
+      ).toBeVisible();
 
       // And "Save" should be enabled while "Publish" and "Preview" remain disabled.
       await assertButtonEnabledDisabledStates(page, {
@@ -120,7 +122,9 @@ test.describe("Grantor Opportunity Happy Path", () => {
       await page.getByRole("button", { name: "Save" }).click();
 
       // Then I should see the "Opportunity draft started" confirmation message.
-      await expect(page.getByText("Opportunity draft started", { exact: true })).toBeVisible();
+      await expect(
+        page.getByText("Opportunity draft started", { exact: true }),
+      ).toBeVisible();
       // And I should see the save confirmation message "Your initial information has been saved...".
       await expect(
         page.getByText(
@@ -174,7 +178,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
       const matchingRow = await waitForOpportunityRowByStatus(page, {
         title: opportunityTitle,
         status: "posted",
-        message: "Waiting for \"posted\" opportunity row to appear on list",
+        message: 'Waiting for "posted" opportunity row to appear on list',
       });
       // And "Edit", "Copy", and "Delete" links should not appear for "posted" rows.
       await assertActionsColumnLinksByStatus(matchingRow, {

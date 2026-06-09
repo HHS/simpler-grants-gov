@@ -3,15 +3,15 @@
 // Usage: import { fillPageField, fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 
 import { type Page, type TestInfo } from "@playwright/test";
+import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
 import {
   runFieldFillBatch,
   runSharedFieldFill,
 } from "tests/e2e/utils/common/index";
-import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
 import {
-  type FillPageFieldsOptions,
   type FieldType,
   type FillFieldDefinition,
+  type FillPageFieldsOptions,
 } from "tests/e2e/utils/common/types";
 
 export type PageFillField = {
@@ -72,7 +72,8 @@ export async function fillPageFields(
       await fillPageField(testInfo, page, field, field.value);
     },
     formatError: (field, error) => {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       return `${field.label} [${field.type}]: ${errorMessage}`;
     },
     failureSummary: (failureCount, failures) => {

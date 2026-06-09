@@ -50,39 +50,45 @@ export const buildPageFieldsFromDefinitions = (
   }));
 };
 
-export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
-  { label: "Opportunity number", type: "text", valueKey: "opportunityNumber" },
-  { label: "Opportunity title", type: "text", valueKey: "opportunityTitle" },
-  {
-    label: "Grant selection method",
-    type: "select",
-    valueKey: "grantSelectionMethod",
-  },
-  {
-    label: "Assistance listing number",
-    type: "text",
-    valueKey: "assistanceListingNumber",
-  },
-];
+export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
+  [
+    {
+      label: "Opportunity number",
+      type: "text",
+      valueKey: "opportunityNumber",
+    },
+    { label: "Opportunity title", type: "text", valueKey: "opportunityTitle" },
+    {
+      label: "Grant selection method",
+      type: "select",
+      valueKey: "grantSelectionMethod",
+    },
+    {
+      label: "Assistance listing number",
+      type: "text",
+      valueKey: "assistanceListingNumber",
+    },
+  ];
 
-export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
-  { label: "Funding type", type: "select", valueKey: "fundingType" },
-  { label: "Category", type: "select", valueKey: "category" },
-  {
-    label: "Expected number of awards",
-    type: "text",
-    valueKey: "expectedNumberOfAwards",
-  },
-  {
-    label: "Estimated total program funding",
-    type: "text",
-    valueKey: "estimatedTotalProgramFunding",
-  },
-  { label: "Award minimum", type: "text", valueKey: "awardMinimum" },
-  { label: "Award maximum", type: "text", valueKey: "awardMaximum" },
-  { label: "Publish date", type: "date", valueKey: "publishDate" },
-  { label: "Close date", type: "date", valueKey: "closeDate" },
-];
+export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
+  [
+    { label: "Funding type", type: "select", valueKey: "fundingType" },
+    { label: "Category", type: "select", valueKey: "category" },
+    {
+      label: "Expected number of awards",
+      type: "text",
+      valueKey: "expectedNumberOfAwards",
+    },
+    {
+      label: "Estimated total program funding",
+      type: "text",
+      valueKey: "estimatedTotalProgramFunding",
+    },
+    { label: "Award minimum", type: "text", valueKey: "awardMinimum" },
+    { label: "Award maximum", type: "text", valueKey: "awardMaximum" },
+    { label: "Publish date", type: "date", valueKey: "publishDate" },
+    { label: "Close date", type: "date", valueKey: "closeDate" },
+  ];
 
 export const ELIGIBILITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
   {
@@ -112,24 +118,25 @@ export const ELIGIBILITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
   },
 ];
 
-export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
-  {
-    label: "Description",
-    type: "textarea",
-    valueKey: "description",
-    exact: true,
-  },
-  {
-    label: "Link to additional information",
-    type: "text",
-    valueKey: "linkToAdditionalInformation",
-  },
-  { label: "Link display text", type: "text", valueKey: "linkDisplayText" },
-  {
-    label: "Grantor contact details",
-    type: "textarea",
-    valueKey: "grantorContactDetails",
-  },
-  { label: "Contact email", type: "email", valueKey: "contactEmail" },
-  { label: "Email display text", type: "text", valueKey: "emailDisplayText" },
-];
+export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
+  [
+    {
+      label: "Description",
+      type: "textarea",
+      valueKey: "description",
+      exact: true,
+    },
+    {
+      label: "Link to additional information",
+      type: "text",
+      valueKey: "linkToAdditionalInformation",
+    },
+    { label: "Link display text", type: "text", valueKey: "linkDisplayText" },
+    {
+      label: "Grantor contact details",
+      type: "textarea",
+      valueKey: "grantorContactDetails",
+    },
+    { label: "Contact email", type: "email", valueKey: "contactEmail" },
+    { label: "Email display text", type: "text", valueKey: "emailDisplayText" },
+  ];

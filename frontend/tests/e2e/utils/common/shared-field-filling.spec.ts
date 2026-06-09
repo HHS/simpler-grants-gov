@@ -70,7 +70,9 @@ test.describe("runSharedFieldFill", () => {
       expect(handlerCalls).toBe(0);
       expect(attachments).toHaveLength(1);
       expect(attachments[0].name).toBe("fillField-test-text-skipped");
-      expect(attachments[0].body).toContain("Skipped test-text: no data provided");
+      expect(attachments[0].body).toContain(
+        "Skipped test-text: no data provided",
+      );
     } finally {
       fieldHandlerDispatcher.text = originalHandler;
     }
@@ -100,7 +102,9 @@ test.describe("runSharedFieldFill", () => {
 
       expect(attachments).toHaveLength(1);
       expect(attachments[0].name).toBe("fillField-test-text-success");
-      expect(attachments[0].body).toContain('Successfully filled test-text: "hello"');
+      expect(attachments[0].body).toContain(
+        'Successfully filled test-text: "hello"',
+      );
     } finally {
       fieldHandlerDispatcher.text = originalHandler;
     }
@@ -110,7 +114,8 @@ test.describe("runSharedFieldFill", () => {
     const originalHandler = fieldHandlerDispatcher.text;
     const attachments: AttachmentRecord[] = [];
 
-    (fieldHandlerDispatcher as unknown as Record<string, unknown>).text = undefined;
+    (fieldHandlerDispatcher as unknown as Record<string, unknown>).text =
+      undefined;
 
     try {
       await expect(
@@ -132,7 +137,9 @@ test.describe("runSharedFieldFill", () => {
 
       expect(attachments).toHaveLength(1);
       expect(attachments[0].name).toBe("fillField-test-text-error");
-      expect(attachments[0].body).toContain("Failed to fill test-text: No handler found");
+      expect(attachments[0].body).toContain(
+        "Failed to fill test-text: No handler found",
+      );
     } finally {
       fieldHandlerDispatcher.text = originalHandler;
     }

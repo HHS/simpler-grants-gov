@@ -1,12 +1,12 @@
 import { Page, TestInfo } from "@playwright/test";
+import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
 // Orchestrates page-field filling by dispatching handlers from each field type and properties.
 import { runSharedFieldFill } from "tests/e2e/utils/common/index";
-import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
 import {
+  shouldFillField,
   type FillFieldDefinition,
   type FillFormConfig,
   type FormFillFieldDefinitions,
-  shouldFillField,
 } from "tests/e2e/utils/common/types";
 
 import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";

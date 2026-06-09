@@ -3,6 +3,7 @@
 // Usage: import { emailHandler, fillEmailByLabel } from "tests/e2e/utils/common/email-field";
 
 import { type Page } from "@playwright/test";
+
 import { FieldHandler } from "./types";
 
 export const fillEmailByLabel = async (

@@ -74,7 +74,9 @@ export const assertActionsColumnLinksByStatus = async (
   const statusRule = statusActionRules[normalizedStatus];
 
   if (!statusRule) {
-    throw new Error(`No action-links rule configured for status: ${options.status}`);
+    throw new Error(
+      `No action-links rule configured for status: ${options.status}`,
+    );
   }
 
   for (const actionText of statusRule.visible ?? []) {

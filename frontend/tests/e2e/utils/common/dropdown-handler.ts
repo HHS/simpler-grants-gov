@@ -36,7 +36,9 @@ export const dropdownHandler: FieldHandler = async (
       .first();
     await control.waitFor({ state: "visible", timeout: 5000 });
 
-    const tagName = await control.evaluate((node) => node.tagName.toLowerCase());
+    const tagName = await control.evaluate((node) =>
+      node.tagName.toLowerCase(),
+    );
     if (tagName === "select") {
       await control.selectOption({ label: data });
       return;

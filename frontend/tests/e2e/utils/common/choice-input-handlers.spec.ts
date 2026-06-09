@@ -129,10 +129,16 @@ const checkboxField: FillFieldDefinition = {
 
 test.describe("choice input handlers", () => {
   test("radio handler falls back to label click when check fails", async () => {
-    const input = new FakeLocator({ checked: false, id: "radio-1", throwOnCheck: true });
-    const label = new FakeLocator({ onClick: () => {
-      input.checked = true;
-    } });
+    const input = new FakeLocator({
+      checked: false,
+      id: "radio-1",
+      throwOnCheck: true,
+    });
+    const label = new FakeLocator({
+      onClick: () => {
+        input.checked = true;
+      },
+    });
 
     const page = new FakePage({
       inputLocator: input,
@@ -160,10 +166,16 @@ test.describe("choice input handlers", () => {
   });
 
   test("checkbox handler falls back to label click when check fails", async () => {
-    const input = new FakeLocator({ checked: false, id: "checkbox-1", throwOnCheck: true });
-    const label = new FakeLocator({ onClick: () => {
-      input.checked = true;
-    } });
+    const input = new FakeLocator({
+      checked: false,
+      id: "checkbox-1",
+      throwOnCheck: true,
+    });
+    const label = new FakeLocator({
+      onClick: () => {
+        input.checked = true;
+      },
+    });
 
     const page = new FakePage({
       inputLocator: input,
@@ -179,16 +191,22 @@ test.describe("choice input handlers", () => {
   });
 
   test("checkbox handler falls back to nested checkbox flow when primary locator is not checkable", async () => {
-    const nested = new FakeLocator({ checked: false, id: "nested-checkbox-1", countValue: 1 });
+    const nested = new FakeLocator({
+      checked: false,
+      id: "nested-checkbox-1",
+      countValue: 1,
+    });
     const input = new FakeLocator({
       checked: false,
       throwOnCheck: true,
       nested,
     });
 
-    const nestedLabel = new FakeLocator({ onClick: () => {
-      nested.checked = true;
-    } });
+    const nestedLabel = new FakeLocator({
+      onClick: () => {
+        nested.checked = true;
+      },
+    });
 
     const page = new FakePage({
       inputLocator: input,

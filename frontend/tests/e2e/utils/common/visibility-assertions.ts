@@ -16,7 +16,9 @@ export const assertPageDetailsVisible = async (
   page: Page,
   options: { heading: string; texts: string[] },
 ) => {
-  await expect(page.getByRole("heading", { name: options.heading })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: options.heading }),
+  ).toBeVisible();
 
   for (const text of options.texts) {
     await assertTextVisible(page, text);

@@ -42,14 +42,12 @@ const getMatchingRowLocator = (
   linkText: string,
   statusText: RegExp,
 ): Locator => {
-  const rowsByTitle = page
-    .locator(rowSelector)
-    .filter({
-      has: page.getByRole("link", {
-        name: linkText,
-        exact: true,
-      }),
-    });
+  const rowsByTitle = page.locator(rowSelector).filter({
+    has: page.getByRole("link", {
+      name: linkText,
+      exact: true,
+    }),
+  });
 
   const rowsByStatusCell = rowsByTitle.filter({
     has: page

@@ -29,7 +29,9 @@ const defaultAttachmentNames: SharedFillAttachmentNames = {
   error: "fillField",
 };
 
-export async function runSharedFieldFill(options: SharedFillOptions): Promise<void> {
+export async function runSharedFieldFill(
+  options: SharedFillOptions,
+): Promise<void> {
   const {
     testInfo,
     page,
@@ -67,7 +69,12 @@ export async function runSharedFieldFill(options: SharedFillOptions): Promise<vo
       await testInfo.attach(
         attachmentNames.success + "-" + fieldIdentifier + "-success",
         {
-          body: "Successfully filled " + fieldIdentifier + ': "' + String(data) + '"',
+          body:
+            "Successfully filled " +
+            fieldIdentifier +
+            ': "' +
+            String(data) +
+            '"',
           contentType: "text/plain",
         },
       );

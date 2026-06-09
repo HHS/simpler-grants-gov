@@ -3,6 +3,7 @@
 // Usage: import { selectHandler, selectOptionByLabel } from "tests/e2e/utils/common/select-field";
 
 import { type Page } from "@playwright/test";
+
 import { FieldHandler } from "./types";
 
 export const selectOptionByLabel = async (

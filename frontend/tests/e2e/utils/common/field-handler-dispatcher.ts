@@ -10,7 +10,7 @@ import { emailHandler } from "./email-field";
 import { fileHandler } from "./file-handler";
 import { radioButtonHandler } from "./radio-button-handler";
 import { selectHandler } from "./select-field";
-import { textHandler, textareaHandler } from "./text-handler";
+import { textareaHandler, textHandler } from "./text-handler";
 import { type FieldHandler, type FieldType } from "./types";
 
 export const fieldHandlerDispatcher: Record<FieldType, FieldHandler> = {
