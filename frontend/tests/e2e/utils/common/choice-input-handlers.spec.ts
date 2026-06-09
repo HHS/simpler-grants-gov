@@ -37,38 +37,41 @@ class FakeLocator {
     return this;
   }
 
-  async waitFor(_options?: unknown) {
-    return;
+  waitFor(_options?: unknown) {
+    return Promise.resolve();
   }
 
-  async click() {
+  click() {
     this.clickCount += 1;
     this.onClick?.();
+    return Promise.resolve();
   }
 
-  async check(_options?: unknown) {
+  check(_options?: unknown) {
     if (this.throwOnCheck) {
       throw new Error("check failed");
     }
     this.checked = true;
+    return Promise.resolve();
   }
 
-  async uncheck(_options?: unknown) {
+  uncheck(_options?: unknown) {
     if (this.throwOnUncheck) {
       throw new Error("uncheck failed");
     }
     this.checked = false;
+    return Promise.resolve();
   }
 
-  async isChecked() {
-    return this.checked;
+  isChecked() {
+    return Promise.resolve(this.checked);
   }
 
-  async getAttribute(name: string) {
+  getAttribute(name: string) {
     if (name === "id") {
-      return this.id ?? null;
+      return Promise.resolve(this.id ?? null);
     }
-    return null;
+    return Promise.resolve(null);
   }
 
   locator(selector: string) {
@@ -79,8 +82,8 @@ class FakeLocator {
     return new FakeLocator({ countValue: 0 });
   }
 
-  async count() {
-    return this.countValue;
+  count() {
+    return Promise.resolve(this.countValue);
   }
 }
 

@@ -12,11 +12,13 @@ test.describe("runFieldFillBatch", () => {
     await expect(
       runFieldFillBatch<number>({
         items: [1, 2, 3],
-        fillItem: async (item) => {
+        fillItem: (item) => {
           visited.push(item);
           if (item === 2) {
-            throw new Error("boom-2");
+            return Promise.reject(new Error("boom-2"));
           }
+
+          return Promise.resolve();
         },
       }),
     ).rejects.toThrow("boom-2");
@@ -29,13 +31,15 @@ test.describe("runFieldFillBatch", () => {
       runFieldFillBatch<number>({
         items: [1, 2, 3],
         continueOnError: true,
-        fillItem: async (item) => {
+        fillItem: (item) => {
           if (item === 1) {
-            throw new Error("bad-1");
+            return Promise.reject(new Error("bad-1"));
           }
           if (item === 3) {
-            throw new Error("bad-3");
+            return Promise.reject(new Error("bad-3"));
           }
+
+          return Promise.resolve();
         },
       }),
     ).rejects.toThrow("Failed to fill 2 item(s):\nbad-1\nbad-3");
@@ -48,8 +52,10 @@ test.describe("runFieldFillBatch", () => {
       runFieldFillBatch<number>({
         items: [1, 2, 3],
         continueOnError: true,
-        fillItem: async (item) => {
+        fillItem: (item) => {
           visited.push(item);
+
+          return Promise.resolve();
         },
       }),
     ).resolves.toBeUndefined();
@@ -62,12 +68,15 @@ test.describe("runFieldFillBatch", () => {
       runFieldFillBatch<number>({
         items: [1, 2],
         continueOnError: true,
-        fillItem: async (item) => {
+        fillItem: (item) => {
           if (item === 2) {
-            throw "raw-error";
+            return Promise.reject(new Error("raw-error"));
           }
+
+          return Promise.resolve();
         },
-        formatError: (item, error) => `item-${item}: ${String(error)}`,
+        formatError: (item, error) =>
+          `item-${item}: ${error instanceof Error ? error.message : String(error)}`,
       }),
     ).rejects.toThrow("Failed to fill 1 item(s):\nitem-2: raw-error");
   });
@@ -77,9 +86,7 @@ test.describe("runFieldFillBatch", () => {
       runFieldFillBatch<number>({
         items: [10, 20],
         continueOnError: true,
-        fillItem: async () => {
-          throw new Error("failed");
-        },
+        fillItem: () => Promise.reject(new Error("failed")),
         formatError: (item) => `failed-${item}`,
         failureSummary: (count, failures) =>
           `Batch failed (${count}): ${failures.join(" | ")}`,

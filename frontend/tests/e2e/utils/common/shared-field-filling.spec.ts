@@ -14,12 +14,14 @@ type AttachmentRecord = {
 };
 
 const buildTestInfo = (attachments: AttachmentRecord[]): TestInfo => {
-  const attachMock: TestInfo["attach"] = async (name, options) => {
+  const attachMock: TestInfo["attach"] = (name, options) => {
     attachments.push({
       name,
       body: String(options?.body ?? ""),
       contentType: String(options?.contentType ?? ""),
     });
+
+    return Promise.resolve();
   };
 
   return {
@@ -44,8 +46,9 @@ test.describe("runSharedFieldFill", () => {
     const attachments: AttachmentRecord[] = [];
     let handlerCalls = 0;
 
-    fieldHandlerDispatcher.text = async () => {
+    fieldHandlerDispatcher.text = () => {
       handlerCalls += 1;
+      return Promise.resolve();
     };
 
     try {
@@ -77,9 +80,7 @@ test.describe("runSharedFieldFill", () => {
     const originalHandler = fieldHandlerDispatcher.text;
     const attachments: AttachmentRecord[] = [];
 
-    fieldHandlerDispatcher.text = async () => {
-      return;
-    };
+    fieldHandlerDispatcher.text = () => Promise.resolve();
 
     try {
       await runSharedFieldFill({
@@ -142,9 +143,7 @@ test.describe("runSharedFieldFill", () => {
     const attachments: AttachmentRecord[] = [];
     const timeoutError = new Error("Test timeout of 30000ms exceeded");
 
-    fieldHandlerDispatcher.text = async () => {
-      throw timeoutError;
-    };
+    fieldHandlerDispatcher.text = () => Promise.reject(timeoutError);
 
     try {
       await expect(

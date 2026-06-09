@@ -15,12 +15,8 @@ export function buildFieldIdentifier(
   field: FillFieldDefinition | PageIdentifierInput,
 ): string {
   if ("section" in field || "field" in field) {
-    const formField = field as FillFieldDefinition;
-    return formField.section
-      ? `${formField.section}-${formField.field}`
-      : formField.field;
+    return field.section ? `${field.section}-${field.field}` : field.field;
   }
 
-  const pageField = field as PageIdentifierInput;
-  return `${pageField.label}-${pageField.type}`;
+  return `${field.label}-${field.type}`;
 }
