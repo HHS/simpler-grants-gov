@@ -88,6 +88,7 @@ export const mockAwardRecommendationSubmissions: AwardRecommendationSubmission[]
           organization: {
             organization_id: "63588df8-f2d1-44ed-a201-5804abba696f",
             organization_name: "Test Org",
+            uei: "UEI000001",
           },
         },
       },

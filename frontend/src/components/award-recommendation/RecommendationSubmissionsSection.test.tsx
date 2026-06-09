@@ -35,6 +35,7 @@ const mockSubmission: AwardRecommendationSubmission = {
       organization: {
         organization_id: "63588df8-f2d1-44ed-a201-5804abba696f",
         organization_name: "Test Org",
+        uei: "UEI000001",
       },
     },
   },
@@ -98,6 +99,7 @@ describe("RecommendationSubmissionsSection", () => {
 
     expect(screen.getByText("Test project")).toBeInTheDocument();
     expect(screen.getByText("Test Org")).toBeInTheDocument();
+    expect(screen.getByText("UEI000001")).toBeInTheDocument();
     expect(screen.getByText("recommended")).toBeInTheDocument();
     expect(screen.queryByText("exceptions.heading")).not.toBeInTheDocument();
   });

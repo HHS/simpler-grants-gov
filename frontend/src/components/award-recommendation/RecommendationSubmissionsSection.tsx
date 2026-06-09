@@ -204,7 +204,9 @@ const SubmissionTable = ({
         applicationSubmission.application?.organization?.organization_name ||
           EMPTY_CELL,
       ),
-      nowrapTableCell(EMPTY_CELL),
+      nowrapTableCell(
+        applicationSubmission.application?.organization?.uei || EMPTY_CELL,
+      ),
       nowrapTableCell(EMPTY_CELL),
       nowrapTableCell(
         <RecommendationTypeTag
