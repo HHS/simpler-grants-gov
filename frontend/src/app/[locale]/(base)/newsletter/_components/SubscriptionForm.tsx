@@ -1,9 +1,10 @@
 "use client";
 
-import { subscribeEmail } from "src/app/[locale]/(base)/newsletter/actions";
+import { useClientFetch } from "src/hooks/useClientFetch";
 
 import { useTranslations } from "next-intl";
-import React, { useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, type ReactNode } from "react";
 import {
   ErrorMessage,
   FormGroup,
@@ -18,24 +19,104 @@ export type ValidationErrors = {
   email?: string[];
 };
 
+type FormState = {
+  errorMessage: ReactNode;
+  validationErrors: ValidationErrors;
+};
+
+type SubscribeResponse = {
+  success: boolean;
+  errorCode?: string;
+  validationErrors?: ValidationErrors;
+};
+
 export default function SubscriptionForm() {
   const t = useTranslations("Subscribe");
+  const router = useRouter();
+  const { clientFetch } = useClientFetch<SubscribeResponse>(
+    "Newsletter subscription failed",
+  );
 
-  const [state, formAction] = useActionState(subscribeEmail, {
+  const [subscribeErrorState, setSubscribeErrorState] = useState<FormState>({
     errorMessage: "",
     validationErrors: {},
   });
 
   const showError = (fieldName: string): boolean => {
-    if (!state?.validationErrors) return false;
+    if (!subscribeErrorState?.validationErrors) return false;
 
     return (
-      state?.validationErrors[fieldName as keyof ValidationErrors] !== undefined
+      subscribeErrorState?.validationErrors[
+        fieldName as keyof ValidationErrors
+      ] !== undefined
     );
   };
 
+  const serverError = t.rich("errors.server", {
+    "email-link": (content) => (
+      <a href="mailto:simpler@grants.gov">{content}</a>
+    ),
+  });
+
+  const handleSubmit = async (event: {
+    preventDefault(): void;
+    currentTarget: HTMLFormElement;
+  }) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    // Client-side validation — mirrors the API's Zod schema so the API never
+    // receives an invalid payload during normal usage.
+    const name = (formData.get("name") as string) ?? "";
+    const email = (formData.get("email") as string) ?? "";
+    const clientValidationErrors: ValidationErrors = {};
+    if (!name.trim()) clientValidationErrors.name = ["Please enter a name."];
+    if (!email.trim())
+      clientValidationErrors.email = ["Please enter an email address."];
+    if (Object.keys(clientValidationErrors).length > 0) {
+      setSubscribeErrorState({
+        errorMessage: "",
+        validationErrors: clientValidationErrors,
+      });
+      return;
+    }
+
+    try {
+      const data = await clientFetch("/api/newsletter/subscribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (data.success) {
+        router.push("/newsletter/confirmation");
+        return;
+      }
+
+      if (data.errorCode === "alreadySubscribed") {
+        setSubscribeErrorState({
+          errorMessage: t("errors.alreadySubscribed"),
+          validationErrors: {},
+        });
+      } else {
+        setSubscribeErrorState({
+          errorMessage: serverError,
+          validationErrors: {},
+        });
+      }
+    } catch {
+      setSubscribeErrorState({
+        errorMessage: serverError,
+        validationErrors: {},
+      });
+    }
+  };
+
   return (
-    <form action={formAction}>
+    <form
+      onSubmit={(e) => {
+        void handleSubmit(e);
+      }}
+    >
       <FormGroup error={showError("name")}>
         <Label htmlFor="name" className="maxw-full">
           {t("form.name") + " "}
@@ -45,7 +126,7 @@ export default function SubscriptionForm() {
         </Label>
         {showError("name") ? (
           <ErrorMessage className="maxw-mobile-lg">
-            {state?.validationErrors.name?.[0]}
+            {subscribeErrorState?.validationErrors.name?.[0]}
           </ErrorMessage>
         ) : (
           <></>
@@ -79,7 +160,7 @@ export default function SubscriptionForm() {
         </Label>
         {showError("email") ? (
           <ErrorMessage className="maxw-mobile-lg">
-            {state?.validationErrors.email?.[0]}
+            {subscribeErrorState?.validationErrors.email?.[0]}
           </ErrorMessage>
         ) : (
           <></>
@@ -97,9 +178,9 @@ export default function SubscriptionForm() {
         <TextInput type="text" name="hp" id="hp" />
       </div>
       <SubscriptionSubmitButton />
-      {state?.errorMessage ? (
+      {subscribeErrorState?.errorMessage ? (
         <ErrorMessage className="maxw-mobile-lg">
-          {state?.errorMessage}
+          {subscribeErrorState?.errorMessage}
         </ErrorMessage>
       ) : (
         <></>

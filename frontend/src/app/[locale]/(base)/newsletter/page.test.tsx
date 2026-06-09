@@ -31,6 +31,7 @@ jest.mock("next-intl/server", () => ({
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
+  useRouter: () => ({ push: jest.fn() }),
 }));
 
 jest.mock("src/services/sessionStorage/sessionStorage", () => {
