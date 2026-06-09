@@ -330,7 +330,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   // A. Check the user's session
   const userSession = await getSession();
   if (!userSession || !userSession.token) {
-    console.error("Invalid session", userSession);
+    console.error("User is not signed in.");
     return <TopLevelError />;
   }
 
