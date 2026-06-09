@@ -70,10 +70,10 @@ def test_write_debug_data_to_s3(
         r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
     )
     request_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/request.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request.txt"
     )
     response_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/response.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
     )
     assert request_contents.replace("\n", "") == SOAP_PAYLOAD.decode().replace("\n", "")
     assert response_contents.replace("\r", "") == SOAP_LEGACY_RESPONSE_PAYLOAD.decode().replace(
