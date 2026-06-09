@@ -72,13 +72,17 @@ const isLikelyLoggedOut = async (page: Page): Promise<boolean> => {
     .getByRole("heading", { name: /sign in to your account/i })
     .first();
 
-  const [hasOpportunitiesHeading, hasAccountButton, hasSignInLink, hasSignInHeading] =
-    await Promise.all([
-      opportunitiesHeading.isVisible().catch(() => false),
-      accountButton.isVisible().catch(() => false),
-      signInLink.isVisible().catch(() => false),
-      signInHeading.isVisible().catch(() => false),
-    ]);
+  const [
+    hasOpportunitiesHeading,
+    hasAccountButton,
+    hasSignInLink,
+    hasSignInHeading,
+  ] = await Promise.all([
+    opportunitiesHeading.isVisible().catch(() => false),
+    accountButton.isVisible().catch(() => false),
+    signInLink.isVisible().catch(() => false),
+    signInHeading.isVisible().catch(() => false),
+  ]);
 
   if (hasOpportunitiesHeading) {
     return false;
