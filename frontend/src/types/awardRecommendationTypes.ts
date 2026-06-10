@@ -109,6 +109,11 @@ export type AwardRecommendationApplicationSubmission = {
   application?: AwardRecommendationApplication;
 };
 
+export type AwardRecommendationSubmissionListFilters = {
+  award_recommendation_type?: { one_of: AwardRecommendationType[] };
+  has_exception?: { one_of: boolean[] };
+};
+
 export type AwardRecommendationSubmissionDetail = {
   recommended_amount?: string;
   scoring_comment?: string;

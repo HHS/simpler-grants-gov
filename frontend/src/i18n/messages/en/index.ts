@@ -2198,6 +2198,35 @@ export const messages = {
         showDescription: "Show full description",
         hideSummaryDescription: "Hide full description",
       },
+      submissions: {
+        errorMessage:
+          "Unable to load application submissions. Please try again.",
+        columns: {
+          appNumber: "App #",
+          projectTitle: "Project title",
+          orgName: "Org name",
+          uei: "UEI",
+          score: "Score",
+          recommendation: "Recommendation",
+          requested: "Requested",
+          recommended: "Recommended",
+        },
+        recommendationOptions: {
+          none: "None",
+          recommended: "Recommended",
+          recommendedWithoutFunding: "Recommended but not funded",
+          notRecommended: "Not recommended",
+        },
+        recommendedAwards: {
+          heading: "Recommended awards",
+          editDescription:
+            "Select applications and use the drop-down box to apply your recommendation for the selected group.",
+          editLink: "Edit recommended awards",
+        },
+        exceptions: {
+          heading: "Exceptions to selection method",
+        },
+      },
     },
     risks: {
       pageTitle: "Risks and Conditions",
