@@ -281,6 +281,20 @@ INTERNAL_S3_SCANNER_ROLE = Role(
     ],
 )
 
+E2E_TEST_USER_MANAGER_ROLE_ID = uuid.UUID("b2c3d4e5-f6a7-4b5c-9d0e-1f2a3b4c5d6e")
+E2E_TEST_USER_MANAGER_ROLE = Role(
+    role_id=E2E_TEST_USER_MANAGER_ROLE_ID,
+    role_name="E2E Test User Manager",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        E2E_TEST_USER_MANAGER_ROLE_ID,
+        [Privilege.MANAGE_TEST_USER_TOKEN],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=E2E_TEST_USER_MANAGER_ROLE_ID, role_type=RoleType.INTERNAL),
+    ],
+)
+
 CORE_ROLES = [
     ORG_ADMIN,
     ORG_MEMBER,
@@ -297,4 +311,5 @@ CORE_ROLES = [
     GRANTOR_PROGRAM_OFFICER,
     GRANTOR_BUDGET_OFFICER,
     INTERNAL_S3_SCANNER_ROLE,
+    E2E_TEST_USER_MANAGER_ROLE,
 ]

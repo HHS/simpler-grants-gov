@@ -23,6 +23,16 @@ class InternalRoleAssignmentResponseSchema(AbstractResponseSchema):
     pass
 
 
+class E2ETokenRequestSchema(Schema):
+    user_id = fields.UUID(
+        required=True,
+        metadata={
+            "description": "The UUID of the test user to issue an auth token for",
+            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        },
+    )
+
+
 class E2ETokenResponseSchema(AbstractResponseSchema):
     token = fields.String(metadata={"description": "The viable JWT auth token"})
     expires_at = fields.DateTime(
