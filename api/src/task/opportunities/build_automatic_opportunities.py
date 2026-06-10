@@ -336,7 +336,7 @@ class BuildAutomaticOpportunitiesTask(Task):
         ### Test data 3 for only individuals - All forms are Optional
         self.create_opportunity(
             OpportunityContainer(
-                opportunity_title="Test data 3 for only individuals - All forms are optional",
+                opportunity_title="Test data 3 for only individuals - All forms are Optional",
                 opportunity_number="SGG-indv-only-test-3",
             ),
             competitions=[
