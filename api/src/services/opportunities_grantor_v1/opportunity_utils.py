@@ -21,3 +21,22 @@ def validate_opportunity_created_in_simpler_grants(opportunity: Opportunity) -> 
         raise_flask_error(
             422, message="Only opportunities created in Simpler Grants can be updated"
         )
+
+
+def validate_opportunity_can_be_updated(opportunity: Opportunity) -> None:
+    """Raise a 422 error if the opportunity cannot be updated.
+
+    Opportunities can be updated if:
+    - They are in draft state, OR
+    - They are published but were created in Simpler Grants
+    """
+    if opportunity.is_draft:
+        return
+
+    if opportunity.is_simpler_grants_opportunity:
+        return
+
+    raise_flask_error(
+        422,
+        message="Only draft opportunities or published opportunities created in Simpler Grants can be updated",
+    )

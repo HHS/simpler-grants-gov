@@ -378,3 +378,75 @@ def test_opportunity_summary_update_cannot_change_forecast_status(
     # Verify that is_forecast was NOT changed in the response
     summary_data = response_json["data"]
     assert summary_data["is_forecast"] == original_is_forecast
+
+
+def test_opportunity_summary_update_422_published_non_sgm_opportunity(
+    client, db_session, opportunity_summary_auth_data, enable_factory_create
+):
+    """Test that updating a summary for a published non-SGM opportunity returns 422"""
+    _, agency, token, _ = opportunity_summary_auth_data
+
+    # Create published non-SGM opportunity with summary
+    opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code,
+        is_draft=False,
+        is_simpler_grants_opportunity=False,
+        no_current_summary=True,
+    )
+
+    summary = OpportunitySummaryFactory.create(
+        opportunity=opportunity,
+        is_forecast=False,
+    )
+
+    update_request = update_opportunity_summary_request()
+
+    response = client.put(
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
+        json=update_request,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 422
+    response_json = response.get_json()
+    assert (
+        response_json["message"]
+        == "Only draft opportunities or published opportunities created in Simpler Grants can be updated"
+    )
+
+
+def test_opportunity_summary_update_200_published_sgm_opportunity(
+    client, db_session, opportunity_summary_auth_data, enable_factory_create
+):
+    """Test that updating a summary for a published SGM opportunity succeeds"""
+    _, agency, token, _ = opportunity_summary_auth_data
+
+    # Create published SGM opportunity with summary
+    opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code,
+        is_draft=False,
+        is_simpler_grants_opportunity=True,
+        no_current_summary=True,
+    )
+
+    summary = OpportunitySummaryFactory.create(
+        opportunity=opportunity,
+        is_forecast=False,
+    )
+
+    update_request = update_opportunity_summary_request(
+        summary_description="Updated summary on published SGM opportunity"
+    )
+
+    response = client.put(
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
+        json=update_request,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    response_json = response.get_json()
+    assert (
+        response_json["data"]["summary_description"]
+        == "Updated summary on published SGM opportunity"
+    )

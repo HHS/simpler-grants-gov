@@ -12,7 +12,9 @@ from src.constants.lookup_constants import Privilege
 from src.db.models.opportunity_models import OpportunityAttachment
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
-from src.services.opportunities_grantor_v1.opportunity_utils import validate_opportunity_is_draft
+from src.services.opportunities_grantor_v1.opportunity_utils import (
+    validate_opportunity_can_be_updated,
+)
 from src.services.opportunity_attachments.attachment_util import (
     adjust_legacy_file_name,
     get_s3_attachment_path,
@@ -37,7 +39,7 @@ def upload_opportunity_attachment(
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
     # Verify opportunity is in draft state
-    validate_opportunity_is_draft(opportunity)
+    validate_opportunity_can_be_updated(opportunity)
 
     attachment_id = uuid.uuid4()
 
@@ -105,7 +107,7 @@ def delete_opportunity_attachment(
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
     # Verify opportunity is in draft state
-    validate_opportunity_is_draft(opportunity)
+    validate_opportunity_can_be_updated(opportunity)
 
     # Find the attachment
     attachment = db_session.execute(
