@@ -51,7 +51,11 @@ describe("RecommendationSubmissionsSection", () => {
     jest.clearAllMocks();
   });
 
-  it("renders edit CTA in edit mode", () => {
+  it("renders edit CTA in edit mode when no recommended submissions exist", async () => {
+    mockClientFetch.mockResolvedValue({
+      pagination_info: { total_records: 0, total_pages: 0 },
+    });
+
     render(
       <RecommendationSubmissionsSection
         awardRecommendationId="test-id"
@@ -59,7 +63,105 @@ describe("RecommendationSubmissionsSection", () => {
       />,
     );
 
+    await waitFor(() => {
+      expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
+    });
+
     expect(screen.getByText("recommendedAwards.heading")).toBeInTheDocument();
+    expect(screen.getByText("recommendedAwards.editLink")).toBeInTheDocument();
+    expect(screen.queryByText("APP-26-00001")).not.toBeInTheDocument();
+  });
+
+  it("renders table with edit link in edit mode when recommended submissions exist", async () => {
+    mockClientFetch.mockImplementation(
+      (_url: string, options?: RequestInit) => {
+        const body = JSON.parse((options?.body as string) || "{}") as {
+          filters?: { award_recommendation_type?: { one_of: string[] } };
+          pagination?: { page_size?: number };
+        };
+
+        if (body.filters?.award_recommendation_type) {
+          if (body.pagination?.page_size === 1) {
+            return { pagination_info: { total_records: 1, total_pages: 1 } };
+          }
+
+          return {
+            data: [mockSubmission],
+            pagination_info: { total_records: 1, total_pages: 1 },
+          };
+        }
+
+        return { pagination_info: { total_records: 0, total_pages: 0 } };
+      },
+    );
+
+    render(
+      <RecommendationSubmissionsSection
+        awardRecommendationId="test-id"
+        viewMode={false}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("APP-26-00001")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("recommendedAwards.heading")).toBeInTheDocument();
+    expect(screen.getByText("recommendedAwards.editLink")).toBeInTheDocument();
+    expect(screen.getByText("Test project")).toBeInTheDocument();
+  });
+
+  it("renders exceptions table in edit mode when exception submissions exist", async () => {
+    mockClientFetch.mockImplementation(
+      (_url: string, options?: RequestInit) => {
+        const body = JSON.parse((options?.body as string) || "{}") as {
+          filters?: {
+            award_recommendation_type?: { one_of: string[] };
+            has_exception?: { one_of: boolean[] };
+          };
+          pagination?: { page_size?: number };
+        };
+
+        if (body.filters?.award_recommendation_type) {
+          return { pagination_info: { total_records: 0, total_pages: 0 } };
+        }
+
+        if (body.filters?.has_exception) {
+          if (body.pagination?.page_size === 1) {
+            return { pagination_info: { total_records: 1, total_pages: 1 } };
+          }
+
+          return {
+            data: [
+              {
+                ...mockSubmission,
+                submission_detail: {
+                  ...mockSubmission.submission_detail,
+                  award_recommendation_type: "not_recommended",
+                  has_exception: true,
+                },
+              },
+            ],
+            pagination_info: { total_records: 1, total_pages: 1 },
+          };
+        }
+
+        return { pagination_info: { total_records: 0, total_pages: 0 } };
+      },
+    );
+
+    render(
+      <RecommendationSubmissionsSection
+        awardRecommendationId="test-id"
+        viewMode={false}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("exceptions.heading")).toBeInTheDocument();
+      expect(screen.getByText("APP-26-00001")).toBeInTheDocument();
+    });
+
     expect(screen.getByText("recommendedAwards.editLink")).toBeInTheDocument();
   });
 

@@ -42,8 +42,8 @@ type RecommendationSubmissionsSectionProps = {
 
 type SubmissionTableProps = {
   awardRecommendationId: string;
-  filters: AwardRecommendationSubmissionListFilters;
-  heading: string;
+  filters?: AwardRecommendationSubmissionListFilters;
+  heading?: string;
 };
 
 const getSubmissionDetailHref = (
@@ -149,7 +149,10 @@ const SubmissionTable = ({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pagination, filters }),
+          body: JSON.stringify({
+            pagination,
+            ...(filters ? { filters } : {}),
+          }),
         },
       )) as {
         data: AwardRecommendationSubmission[];
@@ -225,8 +228,10 @@ const SubmissionTable = ({
   });
 
   return (
-    <div className="margin-top-4 margin-bottom-4">
-      <h3 className="margin-top-0 margin-bottom-2 font-sans-md">{heading}</h3>
+    <div className="margin-top-0">
+      {heading ? (
+        <h3 className="margin-top-0 margin-bottom-2 font-sans-md">{heading}</h3>
+      ) : null}
       {apiError && (
         <SimplerAlert
           alertClick={() => setApiError(false)}
@@ -338,25 +343,58 @@ export const RecommendationSubmissionsSection = ({
     useSubmissionSectionVisibility(awardRecommendationId, "exceptions");
 
   if (!viewMode) {
+    if (recommendedVisibilityLoading || exceptionsVisibilityLoading) {
+      return <Spinner />;
+    }
+
     return (
-      <div className="margin-top-4 margin-bottom-4">
-        <h3 className="margin-top-0 margin-bottom-2 font-sans-md">
-          {t("recommendedAwards.heading")}
-        </h3>
-        <p className="text-base-dark margin-top-0 margin-bottom-3">
-          {t("recommendedAwards.editDescription")}
-        </p>
-        <div className="bg-base-lighter radius-md padding-y-2 padding-x-3">
-          <a
-            className="text-bold text-left display-block width-full text-underline"
-            href="#"
-            onClick={(event) => {
-              event.preventDefault();
-            }}
-          >
-            {t("recommendedAwards.editLink")}
-          </a>
+      <div className="margin-top-4">
+        <div className="margin-bottom-4">
+          <div className="display-flex flex-justify flex-align-end margin-bottom-1">
+            <h3 className="margin-top-0 margin-bottom-0 font-sans-md">
+              {t("recommendedAwards.heading")}
+            </h3>
+            {showRecommended && (
+              <a
+                className="text-bold text-underline"
+                href="#"
+                onClick={(event) => {
+                  event.preventDefault();
+                }}
+              >
+                {t("recommendedAwards.editLink")}
+              </a>
+            )}
+          </div>
+          <p className="text-base-dark margin-top-0">
+            {t("recommendedAwards.editDescription")}
+          </p>
+          {showRecommended ? (
+            <SubmissionTable
+              awardRecommendationId={awardRecommendationId}
+              filters={recommendedFilters}
+            />
+          ) : (
+            <div className="bg-base-lighter radius-md padding-y-2 padding-x-3">
+              <a
+                className="text-bold text-left display-block width-full text-underline"
+                href="#"
+                onClick={(event) => {
+                  event.preventDefault();
+                }}
+              >
+                {t("recommendedAwards.editLink")}
+              </a>
+            </div>
+          )}
         </div>
+        {showExceptions && (
+          <SubmissionTable
+            awardRecommendationId={awardRecommendationId}
+            filters={exceptionsFilters}
+            heading={t("exceptions.heading")}
+          />
+        )}
       </div>
     );
   }
