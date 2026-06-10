@@ -13,10 +13,10 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
     SoapRequestStreamer,
     SOAPResponse,
 )
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPInvalidFilter
 from src.legacy_soap_api.soap_payload_handler import SOAPPayload, get_soap_operation_dict
 from tests.conftest import BaseTestClass
 from tests.lib.data_factories import setup_cert_user
-from src.legacy_soap_api.legacy_soap_api_utils import SOAPInvalidFilter
 from tests.src.db.models.factories import (
     AgencyFactory,
     ApplicationSubmissionFactory,

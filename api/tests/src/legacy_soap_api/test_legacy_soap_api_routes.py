@@ -22,11 +22,11 @@ from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
 from src.util import file_util
 from tests.lib.data_factories import get_mtls_urlencoded_str_and_serial_number, setup_cert_user
 from tests.src.db.models.factories import (
-    ApplicationSubmissionTrackingNumberFactory,
     AgencyFactory,
     ApplicationFactory,
     ApplicationSubmissionFactory,
     ApplicationSubmissionRetrievedFactory,
+    ApplicationSubmissionTrackingNumberFactory,
     CompetitionFactory,
     LegacyAgencyCertificateFactory,
     OpportunityFactory,
