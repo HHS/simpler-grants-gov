@@ -18,7 +18,7 @@ Prior to following any of the sections below, ensure you have forked SimplerGran
 
 The Frontend can be easily setup locally if you intend to work on Frontend Issues. To see further information, such as running the Frontend with Docker, read [here](./documentation/frontend/development.md).
 
-Ensure you have the [Frontend Preqs](#frontend-prerequisites) installed before proceeding.
+Ensure you have the [Frontend Prereqs](#frontend-prerequisites) installed before proceeding.
 
 1. Navigate to the Frontend Directory
 
@@ -42,7 +42,7 @@ npm run local
 
 The API can be run without the Frontend if you intend to work on API issues. For more information on API Development Setup, you can read [here](./documentation/api/development.md).
 
-Ensure you have the [API Preqs](#api-prerequisites) installed before proceeding.
+Ensure you have the [API Prereqs](#api-prerequisites) installed before proceeding.
 
 1. Navigate to the API Directory
 
