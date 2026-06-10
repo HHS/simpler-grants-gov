@@ -68,9 +68,9 @@ make setup-api-data
 make run-logs
 ```
 
-## Full Stack (Frontend and API)
+## Full Stack
 
-Run the API steps from the [API-Only](#api-only) section first.
+Complete the API steps from the [API-Only](#api-only) section first.
 
 Then, from the `frontend/` directory run:
 

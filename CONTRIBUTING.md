@@ -54,51 +54,9 @@ Sharing how you or your organization have used the Simpler Grants project is an 
 
 The following guidelines are for code contributions. Please see [DEVELOPMENT.md](./DEVELOPMENT.md) for more information about the software development lifecycle on the project.
 
-### Getting Started
+### Getting Started and Running Project Locally
 
-This project is monorepo with several apps. Below is a simple Quickstart for running both the Frontend and API locally (Full Stack). For more information refer to the [Quickstart Guide](./QUICKSTART.md) for all setup options.
-
-1. Navigate to the API Directory
-
-```bash
-cd api/
-```
-
-2. Start the local containers
-
-```bash
-make init
-```
-
-3. Fill up the database with local data
-
-```bash
-make setup-api-data
-```
-
-4. Start API with logs (API will be available at [`localhost:8080`](http://localhost:8080/))
-
-```bash
-make run-logs
-```
-
-5. Navigate to the Frontend Directory in another shell
-
-```bash
-cd frontend/
-```
-
-6. Install Node Packages
-
-```bash
-npm install
-```
-
-7. Run the Frontend (will be available at [`localhost:3000`](http://localhost:3000/))
-
-```bash
-npm run local
-```
+This project is monorepo with several apps. To get started refer to the [Quickstart Guide](./QUICKSTART.md) for all setup options. These options include [Frontend-Only](./QUICKSTART.md#frontend-only), [API-Only](./QUICKSTART.md#api-only), or [Full Stack](./QUICKSTART.md#full-stack) (both Frontend and API).
 
 ### Workflow and Branching
 
