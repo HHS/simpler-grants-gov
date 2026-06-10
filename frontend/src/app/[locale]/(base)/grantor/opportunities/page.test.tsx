@@ -64,6 +64,8 @@ const redirectMock = jest.fn();
 jest.mock("next/navigation", () => ({
   redirect: (location: string) => redirectMock(location) as unknown,
   useRouter: () => ({ push: jest.fn() }),
+  usePathname: () => "/grantor/opportunities",
+  useSearchParams: () => new URLSearchParams("page=1"),
 }));
 
 jest.mock(
@@ -145,7 +147,10 @@ const readOnlyPrivilege: UserPrivilegeResult[] = [
   },
 ];
 
-const mockSearchForOpportunities = jest.fn().mockResolvedValue([]);
+const mockSearchForOpportunities = jest.fn().mockResolvedValue({
+  data: [],
+  pagination_info: { total_pages: 0, total_records: 0 },
+});
 const mockFetchUserAgencies = jest.fn().mockResolvedValue([]);
 const mockCheckUserPrivileges = jest.fn().mockResolvedValue(userPrivileges);
 const mockGetSession = jest.fn().mockResolvedValue(userSession);
@@ -265,7 +270,10 @@ describe("Opportunities", () => {
     });
 
     it("does not render agency selector", async () => {
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -276,7 +284,10 @@ describe("Opportunities", () => {
     });
 
     it("renders opportunities filtered by agency", async () => {
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -287,7 +298,10 @@ describe("Opportunities", () => {
     });
 
     it("normalizes array agency search param by using first value", async () => {
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({
@@ -301,7 +315,10 @@ describe("Opportunities", () => {
     });
 
     it("renders both opportunity count and agency label", async () => {
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -313,7 +330,10 @@ describe("Opportunities", () => {
     });
 
     it("renders no opportunities message when list is empty", async () => {
-      mockSearchForOpportunities.mockResolvedValue([]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [],
+        pagination_info: { total_pages: 0, total_records: 0 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -324,7 +344,10 @@ describe("Opportunities", () => {
     });
 
     it("renders create opportunity button when list is empty", async () => {
-      mockSearchForOpportunities.mockResolvedValue([]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [],
+        pagination_info: { total_pages: 0, total_records: 0 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -342,7 +365,10 @@ describe("Opportunities", () => {
     });
 
     it("passes accessibility scan", async () => {
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -357,7 +383,10 @@ describe("Opportunities", () => {
   describe("multi-agency user", () => {
     beforeEach(() => {
       mockFetchUserAgencies.mockResolvedValue([agency1, agency2]);
-      mockSearchForOpportunities.mockResolvedValue([]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [],
+        pagination_info: { total_pages: 0, total_records: 0 },
+      });
     });
 
     it("renders agency selector dropdown", async () => {
@@ -456,7 +485,10 @@ describe("Opportunities", () => {
   describe("single agency opportunity list", () => {
     beforeEach(() => {
       mockFetchUserAgencies.mockResolvedValue([agency1]);
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
     });
 
     it("passes accessibility scan", async () => {
@@ -527,7 +559,10 @@ describe("Opportunities", () => {
     draftOpportunity.opportunity_status = undefined;
     beforeEach(() => {
       mockFetchUserAgencies.mockResolvedValue([agency1]);
-      mockSearchForOpportunities.mockResolvedValue([draftOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [draftOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
     });
 
     it("with read, update and create privileges", async () => {
@@ -580,7 +615,11 @@ describe("Opportunities", () => {
 
     it("with no read/view privilege", async () => {
       mockCheckUserPrivileges.mockResolvedValue([]);
-      mockSearchForOpportunities.mockResolvedValue([]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [],
+        pagination_info: { total_pages: 0, total_records: 0 },
+      });
+
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -607,6 +646,10 @@ describe("Opportunities", () => {
       mockCheckUserPrivileges.mockResolvedValue(userPrivileges);
       mockFetchUserAgencies.mockResolvedValue([agency1]);
       mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
     });
 
     it("renders link to view opportunity details and no Actions", async () => {

@@ -11,7 +11,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect, RedirectType } from "next/navigation";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
+import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
 import OpportunityAwardInfo from "./_components/OpportunityAwardInfo";
 import OpportunityCTA from "./_components/OpportunityCTA";
 import OpportunityDescription from "./_components/OpportunityDescription";
