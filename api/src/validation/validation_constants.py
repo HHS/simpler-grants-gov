@@ -31,6 +31,8 @@ class ValidationErrorType(StrEnum):
     MAX_VALUE = "max_value"
     MIN_OR_MAX_VALUE = "min_or_max_value"
 
+    INVALID_DATE_ORDER = "invalid_date_order"
+
     NOT_IN_PROGRESS = "not_in_progress"
 
     # Competition window validation error types

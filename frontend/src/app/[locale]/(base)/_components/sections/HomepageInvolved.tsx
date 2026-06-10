@@ -4,7 +4,7 @@ import { ExternalRoutes } from "src/constants/routes";
 import { useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
 
-import IconInfo from "src/components/homepage/IconInfoSection";
+import IconInfo from "src/components/core/IconInfoSection";
 
 const HomepageInvolved = () => {
   const t = useTranslations("Homepage.sections.involved");

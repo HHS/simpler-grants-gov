@@ -508,11 +508,11 @@ class TestLoadOracleData(BaseTestClass):
         ).first()
 
         # Verify regular columns were inserted
-        assert inserted_record.certemail == source_record.certemail
         assert inserted_record.creator_id == source_record.creator_id
         assert inserted_record.created_date == source_record.created_date
-        assert inserted_record.serial_num == source_record.serial_num
         assert inserted_record.agencyid == source_record.agencyid
+        assert inserted_record.certemail == source_record.certemail
+        assert inserted_record.serial_num == source_record.serial_num
 
         # Verify excluded column was not copied (should be None)
         assert inserted_record.is_selfsigned is None

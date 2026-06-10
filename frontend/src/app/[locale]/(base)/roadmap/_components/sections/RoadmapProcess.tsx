@@ -3,7 +3,7 @@ import { UswdsIconNames } from "src/types/generalTypes";
 
 import { useTranslations } from "next-intl";
 
-import IconInfo from "src/components/homepage/IconInfoSection";
+import IconInfo from "src/components/core/IconInfoSection";
 
 type RoadmapProcessSectionContentProps = {
   content: string;
