@@ -88,7 +88,9 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Contacts" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Contacts" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Add contacts")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /contacts\s+1/i }),
