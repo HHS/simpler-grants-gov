@@ -289,7 +289,6 @@ class BuildAutomaticOpportunitiesTask(Task):
                 )
             ],
         )
-
         ### Test data 1 for only individuals - all forms are required
         self.create_opportunity(
             OpportunityContainer(
@@ -311,7 +310,6 @@ class BuildAutomaticOpportunitiesTask(Task):
                 )
             ],
         )
-
         ### Test data 2 for only individuals - Some forms are required
         self.create_opportunity(
             OpportunityContainer(
@@ -332,7 +330,6 @@ class BuildAutomaticOpportunitiesTask(Task):
                 )
             ],
         )
-
         ### Test data 3 for only individuals - All forms are Optional
         self.create_opportunity(
             OpportunityContainer(
@@ -354,7 +351,6 @@ class BuildAutomaticOpportunitiesTask(Task):
                 )
             ],
         )
-
         ### Mock BOR Opportunity
         self.create_opportunity(
             OpportunityContainer(
