@@ -33,7 +33,7 @@ import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; id?: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
@@ -47,7 +47,7 @@ export async function generateMetadata({
 export const dynamic = "force-dynamic";
 
 export type AwardRecommendationPageProps = {
-  params: Promise<{ locale: string; id?: string }>;
+  params: Promise<{ locale: string; id: string }>;
 } & WithFeatureFlagProps;
 
 interface OpportunitySectionProps {
@@ -158,44 +158,42 @@ async function AwardRecommendationEditPageContent({
   ];
 
   let awardRecommendationDetails: AwardRecommendationDetails | null = null;
-  if (awardRecommendationId) {
-    try {
-      awardRecommendationDetails = await getAwardRecommendationDetails(
-        awardRecommendationId,
-      );
-    } catch (error) {
-      console.error("Failed to fetch award recommendation details", error);
-      const errorStatus = parseErrorStatus(error as ApiRequestError);
+  try {
+    awardRecommendationDetails = await getAwardRecommendationDetails(
+      awardRecommendationId,
+    );
+  } catch (error) {
+    console.error("Failed to fetch award recommendation details", error);
+    const errorStatus = parseErrorStatus(error as ApiRequestError);
 
-      if (errorStatus === 404) {
-        awardRecommendationDetails = null;
-      }
+    if (errorStatus === 404) {
+      awardRecommendationDetails = null;
+    }
 
-      // Handle authentication errors specifically
-      if (errorStatus === 401 || errorStatus === 403) {
-        return (
-          <Alert
-            heading={t("errorHeadingAuthentication")}
-            headingLevel="h2"
-            type="error"
-            validation
-          >
-            {t("authenticationError")}
-          </Alert>
-        );
-      }
-
+    // Handle authentication errors specifically
+    if (errorStatus === 401 || errorStatus === 403) {
       return (
         <Alert
-          heading={t("errorHeadingAwardRecommendation")}
+          heading={t("errorHeadingAuthentication")}
           headingLevel="h2"
-          type="warning"
+          type="error"
           validation
         >
-          {t("awardRecommendationFetchError")}
+          {t("authenticationError")}
         </Alert>
       );
     }
+
+    return (
+      <Alert
+        heading={t("errorHeadingAwardRecommendation")}
+        headingLevel="h2"
+        type="warning"
+        validation
+      >
+        {t("awardRecommendationFetchError")}
+      </Alert>
+    );
   }
 
   const navigationItems = [
@@ -254,25 +252,21 @@ async function AwardRecommendationEditPageContent({
                   id="recommendations"
                   className="seg-scroll-margin-top--header"
                 >
-                  {awardRecommendationId && (
-                    <RecommendationSummarySection
-                      awardRecommendationId={awardRecommendationId}
-                      summary={
-                        awardRecommendationDetails.award_recommendation_summary
-                      }
-                      fundingStrategy={
-                        awardRecommendationDetails.funding_strategy
-                      }
-                    />
-                  )}
+                  <RecommendationSummarySection
+                    awardRecommendationId={awardRecommendationId}
+                    summary={
+                      awardRecommendationDetails.award_recommendation_summary
+                    }
+                    fundingStrategy={
+                      awardRecommendationDetails.funding_strategy
+                    }
+                  />
                 </div>
                 <div id="attachments" className="seg-scroll-margin-top--header">
-                  {awardRecommendationId && (
-                    <AwardRecommendationAttachments
-                      awardRecommendationId={awardRecommendationId}
-                      mode="edit"
-                    />
-                  )}
+                  <AwardRecommendationAttachments
+                    awardRecommendationId={awardRecommendationId}
+                    mode="edit"
+                  />
                 </div>
               </div>
             </Grid>
