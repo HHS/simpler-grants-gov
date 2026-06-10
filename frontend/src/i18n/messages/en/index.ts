@@ -2460,4 +2460,23 @@ export const messages = {
     whichFundingOpportunity: "Which funding opportunity is this for?",
     cancelButtonText: "Cancel",
   },
+  FileInput: {
+    existingFiles: {
+      savedOn: "Saved on",
+      delete: "Delete",
+    },
+    statusDisplay: {
+      cancel: "Cancel",
+      dismiss: "Dismiss",
+      queued: "Queued",
+      uploading: "Uploading",
+      scanning: "Scanning",
+      success: "Success",
+      error: "Error",
+      scanFail: "Scan failed",
+      uploadError: "Upload error",
+      scanError: "Scan error",
+      postUploadError: "Post upload error",
+    },
+  },
 };
