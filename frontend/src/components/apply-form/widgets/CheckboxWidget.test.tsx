@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import CheckboxWidget from "src/components/applyForm/widgets/CheckboxWidget";
+import CheckboxWidget from "src/components/apply-form/widgets/CheckboxWidget";
 
 const WidgetProps = {
   id: "test",

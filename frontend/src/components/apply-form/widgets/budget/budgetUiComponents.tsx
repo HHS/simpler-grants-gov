@@ -2,7 +2,7 @@ import { get } from "lodash";
 
 import React, { InputEvent, JSX } from "react";
 
-import TextWidget from "src/components/applyForm/widgets/TextWidget";
+import TextWidget from "src/components/apply-form/widgets/TextWidget";
 import { DATA_CELL_BASE_CLASS } from "./budgetConstants";
 import { amountSchema } from "./budgetSchemas";
 

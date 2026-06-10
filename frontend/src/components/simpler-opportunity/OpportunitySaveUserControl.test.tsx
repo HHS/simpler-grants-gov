@@ -4,7 +4,7 @@ import { noop } from "lodash";
 
 import { createRef } from "react";
 
-import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
+import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
 
 let mockUser = {};
 

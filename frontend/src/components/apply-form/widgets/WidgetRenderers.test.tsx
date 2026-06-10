@@ -2,19 +2,16 @@ import { render } from "@testing-library/react";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 import { fakeWidgetProps } from "src/utils/testing/fixtures";
 
-import {
-  renderWidget,
-  wrapSection,
-} from "src/components/applyForm/widgets/WidgetRenderers";
+import { renderWidget, wrapSection } from "./WidgetRenderers";
 
 const mockFieldsetWidget = jest.fn();
 const mockWidget = jest.fn();
 
-jest.mock("src/components/applyForm/widgets/FieldsetWidget", () => ({
+jest.mock("src/components/apply-form/widgets/FieldsetWidget", () => ({
   FieldsetWidget: (props: unknown) => mockFieldsetWidget(props) as unknown,
 }));
 
-jest.mock("src/components/applyForm/widgets/Widgets", () => ({
+jest.mock("src/components/apply-form/widgets/Widgets", () => ({
   widgetComponents: {
     Text: (props: unknown) => mockWidget(props) as unknown,
   },

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { GeneralRecord } from "src/types/applyForm/types";
 
-import Budget424aSectionD from "src/components/applyForm/widgets/budget/Budget424aSectionD";
+import Budget424aSectionD from "src/components/apply-form/widgets/budget/Budget424aSectionD";
 
 const buildWidgetProps = (value: GeneralRecord) => ({
   id: "section-d",

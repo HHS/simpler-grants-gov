@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import TextWidget from "src/components/applyForm/widgets/TextWidget";
+import TextWidget from "src/components/apply-form/widgets/TextWidget";
 
 const WidgetProps = {
   id: "test",

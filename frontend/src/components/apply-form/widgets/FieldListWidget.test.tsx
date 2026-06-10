@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import FieldListWidget from "src/components/applyForm/widgets/FieldListWidget";
+import FieldListWidget from "src/components/apply-form/widgets/FieldListWidget";
 
-jest.mock("src/components/applyForm/widgets/WidgetRenderers", () => ({
+jest.mock("src/components/apply-form/widgets/WidgetRenderers", () => ({
   renderWidget: jest.fn(
     ({
       props,
