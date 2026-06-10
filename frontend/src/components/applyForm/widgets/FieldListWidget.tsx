@@ -378,7 +378,7 @@ function FieldListEntry({
           disabled={!canDeleteEntry}
           className="button--danger margin-left-auto"
           outline
-          aria-describedby={entryHeadingId}
+          aria-label={`${t("deleteEntry")} ${entryLabel} ${entryIndex + 1}`}
         >
           <USWDSIcon name="delete" />
           {t("deleteEntry")}
