@@ -557,7 +557,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             ],
         )
 
-        # --- Isolated form test opportunities --- 
+        # --- Isolated form test opportunities ---
         ISOLATED_FORM_OPPORTUNITIES = [
             ("ATT", AttachmentForm_v1_2.form_id, "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
             ("BNA", BudgetNarrativeAttachment_v1_2.form_id, "caea0f33-b356-4fcd-aae3-c0244e11da1e"),
@@ -568,14 +568,26 @@ class BuildAutomaticOpportunitiesTask(Task):
             ("ONA", OtherNarrativeAttachment_v1_2.form_id, "717b7f78-52f2-49f9-b1b8-5d7118313d2a"),
             ("PABS", ProjectAbstract_v1_2.form_id, "d3081452-2cf8-4817-9abf-812e5d794485"),
             ("PABSS", ProjectAbstractSummary_v2_0.form_id, "e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
-            ("PNA", ProjectNarrativeAttachment_v1_2.form_id, "6bdc2df3-6e51-4aea-89af-bade326feba1"),
-            ("PPSL", ProjectPerformanceSiteLocation_v4_0.form_id, "8a30cbe2-f297-49b7-b996-fc22982a3eb5"),
+            (
+                "PNA",
+                ProjectNarrativeAttachment_v1_2.form_id,
+                "6bdc2df3-6e51-4aea-89af-bade326feba1",
+            ),
+            (
+                "PPSL",
+                ProjectPerformanceSiteLocation_v4_0.form_id,
+                "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
+            ),
             ("SF424", SF424_v4_0.form_id, "a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
             ("SF424A", SF424a_v1_0.form_id, "6c25cd41-660e-473f-abff-654083b7795d"),
             ("SF424B", SF424b_v1_1.form_id, "dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6"),
             ("SF424D", SF424d_v1_1.form_id, "abd9bce9-2b9b-46b8-b814-2c5cb7c5e88b"),
             ("SFLLL", SFLLL_v2_0.form_id, "f3e438ee-ff4c-475b-a058-8049aee9abda"),
-            ("NEHS", SupplementaryNEHCoverSheet_v3_0.form_id, "b88287e2-7e2a-4c99-8ffe-30ab50c388ef"),
+            (
+                "NEHS",
+                SupplementaryNEHCoverSheet_v3_0.form_id,
+                "b88287e2-7e2a-4c99-8ffe-30ab50c388ef",
+            ),
         ]
 
         for prefix, form_id, opportunity_id in ISOLATED_FORM_OPPORTUNITIES:
@@ -584,7 +596,6 @@ class BuildAutomaticOpportunitiesTask(Task):
                 form_id,
                 uuid.UUID(opportunity_id),
             )
-
 
     def create_opportunity(
         self,
