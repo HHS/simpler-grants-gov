@@ -891,6 +891,13 @@ dl {
     padding-top: 0 !important;
   }
 
+  // FIELDLISTS
+
+  .field-list-widget__controls,
+  .field-list-widget__entry-controls {
+    display: none !important;
+  }
+
   // SECTION A
 
   .sf424a-section-a__activity-cell,
