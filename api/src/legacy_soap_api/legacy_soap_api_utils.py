@@ -20,7 +20,7 @@ from src.db.models.competition_models import (
     ApplicationSubmissionTrackingNumber,
 )
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
-from src.legacy_soap_api.legacy_soap_api_constants import SimplerRequests
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent, SimplerRequests
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.soap_payload_handler import extract_soap_xml

@@ -1556,3 +1556,18 @@ $simpler-switch-transition-easing: ease;
   background-color: #c3e8d8;
   height: calc(100% + 1rem);
 }
+
+// Teal green checkboxes for RisksTable
+.risks-table-checkbox {
+  accent-color: color("mint-50");
+
+  &:checked {
+    background-color: color("mint-50");
+    border-color: color("mint-50");
+  }
+
+  &:focus {
+    outline-color: color("mint-50");
+    box-shadow: 0 0 0 0.25rem rgba(color("mint-50"), 0.25);
+  }
+}

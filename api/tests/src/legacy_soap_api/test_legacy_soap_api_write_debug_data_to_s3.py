@@ -64,8 +64,10 @@ def test_write_debug_data_to_s3(
     soap_legacy_response = SOAPResponse(
         data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
     )
-    soap_request = create_soap_request(SOAP_PAYLOAD)
-    write_debug_data_to_s3("GetSubmissionListExpandedRequest", soap_request, soap_legacy_response)
+    soap_request = create_soap_request(
+        SOAP_PAYLOAD, operation_name="GetSubmissionListExpandedRequest"
+    )
+    write_debug_data_to_s3(soap_request, soap_legacy_response)
     record = next(
         r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
     )
@@ -90,8 +92,10 @@ def test_write_debug_data_to_s3_does_not_run_if_flag_is_set_to_false(
     soap_legacy_response = SOAPResponse(
         data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
     )
-    soap_request = create_soap_request(SOAP_PAYLOAD)
-    write_debug_data_to_s3("GetSubmissionListExpandedRequest", soap_request, soap_legacy_response)
+    soap_request = create_soap_request(
+        SOAP_PAYLOAD, operation_name="GetSubmissionListExpandedRequest"
+    )
+    write_debug_data_to_s3(soap_request, soap_legacy_response)
     objects = s3_client.list_objects_v2(Bucket="local-mock-draft-bucket")
     assert objects.get("Contents", None) is None
 
@@ -105,14 +109,32 @@ def test_write_debug_data_to_s3_does_not_run_if_not_in_specified_operations(
     soap_legacy_response = SOAPResponse(
         data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
     )
-    soap_request = create_soap_request(SOAP_PAYLOAD)
-    write_debug_data_to_s3("GetSubmissionListExpandedRequest", soap_request, soap_legacy_response)
-    write_debug_data_to_s3("GetSubmissionListRequest", soap_request, soap_legacy_response)
-    write_debug_data_to_s3("GetApplicationZipRequest", soap_request, soap_legacy_response)
-    write_debug_data_to_s3("ConfirmApplicationDeliveryRequest", soap_request, soap_legacy_response)
-    write_debug_data_to_s3("UpdateApplicationInfoRequest", soap_request, soap_legacy_response)
-    write_debug_data_to_s3("X", soap_request, soap_legacy_response)
-    write_debug_data_to_s3("Y", soap_request, soap_legacy_response)
+    write_debug_data_to_s3(
+        create_soap_request(SOAP_PAYLOAD, operation_name="GetSubmissionListExpandedRequest"),
+        soap_legacy_response,
+    )
+    write_debug_data_to_s3(
+        create_soap_request(SOAP_PAYLOAD, operation_name="GetSubmissionListRequest"),
+        soap_legacy_response,
+    )
+    write_debug_data_to_s3(
+        create_soap_request(SOAP_PAYLOAD, operation_name="GetApplicationZipRequest"),
+        soap_legacy_response,
+    )
+    write_debug_data_to_s3(
+        create_soap_request(SOAP_PAYLOAD, operation_name="ConfirmApplicationDeliveryRequest"),
+        soap_legacy_response,
+    )
+    write_debug_data_to_s3(
+        create_soap_request(SOAP_PAYLOAD, operation_name="UpdateApplicationInfoRequest"),
+        soap_legacy_response,
+    )
+    write_debug_data_to_s3(
+        create_soap_request(SOAP_PAYLOAD, operation_name="X"), soap_legacy_response
+    )
+    write_debug_data_to_s3(
+        create_soap_request(SOAP_PAYLOAD, operation_name="Y"), soap_legacy_response
+    )
     objects = s3_client.list_objects_v2(Bucket="local-mock-draft-bucket")
     # If it triggered on everything it should be 14
     assert len(objects.get("Contents")) == 10

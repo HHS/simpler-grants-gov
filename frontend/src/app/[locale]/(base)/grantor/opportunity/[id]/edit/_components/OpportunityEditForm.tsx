@@ -435,7 +435,7 @@ export default function OpportunityEditForm({
         <h2 className="font-heading-xl margin-top-0 margin-bottom-2">
           {t("sections.keyInformation")}
         </h2>
-        <p className="margin-top-0 margin-bottom-4 font-sans-lg text-base">
+        <p className="margin-top-0 margin-bottom-4 font-sans-lg text-base-dark">
           {t("content.keyInformationIntro")}
         </p>
 
