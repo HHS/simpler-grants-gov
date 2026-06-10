@@ -9,9 +9,11 @@ import {
   fetchOpportunityEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
+  postFiles,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
   toDynamicAwardRecommendationEndpoint,
+  toDynamicFilesEndpoint,
   toDynamicGrantorOpportunityEndpoint,
   toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
@@ -167,3 +169,6 @@ export const fetchGrantorOpportunityWithMethod = (
 
 export const fetchGrantorWithMethod = (type: "POST") =>
   requesterForEndpoint(toDynamicGrantorsEndpoint(type));
+
+export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
+  requesterForEndpoint(toDynamicFilesEndpoint(type));
