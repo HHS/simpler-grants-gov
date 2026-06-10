@@ -40,6 +40,26 @@ class TestGetAwardRecommendationSummary:
         assert result.recommended_for_funding_count == 1
         assert result.not_recommended_count == 1
 
+    def test_total_recommended_amount_excludes_recommended_without_funding(
+        self, db_session, award_recommendation
+    ):
+        AwardRecommendationApplicationSubmissionFactory.create(
+            award_recommendation=award_recommendation,
+            recommended_for_funding=True,
+            award_recommendation_submission_detail__recommended_amount=50000,
+        )
+        AwardRecommendationApplicationSubmissionFactory.create(
+            award_recommendation=award_recommendation,
+            recommended_without_funding=True,
+            award_recommendation_submission_detail__recommended_amount=25000,
+        )
+
+        result = get_award_recommendation_summary(
+            db_session, award_recommendation.award_recommendation_id
+        )
+
+        assert result.total_recommended_amount == Decimal("50000")
+
     def test_returns_zeros_when_no_submissions(self, db_session, award_recommendation):
         result = get_award_recommendation_summary(
             db_session, award_recommendation.award_recommendation_id
