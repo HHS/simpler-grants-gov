@@ -20,7 +20,7 @@ from src.db.models.competition_models import (
     ApplicationSubmissionTrackingNumber,
 )
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
-from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent, SimplerRequests
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.soap_payload_handler import extract_soap_xml
@@ -528,11 +528,8 @@ def to_snake_case(name: str) -> str:
 
 
 def write_debug_data_to_s3(soap_request: SOAPRequest, soap_legacy_response: SOAPResponse) -> None:
-    try:
-        if (
-            get_soap_config().save_soap_messages_to_s3
-            and soap_request.operation_name in SimplerRequests
-        ):
+    if get_soap_config().save_soap_messages_to_s3:
+        try:
             s3_config = S3Config()
             debug_identifier = uuid.uuid4()
             base_path = file_util.join(
@@ -571,8 +568,8 @@ def write_debug_data_to_s3(soap_request: SOAPRequest, soap_legacy_response: SOAP
                 "soap_client: debug info uploaded to s3",
                 extra={"debug_identifier": debug_identifier},
             )
-    except Exception:
-        logger.exception(
-            "soap_client: failed to upload debug info to s3",
-            extra={"soap_api_event": LegacySoapApiEvent.ERROR_UPLOADING_DEBUG_DATA},
-        )
+        except Exception:
+            logger.exception(
+                "soap_client: failed to upload debug info to s3",
+                extra={"soap_api_event": LegacySoapApiEvent.ERROR_UPLOADING_DEBUG_DATA},
+            )

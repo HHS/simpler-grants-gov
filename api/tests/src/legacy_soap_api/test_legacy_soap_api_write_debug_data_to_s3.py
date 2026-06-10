@@ -100,7 +100,7 @@ def test_write_debug_data_to_s3_does_not_run_if_flag_is_set_to_false(
     assert objects.get("Contents", None) is None
 
 
-def test_write_debug_data_to_s3_does_not_run_if_not_in_specified_operations(
+def test_write_debug_data_to_s3_runs_on_any_endpoint(
     db_session, enable_factory_create, monkeypatch, mock_s3_bucket, s3_config, mock_s3
 ) -> None:
     soap_api_config.get_soap_config.cache_clear()
@@ -136,5 +136,4 @@ def test_write_debug_data_to_s3_does_not_run_if_not_in_specified_operations(
         create_soap_request(SOAP_PAYLOAD, operation_name="Y"), soap_legacy_response
     )
     objects = s3_client.list_objects_v2(Bucket="local-mock-draft-bucket")
-    # If it triggered on everything it should be 14
-    assert len(objects.get("Contents")) == 10
+    assert len(objects.get("Contents")) == 14
