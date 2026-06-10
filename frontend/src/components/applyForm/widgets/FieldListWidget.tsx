@@ -40,14 +40,6 @@ type FieldListEntry = {
 
 const FIELD_LIST_INDEX_TOKEN = "~~index~~";
 
-let fieldListEntryValueIdCounter = 0;
-
-const createFieldListEntryValueId = (): string => {
-  fieldListEntryValueIdCounter += 1;
-
-  return `field-list-entry-${fieldListEntryValueIdCounter}`;
-};
-
 /**
  * Builds the initial entries rendered by FieldList.
  *
@@ -71,8 +63,8 @@ const normalizeFieldListEntries = ({
         .filter((entryValue): entryValue is GeneralRecord => {
           return typeof entryValue === "object" && entryValue !== null;
         })
-        .map((entryValue) => ({
-          entryId: createFieldListEntryValueId(),
+        .map((entryValue, entryIndex) => ({
+          entryId: `field-list-entry-${entryIndex}`,
           value: entryValue,
         }))
     : [];
@@ -87,8 +79,8 @@ const normalizeFieldListEntries = ({
 
   return [
     ...startingEntries,
-    ...Array.from({ length: missingEntryCount }, () => ({
-      entryId: createFieldListEntryValueId(),
+    ...Array.from({ length: missingEntryCount }, (_, missingEntryIndex) => ({
+      entryId: `field-list-entry-${startingEntries.length + missingEntryIndex}`,
       value: {},
     })),
   ];
@@ -136,7 +128,7 @@ const addFieldListEntry = ({
   return [
     ...entries,
     {
-      entryId: createFieldListEntryValueId(),
+      entryId: `field-list-entry-${entries.length}`,
       value: {},
     },
   ];
@@ -290,7 +282,8 @@ function FieldListEntry({
   minItemsHelperText?: string;
 }) {
   const t = useTranslations("Application.applyForm.fieldListWidget");
-  const entryHeadingId = `${entryId}-heading`;
+  const fieldListId = fieldListPath.replace("$.", "").replace(/\W/g, "-");
+  const entryHeadingId = `${fieldListId}-entry-${entryIndex + 1}-heading`;
 
   return (
     <div className="field-list-widget__entry padding-y-2 padding-bottom-3">
