@@ -62,7 +62,7 @@ const formatCellValue = (value?: string) => {
 };
 
 const recommendationTypeTagBaseClass =
-  "usa-tag font-sans-sm text-no-uppercase text-ink border-1px radius-pill";
+  "usa-tag font-sans-sm text-no-uppercase text-ink radius-2";
 
 const RecommendationTypeTag = ({
   recommendationType,
@@ -75,9 +75,7 @@ const RecommendationTypeTag = ({
 
   if (!recommendationType) {
     return (
-      <span
-        className={`${recommendationTypeTagBaseClass} bg-base-lighter border-base-lighter`}
-      >
+      <span className={`${recommendationTypeTagBaseClass} bg-base-lighter`}>
         {t("none")}
       </span>
     );
@@ -86,25 +84,21 @@ const RecommendationTypeTag = ({
   switch (recommendationType) {
     case "recommended_for_funding":
       return (
-        <span
-          className={`${recommendationTypeTagBaseClass} border-info-dark bg-info-lighter`}
-        >
+        <span className={`${recommendationTypeTagBaseClass} bg-info-lighter`}>
           {t("recommended")}
         </span>
       );
     case "recommended_without_funding":
       return (
         <span
-          className={`${recommendationTypeTagBaseClass} border-accent-warm-darkest bg-accent-warm-lightest`}
+          className={`${recommendationTypeTagBaseClass} bg-accent-warm-lightest`}
         >
           {t("recommendedWithoutFunding")}
         </span>
       );
     case "not_recommended":
       return (
-        <span
-          className={`${recommendationTypeTagBaseClass} border-error-dark bg-error-lighter`}
-        >
+        <span className={`${recommendationTypeTagBaseClass} bg-error-lighter`}>
           {t("notRecommended")}
         </span>
       );
