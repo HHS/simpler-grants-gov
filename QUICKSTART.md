@@ -70,9 +70,15 @@ make run-logs
 
 ## Full Stack (Frontend and API)
 
-You can run both the API and Frontend simultaneously, by following both the sections above. You can also run the Frontend with docker (as long as the API is also running).
+Run the API steps from the [API-Only](#api-only) section first.
 
-From the `frontend/` directory:
+Then, from the `frontend/` directory run:
+
+```bash
+npm run local
+```
+
+Or, if you have **Docker installed**, you can run:
 
 ```bash
 make dev
