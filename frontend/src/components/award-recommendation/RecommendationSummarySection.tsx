@@ -6,9 +6,11 @@ import { useTranslations } from "next-intl";
 import { CharacterCount } from "@trussworks/react-uswds";
 
 import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
+import { RecommendationSubmissionsSection } from "./RecommendationSubmissionsSection";
 import { RecommendationSummaryDisplay } from "./RecommendationSummaryDisplay";
 
 type RecommendationSummarySectionProps = {
+  awardRecommendationId: string;
   summary?: AwardRecommendationSummary;
   fundingStrategy?: string;
   totalAvailable?: number;
@@ -16,6 +18,7 @@ type RecommendationSummarySectionProps = {
 };
 
 export const RecommendationSummarySection = ({
+  awardRecommendationId,
   summary,
   fundingStrategy,
   totalAvailable = 250000,
@@ -83,6 +86,11 @@ export const RecommendationSummarySection = ({
           )}
         </>
       )}
+
+      <RecommendationSubmissionsSection
+        awardRecommendationId={awardRecommendationId}
+        viewMode={viewMode}
+      />
     </div>
   );
 };

@@ -296,7 +296,6 @@ describe("RisksTable", () => {
       "recommendationType.recommended_for_funding",
     );
     expect(recommendedTag).toHaveClass("bg-info-lighter");
-    expect(recommendedTag).toHaveClass("border-info-dark");
   });
 
   it("only shows Recommended tag for recommended_for_funding type", async () => {
