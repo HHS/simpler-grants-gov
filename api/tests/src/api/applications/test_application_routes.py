@@ -1,4 +1,5 @@
-﻿import logging
+﻿import copy
+import logging
 import uuid
 from datetime import date, timedelta
 
@@ -17,6 +18,8 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
+from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.validation.validation_constants import ValidationErrorType
 from tests.lib.application_test_utils import create_user_in_app
 from tests.lib.organization_test_utils import create_user_in_org
@@ -4384,3 +4387,104 @@ def test_application_submit_fails_with_expired_org(client, enable_factory_create
     assert (
         "SAM.gov registration expired" in response_text
     ), "Expected error about expired SAM.gov registration not found in response"
+
+
+def test_sf424a_section_a_strips_nextjs_action_prefix_and_sums_column_g(
+    client,
+    enable_factory_create,
+    db_session,
+):
+    """Real payload from staging: Next.js prefixed all keys with _2_, breaking pre-population."""
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
+    form = FormFactory.create(
+        form_json_schema=resolve_jsonschema(SF424a_v1_0.form_json_schema),
+        form_rule_schema=SF424a_v1_0.form_rule_schema,
+    )
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    request_payload = {
+        "application_response": {
+            "_2_activity_line_items": [
+                {
+                    "activity_title": "test",
+                    "budget_summary": {"total_amount": "11"},
+                },
+            ],
+        }
+    }
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_payload,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+
+    returned_response = response.json["data"]["application_response"]
+
+    assert "activity_line_items" in returned_response
+    assert "_2_activity_line_items" not in returned_response
+    assert returned_response["total_budget_summary"]["total_amount"] == "11.00"
+
+
+def test_sf424a_section_a_row5_col_g_sums_column_g_via_api(
+    client,
+    enable_factory_create,
+    db_session,
+):
+    """Row 5 Column G = sum of Column G rows 1-4, not sum of Row 5 C-F."""
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
+    form = FormFactory.create(
+        form_json_schema=resolve_jsonschema(SF424a_v1_0.form_json_schema),
+        form_rule_schema=SF424a_v1_0.form_rule_schema,
+    )
+    competition_form = CompetitionFormFactory.create(
+        competition=application.competition,
+        form=form,
+    )
+
+    request_payload = {
+        "application_response": {
+            "activity_line_items": [
+                {
+                    "activity_title": "Activity 1",
+                    "budget_summary": {
+                        "federal_estimated_unobligated_amount": "0.00",
+                        "non_federal_estimated_unobligated_amount": "0.00",
+                        "federal_new_or_revised_amount": "0.00",
+                        "non_federal_new_or_revised_amount": "0.00",
+                        "total_amount": "10",
+                    },
+                },
+                {
+                    "activity_title": "Activity 2",
+                    "budget_summary": {
+                        "federal_estimated_unobligated_amount": "0.00",
+                        "non_federal_estimated_unobligated_amount": "0.00",
+                        "federal_new_or_revised_amount": "0.00",
+                        "non_federal_new_or_revised_amount": "0.00",
+                        "total_amount": "20",
+                    },
+                },
+            ],
+            "confirmation": True,
+        }
+    }
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_payload,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    returned_response = response.json["data"]["application_response"]
+    assert returned_response["total_budget_summary"]["total_amount"] == "30.00"

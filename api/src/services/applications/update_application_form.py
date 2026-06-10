@@ -1,4 +1,5 @@
 import logging
+import re
 from uuid import UUID
 
 import grants_shared.adapters.db as db
@@ -19,6 +20,18 @@ from src.services.applications.application_validation import (
 from src.services.applications.get_application import get_application
 
 logger = logging.getLogger(__name__)
+
+_ACTION_PREFIX = re.compile(r"^_\d+_")
+
+
+def _strip_action_prefix(data: dict) -> dict:
+    # Next.js prefixes form field names with _N_ (e.g. _2_) when multiple
+    # server actions are registered on the same page. After shapeFormData
+    # converts flat form fields to nested JSON, this prefix appears only on
+    # top-level keys. Strip it so keys match the form schema field names.
+    if not any(_ACTION_PREFIX.match(k) for k in data):
+        return data
+    return {_ACTION_PREFIX.sub("", k): v for k, v in data.items()}
 
 
 def update_application_form(
@@ -102,7 +115,7 @@ def update_application_form(
     if application_form:
         # Update existing application form
         if application_response is not None:
-            application_form.application_response = application_response
+            application_form.application_response = _strip_action_prefix(application_response)
         if is_included_in_submission is not None:
             application_form.is_included_in_submission = is_included_in_submission
     else:
@@ -120,7 +133,7 @@ def update_application_form(
         application_form = ApplicationForm(
             application=application,
             competition_form=competition_form,
-            application_response=application_response,
+            application_response=_strip_action_prefix(application_response),
             is_included_in_submission=is_included_in_submission,
         )
         db_session.add(application_form)
