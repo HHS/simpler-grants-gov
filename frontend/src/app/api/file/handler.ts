@@ -7,8 +7,10 @@ import {
 
 import { NextRequest, NextResponse } from "next/server";
 
+// reads from the status update stream returned by the API and writes incoming data
+// to the stream that will be sent in the response to the client
 const makeFileStatusResponseStream = (
-  statusStream: ReadableStreamDefaultReader,
+  inputStream: ReadableStreamDefaultReader<string>,
 ) => {
   //   const stream = new ReadableStream({
   //   start: (controller) => {
@@ -31,29 +33,25 @@ const makeFileStatusResponseStream = (
   //     }, 1000);
   //   },
   // });
-  const stream = new ReadableStream({
-    start: (controller) => {
-      const intervalId = setInterval(() => {
-        try {
-          if (queueMe === maxQueues) {
-            controller.close();
-            clearInterval(intervalId);
-            queueMe = 0;
-            return;
-          }
-          controller.enqueue(queueMe.toString());
-          queueMe++;
-        } catch (e) {
-          queueMe = 0;
-          console.error(e);
-          controller.close();
-          clearInterval(intervalId);
-        }
-      }, 1000);
+  const readInputStream = async (
+    outputController: ReadableStreamDefaultController,
+  ) => {
+    const { value, done } = await inputStream.read();
+    if (value) {
+      outputController.enqueue(value);
+    }
+    if (done) {
+      outputController.close();
+      return;
+    }
+    return readInputStream(outputController);
+  };
+  const outputStream = new ReadableStream({
+    start: async (controller) => {
+      return await readInputStream(controller);
     },
   });
-  return statusStream.read();
-  return stream;
+  return outputStream;
 };
 
 export const handleFileUpload = async (request: NextRequest) => {
@@ -66,12 +64,12 @@ export const handleFileUpload = async (request: NextRequest) => {
       fileUploadDetails.pending_file_id,
     );
     const responseStream = makeFileStatusResponseStream(
-      fileUploadStatusResponse.getReader(),
+      (fileUploadStatusResponse as ReadableStream<string>).getReader(),
     );
     const responseToClient = new NextResponse(responseStream);
-
     return responseToClient;
   } catch (e) {
+    console.error(e);
     const { status, message } = readError(e as Error, 500);
     return Response.json(
       {

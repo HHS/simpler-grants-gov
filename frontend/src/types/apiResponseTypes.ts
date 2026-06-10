@@ -25,3 +25,9 @@ export interface FrontendErrorDetails {
   message?: string;
   type?: string;
 }
+
+export type FileUploadDetailsResponse = {
+  url: string;
+  pending_file_id: string;
+  body: unknown;
+};

@@ -1,8 +1,4 @@
-type FileUploadDetailsResponse = {
-  url: string;
-  pending_file_id: string;
-  body: unknown;
-};
+import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 
 /*
   These three calls made in sequence form the full file upload process
