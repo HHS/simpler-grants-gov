@@ -23,9 +23,9 @@ from src.legacy_soap_api.grantors.statuses import (
 )
 from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, verify_certificate_access
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
-from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPInvalidFilter, convert_bool_to_yes_no
 
 logger = logging.getLogger(__name__)
 GRANTS_APPLICATION_STATUSES = {
@@ -149,6 +149,17 @@ def get_submissions(
 
     if request.expanded_application_filter and request.expanded_application_filter.filters:
         submission_filters = request.expanded_application_filter.filters
+        for sf in submission_filters:
+            if sf.filter_type not in GetSubmissionListFilter:
+                log_msg = "legacy_soap_api: Invalid Filter"
+                logger.info(
+                    log_msg,
+                    extra={"filter_type": sf.filter_type},
+                )
+                faultstring = f"Encountered invalid filter type {sf.filter_type}"
+                raise SOAPInvalidFilter(
+                    log_msg, fault=FaultMessage(faultcode="soap:Server", faultstring=faultstring)
+                )
         status = get_filter_values(submission_filters, GetSubmissionListFilter.STATUS)
         if status:
             if len(status) > 1:

@@ -202,6 +202,10 @@ class SOAPFaultException(Exception):
         super().__init__(message, fault, *args)
 
 
+class SOAPInvalidFilter(SOAPFaultException):
+    pass
+
+
 def wrap_envelope_dict(soap_xml_dict: dict, operation_name: str | None = None) -> dict:
     body = {operation_name: {**soap_xml_dict}} if operation_name else soap_xml_dict
     return {"Envelope": {"Body": {**body}}}

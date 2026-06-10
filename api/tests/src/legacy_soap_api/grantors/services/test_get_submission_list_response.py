@@ -1,4 +1,5 @@
 import io
+import logging
 
 import pytest
 
@@ -15,6 +16,7 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
 from src.legacy_soap_api.soap_payload_handler import SOAPPayload, get_soap_operation_dict
 from tests.conftest import BaseTestClass
 from tests.lib.data_factories import setup_cert_user
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPInvalidFilter
 from tests.src.db.models.factories import (
     AgencyFactory,
     ApplicationSubmissionFactory,
@@ -23,7 +25,9 @@ from tests.src.db.models.factories import (
 )
 
 
-def _make_soap_request(soap_client_certificate, status=None, tracking_number=None):
+def _make_soap_request(
+    soap_client_certificate, status=None, tracking_number=None, invalid_filter=None
+):
     request_xml = (
         '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
         'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
@@ -44,6 +48,13 @@ def _make_soap_request(soap_client_certificate, status=None, tracking_number=Non
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
             f"<gran:FilterValue>GRANT{tracking_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+        )
+    if invalid_filter:
+        request_xml += (
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>XXXXXXXXXXXXXXXXXXXXXXX</gran:FilterType>"
+            f"<gran:FilterValue>{invalid_filter}</gran:FilterValue>"
             "</gran:ExpandedApplicationFilter>"
         )
 
@@ -123,6 +134,28 @@ class TestGetSubmissionListResponseStatusFilter(BaseTestClass):
             result.submission_info[0].grants_gov_application_status
             == "Agency Tracking Number Assigned"
         )
+
+    def test_get_submission_list_raises_exception_for_invalid_filter(
+        self, db_session, enable_factory_create, setup_data, caplog
+    ):
+        caplog.set_level(logging.INFO)
+        soap_request = _make_soap_request(
+            setup_data["soap_client_certificate"],
+            status="Agency Tracking Number Assigned",
+            invalid_filter="X",
+        )
+        payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
+        soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
+        schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
+        with pytest.raises(SOAPInvalidFilter):
+            get_submission_list(
+                db_session=db_session,
+                request=schema,
+                soap_request=soap_request,
+                soap_config=_make_operation_config(),
+            )
+        record = next(r for r in caplog.records if r.message == "legacy_soap_api: Invalid Filter")
+        assert record.filter_type == "XXXXXXXXXXXXXXXXXXXXXXX"
 
     def test_get_submission_list_agency_tracking_number_assigned_filter_supercedes_received_by_agency(
         self, db_session, enable_factory_create, setup_data

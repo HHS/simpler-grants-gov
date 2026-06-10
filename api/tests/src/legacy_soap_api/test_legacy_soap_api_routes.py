@@ -22,11 +22,11 @@ from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
 from src.util import file_util
 from tests.lib.data_factories import get_mtls_urlencoded_str_and_serial_number, setup_cert_user
 from tests.src.db.models.factories import (
+    ApplicationSubmissionTrackingNumberFactory,
     AgencyFactory,
     ApplicationFactory,
     ApplicationSubmissionFactory,
     ApplicationSubmissionRetrievedFactory,
-    ApplicationSubmissionTrackingNumberFactory,
     CompetitionFactory,
     LegacyAgencyCertificateFactory,
     OpportunityFactory,
@@ -1258,6 +1258,40 @@ def test_get_submission_list_expanded_always_calls_legacy_and_simpler(
     assert response.status_code == 200
     mock_get_soap_response.assert_called_once()
     mock_get_simpler_soap_response.assert_called_once()
+
+
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+def test_get_submission_list_returns_error_message_for_invalid_filter(
+    mock_get_soap_response, client, enable_factory_create
+) -> None:
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:GetSubmissionListExpandedRequest>
+        "<gran:ExpandedApplicationFilter>"
+        "<gran:FilterType>XXXXXXXXXX</gran:FilterType>"
+        "<gran:FilterValue>CFDA-PER-123</gran:FilterValue>"
+        "</gran:ExpandedApplicationFilter>"
+        </agen:GetSubmissionListExpandedRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path,
+        data=etree.tostring(envelope),
+        headers={MTLS_CERT_HEADER_KEY: mtls_cert, "Use-Simpler-Override": "1"},
+    )
+    assert response.status_code == 500
+    assert (
+        "<faultstring>Encountered invalid filter type XXXXXXXXXX</faultstring>"
+        in response.data.decode()
+    )
 
 
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
