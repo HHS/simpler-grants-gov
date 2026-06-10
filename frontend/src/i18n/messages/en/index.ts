@@ -417,11 +417,11 @@ export const messages = {
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
       awardMinCurrencyInput:
-        "Award minimum must be greater than zero and less than $1,000,000,000,000,000.",
+        "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMaxCurrencyInput:
-        "Award maximum must be greater than zero and less than $1,000,000,000,000,000.",
+        "Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       totalFundingCurrencyInput:
-        "Estimated total program funding must be greater than zero and less than $1,000,000,000,000,000.",
+        "Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMinLessThanTotal:
         "Award minimum cannot exceed the Estimated Total Program Funding.",
       awardMaxLessThanTotal:
