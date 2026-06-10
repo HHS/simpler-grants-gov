@@ -497,400 +497,177 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
     # --- Isolated Forms testing competitions: one per form ---
     sgg_agency = db_session.scalar(select(Agency).where(Agency.agency_code == "SGG"))
 
-    # Isolated scenario for testing attachment_form
-    attachment_form_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["AttachmentForm_1_2"],
-        opportunity_id=uuid.UUID("97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
-        opportunity_number="TEST-ATT-ORG-IND-01",
-        opportunity_title="TEST-ATT-ORG-IND-OT01",
-        competition_id=uuid.UUID("10048c4d-a23d-418e-b807-6f545d7a7bd2"),
-        competition_title="TEST-ATT-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        attachment_form_competition.opportunity.agency_code = "SGG"
-        attachment_form_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in attachment_form_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
+    isolated_form_competitions = [
+        (
+            "AttachmentForm_1_2",
+            "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1",
+            "TEST-ATT-ORG-IND-01",
+            "TEST-ATT-ORG-IND-OT01",
+            "10048c4d-a23d-418e-b807-6f545d7a7bd2",
+            "TEST-ATT-ORG-IND-CT01",
+        ),
+        (
+            "BudgetNarrativeAttachments_1_2",
+            "caea0f33-b356-4fcd-aae3-c0244e11da1e",
+            "TEST-BNA-ORG-IND-01",
+            "TEST-BNA-ORG-IND-OT01",
+            "83adc230-32da-4dee-9dd6-beb1dffac459",
+            "TEST-BNA-ORG-IND-CT01",
+        ),
+        (
+            "CD511",
+            "5b890089-2bb2-4123-82cd-3d321ca62efe",
+            "TEST-CD511-ORG-IND-01",
+            "TEST-CD511-ORG-IND-OT01",
+            "ca184e83-baf2-4212-af4e-d355cf144bf5",
+            "TEST-CD511-ORG-IND-CT01",
+        ),
+        (
+            "EPA4700_4",
+            "95f80b3b-c119-4a89-a50f-1b47b95a9191",
+            "TEST-EPA4700-ORG-IND-01",
+            "TEST-EPA4700-ORG-IND-OT01",
+            "bd893d81-b8da-4f9b-ba18-f3c7b2fa9686",
+            "TEST-EPA4700-ORG-IND-CT01",
+        ),
+        (
+            "EPA_KeyContacts",
+            "1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631",
+            "TEST-EPAKC-ORG-IND-01",
+            "TEST-EPAKC-ORG-IND-OT01",
+            "165fad29-80d2-4c2d-b86b-1906fd68cf3f",
+            "TEST-EPAKC-ORG-IND-CT01",
+        ),
+        (
+            "GG_LobbyingForm",
+            "552d5866-501a-40b6-b1ce-2efc7a2d3aa5",
+            "TEST-GGLOB-ORG-IND-01",
+            "TEST-GGLOB-ORG-IND-OT01",
+            "bae608bd-56cf-4038-8436-02da6af72df8",
+            "TEST-GGLOB-ORG-IND-CT01",
+        ),
+        (
+            "OtherNarrativeAttachments",
+            "717b7f78-52f2-49f9-b1b8-5d7118313d2a",
+            "TEST-ONA-ORG-IND-01",
+            "TEST-ONA-ORG-IND-OT01",
+            "6098d8b0-8025-448e-a407-a0ac56d27d3e",
+            "TEST-ONA-ORG-IND-CT01",
+        ),
+        (
+            "Project_Abstract",
+            "d3081452-2cf8-4817-9abf-812e5d794485",
+            "TEST-PABS-ORG-IND-01",
+            "TEST-PABS-ORG-IND-OT01",
+            "70238095-fbae-48c3-9007-83446416b18d",
+            "TEST-PABS-ORG-IND-CT01",
+        ),
+        (
+            "Project_AbstractSummary_2_0",
+            "e3bfbd7b-2205-46a8-9aa3-714f7e130958",
+            "TEST-PABSS-ORG-IND-01",
+            "TEST-PABSS-ORG-IND-OT01",
+            "c6e468de-2911-494e-aa14-91b527a1f53e",
+            "TEST-PABSS-ORG-IND-CT01",
+        ),
+        (
+            "ProjectNarrativeAttachments_1_2",
+            "6bdc2df3-6e51-4aea-89af-bade326feba1",
+            "TEST-PNA-ORG-IND-01",
+            "TEST-PNA-ORG-IND-OT01",
+            "3219b68b-c3c5-41d8-b889-d75eafd014d5",
+            "TEST-PNA-ORG-IND-CT01",
+        ),
+        (
+            "PerformanceSite",
+            "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
+            "TEST-PPSL-ORG-IND-01",
+            "TEST-PPSL-ORG-IND-OT01",
+            "7fc52d4e-6efb-421d-8b0a-8c9e982f1e0f",
+            "TEST-PPSL-ORG-IND-CT01",
+        ),
+        (
+            "SF424_4_0",
+            "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "TEST-SF424-ORG-IND-01",
+            "TEST-SF424-ORG-IND-OT01",
+            "f0a1b2c3-d4e5-6789-0abc-def123456789",
+            "TEST-SF424-ORG-IND-CT01",
+        ),
+        (
+            "SF424A",
+            "6c25cd41-660e-473f-abff-654083b7795d",
+            "TEST-SF424A-ORG-IND-01",
+            "TEST-SF424A-ORG-IND-OT01",
+            "57bc877e-60b5-4ae0-bd5c-3e97248e57f2",
+            "TEST-SF424A-ORG-IND-CT01",
+        ),
+        (
+            "SF424B",
+            "dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6",
+            "TEST-SF424B-ORG-IND-01",
+            "TEST-SF424B-ORG-IND-OT01",
+            "15d10405-d81b-4b8e-ae56-8ac1bd4c5560",
+            "TEST-SF424B-ORG-IND-CT01",
+        ),
+        (
+            "SF424D",
+            "abd9bce9-2b9b-46b8-b814-2c5cb7c5e88b",
+            "TEST-SF424D-ORG-IND-01",
+            "TEST-SF424D-ORG-IND-OT01",
+            "2946ff6a-c2ce-4f05-8358-4dea1e2e7c51",
+            "TEST-SF424D-ORG-IND-CT01",
+        ),
+        (
+            "SFLLL_2_0",
+            "f3e438ee-ff4c-475b-a058-8049aee9abda",
+            "TEST-SFLLL-ORG-IND-01",
+            "TEST-SFLLL-ORG-IND-OT01",
+            "4924f35b-7941-4d50-889c-3afaa726b671",
+            "TEST-SFLLL-ORG-IND-CT01",
+        ),
+        (
+            "SupplementaryCoverSheetforNEHGrantPrograms",
+            "b88287e2-7e2a-4c99-8ffe-30ab50c388ef",
+            "TEST-NEHS-ORG-IND-01",
+            "TEST-NEHS-ORG-IND-OT01",
+            "5ba6e068-8f9e-4cbc-89bf-56bbb142b842",
+            "TEST-NEHS-ORG-IND-CT01",
+        ),
+    ]
 
-    # Isolated scenario for testing budget_narrative_attachment
-    budget_narrative_attachment_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["BudgetNarrativeAttachments_1_2"],
-        opportunity_id=uuid.UUID("caea0f33-b356-4fcd-aae3-c0244e11da1e"),
-        opportunity_number="TEST-BNA-ORG-IND-01",
-        opportunity_title="TEST-BNA-ORG-IND-OT01",
-        competition_id=uuid.UUID("83adc230-32da-4dee-9dd6-beb1dffac459"),
-        competition_title="TEST-BNA-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        budget_narrative_attachment_competition.opportunity.agency_code = "SGG"
-        budget_narrative_attachment_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in budget_narrative_attachment_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing cd511
-    cd511_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["CD511"],
-        opportunity_id=uuid.UUID("5b890089-2bb2-4123-82cd-3d321ca62efe"),
-        opportunity_number="TEST-CD511-ORG-IND-01",
-        opportunity_title="TEST-CD511-ORG-IND-OT01",
-        competition_id=uuid.UUID("ca184e83-baf2-4212-af4e-d355cf144bf5"),
-        competition_title="TEST-CD511-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        cd511_competition.opportunity.agency_code = "SGG"
-        cd511_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in cd511_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing epa_form_4700_4
-    epa_form_4700_4_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["EPA4700_4"],
-        opportunity_id=uuid.UUID("95f80b3b-c119-4a89-a50f-1b47b95a9191"),
-        opportunity_number="TEST-EPA4700-ORG-IND-01",
-        opportunity_title="TEST-EPA4700-ORG-IND-OT01",
-        competition_id=uuid.UUID("bd893d81-b8da-4f9b-ba18-f3c7b2fa9686"),
-        competition_title="TEST-EPA4700-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        epa_form_4700_4_competition.opportunity.agency_code = "SGG"
-        epa_form_4700_4_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in epa_form_4700_4_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing epa_key_contacts
-    epa_key_contacts_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["EPA_KeyContacts"],
-        opportunity_id=uuid.UUID("1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631"),
-        opportunity_number="TEST-EPAKC-ORG-IND-01",
-        opportunity_title="TEST-EPAKC-ORG-IND-OT01",
-        competition_id=uuid.UUID("165fad29-80d2-4c2d-b86b-1906fd68cf3f"),
-        competition_title="TEST-EPAKC-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        epa_key_contacts_competition.opportunity.agency_code = "SGG"
-        epa_key_contacts_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in epa_key_contacts_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing gg_lobbying_form
-    gg_lobbying_form_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["GG_LobbyingForm"],
-        opportunity_id=uuid.UUID("552d5866-501a-40b6-b1ce-2efc7a2d3aa5"),
-        opportunity_number="TEST-GGLOB-ORG-IND-01",
-        opportunity_title="TEST-GGLOB-ORG-IND-OT01",
-        competition_id=uuid.UUID("bae608bd-56cf-4038-8436-02da6af72df8"),
-        competition_title="TEST-GGLOB-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        gg_lobbying_form_competition.opportunity.agency_code = "SGG"
-        gg_lobbying_form_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in gg_lobbying_form_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing other_narrative_attachment
-    other_narrative_attachment_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["OtherNarrativeAttachments"],
-        opportunity_id=uuid.UUID("717b7f78-52f2-49f9-b1b8-5d7118313d2a"),
-        opportunity_number="TEST-ONA-ORG-IND-01",
-        opportunity_title="TEST-ONA-ORG-IND-OT01",
-        competition_id=uuid.UUID("6098d8b0-8025-448e-a407-a0ac56d27d3e"),
-        competition_title="TEST-ONA-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        other_narrative_attachment_competition.opportunity.agency_code = "SGG"
-        other_narrative_attachment_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in other_narrative_attachment_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing project_abstract
-    project_abstract_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["Project_Abstract"],
-        opportunity_id=uuid.UUID("d3081452-2cf8-4817-9abf-812e5d794485"),
-        opportunity_number="TEST-PABS-ORG-IND-01",
-        opportunity_title="TEST-PABS-ORG-IND-OT01",
-        competition_id=uuid.UUID("70238095-fbae-48c3-9007-83446416b18d"),
-        competition_title="TEST-PABS-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        project_abstract_competition.opportunity.agency_code = "SGG"
-        project_abstract_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in project_abstract_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing project_abstract_summary
-    project_abstract_summary_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["Project_AbstractSummary_2_0"],
-        opportunity_id=uuid.UUID("e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
-        opportunity_number="TEST-PABSS-ORG-IND-01",
-        opportunity_title="TEST-PABSS-ORG-IND-OT01",
-        competition_id=uuid.UUID("c6e468de-2911-494e-aa14-91b527a1f53e"),
-        competition_title="TEST-PABSS-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        project_abstract_summary_competition.opportunity.agency_code = "SGG"
-        project_abstract_summary_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in project_abstract_summary_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing project_narrative_attachment
-    project_narrative_attachment_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["ProjectNarrativeAttachments_1_2"],
-        opportunity_id=uuid.UUID("6bdc2df3-6e51-4aea-89af-bade326feba1"),
-        opportunity_number="TEST-PNA-ORG-IND-01",
-        opportunity_title="TEST-PNA-ORG-IND-OT01",
-        competition_id=uuid.UUID("3219b68b-c3c5-41d8-b889-d75eafd014d5"),
-        competition_title="TEST-PNA-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        project_narrative_attachment_competition.opportunity.agency_code = "SGG"
-        project_narrative_attachment_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in project_narrative_attachment_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing project_performance_site_location
-    project_performance_site_location_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["PerformanceSite"],
-        opportunity_id=uuid.UUID("8a30cbe2-f297-49b7-b996-fc22982a3eb5"),
-        opportunity_number="TEST-PPSL-ORG-IND-01",
-        opportunity_title="TEST-PPSL-ORG-IND-OT01",
-        competition_id=uuid.UUID("7fc52d4e-6efb-421d-8b0a-8c9e982f1e0f"),
-        competition_title="TEST-PPSL-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        project_performance_site_location_competition.opportunity.agency_code = "SGG"
-        project_performance_site_location_competition.opportunity.agency_id = sgg_agency.agency_id
     for (
-        aln
-    ) in project_performance_site_location_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
+        form_name,
+        opportunity_id,
+        opportunity_number,
+        opportunity_title,
+        competition_id,
+        competition_title,
+    ) in isolated_form_competitions:
+        competition = _build_seeded_competition_for_form(
+            db_session,
+            forms[form_name],
+            opportunity_id=uuid.UUID(opportunity_id),
+            opportunity_number=opportunity_number,
+            opportunity_title=opportunity_title,
+            competition_id=uuid.UUID(competition_id),
+            competition_title=competition_title,
+            is_required=True,
+            open_to_applicants=[
+                CompetitionOpenToApplicant.INDIVIDUAL,
+                CompetitionOpenToApplicant.ORGANIZATION,
+            ],
+        )
 
-    # Isolated scenario for testing sf424
-    sf424_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["SF424_4_0"],
-        opportunity_id=uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
-        opportunity_number="TEST-SF424-ORG-IND-01",
-        opportunity_title="TEST-SF424-ORG-IND-OT01",
-        competition_id=uuid.UUID("f0a1b2c3-d4e5-6789-0abc-def123456789"),
-        competition_title="TEST-SF424-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        sf424_competition.opportunity.agency_code = "SGG"
-        sf424_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in sf424_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
+        if sgg_agency:
+            competition.opportunity.agency_code = "SGG"
+            competition.opportunity.agency_id = sgg_agency.agency_id
 
-    # Isolated scenario for testing sf424a
-    sf424a_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["SF424A"],
-        opportunity_id=uuid.UUID("6c25cd41-660e-473f-abff-654083b7795d"),
-        opportunity_number="TEST-SF424A-ORG-IND-01",
-        opportunity_title="TEST-SF424A-ORG-IND-OT01",
-        competition_id=uuid.UUID("57bc877e-60b5-4ae0-bd5c-3e97248e57f2"),
-        competition_title="TEST-SF424A-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        sf424a_competition.opportunity.agency_code = "SGG"
-        sf424a_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in sf424a_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
+        for aln in competition.opportunity.opportunity_assistance_listings:
+            aln.assistance_listing_number = "10.960"
+            aln.program_title = "Technical Agricultural Assistance"
 
-    # Isolated scenario for testing sf424b
-    sf424b_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["SF424B"],
-        opportunity_id=uuid.UUID("dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6"),
-        opportunity_number="TEST-SF424B-ORG-IND-01",
-        opportunity_title="TEST-SF424B-ORG-IND-OT01",
-        competition_id=uuid.UUID("15d10405-d81b-4b8e-ae56-8ac1bd4c5560"),
-        competition_title="TEST-SF424B-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        sf424b_competition.opportunity.agency_code = "SGG"
-        sf424b_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in sf424b_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing sf424d
-    sf424d_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["SF424D"],
-        opportunity_id=uuid.UUID("abd9bce9-2b9b-46b8-b814-2c5cb7c5e88b"),
-        opportunity_number="TEST-SF424D-ORG-IND-01",
-        opportunity_title="TEST-SF424D-ORG-IND-OT01",
-        competition_id=uuid.UUID("2946ff6a-c2ce-4f05-8358-4dea1e2e7c51"),
-        competition_title="TEST-SF424D-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        sf424d_competition.opportunity.agency_code = "SGG"
-        sf424d_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in sf424d_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing sflll
-    sflll_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["SFLLL_2_0"],
-        opportunity_id=uuid.UUID("f3e438ee-ff4c-475b-a058-8049aee9abda"),
-        opportunity_number="TEST-SFLLL-ORG-IND-01",
-        opportunity_title="TEST-SFLLL-ORG-IND-OT01",
-        competition_id=uuid.UUID("4924f35b-7941-4d50-889c-3afaa726b671"),
-        competition_title="TEST-SFLLL-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        sflll_competition.opportunity.agency_code = "SGG"
-        sflll_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in sflll_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
-
-    # Isolated scenario for testing supplementary_neh_cover_sheet
-    supplementary_neh_cover_sheet_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["SupplementaryCoverSheetforNEHGrantPrograms"],
-        opportunity_id=uuid.UUID("b88287e2-7e2a-4c99-8ffe-30ab50c388ef"),
-        opportunity_number="TEST-NEHS-ORG-IND-01",
-        opportunity_title="TEST-NEHS-ORG-IND-OT01",
-        competition_id=uuid.UUID("5ba6e068-8f9e-4cbc-89bf-56bbb142b842"),
-        competition_title="TEST-NEHS-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    if sgg_agency:
-        supplementary_neh_cover_sheet_competition.opportunity.agency_code = "SGG"
-        supplementary_neh_cover_sheet_competition.opportunity.agency_id = sgg_agency.agency_id
-    for (
-        aln
-    ) in supplementary_neh_cover_sheet_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
+        db_session.flush()
 
 
 def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:
