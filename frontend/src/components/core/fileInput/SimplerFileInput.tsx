@@ -21,6 +21,7 @@ type SimplerFileInputProps = {
   onError?: (err: Error) => void;
   onSuccess?: (postUploadResult: unknown) => void;
   onStart?: () => void;
+  onComplete?: () => void;
   id: string;
   existingFiles?: UploadFileMetadata[];
   required?: boolean;
@@ -56,9 +57,10 @@ export const SimplerFileInput = ({
   labelId,
   existingFiles,
   onDelete,
-  onError = noop,
-  onSuccess = noop,
   onStart = noop,
+  onSuccess = noop,
+  onComplete = noop,
+  onError = noop,
   disabled = false,
   readOnly = false,
   required = false,
@@ -174,6 +176,7 @@ export const SimplerFileInput = ({
             setPostUploadController(undefined);
             setUploadController(undefined);
             setResponseReader(undefined);
+            onComplete();
           })
       );
     },
@@ -184,6 +187,7 @@ export const SimplerFileInput = ({
       onSuccess,
       postUploadAction,
       handleError,
+      onComplete,
     ],
   );
 

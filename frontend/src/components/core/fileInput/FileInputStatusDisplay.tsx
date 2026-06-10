@@ -37,7 +37,7 @@ export const FileInputStatusDisplay = ({
   postUploadActionSuccessMessage?: string;
   postUploadActionErrorMessage?: string;
 }) => {
-  const t = useTranslations("FileUpload.statusMessages");
+  const t = useTranslations("FileUpload.statusDisplay");
 
   if (!status) {
     return;

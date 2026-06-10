@@ -466,6 +466,34 @@ describe("SimplerFileInput", () => {
         expect(mockOnSuccess).toHaveBeenCalledWith("arbitrary return value"),
       );
     });
+
+    it("calls onComplete on completed post upload action", async () => {
+      const trigger = createAdvanceStreamTrigger();
+      // we're not concerned with the upload process here, so no need to mess with stream states
+      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+      const mockOnSuccess = jest.fn();
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          onComplete={mockOnSuccess}
+          postUploadAction={() => Promise.resolve("arbitrary return value")}
+          postUploadActionProgressMessage="post upload action in progress"
+          postUploadActionSuccessMessage="post upload action success"
+          postUploadActionErrorMessage="post upload action error"
+          id="file-input-test"
+          labelId="file-input-label"
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
+      trigger.advance();
+      await waitFor(() => expect(mockOnSuccess).toHaveBeenCalled());
+    });
     it("calls onError callback on error", async () => {
       const mockOnError = jest.fn();
       const fakeError = new Error();
