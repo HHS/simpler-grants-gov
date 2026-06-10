@@ -315,15 +315,12 @@ class BuildAutomaticOpportunitiesTask(Task):
         ### Test data 2 for only individuals - Some forms are required
         self.create_opportunity(
             OpportunityContainer(
-                opportunity_title="Test data 2 for only individuals - some forms are required",
+                opportunity_title="Test data 2 for only individuals - Some forms are required",
                 opportunity_number="SGG-indv-only-test-2",
             ),
             competitions=[
                 CompetitionContainer(
-                    required_form_ids=[
-                        SF424_v4_0.form_id,
-                        ProjectAbstractSummary_v2_0.form_id,
-                    ],
+                    required_form_ids=[SF424_v4_0.form_id, ProjectAbstractSummary_v2_0.form_id],
                     optional_form_ids=[
                         SF424a_v1_0.form_id,
                         SF424b_v1_1.form_id,
@@ -339,7 +336,7 @@ class BuildAutomaticOpportunitiesTask(Task):
         ### Test data 3 for only individuals - All forms are Optional
         self.create_opportunity(
             OpportunityContainer(
-                opportunity_title="Test data 3 for only individuals - all forms are optional",
+                opportunity_title="Test data 3 for only individuals - All forms are optional",
                 opportunity_number="SGG-indv-only-test-3",
             ),
             competitions=[
@@ -368,13 +365,18 @@ class BuildAutomaticOpportunitiesTask(Task):
                 category=OpportunityCategory.DISCRETIONARY,
                 assistance_listing_number="15.519",
                 program_title="Indian Tribal Water Resources Development, Management, and Protection",
-                summary_description="THIS IS NOT A REAL OPPORTUNITY - copied from production for testing.",
+                summary_description="THIS IS NOT A REAL OPPORTUNITY - This is a copy of one from our production environment. The Bureau of Reclamation (Reclamation) through the Native American Affairs Technical Assistance Program (NAA/TAP), provides financial and technical assistance to federally recognized Tribes.The objective of this NOFO is to invite federally recognized Tribes to submit proposals for financial assistance for projects and activities that develop, manage, and protect their water and water related resources. Reclamation plans to make Fiscal Year 2025 funds available for proposals selected from this NOFO through Reclamation's five Regional Offices.Maximum award per applicant: $2,000,000; $1,000,000 per proposal.No cost share requirement; however, partnering and collaboration is encouraged. For further information on the NAA/TAP please visit: www.usbr.gov/native/programs/TAPprogram.html",
                 is_cost_sharing=False,
                 close_date=date(2026, 12, 31),
+                close_date_description=None,
+                expected_number_of_awards=None,
                 estimated_total_program_funding=7_000_000,
                 award_floor=50_000,
                 award_ceiling=1_000_000,
-                applicant_eligibility_description="Federally recognized Tribes in eligible western states.",
+                additional_info_url=None,
+                additional_info_url_description=None,
+                applicant_eligibility_description="To be considered for this program, applicants will meet all the following eligibility requirements:The Tribe must be a federally recognized Indian Tribe, as defined in 25 U.S.C. Section 5304, andThe Tribe must be located in one or more of the 17 western states identified in the Reclamation Act of June 17, 1902, as amended and supplemented: Arizona, California, Colorado, Idaho, Kansas, Montana, Nebraska, Nevada, New Mexico, North Dakota, Oklahoma, Oregon, South Dakota, Texas, Utah, Washington, and Wyoming.Any applicant with an enacted Indian Water Rights Settlement, should identify the settlement in their application and might not be eligible for an award under this NOFO due to the uniqueness of each settlement.Eligible activities may include, but are not limited to:Water need and water infrastructure assessments.Water management plans and studies.Short-term water quality or water measurement data collection and assessment to inform new management approaches.Training for Tribal staff and managers in areas of water resources' development, management and protection.Drilling domestic or stock watering wells.On-the-ground activities related to riparian and aquatic habitat with the goal to maintain or improve water quantity or water quality:Restoring wetlands.Controlling erosion.Stabilizing streambanks.Constructing ponds.Developing water basin plans.Distinct, stand-alone water related activities that are part of a larger project. Please note, if the work for which you are requesting funding is a phase of a larger project, please only describe the work that is reflected in the budget and exclude description of other activities or components of the overall projectProject activities not eligible for funding under this NOFO include, but are not limited to:Feasibility studies (as defined under Reclamation law, which require express congressional authorization).Activities that lack definable products or deliverables.Specific employment positions within an Indian Tribe.Activities with a duration of more than 2 years from date of execution of a grant/cooperative agreement.Activities that generate data or analyses that have the potential to compromise any study or activities of a U.S. Department of the Interior (Department) Indian water rights negotiation or the Department of Justice in its pursuit of related Indian water rights claims.Activities related to non-Federal or non-tribal dams and associated structures.Activities providing funding for the administration of contracts or agreements under P.L. 93-638 that are unrelated to the NAA/TAP.Purchase of equipment as the sole purpose of the activity.Water purchases including the purchase or leasing of water rights or water shares.Activities in direct support of litigation of any kind.Activities that will obligate Reclamation to provide, or are not sustainable unless Reclamation does provide, on-going funding, such as an obligation to provide future funding for operation, maintenance, or replacement.Biological activities such as:fisheries work (including collection, analysis and evaluation of background data);habitat restoration unless directly related to water quality and quantity; andecosystem based activities such as biological surveys, air quality monitoring, and watershed-scale management.",
+                funding_category_description=None,
                 funding_instruments=[
                     FundingInstrument.COOPERATIVE_AGREEMENT,
                     FundingInstrument.GRANT,
@@ -383,6 +385,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 applicant_types=[
                     ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS
                 ],
+                opportunity_attachment_file_name=None,  # We'll manually upload files
             ),
             competitions=[
                 CompetitionContainer(
@@ -397,7 +400,9 @@ class BuildAutomaticOpportunitiesTask(Task):
                     optional_form_ids=[SF424b_v1_1.form_id, SFLLL_v2_0.form_id],
                     open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
                     closing_date=date(2026, 12, 31),
-                ),
+                    grace_period=None,
+                    competition_instructions_file_name=None,  # We'll manually upload files
+                )
             ],
         )
 
@@ -411,15 +416,18 @@ class BuildAutomaticOpportunitiesTask(Task):
                 category=OpportunityCategory.MANDATORY,
                 assistance_listing_number="16.557",
                 program_title="Tribal Domestic Violence and Sexual Assault Coalitions Grant Program",
-                summary_description="Mock DOJ opportunity for testing.",
+                summary_description="THIS IS NOT A REAL OPPORTUNITY - This is a copy of one from our production environment. The OVW Grants to Tribal Domestic Violence and Sexual Assault Coalitions Program supports the development and operation of nonprofit, nongovernmental Tribal domestic violence and sexual assault coalitions. Eligible applicants will be invited by OVW to apply. Each recognized coalition will receive the same amount of base funding. Sexual assault coalitions and dual domestic violence/sexual assault coalitions will receive an additional amount for sexual assault-focused project activities.",
                 is_cost_sharing=False,
                 close_date=date(2026, 12, 31),
+                close_date_description=None,
                 expected_number_of_awards=21,
                 estimated_total_program_funding=7_809_648,
                 award_floor=337_640,
                 award_ceiling=371_888,
                 additional_info_url="https://www.justice.gov/ovw/media/1408381/dl?inline",
-                applicant_eligibility_description="Recognized tribal coalitions only.",
+                additional_info_url_description="Full announcement",
+                applicant_eligibility_description="Eligible applicants are limited to: recognized tribal domestic violence and sexual assault coalitions.",
+                funding_category_description=None,
                 funding_instruments=[FundingInstrument.GRANT],
                 funding_categories=[FundingCategory.LAW_JUSTICE_AND_LEGAL_SERVICES],
                 applicant_types=[
@@ -427,12 +435,16 @@ class BuildAutomaticOpportunitiesTask(Task):
                     ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITH_501C3,
                     ApplicantType.OTHER,
                 ],
+                opportunity_attachment_file_name=None,  # We'll manually upload files
             ),
             competitions=[
                 CompetitionContainer(
+                    competition_title=None,
                     required_form_ids=[SF424_v4_0.form_id],
                     open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
                     closing_date=date(2026, 12, 31),
+                    grace_period=None,
+                    competition_instructions_file_name=None,  # We'll manually upload files
                 )
             ],
         )
@@ -498,6 +510,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 opportunity_title="TEST-ALN-ALPHANUM-OT01",
                 opportunity_number="TEST-ALN-ALPHANUM-ON01",
                 assistance_listing_number="93.KT1",
+                program_title="Alphanumeric ALN Test Program 1",
             ),
             competitions=[
                 CompetitionContainer(
@@ -517,6 +530,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 opportunity_title="TEST-ALN-ALPHANUM-OT02",
                 opportunity_number="TEST-ALN-ALPHANUM-ON02",
                 assistance_listing_number="93.AA1",
+                program_title="Alphanumeric ALN Test Program 2",
             ),
             competitions=[
                 CompetitionContainer(
