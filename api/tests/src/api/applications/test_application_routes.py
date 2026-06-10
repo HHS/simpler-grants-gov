@@ -1,5 +1,4 @@
-﻿import copy
-import logging
+﻿import logging
 import uuid
 from datetime import date, timedelta
 
@@ -4402,7 +4401,7 @@ def test_sf424a_section_a_strips_nextjs_action_prefix_and_sums_column_g(
         form_json_schema=resolve_jsonschema(SF424a_v1_0.form_json_schema),
         form_rule_schema=SF424a_v1_0.form_rule_schema,
     )
-    competition_form = CompetitionFormFactory.create(
+    CompetitionFormFactory.create(
         competition=application.competition,
         form=form,
     )
@@ -4446,7 +4445,7 @@ def test_sf424a_section_a_row5_col_g_sums_column_g_via_api(
         form_json_schema=resolve_jsonschema(SF424a_v1_0.form_json_schema),
         form_rule_schema=SF424a_v1_0.form_rule_schema,
     )
-    competition_form = CompetitionFormFactory.create(
+    CompetitionFormFactory.create(
         competition=application.competition,
         form=form,
     )
