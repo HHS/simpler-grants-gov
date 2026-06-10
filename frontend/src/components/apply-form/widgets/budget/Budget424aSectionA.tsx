@@ -9,7 +9,7 @@ import {
 import React, { JSX } from "react";
 import { Table } from "@trussworks/react-uswds";
 
-import TextWidget from "src/components/applyForm/widgets/TextWidget";
+import TextWidget from "src/components/apply-form/widgets/TextWidget";
 import { ACTIVITY_ITEMS } from "./budgetConstants";
 import { getErrorsForSection } from "./budgetErrors";
 import {
@@ -261,9 +261,9 @@ function Budget424aSectionA<
                       />
                     </div>
 
-                    {/* 
-                    Print only value - we hide the input only for print and show the value here- 
-                    due to the unpredictability of what the activity names may be, 
+                    {/*
+                    Print only value - we hide the input only for print and show the value here-
+                    due to the unpredictability of what the activity names may be,
                     it might get cut off and impossible to read.
                     */}
                     <div className="sf424a-print-only-view sf424a-section-a__activity-print-value">
@@ -292,9 +292,9 @@ function Budget424aSectionA<
                       />
                     </div>
 
-                    {/* 
-                    Print only value - we hide the input only for print and show the value here- 
-                    due to the unpredictability of what the activity names may be, 
+                    {/*
+                    Print only value - we hide the input only for print and show the value here-
+                    due to the unpredictability of what the activity names may be,
                     it might get cut off and impossible to read.
                     */}
                     <div className="sf424a-print-only-view sf424a-section-a__activity-print-value">

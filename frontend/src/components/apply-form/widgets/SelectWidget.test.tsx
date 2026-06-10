@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import SelectWidget from "src/components/applyForm/widgets/SelectWidget";
+import SelectWidget from "src/components/apply-form/widgets/SelectWidget";
 
 const WidgetProps = {
   id: "test",

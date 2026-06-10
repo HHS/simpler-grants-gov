@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import TextAreaWidget from "src/components/applyForm/widgets/TextAreaWidget";
+import TextAreaWidget from "src/components/apply-form/widgets/TextAreaWidget";
 
 const WidgetProps = {
   id: "test",

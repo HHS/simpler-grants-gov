@@ -2,7 +2,7 @@ import { FormContextType, RJSFSchema } from "@rjsf/utils";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { GeneralRecord } from "src/types/applyForm/types";
 
-import Budget424aSectionF from "src/components/applyForm/widgets/budget/Budget424aSectionF";
+import Budget424aSectionF from "src/components/apply-form/widgets/budget/Budget424aSectionF";
 
 function buildRootSchema(): RJSFSchema {
   return {

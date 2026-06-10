@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import Budget424aSectionA from "src/components/applyForm/widgets/budget/Budget424aSectionA";
+import Budget424aSectionA from "src/components/apply-form/widgets/budget/Budget424aSectionA";
 import budget424a from "./budget424a.mock.json";
 
 const WidgetProps = {

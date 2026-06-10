@@ -55,7 +55,16 @@ def get_award_recommendation_summary(
                 "not_recommended_count",
             ),
             func.coalesce(
-                func.sum(AwardRecommendationSubmissionDetail.recommended_amount),
+                func.sum(
+                    case(
+                        (
+                            AwardRecommendationSubmissionDetail.award_recommendation_type
+                            == AwardRecommendationType.RECOMMENDED_FOR_FUNDING,
+                            AwardRecommendationSubmissionDetail.recommended_amount,
+                        ),
+                        else_=0,
+                    )
+                ),
                 0,
             ).label("total_recommended_amount"),
         )
