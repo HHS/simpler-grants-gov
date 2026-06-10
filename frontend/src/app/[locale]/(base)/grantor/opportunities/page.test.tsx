@@ -650,7 +650,10 @@ describe("Opportunities", () => {
     it("for SGM draft opportunities, render action buttons only", async () => {
       basicOpportunity.is_draft = true;
       basicOpportunity.opportunity_status = undefined;
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -666,7 +669,10 @@ describe("Opportunities", () => {
     it("for SGM posted opportunities, render view opportunity link and action buttons", async () => {
       basicOpportunity.is_draft = undefined;
       basicOpportunity.opportunity_status = "posted";
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -687,7 +693,10 @@ describe("Opportunities", () => {
     it("for SGM forecasted opportunities, render view opportunity link and action buttons", async () => {
       basicOpportunity.is_draft = undefined;
       basicOpportunity.opportunity_status = "forecasted";
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -708,7 +717,10 @@ describe("Opportunities", () => {
     it("for SGM closed opportunities, render view opportunity link only", async () => {
       basicOpportunity.is_draft = undefined;
       basicOpportunity.opportunity_status = "closed";
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -726,7 +738,10 @@ describe("Opportunities", () => {
     it("for SGM archived opportunities, render view opportunity link only", async () => {
       basicOpportunity.is_draft = undefined;
       basicOpportunity.opportunity_status = "archived";
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -745,7 +760,10 @@ describe("Opportunities", () => {
       basicOpportunity.is_draft = undefined;
       basicOpportunity.opportunity_status = "posted";
       basicOpportunity.legacy_opportunity_id = 12345;
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -764,7 +782,10 @@ describe("Opportunities", () => {
       basicOpportunity.is_draft = undefined;
       basicOpportunity.opportunity_status = "forecasted";
       basicOpportunity.legacy_opportunity_id = 12345;
-      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+        pagination_info: { total_pages: 1, total_records: 1 },
+      });
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),

@@ -1,3 +1,4 @@
+import TopLevelError from "src/app/[locale]/(base)/error/page";
 import { AgencySelector } from "src/app/[locale]/(base)/grantor/opportunities/_components/AgencySelector";
 import { UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
@@ -162,11 +163,12 @@ const transformTableRowData = (
       },
       {
         cellData:
-          // Only allow editing if the status is not closed or archived, and
-          status.toLowerCase() !== "closed" &&
-          status.toLowerCase() !== "archived" &&
-          // there is no grants.gov id (i.e. this is an SGM created opportunity)
-          !opportunity.legacy_opportunity_id ? (
+          // Only allow editing if this is an SGM created opportunity
+          !opportunity.legacy_opportunity_id &&
+          // and the status is draft, posted or forecasted
+          (status.toLowerCase() === "draft" ||
+            status.toLowerCase() === "forecasted" ||
+            status.toLowerCase() === "posted") ? (
             <span>
               <EditAction
                 canUpdate={canUpdate}
