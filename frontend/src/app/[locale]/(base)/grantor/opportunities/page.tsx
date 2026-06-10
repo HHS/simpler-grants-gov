@@ -329,14 +329,11 @@ const fetchOpportunities = async (agencyId: string, page: number) => {
     ],
   };
   // fetch a page of opportunities for this agency
-  const { data, pagination_info } = await searchOpportunitiesByAgency(
-    agencyId,
-    pageRequest,
-  );
+  const json = await searchOpportunitiesByAgency(agencyId, pageRequest);
   return {
-    opportunities: data,
-    totalRecords: pagination_info.total_records,
-    totalPages: pagination_info.total_pages,
+    opportunities: json.data,
+    totalRecords: json.pagination_info.total_records,
+    totalPages: json.pagination_info.total_pages,
   };
 };
 
@@ -360,7 +357,6 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   // A. Check the user's session
   const userSession = await getSession();
   if (!userSession || !userSession.token) {
-    console.error("Invalid session", userSession);
     return <TopLevelError />;
   }
 
@@ -414,8 +410,8 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
 
   // E. Load a page of data
   // note: the current page number is in the URL
-  let totalRecords: number = 0;
-  let totalPages: number = 0;
+  let totalRecords = 0;
+  let totalPages = 0;
   let userOpportunities: BaseOpportunity[] = [];
   if (agencyUserAcccess.canView) {
     try {
@@ -453,13 +449,13 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       )}
 
       {agencyUserAcccess.canView && userOpportunities.length > 0 && (
-        <div>
+        <>
           <OpportunitiesTable
             userOpportunities={userOpportunities}
             canUpdate={agencyUserAcccess.canUpdate}
           />
           <OpportunitiesPagination totalPages={totalPages} />
-        </div>
+        </>
       )}
     </OpportunitiesPageWrapper>
   );

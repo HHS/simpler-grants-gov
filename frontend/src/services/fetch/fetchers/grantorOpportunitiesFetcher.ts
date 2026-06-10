@@ -24,8 +24,7 @@ export const searchOpportunitiesByAgency = async (
     subPath: `agencies/` + agencyId + `/opportunities`,
     body: pageBody,
   });
-  const json = (await response.json()) as SearchAPIResponse;
-  return { data: json.data, pagination_info: json.pagination_info };
+  return (await response.json()) as SearchAPIResponse;
 };
 
 export const createOpportunity = async (

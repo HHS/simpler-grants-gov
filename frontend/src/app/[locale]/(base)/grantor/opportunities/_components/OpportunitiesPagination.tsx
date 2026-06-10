@@ -1,9 +1,8 @@
-// This component uses the URL because it is the industry-standard "best practice"
-// for server-side pages (the parent or calling component).
+// This component manages pagination state using URL query params, in order to avoid
+// client side state management and trigger render lifecycle actions organically
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
 type PaginationProps = {
@@ -16,26 +15,20 @@ export default function OpportunitiesPagination({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
 
   // Extract current page from URL query string, default to page 1
   const currentPage = Number(searchParams.get("page")) || 1;
 
   const handlePageClick = (pageNumber: number) => {
-    startTransition(() => {
-      // Update the client-side URL parameters
-      // this will trigger a page refresh and load another page of data
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("page", pageNumber.toString());
-      router.push(`${pathname}?${params.toString()}`);
-    });
+    // Update the client-side URL parameters
+    // this will trigger a page refresh and load another page of data
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", pageNumber.toString());
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   return (
-    <div
-      data-testid="pagination-transition-wrapper"
-      style={{ opacity: isPending ? 0.6 : 1, transition: "opacity 0.2s" }}
-    >
+    <div>
       <Pagination
         totalPages={totalPages}
         currentPage={currentPage}
