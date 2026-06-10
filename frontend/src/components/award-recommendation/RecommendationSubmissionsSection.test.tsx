@@ -42,6 +42,7 @@ const mockSubmission: AwardRecommendationSubmission = {
   submission_detail: {
     award_recommendation_type: "recommended_for_funding",
     recommended_amount: "50000.00",
+    scoring_comment: "85",
     has_exception: false,
   },
 };
@@ -202,6 +203,7 @@ describe("RecommendationSubmissionsSection", () => {
     expect(screen.getByText("Test project")).toBeInTheDocument();
     expect(screen.getByText("Test Org")).toBeInTheDocument();
     expect(screen.getByText("UEI000001")).toBeInTheDocument();
+    expect(screen.getByText("85")).toBeInTheDocument();
     expect(screen.getByText("recommended")).toBeInTheDocument();
     expect(screen.queryByText("exceptions.heading")).not.toBeInTheDocument();
   });
