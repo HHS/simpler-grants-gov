@@ -527,11 +527,12 @@ def to_snake_case(name: str) -> str:
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", sub).lower()
 
 
-def write_debug_data_to_s3(
-    operation_name: str, soap_request: SOAPRequest, soap_legacy_response: SOAPResponse
-) -> None:
+def write_debug_data_to_s3(soap_request: SOAPRequest, soap_legacy_response: SOAPResponse) -> None:
     try:
-        if get_soap_config().save_soap_messages_to_s3 and operation_name in SimplerRequests:
+        if (
+            get_soap_config().save_soap_messages_to_s3
+            and soap_request.operation_name in SimplerRequests
+        ):
             s3_config = S3Config()
             debug_identifier = uuid.uuid4()
             base_path = file_util.join(
