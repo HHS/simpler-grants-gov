@@ -555,7 +555,11 @@ describe("Opportunities", () => {
   });
 
   describe("user privileges", () => {
-    const draftOpportunity = { ...basicOpportunity, is_draft: true };
+    const draftOpportunity = {
+      ...basicOpportunity,
+      is_draft: true,
+      is_simpler_grants_opportunity: true,
+    };
     draftOpportunity.opportunity_status = undefined;
     beforeEach(() => {
       mockFetchUserAgencies.mockResolvedValue([agency1]);
@@ -642,16 +646,21 @@ describe("Opportunities", () => {
   });
 
   describe("different opportunity status", () => {
+    // start with a SGM draft opportunity
+    const sgmOpportunity = {
+      ...basicOpportunity,
+      is_draft: true,
+      is_simpler_grants_opportunity: true,
+    };
+    sgmOpportunity.opportunity_status = undefined;
     beforeEach(() => {
       mockCheckUserPrivileges.mockResolvedValue(userPrivileges);
       mockFetchUserAgencies.mockResolvedValue([agency1]);
     });
 
     it("for SGM draft opportunities, render action buttons only", async () => {
-      basicOpportunity.is_draft = true;
-      basicOpportunity.opportunity_status = undefined;
       mockSearchForOpportunities.mockResolvedValue({
-        data: [basicOpportunity],
+        data: [sgmOpportunity],
         pagination_info: { total_pages: 1, total_records: 1 },
       });
       const component = await OpportunitiesListPage({
@@ -667,10 +676,10 @@ describe("Opportunities", () => {
     });
 
     it("for SGM posted opportunities, render view opportunity link and action buttons", async () => {
-      basicOpportunity.is_draft = undefined;
-      basicOpportunity.opportunity_status = "posted";
+      sgmOpportunity.is_draft = false;
+      sgmOpportunity.opportunity_status = "posted";
       mockSearchForOpportunities.mockResolvedValue({
-        data: [basicOpportunity],
+        data: [sgmOpportunity],
         pagination_info: { total_pages: 1, total_records: 1 },
       });
       const component = await OpportunitiesListPage({
@@ -680,7 +689,7 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByText("posted")).toBeVisible();
-      const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
+      const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
       });
@@ -691,10 +700,10 @@ describe("Opportunities", () => {
     });
 
     it("for SGM forecasted opportunities, render view opportunity link and action buttons", async () => {
-      basicOpportunity.is_draft = undefined;
-      basicOpportunity.opportunity_status = "forecasted";
+      sgmOpportunity.is_draft = false;
+      sgmOpportunity.opportunity_status = "forecasted";
       mockSearchForOpportunities.mockResolvedValue({
-        data: [basicOpportunity],
+        data: [sgmOpportunity],
         pagination_info: { total_pages: 1, total_records: 1 },
       });
       const component = await OpportunitiesListPage({
@@ -704,7 +713,7 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByText("forecasted")).toBeVisible();
-      const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
+      const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
       });
@@ -715,10 +724,10 @@ describe("Opportunities", () => {
     });
 
     it("for SGM closed opportunities, render view opportunity link only", async () => {
-      basicOpportunity.is_draft = undefined;
-      basicOpportunity.opportunity_status = "closed";
+      sgmOpportunity.is_draft = false;
+      sgmOpportunity.opportunity_status = "closed";
       mockSearchForOpportunities.mockResolvedValue({
-        data: [basicOpportunity],
+        data: [sgmOpportunity],
         pagination_info: { total_pages: 1, total_records: 1 },
       });
       const component = await OpportunitiesListPage({
@@ -728,7 +737,7 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByText("closed")).toBeVisible();
-      const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
+      const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
       });
@@ -736,10 +745,10 @@ describe("Opportunities", () => {
     });
 
     it("for SGM archived opportunities, render view opportunity link only", async () => {
-      basicOpportunity.is_draft = undefined;
-      basicOpportunity.opportunity_status = "archived";
+      sgmOpportunity.is_draft = false;
+      sgmOpportunity.opportunity_status = "archived";
       mockSearchForOpportunities.mockResolvedValue({
-        data: [basicOpportunity],
+        data: [sgmOpportunity],
         pagination_info: { total_pages: 1, total_records: 1 },
       });
       const component = await OpportunitiesListPage({
@@ -749,7 +758,7 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByText("archived")).toBeVisible();
-      const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
+      const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
       });
@@ -759,7 +768,7 @@ describe("Opportunities", () => {
     it("for Grants.gov posted opportunities, render view opportunity link only", async () => {
       basicOpportunity.is_draft = undefined;
       basicOpportunity.opportunity_status = "posted";
-      basicOpportunity.legacy_opportunity_id = 12345;
+      basicOpportunity.is_simpler_grants_opportunity = null;
       mockSearchForOpportunities.mockResolvedValue({
         data: [basicOpportunity],
         pagination_info: { total_pages: 1, total_records: 1 },
@@ -781,7 +790,7 @@ describe("Opportunities", () => {
     it("for Grants.gov forecasted opportunities, render view opportunity link only", async () => {
       basicOpportunity.is_draft = undefined;
       basicOpportunity.opportunity_status = "forecasted";
-      basicOpportunity.legacy_opportunity_id = 12345;
+      basicOpportunity.is_simpler_grants_opportunity = false;
       mockSearchForOpportunities.mockResolvedValue({
         data: [basicOpportunity],
         pagination_info: { total_pages: 1, total_records: 1 },

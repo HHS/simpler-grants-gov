@@ -111,6 +111,7 @@ export interface BaseOpportunity extends MinimalOpportunity {
   top_level_agency_name: string | null;
   updated_at: string;
   is_draft: boolean;
+  is_simpler_grants_opportunity: boolean | null;
   saved_to_organizations?: SavedToOrganization[];
 }
 

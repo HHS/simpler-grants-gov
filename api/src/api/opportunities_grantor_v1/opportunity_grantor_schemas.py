@@ -116,6 +116,13 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
         },
     )
 
+    is_simpler_grants_opportunity = fields.Boolean(
+        allow_none=True,
+        metadata={
+            "description": "Whether the opportunity was created with the Simpler Grants application",
+        },
+    )
+
     forecast_summary = fields.Nested(
         lambda: OpportunitySummaryDetailSchema(),
         allow_none=True,
@@ -137,12 +144,14 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
     attachments = fields.List(
         fields.Nested(OpportunityAttachmentV1Schema),
         attribute="opportunity_attachments",
-        metadata={"description": "List of attachments associated with the opportunity"},
+        metadata={
+            "description": "List of attachments associated with the opportunity"},
     )
 
     competitions = fields.List(
         fields.Nested(CompetitionAlphaSchema),
-        metadata={"description": "List of competitions associated with the opportunity"},
+        metadata={
+            "description": "List of competitions associated with the opportunity"},
     )
 
 
@@ -230,7 +239,8 @@ class OpportunityListFilterSchema(Schema):
     """Schema for opportunity list filters"""
 
     award_recommendation_ready = fields.Nested(
-        BoolSearchSchemaBuilder("AwardRecommendationReadySchema").with_one_of(example=True).build(),
+        BoolSearchSchemaBuilder("AwardRecommendationReadySchema").with_one_of(
+            example=True).build(),
         metadata={
             "description": "Filter for opportunities ready for award recommendations. Returns only non-draft Simpler Grants opportunities with application submissions and no existing award recommendations."
         },
@@ -249,7 +259,8 @@ class OpportunityListRequestSchema(Schema):
                 "opportunity_title",
                 "created_at",
             ],
-            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+            default_sort_order=[
+                {"order_by": "created_at", "sort_direction": "descending"}],
             default_page_size=25,
             default_page_offset=1,
         ),
@@ -283,7 +294,8 @@ class OpportunitySummaryBaseRequestSchema(Schema):
         required=True,
         allow_none=True,
         validate=validators.Length(max=18000),
-        metadata={"description": "Opportunity summary", "example": "This opportunity..."},
+        metadata={"description": "Opportunity summary",
+                  "example": "This opportunity..."},
     )
 
     is_cost_sharing = fields.Boolean(
@@ -559,7 +571,8 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryBaseRequestSchem
 
     is_forecast = fields.Boolean(
         required=True,
-        metadata={"description": "Whether the opportunity is forecasted", "example": False},
+        metadata={
+            "description": "Whether the opportunity is forecasted", "example": False},
     )
 
 
@@ -638,12 +651,14 @@ class CompetitionRequestBaseSchema(Schema):
     opening_date = fields.Date(
         required=True,
         allow_none=True,
-        metadata={"description": "The opening date of the competition", "example": "2026-05-11"},
+        metadata={"description": "The opening date of the competition",
+                  "example": "2026-05-11"},
     )
     closing_date = fields.Date(
         required=True,
         allow_none=True,
-        metadata={"description": "The closing date of the competition", "example": "2026-05-11"},
+        metadata={"description": "The closing date of the competition",
+                  "example": "2026-05-11"},
     )
     contact_info = fields.String(
         required=True,

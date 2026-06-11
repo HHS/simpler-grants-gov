@@ -141,6 +141,7 @@ const transformTableRowData = (
   _t: TFn,
 ) => {
   return userOpportunities.map((opportunity: BaseOpportunity) => {
+    const isSgmOpportunity = opportunity.is_simpler_grants_opportunity ?? false;
     const status = opportunity.is_draft
       ? "draft"
       : (opportunity.opportunity_status ?? "");
@@ -164,7 +165,7 @@ const transformTableRowData = (
       {
         cellData:
           // Only allow editing if this is an SGM created opportunity
-          !opportunity.legacy_opportunity_id &&
+          isSgmOpportunity &&
           // and the status is draft, posted or forecasted
           (status.toLowerCase() === "draft" ||
             status.toLowerCase() === "forecasted" ||
