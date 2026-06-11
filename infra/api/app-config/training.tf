@@ -10,7 +10,7 @@ module "training_config" {
   secondary_domain_names            = ["alb.training.simpler.grants.gov"]
   mtls_domain_name                  = "soap.training.simpler.grants.gov"
   enable_https                      = true
-  database_engine_version           = "17.5"
+  database_engine_version           = "17.7"
   has_database                      = true
   database_enable_http_endpoint     = true
   database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwtMjEwNzYwNjQ1MjUwNjc2ODE4OQ"
