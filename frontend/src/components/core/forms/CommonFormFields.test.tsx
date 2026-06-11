@@ -161,6 +161,48 @@ describe("CommonCharacterCount", () => {
     const charCountText = screen.getByText("10 characters over limit");
     expect(charCountText).toBeInTheDocument();
   });
+  it("renders the input as disabled when disabled=true", () => {
+    render(
+      <CommonCharacterCount
+        {...commonCharacterCountProps}
+        isTextArea={false}
+        defaultValue=""
+        disabled={true}
+      />,
+    );
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeDisabled();
+  });
+  it("renders the input with type=email when inputType='email'", () => {
+    render(
+      <CommonCharacterCount
+        {...commonCharacterCountProps}
+        isTextArea={false}
+        defaultValue=""
+        inputType="email"
+      />,
+    );
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toHaveAttribute("type", "email");
+  });
+  it("renders the input with type=url when inputType='url'", () => {
+    render(
+      <CommonCharacterCount
+        {...commonCharacterCountProps}
+        isTextArea={false}
+        defaultValue=""
+        inputType="url"
+      />,
+    );
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toHaveAttribute("type", "url");
+  });
 });
 
 // --- Test Common Select ---

@@ -167,6 +167,29 @@ describe("OpportunityEditForm — rendering", () => {
     expect(screen.getByText("content.draftOnlyWarning")).toBeInTheDocument();
   });
 
+  it("disables character-count fields when isDraft is false", () => {
+    renderOpportunityEditForm({ isDraft: false });
+
+    expect(
+      screen.getByRole("textbox", { name: /labels\.description/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("textbox", { name: /labels\.grantorContactDetails/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.additionalInfoUrl" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.additionalInfoUrlText" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.contactEmail" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.contactEmailText" }),
+    ).toBeDisabled();
+  });
+
   it("pre-checks eligibility checkboxes from initialValues", () => {
     renderOpportunityEditForm();
 
