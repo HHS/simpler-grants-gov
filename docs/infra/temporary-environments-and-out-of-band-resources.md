@@ -90,6 +90,6 @@ For more on cleanup of temporary environment resources, see [Pull Request Enviro
 
 - [Pull Request Environments](./pull-request-environments.md) — how PR environments are created and destroyed
 - [Develop and Test Infrastructure in Isolation Using Workspaces](./develop-and-test-infrastructure-in-isolation-using-workspaces.md) — how workspace-based temporary environments work
-- [Custom Domains](./custom-domains.md) — an example of a resource requiring out-of-band DNS configuration
-- [Identity Provider](./identity-provider.md) — Cognito setup and configuration
+- [Custom Domains](/docs/infra/custom-domains.md) — an example of a resource requiring out-of-band DNS configuration
+- [Identity Provider](/docs/infra/identity-provider.md) — Cognito setup and configuration
 - [Set Up Database](/documentation/infra/set-up-database.md) — database provisioning
