@@ -766,9 +766,7 @@ describe("Opportunities", () => {
     });
 
     it("for Grants.gov posted opportunities, render view opportunity link only", async () => {
-      basicOpportunity.is_draft = undefined;
       basicOpportunity.opportunity_status = "posted";
-      basicOpportunity.is_simpler_grants_opportunity = null;
       mockSearchForOpportunities.mockResolvedValue({
         data: [basicOpportunity],
         pagination_info: { total_pages: 1, total_records: 1 },
@@ -788,9 +786,7 @@ describe("Opportunities", () => {
     });
 
     it("for Grants.gov forecasted opportunities, render view opportunity link only", async () => {
-      basicOpportunity.is_draft = undefined;
       basicOpportunity.opportunity_status = "forecasted";
-      basicOpportunity.is_simpler_grants_opportunity = false;
       mockSearchForOpportunities.mockResolvedValue({
         data: [basicOpportunity],
         pagination_info: { total_pages: 1, total_records: 1 },
