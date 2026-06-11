@@ -5,6 +5,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
+import {
+  createAdvanceStreamTrigger,
+  makeAdvanceableTestStreamForTrigger,
+} from "src/utils/testing/streamTestUtils";
 
 import { SimplerFileInput } from "./SimplerFileInput";
 
@@ -20,47 +24,6 @@ jest.mock("src/hooks/useClientFetch", () => ({
     clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
   }),
 }));
-
-// this allows us to advance the response stream manually from within the tests
-const createAdvanceStreamTrigger = () => {
-  let handler: () => void;
-  return {
-    listen(fn: () => void) {
-      handler = fn;
-    },
-    advance() {
-      handler();
-    },
-  };
-};
-
-const makeStream = (
-  chunks: string[],
-  trigger: {
-    listen: (fn: () => void) => void;
-    advance: () => void;
-  },
-) => {
-  let chunkIndex = 0;
-  const maxChunks = chunks.length;
-  return new ReadableStream({
-    start: (controller) => {
-      trigger.listen(() => {
-        if (chunkIndex === maxChunks) {
-          controller.close();
-          return;
-        }
-        const chunk = chunks[chunkIndex];
-        if (chunk === "error") {
-          controller.error(new Error("fake error from test stream chunk"));
-          return;
-        }
-        controller.enqueue(chunk);
-        chunkIndex++;
-      });
-    },
-  });
-};
 
 let originalAbortController: typeof AbortController;
 
@@ -92,7 +55,9 @@ describe("SimplerFileInput", () => {
     });
     it("displays a custom progress indicator during upload", async () => {
       const trigger = createAdvanceStreamTrigger();
-      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+      clientFetchMock.mockResolvedValue(
+        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+      );
       render(
         <SimplerFileInput
           onDelete={() => Promise.resolve()}
@@ -119,7 +84,12 @@ describe("SimplerFileInput", () => {
     it("displays a 'queued' message when queued", async () => {
       const trigger = createAdvanceStreamTrigger();
       clientFetchMock.mockResolvedValue(
-        new Response(makeStream(["uploading", "scanning"], trigger)),
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            ["uploading", "scanning"],
+            trigger,
+          ),
+        ),
       );
       render(
         <SimplerFileInput
@@ -147,7 +117,12 @@ describe("SimplerFileInput", () => {
     it("displays a sequential status messages as received from streaming response", async () => {
       const trigger = createAdvanceStreamTrigger();
       clientFetchMock.mockResolvedValue(
-        new Response(makeStream(["uploading", "scanning"], trigger)),
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            ["uploading", "scanning"],
+            trigger,
+          ),
+        ),
       );
       render(
         <SimplerFileInput
@@ -185,7 +160,9 @@ describe("SimplerFileInput", () => {
     it("displays post upload status after successful upload", async () => {
       const trigger = createAdvanceStreamTrigger();
       // we're not concerned with the upload process here, so no need to mess with stream states
-      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+      clientFetchMock.mockResolvedValue(
+        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+      );
       const delayedPostUploadAction = (): Promise<undefined> => {
         return new Promise((resolve) => {
           setTimeout(() => resolve(undefined), 10);
@@ -219,7 +196,9 @@ describe("SimplerFileInput", () => {
 
     it("displays complete status after successful post-upload", async () => {
       const trigger = createAdvanceStreamTrigger();
-      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+      clientFetchMock.mockResolvedValue(
+        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+      );
       render(
         <SimplerFileInput
           onDelete={() => Promise.resolve()}
@@ -284,7 +263,9 @@ describe("SimplerFileInput", () => {
     it("displays an upload error if error occurs during upload process", async () => {
       const trigger = createAdvanceStreamTrigger();
       clientFetchMock.mockResolvedValue(
-        new Response(makeStream(["uploading", "error"], trigger)),
+        new Response(
+          makeAdvanceableTestStreamForTrigger(["uploading", "error"], trigger),
+        ),
       );
       render(
         <SimplerFileInput
@@ -318,7 +299,12 @@ describe("SimplerFileInput", () => {
     it("displays an scan error if error occurs during scan process", async () => {
       const trigger = createAdvanceStreamTrigger();
       clientFetchMock.mockResolvedValue(
-        new Response(makeStream(["uploading", "scanning", "error"], trigger)),
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            ["uploading", "scanning", "error"],
+            trigger,
+          ),
+        ),
       );
       render(
         <SimplerFileInput
@@ -353,7 +339,9 @@ describe("SimplerFileInput", () => {
     it("displays a post-upload error if error occurs during post-upload process", async () => {
       const trigger = createAdvanceStreamTrigger();
       // we're not concerned with the upload process here, so no need to mess with stream states
-      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+      clientFetchMock.mockResolvedValue(
+        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+      );
       const delayedPostUploadAction = (): Promise<undefined> => {
         return new Promise((_resolve, reject) => {
           setTimeout(() => reject(new Error()), 10);
@@ -413,7 +401,9 @@ describe("SimplerFileInput", () => {
     it("calls postUploadAction on completed upload", async () => {
       const trigger = createAdvanceStreamTrigger();
       // we're not concerned with the upload process here, so no need to mess with stream states
-      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+      clientFetchMock.mockResolvedValue(
+        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+      );
       const mockPostUploadAction = jest.fn();
       render(
         <SimplerFileInput
@@ -440,7 +430,9 @@ describe("SimplerFileInput", () => {
     it("calls onSuccess with expected argument on completed post upload action", async () => {
       const trigger = createAdvanceStreamTrigger();
       // we're not concerned with the upload process here, so no need to mess with stream states
-      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+      clientFetchMock.mockResolvedValue(
+        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+      );
       const mockOnSuccess = jest.fn();
       render(
         <SimplerFileInput
@@ -470,7 +462,9 @@ describe("SimplerFileInput", () => {
     it("calls onComplete on completed post upload action", async () => {
       const trigger = createAdvanceStreamTrigger();
       // we're not concerned with the upload process here, so no need to mess with stream states
-      clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+      clientFetchMock.mockResolvedValue(
+        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+      );
       const mockOnSuccess = jest.fn();
       render(
         <SimplerFileInput
@@ -532,7 +526,7 @@ describe("SimplerFileInput", () => {
     }));
     const trigger = createAdvanceStreamTrigger();
     clientFetchMock.mockResolvedValue(
-      new Response(makeStream(["uploading"], trigger)),
+      new Response(makeAdvanceableTestStreamForTrigger(["uploading"], trigger)),
     );
     render(
       <SimplerFileInput
@@ -581,7 +575,9 @@ describe("SimplerFileInput", () => {
         },
       }));
     const trigger = createAdvanceStreamTrigger();
-    clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+    clientFetchMock.mockResolvedValue(
+      new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+    );
     const delayedPostUploadAction = (): Promise<undefined> => {
       return new Promise((resolve) => {
         setTimeout(() => resolve(undefined), 1000);
@@ -626,7 +622,9 @@ describe("SimplerFileInput", () => {
   // or do we just remove it? use mutation observer? not worry about testing, and rely on the css?
   it.skip("does not display the Trussworks file preview", async () => {
     const trigger = createAdvanceStreamTrigger();
-    clientFetchMock.mockResolvedValue(new Response(makeStream([], trigger)));
+    clientFetchMock.mockResolvedValue(
+      new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+    );
     render(
       <SimplerFileInput
         onDelete={() => Promise.resolve()}

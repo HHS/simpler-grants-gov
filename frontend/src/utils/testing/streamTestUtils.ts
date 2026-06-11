@@ -1,7 +1,12 @@
+export type AdvanceTestStreamTrigger = {
+  listen: (fn: () => void) => undefined;
+  advance: () => void;
+};
+
 // this allows us to advance the response stream manually from within the tests
 // create a trigger with this and pass it to makeAdvanceableTestStreamForTrigger
 // and you can use trigger.advance() to advance the stream to the next chunk
-export const createAdvanceStreamTrigger = () => {
+export const createAdvanceStreamTrigger = (): AdvanceTestStreamTrigger => {
   let handler: () => void;
   return {
     listen(fn: () => void) {
