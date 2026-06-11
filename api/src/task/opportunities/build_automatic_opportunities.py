@@ -192,7 +192,7 @@ class BuildAutomaticOpportunitiesTask(Task):
         self.opportunities: list[Opportunity] = []
 
     def run_task(self) -> None:
-        if os.getenv("ENVIRONMENT", None) not in ["local", "dev", "staging", "training"]:
+        if os.getenv("ENVIRONMENT", None) not in ["grantee1","local", "dev", "staging", "training"]:
             raise Exception("This task is not meant to be run in production")
 
         with self.db_session.begin():
