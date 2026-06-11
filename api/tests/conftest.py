@@ -731,19 +731,6 @@ def load_active_forms(db_session, enable_factory_create) -> None:
         # resolved by init_form_registry() so no deepcopy or re-resolve needed.
         db_session.merge(form, load=True)
 
-
-@pytest.fixture(autouse=True)
-def reset_form_registry() -> None:
-    """Reset the global form registry before each test.
-
-    Mirrors the DB transaction rollback pattern — each test gets a clean
-    registry slate. Prevents custom forms registered by one test from leaking
-    into subsequent tests and polluting the global singleton.
-    """
-    form_template_registry._registry.clear()
-    return
-
-
 @pytest.fixture
 def seed_form_registry(load_active_forms) -> None:
     """Populate the test DB with all registry forms.
