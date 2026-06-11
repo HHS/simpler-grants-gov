@@ -10,5 +10,7 @@ export default class JsdomNodeEnvironment extends JsDomEnvironment {
     super(...args);
     this.global.Request = Request;
     this.global.Response = Response;
+    this.global.ReadableStream = ReadableStream;
+    this.global.AbortController = AbortController;
   }
 }
