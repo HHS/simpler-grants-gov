@@ -30,29 +30,36 @@ from tests.src.db.models.factories import (
 )
 
 
-def _create_test_form(db_session, **kwargs) -> FormModel:
-    """Create a Form(...) directly, seed it to DB, and register in the registry.
-    TODO(#10274): remove db_session.add + flush once the form table is dropped
+@pytest.fixture
+def create_test_form(db_session):
+    """Factory fixture for custom-schema test forms with automatic registry cleanup.
+    # TODO(#10274): remove db_session.add + flush once the form table is dropped
     """
     init_form_registry()
-    form = FormModel(
-        form_id=uuid.uuid4(),
-        form_name=kwargs.get("form_name", "Test Form"),
-        short_form_name="TestForm",
-        form_version="1.0",
-        agency_code="SGG",
-        form_json_schema=kwargs.get("form_json_schema", {"type": "object", "properties": {}}),
-        form_ui_schema={},
-        form_rule_schema=kwargs.get("form_rule_schema", None),
-        json_to_xml_schema=None,
-    )
-    db_session.add(form)
-    db_session.flush()
-    form_template_registry.register(form, major_version=1)
-    return form
+
+    def _make(**kwargs) -> FormModel:
+        form = FormModel(
+            form_id=uuid.uuid4(),
+            form_name=kwargs.get("form_name", "Test Form"),
+            short_form_name=kwargs.get("short_form_name", "TestForm"),
+            form_version=kwargs.get("form_version", "1.0"),
+            agency_code="SGG",
+            form_json_schema=kwargs.get("form_json_schema", {"type": "object", "properties": {}}),
+            form_ui_schema={},
+            form_rule_schema=kwargs.get("form_rule_schema", None),
+            json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
+        )
+        db_session.add(form)
+        db_session.flush()
+        form_template_registry.register(form, major_version=1)
+        return form
+
+    yield _make
+
+    form_template_registry._registry.clear()
 
 
-def test_add_organization_to_application_success(enable_factory_create, db_session):
+def test_add_organization_to_application_success(enable_factory_create, db_session, create_test_form):
     """Test successfully adding an organization to an application."""
     # Create user with proper privileges
     user = UserFactory.create()
@@ -67,8 +74,7 @@ def test_add_organization_to_application_success(enable_factory_create, db_sessi
     )
 
     # Create a form with simple schema for testing pre-population
-    form = _create_test_form(
-        db_session,
+    form = create_test_form(
         form_json_schema={
             "type": "object",
             "properties": {"name": {"type": "string"}},
@@ -379,7 +385,7 @@ def test_add_organization_removes_multiple_application_users(enable_factory_crea
     assert updated_application.organization_id == organization.organization_id
 
 
-def test_add_organization_triggers_form_prepopulation(enable_factory_create, db_session):
+def test_add_organization_triggers_form_prepopulation(enable_factory_create, db_session, create_test_form):
     """Test that adding organization triggers pre-population on application forms."""
     user = UserFactory.create()
 
@@ -389,8 +395,7 @@ def test_add_organization_triggers_form_prepopulation(enable_factory_create, db_
     )
 
     # Create a form with simple schema
-    form = _create_test_form(
-        db_session,
+    form = create_test_form(
         form_json_schema={
             "type": "object",
             "properties": {"test_field": {"type": "string"}},
@@ -481,7 +486,7 @@ def test_add_organization_preserves_intends_to_add_organization(enable_factory_c
 
 
 def test_add_organization_repopulates_application_response_from_org(
-    enable_factory_create, db_session
+    enable_factory_create, db_session, create_test_form
 ):
     """Test that adding an organization repopulates application_response with org data (e.g., UEI)."""
 
@@ -493,8 +498,7 @@ def test_add_organization_repopulates_application_response_from_org(
     )
 
     # Create form schema that includes sam_uei
-    form = _create_test_form(
-        db_session,
+    form = create_test_form(
         form_json_schema={
             "type": "object",
             "properties": {"sam_uei": {"type": "string"}},

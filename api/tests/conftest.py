@@ -731,6 +731,7 @@ def load_active_forms(db_session, enable_factory_create) -> None:
         # resolved by init_form_registry() so no deepcopy or re-resolve needed.
         db_session.merge(form, load=True)
 
+
 @pytest.fixture
 def seed_form_registry(load_active_forms) -> None:
     """Populate the test DB with all registry forms.
