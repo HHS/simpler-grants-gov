@@ -1,8 +1,10 @@
-import src.adapters.db.flask_db as flask_db
+import grants_shared.adapters.db.flask_db as flask_db
+from grants_shared.adapters import db
+
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
-from src.adapters import db
 from src.adapters.aws.sesv2_adapter import BaseSESV2Client
+from src.constants.lookup_constants import JobType
 from src.task.ecs_background_task import ecs_background_task
 from src.task.notifications.closing_date_notification import ClosingDateNotificationTask
 from src.task.notifications.config import EmailNotificationConfig, get_email_config
@@ -19,7 +21,7 @@ from src.task.task_blueprint import task_blueprint
 @task_blueprint.cli.command(
     "email-notifications", help="Send email notifications for opportunity and search changes"
 )
-@ecs_background_task("email-notifications")
+@ecs_background_task(JobType.EMAIL_NOTIFICATIONS)
 @flask_opensearch.with_search_client()
 @flask_db.with_db_session()
 def run_email_notification_task(db_session: db.Session, search_client: search.SearchClient) -> None:

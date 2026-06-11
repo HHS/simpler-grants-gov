@@ -6,13 +6,10 @@ import logging
 import time
 
 import sqlalchemy
+from grants_shared.adapters import db
+from grants_shared.util import datetime_util
 
-import src.db.models.foreign
-import src.db.models.staging
-import src.logging
 import src.task.task
-from src.adapters import db
-from src.util import datetime_util
 
 from . import sql
 
@@ -69,7 +66,10 @@ class LoadOracleDataTask(src.task.task.Task):
         self.foreign_tables = foreign_tables
         self.staging_tables = staging_tables
         self.insert_chunk_size = insert_chunk_size
-        self.batch_cutoff = datetime_util.get_now_us_eastern_datetime()
+        # Strip tzinfo so the cutoff is a naive datetime with EST wall-clock values.
+        # The Oracle foreign data stores EST timestamps but Postgres treats them as UTC, so a
+        # tz-aware cutoff is converted to UTC for comparison and ends up 4-5h ahead of the source.
+        self.batch_cutoff = datetime_util.get_now_us_eastern_datetime().replace(tzinfo=None)
 
     def run_task(self) -> None:
         """Main task process, called by run()."""
@@ -275,22 +275,3 @@ class LoadOracleDataTask(src.task.task.Task):
                 extra["table"] = table.name
                 extra[f"count.{table.schema}.{table.name}"] = count
         logger.info(f"row count {message}", extra=extra, stacklevel=2)
-
-
-def main() -> None:
-    with src.logging.init(__package__):
-        db_client = db.PostgresDBClient()
-
-        foreign_tables = {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
-        staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
-
-        with db_client.get_session() as db_session:
-            LoadOracleDataTask(
-                db_session,
-                foreign_tables,
-                staging_tables,
-            ).run()
-
-
-if __name__ == "__main__":
-    main()

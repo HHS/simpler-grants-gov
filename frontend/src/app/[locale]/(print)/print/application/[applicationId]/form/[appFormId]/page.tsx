@@ -1,12 +1,11 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
+import PrintForm from "src/app/[locale]/(print)/print/application/[applicationId]/form/_components/PrintForm";
+import { addPrintWidgetToFields } from "src/utils/applyForm/applyFormUtils";
 import getFormData from "src/utils/getFormData";
 
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-
-import PrintForm from "src/components/applyForm/PrintForm";
-import { addPrintWidgetToFields } from "src/components/applyForm/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -59,11 +58,6 @@ export default async function FormPage({ params }: FormPageProps) {
   const { applicationId, appFormId, setAttachmentsChanged } = await params;
   const headersList = await headers();
   const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
-
-  if (internalToken === undefined) {
-    console.error("Internal token not supplied");
-    return <TopLevelError />;
-  }
 
   const { data, error } = await getFormData({
     applicationId,

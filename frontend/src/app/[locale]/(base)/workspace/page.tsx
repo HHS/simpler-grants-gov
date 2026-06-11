@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { WorkspaceDashboardLinksSection } from "src/app/[locale]/(base)/workspace/_components/WorkspaceDashboardLinksSection";
 import { getSession } from "src/services/auth/session";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import {
@@ -11,9 +12,8 @@ import { OrganizationInvitation } from "src/types/userTypes";
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
-import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
-import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
-import { WorkspaceDashboardLinksSection } from "src/components/workspace/WorkspaceDashboardLinksSection";
+import { UserOrganizationsList } from "src/components/organizations/UserOrganizationsList";
+import { OrganizationInvitationReplies } from "./_components/OrganizationInvitationReplies";
 
 export async function generateMetadata({
   params,

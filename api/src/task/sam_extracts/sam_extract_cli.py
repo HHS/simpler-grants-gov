@@ -1,10 +1,11 @@
 import logging
 
 import click
+import grants_shared.adapters.db as db
+from grants_shared.adapters.db import flask_db
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
 from src.adapters.sam_gov import create_sam_gov_client
+from src.constants.lookup_constants import JobType
 from src.task.ecs_background_task import ecs_background_task
 from src.task.sam_extracts.cleanup_old_sam_extracts import CleanupOldSamExtractsTask
 from src.task.sam_extracts.create_orgs_from_sam_entity import CreateOrgsFromSamEntityTask
@@ -32,7 +33,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--cleanup-old-files/--no-cleanup-old-files", default=True, help="run CleanupOldSamExtractsTask"
 )
-@ecs_background_task("sam-extracts")
+@ecs_background_task(JobType.SAM_EXTRACTS)
 @flask_db.with_db_session()
 def run_sam_extracts(
     db_session: db.Session,

@@ -1,6 +1,9 @@
 from enum import StrEnum
 from typing import Any
 
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
 from marshmallow import pre_dump
 
 from src.api.opportunities_v1.opportunity_schemas import (
@@ -8,9 +11,6 @@ from src.api.opportunities_v1.opportunity_schemas import (
     SavedOpportunityResponseV1Schema,
 )
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
-from src.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicationStatus,
     ExternalUserType,
@@ -117,6 +117,16 @@ class UserLoginGovCallbackSchema(Schema):
     )
     error_description = fields.String(
         allow_none=True, metadata={"description": "A description of the error"}
+    )
+
+
+class UserLoginSchema(Schema):
+    # This is defining the inputs we receive on the callback from login.gov's
+    # authorization endpoint and must match:
+    # https://developers.login.gov/oidc/authorization/#authorization-response
+    piv_required = fields.Boolean(
+        allow_none=True,
+        metadata={"description": "Whether the user is required to use a PIV to login"},
     )
 
 

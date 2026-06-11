@@ -1,12 +1,16 @@
 import uuid
 from collections.abc import Sequence
 
+import grants_shared.adapters.db as db
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
-from src.db.models.award_recommendation_models import AwardRecommendationRisk
+from src.db.models.award_recommendation_models import (
+    AwardRecommendationApplicationSubmission,
+    AwardRecommendationRisk,
+    AwardRecommendationRiskSubmission,
+)
 from src.db.models.user_models import User
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
@@ -40,7 +44,13 @@ def list_award_recommendation_risks(
             AwardRecommendationRisk.award_recommendation_id == award_recommendation_id,
             AwardRecommendationRisk.is_deleted.isnot(True),
         )
-        .options(selectinload(AwardRecommendationRisk.award_recommendation_risk_submissions))
+        .options(
+            selectinload(AwardRecommendationRisk.award_recommendation_risk_submissions)
+            .selectinload(
+                AwardRecommendationRiskSubmission.award_recommendation_application_submission
+            )
+            .selectinload(AwardRecommendationApplicationSubmission.application_submission)
+        )
     )
     stmt = apply_sorting(stmt, params.pagination.sort_order, COLUMN_MAPPING)
 

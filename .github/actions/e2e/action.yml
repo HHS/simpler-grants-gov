@@ -1,6 +1,13 @@
 name: Run Playwright
 description: Composite action to run Playwright against specified environment
 
+# ---
+# This action conditionally installs Playwright browsers (Chrome, Firefox, WebKit)
+# based on the do-chrome-install, do-firefox-install, and do-webkit-install inputs.
+# Only the browsers needed for the current test shard are installed, improving CI efficiency.
+# Chrome is cached outside this job, and will be available even if not instructed to install.
+# ---
+
 inputs:
   version:
     description: "ref / sha / branch to run tests against"
@@ -44,8 +51,14 @@ inputs:
   workers:
     description: "number of workers to use for test run"
     default: ""
-  force-webkit-install:
-    description: "webkit dependencies aren't all cached, so we need to force it to install"
+  do-chrome-install:
+    description: "install chrome for playwright"
+    default: "false"
+  do-firefox-install:
+    description: "install firefox for playwright"
+    default: "false"
+  do-webkit-install:
+    description: "install webkit for playwright"
     default: "false"
   staging_test_user_api_key:
     description: "test user API key used in spoofing staging user logins"
@@ -83,20 +96,36 @@ runs:
         cache: ${{ inputs.package_manager }}
         cache-dependency-path: ${{ inputs.lockfile_path }}
 
-    - name: Install Node dependencies & Playwright
+    - name: Install Playwright core package
       if: ${{ inputs.needs_node_setup == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
         npm install @playwright/test
-        npx playwright install --with-deps
 
-    - name: Install Webkit dependencies
-      if: ${{ inputs.force-webkit-install == 'true' }}
+    # Conditionally install Chrome if requested
+    - name: Install Chrome and dependencies
+      if: ${{ inputs.do-chrome-install == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
-        npx playwright install-deps webkit
+        npx playwright install --with-deps chromium-headless-shell
+
+    # Conditionally install Firefox if requested (Shard 2 on the CI/CD run)
+    - name: Install Firefox and dependencies
+      if: ${{ inputs.do-firefox-install == 'true' }}
+      shell: bash
+      working-directory: ./frontend
+      run: |
+        npx playwright install --with-deps firefox
+
+    # Conditionally install Webkit if requested (Shard 3 on the CI/CD run)
+    - name: Install Webkit and dependencies
+      if: ${{ inputs.do-webkit-install == 'true' }}
+      shell: bash
+      working-directory: ./frontend
+      run: |
+        npx playwright install --with-deps webkit
 
     - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
       if: ${{ inputs.playwright_tags == '' }}

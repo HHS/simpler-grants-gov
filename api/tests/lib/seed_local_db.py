@@ -4,19 +4,19 @@ import uuid
 from datetime import timedelta
 
 import click
+import grants_shared.adapters.db as db
+import grants_shared.logs
+import grants_shared.util.datetime_util as datetime_util
+from grants_shared.adapters.db import PostgresDBClient
+from grants_shared.util.local import error_if_not_local
 from sqlalchemy import select
 
-import src.adapters.db as db
-import src.logging
-import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
-from src.adapters.db import PostgresDBClient
 from src.constants.lookup_constants import CompetitionOpenToApplicant
 from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
-from src.form_schema.forms import get_active_forms
+from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
-from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_agencies_and_users import _build_agencies_and_users
 from tests.lib.seed_award_recommendations import _build_award_recommendations
@@ -322,6 +322,58 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
     return competition
 
 
+def _build_seeded_competition_for_form(
+    db_session: db.Session,
+    form: Form,
+    *,
+    opportunity_id: uuid.UUID,
+    opportunity_number: str,
+    opportunity_title: str,
+    competition_id: uuid.UUID,
+    competition_title: str,
+    is_required: bool = False,
+    open_to_applicants: list[CompetitionOpenToApplicant] | None = None,
+) -> Competition:
+
+    if open_to_applicants is None:
+        open_to_applicants = [
+            CompetitionOpenToApplicant.INDIVIDUAL,
+            CompetitionOpenToApplicant.ORGANIZATION,
+        ]
+
+    competition = fetch_competition(db_session, competition_id)
+
+    if not competition:
+        competition = factories.CompetitionFactory.create(
+            competition_id=competition_id,
+            opportunity__opportunity_id=opportunity_id,
+            opportunity__opportunity_number=opportunity_number,
+            opportunity__opportunity_title=opportunity_title,
+            competition_title=competition_title,
+            competition_forms=[],
+            open_to_applicants=open_to_applicants,
+            with_instruction=True,
+        )
+
+    if not does_competition_form_exist(
+        db_session,
+        competition.competition_id,
+        form.form_id,
+    ):
+        factories.CompetitionFormFactory.create(
+            competition=competition,
+            form=form,
+            is_required=is_required,
+        )
+
+    logger.info(
+        f"Created seeded competition '{competition_title}' "
+        f"for opportunity '{opportunity_number}'"
+    )
+
+    return competition
+
+
 # Build custom competitions 8037 for testing 7953
 def does_competition_form_exist(db_session, competition_id, form_id):
     return (
@@ -420,9 +472,26 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             factories.CompetitionFormFactory.create(
                 competition=competition, form=sflll_form, is_required=False
             )
+
         logger.info(
             f"Created Apply Happy Path competition '{comp_title}' for opportunity '{opp_num}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
         )
+
+    # Isolated scenario for testing Print Form
+    _build_seeded_competition_for_form(
+        db_session,
+        forms["Project_AbstractSummary_2_0"],
+        opportunity_id=uuid.UUID("f21dc67e-84d8-4e2b-ae3e-2d68f83957db"),
+        opportunity_number="TEST-PRINT-ORG-IND-ON01",
+        opportunity_title="TEST-PRINT-ORG-IND-OT01",
+        competition_id=uuid.UUID("9e3b6fb9-85a7-4b71-9f8f-2ecb31d9e7f4"),
+        competition_title="TEST-PRINT-ORG-IND-CT01",
+        is_required=True,
+        open_to_applicants=[
+            CompetitionOpenToApplicant.INDIVIDUAL,
+            CompetitionOpenToApplicant.ORGANIZATION,
+        ],
+    )
 
 
 def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:
@@ -499,7 +568,7 @@ def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -
         seed_award_recommendations="ALL" in steps or "award_recommendations" in steps,
     )
 
-    with src.logging.init("seed_local_db"):
+    with grants_shared.logs.init("seed_local_db"):
         logger.info("Running seed script for local DB")
         error_if_not_local()
 
@@ -522,6 +591,7 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
 
     competition_container: CompetitionContainer | None = None
     if seed_config.seed_forms:
+        init_form_registry()
         forms_map = _build_forms(db_session)
         competition_container = _build_competitions(db_session, forms_map)
     if seed_config.seed_users:

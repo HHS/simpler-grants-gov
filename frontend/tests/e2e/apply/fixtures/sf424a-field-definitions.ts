@@ -1,5 +1,5 @@
+import { type FillFormConfig } from "tests/e2e/utils/common/types";
 import { numberToTwoDecimalString } from "tests/e2e/utils/forms/form-number-utils";
-import { type FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 // RegExp matcher tolerant of hyphen/dash variants for SF-424A,
@@ -62,11 +62,11 @@ export const SF424A_EXPECTED = {
 
 /**
  * SF-424A form configuration.
- * Matches the FillFormConfig interface from general-forms-filling.ts
+ * Matches the FillFormConfig interface from tests/e2e/utils/common/types.ts
  * Field keys must match the keys in sf424aHappyPathTestData().
  */
 export const SF424A_FORM_CONFIG: FillFormConfig = {
-  formName: "Budget Information for Non-Construction Programs (SF-424A)",
+  formName: SF424A_FORM_MATCHER,
   saveButtonTestId: "apply-form-save",
   noErrorsText: "No errors were detected",
   fields: {
@@ -400,8 +400,8 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
 // Top alert validation errors for SF-424A blank-save behavior.
 export const SF424A_ALERT_ERRORS: FieldError[] = [
   {
-    fieldId: "activity_line_items",
-    message: "[] should be non-empty",
+    fieldId: "activity_line_items[0]--activity_title",
+    message: "'activity_title' is a required property",
   },
   {
     fieldId: "confirmation",

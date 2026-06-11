@@ -21,7 +21,7 @@ import {
   getFieldNameForHtml,
   getFieldPathFromHtml,
   getFieldSchema,
-} from "src/components/applyForm/utils";
+} from "./applyFormUtils";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
@@ -508,14 +508,20 @@ const getFieldListConfig = ({
       };
     },
   );
+
   const fieldListValue =
     formData && typeof formData === "object" && !Array.isArray(formData)
       ? (formData as Record<string, unknown>)[uiFieldObject.name]
       : undefined;
+
   const requiredFields = getFieldListRequiredFields({
     formSchema,
     fieldListName: uiFieldObject.name,
   });
+
+  const fieldListSchema = formSchema.properties?.[uiFieldObject.name] as
+    | RJSFSchema
+    | undefined;
 
   return {
     type: "FieldList",
@@ -529,12 +535,17 @@ const getFieldListConfig = ({
       },
       label: uiFieldObject.label,
       description: uiFieldObject.description,
-      defaultSize: uiFieldObject.defaultSize,
       name: uiFieldObject.name,
+      minItems: fieldListSchema?.minItems,
+      maxItems: fieldListSchema?.maxItems,
       groupDefinition,
       rawErrors: errors ?? [],
       requiredFields,
       value: fieldListValue as GeneralRecord[] | undefined,
+      minItemsHeading: uiFieldObject.minItemsHeading,
+      minItemsHelperText: uiFieldObject.minItemsHelperText,
+      maxItemsHeading: uiFieldObject.maxItemsHeading,
+      maxItemsHelperText: uiFieldObject.maxItemsHelperText,
     },
   };
 };

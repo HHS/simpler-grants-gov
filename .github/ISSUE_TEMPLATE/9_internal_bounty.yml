@@ -1,0 +1,144 @@
+name: Internal - Bounty
+description: Post a paid contribution opportunity under the Simpler Grants Funded Open Source Contributor Program. For program owners only.
+title: "[Bounty: $AMOUNT — TIER] <short description>"
+labels: ["bounty", "status:open"]
+type: Task
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > 💰 **Bounty — $AMOUNT (TIER)**
+        >
+        > This issue is part of the Simpler Grants Funded Open Source Contributor Program.
+        > Payment is contingent on a merged PR meeting all acceptance criteria, two maintainer approvals, and the verification steps in the [Contributor Terms of Service](../blob/main/CONTRIBUTING.md#funded-bounty-program).
+        >
+        > **Eligibility:** US citizens 18+, not current or former Nava/HHS employees or contractors, not on the OFAC SDN list. Full terms in the ToS.
+
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Bounty tier
+      description: Select the bounty tier. Must match the amount in the title and the `bounty:TIER` label.
+      options:
+        - XL
+        - L
+        - M
+    validations:
+      required: true
+
+  - type: input
+    id: amount
+    attributes:
+      label: Bounty amount (USD)
+      description: Dollar amount paid on completion. Must match the title and the selected tier.
+      placeholder: "500"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What is this issue? Why does it matter? Link to any prior discussion, audit finding, or related work. Keep this self-contained so an outside contributor does not need insider context.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Objective, testable pass/fail conditions. A maintainer who has never seen this issue must be able to judge pass/fail from this list alone. No "should feel right" criteria.
+      value: |
+        - [ ] <criterion 1>
+        - [ ] <criterion 2>
+        - [ ] <criterion 3>
+        - [ ] All existing tests continue to pass; new tests cover the changed behavior.
+        - [ ] Documentation updated where the change is user-visible or developer-facing.
+    validations:
+      required: true
+
+  - type: textarea
+    id: in_scope
+    attributes:
+      label: In scope
+      description: What this bounty covers.
+      placeholder: |
+        -
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      description: What this bounty does NOT cover. Adjacent work that may surface during implementation belongs in a separate issue.
+      placeholder: |
+        -
+    validations:
+      required: true
+
+  - type: textarea
+    id: starting_points
+    attributes:
+      label: Suggested starting points
+      description: File paths, related tests, documentation links, and any pattern in the codebase the contributor can mirror. Linking to one or two similar prior PRs is often the most useful thing here.
+      value: |
+        - Files:
+        - Tests:
+        - Docs:
+        - Related PRs / issues:
+    validations:
+      required: false
+
+  - type: textarea
+    id: contributor_tracking_table
+    attributes:
+      label: Contributor tracking table
+      description: Program owners maintain this table. One row per `/claim` — never delete or re-use a row, always append. Rows are ordered by claim date, oldest first. Status values - `claimed`, `in progress`, `pr submitted`, `in review`, `paid`, `stale`, `withdrawn`, `declined`.
+      value: |
+        | Contributor | ToS Ack | Status | Last Updated | PR | Notes |
+        | ----------- | ------- | ------ | ------------ | -- | ----- |
+        | _no claims yet_ | | | | | |
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## How to claim
+
+        1. Read the [Contributor Terms of Service](../blob/main/CONTRIBUTING.md#funded-bounty-program).
+        2. **Post the ToS acknowledgment as a comment on this issue.** Copy the text below verbatim:
+
+           > I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former Nava or HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.
+
+        3. In a **separate** comment, post `/claim`.
+        4. A program owner will verify your acknowledgment and add you to the tracking table above.
+
+        **Claim rules**
+
+        - You may hold up to **3 active claims** at any time across all bounty issues.
+        - A claim expires after **14 days of no activity**. One 7-day extension is available on request with a substantive progress update.
+        - Submitting a PR: include `Closes #<this issue number>` in the PR description.
+        - Multiple valid PRs: first valid PR (by `opened_at` timestamp) is paid in full. Other valid-but-unselected PRs may receive a $50 runner-up payment while program reserve funds remain.
+
+  - type: checkboxes
+    id: program_owner_checklist
+    attributes:
+      label: Program owner checklist
+      description: Complete before publishing this bounty.
+      options:
+        - label: Tier label (`bounty:XL` / `bounty:L` / `bounty:M`) matches the amount in the title
+        - label: Budget tracker reservation status is `posted`
+        - label: Issue is added to the README bounty board
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Support
+
+        - Questions about scope or acceptance criteria: comment on this issue.
+        - Broader questions about the program: see the [Funded Bounty Program section of CONTRIBUTING.md](../blob/main/CONTRIBUTING.md#funded-bounty-program).
+        - Code of Conduct: [CODE_OF_CONDUCT.md](../blob/main/CODE_OF_CONDUCT.md).

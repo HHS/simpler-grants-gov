@@ -1,10 +1,9 @@
 import math
 from collections.abc import Sequence
 
+import grants_shared.adapters.db as db
+from grants_shared.db.models.base import Base
 from sqlalchemy import Select, func, inspect
-
-import src.adapters.db as db
-from src.db.models.base import Base
 
 DEFAULT_PAGE_SIZE = 25
 

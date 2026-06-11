@@ -2,12 +2,13 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING
 
+from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from grants_shared.db.models.base import TimestampMixin
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -16,7 +17,7 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models.agency_models import Agency
-from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
@@ -334,7 +335,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
 class AssistanceListing(ApiSchemaTable, TimestampMixin):
     __tablename__ = "assistance_listing"
 
-    assistance_listing_record_id: Mapped[uuid.UUID] = mapped_column(
+    assistance_listing_id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid.uuid4
     )
 
@@ -360,8 +361,8 @@ class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
     assistance_listing_number: Mapped[str | None]
     program_title: Mapped[str | None]
 
-    assistance_listing_record_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID, ForeignKey(AssistanceListing.assistance_listing_record_id), index=True
+    assistance_listing_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(AssistanceListing.assistance_listing_id), index=True
     )
     assistance_listing: Mapped[AssistanceListing | None] = relationship(AssistanceListing)
 

@@ -5,10 +5,12 @@ import { AwardRecommendationSummary } from "src/types/awardRecommendationTypes";
 import { useTranslations } from "next-intl";
 import { CharacterCount } from "@trussworks/react-uswds";
 
-import { RecommendationSummaryDisplay } from "src/components/award-recommendation/RecommendationSummaryDisplay";
-import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
+import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
+import { RecommendationSubmissionsSection } from "./RecommendationSubmissionsSection";
+import { RecommendationSummaryDisplay } from "./RecommendationSummaryDisplay";
 
 type RecommendationSummarySectionProps = {
+  awardRecommendationId: string;
   summary?: AwardRecommendationSummary;
   fundingStrategy?: string;
   totalAvailable?: number;
@@ -16,6 +18,7 @@ type RecommendationSummarySectionProps = {
 };
 
 export const RecommendationSummarySection = ({
+  awardRecommendationId,
   summary,
   fundingStrategy,
   totalAvailable = 250000,
@@ -46,8 +49,12 @@ export const RecommendationSummarySection = ({
                   {t("fundingStrategy.heading")}
                 </h3>
                 {fundingStrategy ? (
-                  <SummaryDescriptionDisplay
-                    summaryDescription={fundingStrategy}
+                  <ExpandableTextContent
+                    textContent={fundingStrategy}
+                    showCallToAction={t("fundingStrategy.showDescription")}
+                    hideCallToAction={t(
+                      "fundingStrategy.hideSummaryDescription",
+                    )}
                   />
                 ) : (
                   <p className="font-sans-md text-base-dark">
@@ -79,6 +86,11 @@ export const RecommendationSummarySection = ({
           )}
         </>
       )}
+
+      <RecommendationSubmissionsSection
+        awardRecommendationId={awardRecommendationId}
+        viewMode={viewMode}
+      />
     </div>
   );
 };

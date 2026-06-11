@@ -6,7 +6,9 @@ from typing import Any
 from lxml import etree as lxml_etree
 
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
+from src.form_schema.forms import init_form_registry
 from src.services.applications.application_validation import is_form_required
+from src.services.xml_generation.config import load_xml_transform_config
 from src.services.xml_generation.constants import (
     GRANTS_GOV_NAMESPACES,
     SCHEMA_LOCATION_BASE_URL,
@@ -35,6 +37,7 @@ class SubmissionXMLAssembler:
         self.application_submission = application_submission
         self.xml_service = XMLGenerationService()
         self.attachment_mapping = attachment_mapping
+        init_form_registry()
 
     def get_supported_forms(self) -> list[ApplicationForm]:
         """Get list of application forms that are supported for XML generation.
@@ -151,7 +154,7 @@ class SubmissionXMLAssembler:
 
         request = XMLGenerationRequest(
             application_data=app_form.application_response,
-            transform_config=app_form.form.json_to_xml_schema,
+            transform_config=load_xml_transform_config(form_name),
             pretty_print=pretty_print,
             attachment_mapping=attachment_mapping,
         )

@@ -12,19 +12,20 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
+import AwardRecommendationAttachments from "src/components/award-recommendation/AwardRecommendationAttachments";
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
 import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
-import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
+import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
+import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { submitAwardRecommendationForReview } from "./actions";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; id?: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
@@ -36,7 +37,7 @@ export async function generateMetadata({
 }
 
 export type AwardRecommendationPageProps = {
-  params: Promise<{ locale: string; id?: string }>;
+  params: Promise<{ locale: string; id: string }>;
 } & WithFeatureFlagProps;
 
 interface OpportunitySectionProps {
@@ -85,8 +86,10 @@ const OpportunitySection = ({
         <p className="text-bold margin-bottom-2">{t("opportunitySummary")}</p>
         <div className="margin-bottom-3">
           {hasSummary ? (
-            <SummaryDescriptionDisplay
-              summaryDescription={summaryDescription || ""}
+            <ExpandableTextContent
+              textContent={summaryDescription || ""}
+              showCallToAction={t("summary.showDescription")}
+              hideCallToAction={t("summary.hideSummaryDescription")}
             />
           ) : (
             <div>{t("noSummaryAvailable")}</div>
@@ -95,8 +98,10 @@ const OpportunitySection = ({
         <p className="text-bold margin-bottom-2">
           {t("otherOpportunityInfo.label")}
         </p>
-        <SummaryDescriptionDisplay
-          summaryDescription={awardRecommendationDetails.additional_info || ""}
+        <ExpandableTextContent
+          textContent={awardRecommendationDetails.additional_info || ""}
+          showCallToAction={t("summary.showDescription")}
+          hideCallToAction={t("summary.hideSummaryDescription")}
         />
       </div>
     </div>
@@ -126,49 +131,48 @@ async function AwardRecommendationPageContent({
   ];
 
   let awardRecommendationDetails: AwardRecommendationDetails | null = null;
-  if (awardRecommendationId) {
-    try {
-      awardRecommendationDetails = await getAwardRecommendationDetails(
-        awardRecommendationId,
-      );
-    } catch (error) {
-      console.error("Failed to fetch award recommendation details", error);
-      const errorStatus = parseErrorStatus(error as ApiRequestError);
+  try {
+    awardRecommendationDetails = await getAwardRecommendationDetails(
+      awardRecommendationId,
+    );
+  } catch (error) {
+    console.error("Failed to fetch award recommendation details", error);
+    const errorStatus = parseErrorStatus(error as ApiRequestError);
 
-      if (errorStatus === 404) {
-        awardRecommendationDetails = null;
-      }
+    if (errorStatus === 404) {
+      awardRecommendationDetails = null;
+    }
 
-      // Handle authentication errors specifically
-      if (errorStatus === 401 || errorStatus === 403) {
-        return (
-          <Alert
-            heading={t("errorHeadingAuthentication")}
-            headingLevel="h2"
-            type="error"
-            validation
-          >
-            {t("authenticationError")}
-          </Alert>
-        );
-      }
-
+    // Handle authentication errors specifically
+    if (errorStatus === 401 || errorStatus === 403) {
       return (
         <Alert
-          heading={t("errorHeadingAwardRecommendation")}
+          heading={t("errorHeadingAuthentication")}
           headingLevel="h2"
-          type="warning"
+          type="error"
           validation
         >
-          {t("awardRecommendationFetchError")}
+          {t("authenticationError")}
         </Alert>
       );
     }
+
+    return (
+      <Alert
+        heading={t("errorHeadingAwardRecommendation")}
+        headingLevel="h2"
+        type="warning"
+        validation
+      >
+        {t("awardRecommendationFetchError")}
+      </Alert>
+    );
   }
 
   const navigationItems = [
     { text: t("opportunity"), href: "opportunity" },
     { text: t("recommendations.heading"), href: "recommendations" },
+    { text: t("attachments.heading"), href: "attachments" },
   ];
 
   return (
@@ -193,7 +197,10 @@ async function AwardRecommendationPageContent({
               tablet={{ col: 3 }}
               className="display-none desktop:display-block"
             >
-              <ApplyFormNav title={t("onThisPage")} fields={navigationItems} />
+              <LeftHandFormNav
+                title={t("onThisPage")}
+                fields={navigationItems}
+              />
             </Grid>
             <Grid col={12} desktop={{ col: 9 }}>
               <div id="opportunity" className="seg-scroll-margin-top--header">
@@ -222,6 +229,7 @@ async function AwardRecommendationPageContent({
                   className="seg-scroll-margin-top--header"
                 >
                   <RecommendationSummarySection
+                    awardRecommendationId={awardRecommendationId}
                     summary={
                       awardRecommendationDetails.award_recommendation_summary
                     }
@@ -229,6 +237,11 @@ async function AwardRecommendationPageContent({
                       awardRecommendationDetails.funding_strategy
                     }
                     viewMode={true}
+                  />
+                </div>
+                <div id="attachments" className="seg-scroll-margin-top--header">
+                  <AwardRecommendationAttachments
+                    awardRecommendationId={awardRecommendationId}
                   />
                 </div>
               </div>

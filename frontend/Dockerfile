@@ -59,23 +59,22 @@ WORKDIR /frontend
 
 # Update system and install security updates
 RUN apt-get update \
-  && apt-get upgrade -y --no-install-recommends \
-  && apt-get install -y --only-upgrade libc-bin libc6 openssl libssl3 libgnutls30 \
+  && apt-get install -y --no-install-recommends \
+       dpkg=1.21.23 \
+       libc-bin=2.36-9+deb12u14 \
+       libc6=2.36-9+deb12u14 \
+       libgcrypt20=1.10.1-3+deb12u1 \
+       libgnutls30=3.7.9-2+deb12u7 \
+       libsystemd0=252.39-1~deb12u2 \
+       libudev1=252.39-1~deb12u2 \
+       libcap2=1:2.66-4+deb12u3+b1 \
+       sed=4.9-1+deb12u1 \
+       wget=1.21.3-1+deb12u1 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /frontend/.next/cache/images/
 VOLUME ["/frontend/.next/cache/images/"]
-
-RUN apt-get update \
-  # Install security updates
-  # https://pythonspeed.com/articles/security-updates-in-docker/
-  && apt-get upgrade --yes \
-  # Install wget, required for health checks
-  wget \
-  # Reduce the image size by clearing apt cached lists
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
 
 # Remove dev dependencies after build
 RUN npm prune --production

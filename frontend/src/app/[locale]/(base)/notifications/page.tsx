@@ -2,15 +2,15 @@ import { getSession } from "src/services/auth/session";
 import { getSavedOpportunityNotificationPreferences } from "src/services/fetch/fetchers/notificationsFetcher";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
+import {
+  NotificationOrganization,
+  NotificationPreferenceValues,
+} from "src/types/NotificationTypes";
 
 import { getTranslations } from "next-intl/server";
 import { ReactElement } from "react";
 
-import { NotificationsPageContent } from "src/components/notifications/NotificationsPageContent";
-import {
-  NotificationOrganization,
-  NotificationPreferenceValues,
-} from "src/components/notifications/NotificationTypes";
+import { NotificationsPageContent } from "./_components/NotificationsPageContent";
 
 const SELF_SAVED_OPPORTUNITIES_PREFERENCE_KEY = "saved-opportunities";
 

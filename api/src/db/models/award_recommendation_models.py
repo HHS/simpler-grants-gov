@@ -4,11 +4,12 @@ import uuid
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
+from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from grants_shared.db.models.base import TimestampMixin
 from sqlalchemy import ForeignKey, Numeric, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (
     AwardRecommendationAttachmentType,
     AwardRecommendationAuditEvent,
@@ -18,7 +19,7 @@ from src.constants.lookup_constants import (
     AwardRecommendationType,
     AwardSelectionMethod,
 )
-from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.lookup_models import (
     LkAwardRecommendationAttachmentType,
     LkAwardRecommendationAuditEvent,
@@ -209,6 +210,19 @@ class AwardRecommendationRisk(ApiSchemaTable, TimestampMixin):
         return [
             rs.award_recommendation_application_submission_id
             for rs in self.award_recommendation_risk_submissions
+        ]
+
+    @property
+    def applications(self) -> list[dict[str, str | uuid.UUID]]:
+        """Get list of application submission info (ID and number) for this risk."""
+        return [
+            {
+                "award_recommendation_application_submission_id": rs.award_recommendation_application_submission_id,
+                "application_submission_id": rs.award_recommendation_application_submission.application_submission_id,
+                "application_submission_number": rs.award_recommendation_application_submission.application_submission_number,
+            }
+            for rs in self.award_recommendation_risk_submissions
+            if rs.award_recommendation_application_submission.application_submission_number
         ]
 
 

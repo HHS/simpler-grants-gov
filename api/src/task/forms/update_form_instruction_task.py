@@ -3,11 +3,12 @@ import os
 
 import click
 import requests
+from grants_shared.util.local import error_if_not_local
 
+from src.constants.lookup_constants import JobType
 from src.task.ecs_background_task import ecs_background_task
 from src.task.forms.form_task_shared import BaseFormTask, get_form_instruction_url
 from src.task.task_blueprint import task_blueprint
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
     "--form-instruction-id", required=True, type=str, help="The ID of the form instruction"
 )
 @click.option("--file-path", required=True, type=str, help="Path to the instruction file to upload")
-@ecs_background_task(task_name="update-form-instruction")
+@ecs_background_task(task_name=JobType.UPDATE_FORM_INSTRUCTION)
 def update_form_instruction(
     environment: str,
     form_id: str,

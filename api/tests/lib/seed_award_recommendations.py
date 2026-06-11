@@ -1,12 +1,13 @@
 import logging
 import uuid
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 
-import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import (
     ApplicationStatus,
+    AwardRecommendationRiskType,
     AwardRecommendationStatus,
     AwardRecommendationType,
     AwardSelectionMethod,
@@ -81,6 +82,38 @@ def _build_award_recommendations(db_session: db.Session) -> None:
     )
 
     _log_summary(award_recommendations_created)
+    seed_award_recommendation_risks_and_submissions(db_session, award_recommendations_created)
+
+
+def seed_award_recommendation_risks_and_submissions(db_session, award_recommendations_created):
+    """Seed example risks and risk submissions for the first created award recommendation."""
+    logger = logging.getLogger(__name__)
+    if not award_recommendations_created:
+        return
+    ar, _, _ = award_recommendations_created[0]
+    if not ar.award_recommendation_application_submissions:
+        return
+    submission = ar.award_recommendation_application_submissions[0]
+    risks = [
+        (AwardRecommendationRiskType.ADDITIONAL_MONITORING, "Seeded risk for testing"),
+        (AwardRecommendationRiskType.ADDITIONAL_MONITORING, "Financial instability detected"),
+        (AwardRecommendationRiskType.ADDITIONAL_MONITORING, "Prior noncompliance with grant terms"),
+        (AwardRecommendationRiskType.ADDITIONAL_MONITORING, "Limited organizational capacity"),
+        (AwardRecommendationRiskType.ADDITIONAL_MONITORING, "Other: Unusual circumstances noted"),
+    ]
+    for risk_type, comment in risks:
+        risk = factories.AwardRecommendationRiskFactory.create(
+            award_recommendation=ar,
+            award_recommendation_risk_type=risk_type,
+            comment=comment,
+        )
+        factories.AwardRecommendationRiskSubmissionFactory.create(
+            award_recommendation_risk=risk,
+            award_recommendation_application_submission=submission,
+        )
+        logger.info(
+            f"✓ Seeded risk {risk.award_recommendation_risk_number} ({risk_type}) for AR {ar.award_recommendation_number}"
+        )
 
 
 def _setup_agency_and_users(db_session: db.Session) -> Agency:
@@ -496,6 +529,7 @@ def _create_opportunity_ready_for_award_recommendation(
 
     competition = factories.CompetitionFactory.create(
         opportunity=opportunity,
+        competition_forms=[],
     )
 
     logger.info("Creating 5 organizations for applications")
@@ -576,6 +610,7 @@ def _create_competition_with_accepted_applications(
 
     competition = factories.CompetitionFactory.create(
         opportunity=opportunity,
+        competition_forms=[],
     )
     logger.info(f"Associating opportunity with agency: {agency.agency_code}")
 

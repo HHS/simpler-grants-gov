@@ -4,13 +4,11 @@ from datetime import datetime
 
 import pytest
 import pytz
+from grants_shared.util.datetime_util import make_timezone_aware
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.legacy_soap_api.grantors import schemas
-from src.legacy_soap_api.grantors.services.get_submission_list_expanded_response import (
-    get_submission_list_expanded,
-    get_submission_list_expanded_response,
-)
+from src.legacy_soap_api.grantors.services import get_submission_list, get_submission_list_response
 from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPAuth,
     SOAPClientCertificate,
@@ -21,7 +19,6 @@ from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOpera
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPInvalidEnvelope, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_dict
-from src.util.datetime_util import make_timezone_aware
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -80,7 +77,7 @@ def setup_application_submission(
 
 
 class TestLegacySoapApiGrantorGetSubmissionListExpanded:
-    def test_get_submission_list_expanded_response(self, db_session, enable_factory_create):
+    def test_get_submission_list_response(self, db_session, enable_factory_create):
         agency = AgencyFactory.create()
         sam_gov_entity = SamGovEntityFactory.create(
             has_debt_subject_to_offset=True, has_exclusion_status=True
@@ -118,17 +115,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_request_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -160,7 +156,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_fails_if_user_does_not_have_legacy_agency_viewer_privilege(
+    def test_get_submission_list_response_fails_if_user_does_not_have_legacy_agency_viewer_privilege(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -201,18 +197,17 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListRequest(**value)
         with pytest.raises(SOAPClientUserDoesNotHavePermission):
-            get_submission_list_expanded(
+            get_submission_list(
                 db_session=db_session,
                 request=get_submission_list_expanded_request_schema,
                 soap_request=soap_request,
                 soap_config=soap_config,
+                is_expanded=True,
             )
 
-    def test_get_submission_list_expanded_response_fails_if_privileges_are_not_set_on_config(
+    def test_get_submission_list_response_fails_if_privileges_are_not_set_on_config(
         self, db_session, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
@@ -253,20 +248,19 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListRequest(**value)
         with pytest.raises(SOAPClientUserDoesNotHavePermission):
-            get_submission_list_expanded(
+            get_submission_list(
                 db_session=db_session,
                 request=get_submission_list_expanded_request_schema,
                 soap_request=soap_request,
                 soap_config=soap_config,
+                is_expanded=True,
             )
         records = [r for r in caplog.records if "Soap Config privileges not set" in r.message]
         assert len(records) == 1
 
-    def test_get_submission_list_expanded_response_fails_if_there_is_no_agency(
+    def test_get_submission_list_response_fails_if_there_is_no_agency(
         self, db_session, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
@@ -312,22 +306,19 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListRequest(**value)
         with pytest.raises(SOAPClientCertificateLookupError):
-            get_submission_list_expanded(
+            get_submission_list(
                 db_session=db_session,
                 request=get_submission_list_expanded_request_schema,
                 soap_request=soap_request,
                 soap_config=soap_config,
+                is_expanded=True,
             )
         records = [r for r in caplog.records if "certificate does not have agency" in r.message]
         assert len(records) == 1
 
-    def test_get_submission_list_expanded_response_no_filter(
-        self, db_session, enable_factory_create
-    ):
+    def test_get_submission_list_response_no_filter(self, db_session, enable_factory_create):
         agency = AgencyFactory.create(is_multilevel_agency=False)
         other_agency = AgencyFactory.create(is_multilevel_agency=False)
         sam_gov_entity_1 = SamGovEntityFactory.create(
@@ -386,17 +377,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest") or {}
-        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_request_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -442,7 +432,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             for item in expanded_application_info
         )
 
-    def test_get_submission_list_expanded_response_multi_level_agency(
+    def test_get_submission_list_response_multi_level_agency(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create(is_multilevel_agency=True, agency_code="DOD")
@@ -494,17 +484,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest") or {}
-        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_request_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -545,7 +534,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         assert len(expanded_application_info) == 2
         assert expanded_application_info == [expected_1, expected_2]
 
-    def test_get_submission_list_expanded_response_no_filter_cannot_have_empty_expandedapplicationfilter(
+    def test_get_submission_list_response_no_filter_cannot_have_empty_expandedapplicationfilter(
         self, db_session, enable_factory_create
     ):
         request_xml = (
@@ -561,13 +550,13 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest") or {}
         with pytest.raises(SOAPInvalidEnvelope) as e:
-            schemas.GetSubmissionListExpandedRequest(**value)
+            schemas.GetSubmissionListRequest(**value)
         assert (
             f"{e.value}"
             == "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterType}' is expected."
         )
 
-    def test_get_submission_list_expanded_response_filters_legacy_tracking_number_successfully(
+    def test_get_submission_list_response_filters_legacy_tracking_number_successfully(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -615,17 +604,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -657,7 +645,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_grants_gov_tracking_number_filters_just_the_last_one_entered(
+    def test_get_submission_list_response_grants_gov_tracking_number_filters_just_the_last_one_entered(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -705,17 +693,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -747,7 +734,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_cfda_number_filters_just_the_last_one_entered(
+    def test_get_submission_list_response_cfda_number_filters_just_the_last_one_entered(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -797,17 +784,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -839,7 +825,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_opportunity_ids_filters_just_the_last_one_entered(
+    def test_get_submission_list_response_opportunity_ids_filters_just_the_last_one_entered(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -888,17 +874,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -930,7 +915,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_filters_cfda_number_successfully(
+    def test_get_submission_list_response_filters_cfda_number_successfully(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -982,17 +967,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -1024,7 +1008,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_filters_funding_opportunity_number_successfully(
+    def test_get_submission_list_response_filters_funding_opportunity_number_successfully(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -1076,17 +1060,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -1118,7 +1101,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_filters_status_successfully(
+    def test_get_submission_list_response_filters_status_successfully(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -1170,17 +1153,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -1212,7 +1194,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_filters_all_three_filters_successfully(
+    def test_get_submission_list_response_filters_all_three_filters_successfully(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -1272,17 +1254,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -1395,17 +1376,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -1432,7 +1412,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_handles_competition_with_no_opportunity_assistance_listing(
+    def test_get_submission_list_response_handles_competition_with_no_opportunity_assistance_listing(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -1474,17 +1454,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_request_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -1502,7 +1481,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_excludes_sam_gov_entity_data_if_no_organization(
+    def test_get_submission_list_response_excludes_sam_gov_entity_data_if_no_organization(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -1569,17 +1548,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -1608,7 +1586,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_filters_by_certificate_agency(
+    def test_get_submission_list_response_filters_by_certificate_agency(
         self, db_session, enable_factory_create
     ):
         agency_1 = AgencyFactory.create()
@@ -1649,17 +1627,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_request_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -1677,7 +1654,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_filters_by_opportunity_id_successfully(
+    def test_get_submission_list_response_filters_by_opportunity_id_successfully(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -1730,17 +1707,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -1772,7 +1748,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_logs_filters_by_status_successfully(
+    def test_get_submission_list_response_logs_filters_by_status_successfully(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
@@ -1824,17 +1800,16 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
@@ -1866,7 +1841,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         }
         assert soap_envelope_dict == expected
 
-    def test_get_submission_list_expanded_response_logs_filters_by_legacy_competition_id(
+    def test_get_submission_list_response_logs_filters_by_legacy_competition_id(
         self, db_session, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
@@ -1911,14 +1886,13 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
-        get_submission_list_expanded(
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListRequest(**value)
+        get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_rquest_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
         record = next(
             (
@@ -1931,7 +1905,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         assert record
         assert record.competition_ids == f"['{competition.legacy_competition_id}']"
 
-    def test_get_submission_list_expanded_response_logs_filters_by_package_id(
+    def test_get_submission_list_response_logs_filters_by_package_id(
         self, db_session, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
@@ -1980,14 +1954,13 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
-        get_submission_list_expanded(
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListRequest(**value)
+        get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_request_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
         record = next(
             (
@@ -2000,7 +1973,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         assert record
         assert record.package_ids == f"['{competition.legacy_package_id}']"
 
-    def test_get_submission_list_expanded_response_logs_filters_by_submission_title(
+    def test_get_submission_list_response_logs_filters_by_submission_title(
         self, db_session, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
@@ -2047,14 +2020,13 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
-            **value
-        )
-        get_submission_list_expanded(
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListRequest(**value)
+        get_submission_list(
             db_session=db_session,
             request=get_submission_list_expanded_request_schema,
             soap_request=soap_request,
             soap_config=soap_config,
+            is_expanded=True,
         )
         record = next(
             (

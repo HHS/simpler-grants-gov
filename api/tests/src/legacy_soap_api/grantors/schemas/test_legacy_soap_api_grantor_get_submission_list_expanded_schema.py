@@ -12,7 +12,7 @@ GRANTS_GOV_TRACKING_NUMBER_2 = "GRANT80000001"
 GRANTS_GOV_TRACKING_NUMBER_3 = "GRANT80000002"
 
 
-class TestLegacySoapGrantorGetSubmissionListExtendedSchema:
+class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
     def test_get_submission_list_expanded_request_schema_can_consumed_incoming_request_xml_with_all_filters(
         self, db_session
     ):
@@ -47,22 +47,21 @@ class TestLegacySoapGrantorGetSubmissionListExtendedSchema:
         ).encode("utf-8")
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
-        expected = {
-            "expanded_application_filter": {
-                "filters": {
-                    "CFDANumber": ["CFDA-PER-123", "CFDA-PER-124"],
-                    "FundingOpportunityNumber": [
-                        "FundingOppNumber-PER-123",
-                        "FundingOppNumber-PER-124",
-                    ],
-                    "GrantsGovTrackingNumber": [
-                        int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1])
-                    ],
-                }
-            }
-        }
-        assert schema.model_dump() == expected
+        schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
+        expected = [
+            {"filter_type": "CFDANumber", "filter_value": "CFDA-PER-123"},
+            {"filter_type": "CFDANumber", "filter_value": "CFDA-PER-124"},
+            {"filter_type": "FundingOpportunityNumber", "filter_value": "FundingOppNumber-PER-123"},
+            {"filter_type": "FundingOpportunityNumber", "filter_value": "FundingOppNumber-PER-124"},
+            {
+                "filter_type": "GrantsGovTrackingNumber",
+                "filter_value": int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1]),
+            },
+        ]
+        assert sorted(
+            schema.model_dump()["expanded_application_filter"]["filters"],
+            key=lambda x: x["filter_type"],
+        ) == sorted(expected, key=lambda x: x["filter_type"])
 
     def test_get_submission_list_expanded_request_schema_throws_exception_if_filter_types_but_no_filter_value(
         self, db_session
@@ -82,7 +81,7 @@ class TestLegacySoapGrantorGetSubmissionListExtendedSchema:
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
         with pytest.raises(SOAPInvalidEnvelope) as e:
-            grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+            grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         assert (
             f"{e.value}"
             == "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterValue}' is expected."
@@ -106,7 +105,7 @@ class TestLegacySoapGrantorGetSubmissionListExtendedSchema:
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
         with pytest.raises(SOAPInvalidEnvelope) as e:
-            grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+            grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         assert (
             f"{e.value}"
             == "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterType}' is expected."
@@ -130,12 +129,15 @@ class TestLegacySoapGrantorGetSubmissionListExtendedSchema:
         ).encode("utf-8")
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+        schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         expected = {
             "expanded_application_filter": {
-                "filters": {
-                    "GrantsGovTrackingNumber": [int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1])]
-                }
+                "filters": [
+                    {
+                        "filter_type": "GrantsGovTrackingNumber",
+                        "filter_value": int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1]),
+                    }
+                ]
             }
         }
         assert schema.model_dump() == expected
@@ -166,16 +168,23 @@ class TestLegacySoapGrantorGetSubmissionListExtendedSchema:
         ).encode("utf-8")
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+        schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         expected = {
             "expanded_application_filter": {
-                "filters": {
-                    "GrantsGovTrackingNumber": [
-                        int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1]),
-                        int(GRANTS_GOV_TRACKING_NUMBER_2.split("GRANT")[1]),
-                        int(GRANTS_GOV_TRACKING_NUMBER_3.split("GRANT")[1]),
-                    ]
-                }
+                "filters": [
+                    {
+                        "filter_type": "GrantsGovTrackingNumber",
+                        "filter_value": int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1]),
+                    },
+                    {
+                        "filter_type": "GrantsGovTrackingNumber",
+                        "filter_value": int(GRANTS_GOV_TRACKING_NUMBER_2.split("GRANT")[1]),
+                    },
+                    {
+                        "filter_type": "GrantsGovTrackingNumber",
+                        "filter_value": int(GRANTS_GOV_TRACKING_NUMBER_3.split("GRANT")[1]),
+                    },
+                ]
             }
         }
         assert schema.model_dump() == expected
@@ -196,7 +205,7 @@ class TestLegacySoapGrantorGetSubmissionListExtendedSchema:
         soap_operation_dict = (
             get_soap_operation_dict(str(payload.payload), payload.operation_name) or {}
         )
-        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+        schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         assert schema.model_dump() == {"expanded_application_filter": None}
 
     def test_get_submission_list_expanded_request_filters_created_by_multiple_statuses(
@@ -225,16 +234,20 @@ class TestLegacySoapGrantorGetSubmissionListExtendedSchema:
         ).encode("utf-8")
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+        schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         expected = {
             "expanded_application_filter": {
-                "filters": {"Status": ["Rejected with Errors", "Validated", "Received"]}
+                "filters": [
+                    {"filter_type": "Status", "filter_value": "Rejected with Errors"},
+                    {"filter_type": "Status", "filter_value": "Validated"},
+                    {"filter_type": "Status", "filter_value": "Received"},
+                ]
             }
         }
         assert schema.model_dump() == expected
 
 
-class TestSubmissionInfoTimezoneValidation:
+class TestSubmissionInfoExpandedTimezoneValidation:
     SUBMISSION_DEFAULTS = {
         "FundingOpportunityNumber": "OPP-001",
         "CFDANumber": "10.001",
@@ -245,11 +258,10 @@ class TestSubmissionInfoTimezoneValidation:
         "PackageID": "PKG-001",
         "DelinquentFederalDebt": "No",
         "ActiveExclusions": "No",
-        "UEI": "ABC123",
     }
 
     def _make_submission_info(self, received_date_time):
-        return grantors_schemas.SubmissionInfo(
+        return grantors_schemas.SubmissionInfoExpanded(
             **{**self.SUBMISSION_DEFAULTS, "ns2:ReceivedDateTime": received_date_time}
         )
 
@@ -286,11 +298,11 @@ class TestSubmissionInfoTimezoneValidation:
         assert sorted_info[0].received_date_time == aware_dt
 
 
-class TestSubmissionInfoDefaultNone:
-    """Test that SubmissionInfo fields default to None when keys are missing from input."""
+class TestSubmissionInfoExpandedDefaultNone:
+    """Test that SubmissionInfoExpanded fields default to None when keys are missing from input."""
 
     def test_submission_info_from_empty_dict(self):
-        info = grantors_schemas.SubmissionInfo(**{})
+        info = grantors_schemas.SubmissionInfoExpanded(**{})
         assert info.funding_opportunity_number is None
         assert info.cfda_number is None
         assert info.grants_gov_tracking_number is None
@@ -301,16 +313,15 @@ class TestSubmissionInfoDefaultNone:
         assert info.package_id is None
         assert info.delinquent_federal_debt is None
         assert info.active_exclusions is None
-        assert info.uei is None
 
     def test_submission_info_with_partial_dict(self):
-        info = grantors_schemas.SubmissionInfo(**{"UEI": "00000000INDV"})
-        assert info.uei == "00000000INDV"
+        info = grantors_schemas.SubmissionInfoExpanded(**{"PackageID": "00000000INDV"})
+        assert info.package_id == "00000000INDV"
         assert info.cfda_number is None
         assert info.funding_opportunity_number is None
 
     def test_get_submission_list_expanded_response_from_empty_dict(self):
-        response = grantors_schemas.GetSubmissionListExpandedResponse(**{})
+        response = grantors_schemas.GetSubmissionListResponse(**{})
         assert response.success is True
         assert response.available_application_number is None
         assert response.submission_info == []

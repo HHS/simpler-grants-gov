@@ -1,6 +1,6 @@
 /**
  * @feature Apply - Application Form Failure Path
- * @featureFile tests/e2e/apply/forms/failure-path/features/negative-path-forms.feature
+ * @featureFile tests/e2e/apply/forms/failure-path/features/failure-path-forms.feature
  * @scenario Application form completion failure path - sf424d
  */
 
@@ -14,11 +14,11 @@ import {
   SF424D_FORM_MATCHER,
   SF424D_REQUIRED_FIELD_ERRORS,
 } from "tests/e2e/apply/fixtures/sf424d-field-definitions";
-import { getOpportunityId } from "tests/e2e/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
-import { createApplication } from "tests/e2e/utils/create-application-utils";
+import { createApplication } from "tests/e2e/utils/application/create-application-utils";
+import { getOpportunityId } from "tests/e2e/utils/application/get-opportunityId-utils";
+import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import {
@@ -26,7 +26,7 @@ import {
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { APPLY, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
 
@@ -42,7 +42,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "SF-424D - error validation on empty save",
-  { tag: [APPLY, CORE_REGRESSION] },
+  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

@@ -94,12 +94,6 @@ export const messages = {
       link: "Read about the Spring 2025 Coding Challenge",
     },
   },
-  BetaAlert: {
-    alertTitle:
-      "This site is a work in progress, with new features and updates based on your feedback.",
-    alert:
-      "Search for grants here. To use more advanced features or to apply, go to <LinkToGrants>Grants.gov</LinkToGrants>.",
-  },
   OpportunityListing: {
     pageTitle: "Opportunity Listing",
     metaDescription:
@@ -384,10 +378,6 @@ export const messages = {
         "Enter the text that will be shown as the email link.",
       attachmentsIntro:
         "Upload the official Notice of Funding Opportunity (NOFO) and any supporting templates or guidelines that applicants need to complete their submission.",
-      reviewButton: {
-        idle: "Review required fields",
-        pending: "Reviewing...",
-      },
       alerts: {
         success: "Saved successfully",
         successBody: "Your changes have been saved.",
@@ -400,10 +390,8 @@ export const messages = {
         forbidden: "You do not have permission to update this opportunity.",
         notFound: "The opportunity summary could not be found.",
         draftOnly: "Only draft opportunity summaries can be updated.",
-        validationHeading: "Please fix the highlighted fields.",
-        validationWarningHeading: "Progress saved",
-        validationWarningBody:
-          "Your progress has been saved. However, this opportunity cannot be submitted/published until the following required fields are completed:",
+        validationErrorHeading: "Error(s) Found",
+        validationErrorBody: "Please correct the following errors:",
       },
     },
     validationErrors: {
@@ -418,8 +406,6 @@ export const messages = {
       closeDateOrder: "Close date must be on or after publish date.",
       awardMinimum: "Enter an award minimum.",
       awardMaximum: "Enter an award maximum.",
-      awardMaximumOrder:
-        "Award maximum must be greater than or equal to award minimum.",
       fundingType: "Select a funding type.",
       fundingCategory: "Select a funding category.",
       expectedNumberOfAwards: "Enter the expected number of awards.",
@@ -430,9 +416,21 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+      awardMinCurrencyInput:
+        "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+      awardMaxCurrencyInput:
+        "Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+      totalFundingCurrencyInput:
+        "Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+      awardMinLessThanTotal:
+        "Award minimum cannot exceed the Estimated Total Program Funding.",
+      awardMaxLessThanTotal:
+        "Award maximum cannot exceed the Estimated Total Program Funding.",
+      awardMinLessThanMax: "Award minimum cannot exceed Award maximum.",
     },
     attachments: {
       removeButton: "Remove",
+      uploadLabel: "Upload files",
       errorHeading: "Upload error",
       errorUploadFailed: "Failed to upload {fileName}.",
       errorDeleteFailed: "Failed to delete {fileName}.",
@@ -606,9 +604,8 @@ export const messages = {
       unsavedChangesWarning:
         "You have unsaved changes or attachments that will be lost if you select OK.",
       fieldListWidget: {
-        entry: "Entry",
-        delete: "Delete",
-        add: "Add entry",
+        deleteEntry: "Delete",
+        addEntry: "Add another entry",
       },
     },
     transferOwnershipModal: {
@@ -916,6 +913,12 @@ export const messages = {
       "You'll be redirected to Login.gov to sign in or create an account. Then, you'll return to Simpler.Grants.gov as a signed-in user.",
     button: "Sign in with Login.gov",
     close: "Cancel",
+  },
+  PivRequiredModal: {
+    title: "Your account requires additional identity verification.",
+    description:
+      "You must sign in with your government employee ID. Make sure you've set up your Personal Identity Verification (PIV) or Common Access Card (CAC) as a two-factor authentication method.",
+    button: "Sign in using PIV/CAC",
   },
   Footer: {
     agencyName: "Grants.gov",
@@ -2047,13 +2050,20 @@ export const messages = {
     breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
+    summary: {
+      showDescription: "Show full description",
+      hideSummaryDescription: "Hide full description",
+    },
     awardRecs: "Award Recs",
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",
     metaDescriptionEdit: "Edit your award recommendations",
+    pageTitleEditApplicationSubmissionDetails:
+      "Edit application submission details",
     pageHeading: "Award Recommendations",
     heroTitle: "Award Rec #",
+    createHeroTitle: "Create recommendation",
     datePrepared: "Date prepared",
     status: "Status",
     onThisPage: "On this page",
@@ -2064,10 +2074,12 @@ export const messages = {
     },
     heroButtons: {
       save: "Save",
+      cancel: "Cancel",
       create: "Create",
       edit: "Edit",
       preview: "Preview",
       submitForReview: "Submit for review",
+      backToEdit: "Back to Edit",
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -2110,6 +2122,47 @@ export const messages = {
       description:
         "Add any relevant information related to this reviewer and decision-maker for this opportunity",
     },
+    attachments: {
+      heading: "Attachments",
+      attachedDocument: "Attached document",
+      uploadedBy: "Uploaded by",
+      uploadDate: "Upload date",
+      standardTermsHeading: "Standard and program terms & conditions",
+      enterTermsConditions: "Enter terms & conditions",
+      editTermsConditions: "Edit terms & conditions",
+      risksHeading: "Specific risks & recommended conditions",
+      enterRisks: "Enter risks & recommended conditions",
+      editRisks: "Edit risks & recommended conditions",
+      riskNumber: "Risk #",
+      appNumber: "App #",
+      condition: "Condition",
+      action: "Action",
+      delete: "Delete",
+      applications: "applications",
+      errorMessage: "Unable to load or update risks. Please try again.",
+      otherDocumentsHeading: "Other supporting documents",
+      enterSupportingDocuments: "Enter supporting documents",
+      editSupportingDocuments: "Edit supporting documents",
+    },
+    recommendationDetails: {
+      heading: "Recommendation details",
+      recommendationLabel: "Recommendation",
+      recommendationOptions: {
+        recommended: "Recommended",
+        recommendedWithoutFunding: "Recommended but not funded",
+        notRecommended: "Not recommended",
+      },
+      hasExceptionLabel: "Contains exceptions to selection method",
+      commentsLabel: "Recommendation comments",
+      commentsDescription:
+        "Add any needed context for your recommendations for any selected group or single application.",
+      exceptionDetailLabel: "Exceptions to selection method",
+      exceptionDetailDescription:
+        "Select one or more applications and explain any exceptions to the general selection method. For example, the reasons for any applications skipped on the merit review ranking or other similar exceptions.",
+      fundingHeading: "Funding recommendations",
+      amountRequestedLabel: "Amount Requested",
+      amountRecommendedLabel: "Amount Recommended",
+    },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
     errorHeadingAuthentication: "Authentication Error",
@@ -2117,6 +2170,10 @@ export const messages = {
       "You are not authenticated. Please sign in to view award recommendations.",
     awardRecommendationFetchError:
       "Error fetching award recommendation data. Please try refreshing the page.",
+    errorHeadingAwardRecommendationSubmission:
+      "Error fetching application submission details",
+    awardRecommendationSubmissionFetchError:
+      "Error fetching application submission data. Please try refreshing the page.",
     recommendations: {
       heading: "Recommendations",
       editPageDescription:
@@ -2138,15 +2195,72 @@ export const messages = {
         description:
           "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
         noFundingStrategyProvided: "No funding strategy provided.",
+        showDescription: "Show full description",
+        hideSummaryDescription: "Hide full description",
       },
+      submissions: {
+        errorMessage:
+          "Unable to load application submissions. Please try again.",
+        columns: {
+          appNumber: "App #",
+          projectTitle: "Project title",
+          orgName: "Org name",
+          uei: "UEI",
+          score: "Score",
+          recommendation: "Recommendation",
+          requested: "Requested",
+          recommended: "Recommended",
+        },
+        recommendationOptions: {
+          none: "None",
+          recommended: "Recommended",
+          recommendedWithoutFunding: "Recommended but not funded",
+          notRecommended: "Not recommended",
+        },
+        recommendedAwards: {
+          heading: "Recommended awards",
+          editDescription:
+            "Select applications and use the drop-down box to apply your recommendation for the selected group.",
+          editLink: "Edit recommended awards",
+        },
+        exceptions: {
+          heading: "Exceptions to selection method",
+        },
+      },
+    },
+    risks: {
+      pageTitle: "Risks and Conditions",
+      metaDescription: "Manage risks and conditions for award recommendations",
+      heading: "Risks and Conditions",
+      description:
+        "Review and manage risks and conditions for application submissions",
+      selectAll: "Select all",
+      selectRow: "Select row for {appNumber}",
+      selectedCount:
+        "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      columns: {
+        appNumber: "App #",
+        projectTitle: "Project Title",
+        orgName: "Organization Name",
+        uei: "UEI",
+        recommendation: "Recommendation",
+        risk: "Risk",
+        condition: "Condition",
+      },
+      recommendationType: {
+        recommended_for_funding: "Recommended",
+      },
+      defaultNone: "None",
+      loading: "Loading submissions...",
+      errorLoading: "Error loading submissions. Please try again.",
+      showingRange: "Showing {start}-{end} of {total}",
+      editButton: "Edit",
     },
   },
   CreateAwardRecommendation: {
     pageTitle: "Create recommendation",
     metaDescription: "Create a new award recommendation",
     beforeYouGetStarted: "Before you get started",
-    introDescription:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
     steps: {
       identifyOpportunity: {
         title: "Identify the opportunity",
@@ -2277,5 +2391,92 @@ export const messages = {
     preferencesNotSavedError:
       "Your notification preference was not saved. Refresh the page to try again.",
     srPendingSave: "Saving notification preference...",
+  },
+  OpportunityCompetition: {
+    pageTitle: "Competition",
+    metaDescription: "Set up competition details for this opportunity.",
+    sections: {
+      applicationRequirements: "Application requirements",
+      applicationRequirementsSubheader:
+        "What applicants must submit, how they'll be scored, and the format rules.",
+      submissionSetUp: "Submission set-up",
+      submissionSetUpSubheader:
+        "A competition is one apply-window inside an opportunity. Most opportunities have only one.",
+      competitionId: "Competition ID",
+      competitionIdHint: "An ID if this opportunity has multiple competitions.",
+      competitionTitle: "Competition title",
+      competitionTitleHint: "Shown to applicants. Plain language is best.",
+      whoCanApply: "Who can apply?",
+      whoCanApplyHint:
+        "Applicants who don't match this type won't see the competition in search.",
+      whoCanApplyOrganizationsOnly: "Organizations only",
+      whoCanApplyIndividualsOnly: "Individuals only",
+      whoCanApplyBoth: "Both organizations and individuals",
+      expectedNumberOfApplicants: "Expected number of applicants",
+      expectedNumberOfApplicantsHint: "A best estimate to plan for capacity",
+      expectedApplicationSize: "Expected application size",
+      expectedApplicationSizeHint:
+        "Approximate file size of a typical submission",
+      openDate: "Open date",
+      openDateHint: "First day to start applying.",
+      closeDate: "Close date",
+      closeDateHint: "Final deadline for all applications",
+      back: "Back",
+      saveAndFinishLater: "Save and finish later",
+      saveAndContinue: "Save and continue",
+      howDoesThisClose: "How does this opportunity close?",
+      howDoesThisCloseHint:
+        "Most federal opportunities have a single hard deadline. Choose another option only when the program runs differently.",
+      hardDeadline: "Hard deadline",
+      hardDeadlineHint: "All applications must be in by the close date.",
+      rollingDeadline: "Rolling deadline",
+      rollingDeadlineHint: "Applications are reviewed in cycles.",
+      continuousReview: "Continuous review",
+      continuousReviewHint: "No close date, open until further notice",
+      openAndCloseDates: "Open and close dates",
+      applicationChecklist: "Application checklist",
+      narrativeFormatInstructions: "Narrative format instructions",
+      navTitle: "On this page",
+    },
+  },
+  FeatureFlagsAdmin: {
+    heading: "Refresh your page",
+    alertMessage:
+      "Hard refresh your page when done changing Flags for the changes to fully apply.",
+  },
+  OpportunityDetailsHeader: {
+    opportunityNumber: "Opportunity #: {number}",
+    title: "Title:",
+    agency: "Agency:",
+    subAgency: "Sub-agency:",
+    draft: "Draft",
+    lastUpdated: "Last updated:",
+  },
+  AwardRecommendationSelectFundingOpportunity: {
+    pageTitle: "Select funding opportunity | Simpler.Grants.gov",
+    pageHeading: "Award Recommendations",
+    metaDescription:
+      "Select a funding opportunity for your award recommendation",
+    whichFundingOpportunity: "Which funding opportunity is this for?",
+    cancelButtonText: "Cancel",
+  },
+  FileInput: {
+    existingFiles: {
+      savedOn: "Saved on",
+      delete: "Delete",
+    },
+    statusDisplay: {
+      cancel: "Cancel",
+      dismiss: "Dismiss",
+      queued: "Queued",
+      uploading: "Uploading",
+      scanning: "Scanning",
+      success: "Success",
+      error: "Error",
+      scanFail: "Scan failed",
+      uploadError: "Upload error",
+      scanError: "Scan error",
+      postUploadError: "Post upload error",
+    },
   },
 };

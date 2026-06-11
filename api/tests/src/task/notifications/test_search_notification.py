@@ -2,6 +2,7 @@ import uuid
 from datetime import date, timedelta
 
 import pytest
+from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
@@ -18,7 +19,6 @@ from src.task.notifications.search_notification import (
     SearchNotificationTask,
     _strip_pagination_params,
 )
-from src.util import datetime_util
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
 

@@ -1,6 +1,6 @@
 /**
  * @feature Apply - Application Form Failure Path
- * @featureFile tests/e2e/apply/forms/failure-path/features/negative-path-forms.feature
+ * @featureFile tests/e2e/apply/forms/failure-path/features/failure-path-forms.feature
  * @scenario Application form completion failure path - epa-keycontacts
  */
 
@@ -18,8 +18,8 @@ import {
 import { epaKeyContactsFailurePathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
-import { createApplication } from "tests/e2e/utils/create-application-utils";
+import { createApplication } from "tests/e2e/utils/application/create-application-utils";
+import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { fillFormPartial } from "tests/e2e/utils/forms/general-forms-filling";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
@@ -28,7 +28,7 @@ import {
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { APPLY, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;
 
 // Environment-specific opportunity IDs
@@ -52,7 +52,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "EPA Key Contacts Form - error validation with prefix-only data",
-  { tag: [APPLY, CORE_REGRESSION] },
+  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

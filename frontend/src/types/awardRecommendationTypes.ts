@@ -2,6 +2,11 @@ export type AwardRecommendationStatus = "draft" | "in_review" | "approved";
 
 export type AwardSelectionMethod = "merit-review-only" | "merit-review-other";
 
+export type AwardRecommendationType =
+  | "recommended_for_funding"
+  | "recommended_without_funding"
+  | "not_recommended";
+
 export type AwardRecommendationSummary = {
   total_received_count: number;
   recommended_for_funding_count: number;
@@ -48,6 +53,24 @@ export type AwardRecommendationOpportunity = {
 /**
  * AwardRecommendationDetails represents the data structure from the API
  */
+export type ApplicationSubmissionInfo = {
+  award_recommendation_application_submission_id: string;
+  application_submission_id: string;
+  application_submission_number: string;
+};
+
+export type AwardRecommendationRisk = {
+  award_recommendation_risk_id: string;
+  award_recommendation_risk_number?: string;
+  risk_number: number;
+  condition: string;
+  condition_number?: string;
+  award_recommendation_application_submission_ids: string[];
+  applications: ApplicationSubmissionInfo[];
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type AwardRecommendationDetails = {
   award_recommendation_id: string;
   award_recommendation_number: string;
@@ -64,4 +87,44 @@ export type AwardRecommendationDetails = {
   award_recommendation_attachments?: AwardRecommendationAttachment[];
   award_recommendation_reviews?: AwardRecommendationReview[];
   award_recommendation_summary?: AwardRecommendationSummary;
+};
+
+export type AwardRecommendationOrganization = {
+  organization_id: string;
+  organization_name?: string;
+  uei?: string;
+};
+
+export type AwardRecommendationApplication = {
+  application_id: string;
+  competition_id: string;
+  organization?: AwardRecommendationOrganization;
+};
+
+export type AwardRecommendationApplicationSubmission = {
+  application_submission_id: string;
+  application_submission_number?: string;
+  project_title?: string;
+  total_requested_amount?: string;
+  application?: AwardRecommendationApplication;
+};
+
+export type AwardRecommendationSubmissionListFilters = {
+  award_recommendation_type?: { one_of: AwardRecommendationType[] };
+  has_exception?: { one_of: boolean[] };
+};
+
+export type AwardRecommendationSubmissionDetail = {
+  recommended_amount?: string;
+  scoring_comment?: string;
+  general_comment?: string;
+  award_recommendation_type?: AwardRecommendationType;
+  has_exception?: boolean;
+  exception_detail?: string;
+};
+
+export type AwardRecommendationSubmission = {
+  award_recommendation_application_submission_id: string;
+  application_submission: AwardRecommendationApplicationSubmission;
+  submission_detail?: AwardRecommendationSubmissionDetail;
 };

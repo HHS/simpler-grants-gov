@@ -1,11 +1,13 @@
-from src.api.schemas.extension import Schema, fields
-from src.api.schemas.extension.field_validators import Length
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import (
+from grants_shared.api.schemas.extension import Schema, fields
+from grants_shared.api.schemas.extension.field_validators import Length
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     StrSearchSchemaBuilder,
     UuidSearchSchemaBuilder,
 )
+
+from src.api.schemas.response_schema import PaginationMixinSchema
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApprovalResponseType,
@@ -187,6 +189,30 @@ class AwardRecommendationReviewSchema(Schema):
     is_reviewed = fields.Boolean(metadata={"description": "Whether the review has been completed"})
 
 
+class AwardRecommendationSummarySchema(Schema):
+    """Aggregated submission counts and funding totals for an award recommendation."""
+
+    total_received_count = fields.Integer(
+        metadata={"description": "Total number of application submissions received"},
+    )
+    recommended_for_funding_count = fields.Integer(
+        metadata={"description": "Number of submissions recommended for funding"},
+    )
+    recommended_without_funding_count = fields.Integer(
+        metadata={"description": "Number of submissions recommended without funding"},
+    )
+    not_recommended_count = fields.Integer(
+        metadata={"description": "Number of submissions not recommended"},
+    )
+    total_recommended_amount = fields.Decimal(
+        as_string=True,
+        metadata={
+            "description": "Sum of recommended amounts across all submissions",
+            "example": "250000.00",
+        },
+    )
+
+
 class AwardRecommendationBaseSchema(Schema):
     """Base schema for award recommendations (excludes attachments)."""
 
@@ -248,6 +274,10 @@ class AwardRecommendationBaseSchema(Schema):
         fields.Nested(AwardRecommendationReviewSchema),
         dump_default=[],
         metadata={"description": "Reviews associated with the award recommendation"},
+    )
+    award_recommendation_summary = fields.Nested(
+        AwardRecommendationSummarySchema,
+        metadata={"description": "Aggregated submission recommendation summary"},
     )
 
 
@@ -326,6 +356,13 @@ class AwardRecommendationOrganizationSchema(Schema):
     organization_name = fields.String(
         allow_none=True,
         metadata={"description": "The organization name"},
+    )
+    uei = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The organization's Unique Entity Identifier (UEI)",
+            "example": "ABC123DEF456",
+        },
     )
 
 
@@ -461,6 +498,23 @@ class AwardRecommendationRiskRequestSchema(Schema):
     )
 
 
+class ApplicationSubmissionInfoSchema(Schema):
+    """Schema for application submission information within a risk"""
+
+    award_recommendation_application_submission_id = fields.UUID(
+        metadata={"description": "The award recommendation application submission ID"}
+    )
+    application_submission_id = fields.UUID(
+        metadata={"description": "The application submission ID"}
+    )
+    application_submission_number = fields.String(
+        metadata={
+            "description": "The application submission number",
+            "example": "GRANT-2024-001",
+        },
+    )
+
+
 class AwardRecommendationRiskResponseDataSchema(Schema):
     """Schema for risk response data (used by create and update)"""
 
@@ -486,9 +540,29 @@ class AwardRecommendationRiskResponseDataSchema(Schema):
             "description": "List of award recommendation application submission IDs linked to this risk"
         },
     )
+    applications = fields.List(
+        fields.Nested(ApplicationSubmissionInfoSchema),
+        metadata={
+            "description": "List of application submissions linked to this risk",
+            "example": [
+                {
+                    "application_submission_id": "123e4567-e89b-12d3-a456-426614174000",
+                    "application_submission_number": "GRANT-2024-001",
+                }
+            ],
+        },
+    )
 
 
 class AwardRecommendationRiskDeleteResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
+class AwardRecommendationAttachmentDeleteResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
+class AwardRecommendationDeleteResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
 

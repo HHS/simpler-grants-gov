@@ -10,6 +10,7 @@ from botocore.config import Config
 from werkzeug.utils import secure_filename
 
 from src.adapters.aws import S3Config, get_boto_session, get_s3_client
+from src.app_config import AppConfig
 
 ##################################
 # Path parsing utils
@@ -116,6 +117,57 @@ def pre_sign_file_location(file_path: str, s3_config: S3Config | None = None) ->
     return pre_sign_file_loc
 
 
+def pre_sign_upload(
+    file_path: str,
+    content_type: str,
+    metadata: dict[str, str],
+    s3_config: S3Config | None = None,
+) -> dict[str, Any]:
+    """Generate a presigned POST URL + body for uploading a file to s3.
+
+    The returned dict has a ``url`` (where the caller POSTs the file) and
+    ``fields`` (form fields the caller must include in the POST). The
+    presigned policy:
+
+    - Pins Content-Type so the caller can't override how s3 serves the file
+      back later.
+    - Sets each ``metadata`` entry as an ``x-amz-meta-<key>`` field and pins
+      it in the conditions list so the caller can't tamper with it. This is
+      how the scanning lambda picks up identifiers (file id, user id, ...)
+      off the s3 object without needing a separate lookup.
+    - Bounds the upload size between 1 byte and
+      ``AppConfig.max_file_upload_size_bytes``.
+    - Sets ``IfNoneMatch: *`` so the URL can't be replayed to overwrite an
+      already-uploaded object.
+
+    Args:
+        file_path: Full ``s3://bucket/key`` path where the upload will land.
+        content_type: MIME type of the file being uploaded.
+        metadata: Key→value pairs to attach as object metadata. Keys are
+            passed through to s3 as ``x-amz-meta-<key>``.
+    """
+    if s3_config is None:
+        s3_config = get_default_s3_config()
+
+    s3_client = get_s3_client(s3_config)
+    bucket, key = split_s3_url(file_path)
+
+    metadata_fields = {f"x-amz-meta-{k}": v for k, v in metadata.items()}
+
+    return s3_client.generate_presigned_post(
+        Bucket=bucket,
+        Key=key,
+        Fields={"Content-Type": content_type, **metadata_fields},
+        Conditions=[
+            ["content-length-range", 1, AppConfig().max_file_upload_size_bytes],
+            {"Content-Type": content_type},
+            *[{k: v} for k, v in metadata_fields.items()],
+            {"IfNoneMatch": "*"},
+        ],
+        ExpiresIn=s3_config.presigned_s3_duration,
+    )
+
+
 def get_file_length_bytes(path: str) -> int:
     if is_s3_path(path):
         s3_client = (
@@ -202,9 +254,11 @@ def read_file(path: str | Path, mode: str = "r", encoding: str | None = None) ->
         return input_file.read()
 
 
-def write_to_file(path: str | Path, content: str, encoding: str | None = None) -> str:
+def write_to_file(
+    path: str | Path, content: str, encoding: str | None = None, content_type: str | None = None
+) -> str:
     """Simple function for replacing contents of a file"""
-    with open_stream(path, "w", encoding) as file_to_write_to:
+    with open_stream(path, "w", encoding, content_type) as file_to_write_to:
         return file_to_write_to.write(content)
 
 

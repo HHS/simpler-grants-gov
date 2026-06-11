@@ -1,9 +1,9 @@
 import uuid
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
@@ -13,6 +13,9 @@ from src.db.models.award_recommendation_models import (
 )
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.db.models.user_models import User
+from src.services.award_recommendations.get_award_recommendation_summary import (
+    get_award_recommendation_summary,
+)
 
 
 def _get_award_recommendation(
@@ -54,5 +57,40 @@ def get_award_recommendation_and_verify_access(
         raise_flask_error(403, message="Forbidden")
 
     verify_access(user, {Privilege.VIEW_AWARD_RECOMMENDATION}, agency)
+
+    # Summary is computed in one aggregated query; monitor staging latency as data volume grows.
+    award_recommendation.award_recommendation_summary = get_award_recommendation_summary(  # type: ignore[attr-defined]
+        db_session, award_recommendation_id
+    )
+
+    return award_recommendation
+
+
+def get_award_recommendation_for_update(
+    db_session: db.Session, user: User, award_recommendation_id: uuid.UUID
+) -> AwardRecommendation:
+    stmt = (
+        select(AwardRecommendation)
+        .where(
+            AwardRecommendation.award_recommendation_id == award_recommendation_id,
+            AwardRecommendation.is_deleted.isnot(True),
+        )
+        .options(
+            selectinload(AwardRecommendation.opportunity).selectinload(Opportunity.agency_record),
+        )
+    )
+
+    award_recommendation = db_session.execute(stmt).scalar_one_or_none()
+    if award_recommendation is None:
+        raise_flask_error(
+            404,
+            message=f"Could not find Award Recommendation with ID {award_recommendation_id}",
+        )
+
+    agency = award_recommendation.opportunity.agency_record
+    if agency is None:
+        raise_flask_error(403, message="Forbidden")
+
+    verify_access(user, {Privilege.UPDATE_AWARD_RECOMMENDATION}, agency)
 
     return award_recommendation

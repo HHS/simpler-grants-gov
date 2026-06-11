@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:8ae2ecf@sha256:33d915d6da8c2c4049537fb5a5a209fb6af0a2b7009c524c3474631b57510864 AS base
+FROM ghcr.io/hhs/python-base-image:6717a8a@sha256:1e465daf806babc12710454f6738cd951f2cfefdc5a770cf737fee906e73efac AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -30,6 +30,8 @@ COPY newrelic.ini /api/newrelic.ini
 ENV UV_NO_DEV=1
 # Compile python to *.pyc files for performance
 ENV UV_COMPILE_BYTECODE=1
+ENV UV_CACHE_DIR="/tmp/.cache/uv"
+ENV UV_NO_SYNC=1
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
@@ -133,4 +135,4 @@ ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
 # Run as the non-root user
 USER ${RUN_USER}
 
-CMD ["gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()"]
+CMD ["gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()", "--log-level", "debug", "--limit-request-field_size", "16384", "--limit-request-fields", "50"]

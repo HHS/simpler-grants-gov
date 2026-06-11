@@ -6,16 +6,18 @@ import uuid
 from datetime import date
 from enum import StrEnum
 
+from grants_shared.adapters import db
+from grants_shared.adapters.db import flask_db
+from grants_shared.util import datetime_util
 from sqlalchemy import select
 
-from src.adapters import db
 from src.adapters.aws import S3Config
-from src.adapters.db import flask_db
 from src.constants.lookup_constants import (
     ApplicantType,
     CompetitionOpenToApplicant,
     FundingCategory,
     FundingInstrument,
+    JobType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -45,7 +47,7 @@ from src.services.opportunity_attachments.attachment_util import get_s3_attachme
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
-from src.util import datetime_util, file_util
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -504,6 +506,25 @@ class BuildAutomaticOpportunitiesTask(Task):
             ],
         )
 
+        # Opportunity with static OpportunityID open to both orgs and ind
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-PRINT-ORG-IND-OT01",
+                opportunity_number="TEST-PRINT-ORG-IND-ON01",
+                opportunity_id=uuid.UUID("f21dc67e-84d8-4e2b-ae3e-2d68f83957db"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-PRINT-ORG-IND-CT01",
+                    required_form_ids=[ProjectAbstractSummary_v2_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
     def create_opportunity(
         self,
         data: OpportunityContainer,
@@ -690,6 +711,6 @@ class BuildAutomaticOpportunitiesTask(Task):
     "build-automatic-opportunities", help="Utility to automatically create opportunities for forms"
 )
 @flask_db.with_db_session()
-@ecs_background_task(task_name="build-automatic-opportunities")
+@ecs_background_task(task_name=JobType.BUILD_AUTOMATIC_OPPORTUNITIES)
 def generate_opportunity_sql(db_session: db.Session) -> None:
     BuildAutomaticOpportunitiesTask(db_session).run()

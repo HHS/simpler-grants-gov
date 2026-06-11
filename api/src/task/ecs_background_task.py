@@ -9,8 +9,7 @@ from typing import ParamSpec, TypeVar
 
 import newrelic.agent
 import requests
-
-from src.logging.flask_logger import add_extra_data_to_global_logs
+from grants_shared.logs.flask_logger import add_extra_data_to_global_logs
 
 logger = logging.getLogger(__name__)
 
@@ -27,17 +26,17 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
     - write new ECS task code without thinking about the boilerplate
 
     Usage:
+        The JobType enum is used to pass the task name into the ecs_background_task. A task
+        "my-cool-task" is translated to JobType.MY_COOL_TASK
 
-        TASK_NAME = "my-cool-task"
-
-        @task_blueprint.cli.command(TASK_NAME, help="For running my cool task")
-        @ecs_background_task(TASK_NAME)
+        @task_blueprint.cli.command("my-cool-task", help="For running my cool task")
+        @ecs_background_task(JobType.MY_COOL_TASK)
         @flask_db.with_db_session()
         def entrypoint(db_session: db.Session):
             do_cool_stuff()
 
     Parameters:
-      task_name (str): Name of the ECS task
+      task_name (JobType): Job type of the ECS task
 
     IMPORTANT: Do not specify this decorator before the task command.
                Click effectively rewrites your function to be a main function

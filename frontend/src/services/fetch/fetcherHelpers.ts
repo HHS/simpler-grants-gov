@@ -7,6 +7,7 @@ import {
   BadRequestError,
   ForbiddenError,
   InternalServerError,
+  MissingAuthError,
   NetworkError,
   NotFoundError,
   RequestTimeoutError,
@@ -15,18 +16,22 @@ import {
   ValidationError,
 } from "src/errors";
 import { getSession } from "src/services/auth/session";
+import { getCorrelationId } from "src/services/correlationId/correlationId";
 import { APIResponse } from "src/types/apiResponseTypes";
 import { ApiMethod } from "src/types/generalTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
+import { printAwsHeaders, printResponseInfo } from "src/utils/generalUtils";
 
 // Configuration of headers to send with all requests
 // optionally adds content type and user auth token
 export async function getDefaultHeaders({
   addContentType = true,
   requiresUserAuthToken = false,
+  url,
 }: {
   addContentType?: boolean;
   requiresUserAuthToken?: boolean;
+  url?: string;
 }): Promise<Record<string, string>> {
   const headers: Record<string, string> = {};
 
@@ -38,14 +43,19 @@ export async function getDefaultHeaders({
     headers["Content-Type"] = "application/json";
   }
 
+  const correlationId = await getCorrelationId();
+  if (correlationId) {
+    headers["X-Correlation-Id"] = correlationId;
+  }
+
   if (requiresUserAuthToken) {
     const session = await getSession();
     if (!session?.token) {
-      // May want to throw here
-      console.warn("no user token present for authorized endpoint call");
-    } else {
-      headers["X-SGG-Token"] = session.token;
+      throw new MissingAuthError(
+        `No user token present for call to authorized endpoint at ${url || "unknown url"}`,
+      );
     }
+    headers["X-SGG-Token"] = session.token;
   }
 
   return headers;
@@ -111,9 +121,16 @@ export function fetchErrorToNetworkError(
     : new NetworkError(error);
 }
 
-export const throwError = (responseBody: APIResponse, url: string) => {
+export const throwError = (
+  responseBody: APIResponse,
+  url: string,
+  response: Response,
+) => {
   const { status_code = 0, message = "", errors } = responseBody;
-  console.error(`API request error at ${url} (${status_code}): ${message}`);
+  // errors raised here that have a status_code of 0 (the default above) and a message of "Internal server error" are injected by API GW
+  console.error(
+    `API request error at ${url} (${status_code}): ${message}, ${printResponseInfo(response)}, ${printAwsHeaders(response.headers)}`,
+  );
 
   const details = (errors && errors[0]) || {};
 

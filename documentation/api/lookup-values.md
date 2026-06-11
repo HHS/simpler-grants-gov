@@ -37,7 +37,7 @@ See [routes](api-details.md#routes) for details on how the Marshmallow schemas w
 Enums are directly supported as a field type, and only require specifying the field like:
 
 ```py
-from src.api.schemas.extension import Schema, fields
+from grants_shared.api.schemas.extension import Schema, fields
 
 class ExampleSchema(Schema):
 
@@ -66,7 +66,7 @@ First, we need to define the `<lookup>_id` column value for each enum value. Thi
 as a simple mapping next to the enum. For example, this would be defined as:
 
 ```py
-from src.db.models.lookup  import LookupConfig, LookupStr
+from grants_shared.db.models.lookup  import LookupConfig, LookupStr
 
 EXAMPLE_CONFIG = LookupConfig([
         LookupStr(Example.A, 1),
@@ -83,8 +83,8 @@ Then we want to define the lookup table in [lookup_models.py](../../api/src/db/m
 from sqlalchemy.orm import Mapped, mapped_column
 
 import src.constants.lookup_constants as lookup_constants
-from src.db.models.lookup import Lookup, LookupRegistry, LookupTable
-from src.db.models.base import TimestampMixin
+from grants_shared.db.models.lookup import Lookup, LookupRegistry, LookupTable
+from grants_shared.db.models.base import TimestampMixin
 
 @LookupRegistry.register_lookup(lookup_constants.EXAMPLE_CONFIG)
 class LkExample(LookupTable, TimestampMixin):
@@ -112,10 +112,10 @@ import uuid
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.db.models.base import TimestampMixin
-from src.db.models.lookup_models import LkExample
-from src.db.models.base import Base
-from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from grants_shared.db.models.base import TimestampMixin
+from grants_shared.db.models.lookup_models import LkExample
+from grants_shared.db.models.base import Base
+from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import Example
 
 class ExampleTable(Base, TimestampMixin):

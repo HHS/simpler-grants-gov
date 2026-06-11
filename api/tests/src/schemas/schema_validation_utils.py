@@ -2,7 +2,13 @@ from enum import Enum, StrEnum
 from random import choice
 from string import ascii_uppercase
 
-from src.api.schemas.extension import MarshmallowErrorContainer, Schema, fields, validators
+from grants_shared.api.schemas.extension import (
+    MarshmallowErrorContainer,
+    Schema,
+    fields,
+    validators,
+)
+
 from src.validation.validation_constants import ValidationErrorType
 
 #############################
@@ -144,6 +150,9 @@ class FieldTestSchema(Schema):
     field_str_min_and_max = fields.String(validate=[validators.Length(min=2, max=3)])
     field_str_equal = fields.String(validate=[validators.Length(equal=3)])
     field_str_regex = fields.String(validate=[validators.Regexp("^\\d{3}$")])
+    field_str_regex_msg = fields.String(
+        validate=[validators.Regexp("^\\d{3}$", error_message="This is the override error")]
+    )
     field_str_email = fields.String(validate=[validators.Email()])
 
     field_url = fields.URL()
@@ -220,6 +229,7 @@ def get_valid_field_test_schema_req():
         "field_str_min_and_max": "ab",
         "field_str_equal": "abc",
         "field_str_regex": "123",
+        "field_str_regex_msg": "123",
         "field_str_email": "person@example.com",
         "field_url": "https://example.com",
         "field_int": 1,
@@ -283,6 +293,7 @@ def get_invalid_field_test_schema_req():
         "field_str_min_and_max": "a",
         "field_str_equal": "a",
         "field_str_regex": "abc",
+        "field_str_regex_msg": "abc",
         "field_str_email": "not an email",
         "field_url": "not a url",
         "field_int": {},
@@ -344,6 +355,9 @@ def get_expected_validation_errors():
         "field_str_min_and_max": [get_length_range_error_msg(2, 3)],
         "field_str_equal": [get_length_equal_error_msg(3)],
         "field_str_regex": [INVALID_STRING_PATTERN],
+        "field_str_regex_msg": [
+            MarshmallowErrorContainer(ValidationErrorType.FORMAT, "This is the override error")
+        ],
         "field_str_email": [INVALID_EMAIL],
         "field_url": [INVALID_URL],
         "field_int": [INVALID_INTEGER],

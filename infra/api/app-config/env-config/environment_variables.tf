@@ -9,7 +9,6 @@ locals {
     # LOG_LEVEL               = "info"
     # DB_CONNECTION_POOL_SIZE = 5
 
-
     # Login.gov OAuth
     # Default values point to the IDP integration environment
     # which all non-prod environments should use
@@ -42,6 +41,9 @@ locals {
 
     # OpenSearch explanation logging (kill switch if explain queries cause latency issues)
     OPENSEARCH_EXPLAIN_ENABLED = "true"
+
+    # DB Schemas
+    ALL_DB_SCHEMAS = "api,legacy,staging"
   }
 
   # Configuration for secrets
@@ -117,6 +119,16 @@ locals {
     USE_SIMPLER = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/use-simpler"
+    }
+
+    ENABLE_SIMPLER_ROUTE = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/enable-simpler-route"
+    }
+
+    SAVE_SOAP_MESSAGES_TO_S3 = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/save-soap-messages-to-s3"
     }
 
     SAM_GOV_API_KEY = {

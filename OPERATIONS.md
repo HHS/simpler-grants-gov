@@ -127,6 +127,16 @@ We manage several secret values that need to be rotated yearly.
 
 #### Application Certificates: Part 1: Generate A Cert
 
+##### NEW more scripted process
+```bash
+bin/create-csr <domain prefix> # anything you pass as the prefix will be prepended to .simpler.grants.gov
+bin/create-csr soap.training # would yield a CSR for soap.training.simpler.grants.gov
+
+bin/create-csr # called without any domain will generate a request for the root, simpler.grants.gov domain
+```
+
+##### DEPRECIATED more manual process
+
 The process starts by generating a cert like so. You will need to generate the certs one at a time.
 
 ```bash

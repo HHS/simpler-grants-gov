@@ -2,10 +2,11 @@ import logging
 from datetime import timedelta
 from uuid import UUID
 
+from grants_shared.adapters import db
+from grants_shared.util import datetime_util
 from sqlalchemy import and_, exists, select, update
 from sqlalchemy.orm import selectinload
 
-from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import (
     LinkExternalUser,
@@ -16,7 +17,6 @@ from src.db.models.user_models import (
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason, UserEmailNotification
-from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 
@@ -133,9 +133,9 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                     extra={"user_id": user_id, "closing_opp_count": len(closing_opportunities)},
                 )
                 subject = (
-                    "Applications for your bookmarked funding opportunity are due soon"
+                    "Applications for your saved funding opportunity are due soon"
                     if len(closing_opportunities) == 1
-                    else "Applications for your bookmarked funding opportunities are due soon"
+                    else "Applications for your saved funding opportunities are due soon"
                 )
                 users_email_notifications.append(
                     UserEmailNotification(
@@ -168,7 +168,7 @@ class ClosingDateNotificationTask(BaseNotificationTask):
         message = (
             "Applications for the following funding opportunities are due in two weeks:\n\n"
             if has_multiple_grants
-            else "Applications for your bookmarked funding opportunity are due soon\n\n"
+            else "Applications for your saved funding opportunity are due soon\n\n"
         )
 
         for closing_opp in closing_opportunities:
@@ -180,14 +180,14 @@ class ClosingDateNotificationTask(BaseNotificationTask):
         if has_multiple_grants:
             message += (
                 "Please carefully review the opportunity listings for all requirements and deadlines.\n\n"
-                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities{UTM_TAG}' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities{UTM_TAG}' target='_blank'>To unsubscribe from email notifications for an opportunity, delete it from your saved funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about an opportunity"
             )
         else:
             message += (
                 "Please carefully review the opportunity listing for all requirements and deadlines.\n\n"
-                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities{UTM_TAG}' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your bookmarked funding opportunities.</a>\n\n"
+                f"<a href='{self.notification_config.frontend_base_url}/saved-opportunities{UTM_TAG}' target='_blank'>To unsubscribe from email notifications for this opportunity, delete it from your saved funding opportunities.</a>\n\n"
                 "<b>Questions?</b>\n"
                 "If you have questions about the opportunity"
             )

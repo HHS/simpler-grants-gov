@@ -4,7 +4,7 @@ import logging
 import re
 from typing import Any
 
-from src.util.dict_util import get_nested_value
+from grants_shared.util.dict_util import get_nested_value
 
 from ..conditional_transformers import apply_conditional_transform
 from ..value_transformers import apply_value_transformation
@@ -390,6 +390,32 @@ class RecursiveXMLTransformer:
                                 nested_result[child_transform["target"]] = transformed_child
 
             return nested_result if nested_result else None
+
+        elif transform_type == "array":
+            # Transform each array item using the 'items' field config
+            if not isinstance(source_value, list):
+                return None
+            items_config = full_rule_config.get("items", {})
+            if not items_config:
+                return source_value or None
+            transformed_items = []
+            for item in source_value:
+                if isinstance(item, dict):
+                    item_result = {}
+                    for child_key, child_config in items_config.items():
+                        if isinstance(child_config, dict) and "xml_transform" in child_config:
+                            child_transform = child_config["xml_transform"]
+                            child_value = item.get(child_key)
+                            if child_value is not None:
+                                transformed_child = self._apply_transform_rule(
+                                    child_value, child_transform, child_config, path + [child_key]
+                                )
+                                if transformed_child is not None:
+                                    item_result[child_transform["target"]] = transformed_child
+                    if item_result:
+                        transformed_items.append(item_result)
+            return transformed_items if transformed_items else None
+
         else:
             # Simple transformation - apply value transformation if specified
             transformed_value = source_value

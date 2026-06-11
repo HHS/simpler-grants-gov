@@ -103,6 +103,7 @@ describe("requesterForEndpoint", () => {
     expect(getDefaultHeadersMock).toHaveBeenCalledWith({
       addContentType: true,
       requiresUserAuthToken: true,
+      url: "fakeurl/1",
     });
     expect(fetchMock).toHaveBeenCalledWith("fakeurl/1", {
       body: JSON.stringify({ key: "value" }),
@@ -123,12 +124,14 @@ describe("requesterForEndpoint", () => {
     expect(response).toEqual(fakeResponse);
   });
   it("extracts errors from json response where applicable", async () => {
-    fetchMock.mockResolvedValue({
+    const mockHeaders = { get: () => "application/json" };
+    const mockResponse = {
       json: responseJsonMock,
       ok: false,
       status: 404,
-      headers: { get: () => "application/json" },
-    });
+      headers: mockHeaders,
+    };
+    fetchMock.mockResolvedValue(mockResponse);
 
     const requester = requesterForEndpoint(basicEndpoint);
 
@@ -138,7 +141,11 @@ describe("requesterForEndpoint", () => {
       additionalHeaders: { "Header-Name": "headerValue" },
     });
     expect(responseJsonMock).toHaveBeenCalledTimes(1);
-    expect(throwErrorMock).toHaveBeenCalledWith(fakeJsonBody, "fakeurl/1");
+    expect(throwErrorMock).toHaveBeenCalledWith(
+      fakeJsonBody,
+      "fakeurl/1",
+      mockResponse,
+    );
   });
   it("returns without error if status included in allowedErrorStatuses", async () => {
     fetchMock.mockResolvedValue({

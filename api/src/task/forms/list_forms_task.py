@@ -3,13 +3,14 @@ import logging
 
 import click
 import requests
+from grants_shared.util.local import error_if_not_local
 from prettytable import PrettyTable
 
+from src.constants.lookup_constants import JobType
 from src.db.models.competition_models import Form
 from src.task.ecs_background_task import ecs_background_task
 from src.task.forms.form_task_shared import BaseFormTask, build_form_json, get_form_url
 from src.task.task_blueprint import task_blueprint
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
     type=click.Choice(["local", "dev", "staging", "training", "prod"]),
 )
 @click.option("--verbose", default=False, is_flag=True, help="Show the full diff of forms")
-@ecs_background_task(task_name="list-forms")
+@ecs_background_task(task_name=JobType.LIST_FORMS)
 def list_forms(environment: str, verbose: bool) -> None:
     # This script is only meant for running locally at this time
     error_if_not_local()

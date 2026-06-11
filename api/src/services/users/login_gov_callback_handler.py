@@ -1,11 +1,12 @@
 import logging
 from dataclasses import dataclass
 
+import grants_shared.adapters.db as db
+from grants_shared.util.string_utils import is_valid_uuid
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
 from src.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
 from src.adapters.oauth.oauth_client_models import OauthTokenRequest
 from src.api.route_utils import raise_flask_error
@@ -15,7 +16,6 @@ from src.auth.login_gov_jwt_auth import get_config, get_login_gov_client_asserti
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.user_models import LinkExternalUser, LoginGovState, User
 from src.services.users.organization_from_ebiz_poc import handle_ebiz_poc_organization_during_login
-from src.util.string_utils import is_valid_uuid
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +130,11 @@ def _validate_piv_requirement(user: User, x509_presented: bool | None) -> None:
                     "x509_presented": x509_presented,
                 },
             )
-            raise_flask_error(422, "Agency users must authenticate using a PIV/CAC card")
+            raise_flask_error(
+                422,
+                "Agency users must authenticate using a PIV/CAC card",
+                extra_data={"login_piv_required_error": "true"},
+            )
         else:
             logger.info(
                 "Agency user login would have been blocked if PIV were required",

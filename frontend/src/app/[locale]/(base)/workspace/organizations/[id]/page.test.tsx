@@ -37,7 +37,7 @@ jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
   getUserOrganizations: () => organizations() as Promise<Organization[]>,
 }));
 
-jest.mock("src/components/workspace/UserOrganizationsList", () => ({
+jest.mock("src/components/organizations/UserOrganizationsList", () => ({
   UserOrganizationsList: () => <div data-testid="user-org-list" />,
 }));
 
@@ -46,7 +46,7 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,
 }));
 
-jest.mock("src/components/user/AuthenticationGate", () => ({
+jest.mock("src/components/core/AuthenticationGate", () => ({
   AuthenticationGate: ({ children }: PropsWithChildren) => children,
 }));
 

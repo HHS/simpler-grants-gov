@@ -11,7 +11,7 @@ class S3Config(PydanticBaseEnvConfig):
     # We should generally not need to set this except
     # locally to use s3mock
     aws_s3_endpoint_url: str | None = Field(alias="AWS_S3_ENDPOINT_URL", default=None)
-    presigned_s3_duration: int = 7200  # 2 hours in seconds
+    presigned_s3_duration: int = 900  # 15 minutes in seconds
 
     # CDN URL for public files - if set, will be used instead of presigned URLs
     cdn_url: str | None = None
@@ -24,6 +24,7 @@ class S3Config(PydanticBaseEnvConfig):
     # Note these env vars get set as "s3://..."
     public_files_bucket_path: str = Field(alias="PUBLIC_FILES_BUCKET")
     draft_files_bucket_path: str = Field(alias="DRAFT_FILES_BUCKET")
+    file_scan_bucket_path: str = Field(alias="FILE_SCAN_BUCKET")
 
 
 def get_s3_client(
@@ -43,6 +44,11 @@ def get_s3_client(
             signature_version="s3v4",
             request_checksum_calculation="when_required",
             response_checksum_validation="when_required",
+            # Force path-style addressing (s3.<region>.amazonaws.com/<bucket>).
+            # Virtual-hosted-style requests (<bucket>.s3.amazonaws.com) fail with
+            # HTTP 500 from inside our VPC, which surfaces as smart_open's
+            # "bucket does not exist, or is forbidden for access" on multipart uploads.
+            s3={"addressing_style": "path"},
         )
 
     params["config"] = boto_config

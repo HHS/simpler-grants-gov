@@ -6,15 +6,21 @@ from datetime import timedelta
 
 import flask
 import jwt
-from pydantic import Field
+from grants_shared.adapters import db
+from grants_shared.util import datetime_util
+from pydantic import BaseModel, Field
 
-from src.adapters import db
 from src.auth.auth_errors import JwtValidationError
 from src.db.models.user_models import LoginGovState
-from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+# This ACR value forces login.gov to require PIV/CAC authentication. Documentation: https://developers.login.gov/oidc/authorization/
+LOGIN_GOV_PIV_REQUIRED = "http://idmanagement.gov/ns/assurance/aal/2?hspd12=true"
+
+
+class RedirectParams(BaseModel):
+    piv_required: bool | None = None
 
 
 class LoginGovConfig(PydanticBaseEnvConfig):
@@ -126,12 +132,16 @@ def _refresh_keys(config: LoginGovConfig) -> None:
     config.public_key_map = public_key_map
 
 
-def get_login_gov_redirect_uri(db_session: db.Session, config: LoginGovConfig | None = None) -> str:
+def get_login_gov_redirect_uri(
+    query_data: dict, db_session: db.Session, config: LoginGovConfig | None = None
+) -> str:
     if config is None:
         config = get_config()
 
     nonce = uuid.uuid4()
     state = uuid.uuid4()
+
+    redirect_params = RedirectParams.model_validate(query_data)
 
     # Ask Flask for its own URI - specifying we want the callback route
     # .user_login_callback points to the function itself defined in user_routes.py
@@ -139,21 +149,23 @@ def get_login_gov_redirect_uri(db_session: db.Session, config: LoginGovConfig | 
         ".user_login_callback", _external=True, _scheme=config.login_gov_redirect_scheme
     )
 
+    url_params = {
+        "client_id": config.client_id,
+        "nonce": nonce,
+        "state": state,
+        "redirect_uri": redirect_uri,
+        "acr_values": config.acr_value,
+        "scope": config.scope,
+        # These are statically defined by the spec
+        "prompt": "select_account",
+        "response_type": "code",
+    }
+    if redirect_params.piv_required:
+        url_params["acr_values"] = config.acr_value + " " + LOGIN_GOV_PIV_REQUIRED
+
     # We want to redirect to the authorization endpoint of login.gov
     # See: https://developers.login.gov/oidc/authorization/
-    encoded_params = urllib.parse.urlencode(
-        {
-            "client_id": config.client_id,
-            "nonce": nonce,
-            "state": state,
-            "redirect_uri": redirect_uri,
-            "acr_values": config.acr_value,
-            "scope": config.scope,
-            # These are statically defined by the spec
-            "prompt": "select_account",
-            "response_type": "code",
-        }
-    )
+    encoded_params = urllib.parse.urlencode(url_params)
 
     # Add the state to the DB
     db_session.add(LoginGovState(login_gov_state_id=state, nonce=nonce))
@@ -189,6 +201,7 @@ def get_final_redirect_uri(
     token: str | None = None,
     is_user_new: bool | None = None,
     error_description: str | None = None,
+    login_piv_required_error: str | None = None,
     config: LoginGovConfig | None = None,
 ) -> str:
     if config is None:
@@ -204,6 +217,8 @@ def get_final_redirect_uri(
 
     if error_description is not None:
         params["error_description"] = error_description
+    if login_piv_required_error is not None:
+        params["login_piv_required_error"] = login_piv_required_error
 
     encoded_params = urllib.parse.urlencode(params)
 

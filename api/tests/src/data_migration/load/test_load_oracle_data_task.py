@@ -304,7 +304,7 @@ class TestLoadOracleData(BaseTestClass):
         assert updated_record.oppcategory is None
 
     @freezegun.freeze_time("2024-06-15 14:30:00")
-    def test_cutoff_is_timezone_aware_eastern(
+    def test_cutoff_is_naive_eastern_wall_clock(
         self, db_session, foreign_tables, staging_tables, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
@@ -319,8 +319,13 @@ class TestLoadOracleData(BaseTestClass):
         )
         task.run()
 
-        assert task.batch_cutoff.tzinfo is not None
-        assert str(task.batch_cutoff.tzinfo) in ("EST", "EDT", "US/Eastern", "America/New_York")
+        # The cutoff must be naive: the Oracle foreign data stores EST timestamps as UTC, so a
+        # tz-aware cutoff would get converted to UTC for comparison and end up 4-5h ahead of the
+        # source data, letting post-cutoff records sneak through the filter.
+        assert task.batch_cutoff.tzinfo is None
+        # Frozen UTC time is 14:30; Eastern wall-clock (EDT in June) is 10:30.
+        assert task.batch_cutoff.hour == 10
+        assert task.batch_cutoff.minute == 30
 
         cutoff_log = next(
             record
@@ -365,7 +370,9 @@ class TestLoadOracleData(BaseTestClass):
             last_upd_date=cutoff_time + datetime.timedelta(seconds=1),
         )
 
-        with freezegun.freeze_time("2024-06-15 10:00:00"):
+        # Freeze UTC at 14:00 so the Eastern wall-clock cutoff lands at 10:00, matching
+        # cutoff_time above. (June = EDT = UTC-4.)
+        with freezegun.freeze_time("2024-06-15 14:00:00"):
             task = load_oracle_data_task.LoadOracleDataTask(
                 db_session, foreign_tables, staging_tables, ["topportunity"]
             )
@@ -400,8 +407,9 @@ class TestLoadOracleData(BaseTestClass):
             last_upd_date=cutoff_time + datetime.timedelta(minutes=5),
         )
 
-        # Run 1: cutoff is at 10:00, record is at 10:05 -- should be excluded
-        with freezegun.freeze_time("2024-06-15 10:00:00"):
+        # Freeze UTC at 14:00 so the Eastern wall-clock cutoff is 10:00 (June = EDT = UTC-4).
+        # Record is at 10:05 -- should be excluded.
+        with freezegun.freeze_time("2024-06-15 14:00:00"):
             task1 = load_oracle_data_task.LoadOracleDataTask(
                 db_session, foreign_tables, staging_tables, ["topportunity"]
             )
@@ -416,8 +424,8 @@ class TestLoadOracleData(BaseTestClass):
         )
         assert task1.metrics["count.insert.total"] == 0
 
-        # Run 2: cutoff is at 10:10, record is at 10:05 -- should be included
-        with freezegun.freeze_time("2024-06-15 10:10:00"):
+        # Run 2: cutoff is at 10:10 Eastern, record is at 10:05 -- should be included.
+        with freezegun.freeze_time("2024-06-15 14:10:00"):
             task2 = load_oracle_data_task.LoadOracleDataTask(
                 db_session, foreign_tables, staging_tables, ["topportunity"]
             )
@@ -500,11 +508,11 @@ class TestLoadOracleData(BaseTestClass):
         ).first()
 
         # Verify regular columns were inserted
-        assert inserted_record.certemail == source_record.certemail
         assert inserted_record.creator_id == source_record.creator_id
         assert inserted_record.created_date == source_record.created_date
-        assert inserted_record.serial_num == source_record.serial_num
         assert inserted_record.agencyid == source_record.agencyid
+        assert inserted_record.certemail == source_record.certemail
+        assert inserted_record.serial_num == source_record.serial_num
 
         # Verify excluded column was not copied (should be None)
         assert inserted_record.is_selfsigned is None

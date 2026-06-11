@@ -1,11 +1,11 @@
 import { expect, type Page } from "@playwright/test";
+import { gotoWithRetry } from "tests/e2e/utils/common/lifecycle-utils";
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import {
   verifyAlertErrors,
   verifyInlineErrors,
   type FieldError,
 } from "tests/e2e/utils/forms/verify-form-errors-utils";
-import { gotoWithRetry } from "tests/e2e/utils/lifecycle-utils";
 
 import { buildFlexibleFormNameRegex } from "./form-navigation-utils";
 

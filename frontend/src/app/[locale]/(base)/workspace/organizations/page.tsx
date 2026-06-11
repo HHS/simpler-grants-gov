@@ -11,9 +11,9 @@ import { setRequestLocale } from "next-intl/server";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
-import { AuthenticationGate } from "src/components/user/AuthenticationGate";
-import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
+import { AuthenticationGate } from "src/components/core/AuthenticationGate";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
+import { UserOrganizationsList } from "src/components/organizations/UserOrganizationsList";
 
 const OrganizationsPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Organizations");

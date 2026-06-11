@@ -1,19 +1,22 @@
-import copy
 import logging
+import os
 import uuid
 from os import path
 
 import _pytest.monkeypatch
 import boto3
 import flask.testing
+import grants_shared.adapters.db as db
 import moto
 import pytest
 from apiflask import APIFlask
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from grants_shared.util.local import load_local_env_vars
+from moto.core import DEFAULT_ACCOUNT_ID
+from moto.ses.models import ses_backends
 from sqlalchemy import select, text
 
-import src.adapters.db as db
 import src.app as app_entry
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
@@ -32,9 +35,7 @@ from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
-from src.form_schema.forms import get_active_forms
-from src.form_schema.jsonschema_resolver import resolve_jsonschema
-from src.util.local import load_local_env_vars
+from src.form_schema.forms import get_active_forms, init_form_registry
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
     init_workflow_client_registry,
@@ -132,6 +133,9 @@ def set_env_var_defaults(monkeypatch_session):
 
     # We will set this to false so we skip logs during unit tests and keep enabled during dev.
     monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
+
+    # Stops the local file-scan watcher from spawning a thread per app fixture.
+    monkeypatch_session.setenv("ENABLE_LOCAL_FILE_SCANNER", "FALSE")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -452,6 +456,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
     monkeypatch.delenv("AWS_S3_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("AWS_SQS_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_DYNAMODB_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("CDN_URL", raising=False)
     monkeypatch.setattr("src.adapters.aws.aws_session._aws_config", None)
 
@@ -490,10 +495,23 @@ def other_mock_s3_bucket(other_mock_s3_bucket_resource):
 
 
 @pytest.fixture
-def s3_config(mock_s3_bucket, other_mock_s3_bucket):
+def mock_file_scan_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("local-mock-file-scan-bucket")
+    bucket.create()
+    return bucket
+
+
+@pytest.fixture
+def mock_file_scan_s3_bucket(mock_file_scan_s3_bucket_resource):
+    return mock_file_scan_s3_bucket_resource.name
+
+
+@pytest.fixture
+def s3_config(mock_s3_bucket, other_mock_s3_bucket, mock_file_scan_s3_bucket):
     return S3Config(
         PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
         DRAFT_FILES_BUCKET=f"s3://{other_mock_s3_bucket}",
+        FILE_SCAN_BUCKET=f"s3://{mock_file_scan_s3_bucket}",
     )
 
 
@@ -511,6 +529,51 @@ def workflow_sqs_queue(mock_sqs, monkeypatch):
     # Set the env var of this queue so the SQSConfig picks it up
     monkeypatch.setenv("WORKFLOW_QUEUE_URL", queue["QueueUrl"])
     return queue["QueueUrl"]
+
+
+@pytest.fixture
+def mock_dynamodb(reset_aws_env_vars):
+    with moto.mock_aws(config={"core": {"service_whitelist": ["dynamodb"]}}):
+        yield
+
+
+@pytest.fixture
+def file_scan_dynamodb_table(mock_dynamodb, monkeypatch):
+    dynamodb = boto3.client("dynamodb", region_name="us-east-1")
+    table_name = "test-local-virus-scan"
+    dynamodb.create_table(
+        TableName=table_name,
+        KeySchema=[
+            {"AttributeName": "file_id", "KeyType": "HASH"},
+        ],
+        AttributeDefinitions=[
+            {"AttributeName": "file_id", "AttributeType": "S"},
+        ],
+        BillingMode="PAY_PER_REQUEST",
+    )
+    monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
+    return table_name
+
+
+@pytest.fixture
+def ses_client(monkeypatch):
+    """Create a mocked SESv2 client using moto3."""
+    monkeypatch.setenv("IS_LOCAL_AWS", "0")
+
+    # to access ses_backends, need to add ses to the whitelist
+    with moto.mock_aws(config={"core": {"service_whitelist": ["ses", "sesv2"]}}):
+        ses_client = boto3.client("sesv2", region_name="us-east-1")
+        ses_client.create_email_identity(EmailIdentity=os.getenv("AWS_SES_FROM_EMAIL"))
+        yield ses_client
+
+
+@pytest.fixture
+def get_sent_emails():
+    def func():
+        ses_backend = ses_backends[DEFAULT_ACCOUNT_ID]["us-east-1"]
+        return ses_backend.sent_messages
+
+    return func
 
 
 ####################
@@ -644,6 +707,7 @@ def load_active_forms(db_session, enable_factory_create) -> None:
     Note that because these are all in the same DB, don't
     modify these forms otherwise you might break other tests that use them.
     """
+    init_form_registry()
 
     existing_form_instruction_ids = set(
         db_session.execute(select(FormInstruction.form_instruction_id)).scalars()
@@ -662,10 +726,43 @@ def load_active_forms(db_session, enable_factory_create) -> None:
                 file_name=f"{form.short_form_name}.txt",
             )
 
-        # do a copy so we aren't modifying a global form object
-        copied_form = copy.deepcopy(form)
-        copied_form.form_json_schema = resolve_jsonschema(form.form_json_schema)
-        db_session.merge(copied_form, load=True)
+        # Session.merge() does not modify the source object; schemas are already
+        # resolved by init_form_registry() so no deepcopy or re-resolve needed.
+        db_session.merge(form, load=True)
+
+
+@pytest.fixture
+def seed_form_registry(load_active_forms) -> None:
+    """Populate the test DB with all registry forms.
+
+    Preferred alias for load_active_forms in new tests. After this fixture runs,
+    any registered form (e.g. SF424_v4_0) can be retrieved via db_session.get().
+    """
+    factories._seed_form_registry_active = True
+    yield
+    factories._seed_form_registry_active = False
+
+
+@pytest.fixture
+def s3_scanner_user(db_session, monkeypatch) -> User:
+    """Create the local file-scanner user with the INTERNAL_S3_SCAN privilege
+    and point LOCAL_FILE_SCANNER_USER_ID at them.
+
+    Mirrors the workflow_user fixture pattern but skips enable_factory_create
+    so it can compose with a test-local moto context. enable_factory_create
+    pulls in mock_s3_bucket -> mock_s3, whose s3-only whitelist would block
+    the DynamoDB calls these tests also need.
+    """
+    monkeypatch.setattr(factories, "_db_session", db_session)
+    user = UserFactory.create()
+    role = RoleFactory.create(
+        privileges=[Privilege.INTERNAL_S3_SCAN], role_types=[RoleType.INTERNAL]
+    )
+    InternalUserRoleFactory.create(user=user, role=role)
+
+    monkeypatch.setenv("LOCAL_FILE_SCANNER_USER_ID", str(user.user_id))
+
+    return user
 
 
 @pytest.fixture

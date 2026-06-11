@@ -4,6 +4,7 @@ from datetime import timedelta
 from os.path import join
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 
+from grants_shared.util.datetime_util import utcnow
 from requests import Request, Session
 
 from src.legacy_soap_api.legacy_soap_api_auth import (
@@ -29,7 +30,6 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_streamed_soap_response,
     log_local,
 )
-from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +74,10 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
             soap_request.headers.get(config.gg_s2s_proxy_header_key, config.gg_url),
             soap_request.full_path.lstrip("/"),
         )
+    logger.info(
+        "soap_client_certificate: sending request to proxy_url",
+        extra={"proxy_url": proxy_url},
+    )
     _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
 
     response = _get_soap_response(_request, timeout=timeout)

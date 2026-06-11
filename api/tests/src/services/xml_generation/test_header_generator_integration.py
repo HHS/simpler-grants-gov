@@ -2,7 +2,8 @@
 
 from datetime import date
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 from src.services.xml_generation.header_generator import generate_application_header_xml
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -32,6 +33,7 @@ def test_header_generation_example_output(enable_factory_create, db_session: db.
         opening_date=date(2025, 9, 2),
         closing_date=date(2025, 9, 30),
         opportunity_assistance_listing=assistance_listing,
+        competition_forms=[],
     )
 
     application = ApplicationFactory.create(competition=competition, application_name="Test App")

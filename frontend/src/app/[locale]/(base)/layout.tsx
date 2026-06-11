@@ -6,8 +6,8 @@ import { Metadata } from "next";
 import { environment } from "src/constants/environments";
 import { LayoutProps } from "src/types/generalTypes";
 
-import Layout from "src/components/Layout";
-import RootLayoutWrapper from "src/components/RootLayoutWrapper";
+import Layout from "src/components/core/Layout";
+import RootLayoutWrapper from "src/components/core/RootLayoutWrapper";
 
 export const metadata: Metadata = {
   icons: [`${environment.NEXT_PUBLIC_BASE_PATH}/img/favicon.ico`],

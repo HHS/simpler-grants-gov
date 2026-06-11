@@ -72,7 +72,7 @@ h6 {
 
   &:disabled,
   &[aria-disabled="true"] {
-    color: color("gray-60");
+    color: color("gray-70");
     background-color: color("gray-20");
     border-bottom: 5px solid color("gray-10");
   }
@@ -246,6 +246,27 @@ h6 {
 .usa-button--small {
   font-size: font-size($theme-button-font-family, "sm");
   padding: units(1) units(2);
+}
+
+.button--danger {
+  &.usa-button--outline,
+  &.usa-button--outline:visited {
+    box-shadow: inset 0 0 0 2px color("red-60");
+    border-bottom: 5px solid color("red-60");
+    color: color("red-60");
+  }
+
+  &.usa-button--outline:hover {
+    box-shadow: inset 0 0 0 2px color("red-70");
+    border-bottom: 5px solid color("red-70");
+    color: color("red-70");
+  }
+
+  &.usa-button--outline:disabled {
+    box-shadow: inset 0 0 0 2px color("base-light");
+    border-bottom: 5px solid color("base-light");
+    color: color("base-light");
+  }
 }
 
 .button-icon-large {
@@ -587,6 +608,15 @@ dl {
   }
 }
 
+.recommendation-submissions-table .simpler-responsive-table {
+  th,
+  tbody td {
+    white-space: nowrap;
+    word-wrap: normal;
+    overflow-wrap: normal;
+  }
+}
+
 .simpler-selected-filter {
   .usa-accordion__button {
     background-color: color($theme-color-secondary-lightest);
@@ -717,6 +747,25 @@ dl {
 
 .apply-form-print-preview .field-list-widget__controls {
   display: none !important;
+}
+
+.field-list-widget {
+  &__entry-controls {
+    border-top: 1px solid color("base-lighter");
+    border-bottom: 1px solid color("base-lighter");
+    padding-bottom: units(2);
+  }
+
+  &__controls {
+    border-top: 1px solid color("base-lighter");
+  }
+
+  &__entry:has(+ .field-list-widget__controls) {
+    .field-list-widget__entry-controls {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+  }
 }
 
 @media print {
@@ -1249,7 +1298,7 @@ input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
 }
 
 /*
-  Notifications page error message fade in animation. 
+  Notifications page error message fade in animation.
   This is used on the notifications page when an error occurs fetching notifications,
   to fade in the error message in a way that draws attention without being too jarring.
 */
@@ -1515,4 +1564,27 @@ $simpler-switch-transition-easing: ease;
 .award-recommendation-step-connector {
   background-color: #c3e8d8;
   height: calc(100% + 1rem);
+}
+
+// Teal green checkboxes for RisksTable
+.risks-table-checkbox {
+  accent-color: color("mint-50");
+
+  &:checked {
+    background-color: color("mint-50");
+    border-color: color("mint-50");
+  }
+
+  &:focus {
+    outline-color: color("mint-50");
+    box-shadow: 0 0 0 0.25rem rgba(color("mint-50"), 0.25);
+  }
+}
+
+// hide native file input status / preview
+.usa-file-input__preview {
+  display: none;
+}
+.usa-file-input__preview-image {
+  display: none;
 }

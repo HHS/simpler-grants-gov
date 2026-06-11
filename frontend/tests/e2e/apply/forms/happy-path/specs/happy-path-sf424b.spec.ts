@@ -14,12 +14,12 @@ import { SF424B_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424b-field-defini
 import { sf424BHappyPathTestData } from "tests/e2e/apply/fixtures/sf424b-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
-import { createApplication } from "tests/e2e/utils/create-application-utils";
+import { createApplication } from "tests/e2e/utils/application/create-application-utils";
+import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { APPLY, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
@@ -36,7 +36,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "Application form completion happy path - SF424B",
-  { tag: [APPLY, CORE_REGRESSION] },
+  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

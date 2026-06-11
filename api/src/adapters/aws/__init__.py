@@ -1,4 +1,5 @@
 from .aws_session import get_aws_config, get_boto_session
+from .dynamodb_adapter import DynamoDBConfig, get_boto_dynamodb_client
 from .s3_adapter import S3Config, get_s3_client
 from .sqs_adapter import SQSConfig, get_boto_sqs_client
 
@@ -9,4 +10,6 @@ __all__ = [
     "S3Config",
     "get_boto_sqs_client",
     "SQSConfig",
+    "get_boto_dynamodb_client",
+    "DynamoDBConfig",
 ]

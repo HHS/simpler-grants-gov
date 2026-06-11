@@ -176,6 +176,8 @@ class FormType(StrEnum):
 
     ATTACHMENT_FORM = "AttachmentForm"
 
+    PROJECT_PERFORMANCE_SITE_LOCATION = "ProjectPerformanceSiteLocation"
+
 
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
@@ -268,6 +270,7 @@ class AwardRecommendationRiskType(StrEnum):
 class AwardRecommendationAuditEvent(StrEnum):
     AWARD_RECOMMENDATION_CREATED = "award_recommendation_created"
     AWARD_RECOMMENDATION_UPDATED = "award_recommendation_updated"
+    AWARD_RECOMMENDATION_DELETED = "award_recommendation_deleted"
     ATTACHMENT_CREATED = "attachment_created"
     ATTACHMENT_UPDATED = "attachment_updated"
     ATTACHMENT_DELETED = "attachment_deleted"
@@ -439,3 +442,24 @@ class FileScanStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     COMPLETE = "complete"
     INFECTED = "infected"
+
+
+class JobType(StrEnum):
+    MIGRATE_UP = "migrate-up"
+    MIGRATE_DOWN = "migrate-down"
+    MIGRATE_DOWNALL = "migrate-downall"
+    LOAD_TRANSFORM = "load-transform"
+    SETUP_FOREIGN_TABLES = "setup-foreign-tables"
+    LOAD_OPPORTUNITY_DATA_OPENSEARCH = "load-opportunity-data-opensearch"
+    SETUP_LOWER_ENV_AGENCIES = "setup-lower-env-agencies"
+    CREATE_ANALYTICS_DB_CSVS = "create-analytics-db-csvs"
+    CREATE_APPLICATION_SUBMISSION = "create-application-submission"
+    SETUP_CERT_USER = "setup-cert-user"
+    UPDATE_FORM_INSTRUCTION = "update-form-instruction"
+    UPDATE_FORM = "update-form"
+    EMAIL_NOTIFICATIONS = "email-notifications"
+    BUILD_AUTOMATIC_OPPORTUNITIES = "build-automatic-opportunities"
+    SAM_EXTRACTS = "sam-extracts"
+    LOAD_AGENCY_DATA_OPENSEARCH = "load-agency-data-opensearch"
+    EXPORT_OPPORTUNITY_DATA = "export-opportunity-data"
+    LIST_FORMS = "list-forms"

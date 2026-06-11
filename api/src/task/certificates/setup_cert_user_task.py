@@ -4,12 +4,12 @@ from datetime import date
 from enum import StrEnum
 
 import click
+import grants_shared.adapters.db.flask_db as flask_db
+import grants_shared.util.datetime_util as datetime_util
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-import src.adapters.db.flask_db as flask_db
-import src.util.datetime_util as datetime_util
-from src.adapters import db
-from src.constants.lookup_constants import UserType
+from src.constants.lookup_constants import JobType, UserType
 from src.db.models import staging
 from src.db.models.user_models import (
     Agency,
@@ -42,7 +42,7 @@ class SetupCertUserTaskStatus(StrEnum):
 @click.option("--tcertificates-id", "-t", help="tcertificates_id on Staging Tcertificate")
 @click.option("--role-ids", "-t", help="role_id of role that needs to be added", multiple=True)
 @flask_db.with_db_session()
-@ecs_background_task(task_name="setup-cert-user")
+@ecs_background_task(task_name=JobType.SETUP_CERT_USER)
 def setup_cert_user(db_session: db.Session, tcertificates_id: str, role_ids: list[str]) -> None:
     SetupCertUserTask(db_session, tcertificates_id, role_ids).run_task()
 
@@ -105,7 +105,7 @@ class SetupCertUserTask(Task):
             agency=agency,
             cert_id=tcertificate.currentcertid,
             expiration_date=valid_expiration_date,
-            serial_number=tcertificate.serial_num,
+            serial_number=tcertificate.serial_num.lower() if tcertificate.serial_num else None,
             user=user,
         )
         self.db_session.add(legacy_certificate)

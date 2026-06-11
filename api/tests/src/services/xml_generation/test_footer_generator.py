@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 
 import pytest
+from grants_shared.util.datetime_util import utcnow
 from lxml import etree as lxml_etree
 
 from src.services.xml_generation.constants import FOOTER_NAMESPACES
@@ -10,7 +11,6 @@ from src.services.xml_generation.header_generator import (
     SubmissionXMLGenerator,
     generate_application_footer_xml,
 )
-from src.util.datetime_util import utcnow
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationSubmissionFactory,
