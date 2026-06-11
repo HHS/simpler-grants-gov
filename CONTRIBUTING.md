@@ -57,9 +57,9 @@ Sharing how you or your organization have used the Simpler Grants project is an 
 
 The following guidelines are for code contributions. Please see [DEVELOPMENT.md](./DEVELOPMENT.md) for more information about the software development lifecycle on the project.
 
-### Getting Started
+### Getting Started and Running Project Locally
 
-This project is monorepo with several apps. Please see the [api](./api/README.md) and [frontend](./frontend/README.md) READMEs for information on spinning up those projects locally. Also see the project [documentation](./documentation) for more info.
+This project is monorepo with several apps. To get started refer to the [Quickstart Guide](./QUICKSTART.md) for all setup options. These options include [Frontend-Only](./QUICKSTART.md#frontend-only), [API-Only](./QUICKSTART.md#api-only), or [Full Stack](./QUICKSTART.md#full-stack) (both Frontend and API).
 
 ### Workflow and Branching
 

@@ -8,7 +8,7 @@ This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
 ### 🏗️ Development version
 
-Running a local server requires the version of Node specified in [the .nvmrc file](https://github.com/HHS/simpler-grants-gov/blob/main/.nvmrc) to be installed.
+Running a local server requires the version of Node specified in [the .nvmrc file](../../frontend/.nvmrc) to be installed.
 
 This project supports the use of NVM for node version management, so it is suggested you install and use NVM. More information can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
 
