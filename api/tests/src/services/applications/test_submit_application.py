@@ -6,12 +6,12 @@ import pytest
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, Privilege
-from src.form_schema.rule_processing.json_rule_field_population import UNKNOWN_VALUE
-from src.services.applications.submit_application import submit_application
-from src.validation.validation_constants import ValidationErrorType
 from src.db.models.competition_models import Form as FormModel
 from src.form_schema.forms import init_form_registry
 from src.form_schema.registry.form_template_registry import form_template_registry
+from src.form_schema.rule_processing.json_rule_field_population import UNKNOWN_VALUE
+from src.services.applications.submit_application import submit_application
+from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
@@ -45,6 +45,7 @@ def _create_test_form(db_session, **kwargs) -> FormModel:
     db_session.flush()
     form_template_registry.register(form, major_version=1)
     return form
+
 
 # Simple JSON schema used for tests below
 SIMPLE_JSON_SCHEMA = {

@@ -5,10 +5,9 @@ with only a few alterations.
 """
 
 import io
+import uuid
 from datetime import timedelta
 from urllib import parse
-
-import uuid
 
 import grants_shared.util.datetime_util as datetime_util
 from cryptography import x509
@@ -22,7 +21,6 @@ from src.db.models.competition_models import ApplicationForm, Form
 from src.db.models.user_models import Role, User
 from src.form_schema.forms import init_form_registry
 from src.form_schema.registry.form_template_registry import form_template_registry
-from tests.src.db.models.factories import get_db_session
 from src.legacy_soap_api.legacy_soap_api_auth import (
     LOG_LOCAL_RESPONSE_HEADER_KEY,
     SOAPAuth,
@@ -47,6 +45,7 @@ from tests.src.db.models.factories import (
     OrganizationFactory,
     RoleFactory,
     StagingTcertificatesFactory,
+    get_db_session,
 )
 
 DEFAULT_VALUE = object()

@@ -9,12 +9,12 @@ from src.constants.lookup_constants import (
     CompetitionOpenToApplicant,
     Privilege,
 )
-from src.services.applications.add_organization_to_application import (
-    add_organization_to_application,
-)
 from src.db.models.competition_models import Form as FormModel
 from src.form_schema.forms import init_form_registry
 from src.form_schema.registry.form_template_registry import form_template_registry
+from src.services.applications.add_organization_to_application import (
+    add_organization_to_application,
+)
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
@@ -67,11 +67,14 @@ def test_add_organization_to_application_success(enable_factory_create, db_sessi
     )
 
     # Create a form with simple schema for testing pre-population
-    form = _create_test_form(db_session, form_json_schema={
-        "type": "object",
-        "properties": {"name": {"type": "string"}},
-        "required": ["name"],
-    })
+    form = _create_test_form(
+        db_session,
+        form_json_schema={
+            "type": "object",
+            "properties": {"name": {"type": "string"}},
+            "required": ["name"],
+        },
+    )
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     # Create application without an organization
@@ -386,11 +389,14 @@ def test_add_organization_triggers_form_prepopulation(enable_factory_create, db_
     )
 
     # Create a form with simple schema
-    form = _create_test_form(db_session, form_json_schema={
-        "type": "object",
-        "properties": {"test_field": {"type": "string"}},
-        "required": ["test_field"],
-    })
+    form = _create_test_form(
+        db_session,
+        form_json_schema={
+            "type": "object",
+            "properties": {"test_field": {"type": "string"}},
+            "required": ["test_field"],
+        },
+    )
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -487,7 +493,8 @@ def test_add_organization_repopulates_application_response_from_org(
     )
 
     # Create form schema that includes sam_uei
-    form = _create_test_form(db_session,
+    form = _create_test_form(
+        db_session,
         form_json_schema={
             "type": "object",
             "properties": {"sam_uei": {"type": "string"}},

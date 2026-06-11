@@ -1,3 +1,4 @@
+import uuid
 import zipfile
 from decimal import Decimal
 from io import BytesIO
@@ -5,13 +6,10 @@ from io import BytesIO
 import pytest
 from sqlalchemy import update
 
-import uuid
-
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
-from src.db.models.competition_models import Form
-from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
-from src.db.models.competition_models import Application
+from src.db.models.competition_models import Application, Form
 from src.form_schema.forms import SF424_v4_0
+from src.form_schema.registry.form_template_registry import form_template_registry
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     ApplicationSubmissionConfig,
