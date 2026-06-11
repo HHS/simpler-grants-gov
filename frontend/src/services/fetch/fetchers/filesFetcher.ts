@@ -1,4 +1,7 @@
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
+import { createFormData } from "src/utils/fileUtils/createFormData";
+
+import { fetchFileUploadWithMethod } from "./fetchers";
 
 /*
   These three calls made in sequence form the full file upload process
@@ -17,15 +20,22 @@ import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 */
 
 export const fetchFileUploadDetails = async (
-  _file: File,
+  file: File,
 ): Promise<FileUploadDetailsResponse> => {
-  return Promise.resolve({
-    url: "any --- url",
-    pending_file_id: "1",
-    body: {
-      arbitraryAwsBodyKey: "arbitrary aws body value",
-    },
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const fileFormData = createFormData(file.name, buffer, file.type);
+  const uploadDetailsResponse = await fetchFileUploadWithMethod("POST")({
+    body: fileFormData,
   });
+  // return Promise.resolve({
+  //   url: "any --- url",
+  //   pending_file_id: "1",
+  //   body: {
+  //     arbitraryAwsBodyKey: "arbitrary aws body value",
+  //   },
+  // });
 };
 
 // a fire and forget request to S3 to start file upload using the

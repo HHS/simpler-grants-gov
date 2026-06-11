@@ -38,6 +38,10 @@ export const handleFileUpload = async (request: NextRequest) => {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
+
+    if (!file) {
+      return NextResponse.json({ error: "Missing file" }, { status: 400 });
+    }
     // call Simpler API to obtain details for S3 upload and pending file id
     const fileUploadDetails = await fetchFileUploadDetails(file);
     // fire call to S3 to begin upload process

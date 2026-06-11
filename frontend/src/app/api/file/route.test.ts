@@ -4,7 +4,6 @@
 
 import { ApiRequestError } from "src/errors";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
-import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 import {
   AdvanceTestStreamTrigger,
   createAdvanceStreamTrigger,
