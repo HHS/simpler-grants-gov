@@ -38,7 +38,7 @@ def upload_opportunity_attachment(
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
-    # Verify opportunity is in draft state
+    # Verify opportunity can be updated (draft or published SGM)
     validate_opportunity_can_be_updated(opportunity)
 
     attachment_id = uuid.uuid4()
@@ -106,7 +106,7 @@ def delete_opportunity_attachment(
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
-    # Verify opportunity is in draft state
+    # Verify opportunity can be updated (draft or published SGM)
     validate_opportunity_can_be_updated(opportunity)
 
     # Find the attachment
