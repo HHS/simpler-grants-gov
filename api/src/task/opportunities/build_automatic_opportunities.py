@@ -244,13 +244,13 @@ class BuildAutomaticOpportunitiesTask(Task):
         """Create a single-form test opportunity open to both organizations and individuals."""
         self.create_opportunity(
             OpportunityContainer(
-                opportunity_title=f"TEST-{prefix}-ORG-IND-OT01",
-                opportunity_number=f"TEST-{prefix}-ORG-IND-01",
+                opportunity_title=f"TEST {prefix} ORG IND OT01",
+                opportunity_number=f"TEST {prefix} ORG IND 01",
                 opportunity_id=opportunity_id,
             ),
             competitions=[
                 CompetitionContainer(
-                    competition_title=f"TEST-{prefix}-ORG-IND-CT01",
+                    competition_title=f"TEST {prefix} ORG IND CT01",
                     required_form_ids=[form_id],
                     open_to_applicants=[
                         CompetitionOpenToApplicant.INDIVIDUAL,
@@ -565,22 +565,42 @@ class BuildAutomaticOpportunitiesTask(Task):
 
         # Isolated form test opportunities
         ISOLATED_FORM_OPPORTUNITIES = [
-            ("ATT", AttachmentForm_v1_2.form_id, "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
-            ("BNA", BudgetNarrativeAttachment_v1_2.form_id, "caea0f33-b356-4fcd-aae3-c0244e11da1e"),
-            ("CD511", CD511_v1_1.form_id, "5b890089-2bb2-4123-82cd-3d321ca62efe"),
-            ("EPA4700", EPA_FORM_4700_4_v5_0.form_id, "95f80b3b-c119-4a89-a50f-1b47b95a9191"),
-            ("EPAKC", EPA_KEY_CONTACT_v2_0.form_id, "1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631"),
-            ("GGLOB", GG_LobbyingForm_v1_1.form_id, "552d5866-501a-40b6-b1ce-2efc7a2d3aa5"),
-            ("ONA", OtherNarrativeAttachment_v1_2.form_id, "717b7f78-52f2-49f9-b1b8-5d7118313d2a"),
-            ("PABS", ProjectAbstract_v1_2.form_id, "d3081452-2cf8-4817-9abf-812e5d794485"),
-            ("PABSS", ProjectAbstractSummary_v2_0.form_id, "e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
+            ("ATTACHMENTFORM", AttachmentForm_v1_2.form_id, "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
             (
-                "PNA",
+                "BUDGETNARRATIVEATTACHMENT",
+                BudgetNarrativeAttachment_v1_2.form_id,
+                "caea0f33-b356-4fcd-aae3-c0244e11da1e",
+            ),
+            ("CD511", CD511_v1_1.form_id, "5b890089-2bb2-4123-82cd-3d321ca62efe"),
+            ("EPAFORM47004", EPA_FORM_4700_4_v5_0.form_id, "95f80b3b-c119-4a89-a50f-1b47b95a9191"),
+            ("EPAKEYCONTACT", EPA_KEY_CONTACT_v2_0.form_id, "1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631"),
+            (
+                "GGLOBBYINGFORM",
+                GG_LobbyingForm_v1_1.form_id,
+                "552d5866-501a-40b6-b1ce-2efc7a2d3aa5",
+            ),
+            (
+                "OTHERNARRATIVEATTACHMENT",
+                OtherNarrativeAttachment_v1_2.form_id,
+                "717b7f78-52f2-49f9-b1b8-5d7118313d2a",
+            ),
+            (
+                "PROJECTABSTRACT",
+                ProjectAbstract_v1_2.form_id,
+                "d3081452-2cf8-4817-9abf-812e5d794485",
+            ),
+            (
+                "PROJECTABSTRACTSUMMARY",
+                ProjectAbstractSummary_v2_0.form_id,
+                "e3bfbd7b-2205-46a8-9aa3-714f7e130958",
+            ),
+            (
+                "PROJECTNARRATIVEATTACHMENT",
                 ProjectNarrativeAttachment_v1_2.form_id,
                 "6bdc2df3-6e51-4aea-89af-bade326feba1",
             ),
             (
-                "PPSL",
+                "PROJECTPERFORMANCESITELOCATION",
                 ProjectPerformanceSiteLocation_v4_0.form_id,
                 "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
             ),
@@ -590,7 +610,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             ("SF424D", SF424d_v1_1.form_id, "abd9bce9-2b9b-46b8-b814-2c5cb7c5e88b"),
             ("SFLLL", SFLLL_v2_0.form_id, "f3e438ee-ff4c-475b-a058-8049aee9abda"),
             (
-                "NEHS",
+                "SUPPLEMENTARYNEHCOVERSHEET",
                 SupplementaryNEHCoverSheet_v3_0.form_id,
                 "b88287e2-7e2a-4c99-8ffe-30ab50c388ef",
             ),

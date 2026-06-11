@@ -500,13 +500,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
     isolated_form_competitions = [
         (
             "AttachmentForm_1_2",
-            "ATT",
+            "ATTACHMENTFORM",
             "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1",
             "10048c4d-a23d-418e-b807-6f545d7a7bd2",
         ),
         (
             "BudgetNarrativeAttachments_1_2",
-            "BNA",
+            "BUDGETNARRATIVEATTACHMENT",
             "caea0f33-b356-4fcd-aae3-c0244e11da1e",
             "83adc230-32da-4dee-9dd6-beb1dffac459",
         ),
@@ -518,49 +518,49 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         ),
         (
             "EPA4700_4",
-            "EPA4700",
+            "EPAFORM47004",
             "95f80b3b-c119-4a89-a50f-1b47b95a9191",
             "bd893d81-b8da-4f9b-ba18-f3c7b2fa9686",
         ),
         (
             "EPA_KeyContacts",
-            "EPAKC",
+            "EPAKEYCONTACT",
             "1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631",
             "165fad29-80d2-4c2d-b86b-1906fd68cf3f",
         ),
         (
             "GG_LobbyingForm",
-            "GGLOB",
+            "GGLOBBYINGFORM",
             "552d5866-501a-40b6-b1ce-2efc7a2d3aa5",
             "bae608bd-56cf-4038-8436-02da6af72df8",
         ),
         (
             "OtherNarrativeAttachments",
-            "ONA",
+            "OTHERNARRATIVEATTACHMENT",
             "717b7f78-52f2-49f9-b1b8-5d7118313d2a",
             "6098d8b0-8025-448e-a407-a0ac56d27d3e",
         ),
         (
             "Project_Abstract",
-            "PABS",
+            "PROJECTABSTRACT",
             "d3081452-2cf8-4817-9abf-812e5d794485",
             "70238095-fbae-48c3-9007-83446416b18d",
         ),
         (
             "Project_AbstractSummary_2_0",
-            "PABSS",
+            "PROJECTABSTRACTSUMMARY",
             "e3bfbd7b-2205-46a8-9aa3-714f7e130958",
             "c6e468de-2911-494e-aa14-91b527a1f53e",
         ),
         (
             "ProjectNarrativeAttachments_1_2",
-            "PNA",
+            "PROJECTNARRATIVEATTACHMENT",
             "6bdc2df3-6e51-4aea-89af-bade326feba1",
             "3219b68b-c3c5-41d8-b889-d75eafd014d5",
         ),
         (
             "PerformanceSite",
-            "PPSL",
+            "PROJECTPERFORMANCESITELOCATION",
             "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
             "7fc52d4e-6efb-421d-8b0a-8c9e982f1e0f",
         ),
@@ -596,7 +596,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         ),
         (
             "SupplementaryCoverSheetforNEHGrantPrograms",
-            "NEHS",
+            "SUPPLEMENTARYNEHCOVERSHEET",
             "b88287e2-7e2a-4c99-8ffe-30ab50c388ef",
             "5ba6e068-8f9e-4cbc-89bf-56bbb142b842",
         ),
@@ -608,9 +608,9 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         opportunity_id,
         competition_id,
     ) in isolated_form_competitions:
-        opportunity_number = f"TEST-{prefix}-ORG-IND-01"
-        opportunity_title = f"TEST-{prefix}-ORG-IND-OT01"
-        competition_title = f"TEST-{prefix}-ORG-IND-CT01"
+        opportunity_number = f"TEST {prefix} ORG IND 01"
+        opportunity_title = f"TEST {prefix} ORG IND OT01"
+        competition_title = f"TEST {prefix} ORG IND CT01"
 
         competition = _build_seeded_competition_for_form(
             db_session,
