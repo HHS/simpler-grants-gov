@@ -12,6 +12,9 @@ from src.constants.lookup_constants import (
 from src.services.applications.add_organization_to_application import (
     add_organization_to_application,
 )
+from src.db.models.competition_models import Form as FormModel
+from src.form_schema.forms import init_form_registry
+from src.form_schema.registry.form_template_registry import form_template_registry
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
@@ -19,13 +22,34 @@ from tests.src.db.models.factories import (
     ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OrganizationFactory,
     OrganizationUserFactory,
     OrganizationUserRoleFactory,
     RoleFactory,
     UserFactory,
 )
+
+
+def _create_test_form(db_session, **kwargs) -> FormModel:
+    """Create a Form(...) directly, seed it to DB, and register in the registry.
+    TODO(#10274): remove db_session.add + flush once the form table is dropped
+    """
+    init_form_registry()
+    form = FormModel(
+        form_id=uuid.uuid4(),
+        form_name=kwargs.get("form_name", "Test Form"),
+        short_form_name="TestForm",
+        form_version="1.0",
+        agency_code="SGG",
+        form_json_schema=kwargs.get("form_json_schema", {"type": "object", "properties": {}}),
+        form_ui_schema={},
+        form_rule_schema=kwargs.get("form_rule_schema", None),
+        json_to_xml_schema=None,
+    )
+    db_session.add(form)
+    db_session.flush()
+    form_template_registry.register(form, major_version=1)
+    return form
 
 
 def test_add_organization_to_application_success(enable_factory_create, db_session):
@@ -43,13 +67,11 @@ def test_add_organization_to_application_success(enable_factory_create, db_sessi
     )
 
     # Create a form with simple schema for testing pre-population
-    form = FormFactory.create(
-        form_json_schema={
-            "type": "object",
-            "properties": {"name": {"type": "string"}},
-            "required": ["name"],
-        }
-    )
+    form = _create_test_form(db_session, form_json_schema={
+        "type": "object",
+        "properties": {"name": {"type": "string"}},
+        "required": ["name"],
+    })
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     # Create application without an organization
@@ -364,13 +386,11 @@ def test_add_organization_triggers_form_prepopulation(enable_factory_create, db_
     )
 
     # Create a form with simple schema
-    form = FormFactory.create(
-        form_json_schema={
-            "type": "object",
-            "properties": {"test_field": {"type": "string"}},
-            "required": ["test_field"],
-        }
-    )
+    form = _create_test_form(db_session, form_json_schema={
+        "type": "object",
+        "properties": {"test_field": {"type": "string"}},
+        "required": ["test_field"],
+    })
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -467,16 +487,12 @@ def test_add_organization_repopulates_application_response_from_org(
     )
 
     # Create form schema that includes sam_uei
-    form = FormFactory.create(
+    form = _create_test_form(db_session,
         form_json_schema={
             "type": "object",
-            "properties": {
-                "sam_uei": {"type": "string"},
-            },
+            "properties": {"sam_uei": {"type": "string"}},
         },
-        form_rule_schema={
-            "sam_uei": {"gg_pre_population": {"rule": "uei"}},
-        },
+        form_rule_schema={"sam_uei": {"gg_pre_population": {"rule": "uei"}}},
     )
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 

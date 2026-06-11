@@ -16,12 +16,16 @@ from src.services.applications.application_validation import (
     validate_competition_open,
 )
 from src.validation.validation_constants import ValidationErrorType
+import uuid
+
+from src.db.models.competition_models import Form as FormModel
+from src.form_schema.forms import init_form_registry
+from src.form_schema.registry.form_template_registry import form_template_registry
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OrganizationFactory,
     SamGovEntityFactory,
 )
@@ -33,52 +37,59 @@ VALID_FORM_B_RESPONSE = {"str_b": "text", "bool_b": True}
 VALID_FORM_C_RESPONSE = {"str_c": "text"}
 
 
+def _make_test_form(form_name: str, form_json_schema: dict, form_rule_schema: dict | None = None) -> FormModel:
+    """Create an in-memory Form and register it in the registry. No DB persistence needed."""
+    init_form_registry()
+    form = FormModel(
+        form_id=uuid.uuid4(),
+        form_name=form_name,
+        short_form_name=form_name,
+        form_version="1.0",
+        agency_code="SGG",
+        form_json_schema=form_json_schema,
+        form_ui_schema={},
+        form_rule_schema=form_rule_schema,
+        json_to_xml_schema=None,
+    )
+    form_template_registry.register(form, major_version=1)
+    return form
+
+
 @pytest.fixture
 def form_a():
-    return FormFactory.build(
-        form_name="form_a",
-        form_json_schema={
-            "type": "object",
-            "required": ["str_a", "obj_a"],
-            "properties": {
-                "str_a": {"type": "string"},
-                "obj_a": {
-                    "type": "object",
-                    "required": ["int_a"],
-                    "properties": {
-                        "int_a": {"type": "integer"},
-                    },
-                },
+    return _make_test_form("form_a", {
+        "type": "object",
+        "required": ["str_a", "obj_a"],
+        "properties": {
+            "str_a": {"type": "string"},
+            "obj_a": {
+                "type": "object",
+                "required": ["int_a"],
+                "properties": {"int_a": {"type": "integer"}},
             },
         },
-    )
+    })
 
 
 @pytest.fixture
 def form_b():
-    return FormFactory.build(
-        form_name="form_b",
-        form_json_schema={
-            "type": "object",
-            "required": ["str_b"],
-            "properties": {
-                "str_b": {"type": "string"},
-                "bool_b": {"type": "boolean"},
-            },
+    return _make_test_form("form_b", {
+        "type": "object",
+        "required": ["str_b"],
+        "properties": {
+            "str_b": {"type": "string"},
+            "bool_b": {"type": "boolean"},
         },
-    )
+    })
 
 
 @pytest.fixture
 def form_c():
-    return FormFactory.build(
-        form_name="form_c",
-        form_json_schema={
-            "type": "object",
-            "required": ["str_c"],
-            "properties": {"str_c": {"type": "string"}},
-        },
-    )
+    return _make_test_form("form_c", {
+        "type": "object",
+        "required": ["str_c"],
+        "properties": {"str_c": {"type": "string"}},
+    })
 
 
 @pytest.fixture
@@ -699,23 +710,23 @@ def test_validate_is_included_in_submission_behavior(
 
 
 @freeze_time("2023-02-20 12:00:00", tz_offset=0)
-def test_validate_application_form_submit_post_population(enable_factory_create):
+def test_validate_application_form_submit_post_population(enable_factory_create, db_session):
     """Test that post-population occurs and updates application_response during submit action"""
-    # Create a form with post-population rules
-    form = FormFactory.create(
-        form_json_schema={
-            "type": "object",
-            "properties": {
-                "signature_field": {"type": "string"},
-                "date_field": {"type": "string"},
-                "existing_field": {"type": "string"},
-            },
+    post_population_schema = {
+        "type": "object",
+        "properties": {
+            "signature_field": {"type": "string"},
+            "date_field": {"type": "string"},
+            "existing_field": {"type": "string"},
         },
-        form_rule_schema={
-            "signature_field": {"gg_post_population": {"rule": "signature"}},
-            "date_field": {"gg_post_population": {"rule": "current_date"}},
-        },
-    )
+    }
+    post_population_rule_schema = {
+        "signature_field": {"gg_post_population": {"rule": "signature"}},
+        "date_field": {"gg_post_population": {"rule": "current_date"}},
+    }
+    form = _make_test_form("PostPopForm", post_population_schema, post_population_rule_schema)
+    db_session.add(form)
+    db_session.flush()
 
     # Create application and form
     application = ApplicationFactory.create()
@@ -751,23 +762,21 @@ def test_validate_application_form_submit_post_population(enable_factory_create)
     assert application_form.application_response["date_field"] == "2023-02-20"
 
 
-def test_validate_application_form_get_no_post_population(enable_factory_create):
+def test_validate_application_form_get_no_post_population(enable_factory_create, db_session):
     """Test that post-population does NOT occur during GET action"""
-    # Create a form with post-population rules
-    form = FormFactory.create(
-        form_json_schema={
-            "type": "object",
-            "properties": {
-                "signature_field": {"type": "string"},
-                "date_field": {"type": "string"},
-                "existing_field": {"type": "string"},
-            },
+    form = _make_test_form("PostPopForm", {
+        "type": "object",
+        "properties": {
+            "signature_field": {"type": "string"},
+            "date_field": {"type": "string"},
+            "existing_field": {"type": "string"},
         },
-        form_rule_schema={
-            "signature_field": {"gg_post_population": {"rule": "signature"}},
-            "date_field": {"gg_post_population": {"rule": "current_date"}},
-        },
-    )
+    }, {
+        "signature_field": {"gg_post_population": {"rule": "signature"}},
+        "date_field": {"gg_post_population": {"rule": "current_date"}},
+    })
+    db_session.add(form)
+    db_session.flush()
 
     # Create application and form
     application = ApplicationFactory.create()
@@ -796,23 +805,21 @@ def test_validate_application_form_get_no_post_population(enable_factory_create)
     assert "date_field" not in application_form.application_response
 
 
-def test_validate_application_form_modify_no_post_population(enable_factory_create):
+def test_validate_application_form_modify_no_post_population(enable_factory_create, db_session):
     """Test that post-population does NOT occur during MODIFY action"""
-    # Create a form with post-population rules
-    form = FormFactory.create(
-        form_json_schema={
-            "type": "object",
-            "properties": {
-                "signature_field": {"type": "string"},
-                "date_field": {"type": "string"},
-                "existing_field": {"type": "string"},
-            },
+    form = _make_test_form("PostPopForm", {
+        "type": "object",
+        "properties": {
+            "signature_field": {"type": "string"},
+            "date_field": {"type": "string"},
+            "existing_field": {"type": "string"},
         },
-        form_rule_schema={
-            "signature_field": {"gg_post_population": {"rule": "signature"}},
-            "date_field": {"gg_post_population": {"rule": "current_date"}},
-        },
-    )
+    }, {
+        "signature_field": {"gg_post_population": {"rule": "signature"}},
+        "date_field": {"gg_post_population": {"rule": "current_date"}},
+    })
+    db_session.add(form)
+    db_session.flush()
 
     # Create application and form
     application = ApplicationFactory.create()

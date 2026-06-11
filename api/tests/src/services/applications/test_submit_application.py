@@ -9,6 +9,9 @@ from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToA
 from src.form_schema.rule_processing.json_rule_field_population import UNKNOWN_VALUE
 from src.services.applications.submit_application import submit_application
 from src.validation.validation_constants import ValidationErrorType
+from src.db.models.competition_models import Form as FormModel
+from src.form_schema.forms import init_form_registry
+from src.form_schema.registry.form_template_registry import form_template_registry
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
@@ -16,11 +19,32 @@ from tests.src.db.models.factories import (
     ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     LinkExternalUserFactory,
     RoleFactory,
     UserFactory,
 )
+
+
+def _create_test_form(db_session, **kwargs) -> FormModel:
+    """Create a Form(...) directly, seed to DB, and register in the registry.
+    # TODO(#10274): remove db_session.add + flush once the form table is dropped
+    """
+    init_form_registry()
+    form = FormModel(
+        form_id=uuid.uuid4(),
+        form_name=kwargs.get("form_name", "Test Form"),
+        short_form_name="TestForm",
+        form_version="1.0",
+        agency_code="SGG",
+        form_json_schema=kwargs.get("form_json_schema", {"type": "object", "properties": {}}),
+        form_ui_schema={},
+        form_rule_schema=kwargs.get("form_rule_schema", None),
+        json_to_xml_schema=None,
+    )
+    db_session.add(form)
+    db_session.flush()
+    form_template_registry.register(form, major_version=1)
+    return form
 
 # Simple JSON schema used for tests below
 SIMPLE_JSON_SCHEMA = {
@@ -40,7 +64,7 @@ def test_submit_application_success(enable_factory_create, db_session):
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = _create_test_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -82,7 +106,7 @@ def test_submit_application_with_missing_required_form(enable_factory_create, db
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = _create_test_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
     CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -109,7 +133,7 @@ def test_submit_application_with_missing_required_form(enable_factory_create, db
 
 def test_submit_application_with_invalid_required_form(enable_factory_create, db_session, user):
     competition = CompetitionFactory.create(competition_forms=[])
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = _create_test_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -144,7 +168,7 @@ def test_submit_application_with_invalid_field(enable_factory_create, db_session
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = _create_test_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -193,7 +217,7 @@ def test_submit_application_organization_required_but_missing(enable_factory_cre
         competition_forms=[],
         open_to_applicants={CompetitionOpenToApplicant.ORGANIZATION},  # Only org allowed
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = _create_test_form(db_session, form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     # Create application WITHOUT organization
@@ -237,7 +261,8 @@ def test_submit_application_signature_post_processing(enable_factory_create, db_
         closing_date=today + timedelta(days=1),
         competition_forms=[],
     )
-    form = FormFactory.create(
+    form = _create_test_form(
+        db_session,
         form_json_schema={
             "type": "object",
             "properties": {
