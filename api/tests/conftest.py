@@ -741,7 +741,7 @@ def reset_form_registry() -> None:
     into subsequent tests and polluting the global singleton.
     """
     form_template_registry._registry.clear()
-    yield
+    return
 
 
 @pytest.fixture
