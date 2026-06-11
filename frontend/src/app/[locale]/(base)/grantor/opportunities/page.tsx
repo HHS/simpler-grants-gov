@@ -141,9 +141,10 @@ const transformTableRowData = (
   _t: TFn,
 ) => {
   return userOpportunities.map((opportunity: BaseOpportunity) => {
+    const isSgmOpportunity = opportunity.is_simpler_grants_opportunity ?? false;
     const status = opportunity.is_draft
-      ? "Draft"
-      : opportunity.opportunity_status;
+      ? "draft"
+      : (opportunity.opportunity_status ?? "");
     const opportunityTitleUrl = opportunity.is_draft
       ? canUpdate
         ? `/grantor/opportunity/${opportunity.opportunity_id}/edit`
@@ -162,17 +163,23 @@ const transformTableRowData = (
         cellData: status,
       },
       {
-        cellData: opportunity.is_draft ? (
-          <span>
-            <EditAction
-              canUpdate={canUpdate}
-              opportunityId={opportunity.opportunity_id}
-            />
-            , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
-          </span>
-        ) : (
-          "" // Don't show any actions for published opportunities
-        ),
+        cellData:
+          // Only allow editing if this is an SGM created opportunity
+          isSgmOpportunity &&
+          // and the status is draft, posted or forecasted
+          (status.toLowerCase() === "draft" ||
+            status.toLowerCase() === "forecasted" ||
+            status.toLowerCase() === "posted") ? (
+            <span>
+              <EditAction
+                canUpdate={canUpdate}
+                opportunityId={opportunity.opportunity_id}
+              />
+              , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
+            </span>
+          ) : (
+            "" // Don't show any actions for published opportunities
+          ),
       },
     ];
   });
