@@ -31,7 +31,7 @@ def app(logger):
 def test_ecs_background_task(app, caplog, monkeypatch_session):
     monkeypatch_session.setenv(
         "LOG_LEVEL_OVERRIDES",
-        "newrelic.core.agent=ERROR,newrelic.core.agent_protocol=ERROR,src.adapters.newrelic=ERROR",
+        "newrelic.core.agent=ERROR,newrelic.core.agent_protocol=ERROR,grants_shared.adapters.newrelic=ERROR",
     )
 
     # We pull in the app so its initialized
@@ -69,7 +69,7 @@ def test_ecs_background_task(app, caplog, monkeypatch_session):
 def test_ecs_background_task_when_erroring(app, caplog, monkeypatch_session):
     monkeypatch_session.setenv(
         "LOG_LEVEL_OVERRIDES",
-        "newrelic.core.agent=ERROR,newrelic.core.agent_protocol=ERROR,src.adapters.newrelic=ERROR",
+        "newrelic.core.agent=ERROR,newrelic.core.agent_protocol=ERROR,grants_shared.adapters.newrelic=ERROR",
     )
 
     caplog.set_level(logging.INFO)

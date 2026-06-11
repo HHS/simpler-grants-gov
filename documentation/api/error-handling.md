@@ -41,8 +41,8 @@ use our `raise_flask_error` function which handles wrapping exceptions in
 a format that APIFlask will keep the context we add.
 
 ```py
-from src.api.response import ValidationErrorDetail
-from src.api.route_utils import raise_flask_error
+from grants_shared.api.response import ValidationErrorDetail
+from grants_shared.api.route_utils import raise_flask_error
 from src.validation.validation_constants import ValidationErrorType
 
 

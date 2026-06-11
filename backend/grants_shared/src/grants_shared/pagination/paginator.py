@@ -21,7 +21,7 @@ class Paginator[T: Base]:
         from sqlalchemy import desc, select
 
         from src.db.models.opportunity_models import Opportunity
-        from src.pagination.paginator import Paginator
+        from grants_shared.pagination.paginator import Paginator
 
         # Create a select statement that includes ordering and sorting
         stmt = select(User).order_by(desc("opportunity_id"))
