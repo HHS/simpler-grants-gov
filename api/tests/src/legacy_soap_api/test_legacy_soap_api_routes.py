@@ -291,7 +291,7 @@ def test_if_write_debug_data_to_s3_fails_the_exception_is_logged(
 
 @mock.patch("uuid.uuid4")
 @mock.patch("src.legacy_soap_api.simpler_soap_api.SimplerGrantorsS2SClient")
-def test_write_debug_data_if_s2s_client_throws_specific_errors(
+def test_write_debug_data_if_flag_save_soap_messages_to_s3_is_set(
     mock_s2s_client,
     mock_uuid,
     monkeypatch,
@@ -352,8 +352,17 @@ def test_write_debug_data_if_s2s_client_throws_specific_errors(
 
 @mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_received_by_agency_status(
-    mock_uuid, db_session, client, enable_factory_create, caplog
+    mock_uuid,
+    db_session,
+    client,
+    enable_factory_create,
+    caplog,
+    monkeypatch,
+    mock_s3_bucket,
+    mock_s3,
+    s3_config,
 ) -> None:
+    monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
@@ -427,6 +436,8 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
         log.faultstring
         == f"Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received by Agency' for GRANT{submission.legacy_tracking_number})"
     )
+    records = [r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"]
+    assert len(records) == 1
 
 
 @mock.patch("uuid.uuid4")

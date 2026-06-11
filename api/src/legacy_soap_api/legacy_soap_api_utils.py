@@ -531,7 +531,7 @@ def to_snake_case(name: str) -> str:
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", sub).lower()
 
 
-def write_debug_data_to_s3(soap_request: SOAPRequest, soap_legacy_response: SOAPResponse) -> None:
+def write_debug_data_to_s3(soap_request: SOAPRequest, soap_response: SOAPResponse) -> None:
     if get_soap_config().save_soap_messages_to_s3:
         try:
             s3_config = S3Config()
@@ -565,7 +565,7 @@ def write_debug_data_to_s3(soap_request: SOAPRequest, soap_legacy_response: SOAP
             )
             file_util.write_to_file(
                 response_s3_path,
-                soap_legacy_response.to_bytes().decode("utf-8"),
+                soap_response.to_bytes().decode("utf-8"),
                 content_type=text_content_type,
             )
             logger.info(
