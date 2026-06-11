@@ -98,7 +98,7 @@ the code, or
 ## Automatic request log details
 
 Several fields are automatically attached to every log message of a request regardless
-of what you configure in the [flask_logger](../../../api/src/logging/flask_logger.py). This includes:
+of what you configure in the [flask_logger](/backend/grants_shared/src/grants_shared/logs/flask_logger.py). This includes:
 * Request ID
 * Request method (eg. `POST` or `PATCH`)
 * Request path
