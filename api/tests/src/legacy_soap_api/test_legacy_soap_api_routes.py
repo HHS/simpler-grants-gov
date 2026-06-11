@@ -207,10 +207,10 @@ def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_
     )
     assert record
     request_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/request.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request.txt"
     )
     response_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/response.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
     )
     assert request_contents.replace("\n", "") == mock_data.decode().replace("\n", "")
     assert response_contents.replace("\r", "") == expected_response.decode().replace("\r", "")

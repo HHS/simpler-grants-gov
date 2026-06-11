@@ -19,7 +19,7 @@ import { useNavigationGuard } from "next-navigation-guard";
 import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
-import { FormFields } from "src/components/applyForm/FormFields";
+import { FormFields } from "src/components/apply-form/FormFields";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 
