@@ -1,14 +1,16 @@
 """Utility functions for applying sorting to SQLAlchemy queries."""
 
 from sqlalchemy import asc, desc
-from sqlalchemy.orm import MappedColumn
+from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.sql.selectable import Select
 
 from grants_shared.pagination.pagination_models import SortDirection, SortOrderParams
 
 
 def apply_sorting(
-    stmt: Select, sort_order: list[SortOrderParams], column_mapping: dict[str, MappedColumn]
+    stmt: Select,
+    sort_order: list[SortOrderParams],
+    column_mapping: dict[str, InstrumentedAttribute],
 ) -> Select:
     """Apply sorting to a query using a custom column mapping.
 
