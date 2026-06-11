@@ -41,11 +41,11 @@ We need to decide which platform(s) to use for this category of internal, privat
 
 ### Options considered
 
-* [Confluence](2025-04-18-internal-knowledge-management.md#confluence)
-* [Google Drive](2025-04-18-internal-knowledge-management.md#google-drive)
+* [Confluence](/documentation/wiki/product/decisions/adr/2025-04-18-internal-knowledge-management.md#confluence)
+* [Google Drive](/documentation/wiki/product/decisions/adr/2025-04-18-internal-knowledge-management.md#google-drive)
 * [GitHub](https://docs.google.com/document/d/1KThRD8jIjZuSxNTRqD5OfJQdF9U1DhQ7jxOr2Q_f4DY/edit?tab=t.0#heading=h.eb10fcu3jxre)
-* [Slack canvas](2025-04-18-internal-knowledge-management.md#slack-canvas)
-* [Public wiki](2025-04-18-internal-knowledge-management.md#public-wiki-gitbook)
+* [Slack canvas](/documentation/wiki/product/decisions/adr/2025-04-18-internal-knowledge-management.md#slack-canvas)
+* [Public wiki](/documentation/wiki/product/decisions/adr/2025-04-18-internal-knowledge-management.md#public-wiki-gitbook)
 
 Another internal GitBook instance was not evaluated and is not recommended at this time due to usability concerns raised by the team pertaining to multiple GitBook instances.
 

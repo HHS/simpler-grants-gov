@@ -10,9 +10,9 @@ Features include:
 
 Workflows are built on the [python-statemachine](https://python-statemachine.readthedocs.io/en/latest/index.html) library.
 
-For more information on what led us to use this technology, see [the ADR](../wiki/product/decisions/adr/2026-02-03-workflow_management.md)
+For more information on what led us to use this technology, see [the ADR](/documentation/wiki/product/decisions/adr/2026-02-03-workflow_management.md)
 
-For more information on building workflows, see [the workflow README.md](../../api/src/workflow/README.md).
+For more information on building workflows, see [the workflow README.md](/api/src/workflow/README.md).
 
 ## Terminology
 
@@ -36,7 +36,7 @@ For more information on building workflows, see [the workflow README.md](../../a
 
 
 # Architecture
-![Local DB CLI](./images/workflow-arch.png)
+![Local DB CLI](/documentation/api/images/workflow-arch.png)
 
 Our architecture consists of a few components:
 * API Endpoints (part of our existing)

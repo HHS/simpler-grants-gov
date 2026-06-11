@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes how logging is configured in the application. The logging functionality is defined in the [grants_shared.logs](../../../backend/grants_shared/src/grants_shared/logs) package and leverages Python's built-in [logging](https://docs.python.org/3/library/logging.html) framework.
+This document describes how logging is configured in the application. The logging functionality is defined in the [src.logging](/api/src/logging/) package and leverages Python's built-in [logging](https://docs.python.org/3/library/logging.html) framework.
 
 ## Usage
 Our logging approach uses a context manager to start up and tear down logging. This is mostly done to prevent tests from
@@ -13,12 +13,12 @@ If you wanted to write a simple script that could log, something like this would
 ```py
 import logging
 
-import grants_shared.logs
+import src.logging
 
 logger = logging.getLogger(__name__)
 
 def main():
-    with grants_shared.logs.init(__package__):
+    with src.logging.init(__package__):
         logger.info("Hello")
 ```
 
@@ -62,17 +62,17 @@ We have two separate ways of formatting the logs which are controlled by the `LO
 
 `human-readable` (set by default in `local.env`) -> Produces color coded logs for local development or for troubleshooting.
 
-![Human readable logs](human-readable-logs.png)
+![Human readable logs](/documentation/api/monitoring-and-observability/human-readable-logs.png)
 
 ## Logging Extra Data in a Request
 
-The [grants_shared.logs.flask_logger](../../../backend/grants_shared/src/grants_shared/logs/flask_logger.py) module adds logging functionality to Flask applications. It automatically adds useful data from the Flask request object to logs, logs the start and end of requests, and provides a mechanism for developers to dynamically add extra data to all subsequent logs for the current request.
+The [src.logging.flask_logger](/api/src/logging/flask_logger.py) module adds logging functionality to Flask applications. It automatically adds useful data from the Flask request object to logs, logs the start and end of requests, and provides a mechanism for developers to dynamically add extra data to all subsequent logs for the current request.
 
 For example, if you would like to add the `opportunity_id` to every log message during the lifecycle of a request, then you can do:
 ```py
 import logging
 
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
@@ -97,8 +97,7 @@ the code, or
 
 ## Automatic request log details
 
-Several fields are automatically attached to every log message of a request regardless
-of what you configure in the [flask_logger](../../../backend/grants_shared/src/grants_shared/logs/flask_logger.py). This includes:
+Several fields are automatically attached to every log message of a request regardless of what you configure in the [flask_logger](../../../backend/grants_shared/src/grants_shared/logs/flask_logger.py). This includes:
 * Request ID
 * Request method (eg. `POST` or `PATCH`)
 * Request path
@@ -114,11 +113,11 @@ Additionally when a request ends, the following will always be logged:
 
 ## PII Masking
 
-The [grants_shared.logs.pii](../../../backend/grants_shared/src/grants_shared/logs/pii.py) module defines a filter that applies to all logs that automatically masks data fields that look like social security numbers.
+The [src.logging.pii](/api/src/logging/pii.py) module defines a filter that applies to all logs that automatically masks data fields that look like social security numbers.
 
 ## Audit Logging
 
-We have configured [audit logging](../../../backend/grants_shared/src/grants_shared/logs/audit.py) which logs
+We have configured [audit logging](/api/src/logging/audit.py) which logs
 various events related to the process making network, file system and
 subprocess calls. This is largely done in the event we need to debug an
 issue or to detect if a library we are relying on is potentially doing

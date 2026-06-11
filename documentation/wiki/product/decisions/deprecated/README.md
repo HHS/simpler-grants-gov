@@ -8,7 +8,7 @@ Deprecated ADRs are retained for historical reference and to understand the evol
 
 ## Guidelines
 
-- **Do not reference deprecated ADRs** in active decision-making unless at the top to indicate they are superseded. See the formatting in the [ADR Template](../template.md)
+- **Do not reference deprecated ADRs** in active decision-making unless at the top to indicate they are superseded. See the formatting in the [ADR Template](/documentation/wiki/product/decisions/template.md)
 - Use the superseding ADR instead (linked in the deprecated record)
 - Review deprecated decisions when understanding past trade-offs and context
 
@@ -16,8 +16,8 @@ Deprecated ADRs are retained for historical reference and to understand the evol
 
 Each deprecated ADR follows the standard ADR naming convention: `yyyymmdd-xxx.md)`
 
-See the [ADR Template](../template.md) for formatting guidelines.
+See the [ADR Template](/documentation/wiki/product/decisions/template.md) for formatting guidelines.
 
 ## Finding Active ADRs
 
-For current tural decisions, see the parent [Decisions](../adr) directory.
+For current tural decisions, see the parent [Decisions](/documentation/wiki/product/decisions/adr) directory.

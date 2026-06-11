@@ -14,7 +14,7 @@ The diagrams generated are based on our SQLAlchemy models metadata, and not the 
 # Files
 
 ## API Schema
-![API Table ERD](api-schema.png)
+![API Table ERD](/documentation/api/database/erds/api-schema.png)
 
 ## Staging Schema
-![Staging Table ERD](staging-schema.png)
+![Staging Table ERD](/documentation/api/database/erds/staging-schema.png)

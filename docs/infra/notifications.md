@@ -8,7 +8,7 @@ The application may need to send email notifications to users. This document des
 
 ## Requirements
 
-Before setting up notifications you'll need to have [set up custom domains](../../docs/infra/custom-domains.md) since notifications require a domain for the sender email address.
+Before setting up notifications you'll need to have [set up custom domains](/docs/infra/custom-domains.md) since notifications require a domain for the sender email address.
 
 ## 1. Enable notifications in application config
 

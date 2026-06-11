@@ -14,11 +14,11 @@ Since September 2024, we've been tracking our deliverables in a [GitHub-based pr
 
 Prior to adopting the current process for tracking deliverables in GitHub, we used the following pages in our wiki to scope and report on deliverables.
 
-* [Static site soft launch](static-site-soft-launch.md)
-* [Static site public launch](static-site-public-launch.md)
-* [GET opportunities endpoint](get-opportunities.md)
-* [Open source onboarding](open-source-onboarding.md)
-* [Co-design group planning](co-design-group.md)
+* [Static site soft launch](/documentation/wiki/product/deliverables/static-site-soft-launch.md)
+* [Static site public launch](/documentation/wiki/product/deliverables/static-site-public-launch.md)
+* [GET opportunities endpoint](/documentation/wiki/product/deliverables/get-opportunities.md)
+* [Open source onboarding](/documentation/wiki/product/deliverables/open-source-onboarding.md)
+* [Co-design group planning](/documentation/wiki/product/deliverables/co-design-group.md)
 
 ## Change log
 

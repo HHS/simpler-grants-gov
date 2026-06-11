@@ -51,8 +51,8 @@ After verifying that any changes To update the snapshots you can run ``pytest --
 
 The service is open-source and can be installed and run in a local development environment, which is useful for project maintainers and/or open source contributors. Follow the links below for more information:
 
-1. [Technical Overview](../documentation/analytics/technical-overview.md)
-2. [Getting Started Guide for Developers](../documentation/analytics/development.md)
-3. [Writing and Running Tests](../documentation/analytics/testing.md)
-4. [Usage Guide: Data Pipeline Service & CLI](../documentation/analytics/usage.md)
+1. [Technical Overview](/documentation/analytics/technical-overview.md)
+2. [Getting Started Guide for Developers](/documentation/analytics/development.md)
+3. [Writing and Running Tests](/documentation/analytics/testing.md)
+4. [Usage Guide: Data Pipeline Service & CLI](/documentation/analytics/usage.md)
 

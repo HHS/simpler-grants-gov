@@ -351,7 +351,7 @@ We currently have 3 groups of rules:
 * Validation - fields we validate with custom rules that can't be expressed in JSON schema
 
 For details on how these rules work, and how to configure them,
-see the [Rule Processing README](../rule_processing/README.md)
+see the [Rule Processing README](/api/src/form_schema/rule_processing/README.md)
 
 To know which rules we need to add, we need to consult the
 pre/post-population documentation. In this we need to find
@@ -368,8 +368,8 @@ with product and confirm the behavior we want for any auto-summed fields.
 
 ## Building the XML Conversion Schema
 We have a configuration for each form to convert it to the XML format
-that grants.gov used. This is further documented in [xml_generation](../../services/xml_generation/README.md)
+that grants.gov used. This is further documented in [xml_generation](/api/src/services/xml_generation/README.md)
 
 ## Deploying a form
 We deploy forms to a given environment using a set of scripts.
-This is documented in [task/forms/README.md](../../task/forms/README.md)
+This is documented in [task/forms/README.md](/api/src/task/forms/README.md)

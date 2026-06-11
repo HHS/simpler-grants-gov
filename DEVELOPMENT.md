@@ -1,10 +1,10 @@
 # Development and Software Delivery Lifecycle
 
-The following guide is for members of the project team who have access to the repository as well as code contributors. The main difference between internal and external contributions is that external contributors will need to fork the project and will not be able to merge their own pull requests. For more information on contributing, see: [CONTRIBUTING.md](./CONTRIBUTING.md).
+The following guide is for members of the project team who have access to the repository as well as code contributors. The main difference between internal and external contributions is that external contributors will need to fork the project and will not be able to merge their own pull requests. For more information on contributing, see: [CONTRIBUTING.md](/CONTRIBUTING.md).
 
 ## Local Development
 
-This project is monorepo with several apps. Please see the [api](./api/README.md) and [frontend](./frontend/README.md) READMEs for information on spinning up those projects locally. Also see the project [documentation](./documentation) for more info.
+This project is monorepo with several apps. Please see the [api](/api/README.md) and [frontend](/frontend/README.md) READMEs for information on spinning up those projects locally. Also see the project [documentation](/documentation) for more info.
 
 ### Linting and Testing
 
@@ -20,7 +20,7 @@ This project follows [trunk-based development](https://trunkbaseddevelopment.com
 - Ticket any unfinished or partially finished work.
 - Tests should be written for changes introduced, and adhere to the text percentage threshold determined by the project.
 
-This project uses **continuous deployment** using [Github Actions](https://github.com/features/actions) which is configured in the [./github/worfklows](.github/workflows) directory.
+This project uses **continuous deployment** using [Github Actions](https://github.com/features/actions) which is configured in the [./github/worfklows](/.github/workflows) directory.
 
 Pull-requests are merged to `main` and the changes are immediately deployed to the development environment. Releases are created to push changes to production.
 
@@ -63,7 +63,7 @@ If any manual testing was performed, document it in enough detail in the PR desc
 
 ### Reviewers
 
-Assign reviewers applicable to the domain of your pull request. See [Review Assignment](CONTRIBUTING.md#review-assignment) for more details.
+Assign reviewers applicable to the domain of your pull request. See [Review Assignment](/CONTRIBUTING.md#review-assignment) for more details.
 
 ### Pull in Own Requests
 
@@ -125,7 +125,7 @@ Any changes to features, tools, or workflows should include updates or additions
 
 ## Load Testing
 
-[Artillery.io](https://www.artillery.io/docs) is the open source tool used to load test the application. You can find the yml file for the frontend load test at [`/frontend/artillery-load-test.yml`](./frontend/artillery-load-test.yml). You can find the yml file for the backend API load test at [`/api/artillery-load-test.yml`](./api/artillery-load-test.yml).
+[Artillery.io](https://www.artillery.io/docs) is the open source tool used to load test the application. You can find the yml file for the frontend load test at [                                   ](/frontend/artillery-load-test.yml). You can find the yml file for the backend API load test at [                              ](/api/artillery-load-test.yml).
 
 To run the load test:
 

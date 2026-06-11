@@ -37,7 +37,7 @@ root
 
 ## Local Development
 
-See [development.md](../documentation/api/development.md) for installation and development instructions.
+See [development.md](/documentation/api/development.md) for installation and development instructions.
 
 ## Running tests locally
 1. Run `make init` or have run it previously
@@ -70,7 +70,7 @@ CLI commands are of the form `<task group> <task name> <any other params>`. So i
 
 ### In AWS
 
-1. Ensure your [SSO login](../documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) is fresh
+1. Ensure your [SSO login](/documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) is fresh
 2. Setup your terraform environment
 
    ```bash
@@ -85,9 +85,9 @@ CLI commands are of the form `<task group> <task name> <any other params>`. So i
 
 ## Technical Information
 
-* [API Technical Overview](../documentation/api/technical-overview.md)
-* [Database Management](../documentation/api/database/database-management.md)
-* [Formatting and Linting](../documentation/api/formatting-and-linting.md)
-* [Writing Tests](../documentation/api/writing-tests.md)
-* [Logging configuration](../documentation/api/monitoring-and-observability/logging-configuration.md)
-* [Logging conventions](../documentation/api/monitoring-and-observability/logging-conventions.md)
+* [API Technical Overview](/documentation/api/technical-overview.md)
+* [Database Management](/documentation/api/database/database-management.md)
+* [Formatting and Linting](/documentation/api/formatting-and-linting.md)
+* [Writing Tests](/documentation/api/writing-tests.md)
+* [Logging configuration](/documentation/api/monitoring-and-observability/logging-configuration.md)
+* [Logging conventions](/documentation/api/monitoring-and-observability/logging-conventions.md)

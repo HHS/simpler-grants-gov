@@ -32,7 +32,7 @@ There are some dependencies to keep in mind:
 
 Changes to database infrastructure are infrequent and therefore do not need to be incorporated as part of the continuous delivery process of deploying the application as it would needlessly slow down application deploys and also increase the risk of accidental changes to the database layer. When database changes are needed, they are sometimes complex due to the stateful nature of databases and can require multiple steps to make those changes gracefully. For these changes, it is beneficial to separate them from application resources so that application deploys can remain unaffected. Finally, breaking down the environment setup process into smaller, more linear steps – creating the database first before creating the application service – makes the environment setup process easier to understand and troubleshoot than trying to do everything at once.
 
-The biggest disadvantage to this approach is ~~the fact that dependencies between root modules cannot be directly expressed in terraform. To mitigate this problem, we should carefully design the interface between root modules to minimize breaking changes in that interface.~~ (Update: 2023-07-07) that dependencies between root modules become more indirect and difficult to express. See [module dependencies](../../../documentation/infra/module-dependencies.md)
+The biggest disadvantage to this approach is ~~the fact that dependencies between root modules cannot be directly expressed in terraform. To mitigate this problem, we should carefully design the interface between root modules to minimize breaking changes in that interface.~~ (Update: 2023-07-07) that dependencies between root modules become more indirect and difficult to express. See [module dependencies](/documentation/infra/module-dependencies.md)
 
 ## Pros and Cons of the Options
 
@@ -59,8 +59,8 @@ Pros:
 Cons:
 
 - Application resources for a single environment are split across multiple root modules
-- Dependencies between root modules cannot be expressed directly in Terraform to use Terraform's built-in dependency graph. ~~Instead, dependencies between root modules need to be configured from one module's outputs to another module's variable definitions file~~ (Update: 2023-07-07) Instead, dependencies between root modules need to leverage Terraform data sources to reference resources across root modules and need to use a shared config module to reference the parameters that can uniquely identify the resource. See [module dependencies](../../../documentation/infra/module-dependencies.md)
+- Dependencies between root modules cannot be expressed directly in Terraform to use Terraform's built-in dependency graph. ~~Instead, dependencies between root modules need to be configured from one module's outputs to another module's variable definitions file~~ (Update: 2023-07-07) Instead, dependencies between root modules need to leverage Terraform data sources to reference resources across root modules and need to use a shared config module to reference the parameters that can uniquely identify the resource. See [module dependencies](/documentation/infra/module-dependencies.md)
 
 ## Links
 
-- Refined by [ADR-2023-09-11](./2023-09-11-separate-app-infrastructure-into-layers.md)
+- Refined by [ADR-2023-09-11](/docs/decisions/infra/2023-09-11-separate-app-infrastructure-into-layers.md)

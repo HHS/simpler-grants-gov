@@ -83,4 +83,4 @@ app/database --> accounts
 
 ## Making changes to infrastructure
 
-Now that you understand how the modules are structured, see [making changes to infrastructure](./making-infra-changes.md).
+Now that you understand how the modules are structured, see [making changes to infrastructure](/documentation/infra/making-infra-changes.md).

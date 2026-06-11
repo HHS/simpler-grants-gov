@@ -45,7 +45,7 @@ You can fix them on CLI by:
 1. Finding the job (via Github Action or otherwise) where the deployment failed. If you aren't sure, then it was probably in a Github Action. You can find a list of failing actions here: https://github.com/HHS/simpler-grants-gov/actions
 2. Wait for the deployment that caused the state lock to finish. If you can't find it, just wait 30 minutes.
 3. Identify the folder in which the state lock is happening. The `Path` attribute on the `Lock Info` block will identify this.
-4. Open up your terminal, [setup AWS](documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) (eg. `export AWS_PROFILE=grants-bla-bla-bla` && `aws sso login`), and cd into the folder identified above
+4. Open up your terminal, [setup AWS](/documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) (eg. `export AWS_PROFILE=grants-bla-bla-bla` && `aws sso login`), and cd into the folder identified above
 5. Run `terraform init -backend-config=<ENVIRONMENT>.s3.tfbackend`, where `<ENVIRONMENT>` can be identified by the `Path` above.
 6. Run `terraform force-unlock -force <LOCK_ID>` where `<LOCK_ID>` is the value of `ID` in your state lock message.
 7. Re-run your deploy job
@@ -72,15 +72,15 @@ All scaling options can be found in the following files:
 
 API:
 
-- [infra/api/app-config/dev.tf](infra/api/app-config/dev.tf)
-- [infra/api/app-config/staging.tf](infra/api/app-config/staging.tf)
-- [infra/api/app-config/prod.tf](infra/api/app-config/prod.tf)
+- [infra/api/app-config/dev.tf](/infra/api/app-config/dev.tf)
+- [infra/api/app-config/staging.tf](/infra/api/app-config/staging.tf)
+- [infra/api/app-config/prod.tf](/infra/api/app-config/prod.tf)
 
 Frontend:
 
-- [infra/frontend/app-config/dev.tf](infra/frontend/app-config/dev.tf)
-- [infra/frontend/app-config/staging.tf](infra/frontend/app-config/staging.tf)
-- [infra/frontend/app-config/prod.tf](infra/frontend/app-config/prod.tf)
+- [infra/frontend/app-config/dev.tf](/infra/frontend/app-config/dev.tf)
+- [infra/frontend/app-config/staging.tf](/infra/frontend/app-config/staging.tf)
+- [infra/frontend/app-config/prod.tf](/infra/frontend/app-config/prod.tf)
 
 ### ECS
 
@@ -93,7 +93,7 @@ Scaling is handled by configuring the following values:
 - instance memory
 
 Our ECS instances auto scale based on both memory and CPU. You can view the autoscaling configuration
-here: [infra/modules/service/autoscaling.tf](infra/modules/service/autoscaling.tf)
+here: [infra/modules/service/autoscaling.tf](/infra/modules/service/autoscaling.tf)
 
 ### Database
 
@@ -208,7 +208,7 @@ In summary, Inspect which certs are binary, which are plain text, and decrypt th
 See https://github.com/HHS/simpler-grants-gov/pull/5261 for an example of committing this change
 
 ##### 2. Via Terraform
-[Set up your console for AWS Credentials](documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up)
+[Set up your console for AWS Credentials](/documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up)
 ```bash
 cd infra/<app name>/service
 terraform init -backend-config <env name>.s3.tfbackend

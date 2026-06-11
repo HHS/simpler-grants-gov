@@ -86,5 +86,5 @@ Cons
 
 ## Related ADRS:
 
-* [Database module design](0005-database-module-design.md)
-* [Provision database users with serverless function](0006-provision-database-users-with-serverless-function.md)
+* [Database module design](/documentation/wiki/product/decisions/infra/0005-database-module-design.md)
+* [Provision database users with serverless function](/documentation/wiki/product/decisions/infra/0006-provision-database-users-with-serverless-function.md)

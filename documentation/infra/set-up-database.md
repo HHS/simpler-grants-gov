@@ -12,7 +12,7 @@ The database setup process will:
 
 Before setting up the database you'll need to have:
 
-1. [Set up the AWS account](./set-up-aws-account.md)
+1. [Set up the AWS account](/documentation/infra/set-up-aws-account.md)
 2. pip installed (pip is needed to download dependencies for the role manager Lambda function)
 
 ## 1. Configure backend
@@ -81,4 +81,4 @@ make infra-check-app-database-roles APP_NAME=app ENVIRONMENT=<ENVIRONMENT>
 
 ## Set up application environments
 
-Once you set up the deployment process, you can proceed to [set up the application service](./set-up-app-env.md)
+Once you set up the deployment process, you can proceed to [set up the application service](/documentation/infra/set-up-app-env.md)

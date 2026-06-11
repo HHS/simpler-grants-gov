@@ -12,8 +12,8 @@ Now that you've made your first API call, here's where you can go next:
 
 #### &#x20;Learn More About Our APIs
 
-* [**Opportunity Search API**](../search-opportunities.md) - Deep dive into searching for grants
-* [**Extract API**](../extracts.md) - Download bulk data for analysis
+* [**Opportunity Search API**](/documentation/wiki/product/api/search-opportunities.md) - Deep dive into searching for grants
+* [**Extract API**](/documentation/wiki/product/api/extracts.md) - Download bulk data for analysis
 
 #### Get Involved
 

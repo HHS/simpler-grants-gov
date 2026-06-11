@@ -4,12 +4,12 @@ workflows via state machines, as well as defining the
 state machines.
 
 For details on the architecture of the workflow system
-see [these docs](../../../documentation/api/workflow-service.md).
+see [these docs](/documentation/api/workflow-service.md).
 
 ## General Structure
 The workflow service has 3 layers:
-* The [workflow manager](./manager/workflow_manager.py) which is the main entrypoint to the looping logic that fetches events from SQS and passes them to the event handler for processing.
-* The [event handler](./handler/event_handler.py) which handles processing and validating events from SQS before passing them to the underlying state machines
+* The [workflow manager](/api/src/workflow/manager/workflow_manager.py) which is the main entrypoint to the looping logic that fetches events from SQS and passes them to the event handler for processing.
+* The [event handler](/api/src/workflow/handler/event_handler.py) which handles processing and validating events from SQS before passing them to the underlying state machines
 * Our state machines that have the actual logic and configuration of a given workflow.
 
 Unless you need to change fundamental logic about how we handle events, most workflow work
@@ -254,7 +254,7 @@ To add an approval to a workflow, first determine the following:
 
 Let's assume we want to support an "Example Approval" which requires the
 `example_approval` privilege. After that privilege is added to the privilege
-enum + configured to work with the lookup table (see [lookup-values](../../../documentation/api/lookup-values.md))
+enum + configured to work with the lookup table (see [lookup-values](/documentation/api/lookup-values.md))
 and we add whatever approvals to the `ApprovalType` enum in the same manner,
 you'll want to do the following.
 
@@ -394,7 +394,7 @@ with a workflow, there are a few changes that you'll need to make.
 Update the `WorkflowEntityType` to contain the enum you want to support.
 
 ### Add a foreign key from the workflow table to the entity table
-In our [workflow table](../db/models/workflow_models.py) we have foreign
+In our [workflow table](/api/src/db/models/workflow_models.py) we have foreign
 keys to each entity, add a foreign key and update the constraint that is defined
 on the table. This constraint makes it so exactly 1 of the entities is set.
 
@@ -404,16 +404,16 @@ on the table. This constraint makes it so exactly 1 of the entities is set.
 > detect it automatically. Follow the instructions carefully.
 
 ### Adjust the logic to find a workflow entity
-We have a [get_workflow_entity](./service/workflow_service.py) function that finds the workflow entity for new workflows.
+We have a [get_workflow_entity](/api/src/workflow/service/workflow_service.py) function that finds the workflow entity for new workflows.
 Add logic to this to find the table from its primary key in the same pattern.
 
 ### Add a persistence handler
-Like our [opportunity_persistence_model](./state_persistence/opportunity_persistence_model.py)
+Like our [opportunity_persistence_model](/api/src/workflow/state_persistence/opportunity_persistence_model.py)
 add a class that handles persistence for that particular type, following the same pattern.
 
 ## Send emails for approvals
 Approval emails are automatically handled for you. We have a listener
-defined in [workflow_approval_email_listener.py](./listener/workflow_approval_email_listener.py)
+defined in [workflow_approval_email_listener.py](/api/src/workflow/listener/workflow_approval_email_listener.py)
 that checks if a state being entered is configured as an approval state.
 If it is, it looks at the privilege to find who could possibly do the approval
 and sends them each an email.

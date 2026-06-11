@@ -8,7 +8,7 @@ The network setup process will:
 
 Before setting up the database you'll need to have:
 
-1. [Set up the AWS account](./set-up-aws-account.md)
+1. [Set up the AWS account](/documentation/infra/set-up-aws-account.md)
 
 ## 1. Configure backend
 

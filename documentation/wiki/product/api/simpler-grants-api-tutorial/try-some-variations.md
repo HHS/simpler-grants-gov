@@ -59,5 +59,5 @@ curl -X POST "https://api.simpler.grants.gov/v1/opportunities/search" \
 Next we are going to create a Python script together which will tie in everything that we have learned so far. By the end of it you will be ready to create and manage your own software which leverages Simpler.Grants.gov's API.&#x20;
 
 {% hint style="warning" %}
-Something not working as expected? Check out [common issues & solutions](common-issues-and-solutions.md).&#x20;
+Something not working as expected? Check out [common issues & solutions](/documentation/wiki/product/api/simpler-grants-api-tutorial/common-issues-and-solutions.md).&#x20;
 {% endhint %}

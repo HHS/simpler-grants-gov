@@ -39,10 +39,10 @@ The goal of this ADR is to evaluate a series of ticket tracking systems and sele
 
 ## Options Considered
 
-* [GitHub Issues + Zenhub](2023-07-11-ticket-tracking.md#github-issues--zenhub)
-* [GitHub Issues + GitHub Projects](2023-07-11-ticket-tracking.md#github-issues--github-projects)
-* [Jira](2023-07-11-ticket-tracking.md#jira)
-* [OpenProject](2023-07-11-ticket-tracking.md#openproject)
+* [GitHub Issues + Zenhub](/documentation/wiki/product/decisions/adr/2023-07-11-ticket-tracking.md#github-issues--zenhub)
+* [GitHub Issues + GitHub Projects](/documentation/wiki/product/decisions/adr/2023-07-11-ticket-tracking.md#github-issues--github-projects)
+* [Jira](/documentation/wiki/product/decisions/adr/2023-07-11-ticket-tracking.md#jira)
+* [OpenProject](/documentation/wiki/product/decisions/adr/2023-07-11-ticket-tracking.md#openproject)
 
 ## Decision Outcome
 

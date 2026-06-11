@@ -77,8 +77,8 @@ python search_opportunities.py
 {% endtab %}
 {% endtabs %}
 
-If you are getting an error message please check to make sure that your code matches the example. if you continue to have issues check out the [common issues & solutions section](../common-issues-and-solutions.md) to see if it is applicable to the error you are seeing.&#x20;
+If you are getting an error message please check to make sure that your code matches the example. if you continue to have issues check out the [common issues & solutions section](/documentation/wiki/product/api/simpler-grants-api-tutorial/common-issues-and-solutions.md) to see if it is applicable to the error you are seeing.&#x20;
 
 {% hint style="warning" %}
-Something not working as expected? Check out [common issues & solutions](../common-issues-and-solutions.md).&#x20;
+Something not working as expected? Check out [common issues & solutions](/documentation/wiki/product/api/simpler-grants-api-tutorial/common-issues-and-solutions.md).&#x20;
 {% endhint %}

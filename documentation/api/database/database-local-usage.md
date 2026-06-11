@@ -12,16 +12,16 @@ Steps:
 1. Make sure your local DB is running, you can start it up by doing `make init-db` which will handle starting + running initial DB migrations
 2. Open your program for connecting to the DB, and add the connection parameters as shown below
 
-![Local DB Connection Parameters](../images/local-db-connection.png)
+![Local DB Connection Parameters](/documentation/api/images/local-db-connection.png)
 
-Connection parameters for the database can be found in [local.env](../../../api/local.env) including the password.
+Connection parameters for the database can be found in [local.env](/api/local.env) including the password.
 
 ### CLI
 
 If you have `psql` installed locally, you can also access the DB by running `psql -h localhost -d app -U app` which will require you enter the password afterwards.
 
 For example:
-![Local DB CLI](../images/local-db-cli.png)
+![Local DB CLI](/documentation/api/images/local-db-cli.png)
 
 ## Seeding the DB
 
