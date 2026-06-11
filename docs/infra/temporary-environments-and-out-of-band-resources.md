@@ -29,7 +29,7 @@ Temporary environments use two strategies for handling out-of-band resources: **
 
 Some out-of-band resources are shared across temporary environments rather than being provisioned independently for each one. This sharing can take two forms:
 
-- **Cross-layer sharing** — temporary environments in one infrastructure layer (also called a root module — see [Module Architecture](./module-architecture.md)) share resources managed by a different layer (e.g., the service layer's temporary environments share the database provisioned by the database layer)
+- **Cross-layer sharing** — temporary environments in one infrastructure layer (also called a root module — see [Module Architecture](/documentation/infra/module-architecture.md)) share resources managed by a different layer (e.g., the service layer's temporary environments share the database provisioned by the database layer)
 - **Same-layer sharing** — temporary environments using non-default Terraform workspaces share resources with the default workspace (e.g., a PR environment's service workspace shares resources that only exist in the default workspace)
 
 **Resources that use this strategy:**
@@ -92,4 +92,4 @@ For more on cleanup of temporary environment resources, see [Pull Request Enviro
 - [Develop and Test Infrastructure in Isolation Using Workspaces](./develop-and-test-infrastructure-in-isolation-using-workspaces.md) — how workspace-based temporary environments work
 - [Custom Domains](./custom-domains.md) — an example of a resource requiring out-of-band DNS configuration
 - [Identity Provider](./identity-provider.md) — Cognito setup and configuration
-- [Set Up Database](./set-up-database.md) — database provisioning
+- [Set Up Database](/documentation/infra/set-up-database.md) — database provisioning
