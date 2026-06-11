@@ -13,7 +13,11 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPAuth,
     SOAPClientCertificate,
 )
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import (
+    SOAPInvalidEnvelope,
+    SOAPOperationNotSupported,
+    SOAPResponse,
+)
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
 from src.util import file_util
 from tests.lib.data_factories import get_mtls_urlencoded_str_and_serial_number, setup_cert_user
@@ -203,10 +207,10 @@ def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_
     )
     assert record
     request_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/request.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request.txt"
     )
     response_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap/{record.debug_identifier}/response.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
     )
     assert request_contents.replace("\n", "") == mock_data.decode().replace("\n", "")
     assert response_contents.replace("\r", "") == expected_response.decode().replace("\r", "")
@@ -265,9 +269,9 @@ def test_if_write_debug_data_to_s3_fails_the_exception_is_logged(
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         with mock.patch(
-            "src.legacy_soap_api.simpler_soap_api.write_debug_data_to_s3"
+            "src.legacy_soap_api.legacy_soap_api_utils.file_util.join"
         ) as mock_write_debug:
-            mock_write_debug.side_effect = Exception()
+            mock_write_debug.side_effect = Exception("test")
             response = client.post(
                 full_path,
                 data=mock_data,
@@ -283,6 +287,67 @@ def test_if_write_debug_data_to_s3_fails_the_exception_is_logged(
             if r.message == "soap_client: failed to upload debug info to s3"
         )
         assert record
+
+
+@mock.patch("uuid.uuid4")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.SimplerGrantorsS2SClient")
+def test_write_debug_data_if_s2s_client_throws_specific_errors(
+    mock_s2s_client,
+    mock_uuid,
+    monkeypatch,
+    mock_s3_bucket,
+    db_session,
+    client,
+    enable_factory_create,
+    caplog,
+    s3_config,
+    mock_s3,
+) -> None:
+    mock_uuid.return_value = TEST_UUID
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
+    mock_s2s_client.side_effect = [Exception, SOAPInvalidEnvelope, SOAPOperationNotSupported]
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
+    submission = ApplicationSubmissionFactory.create()
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+        cert_id=soap_client_certificate.legacy_certificate.cert_id,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        for _ in range(0, 3):
+            response = client.post(
+                full_path,
+                data=mock_data,
+                headers={
+                    "Use-Simpler-Override": "1",
+                    MTLS_CERT_HEADER_KEY: mtls_cert,
+                },
+            )
+            assert response.status_code == 500
+        records = [
+            r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
+        ]
+        assert len(records) == 3
 
 
 @mock.patch("uuid.uuid4")
