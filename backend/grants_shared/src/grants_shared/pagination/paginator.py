@@ -17,7 +17,7 @@ class Paginator[T: Base]:
     Any usage of this should make sure that the select query passed in
     contains sorting information otherwise results may not be expected.
 
-    Expected usage::
+    Expected usage:
         from sqlalchemy import desc, select
 
         from src.db.models.opportunity_models import Opportunity
