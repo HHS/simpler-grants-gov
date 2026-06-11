@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 
 import {
   CommonCharacterCount,
@@ -112,6 +113,14 @@ const commonCharacterCountProps = {
   isTextArea: false,
 };
 describe("CommonCharacterCount", () => {
+  it("has no accessibility violations", async () => {
+    const { container } = render(
+      <CommonCharacterCount {...commonCharacterCountProps} isTextArea={false} defaultValue="" />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
   it("Renders the element with maxLength", () => {
     render(<CommonCharacterCount {...commonCharacterCountProps} />);
     const element = screen.getByRole("textbox", {
@@ -175,6 +184,23 @@ describe("CommonCharacterCount", () => {
     });
     expect(element).toBeDisabled();
   });
+
+  it("renders the textarea as disabled when disabled=true and isTextArea=true", () => {
+    render(
+      <CommonCharacterCount
+        {...commonCharacterCountProps}
+        isTextArea={true}
+        defaultValue=""
+        disabled={true}
+      />,
+    );
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeDisabled();
+    expect(element instanceof HTMLTextAreaElement).toBe(true);
+  });
+
   it("renders the input with type=email when inputType='email'", () => {
     render(
       <CommonCharacterCount
@@ -189,6 +215,7 @@ describe("CommonCharacterCount", () => {
     });
     expect(element).toHaveAttribute("type", "email");
   });
+
   it("renders the input with type=url when inputType='url'", () => {
     render(
       <CommonCharacterCount

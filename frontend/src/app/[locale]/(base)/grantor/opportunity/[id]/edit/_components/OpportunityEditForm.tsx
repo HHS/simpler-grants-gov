@@ -298,6 +298,8 @@ export default function OpportunityEditForm({
     {} as Record<string, { label: string; value: string }[]>,
   );
 
+  // CommonCharacterCount fields use onTextChange={() => {}} because they are uncontrolled:
+  // values are read from FormData on submit, not tracked in React state.
   return (
     <form
       ref={formRef}
