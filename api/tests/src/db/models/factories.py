@@ -84,7 +84,7 @@ from src.constants.static_role_values import (
 from src.db.models import agency_models
 from src.db.models.agency_models import Agency
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
-from src.form_schema.forms import SF424_v4_0
+from src.form_schema.forms import SF424_v4_0, init_form_registry
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -1507,7 +1507,7 @@ class CompetitionFactory(BaseFactory):
     competition_forms = factory.RelatedFactoryList(
         "tests.src.db.models.factories.CompetitionFormFactory",
         factory_related_name="competition",
-        size=lambda: random.randint(1, 2),
+        size=1,
     )
 
     # Default to allowing both individual and organization applicants
@@ -1747,35 +1747,57 @@ class FormFactory(BaseFactory):
 
 
 def _get_default_competition_form() -> competition_models.Form:
-    """Return SF424 from the DB if seed_form_registry is active, else fall back to FormFactory."""
+    """Return SF424 for use as the default CompetitionForm form_id.
+
+    CompetitionForm.form is a registry-backed @property — form_id must resolve
+    to a registered form. SF424 is used as the fixed default for determinism.
+    The DB row is seeded on first use to satisfy the FK constraint on competition_form.form_id.
+
+    Tests that need multiple CompetitionForms for the same competition must pass
+    form= explicitly with different forms. Tests that need a form with specific
+    behavior (e.g. no XML config) should construct Form(...) directly.
+    """
     if _db_session is None:
         return FormFactory.build()
 
     if not _seed_form_registry_active:
         warnings.warn(
-            "CompetitionFormFactory: SF424 not in DB — add seed_form_registry to your test. "
-            "Falling back to FormFactory (deprecated).",
+            "CompetitionFormFactory: seed_form_registry not active — seeding SF424 automatically. "
+            "Add seed_form_registry to your test for explicit control.",
             DeprecationWarning,
             stacklevel=4,
         )
-        return FormFactory.create()
+
+    init_form_registry()
 
     session = get_db_session()
+
+    # TODO(#10274): remove db_session.add + flush once the form table is dropped
     form = session.get(competition_models.Form, SF424_v4_0.form_id)
     if form is None:
-        warnings.warn(
-            "CompetitionFormFactory: SF424 not in DB — add seed_form_registry to your test. "
-            "Falling back to FormFactory (deprecated).",
-            DeprecationWarning,
-            stacklevel=4,
-        )
-        return FormFactory.create()
+        # Seed FormInstruction first to satisfy the FK constraint on form.form_instruction_id
+        if (
+            SF424_v4_0.form_instruction_id is not None
+            and session.get(competition_models.FormInstruction, SF424_v4_0.form_instruction_id)
+            is None
+        ):
+            FormInstructionFactory.create(
+                form_instruction_id=SF424_v4_0.form_instruction_id,
+                file_name=f"{SF424_v4_0.short_form_name}.txt",
+            )
+        form = session.merge(SF424_v4_0, load=True)
+        session.flush()
+
     return form
 
 
 class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
+        # `form` is excluded so factory-boy uses it only to derive `form_id`
+        # and never tries to set it on the model. CompetitionForm.form is a
+        # read-only @property backed by the registry — it has no setter.
+        exclude = ["form"]
 
     competition = factory.SubFactory(CompetitionFactory, competition_forms=[])
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
@@ -1816,7 +1838,7 @@ class ApplicationFactory(BaseFactory):
             application_forms=factory.RelatedFactoryList(
                 "tests.src.db.models.factories.ApplicationFormFactory",
                 factory_related_name="application",
-                size=lambda: random.randint(1, 3),
+                size=1,
                 # This SelfAttribute gets the competition we just made above
                 competition_form=factory.SubFactory(
                     CompetitionFormFactory,
