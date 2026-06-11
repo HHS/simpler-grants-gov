@@ -557,7 +557,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             ],
         )
 
-        # --- Isolated form test opportunities ---
+        # Isolated form test opportunities
         ISOLATED_FORM_OPPORTUNITIES = [
             ("ATT", AttachmentForm_v1_2.form_id, "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
             ("BNA", BudgetNarrativeAttachment_v1_2.form_id, "caea0f33-b356-4fcd-aae3-c0244e11da1e"),
