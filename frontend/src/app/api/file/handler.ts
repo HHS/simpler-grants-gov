@@ -12,27 +12,6 @@ import { NextRequest, NextResponse } from "next/server";
 const makeFileStatusResponseStream = (
   inputStream: ReadableStreamDefaultReader<string>,
 ) => {
-  //   const stream = new ReadableStream({
-  //   start: (controller) => {
-  //     const intervalId = setInterval(() => {
-  //       try {
-  //         if (queueMe === maxQueues) {
-  //           controller.close();
-  //           clearInterval(intervalId);
-  //           queueMe = 0;
-  //           return;
-  //         }
-  //         controller.enqueue(queueMe.toString());
-  //         queueMe++;
-  //       } catch (e) {
-  //         queueMe = 0;
-  //         console.error(e);
-  //         controller.close();
-  //         clearInterval(intervalId);
-  //       }
-  //     }, 1000);
-  //   },
-  // });
   const readInputStream = async (
     outputController: ReadableStreamDefaultController,
   ) => {
@@ -54,15 +33,20 @@ const makeFileStatusResponseStream = (
   return outputStream;
 };
 
+// uploads file to S3 and sends the client updates about upload and virus scan progress
 export const handleFileUpload = async (request: NextRequest) => {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    // call Simpler API to obtain details for S3 upload and pending file id
     const fileUploadDetails = await fetchFileUploadDetails(file);
+    // fire call to S3 to begin upload process
     startFileUpload(fileUploadDetails.url, fileUploadDetails.body);
+    // open stream to fetch upload and scan progress updates
     const fileUploadStatusResponse = await fetchFileUploadStatus(
       fileUploadDetails.pending_file_id,
     );
+    // create a stream to consume progress updates from the API and send them back to the client
     const responseStream = makeFileStatusResponseStream(
       (fileUploadStatusResponse as ReadableStream<string>).getReader(),
     );
@@ -73,7 +57,7 @@ export const handleFileUpload = async (request: NextRequest) => {
     const { status, message } = readError(e as Error, 500);
     return Response.json(
       {
-        message: `Error attempting to submit application: ${message}`,
+        message: `Error attempting to upload file: ${message}`,
       },
       { status },
     );

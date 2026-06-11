@@ -2,7 +2,9 @@
  * @jest-environment node
  */
 
+import { ApiRequestError } from "src/errors";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
+import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 import {
   AdvanceTestStreamTrigger,
   createAdvanceStreamTrigger,
@@ -106,7 +108,9 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
         body: testFormData,
       }),
     );
+
     expect(response).toBeInstanceOf(NextResponse);
+    expect(response.status).toEqual(200);
     expect(response.body).toBeInstanceOf(ReadableStream);
 
     const reader = response.body?.getReader();
@@ -122,5 +126,44 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     trigger.advance();
     const thirdChunk = await reader?.read();
     expect(thirdChunk?.value).toEqual("step 3");
+  });
+  it("returns an error response if fetchFileUploadDetails returns an error response", async () => {
+    mockFetchFileUploadDetails.mockRejectedValue(
+      new ApiRequestError("api error"),
+    );
+    const testFile = new File(["file contents"], "file.txt");
+    const testFormData = new FormData();
+    testFormData.append("file", testFile);
+    const response = await handleFileUpload(
+      new NextRequest("http://arbitrary", {
+        method: "POST",
+        body: testFormData,
+      }),
+    );
+    expect(response.status).toEqual(400);
+    const responsePayload = (await response.json()) as { message: string };
+    expect(responsePayload.message).toEqual(
+      "Error attempting to upload file: api error",
+    );
+  });
+
+  it("returns an error response if fetchFileUploadStatus returns an error response", async () => {
+    mockFetchFileUploadStatus.mockRejectedValue(
+      new ApiRequestError("api error"),
+    );
+    const testFile = new File(["file contents"], "file.txt");
+    const testFormData = new FormData();
+    testFormData.append("file", testFile);
+    const response = await handleFileUpload(
+      new NextRequest("http://arbitrary", {
+        method: "POST",
+        body: testFormData,
+      }),
+    );
+    expect(response.status).toEqual(400);
+    const responsePayload = (await response.json()) as { message: string };
+    expect(responsePayload.message).toEqual(
+      "Error attempting to upload file: api error",
+    );
   });
 });
