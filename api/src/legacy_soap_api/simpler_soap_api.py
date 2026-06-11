@@ -27,7 +27,7 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPResponse,
 )
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
-from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException, SOAPInvalidFilter
 from src.legacy_soap_api.legacy_soap_api_utils import (
     get_alternate_proxy_response as get_alternate_legacy_response,
 )
@@ -65,7 +65,6 @@ def get_simpler_soap_response(
         simpler_soap_client = simpler_soap_client_type(
             soap_request=soap_request, db_session=db_session
         )
-
         add_extra_data_to_current_request_logs(
             {
                 "soap_response_operation": simpler_soap_client.operation_config.response_operation_name,
@@ -239,6 +238,18 @@ def process_simpler_request(
                     "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
                 },
             )
+        except SOAPInvalidFilter as e:
+            logger.info(
+                msg="Invalid filter type",
+                exc_info=True,
+                extra={
+                    "soap_api_event": LegacySoapApiEvent.INVALID_FILTER,
+                    "faultstring": e.fault.faultstring,
+                },
+            )
+            return get_soap_fault_error_response(
+                faultcode=e.fault.faultcode, faultstring=e.fault.faultstring
+            ).to_flask_response()
         except SOAPFaultException as e:
             logger.info(
                 msg="Soap Fault Exception raised",
