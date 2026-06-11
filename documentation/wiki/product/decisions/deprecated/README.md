@@ -14,10 +14,10 @@ Deprecated ADRs are retained for historical reference and to understand the evol
 
 ## Structure
 
-Each deprecated ADR follows the standard ADR naming convention: `yyyymmdd-xxx.md)`
+Each deprecated ADR follows the standard ADR naming convention: `yyyymmdd-xxx.md`
 
 See the [ADR Template](/documentation/wiki/product/decisions/template.md) for formatting guidelines.
 
 ## Finding Active ADRs
 
-For current tural decisions, see the parent [Decisions](/documentation/wiki/product/decisions/adr) directory.
+For current architectural decisions, see the parent [Decisions](/documentation/wiki/product/decisions/adr) directory.
