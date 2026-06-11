@@ -3,6 +3,8 @@ from collections.abc import Sequence
 from uuid import UUID
 
 import grants_shared.adapters.db as db
+from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams
+from grants_shared.pagination.paginator import Paginator
 from pydantic import BaseModel
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import selectinload
@@ -18,8 +20,6 @@ from src.db.models.user_models import (
     OrganizationUser,
     OrganizationUserRole,
 )
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
-from src.pagination.paginator import Paginator
 from src.search.search_models import StrSearchFilter, UuidSearchFilter
 from src.services.service_utils import apply_sorting
 

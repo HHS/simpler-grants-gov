@@ -2,6 +2,8 @@ import uuid
 from collections.abc import Sequence
 
 import grants_shared.adapters.db as db
+from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams
+from grants_shared.pagination.paginator import Paginator
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -11,8 +13,6 @@ from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import ApplicationAudit, ApplicationForm, CompetitionForm
 from src.db.models.user_models import User
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
-from src.pagination.paginator import Paginator
 from src.search.search_models import StrSearchFilter
 from src.services.applications.get_application import get_application
 from src.services.service_utils import apply_sorting

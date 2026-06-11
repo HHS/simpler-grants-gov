@@ -3,9 +3,10 @@ from typing import Any
 from grants_shared.api.schemas.extension import Schema, fields, validators
 from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
 from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.pagination.pagination_schema import generate_pagination_schema
 from marshmallow import ValidationError, validates_schema
 
-from src.api.schemas.response_schema import PaginationMixinSchema
+from grants_shared.api.schemas.response_schema import PaginationMixinSchema
 from src.constants.lookup_constants import (
     ApprovalResponseType,
     ApprovalType,
@@ -14,7 +15,6 @@ from src.constants.lookup_constants import (
     WorkflowEventType,
     WorkflowType,
 )
-from src.pagination.pagination_schema import generate_pagination_schema
 from src.validation.validation_constants import ValidationErrorType
 
 

@@ -1,7 +1,7 @@
 import jsonschema
 import pytest
+from grants_shared.api.response import ValidationErrorDetail
 
-from src.api.response import ValidationErrorDetail
 from src.form_schema.jsonschema_validator import validate_json_schema, validate_json_schema_for_form
 from tests.src.db.models.factories import FormFactory
 

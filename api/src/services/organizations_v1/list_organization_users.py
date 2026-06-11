@@ -3,6 +3,9 @@ from dataclasses import dataclass
 from uuid import UUID
 
 import grants_shared.adapters.db as db
+from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams
+from grants_shared.pagination.paginator import Paginator
+from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel
 from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
@@ -17,9 +20,6 @@ from src.db.models.user_models import (
     User,
     UserProfile,
 )
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
-from src.pagination.paginator import Paginator
-from src.pagination.sorting_util import apply_sorting
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 
 

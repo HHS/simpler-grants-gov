@@ -2,10 +2,10 @@ import uuid
 from datetime import date, timedelta
 
 import pytest
+from grants_shared.pagination.pagination_models import SortDirection
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 
 from src.adapters.search.opensearch_query_builder import SearchQueryBuilder
-from src.pagination.pagination_models import SortDirection
 from src.services.opportunities_v1.search_opportunities import STATIC_DATE_RANGES
 from tests.conftest import BaseTestClass
 
