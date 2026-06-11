@@ -25,7 +25,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from urllib.parse import unquote
+from urllib.parse import unquote, quote
 
 
 INLINE_LINK_RE = re.compile(r"(!?)\[([^\]\n]*)\]\(([^)\n]*)\)")
@@ -93,11 +93,19 @@ def rewrite_target(
     if not path:
         return url, "unchanged", "anchor-only or query-only"
 
+    if url.startswith("#") or is_external_url(url) or url.startswith("/"):
+        return url, "unchanged", "external or relative-root URL"
+
+    # File name is decoded so the file name can be searched for.
     decoded = unquote(path)
     had_trailing_slash = decoded.endswith("/")
     joined = os.path.normpath(os.path.join(str(source.parent), decoded))
     resolved = Path(joined)
-
+    
+    if not resolved.exists(): # fallback that checks for the literal file name (e.g., if the filename has a literal %20 in it.
+        joined = os.path.normpath(os.path.join(str(source.parent), path))
+        resolved = Path(joined)
+    
     try:
         rel = resolved.relative_to(repo_root)
     except ValueError:
@@ -106,12 +114,24 @@ def rewrite_target(
     if not resolved.exists():
         return url, "unable to validate", "target does not exist"
 
-    new_path = "/" + str(rel).replace(os.sep, "/")
+    # relative path
+    rel_str = str(rel).replace(os.sep, "/")
+
+    # original filename prior to decoding
+    original_parts = path.split("/")
+
+    computed_parts = rel_str.split("/")
+
+    if len(original_parts) > 0 and len(computed_parts) > 0:
+        computed_parts[-1] = original_parts[-1] # keeps the original file name since it's the last part in the final output. 
+
+    new_path = "/" + "/".join(computed_parts)
+
     if had_trailing_slash and not new_path.endswith("/"):
         new_path += "/"
-    if "%20" in path:
-        new_path = new_path.replace(" ", "%20")
+
     new_url = new_path + suffix
+
     if new_url == url:
         return url, "unchanged", "already equivalent"
     return new_url, "rewritten", ""
