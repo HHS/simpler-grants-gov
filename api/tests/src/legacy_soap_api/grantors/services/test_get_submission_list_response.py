@@ -146,16 +146,8 @@ class TestGetSubmissionListResponseStatusFilter(BaseTestClass):
         )
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
         with pytest.raises(SOAPInvalidFilter):
-            get_submission_list(
-                db_session=db_session,
-                request=schema,
-                soap_request=soap_request,
-                soap_config=_make_operation_config(),
-            )
-        record = next(r for r in caplog.records if r.message == "legacy_soap_api: Invalid Filter")
-        assert record.filter_type == "XXXXXXXXXXXXXXXXXXXXXXX"
+            grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
 
     def test_get_submission_list_agency_tracking_number_assigned_filter_supercedes_received_by_agency(
         self, db_session, enable_factory_create, setup_data

@@ -1,7 +1,6 @@
 import logging
 from collections.abc import Generator, Iterator
 from datetime import datetime, timezone
-from enum import StrEnum
 
 import grants_shared.adapters.db as db
 import xmltodict
@@ -17,15 +16,16 @@ from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.grantors import schemas
+from src.legacy_soap_api.grantors.filters import GetSubmissionListFilter
 from src.legacy_soap_api.grantors.statuses import (
     AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS,
     RECEIVED_BY_AGENCY_STATUS,
 )
 from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, verify_certificate_access
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
-from src.legacy_soap_api.legacy_soap_api_utils import SOAPInvalidFilter, convert_bool_to_yes_no
+from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
 
 logger = logging.getLogger(__name__)
 GRANTS_APPLICATION_STATUSES = {
@@ -42,17 +42,6 @@ STATUS_TRANSFORM = {
     "Rejected with Errors": None,
     "Download Preparation": None,
 }
-
-
-class GetSubmissionListFilter(StrEnum):
-    STATUS = "Status"
-    GRANTS_GOV_TRACKING_NUMBER = "GrantsGovTrackingNumber"
-    CFDA_NUMBER = "CFDANumber"
-    FUNDING_OPPORTUNITY_NUMBER = "FundingOpportunityNumber"
-    OPPORTUNITY_ID = "OpportunityID"
-    COMPETITION_ID = "CompetitionID"
-    PACKAGE_ID = "PackageID"
-    SUBMISSION_TITLE = "SubmissionTitle"
 
 
 def get_grants_gov_application_status(submission: ApplicationSubmission) -> str | None:
@@ -149,17 +138,6 @@ def get_submissions(
 
     if request.expanded_application_filter and request.expanded_application_filter.filters:
         submission_filters = request.expanded_application_filter.filters
-        for sf in submission_filters:
-            if sf.filter_type not in GetSubmissionListFilter:
-                log_msg = "legacy_soap_api: Invalid Filter"
-                logger.info(
-                    log_msg,
-                    extra={"filter_type": sf.filter_type},
-                )
-                faultstring = f"Encountered invalid filter type {sf.filter_type}"
-                raise SOAPInvalidFilter(
-                    log_msg, fault=FaultMessage(faultcode="soap:Server", faultstring=faultstring)
-                )
         status = get_filter_values(submission_filters, GetSubmissionListFilter.STATUS)
         if status:
             if len(status) > 1:
