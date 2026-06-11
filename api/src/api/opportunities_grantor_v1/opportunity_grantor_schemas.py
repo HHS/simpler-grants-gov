@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from grants_shared.api.schemas.extension import Schema, fields, validators
 from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from grants_shared.api.schemas.search_schema import BoolSearchSchemaBuilder
 from grants_shared.pagination.pagination_schema import generate_pagination_schema
 from marshmallow import ValidationError, validates_schema
@@ -13,7 +13,6 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySummaryV1Schema,
     OpportunityV1Schema,
 )
-from grants_shared.api.schemas.response_schema import PaginationMixinSchema
 from src.constants.lookup_constants import (
     ApplicantType,
     CompetitionOpenToApplicant,

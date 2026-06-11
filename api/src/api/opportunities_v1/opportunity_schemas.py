@@ -1,7 +1,11 @@
 from enum import StrEnum
 
 from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema, FileResponseSchema
+from grants_shared.api.schemas.response_schema import (
+    AbstractResponseSchema,
+    FileResponseSchema,
+    PaginationMixinSchema,
+)
 from grants_shared.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     DateSearchSchemaBuilder,
@@ -12,7 +16,6 @@ from grants_shared.pagination.pagination_schema import generate_pagination_schem
 from marshmallow import RAISE
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
-from grants_shared.api.schemas.response_schema import PaginationMixinSchema
 from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
