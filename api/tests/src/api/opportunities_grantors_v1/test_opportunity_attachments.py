@@ -24,7 +24,9 @@ def grantor_auth_data(db_session, enable_factory_create):
 def existing_opportunity(grantor_auth_data, enable_factory_create):
     """Create an opportunity belonging to the grantor's agency"""
     user, agency, _, _ = grantor_auth_data
-    return OpportunityFactory.create(agency_code=agency.agency_code, is_draft=True)
+    return OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=True, is_simpler_grants_opportunity=True
+    )
 
 
 @pytest.fixture

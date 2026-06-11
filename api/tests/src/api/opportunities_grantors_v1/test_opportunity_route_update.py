@@ -21,7 +21,9 @@ def grantor_auth_data(db_session, enable_factory_create):
 def existing_opportunity(grantor_auth_data, enable_factory_create):
     """Create an opportunity belonging to the grantor's agency"""
     _, agency, _, _ = grantor_auth_data
-    return OpportunityFactory.create(agency_code=agency.agency_code, is_draft=True)
+    return OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=True, is_simpler_grants_opportunity=True
+    )
 
 
 def test_opportunity_update_200_full_update(client, grantor_auth_data, existing_opportunity):
