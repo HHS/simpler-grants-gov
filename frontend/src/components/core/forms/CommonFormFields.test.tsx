@@ -115,7 +115,11 @@ const commonCharacterCountProps = {
 describe("CommonCharacterCount", () => {
   it("has no accessibility violations", async () => {
     const { container } = render(
-      <CommonCharacterCount {...commonCharacterCountProps} isTextArea={false} defaultValue="" />,
+      <CommonCharacterCount
+        {...commonCharacterCountProps}
+        isTextArea={false}
+        defaultValue=""
+      />,
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
