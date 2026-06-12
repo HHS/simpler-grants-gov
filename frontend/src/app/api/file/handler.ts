@@ -1,7 +1,7 @@
 import { readError } from "src/errors";
 import {
+  fetchFileScanStatus,
   fetchFileUploadDetails,
-  fetchFileUploadStatus,
   uploadFileToS3,
 } from "src/services/fetch/fetchers/filesFetcher";
 import { FileUploadStatusUpdate } from "src/types/fileUploadTypes";
@@ -52,13 +52,13 @@ const orchestrateFileUpload = async (
   responseStreamController.enqueue({ status: "starting-scan" });
 
   // open stream to fetch upload and scan progress updates
-  const fileUploadStatusResponse = await fetchFileUploadStatus(
+  const fileUploadStatusResponse = await fetchFileScanStatus(
     fileUploadDetails.pending_file_id,
   );
 
   await pipeStatusStreamToResponse(
     responseStreamController,
-    (fileUploadStatusResponse as ReadableStream<string>).getReader(),
+    fileUploadStatusResponse.getReader(),
   );
 };
 

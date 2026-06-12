@@ -9,13 +9,13 @@ import { fetchFileUploadWithMethod } from "./fetchers";
 
   1. fetchFileUploadDetails
   Calls API to create a pending file record and obtain details necessary to call to S3 to begin uploading the file
-  Returns a pending_file_id that will be used to call fetchFileUploadStatus to track upload progress
+  Returns a pending_file_id that will be used to call fetchFileScanStatus to track upload progress
 
   2. startFileUpload
   Using the url and body returned from fetchFileUploadDetails, makes a fire and forget call to S3 to initiate
   the file upload
 
-  3. fetchFileUploadStatus
+  3. fetchFileScanStatus
   Calls to the API to fetch a stream that will update as the upload process progresses. Stream will be consumed by
   the calling handler and results streamed onward to the client
 */
@@ -30,13 +30,7 @@ export const fetchFileUploadDetails = async (
   const uploadDetailsResponse = await fetchFileUploadWithMethod("POST")({
     body: fileFormData,
   });
-  // return Promise.resolve({
-  //   url: "any --- url",
-  //   pending_file_id: "1",
-  //   body: {
-  //     arbitraryAwsBodyKey: "arbitrary aws body value",
-  //   },
-  // });
+  return (await uploadDetailsResponse.json()) as FileUploadDetailsResponse;
 };
 
 // uses the url and body parameters return by the API in the fetchFileUploadDetails call
@@ -60,8 +54,13 @@ export const uploadFileToS3 = async (
   }
 };
 
-export const fetchFileUploadStatus = async (
-  _pendingFileId: string,
-): Promise<ReadableStream> => {
-  return Promise.resolve(new ReadableStream());
+// opens a stream with the API to fetch scan status
+export const fetchFileScanStatus = async (
+  pendingFileId: string,
+): Promise<ReadableStream<string>> => {
+  const fileScanStatusResponse = await fetchFileUploadWithMethod("GET")({
+    subPath: `/${pendingFileId}/results`,
+  });
+  // may need to do some work here if the body isn't readable as a string in the end
+  return fileScanStatusResponse.body as unknown as ReadableStream<string>;
 };

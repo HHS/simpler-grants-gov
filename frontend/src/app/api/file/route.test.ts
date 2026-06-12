@@ -19,7 +19,7 @@ const mockFetchFileUploadDetails = jest.fn<
   Promise<FileUploadDetailsResponse>,
   [File]
 >();
-const mockFetchFileUploadStatus = jest.fn();
+const mockFetchFileScanStatus = jest.fn();
 const mockUploadFileToS3 = jest.fn();
 
 let trigger: AdvanceTestStreamTrigger;
@@ -34,8 +34,7 @@ let testResponseChunks = [
 jest.mock("src/services/fetch/fetchers/filesFetcher", () => ({
   fetchFileUploadDetails: (file: File) =>
     mockFetchFileUploadDetails(file) as unknown,
-  fetchFileUploadStatus: (id: string) =>
-    mockFetchFileUploadStatus(id) as unknown,
+  fetchFileScanStatus: (id: string) => mockFetchFileScanStatus(id) as unknown,
   uploadFileToS3: (url: string, body: unknown[]) =>
     mockUploadFileToS3(url, body) as unknown,
 }));
@@ -47,7 +46,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
       testResponseChunks,
       trigger,
     );
-    mockFetchFileUploadStatus.mockResolvedValue(testStream);
+    mockFetchFileScanStatus.mockResolvedValue(testStream);
     mockFetchFileUploadDetails.mockResolvedValue({
       url: "any url",
       pending_file_id: "fake id",
@@ -138,7 +137,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
       "some sort of body to send in the next request",
     );
   });
-  it("calls fetchFileUploadStatus with pending_file_id from fetchFileUploadDetails, and streams 'starting-scan' status", async () => {
+  it("calls fetchFileScanStatus with pending_file_id from fetchFileUploadDetails, and streams 'starting-scan' status", async () => {
     const testFile = new File(["file contents"], "file.txt");
     const testFormData = new FormData();
     testFormData.append("file", testFile);
@@ -159,9 +158,9 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     const thirdChunk = await reader?.read();
     expect(thirdChunk?.value?.status).toEqual("starting-scan");
 
-    expect(mockFetchFileUploadStatus).toHaveBeenCalledWith("fake id");
+    expect(mockFetchFileScanStatus).toHaveBeenCalledWith("fake id");
   });
-  it("streams data from fetchFileUploadStatus into response stream", async () => {
+  it("streams data from fetchFileScanStatus into response stream", async () => {
     const testFile = new File(["file contents"], "file.txt");
     const testFormData = new FormData();
     testFormData.append("file", testFile);
@@ -243,10 +242,8 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     expect(errorChunk?.value?.error).toEqual("api error");
   });
 
-  it("streams error data if fetchFileUploadStatus returns an error response", async () => {
-    mockFetchFileUploadStatus.mockRejectedValue(
-      new ApiRequestError("api error"),
-    );
+  it("streams error data if fetchFileScanStatus returns an error response", async () => {
+    mockFetchFileScanStatus.mockRejectedValue(new ApiRequestError("api error"));
     const testFile = new File(["file contents"], "file.txt");
     const testFormData = new FormData();
     testFormData.append("file", testFile);
@@ -271,7 +268,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
   });
 
   // waiting on implementing this since implementation depends on how the stream from /results will actually report errors
-  it.skip("streams error data if fetchFileUploadStatus encounters an error in the underlying response stream", async () => {
+  it.skip("streams error data if fetchFileScanStatus encounters an error in the underlying response stream", async () => {
     testResponseChunks = [JSON.stringify({ status: "error" })];
     const testFile = new File(["file contents"], "file.txt");
     const testFormData = new FormData();
