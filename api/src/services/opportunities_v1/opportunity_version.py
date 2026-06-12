@@ -5,6 +5,7 @@ from grants_shared.adapters import db
 from grants_shared.util.dict_util import diff_nested_dicts
 
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
+from src.constants.lookup_constants import OpportunityVersionChangeType
 from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,11 @@ logger = logging.getLogger(__name__)
 SCHEMA = OpportunityVersionSchema()
 
 
-def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -> bool:
+def save_opportunity_version(
+    db_session: db.Session,
+    opportunity: Opportunity,
+    change_type: OpportunityVersionChangeType = OpportunityVersionChangeType.UPDATE,
+) -> bool:
     """
     Saves a new version of an Opportunity record in the OpportunityVersion table if there are changes and the opportunity is not in draft status.
 
@@ -22,6 +27,7 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
 
     :param  db_session: The active SQLAlchemy session used to interact with the database.
     :param opportunity: An instance of the Opportunity model containing the data to be saved.
+    :param change_type: The type of change (CREATE, UPDATE, or DELETE) that triggered this version.
     :return: This function returns a boolean indicating whether the opportunity was successfully saved.
     """
 
@@ -46,6 +52,7 @@ def save_opportunity_version(db_session: db.Session, opportunity: Opportunity) -
         opportunity_version = OpportunityVersion(
             opportunity_id=opportunity.opportunity_id,
             opportunity_data=opportunity_new,
+            change_type=change_type,
         )
 
         db_session.add(opportunity_version)

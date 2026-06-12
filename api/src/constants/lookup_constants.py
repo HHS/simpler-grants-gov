@@ -27,6 +27,12 @@ class OpportunityCategory(StrEnum):
     OTHER = "other"
 
 
+class OpportunityVersionChangeType(StrEnum):
+    CREATE = "create"
+    UPDATE = "update"
+    DELETE = "delete"
+
+
 class ApplicantType(StrEnum):
     # https://grants.gov/system-to-system/grantor-system-to-system/schemas/grants-funding-synopsis#EligibleApplicantTypes
     # Comment is the legacy systems code
