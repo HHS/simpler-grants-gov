@@ -104,7 +104,7 @@ type PropertyPath = `/properties/${string}`;
  *   The FieldList field name. Used to derive the base field path
  *   (e.g. $.fieldListName) for mapping validation warnings to the list.
  *
- * fieldListEntryDescriptionId
+ * additionalDescribedById
  *   Optional accessibility identifier used to associate widgets rendered
  *   inside a FieldList entry with that entry's heading. This allows
  *   assistive technologies to announce both the field label and the
@@ -146,7 +146,7 @@ export type FieldListWidgetProps = {
   };
   label: string;
   description?: string;
-  fieldListEntryDescriptionId?: string;
+  additionalDescribedById?: string;
   name: string;
   minItems?: number;
   minItemsHeading?: string;
@@ -245,7 +245,7 @@ export interface UiSchemaFieldList {
   maxItemsHelperText?: string;
   name: string;
   description?: string;
-  fieldListEntryDescriptionId?: string;
+  additionalDescribedById?: string;
   children: UiSchemaField[];
 }
 
@@ -295,7 +295,7 @@ export interface UswdsWidgetProps<
     enumDisabled?: unknown;
     emptyValue?: string | undefined;
   };
-  fieldListEntryDescriptionId?: string;
+  additionalDescribedById?: string;
   formClassName?: string;
   inputClassName?: string;
   hideLabel?: boolean;

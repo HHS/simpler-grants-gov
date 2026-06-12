@@ -42,7 +42,7 @@ function SelectWidget<
 >({
   id,
   disabled,
-  fieldListEntryDescriptionId,
+  additionalDescribedById,
   options = {},
   readOnly,
   required,
@@ -100,7 +100,7 @@ function SelectWidget<
   const error = rawErrors.length ? true : undefined;
   const describedby = [
     error ? `error-for-${id}` : undefined,
-    fieldListEntryDescriptionId,
+    additionalDescribedById,
   ]
     .filter(Boolean)
     .join(" ");

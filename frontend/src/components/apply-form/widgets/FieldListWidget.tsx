@@ -21,14 +21,23 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { renderWidget } from "./WidgetRenderers";
 
 /**
- * Params for updating a specific field within a FieldList entry.
+ * Path to this child field's value inside a single FieldList entry object.
  *
- * `nextValue` is typed as `unknown` because widget `onChange` handlers
- * emit `unknown` by contract. This value is normalized to
- * `BroadlyDefinedWidgetValue` inside `handleFieldChange`.
+ * Flat fields use a one-item path:
+ *   ["organization_name"] -> entry.organization_name
+ *
+ * Nested fields use multiple path parts:
+ *   ["address", "street1"] -> entry.address.street1
+ *
+ * This is an array so the widget can read and update nested values without
+ * flattening them into keys like "address--street1".
  */
 type FieldListChangeParams = {
   entryId: string;
+  /**
+   * Path to the field being updated within the entry object.
+   * Example: ["address", "street1"] updates entry.address.street1.
+   */
   storagePath: string[];
   nextValue: unknown;
 };
@@ -106,13 +115,12 @@ const replaceFieldListIndexPlaceholder = ({
 };
 
 /**
- * Extracts the final field segment from a FieldList base id.
+ * Extracts the final field name from a FieldList base id.
  *
- * This is used only to build stable React keys for child widgets. Value lookup
- * and updates use `storagePath` so nested fields like address.street1 are
- * preserved correctly.
+ * This is only used to build a stable React key for the rendered child widget.
+ * Field values are read and written using `storagePath`.
  */
-const getFieldListStorageKey = ({ baseId }: { baseId: string }): string => {
+const getFieldListChildKey = ({ baseId }: { baseId: string }): string => {
   const baseIdParts = baseId.split("--");
   return baseIdParts[baseIdParts.length - 1];
 };
@@ -304,7 +312,7 @@ function FieldListEntry({
           entryIndex,
         });
 
-        const storageKey = getFieldListStorageKey({
+        const childKey = getFieldListChildKey({
           baseId: groupItem.baseId,
         });
 
@@ -328,12 +336,12 @@ function FieldListEntry({
           schema: groupItem.generalProps.schema as RJSFSchema,
           id: generatedId,
           name: generatedId,
-          key: `${entryId}-${storageKey}`,
+          key: `${entryId}-${childKey}`,
           value: currentValue,
           rawErrors: childErrors,
           required: isRequired,
           updateOnInput: true,
-          fieldListEntryDescriptionId: entryHeadingId,
+          additionalDescribedById: entryHeadingId,
           onChange: (nextValue) => {
             handleFieldChange({
               entryId,

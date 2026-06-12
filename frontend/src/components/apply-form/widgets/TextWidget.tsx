@@ -26,7 +26,7 @@ function TextWidget<
 >({
   id,
   disabled,
-  fieldListEntryDescriptionId,
+  additionalDescribedById,
   readOnly,
   required,
   schema,
@@ -93,7 +93,7 @@ function TextWidget<
 
   const describedby = [
     error ? `error-for-${id}` : undefined,
-    fieldListEntryDescriptionId,
+    additionalDescribedById,
   ]
     .filter(Boolean)
     .join(" ");

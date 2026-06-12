@@ -12,7 +12,7 @@ jest.mock("src/components/apply-form/widgets/WidgetRenderers", () => ({
         id: string;
         value?: unknown;
         rawErrors?: string[];
-        fieldListEntryDescriptionId?: string;
+        additionalDescribedById?: string;
         onChange?: (value: unknown) => void;
       };
     }) => {
@@ -28,7 +28,7 @@ jest.mock("src/components/apply-form/widgets/WidgetRenderers", () => ({
           <input
             data-testid="mock-widget"
             data-widget-id={props.id}
-            data-entry-description-id={props.fieldListEntryDescriptionId}
+            data-entry-description-id={props.additionalDescribedById}
             aria-label={props.id}
             value={displayValue}
             onChange={(event) => props.onChange?.(event.target.value)}
