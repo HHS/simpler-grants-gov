@@ -442,6 +442,7 @@ class FileScanStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     COMPLETE = "complete"
     INFECTED = "infected"
+    PROCESSED = "processed"
 
 
 class JobType(StrEnum):
