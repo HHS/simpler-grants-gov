@@ -8,7 +8,7 @@ from grants_shared.util.datetime_util import get_now_us_eastern_date
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, Privilege
 from src.db.models.competition_models import Form as FormModel
 from src.form_schema.forms import init_form_registry
-from src.form_schema.registry.form_template_registry import form_template_registry
+from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
 from src.form_schema.rule_processing.json_rule_field_population import UNKNOWN_VALUE
 from src.services.applications.submit_application import submit_application
 from src.validation.validation_constants import ValidationErrorType
@@ -32,7 +32,10 @@ def create_test_form(db_session):
     """
     init_form_registry()
 
+    registered_key = None
+
     def _make(**kwargs) -> FormModel:
+        nonlocal registered_key
         form = FormModel(
             form_id=uuid.uuid4(),
             form_name=kwargs.get("form_name", "Test Form"),
@@ -47,11 +50,13 @@ def create_test_form(db_session):
         db_session.add(form)
         db_session.flush()
         form_template_registry.register(form, major_version=1)
+        registered_key = FormTemplateKey(form.form_id, 1)
         return form
 
     yield _make
 
-    form_template_registry._registry.clear()
+    if registered_key:
+        form_template_registry._registry.pop(registered_key, None)
 
 
 # Simple JSON schema used for tests below
