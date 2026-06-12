@@ -13,7 +13,7 @@ from src.db.models.opportunity_models import OpportunityAttachment
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 from src.services.opportunities_grantor_v1.opportunity_utils import (
-    validate_opportunity_can_be_updated,
+    validate_opportunity_created_in_simpler_grants,
 )
 from src.services.opportunity_attachments.attachment_util import (
     adjust_legacy_file_name,
@@ -38,8 +38,8 @@ def upload_opportunity_attachment(
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
-    # Verify opportunity can be updated (draft or published SGM)
-    validate_opportunity_can_be_updated(opportunity)
+    # Verify opportunity was created in Simpler Grants
+    validate_opportunity_created_in_simpler_grants(opportunity)
 
     attachment_id = uuid.uuid4()
 
@@ -106,8 +106,8 @@ def delete_opportunity_attachment(
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
-    # Verify opportunity can be updated (draft or published SGM)
-    validate_opportunity_can_be_updated(opportunity)
+    # Verify opportunity was created in Simpler Grants
+    validate_opportunity_created_in_simpler_grants(opportunity)
 
     # Find the attachment
     attachment = db_session.execute(

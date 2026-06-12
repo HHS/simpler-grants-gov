@@ -159,10 +159,7 @@ def test_upload_attachment_published_non_sgm_opportunity(
 
     assert resp.status_code == 422
     response_json = resp.get_json()
-    assert (
-        response_json["message"]
-        == "Only draft opportunities or published opportunities created in Simpler Grants can be updated"
-    )
+    assert response_json["message"] == "Only opportunities created in Simpler Grants can be updated"
 
 
 def test_upload_attachment_published_sgm_opportunity(
@@ -333,10 +330,7 @@ def test_delete_attachment_published_non_sgm_opportunity(
 
     assert resp.status_code == 422
     response_json = resp.get_json()
-    assert (
-        response_json["message"]
-        == "Only draft opportunities or published opportunities created in Simpler Grants can be updated"
-    )
+    assert response_json["message"] == "Only opportunities created in Simpler Grants can be updated"
 
 
 def test_delete_attachment_published_sgm_opportunity(

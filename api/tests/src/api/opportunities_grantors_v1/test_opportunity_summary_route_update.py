@@ -409,10 +409,7 @@ def test_opportunity_summary_update_422_published_non_sgm_opportunity(
 
     assert response.status_code == 422
     response_json = response.get_json()
-    assert (
-        response_json["message"]
-        == "Only draft opportunities or published opportunities created in Simpler Grants can be updated"
-    )
+    assert response_json["message"] == "Only opportunities created in Simpler Grants can be updated"
 
 
 def test_opportunity_summary_update_200_published_sgm_opportunity(

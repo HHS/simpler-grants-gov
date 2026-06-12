@@ -9,7 +9,7 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 from src.services.opportunities_grantor_v1.opportunity_utils import (
-    validate_opportunity_can_be_updated,
+    validate_opportunity_created_in_simpler_grants,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def update_opportunity(
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
-    validate_opportunity_can_be_updated(opportunity)
+    validate_opportunity_created_in_simpler_grants(opportunity)
 
     # PUT endpoint — always update all fields
     for field, value in opportunity_data.items():

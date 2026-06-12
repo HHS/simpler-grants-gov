@@ -10,7 +10,6 @@ from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 from src.services.opportunities_grantor_v1.opportunity_utils import (
-    validate_opportunity_can_be_updated,
     validate_opportunity_created_in_simpler_grants,
     validate_opportunity_is_draft,
 )
@@ -93,7 +92,7 @@ def update_opportunity_summary(
     agency = opportunity.agency_record
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, agency)
 
-    validate_opportunity_can_be_updated(opportunity)
+    validate_opportunity_created_in_simpler_grants(opportunity)
 
     # Get and validate the opportunity summary
     summary = _get_opportunity_summary(opportunity, opportunity_summary_id, summary_data)

@@ -153,8 +153,7 @@ def test_opportunity_update_422_published_non_sgm_opportunity(
 
     assert resp.status_code == 422
     assert (
-        "Only draft opportunities or published opportunities created in Simpler Grants can be updated"
-        in resp.get_json()["message"]
+        "Only opportunities created in Simpler Grants can be updated" in resp.get_json()["message"]
     )
 
 
