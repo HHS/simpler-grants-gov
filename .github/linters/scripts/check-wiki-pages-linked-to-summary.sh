@@ -25,6 +25,8 @@ find "${WIKI_DIR}" -name "*.md" | \
 grep -oE '\[.*\]\((.*\.md)\)' "${WIKI_DIR}/SUMMARY.md" |\
  # remove the extra parantheses around the markdown files
  sed -E "s|\[.*\]\((.+)\)|\1|" |\
+ # normalize root-relative links. 
+ sed -E "s|^/documentation/wiki/||" |\
  # sort the files alphabetically and write to a temporary file
  sort > $SUMMARY_FILES
 

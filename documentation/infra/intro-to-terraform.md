@@ -30,4 +30,4 @@ A module is a container for multiple resources that are used together. Modules c
 
 ## Terraform Workspaces
 
-Workspaces are used to allow multiple engineers to deploy their own stacks for development and testing. Read more about it in [Terraform Workspaces](./intro-to-terraform-workspaces.md)
+Workspaces are used to allow multiple engineers to deploy their own stacks for development and testing. Read more about it in [Terraform Workspaces](/documentation/infra/intro-to-terraform-workspaces.md)

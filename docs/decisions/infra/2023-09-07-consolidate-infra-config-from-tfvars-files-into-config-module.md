@@ -27,4 +27,4 @@ Benefits:
 
 ## Links
 
-- Builds on [ADR-2023-05-09](./2023-05-09-separate-terraform-backend-configs-into-separate-config-files.md)
+- Builds on [ADR-2023-05-09](/docs/decisions/infra/2023-05-09-separate-terraform-backend-configs-into-separate-config-files.md)

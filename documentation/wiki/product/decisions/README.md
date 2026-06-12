@@ -19,7 +19,7 @@ Almost all of engineering and code development involves making choices, so how d
 
 > An Architectural Decision (AD) is a software design choice that addresses a functional or non-functional requirement that is architecturally significant.
 >
-> Source: [ADR GitHub Organization](adr/)
+> Source: [ADR GitHub Organization](https://adr.github.io/)
 
 Another way to recognize when making a decision related to your project constitutes an architecture decision is to ask yourself three questions about that decision:
 
@@ -46,9 +46,9 @@ When an architectural decision needs to be recorded, please use the following st
 2. Identify the approvers for this decision, i.e. individuals or groups who must sign off on the decision before the ADR can be merged (ideally this happens before work starts on the ADR)
 3. Draft an ADR in a branch named after the ticket, then open a Pull Request (PR)
 
-* Use the `{YYYY-MM-DD}-{description}.md` naming convention and copy the [template](template.md) into the [adr](adr/) directory (name the file with the date it was created, which may differ from the date the decision was made, PR was merged, or file was last modified)
+* Use the `{YYYY-MM-DD}-{description}.md` naming convention and copy the [template](/documentation/wiki/product/decisions/template.md) into the [adr](/documentation/wiki/product/decisions/adr/) directory (name the file with the date it was created, which may differ from the date the decision was made, PR was merged, or file was last modified)
 * The ADR should use the status "Active"
-* If this decision deprecates an ADR, update its status to indicate the reason (e.g. `"Superseded By [xxx](yyyymmdd-xxx.md)"`), and move it to the [deprecated](./deprecated/) directory
+* If this decision deprecates an ADR, update its status to indicate the reason (e.g. `"Superseded By [xxx](yyyymmdd-xxx.md)"`), and move it to the [deprecated](/documentation/wiki/product/decisions/deprecated/) directory
 
 4. Invite the approvers to review the PR and provide feedback or approve the decision
 5. Once the approvers have signed off on the decision, merge the PR into the `main` branch

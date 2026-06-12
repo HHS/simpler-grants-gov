@@ -54,7 +54,7 @@ The migration files Alembic generates each receive a unique identifier, and the 
 
 When Alembic migrations fail, they do not commit any changes to the database.
 
-See [database-management.md](../../../../api/database/database-management.md) for some details on how we use Alembic in this environment
+See [database-management.md](/documentation/api/database/database-management.md) for some details on how we use Alembic in this environment
 
 * **Pros**
   * Built specifically to work with SQLAlchemy, the ORM layer that we already use
@@ -84,7 +84,7 @@ The Django framework comes with its own [migration process](https://docs.djangop
   * Provides a way to [squash migrations](https://docs.djangoproject.com/en/5.0/topics/migrations/#squashing-migrations) as they build up over time
   * Thoroughly integrated with the Django framework with lots of customization possible
 * **Cons**
-  * We would need to switch our API stack to use Django, see [API Framework](2023-07-07-api-framework.md) for further details on this decision process
+  * We would need to switch our API stack to use Django, see [API Framework](/documentation/wiki/product/decisions/adr/2023-07-07-api-framework.md) for further details on this decision process
 
 ### Flyway
 

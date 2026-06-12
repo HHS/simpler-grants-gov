@@ -18,10 +18,8 @@ Each app should have:
 
 ### App-agnostic workflows
 
-- [`ci-docs`](./ci-docs.yml): runs markdown linting on all markdown files in the file
-  - Configure in [markdownlint-config.json](./markdownlint-config.json)
-- [`ci-infra`](./ci-infra.yml): run infrastructure CI checks
-
+- [`ci-docs`](/.github/workflows/ci-docs.yml): runs markdown linting on all markdown files in the file
+- [`ci-infra`](/.github/workflows/ci-infra.yml): run infrastructure CI checks
 ## 🚢 CD
 
 Each app should have:
@@ -31,9 +29,9 @@ Each app should have:
 
 The CD workflow uses these reusable workflows:
 
-- [`deploy`](./deploy.yml): deploys an application
-- [`database-migrations`](./database-migrations.yml): runs database migrations for an application
-- [`build-and-publish`](./build-and-publish.yml): builds a container image for an application and publishes it to an image repository
+- [`deploy`](/.github/workflows/deploy.yml): deploys an application
+- [`database-migrations`](/.github/workflows/database-migrations.yml): runs database migrations for an application
+- [`build-and-publish`](/.github/workflows/build-and-publish.yml): builds a container image for an application and publishes it to an image repository
 
 ```mermaid
 graph TD
@@ -47,4 +45,4 @@ graph TD
 
 ## ⛑️ Helper workflows
 
-- [`check-ci-cd-auth`](./check-ci-cd-auth.yml): verifes that the project's Github repo is able to connect to AWS
+- [`check-ci-cd-auth`](/.github/workflows/check-ci-cd-auth.yml): verifes that the project's Github repo is able to connect to AWS

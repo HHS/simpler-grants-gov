@@ -8,7 +8,7 @@ Technical Story: [Document rationale for splitting up infra layers across multip
 
 ## Context and Problem Statement
 
-This document builds on the database module design [ADR: Separate the database infrastructure into a separate layer](./2023-05-25-separate-database-infrastructure-into-separate-layer.md) to describe the general rationale for separating application environment infrastructure into separate root modules that are managed in separate terraform state files and updated separately rather than all in one single root module. It restates and summarizes the rationale from the previous ADR and includes additional motivating examples.
+This document builds on the database module design [ADR: Separate the database infrastructure into a separate layer](/docs/decisions/infra/2023-05-25-separate-database-infrastructure-into-separate-layer.md) to describe the general rationale for separating application environment infrastructure into separate root modules that are managed in separate terraform state files and updated separately rather than all in one single root module. It restates and summarizes the rationale from the previous ADR and includes additional motivating examples.
 
 ## Overview
 
@@ -36,5 +36,5 @@ Based on the factors in the section below, the infrastructure has been grouped i
 
 ## Links
 
-- Based on [ADR-2023-05-25](./2023-05-25-separate-database-infrastructure-into-separate-layer.md)
-- [Module architecture](/docs/infra/module-architecture.md)
+- Based on [ADR-2023-05-25](/docs/decisions/infra/2023-05-25-separate-database-infrastructure-into-separate-layer.md)
+- [Module architecture](/documentation/infra/module-architecture.md)

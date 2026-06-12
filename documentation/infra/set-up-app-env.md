@@ -9,11 +9,11 @@ The application environment setup process will:
 Before setting up the application's environments you'll need to have:
 
 1. [A compatible application in the app folder](https://github.com/navapbc/template-infra/blob/main/template-only-docs/application-requirements.md)
-2. [Configure the app](../../infra/frontend/app-config/main.tf). Make sure you update `has_database` to `true` or `false` depending on whether or not your application has a database to integrate with.
-3. (If the application has a database) [Set up the network with VPC endpoints required for the database](./set-up-network.md)
-4. (If the application has a database) [Set up the database for the application](./set-up-database.md)
-5. (If you have an incident management service) [Set up monitoring](./set-up-monitoring-alerts.md)
-6. [Set up the application build repository](./set-up-app-build-repository.md)
+2. [Configure the app](/infra/frontend/app-config/main.tf). Make sure you update `has_database` to `true` or `false` depending on whether or not your application has a database to integrate with.
+3. (If the application has a database) [Set up the network with VPC endpoints required for the database](/documentation/infra/set-up-network.md)
+4. (If the application has a database) [Set up the database for the application](/documentation/infra/set-up-database.md)
+5. (If you have an incident management service) [Set up monitoring](/documentation/infra/set-up-monitoring-alerts.md)
+6. [Set up the application build repository](/documentation/infra/set-up-app-build-repository.md)
 
 ## 1. Configure backend
 
@@ -26,7 +26,7 @@ make infra-configure-app-service APP_NAME=app ENVIRONMENT=<ENVIRONMENT>
 `APP_NAME` needs to be the name of the application folder within the `infra` folder. It defaults to `app`.
 `ENVIRONMENT` needs to be the name of the environment you are creating. This will create a file called `<ENVIRONMENT>.s3.tfbackend` in the `infra/app/service` module directory.
 
-Depending on the value of `has_database` in the [app-config module](../../infra/frontend/app-config/main.tf), the application will be configured with or without database access.
+Depending on the value of `has_database` in the [app-config module](/infra/frontend/app-config/main.tf), the application will be configured with or without database access.
 
 ## 2. Build and publish the application to the application build repository
 
@@ -55,4 +55,4 @@ TF_CLI_ARGS_apply="-var=image_tag=<IMAGE_TAG>" make infra-update-app-service APP
 ## 4. Configure monitoring alerts
 
 Configure email alerts, external incident management service integration and additional Cloudwatch Alerts.
-[Configure monitoring module](./set-up-monitoring-alerts.md)
+[Configure monitoring module](/documentation/infra/set-up-monitoring-alerts.md)

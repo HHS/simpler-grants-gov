@@ -33,13 +33,13 @@ On Windows, run `cp .env.local.example .env.local` in PowerShell.
 
 `.env.local.example` is tracked and sensitive information **SHOULD NOT** be enteredin the file itself. 
 
-For more information about environments, take a look at [environments.md](./environments.md).
+For more information about environments, take a look at [environments.md](/documentation/frontend/environments.md).
 
 ### Authentication
 
 Running authentication locally requires running the API and sharing the correct JWT keys.
 
-1. Ensure you've completed the [API setup](../api/development.md), including creating the `override.env` file
+1. Ensure you've completed the [API setup](/documentation/api/development.md), including creating the `override.env` file
 2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to your `/frontend/.env.local` file which creates the necessary keys
 3. Restart the API (if necessary reseed the database, then `make start`)
 4. Restart the frontend (on Mac, `npm run local`, and on Windows, `npx run dev`) for development
@@ -71,7 +71,7 @@ From the `/frontend` directory:
 
 ### 🚀 Production version
 
-The `make dev` command runs the `docker-compose.yml` which runs the `dev` target in the [Dockerfile](../../frontend/Dockerfile). To run a production version in docker, run `docker compose up -d -f docker-compose-realease.yml` which targest the `release` stage in the docker build. This runs the production version, while still creating a network connection to the local API.
+The `make dev` command runs the `docker-compose.yml` which runs the `dev` target in the [Dockerfile](/frontend/Dockerfile). To run a production version in docker, run `docker compose up -d -f docker-compose-realease.yml` which targest the `release` stage in the docker build. This runs the production version, while still creating a network connection to the local API.
 
 ### Testing Release Target Locally
 
@@ -211,7 +211,7 @@ From the `frontend/` directory:
 - Place breakpoints in VSCode
 - Visit the relevant routes in the browser and confirm you can hit these breakpoints
 
-**Note** that debugging the server-side or full-stack here doesn't debug the API. [See the API readme for more information](../api/development.md)
+**Note** that debugging the server-side or full-stack here doesn't debug the API. [See the API readme for more information](/documentation/api/development.md)
 
 ## Feature setup and development
 
@@ -225,11 +225,11 @@ The `API_URL` environment variable can be set to connect to prod (`https://api.s
 
 To start a local development version of the API, run `make remake-backend` in the `/api` folder.
 
-See [documentation/api/development.md](../api/development.md) for more details.
+See [documentation/api/development.md](/documentation/api/development.md) for more details.
 
 #### Login flow
 
-The [documentation/api/authentication.md](../api/authentication.md) details the login flow from the frontend → API → login.gov → API → frontend.
+The [documentation/api/authentication.md](/documentation/api/authentication.md) details the login flow from the frontend → API → login.gov → API → frontend.
 
 The `/api/auth/callback` route handler receives a JSON web token as query parameter, uses the `API_JWT_PUBLIC_KEY` env variable to verify that it was created by the API, sets a cookie with the token, then later uses that token to verify the user identity in `/api/auth/session` and other routes.
 
@@ -253,6 +253,6 @@ If you need to access this functionality locally, contact an engineer on the tea
 
 ## Other topics
 
-- [Internationalization](./internationalization.md)
-- [Feature Flags](./featureFlags.md)
-- Refer to the [architecture decision records](../wiki/product/decisions) for more context on technical decisions.
+- [Internationalization](/documentation/frontend/internationalization.md)
+- [Feature Flags](/documentation/frontend/featureFlags.md)
+- Refer to the [architecture decision records](/documentation/wiki/product/decisions) for more context on technical decisions.

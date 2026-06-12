@@ -16,7 +16,7 @@ than create a separate database instance for each of them, we instead create
 one database instance with separate logical databases inside it. Each database
 is isolated from the others and has their own users.
 
-As part of the setup defined in [docker-compose.db.yml](../../../backend/docker-compose.db.yml) we setup:
+As part of the setup defined in [docker-compose.db.yml](/backend/docker-compose.db.yml) we setup:
 * A Postgres DB
 * Separate logical databases with their own separate super users - this way the services are still isolated
 
@@ -43,7 +43,7 @@ services:
       - default
 ```
 
-In [docker-compose.db.yml](../../../backend/docker-compose.db.yml) update the
+In [docker-compose.db.yml](/backend/docker-compose.db.yml) update the
 `POSTGRES_MULTIPLE_DATABASES: "app,app:analytics,analytics"` env variable to include
 the name of the database + user you want the service to connect as. We generally name
 these the same. When the DB service starts up, we'll create a logical database owned
@@ -114,7 +114,7 @@ $ make db-migrate
 <details>
     <summary>Example: Adding a new column to an existing table:</summary>
 
-1. Manually update the database models with the changes ([example_models.py](../../../api/src/db/models/base.py) in this example)
+1. Manually update the database models with the changes ([example_models.py](/api/src/db/models/staging/staging_base.py) in this example)
 ```python
 class ExampleTable(Base):
     ...

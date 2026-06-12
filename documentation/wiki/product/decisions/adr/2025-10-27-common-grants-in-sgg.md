@@ -44,21 +44,21 @@ We’ve implemented the first round of CommonGrants (CG) compliant routes within
 
 #### Tech stack options
 
-* [Same framework, integrated router](2025-10-27-common-grants-in-sgg.md#same-framework-integrated-routers)
-* [Same framework, isolated app](2025-10-27-common-grants-in-sgg.md#same-framework-isolated-app)
-* [Different framework](2025-10-27-common-grants-in-sgg.md#different-framework)
+* [Same framework, integrated router](/documentation/wiki/product/decisions/adr/2025-10-27-common-grants-in-sgg.md#same-framework-integrated-routers)
+* [Same framework, isolated app](/documentation/wiki/product/decisions/adr/2025-10-27-common-grants-in-sgg.md#same-framework-isolated-app)
+* [Different framework](/documentation/wiki/product/decisions/adr/2025-10-27-common-grants-in-sgg.md#different-framework)
 
 #### Resolving discrepancies options
 
-* [Fix SGG implementation](2025-10-27-common-grants-in-sgg.md#fix-sgg-implementation)
-* [Update CG protocol](2025-10-27-common-grants-in-sgg.md#update-cg-protocol)
-* [Handle in CG tooling](2025-10-27-common-grants-in-sgg.md#handle-in-cg-tooling)
+* [Fix SGG implementation](/documentation/wiki/product/decisions/adr/2025-10-27-common-grants-in-sgg.md#fix-sgg-implementation)
+* [Update CG protocol](/documentation/wiki/product/decisions/adr/2025-10-27-common-grants-in-sgg.md#update-cg-protocol)
+* [Handle in CG tooling](/documentation/wiki/product/decisions/adr/2025-10-27-common-grants-in-sgg.md#handle-in-cg-tooling)
 
 #### Maintenance options
 
-* [A6-maintained](2025-10-27-common-grants-in-sgg.md#a6-maintained)
-* [Nava-maintained](2025-10-27-common-grants-in-sgg.md#nava-maintained)
-* [Shared maintenance](2025-10-27-common-grants-in-sgg.md#shared-maintenance)
+* [A6-maintained](/documentation/wiki/product/decisions/adr/2025-10-27-common-grants-in-sgg.md#a6-maintained)
+* [Nava-maintained](/documentation/wiki/product/decisions/adr/2025-10-27-common-grants-in-sgg.md#nava-maintained)
+* [Shared maintenance](/documentation/wiki/product/decisions/adr/2025-10-27-common-grants-in-sgg.md#shared-maintenance)
 
 ### Decision Outcomes
 
