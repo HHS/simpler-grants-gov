@@ -18,8 +18,8 @@ export const createAdvanceStreamTrigger = (): AdvanceTestStreamTrigger => {
   };
 };
 
-export const makeAdvanceableTestStreamForTrigger = (
-  chunks: string[],
+export const makeAdvanceableTestStreamForTrigger = <ChunkType>(
+  chunks: ChunkType[],
   trigger: {
     listen: (fn: () => void) => void;
     advance: () => void;

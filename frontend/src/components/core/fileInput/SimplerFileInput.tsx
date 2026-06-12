@@ -122,9 +122,10 @@ export const SimplerFileInput = ({
               throw e;
             }
             if (payloadJson?.error) {
-              console.error("Error in file upload stream", payloadJson.error);
+              throw new Error(payloadJson.error);
+            } else {
+              setCurrentStatus(payloadJson?.status as FileUploadProcessStatus);
             }
-            setCurrentStatus(payloadJson?.status as FileUploadProcessStatus);
             if (done) {
               return payloadJson?.status as FileUploadProcessStatus;
             }

@@ -299,6 +299,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
   // come back to this!
   it.skip("handles unexpected closing or erroring of the underlying response stream", async () => {
     /*
+      TODO: https://github.com/HHS/simpler-grants-gov/issues/10927
       to what degree can we manage this?
 
       - if the main response stream errors or closes unexpectedly, we won't be able to handle that within the endpoint

@@ -86,7 +86,10 @@ describe("SimplerFileInput", () => {
       clientFetchMock.mockResolvedValue(
         new Response(
           makeAdvanceableTestStreamForTrigger(
-            ["uploading", "scanning"],
+            [
+              JSON.stringify({ status: "uploading" }),
+              JSON.stringify({ status: "scanning" }),
+            ],
             trigger,
           ),
         ),
@@ -119,7 +122,10 @@ describe("SimplerFileInput", () => {
       clientFetchMock.mockResolvedValue(
         new Response(
           makeAdvanceableTestStreamForTrigger(
-            ["uploading", "scanning"],
+            [
+              JSON.stringify({ status: "uploading" }),
+              JSON.stringify({ status: "scanning" }),
+            ],
             trigger,
           ),
         ),
@@ -264,7 +270,13 @@ describe("SimplerFileInput", () => {
       const trigger = createAdvanceStreamTrigger();
       clientFetchMock.mockResolvedValue(
         new Response(
-          makeAdvanceableTestStreamForTrigger(["uploading", "error"], trigger),
+          makeAdvanceableTestStreamForTrigger(
+            [
+              JSON.stringify({ status: "uploading" }),
+              JSON.stringify({ status: "error", error: "yes" }),
+            ],
+            trigger,
+          ),
         ),
       );
       render(
@@ -301,7 +313,11 @@ describe("SimplerFileInput", () => {
       clientFetchMock.mockResolvedValue(
         new Response(
           makeAdvanceableTestStreamForTrigger(
-            ["uploading", "scanning", "error"],
+            [
+              JSON.stringify({ status: "uploading" }),
+              JSON.stringify({ status: "scanning" }),
+              JSON.stringify({ status: "error", error: "yes" }),
+            ],
             trigger,
           ),
         ),
@@ -526,7 +542,12 @@ describe("SimplerFileInput", () => {
     }));
     const trigger = createAdvanceStreamTrigger();
     clientFetchMock.mockResolvedValue(
-      new Response(makeAdvanceableTestStreamForTrigger(["uploading"], trigger)),
+      new Response(
+        makeAdvanceableTestStreamForTrigger(
+          [JSON.stringify({ status: "uploading" })],
+          trigger,
+        ),
+      ),
     );
     render(
       <SimplerFileInput

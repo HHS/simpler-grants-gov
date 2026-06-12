@@ -9,7 +9,6 @@ import {
   fetchOpportunityEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
-  postFiles,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
   toDynamicAwardRecommendationEndpoint,
