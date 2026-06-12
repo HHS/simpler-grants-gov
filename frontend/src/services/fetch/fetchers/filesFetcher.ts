@@ -1,3 +1,4 @@
+import { ApiRequestError } from "src/errors";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 import { createFormData } from "src/utils/fileUtils/createFormData";
 
@@ -38,18 +39,23 @@ export const fetchFileUploadDetails = async (
   // });
 };
 
-// a fire and forget request to S3 to start file upload using the
-// url and body parameters return by the API in the fetchFileUploadDetails call
-// progress of the upload at this point will be tracked by the fetchFileUploadStatus call
-export const startFileUpload = (url: string, body: unknown) => {
+// uses the url and body parameters return by the API in the fetchFileUploadDetails call
+export const uploadFileToS3 = async (
+  url: string,
+  body: unknown,
+): Promise<boolean> => {
   try {
     const bodyString = JSON.stringify(body);
-    void fetch(url, {
+    const s3Response = await fetch(url, {
       method: "POST",
       body: bodyString,
     });
+    if (s3Response.ok) {
+      return true;
+    }
+    throw new ApiRequestError("Error uploading file to S3");
   } catch (e) {
-    console.error("Error calling AWS to start S3 Upload");
+    console.error(e);
     throw e;
   }
 };
