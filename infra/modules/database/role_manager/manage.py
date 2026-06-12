@@ -154,6 +154,8 @@ def configure_schema(conn: Connection, schema_name: str, migrator_username: str,
         f"REVOKE CREATE ON SCHEMA {identifier(schema_name)} FROM {identifier(app_username)}",
     )
 
+    fix_schema_object_ownership(conn, schema_name, migrator_username)
+
     print(f"------ Granting privileges on existing objects in schema: grantee={app_username}")
     db.execute(
         conn,
@@ -167,8 +169,6 @@ def configure_schema(conn: Connection, schema_name: str, migrator_username: str,
         conn,
         f"GRANT ALL ON ALL ROUTINES IN SCHEMA {identifier(schema_name)} TO {identifier(app_username)}",
     )
-
-    fix_schema_object_ownership(conn, schema_name, migrator_username)
 
 
 def fix_schema_object_ownership(conn: Connection, schema_name: str, migrator_username: str) -> None:

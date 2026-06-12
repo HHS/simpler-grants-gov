@@ -89,11 +89,29 @@ export type AwardRecommendationDetails = {
   award_recommendation_summary?: AwardRecommendationSummary;
 };
 
+export type AwardRecommendationOrganization = {
+  organization_id: string;
+  organization_name?: string;
+  uei?: string;
+};
+
+export type AwardRecommendationApplication = {
+  application_id: string;
+  competition_id: string;
+  organization?: AwardRecommendationOrganization;
+};
+
 export type AwardRecommendationApplicationSubmission = {
   application_submission_id: string;
   application_submission_number?: string;
   project_title?: string;
   total_requested_amount?: string;
+  application?: AwardRecommendationApplication;
+};
+
+export type AwardRecommendationSubmissionListFilters = {
+  award_recommendation_type?: { one_of: AwardRecommendationType[] };
+  has_exception?: { one_of: boolean[] };
 };
 
 export type AwardRecommendationSubmissionDetail = {

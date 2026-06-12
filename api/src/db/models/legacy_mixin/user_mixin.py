@@ -2,13 +2,17 @@ from datetime import date, datetime
 
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
+from src.db.extension.sqlalchemy_column import StripZerosText
+
 
 @declarative_mixin
 class VuserAccountMixin:
     user_account_id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[str]
     full_name: Mapped[str | None]
-    email: Mapped[str | None]
+    # We've encountered issues where the emails sometimes include 0x00
+    # Set the type as StripZerosText to strip those out when generating the create table command.
+    email: Mapped[str | None] = mapped_column(StripZerosText)
     phone_number: Mapped[str | None]
     first_name: Mapped[str | None]
     middle_name: Mapped[str | None]

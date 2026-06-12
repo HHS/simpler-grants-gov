@@ -1,7 +1,6 @@
 import logging
 from collections.abc import Generator, Iterator
 from datetime import datetime, timezone
-from enum import StrEnum
 
 import grants_shared.adapters.db as db
 import xmltodict
@@ -17,6 +16,7 @@ from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.grantors import schemas
+from src.legacy_soap_api.grantors.filters import GetSubmissionListFilter
 from src.legacy_soap_api.grantors.statuses import (
     AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS,
     RECEIVED_BY_AGENCY_STATUS,
@@ -42,17 +42,6 @@ STATUS_TRANSFORM = {
     "Rejected with Errors": None,
     "Download Preparation": None,
 }
-
-
-class GetSubmissionListFilter(StrEnum):
-    STATUS = "Status"
-    GRANTS_GOV_TRACKING_NUMBER = "GrantsGovTrackingNumber"
-    CFDA_NUMBER = "CFDANumber"
-    FUNDING_OPPORTUNITY_NUMBER = "FundingOpportunityNumber"
-    OPPORTUNITY_ID = "OpportunityID"
-    COMPETITION_ID = "CompetitionID"
-    PACKAGE_ID = "PackageID"
-    SUBMISSION_TITLE = "SubmissionTitle"
 
 
 def get_grants_gov_application_status(submission: ApplicationSubmission) -> str | None:

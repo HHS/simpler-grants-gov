@@ -357,6 +357,13 @@ class AwardRecommendationOrganizationSchema(Schema):
         allow_none=True,
         metadata={"description": "The organization name"},
     )
+    uei = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The organization's Unique Entity Identifier (UEI)",
+            "example": "ABC123DEF456",
+        },
+    )
 
 
 class AwardRecommendationApplicationSchema(Schema):
