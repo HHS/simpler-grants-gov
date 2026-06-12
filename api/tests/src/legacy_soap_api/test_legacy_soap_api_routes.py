@@ -362,6 +362,7 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
     mock_s3,
     s3_config,
 ) -> None:
+    soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
@@ -450,6 +451,7 @@ def test_if_soap_request_errors_on_creation_the_s3_handling_records_just_the_res
     mock_s3,
     s3_config,
 ) -> None:
+    soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
