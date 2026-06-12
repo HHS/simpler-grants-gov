@@ -109,7 +109,9 @@ def test_submit_application_success(enable_factory_create, db_session, create_te
     assert application.submitted_by == user.user_id
 
 
-def test_submit_application_with_missing_required_form(enable_factory_create, db_session, create_test_form):
+def test_submit_application_with_missing_required_form(
+    enable_factory_create, db_session, create_test_form
+):
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
@@ -139,7 +141,9 @@ def test_submit_application_with_missing_required_form(enable_factory_create, db
     )
 
 
-def test_submit_application_with_invalid_required_form(enable_factory_create, db_session, user, create_test_form):
+def test_submit_application_with_invalid_required_form(
+    enable_factory_create, db_session, user, create_test_form
+):
     competition = CompetitionFactory.create(competition_forms=[])
     form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
@@ -216,7 +220,9 @@ def test_submit_application_not_found(db_session, enable_factory_create):
     assert f"Application with ID {non_existent_id} not found" in excinfo.value.message
 
 
-def test_submit_application_organization_required_but_missing(enable_factory_create, db_session, create_test_form):
+def test_submit_application_organization_required_but_missing(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that submitting an application without an organization when required returns 422."""
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
@@ -263,7 +269,9 @@ def test_submit_application_organization_required_but_missing(enable_factory_cre
     )
 
 
-def test_submit_application_signature_post_processing(enable_factory_create, db_session, create_test_form):
+def test_submit_application_signature_post_processing(
+    enable_factory_create, db_session, create_test_form
+):
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1),

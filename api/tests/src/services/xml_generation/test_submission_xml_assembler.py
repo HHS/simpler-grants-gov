@@ -145,7 +145,12 @@ class TestSubmissionXMLAssembler:
         assert app_form.form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_mixed_support(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session, create_test_form
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test getting supported forms when some forms are unsupported."""
         # Add an unsupported form to the application
@@ -173,7 +178,12 @@ class TestSubmissionXMLAssembler:
         assert app_form.form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_none_supported(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session, create_test_form
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test getting supported forms when no forms are supported."""
         # Remove the SF424 form and add only unsupported forms
@@ -403,7 +413,12 @@ class TestSubmissionXMLAssembler:
         assert "GRANT12345678" in xml_string  # Tracking number
 
     def test_generate_complete_submission_xml_no_supported_forms(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session, create_test_form
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that XML generation raises error when no supported forms."""
         # Remove the SF424 form and add only unsupported forms
@@ -642,7 +657,12 @@ class TestSubmissionXMLAssembler:
         assert Namespace.GLOB in root.nsmap.values()
 
     def test_get_supported_forms_filters_non_required_not_included(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session, create_test_form
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that non-required forms with is_included_in_submission=False are filtered out."""
         # Create a non-required form with XML support
@@ -676,7 +696,12 @@ class TestSubmissionXMLAssembler:
         assert supported_forms[0].form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_includes_non_required_when_included(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session, create_test_form
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that non-required forms with is_included_in_submission=True are included."""
         # Create a non-required form with XML support
@@ -728,7 +753,12 @@ class TestSubmissionXMLAssembler:
         assert supported_forms[0].form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_filters_non_required_null_is_included(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session, create_test_form
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that non-required forms with is_included_in_submission=None are filtered out."""
         # Create a non-required form with XML support

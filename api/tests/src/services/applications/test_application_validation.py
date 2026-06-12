@@ -41,7 +41,9 @@ def make_test_form():
     """Factory fixture for in-memory test forms with automatic registry cleanup."""
     init_form_registry()
 
-    def _make(form_name: str, form_json_schema: dict, form_rule_schema: dict | None = None) -> FormModel:
+    def _make(
+        form_name: str, form_json_schema: dict, form_rule_schema: dict | None = None
+    ) -> FormModel:
         form = FormModel(
             form_id=uuid.uuid4(),
             form_name=form_name,
@@ -754,7 +756,9 @@ def test_validate_is_included_in_submission_behavior(
 
 
 @freeze_time("2023-02-20 12:00:00", tz_offset=0)
-def test_validate_application_form_submit_post_population(enable_factory_create, db_session, create_test_form):
+def test_validate_application_form_submit_post_population(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that post-population occurs and updates application_response during submit action"""
     form = create_test_form(
         form_name="PostPopForm",
@@ -806,7 +810,9 @@ def test_validate_application_form_submit_post_population(enable_factory_create,
     assert application_form.application_response["date_field"] == "2023-02-20"
 
 
-def test_validate_application_form_get_no_post_population(enable_factory_create, db_session, create_test_form):
+def test_validate_application_form_get_no_post_population(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that post-population does NOT occur during GET action"""
     form = create_test_form(
         form_name="PostPopForm",
@@ -851,7 +857,9 @@ def test_validate_application_form_get_no_post_population(enable_factory_create,
     assert "date_field" not in application_form.application_response
 
 
-def test_validate_application_form_modify_no_post_population(enable_factory_create, db_session, create_test_form):
+def test_validate_application_form_modify_no_post_population(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that post-population does NOT occur during MODIFY action"""
     form = create_test_form(
         form_name="PostPopForm",

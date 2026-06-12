@@ -59,7 +59,9 @@ def create_test_form(db_session):
     form_template_registry._registry.clear()
 
 
-def test_add_organization_to_application_success(enable_factory_create, db_session, create_test_form):
+def test_add_organization_to_application_success(
+    enable_factory_create, db_session, create_test_form
+):
     """Test successfully adding an organization to an application."""
     # Create user with proper privileges
     user = UserFactory.create()
@@ -385,7 +387,9 @@ def test_add_organization_removes_multiple_application_users(enable_factory_crea
     assert updated_application.organization_id == organization.organization_id
 
 
-def test_add_organization_triggers_form_prepopulation(enable_factory_create, db_session, create_test_form):
+def test_add_organization_triggers_form_prepopulation(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that adding organization triggers pre-population on application forms."""
     user = UserFactory.create()
 
