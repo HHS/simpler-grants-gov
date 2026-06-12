@@ -36,7 +36,6 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
-from src.form_schema.registry.form_template_registry import form_template_registry
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
     init_workflow_client_registry,

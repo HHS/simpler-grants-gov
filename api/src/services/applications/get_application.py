@@ -9,7 +9,12 @@ from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege
-from src.db.models.competition_models import Application, ApplicationForm, Competition
+from src.db.models.competition_models import (
+    Application,
+    ApplicationForm,
+    Competition,
+    FormInstruction,
+)
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, User
 from src.services.applications.application_logging import add_application_metadata_to_logs
@@ -76,6 +81,30 @@ def get_application(
     # NOTE: Trying to put this in an order_by in the relationship doesn't work as we can't sort on a joined value
     #       Haven't found a way to sort this when querying above that doesn't break the query
     application.application_forms.sort(key=lambda app_form: app_form.form.form_name)
+
+    # Load form_instruction for each application form.
+    # CompetitionForm.form is a registry-backed @property returning an in-memory Form object
+    # with no DB session, so form_instruction cannot be selectinloaded through it.
+    # We load FormInstruction rows in one query and attach them to the registry form objects.
+    forms_needing_instruction = {
+        app_form.form.form_instruction_id: app_form.form
+        for app_form in application.application_forms
+        if app_form.form.form_instruction_id is not None
+    }
+    if forms_needing_instruction:
+        instructions = (
+            db_session.execute(
+                select(FormInstruction).where(
+                    FormInstruction.form_instruction_id.in_(forms_needing_instruction.keys())
+                )
+            )
+            .scalars()
+            .all()
+        )
+        for instruction in instructions:
+            forms_needing_instruction[instruction.form_instruction_id].form_instruction = (
+                instruction
+            )
 
     # Add application metadata to logs
     add_application_metadata_to_logs(application)
