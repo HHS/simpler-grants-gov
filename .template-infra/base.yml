@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: v0.15.7
+_commit: v0.17.0
 _src_path: https://github.com/navapbc/template-infra
 base_code_repository_url: https://github.com/navapbc/simpler-grants-gov
 base_default_region: us-east-2

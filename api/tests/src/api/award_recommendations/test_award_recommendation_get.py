@@ -119,6 +119,7 @@ class TestGetAwardRecommendation200:
         AwardRecommendationApplicationSubmissionFactory.create(
             award_recommendation=award_recommendation,
             recommended_without_funding=True,
+            award_recommendation_submission_detail__recommended_amount=25000,
         )
         AwardRecommendationApplicationSubmissionFactory.create(
             award_recommendation=award_recommendation,

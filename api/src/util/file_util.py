@@ -254,9 +254,11 @@ def read_file(path: str | Path, mode: str = "r", encoding: str | None = None) ->
         return input_file.read()
 
 
-def write_to_file(path: str | Path, content: str, encoding: str | None = None) -> str:
+def write_to_file(
+    path: str | Path, content: str, encoding: str | None = None, content_type: str | None = None
+) -> str:
     """Simple function for replacing contents of a file"""
-    with open_stream(path, "w", encoding) as file_to_write_to:
+    with open_stream(path, "w", encoding, content_type) as file_to_write_to:
         return file_to_write_to.write(content)
 
 

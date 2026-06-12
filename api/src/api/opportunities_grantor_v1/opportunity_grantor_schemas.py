@@ -115,6 +115,13 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
         },
     )
 
+    is_simpler_grants_opportunity = fields.Boolean(
+        allow_none=True,
+        metadata={
+            "description": "Whether the opportunity was created with the Simpler Grants application",
+        },
+    )
+
     forecast_summary = fields.Nested(
         lambda: OpportunitySummaryDetailSchema(),
         allow_none=True,
