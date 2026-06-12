@@ -63,6 +63,12 @@ inputs:
   staging_test_user_api_key:
     description: "test user API key used in spoofing staging user logins"
     default: ""
+  staging_test_user_manager_api_key:
+    description: "manager API key used to request auth tokens for test users via POST /v1/internal/e2e-token"
+    default: ""
+  staging_test_user_id:
+    description: "UUID of the staging test user whose token will be requested for login spoofing"
+    default: ""
   staging_client_session_secret:
     description: "encode key for client side JWTs, used in spoofing staging user logins"
     default: ""
@@ -140,6 +146,8 @@ runs:
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
         STAGING_TEST_USER_API_KEY: ${{ inputs.staging_test_user_api_key }}
+        STAGING_TEST_USER_MANAGER_API_KEY: ${{ inputs.staging_test_user_manager_api_key }}
+        STAGING_TEST_USER_ID: ${{ inputs.staging_test_user_id }}
         SESSION_SECRET_OVERRIDE: ${{ inputs.staging_client_session_secret }}
 
       run: |
@@ -159,6 +167,8 @@ runs:
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
         STAGING_TEST_USER_API_KEY: ${{ inputs.staging_test_user_api_key }}
+        STAGING_TEST_USER_MANAGER_API_KEY: ${{ inputs.staging_test_user_manager_api_key }}
+        STAGING_TEST_USER_ID: ${{ inputs.staging_test_user_id }}
         SESSION_SECRET_OVERRIDE: ${{ inputs.staging_client_session_secret }}
 
       run: |
