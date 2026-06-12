@@ -161,6 +161,8 @@ def process_simpler_request(
             return get_soap_error_response(
                 faultstring="Certificate is expired. (Authorization Failure)"
             ).to_flask_response()
+
+    soap_request: SOAPRequest | None = None
     try:
         soap_request = SOAPRequest(
             api_name=api_name,
@@ -230,7 +232,7 @@ def process_simpler_request(
         )
         error_response = get_soap_error_response()
         write_debug_data_to_s3(soap_request, error_response)
-        return soap_legacy_response.to_flask_response()
+        return error_response.to_flask_response()
     if auth and auth.certificate.legacy_certificate:
         try:
             simpler_soap_response = get_simpler_soap_response(
