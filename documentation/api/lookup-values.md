@@ -100,7 +100,7 @@ class LkExample(LookupTable, TimestampMixin):
 
 The table definition itself is pretty straightforward, and follows our usual approach to any SQLAlchemy model.
 
-The [LookupRegistry](../../api/src/db/models/lookup/lookup_registry.py) is a global registry that defines the table for each lookup value. This is used in two ways:
+The [LookupRegistry](../../backend/grants_shared/src/grants_shared/db/models/lookup/lookup_registry.py) is a global registry that defines the table for each lookup value. This is used in two ways:
 1. When running DB migrations, the enum values will be merged into the corresponding Lookup table automatically
 2. When defining a database table with a foreign key to these lookup values, handles converting to/from an enum.
 
