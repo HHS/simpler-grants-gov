@@ -10,10 +10,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 // reads from the status update stream returned by the /results API and writes incoming data
 // to the client response stream
-// TODO: think about setting a timeout here?
+// apparently this will timeout after 60 seconds, and deliver chunks every 3 seconds
+// we will need to watch for changes in state here rather than assuming that chunks will only come on
+// state change
 const pipeStatusStreamToResponse = async (
   outputController: ReadableStreamDefaultController,
   inputStream: ReadableStreamDefaultReader<string>,
+  previousState?: string,
 ) => {
   const { value, done } = await inputStream.read();
   // this structure is dependent on what the API will actually send back, and will need to be adjusted
@@ -25,7 +28,9 @@ const pipeStatusStreamToResponse = async (
       console.error("Error parsing json from file upload stream payload");
       throw e;
     }
-    outputController.enqueue({ status: payloadJson.status });
+    if (previousState !== payloadJson.status) {
+      outputController.enqueue({ status: payloadJson.status });
+    }
   }
   if (done) {
     outputController.close();
@@ -44,11 +49,11 @@ const orchestrateFileUpload = async (
 ) => {
   responseStreamController.enqueue({ status: "queued" });
   // call Simpler API to obtain details for S3 upload and pending file id
-  const fileUploadDetails = await fetchFileUploadDetails(file);
+  const fileUploadDetails = await fetchFileUploadDetails(file.name, file.type);
   responseStreamController.enqueue({ status: "uploading" });
 
   // upload file to s3
-  await uploadFileToS3(fileUploadDetails.url, fileUploadDetails.body);
+  await uploadFileToS3(fileUploadDetails.url, fileUploadDetails.body, file);
   responseStreamController.enqueue({ status: "starting-scan" });
 
   // open stream to fetch upload and scan progress updates

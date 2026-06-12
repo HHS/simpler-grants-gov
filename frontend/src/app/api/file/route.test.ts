@@ -17,7 +17,7 @@ import { handleFileUpload } from "./handler";
 
 const mockFetchFileUploadDetails = jest.fn<
   Promise<FileUploadDetailsResponse>,
-  [File]
+  [string, string]
 >();
 const mockFetchFileScanStatus = jest.fn();
 const mockUploadFileToS3 = jest.fn();
@@ -32,11 +32,11 @@ let testResponseChunks = [
 
 // normally wouldn't bother typing these, but it makes asserting arguments easier in this case
 jest.mock("src/services/fetch/fetchers/filesFetcher", () => ({
-  fetchFileUploadDetails: (file: File) =>
-    mockFetchFileUploadDetails(file) as unknown,
+  fetchFileUploadDetails: (fileName: string, mimeType: string) =>
+    mockFetchFileUploadDetails(fileName, mimeType) as unknown,
   fetchFileScanStatus: (id: string) => mockFetchFileScanStatus(id) as unknown,
-  uploadFileToS3: (url: string, body: unknown[]) =>
-    mockUploadFileToS3(url, body) as unknown,
+  uploadFileToS3: (url: string, body: unknown[], file: File) =>
+    mockUploadFileToS3(url, body, file) as unknown,
 }));
 
 describe("POST request handler /api/file (handleFileUpload)", () => {
@@ -135,7 +135,15 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     expect(mockUploadFileToS3).toHaveBeenCalledWith(
       "any url",
       "some sort of body to send in the next request",
+      expect.any(File),
     );
+
+    // can't simply assert that this was called with the file from the request since
+    // form data API seems to recreate / duplicate the file, meaning the mock file created is not
+    // exactly the same as the mock file extracted from the form data
+    const fileArg: File = mockFetchFileUploadDetails.mock.calls[0][2];
+    expect(fileArg).toBeInstanceOf(File);
+    expect(fileArg.name).toEqual(testFile.name);
   });
   it("calls fetchFileScanStatus with pending_file_id from fetchFileUploadDetails, and streams 'starting-scan' status", async () => {
     const testFile = new File(["file contents"], "file.txt");

@@ -14,7 +14,12 @@ import {
 
 const mockFetchFileUpload = jest.fn();
 const mockFetchFileUploadWithMethod = jest.fn();
-const mockCreateFormData = jest.fn(() => "this is not actually form data");
+// slightly simplifies things...
+const mockCreateFormData = jest.fn((file: File) => {
+  const testFormData = new FormData();
+  testFormData.append("file", file.name);
+  return testFormData;
+});
 const mockFetch = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
@@ -23,7 +28,7 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 }));
 
 jest.mock("src/utils/fileUtils/createFormData", () => ({
-  createFormData: () => mockCreateFormData(),
+  createFormData: (file: File) => mockCreateFormData(file),
 }));
 
 describe("fetchFileUploadDetails", () => {
@@ -37,11 +42,13 @@ describe("fetchFileUploadDetails", () => {
     mockFetchFileUploadWithMethod.mockImplementation(
       (_arg) => mockFetchFileUpload,
     );
-    const fakeFile = new File(["hi"], "hi.txt");
-    const response = await fetchFileUploadDetails(fakeFile);
+    const response = await fetchFileUploadDetails("fileName", "mimeType");
     expect(mockFetchFileUploadWithMethod).toHaveBeenCalledWith("POST");
     expect(mockFetchFileUpload).toHaveBeenCalledWith({
-      body: "this is not actually form data",
+      body: {
+        file_name: "fileName",
+        mime_type: "mimeType",
+      },
     });
     expect(response).toEqual("good return value");
   });
@@ -57,13 +64,18 @@ describe("uploadFileToS3", () => {
     global.fetch = originalFetch;
     jest.resetAllMocks();
   });
-  it("calls fetch with the expected arguments", async () => {
+  it.only("calls fetch with the expected arguments", async () => {
     mockFetch.mockResolvedValue({ ok: true });
+    const expectedFormData = new FormData();
+    const fakeFile = new File(["hi"], "hi.txt");
     const jsonBody = { something: "else" };
-    const response = await uploadFileToS3("some url", jsonBody);
+    expectedFormData.append("file", "hi.txt");
+    expectedFormData.append("something", "else");
+
+    const response = await uploadFileToS3("some url", jsonBody, fakeFile);
     expect(mockFetch).toHaveBeenCalledWith("some url", {
       method: "POST",
-      body: JSON.stringify(jsonBody),
+      body: expectedFormData,
     });
     expect(response).toEqual(true);
   });

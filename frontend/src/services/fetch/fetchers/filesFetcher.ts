@@ -1,5 +1,6 @@
 import { ApiRequestError } from "src/errors";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
+import { OptionalStringDict } from "src/types/generalTypes";
 import { createFormData } from "src/utils/fileUtils/createFormData";
 
 import { fetchFileUploadWithMethod } from "./fetchers";
@@ -21,14 +22,14 @@ import { fetchFileUploadWithMethod } from "./fetchers";
 */
 
 export const fetchFileUploadDetails = async (
-  file: File,
+  fileName: string,
+  mimeType: string,
 ): Promise<FileUploadDetailsResponse> => {
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  const fileFormData = createFormData(file.name, buffer, file.type);
   const uploadDetailsResponse = await fetchFileUploadWithMethod("POST")({
-    body: fileFormData,
+    body: {
+      file_name: fileName,
+      mime_type: mimeType,
+    },
   });
   return (await uploadDetailsResponse.json()) as FileUploadDetailsResponse;
 };
@@ -36,13 +37,23 @@ export const fetchFileUploadDetails = async (
 // uses the url and body parameters return by the API in the fetchFileUploadDetails call
 export const uploadFileToS3 = async (
   url: string,
-  body: unknown,
+  body: OptionalStringDict,
+  file: File,
 ): Promise<boolean> => {
   try {
-    const bodyString = JSON.stringify(body);
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const fileFormData = createFormData(file.name, buffer, file.type, "file");
+    Object.entries(body).forEach(([key, value]) => {
+      // don't overwrite the file field
+      if (value && key !== "file") {
+        fileFormData.append(key, value);
+      }
+    });
     const s3Response = await fetch(url, {
       method: "POST",
-      body: bodyString,
+      body: fileFormData,
     });
     if (s3Response.ok) {
       return true;
