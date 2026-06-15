@@ -22,6 +22,18 @@ export const parseErrorStatus = (error: ApiRequestError): number => {
   }
 };
 
+export class MissingAuthError extends Error {
+  constructor(message?: string) {
+    const errorMessage =
+      message || "Request requires authentication and is missing user token";
+    const cause = {
+      type: "MissingAuthError",
+      message: errorMessage,
+    };
+    super(errorMessage, { cause });
+  }
+}
+
 /**
  * A fetch request failed due to a network error. The error wasn't the fault of the user,
  * and an issue was encountered while setting up or sending a request, or parsing the response.

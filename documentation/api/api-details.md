@@ -41,8 +41,8 @@ For example, if we wanted to define an endpoint with a request like:
 We would define the Marshmallow schema in-python like so:
 ```py
 from enum import StrEnum
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
 
 class Suffix(StrEnum):
     SENIOR = "SR"
@@ -82,7 +82,7 @@ but it's recommended you try to populate the following:
 You can specify validators that will be run when the request is being serialized by APIFlask
 
 Defining a response works the exact same way however field validation does not occur on response, only formatting.
-To keep our response schema following a consistent pattern, we have a few base schema classes like [AbstractResponseSchema](../../api/src/api/schemas/response_schema.py)
+To keep our response schema following a consistent pattern, we have a few base schema classes like [AbstractResponseSchema](../../backend/grants_shared/src/grants_shared/api/schemas/response_schema.py)
 that you can derive from for shared values like the message.
 
 ### Schema tips

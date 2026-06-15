@@ -276,3 +276,30 @@ def test_competition_create_without_assistance_listing(
 
     # Verify assistance listing is None when opportunity has no ALNs
     assert competition_data["opportunity_assistance_listing"] is None
+
+
+def test_competition_create_closing_before_opening(client, grantor_auth_data):
+    """Test competition creation with closing_date before opening_date"""
+    _, agency, token, _ = grantor_auth_data
+
+    opportunity = OpportunityFactory.create(
+        agency_id=agency.agency_id, agency_code=agency.agency_code
+    )
+
+    competition_request = create_competition_request(
+        opening_date="2026-06-01", closing_date="2026-05-01"  # Before opening
+    )
+
+    response = client.post(
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
+        json=competition_request,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 422
+    response_json = response.get_json()
+    assert response_json["message"] == "Validation error"
+    assert any(
+        "closing date must be on or after opening date" in error.get("message", "").lower()
+        for error in response_json.get("errors", [])
+    )

@@ -21,7 +21,7 @@ import {
   getFieldNameForHtml,
   getFieldPathFromHtml,
   getFieldSchema,
-} from "src/components/applyForm/utils";
+} from "./applyFormUtils";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 

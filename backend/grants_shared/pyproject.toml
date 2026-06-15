@@ -1,6 +1,6 @@
 [project]
 name = "grants-shared"
-version = "0.2.4"
+version = "0.2.5"
 description = "Shared code used by the Simpler Grants.gov repo"
 readme = "README.md"
 license = "CC0-1.0"
@@ -31,6 +31,7 @@ dependencies = [
     "pandas-stubs>=2.0.3,<3",
     "newrelic>=12.1.0,<13",
     "python-dotenv>=1.2.2,<2",
+    "beautifulsoup4>=4.14.3,<5",
 ]
 
 [project.urls]

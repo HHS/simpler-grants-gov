@@ -5,6 +5,7 @@ import { PaginationInfo } from "src/types/apiResponseTypes";
 import { AwardRecommendationRisk } from "src/types/awardRecommendationTypes";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
@@ -200,16 +201,13 @@ export const AwardRecommendationAttachments = ({
       <div className="display-flex flex-justify flex-align-end margin-top-6 margin-bottom-1">
         <h3 className="margin-y-0">{t("risksHeading")}</h3>
         {mode === "edit" && risks.length > 0 && (
-          <a
-            href="#"
+          <Link
+            href={`/award-recommendation/${awardRecommendationId}/risks`}
             className="text-bold"
             style={{ textDecoration: "underline" }}
-            onClick={() => {
-              /* TODO: implement routing */
-            }}
           >
             {t("editRisks")}
-          </a>
+          </Link>
         )}
       </div>
       {apiError && (
@@ -226,16 +224,13 @@ export const AwardRecommendationAttachments = ({
         </div>
       ) : mode === "edit" && risks.length === 0 ? (
         <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
-          <a
+          <Link
+            href={`/award-recommendation/${awardRecommendationId}/risks`}
             className="text-bold text-left display-block width-full"
-            href="#"
             style={{ textDecoration: "underline" }}
-            onClick={() => {
-              /* TODO: implement routing */
-            }}
           >
             {t("enterRisks")}
-          </a>
+          </Link>
         </div>
       ) : (
         <>
