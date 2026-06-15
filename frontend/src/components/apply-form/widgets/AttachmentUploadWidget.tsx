@@ -178,7 +178,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
       )}
 
       <DeleteFileModal
-        Filending={deletePending}
+        deletePending={deletePending}
         handleDeleteFile={handleDeleteConfirmed}
         modalId="delete-attachment-modal"
         modalRef={deleteModalRef}

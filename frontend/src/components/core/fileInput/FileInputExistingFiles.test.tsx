@@ -22,6 +22,9 @@ const generateFile = (date: Date, index: number) => ({
   updatedAt: date.getTime(),
 });
 
+const testDateOne = new Date("04 Dec 1995");
+const testDateTwo = new Date("04 Dec 1996");
+
 describe("FileInputExistingFiles", () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -33,8 +36,8 @@ describe("FileInputExistingFiles", () => {
     ).not.toBeInTheDocument();
   });
   it("displays file name for each file present", () => {
-    const fileOne = generateFile(new Date("04 Dec 1995"), 1);
-    const fileTwo = generateFile(new Date("04 Dec 1996"), 2);
+    const fileOne = generateFile(testDateOne, 1);
+    const fileTwo = generateFile(testDateTwo, 2);
     render(
       <FileInputExistingFiles
         existingFiles={[fileOne, fileTwo]}
@@ -45,8 +48,8 @@ describe("FileInputExistingFiles", () => {
     expect(screen.getByText("file name 2")).toBeInTheDocument();
   });
   it("displays file size and timestamp for each file present", () => {
-    const fileOne = generateFile(new Date("04 Dec 1995"), 1);
-    const fileTwo = generateFile(new Date("04 Dec 1996"), 2);
+    const fileOne = generateFile(testDateOne, 1);
+    const fileTwo = generateFile(testDateTwo, 2);
     render(
       <FileInputExistingFiles
         existingFiles={[fileOne, fileTwo]}
@@ -57,8 +60,8 @@ describe("FileInputExistingFiles", () => {
     expect(screen.getByText("2 | savedOn 1996")).toBeInTheDocument();
   });
   it("displays a delete button for each provided file", async () => {
-    const fileOne = generateFile(new Date("04 Dec 1995"), 1);
-    const fileTwo = generateFile(new Date("04 Dec 1996"), 2);
+    const fileOne = generateFile(testDateOne, 1);
+    const fileTwo = generateFile(testDateTwo, 2);
     render(
       <FileInputExistingFiles
         existingFiles={[fileOne, fileTwo]}
@@ -70,10 +73,10 @@ describe("FileInputExistingFiles", () => {
     });
     expect(deleteButtons).toHaveLength(2);
   });
-  it("calls onDelete with the id for each file on delete button click", async () => {
+  it("calls onDelete with file metadata for each file on delete button click", async () => {
     const onDeleteMock = jest.fn();
-    const fileOne = generateFile(new Date("04 Dec 1995"), 1);
-    const fileTwo = generateFile(new Date("04 Dec 1996"), 2);
+    const fileOne = generateFile(testDateOne, 1);
+    const fileTwo = generateFile(testDateTwo, 2);
     render(
       <FileInputExistingFiles
         existingFiles={[fileOne, fileTwo]}
@@ -91,10 +94,22 @@ describe("FileInputExistingFiles", () => {
 
     await userEvent.click(firstButton);
     expect(onDeleteMock).toHaveBeenCalledTimes(1);
-    expect(onDeleteMock).toHaveBeenCalledWith("1");
+    expect(onDeleteMock).toHaveBeenCalledWith({
+      fileName: "file name 1",
+      fileSize: 1,
+      id: "1",
+      mimeType: "file",
+      updatedAt: testDateOne.getTime(),
+    });
 
     await userEvent.click(secondButton);
     expect(onDeleteMock).toHaveBeenCalledTimes(2);
-    expect(onDeleteMock).toHaveBeenCalledWith("2");
+    expect(onDeleteMock).toHaveBeenCalledWith({
+      fileName: "file name 2",
+      fileSize: 2,
+      id: "2",
+      mimeType: "file",
+      updatedAt: testDateTwo.getTime(),
+    });
   });
 });
