@@ -4,9 +4,9 @@
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { checkboxHandler } from "../checkbox-handler";
-import { radioButtonHandler } from "../radio-button-handler";
-import { type FillFieldDefinition } from "../types";
+import { checkboxHandler } from "tests/e2e/utils/common/checkbox-handler";
+import { radioButtonHandler } from "tests/e2e/utils/common/radio-button-handler";
+import { type FillFieldDefinition } from "tests/e2e/utils/common/types";
 
 class FakeLocator {
   checked: boolean;
