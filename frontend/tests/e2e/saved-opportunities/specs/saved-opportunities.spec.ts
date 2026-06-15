@@ -180,7 +180,9 @@ test.describe("Saved Opportunities", () => {
       );
 
       // And the detail page should not display any error states
-      await expect(page.getByRole("heading", { name: /500|Internal Server Error/i }),).not.toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: /500|Internal Server Error/i }),
+      ).not.toBeVisible();
       await expect(page.locator("body")).not.toContainText(
         "Something went wrong",
       );
