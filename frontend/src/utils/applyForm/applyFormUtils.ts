@@ -702,7 +702,13 @@ export const processFormSchema = (
       );
     const condensedProperties = mergeAllOf({
       properties: propertiesWithoutComplexConditionals,
-    } as JSONSchema7);
+    } as JSONSchema7, {
+      resolvers: {
+        if: (baseSchema, ifSchema) => baseSchema,
+        then: (baseSchema, thenSchema) => baseSchema,
+        else: (baseSchema, elseSchema) => baseSchema,
+      }
+    });
     return {
       formSchema: {
         ...formSchema,
@@ -711,7 +717,10 @@ export const processFormSchema = (
       conditionalValidationRules,
     };
   } catch (e) {
-    console.error("Error processing schema");
+    console.error("Error processing schema:", {
+      error: e instanceof Error ? e.message : String(e),
+      properties: Object.keys(propertiesWithoutComplexConditionals),
+    });
     throw e;
   }
 };
