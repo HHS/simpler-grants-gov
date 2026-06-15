@@ -1830,6 +1830,142 @@ OTHER_NARRATIVE_ATTACHMENTS_TEST_CASES = [
 ]
 
 
+# Sample test cases for Project/Performance Site Location v4.0 validation
+PERFORMANCE_SITE_TEST_CASES = [
+    {
+        "name": "performance_site_us_primary_only",
+        "json_input": {
+            "primary_site": {
+                "submitting_as_individual": False,
+                "organization_name": "Example University",
+                "uei": "ABCDEFGHIJ12",
+                "address": {
+                    "street1": "123 Research Blvd",
+                    "street2": "Suite 400",
+                    "city": "Science City",
+                    "county": "Grant County",
+                    "state": "CA: California",
+                    "country": "USA: UNITED STATES",
+                    "zip_code": "90210-1234",
+                },
+                "congressional_district": "CA-033",
+            }
+        },
+        "form_name": "PerformanceSite",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PerformanceSite_4_0-V4.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "performance_site_international_primary",
+        "json_input": {
+            "primary_site": {
+                "submitting_as_individual": False,
+                "organization_name": "International Research Institute",
+                "address": {
+                    "street1": "10 Rue de la Paix",
+                    "city": "Paris",
+                    "country": "FRA: FRANCE",
+                },
+            }
+        },
+        "form_name": "PerformanceSite",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PerformanceSite_4_0-V4.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "performance_site_individual_submitter",
+        "json_input": {
+            "primary_site": {
+                "submitting_as_individual": True,
+                "address": {
+                    "street1": "456 Main St",
+                    "city": "Springfield",
+                    "country": "USA: UNITED STATES",
+                    "zip_code": "12345-6789",
+                    "state": "IL: Illinois",
+                },
+                "congressional_district": "IL-013",
+            }
+        },
+        "form_name": "PerformanceSite",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PerformanceSite_4_0-V4.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "performance_site_with_additional_sites",
+        "json_input": {
+            "primary_site": {
+                "submitting_as_individual": False,
+                "organization_name": "Example University",
+                "uei": "ABCDEFGHIJ12",
+                "address": {
+                    "street1": "123 Research Blvd",
+                    "city": "Science City",
+                    "state": "CA: California",
+                    "country": "USA: UNITED STATES",
+                    "zip_code": "90210-1234",
+                },
+                "congressional_district": "CA-033",
+            },
+            "additional_sites": [
+                {
+                    "organization_name": "Partner Lab",
+                    "address": {
+                        "street1": "789 Partner Ave",
+                        "city": "Austin",
+                        "state": "TX: Texas",
+                        "country": "USA: UNITED STATES",
+                        "zip_code": "78701",
+                    },
+                    "congressional_district": "TX-025",
+                },
+                {
+                    "organization_name": "International Research Institute",
+                    "address": {
+                        "street1": "10 Rue de la Paix",
+                        "city": "Paris",
+                        "country": "FRA: FRANCE",
+                    },
+                },
+            ],
+        },
+        "form_name": "PerformanceSite",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PerformanceSite_4_0-V4.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "performance_site_with_attachment",
+        "json_input": {
+            "primary_site": {
+                "submitting_as_individual": False,
+                "organization_name": "Example University",
+                "address": {
+                    "street1": "123 Research Blvd",
+                    "city": "Science City",
+                    "state": "CA: California",
+                    "country": "USA: UNITED STATES",
+                    "zip_code": "90210-1234",
+                },
+                "congressional_district": "CA-033",
+            },
+            "additional_locations_attachment": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+        },
+        "form_name": "PerformanceSite",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PerformanceSite_4_0-V4.0.xsd",
+        "pretty_print": True,
+        "attachment_mapping": {
+            "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee": {
+                "FileName": "additional_locations.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "additional_locations.pdf",
+                "HashValue": "aeB1+6gdFwih51ijIRn3b8QYn24=",
+                "HashAlgorithm": "SHA-1",
+            }
+        },
+    },
+]
+
+
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
 
@@ -1849,6 +1985,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + EPA_KEY_CONTACTS_TEST_CASES
         + ATTACHMENTFORM_TEST_CASES
         + OTHER_NARRATIVE_ATTACHMENTS_TEST_CASES
+        + PERFORMANCE_SITE_TEST_CASES
     )
 
 

@@ -171,7 +171,8 @@ class AttachmentTransformer:
         uses_wrapper = field_config and field_config.get("type") == "single_with_wrapper"
 
         if uses_wrapper:
-            # Determine inner element name: config override or default to '{element_name}File'
+            # Determine inner element name: config override or default to '{element_name}File'.
+            # Empty string means no inner wrapper — content goes directly in the outer element.
             file_element_name = (
                 field_config.get("file_element", f"{element_name}File")
                 if field_config
@@ -180,18 +181,24 @@ class AttachmentTransformer:
 
             default_ns = next(iter(nsmap.values()), None) if nsmap else None
 
-            # Create the wrapper element (e.g., <ATT1>) in the default namespace
+            # Create the outer wrapper element (e.g., <ATT1>) in the default namespace
             if default_ns:
                 attachment_elem = lxml_etree.SubElement(parent, f"{{{default_ns}}}{element_name}")
-                file_elem = lxml_etree.SubElement(
-                    attachment_elem, f"{{{default_ns}}}{file_element_name}"
-                )
             else:
                 attachment_elem = lxml_etree.SubElement(parent, element_name)
-                file_elem = lxml_etree.SubElement(attachment_elem, file_element_name)
 
-            # Populate the File element with attachment content
-            self._populate_attachment_content(file_elem, attachment_data, nsmap)
+            if file_element_name:
+                # Create inner file element (e.g., <ATT1File>) and populate it
+                if default_ns:
+                    file_elem = lxml_etree.SubElement(
+                        attachment_elem, f"{{{default_ns}}}{file_element_name}"
+                    )
+                else:
+                    file_elem = lxml_etree.SubElement(attachment_elem, file_element_name)
+                self._populate_attachment_content(file_elem, attachment_data, nsmap)
+            else:
+                # No inner wrapper — populate content directly in the outer element
+                self._populate_attachment_content(attachment_elem, attachment_data, nsmap)
         else:
             # No wrapper needed - populate content directly on parent
             self._populate_attachment_content(parent, attachment_data, nsmap)
