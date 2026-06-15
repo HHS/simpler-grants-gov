@@ -10,15 +10,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 // reads from the status update stream returned by the /results API and writes incoming data
 // to the client response stream
-// apparently this will timeout after 60 seconds, and deliver chunks every 3 seconds
-// we will need to watch for changes in state here rather than assuming that chunks will only come on
-// state change
+// apparently the API response stream will timeout after 60 seconds, and deliver chunks every 3 seconds
 const pipeStatusStreamToResponse = async (
   outputController: ReadableStreamDefaultController,
   inputStream: ReadableStreamDefaultReader<string>,
   previousState?: string,
 ) => {
   const { value, done } = await inputStream.read();
+  let responseState = previousState;
   // this structure is dependent on what the API will actually send back, and will need to be adjusted
   if (value) {
     let payloadJson: FileUploadStatusUpdate;
@@ -28,7 +27,10 @@ const pipeStatusStreamToResponse = async (
       console.error("Error parsing json from file upload stream payload");
       throw e;
     }
+    // we will expect the API to deliver duplicate chunks until a state change, but will only write to our
+    // output stream when the state changes
     if (previousState !== payloadJson.status) {
+      responseState = payloadJson.status;
       outputController.enqueue({ status: payloadJson.status });
     }
   }
@@ -36,7 +38,11 @@ const pipeStatusStreamToResponse = async (
     outputController.close();
     return;
   }
-  return pipeStatusStreamToResponse(outputController, inputStream);
+  return pipeStatusStreamToResponse(
+    outputController,
+    inputStream,
+    responseState,
+  );
 };
 
 // This is an async function that will perform all of the file upload orchestraction

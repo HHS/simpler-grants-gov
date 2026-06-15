@@ -20,7 +20,7 @@ const mockFetchFileUploadDetails = jest.fn<
   [string, string]
 >();
 const mockFetchFileScanStatus = jest.fn();
-const mockUploadFileToS3 = jest.fn();
+const mockUploadFileToS3 = jest.fn<Promise<boolean>, [string, unknown, File]>();
 
 let trigger: AdvanceTestStreamTrigger;
 let testStream: ReadableStream;
@@ -50,7 +50,9 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     mockFetchFileUploadDetails.mockResolvedValue({
       url: "any url",
       pending_file_id: "fake id",
-      body: "some sort of body to send in the next request",
+      body: {
+        key: "some sort of body to send in the next request",
+      },
     });
   });
   afterEach(() => {
@@ -66,7 +68,9 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     expect(response.status).toEqual(400);
   });
   it("calls fetchFileUploadDetails with uploaded file, and streams 'queued' status", async () => {
-    const testFile = new File(["file contents"], "file.txt");
+    const testFile = new File(["file contents"], "file.txt", {
+      type: "application/octet-stream",
+    });
     const testFormData = new FormData();
     testFormData.append("file", testFile);
     const response = await handleFileUpload(
@@ -84,13 +88,11 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     const firstChunk = await reader?.read();
     expect(firstChunk?.value?.status).toEqual("queued");
 
-    // can't simply assert that this was called with the file from the request since
-    // form data API seems to recreate / duplicate the file, meaning the mock file created is not
-    // exactly the same as the mock file extracted from the form data
     expect(mockFetchFileUploadDetails).toHaveBeenCalledTimes(1);
-    const fileArg: File = mockFetchFileUploadDetails.mock.calls[0][0];
-    expect(fileArg).toBeInstanceOf(File);
-    expect(fileArg.name).toEqual(testFile.name);
+    expect(mockFetchFileUploadDetails).toHaveBeenCalledWith(
+      testFile.name,
+      testFile.type,
+    );
   });
   it("sets queued status while fetching s3 details", async () => {
     const testFile = new File(["file contents"], "file.txt");
@@ -111,7 +113,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     const firstChunk = await reader?.read();
     expect(firstChunk?.value?.status).toEqual("queued");
   });
-  it("calls uploadFileToS3 with returned data from fetchFileUploadDetails, and streams 'uploading' status", async () => {
+  it("calls uploadFileToS3 with returned data from fetchFileUploadDetails and file, and streams 'uploading' status", async () => {
     const testFile = new File(["file contents"], "file.txt");
     const testFormData = new FormData();
     testFormData.append("file", testFile);
@@ -134,14 +136,14 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     expect(mockUploadFileToS3).toHaveBeenCalledTimes(1);
     expect(mockUploadFileToS3).toHaveBeenCalledWith(
       "any url",
-      "some sort of body to send in the next request",
+      { key: "some sort of body to send in the next request" },
       expect.any(File),
     );
 
     // can't simply assert that this was called with the file from the request since
     // form data API seems to recreate / duplicate the file, meaning the mock file created is not
     // exactly the same as the mock file extracted from the form data
-    const fileArg: File = mockFetchFileUploadDetails.mock.calls[0][2];
+    const fileArg: File = mockUploadFileToS3.mock.calls[0][2];
     expect(fileArg).toBeInstanceOf(File);
     expect(fileArg.name).toEqual(testFile.name);
   });
@@ -193,6 +195,53 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     const firstChunk = await reader?.read();
     expect(firstChunk?.value?.status).toEqual("step 1");
 
+    trigger.advance();
+    const secondChunk = await reader?.read();
+    expect(secondChunk?.value?.status).toEqual("step 2");
+
+    trigger.advance();
+    const thirdChunk = await reader?.read();
+    expect(thirdChunk?.value?.status).toEqual("step 3");
+  });
+  it("streams data from fetchFileScanStatus only when data status changes", async () => {
+    trigger = createAdvanceStreamTrigger();
+    testStream = makeAdvanceableTestStreamForTrigger(
+      [
+        JSON.stringify({ status: "step 1" }),
+        JSON.stringify({ status: "step 1" }),
+        JSON.stringify({ status: "step 1" }),
+        JSON.stringify({ status: "step 2" }),
+        JSON.stringify({ status: "step 3" }),
+      ],
+      trigger,
+    );
+    mockFetchFileScanStatus.mockResolvedValue(testStream);
+    const testFile = new File(["file contents"], "file.txt");
+    const testFormData = new FormData();
+    testFormData.append("file", testFile);
+    const response = await handleFileUpload(
+      new NextRequest("http://arbitrary", {
+        method: "POST",
+        body: testFormData,
+      }),
+    );
+    expect(response.status).toEqual(200);
+    expect(response.body).toBeInstanceOf(ReadableStream);
+
+    const reader =
+      response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
+
+    // advance through queued, uploading, and starting-scan states
+    await reader?.read();
+    await reader?.read();
+    await reader?.read();
+
+    trigger.advance();
+    const firstChunk = await reader?.read();
+    expect(firstChunk?.value?.status).toEqual("step 1");
+
+    trigger.advance();
+    trigger.advance();
     trigger.advance();
     const secondChunk = await reader?.read();
     expect(secondChunk?.value?.status).toEqual("step 2");

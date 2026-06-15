@@ -24,7 +24,7 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 }));
 
 jest.mock("src/utils/fileUtils/createFormData", () => ({
-  createFormData: (fileName: string) => mockCreateFormData(fileName),
+  createFormData: (fileName: string) => mockCreateFormData(fileName) as unknown,
 }));
 
 describe("fetchFileUploadDetails", () => {
