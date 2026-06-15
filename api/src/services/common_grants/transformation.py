@@ -20,6 +20,7 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SingleDateEvent,
 )
+from grants_shared.api.response import ValidationErrorDetail
 from pydantic import ValidationError
 
 from src.api.common_grants.schemas.pydantic.custom_fields import (
@@ -36,7 +37,6 @@ from src.api.common_grants.schemas.pydantic.custom_fields import (
     FiscalYearField,
     LegacySerialIdField,
 )
-from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.services.common_grants.url_utils import validate_url_compatible

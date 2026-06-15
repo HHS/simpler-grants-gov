@@ -2,21 +2,21 @@ from grants_shared.api.schemas.extension import Schema, fields
 from grants_shared.api.schemas.response_schema import (
     AbstractResponseSchema,
     FileResponseSchema,
+    PaginationMixinSchema,
     WarningMixinSchema,
 )
 from grants_shared.api.schemas.search_schema import StrSearchSchemaBuilder
+from grants_shared.pagination.pagination_schema import generate_pagination_schema
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.form_alpha.form_schema import FormAlphaSchema
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
-from src.api.schemas.response_schema import PaginationMixinSchema
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,
     ApplicationFormStatus,
     ApplicationStatus,
 )
-from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class ApplicationStartRequestSchema(Schema):

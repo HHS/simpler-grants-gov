@@ -3,10 +3,10 @@ import logging
 import click
 import grants_shared.adapters.db as db
 from grants_shared.adapters.db import flask_db
+from grants_shared.task.ecs_background_task import ecs_background_task
 
 from src.adapters.sam_gov import create_sam_gov_client
 from src.constants.lookup_constants import JobType
-from src.task.ecs_background_task import ecs_background_task
 from src.task.sam_extracts.cleanup_old_sam_extracts import CleanupOldSamExtractsTask
 from src.task.sam_extracts.create_orgs_from_sam_entity import CreateOrgsFromSamEntityTask
 from src.task.sam_extracts.fetch_sam_extracts import FetchSamExtractsTask

@@ -17,7 +17,7 @@ from grants_shared.logs.flask_logger import init_general_logging
 from src.constants.lookup_constants import JobType
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 
-from src.task.ecs_background_task import ecs_background_task  # isort:skip
+from grants_shared.task.ecs_background_task import ecs_background_task  # isort:skip
 
 logger = logging.getLogger(__name__)
 alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "./alembic.ini"))

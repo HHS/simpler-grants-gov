@@ -3,7 +3,7 @@ from typing import Any, Never
 from apiflask import abort
 from apiflask.types import ResponseHeaderType
 
-from src.api.response import ValidationErrorDetail
+from grants_shared.api.response import ValidationErrorDetail
 
 
 def raise_flask_error(

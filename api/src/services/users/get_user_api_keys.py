@@ -3,8 +3,8 @@ from collections.abc import Sequence
 from uuid import UUID
 
 from grants_shared.adapters import db
+from grants_shared.api.route_utils import raise_flask_error
 
-from src.api.route_utils import raise_flask_error
 from src.auth.auth_handler import get_auth_handler
 from src.db.models.auth_base_models import BaseUserApiKey
 

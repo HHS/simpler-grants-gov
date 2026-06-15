@@ -5,9 +5,9 @@ import grants_shared.util.datetime_util as datetime_util
 from apiflask import APIKeyHeaderAuth
 from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
+from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-from src.api.route_utils import raise_flask_error
 from src.auth.auth_handler import get_auth_handler
 from src.db.models.auth_base_models import BaseUserApiKey
 from src.db.models.user_models import User, UserApiKey

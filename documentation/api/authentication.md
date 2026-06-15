@@ -143,7 +143,7 @@ of your endpoint. Additionally, you can fetch the user token session object from
 ```py
 from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
-from src.api import response
+from grants_shared.api import response
 from src.auth.api_jwt_auth import api_jwt_auth
 
 @example_blueprint.post("/my-example")
@@ -177,7 +177,7 @@ from typing import cast
 
 import grants_shared.adapters.db as db
 import grants_shared.adapters.db.flask_db as flask_db
-import src.api.response as response
+import grants_shared.api.response as response
 
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 

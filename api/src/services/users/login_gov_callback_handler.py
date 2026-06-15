@@ -4,12 +4,12 @@ from dataclasses import dataclass
 from typing import Any
 
 import grants_shared.adapters.db as db
+from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util.string_utils import is_valid_uuid
 from pydantic import BaseModel
 
 from src.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
 from src.adapters.oauth.oauth_client_models import OauthTokenRequest
-from src.api.route_utils import raise_flask_error
 from src.auth.api_jwt_auth import JwtAuth
 from src.auth.auth_errors import JwtValidationError
 from src.auth.auth_handler import AbstractAuthHandler, AuthHandler
