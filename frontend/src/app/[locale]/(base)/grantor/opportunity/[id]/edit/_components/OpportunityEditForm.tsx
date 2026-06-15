@@ -38,6 +38,7 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
+import { CommonCharacterCount } from "src/components/core/forms/CommonFormFields";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 
 function formatNumber(value: string): string {
@@ -297,6 +298,8 @@ export default function OpportunityEditForm({
     {} as Record<string, { label: string; value: string }[]>,
   );
 
+  // CommonCharacterCount fields use onTextChange={() => {}} because they are uncontrolled:
+  // values are read from FormData on submit, not tracked in React state.
   return (
     <form
       ref={formRef}
@@ -578,21 +581,17 @@ export default function OpportunityEditForm({
 
           {fundingCategory === "other" && (
             <div className="width-full">
-              <FormGroup>
-                <DynamicFieldLabel
-                  idFor="funding-category-explanation"
-                  title={t("labels.fundingCategoryExplanation")}
-                  description={t("content.fundingCategoryExplanationHint")}
-                />
-                <Textarea
-                  id="funding-category-explanation"
-                  name="fundingCategoryExplanation"
-                  defaultValue={initialValues.fundingCategoryExplanation}
-                  rows={5}
-                  className="width-full"
-                  disabled={!isDraft}
-                />
-              </FormGroup>
+              <CommonCharacterCount
+                isTextArea={true}
+                labelText={t("labels.fundingCategoryExplanation")}
+                description={t("content.fundingCategoryExplanationHint")}
+                fieldId="fundingCategoryExplanation"
+                fieldMaxLength={2500}
+                isRequired={false}
+                defaultValue={initialValues.fundingCategoryExplanation}
+                onTextChange={() => {}}
+                disabled={!isDraft}
+              />
             </div>
           )}
 
@@ -843,26 +842,22 @@ export default function OpportunityEditForm({
           {(selectedEligibility.includes("other") ||
             selectedEligibility.includes("unrestricted")) && (
             <div className="width-full">
-              <FormGroup error={!!getFieldError("additionalEligibilityInfo")}>
-                <DynamicFieldLabel
-                  idFor="additional-eligibility-info"
-                  title={t("labels.additionalEligibilityInfo")}
-                  description={t("content.additionalEligibilityInfoHint")}
-                />
-                {getFieldError("additionalEligibilityInfo") ? (
-                  <ErrorMessage>
-                    {getFieldError("additionalEligibilityInfo")}
-                  </ErrorMessage>
-                ) : null}
-                <Textarea
-                  id="additional-eligibility-info"
-                  name="additionalEligibilityInfo"
-                  defaultValue={initialValues.additionalEligibilityInfo}
-                  rows={5}
-                  className="width-full"
-                  disabled={!isDraft}
-                />
-              </FormGroup>
+              <CommonCharacterCount
+                isTextArea={true}
+                labelText={t("labels.additionalEligibilityInfo")}
+                description={t("content.additionalEligibilityInfoHint")}
+                fieldId="additionalEligibilityInfo"
+                fieldMaxLength={4000}
+                isRequired={false}
+                defaultValue={initialValues.additionalEligibilityInfo}
+                onTextChange={() => {}}
+                rawErrors={
+                  getFieldError("additionalEligibilityInfo")
+                    ? [getFieldError("additionalEligibilityInfo") as string]
+                    : []
+                }
+                disabled={!isDraft}
+              />
             </div>
           )}
         </div>
@@ -883,138 +878,116 @@ export default function OpportunityEditForm({
 
         <div className="display-flex flex-column gap-2">
           <div className="width-full">
-            <FormGroup error={!!getFieldError("description")}>
-              <DynamicFieldLabel
-                idFor="description"
-                title={t("labels.description")}
-                description={t("content.descriptionHint")}
-              />
-              {getFieldError("description") ? (
-                <ErrorMessage>{getFieldError("description")}</ErrorMessage>
-              ) : null}
-              <Textarea
-                id="description"
-                name="description"
-                defaultValue={initialValues.description}
-                rows={5}
-                className="width-full"
-                disabled={!isDraft}
-              />
-            </FormGroup>
+            <CommonCharacterCount
+              isTextArea={true}
+              labelText={t("labels.description")}
+              description={t("content.descriptionHint")}
+              fieldId="description"
+              fieldMaxLength={1800}
+              isRequired={false}
+              defaultValue={initialValues.description}
+              onTextChange={() => {}}
+              rawErrors={
+                getFieldError("description")
+                  ? [getFieldError("description") as string]
+                  : []
+              }
+              disabled={!isDraft}
+            />
           </div>
 
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("additionalInfoUrl")}>
-                <DynamicFieldLabel
-                  idFor="additional-info-url"
-                  title={t("labels.additionalInfoUrl")}
-                  description={t("content.additionalInfoUrlHint")}
-                />
-                {getFieldError("additionalInfoUrl") ? (
-                  <ErrorMessage>
-                    {getFieldError("additionalInfoUrl")}
-                  </ErrorMessage>
-                ) : null}
-                <TextInput
-                  id="additional-info-url"
-                  name="additionalInfoUrl"
-                  type="url"
-                  defaultValue={initialValues.additionalInfoUrl}
-                  className="width-full"
-                  disabled={!isDraft}
-                />
-              </FormGroup>
+              <CommonCharacterCount
+                inputType="url"
+                labelText={t("labels.additionalInfoUrl")}
+                description={t("content.additionalInfoUrlHint")}
+                fieldId="additionalInfoUrl"
+                fieldMaxLength={250}
+                isRequired={false}
+                defaultValue={initialValues.additionalInfoUrl}
+                onTextChange={() => {}}
+                rawErrors={
+                  getFieldError("additionalInfoUrl")
+                    ? [getFieldError("additionalInfoUrl") as string]
+                    : []
+                }
+                disabled={!isDraft}
+              />
             </div>
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("additionalInfoUrlText")}>
-                <DynamicFieldLabel
-                  idFor="additional-info-url-text"
-                  title={t("labels.additionalInfoUrlText")}
-                  description={t("content.additionalInfoUrlTextHint")}
-                />
-                {getFieldError("additionalInfoUrlText") ? (
-                  <ErrorMessage>
-                    {getFieldError("additionalInfoUrlText")}
-                  </ErrorMessage>
-                ) : null}
-                <TextInput
-                  id="additional-info-url-text"
-                  name="additionalInfoUrlText"
-                  type="text"
-                  defaultValue={initialValues.additionalInfoUrlText}
-                  className="width-full"
-                  disabled={!isDraft}
-                />
-              </FormGroup>
+              <CommonCharacterCount
+                labelText={t("labels.additionalInfoUrlText")}
+                description={t("content.additionalInfoUrlTextHint")}
+                fieldId="additionalInfoUrlText"
+                fieldMaxLength={250}
+                isRequired={false}
+                defaultValue={initialValues.additionalInfoUrlText}
+                onTextChange={() => {}}
+                rawErrors={
+                  getFieldError("additionalInfoUrlText")
+                    ? [getFieldError("additionalInfoUrlText") as string]
+                    : []
+                }
+                disabled={!isDraft}
+              />
             </div>
           </div>
 
           <div className="width-full">
-            <FormGroup error={!!getFieldError("grantorContactDetails")}>
-              <DynamicFieldLabel
-                idFor="grantor-contact-details"
-                title={t("labels.grantorContactDetails")}
-                description={t("content.grantorContactDetailsHint")}
-              />
-              {getFieldError("grantorContactDetails") ? (
-                <ErrorMessage>
-                  {getFieldError("grantorContactDetails")}
-                </ErrorMessage>
-              ) : null}
-              <Textarea
-                id="grantor-contact-details"
-                name="grantorContactDetails"
-                defaultValue={initialValues.grantorContactDetails}
-                rows={5}
-                className="width-full"
-                disabled={!isDraft}
-              />
-            </FormGroup>
+            <CommonCharacterCount
+              isTextArea={true}
+              labelText={t("labels.grantorContactDetails")}
+              description={t("content.grantorContactDetailsHint")}
+              fieldId="grantorContactDetails"
+              fieldMaxLength={1000}
+              isRequired={false}
+              defaultValue={initialValues.grantorContactDetails}
+              onTextChange={() => {}}
+              rawErrors={
+                getFieldError("grantorContactDetails")
+                  ? [getFieldError("grantorContactDetails") as string]
+                  : []
+              }
+              disabled={!isDraft}
+            />
           </div>
 
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("contactEmail")}>
-                <DynamicFieldLabel
-                  idFor="contact-email"
-                  title={t("labels.contactEmail")}
-                  description={t("content.contactEmailHint")}
-                />
-                {getFieldError("contactEmail") ? (
-                  <ErrorMessage>{getFieldError("contactEmail")}</ErrorMessage>
-                ) : null}
-                <TextInput
-                  id="contact-email"
-                  name="contactEmail"
-                  type="email"
-                  defaultValue={initialValues.contactEmail}
-                  className="width-full"
-                  disabled={!isDraft}
-                />
-              </FormGroup>
+              <CommonCharacterCount
+                inputType="email"
+                labelText={t("labels.contactEmail")}
+                description={t("content.contactEmailHint")}
+                fieldId="contactEmail"
+                fieldMaxLength={130}
+                isRequired={false}
+                defaultValue={initialValues.contactEmail}
+                onTextChange={() => {}}
+                rawErrors={
+                  getFieldError("contactEmail")
+                    ? [getFieldError("contactEmail") as string]
+                    : []
+                }
+                disabled={!isDraft}
+              />
             </div>
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("contactEmailText")}>
-                <DynamicFieldLabel
-                  idFor="contact-email-text"
-                  title={t("labels.contactEmailText")}
-                  description={t("content.contactEmailTextHint")}
-                />
-                {getFieldError("contactEmailText") ? (
-                  <ErrorMessage>
-                    {getFieldError("contactEmailText")}
-                  </ErrorMessage>
-                ) : null}
-                <TextInput
-                  id="contact-email-text"
-                  name="contactEmailText"
-                  type="text"
-                  defaultValue={initialValues.contactEmailText}
-                  className="width-full"
-                  disabled={!isDraft}
-                />
-              </FormGroup>
+              <CommonCharacterCount
+                labelText={t("labels.contactEmailText")}
+                description={t("content.contactEmailTextHint")}
+                fieldId="contactEmailText"
+                fieldMaxLength={108}
+                isRequired={false}
+                defaultValue={initialValues.contactEmailText}
+                onTextChange={() => {}}
+                rawErrors={
+                  getFieldError("contactEmailText")
+                    ? [getFieldError("contactEmailText") as string]
+                    : []
+                }
+                disabled={!isDraft}
+              />
             </div>
           </div>
         </div>

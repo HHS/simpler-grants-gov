@@ -23,19 +23,24 @@ const { baseUrl, targetEnv, testUserLabel } = playwrightEnv;
 // used to simulate a staging login without performing any login actions
 // calls dedicated API endpoint to fetch session token for a test user
 // and creates a frontend session based on the token from the response
-// requires STAGING_TEST_USER_API_KEY to be set in env vars
+// requires STAGING_TEST_USER_MANAGER_API_KEY and STAGING_TEST_USER_ID to be set in env vars
 const attemptStagingSpoof = async (
   context: BrowserContext,
 ): Promise<boolean> => {
-  if (!playwrightEnv.stagingTestUserApiKey) {
+  const { stagingTestUserManagerApiKey, stagingTestUserId } = playwrightEnv;
+  if (!stagingTestUserManagerApiKey || !stagingTestUserId) {
     return false;
   }
   // get server side staging user JWT token
   const response = await fetch(
     `${playwrightEnv.apiUrl}/v1/internal/e2e-token`,
     {
-      headers: { "X-API-Key": playwrightEnv.stagingTestUserApiKey },
+      headers: {
+        "X-API-Key": stagingTestUserManagerApiKey,
+        "Content-Type": "application/json",
+      },
       method: "POST",
+      body: JSON.stringify({ user_id: stagingTestUserId }),
     },
   );
   if (!response.ok) {

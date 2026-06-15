@@ -292,8 +292,7 @@ else
 	APP_NAME_ARG := "."
 endif
 
-ifdef IMAGE_TAG
-else
+ifeq ($(origin IMAGE_TAG),undefined)
 	ifdef GIT_REPO_AVAILABLE
 		IMAGE_TAG := $(shell git log --pretty=format:'%H' -n 1 "${ROOT_REV}" -- "${APP_NAME_ARG}")
 	else
