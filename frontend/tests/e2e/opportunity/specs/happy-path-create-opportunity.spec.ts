@@ -224,7 +224,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
       // When I open the "Opportunity details" page from the row title.
       await clickRowTitle(matchingRow, opportunityTitle);
 
-      // And I should see all expected values on the "Opportunity details" page.
+      // Then I should see all expected values on the "Opportunity details" page.
       const finalAssertions = [
         opportunityTitle,
         opportunityNumber,
