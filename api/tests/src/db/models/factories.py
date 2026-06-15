@@ -64,6 +64,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    OpportunityVersionChangeType,
     OrganizationAuditEvent,
     Privilege,
     RoleType,
@@ -531,6 +532,8 @@ class OpportunityVersionFactory(BaseFactory):
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
     opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
+
+    change_type = OpportunityVersionChangeType.UPDATE
 
 
 class ReferencedOpportunityFactory(BaseFactory):
