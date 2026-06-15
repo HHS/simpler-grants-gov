@@ -9,25 +9,12 @@ import {
   runSharedFieldFill,
 } from "tests/e2e/utils/common/index";
 import {
-  type FieldType,
   type FillFieldDefinition,
   type FillPageFieldsOptions,
 } from "tests/e2e/utils/common/types";
 
-export type PageFillField = {
-  label: string;
-  type: FieldType;
+export type PageFillField = FillFieldDefinition & {
   value: string | boolean;
-  exact?: boolean;
-};
-
-const toCommonFieldDefinition = (field: PageFillField): FillFieldDefinition => {
-  return {
-    field: field.label,
-    type: field.type,
-    label: field.label,
-    labelExact: field.exact,
-  };
 };
 
 export async function fillPageField(
@@ -37,11 +24,10 @@ export async function fillPageField(
   data: string | boolean | undefined,
 ): Promise<void> {
   const fieldIdentifier = buildFieldIdentifier(field);
-  const commonField = toCommonFieldDefinition(field);
   await runSharedFieldFill({
     testInfo,
     page,
-    field: commonField,
+    field,
     data,
     fieldIdentifier,
     attachmentNames: {

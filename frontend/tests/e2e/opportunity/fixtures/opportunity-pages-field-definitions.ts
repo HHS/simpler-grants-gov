@@ -43,10 +43,11 @@ export const buildPageFieldsFromDefinitions = (
   fillData: Record<OpportunityFieldValueKey, string>,
 ): PageFillField[] => {
   return definitions.map((definition) => ({
-    label: definition.label,
+    field: definition.label,
     type: definition.type,
     value: fillData[definition.valueKey],
-    exact: definition.exact,
+    label: definition.label,
+    labelExact: definition.exact,
   }));
 };
 
