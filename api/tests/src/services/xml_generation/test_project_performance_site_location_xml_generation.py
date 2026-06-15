@@ -316,6 +316,36 @@ class TestPerformanceSiteLegacyParity:
         ), "AttachedFile must not contain a spurious AttachedFileFile inner wrapper"
 
 
+_SNAPSHOT_PATH = Path(__file__).parent / "snapshots" / "performance_site_4_0.xml"
+
+
+class TestPerformanceSiteSnapshot:
+    """Regression snapshot test pinning the full generated XML output.
+
+    To regenerate after an intentional change, run the generation with the same
+    input below and write the result to the snapshot file.
+    """
+
+    def test_full_xml_matches_snapshot(self):
+        """Generated XML for a comprehensive case must match the stored snapshot."""
+        data = {
+            "primary_site": _US_SITE,
+            "additional_sites": [_INTL_SITE, _INDIVIDUAL_US_SITE],
+            "additional_locations_attachment": _ATTACHMENT_UUID,
+        }
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=data,
+            transform_config=PERFORMANCE_SITE_TRANSFORM_RULES,
+            attachment_mapping={_ATTACHMENT_UUID: _ATTACHMENT_INFO},
+        )
+        response = service.generate_xml(request)
+        assert response.success, response.error_message
+
+        expected = _SNAPSHOT_PATH.read_text()
+        assert response.xml_data == expected
+
+
 class TestPerformanceSiteXSDValidation:
     """XSD validation tests for Performance Site Location form XML."""
 

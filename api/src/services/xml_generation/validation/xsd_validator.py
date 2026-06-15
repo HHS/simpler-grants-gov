@@ -58,8 +58,8 @@ class XSDValidator:
                 ns = root.get("targetNamespace")
                 if ns:
                     locations[ns] = str(xsd_file)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Failed to parse XSD file for locations map: %s (%s)", xsd_file, e)
         return locations
 
     def get_xsd_path(self, form_name: str) -> Path:
