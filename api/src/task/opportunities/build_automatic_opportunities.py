@@ -194,6 +194,7 @@ class BuildAutomaticOpportunitiesTask(Task):
     def run_task(self) -> None:
         if os.getenv("ENVIRONMENT", None) not in [
             "grantee1",
+            "grantee2",
             "local",
             "dev",
             "staging",
@@ -239,18 +240,18 @@ class BuildAutomaticOpportunitiesTask(Task):
         self._create_opportunity_scenarios()
 
     def _create_isolated_form_opportunity(
-        self, prefix: str, form_id: uuid.UUID, opportunity_id: uuid.UUID
+        self, prefix: str, form_label: str, form_id: uuid.UUID, opportunity_id: uuid.UUID
     ) -> None:
         """Create a single-form test opportunity open to both organizations and individuals."""
         self.create_opportunity(
             OpportunityContainer(
-                opportunity_title=f"TEST {prefix} ORG IND OT01",
-                opportunity_number=f"TEST {prefix} ORG IND 01",
+                opportunity_title=f"E2E {form_label} ORG IND OT01",
+                opportunity_number=f"E2E-{prefix}-ORG-IND-01",  # form names are abbreviated in opportunity number to be under the 40 char limit
                 opportunity_id=opportunity_id,
             ),
             competitions=[
                 CompetitionContainer(
-                    competition_title=f"TEST {prefix} ORG IND CT01",
+                    competition_title=f"E2E {form_label} ORG IND CT01",
                     required_form_ids=[form_id],
                     open_to_applicants=[
                         CompetitionOpenToApplicant.INDIVIDUAL,
@@ -565,60 +566,109 @@ class BuildAutomaticOpportunitiesTask(Task):
 
         # Isolated form test opportunities
         ISOLATED_FORM_OPPORTUNITIES = [
-            ("ATTACHMENTFORM", AttachmentForm_v1_2.form_id, "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
             (
-                "BUDGETNARRATIVEATTACHMENT",
+                "E2E-ATT",
+                "Attachment Form",
+                AttachmentForm_v1_2.form_id,
+                "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1",
+            ),
+            (
+                "E2E-BNA",
+                "Budget Narrative Attachment Form",
                 BudgetNarrativeAttachment_v1_2.form_id,
                 "caea0f33-b356-4fcd-aae3-c0244e11da1e",
             ),
-            ("CD511", CD511_v1_1.form_id, "5b890089-2bb2-4123-82cd-3d321ca62efe"),
-            ("EPAFORM47004", EPA_FORM_4700_4_v5_0.form_id, "95f80b3b-c119-4a89-a50f-1b47b95a9191"),
-            ("EPAKEYCONTACT", EPA_KEY_CONTACT_v2_0.form_id, "1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631"),
+            ("E2E-CD511", "CD511 Form", CD511_v1_1.form_id, "5b890089-2bb2-4123-82cd-3d321ca62efe"),
             (
-                "GGLOBBYINGFORM",
+                "E2E-EPA4700",
+                "EPA Form 4700-4",
+                EPA_FORM_4700_4_v5_0.form_id,
+                "95f80b3b-c119-4a89-a50f-1b47b95a9191",
+            ),
+            (
+                "E2E-EPAKC",
+                "EPA Key Contacts Form",
+                EPA_KEY_CONTACT_v2_0.form_id,
+                "1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631",
+            ),
+            (
+                "E2E-GGLOB",
+                "Grants.gov Lobbying Form",
                 GG_LobbyingForm_v1_1.form_id,
                 "552d5866-501a-40b6-b1ce-2efc7a2d3aa5",
             ),
             (
-                "OTHERNARRATIVEATTACHMENT",
+                "E2E-ONA",
+                "Other Narrative Attachments",
                 OtherNarrativeAttachment_v1_2.form_id,
                 "717b7f78-52f2-49f9-b1b8-5d7118313d2a",
             ),
             (
-                "PROJECTABSTRACT",
+                "E2E-PABS",
+                "Project Abstract",
                 ProjectAbstract_v1_2.form_id,
                 "d3081452-2cf8-4817-9abf-812e5d794485",
             ),
             (
-                "PROJECTABSTRACTSUMMARY",
+                "E2E-PABSS",
+                "Project Abstract Summary",
                 ProjectAbstractSummary_v2_0.form_id,
                 "e3bfbd7b-2205-46a8-9aa3-714f7e130958",
             ),
             (
-                "PROJECTNARRATIVEATTACHMENT",
+                "E2E-PNA",
+                "Project Narrative Attachment Form",
                 ProjectNarrativeAttachment_v1_2.form_id,
                 "6bdc2df3-6e51-4aea-89af-bade326feba1",
             ),
             (
-                "PROJECTPERFORMANCESITELOCATION",
+                "E2E-PPSL",
+                "Project Performance Site Location(s)",
                 ProjectPerformanceSiteLocation_v4_0.form_id,
                 "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
             ),
-            ("SF424", SF424_v4_0.form_id, "a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
-            ("SF424A", SF424a_v1_0.form_id, "6c25cd41-660e-473f-abff-654083b7795d"),
-            ("SF424B", SF424b_v1_1.form_id, "dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6"),
-            ("SF424D", SF424d_v1_1.form_id, "abd9bce9-2b9b-46b8-b814-2c5cb7c5e88b"),
-            ("SFLLL", SFLLL_v2_0.form_id, "f3e438ee-ff4c-475b-a058-8049aee9abda"),
             (
-                "SUPPLEMENTARYNEHCOVERSHEET",
+                "E2E-SF424",
+                "Application for Federal Assistance (SF-424)",
+                SF424_v4_0.form_id,
+                "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            ),
+            (
+                "E2E-SF424A",
+                "Budget Information for Non-Construction Programs (SF-424A)",
+                SF424a_v1_0.form_id,
+                "6c25cd41-660e-473f-abff-654083b7795d",
+            ),
+            (
+                "E2E-SF424B",
+                "Assurances for Non-Construction Programs (SF-424B)",
+                SF424b_v1_1.form_id,
+                "dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6",
+            ),
+            (
+                "E2E-SF424D",
+                "Assurances for Construction Programs (SF-424D)",
+                SF424d_v1_1.form_id,
+                "abd9bce9-2b9b-46b8-b814-2c5cb7c5e88b",
+            ),
+            (
+                "E2E-SFLLL",
+                "Disclosure of Lobbying Activities (SF-LLL)",
+                SFLLL_v2_0.form_id,
+                "f3e438ee-ff4c-475b-a058-8049aee9abda",
+            ),
+            (
+                "E2E-NEHCS",
+                "Supplementary Cover Sheet for NEH Grant Programs",
                 SupplementaryNEHCoverSheet_v3_0.form_id,
                 "b88287e2-7e2a-4c99-8ffe-30ab50c388ef",
             ),
         ]
 
-        for prefix, form_id, opportunity_id in ISOLATED_FORM_OPPORTUNITIES:
+        for prefix, form_label, form_id, opportunity_id in ISOLATED_FORM_OPPORTUNITIES:
             self._create_isolated_form_opportunity(
                 prefix,
+                form_label,
                 form_id,
                 uuid.UUID(opportunity_id),
             )

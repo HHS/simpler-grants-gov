@@ -133,33 +133,23 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
         "MOCK-R25AS00293-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000003"),
         "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
-        "TEST ATTACHMENTFORM ORG IND 01": uuid.UUID("97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
-        "TEST BUDGETNARRATIVEATTACHMENT ORG IND 01": uuid.UUID(
-            "caea0f33-b356-4fcd-aae3-c0244e11da1e"
-        ),
-        "TEST CD511 ORG IND 01": uuid.UUID("5b890089-2bb2-4123-82cd-3d321ca62efe"),
-        "TEST EPAFORM47004 ORG IND 01": uuid.UUID("95f80b3b-c119-4a89-a50f-1b47b95a9191"),
-        "TEST EPAKEYCONTACT ORG IND 01": uuid.UUID("1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631"),
-        "TEST GGLOBBYINGFORM ORG IND 01": uuid.UUID("552d5866-501a-40b6-b1ce-2efc7a2d3aa5"),
-        "TEST OTHERNARRATIVEATTACHMENT ORG IND 01": uuid.UUID(
-            "717b7f78-52f2-49f9-b1b8-5d7118313d2a"
-        ),
-        "TEST PROJECTABSTRACT ORG IND 01": uuid.UUID("d3081452-2cf8-4817-9abf-812e5d794485"),
-        "TEST PROJECTABSTRACTSUMMARY ORG IND 01": uuid.UUID("e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
-        "TEST PROJECTNARRATIVEATTACHMENT ORG IND 01": uuid.UUID(
-            "6bdc2df3-6e51-4aea-89af-bade326feba1"
-        ),
-        "TEST PROJECTPERFORMANCESITELOCATION ORG IND 01": uuid.UUID(
-            "8a30cbe2-f297-49b7-b996-fc22982a3eb5"
-        ),
-        "TEST SF424 ORG IND 01": uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
-        "TEST SF424A ORG IND 01": uuid.UUID("6c25cd41-660e-473f-abff-654083b7795d"),
-        "TEST SF424B ORG IND 01": uuid.UUID("dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6"),
-        "TEST SF424D ORG IND 01": uuid.UUID("abd9bce9-2b9b-46b8-b814-2c5cb7c5e88b"),
-        "TEST SFLLL ORG IND 01": uuid.UUID("f3e438ee-ff4c-475b-a058-8049aee9abda"),
-        "TEST SUPPLEMENTARYNEHCOVERSHEET ORG IND 01": uuid.UUID(
-            "b88287e2-7e2a-4c99-8ffe-30ab50c388ef"
-        ),
+        "E2E-ATT-ORG-IND-01": uuid.UUID("97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"),
+        "E2E-BNA-ORG-IND-01": uuid.UUID("caea0f33-b356-4fcd-aae3-c0244e11da1e"),
+        "E2E-CD511-ORG-IND-01": uuid.UUID("5b890089-2bb2-4123-82cd-3d321ca62efe"),
+        "E2E-EPA4700-ORG-IND-01": uuid.UUID("95f80b3b-c119-4a89-a50f-1b47b95a9191"),
+        "E2E-EPAKC-ORG-IND-01": uuid.UUID("1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631"),
+        "E2E-GGLOB-ORG-IND-01": uuid.UUID("552d5866-501a-40b6-b1ce-2efc7a2d3aa5"),
+        "E2E-ONA-ORG-IND-01": uuid.UUID("717b7f78-52f2-49f9-b1b8-5d7118313d2a"),
+        "E2E-PABS-ORG-IND-01": uuid.UUID("d3081452-2cf8-4817-9abf-812e5d794485"),
+        "E2E-PABSS-ORG-IND-01": uuid.UUID("e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
+        "E2E-PNA-ORG-IND-01": uuid.UUID("6bdc2df3-6e51-4aea-89af-bade326feba1"),
+        "E2E-PPSL-ORG-IND-01": uuid.UUID("8a30cbe2-f297-49b7-b996-fc22982a3eb5"),
+        "E2E-SF424-ORG-IND-01": uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+        "E2E-SF424A-ORG-IND-01": uuid.UUID("6c25cd41-660e-473f-abff-654083b7795d"),
+        "E2E-SF424B-ORG-IND-01": uuid.UUID("dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6"),
+        "E2E-SF424D-ORG-IND-01": uuid.UUID("abd9bce9-2b9b-46b8-b814-2c5cb7c5e88b"),
+        "E2E-SFLLL-ORG-IND-01": uuid.UUID("f3e438ee-ff4c-475b-a058-8049aee9abda"),
+        "E2E-NEHCS-ORG-IND-01": uuid.UUID("b88287e2-7e2a-4c99-8ffe-30ab50c388ef"),
     }
 
     for opp_number, expected_id in expected_ids.items():
