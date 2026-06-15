@@ -11,7 +11,7 @@ from grants_shared.util import datetime_util
 from pydantic import BaseModel, Field
 
 from src.auth.auth_errors import JwtValidationError
-from src.db.models.user_models import LoginGovState
+from src.auth.auth_handler import get_auth_handler
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -168,7 +168,7 @@ def get_login_gov_redirect_uri(
     encoded_params = urllib.parse.urlencode(url_params)
 
     # Add the state to the DB
-    db_session.add(LoginGovState(login_gov_state_id=state, nonce=nonce))
+    get_auth_handler().create_login_gov_state(db_session, state, nonce)
 
     return f"{config.login_gov_auth_endpoint}?{encoded_params}"
 

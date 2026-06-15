@@ -1,20 +1,19 @@
 import logging
 from dataclasses import dataclass
+from typing import cast
 
 import grants_shared.adapters.db as db
 from grants_shared.util.string_utils import is_valid_uuid
 from pydantic import BaseModel
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
 from src.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
 from src.adapters.oauth.oauth_client_models import OauthTokenRequest
 from src.api.route_utils import raise_flask_error
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.auth_errors import JwtValidationError
+from src.auth.auth_handler import get_auth_handler
 from src.auth.login_gov_jwt_auth import get_config, get_login_gov_client_assertion, validate_token
-from src.constants.lookup_constants import ExternalUserType
-from src.db.models.user_models import LinkExternalUser, LoginGovState, User
+from src.db.models.user_models import User
 from src.services.users.organization_from_ebiz_poc import handle_ebiz_poc_organization_during_login
 
 logger = logging.getLogger(__name__)
@@ -85,9 +84,7 @@ def handle_login_gov_callback_request(
     if not is_valid_uuid(callback_params.state):
         raise_flask_error(422, "Invalid OAuth state value")
 
-    login_gov_state = db_session.execute(
-        select(LoginGovState).where(LoginGovState.login_gov_state_id == callback_params.state)
-    ).scalar_one_or_none()
+    login_gov_state = get_auth_handler().get_login_gov_state(db_session, callback_params.state)
 
     # If we don't have the state value in our DB, that either means:
     # * login.gov is very broken and sending us bad data
@@ -200,20 +197,14 @@ def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCa
         logger.info("Login.gov token validation failed", extra={"auth.issue": e.message})
         raise_flask_error(401, e.message)
 
-    external_user: LinkExternalUser | None = db_session.execute(
-        select(LinkExternalUser)
-        .where(LinkExternalUser.external_user_id == login_gov_user.user_id)
-        # We only support login.gov right now, so this does nothing, but let's
-        # be explicit just in case.
-        .where(LinkExternalUser.external_user_type == ExternalUserType.LOGIN_GOV)
-        .options(selectinload(LinkExternalUser.user).selectinload(User.agency_users))
-    ).scalar()
+    handler = get_auth_handler()
+    external_user = handler.get_link_external_user(db_session, login_gov_user.user_id)
 
     is_user_new = external_user is None
 
     # If we didn't find anything, we want to create the user
     if external_user is None:
-        external_user = _create_login_gov_user(login_gov_user.user_id, db_session)
+        external_user = handler.create_user_with_external_link(db_session, login_gov_user.user_id)
 
     # Update fields on the external user table
     # Store the email as lowercase, this should be how it's returned already
@@ -225,17 +216,17 @@ def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCa
     # NOTE: This doesn't commit yet - but effectively moves the cache from memory to the DB transaction
     db_session.flush()
 
+    user = cast(User, handler.get_user_for_external_link(external_user))
+
     # Check if the user is an ebiz POC and create/link their organization
     # Only do this for new users
     if is_user_new:
-        handle_ebiz_poc_organization_during_login(db_session, external_user.user)
+        handle_ebiz_poc_organization_during_login(db_session, user)
 
     # Validate PIV requirement for agency users
-    _validate_piv_requirement(external_user.user, login_gov_user.x509_presented)
+    _validate_piv_requirement(user, login_gov_user.x509_presented)
 
-    token, user_token_session = create_jwt_for_user(
-        external_user.user, db_session, email=external_user.email
-    )
+    token, user_token_session = create_jwt_for_user(user, db_session, email=external_user.email)
 
     logger.info(
         "Generated token for user",
@@ -246,18 +237,3 @@ def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCa
     )
 
     return LoginGovCallbackResponse(token=token, is_user_new=is_user_new)
-
-
-def _create_login_gov_user(external_user_id: str, db_session: db.Session) -> LinkExternalUser:
-    user = User()
-    db_session.add(user)
-
-    external_user = LinkExternalUser(
-        user=user,
-        external_user_type=ExternalUserType.LOGIN_GOV,
-        external_user_id=external_user_id,
-        # note we set other params in the calling method to also handle updates
-    )
-    db_session.add(external_user)
-
-    return external_user

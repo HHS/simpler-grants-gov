@@ -8,13 +8,12 @@ from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from pydantic import Field
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
 from src.api.route_utils import raise_flask_error
 from src.auth.auth_errors import JwtValidationError
+from src.auth.auth_handler import get_auth_handler
 from src.auth.jwt_user_http_token_auth import JwtUserHttpTokenAuth
-from src.db.models.user_models import User, UserTokenSession
+from src.db.models.auth_base_models import BaseUser, BaseUserTokenSession
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -68,8 +67,11 @@ def get_config() -> ApiJwtConfig:
 
 
 def create_jwt_for_user(
-    user: User, db_session: db.Session, config: ApiJwtConfig | None = None, email: str | None = None
-) -> tuple[str, UserTokenSession]:
+    user: BaseUser,
+    db_session: db.Session,
+    config: ApiJwtConfig | None = None,
+    email: str | None = None,
+) -> tuple[str, BaseUserTokenSession]:
     if config is None:
         config = get_config()
 
@@ -78,10 +80,9 @@ def create_jwt_for_user(
     expiration_time = current_time + timedelta(minutes=config.token_expiration_minutes)
 
     # Create the session in the DB
-    user_token_session = UserTokenSession(
-        user=user, token_id=uuid.uuid4(), expires_at=expiration_time
+    user_token_session = get_auth_handler().create_token_session(
+        db_session, user, uuid.uuid4(), expiration_time
     )
-    db_session.add(user_token_session)
     jwt_str = generate_jwt(
         user_token_session, current_time=current_time, email=email, config=config
     )
@@ -97,7 +98,7 @@ def create_jwt_for_user(
 
 
 def generate_jwt(
-    user_token_session: UserTokenSession,
+    user_token_session: BaseUserTokenSession,
     current_time: datetime,
     email: str | None = None,
     config: ApiJwtConfig | None = None,
@@ -106,6 +107,8 @@ def generate_jwt(
     if config is None:
         config = get_config()
 
+    user = get_auth_handler().get_user_for_token_session(user_token_session)
+
     payload = {
         "sub": str(user_token_session.token_id),
         # iat -> issued at
@@ -113,7 +116,7 @@ def generate_jwt(
         "aud": config.audience,
         "iss": config.issuer,
         "email": email,
-        "user_id": str(user_token_session.user.user_id),
+        "user_id": str(user.user_id),
         "session_duration_minutes": config.token_expiration_minutes,
     }
 
@@ -122,7 +125,7 @@ def generate_jwt(
 
 def parse_jwt_for_user(
     token: str, db_session: db.Session, config: ApiJwtConfig | None = None
-) -> UserTokenSession:
+) -> BaseUserTokenSession:
     """Handle processing a jwt token, and connecting it to a user token session in our DB"""
     if config is None:
         config = get_config()
@@ -163,11 +166,9 @@ def parse_jwt_for_user(
     if sub_id is None:
         raise JwtValidationError("Token missing sub field")
 
-    token_session: UserTokenSession | None = db_session.execute(
-        select(UserTokenSession)
-        .where(UserTokenSession.token_id == sub_id)
-        .options(selectinload(UserTokenSession.user))
-    ).scalar()
+    token_session: BaseUserTokenSession | None = get_auth_handler().get_token_session_by_token_id(
+        db_session, sub_id
+    )
 
     # We check both the token expires_at timestamp as well as an
     # is_valid flag to make sure the token is still valid.
@@ -183,7 +184,7 @@ def parse_jwt_for_user(
 
 @api_jwt_auth.verify_token
 @flask_db.with_db_session()
-def decode_token(db_session: db.Session, token: str) -> UserTokenSession:
+def decode_token(db_session: db.Session, token: str) -> BaseUserTokenSession:
     """
     Process an internal jwt token as created by the above create_jwt_for_user method.
 
@@ -226,8 +227,8 @@ def decode_token(db_session: db.Session, token: str) -> UserTokenSession:
 
 
 def refresh_token_expiration(
-    token_session: UserTokenSession, config: ApiJwtConfig | None = None
-) -> UserTokenSession:
+    token_session: BaseUserTokenSession, config: ApiJwtConfig | None = None
+) -> BaseUserTokenSession:
     if config is None:
         config = get_config()
 
