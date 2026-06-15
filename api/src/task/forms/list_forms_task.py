@@ -3,12 +3,12 @@ import logging
 
 import click
 import requests
+from grants_shared.task.ecs_background_task import ecs_background_task
 from grants_shared.util.local import error_if_not_local
 from prettytable import PrettyTable
 
 from src.constants.lookup_constants import JobType
 from src.db.models.competition_models import Form
-from src.task.ecs_background_task import ecs_background_task
 from src.task.forms.form_task_shared import BaseFormTask, build_form_json, get_form_url
 from src.task.task_blueprint import task_blueprint
 

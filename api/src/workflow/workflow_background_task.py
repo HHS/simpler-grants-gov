@@ -7,8 +7,7 @@ from typing import ParamSpec, TypeVar
 
 import newrelic.agent
 import newrelic.api.application
-
-from src.task.ecs_background_task import _add_log_metadata
+from grants_shared.task.ecs_background_task import _add_log_metadata
 
 logger = logging.getLogger(__name__)
 

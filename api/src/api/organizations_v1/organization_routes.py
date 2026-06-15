@@ -3,9 +3,9 @@ from uuid import UUID
 
 from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
+from grants_shared.api import response
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-from src.api import response
 from src.api.organizations_v1.organization_blueprint import organization_blueprint
 from src.api.organizations_v1.organization_schemas import (
     LegacyUsersListRequestSchema,
