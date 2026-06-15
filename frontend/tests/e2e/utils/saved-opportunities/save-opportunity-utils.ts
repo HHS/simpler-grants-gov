@@ -39,11 +39,8 @@ export async function saveOpportunityViaSearch(
   page: Page,
   title: string,
 ): Promise<void> {
-  // Navigate to Search via the header link
-  await page
-    .getByTestId("header")
-    .getByRole("link", { name: "Search", exact: true })
-    .click();
+  // Navigate to Search
+  await page.goto("/search");
   await waitForURLChange(page, (url) => !!url.match(/\/search/));
 
   // Search for the opportunity by title
