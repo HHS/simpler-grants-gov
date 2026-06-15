@@ -68,5 +68,5 @@ export const environment: { [key: string]: string } = {
   NEXT_RUNTIME: NEXT_RUNTIME || "",
   IS_CI: CI || "false",
   LOCAL_DEV:
-    ENVIRONMENT === "local" && API_URL?.includes("localhost") ? "true" : "",
+    ENVIRONMENT === "local" && (API_URL?.includes("localhost") || API_URL?.includes("grants-api")) ? "true" : "",
 };

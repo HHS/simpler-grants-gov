@@ -139,7 +139,12 @@ export default async function getFormData({
       },
     };
   } catch (e) {
-    console.error(`Error parsing JSON schema for form id: ${formId}`, e);
+    console.error(`Error parsing JSON schema for form id: ${formId}`, {
+      formName,
+      error: e instanceof Error ? e.message : String(e),
+      applicationId,
+      appFormId,
+    });
     return { error: "TopLevelError" };
   }
 }

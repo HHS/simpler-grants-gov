@@ -7,6 +7,21 @@ services:
       target: dev
     env_file:
       - ./.env.development
+      - ./.env.local
+    environment:
+      SESSION_SECRET: extraSecretSessionSecretValueSssh
+      API_JWT_PUBLIC_KEY: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn+VBEtznw3VN/ChVXB2I
+        t36IpXD9j/dfQNWPkIJ/42ZF3XsK0MjkExrH9CSdeTOxxPk2qINYOEuMW9nkUFRr
+        1fQW/ztrvKtCIqEHKCJiVP2hxos+/mGcKyahdEIZ5+U0Hk3TE6MRCGN6WtXz5rlJ
+        J9vIGLRrJ7HaxQBKzc+tIWMMbrmKkqMweHi1dZCs2iMMO+TCc6s48nUtzdLITwTN
+        TgwWmkBykpoaG2d3sOUpLdod/UiGhvXNmeIvx6x6C7J/cH9eVQdyfdU5WMTtuYES
+        Rdz/zR4uQR6WQ1H+ORWOr0VPe7UpwXWaHp8LAkhQIZ9LNRg6fph30pL0TYNjfi2v
+        8QIDAQAB
+        -----END PUBLIC KEY-----
+      API_URL: http://grants-api:8080
+      LOCAL_DEV: "true"
     volumes:
       - ./src:/frontend/src
       - ./public:/frontend/public
