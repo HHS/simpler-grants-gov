@@ -8,7 +8,7 @@ E2E tests are run using Playwright. See [development.md](/DEVELOPMENT.md) for mo
 
 There are situations where we want to be able to test a "logged in" experience without having to script the test through the full login flow. In order to support this we have built a system to spoof the user login by placing a session cookie into the browser context. This system works by creating a client side cookie on the browser context within Playwright that will function the same as the session cookie produced as the output of the real login process.
 
-The system is defined in [Login Utils](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/loginUtils.ts)
+The system is defined in [Login Utils](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/utils/auth/login-utils.ts)
 
 #### Local setup
 

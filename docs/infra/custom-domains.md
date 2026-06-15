@@ -7,7 +7,7 @@ Production systems will want to set up custom domains to route internet traffic 
 
 ## Requirements
 
-Before setting up custom domains you'll need to have [set up the AWS account](/docs/infra/set-up-aws-account.md)
+Before setting up custom domains you'll need to have [set up the AWS account](https://github.com/HHS/simpler-grants-gov/blob/main/documentation/infra/set-up-aws-account.md)
 
 ## 1. Set hosted zone in domain configuration
 

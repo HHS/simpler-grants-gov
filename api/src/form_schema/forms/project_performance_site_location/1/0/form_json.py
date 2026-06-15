@@ -258,23 +258,23 @@ FORM_RULE_SCHEMA = {
 # Helper to build site location field mappings for XML (shared between primary and additional sites)
 def _site_location_xml_fields() -> dict:
     return {
+        # Individual, OrganizationName, SAMUEI, Address, CongressionalDistrictProgramProject
+        # are defined locally in SiteLocationDataType (PerformanceSite_4_0 namespace).
+        # Their content types come from globLib, but the element names belong to the form namespace.
         "submitting_as_individual": {
             "xml_transform": {
                 "target": "Individual",
-                "namespace": "globLib",
                 "value_transform": {"type": "boolean_to_yes_no"},
             }
         },
         "organization_name": {
             "xml_transform": {
                 "target": "OrganizationName",
-                "namespace": "globLib",
             }
         },
         "uei": {
             "xml_transform": {
                 "target": "SAMUEI",
-                "namespace": "globLib",
             }
         },
         "address": {
@@ -282,6 +282,8 @@ def _site_location_xml_fields() -> dict:
                 "target": "Address",
                 "type": "nested_object",
             },
+            # Order matches AddressDataTypeV3 XSD sequence: Street1, Street2, City, County,
+            # State|Province (choice), ZipPostalCode, Country
             "street1": {
                 "xml_transform": {
                     "target": "Street1",
@@ -318,15 +320,15 @@ def _site_location_xml_fields() -> dict:
                     "namespace": "globLib",
                 }
             },
-            "country": {
-                "xml_transform": {
-                    "target": "Country",
-                    "namespace": "globLib",
-                }
-            },
             "zip_code": {
                 "xml_transform": {
                     "target": "ZipPostalCode",
+                    "namespace": "globLib",
+                }
+            },
+            "country": {
+                "xml_transform": {
+                    "target": "Country",
                     "namespace": "globLib",
                 }
             },
@@ -334,7 +336,6 @@ def _site_location_xml_fields() -> dict:
         "congressional_district": {
             "xml_transform": {
                 "target": "CongressionalDistrictProgramProject",
-                "namespace": "globLib",
             }
         },
     }
@@ -366,6 +367,7 @@ FORM_XML_TRANSFORM_RULES = {
             "additional_locations_attachment": {
                 "xml_element": "AttachedFile",
                 "type": "single_with_wrapper",
+                "file_element": "",  # content directly in <AttachedFile>, no inner wrapper
             },
         },
     },
