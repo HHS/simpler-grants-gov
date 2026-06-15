@@ -9,8 +9,8 @@ jest.mock("src/utils/fileUtils/formatFileSizeUtil", () => ({
 
 jest.mock("src/utils/dateUtil", () => ({
   // for ease of testing, this will take the epoch ms, and return the year
-  formatDate: (dateMs: number | string) => {
-    return new Date(Number(dateMs)).getFullYear();
+  formatDate: (dateMs: string) => {
+    return new Date(dateMs).getFullYear();
   },
 }));
 
@@ -19,7 +19,7 @@ const generateFile = (date: Date, index: number) => ({
   fileName: `file name ${index}`,
   fileSize: index,
   mimeType: "file",
-  updatedAt: date.getTime(),
+  updatedAt: date.toString(),
 });
 
 const testDateOne = new Date("04 Dec 1995");
@@ -99,7 +99,7 @@ describe("FileInputExistingFiles", () => {
       fileSize: 1,
       id: "1",
       mimeType: "file",
-      updatedAt: testDateOne.getTime(),
+      updatedAt: testDateOne.toString(),
     });
 
     await userEvent.click(secondButton);
@@ -109,7 +109,7 @@ describe("FileInputExistingFiles", () => {
       fileSize: 2,
       id: "2",
       mimeType: "file",
-      updatedAt: testDateTwo.getTime(),
+      updatedAt: testDateTwo.toString(),
     });
   });
 });

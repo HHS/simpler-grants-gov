@@ -25,6 +25,12 @@ jest.mock("src/hooks/useClientFetch", () => ({
   }),
 }));
 
+const fakeExistingFile = {
+  id: "1",
+  fileName: "test.txt",
+  updatedAt: new Date().toDateString(),
+};
+
 let originalAbortController: typeof AbortController;
 
 describe("SimplerFileInput", () => {
@@ -530,6 +536,36 @@ describe("SimplerFileInput", () => {
         }),
       );
       await waitFor(() => expect(mockOnError).toHaveBeenCalledWith(fakeError));
+    });
+    it("calls onDelete callback with file id on delete file confirmation", async () => {
+      const mockOnDelete = jest.fn().mockResolvedValue(true);
+      render(
+        <SimplerFileInput
+          onDelete={mockOnDelete}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          postUploadActionSuccessMessage="post upload action success"
+          postUploadActionErrorMessage="post upload action error"
+          id="file-input-test"
+          labelId="file-input-label"
+          existingFiles={[fakeExistingFile]}
+        />,
+      );
+      const deleteButton = screen.getByRole("button", {
+        name: "delete",
+      });
+      expect(deleteButton).toBeInTheDocument();
+      // open the modal
+      await userEvent.click(deleteButton);
+
+      const deleteConfirmButton = screen.getByRole("button", {
+        name: "deleteFileCta",
+      });
+      expect(deleteConfirmButton).toBeInTheDocument();
+
+      // confirm deletion
+      await userEvent.click(deleteConfirmButton);
+      expect(mockOnDelete).toHaveBeenCalledWith(fakeExistingFile.id);
     });
   });
   it("cancels upload in progress on cancel button click", async () => {
