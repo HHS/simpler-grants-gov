@@ -214,9 +214,9 @@ test.describe("Grantor Opportunity Happy Path", () => {
       await assertActionsColumnLinksByStatus(matchingRow, {
         status: "posted",
         actionLinkVisibility: {
-          Edit: false,
-          Copy: false,
-          Delete: false,
+          Edit: true,
+          Copy: true,
+          Delete: true,
         },
       });
 
