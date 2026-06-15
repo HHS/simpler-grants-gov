@@ -47,7 +47,7 @@ As the duly authorized representative of the applicant, I certify that the appli
 
 18. Will comply with all applicable requirements of all other Federal laws, executive orders, regulations, and policies governing this program.
 
-19. Will comply with the requirements of Section 106(g) of the Trafficking Victims Protection Act (TVPA) of 2000, as amended (22 U.S.C. 7104) which prohibits grant award recipients or a sub-recipient from (1) Engaging in severe forms of trafficking in persons during the period of time that the award is in effect (2) Procuring a commercial\\ sex act during the period of time that the award is in effect or (3) Using forced labor in the performance of the award or subawards under the award.
+19. Will comply with the requirements of Section 106(g) of the Trafficking Victims Protection Act (TVPA) of 2000, as amended (22 U.S.C. 7104) which prohibits grant award recipients or a sub-recipient from (1) Engaging in severe forms of trafficking in persons during the period of time that the award is in effect (2) Procuring a commercial sex act during the period of time that the award is in effect or (3) Using forced labor in the performance of the award or subawards under the award.
 """
 
 FORM_JSON_SCHEMA = {
