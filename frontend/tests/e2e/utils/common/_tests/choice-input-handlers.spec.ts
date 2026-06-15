@@ -3,7 +3,6 @@
 // Usage: npx playwright test tests/e2e/utils/common/_tests/choice-input-handlers.spec.ts
 
 import { expect, test, type Page } from "@playwright/test";
-
 import { checkboxHandler } from "tests/e2e/utils/common/checkbox-handler";
 import { radioButtonHandler } from "tests/e2e/utils/common/radio-button-handler";
 import { type FillFieldDefinition } from "tests/e2e/utils/common/types";
