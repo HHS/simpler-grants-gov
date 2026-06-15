@@ -12,7 +12,7 @@ export const FileInputExistingFiles = ({
   onDelete,
 }: {
   existingFiles?: UploadFileMetadata[];
-  onDelete: (fileId: string) => Promise<unknown>;
+  onDelete: (fileToDelete: UploadFileMetadata) => void;
 }) => {
   const t = useTranslations("FileInput.existingFiles");
   if (existingFiles && existingFiles.length) {
@@ -38,7 +38,7 @@ export const FileInputExistingFiles = ({
               type="button"
               unstyled
               onClick={() => {
-                void onDelete(existingFile.id);
+                void onDelete(existingFile);
               }}
             >
               <USWDSIcon

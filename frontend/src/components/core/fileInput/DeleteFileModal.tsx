@@ -14,21 +14,24 @@ import { SimplerModal } from "src/components/core/SimplerModal";
 import Spinner from "src/components/core/Spinner";
 
 interface Props {
+  // for now, allowing the ID to be optional. As the SimplerFileInput is rolled out, this component
+  // will only be used there, where it is required, so we can adjust at that time
+  // or can we do this without the id, and rely on the parent to know about the id, yeah probably
+  handleDeleteFile: () => void;
   deletePending: boolean;
-  handleDeleteAttachment: () => void;
   modalId: string;
   modalRef: RefObject<ModalRef | null>;
   pendingDeleteName: string | undefined;
 }
 
-export const DeleteAttachmentModal = ({
+export const DeleteFileModal = ({
   deletePending,
-  handleDeleteAttachment,
+  handleDeleteFile,
   modalId,
   modalRef,
   pendingDeleteName,
 }: Props) => {
-  const t = useTranslations("Application.attachments.deleteModal");
+  const t = useTranslations("FileInput.deleteModal");
   return (
     <SimplerModal
       modalId={modalId}
@@ -46,7 +49,7 @@ export const DeleteAttachmentModal = ({
           <Button
             disabled={deletePending}
             type="button"
-            onClick={handleDeleteAttachment}
+            onClick={handleDeleteFile}
           >
             {deletePending ? (
               <>

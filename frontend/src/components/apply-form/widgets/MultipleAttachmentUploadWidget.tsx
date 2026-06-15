@@ -18,7 +18,7 @@ import {
   ModalRef,
 } from "@trussworks/react-uswds";
 
-import { DeleteAttachmentModal } from "src/components/core/fileInput/DeleteAttachmentModal";
+import { DeleteFileModal } from "src/components/core/fileInput/DeleteFileModal";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
@@ -224,9 +224,9 @@ const MultipleAttachmentUploadWidget = ({
         />
       )}
 
-      <DeleteAttachmentModal
+      <DeleteFileModal
         deletePending={deletePending}
-        handleDeleteAttachment={confirmDelete}
+        handleDeleteFile={confirmDelete}
         modalId="multi-attachment-delete-modal"
         modalRef={deleteModalRef}
         pendingDeleteName={deletePendingName ?? ""}

@@ -8,8 +8,9 @@ import {
 } from "src/types/fileUploadTypes";
 
 import { ChangeEvent, useCallback, useRef, useState } from "react";
-import { FileInput, FileInputRef } from "@trussworks/react-uswds";
+import { FileInput, FileInputRef, ModalRef } from "@trussworks/react-uswds";
 
+import { DeleteFileModal } from "./DeleteFileModal";
 import { FileInputExistingFiles } from "./FileInputExistingFiles";
 import { FileInputStatusDisplay } from "./FileInputStatusDisplay";
 
@@ -67,6 +68,7 @@ export const SimplerFileInput = ({
   required = false,
 }: SimplerFileInputProps) => {
   const fileInputRef = useRef<FileInputRef | null>(null);
+  const deleteModalRef = useRef<ModalRef | null>(null);
 
   const { clientFetch } = useClientFetch<Response>("unable to upload file", {
     jsonResponse: true,
@@ -83,6 +85,9 @@ export const SimplerFileInput = ({
     useState<AbortController>();
   const [responseReader, setResponseReader] =
     useState<ReadableStreamDefaultReader>();
+  const [filePendingDeletion, setFilePendingDeletion] =
+    useState<UploadFileMetadata>();
+  const [deletePending, setDeletePending] = useState(false);
 
   const handleCancel = async () => {
     setCurrentStatus(undefined);
@@ -103,6 +108,30 @@ export const SimplerFileInput = ({
     },
     [currentStatus, setUploadError, onError],
   );
+
+  // this does not update the list of existing / previously uploaded files internally,
+  // and relies on the parent to update that list upon successful deletion
+  const handleDeleteFile = useCallback(() => {
+    if (!filePendingDeletion) {
+      console.error("Attempting to delete, but no file selected");
+      return;
+    }
+    setDeletePending(true);
+    onDelete(filePendingDeletion?.id)
+      .then(() => {
+        setDeletePending(false);
+        setFilePendingDeletion(undefined);
+        deleteModalRef.current?.toggleModal();
+        return;
+      })
+      .catch((e) => {
+        // do we want to do anything else here to surface the error?
+        console.error("Error deleting file", e);
+        setDeletePending(false);
+        setFilePendingDeletion(undefined);
+        deleteModalRef.current?.toggleModal();
+      });
+  }, [filePendingDeletion, onDelete]);
 
   const readResponseStream = useCallback(
     (reader: ReadableStreamDefaultReader<string>) => {
@@ -238,7 +267,20 @@ export const SimplerFileInput = ({
       ) : null}
       <FileInputExistingFiles
         existingFiles={existingFiles}
-        onDelete={onDelete}
+        onDelete={(fileToDelete: UploadFileMetadata) => {
+          setFilePendingDeletion(fileToDelete);
+          deleteModalRef.current?.toggleModal();
+        }}
+      />
+      <DeleteFileModal
+        // this only supports deleting one file at a time.
+        // in order to support deleting more than one file at a time we'd
+        // need to switch things up a bit, and I don't know if that's a requirement
+        deletePending={deletePending}
+        handleDeleteFile={handleDeleteFile}
+        modalId={`${id}-delete-file-modal`}
+        modalRef={deleteModalRef}
+        pendingDeleteName={filePendingDeletion?.fileName}
       />
     </>
   );
