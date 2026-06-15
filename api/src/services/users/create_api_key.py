@@ -42,7 +42,7 @@ def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> Ba
     key_id = _generate_unique_key_id(db_session)
 
     # Create the new API key in our database first
-    api_key = get_auth_handler().create_api_key(db_session, user_id, key_name, key_id)
+    api_key = get_auth_handler(db_session).create_api_key(user_id, key_name, key_id)
 
     # Import the API key to AWS API Gateway
     _import_api_key_to_aws_gateway(api_key)
@@ -93,7 +93,7 @@ def _generate_unique_key_id(db_session: db.Session) -> str:
         key_id = generate_api_key_id()
 
         # Check if this key_id already exists
-        existing_key = get_auth_handler().get_api_key_by_key_id(db_session, key_id)
+        existing_key = get_auth_handler(db_session).get_api_key_by_key_id(key_id)
 
         if existing_key is None:
             return key_id

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def get_user_api_keys(db_session: db.Session, user_id: UUID) -> Sequence[BaseUserApiKey]:
     logger.info("Getting API keys for user", extra={"user_id": user_id})
 
-    api_keys = get_auth_handler().list_api_keys_for_user(db_session, user_id)
+    api_keys = get_auth_handler(db_session).list_api_keys_for_user(user_id)
 
     logger.info(
         "Retrieved API keys for user",
@@ -37,7 +37,7 @@ def get_user_api_key(db_session: db.Session, user_id: UUID, api_key_id: UUID) ->
         },
     )
 
-    api_key = get_auth_handler().get_api_key_for_user(db_session, user_id, api_key_id)
+    api_key = get_auth_handler(db_session).get_api_key_for_user(user_id, api_key_id)
 
     if api_key is None:
         raise_flask_error(404, "API key not found")

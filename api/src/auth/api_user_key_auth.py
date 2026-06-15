@@ -79,7 +79,7 @@ def verify_api_key(db_session: db.Session, token: str) -> BaseUserApiKey:
 
 
 def validate_api_key_in_db(api_key: str, db_session: db.Session) -> BaseUserApiKey:
-    user_api_key = get_auth_handler().get_api_key_by_key_id(db_session, api_key)
+    user_api_key = get_auth_handler(db_session).get_api_key_by_key_id(api_key)
 
     if user_api_key is None:
         raise ApiKeyValidationError("Invalid API key")
