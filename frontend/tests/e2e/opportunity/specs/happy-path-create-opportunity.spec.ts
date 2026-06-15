@@ -19,6 +19,7 @@ import {
   FUNDING_DETAILS_FIELD_DEFINITIONS,
 } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
 import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixtures/opportunity-pages-fill-data";
+import { verifyOpportunityInSearchByTitleAndNumber } from "tests/e2e/opportunity/search-opportunity-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
@@ -215,8 +216,8 @@ test.describe("Grantor Opportunity Happy Path", () => {
         status: "posted",
         actionLinkVisibility: {
           Edit: true,
-          Copy: true,
-          Delete: true,
+          Copy: false,
+          Delete: false,
         },
       });
 
@@ -251,6 +252,13 @@ test.describe("Grantor Opportunity Happy Path", () => {
         heading: opportunityTitle,
         texts: finalAssertions,
       });
+
+      //--------------Additional verification of opportunity visibility on search results page after publishing----------------
+      await verifyOpportunityInSearchByTitleAndNumber(
+        page,
+        opportunityTitle,
+        opportunityNumber,
+      );
 
       //--------------Scenario steps end here----------------
     },
