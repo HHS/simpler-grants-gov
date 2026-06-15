@@ -253,7 +253,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
         texts: finalAssertions,
       });
 
-      //--------------Additional verification of opportunity visibility on search results page after publishing----------------
+      // And I verify the opportunity visibility on search results page after publishing
       await verifyOpportunityInSearchByTitleAndNumber(
         page,
         opportunityTitle,
