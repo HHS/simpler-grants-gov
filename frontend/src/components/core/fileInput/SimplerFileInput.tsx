@@ -227,6 +227,7 @@ export const SimplerFileInput = ({
             handleError(e);
           })
           .finally(() => {
+            // may need to clear files from the input here has well?
             setFileName("");
             setPostUploadController(undefined);
             setUploadController(undefined);
