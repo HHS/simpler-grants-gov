@@ -110,3 +110,44 @@ See `.github/skills/start-local-environment/SKILL.md` for:
 - Environment variable setup details
 - Error pattern documentation
 - Test data verification procedures
+
+---
+
+## 📚 Environment Variables Guide
+
+For detailed information on all environment variables, see **[ENV_VARIABLES.md](ENV_VARIABLES.md)**:
+
+### Quick Checklist:
+- [ ] `frontend/.env.development` has `ENVIRONMENT=local`
+- [ ] `frontend/.env.development` has `API_URL=http://grants-api:8080` (for Docker)
+- [ ] `frontend/docker-compose.yml` has `LOCAL_DEV: "true"` 
+- [ ] `frontend/docker-compose.yml` has `API_URL: "http://grants-api:8080"`
+- [ ] `api/.env` has correct database credentials
+
+### Why Each Matters:
+- **ENVIRONMENT=local** + **API_URL with grants-api** → Enables LOCAL_DEV detection
+- **LOCAL_DEV: "true"** → Test user dropdown renders
+- **API_URL: http://grants-api:8080** → Frontend can reach backend in Docker
+
+### Common Fixes:
+1. **Test dropdown missing?** → Check `LOCAL_DEV: "true"` in docker-compose
+2. **Can't connect to API?** → Check `API_URL=http://grants-api:8080` (not localhost)
+3. **Wrong environment being used?** → Check `ENVIRONMENT=local` in .env.development
+
+See **ENV_VARIABLES.md** for complete documentation and troubleshooting.
+
+---
+
+## 📝 Create a Pull Request
+
+To create a PR with these changes, visit:
+```
+https://github.com/HHS/simpler-grants-gov/pull/new/bhavna/Local-Env
+```
+
+Or compare with main:
+```
+https://github.com/HHS/simpler-grants-gov/compare/main...bhavna/Local-Env
+```
+
+The branch is ready for review and testing! 🚀
