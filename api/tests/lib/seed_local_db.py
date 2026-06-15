@@ -635,7 +635,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             db_session,
             forms[form_name],
             opportunity_id=uuid.UUID(opportunity_id),
-            opportunity_number=opportunity_number,  # form names are abbreviated in opportunity number to be under the 40 char limit
+            opportunity_number=opportunity_number,
             opportunity_title=opportunity_title,
             competition_id=uuid.UUID(competition_id),
             competition_title=competition_title,
