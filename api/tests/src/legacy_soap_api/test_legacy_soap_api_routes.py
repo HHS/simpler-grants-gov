@@ -291,7 +291,7 @@ def test_if_write_debug_data_to_s3_fails_the_exception_is_logged(
 
 @mock.patch("uuid.uuid4")
 @mock.patch("src.legacy_soap_api.simpler_soap_api.SimplerGrantorsS2SClient")
-def test_write_debug_data_if_s2s_client_throws_specific_errors(
+def test_write_debug_data_if_flag_save_soap_messages_to_s3_is_set(
     mock_s2s_client,
     mock_uuid,
     monkeypatch,
@@ -352,8 +352,18 @@ def test_write_debug_data_if_s2s_client_throws_specific_errors(
 
 @mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_received_by_agency_status(
-    mock_uuid, db_session, client, enable_factory_create, caplog
+    mock_uuid,
+    db_session,
+    client,
+    enable_factory_create,
+    caplog,
+    monkeypatch,
+    mock_s3_bucket,
+    mock_s3,
+    s3_config,
 ) -> None:
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
@@ -426,6 +436,80 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
     assert (
         log.faultstring
         == f"Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received by Agency' for GRANT{submission.legacy_tracking_number})"
+    )
+    records = [r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"]
+    assert len(records) == 1
+
+
+def test_if_soap_request_errors_on_creation_the_s3_handling_records_just_the_response(
+    db_session,
+    client,
+    enable_factory_create,
+    caplog,
+    monkeypatch,
+    mock_s3_bucket,
+    mock_s3,
+    s3_config,
+) -> None:
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    ApplicationSubmissionRetrievedFactory.create(
+        application_submission=submission, created_by_user=user
+    )
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        with mock.patch("src.legacy_soap_api.simpler_soap_api.SOAPRequest") as mock_soap_request:
+            mock_soap_request.side_effect = Exception()
+            mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+            response = client.post(
+                full_path,
+                data=mock_data,
+                headers={
+                    "Use-Simpler-Override": "1",
+                    MTLS_CERT_HEADER_KEY: mtls_cert,
+                },
+            )
+        assert response.status_code == 500
+        records = [
+            r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
+        ]
+        assert len(records) == 1
+    record = records[0]
+    assert not file_util.file_exists(
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request.txt"
+    )
+    assert file_util.file_exists(
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
     )
 
 

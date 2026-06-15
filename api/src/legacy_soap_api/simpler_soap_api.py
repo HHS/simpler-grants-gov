@@ -79,7 +79,6 @@ def get_simpler_soap_response(
                 "used_simpler_response": use_simpler,
             },
         )
-        write_debug_data_to_s3(soap_request, soap_legacy_response)
         return soap_legacy_response
     except Exception:
         err = "Unable to initialize Simpler SOAP client: Unknown error"
@@ -91,7 +90,6 @@ def get_simpler_soap_response(
                 "used_simpler_response": use_simpler,
             },
         )
-        write_debug_data_to_s3(soap_request, soap_legacy_response)
         return soap_legacy_response
 
     if use_simpler or simpler_soap_client.operation_config.always_call_simpler:
@@ -163,6 +161,8 @@ def process_simpler_request(
             return get_soap_error_response(
                 faultstring="Certificate is expired. (Authorization Failure)"
             ).to_flask_response()
+
+    soap_request: SOAPRequest | None = None
     try:
         soap_request = SOAPRequest(
             api_name=api_name,
@@ -189,12 +189,16 @@ def process_simpler_request(
                 "soap_client_certificate: simpler route is disabled, returning legacy response",
                 extra={"soap_api_event": LegacySoapApiEvent.SIMPLER_ROUTE_DISABLED},
             )
-            return get_legacy_response(soap_request).to_flask_response()
+            soap_legacy_response = get_legacy_response(soap_request)
+            write_debug_data_to_s3(soap_request, soap_legacy_response)
+            return soap_legacy_response.to_flask_response()
 
         # If it is GetOpportunityList or is valid legacy certificate but not configured in Simpler
         # call legacy and don't call simpler
         if is_get_opportunity_list or is_legacy_only_certificate:
-            return get_legacy_response(soap_request).to_flask_response()
+            soap_legacy_response = get_legacy_response(soap_request)
+            write_debug_data_to_s3(soap_request, soap_legacy_response)
+            return soap_legacy_response.to_flask_response()
         # If it has a Simpler GrantsGovTrackingNumber then don't call legacy
         elif alternate_legacy_response := get_alternate_legacy_response(soap_request):
             logger.info(
@@ -214,7 +218,9 @@ def process_simpler_request(
             soap_legacy_response = get_legacy_response(soap_request)
         # Fallback: return legacy response and don't call simpler
         else:
-            return get_legacy_response(soap_request).to_flask_response()
+            soap_legacy_response = get_legacy_response(soap_request)
+            write_debug_data_to_s3(soap_request, soap_legacy_response)
+            return soap_legacy_response.to_flask_response()
 
     except Exception:
         logger.exception(
@@ -224,12 +230,16 @@ def process_simpler_request(
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_LEGACY_SOAP,
             },
         )
-        return get_soap_error_response().to_flask_response()
+        error_response = get_soap_error_response()
+        write_debug_data_to_s3(soap_request, error_response)
+        return error_response.to_flask_response()
     if auth and auth.certificate.legacy_certificate:
         try:
-            return get_simpler_soap_response(
+            simpler_soap_response = get_simpler_soap_response(
                 soap_request, soap_legacy_response, db_session
-            ).to_flask_response()
+            )
+            write_debug_data_to_s3(soap_request, simpler_soap_response)
+            return simpler_soap_response.to_flask_response()
         except SOAPClientUserDoesNotHavePermission:
             msg = "soap_client_certificate: User did not have permission to access this application"
             logger.info(
@@ -247,9 +257,11 @@ def process_simpler_request(
                     "faultstring": e.fault.faultstring,
                 },
             )
-            return get_soap_fault_error_response(
+            error_response = get_soap_fault_error_response(
                 faultcode=e.fault.faultcode, faultstring=e.fault.faultstring
-            ).to_flask_response()
+            )
+            write_debug_data_to_s3(soap_request, error_response)
+            return error_response.to_flask_response()
         except SOAPFaultException as e:
             logger.info(
                 msg="Soap Fault Exception raised",
@@ -260,9 +272,11 @@ def process_simpler_request(
                 },
             )
             if soap_legacy_response.status_code == 500:
-                return get_soap_fault_error_response(
+                error_response = get_soap_fault_error_response(
                     faultcode=e.fault.faultcode, faultstring=e.fault.faultstring
-                ).to_flask_response()
+                )
+                write_debug_data_to_s3(soap_request, error_response)
+                return error_response.to_flask_response()
         except Exception:
             msg = "Unable to process Simpler SOAP legacy response"
             logger.exception(
@@ -272,5 +286,5 @@ def process_simpler_request(
                     "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
                 },
             )
-            write_debug_data_to_s3(soap_request, soap_legacy_response)
+    write_debug_data_to_s3(soap_request, soap_legacy_response)
     return soap_legacy_response.to_flask_response()
