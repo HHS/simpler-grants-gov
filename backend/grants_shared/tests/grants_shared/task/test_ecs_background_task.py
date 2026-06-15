@@ -24,8 +24,9 @@ def logger():
 
 @pytest.fixture
 def app(logger):
-    init_app(logger, Flask("test_app_name"), "test")
-    return app
+    flask_app = Flask("test_app_name")
+    init_app(logger, flask_app, "test")
+    return flask_app
 
 
 def test_ecs_background_task(app, caplog, monkeypatch_session):
