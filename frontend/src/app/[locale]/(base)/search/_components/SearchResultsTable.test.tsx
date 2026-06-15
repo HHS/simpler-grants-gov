@@ -6,25 +6,28 @@ import {
 } from "src/app/[locale]/(base)/search/_components/SearchResultsTable";
 import { mockOpportunity } from "src/utils/testing/fixtures";
 
-import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
+import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
 
-jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
-  OpportunitySaveUserControl: jest
-    .fn()
-    .mockImplementation(
-      ({ opportunityId, type }: { opportunityId: string; type?: string }) => {
-        return (
-          <div
-            data-testid={`opportunity-save-control-${opportunityId}`}
-            data-opportunity-id={opportunityId}
-            data-type={type || "button"}
-          >
-            {`Mocked Save Control for ${opportunityId} (${type || "button"})`}
-          </div>
-        );
-      },
-    ),
-}));
+jest.mock(
+  "src/components/simpler-opportunity/OpportunitySaveUserControl",
+  () => ({
+    OpportunitySaveUserControl: jest
+      .fn()
+      .mockImplementation(
+        ({ opportunityId, type }: { opportunityId: string; type?: string }) => {
+          return (
+            <div
+              data-testid={`opportunity-save-control-${opportunityId}`}
+              data-opportunity-id={opportunityId}
+              data-type={type || "button"}
+            >
+              {`Mocked Save Control for ${opportunityId} (${type || "button"})`}
+            </div>
+          );
+        },
+      ),
+  }),
+);
 
 // this does not directly test responsive aspects of the component, that should be done in e2e tests
 // see https://github.com/HHS/simpler-grants-gov/issues/5414

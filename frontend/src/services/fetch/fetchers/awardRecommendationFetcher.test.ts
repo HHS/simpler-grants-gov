@@ -4,6 +4,7 @@ import {
   getAwardRecommendationRisks,
   getAwardRecommendationSubmission,
   listAwardRecommendationSubmissions,
+  listAwardRecommendationSubmissionsPaginated,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 import { APIResponse } from "src/types/apiResponseTypes";
 import {
@@ -86,6 +87,40 @@ describe("listAwardRecommendationSubmissions", () => {
     const result = await listAwardRecommendationSubmissions("an id");
 
     expect(result).toEqual(mockAwardRecommendationSubmissions);
+  });
+});
+
+describe("listAwardRecommendationSubmissionsPaginated", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls fetchAwardRecommendationWithMethod with pagination and filters", async () => {
+    await listAwardRecommendationSubmissionsPaginated(
+      "an id",
+      {
+        page_offset: 2,
+        page_size: 10,
+        sort_order: [],
+      },
+      {
+        award_recommendation_type: { one_of: ["recommended_for_funding"] },
+      },
+    );
+
+    expect(mockInnerFetch).toHaveBeenCalledWith({
+      subPath: "an id/submissions/list",
+      body: {
+        filters: {
+          award_recommendation_type: { one_of: ["recommended_for_funding"] },
+        },
+        pagination: {
+          page_offset: 2,
+          page_size: 10,
+          sort_order: [],
+        },
+      },
+    });
   });
 });
 

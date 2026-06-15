@@ -111,6 +111,7 @@ export const CommonTextArea = ({
 // ----------------------------------------------------------
 export const CommonCharacterCount = ({
   isTextArea = false,
+  inputType = "text",
   labelText,
   description, // or instructions
   fieldId,
@@ -119,8 +120,10 @@ export const CommonCharacterCount = ({
   defaultValue = "",
   onTextChange,
   rawErrors = [],
+  disabled = false,
 }: {
   isTextArea?: boolean;
+  inputType?: "text" | "email" | "url";
   labelText: string;
   description: string;
   fieldId: string;
@@ -129,6 +132,7 @@ export const CommonCharacterCount = ({
   defaultValue?: string;
   onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   rawErrors?: string[];
+  disabled?: boolean;
 }) => {
   const error = rawErrors.length ? true : undefined;
   return (
@@ -149,6 +153,8 @@ export const CommonCharacterCount = ({
           onChange={onTextChange}
           isTextArea={isTextArea}
           aria-describedby={`label-for-${fieldId}`}
+          disabled={disabled}
+          {...(!isTextArea && { type: inputType })}
         />
       </FormGroup>
     </>

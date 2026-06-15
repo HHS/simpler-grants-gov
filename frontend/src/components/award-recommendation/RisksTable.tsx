@@ -254,7 +254,7 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
                 <td>
                   {detail?.award_recommendation_type ===
                   "recommended_for_funding" ? (
-                    <span className="usa-tag font-sans-sm text-no-uppercase text-ink border-1px radius-pill border-info-dark bg-info-lighter">
+                    <span className="usa-tag font-sans-sm text-no-uppercase text-ink radius-2 bg-info-lighter">
                       {t("recommendationType.recommended_for_funding")}
                     </span>
                   ) : (
