@@ -13,8 +13,8 @@ import { fetchFileUploadWithMethod } from "./fetchers";
   Returns a pending_file_id that will be used to call fetchFileScanStatus to track upload progress
 
   2. startFileUpload
-  Using the url and body returned from fetchFileUploadDetails, makes a fire and forget call to S3 to initiate
-  the file upload
+  Using the url and body returned from fetchFileUploadDetails, calls to s3 to upload the file. Note that the "body" returned
+  from fetchFileUploadDetails is combined with the file in a new FormData to form the body of the s3 request
 
   3. fetchFileScanStatus
   Calls to the API to fetch a stream that will update as the upload process progresses. Stream will be consumed by
