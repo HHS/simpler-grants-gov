@@ -625,7 +625,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             (
                 "E2E-PPSL",
                 "Project Performance Site Location(s)",
-                PerformanceSite_4_0.form_id,
+                ProjectPerformanceSiteLocation_v4_0.form_id,
                 "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
             ),
             (
