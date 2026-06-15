@@ -246,7 +246,7 @@ class BuildAutomaticOpportunitiesTask(Task):
         self.create_opportunity(
             OpportunityContainer(
                 opportunity_title=f"E2E {form_label} ORG IND OT01",
-                opportunity_number=f"E2E-{prefix}-ORG-IND-01",  # form names are abbreviated in opportunity number to be under the 40 char limit
+                opportunity_number=f"{prefix}-ORG-IND-01",  # form names are abbreviated in opportunity number to be under the 40 char limit
                 opportunity_id=opportunity_id,
             ),
             competitions=[
