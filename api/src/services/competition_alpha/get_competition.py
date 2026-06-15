@@ -50,8 +50,15 @@ def get_competition(db_session: db.Session, competition_id: uuid.UUID) -> Compet
             .all()
         )
         for instruction in instructions:
-            forms_needing_instruction[instruction.form_instruction_id].form_instruction = (
-                instruction
-            )
+            # Store as a plain dict so no SQLAlchemy session binding is held on the
+            # long-lived registry Form singleton. download_path is computed here while
+            # the session is open (it reads file_location under the hood).
+            forms_needing_instruction[instruction.form_instruction_id].form_instruction = {
+                "form_instruction_id": instruction.form_instruction_id,
+                "file_name": instruction.file_name,
+                "download_path": instruction.download_path,
+                "created_at": instruction.created_at,
+                "updated_at": instruction.updated_at,
+            }
 
     return competition
