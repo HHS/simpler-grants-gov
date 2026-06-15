@@ -1,5 +1,5 @@
 name: Deploy Metabase
-run-name: Deploy ${{ inputs.image_tag || github.ref_name }} to Metabase ${{ inputs.environment || 'nonprod' }}
+run-name: Deploy ${{ inputs.image_tag || 'current image' }} to Metabase ${{ inputs.environment || 'nonprod' }}
 
 on:
   push:
@@ -51,7 +51,7 @@ jobs:
           environment: ${{ matrix.envs }}
 
       - name: Deploy Metabase
-        run: make release-deploy APP_NAME=metabase ENVIRONMENT=${{ matrix.envs }} IMAGE_TAG=${{ inputs.image_tag || github.ref }}
+        run: make release-deploy APP_NAME=metabase ENVIRONMENT=${{ matrix.envs }} IMAGE_TAG=${{ inputs.image_tag }}
 
   send-slack-notification:
     if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-424B, SF-424D, SF-LLL, CD-511, GG_LobbyingForm, Project Abstract Summary, EPA Key Contacts, Project Narrative Attachments, Budget Narrative Attachments, Other Narrative Attachments, and Project Abstract.
+This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-424B, SF-424D, SF-LLL, CD-511, GG_LobbyingForm, Project Abstract Summary, EPA Key Contacts, Project Narrative Attachments, Budget Narrative Attachments, Other Narrative Attachments, Project Abstract, and Project/Performance Site Location(s).
 
 ## Architecture
 
@@ -541,6 +541,56 @@ The following forms currently have XML generation support:
 - **Other Narrative Attachments (v1.2)**: Other narrative file attachments
 - **Project Abstract (v1.2)**: Project abstract file attachment
 - **Supplementary Cover Sheet for NEH Grant Programs (v3.0)**: NEH-specific supplementary cover sheet
+- **Project/Performance Site Location(s) (v4.0)**: Primary and additional project performance site locations with optional attachment
+
+### Example: Project/Performance Site Location(s) (v4.0)
+
+The Performance Site form maps site location data for both the primary site and up to 299 additional sites, plus an optional attachment for overflow locations:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for Project/Performance Site Location(s) v4.0",
+        "form_name": "PerformanceSite_4_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/PerformanceSite_4_0-V4.0",
+            "PerformanceSite_4_0": "http://apply.grants.gov/forms/PerformanceSite_4_0-V4.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/PerformanceSite_4_0-V4.0.xsd",
+        "xml_structure": {
+            "root_element": "PerformanceSite_4_0",
+            "root_namespace_prefix": "PerformanceSite_4_0",
+            "root_attributes": {"FormVersion": "4.0"},
+        },
+        "attachment_fields": {
+            "additional_locations_attachment": {
+                "xml_element": "AttachedFile",
+                "type": "single_with_wrapper",
+                "file_element": "",  # content directly in <AttachedFile>, no inner wrapper
+            },
+        },
+    },
+    "primary_site": {
+        "xml_transform": {"target": "PrimarySite", "type": "nested_object"},
+        **_site_location_xml_fields(),
+    },
+    "additional_sites": {
+        "xml_transform": {"target": "OtherSite", "type": "array"},
+        "items": _site_location_xml_fields(),
+    },
+}
+```
+
+**Performance Site Location Field Mapping Notes:**
+
+- **Namespace split**: `Individual`, `OrganizationName`, `SAMUEI`, `Address`, and `CongressionalDistrictProgramProject` are declared in the form's own `SiteLocationDataType` — they use the default `PerformanceSite_4_0` namespace. The address *sub*-elements (`Street1`, `City`, etc.) are typed via `globLib:AddressDataTypeV3` and use the `globLib` namespace.
+- **Address element order**: The XSD sequence requires `ZipPostalCode` before `Country`. The transform rules must declare `zip_code` before `country` to match this ordering.
+- **Attachment**: The optional `additional_locations_attachment` field maps to a single `<AttachedFile>` element (type `att:AttachedFileDataType`) as a direct child of the root. Using `single_with_wrapper` with `file_element: ""` creates the outer `<AttachedFile>` wrapper and places `att:FileName`, `att:MimeType`, `att:FileLocation`, and `glob:HashValue` directly inside it — no spurious inner wrapper element.
+- `submitting_as_individual` uses the `boolean_to_yes_no` value transform (outputs `Y: Yes` / `N: No`).
+- `additional_sites` uses `type: "array"` to emit one `<OtherSite>` element per entry (max 299).
+- XSD reference: https://apply07.grants.gov/apply/forms/schemas/PerformanceSite_4_0-V4.0.xsd
 
 ## Adding New Forms
 

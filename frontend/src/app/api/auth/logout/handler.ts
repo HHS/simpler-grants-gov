@@ -1,6 +1,7 @@
 import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { deleteSession } from "src/services/auth/sessionUtils";
+import { clearCorrelationId } from "src/services/correlationId/correlationId";
 import { postUserLogout } from "src/services/fetch/fetchers/fetchers";
 
 import { NextResponse } from "next/server";
@@ -9,7 +10,9 @@ export async function logoutUser() {
   try {
     const session = await getSession();
     if (!session || !session.token) {
-      throw new UnauthorizedError("No active session to logout");
+      throw new UnauthorizedError(
+        "Expired token or no active session to logout",
+      );
     }
     // logout on API via /v1/users/token/logout
     const response = await postUserLogout();
@@ -18,6 +21,11 @@ export async function logoutUser() {
     }
     // delete session from current cookies
     await deleteSession();
+
+    // Delete correlation_id on explicit logout only. Do not rotate
+    // correlation_id if the user is implicitly logged out such as through
+    // token expiration.
+    await clearCorrelationId("Clearing correlation_id on logout");
     return NextResponse.json({ message: "logout success" });
   } catch (e) {
     const { message, status, cause } = readError(e as Error, 500);

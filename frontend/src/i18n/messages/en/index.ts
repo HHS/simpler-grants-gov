@@ -417,11 +417,11 @@ export const messages = {
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
       awardMinCurrencyInput:
-        "Award minimum must be greater than zero and less than $1,000,000,000,000,000.",
+        "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMaxCurrencyInput:
-        "Award maximum must be greater than zero and less than $1,000,000,000,000,000.",
+        "Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       totalFundingCurrencyInput:
-        "Estimated total program funding must be greater than zero and less than $1,000,000,000,000,000.",
+        "Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMinLessThanTotal:
         "Award minimum cannot exceed the Estimated Total Program Funding.",
       awardMaxLessThanTotal:
@@ -2198,6 +2198,35 @@ export const messages = {
         showDescription: "Show full description",
         hideSummaryDescription: "Hide full description",
       },
+      submissions: {
+        errorMessage:
+          "Unable to load application submissions. Please try again.",
+        columns: {
+          appNumber: "App #",
+          projectTitle: "Project title",
+          orgName: "Org name",
+          uei: "UEI",
+          score: "Score",
+          recommendation: "Recommendation",
+          requested: "Requested",
+          recommended: "Recommended",
+        },
+        recommendationOptions: {
+          none: "None",
+          recommended: "Recommended",
+          recommendedWithoutFunding: "Recommended but not funded",
+          notRecommended: "Not recommended",
+        },
+        recommendedAwards: {
+          heading: "Recommended awards",
+          editDescription:
+            "Select applications and use the drop-down box to apply your recommendation for the selected group.",
+          editLink: "Edit recommended awards",
+        },
+        exceptions: {
+          heading: "Exceptions to selection method",
+        },
+      },
     },
     risks: {
       pageTitle: "Risks and Conditions",
@@ -2430,5 +2459,24 @@ export const messages = {
       "Select a funding opportunity for your award recommendation",
     whichFundingOpportunity: "Which funding opportunity is this for?",
     cancelButtonText: "Cancel",
+  },
+  FileInput: {
+    existingFiles: {
+      savedOn: "Saved on",
+      delete: "Delete",
+    },
+    statusDisplay: {
+      cancel: "Cancel",
+      dismiss: "Dismiss",
+      queued: "Queued",
+      uploading: "Uploading",
+      scanning: "Scanning",
+      success: "Success",
+      error: "Error",
+      scanFail: "Scan failed",
+      uploadError: "Upload error",
+      scanError: "Scan error",
+      postUploadError: "Post upload error",
+    },
   },
 };
