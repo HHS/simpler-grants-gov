@@ -531,7 +531,7 @@ def to_snake_case(name: str) -> str:
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", sub).lower()
 
 
-def write_debug_data_to_s3(soap_request: SOAPRequest, soap_legacy_response: SOAPResponse) -> None:
+def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAPResponse) -> None:
     if get_soap_config().save_soap_messages_to_s3:
         try:
             s3_config = S3Config()
@@ -547,25 +547,26 @@ def write_debug_data_to_s3(soap_request: SOAPRequest, soap_legacy_response: SOAP
             # Store as plain text so the debug files preview in the browser / S3 console
             # instead of downloading as binary/octet-stream.
             text_content_type = "text/plain; charset=utf-8"
-            request_s3_path = file_util.join(
-                base_path,
-                "request.txt",
-            )
-            file_util.write_to_file(
-                request_s3_path,
-                # The request body stream is consumed when forwarding to the legacy proxy, so
-                # re-reading soap_request.data here yields nothing (the empty-request.txt bug).
-                # Use the cached head, which holds the SOAP envelope captured during parsing.
-                soap_request.data.head().decode("utf-8"),
-                content_type=text_content_type,
-            )
+            if soap_request is not None:
+                request_s3_path = file_util.join(
+                    base_path,
+                    "request.txt",
+                )
+                file_util.write_to_file(
+                    request_s3_path,
+                    # The request body stream is consumed when forwarding to the legacy proxy, so
+                    # re-reading soap_request.data here yields nothing (the empty-request.txt bug).
+                    # Use the cached head, which holds the SOAP envelope captured during parsing.
+                    soap_request.data.head().decode("utf-8"),
+                    content_type=text_content_type,
+                )
             response_s3_path = file_util.join(
                 base_path,
                 "response.txt",
             )
             file_util.write_to_file(
                 response_s3_path,
-                soap_legacy_response.to_bytes().decode("utf-8"),
+                soap_response.to_bytes().decode("utf-8"),
                 content_type=text_content_type,
             )
             logger.info(
