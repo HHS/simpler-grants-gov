@@ -88,6 +88,7 @@ export const SimplerFileInput = ({
   const [filePendingDeletion, setFilePendingDeletion] =
     useState<UploadFileMetadata>();
   const [deletePending, setDeletePending] = useState(false);
+  const [deleteErrors, setDeleteErrors] = useState<string[]>([]);
 
   const handleCancel = async () => {
     setCurrentStatus(undefined);
@@ -109,6 +110,20 @@ export const SimplerFileInput = ({
     [currentStatus, setUploadError, onError],
   );
 
+  const clearDeleteErrorsForId = useCallback(
+    (id: string) => {
+      setDeleteErrors(
+        deleteErrors.reduce((acc, currentDeleteErrorId) => {
+          if (currentDeleteErrorId !== id) {
+            return acc.concat([currentDeleteErrorId]);
+          }
+          return acc;
+        }, [] as string[]),
+      );
+    },
+    [deleteErrors],
+  );
+
   // this does not update the list of existing / previously uploaded files internally,
   // and relies on the parent to update that list upon successful deletion
   const handleDeleteFile = useCallback(() => {
@@ -122,6 +137,7 @@ export const SimplerFileInput = ({
         setDeletePending(false);
         setFilePendingDeletion(undefined);
         deleteModalRef.current?.toggleModal();
+        clearDeleteErrorsForId(filePendingDeletion.id);
         return;
       })
       .catch((e) => {
@@ -130,8 +146,9 @@ export const SimplerFileInput = ({
         setDeletePending(false);
         setFilePendingDeletion(undefined);
         deleteModalRef.current?.toggleModal();
+        setDeleteErrors(deleteErrors.concat([filePendingDeletion.id]));
       });
-  }, [filePendingDeletion, onDelete]);
+  }, [filePendingDeletion, onDelete, deleteErrors, clearDeleteErrorsForId]);
 
   const readResponseStream = useCallback(
     (reader: ReadableStreamDefaultReader<string>) => {
@@ -271,6 +288,7 @@ export const SimplerFileInput = ({
           setFilePendingDeletion(fileToDelete);
           deleteModalRef.current?.toggleModal();
         }}
+        filesWithDeleteError={}
       />
       <DeleteFileModal
         // this only supports deleting one file at a time.
