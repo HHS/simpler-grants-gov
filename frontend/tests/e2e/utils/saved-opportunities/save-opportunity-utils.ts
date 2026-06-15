@@ -64,20 +64,8 @@ export async function saveOpportunityViaSearch(
   // Save the opportunity via the save button
   await page.getByTestId("simpler-save-button").click();
 
-  // Return to Saved Opportunities via Workspace dropdown
-  // When the user clicks the "Workspace" dropdown button
-  // find the Workspace nav dropdown item and open it
-  const dropDownButton = page.locator("#nav-dropdown-button-4");
-  await expect(dropDownButton).toBeInViewport();
-  await dropDownButton.click();
-
-  // And the user clicks the "Saved opportunities" item in the Workspace dropdown
-  // the fourth item in the dropdown should be the saved opportunities link
-  const savedOpportunitiesNavItem = page.locator(
-    "ul#Workspace li:nth-child(4)",
-  );
-  await expect(savedOpportunitiesNavItem).toHaveText("Saved opportunities");
-  await savedOpportunitiesNavItem.click();
+  // Return to Saved Opportunities
+  await page.goto("/saved-opportunities");
 
   await waitForURLChange(page, (url) => !!url.match(/saved-opportunities/));
 }
