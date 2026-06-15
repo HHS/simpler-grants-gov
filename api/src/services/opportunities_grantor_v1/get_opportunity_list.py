@@ -2,6 +2,8 @@ import uuid
 from collections.abc import Sequence
 
 import grants_shared.adapters.db as db
+from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
+from grants_shared.pagination.paginator import Paginator
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -16,8 +18,6 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.db.models.user_models import User
-from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
-from src.pagination.paginator import Paginator
 from src.search.search_models import BoolSearchFilter
 from src.services.opportunities_grantor_v1.get_agency import get_agency
 from src.services.service_utils import apply_sorting

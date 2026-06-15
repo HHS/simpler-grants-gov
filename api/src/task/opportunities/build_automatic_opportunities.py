@@ -8,6 +8,7 @@ from enum import StrEnum
 
 from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
+from grants_shared.task.ecs_background_task import ecs_background_task
 from grants_shared.util import datetime_util
 from sqlalchemy import select
 
@@ -54,7 +55,6 @@ from src.form_schema.forms import (
     SupplementaryNEHCoverSheet_v3_0,
 )
 from src.services.opportunity_attachments.attachment_util import get_s3_attachment_path
-from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
 from src.util import file_util
