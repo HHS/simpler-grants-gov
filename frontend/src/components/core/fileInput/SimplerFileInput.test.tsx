@@ -672,6 +672,38 @@ describe("SimplerFileInput", () => {
 
     expect(controllerAbortMock).toHaveBeenCalledTimes(1);
   });
+  it("displays error message if error occurs during delete", async () => {
+    const mockOnDelete = jest.fn().mockRejectedValue(new Error());
+    render(
+      <SimplerFileInput
+        onDelete={mockOnDelete}
+        postUploadAction={() => Promise.resolve(undefined)}
+        postUploadActionProgressMessage="post upload action in progress"
+        postUploadActionSuccessMessage="post upload action success"
+        postUploadActionErrorMessage="post upload action error"
+        id="file-input-test"
+        labelId="file-input-label"
+        existingFiles={[fakeExistingFile]}
+      />,
+    );
+    const deleteButton = screen.getByRole("button", {
+      name: "delete",
+    });
+    expect(deleteButton).toBeInTheDocument();
+    // open the modal
+    await userEvent.click(deleteButton);
+
+    const deleteConfirmButton = screen.getByRole("button", {
+      name: "deleteFileCta",
+    });
+    expect(deleteConfirmButton).toBeInTheDocument();
+
+    // confirm deletion
+    await userEvent.click(deleteConfirmButton);
+    expect(mockOnDelete).toHaveBeenCalledWith(fakeExistingFile.id);
+    const errorMessage = screen.getByText("deleteError");
+    expect(errorMessage).toBeInTheDocument();
+  });
   // not able to test this since the only way to really hide this for now is with CSS, which is not
   // testable using testing-library tools.
   // aria-hidden seems to be the way to do this for testing, but is that possible?
