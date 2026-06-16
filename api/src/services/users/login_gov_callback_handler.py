@@ -210,8 +210,8 @@ class AbstractLoginGovCallbackHandler[
         logger.info(
             "Generated token for user",
             extra={
-                "user_token_session.token_id": str(user_token_session.token_id),
-                "user_token_session.user_id": str(user_token_session.user_id),
+                "user_token_session.token_id": user_token_session.token_id,
+                "user_token_session.user_id": user_token_session.user_id,
             },
         )
 
@@ -242,6 +242,8 @@ class LoginGovCallbackHandler(
             handle_ebiz_poc_organization_during_login(self.db_session, user)
 
         # Validate PIV requirement for agency users
+        # NOTE: PIV/agency-user handling likely belongs on the grantor side once that exists.
+        # Leaving it here for now so we don't break existing publish setup.
         self._validate_piv_requirement(user, login_gov_user.x509_presented)
 
     def _validate_piv_requirement(self, user: User, x509_presented: bool | None) -> None:

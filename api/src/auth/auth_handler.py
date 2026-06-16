@@ -64,9 +64,6 @@ class AbstractAuthHandler[
     @abc.abstractmethod
     def get_token_session_by_token_id(self, token_id: str) -> USER_TOKEN_SESSION | None: ...
 
-    @abc.abstractmethod
-    def get_user_for_token_session(self, token_session: USER_TOKEN_SESSION) -> USER: ...
-
     # --- API keys ---
 
     @abc.abstractmethod
@@ -121,9 +118,6 @@ class AuthHandler(
             .where(UserTokenSession.token_id == token_id)
             .options(selectinload(UserTokenSession.user))
         ).scalar()
-
-    def get_user_for_token_session(self, token_session: UserTokenSession) -> User:
-        return token_session.user
 
     # --- API keys ---
 
