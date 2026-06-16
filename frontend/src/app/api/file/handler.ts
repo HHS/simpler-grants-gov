@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 // apparently the API response stream will timeout after 60 seconds, and deliver chunks every 3 seconds
 const pipeStatusStreamToResponse = async (
   outputController: ReadableStreamDefaultController,
-  inputStream: ReadableStreamDefaultReader<string>,
+  inputStream: ReadableStreamDefaultReader<Uint8Array>,
   previousState?: string,
 ) => {
   const { value, done } = await inputStream.read();
@@ -22,19 +22,28 @@ const pipeStatusStreamToResponse = async (
   if (value) {
     let payloadJson: FileUploadStatusUpdate;
     try {
-      payloadJson = value ? (JSON.parse(value) as FileUploadStatusUpdate) : {};
+      console.log("1.", value);
+      const payloadString = new TextDecoder().decode(value);
+      console.log("2.", payloadString);
+      payloadJson = payloadString
+        ? (JSON.parse(payloadString) as FileUploadStatusUpdate)
+        : {};
     } catch (e) {
       console.error("Error parsing json from file upload stream payload");
       throw e;
     }
     // we will expect the API to deliver duplicate chunks until a state change, but will only write to our
     // output stream when the state changes
-    if (previousState !== payloadJson.status) {
-      responseState = payloadJson.status;
-      outputController.enqueue(JSON.stringify({ status: payloadJson.status }));
+    console.log("3.", payloadJson);
+    const statusOnRead = payloadJson.data.status;
+    if (previousState !== statusOnRead) {
+      console.log("4.", statusOnRead);
+      responseState = statusOnRead;
+      outputController.enqueue(JSON.stringify({ status: statusOnRead }));
     }
   }
   if (done) {
+    console.log("5. DONE");
     outputController.close();
     return;
   }
