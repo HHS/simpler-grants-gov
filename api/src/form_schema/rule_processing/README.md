@@ -163,7 +163,7 @@ requires that you specify which fields to subtract like so:
 }
 ```
 
-This mirrors `sum_monetary`, but and every subsequent field is subtracted from the first. 
+This mirrors `sum_monetary`, but every subsequent field is subtracted from the first. 
 The example above produces `a - b`, and fields of `["a", "b", "c"]` would produce `a - b - c`.
 
 For details on how the fields parameter works, see the Fields section below.
