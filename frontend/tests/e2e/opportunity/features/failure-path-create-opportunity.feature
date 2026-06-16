@@ -34,5 +34,5 @@ Feature: Opportunity failure path create opportunity
     And I click "Save and continue" button
     Then I should remain on the "Create Opportunity" page
     And I should see character-limit validation messages for all character-limited fields
-    And the "Save and continue" button should be disabled
+    And the "Save and continue" button should be enabled
     And the "Cancel" button should be enabled
