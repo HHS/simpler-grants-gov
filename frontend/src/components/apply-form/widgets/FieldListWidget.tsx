@@ -268,6 +268,7 @@ function FieldListEntry({
   canDeleteEntry,
   handleDeleteEntry,
   handleFieldChange,
+  isInteractionDisabled,
   rawErrors,
   fieldListPath,
   groupDefinition,
@@ -282,6 +283,7 @@ function FieldListEntry({
   canDeleteEntry: boolean;
   handleDeleteEntry: (entryId: string) => void;
   handleFieldChange: (params: FieldListChangeParams) => void;
+  isInteractionDisabled: boolean;
   rawErrors?: FormattedFormValidationWarning[];
   fieldListPath: string;
   groupDefinition: FieldListGroupItem[];
@@ -342,6 +344,9 @@ function FieldListEntry({
           required: isRequired,
           updateOnInput: true,
           additionalDescribedById: entryHeadingId,
+          disabled: isInteractionDisabled,
+          readOnly: isInteractionDisabled,
+          isFormLocked: isInteractionDisabled,
           onChange: (nextValue) => {
             handleFieldChange({
               entryId,
@@ -599,6 +604,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
             canDeleteEntry={canDeleteEntry}
             handleDeleteEntry={handleDeleteEntry}
             handleFieldChange={handleFieldChange}
+            isInteractionDisabled={isInteractionDisabled}
             groupDefinition={groupDefinition}
             rawErrors={rawErrors}
             fieldListPath={fieldListPath}
