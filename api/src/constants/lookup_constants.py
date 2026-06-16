@@ -324,6 +324,8 @@ class Privilege(StrEnum):
 
     INTERNAL_S3_SCAN = "internal_s3_scan"
 
+    MANAGE_TEST_USER_TOKEN = "manage_test_user_token"
+
 
 class RoleType(StrEnum):
     ORGANIZATION = "organization"

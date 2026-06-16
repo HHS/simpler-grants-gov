@@ -2,9 +2,9 @@ import logging
 from uuid import UUID
 
 from grants_shared.adapters import db
+from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 
-from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import OrganizationAuditEvent, Privilege
 from src.db.models.entity_models import Organization

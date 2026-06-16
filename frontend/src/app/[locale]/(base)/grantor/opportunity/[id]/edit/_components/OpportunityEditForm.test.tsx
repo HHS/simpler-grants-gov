@@ -167,6 +167,55 @@ describe("OpportunityEditForm — rendering", () => {
     expect(screen.getByText("content.draftOnlyWarning")).toBeInTheDocument();
   });
 
+  it("disables character-count fields when isDraft is false", () => {
+    renderOpportunityEditForm({ isDraft: false });
+
+    expect(
+      screen.getByRole("textbox", { name: /labels\.description/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("textbox", { name: /labels\.grantorContactDetails/i }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.additionalInfoUrl" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.additionalInfoUrlText" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.contactEmail" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("textbox", { name: "labels.contactEmailText" }),
+    ).toBeDisabled();
+  });
+
+  it("disables fundingCategoryExplanation when isDraft is false and fundingCategories is 'other'", () => {
+    renderOpportunityEditForm({
+      isDraft: false,
+      initialValues: { ...initialValues, fundingCategories: "other" },
+    });
+
+    expect(
+      screen.getByRole("textbox", {
+        name: /labels\.fundingCategoryExplanation/i,
+      }),
+    ).toBeDisabled();
+  });
+
+  it("disables additionalEligibilityInfo when isDraft is false and eligibleApplicants includes 'other'", () => {
+    renderOpportunityEditForm({
+      isDraft: false,
+      initialValues: { ...initialValues, eligibleApplicants: ["other"] },
+    });
+
+    expect(
+      screen.getByRole("textbox", {
+        name: /labels\.additionalEligibilityInfo/i,
+      }),
+    ).toBeDisabled();
+  });
+
   it("pre-checks eligibility checkboxes from initialValues", () => {
     renderOpportunityEditForm();
 

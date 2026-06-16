@@ -3,7 +3,7 @@ from uuid import UUID
 
 from grants_shared.adapters import db
 
-from src.db.models.user_models import UserApiKey
+from src.db.models.auth_base_models import BaseUserApiKey
 from src.services.users.get_user_api_keys import get_user_api_key
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class RenameApiKeyParams:
 
 def rename_api_key(
     db_session: db.Session, user_id: UUID, api_key_id: UUID, json_data: dict
-) -> UserApiKey:
+) -> BaseUserApiKey:
     """Rename an existing API key for a user"""
     params = RenameApiKeyParams(json_data)
 

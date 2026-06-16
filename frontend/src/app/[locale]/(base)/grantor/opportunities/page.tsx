@@ -28,6 +28,7 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
+import OpportunitiesPagination from "./_components/OpportunitiesPagination";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");
@@ -140,9 +141,10 @@ const transformTableRowData = (
   _t: TFn,
 ) => {
   return userOpportunities.map((opportunity: BaseOpportunity) => {
+    const isSgmOpportunity = opportunity.is_simpler_grants_opportunity ?? false;
     const status = opportunity.is_draft
-      ? "Draft"
-      : opportunity.opportunity_status;
+      ? "draft"
+      : (opportunity.opportunity_status ?? "");
     const opportunityTitleUrl = opportunity.is_draft
       ? canUpdate
         ? `/grantor/opportunity/${opportunity.opportunity_id}/edit`
@@ -161,17 +163,23 @@ const transformTableRowData = (
         cellData: status,
       },
       {
-        cellData: opportunity.is_draft ? (
-          <span>
-            <EditAction
-              canUpdate={canUpdate}
-              opportunityId={opportunity.opportunity_id}
-            />
-            , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
-          </span>
-        ) : (
-          "" // Don't show any actions for published opportunities
-        ),
+        cellData:
+          // Only allow editing if this is an SGM created opportunity
+          isSgmOpportunity &&
+          // and the status is draft, posted or forecasted
+          (status.toLowerCase() === "draft" ||
+            status.toLowerCase() === "forecasted" ||
+            status.toLowerCase() === "posted") ? (
+            <span>
+              <EditAction
+                canUpdate={canUpdate}
+                opportunityId={opportunity.opportunity_id}
+              />
+              , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
+            </span>
+          ) : (
+            "" // Don't show any actions for published opportunities
+          ),
       },
     ];
   });
@@ -312,6 +320,31 @@ const parseUserPrivileges = (
 };
 
 // --------------------------------------------------
+// Fetch function: get the list of opportunities for this agency
+// Note: if the user does not have read_opportunity privilege for this agency,
+// this API will return an error
+// --------------------------------------------------
+const fetchOpportunities = async (agencyId: string, page: number) => {
+  const pageRequest: PaginationRequestBody = {
+    page_offset: page,
+    page_size: 25,
+    sort_order: [
+      {
+        order_by: "created_at",
+        sort_direction: "descending",
+      },
+    ],
+  };
+  // fetch a page of opportunities for this agency
+  const json = await searchOpportunitiesByAgency(agencyId, pageRequest);
+  return {
+    opportunities: json.data,
+    totalRecords: json.pagination_info.total_records,
+    totalPages: json.pagination_info.total_pages,
+  };
+};
+
+// --------------------------------------------------
 // The Main Page
 // --------------------------------------------------
 type OpportunitiesListProps = LocalizedPageProps & WithFeatureFlagProps;
@@ -326,11 +359,11 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   )
     ? selectedAgencyParam[0]
     : selectedAgencyParam;
+  const currentPage = Number(resolvedSearchParams.page) || 1;
 
   // A. Check the user's session
   const userSession = await getSession();
   if (!userSession || !userSession.token) {
-    console.error("Invalid session", userSession);
     return <TopLevelError />;
   }
 
@@ -382,26 +415,20 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   }
   const agencyUserAcccess = parseUserPrivileges(userPrivilegeResult);
 
-  // E. Get the list of opportunities for this agency
-  // Note: if the user does not have read_opportunity privilege for this agency,
-  // this API will return an error
+  // E. Load a page of data
+  // note: the current page number is in the URL
+  let totalRecords = 0;
+  let totalPages = 0;
   let userOpportunities: BaseOpportunity[] = [];
   if (agencyUserAcccess.canView) {
-    const pageRequest: PaginationRequestBody = {
-      page_offset: 1,
-      page_size: 5000,
-      sort_order: [
-        {
-          order_by: "created_at",
-          sort_direction: "descending",
-        },
-      ],
-    };
     try {
-      userOpportunities = await searchOpportunitiesByAgency(
+      const data = await fetchOpportunities(
         selectedAgency.agency_id,
-        pageRequest,
+        currentPage,
       );
+      userOpportunities = data.opportunities;
+      totalRecords = data.totalRecords;
+      totalPages = data.totalPages;
     } catch (error) {
       console.error("Error fetching Opportunities", error);
       if (error instanceof UnauthorizedError) {
@@ -415,7 +442,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   return (
     <OpportunitiesPageWrapper>
       <OpportunitiesHeader
-        userOpportunitiesCount={userOpportunities.length}
+        userOpportunitiesCount={totalRecords}
         agencyName={selectedAgency.agency_name}
         agencies={sortedUserAgencies}
         currentAgencyId={selectedAgencyId}
@@ -429,10 +456,13 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       )}
 
       {agencyUserAcccess.canView && userOpportunities.length > 0 && (
-        <OpportunitiesTable
-          userOpportunities={userOpportunities}
-          canUpdate={agencyUserAcccess.canUpdate}
-        />
+        <>
+          <OpportunitiesTable
+            userOpportunities={userOpportunities}
+            canUpdate={agencyUserAcccess.canUpdate}
+          />
+          <OpportunitiesPagination totalPages={totalPages} />
+        </>
       )}
     </OpportunitiesPageWrapper>
   );

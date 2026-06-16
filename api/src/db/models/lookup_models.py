@@ -345,6 +345,7 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.UPDATE_AWARD_RECOMMENDATION, 30),
         LookupStr(Privilege.SUBMIT_AWARD_RECOMMENDATION, 31),
         LookupStr(Privilege.INTERNAL_S3_SCAN, 32),
+        LookupStr(Privilege.MANAGE_TEST_USER_TOKEN, 33),
     ]
 )
 

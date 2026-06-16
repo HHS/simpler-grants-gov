@@ -44,6 +44,11 @@ def get_s3_client(
             signature_version="s3v4",
             request_checksum_calculation="when_required",
             response_checksum_validation="when_required",
+            # Force path-style addressing (s3.<region>.amazonaws.com/<bucket>).
+            # Virtual-hosted-style requests (<bucket>.s3.amazonaws.com) fail with
+            # HTTP 500 from inside our VPC, which surfaces as smart_open's
+            # "bucket does not exist, or is forbidden for access" on multipart uploads.
+            s3={"addressing_style": "path"},
         )
 
     params["config"] = boto_config

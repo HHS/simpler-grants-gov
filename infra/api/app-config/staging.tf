@@ -12,6 +12,7 @@ module "staging_config" {
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
+  database_engine_version           = "17.7"
   database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwtMjA3MTAxMDcwODY2NTUyNTU"
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
@@ -70,7 +71,7 @@ module "staging_config" {
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
-  # enable_command_execution = true
+  enable_command_execution = true
 
   enable_workflow_service = true
 }

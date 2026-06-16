@@ -83,9 +83,12 @@ jest.mock(
   }),
 );
 
-jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
-  OpportunitySaveUserControl: () => <div />,
-}));
+jest.mock(
+  "src/components/simpler-opportunity/OpportunitySaveUserControl",
+  () => ({
+    OpportunitySaveUserControl: () => <div />,
+  }),
+);
 
 const opportunityParams = Promise.resolve({
   locale: "en",
