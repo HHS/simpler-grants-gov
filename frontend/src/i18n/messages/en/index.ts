@@ -2487,6 +2487,7 @@ export const messages = {
       uploading: "Uploading",
       startingScan: "Starting scan",
       scanning: "Scanning",
+      scanComplete: "Scan complete",
       success: "Success",
       error: "Error",
       scanFail: "Scan failed",

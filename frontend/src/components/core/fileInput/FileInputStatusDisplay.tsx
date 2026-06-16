@@ -18,6 +18,26 @@ const errorStatuses = new Map([
   // Next API will return a specific error and we can return that error status before dealing with this map
 ]);
 
+// if there's an error show the error icon
+// if upload is in progress, show a spinner
+// otherwise show nothing
+const StatusIcon = ({
+  error,
+  status,
+}: {
+  status?: FileUploadProcessStatus;
+  error: boolean;
+}) => {
+  if (error) {
+    return <USWDSIcon name="error" />;
+  }
+  if (!status || status === "success") {
+    return null;
+  }
+
+  return <Spinner />;
+};
+
 export const FileInputStatusDisplay = ({
   fileName,
   status,
@@ -46,10 +66,12 @@ export const FileInputStatusDisplay = ({
   const messagesMap: { [key in FileUploadStatus]: string } = {
     queued: t("queued"),
     uploading: t("uploading"),
-    scanning: t("scanning"),
     "starting-scan": t("startingScan"),
+    pending: t("scanning"),
+    complete: t("scanComplete"),
+    "scan-complete": t("scanComplete"),
     "post-upload": postUploadActionProgressMessage,
-    complete: postUploadActionSuccessMessage || t("success"),
+    success: postUploadActionSuccessMessage || t("success"),
     error: t("error"),
     "scan-fail": t("scanFail"),
     "upload-error": t("uploadError"),
@@ -91,17 +113,13 @@ export const FileInputStatusDisplay = ({
       {t("cancel")}
     </Button>
   );
-  // if there's an error show the error icon
-  // if upload is in progress, show a spinner
-  // otherwise show nothing
-  const IconDisplay = error ? (
-    <USWDSIcon name="error" />
-  ) : statusMessageForDisplay ? (
-    <Spinner />
-  ) : null;
+
+  console.log("** display value", statusMessageForDisplay);
   return (
     <GridContainer data-testid="file-upload-status-display">
-      <Grid col={2}>{IconDisplay}</Grid>
+      <Grid col={2}>
+        <StatusIcon error={error} status={status} />
+      </Grid>
       <Grid>
         <div className="text-bold">{fileName}</div>
         <div>{statusMessageForDisplay}</div>

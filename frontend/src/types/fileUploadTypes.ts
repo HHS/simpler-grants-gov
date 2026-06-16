@@ -1,17 +1,12 @@
-// export type FileUploadProcessStatus =
-//   | "queued"
-//   | "uploading"
-//   | "starting-scan"
-//   | "scanning"
-//   | "post-upload"
-//   | "complete";
 export const fileUploadProcessStatus = [
   "queued",
   "uploading",
   "starting-scan",
-  "scanning",
+  "pending", // API supplied status while undergoing virus scan
+  "scan-complete", // Synthetic status used for sending back pending file id, same visually as "complete"
+  "complete", // API supplied status for complete virus scan
   "post-upload",
-  "complete",
+  "success",
 ] as const;
 
 export type FileUploadProcessStatus = (typeof fileUploadProcessStatus)[number];

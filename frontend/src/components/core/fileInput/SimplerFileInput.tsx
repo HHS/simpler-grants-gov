@@ -246,7 +246,7 @@ export const SimplerFileInput = ({
           .then((postUploadResult: unknown) => {
             setPostUploadController(undefined);
             // complete status will persist until refresh or form change
-            setCurrentStatus("complete");
+            setCurrentStatus("success");
             onSuccess(postUploadResult);
             return;
           })
