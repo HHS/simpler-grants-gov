@@ -10,6 +10,7 @@ import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
 from flask import Response
 from flask_cors import CORS
+from grants_shared.api.response import restructure_error_response
 from grants_shared.api.schemas import response_schema
 from grants_shared.util.local import error_if_not_local
 from pydantic import Field
@@ -35,7 +36,6 @@ from src.api.opportunities_grantor_v1 import (
 )
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
-from src.api.response import restructure_error_response
 from src.api.users.user_blueprint import user_blueprint
 from src.api.workflows import workflow_blueprint
 from src.app_config import AppConfig

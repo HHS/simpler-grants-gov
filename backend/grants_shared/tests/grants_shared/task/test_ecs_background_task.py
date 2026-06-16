@@ -1,16 +1,38 @@
 import logging
+import sys
 import time
 
 import pytest
-from grants_shared.logs.flask_logger import add_extra_data_to_global_logs
+from flask import Flask
 
-from src.task.ecs_background_task import ecs_background_task
+from grants_shared.logs.flask_logger import add_extra_data_to_global_logs, init_app
+from grants_shared.task.ecs_background_task import ecs_background_task
+
+
+@pytest.fixture
+def logger():
+    logger = logging.getLogger("grants_shared")
+    before_level = logger.level
+
+    logger.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler(sys.stdout)
+    logger.addHandler(handler)
+    yield logger
+    logger.setLevel(before_level)
+    logger.removeHandler(handler)
+
+
+@pytest.fixture
+def app(logger):
+    flask_app = Flask("test_app_name")
+    init_app(logger, flask_app, "test")
+    return flask_app
 
 
 def test_ecs_background_task(app, caplog, monkeypatch_session):
     monkeypatch_session.setenv(
         "LOG_LEVEL_OVERRIDES",
-        "newrelic.core.agent=ERROR,newrelic.core.agent_protocol=ERROR,src.adapters.newrelic=ERROR",
+        "newrelic.core.agent=ERROR,newrelic.core.agent_protocol=ERROR,grants_shared.adapters.newrelic=ERROR",
     )
 
     # We pull in the app so its initialized
@@ -48,7 +70,7 @@ def test_ecs_background_task(app, caplog, monkeypatch_session):
 def test_ecs_background_task_when_erroring(app, caplog, monkeypatch_session):
     monkeypatch_session.setenv(
         "LOG_LEVEL_OVERRIDES",
-        "newrelic.core.agent=ERROR,newrelic.core.agent_protocol=ERROR,src.adapters.newrelic=ERROR",
+        "newrelic.core.agent=ERROR,newrelic.core.agent_protocol=ERROR,grants_shared.adapters.newrelic=ERROR",
     )
 
     caplog.set_level(logging.INFO)

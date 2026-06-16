@@ -2,13 +2,15 @@ import { noop } from "lodash";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import {
   FileUploadProcessStatus,
+  FileUploadStatusUpdate,
   PostUploadAction,
   UploadFileMetadata,
 } from "src/types/fileUploadTypes";
 
 import { ChangeEvent, useCallback, useRef, useState } from "react";
-import { FileInput, FileInputRef } from "@trussworks/react-uswds";
+import { FileInput, FileInputRef, ModalRef } from "@trussworks/react-uswds";
 
+import { DeleteFileModal } from "./DeleteFileModal";
 import { FileInputExistingFiles } from "./FileInputExistingFiles";
 import { FileInputStatusDisplay } from "./FileInputStatusDisplay";
 
@@ -66,6 +68,7 @@ export const SimplerFileInput = ({
   required = false,
 }: SimplerFileInputProps) => {
   const fileInputRef = useRef<FileInputRef | null>(null);
+  const deleteModalRef = useRef<ModalRef | null>(null);
 
   const { clientFetch } = useClientFetch<Response>("unable to upload file", {
     jsonResponse: true,
@@ -82,6 +85,12 @@ export const SimplerFileInput = ({
     useState<AbortController>();
   const [responseReader, setResponseReader] =
     useState<ReadableStreamDefaultReader>();
+  const [filePendingDeletion, setFilePendingDeletion] =
+    useState<UploadFileMetadata>();
+  const [deletePending, setDeletePending] = useState(false);
+  const [filesWithDeleteError, setFilesWithDeleteError] = useState<string[]>(
+    [],
+  );
 
   const handleCancel = async () => {
     setCurrentStatus(undefined);
@@ -103,15 +112,59 @@ export const SimplerFileInput = ({
     [currentStatus, setUploadError, onError],
   );
 
+  // this does not update the list of existing / previously uploaded files internally,
+  // and relies on the parent to update that list upon successful deletion
+  const handleDeleteFile = useCallback(() => {
+    if (!filePendingDeletion) {
+      console.error("Attempting to delete, but no file selected");
+      return;
+    }
+    setDeletePending(true);
+    onDelete(filePendingDeletion?.id)
+      .then(() => {
+        setDeletePending(false);
+        setFilePendingDeletion(undefined);
+        deleteModalRef.current?.toggleModal();
+        // figured we may need to clear delete errors for the file here, but it should
+        // be removed from the dom on successful delete so I don't think it's necessary
+        return;
+      })
+      .catch((e) => {
+        // do we want to do anything else here to surface the error?
+        console.error("Error deleting file", e);
+        setDeletePending(false);
+        setFilePendingDeletion(undefined);
+        deleteModalRef.current?.toggleModal();
+        setFilesWithDeleteError(
+          filesWithDeleteError.concat([filePendingDeletion.id]),
+        );
+      });
+  }, [filePendingDeletion, onDelete, filesWithDeleteError]);
+
   const readResponseStream = useCallback(
-    (reader: ReadableStreamDefaultReader) => {
-      const process = (): Promise<string> => {
+    (reader: ReadableStreamDefaultReader<string>) => {
+      const process = (): Promise<FileUploadProcessStatus> => {
         return reader
           .read()
           .then(({ value, done }) => {
-            setCurrentStatus(value as FileUploadProcessStatus);
+            let payloadJson: FileUploadStatusUpdate;
+            try {
+              payloadJson = value
+                ? (JSON.parse(value) as FileUploadStatusUpdate)
+                : {};
+            } catch (e) {
+              console.error(
+                "Error parsing json from file upload stream payload",
+              );
+              throw e;
+            }
+            if (payloadJson?.error) {
+              throw new Error(payloadJson.error);
+            } else {
+              setCurrentStatus(payloadJson?.status as FileUploadProcessStatus);
+            }
             if (done) {
-              return value as string;
+              return payloadJson?.status as FileUploadProcessStatus;
             }
             return process();
           })
@@ -146,10 +199,12 @@ export const SimplerFileInput = ({
         clientFetch(UPLOAD_ENDPOINT, { signal: uploadAbortController.signal })
           // process streaming response
           .then((response: Response) => {
-            const reader =
-              response.body?.getReader() as ReadableStreamDefaultReader;
+            const reader = response.body?.getReader();
             setResponseReader(reader);
-            return readResponseStream(reader);
+            // this may need to be fixed up if we need to convert the buffer to a string on read, but leaving for now
+            return readResponseStream(
+              reader as unknown as ReadableStreamDefaultReader<string>,
+            );
           })
           // run post upload action
           .then((fileId) => {
@@ -220,7 +275,21 @@ export const SimplerFileInput = ({
       ) : null}
       <FileInputExistingFiles
         existingFiles={existingFiles}
-        onDelete={onDelete}
+        onDelete={(fileToDelete: UploadFileMetadata) => {
+          setFilePendingDeletion(fileToDelete);
+          deleteModalRef.current?.toggleModal();
+        }}
+        filesWithDeleteError={filesWithDeleteError}
+      />
+      <DeleteFileModal
+        // this only supports deleting one file at a time.
+        // in order to support deleting more than one file at a time we'd
+        // need to switch things up a bit, and I don't know if that's a requirement
+        deletePending={deletePending}
+        handleDeleteFile={handleDeleteFile}
+        modalId={`${id}-delete-file-modal`}
+        modalRef={deleteModalRef}
+        pendingDeleteName={filePendingDeletion?.fileName}
       />
     </>
   );

@@ -7,11 +7,11 @@ import logging
 import click
 import grants_shared.adapters.db as db
 import grants_shared.adapters.db.flask_db as flask_db
+from grants_shared.task.ecs_background_task import ecs_background_task
 
 import src.db.models.foreign
 import src.db.models.staging
 from src.constants.lookup_constants import JobType
-from src.task.ecs_background_task import ecs_background_task
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
 from src.task.task_job_lock import TaskJobLock
 

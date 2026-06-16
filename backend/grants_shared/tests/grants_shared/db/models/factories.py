@@ -61,6 +61,12 @@ class ExampleTableFactory(BaseFactory):
     description = factory.Faker("paragraph", nb_sentences=1)
     my_count = factory.Faker("random_int", min=1, max=10)
 
+    friends = factory.RelatedFactoryList(
+        "tests.grants_shared.db.models.factories.FriendTableFactory",
+        factory_related_name="example",
+        size=lambda: random.randint(1, 3),
+    )
+
 
 class FriendTableFactory(BaseFactory):
     class Meta:
@@ -68,8 +74,8 @@ class FriendTableFactory(BaseFactory):
 
     friend_id = Generators.UuidObj
 
-    best_example = factory.SubFactory(ExampleTableFactory)
-    best_example_id = factory.LazyAttribute(lambda f: f.best_example.example_id)
+    example = factory.SubFactory(ExampleTableFactory)
+    example_id = factory.LazyAttribute(lambda f: f.example.example_id)
 
     friend_types = factory.Faker(
         "random_elements",

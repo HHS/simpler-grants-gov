@@ -2,9 +2,10 @@ export const createFormData = (
   filename: string,
   buffer: Buffer,
   mimeType: string,
+  key = "file_attachment",
 ) => {
-  const form = new FormData();
+  const formData = new FormData();
   const file = new File([buffer] as BlobPart[], filename, { type: mimeType });
-  form.append("file_attachment", file);
-  return form;
+  formData.append(key, file);
+  return formData;
 };

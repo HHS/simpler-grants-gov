@@ -41,8 +41,8 @@ use our `raise_flask_error` function which handles wrapping exceptions in
 a format that APIFlask will keep the context we add.
 
 ```py
-from src.api.response import ValidationErrorDetail
-from src.api.route_utils import raise_flask_error
+from grants_shared.api.response import ValidationErrorDetail
+from grants_shared.api.route_utils import raise_flask_error
 from src.validation.validation_constants import ValidationErrorType
 
 
@@ -97,6 +97,6 @@ This is done by modifying the default error message that each validation rule ha
 be a `MarshmallowErrorContainer` object. For most of the fields, this is just a bit of configuration,
 but the validators required re-implementing them as they handled errors directly in validation.
 
-When Marshmallow throws its errors, our [process_marshmallow_issues](../../api/src/api/response.py) function
+When Marshmallow throws its errors, our [process_marshmallow_issues](../../backend/grants_shared/src/grants_shared/api/response.py) function
 will get called which handles flattening the errors, and then restructuring them into
 proper format.
