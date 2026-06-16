@@ -261,7 +261,6 @@ test.describe("Grantor Opportunity Happy Path", () => {
       );
 
       //--------------Scenario steps end here----------------
-      
     },
   );
 });
