@@ -49,15 +49,8 @@ export default function AddRiskForm({
     router.push(`/award-recommendation/${awardRecommendationId}/edit`);
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     // TODO: Implement save functionality
-    console.log("Saving risk:", {
-      riskSummary,
-      selectedCondition,
-      submissions: selectedSubmissions.map(
-        (s) => s.award_recommendation_application_submission_id,
-      ),
-    });
   };
 
   if (!hasSelections) {
