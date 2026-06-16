@@ -7,7 +7,7 @@ timestamp is the time of the valid ack, not the `/claim`.
 
 This text is the canonical, binding affirmation of eligibility. Do not paraphrase
 it. It must match the version in the
-[Contributor Terms of Service §4.9](/documentation/bounties/paid-contributor-TOS.md#49-acknowledgment-template)
+[Contributor Terms of Service §4.9](/documentation/bounties/paid-contributor-TOS.md#19-acknowledgment-template)
 and the `/claim` instructions in the
 [bounty issue template](../../../.github/ISSUE_TEMPLATE/9_internal_bounty.yml).
 
