@@ -5,11 +5,25 @@ from typing import Any
 import boto3
 import opensearchpy
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_fixed
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
 from src.adapters.search.opensearch_response import SearchResponse
 
 logger = logging.getLogger(__name__)
+
+# OpenSearch automatically snapshots our indexes hourly. An index that is
+# actively being snapshotted cannot be deleted and OpenSearch returns a 400
+# RequestError with this error type.
+SNAPSHOT_IN_PROGRESS_ERROR = "snapshot_in_progress_exception"
+
+
+def _is_snapshot_in_progress_error(exception: BaseException) -> bool:
+    return (
+        isinstance(exception, opensearchpy.exceptions.RequestError)
+        and exception.error == SNAPSHOT_IN_PROGRESS_ERROR
+    )
+
 
 # By default, we'll override the default analyzer+tokenization
 # for a search index. You can provide your own when calling create_index
@@ -77,8 +91,30 @@ class SearchClient:
     def delete_index(self, index_name: str) -> None:
         """
         Delete an index. Can also delete all indexes via a prefix.
+
+        If the index is being snapshotted, OpenSearch refuses the delete. We retry
+        a few times to wait out a short snapshot, and if it is still in progress we
+        skip the delete rather than fail the job -- the next run of the load job
+        deletes all stale indexes, so the leftover index gets cleaned up then.
         """
         logger.info("Deleting search index %s", index_name, extra={"index_name": index_name})
+        try:
+            self._delete_index_with_retry(index_name)
+        except opensearchpy.exceptions.RequestError as e:
+            if not _is_snapshot_in_progress_error(e):
+                raise
+            logger.info(
+                "Skipping search index delete, snapshot in progress",
+                extra={"index_name": index_name},
+            )
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(2),
+        retry=retry_if_exception(_is_snapshot_in_progress_error),
+        reraise=True,
+    )
+    def _delete_index_with_retry(self, index_name: str) -> None:
         self._client.indices.delete(index=index_name)
 
     def bulk_upsert(
