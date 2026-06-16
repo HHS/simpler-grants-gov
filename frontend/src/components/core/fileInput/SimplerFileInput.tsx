@@ -47,6 +47,17 @@ type SimplerFileInputProps = {
   * cancel a download [x]
   * delete a previously uploaded file [x]
 
+  * remove the "selected file" thing on single file inputs [x]
+  * confirm delete behavior [ ]
+  * confirm cancel behavior [ ]
+  * confirm callback behavior [ ]
+  *
+  * confirm error status displays [ ]
+  *
+  * properly format status display [ ]
+  * properly format existing file display [ ]
+
+
 */
 
 export const SimplerFileInput = ({
@@ -225,9 +236,8 @@ export const SimplerFileInput = ({
             );
           })
           // run post upload action
-          .then((passedInId) => {
-            console.log("++++ reading pending file id", passedInId);
-            if (!passedInId) {
+          .then((pendingFileId) => {
+            if (!pendingFileId) {
               throw new Error(
                 "upload stream completed without sending pending file id",
               );
@@ -238,7 +248,7 @@ export const SimplerFileInput = ({
             setCurrentStatus("post-upload");
             setPostUploadController(postUploadAbortController);
             return postUploadAction(
-              passedInId,
+              pendingFileId,
               postUploadAbortController.signal,
             );
           })
@@ -290,6 +300,7 @@ export const SimplerFileInput = ({
         }}
         aria-describedby={labelId}
         aria-invalid={!!uploadError}
+        className={currentStatus || existingFiles?.length ? "display-none" : ""}
       />
       {currentStatus ? (
         <FileInputStatusDisplay

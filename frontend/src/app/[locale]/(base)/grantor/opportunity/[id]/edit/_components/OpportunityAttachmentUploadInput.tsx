@@ -14,18 +14,28 @@ interface OpportunityAttachmentUploadInputProps {
   opportunityId: string;
   initialAttachments?: OpportunityAttachment[];
   isDraft?: boolean;
+  addExistingFile: (fakeFile: UploadFileMetadata) => void;
 }
+
+const FakeFILE_____DELIETEmeeee = {
+  id: "1",
+  fileName: "file name 1",
+  fileSize: 1,
+  mimeType: "file",
+  updatedAt: new Date().getTime(),
+};
 
 /*
   - [x] translate initialAttachments into proper metadata format
   - [ ] integrate delete behavior (build delete route?)
-  - [ ] integrate upload behavior (build upload route(s)?)
+  - [x] integrate upload behavior (build upload route(s)?)
 */
 
 export function OpportunityAttachmentUploadInput({
   opportunityId,
   initialAttachments = [],
   isDraft = false,
+  addExistingFile,
 }: OpportunityAttachmentUploadInputProps) {
   const t = useTranslations("OpportunityEdit.attachments");
 
@@ -116,7 +126,7 @@ export function OpportunityAttachmentUploadInput({
         labelId={"opportunity-attachment-upload-label"}
         onDelete={confirmDelete}
         // onStart={noop}
-        // onSuccess={noop}
+        onSuccess={() => addExistingFile([FakeFILE_____DELIETEmeeee])}
         // onComplete={noop}
         onError={(e) => console.error("onError callback", e)}
         disabled={isUploading || !isDraft}
