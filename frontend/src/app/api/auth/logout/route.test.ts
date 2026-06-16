@@ -62,9 +62,6 @@ describe("/api/auth/logout POST handler", () => {
     expect(deleteSessionMock).toHaveBeenCalledTimes(1);
   });
   it("clears the correlation id on successful logout", async () => {
-    getSessionMock.mockImplementation(() => ({
-      token: "fakeToken",
-    }));
     postLogoutMock.mockImplementation(() => "success");
     await logoutUser();
 
