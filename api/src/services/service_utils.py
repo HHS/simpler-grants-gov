@@ -1,9 +1,9 @@
+from grants_shared.pagination.pagination_models import SortDirection
 from pydantic import BaseModel
 from sqlalchemy import asc, desc
 from sqlalchemy.sql import Select
 
 from src.adapters import search
-from src.pagination.pagination_models import SortDirection
 from src.search.search_models import (
     BoolSearchFilter,
     DateSearchFilter,

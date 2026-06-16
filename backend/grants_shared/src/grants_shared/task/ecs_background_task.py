@@ -9,6 +9,7 @@ from typing import ParamSpec, TypeVar
 
 import newrelic.agent
 import requests
+
 from grants_shared.logs.flask_logger import add_extra_data_to_global_logs
 
 logger = logging.getLogger(__name__)

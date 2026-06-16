@@ -1,17 +1,11 @@
 import dataclasses
 import math
 from enum import StrEnum
-from typing import TYPE_CHECKING, Self
+from typing import Self
 
 from pydantic import BaseModel, Field
 
-from src.pagination.paginator import Paginator
-
-# In some scripts that don't start at our app, importing
-# anything that leads to this file hits a circular dependency issue
-# as SearchResponse is defined in a file that chains to import this file
-if TYPE_CHECKING:
-    from src.adapters.search.opensearch_response import SearchResponse
+from grants_shared.pagination.paginator import Paginator
 
 
 class SortDirection(StrEnum):
@@ -67,12 +61,9 @@ class PaginationInfo:
         )
 
     @classmethod
-    def from_search_response(
-        cls, pagination_params: PaginationParams, search_response: SearchResponse
-    ) -> Self:
+    def from_search_response(cls, pagination_params: PaginationParams, total_records: int) -> Self:
         # OpenSearch cannot return records past 10,000, so even if the count
         # is greater, reduce it to 10,000 exactly.
-        total_records = search_response.total_records
         if total_records > 10000:
             total_records = 10000
 

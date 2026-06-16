@@ -1,10 +1,10 @@
 from uuid import UUID
 
 import grants_shared.adapters.db as db
+from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.api.route_utils import raise_flask_error
 from src.db.models.competition_models import Application, ApplicationForm
 from src.db.models.user_models import User
 from src.form_schema.jsonschema_validator import ValidationErrorDetail
