@@ -17,7 +17,7 @@ interface OpportunityAttachmentUploadInputProps {
 }
 
 /*
-  - [ ] translate initialAttachments into proper metadata format
+  - [x] translate initialAttachments into proper metadata format
   - [ ] integrate delete behavior (build delete route?)
   - [ ] integrate upload behavior (build upload route(s)?)
 */
@@ -40,8 +40,25 @@ export function OpportunityAttachmentUploadInput({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const existingFiles: UploadFileMetadata[] = useMemo(() => {
-    return initialAttachments.map((initialAttachment) => {});
-  });
+    return initialAttachments.map((initialAttachment) => {
+      const {
+        opportunity_attachment_id,
+        file_name,
+        mime_type,
+        file_size,
+        // updated_at, // this is not in the type, unsure if we need to update anything to get it sent back
+      } = initialAttachment;
+
+      return {
+        id: opportunity_attachment_id,
+        fileName: file_name,
+        fileSize: file_size,
+        mimeType: mime_type,
+        // updatedAt: updated_at,
+        updatedAt: new Date().getTime(),
+      };
+    });
+  }, [initialAttachments]);
 
   const handleOpportunityAttachment = async (
     fileId: string,
@@ -54,7 +71,7 @@ export function OpportunityAttachmentUploadInput({
       );
     } catch (err) {
       console.error("Attachment upload failed", err);
-      setErrorMessage(t("errorUploadFailed", { fileName: file.name }));
+      setErrorMessage(t("errorUploadFailed"));
     }
     setIsUploading(false);
   };
@@ -105,7 +122,7 @@ export function OpportunityAttachmentUploadInput({
         disabled={isUploading || !isDraft}
         readOnly={false}
         required={false}
-        existingFiles={initialAttachments}
+        existingFiles={existingFiles}
       />
     </FormGroup>
   );
