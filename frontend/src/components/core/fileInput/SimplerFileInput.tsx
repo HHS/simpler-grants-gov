@@ -6,6 +6,7 @@ import {
   PostUploadAction,
   UploadFileMetadata,
 } from "src/types/fileUploadTypes";
+import { createFormDataForFile } from "src/utils/fileUtils/createFormData";
 
 import { ChangeEvent, useCallback, useRef, useState } from "react";
 import { FileInput, FileInputRef, ModalRef } from "@trussworks/react-uswds";
@@ -31,8 +32,6 @@ type SimplerFileInputProps = {
   readOnly?: boolean;
   labelId: string;
 };
-
-const UPLOAD_ENDPOINT = "something_fake_for_now";
 
 /*
   things this needs to do
@@ -180,9 +179,11 @@ export const SimplerFileInput = ({
 
   const onFileSelect = useCallback(
     (changeEvent: ChangeEvent<HTMLInputElement>) => {
-      const fileName = changeEvent.target.files?.length
-        ? changeEvent.target.files[0].name
-        : "No Filename!";
+      if (!changeEvent.target.files?.length) {
+        console.error("no files!");
+        return;
+      }
+      const fileName = changeEvent.target.files[0].name || "No Filename!";
       const uploadAbortController = new AbortController();
       setFileName(fileName);
       setCurrentStatus("queued");
@@ -196,7 +197,14 @@ export const SimplerFileInput = ({
       }
       // start upload
       return (
-        clientFetch(UPLOAD_ENDPOINT, { signal: uploadAbortController.signal })
+        createFormDataForFile(changeEvent.target.files[0])
+          .then((fileFormData) => {
+            return clientFetch("/api/file", {
+              method: "POST",
+              body: fileFormData,
+              signal: uploadAbortController.signal,
+            });
+          })
           // process streaming response
           .then((response: Response) => {
             const reader = response.body?.getReader();

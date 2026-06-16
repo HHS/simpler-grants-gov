@@ -38,7 +38,9 @@ export const attachOpportunityFile = async ({
             queueIndex = 0;
             return;
           }
-          controller.enqueue(fileUploadProcessStatus[queueIndex]);
+          controller.enqueue(
+            JSON.stringify({ status: fileUploadProcessStatus[queueIndex] }),
+          );
           queueIndex++;
         } catch (e) {
           queueIndex = 0;
