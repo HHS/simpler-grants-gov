@@ -11,10 +11,23 @@ import {
   ButtonGroup,
   CharacterCount,
   Select,
-  Table,
 } from "@trussworks/react-uswds";
 
 import SimplerAlert from "src/components/core/SimplerAlert";
+import {
+  TableCellData,
+  TableWithResponsiveHeader,
+} from "src/components/core/TableWithResponsiveHeader";
+
+const EMPTY_CELL = "—";
+
+const tableCell = (
+  cellData: TableCellData["cellData"],
+  className?: string,
+): TableCellData => ({
+  cellData,
+  className,
+});
 
 interface AddRiskFormProps {
   awardRecommendationId: string;
@@ -60,78 +73,77 @@ export default function AddRiskForm({
     );
   }
 
+  const headers: TableCellData[] = [
+    tableCell(t("columns.appNumber")),
+    tableCell(t("columns.projectTitle")),
+    tableCell(t("columns.orgName")),
+    tableCell(t("columns.uei")),
+    tableCell(t("columns.score")),
+    tableCell(t("columns.recommendation")),
+    tableCell(t("columns.requested"), "text-right"),
+    tableCell(t("columns.recommended"), "text-right"),
+  ];
+
+  const rows: TableCellData[][] = selectedSubmissions.map((submission) => {
+    const appSubmission = submission.application_submission;
+    const detail = submission.submission_detail;
+    const id = submission.award_recommendation_application_submission_id;
+
+    return [
+      tableCell(
+        appSubmission.application_submission_number ? (
+          <Link
+            href={`/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
+          >
+            {appSubmission.application_submission_number}
+          </Link>
+        ) : (
+          EMPTY_CELL
+        ),
+      ),
+      tableCell(appSubmission.project_title || EMPTY_CELL),
+      tableCell(
+        appSubmission.application?.organization?.organization_name ||
+          EMPTY_CELL,
+      ),
+      tableCell(appSubmission.application?.organization?.uei || EMPTY_CELL),
+      tableCell(EMPTY_CELL),
+      tableCell(
+        detail?.award_recommendation_type === "recommended_for_funding" ? (
+          <span className="usa-tag font-sans-sm text-no-uppercase text-ink radius-2 bg-info-lighter">
+            {t("recommendationType.recommended_for_funding")}
+          </span>
+        ) : (
+          EMPTY_CELL
+        ),
+      ),
+      tableCell(
+        appSubmission.total_requested_amount
+          ? `$${parseFloat(appSubmission.total_requested_amount).toLocaleString()}`
+          : EMPTY_CELL,
+        "text-right",
+      ),
+      tableCell(
+        detail?.recommended_amount
+          ? `$${parseFloat(detail.recommended_amount).toLocaleString()}`
+          : EMPTY_CELL,
+        "text-right",
+      ),
+    ];
+  });
+
   return (
     <div>
       <h2 className="margin-top-0 margin-bottom-3">
         {t("selectedApplications")}
       </h2>
 
-      <Table fullWidth>
-        <thead>
-          <tr>
-            <th scope="col">{t("columns.appNumber")}</th>
-            <th scope="col">{t("columns.projectTitle")}</th>
-            <th scope="col">{t("columns.orgName")}</th>
-            <th scope="col">{t("columns.uei")}</th>
-            <th scope="col">{t("columns.score")}</th>
-            <th scope="col">{t("columns.recommendation")}</th>
-            <th scope="col">{t("columns.requested")}</th>
-            <th scope="col">{t("columns.recommended")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {selectedSubmissions.map((submission) => {
-            const appSubmission = submission.application_submission;
-            const detail = submission.submission_detail;
-            const id =
-              submission.award_recommendation_application_submission_id;
-
-            return (
-              <tr key={id}>
-                <td>
-                  {appSubmission.application_submission_number ? (
-                    <Link
-                      href={`/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
-                      className="usa-link"
-                    >
-                      {appSubmission.application_submission_number}
-                    </Link>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td>{appSubmission.project_title || "—"}</td>
-                <td>
-                  {appSubmission.application?.organization?.organization_name ||
-                    "—"}
-                </td>
-                <td>{appSubmission.application?.organization?.uei || "—"}</td>
-                <td>—</td>
-                <td>
-                  {detail?.award_recommendation_type ===
-                  "recommended_for_funding" ? (
-                    <span className="usa-tag font-sans-sm text-no-uppercase text-ink radius-2 bg-info-lighter">
-                      {t("recommendationType.recommended_for_funding")}
-                    </span>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td>
-                  {appSubmission.total_requested_amount
-                    ? `$${parseFloat(appSubmission.total_requested_amount).toLocaleString()}`
-                    : "—"}
-                </td>
-                <td>
-                  {detail?.recommended_amount
-                    ? `$${parseFloat(detail.recommended_amount).toLocaleString()}`
-                    : "—"}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table>
+      <div className="width-full minw-0 overflow-auto">
+        <TableWithResponsiveHeader
+          headerContent={headers}
+          tableRowData={rows}
+        />
+      </div>
 
       <div className="margin-top-6">
         <h2 className="margin-top-0 margin-bottom-3">
@@ -156,7 +168,7 @@ export default function AddRiskForm({
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setRiskSummary(e.target.value)
             }
-            className="width-full"
+            className="maxw-tablet-lg"
           />
         </div>
 
@@ -173,7 +185,7 @@ export default function AddRiskForm({
             name="recommended-condition"
             value={selectedCondition}
             onChange={(e) => setSelectedCondition(e.target.value)}
-            className="width-full"
+            className="maxw-tablet-lg"
           >
             <option value="">{t("selectConditionPlaceholder")}</option>
             <option value="condition1">{t("condition1")}</option>
