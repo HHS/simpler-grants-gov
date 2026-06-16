@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<PerformanceSite_4_0:PerformanceSite_4_0 xmlns:PerformanceSite_4_0="http://apply.grants.gov/forms/PerformanceSite_4_0-V4.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" PerformanceSite_4_0:FormVersion="4.0">
+  <PerformanceSite_4_0:PrimarySite>
+    <PerformanceSite_4_0:Individual>N: No</PerformanceSite_4_0:Individual>
+    <PerformanceSite_4_0:OrganizationName>Example University</PerformanceSite_4_0:OrganizationName>
+    <PerformanceSite_4_0:SAMUEI>ABCDEFGHIJ12</PerformanceSite_4_0:SAMUEI>
+    <PerformanceSite_4_0:Address>
+      <globLib:Street1>123 Research Blvd</globLib:Street1>
+      <globLib:Street2>Suite 400</globLib:Street2>
+      <globLib:City>Science City</globLib:City>
+      <globLib:County>Grant County</globLib:County>
+      <globLib:State>CA: California</globLib:State>
+      <globLib:ZipPostalCode>90210-1234</globLib:ZipPostalCode>
+      <globLib:Country>USA: UNITED STATES</globLib:Country>
+    </PerformanceSite_4_0:Address>
+    <PerformanceSite_4_0:CongressionalDistrictProgramProject>CA-033</PerformanceSite_4_0:CongressionalDistrictProgramProject>
+  </PerformanceSite_4_0:PrimarySite>
+  <PerformanceSite_4_0:OtherSite>
+    <PerformanceSite_4_0:Individual>N: No</PerformanceSite_4_0:Individual>
+    <PerformanceSite_4_0:OrganizationName>International Research Institute</PerformanceSite_4_0:OrganizationName>
+    <PerformanceSite_4_0:Address>
+      <globLib:Street1>10 Rue de la Paix</globLib:Street1>
+      <globLib:City>Paris</globLib:City>
+      <globLib:Country>FRA: FRANCE</globLib:Country>
+    </PerformanceSite_4_0:Address>
+  </PerformanceSite_4_0:OtherSite>
+  <PerformanceSite_4_0:OtherSite>
+    <PerformanceSite_4_0:Individual>Y: Yes</PerformanceSite_4_0:Individual>
+    <PerformanceSite_4_0:Address>
+      <globLib:Street1>456 Main St</globLib:Street1>
+      <globLib:City>Springfield</globLib:City>
+      <globLib:State>IL: Illinois</globLib:State>
+      <globLib:ZipPostalCode>12345-6789</globLib:ZipPostalCode>
+      <globLib:Country>USA: UNITED STATES</globLib:Country>
+    </PerformanceSite_4_0:Address>
+    <PerformanceSite_4_0:CongressionalDistrictProgramProject>IL-013</PerformanceSite_4_0:CongressionalDistrictProgramProject>
+  </PerformanceSite_4_0:OtherSite>
+  <PerformanceSite_4_0:AttachedFile>
+    <att:FileName>additional_locations.pdf</att:FileName>
+    <att:MimeType>application/pdf</att:MimeType>
+    <att:FileLocation att:href="additional_locations.pdf"/>
+    <ns0:HashValue xmlns:ns0="http://apply.grants.gov/system/Global-V1.0" ns0:hashAlgorithm="SHA-1">aeB1+6gdFwih51ijIRn3b8QYn24=</ns0:HashValue>
+  </PerformanceSite_4_0:AttachedFile>
+</PerformanceSite_4_0:PerformanceSite_4_0>

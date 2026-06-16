@@ -1,9 +1,9 @@
 from typing import Any
 
-from grants_shared.api.schemas.extension import Schema, fields, validators
 from marshmallow import pre_load
 
-from src.pagination.pagination_models import SortDirection
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.pagination.pagination_models import SortDirection
 
 
 class BasePaginationSchema(Schema):

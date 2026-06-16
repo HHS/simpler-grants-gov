@@ -2,9 +2,9 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 
-from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.db.models.user_models import User

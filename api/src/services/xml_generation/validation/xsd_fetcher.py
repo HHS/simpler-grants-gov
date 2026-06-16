@@ -83,6 +83,12 @@ KNOWN_XSD_DEPENDENCIES = {
         "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
     ],
+    "PerformanceSite_4_0-V4.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+    ],
 }
 
 

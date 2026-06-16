@@ -2,6 +2,7 @@ import logging
 import uuid
 from typing import Any
 
+from grants_shared.pagination.pagination_models import PaginationParams
 from pydantic import BaseModel, Field
 from sqlalchemy import Select, select
 from sqlalchemy.orm import InstrumentedAttribute
@@ -9,7 +10,6 @@ from sqlalchemy.orm import InstrumentedAttribute
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
-from src.pagination.pagination_models import PaginationParams
 
 logger = logging.getLogger(__name__)
 

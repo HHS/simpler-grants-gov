@@ -123,14 +123,18 @@ class ExampleTable(GrantsSharedSchemaTable, TimestampMixin):
         ForeignKey(LkExampleType.example_type_id),
     )
 
+    friends: Mapped[list[FriendTable]] = relationship(
+        back_populates="example", uselist=True, cascade="all, delete-orphan"
+    )
+
 
 class FriendTable(OtherSchemaTable, TimestampMixin):
     __tablename__ = "friend"
 
     friend_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
-    best_example_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(ExampleTable.example_id))
-    best_example: Mapped[ExampleTable] = relationship(ExampleTable)
+    example_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(ExampleTable.example_id))
+    example: Mapped[ExampleTable] = relationship(ExampleTable)
 
     # Relationship link to the link_friend_type table
     link_friend_types: Mapped[list[LinkFriendType]] = relationship(

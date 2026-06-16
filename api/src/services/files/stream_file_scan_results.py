@@ -5,11 +5,11 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Any
 
+from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util import datetime_util
 from pydantic import Field
 
 from src.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
-from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import FileScanStatus
 from src.db.models.user_models import User
 from src.util.env_config import PydanticBaseEnvConfig
