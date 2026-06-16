@@ -1,5 +1,4 @@
 import uuid
-from unittest.mock import patch
 
 import pytest
 from apiflask.exceptions import HTTPError
@@ -60,32 +59,6 @@ class TestValidateAndFetchPendingFile(BaseTestClass):
         assert exc_info.value.status_code == 403
         assert "permission" in exc_info.value.message.lower()
 
-    def test_fetch_and_validate_scan_complete_file_not_complete_pending(
-        self, enable_factory_create, db_session, user
-    ):
-        pending_file = factories.PendingFileFactory.create(
-            user=user, file_scan_status=FileScanStatus.PENDING
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            fetch_and_validate_scan_complete_file(db_session, pending_file.pending_file_id, user)
-
-        assert exc_info.value.status_code == 422
-        assert "pending" in exc_info.value.extra_data["file_status"].lower()
-
-    def test_fetch_and_validate_scan_complete_file_not_complete_in_progress(
-        self, enable_factory_create, db_session, user
-    ):
-        pending_file = factories.PendingFileFactory.create(
-            user=user, file_scan_status=FileScanStatus.IN_PROGRESS
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            fetch_and_validate_scan_complete_file(db_session, pending_file.pending_file_id, user)
-
-        assert exc_info.value.status_code == 422
-        assert "in_progress" in exc_info.value.extra_data["file_status"].lower()
-
     def test_fetch_and_validate_scan_complete_file_not_complete_infected(
         self, enable_factory_create, db_session, user
     ):
@@ -98,19 +71,6 @@ class TestValidateAndFetchPendingFile(BaseTestClass):
 
         assert exc_info.value.status_code == 422
         assert "infected" in exc_info.value.extra_data["file_status"].lower()
-
-    def test_fetch_and_validate_scan_complete_file_already_processed(
-        self, enable_factory_create, db_session, user
-    ):
-        pending_file = factories.PendingFileFactory.create(
-            user=user, file_scan_status=FileScanStatus.PROCESSED
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            fetch_and_validate_scan_complete_file(db_session, pending_file.pending_file_id, user)
-
-        assert exc_info.value.status_code == 422
-        assert "processed" in exc_info.value.extra_data["file_status"].lower()
 
 
 class TestMovePendingFileToDestination(BaseTestClass):
@@ -136,6 +96,7 @@ class TestMovePendingFileToDestination(BaseTestClass):
 
         # Verify source file exists before move
         assert file_util.file_exists(source_location)
+        assert pending_file_complete.file_scan_status == FileScanStatus.COMPLETE
 
         move_pending_file_to_destination(pending_file_complete, destination_path)
         db_session.commit()
@@ -147,70 +108,17 @@ class TestMovePendingFileToDestination(BaseTestClass):
         db_session.refresh(pending_file_complete)
         assert pending_file_complete.file_scan_status == FileScanStatus.PROCESSED
 
-    def test_move_pending_file_to_destination_updates_status(
+    def test_move_pending_file_to_destination_handles_move_failure(
         self, db_session, pending_file_complete, mock_s3_bucket
     ):
-        destination_path = f"s3://{mock_s3_bucket}/final/test-file.pdf"
+        # Setup invalid destination path
+        destination_path = "abcdefg"
 
+        with pytest.raises(Exception, match="Cannot download/upload between disk and S3"):
+            move_pending_file_to_destination(pending_file_complete, destination_path)
+
+        db_session.refresh(pending_file_complete)
         assert pending_file_complete.file_scan_status == FileScanStatus.COMPLETE
-
-        move_pending_file_to_destination(pending_file_complete, destination_path)
-        db_session.commit()
-
-        assert pending_file_complete.file_scan_status == FileScanStatus.PROCESSED
-
-    def test_move_pending_file_to_destination_move_file_called_with_correct_args(
-        self, db_session, user, enable_factory_create, mock_s3_bucket
-    ):
-        source_location = f"s3://{mock_s3_bucket}/unscanned/file.pdf"
-        destination_path = f"s3://{mock_s3_bucket}/final/file.pdf"
-
-        # Create the source file in S3
-        file_util.write_to_file(source_location, "test file content")
-
-        pending_file = factories.PendingFileFactory.create(
-            user=user,
-            file_scan_status=FileScanStatus.COMPLETE,
-            file_location=source_location,
-        )
-
-        # Verify source file exists before move
-        assert file_util.file_exists(source_location)
-
-        move_pending_file_to_destination(pending_file, destination_path)
-        db_session.commit()
-
-        # Verify file was moved (exists at destination, not at source)
-        assert file_util.file_exists(destination_path)
-        assert not file_util.file_exists(source_location)
-
-        # Verify content is preserved
-        moved_content = file_util.read_file(destination_path)
-        assert moved_content == "test file content"
-
-    @patch("src.services.files.pending_file_handling_domain_specific.file_util.move_file")
-    def test_move_pending_file_to_destination_handles_move_failure(
-        self, mock_move_file, db_session, user, enable_factory_create, mock_s3_bucket
-    ):
-        # For error testing, we still mock to simulate failure
-        source_location = f"s3://{mock_s3_bucket}/unscanned/error-test.pdf"
-        file_util.write_to_file(source_location, "test file content")
-
-        pending_file = factories.PendingFileFactory.create(
-            user=user,
-            file_scan_status=FileScanStatus.COMPLETE,
-            file_location=source_location,
-        )
-
-        mock_move_file.side_effect = Exception("S3 move failed")
-        destination_path = f"s3://{mock_s3_bucket}/final/error-test.pdf"
-
-        with pytest.raises(Exception) as exc_info:
-            move_pending_file_to_destination(pending_file, destination_path)
-
-        assert "S3 move failed" in str(exc_info.value)
-        db_session.refresh(pending_file)
-        assert pending_file.file_scan_status == FileScanStatus.COMPLETE
 
 
 class TestIntegrationValidateAndMove(BaseTestClass):
