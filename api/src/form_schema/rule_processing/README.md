@@ -95,6 +95,7 @@ rules currently implemented:
 * `public_competition_id` - from the competition
 * `competition_title` - from the competition
 * `sum_monetary` - calculated based on other fields in the JSON, see Monetary Summation section below for further details
+* `subtract_monetary` - calculated based on other fields in the JSON, see Monetary Subtraction section below for further details
 
 For post-population, this rule group is `gg_post_population` with the following
 rules currently implemented:
@@ -147,6 +148,25 @@ A few important details about our summation logic:
 NOTE: Only monetary summation is supported right now. All math done by this summing
 logic assumes the input values are strings of the format "0.00". If we need to support
 summing integers or other numeric types, we'll need to add a separate rule for those.
+
+## Monetary Subtraction
+We support the ability to subtract monetary amounts from each other. This rule
+requires that you specify which fields to subtract like so:
+```json
+{
+  "my_field": {
+    "gg_pre_population": {
+      "rule": "subtract_monetary",
+      "fields": ["@THIS.a", "@THIS.b"]
+    }
+  }
+}
+```
+
+This mirrors `sum_monetary`, but and every subsequent field is subtracted from the first. 
+The example above produces `a - b`, and fields of `["a", "b", "c"]` would produce `a - b - c`.
+
+For details on how the fields parameter works, see the Fields section below.
 
 ## Fields
 Some rules like our `sum_monetary` rule allow you to specify fields that
