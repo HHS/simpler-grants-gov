@@ -2247,7 +2247,7 @@ export const messages = {
       columns: {
         appNumber: "App #",
         projectTitle: "Project Title",
-        orgName: "Organization Name",
+        orgName: "Org Name",
         uei: "UEI",
         score: "Score",
         recommendation: "Recommendation",

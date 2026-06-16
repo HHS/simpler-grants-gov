@@ -70,10 +70,10 @@ export default function AddRiskForm({
     tableCell(t("columns.appNumber")),
     tableCell(t("columns.projectTitle")),
     tableCell(t("columns.orgName")),
-    tableCell(t("columns.uei")),
+    tableCell(t("columns.uei"), "text-no-wrap"),
     tableCell(t("columns.score")),
     tableCell(t("columns.recommendation")),
-    tableCell(t("columns.requested"), "text-right"),
+    tableCell(t("columns.requested"), "text-right text-no-wrap"),
     tableCell(t("columns.recommended"), "text-right"),
   ];
 
@@ -99,7 +99,10 @@ export default function AddRiskForm({
         appSubmission.application?.organization?.organization_name ||
           EMPTY_CELL,
       ),
-      tableCell(appSubmission.application?.organization?.uei || EMPTY_CELL),
+      tableCell(
+        appSubmission.application?.organization?.uei || EMPTY_CELL,
+        "text-no-wrap",
+      ),
       tableCell(EMPTY_CELL),
       tableCell(
         detail?.award_recommendation_type === "recommended_for_funding" ? (
@@ -114,7 +117,7 @@ export default function AddRiskForm({
         appSubmission.total_requested_amount
           ? `$${parseFloat(appSubmission.total_requested_amount).toLocaleString()}`
           : EMPTY_CELL,
-        "text-right",
+        "text-right text-no-wrap",
       ),
       tableCell(
         detail?.recommended_amount
@@ -146,9 +149,9 @@ export default function AddRiskForm({
         <div>
           <label className="usa-label text-bold" htmlFor="risk-summary">
             {t("riskSummaryLabel")}
-            <abbr title="required" className="usa-hint usa-hint--required">
+            <span className="usa-hint usa-hint--required text-no-underline">
               *
-            </abbr>
+            </span>
           </label>
           <span className="usa-hint">{t("riskSummaryHint")}</span>
           <CharacterCount
