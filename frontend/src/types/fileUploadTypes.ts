@@ -39,5 +39,6 @@ export type UploadFileMetadata = {
 };
 
 export type FileUploadStatusUpdate = {
-  data: { status?: FileUploadStatus; error?: string };
+  status?: FileUploadStatus;
+  error?: string;
 };

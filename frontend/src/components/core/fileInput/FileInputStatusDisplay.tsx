@@ -91,7 +91,14 @@ export const FileInputStatusDisplay = ({
       {t("cancel")}
     </Button>
   );
-  const IconDisplay = error ? <USWDSIcon name="error" /> : <Spinner />;
+  // if there's an error show the error icon
+  // if upload is in progress, show a spinner
+  // otherwise show nothing
+  const IconDisplay = error ? (
+    <USWDSIcon name="error" />
+  ) : statusMessageForDisplay ? (
+    <Spinner />
+  ) : null;
   return (
     <GridContainer data-testid="file-upload-status-display">
       <Grid col={2}>{IconDisplay}</Grid>

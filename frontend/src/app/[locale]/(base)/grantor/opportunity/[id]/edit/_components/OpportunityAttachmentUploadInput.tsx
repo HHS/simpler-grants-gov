@@ -69,8 +69,8 @@ export function OpportunityAttachmentUploadInput({
         `/api/opportunities/${opportunityId}/attachments/${fileId}`,
         { method: "POST", signal: abortSignal },
       );
-    } catch (err) {
-      console.error("Attachment upload failed", err);
+    } catch (e) {
+      console.error("Attachment upload failed", e);
       setErrorMessage(t("errorUploadFailed"));
     }
     setIsUploading(false);
@@ -118,7 +118,7 @@ export function OpportunityAttachmentUploadInput({
         // onStart={noop}
         // onSuccess={noop}
         // onComplete={noop}
-        // onError={noop}
+        onError={(e) => console.error("onError callback", e)}
         disabled={isUploading || !isDraft}
         readOnly={false}
         required={false}

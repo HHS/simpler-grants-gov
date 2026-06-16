@@ -70,8 +70,8 @@ export const SimplerFileInput = ({
   const deleteModalRef = useRef<ModalRef | null>(null);
 
   const { clientFetch } = useClientFetch<Response>("unable to upload file", {
-    jsonResponse: true,
     authGatedRequest: true,
+    jsonResponse: false,
   });
 
   const [uploadError, setUploadError] = useState<
@@ -141,15 +141,17 @@ export const SimplerFileInput = ({
   }, [filePendingDeletion, onDelete, filesWithDeleteError]);
 
   const readResponseStream = useCallback(
-    (reader: ReadableStreamDefaultReader<string>) => {
+    (reader: ReadableStreamDefaultReader<Uint8Array>) => {
       const process = (): Promise<FileUploadProcessStatus> => {
         return reader
           .read()
           .then(({ value, done }) => {
+            console.log("1.", value);
             let payloadJson: FileUploadStatusUpdate;
             try {
-              payloadJson = value
-                ? (JSON.parse(value) as FileUploadStatusUpdate)
+              const payloadString = new TextDecoder().decode(value);
+              payloadJson = payloadString
+                ? (JSON.parse(payloadString) as FileUploadStatusUpdate)
                 : {};
             } catch (e) {
               console.error(
@@ -157,6 +159,7 @@ export const SimplerFileInput = ({
               );
               throw e;
             }
+            console.log("2.", payloadJson);
             if (payloadJson?.error) {
               throw new Error(payloadJson.error);
             } else {
@@ -207,11 +210,12 @@ export const SimplerFileInput = ({
           })
           // process streaming response
           .then((response: Response) => {
+            console.log("0.");
             const reader = response.body?.getReader();
             setResponseReader(reader);
             // this may need to be fixed up if we need to convert the buffer to a string on read, but leaving for now
             return readResponseStream(
-              reader as unknown as ReadableStreamDefaultReader<string>,
+              reader as unknown as ReadableStreamDefaultReader<Uint8Array>,
             );
           })
           // run post upload action
@@ -241,6 +245,8 @@ export const SimplerFileInput = ({
             setUploadController(undefined);
             setResponseReader(undefined);
             onComplete();
+            // wait 5 seconds then hide the progress display
+            setTimeout(() => setCurrentStatus(undefined), 5000);
           })
       );
     },

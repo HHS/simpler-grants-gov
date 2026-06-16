@@ -26,33 +26,7 @@ export const attachOpportunityFile = async ({
   pendingFileId: string;
 }) => {
   console.log("!!! attaching", opportunityId, pendingFileId);
-  const maxQueues = fileUploadProcessStatus.length;
-  let queueIndex = 0;
-  const stream = new ReadableStream({
-    start: (controller) => {
-      const intervalId = setInterval(() => {
-        try {
-          if (queueIndex === maxQueues) {
-            controller.close();
-            clearInterval(intervalId);
-            queueIndex = 0;
-            return;
-          }
-          controller.enqueue(
-            JSON.stringify({ status: fileUploadProcessStatus[queueIndex] }),
-          );
-          queueIndex++;
-        } catch (e) {
-          queueIndex = 0;
-          console.error(e);
-          controller.close();
-          clearInterval(intervalId);
-        }
-      }, 1000);
-    },
-  });
-  const response = new Response(stream);
-  return response;
+  return await new Promise((resolve) => resolve(new Response()));
 };
 
 export const uploadOpportunityAttachment = async (

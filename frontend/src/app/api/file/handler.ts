@@ -20,14 +20,14 @@ const pipeStatusStreamToResponse = async (
   let responseState = previousState;
   // this structure is dependent on what the API will actually send back, and will need to be adjusted
   if (value) {
-    let payloadJson: FileUploadStatusUpdate;
+    let payloadJson: { data: FileUploadStatusUpdate };
     try {
       console.log("1.", value);
       const payloadString = new TextDecoder().decode(value);
       console.log("2.", payloadString);
-      payloadJson = payloadString
-        ? (JSON.parse(payloadString) as FileUploadStatusUpdate)
-        : {};
+      payloadJson = JSON.parse(payloadString) as {
+        data: FileUploadStatusUpdate;
+      };
     } catch (e) {
       console.error("Error parsing json from file upload stream payload");
       throw e;

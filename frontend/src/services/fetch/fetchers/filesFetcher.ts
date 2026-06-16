@@ -54,16 +54,14 @@ export const uploadFileToS3 = async (
         fileFormData.append(key, value);
       }
     });
-    return true;
-    // local s3 mock setup isn't working, skipping this for now
-    // const s3Response = await fetch(url, {
-    //   method: "POST",
-    //   body: fileFormData,
-    // });
-    // if (s3Response.ok) {
-    //   return true;
-    // }
-    // throw new ApiRequestError("Error uploading file to S3");
+    const s3Response = await fetch(url, {
+      method: "POST",
+      body: fileFormData,
+    });
+    if (s3Response.ok) {
+      return true;
+    }
+    throw new ApiRequestError("Error uploading file to S3");
   } catch (e) {
     console.error(e);
     throw e;
@@ -73,10 +71,10 @@ export const uploadFileToS3 = async (
 // opens a stream with the API to fetch scan status
 export const fetchFileScanStatus = async (
   pendingFileId: string,
-): Promise<ReadableStream<string>> => {
+): Promise<ReadableStream<Uint8Array>> => {
   const fileScanStatusResponse = await fetchFileUploadWithMethod("GET")({
     subPath: `/${pendingFileId}/results`,
   });
   // may need to do some work here if the body isn't readable as a string in the end
-  return fileScanStatusResponse.body as unknown as ReadableStream<string>;
+  return fileScanStatusResponse.body as unknown as ReadableStream<Uint8Array>;
 };
