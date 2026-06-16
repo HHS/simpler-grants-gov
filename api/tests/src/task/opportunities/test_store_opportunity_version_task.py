@@ -1,6 +1,7 @@
 import pytest
 from grants_shared.util import datetime_util
 
+from src.constants.lookup_constants import OpportunityVersionChangeType
 from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.task.opportunities.store_opportunity_version_task import (
     StoreOpportunityVersionConfig,
@@ -131,3 +132,47 @@ class TestStoreOpportunityVersionTask(BaseTestClass):
         metrics = store_opportunity_version_task.metrics
         assert metrics[store_opportunity_version_task.Metrics.OPPORTUNITIES_VERSIONED] == 5
         assert metrics[store_opportunity_version_task.Metrics.BATCHES_PROCESSED] == 3
+
+    def test_first_version_is_create_type(
+        self, db_session, enable_factory_create, store_opportunity_version_task
+    ):
+        """Test that first version after publish is CREATE type"""
+        # Create opportunity change audit with no existing versions
+        oca = OpportunityChangeAuditFactory.create()
+
+        store_opportunity_version_task.run()
+
+        opp_vers = (
+            db_session.query(OpportunityVersion)
+            .where(OpportunityVersion.opportunity_id == oca.opportunity_id)
+            .all()
+        )
+        assert len(opp_vers) == 1
+        assert opp_vers[0].change_type == OpportunityVersionChangeType.CREATE
+
+    def test_subsequent_versions_are_update_type(
+        self, db_session, enable_factory_create, store_opportunity_version_task
+    ):
+        """Test that subsequent versions after first are UPDATE type"""
+        # Create opportunity with existing version (CREATE)
+        oca = OpportunityChangeAuditFactory.create()
+        OpportunityVersionFactory.create(
+            opportunity=oca.opportunity, change_type=OpportunityVersionChangeType.CREATE
+        )
+
+        # Update the opportunity to trigger new version
+        oca.opportunity.opportunity_title = "Updated Title"
+        oca.is_loaded_to_version_table = False
+        db_session.commit()
+
+        store_opportunity_version_task.run()
+
+        opp_vers = (
+            db_session.query(OpportunityVersion)
+            .where(OpportunityVersion.opportunity_id == oca.opportunity_id)
+            .order_by(OpportunityVersion.created_at)
+            .all()
+        )
+        assert len(opp_vers) == 2
+        assert opp_vers[0].change_type == OpportunityVersionChangeType.CREATE
+        assert opp_vers[1].change_type == OpportunityVersionChangeType.UPDATE
