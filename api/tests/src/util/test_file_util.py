@@ -1,4 +1,5 @@
 import os
+import uuid
 from urllib.parse import parse_qs, urlparse
 
 import boto3
@@ -283,3 +284,22 @@ def test_pre_sign_file_location_uses_configured_duration(mock_s3_bucket):
 
     query = parse_qs(urlparse(url).query)
     assert int(query["X-Amz-Expires"][0]) == 900
+
+
+def test_presigned_post_local_override_with_s3_endpoint_url(mock_s3_bucket, s3_config):
+    file_id = uuid.uuid4()
+    user_id = uuid.uuid4()
+
+    s3_config.aws_s3_endpoint_url = "http://mocks3:9090"
+
+    result = file_util.pre_sign_upload(
+        file_path=f"s3://{mock_s3_bucket}/some/file.txt",
+        content_type="text/plain",
+        metadata={
+            "file-id": str(file_id),
+            "user-id": str(user_id),
+        },
+        s3_config=s3_config,
+    )
+
+    assert result["url"].startswith("http://localhost:9090")
