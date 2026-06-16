@@ -10,9 +10,11 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 export const FileInputExistingFiles = ({
   existingFiles,
   onDelete,
+  filesWithDeleteError = [] as string[],
 }: {
   existingFiles?: UploadFileMetadata[];
-  onDelete: (fileId: string) => Promise<unknown>;
+  onDelete: (fileToDelete: UploadFileMetadata) => void;
+  filesWithDeleteError?: string[];
 }) => {
   const t = useTranslations("FileInput.existingFiles");
   if (existingFiles && existingFiles.length) {
@@ -21,34 +23,40 @@ export const FileInputExistingFiles = ({
         ? `${formatFileSize(existingFile.fileSize)} | `
         : "";
       const timestampDisplay = `${t("savedOn")} ${formatDate(existingFile.updatedAt.toString())}`;
+      const hasError = filesWithDeleteError.findIndex(
+        (fileWithDeleteError) => fileWithDeleteError === existingFile.id,
+      );
       return (
-        <GridContainer key={existingFile.id}>
-          <Grid col={2}>
-            <USWDSIcon name="file_present" />
-          </Grid>
-          <Grid>
-            <div className="text-bold">{existingFile.fileName}</div>
-            <div>
-              {fileSizeDisplay}
-              {timestampDisplay}
-            </div>
-          </Grid>
-          <Grid col={3}>
-            <Button
-              type="button"
-              unstyled
-              onClick={() => {
-                void onDelete(existingFile.id);
-              }}
-            >
-              <USWDSIcon
-                className="usa-icon margin-right-05 margin-left-neg-05"
-                name="delete"
-              />
-              {t("delete")}
-            </Button>
-          </Grid>
-        </GridContainer>
+        <>
+          <GridContainer key={existingFile.id}>
+            <Grid col={2}>
+              <USWDSIcon name="file_present" />
+            </Grid>
+            <Grid>
+              <div className="text-bold">{existingFile.fileName}</div>
+              <div>
+                {fileSizeDisplay}
+                {timestampDisplay}
+              </div>
+            </Grid>
+            <Grid col={3}>
+              <Button
+                type="button"
+                unstyled
+                onClick={() => {
+                  void onDelete(existingFile);
+                }}
+              >
+                <USWDSIcon
+                  className="usa-icon margin-right-05 margin-left-neg-05"
+                  name="delete"
+                />
+                {t("delete")}
+              </Button>
+            </Grid>
+          </GridContainer>
+          {hasError > -1 ? <div>{t("deleteError")}</div> : null}
+        </>
       );
     });
     return (

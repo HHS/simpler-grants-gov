@@ -557,16 +557,6 @@ export const messages = {
       fileSize: "File Size",
       uploadBy: "Upload by",
       uploadDate: "Upload date",
-      deleteModal: {
-        titleText: "Delete",
-        cancelDeleteCta: "Cancel",
-        cautionDeletingAttachment: "Caution, deleting attachment",
-        descriptionText:
-          "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
-        deleteFileCta: "Delete file",
-        deleteFilesCta: "Delete files",
-        deleting: "Deleting...",
-      },
     },
     historyTable: {
       applicationHistory: "Application History",
@@ -2477,6 +2467,16 @@ export const messages = {
       uploadError: "Upload error",
       scanError: "Scan error",
       postUploadError: "Post upload error",
+    },
+    deleteModal: {
+      titleText: "Delete",
+      cancelDeleteCta: "Cancel",
+      cautionDeletingAttachment: "Caution, deleting attachment",
+      descriptionText:
+        "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
+      deleteFileCta: "Delete file",
+      deleteFilesCta: "Delete files",
+      deleting: "Deleting...",
     },
   },
 };

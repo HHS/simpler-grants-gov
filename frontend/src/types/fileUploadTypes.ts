@@ -24,7 +24,7 @@ export type UploadFileMetadata = {
   fileSize?: number;
   mimeType?: string;
   downloadUrl?: string;
-  updatedAt: number; // ?? may come back as a string
+  updatedAt: string;
 };
 
 export type FileUploadStatusUpdate = {
