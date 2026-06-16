@@ -345,18 +345,15 @@ def test_delete_attachment_published_sgm_opportunity(
     )
 
     # Create an attachment
-    attachment = opportunity_models.OpportunityAttachment(
-        attachment_id=uuid.uuid4(),
-        legacy_attachment_id=12346,
-        opportunity_id=published_sgm_opportunity.opportunity_id,
+    attachment = OpportunityAttachmentFactory.create(
+        opportunity=published_sgm_opportunity,
         file_name="test_file.pdf",
         file_description="Test attachment for published SGM opportunity",
         file_location=f"s3://{mock_s3_bucket}/published-sgm-test-file.pdf",
         mime_type="application/pdf",
         file_size_bytes=1024,
+        legacy_attachment_id=12346,
     )
-    db_session.add(attachment)
-    db_session.commit()
 
     resp = client.delete(
         f"/v1/grantors/opportunities/{published_sgm_opportunity.opportunity_id}/attachments/{attachment.attachment_id}",
