@@ -22,9 +22,7 @@ const pipeStatusStreamToResponse = async (
   if (value) {
     let payloadJson: { data: FileUploadStatusUpdate };
     try {
-      console.log("1.", value);
       const payloadString = new TextDecoder().decode(value);
-      console.log("2.", payloadString);
       payloadJson = JSON.parse(payloadString) as {
         data: FileUploadStatusUpdate;
       };
@@ -34,7 +32,6 @@ const pipeStatusStreamToResponse = async (
     }
     // we will expect the API to deliver duplicate chunks until a state change, but will only write to our
     // output stream when the state changes
-    console.log("3.", payloadJson);
     const statusOnRead = payloadJson.data.status;
     if (previousState !== statusOnRead) {
       console.log("4.", statusOnRead);
@@ -44,7 +41,7 @@ const pipeStatusStreamToResponse = async (
   }
   if (done) {
     console.log("5. DONE");
-    outputController.close();
+    // outputController.close();
     return;
   }
   return pipeStatusStreamToResponse(
@@ -80,6 +77,15 @@ const orchestrateFileUpload = async (
     responseStreamController,
     fileUploadStatusResponse.getReader(),
   );
+
+  // this is here in order to send back the file id
+  responseStreamController.enqueue(
+    JSON.stringify({
+      status: "scan-complete",
+      pendingFileId: fileUploadDetails.pending_file_id,
+    }),
+  );
+  return fileUploadDetails.pending_file_id;
 };
 
 // creates a new stream to use for the client response and makes all
@@ -89,6 +95,7 @@ const processUploadInStream = (file: File): ReadableStream<string> => {
     start: async (responseStreamController) => {
       try {
         await orchestrateFileUpload(responseStreamController, file);
+        responseStreamController.close();
       } catch (e) {
         console.error("Error in file upload orchestration stream", e);
         responseStreamController.enqueue(

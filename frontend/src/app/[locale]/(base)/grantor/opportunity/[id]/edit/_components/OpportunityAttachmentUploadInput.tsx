@@ -66,7 +66,7 @@ export function OpportunityAttachmentUploadInput({
   ) => {
     try {
       await uploadFetch(
-        `/api/opportunities/${opportunityId}/attachments/${fileId}`,
+        `/api/opportunities/${opportunityId}/attachments/attach/${fileId}`,
         { method: "POST", signal: abortSignal },
       );
     } catch (e) {

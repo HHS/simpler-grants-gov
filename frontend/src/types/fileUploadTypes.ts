@@ -41,4 +41,5 @@ export type UploadFileMetadata = {
 export type FileUploadStatusUpdate = {
   status?: FileUploadStatus;
   error?: string;
+  pendingFileId?: string;
 };

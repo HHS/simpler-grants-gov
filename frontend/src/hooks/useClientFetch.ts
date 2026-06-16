@@ -46,6 +46,7 @@ export const useClientFetch = <T>(
   const clientFetch = useCallback(
     async (url: string, options: RequestInit = {}): Promise<T> => {
       const response = await fetchWithAuthCheck(url, options);
+      console.log("$$$", response);
       if (response.ok && response.status === 200) {
         if (jsonResponse) {
           const data = (await response.json()) as T;

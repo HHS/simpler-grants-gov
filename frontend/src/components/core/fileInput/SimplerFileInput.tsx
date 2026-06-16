@@ -142,14 +142,17 @@ export const SimplerFileInput = ({
 
   const readResponseStream = useCallback(
     (reader: ReadableStreamDefaultReader<Uint8Array>) => {
-      const process = (): Promise<FileUploadProcessStatus> => {
+      // can't use state to track this because it would need to be both set and referenced within the same useCallback function call
+      // and the function can't be recalculated to include updated state values while running
+      let newFileId: string;
+      const process = (): Promise<string> => {
         return reader
           .read()
           .then(({ value, done }) => {
-            console.log("1.", value);
             let payloadJson: FileUploadStatusUpdate;
             try {
               const payloadString = new TextDecoder().decode(value);
+              console.log("~~~~", payloadString);
               payloadJson = payloadString
                 ? (JSON.parse(payloadString) as FileUploadStatusUpdate)
                 : {};
@@ -164,9 +167,13 @@ export const SimplerFileInput = ({
               throw new Error(payloadJson.error);
             } else {
               setCurrentStatus(payloadJson?.status as FileUploadProcessStatus);
+              if (payloadJson.pendingFileId) {
+                console.log("~~ setting file id", payloadJson.pendingFileId);
+                newFileId = payloadJson.pendingFileId;
+              }
             }
             if (done) {
-              return payloadJson?.status as FileUploadProcessStatus;
+              return newFileId;
             }
             return process();
           })
@@ -210,7 +217,6 @@ export const SimplerFileInput = ({
           })
           // process streaming response
           .then((response: Response) => {
-            console.log("0.");
             const reader = response.body?.getReader();
             setResponseReader(reader);
             // this may need to be fixed up if we need to convert the buffer to a string on read, but leaving for now
@@ -219,13 +225,22 @@ export const SimplerFileInput = ({
             );
           })
           // run post upload action
-          .then((fileId) => {
+          .then((passedInId) => {
+            console.log("++++ reading pending file id", passedInId);
+            if (!passedInId) {
+              throw new Error(
+                "upload stream completed without sending pending file id",
+              );
+            }
             const postUploadAbortController = new AbortController();
             setUploadController(undefined);
             setResponseReader(undefined);
             setCurrentStatus("post-upload");
             setPostUploadController(postUploadAbortController);
-            return postUploadAction(fileId, postUploadAbortController.signal);
+            return postUploadAction(
+              passedInId,
+              postUploadAbortController.signal,
+            );
           })
           // run complete actions
           .then((postUploadResult: unknown) => {
