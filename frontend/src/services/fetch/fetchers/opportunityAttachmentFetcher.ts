@@ -1,5 +1,6 @@
 import "server-only";
 
+import { fileUploadProcessStatus } from "src/types/fileUploadTypes";
 import {
   OpportunityAttachmentListResponse,
   OpportunityAttachmentUploadResponse,
@@ -14,6 +15,42 @@ export const listOpportunityAttachments = async (
     subPath: `${opportunityId}/attachments`,
   });
   return (await response.json()) as OpportunityAttachmentListResponse;
+};
+
+// for now this just iterates through the valid statuses and delivers them in a stream in 1 second intervals
+export const attachOpportunityFile = async ({
+  opportunityId,
+  pendingFileId,
+}: {
+  opportunityId: string;
+  pendingFileId: string;
+}) => {
+  console.log("!!! attaching", opportunityId, pendingFileId);
+  const maxQueues = fileUploadProcessStatus.length;
+  let queueIndex = 0;
+  const stream = new ReadableStream({
+    start: (controller) => {
+      const intervalId = setInterval(() => {
+        try {
+          if (queueIndex === maxQueues) {
+            controller.close();
+            clearInterval(intervalId);
+            queueIndex = 0;
+            return;
+          }
+          controller.enqueue(fileUploadProcessStatus[queueIndex]);
+          queueIndex++;
+        } catch (e) {
+          queueIndex = 0;
+          console.error(e);
+          controller.close();
+          clearInterval(intervalId);
+        }
+      }, 1000);
+    },
+  });
+  const response = new Response(stream);
+  return response;
 };
 
 export const uploadOpportunityAttachment = async (

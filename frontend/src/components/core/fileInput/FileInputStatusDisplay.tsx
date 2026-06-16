@@ -37,7 +37,7 @@ export const FileInputStatusDisplay = ({
   postUploadActionSuccessMessage?: string;
   postUploadActionErrorMessage?: string;
 }) => {
-  const t = useTranslations("FileUpload.statusDisplay");
+  const t = useTranslations("FileInput.statusDisplay");
 
   if (!status) {
     return;
@@ -47,6 +47,7 @@ export const FileInputStatusDisplay = ({
     queued: t("queued"),
     uploading: t("uploading"),
     scanning: t("scanning"),
+    "starting-scan": t("startingScan"),
     "post-upload": postUploadActionProgressMessage,
     complete: postUploadActionSuccessMessage || t("success"),
     error: t("error"),

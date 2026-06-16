@@ -1,9 +1,20 @@
-export type FileUploadProcessStatus =
-  | "queued"
-  | "uploading"
-  | "scanning"
-  | "post-upload"
-  | "complete";
+// export type FileUploadProcessStatus =
+//   | "queued"
+//   | "uploading"
+//   | "starting-scan"
+//   | "scanning"
+//   | "post-upload"
+//   | "complete";
+export const fileUploadProcessStatus = [
+  "queued",
+  "uploading",
+  "starting-scan",
+  "scanning",
+  "post-upload",
+  "complete",
+] as const;
+
+export type FileUploadProcessStatus = (typeof fileUploadProcessStatus)[number];
 
 export type FileUploadErrorStatus =
   | "error"
