@@ -1,6 +1,7 @@
 from grants_shared.api.schemas.extension import Schema, fields
 from grants_shared.api.schemas.extension.field_validators import Length
 from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from marshmallow import ValidationError, validates_schema
 from grants_shared.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     StrSearchSchemaBuilder,
@@ -870,3 +871,137 @@ class AwardRecommendationAuditResponseSchema(AbstractResponseSchema, PaginationM
     """Schema for POST /alpha/award-recommendations/:award_recommendation_id/audit_history response"""
 
     data = fields.List(fields.Nested(AwardRecommendationAuditDataSchema()))
+
+class AwardRecommendationSubmissionDetailBulkUpdateFieldsSchema(Schema):
+    """Fields applied to every selected award recommendation submission detail."""
+
+    award_recommendation_type = fields.Enum(
+        AwardRecommendationType,
+        allow_none=True,
+        metadata={"description": "The recommendation type for this submission"},
+    )
+
+    has_exception = fields.Boolean(
+        required=True,
+        metadata={"description": "Whether the recommendation has an exception."},
+    )
+
+    general_comment = fields.String(
+        allow_none=True,
+        required=True,
+        metadata={"description": "General comment for the recommendation."},
+    )
+
+    exception_detail = fields.String(
+        allow_none=True,
+        required=True,
+        metadata={"description": "Exception detail for the recommendation."},
+    )
+
+
+class AwardRecommendationSubmissionDetailIndividualUpdateFieldsSchema(Schema):
+    """Fields applied individually by award recommendation ID."""
+
+    recommended_amount = fields.Decimal(
+        required=True,
+        as_string=True,
+        metadata={"description": "Recommended amount for this award recommendation."},
+    )
+
+class AwardRecommendationSubmissionDetailBulkUpdateRequestSchema(Schema):
+    """Schema for PUT /alpha/award-recommendations/submission-details/bulk request."""
+
+    record_ids = fields.List(
+        fields.UUID(),
+        required=True,
+        metadata={
+            "description": "Award recommendation IDs to update.",
+        },
+    )
+
+    bulk_field_updates = fields.Nested(
+        AwardRecommendationSubmissionDetailBulkUpdateFieldsSchema,
+        required=True,
+        metadata={
+            "description": "Fields applied to every selected award recommendation.",
+        },
+    )
+
+    individual_updates = fields.Dict(
+        keys=fields.UUID(),
+        values=fields.Nested(
+            AwardRecommendationSubmissionDetailIndividualUpdateFieldsSchema
+        ),
+        required=True,
+        metadata={
+            "description": (
+                "Per-record updates keyed by award recommendation ID. "
+                "Each record ID must also be present in record_ids."
+            ),
+        },
+    )
+
+    @validates_schema
+    def validate_record_ids_match_individual_updates(self, data, **kwargs):
+        record_ids = set(data.get("record_ids", []))
+        individual_update_ids = set(data.get("individual_updates", {}).keys())
+
+        missing_ids = record_ids - individual_update_ids
+        unexpected_ids = individual_update_ids - record_ids
+
+        errors = {}
+
+        if missing_ids:
+            errors["individual_updates"] = [
+                "Missing individual updates for record IDs: "
+                f"{sorted(str(id_) for id_ in missing_ids)}"
+            ]
+
+        if unexpected_ids:
+            errors["individual_updates"] = [
+                *errors.get("individual_updates", []),
+                "Individual updates provided for IDs not present in record_ids: "
+                f"{sorted(str(id_) for id_ in unexpected_ids)}",
+            ]
+
+        if errors:
+            raise ValidationError(errors)
+        
+class AwardRecommendationSubmissionDetailBulkUpdateResultSchema(Schema):
+    award_recommendation_submission_detail_id = fields.UUID(
+        required=True,
+        metadata={"description": "The updated award recommendation submission detail ID."},
+    )
+
+    award_recommendation_type = fields.Enum(
+        AwardRecommendationType,
+        allow_none=True,
+        metadata={"description": "The recommendation type for this submission"},
+    )
+
+    has_exception = fields.Boolean(required=True)
+
+    general_comment = fields.String(
+        allow_none=True,
+        required=True,
+    )
+
+    exception_detail = fields.String(
+        allow_none=True,
+        required=True,
+    )
+
+    recommended_amount = fields.Decimal(
+        required=True,
+        as_string=True,
+    )
+
+
+class AwardRecommendationSubmissionDetailBulkUpdateResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(AwardRecommendationSubmissionDetailBulkUpdateResultSchema),
+        required=True,
+        metadata={
+            "description": "Updated award recommendation submission detail records.",
+        },
+    )
