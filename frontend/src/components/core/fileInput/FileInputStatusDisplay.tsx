@@ -91,7 +91,6 @@ export const FileInputStatusDisplay = ({
     </Button>
   );
   const IconDisplay = error ? <USWDSIcon name="error" /> : <Spinner />;
-
   return (
     <GridContainer data-testid="file-upload-status-display">
       <Grid col={2}>{IconDisplay}</Grid>

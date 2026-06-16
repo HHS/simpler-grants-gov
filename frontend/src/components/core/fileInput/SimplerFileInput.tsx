@@ -2,6 +2,7 @@ import { noop } from "lodash";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import {
   FileUploadProcessStatus,
+  FileUploadStatusUpdate,
   PostUploadAction,
   UploadFileMetadata,
 } from "src/types/fileUploadTypes";
@@ -104,14 +105,29 @@ export const SimplerFileInput = ({
   );
 
   const readResponseStream = useCallback(
-    (reader: ReadableStreamDefaultReader) => {
-      const process = (): Promise<string> => {
+    (reader: ReadableStreamDefaultReader<string>) => {
+      const process = (): Promise<FileUploadProcessStatus> => {
         return reader
           .read()
           .then(({ value, done }) => {
-            setCurrentStatus(value as FileUploadProcessStatus);
+            let payloadJson: FileUploadStatusUpdate;
+            try {
+              payloadJson = value
+                ? (JSON.parse(value) as FileUploadStatusUpdate)
+                : {};
+            } catch (e) {
+              console.error(
+                "Error parsing json from file upload stream payload",
+              );
+              throw e;
+            }
+            if (payloadJson?.error) {
+              throw new Error(payloadJson.error);
+            } else {
+              setCurrentStatus(payloadJson?.status as FileUploadProcessStatus);
+            }
             if (done) {
-              return value as string;
+              return payloadJson?.status as FileUploadProcessStatus;
             }
             return process();
           })
@@ -146,10 +162,12 @@ export const SimplerFileInput = ({
         clientFetch(UPLOAD_ENDPOINT, { signal: uploadAbortController.signal })
           // process streaming response
           .then((response: Response) => {
-            const reader =
-              response.body?.getReader() as ReadableStreamDefaultReader;
+            const reader = response.body?.getReader();
             setResponseReader(reader);
-            return readResponseStream(reader);
+            // this may need to be fixed up if we need to convert the buffer to a string on read, but leaving for now
+            return readResponseStream(
+              reader as unknown as ReadableStreamDefaultReader<string>,
+            );
           })
           // run post upload action
           .then((fileId) => {

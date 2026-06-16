@@ -26,3 +26,8 @@ export type UploadFileMetadata = {
   downloadUrl?: string;
   updatedAt: number; // ?? may come back as a string
 };
+
+export type FileUploadStatusUpdate = {
+  status?: FileUploadStatus;
+  error?: string;
+};
