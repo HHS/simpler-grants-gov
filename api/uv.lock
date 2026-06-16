@@ -609,10 +609,11 @@ wheels = [
 
 [[package]]
 name = "grants-shared"
-version = "0.2.3"
+version = "0.2.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apiflask" },
+    { name = "beautifulsoup4" },
     { name = "boto3" },
     { name = "botocore" },
     { name = "jsonpath-ng" },
@@ -631,9 +632,9 @@ dependencies = [
     { name = "smart-open" },
     { name = "sqlalchemy", extra = ["mypy"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c2/5f/596f71faffd23d03117dd0254e5bca4ac1a240e6cb00cd01c12fab772906/grants_shared-0.2.3.tar.gz", hash = "sha256:f76ff74b8b5e6e383bd08111f2d28fb366bab85fa11c637b3bd8863fb47cbf8d", size = 25327, upload-time = "2026-05-29T17:28:32.336Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/36/db/7e6696e14c2b9036f91d10ed2e9216b948dabc92ead6613f5add7493fc2d/grants_shared-0.2.7.tar.gz", hash = "sha256:ec246f939fed16146ecec0832c4771ed24b0d31a5e8820654998bff6e9eaf94c", size = 49428, upload-time = "2026-06-11T17:26:25.25Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0f/3c/8b8884fa8a193640af5a6989abe7c9ec81e6b750267cb283a26cd34a070d/grants_shared-0.2.3-py3-none-any.whl", hash = "sha256:9df5f10bb4cf5e346c1e6359773cf4451cf0106e3ebeba4ca1111e64cdeb14a0", size = 28115, upload-time = "2026-05-29T17:28:31.047Z" },
+    { url = "https://files.pythonhosted.org/packages/4e/b5/2396a19498d265567bc414648ca8052809661a614e934fd74660d84fcc6a/grants_shared-0.2.7-py3-none-any.whl", hash = "sha256:b2951d770be8390612c824e2823d82b18874ed9d415b957242b2b5f473d8215b", size = 61691, upload-time = "2026-06-11T17:26:24.105Z" },
 ]
 
 [[package]]
@@ -1775,7 +1776,7 @@ requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1,<0.8" },
     { name = "docraptor", specifier = ">=3.0.0,<4" },
     { name = "flask-cors", specifier = ">=6.0.0,<7" },
-    { name = "grants-shared", specifier = "==0.2.3" },
+    { name = "grants-shared", specifier = "==0.2.7" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
     { name = "jinja2", specifier = ">=3.1.5" },
     { name = "jsonpath-ng", specifier = ">=1.7.0,<2" },

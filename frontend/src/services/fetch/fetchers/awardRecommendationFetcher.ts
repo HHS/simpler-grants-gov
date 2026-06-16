@@ -3,6 +3,7 @@ import {
   AwardRecommendationDetails,
   AwardRecommendationRisk,
   AwardRecommendationSubmission,
+  AwardRecommendationSubmissionListFilters,
 } from "src/types/awardRecommendationTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 
@@ -16,41 +17,50 @@ export const getAwardRecommendationDetails = async (
 ): Promise<AwardRecommendationDetails> => {
   const response = await fetchAwardRecommendation({ subPath: id });
   const responseBody = (await response.json()) as APIResponse;
-  const apiData = responseBody.data as Partial<AwardRecommendationDetails>;
+  return responseBody.data as AwardRecommendationDetails;
+};
+
+export const listAwardRecommendationSubmissionsPaginated = async (
+  id: string,
+  pagination: PaginationRequestBody,
+  filters?: AwardRecommendationSubmissionListFilters,
+): Promise<{
+  submissions: AwardRecommendationSubmission[];
+  paginationInfo: PaginationInfo | undefined;
+}> => {
+  const response = await fetchAwardRecommendationWithMethod("POST")({
+    subPath: `${id}/submissions/list`,
+    body: {
+      ...(filters ? { filters } : {}),
+      pagination,
+    },
+  });
+  const responseBody = (await response.json()) as APIResponse;
 
   return {
-    ...apiData,
-    award_recommendation_summary: apiData.award_recommendation_summary || {
-      total_received_count: 200,
-      recommended_for_funding_count: 150,
-      recommended_without_funding_count: 25,
-      not_recommended_count: 25,
-      total_recommended_amount: 250000,
-    },
-  } as AwardRecommendationDetails;
+    submissions: (responseBody.data as AwardRecommendationSubmission[]) || [],
+    paginationInfo: responseBody.pagination_info,
+  };
 };
 
 export const listAwardRecommendationSubmissions = async (
   id: string,
 ): Promise<AwardRecommendationSubmission[]> => {
-  const response = await fetchAwardRecommendationWithMethod("POST")({
-    subPath: `${id}/submissions/list`,
-    body: {
-      pagination: {
-        page_offset: 1,
-        page_size: 100,
-        sort_order: [
-          {
-            order_by: "application_submission_number",
-            sort_direction: "ascending",
-          },
-        ],
-      },
+  const { submissions } = await listAwardRecommendationSubmissionsPaginated(
+    id,
+    {
+      page_offset: 1,
+      page_size: 100,
+      sort_order: [
+        {
+          order_by: "application_submission_number",
+          sort_direction: "ascending",
+        },
+      ],
     },
-  });
-  const responseBody = (await response.json()) as APIResponse;
+  );
 
-  return responseBody.data as AwardRecommendationSubmission[];
+  return submissions;
 };
 
 export const getAwardRecommendationSubmission = async (

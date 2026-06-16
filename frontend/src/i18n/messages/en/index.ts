@@ -417,11 +417,11 @@ export const messages = {
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
       awardMinCurrencyInput:
-        "Award minimum must be greater than zero and less than $1,000,000,000,000,000.",
+        "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMaxCurrencyInput:
-        "Award maximum must be greater than zero and less than $1,000,000,000,000,000.",
+        "Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       totalFundingCurrencyInput:
-        "Estimated total program funding must be greater than zero and less than $1,000,000,000,000,000.",
+        "Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMinLessThanTotal:
         "Award minimum cannot exceed the Estimated Total Program Funding.",
       awardMaxLessThanTotal:
@@ -2063,6 +2063,7 @@ export const messages = {
       "Edit application submission details",
     pageHeading: "Award Recommendations",
     heroTitle: "Award Rec #",
+    createHeroTitle: "Create recommendation",
     datePrepared: "Date prepared",
     status: "Status",
     onThisPage: "On this page",
@@ -2078,6 +2079,7 @@ export const messages = {
       edit: "Edit",
       preview: "Preview",
       submitForReview: "Submit for review",
+      backToEdit: "Back to Edit",
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -2196,6 +2198,63 @@ export const messages = {
         showDescription: "Show full description",
         hideSummaryDescription: "Hide full description",
       },
+      submissions: {
+        errorMessage:
+          "Unable to load application submissions. Please try again.",
+        columns: {
+          appNumber: "App #",
+          projectTitle: "Project title",
+          orgName: "Org name",
+          uei: "UEI",
+          score: "Score",
+          recommendation: "Recommendation",
+          requested: "Requested",
+          recommended: "Recommended",
+        },
+        recommendationOptions: {
+          none: "None",
+          recommended: "Recommended",
+          recommendedWithoutFunding: "Recommended but not funded",
+          notRecommended: "Not recommended",
+        },
+        recommendedAwards: {
+          heading: "Recommended awards",
+          editDescription:
+            "Select applications and use the drop-down box to apply your recommendation for the selected group.",
+          editLink: "Edit recommended awards",
+        },
+        exceptions: {
+          heading: "Exceptions to selection method",
+        },
+      },
+    },
+    risks: {
+      pageTitle: "Risks and Conditions",
+      metaDescription: "Manage risks and conditions for award recommendations",
+      heading: "Risks and Conditions",
+      description:
+        "Review and manage risks and conditions for application submissions",
+      selectAll: "Select all",
+      selectRow: "Select row for {appNumber}",
+      selectedCount:
+        "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      columns: {
+        appNumber: "App #",
+        projectTitle: "Project Title",
+        orgName: "Organization Name",
+        uei: "UEI",
+        recommendation: "Recommendation",
+        risk: "Risk",
+        condition: "Condition",
+      },
+      recommendationType: {
+        recommended_for_funding: "Recommended",
+      },
+      defaultNone: "None",
+      loading: "Loading submissions...",
+      errorLoading: "Error loading submissions. Please try again.",
+      showingRange: "Showing {start}-{end} of {total}",
+      editButton: "Edit",
     },
   },
   CreateAwardRecommendation: {
@@ -2384,5 +2443,40 @@ export const messages = {
     heading: "Refresh your page",
     alertMessage:
       "Hard refresh your page when done changing Flags for the changes to fully apply.",
+  },
+  OpportunityDetailsHeader: {
+    opportunityNumber: "Opportunity #: {number}",
+    title: "Title:",
+    agency: "Agency:",
+    subAgency: "Sub-agency:",
+    draft: "Draft",
+    lastUpdated: "Last updated:",
+  },
+  AwardRecommendationSelectFundingOpportunity: {
+    pageTitle: "Select funding opportunity | Simpler.Grants.gov",
+    pageHeading: "Award Recommendations",
+    metaDescription:
+      "Select a funding opportunity for your award recommendation",
+    whichFundingOpportunity: "Which funding opportunity is this for?",
+    cancelButtonText: "Cancel",
+  },
+  FileInput: {
+    existingFiles: {
+      savedOn: "Saved on",
+      delete: "Delete",
+    },
+    statusDisplay: {
+      cancel: "Cancel",
+      dismiss: "Dismiss",
+      queued: "Queued",
+      uploading: "Uploading",
+      scanning: "Scanning",
+      success: "Success",
+      error: "Error",
+      scanFail: "Scan failed",
+      uploadError: "Upload error",
+      scanError: "Scan error",
+      postUploadError: "Post upload error",
+    },
   },
 };

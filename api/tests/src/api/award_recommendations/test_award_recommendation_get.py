@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 import pytest
 
@@ -11,6 +12,7 @@ from src.db.models.opportunity_models import Opportunity
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt
 from tests.src.db.models.factories import (
     AgencyFactory,
+    AwardRecommendationApplicationSubmissionFactory,
     AwardRecommendationFactory,
     OpportunityFactory,
 )
@@ -97,6 +99,67 @@ class TestGetAwardRecommendation200:
         assert opp_data["opportunity_id"] == str(opportunity.opportunity_id)
         assert opp_data["opportunity_number"] == opportunity.opportunity_number
         assert opp_data["opportunity_title"] == opportunity.opportunity_title
+
+    def test_get_award_recommendation_summary_200(
+        self, client, db_session, agency, award_recommendation
+    ):
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        AwardRecommendationApplicationSubmissionFactory.create(
+            award_recommendation=award_recommendation,
+            recommended_for_funding=True,
+        )
+        AwardRecommendationApplicationSubmissionFactory.create(
+            award_recommendation=award_recommendation,
+            recommended_for_funding=True,
+            award_recommendation_submission_detail__recommended_amount=30000,
+        )
+        AwardRecommendationApplicationSubmissionFactory.create(
+            award_recommendation=award_recommendation,
+            recommended_without_funding=True,
+            award_recommendation_submission_detail__recommended_amount=25000,
+        )
+        AwardRecommendationApplicationSubmissionFactory.create(
+            award_recommendation=award_recommendation,
+            not_recommended=True,
+        )
+
+        resp = client.get(
+            f"{API_URL}/{award_recommendation.award_recommendation_id}",
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 200
+        summary = resp.json["data"]["award_recommendation_summary"]
+
+        assert summary["total_received_count"] == 4
+        assert summary["recommended_for_funding_count"] == 2
+        assert summary["recommended_without_funding_count"] == 1
+        assert summary["not_recommended_count"] == 1
+        assert Decimal(summary["total_recommended_amount"]) == Decimal("80000")
+
+    def test_get_award_recommendation_summary_empty_200(
+        self, client, db_session, agency, award_recommendation
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        resp = client.get(
+            f"{API_URL}/{award_recommendation.award_recommendation_id}",
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 200
+        summary = resp.json["data"]["award_recommendation_summary"]
+
+        assert summary["total_received_count"] == 0
+        assert summary["recommended_for_funding_count"] == 0
+        assert summary["recommended_without_funding_count"] == 0
+        assert summary["not_recommended_count"] == 0
+        assert Decimal(summary["total_recommended_amount"]) == Decimal("0")
 
     def test_get_award_recommendation_empty_attachments_and_reviews_200(
         self, client, db_session, agency, award_recommendation

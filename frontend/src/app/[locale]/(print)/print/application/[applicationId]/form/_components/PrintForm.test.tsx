@@ -7,7 +7,7 @@ import { UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 
 // Mock FormFields component
-jest.mock("src/components/applyForm/FormFields", () => ({
+jest.mock("src/components/apply-form/FormFields", () => ({
   FormFields: ({ formData, schema, uiSchema, errors }: any) => (
     <div data-testid="form-fields">
       <div data-testid="form-data">{JSON.stringify(formData)}</div>

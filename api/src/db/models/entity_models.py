@@ -2,13 +2,13 @@ import uuid
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
+from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from grants_shared.db.models.base import TimestampMixin
 from grants_shared.util.datetime_util import utcnow
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (
     OrganizationAuditEvent,
     OrganizationInvitationStatus,
@@ -114,6 +114,10 @@ class Organization(ApiSchemaTable, TimestampMixin):
     @property
     def organization_name(self) -> str | None:
         return self.sam_gov_entity.legal_business_name if self.sam_gov_entity else None
+
+    @property
+    def uei(self) -> str | None:
+        return self.sam_gov_entity.uei if self.sam_gov_entity else None
 
 
 class OrganizationInvitation(ApiSchemaTable, TimestampMixin):

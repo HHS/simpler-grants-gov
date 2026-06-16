@@ -2,20 +2,20 @@ import logging
 from dataclasses import dataclass
 
 import grants_shared.adapters.db as db
+from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.util.string_utils import is_valid_uuid
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
 from src.adapters.oauth.oauth_client_models import OauthTokenRequest
-from src.api.route_utils import raise_flask_error
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.auth_errors import JwtValidationError
 from src.auth.login_gov_jwt_auth import get_config, get_login_gov_client_assertion, validate_token
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.user_models import LinkExternalUser, LoginGovState, User
 from src.services.users.organization_from_ebiz_poc import handle_ebiz_poc_organization_during_login
-from src.util.string_utils import is_valid_uuid
 
 logger = logging.getLogger(__name__)
 

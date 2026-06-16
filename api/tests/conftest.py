@@ -1,4 +1,5 @@
 import logging
+import os
 import uuid
 from os import path
 
@@ -12,6 +13,8 @@ from apiflask import APIFlask
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from grants_shared.util.local import load_local_env_vars
+from moto.core import DEFAULT_ACCOUNT_ID
+from moto.ses.models import ses_backends
 from sqlalchemy import select, text
 
 import src.app as app_entry
@@ -550,6 +553,27 @@ def file_scan_dynamodb_table(mock_dynamodb, monkeypatch):
     )
     monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
     return table_name
+
+
+@pytest.fixture
+def ses_client(monkeypatch):
+    """Create a mocked SESv2 client using moto3."""
+    monkeypatch.setenv("IS_LOCAL_AWS", "0")
+
+    # to access ses_backends, need to add ses to the whitelist
+    with moto.mock_aws(config={"core": {"service_whitelist": ["ses", "sesv2"]}}):
+        ses_client = boto3.client("sesv2", region_name="us-east-1")
+        ses_client.create_email_identity(EmailIdentity=os.getenv("AWS_SES_FROM_EMAIL"))
+        yield ses_client
+
+
+@pytest.fixture
+def get_sent_emails():
+    def func():
+        ses_backend = ses_backends[DEFAULT_ACCOUNT_ID]["us-east-1"]
+        return ses_backend.sent_messages
+
+    return func
 
 
 ####################

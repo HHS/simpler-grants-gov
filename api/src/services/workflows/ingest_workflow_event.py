@@ -3,10 +3,10 @@ import uuid
 from typing import Any, cast
 
 from grants_shared.adapters import db
+from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 import src.workflow.state_machine  # noqa: F401  # Import to register all state machines
-from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import Privilege, WorkflowEventType
 from src.db.models.user_models import User

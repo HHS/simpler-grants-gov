@@ -3,11 +3,11 @@ import uuid
 from datetime import timedelta
 
 import pytest
+from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util import datetime_util
 
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 from src.adapters.oauth.oauth_client_models import OauthTokenResponse
-from src.api.route_utils import raise_flask_error
 from src.auth.api_jwt_auth import parse_jwt_for_user
 from src.db.models.user_models import LinkExternalUser, LoginGovState
 from tests.lib.auth_test_utils import create_jwt

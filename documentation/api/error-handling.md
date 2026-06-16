@@ -41,8 +41,8 @@ use our `raise_flask_error` function which handles wrapping exceptions in
 a format that APIFlask will keep the context we add.
 
 ```py
-from src.api.response import ValidationErrorDetail
-from src.api.route_utils import raise_flask_error
+from grants_shared.api.response import ValidationErrorDetail
+from grants_shared.api.route_utils import raise_flask_error
 from src.validation.validation_constants import ValidationErrorType
 
 
@@ -89,14 +89,14 @@ structure is simple and just requires flattening the dictionary, but the error m
 unfortunately only provide a message, when we want a message AND code for the particular error.
 
 To work around this challenge, we created our own derived versions of the Marshmallow schema,
-field, and validator classes in the [extensions folder](../../api/src/api/schemas/extension).
+field, and validator classes in the [extensions folder](../../backend/grants_shared/src/grants_shared/api/schemas/extension).
 
-These extend the Marshmallow classes to instead output their errors as a [MarshmallowErrorContainer](../../api/src/api/schemas/extension/schema_common.py)
+These extend the Marshmallow classes to instead output their errors as a [MarshmallowErrorContainer](../../backend/grants_shared/src/grants_shared/api/schemas/extension/schema_common.py)
 
 This is done by modifying the default error message that each validation rule has to instead
 be a `MarshmallowErrorContainer` object. For most of the fields, this is just a bit of configuration,
 but the validators required re-implementing them as they handled errors directly in validation.
 
-When Marshmallow throws its errors, our [process_marshmallow_issues](../../api/src/api/response.py) function
+When Marshmallow throws its errors, our [process_marshmallow_issues](../../backend/grants_shared/src/grants_shared/api/response.py) function
 will get called which handles flattening the errors, and then restructuring them into
 proper format.

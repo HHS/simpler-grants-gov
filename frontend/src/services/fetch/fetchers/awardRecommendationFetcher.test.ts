@@ -4,6 +4,7 @@ import {
   getAwardRecommendationRisks,
   getAwardRecommendationSubmission,
   listAwardRecommendationSubmissions,
+  listAwardRecommendationSubmissionsPaginated,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 import { APIResponse } from "src/types/apiResponseTypes";
 import {
@@ -53,17 +54,7 @@ describe("getAwardRecommendationDetails", () => {
   it("returns the expected award recommendation details", async () => {
     const result = await getAwardRecommendationDetails("an id");
     expect(mockJson).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      ...mockAwardRecommendationDetails,
-      award_recommendation_summary:
-        mockAwardRecommendationDetails.award_recommendation_summary || {
-          total_received_count: 200,
-          recommended_for_funding_count: 150,
-          recommended_without_funding_count: 25,
-          not_recommended_count: 25,
-          total_recommended_amount: 250000,
-        },
-    });
+    expect(result).toEqual(mockAwardRecommendationDetails);
   });
 });
 
@@ -96,6 +87,40 @@ describe("listAwardRecommendationSubmissions", () => {
     const result = await listAwardRecommendationSubmissions("an id");
 
     expect(result).toEqual(mockAwardRecommendationSubmissions);
+  });
+});
+
+describe("listAwardRecommendationSubmissionsPaginated", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls fetchAwardRecommendationWithMethod with pagination and filters", async () => {
+    await listAwardRecommendationSubmissionsPaginated(
+      "an id",
+      {
+        page_offset: 2,
+        page_size: 10,
+        sort_order: [],
+      },
+      {
+        award_recommendation_type: { one_of: ["recommended_for_funding"] },
+      },
+    );
+
+    expect(mockInnerFetch).toHaveBeenCalledWith({
+      subPath: "an id/submissions/list",
+      body: {
+        filters: {
+          award_recommendation_type: { one_of: ["recommended_for_funding"] },
+        },
+        pagination: {
+          page_offset: 2,
+          page_size: 10,
+          sort_order: [],
+        },
+      },
+    });
   });
 });
 

@@ -10,6 +10,9 @@ jest.mock("src/services/fetch/fetchers/clientUserFetcher", () => ({
   debouncedUserFetcher: () => debouncedUserFetcherMock() as unknown,
 }));
 
+const fetchMock = jest.fn(() => Promise.resolve({ ok: true } as Response));
+global.fetch = fetchMock as unknown as typeof global.fetch;
+
 const UseUserConsumer = () => {
   const { error, isLoading, user } = useUser();
   return (
@@ -96,6 +99,28 @@ describe("useUser", () => {
       expect(result.current.user?.token).toEqual("");
     });
     expect(result.current.hasBeenLoggedOut).toEqual(true);
+    // clears the correlation id cookie server-side, mirroring explicit logout
+    expect(fetchMock).toHaveBeenCalledWith("/api/auth/logout", {
+      method: "POST",
+    });
+  });
+  it("does not clear the correlation id when an anonymous user remains logged out", async () => {
+    debouncedUserFetcherMock.mockReturnValue({ token: "" });
+    const { result } = renderHook(() => useUser(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.user?.token).toEqual("");
+    });
+
+    await result.current.refreshUser();
+
+    await waitFor(() => {
+      expect(result.current.user?.token).toEqual("");
+    });
+    expect(result.current.hasBeenLoggedOut).toEqual(false);
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/auth/logout", {
+      method: "POST",
+    });
   });
   describe("logoutLocalUser", () => {
     it("removes user token", async () => {

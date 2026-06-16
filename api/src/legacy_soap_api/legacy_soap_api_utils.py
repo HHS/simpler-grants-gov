@@ -13,15 +13,18 @@ from defusedxml import minidom
 from lxml import etree
 from sqlalchemy import exists, select
 
+from src.adapters.aws import S3Config
 from src.db.models.competition_models import (
     ApplicationSubmission,
     ApplicationSubmissionRetrieved,
     ApplicationSubmissionTrackingNumber,
 )
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.soap_payload_handler import extract_soap_xml
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -197,6 +200,10 @@ class SOAPFaultException(Exception):
         self.message = message
         self.fault = fault
         super().__init__(message, fault, *args)
+
+
+class SOAPInvalidFilter(SOAPFaultException):
+    pass
 
 
 def wrap_envelope_dict(soap_xml_dict: dict, operation_name: str | None = None) -> dict:
@@ -522,3 +529,52 @@ def to_snake_case(name: str) -> str:
     """
     sub = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", sub).lower()
+
+
+def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAPResponse) -> None:
+    if get_soap_config().save_soap_messages_to_s3:
+        try:
+            s3_config = S3Config()
+            debug_identifier = uuid.uuid4()
+            base_path = file_util.join(
+                s3_config.draft_files_bucket_path,
+                # Not "soap": in virtual-hosted S3 URLs the object key becomes the URL path,
+                # and a WAF rule blocks paths starting with /soap -- which breaks both the
+                # upload here and downloading these files from the S3 console.
+                "soap-debug",
+                str(debug_identifier),
+            )
+            # Store as plain text so the debug files preview in the browser / S3 console
+            # instead of downloading as binary/octet-stream.
+            text_content_type = "text/plain; charset=utf-8"
+            if soap_request is not None:
+                request_s3_path = file_util.join(
+                    base_path,
+                    "request.txt",
+                )
+                file_util.write_to_file(
+                    request_s3_path,
+                    # The request body stream is consumed when forwarding to the legacy proxy, so
+                    # re-reading soap_request.data here yields nothing (the empty-request.txt bug).
+                    # Use the cached head, which holds the SOAP envelope captured during parsing.
+                    soap_request.data.head().decode("utf-8"),
+                    content_type=text_content_type,
+                )
+            response_s3_path = file_util.join(
+                base_path,
+                "response.txt",
+            )
+            file_util.write_to_file(
+                response_s3_path,
+                soap_response.to_bytes().decode("utf-8"),
+                content_type=text_content_type,
+            )
+            logger.info(
+                "soap_client: debug info uploaded to s3",
+                extra={"debug_identifier": debug_identifier},
+            )
+        except Exception:
+            logger.exception(
+                "soap_client: failed to upload debug info to s3",
+                extra={"soap_api_event": LegacySoapApiEvent.ERROR_UPLOADING_DEBUG_DATA},
+            )

@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { saveAwardRecommendationSubmissionDetails } from "src/app/[locale]/(base)/award-recommendation/[id]/actions";
+import { RecommendationDetailsSection } from "src/app/[locale]/(base)/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getAwardRecommendationSubmission } from "src/services/fetch/fetchers/awardRecommendationFetcher";
@@ -10,8 +11,6 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Alert, Button, Grid, GridContainer } from "@trussworks/react-uswds";
-
-import { RecommendationDetailsSection } from "src/components/award-recommendation/RecommendationDetailsSection";
 
 export async function generateMetadata({
   params,

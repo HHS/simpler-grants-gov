@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OpportunityCompetitionStart } from "src/app/[locale]/(base)/opportunity/[id]/_components/OpportunityCompetitionStart";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
@@ -10,16 +11,15 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect, RedirectType } from "next/navigation";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
-import OpportunityCTA from "src/components/opportunity/OpportunityCTA";
-import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
-import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
-import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
-import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
-import OpportunityLink from "src/components/opportunity/OpportunityLink";
-import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
-import { OpportunityCompetitionStart } from "src/components/user/OpportunityCompetitionStart";
-import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
+import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
+import OpportunityAwardInfo from "./_components/OpportunityAwardInfo";
+import OpportunityCTA from "./_components/OpportunityCTA";
+import OpportunityDescription from "./_components/OpportunityDescription";
+import OpportunityDocuments from "./_components/OpportunityDocuments";
+import OpportunityHistory from "./_components/OpportunityHistory";
+import OpportunityIntro from "./_components/OpportunityIntro";
+import OpportunityLink from "./_components/OpportunityLink";
+import OpportunityStatusWidget from "./_components/OpportunityStatusWidget";
 
 type OpportunityListingProps = {
   params: Promise<{ id: string }>;
