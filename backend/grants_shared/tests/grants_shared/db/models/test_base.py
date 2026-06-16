@@ -51,7 +51,7 @@ def test_db_models(db_session):
         example = ExampleTable(description="a description")
         db_session.add(example)
 
-        friend = FriendTable(best_example=example)
+        friend = FriendTable(example=example)
         db_session.add(friend)
 
     db_session.refresh(example)
@@ -61,4 +61,4 @@ def test_db_models(db_session):
 
     db_session.refresh(friend)
     assert friend.friend_id is not None
-    assert friend.best_example is example
+    assert friend.example is example

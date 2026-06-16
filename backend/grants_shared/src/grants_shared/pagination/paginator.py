@@ -1,9 +1,10 @@
 import math
 from collections.abc import Sequence
 
+from sqlalchemy import Select, func, inspect
+
 import grants_shared.adapters.db as db
 from grants_shared.db.models.base import Base
-from sqlalchemy import Select, func, inspect
 
 DEFAULT_PAGE_SIZE = 25
 
@@ -16,11 +17,11 @@ class Paginator[T: Base]:
     Any usage of this should make sure that the select query passed in
     contains sorting information otherwise results may not be expected.
 
-    Expected usage::
+    Expected usage:
         from sqlalchemy import desc, select
 
         from src.db.models.opportunity_models import Opportunity
-        from src.pagination.paginator import Paginator
+        from grants_shared.pagination.paginator import Paginator
 
         # Create a select statement that includes ordering and sorting
         stmt = select(User).order_by(desc("opportunity_id"))

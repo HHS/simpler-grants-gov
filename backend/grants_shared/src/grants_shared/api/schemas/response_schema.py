@@ -1,4 +1,5 @@
 from grants_shared.api.schemas.extension import Schema, fields
+from grants_shared.pagination.pagination_schema import PaginationInfoSchema
 
 
 class ValidationIssueSchema(Schema):
@@ -32,13 +33,11 @@ class WarningMixinSchema(Schema):
     )
 
 
-# TODO - https://github.com/HHS/simpler-grants-gov/issues/10619
-# This depends on some pagination utils we'll move in a later ticket
-# class PaginationMixinSchema(Schema):
-#     pagination_info = fields.Nested(
-#         PaginationInfoSchema(),
-#         metadata={"description": "The pagination information for paginated endpoints"},
-#     )
+class PaginationMixinSchema(Schema):
+    pagination_info = fields.Nested(
+        PaginationInfoSchema(),
+        metadata={"description": "The pagination information for paginated endpoints"},
+    )
 
 
 class ErrorResponseSchema(Schema):

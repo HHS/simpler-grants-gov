@@ -1,17 +1,21 @@
 from enum import StrEnum
 
 from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema, FileResponseSchema
+from grants_shared.api.schemas.response_schema import (
+    AbstractResponseSchema,
+    FileResponseSchema,
+    PaginationMixinSchema,
+)
 from grants_shared.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     DateSearchSchemaBuilder,
     IntegerSearchSchemaBuilder,
     StrSearchSchemaBuilder,
 )
+from grants_shared.pagination.pagination_schema import generate_pagination_schema
 from marshmallow import RAISE
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
-from src.api.schemas.response_schema import PaginationMixinSchema
 from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -20,7 +24,6 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityStatus,
 )
-from src.pagination.pagination_schema import generate_pagination_schema
 from src.services.opportunities_v1.experimental_constant import ScoringRule
 
 
