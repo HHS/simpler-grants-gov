@@ -30,22 +30,17 @@ def existing_opportunity(grantor_auth_data, enable_factory_create):
 
 
 @pytest.fixture
-def existing_attachment(db_session, existing_opportunity, enable_factory_create, mock_s3_bucket):
+def existing_attachment(existing_opportunity, enable_factory_create, mock_s3_bucket):
     """Create an attachment for the opportunity"""
-    attachment = opportunity_models.OpportunityAttachment(
-        attachment_id=uuid.uuid4(),
-        legacy_attachment_id=12345,
-        opportunity_id=existing_opportunity.opportunity_id,
+    return OpportunityAttachmentFactory.create(
+        opportunity=existing_opportunity,
         file_name="test_file.pdf",
         file_description="Test attachment",
         file_location=f"s3://{mock_s3_bucket}/test-file.pdf",
         mime_type="application/pdf",
         file_size_bytes=1024,
+        legacy_attachment_id=12345,
     )
-    db_session.add(attachment)
-    db_session.commit()
-
-    return attachment
 
 
 def test_upload_attachment_success(
@@ -314,7 +309,7 @@ def test_delete_attachment_published_non_sgm_opportunity(
 
     # Create an attachment for the published opportunity
     attachment = OpportunityAttachmentFactory.create(
-        opportunity_id=published_opportunity.opportunity_id,
+        opportunity=published_opportunity,
         file_name="test_file.pdf",
         file_description="Test attachment for published opportunity",
         file_location=f"s3://{mock_s3_bucket}/published-test-file.pdf",
