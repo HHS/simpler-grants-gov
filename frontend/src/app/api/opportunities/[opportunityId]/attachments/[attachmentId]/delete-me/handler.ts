@@ -1,8 +1,8 @@
 import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { deleteOpportunityAttachment } from "src/services/fetch/fetchers/opportunityAttachmentFetcher";
+import { newDeleteOpportunityAttachment } from "src/services/fetch/fetchers/opportunityAttachmentFetcher";
 
-export const newDeleteOpportunityAttachmentHandler = async (
+export const deleteOpportunityAttachmentHandler = async (
   _request: Request,
   {
     params,
@@ -18,7 +18,7 @@ export const newDeleteOpportunityAttachmentHandler = async (
 
     const { opportunityId, attachmentId } = await params;
 
-    const response = await deleteOpportunityAttachment(
+    const response = await newDeleteOpportunityAttachment(
       opportunityId,
       attachmentId,
     );

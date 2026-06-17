@@ -48,7 +48,7 @@ type SimplerFileInputProps = {
   * delete a previously uploaded file [x]
 
   * remove the "selected file" thing on single file inputs [x]
-  * confirm delete behavior [ ]
+  * confirm delete behavior [x]
   * confirm cancel behavior [ ]
   * confirm callback behavior [ ]
   *
@@ -135,6 +135,7 @@ export const SimplerFileInput = ({
         setDeletePending(false);
         setFilePendingDeletion(undefined);
         deleteModalRef.current?.toggleModal();
+        fileInputRef.current?.clearFiles();
         // figured we may need to clear delete errors for the file here, but it should
         // be removed from the dom on successful delete so I don't think it's necessary
         return;
@@ -230,7 +231,6 @@ export const SimplerFileInput = ({
           .then((response: Response) => {
             const reader = response.body?.getReader();
             setResponseReader(reader);
-            // this may need to be fixed up if we need to convert the buffer to a string on read, but leaving for now
             return readResponseStream(
               reader as unknown as ReadableStreamDefaultReader<Uint8Array>,
             );

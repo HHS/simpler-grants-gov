@@ -1013,11 +1013,12 @@ export default function OpportunityEditForm({
           opportunityId={opportunityId}
           initialAttachments={initialAttachmentsPlusFakeAttachments}
           isDraft={isDraft}
-          addExistingFile={(fakeAttachment) =>
+          addExistingFile={(fakeAttachment) => {
+            console.log("*** adding existing file");
             setInitialAttachmentsPlusFakeAttachments(
               initialAttachmentsPlusFakeAttachments.concat([fakeAttachment]),
-            )
-          }
+            );
+          }}
         />
       </section>
     </form>

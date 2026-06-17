@@ -51,3 +51,13 @@ export const deleteOpportunityAttachment = async (
   });
   return (await response.json()) as { status_code: number; message: string };
 };
+
+export const newDeleteOpportunityAttachment = async (
+  opportunityId: string,
+  attachmentId: string,
+): Promise<{ status_code: number; message: string }> => {
+  const response = await fetchGrantorOpportunityWithMethod("DELETE")({
+    subPath: `${opportunityId}/attachments/${attachmentId}`,
+  });
+  return (await response.json()) as { status_code: number; message: string };
+};
