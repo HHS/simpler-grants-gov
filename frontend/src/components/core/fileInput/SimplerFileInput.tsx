@@ -175,10 +175,11 @@ export const SimplerFileInput = ({
               );
               throw e;
             }
+            console.log("$$$", payloadJson);
             if (payloadJson?.error) {
               throw new Error(payloadJson.error);
-            } else {
-              setCurrentStatus(payloadJson?.status as FileUploadProcessStatus);
+            } else if (payloadJson?.status) {
+              setCurrentStatus(payloadJson.status as FileUploadProcessStatus);
               if (payloadJson.pendingFileId) {
                 console.log("~~ setting file id", payloadJson.pendingFileId);
                 newFileId = payloadJson.pendingFileId;
@@ -259,6 +260,12 @@ export const SimplerFileInput = ({
             // complete status will persist until refresh or form change
             setCurrentStatus("success");
             onSuccess(postUploadResult);
+            // wait 5 seconds then hide the progress display
+            // don't want to clear these in an error scenario
+            setTimeout(() => {
+              setFileName("");
+              setCurrentStatus(undefined);
+            }, 5000);
             return;
           })
           .catch((e: Error) => {
@@ -266,13 +273,11 @@ export const SimplerFileInput = ({
           })
           .finally(() => {
             // may need to clear files from the input here has well?
-            setFileName("");
+
             setPostUploadController(undefined);
             setUploadController(undefined);
             setResponseReader(undefined);
             onComplete();
-            // wait 5 seconds then hide the progress display
-            setTimeout(() => setCurrentStatus(undefined), 5000);
           })
       );
     },
@@ -308,7 +313,7 @@ export const SimplerFileInput = ({
           fileName={fileName || ""}
           onCancel={() => void handleCancel()}
           onDismiss={handleDismiss}
-          error={true}
+          error={!!uploadError}
           status={currentStatus}
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
