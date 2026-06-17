@@ -2494,6 +2494,8 @@ export const messages = {
       uploadError: "Upload error",
       scanError: "Scan error",
       postUploadError: "Post upload error",
+      missingFileId: "Missing file id",
+      preUploadError: "Pre upload error",
     },
     deleteModal: {
       titleText: "Delete",

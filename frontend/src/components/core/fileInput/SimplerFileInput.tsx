@@ -164,14 +164,15 @@ export const SimplerFileInput = ({
           .read()
           .then(({ value, done }) => {
             let payloadJson: FileUploadStatusUpdate;
+            const payloadString = new TextDecoder().decode(value);
             try {
-              const payloadString = new TextDecoder().decode(value);
               payloadJson = payloadString
                 ? (JSON.parse(payloadString) as FileUploadStatusUpdate)
                 : {};
             } catch (e) {
               console.error(
                 "Error parsing json from file upload stream payload",
+                payloadString,
               );
               throw e;
             }
@@ -234,7 +235,7 @@ export const SimplerFileInput = ({
             const reader = response.body?.getReader();
             setResponseReader(reader);
             return readResponseStream(
-              reader as unknown as ReadableStreamDefaultReader<Uint8Array>,
+              reader as ReadableStreamDefaultReader<Uint8Array>,
             );
           })
           // run post upload action
@@ -265,6 +266,7 @@ export const SimplerFileInput = ({
             setTimeout(() => {
               setFileName("");
               setCurrentStatus(undefined);
+              fileInputRef.current?.clearFiles();
             }, 5000);
             return;
           })
@@ -272,8 +274,6 @@ export const SimplerFileInput = ({
             handleError(e);
           })
           .finally(() => {
-            // may need to clear files from the input here has well?
-
             setPostUploadController(undefined);
             setUploadController(undefined);
             setResponseReader(undefined);

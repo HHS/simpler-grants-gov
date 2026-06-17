@@ -11,8 +11,10 @@ import Spinner from "src/components/core/Spinner";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 const errorStatuses = new Map([
+  ["queued", "pre-upload-error"],
   ["uploading", "upload-error"],
   ["scanning", "scan-error"],
+  ["complete", "file-id-error"], // assuming that any error in this state is due to a missing file id
   ["post-upload", "post-upload-error"],
   // need to figure out how to disintguish between scan failure and scan error.
   // this will likely depend on the implementation of handling scan failures on the backend
@@ -136,6 +138,8 @@ export const FileInputStatusDisplay = ({
     "scan-fail": t("scanFail"),
     "upload-error": t("uploadError"),
     "scan-error": t("scanError"),
+    "file-id-error": t("missingFileId"),
+    "pre-upload-error": t("preUploadError"),
     "post-upload-error": postUploadActionErrorMessage || t("postUploadError"),
   };
 
@@ -144,7 +148,7 @@ export const FileInputStatusDisplay = ({
     : status;
   const statusMessageForDisplay = messagesMap[adjustedStatus];
 
-  console.log("** display value", statusMessageForDisplay, error);
+  console.log("** display value", status, statusMessageForDisplay, error);
   return (
     <Grid
       row

@@ -52,6 +52,10 @@ const mapInitialAttachmentsToExistingFiles = (
   - [x] translate initialAttachments into proper metadata format
   - [x] integrate delete behavior (build delete route?)
   - [x] integrate upload behavior (build upload route(s)?)
+
+  for failure path scenario testing, use these filenames:
+  - "scenario-infected"
+  - "scenario-wait10s"
 */
 
 export function OpportunityAttachmentUploadInput({
