@@ -15,20 +15,20 @@ import Spinner from "src/components/core/Spinner";
 
 interface Props {
   deletePending: boolean;
-  handleDeleteAttachment: () => void;
+  handleDeleteFile: () => void;
   modalId: string;
   modalRef: RefObject<ModalRef | null>;
   pendingDeleteName: string | undefined;
 }
 
-export const DeleteAttachmentModal = ({
+export const DeleteFileModal = ({
   deletePending,
-  handleDeleteAttachment,
+  handleDeleteFile,
   modalId,
   modalRef,
   pendingDeleteName,
 }: Props) => {
-  const t = useTranslations("Application.attachments.deleteModal");
+  const t = useTranslations("FileInput.deleteModal");
   return (
     <SimplerModal
       modalId={modalId}
@@ -46,7 +46,7 @@ export const DeleteAttachmentModal = ({
           <Button
             disabled={deletePending}
             type="button"
-            onClick={handleDeleteAttachment}
+            onClick={handleDeleteFile}
           >
             {deletePending ? (
               <>

@@ -7,9 +7,9 @@ from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
 from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
+from src.auth.auth_handler import get_auth_handler
+from src.db.models.auth_base_models import BaseUserApiKey
 from src.db.models.user_models import User, UserApiKey
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ class ApiKeyValidationError(Exception):
 
 @api_user_key_auth.verify_token
 @flask_db.with_db_session()
-def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
+def verify_api_key(db_session: db.Session, token: str) -> BaseUserApiKey:
     logger.info("Authenticating API Gateway key")
 
     with db_session.begin():
@@ -78,12 +78,8 @@ def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
         return api_key
 
 
-def validate_api_key_in_db(api_key: str, db_session: db.Session) -> UserApiKey:
-    user_api_key: UserApiKey | None = db_session.execute(
-        select(UserApiKey)
-        .where(UserApiKey.key_id == api_key)
-        .options(selectinload(UserApiKey.user))
-    ).scalar_one_or_none()
+def validate_api_key_in_db(api_key: str, db_session: db.Session) -> BaseUserApiKey:
+    user_api_key = get_auth_handler(db_session).get_api_key_by_key_id(api_key)
 
     if user_api_key is None:
         raise ApiKeyValidationError("Invalid API key")
