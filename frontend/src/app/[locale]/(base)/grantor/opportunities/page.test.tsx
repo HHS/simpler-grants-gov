@@ -343,6 +343,22 @@ describe("Opportunities", () => {
       expect(await screen.findByText("primary")).toBeVisible();
     });
 
+    it("redirects to the last available page when page param is out of range", async () => {
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [],
+        pagination_info: { total_pages: 1, total_records: 7 },
+      });
+
+      await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id, page: "2" }),
+      });
+
+      expect(redirectMock).toHaveBeenCalledWith(
+        `?agency=${agency1.agency_id}&page=1`,
+      );
+    });
+
     it("renders create opportunity button when list is empty", async () => {
       mockSearchForOpportunities.mockResolvedValue({
         data: [],
