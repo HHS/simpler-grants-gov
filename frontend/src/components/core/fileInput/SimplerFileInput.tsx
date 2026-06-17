@@ -49,8 +49,8 @@ type SimplerFileInputProps = {
 
   * remove the "selected file" thing on single file inputs [x]
   * confirm delete behavior [x]
-  * confirm cancel behavior [ ]
-  * confirm callback behavior [ ]
+  * confirm cancel behavior [x]
+  * confirm callback behavior [x]
   *
   * confirm error status displays [ ]
   *
@@ -106,6 +106,7 @@ export const SimplerFileInput = ({
     setCurrentStatus(undefined);
     uploadController?.abort();
     postUploadController?.abort();
+    fileInputRef.current?.clearFiles();
     await responseReader?.cancel();
   };
 
@@ -205,6 +206,7 @@ export const SimplerFileInput = ({
         console.error("no files!");
         return;
       }
+      setUploadError(undefined);
       const fileName = changeEvent.target.files[0].name || "No Filename!";
       const uploadAbortController = new AbortController();
       setFileName(fileName);

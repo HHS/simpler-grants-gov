@@ -72,7 +72,7 @@ export function OpportunityAttachmentUploadInput({
 
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [existingFiles, setExistingFiles] = useState(
+  const [existingFiles, setExistingFiles] = useState<UploadFileMetadata[]>(
     mapInitialAttachmentsToExistingFiles(initialAttachments),
   );
 
@@ -108,7 +108,7 @@ export function OpportunityAttachmentUploadInput({
       );
       existingFiles.splice(deleteAtIndex, 1);
       console.log("!!! removed", existingFiles);
-      setExistingFiles(existingFiles);
+      setExistingFiles(([] as UploadFileMetadata[]).concat(existingFiles));
     } catch (err) {
       console.error("Attachment delete failed", err);
       setErrorMessage(t("errorDeleteFailed"));
@@ -142,9 +142,9 @@ export function OpportunityAttachmentUploadInput({
         id="opportunity-attachment-upload"
         labelId={"opportunity-attachment-upload-label"}
         onDelete={confirmDelete}
-        // onStart={noop}
+        onStart={() => console.log("onStart callback")}
         onSuccess={() => addExistingFile(FakeFILE_____DELIETEmeeee)}
-        // onComplete={noop}
+        onComplete={() => console.log("onComplete callback")}
         onError={(e) => console.error("onError callback", e)}
         disabled={isUploading || !isDraft}
         readOnly={false}

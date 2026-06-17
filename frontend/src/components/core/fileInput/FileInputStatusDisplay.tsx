@@ -38,6 +38,46 @@ const StatusIcon = ({
   return <Spinner />;
 };
 
+const ActionButton = ({ error, status, onDismiss, onCancel }) => {
+  const t = useTranslations("FileInput.statusDisplay");
+  if (error) {
+    return (
+      <Button
+        type="button"
+        unstyled
+        onClick={() => {
+          void onDismiss();
+        }}
+      >
+        <USWDSIcon
+          className="usa-icon margin-right-05 margin-left-neg-05"
+          name="error"
+        />
+        {t("dismiss")}
+      </Button>
+    );
+  }
+  if (!status || status === "success") {
+    return null;
+  }
+
+  return (
+    <Button
+      type="button"
+      unstyled
+      onClick={() => {
+        void onCancel();
+      }}
+    >
+      <USWDSIcon
+        className="usa-icon margin-right-05 margin-left-neg-05"
+        name="close"
+      />
+      {t("cancel")}
+    </Button>
+  );
+};
+
 export const FileInputStatusDisplay = ({
   fileName,
   status,
@@ -84,36 +124,6 @@ export const FileInputStatusDisplay = ({
     : status;
   const statusMessageForDisplay = messagesMap[adjustedStatus];
 
-  const ActionButton = error ? (
-    <Button
-      type="button"
-      unstyled
-      onClick={() => {
-        void onDismiss();
-      }}
-    >
-      <USWDSIcon
-        className="usa-icon margin-right-05 margin-left-neg-05"
-        name="error"
-      />
-      {t("dismiss")}
-    </Button>
-  ) : (
-    <Button
-      type="button"
-      unstyled
-      onClick={() => {
-        void onCancel();
-      }}
-    >
-      <USWDSIcon
-        className="usa-icon margin-right-05 margin-left-neg-05"
-        name="close"
-      />
-      {t("cancel")}
-    </Button>
-  );
-
   console.log("** display value", statusMessageForDisplay);
   return (
     <GridContainer data-testid="file-upload-status-display">
@@ -124,7 +134,14 @@ export const FileInputStatusDisplay = ({
         <div className="text-bold">{fileName}</div>
         <div>{statusMessageForDisplay}</div>
       </Grid>
-      <Grid col={3}>{ActionButton}</Grid>
+      <Grid col={3}>
+        <ActionButton
+          onDismiss={onDismiss}
+          onCancel={onCancel}
+          error={error}
+          status={status}
+        />
+      </Grid>
     </GridContainer>
   );
 };
