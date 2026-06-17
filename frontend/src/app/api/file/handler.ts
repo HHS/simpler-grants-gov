@@ -41,7 +41,7 @@ const pipeStatusStreamToResponse = async (
   }
   if (done) {
     console.log("5. DONE");
-    // outputController.close();
+    outputController.close();
     return;
   }
   return pipeStatusStreamToResponse(
@@ -95,7 +95,7 @@ const processUploadInStream = (file: File): ReadableStream<string> => {
     start: async (responseStreamController) => {
       try {
         await orchestrateFileUpload(responseStreamController, file);
-        responseStreamController.close();
+        // responseStreamController.close();
       } catch (e) {
         console.error("Error in file upload orchestration stream", e);
         responseStreamController.enqueue(

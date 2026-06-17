@@ -1,10 +1,11 @@
+import clsx from "clsx";
 import {
   FileUploadProcessStatus,
   FileUploadStatus,
 } from "src/types/fileUploadTypes";
 
 import { useTranslations } from "next-intl";
-import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
+import { Button, Grid } from "@trussworks/react-uswds";
 
 import Spinner from "src/components/core/Spinner";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
@@ -29,16 +30,35 @@ const StatusIcon = ({
   error: boolean;
 }) => {
   if (error) {
-    return <USWDSIcon name="error" />;
+    return (
+      <USWDSIcon
+        name="error"
+        className="usa-icon--size-6 text-middle text-error-dark"
+      />
+    );
   }
   if (!status || status === "success") {
     return null;
   }
 
-  return <Spinner />;
+  return (
+    <div className="display-flex">
+      <Spinner />
+    </div>
+  );
 };
 
-const ActionButton = ({ error, status, onDismiss, onCancel }) => {
+const ActionButton = ({
+  error,
+  status,
+  onDismiss,
+  onCancel,
+}: {
+  error: boolean;
+  status: FileUploadProcessStatus;
+  onCancel: () => void;
+  onDismiss: () => void;
+}) => {
   const t = useTranslations("FileInput.statusDisplay");
   if (error) {
     return (
@@ -51,7 +71,7 @@ const ActionButton = ({ error, status, onDismiss, onCancel }) => {
       >
         <USWDSIcon
           className="usa-icon margin-right-05 margin-left-neg-05"
-          name="error"
+          name="close"
         />
         {t("dismiss")}
       </Button>
@@ -126,15 +146,26 @@ export const FileInputStatusDisplay = ({
 
   console.log("** display value", statusMessageForDisplay);
   return (
-    <GridContainer data-testid="file-upload-status-display">
-      <Grid col={2}>
+    <Grid
+      row
+      data-testid="file-upload-status-display"
+      className={clsx({
+        "bg-secondary-lightest": !error,
+        "bg-error-lighter": !!error,
+        "border-left-1": !!error,
+        "border-error-dark": !!error,
+        "padding-2": true,
+        "margin-top-2": true,
+      })}
+    >
+      <Grid col={1} className="display-flex flex-align-center">
         <StatusIcon error={error} status={status} />
       </Grid>
-      <Grid>
+      <Grid col={9}>
         <div className="text-bold">{fileName}</div>
         <div>{statusMessageForDisplay}</div>
       </Grid>
-      <Grid col={3}>
+      <Grid col={2} className="display-flex">
         <ActionButton
           onDismiss={onDismiss}
           onCancel={onCancel}
@@ -142,6 +173,6 @@ export const FileInputStatusDisplay = ({
           status={status}
         />
       </Grid>
-    </GridContainer>
+    </Grid>
   );
 };

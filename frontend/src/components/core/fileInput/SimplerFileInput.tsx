@@ -113,6 +113,7 @@ export const SimplerFileInput = ({
   const handleDismiss = () => {
     setCurrentStatus(undefined);
     setUploadError(undefined);
+    fileInputRef.current?.clearFiles();
   };
 
   const handleError = useCallback(
@@ -165,7 +166,6 @@ export const SimplerFileInput = ({
             let payloadJson: FileUploadStatusUpdate;
             try {
               const payloadString = new TextDecoder().decode(value);
-              console.log("~~~~", payloadString);
               payloadJson = payloadString
                 ? (JSON.parse(payloadString) as FileUploadStatusUpdate)
                 : {};
@@ -175,7 +175,6 @@ export const SimplerFileInput = ({
               );
               throw e;
             }
-            console.log("2.", payloadJson);
             if (payloadJson?.error) {
               throw new Error(payloadJson.error);
             } else {
@@ -309,7 +308,7 @@ export const SimplerFileInput = ({
           fileName={fileName || ""}
           onCancel={() => void handleCancel()}
           onDismiss={handleDismiss}
-          error={!!uploadError}
+          error={true}
           status={currentStatus}
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
