@@ -3,8 +3,11 @@ import TopLevelError from "src/app/[locale]/(base)/error/page";
 import ApplicationContainer from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationContainer";
 import { ApplicationHistoryCardProps } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/ApplicationHistoryTable";
 import { ApplicationDetailsCardProps } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/InformationCard";
-import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import {
+  ApiRequestError,
+  MissingAuthError,
+  parseErrorStatus,
+} from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
   getApplicationDetails,
@@ -34,12 +37,8 @@ interface ApplicationLandingPageProps {
 }
 
 async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
-  const userSession = await getSession();
   const t = await getTranslations("Application");
 
-  if (!userSession || !userSession.token) {
-    return <TopLevelError />;
-  }
   const { applicationId } = await params;
   let details = {} as ApplicationDetailsCardProps;
   let historyDetails = [] as ApplicationHistoryCardProps;
@@ -73,6 +72,9 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     }
     opportunity = opportunityResponse.data;
   } catch (e) {
+    if (e instanceof MissingAuthError) {
+      return <TopLevelError />;
+    }
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
         `Error retrieving application details for application (${applicationId})`,

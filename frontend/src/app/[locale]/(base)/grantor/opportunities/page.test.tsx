@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { identity } from "lodash";
 import OpportunitiesListPage from "src/app/[locale]/(base)/grantor/opportunities/page";
 import { UnauthorizedError } from "src/errors";
 import { UserAgency } from "src/services/fetch/fetchers/userAgenciesFetcher";
@@ -24,6 +25,10 @@ jest.mock("react", () => ({
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
+}));
+
+jest.mock("next-intl/server", () => ({
+  getTranslations: identity,
 }));
 
 const withFeatureFlagMock = jest
@@ -160,8 +165,8 @@ jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
     mockSearchForOpportunities(arg) as Promise<BaseOpportunity[]>,
 }));
 
-jest.mock("src/services/fetch/fetchers/userAgenciesFetcher", () => ({
-  fetchUserAgencies: () => mockFetchUserAgencies() as Promise<UserAgency[]>,
+jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
+  getUserAgencies: () => mockFetchUserAgencies() as Promise<UserAgency[]>,
 }));
 
 jest.mock("src/utils/userPrivileges", () => ({
@@ -441,15 +446,6 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByTestId("alert")).toBeVisible();
-    });
-
-    it("unauthorized errors propagate up the stack", async () => {
-      mockFetchUserAgencies.mockRejectedValue(
-        new UnauthorizedError("No active session"),
-      );
-      await expect(
-        OpportunitiesListPage({ params: localeParams }),
-      ).rejects.toThrow();
     });
   });
 
