@@ -7,6 +7,7 @@ import { AwardRecommendationSubmission } from "src/types/awardRecommendationType
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Pagination, Table } from "@trussworks/react-uswds";
 
@@ -16,6 +17,7 @@ interface RisksTableProps {
 
 export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
   const t = useTranslations("AwardRecommendation.risks");
+  const router = useRouter();
   const {
     selectedSubmissionIds,
     addSubmission,
@@ -174,7 +176,9 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
               type="button"
               className="usa-button"
               onClick={() => {
-                /* TODO: Navigate to edit page */
+                router.push(
+                  `/award-recommendation/${awardRecommendationId}/risks/add`,
+                );
               }}
             >
               {t("editButton")}
