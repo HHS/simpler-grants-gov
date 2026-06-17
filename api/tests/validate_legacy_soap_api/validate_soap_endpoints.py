@@ -2,15 +2,25 @@ import logging
 import os
 import re
 import tempfile
+import uuid
+import zipfile
 from collections.abc import Callable
 from contextlib import ExitStack
 from dataclasses import dataclass, field
+from datetime import timedelta
+from pathlib import Path
 from urllib.parse import quote
 
 import click
 import grants_shared.adapters.db as db
 import grants_shared.logs
+import grants_shared.util.datetime_util as datetime_util
 import requests
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import NameOID
 from grants_shared.adapters.db import PostgresDBClient
 from grants_shared.util.local import error_if_not_local
 from lxml import etree
@@ -18,11 +28,21 @@ from pydantic import Field
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationStatus, Privilege
+from src.db.models import staging
+from src.db.models.agency_models import Agency
 from src.db.models.competition_models import ApplicationSubmission
+from src.db.models.user_models import LegacyCertificate
+from src.util import file_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+PRIVILEGES = {
+    Privilege.LEGACY_AGENCY_VIEWER,
+    Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
+    Privilege.LEGACY_AGENCY_ASSIGNER,
+}
+UTC_NOW = datetime_util.utcnow()
 
 
 """
@@ -292,6 +312,14 @@ def validate_grantors_get_submission_list_expanded_request(
     soap_context: ValidateSoapContext, legacy_tracking_number: int
 ) -> None:
     resp = get_response(soap_context, "GetSubmissionListExpandedRequest", legacy_tracking_number)
+    assert (
+        f"<GrantsGovTrackingNumber>GRANT{legacy_tracking_number}</GrantsGovTrackingNumber>".encode()
+        in resp.content
+    )
+    assert (
+        b"<ns2:Success>true</ns2:Success><ns2:AvailableApplicationNumber>1</ns2:AvailableApplicationNumber>"
+        in resp.content
+    )
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "GetSubmissionListExpandedResponse", soap_context)
@@ -302,6 +330,14 @@ def validate_grantors_get_submission_list_request(
     soap_context: ValidateSoapContext, legacy_tracking_number: int
 ) -> None:
     resp = get_response(soap_context, "GetSubmissionListRequest", legacy_tracking_number)
+    assert (
+        f"<GrantsGovTrackingNumber>GRANT{legacy_tracking_number}</GrantsGovTrackingNumber>".encode()
+        in resp.content
+    )
+    assert (
+        b"<ns2:Success>true</ns2:Success><ns2:AvailableApplicationNumber>1</ns2:AvailableApplicationNumber>"
+        in resp.content
+    )
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "GetSubmissionListResponse", soap_context)
@@ -312,6 +348,11 @@ def validate_confirm_application_delivery_request(
     soap_context: ValidateSoapContext, legacy_tracking_number
 ) -> None:
     resp = get_response(soap_context, "ConfirmApplicationDeliveryRequest", legacy_tracking_number)
+    assert (
+        f"<GrantsGovTrackingNumber>GRANT{legacy_tracking_number}</GrantsGovTrackingNumber>".encode()
+        in resp.content
+    )
+    assert b"<ResponseMessage>Success</ResponseMessage>" in resp.content
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "ConfirmApplicationDeliveryResponse", soap_context)
@@ -322,6 +363,11 @@ def validate_update_application_info_request(
     soap_context: ValidateSoapContext, legacy_tracking_number
 ) -> None:
     resp = get_response(soap_context, "UpdateApplicationInfoRequest", legacy_tracking_number)
+    assert (
+        f"<GrantsGovTrackingNumber>GRANT{legacy_tracking_number}</GrantsGovTrackingNumber>".encode()
+        in resp.content
+    )
+    assert b"<ns2:Success>true</ns2:Success>" in resp.content
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "UpdateApplicationInfoResponse", soap_context)
@@ -350,6 +396,141 @@ def get_credentials(stack: ExitStack) -> tuple:
     return cert, key
 
 
+def create_private_key(path_key: Path) -> rsa.RSAPrivateKey:
+    logger.info("creating private key & crt")
+    key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+    )
+    with open(path_key, "wb") as f:
+        f.write(
+            key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption(),
+            )
+        )
+    return key
+
+
+def create_cert(key: rsa.RSAPrivateKey, path_crt: Path) -> None:
+    subject = issuer = x509.Name(
+        [
+            x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
+            x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "Oregon"),
+            x509.NameAttribute(NameOID.LOCALITY_NAME, "Portland"),
+            x509.NameAttribute(NameOID.ORGANIZATION_NAME, "My Company"),
+            x509.NameAttribute(NameOID.COMMON_NAME, "example.com"),
+        ]
+    )
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(subject)
+        .issuer_name(issuer)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(UTC_NOW)
+        .not_valid_after(UTC_NOW + timedelta(days=365))
+        .add_extension(
+            x509.SubjectAlternativeName([x509.DNSName("example.com")]),
+            critical=False,
+        )
+        .sign(key, algorithm=hashes.SHA256())
+    )
+    with open(path_crt, "wb") as f:
+        f.write(cert.public_bytes(serialization.Encoding.PEM))
+
+
+def setup_legacy_certificate(db_session: db.Session, agency: Agency, serial_number: str) -> None:
+    legacy_certificate = db_session.scalar(
+        select(LegacyCertificate).where(LegacyCertificate.serial_number == serial_number)
+    )
+    tcertificate = db_session.scalar(
+        select(staging.certificates.Tcertificates).where(
+            staging.certificates.Tcertificates.serial_num == serial_number
+        )
+    )
+    stale_tcertificate = db_session.scalar(
+        select(staging.certificates.Tcertificates).where(
+            staging.certificates.Tcertificates.currentcertid == "9999"
+        )
+    )
+    if legacy_certificate:
+        db_session.delete(legacy_certificate)
+    if tcertificate:
+        db_session.delete(tcertificate)
+    if stale_tcertificate:
+        db_session.delete(stale_tcertificate)
+    db_session.flush()
+    tcertificate = factories.StagingTcertificatesFactory.create(
+        agencyid=agency.agency_code,
+        serial_num=serial_number,
+        expirationdate=UTC_NOW.date() + timedelta(days=365),
+        currentcertid=9999,
+    )
+    legacy_certificate = factories.LegacyAgencyCertificateFactory(
+        agency_id=agency.agency_id,
+        agency=agency,
+        serial_number=tcertificate.serial_num,
+        expiration_date=tcertificate.expirationdate,
+    )
+    agency_user = factories.AgencyUserFactory.create(agency=agency, user=legacy_certificate.user)
+    role = factories.RoleFactory.create(privileges=PRIVILEGES, is_agency_role=True)
+    factories.AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
+    db_session.add(legacy_certificate)
+
+
+def _build_legacy_certificate_and_submission(
+    db_session: db.Session, soap_context: ValidateSoapContext
+) -> ApplicationSubmission:
+    path_key = Path(soap_context.key)
+    path_crt = Path(soap_context.cert)
+    if path_key.exists() and path_crt.exists():
+        logger.info("cert and key file exist")
+    else:
+        key = create_private_key(path_key)
+        create_cert(key, path_crt)
+    with open(path_crt, "rb") as f:
+        cert_data = f.read()
+    cert = x509.load_pem_x509_certificate(cert_data, default_backend())
+    serial_number = hex(cert.serial_number).lower().lstrip("0x")
+
+    agency = factories.AgencyFactory.create()
+    setup_legacy_certificate(db_session, agency, serial_number)
+    opportunity = factories.OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = factories.CompetitionFactory.create(opportunity=opportunity)
+    application = factories.ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    s3_path = f"s3://local-mock-public-bucket/applications/{application.application_id}/submissions/{uuid.uuid4()}/submission.zip"
+    with file_util.open_stream(s3_path, "wb") as outfile:
+        with zipfile.ZipFile(outfile, "w") as submission_zip:
+
+            # Create a dummy manifest file
+            with submission_zip.open("manifest.txt", "w") as manifest_file:
+                manifest_file.write(
+                    f"Manifest for Grant Application {application.application_id}".encode("utf-8")
+                )
+
+            # Add a file for each application form
+            # Note we make these text files as even a very simple
+            # PDF is quite complex
+            for app_form in application.application_forms:
+                with submission_zip.open(f"{app_form.form.short_form_name}.txt", "w") as form_file:
+                    form_file.write(str(app_form.application_response).encode("utf-8"))
+
+            # Add some random attachments
+            with submission_zip.open("dummy-attachment-1.txt", "w") as dummy_attachment:
+                dummy_attachment.write(b"This is an attachment file")
+
+            with submission_zip.open("dummy-attachment-2.txt", "w") as dummy_attachment:
+                dummy_attachment.write(b"This is a different attachment file")
+
+    return factories.ApplicationSubmissionFactory.create(
+        application=application, file_location=s3_path, file_contents="SKIP"
+    )
+
+
 VALIDATIONS = [
     validate_grantors_get_application_zip_request,
     validate_grantors_get_submission_list_expanded_request,
@@ -372,21 +553,7 @@ def validate_simpler_endpoints() -> None:
         soap_context = ValidateSoapContext(stack=stack, db_session=db_session)
         factories._db_session = db_session
 
-        # Reset the application_status to get a successful response for ConfirmApplicationDelivery & UpdateApplicationInfo
-        with soap_context.db_session.begin():
-            application_submission = (
-                soap_context.db_session.execute(select(ApplicationSubmission)).scalars().first()
-            )
-            if not application_submission:
-                raise Exception(
-                    "Not ApplicationSubmission found, you probably need to run the seed-local-db-with-agencies command"
-                )
-            application_submission.has_tracking = False
-            application_submission.application_submission_retrievals = []
-            application_submission.application_submission_tracking_numbers = []
-            application = application_submission.application
-            application.application_status = ApplicationStatus.ACCEPTED
-
+        application_submission = _build_legacy_certificate_and_submission(db_session, soap_context)
         for validation in VALIDATIONS:
             test_name = validation.__name__
             try:
