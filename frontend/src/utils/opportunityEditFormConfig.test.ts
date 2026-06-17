@@ -35,6 +35,7 @@ function makeOpportunity(
     created_at: "2026-01-01",
     updated_at: "2026-01-01",
     is_draft: true,
+    is_simpler_grants_opportunity: true,
     opportunity_assistance_listings: [],
     attachments: [],
     competitions: null,

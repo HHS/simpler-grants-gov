@@ -115,6 +115,10 @@ class Organization(ApiSchemaTable, TimestampMixin):
     def organization_name(self) -> str | None:
         return self.sam_gov_entity.legal_business_name if self.sam_gov_entity else None
 
+    @property
+    def uei(self) -> str | None:
+        return self.sam_gov_entity.uei if self.sam_gov_entity else None
+
 
 class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     __tablename__ = "organization_invitation"

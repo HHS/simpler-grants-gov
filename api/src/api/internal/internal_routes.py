@@ -1,11 +1,12 @@
 import logging
+import uuid
 
 import grants_shared.adapters.db as db
 import grants_shared.adapters.db.flask_db as flask_db
+import grants_shared.api.response as response
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 import src.api.internal.internal_schema as internal_schema
-import src.api.response as response
 from src.api.internal.internal_blueprint import internal_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
 from src.services.internal.create_e2e_token import create_e2e_token
@@ -38,21 +39,26 @@ def update_internal_roles(
 
 
 @internal_blueprint.post("/e2e-token")
+@internal_blueprint.input(internal_schema.E2ETokenRequestSchema, location="json")
 @internal_blueprint.output(internal_schema.E2ETokenResponseSchema)
 @internal_blueprint.doc(hide=True)
 @internal_blueprint.auth_required(api_user_key_auth)
 @flask_db.with_db_session()
-def get_e2e_token(db_session: db.Session) -> response.ApiResponse:
+def get_e2e_token(db_session: db.Session, json_data: dict[str, uuid.UUID]) -> response.ApiResponse:
     """
     Endpoint to fetch a viable auth token for a test user account.
-    Only accessible via API key auth with the read_test_user_token privilege.
+    Only accessible via API key auth with the manage_test_user_token privilege,
+    and only in lower environments.
     """
+    target_user_id = json_data["user_id"]
+
+    add_extra_data_to_current_request_logs({"target_user_id": target_user_id})
     logger.info("POST /v1/internal/e2e-token")
 
     with db_session.begin():
-        user = api_user_key_auth.get_user()
-        db_session.add(user)
+        api_key_user = api_user_key_auth.get_user()
+        db_session.add(api_key_user)
 
-        token_data = create_e2e_token(db_session, user)
+        token_data = create_e2e_token(db_session, api_key_user, target_user_id)
 
     return response.ApiResponse(message="Success", data=token_data)

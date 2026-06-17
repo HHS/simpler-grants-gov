@@ -1,13 +1,13 @@
 from grants_shared.api.schemas.extension import Schema, fields
 from grants_shared.api.schemas.extension.field_validators import Length
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from grants_shared.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     StrSearchSchemaBuilder,
     UuidSearchSchemaBuilder,
 )
+from grants_shared.pagination.pagination_schema import generate_pagination_schema
 
-from src.api.schemas.response_schema import PaginationMixinSchema
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApprovalResponseType,
@@ -21,7 +21,6 @@ from src.constants.lookup_constants import (
     AwardSelectionMethod,
     OpportunityStatus,
 )
-from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class AwardRecommendationCreateRequestSchema(Schema):
@@ -356,6 +355,13 @@ class AwardRecommendationOrganizationSchema(Schema):
     organization_name = fields.String(
         allow_none=True,
         metadata={"description": "The organization name"},
+    )
+    uei = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The organization's Unique Entity Identifier (UEI)",
+            "example": "ABC123DEF456",
+        },
     )
 
 

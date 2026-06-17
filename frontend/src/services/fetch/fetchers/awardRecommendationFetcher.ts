@@ -3,6 +3,7 @@ import {
   AwardRecommendationDetails,
   AwardRecommendationRisk,
   AwardRecommendationSubmission,
+  AwardRecommendationSubmissionListFilters,
 } from "src/types/awardRecommendationTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 
@@ -19,27 +20,47 @@ export const getAwardRecommendationDetails = async (
   return responseBody.data as AwardRecommendationDetails;
 };
 
-export const listAwardRecommendationSubmissions = async (
+export const listAwardRecommendationSubmissionsPaginated = async (
   id: string,
-): Promise<AwardRecommendationSubmission[]> => {
+  pagination: PaginationRequestBody,
+  filters?: AwardRecommendationSubmissionListFilters,
+): Promise<{
+  submissions: AwardRecommendationSubmission[];
+  paginationInfo: PaginationInfo | undefined;
+}> => {
   const response = await fetchAwardRecommendationWithMethod("POST")({
     subPath: `${id}/submissions/list`,
     body: {
-      pagination: {
-        page_offset: 1,
-        page_size: 100,
-        sort_order: [
-          {
-            order_by: "application_submission_number",
-            sort_direction: "ascending",
-          },
-        ],
-      },
+      ...(filters ? { filters } : {}),
+      pagination,
     },
   });
   const responseBody = (await response.json()) as APIResponse;
 
-  return responseBody.data as AwardRecommendationSubmission[];
+  return {
+    submissions: (responseBody.data as AwardRecommendationSubmission[]) || [],
+    paginationInfo: responseBody.pagination_info,
+  };
+};
+
+export const listAwardRecommendationSubmissions = async (
+  id: string,
+): Promise<AwardRecommendationSubmission[]> => {
+  const { submissions } = await listAwardRecommendationSubmissionsPaginated(
+    id,
+    {
+      page_offset: 1,
+      page_size: 100,
+      sort_order: [
+        {
+          order_by: "application_submission_number",
+          sort_direction: "ascending",
+        },
+      ],
+    },
+  );
+
+  return submissions;
 };
 
 export const getAwardRecommendationSubmission = async (

@@ -2,10 +2,10 @@ import logging
 from typing import Any
 
 from grants_shared.adapters import db
+from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import exists, select
 from sqlalchemy.orm import selectinload
 
-from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application

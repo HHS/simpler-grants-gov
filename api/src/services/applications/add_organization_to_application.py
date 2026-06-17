@@ -2,10 +2,10 @@ import logging
 from uuid import UUID
 
 import grants_shared.adapters.db as db
+from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,

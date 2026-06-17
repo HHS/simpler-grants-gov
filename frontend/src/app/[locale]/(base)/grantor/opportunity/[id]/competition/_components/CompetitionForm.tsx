@@ -42,7 +42,7 @@ export function CompetitionForm() {
               <h2 className="font-heading-xl margin-top-0 margin-bottom-1">
                 {t("applicationRequirements")}
               </h2>
-              <p className="font-body-lg text-base margin-top-0">
+              <p className="font-body-lg text-base-dark margin-top-0">
                 {t("applicationRequirementsSubheader")}
               </p>
               <SubmissionSetUp />

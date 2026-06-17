@@ -215,7 +215,7 @@ All of these logs are forwarded to New Relic Logs and CloudWatch via the FluentB
 
 ### 3.2 Frontend: New Relic Browser Custom Attributes
 
-[`SearchAnalytics.tsx`](../../../frontend/src/components/search/SearchAnalytics.tsx) sets NR browser custom attributes for search parameters on every search page load:
+[`SearchAnalytics.tsx`](../../../frontend/src/app/%5Blocale%5D/(base)/search/_components/SearchAnalytics.tsx) sets NR browser custom attributes for search parameters on every search page load:
 
 ```typescript
 // For each search query parameter:

@@ -417,11 +417,11 @@ export const messages = {
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
       awardMinCurrencyInput:
-        "Award minimum must be greater than zero and less than $1,000,000,000,000,000.",
+        "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMaxCurrencyInput:
-        "Award maximum must be greater than zero and less than $1,000,000,000,000,000.",
+        "Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       totalFundingCurrencyInput:
-        "Estimated total program funding must be greater than zero and less than $1,000,000,000,000,000.",
+        "Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMinLessThanTotal:
         "Award minimum cannot exceed the Estimated Total Program Funding.",
       awardMaxLessThanTotal:
@@ -557,16 +557,6 @@ export const messages = {
       fileSize: "File Size",
       uploadBy: "Upload by",
       uploadDate: "Upload date",
-      deleteModal: {
-        titleText: "Delete",
-        cancelDeleteCta: "Cancel",
-        cautionDeletingAttachment: "Caution, deleting attachment",
-        descriptionText:
-          "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
-        deleteFileCta: "Delete file",
-        deleteFilesCta: "Delete files",
-        deleting: "Deleting...",
-      },
     },
     historyTable: {
       applicationHistory: "Application History",
@@ -2079,6 +2069,7 @@ export const messages = {
       edit: "Edit",
       preview: "Preview",
       submitForReview: "Submit for review",
+      backToEdit: "Back to Edit",
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -2197,6 +2188,88 @@ export const messages = {
         showDescription: "Show full description",
         hideSummaryDescription: "Hide full description",
       },
+      submissions: {
+        errorMessage:
+          "Unable to load application submissions. Please try again.",
+        columns: {
+          appNumber: "App #",
+          projectTitle: "Project title",
+          orgName: "Org name",
+          uei: "UEI",
+          score: "Score",
+          recommendation: "Recommendation",
+          requested: "Requested",
+          recommended: "Recommended",
+        },
+        recommendationOptions: {
+          none: "None",
+          recommended: "Recommended",
+          recommendedWithoutFunding: "Recommended but not funded",
+          notRecommended: "Not recommended",
+        },
+        recommendedAwards: {
+          heading: "Recommended awards",
+          editDescription:
+            "Select applications and use the drop-down box to apply your recommendation for the selected group.",
+          editLink: "Edit recommended awards",
+        },
+        exceptions: {
+          heading: "Exceptions to selection method",
+        },
+      },
+    },
+    risks: {
+      pageTitle: "Risks and Conditions",
+      metaDescription: "Manage risks and conditions for award recommendations",
+      heading: "Risks and Conditions",
+      description:
+        "Review and manage risks and conditions for application submissions",
+      addPageTitle: "Add Risk or Condition",
+      addMetaDescription: "Add risk or condition to selected applications",
+      addHeading: "Add risk or condition",
+      addDescription:
+        "Add risk details and recommended terms or conditions for the selected applications",
+      selectAll: "Select all",
+      selectRow: "Select row for {appNumber}",
+      selectedCount:
+        "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      selectedApplications: "Selected applications",
+      columns: {
+        appNumber: "App #",
+        projectTitle: "Project Title",
+        orgName: "Org Name",
+        uei: "UEI",
+        score: "Score",
+        recommendation: "Recommendation",
+        requested: "Requested",
+        recommended: "Recommended",
+        risk: "Risk",
+        condition: "Condition",
+      },
+      recommendationType: {
+        recommended_for_funding: "Recommended",
+      },
+      riskDetailsHeading: "Risk details",
+      riskSummaryLabel: "Risk summary",
+      riskSummaryHint:
+        "Any program or organization risks already identified at this time",
+      recommendedConditionLabel: "Recommended term or condition",
+      recommendedConditionHint:
+        "Add any recommended conditions based on the risks identified",
+      selectConditionPlaceholder: "Select a condition",
+      condition1: "Condition 1",
+      condition2: "Condition 2",
+      condition3: "Condition 3",
+      cancelButton: "Cancel",
+      saveButton: "Save",
+      errorMessage: "Unable to load application submissions. Please try again.",
+      noSelectionsMessage:
+        "No applications selected. Please select applications from the Risks and Conditions page first.",
+      defaultNone: "None",
+      loading: "Loading submissions...",
+      errorLoading: "Error loading submissions. Please try again.",
+      showingRange: "Showing {start}-{end} of {total}",
+      editButton: "Edit",
     },
   },
   CreateAwardRecommendation: {
@@ -2386,6 +2459,14 @@ export const messages = {
     alertMessage:
       "Hard refresh your page when done changing Flags for the changes to fully apply.",
   },
+  OpportunityDetailsHeader: {
+    opportunityNumber: "Opportunity #: {number}",
+    title: "Title:",
+    agency: "Agency:",
+    subAgency: "Sub-agency:",
+    draft: "Draft",
+    lastUpdated: "Last updated:",
+  },
   AwardRecommendationSelectFundingOpportunity: {
     pageTitle: "Select funding opportunity | Simpler.Grants.gov",
     pageHeading: "Award Recommendations",
@@ -2393,5 +2474,34 @@ export const messages = {
       "Select a funding opportunity for your award recommendation",
     whichFundingOpportunity: "Which funding opportunity is this for?",
     cancelButtonText: "Cancel",
+  },
+  FileInput: {
+    existingFiles: {
+      savedOn: "Saved on",
+      delete: "Delete",
+    },
+    statusDisplay: {
+      cancel: "Cancel",
+      dismiss: "Dismiss",
+      queued: "Queued",
+      uploading: "Uploading",
+      scanning: "Scanning",
+      success: "Success",
+      error: "Error",
+      scanFail: "Scan failed",
+      uploadError: "Upload error",
+      scanError: "Scan error",
+      postUploadError: "Post upload error",
+    },
+    deleteModal: {
+      titleText: "Delete",
+      cancelDeleteCta: "Cancel",
+      cautionDeletingAttachment: "Caution, deleting attachment",
+      descriptionText:
+        "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
+      deleteFileCta: "Delete file",
+      deleteFilesCta: "Delete files",
+      deleting: "Deleting...",
+    },
   },
 };

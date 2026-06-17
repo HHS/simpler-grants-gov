@@ -77,6 +77,9 @@ const playwrightEnv = {
   testUserPassword: process.env.STAGING_TEST_USER_PASSWORD || "",
   testUserAuthKey: process.env.STAGING_TEST_USER_MFA_KEY || "",
   stagingTestUserApiKey: process.env.STAGING_TEST_USER_API_KEY || "",
+  stagingTestUserManagerApiKey:
+    process.env.STAGING_TEST_USER_MANAGER_API_KEY || "",
+  stagingTestUserId: process.env.STAGING_TEST_USER_ID || "",
 };
 
 export default playwrightEnv;
