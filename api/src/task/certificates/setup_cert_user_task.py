@@ -7,6 +7,7 @@ import click
 import grants_shared.adapters.db.flask_db as flask_db
 import grants_shared.util.datetime_util as datetime_util
 from grants_shared.adapters import db
+from grants_shared.task.ecs_background_task import ecs_background_task
 from sqlalchemy import select
 
 from src.constants.lookup_constants import JobType, UserType
@@ -19,7 +20,6 @@ from src.db.models.user_models import (
     Role,
     User,
 )
-from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
 
@@ -105,7 +105,7 @@ class SetupCertUserTask(Task):
             agency=agency,
             cert_id=tcertificate.currentcertid,
             expiration_date=valid_expiration_date,
-            serial_number=tcertificate.serial_num,
+            serial_number=tcertificate.serial_num.lower() if tcertificate.serial_num else None,
             user=user,
         )
         self.db_session.add(legacy_certificate)

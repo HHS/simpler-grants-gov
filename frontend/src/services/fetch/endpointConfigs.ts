@@ -153,3 +153,11 @@ export const getApplicationForPrint = {
   namespace: "applications",
   method: "GET" as ApiMethod,
 };
+
+export const toDynamicFilesEndpoint = (type: "POST" | "GET") => ({
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "files",
+  method: type as ApiMethod,
+  requiresAuth: true,
+});

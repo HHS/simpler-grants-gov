@@ -494,30 +494,160 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         ],
     )
 
-    # Isolated scenario for testing SF-424 Print View
-    sf424_print_competition = _build_seeded_competition_for_form(
-        db_session,
-        forms["SF424_4_0"],
-        opportunity_id=uuid.UUID("284c3eee-0686-453a-800e-9dce80079369"),
-        opportunity_number="TEST-SF424-ORG-IND-01",
-        opportunity_title="TEST-SF424-ORG-IND-OT01",
-        competition_id=uuid.UUID("86ac630b-2ca6-4115-81af-7eaa8b6db283"),
-        competition_title="TEST-SF424-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
-    # Pin agency and ALN values to match print-view-opportunities.json assertions
+    # Isolated Forms testing competitions: one per form
     sgg_agency = db_session.scalar(select(Agency).where(Agency.agency_code == "SGG"))
-    if sgg_agency:
-        sf424_print_competition.opportunity.agency_code = "SGG"
-        sf424_print_competition.opportunity.agency_id = sgg_agency.agency_id
-    for aln in sf424_print_competition.opportunity.opportunity_assistance_listings:
-        aln.assistance_listing_number = "10.960"
-        aln.program_title = "Technical Agricultural Assistance"
-    db_session.flush()
+
+    isolated_form_competitions = [
+        # form names are abbreviated in opportunity number to be under the 40 char limit
+        (
+            "AttachmentForm_1_2",
+            "E2E-ATT",
+            "ATTACHMENTFORM",
+            "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1",
+            "10048c4d-a23d-418e-b807-6f545d7a7bd2",
+        ),
+        (
+            "BudgetNarrativeAttachments_1_2",
+            "E2E-BNA",
+            "Budget Narrative Attachment Form",
+            "caea0f33-b356-4fcd-aae3-c0244e11da1e",
+            "83adc230-32da-4dee-9dd6-beb1dffac459",
+        ),
+        (
+            "CD511",
+            "E2E-CD511",
+            "CD511",
+            "5b890089-2bb2-4123-82cd-3d321ca62efe",
+            "ca184e83-baf2-4212-af4e-d355cf144bf5",
+        ),
+        (
+            "EPA4700_4",
+            "E2E-EPA4700",
+            "EPA Form 4700-4",
+            "95f80b3b-c119-4a89-a50f-1b47b95a9191",
+            "bd893d81-b8da-4f9b-ba18-f3c7b2fa9686",
+        ),
+        (
+            "EPA_KeyContacts",
+            "E2E-EPAKC",
+            "EPA Key Contacts Form",
+            "1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631",
+            "165fad29-80d2-4c2d-b86b-1906fd68cf3f",
+        ),
+        (
+            "GG_LobbyingForm",
+            "E2E-GGLOB",
+            "Grants.gov Lobbying Form",
+            "552d5866-501a-40b6-b1ce-2efc7a2d3aa5",
+            "bae608bd-56cf-4038-8436-02da6af72df8",
+        ),
+        (
+            "OtherNarrativeAttachments",
+            "E2E-ONA",
+            "Other Narrative Attachments",
+            "717b7f78-52f2-49f9-b1b8-5d7118313d2a",
+            "6098d8b0-8025-448e-a407-a0ac56d27d3e",
+        ),
+        (
+            "Project_Abstract",
+            "E2E-PABS",
+            "Project Abstract",
+            "d3081452-2cf8-4817-9abf-812e5d794485",
+            "70238095-fbae-48c3-9007-83446416b18d",
+        ),
+        (
+            "Project_AbstractSummary_2_0",
+            "E2E-PABSS",
+            "Project Abstract Summary",
+            "e3bfbd7b-2205-46a8-9aa3-714f7e130958",
+            "c6e468de-2911-494e-aa14-91b527a1f53e",
+        ),
+        (
+            "ProjectNarrativeAttachments_1_2",
+            "E2E-PNA",
+            "Project Narrative Attachment Form",
+            "6bdc2df3-6e51-4aea-89af-bade326feba1",
+            "3219b68b-c3c5-41d8-b889-d75eafd014d5",
+        ),
+        (
+            "SF424_4_0",
+            "E2E-SF424",
+            "Application for Federal Assistance (SF-424)",
+            "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "f0a1b2c3-d4e5-6789-0abc-def123456789",
+        ),
+        (
+            "SF424A",
+            "E2E-SF424A",
+            "Budget Information for Non-Construction Programs (SF-424A)",
+            "6c25cd41-660e-473f-abff-654083b7795d",
+            "57bc877e-60b5-4ae0-bd5c-3e97248e57f2",
+        ),
+        (
+            "SF424B",
+            "E2E-SF424B",
+            "Assurances for Non-Construction Programs (SF-424B)",
+            "dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6",
+            "15d10405-d81b-4b8e-ae56-8ac1bd4c5560",
+        ),
+        (
+            "SF424D",
+            "E2E-SF424D",
+            "Assurances for Construction Programs (SF-424D)",
+            "abd9bce9-2b9b-46b8-b814-2c5cb7c5e88b",
+            "2946ff6a-c2ce-4f05-8358-4dea1e2e7c51",
+        ),
+        (
+            "SFLLL_2_0",
+            "E2E-SFLLL",
+            "Disclosure of Lobbying Activities (SF-LLL)",
+            "f3e438ee-ff4c-475b-a058-8049aee9abda",
+            "4924f35b-7941-4d50-889c-3afaa726b671",
+        ),
+        (
+            "SupplementaryCoverSheetforNEHGrantPrograms",
+            "E2E-NEHCS",
+            "Supplementary Cover Sheet for NEH Grant Programs",
+            "b88287e2-7e2a-4c99-8ffe-30ab50c388ef",
+            "5ba6e068-8f9e-4cbc-89bf-56bbb142b842",
+        ),
+    ]
+
+    for (
+        form_name,
+        prefix,
+        form_label,
+        opportunity_id,
+        competition_id,
+    ) in isolated_form_competitions:
+        opportunity_number = f"{prefix}-ORG-IND-01"
+        opportunity_title = f"E2E {form_label} ORG IND OT01"
+        competition_title = f"E2E {form_label} ORG IND OT01"
+
+        competition = _build_seeded_competition_for_form(
+            db_session,
+            forms[form_name],
+            opportunity_id=uuid.UUID(opportunity_id),
+            opportunity_number=opportunity_number,
+            opportunity_title=opportunity_title,
+            competition_id=uuid.UUID(competition_id),
+            competition_title=competition_title,
+            is_required=True,
+            open_to_applicants=[
+                CompetitionOpenToApplicant.INDIVIDUAL,
+                CompetitionOpenToApplicant.ORGANIZATION,
+            ],
+        )
+
+        if sgg_agency:
+            competition.opportunity.agency_code = "SGG"
+            competition.opportunity.agency_id = sgg_agency.agency_id
+
+        for aln in competition.opportunity.opportunity_assistance_listings:
+            aln.assistance_listing_number = "10.960"
+            aln.program_title = "Technical Agricultural Assistance"
+
+        db_session.flush()
 
 
 def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:

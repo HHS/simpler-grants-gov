@@ -12,6 +12,7 @@ import {
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
   toDynamicAwardRecommendationEndpoint,
+  toDynamicFilesEndpoint,
   toDynamicGrantorOpportunityEndpoint,
   toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
@@ -69,6 +70,7 @@ export function requesterForEndpoint({
     const defaultHeaders = await getDefaultHeaders({
       addContentType,
       requiresUserAuthToken: requiresAuth,
+      url,
     });
     const headers = {
       ...defaultHeaders,
@@ -166,3 +168,6 @@ export const fetchGrantorOpportunityWithMethod = (
 
 export const fetchGrantorWithMethod = (type: "POST") =>
   requesterForEndpoint(toDynamicGrantorsEndpoint(type));
+
+export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
+  requesterForEndpoint(toDynamicFilesEndpoint(type));

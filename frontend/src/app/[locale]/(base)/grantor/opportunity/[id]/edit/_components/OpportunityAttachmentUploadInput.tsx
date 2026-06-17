@@ -15,7 +15,7 @@ import {
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
-import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
+import { DeleteFileModal } from "src/components/core/fileInput/DeleteFileModal";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
@@ -178,9 +178,9 @@ export function OpportunityAttachmentUploadInput({
         </ul>
       )}
 
-      <DeleteAttachmentModal
+      <DeleteFileModal
         deletePending={deletePending}
-        handleDeleteAttachment={() => {
+        handleDeleteFile={() => {
           confirmDelete().catch(() =>
             setErrorMessage(
               t("errorDeleteFailed", { fileName: fileToDelete?.name ?? "" }),

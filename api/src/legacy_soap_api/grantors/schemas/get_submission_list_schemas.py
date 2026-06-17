@@ -4,7 +4,13 @@ from typing import Any
 from grants_shared.util.datetime_util import make_timezone_aware
 from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
 
-from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema, SOAPInvalidEnvelope
+from src.legacy_soap_api.grantors.filters import GetSubmissionListFilter
+from src.legacy_soap_api.legacy_soap_api_schemas import (
+    BaseSOAPSchema,
+    FaultMessage,
+    SOAPInvalidEnvelope,
+)
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPInvalidFilter
 
 
 class SubmissionInfo(BaseSOAPSchema):
@@ -99,6 +105,18 @@ class ConsolidatedFilter(BaseModel):
                 consolidated, item["FilterType"], item["FilterValue"]
             )
         return {"filters": consolidated}
+
+    @model_validator(mode="after")
+    def validate_filters(self) -> ConsolidatedFilter:
+        for f in self.filters:
+            filter_type = f.filter_type
+            if filter_type not in GetSubmissionListFilter:
+                log_msg = "legacy_soap_api: Invalid Filter"
+                faultstring = f"Encountered invalid filter type {filter_type}"
+                raise SOAPInvalidFilter(
+                    log_msg, fault=FaultMessage(faultcode="soap:Server", faultstring=faultstring)
+                )
+        return self
 
 
 class GetSubmissionListRequest(BaseModel):

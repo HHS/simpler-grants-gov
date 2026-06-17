@@ -156,6 +156,56 @@ class TestLoadOracleData(BaseTestClass):
         assert task.metrics["count.insert.total"] == 2
         assert task.metrics["count.update.total"] == 2
 
+        # Timing total metrics are recorded for each part of the run. Timing is
+        # non-deterministic, so just assert the keys exist and hold sane values.
+        for timing_metric in (
+            "time.insert.total",
+            "time.insert_fetch.total",
+            "time.update.total",
+            "time.update_fetch.total",
+            "time.delete.total",
+        ):
+            assert timing_metric in task.metrics
+            assert task.metrics[timing_metric] >= 0
+
+    def test_per_table_timing_metrics_logged(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create, caplog
+    ):
+        caplog.set_level(logging.INFO)
+
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        ForeignTopportunityFactory.create(opportunity_id=101, oppnumber="B-1", cfdas=[])
+
+        task = load_oracle_data_task.LoadOracleDataTask(
+            db_session, foreign_tables, staging_tables, ["topportunity"]
+        )
+        task.run()
+
+        # The fetch timing for the SELECT that determines records appears alongside
+        # the existing copy timing in the per-operation "Processed records" log lines.
+        insert_log = next(
+            r for r in caplog.records if r.message == "Processed records to be inserted"
+        )
+        assert hasattr(insert_log, "time.insert.topportunity")
+        assert hasattr(insert_log, "time.insert_fetch.topportunity")
+        assert getattr(insert_log, "time.insert_fetch.topportunity") >= 0
+
+        update_log = next(
+            r for r in caplog.records if r.message == "Processed records to be updated"
+        )
+        assert hasattr(update_log, "time.update.topportunity")
+        assert hasattr(update_log, "time.update_fetch.topportunity")
+
+        # The per-table processing time (sum of the five parts) is logged once per table.
+        processing_log = next(r for r in caplog.records if r.message == "Processed table")
+        assert hasattr(processing_log, "time.processing.topportunity")
+        assert getattr(processing_log, "time.processing.topportunity") >= 0
+
     def test_raises_if_table_dicts_different(self, db_session, foreign_tables, staging_tables):
         with pytest.raises(
             ValueError, match="keys of foreign_tables and staging_tables must be equal"
@@ -508,11 +558,11 @@ class TestLoadOracleData(BaseTestClass):
         ).first()
 
         # Verify regular columns were inserted
-        assert inserted_record.certemail == source_record.certemail
         assert inserted_record.creator_id == source_record.creator_id
         assert inserted_record.created_date == source_record.created_date
-        assert inserted_record.serial_num == source_record.serial_num
         assert inserted_record.agencyid == source_record.agencyid
+        assert inserted_record.certemail == source_record.certemail
+        assert inserted_record.serial_num == source_record.serial_num
 
         # Verify excluded column was not copied (should be None)
         assert inserted_record.is_selfsigned is None

@@ -77,8 +77,8 @@ RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
 # Upgrade filelock to fix GHSA-w853-jp5j-5j7f
 RUN python3 -m pip install --no-cache-dir --upgrade "filelock>=3.20.1"
 
-# Upgrade cryptography to fix GHSA-m959-cc7f-wv43
-RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=46.0.7"
+# Upgrade cryptography to fix GHSA-m959-cc7f-wv43 and GHSA-537c-gmf6-5ccf
+RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=48.0.1"
 
 # Upgrade idna to fix GHSA-65pc-fj4g-8rjx
 RUN python3 -m pip install --no-cache-dir --upgrade "idna>=3.15"
@@ -165,7 +165,8 @@ RUN dnf install -y \
       krb5-libs-1.21.3-7.amzn2023.0.1 \
       rust-toolset-srpm-macros-1.95.0-1.amzn2023.0.2 \
       libgcrypt-1.10.2-1.amzn2023.0.3 \
-      gnutls-3.8.3-8.amzn2023.0.3 && \
+      libsolv-0.7.22-1.amzn2023.0.4 \
+      gnutls-3.8.10-4.amzn2023.0.2 && \
     # CVE-2026-1757: libxml2 memory leak in xmllint (ALAS2023-2026-1446)
     dnf update -y --releasever=2023.10.20260302 \
       libxml2-2.10.4-1.amzn2023.0.18 \

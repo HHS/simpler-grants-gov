@@ -1,19 +1,19 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
 import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyForm";
-import { getSession } from "src/services/auth/session";
+import { ApiRequestError } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import {
+  buildWarningTree,
+  pointerToFieldName,
+} from "src/utils/applyForm/applyFormUtils";
 import getFormData from "src/utils/getFormData";
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import {
-  buildWarningTree,
-  pointerToFieldName,
-} from "src/components/applyForm/utils";
 import Breadcrumbs from "src/components/core/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
@@ -47,23 +47,18 @@ interface formPageProps {
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
   const { data, error } = await getFormData({ applicationId, appFormId });
-  const userSession = await getSession();
   const t = await getTranslations("Application");
-
-  if (!userSession || !userSession.token) {
-    return <TopLevelError />;
-  }
 
   let response;
   try {
     response = await getApplicationDetails(applicationId);
 
     if (response.status_code !== 200) {
-      console.error(
-        `Error retrieving application details for (${applicationId})`,
-        response,
+      throw new ApiRequestError(
+        "API request error",
+        "APIRequestError",
+        response.status_code,
       );
-      return <TopLevelError />;
     }
   } catch (e) {
     console.error(

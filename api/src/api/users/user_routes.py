@@ -4,12 +4,13 @@ from uuid import UUID
 import flask
 from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
+from grants_shared.api import response
+from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.util.dict_util import flatten_dict
 
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.adapters import search
-from src.api import response
-from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
@@ -87,7 +88,6 @@ from src.services.users.set_saved_opportunity_notification_settings import (
 from src.services.users.update_saved_searches import update_saved_search
 from src.services.users.update_user_profile import update_user_profile
 from src.services.users.user_can_access import check_user_can_access
-from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 

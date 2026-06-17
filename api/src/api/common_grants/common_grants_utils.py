@@ -6,9 +6,9 @@ from typing import ParamSpec
 
 import flask
 from apiflask.exceptions import HTTPError
+from grants_shared.api.route_utils import raise_flask_error
 from pydantic import ValidationError
 
-from src.api.route_utils import raise_flask_error
 from src.services.common_grants.transformation import transform_validation_error_from_cg
 
 logger = logging.getLogger(__name__)

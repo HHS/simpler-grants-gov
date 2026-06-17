@@ -1,27 +1,33 @@
 import { render, screen, within } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { SearchResultsTable } from "src/app/[locale]/(base)/search/_components/SearchResultsTable";
+import {
+  AwardValue,
+  SearchResultsTable,
+} from "src/app/[locale]/(base)/search/_components/SearchResultsTable";
 import { mockOpportunity } from "src/utils/testing/fixtures";
 
-import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
+import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
 
-jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
-  OpportunitySaveUserControl: jest
-    .fn()
-    .mockImplementation(
-      ({ opportunityId, type }: { opportunityId: string; type?: string }) => {
-        return (
-          <div
-            data-testid={`opportunity-save-control-${opportunityId}`}
-            data-opportunity-id={opportunityId}
-            data-type={type || "button"}
-          >
-            {`Mocked Save Control for ${opportunityId} (${type || "button"})`}
-          </div>
-        );
-      },
-    ),
-}));
+jest.mock(
+  "src/components/simpler-opportunity/OpportunitySaveUserControl",
+  () => ({
+    OpportunitySaveUserControl: jest
+      .fn()
+      .mockImplementation(
+        ({ opportunityId, type }: { opportunityId: string; type?: string }) => {
+          return (
+            <div
+              data-testid={`opportunity-save-control-${opportunityId}`}
+              data-opportunity-id={opportunityId}
+              data-type={type || "button"}
+            >
+              {`Mocked Save Control for ${opportunityId} (${type || "button"})`}
+            </div>
+          );
+        },
+      ),
+  }),
+);
 
 // this does not directly test responsive aspects of the component, that should be done in e2e tests
 // see https://github.com/HHS/simpler-grants-gov/issues/5414
@@ -359,6 +365,31 @@ describe("SearchResultsTable", () => {
         opportunitySaved: false,
       },
       undefined,
+    );
+  });
+});
+
+describe("AwardValue", () => {
+  it("renders placeholder when awardValue is undefined", () => {
+    render(<AwardValue awardValue={undefined} />);
+    expect(screen.getByText("$--")).toBeInTheDocument();
+  });
+
+  it("renders placeholder when awardValue is null", () => {
+    render(<AwardValue awardValue={null} />);
+    expect(screen.getByText("$--")).toBeInTheDocument();
+  });
+
+  it("renders formatted currency when awardValue is a number", () => {
+    render(<AwardValue awardValue={1500} />);
+    expect(screen.getByText("$1,500")).toBeInTheDocument();
+  });
+
+  it("applies the correct className", () => {
+    render(<AwardValue awardValue={99000000000} />);
+    expect(screen.getByText("$99,000,000,000")).toHaveClass(
+      "font-sans-xs",
+      "text-no-wrap",
     );
   });
 });

@@ -16,7 +16,7 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
-import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
+import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
 import { FilterSearchNoResults } from "./Filters/FilterSearchNoResults";
 
 const statusColorClasses = {
@@ -49,9 +49,12 @@ const SearchTableStatusDisplay = ({
   const backgroundClass = statusColorClasses[status];
   return (
     <div
-      className={clsx("text-center padding-y-05 minw-15 radius-md", {
-        [backgroundClass]: !!backgroundClass,
-      })}
+      className={clsx(
+        "font-sans-xs text-center padding-y-05 minw-5 radius-md",
+        {
+          [backgroundClass]: !!backgroundClass,
+        },
+      )}
     >
       {t(`statuses.${status}`)}
     </div>
@@ -60,7 +63,11 @@ const SearchTableStatusDisplay = ({
 
 const CloseDateDisplay = ({ closeDate }: { closeDate: string }) => {
   const t = useTranslations("Search.table");
-  return <>{closeDate ? toShortMonthDate(closeDate) : t("tbd")}</>;
+  return (
+    <p className={"font-sans-xs"}>
+      {closeDate ? toShortMonthDate(closeDate) : t("tbd")}
+    </p>
+  );
 };
 
 const TitleDisplay = ({
@@ -147,23 +154,27 @@ const toSearchResultsTableRow = (
       stackOrder: 3,
     },
     {
-      cellData:
-        result.summary.award_floor === undefined ||
-        result.summary.award_floor === null
-          ? "$--"
-          : formatCurrency(result.summary.award_floor),
+      cellData: <AwardValue awardValue={result.summary.award_floor} />,
       stackOrder: 4,
     },
     {
-      cellData:
-        result.summary.award_ceiling === undefined ||
-        result.summary.award_ceiling === null
-          ? "$--"
-          : formatCurrency(result.summary.award_ceiling),
+      cellData: <AwardValue awardValue={result.summary.award_ceiling} />,
       stackOrder: 5,
     },
   ];
 };
+
+export const AwardValue = ({
+  awardValue,
+}: {
+  awardValue: undefined | null | number;
+}) => (
+  <p className={"font-sans-xs text-no-wrap"}>
+    {awardValue === undefined || awardValue === null
+      ? "$--"
+      : formatCurrency(awardValue)}
+  </p>
+);
 
 export const SearchResultsTable = ({
   searchResults,

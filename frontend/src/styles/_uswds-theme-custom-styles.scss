@@ -72,7 +72,7 @@ h6 {
 
   &:disabled,
   &[aria-disabled="true"] {
-    color: color("gray-60");
+    color: color("gray-70");
     background-color: color("gray-20");
     border-bottom: 5px solid color("gray-10");
   }
@@ -605,6 +605,15 @@ dl {
         }
       }
     }
+  }
+}
+
+.recommendation-submissions-table .simpler-responsive-table {
+  th,
+  tbody td {
+    white-space: nowrap;
+    word-wrap: normal;
+    overflow-wrap: normal;
   }
 }
 
@@ -1289,7 +1298,7 @@ input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
 }
 
 /*
-  Notifications page error message fade in animation. 
+  Notifications page error message fade in animation.
   This is used on the notifications page when an error occurs fetching notifications,
   to fade in the error message in a way that draws attention without being too jarring.
 */
@@ -1555,4 +1564,27 @@ $simpler-switch-transition-easing: ease;
 .award-recommendation-step-connector {
   background-color: #c3e8d8;
   height: calc(100% + 1rem);
+}
+
+// Teal green checkboxes for RisksTable
+.risks-table-checkbox {
+  accent-color: color("mint-50");
+
+  &:checked {
+    background-color: color("mint-50");
+    border-color: color("mint-50");
+  }
+
+  &:focus {
+    outline-color: color("mint-50");
+    box-shadow: 0 0 0 0.25rem rgba(color("mint-50"), 0.25);
+  }
+}
+
+// hide native file input status / preview
+.usa-file-input__preview {
+  display: none;
+}
+.usa-file-input__preview-image {
+  display: none;
 }

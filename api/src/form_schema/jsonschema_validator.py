@@ -2,8 +2,8 @@ import logging
 import typing
 
 import jsonschema
+from grants_shared.api.response import ValidationErrorDetail
 
-from src.api.response import ValidationErrorDetail
 from src.db.models.competition_models import Form
 
 logger = logging.getLogger(__name__)

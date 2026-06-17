@@ -3,15 +3,16 @@ from uuid import UUID
 
 import grants_shared.adapters.db as db
 import grants_shared.adapters.db.flask_db as flask_db
+import grants_shared.api.response as response
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 import src.api.opportunities_grantor_v1.opportunity_grantor_schemas as opportunity_grantor_schemas
-import src.api.response as response
 from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
     opportunity_grantor_blueprint,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.services.opportunities_grantor_v1.competition_creation import create_competition
+from src.services.opportunities_grantor_v1.competition_update import update_competition
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 from src.services.opportunities_grantor_v1.get_opportunity_list import (
     get_opportunity_list_for_grantors,
@@ -286,5 +287,35 @@ def competition_create(
         db_session.add(user)
 
         competition = create_competition(db_session, user, json_data, opportunity_id)
+
+    return response.ApiResponse(message="Success", data=competition)
+
+
+@opportunity_grantor_blueprint.put(
+    "/opportunities/<uuid:opportunity_id>/competitions/<uuid:competition_id>"
+)
+@opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.CompetitionUpdateRequestSchema(), location="json"
+)
+@opportunity_grantor_blueprint.output(opportunity_grantor_schemas.CompetitionUpdateResponseSchema())
+@opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
+@flask_db.with_db_session()
+def competition_update(
+    db_session: db.Session, opportunity_id: UUID, competition_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Update a competition for an opportunity"""
+    add_extra_data_to_current_request_logs(
+        {"opportunity_id": opportunity_id, "competition_id": competition_id}
+    )
+    logger.info(f"PUT /v1/grantors/opportunities/{opportunity_id}/competitions/{competition_id}")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        competition = update_competition(
+            db_session, user, json_data, opportunity_id, competition_id
+        )
 
     return response.ApiResponse(message="Success", data=competition)

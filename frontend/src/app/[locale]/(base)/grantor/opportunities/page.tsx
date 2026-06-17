@@ -1,15 +1,14 @@
 import TopLevelError from "src/app/[locale]/(base)/error/page";
 import { AgencySelector } from "src/app/[locale]/(base)/grantor/opportunities/_components/AgencySelector";
-import { UnauthorizedError } from "src/errors";
+import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
+import { MissingAuthError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { searchOpportunitiesByAgency } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
-import {
-  fetchUserAgencies,
-  UserAgency,
-} from "src/services/fetch/fetchers/userAgenciesFetcher";
 import { LocalizedPageProps, TFn } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 import {
@@ -28,6 +27,7 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
+import OpportunitiesPagination from "./_components/OpportunitiesPagination";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");
@@ -69,7 +69,11 @@ const OpportunitiesErrorPage = () => {
   );
 };
 
-const AgencyNotAuthorizedPage = ({ agencies }: { agencies: UserAgency[] }) => {
+const AgencyNotAuthorizedPage = ({
+  agencies,
+}: {
+  agencies: RelevantAgencyRecord[];
+}) => {
   const t = useTranslations("Opportunities");
   return (
     <OpportunitiesPageWrapper>
@@ -140,9 +144,10 @@ const transformTableRowData = (
   _t: TFn,
 ) => {
   return userOpportunities.map((opportunity: BaseOpportunity) => {
+    const isSgmOpportunity = opportunity.is_simpler_grants_opportunity ?? false;
     const status = opportunity.is_draft
-      ? "Draft"
-      : opportunity.opportunity_status;
+      ? "draft"
+      : (opportunity.opportunity_status ?? "");
     const opportunityTitleUrl = opportunity.is_draft
       ? canUpdate
         ? `/grantor/opportunity/${opportunity.opportunity_id}/edit`
@@ -161,17 +166,23 @@ const transformTableRowData = (
         cellData: status,
       },
       {
-        cellData: opportunity.is_draft ? (
-          <span>
-            <EditAction
-              canUpdate={canUpdate}
-              opportunityId={opportunity.opportunity_id}
-            />
-            , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
-          </span>
-        ) : (
-          "" // Don't show any actions for published opportunities
-        ),
+        cellData:
+          // Only allow editing if this is an SGM created opportunity
+          isSgmOpportunity &&
+          // and the status is draft, posted or forecasted
+          (status.toLowerCase() === "draft" ||
+            status.toLowerCase() === "forecasted" ||
+            status.toLowerCase() === "posted") ? (
+            <span>
+              <EditAction
+                canUpdate={canUpdate}
+                opportunityId={opportunity.opportunity_id}
+              />
+              , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
+            </span>
+          ) : (
+            "" // Don't show any actions for published opportunities
+          ),
       },
     ];
   });
@@ -187,7 +198,7 @@ const OpportunitiesHeader = ({
 }: {
   userOpportunitiesCount: number;
   agencyName: string;
-  agencies: UserAgency[];
+  agencies: RelevantAgencyRecord[];
   currentAgencyId: string;
   isSingleAgency: boolean;
   canCreate: boolean;
@@ -312,6 +323,31 @@ const parseUserPrivileges = (
 };
 
 // --------------------------------------------------
+// Fetch function: get the list of opportunities for this agency
+// Note: if the user does not have read_opportunity privilege for this agency,
+// this API will return an error
+// --------------------------------------------------
+const fetchOpportunities = async (agencyId: string, page: number) => {
+  const pageRequest: PaginationRequestBody = {
+    page_offset: page,
+    page_size: 25,
+    sort_order: [
+      {
+        order_by: "created_at",
+        sort_direction: "descending",
+      },
+    ],
+  };
+  // fetch a page of opportunities for this agency
+  const json = await searchOpportunitiesByAgency(agencyId, pageRequest);
+  return {
+    opportunities: json.data,
+    totalRecords: json.pagination_info.total_records,
+    totalPages: json.pagination_info.total_pages,
+  };
+};
+
+// --------------------------------------------------
 // The Main Page
 // --------------------------------------------------
 type OpportunitiesListProps = LocalizedPageProps & WithFeatureFlagProps;
@@ -326,22 +362,21 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   )
     ? selectedAgencyParam[0]
     : selectedAgencyParam;
+  const currentPage = Number(resolvedSearchParams.page) || 1;
 
   // A. Check the user's session
   const userSession = await getSession();
   if (!userSession || !userSession.token) {
-    console.error("Invalid session", userSession);
     return <TopLevelError />;
   }
 
   // B. Get all Agencies this user belongs to
-  let userAgencies: UserAgency[];
+  let userAgencies: RelevantAgencyRecord[];
   try {
-    userAgencies = await fetchUserAgencies();
+    userAgencies = await getUserAgencies(userSession.user_id);
   } catch (error) {
-    console.error("Bad agencies", error);
-    if (error instanceof UnauthorizedError) {
-      throw error;
+    if (error instanceof MissingAuthError) {
+      return <Unauthenticated />;
     }
     return <OpportunitiesErrorPage />;
   }
@@ -357,7 +392,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
     redirect(`?agency=${sortedUserAgencies[0].agency_id}`);
   }
   const selectedAgency = sortedUserAgencies.find(
-    (a) => a.agency_id === selectedAgencyId,
+    (a) => a.agency_id.toString() === selectedAgencyId,
   );
   if (!selectedAgency) {
     return <AgencyNotAuthorizedPage agencies={sortedUserAgencies} />;
@@ -366,7 +401,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   // D. Check the user's privileges for the selected Agency
   let userPrivilegeResult: UserPrivilegeResult[];
   const userPrivilegeDef: UserPrivilegeRequest[] = getUserPrivilegeDefinition(
-    selectedAgency.agency_id,
+    selectedAgency.agency_id.toString(),
   );
   try {
     userPrivilegeResult = await checkRequiredPrivileges(
@@ -382,26 +417,20 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   }
   const agencyUserAcccess = parseUserPrivileges(userPrivilegeResult);
 
-  // E. Get the list of opportunities for this agency
-  // Note: if the user does not have read_opportunity privilege for this agency,
-  // this API will return an error
+  // E. Load a page of data
+  // note: the current page number is in the URL
+  let totalRecords = 0;
+  let totalPages = 0;
   let userOpportunities: BaseOpportunity[] = [];
   if (agencyUserAcccess.canView) {
-    const pageRequest: PaginationRequestBody = {
-      page_offset: 1,
-      page_size: 5000,
-      sort_order: [
-        {
-          order_by: "created_at",
-          sort_direction: "descending",
-        },
-      ],
-    };
     try {
-      userOpportunities = await searchOpportunitiesByAgency(
-        selectedAgency.agency_id,
-        pageRequest,
+      const data = await fetchOpportunities(
+        selectedAgency.agency_id.toString(),
+        currentPage,
       );
+      userOpportunities = data.opportunities;
+      totalRecords = data.totalRecords;
+      totalPages = data.totalPages;
     } catch (error) {
       console.error("Error fetching Opportunities", error);
       if (error instanceof UnauthorizedError) {
@@ -415,7 +444,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   return (
     <OpportunitiesPageWrapper>
       <OpportunitiesHeader
-        userOpportunitiesCount={userOpportunities.length}
+        userOpportunitiesCount={totalRecords}
         agencyName={selectedAgency.agency_name}
         agencies={sortedUserAgencies}
         currentAgencyId={selectedAgencyId}
@@ -429,10 +458,13 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       )}
 
       {agencyUserAcccess.canView && userOpportunities.length > 0 && (
-        <OpportunitiesTable
-          userOpportunities={userOpportunities}
-          canUpdate={agencyUserAcccess.canUpdate}
-        />
+        <>
+          <OpportunitiesTable
+            userOpportunities={userOpportunities}
+            canUpdate={agencyUserAcccess.canUpdate}
+          />
+          <OpportunitiesPagination totalPages={totalPages} />
+        </>
       )}
     </OpportunitiesPageWrapper>
   );
