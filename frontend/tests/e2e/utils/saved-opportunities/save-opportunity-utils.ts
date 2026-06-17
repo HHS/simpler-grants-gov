@@ -5,9 +5,9 @@ import { waitForURLChange } from "tests/e2e/playwrightUtils";
 const { targetEnv } = playwrightEnv;
 
 /**
- * Asserts that the Saved Opportunities page is fully rendered.
- * Called after both the "already saved" and "newly saved" paths
- * to guarantee a consistent state before assertions.
+ * Asserts that the Saved Opportunities page is fully rendered and the
+ * opportunity link is visible. Called after the "newly saved" path to
+ * confirm the page has settled before returning to the caller.
  *
  * @param page  - Playwright Page instance
  * @param title - Exact opportunity title expected to be visible
@@ -15,31 +15,38 @@ const { targetEnv } = playwrightEnv;
 
 async function assertSavedOpportunitiesPageReady(
   page: Page,
+
   title: string,
 ): Promise<void> {
   const timeout = targetEnv === "staging" ? 30000 : 5000;
+
   await expect(page).toHaveTitle("Saved opportunities | Simpler.Grants.gov", {
     timeout,
   });
+
   await expect(page.getByRole("link", { name: title })).toBeVisible({
     timeout,
   });
 }
 
 /**
- * Navigates to the Search page, searches for an opportunity by title,
- * opens its detail page, and saves it via the save button.
- * Returns to the Saved Opportunities page on completion.
- *
- * @param page  - Playwright Page instance
- * @param title - Exact opportunity title to search for (e.g. "TEST-APPLY-ORG-IND-OT01")
- */
+* Navigates to the Search page, searches for an opportunity by title,
+* opens its detail page, and saves it via the save button.
+* Waits for the save button to confirm the save completed before navigating.
+* Returns to the Saved Opportunities page on completion.
+*
+* @param page  - Playwright Page instance
+* @param title - Exact opportunity title to search for (e.g. "TEST-APPLY-ORG-IND-OT01")
+
+*/
 
 export async function saveOpportunityViaSearch(
   page: Page,
+
   title: string,
 ): Promise<void> {
-  // Navigate to Search
+  // Navigate directly to Search - avoids mobile hamburger nav state
+
   await page.goto("/search");
   await waitForURLChange(page, (url) => !!url.match(/\/search/));
 
@@ -49,6 +56,7 @@ export async function saveOpportunityViaSearch(
   });
 
   await searchBox.click();
+
   await searchBox.fill(title);
 
   await page.getByRole("button", { name: "Search", exact: true }).click();
@@ -58,26 +66,28 @@ export async function saveOpportunityViaSearch(
 
   await waitForURLChange(
     page,
+
     (url) => !!url.match(/opportunity|opportunities/),
   );
 
   // Save the opportunity via the save button
   await page.getByTestId("simpler-save-button").click();
 
-  // Return to Saved Opportunities
-  await page.goto("/saved-opportunities");
+  // Wait for the UI to confirm the save completed before navigating away.
+  await expect(page.getByTestId("simpler-save-button")).toContainText(/saved/i);
 
+  // Return to Saved Opportunities via direct navigation - avoids mobile nav state
+  await page.goto("/saved-opportunities");
   await waitForURLChange(page, (url) => !!url.match(/saved-opportunities/));
+
+  // Confirm the page has settled and the opportunity link is visible
+  await assertSavedOpportunitiesPageReady(page, title);
 }
 
 /**
  * Ensures an opportunity is saved in the user's workspace before assertions run.
  * - If already saved: verifies the page is settled and ready
  * - If not saved: searches for it, saves it, then returns to Saved Opportunities
- *
- * In both cases assertSavedOpportunitiesPageReady() is called to guarantee:
- *   - The page title is "Saved opportunities | Simpler.Grants.gov"
- *   - The opportunity link is visible and the page is ready for assertions
  *
  * Precondition: page must already be on the Saved Opportunities URL.
  *
@@ -87,8 +97,16 @@ export async function saveOpportunityViaSearch(
 
 export async function ensureOpportunityIsSaved(
   page: Page,
+
   title: string,
 ): Promise<void> {
+  // Wait for the page to fully settle before checking saved state
+  const timeout = targetEnv === "staging" ? 30000 : 5000;
+
+  await expect(page).toHaveTitle("Saved opportunities | Simpler.Grants.gov", {
+    timeout,
+  });
+
   const isAlreadySaved = await page
     .getByRole("link", { name: title, exact: true })
     .isVisible();
@@ -96,8 +114,8 @@ export async function ensureOpportunityIsSaved(
   if (!isAlreadySaved) {
     // Opportunity not found in saved list - navigate to Search, find it, and save it
     await saveOpportunityViaSearch(page, title);
+  } else {
+    // Opportunity already in saved list - confirm page is fully ready before assertions
+    await assertSavedOpportunitiesPageReady(page, title);
   }
-
-  // Called in both paths - guarantees page title and opportunity link are ready
-  await assertSavedOpportunitiesPageReady(page, title);
 }
