@@ -100,22 +100,26 @@ export async function ensureOpportunityIsSaved(
 
   title: string,
 ): Promise<void> {
-  // Wait for the page to fully settle before checking saved state
+  
   const timeout = targetEnv === "staging" ? 30000 : 5000;
 
   await expect(page).toHaveTitle("Saved opportunities | Simpler.Grants.gov", {
     timeout,
   });
 
-  const isAlreadySaved = await page
-    .getByRole("link", { name: title, exact: true })
-    .isVisible();
+  let isAlreadySaved = false;
+  try {
+    await expect(
+      page.getByRole("link", { name: title, exact: true }),
+    ).toBeVisible({ timeout: 3000 });
+    isAlreadySaved = true;
+  } catch {
+    isAlreadySaved = false;
+  }
 
   if (!isAlreadySaved) {
-    // Opportunity not found in saved list - navigate to Search, find it, and save it
     await saveOpportunityViaSearch(page, title);
   } else {
-    // Opportunity already in saved list - confirm page is fully ready before assertions
     await assertSavedOpportunitiesPageReady(page, title);
   }
 }
