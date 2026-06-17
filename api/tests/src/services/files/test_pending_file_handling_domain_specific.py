@@ -42,22 +42,23 @@ class TestValidateAndFetchPendingFile(BaseTestClass):
     def test_fetch_and_validate_scan_complete_file_not_found(self, db_session, user):
         non_existent_id = uuid.uuid4()
 
-        with pytest.raises(HTTPError) as exc_info:
+        with pytest.raises(
+            HTTPError,
+            check=lambda e: e.status_code == 404 and e.message == "Pending file not found",
+        ):
             fetch_and_validate_scan_complete_file(db_session, non_existent_id, user)
-
-        assert exc_info.value.status_code == 404
-        assert exc_info.value.message == "Pending file not found"
 
     def test_fetch_and_validate_scan_complete_file_wrong_user(
         self, db_session, other_user, pending_file_complete
     ):
-        with pytest.raises(HTTPError) as exc_info:
+        with pytest.raises(
+            HTTPError,
+            check=lambda e: e.status_code == 403
+            and e.message == "You do not have permission to access this file",
+        ):
             fetch_and_validate_scan_complete_file(
                 db_session, pending_file_complete.pending_file_id, other_user
             )
-
-        assert exc_info.value.status_code == 403
-        assert "permission" in exc_info.value.message.lower()
 
     def test_fetch_and_validate_scan_complete_file_not_complete_infected(
         self, enable_factory_create, db_session, user
@@ -66,11 +67,13 @@ class TestValidateAndFetchPendingFile(BaseTestClass):
             user=user, file_scan_status=FileScanStatus.INFECTED
         )
 
-        with pytest.raises(HTTPError) as exc_info:
+        with pytest.raises(
+            HTTPError,
+            check=lambda e: e.status_code == 422
+            and e.message == "File cannot be used, status must be complete"
+            and e.extra_data["validation_issues"][0].value == FileScanStatus.INFECTED,
+        ):
             fetch_and_validate_scan_complete_file(db_session, pending_file.pending_file_id, user)
-
-        assert exc_info.value.status_code == 422
-        assert "infected" in exc_info.value.extra_data["file_status"].lower()
 
 
 class TestMovePendingFileToDestination(BaseTestClass):

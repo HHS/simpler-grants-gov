@@ -2,6 +2,7 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+from grants_shared.api.response import ValidationErrorDetail
 from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 
@@ -9,6 +10,7 @@ from src.constants.lookup_constants import FileScanStatus
 from src.db.models.file_upload_models import PendingFile
 from src.db.models.user_models import User
 from src.util import file_util
+from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +65,15 @@ def validate_file_scan_complete(pending_file: PendingFile) -> None:
         )
         raise_flask_error(
             422,
-            message="File is not valid for processing",
-            extra_data={"file_status": pending_file.file_scan_status},
+            message="File cannot be used, status must be complete",
+            validation_issues=[
+                ValidationErrorDetail(
+                    type=ValidationErrorType.INVALID,
+                    message="File scan status must be 'complete'",
+                    value=pending_file.file_scan_status,
+                    field="file_scan_status",
+                )
+            ],
         )
 
 
