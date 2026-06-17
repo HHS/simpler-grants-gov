@@ -493,8 +493,7 @@ def _build_legacy_certificate_and_submission(
     with open(path_crt, "rb") as f:
         cert_data = f.read()
     cert = x509.load_pem_x509_certificate(cert_data, default_backend())
-    serial_number = hex(cert.serial_number).lower().lstrip("0x")
-
+    serial_number = format(cert.serial_number, "x")
     agency = factories.AgencyFactory.create()
     setup_legacy_certificate(db_session, agency, serial_number)
     opportunity = factories.OpportunityFactory.create(agency_code=agency.agency_code)
