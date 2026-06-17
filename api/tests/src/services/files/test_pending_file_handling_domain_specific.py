@@ -79,8 +79,8 @@ class TestMovePendingFileToDestination(BaseTestClass):
         return factories.UserFactory.create()
 
     @pytest.fixture
-    def pending_file_complete(self, enable_factory_create, user, mock_s3_bucket):
-        source_location = f"s3://{mock_s3_bucket}/unscanned/test-file.pdf"
+    def pending_file_complete(self, enable_factory_create, user, s3_config):
+        source_location = f"{s3_config.file_scan_bucket_path}/scan_complete/test-file.pdf"
         file_util.write_to_file(source_location, "test file content")
         return factories.PendingFileFactory.create(
             user=user,
@@ -89,9 +89,9 @@ class TestMovePendingFileToDestination(BaseTestClass):
         )
 
     def test_move_pending_file_to_destination_success(
-        self, db_session, pending_file_complete, mock_s3_bucket
+        self, db_session, pending_file_complete, s3_config
     ):
-        destination_path = f"s3://{mock_s3_bucket}/final/test-file.pdf"
+        destination_path = f"{s3_config.public_files_bucket_path}/domain_specific/test-file.pdf"
         source_location = pending_file_complete.file_location
 
         # Verify source file exists before move
@@ -109,7 +109,7 @@ class TestMovePendingFileToDestination(BaseTestClass):
         assert pending_file_complete.file_scan_status == FileScanStatus.PROCESSED
 
     def test_move_pending_file_to_destination_handles_move_failure(
-        self, db_session, pending_file_complete, mock_s3_bucket
+        self, db_session, pending_file_complete, s3_config
     ):
         # Setup invalid destination path
         destination_path = "abcdefg"
@@ -127,8 +127,8 @@ class TestIntegrationValidateAndMove(BaseTestClass):
         return factories.UserFactory.create()
 
     @pytest.fixture
-    def pending_file_complete(self, enable_factory_create, user, mock_s3_bucket):
-        source_location = f"s3://{mock_s3_bucket}/unscanned/workflow-test.pdf"
+    def pending_file_complete(self, enable_factory_create, user, s3_config):
+        source_location = f"{s3_config.file_scan_bucket_path}/scan_complete/workflow-test.pdf"
         file_util.write_to_file(source_location, "workflow test content")
         return factories.PendingFileFactory.create(
             user=user,
@@ -137,7 +137,7 @@ class TestIntegrationValidateAndMove(BaseTestClass):
         )
 
     def test_full_workflow_validate_then_move(
-        self, db_session, user, pending_file_complete, mock_s3_bucket
+        self, db_session, user, pending_file_complete, s3_config
     ):
         validated_file = fetch_and_validate_scan_complete_file(
             db_session, pending_file_complete.pending_file_id, user
@@ -146,7 +146,7 @@ class TestIntegrationValidateAndMove(BaseTestClass):
         assert validated_file.file_scan_status == FileScanStatus.COMPLETE
         source_location = validated_file.file_location
 
-        destination_path = f"s3://{mock_s3_bucket}/final/workflow-test.pdf"
+        destination_path = f"{s3_config.public_files_bucket_path}/domain_specific/workflow-test.pdf"
         move_pending_file_to_destination(validated_file, destination_path)
         db_session.commit()
 
