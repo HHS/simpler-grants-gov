@@ -2449,6 +2449,12 @@ export const messages = {
       "Select a funding opportunity for your award recommendation",
     whichFundingOpportunity: "Which funding opportunity is this for?",
     cancelButtonText: "Cancel",
+    startButtonText: "Start",
+    columns: {
+      fundingOpportunityNumber: "Funding opp #",
+      fundingOpportunityName: "Funding opp name",
+      action: "Action"
+    }
   },
   FileInput: {
     existingFiles: {
