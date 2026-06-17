@@ -156,6 +156,13 @@ class LoadOracleDataTask(src.task.task.Task):
 
         self.log_row_count("after", staging_table)
 
+    def add_timing_metric(self, name: str, value: float) -> None:
+        """Accumulate a float timing metric into the task metrics.
+
+        increment() only handles integer counts, so timing totals are summed here instead.
+        """
+        self.metrics[name] = round(self.metrics.get(name, 0) + value, 3)
+
     def do_insert(
         self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table
     ) -> LoadResult:
@@ -202,8 +209,8 @@ class LoadOracleDataTask(src.task.task.Task):
         copy_time = round(t1 - t0, 3)
         total_insert_count = sum(insert_chunk_count)
         self.increment("count.insert.total", total_insert_count)
-        self.increment("time.insert.total", copy_time)
-        self.increment("time.insert_fetch.total", fetch_time)
+        self.add_timing_metric("time.insert.total", copy_time)
+        self.add_timing_metric("time.insert_fetch.total", fetch_time)
 
         log_extra |= {
             f"count.insert.{staging_table.name}": total_insert_count,
@@ -267,8 +274,8 @@ class LoadOracleDataTask(src.task.task.Task):
         copy_time = round(t1 - t0, 3)
         total_update_count = sum(update_chunk_count)
         self.increment("count.update.total", total_update_count)
-        self.increment("time.update.total", copy_time)
-        self.increment("time.update_fetch.total", fetch_time)
+        self.add_timing_metric("time.update.total", copy_time)
+        self.add_timing_metric("time.update_fetch.total", fetch_time)
 
         log_extra |= {
             f"count.update.{staging_table.name}": total_update_count,
@@ -301,7 +308,7 @@ class LoadOracleDataTask(src.task.task.Task):
         delete_count = result.rowcount  # type: ignore[attr-defined]
 
         self.increment("count.delete.total", delete_count)
-        self.increment("time.delete.total", delete_time)
+        self.add_timing_metric("time.delete.total", delete_time)
 
         log_extra |= {
             f"count.delete.{staging_table.name}": delete_count,
