@@ -439,6 +439,11 @@ AGENCIES_TO_CREATE = [
         "agency_id": "add4bfff-e895-4ca9-92f4-38ed34055247",
         "agency_name": "Agency of archived opportunities",
     },
+    {
+        "agency_code": "SGG",
+        "agency_id": "00000000-0000-0000-0000-000000000001",
+        "agency_name": "Simpler Grants.gov",
+    },
 ]
 
 
