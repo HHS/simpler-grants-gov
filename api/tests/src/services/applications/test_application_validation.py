@@ -1,3 +1,4 @@
+import uuid
 from datetime import date, timedelta
 
 import apiflask
@@ -7,6 +8,8 @@ from grants_shared.api.response import ValidationErrorDetail
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant
+from src.db.models.competition_models import Form as FormModel
+from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
 from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
@@ -21,7 +24,6 @@ from tests.src.db.models.factories import (
     ApplicationFormFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OrganizationFactory,
     SamGovEntityFactory,
 )
@@ -34,10 +36,47 @@ VALID_FORM_C_RESPONSE = {"str_c": "text"}
 
 
 @pytest.fixture
-def form_a():
-    return FormFactory.build(
-        form_name="form_a",
-        form_json_schema={
+def create_test_form(db_session):
+    """Factory fixture for test forms with automatic registry cleanup.
+    # TODO(#10274): remove db_session.add + flush once the form table is dropped
+    """
+    registered_keys = []
+
+    def _make(
+        form_name: str = "Test Form",
+        form_json_schema: dict | None = None,
+        form_rule_schema: dict | None = None,
+        **kwargs,
+    ) -> FormModel:
+        form = FormModel(
+            form_id=uuid.uuid4(),
+            form_name=form_name,
+            short_form_name=kwargs.get("short_form_name", form_name),
+            form_version="1.0",
+            agency_code="SGG",
+            form_json_schema=form_json_schema or {"type": "object", "properties": {}},
+            form_ui_schema={},
+            form_rule_schema=form_rule_schema,
+            json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
+        )
+        db_session.add(form)
+        db_session.flush()
+        key = FormTemplateKey(form.form_id, 1)
+        form_template_registry.register(form, major_version=1)
+        registered_keys.append(key)
+        return form
+
+    yield _make
+
+    for key in registered_keys:
+        form_template_registry._registry.pop(key, None)
+
+
+@pytest.fixture
+def form_a(create_test_form):
+    return create_test_form(
+        "form_a",
+        {
             "type": "object",
             "required": ["str_a", "obj_a"],
             "properties": {
@@ -45,9 +84,7 @@ def form_a():
                 "obj_a": {
                     "type": "object",
                     "required": ["int_a"],
-                    "properties": {
-                        "int_a": {"type": "integer"},
-                    },
+                    "properties": {"int_a": {"type": "integer"}},
                 },
             },
         },
@@ -55,10 +92,10 @@ def form_a():
 
 
 @pytest.fixture
-def form_b():
-    return FormFactory.build(
-        form_name="form_b",
-        form_json_schema={
+def form_b(create_test_form):
+    return create_test_form(
+        "form_b",
+        {
             "type": "object",
             "required": ["str_b"],
             "properties": {
@@ -70,10 +107,10 @@ def form_b():
 
 
 @pytest.fixture
-def form_c():
-    return FormFactory.build(
-        form_name="form_c",
-        form_json_schema={
+def form_c(create_test_form):
+    return create_test_form(
+        "form_c",
+        {
             "type": "object",
             "required": ["str_c"],
             "properties": {"str_c": {"type": "string"}},
@@ -699,10 +736,12 @@ def test_validate_is_included_in_submission_behavior(
 
 
 @freeze_time("2023-02-20 12:00:00", tz_offset=0)
-def test_validate_application_form_submit_post_population(enable_factory_create):
+def test_validate_application_form_submit_post_population(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that post-population occurs and updates application_response during submit action"""
-    # Create a form with post-population rules
-    form = FormFactory.create(
+    form = create_test_form(
+        form_name="PostPopForm",
         form_json_schema={
             "type": "object",
             "properties": {
@@ -751,10 +790,12 @@ def test_validate_application_form_submit_post_population(enable_factory_create)
     assert application_form.application_response["date_field"] == "2023-02-20"
 
 
-def test_validate_application_form_get_no_post_population(enable_factory_create):
+def test_validate_application_form_get_no_post_population(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that post-population does NOT occur during GET action"""
-    # Create a form with post-population rules
-    form = FormFactory.create(
+    form = create_test_form(
+        form_name="PostPopForm",
         form_json_schema={
             "type": "object",
             "properties": {
@@ -796,10 +837,12 @@ def test_validate_application_form_get_no_post_population(enable_factory_create)
     assert "date_field" not in application_form.application_response
 
 
-def test_validate_application_form_modify_no_post_population(enable_factory_create):
+def test_validate_application_form_modify_no_post_population(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that post-population does NOT occur during MODIFY action"""
-    # Create a form with post-population rules
-    form = FormFactory.create(
+    form = create_test_form(
+        form_name="PostPopForm",
         form_json_schema={
             "type": "object",
             "properties": {
