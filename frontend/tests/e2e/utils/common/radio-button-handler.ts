@@ -7,7 +7,7 @@ import { type Locator, type Page } from "@playwright/test";
 
 import { shouldActivateField } from "./activation";
 import { getChoiceLocator } from "./choice-locator";
-import { type FillFieldDefinition, type FieldHandler } from "./types";
+import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 /** Checks a radio input by clicking its associated label when direct check fails. */
 async function checkRadioViaLabelFallback(

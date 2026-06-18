@@ -7,7 +7,7 @@ import { type Page } from "@playwright/test";
 
 import { shouldActivateField } from "./activation";
 import { getChoiceLocator } from "./choice-locator";
-import { type FillFieldDefinition, type FieldHandler } from "./types";
+import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 /** Falls back to nested checkbox input interactions when primary locator actions fail. */
 const applyNestedCheckboxFallback = async (

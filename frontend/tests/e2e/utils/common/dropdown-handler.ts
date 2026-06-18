@@ -3,11 +3,11 @@
  * Usage: import { dropdownHandler } from "tests/e2e/utils/common/dropdown-handler";
  */
 
-import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
 import { type Page } from "@playwright/test";
+import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
 
 import { escapeRegex } from "./regex-utils";
-import { type FillFieldDefinition, type FieldHandler } from "./types";
+import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 export const dropdownHandler: FieldHandler = async (
   page: Page,

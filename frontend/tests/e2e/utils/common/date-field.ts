@@ -5,7 +5,7 @@
 
 import { expect, type Page } from "@playwright/test";
 
-import { type FillFieldDefinition, type FieldHandler } from "./types";
+import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 /** Fills a date input by label and blurs it to trigger validations. */
 export const fillDateByLabel = async (

@@ -6,7 +6,7 @@
 import { expect, type Page } from "@playwright/test";
 
 import { fillTextByLabel } from "./text-handler";
-import { type FillFieldDefinition, type FieldHandler } from "./types";
+import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 /** Fills an email input by label and validates the input type first. */
 export const fillEmailByLabel = async (

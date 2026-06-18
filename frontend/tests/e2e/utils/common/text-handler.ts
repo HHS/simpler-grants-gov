@@ -5,7 +5,7 @@
 
 import { type Page } from "@playwright/test";
 
-import { type FillFieldDefinition, type FieldHandler } from "./types";
+import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 /** Fills a text input resolved by its accessible label. */
 export const fillTextByLabel = async (

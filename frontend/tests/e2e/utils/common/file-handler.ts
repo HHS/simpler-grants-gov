@@ -4,7 +4,7 @@
 
 import { type Page } from "@playwright/test";
 
-import { type FillFieldDefinition, type FieldHandler } from "./types";
+import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 export const fileHandler: FieldHandler = async (
   page: Page,
