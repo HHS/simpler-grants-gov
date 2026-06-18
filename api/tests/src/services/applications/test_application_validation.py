@@ -1,4 +1,3 @@
-import uuid
 from datetime import date, timedelta
 
 import apiflask
@@ -8,8 +7,6 @@ from grants_shared.api.response import ValidationErrorDetail
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant
-from src.db.models.competition_models import Form as FormModel
-from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
 from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
@@ -33,43 +30,6 @@ VALID_FORM_A_RESPONSE = {"str_a": "text", "obj_a": {"int_a": 4}}
 VALID_FORM_B_RESPONSE = {"str_b": "text", "bool_b": True}
 
 VALID_FORM_C_RESPONSE = {"str_c": "text"}
-
-
-@pytest.fixture
-def create_test_form(db_session):
-    """Factory fixture for test forms with automatic registry cleanup.
-    # TODO(#10274): remove db_session.add + flush once the form table is dropped
-    """
-    registered_keys = []
-
-    def _make(
-        form_name: str = "Test Form",
-        form_json_schema: dict | None = None,
-        form_rule_schema: dict | None = None,
-        **kwargs,
-    ) -> FormModel:
-        form = FormModel(
-            form_id=uuid.uuid4(),
-            form_name=form_name,
-            short_form_name=kwargs.get("short_form_name", form_name),
-            form_version="1.0",
-            agency_code="SGG",
-            form_json_schema=form_json_schema or {"type": "object", "properties": {}},
-            form_ui_schema={},
-            form_rule_schema=form_rule_schema,
-            json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
-        )
-        db_session.add(form)
-        db_session.flush()
-        key = FormTemplateKey(form.form_id, 1)
-        form_template_registry.register(form, major_version=1)
-        registered_keys.append(key)
-        return form
-
-    yield _make
-
-    for key in registered_keys:
-        form_template_registry._registry.pop(key, None)
 
 
 @pytest.fixture
