@@ -11,6 +11,7 @@ import src.task.generate_internal_token  # noqa: F401 isort:skip
 import src.task.forms.update_form_task  # noqa: F401 isort:skip
 import src.task.forms.update_form_instruction_task  # noqa: F401 isort:skip
 import src.task.certificates.setup_cert_user_task  # noqa: F401 isort:skip
+import src.task.files.setup_file_scan_scanner_user_task  # noqa: F401 isort:skip
 import src.task.forms.list_forms_task  # noqa: F401 isort:skip
 import src.task.forms.lock_form_version_task  # noqa: F401 isort:skip
 import src.task.opportunities.build_automatic_opportunities  # noqa: F401 isort:skip

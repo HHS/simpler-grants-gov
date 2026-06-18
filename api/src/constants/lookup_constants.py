@@ -465,3 +465,4 @@ class JobType(StrEnum):
     LOAD_AGENCY_DATA_OPENSEARCH = "load-agency-data-opensearch"
     EXPORT_OPPORTUNITY_DATA = "export-opportunity-data"
     LIST_FORMS = "list-forms"
+    SETUP_FILE_SCAN_SCANNER_USER = "setup-file-scan-scanner-user"
