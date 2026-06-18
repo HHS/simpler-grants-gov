@@ -97,45 +97,25 @@ export const buildSF424HappyPathTestData = (
 };
 
 /**
- * Opportunity data for the SF-424 form — SGG staging opportunity.
+ * Opportunity data for the SF-424 form — unified opportunity for both local and staging.
  * Contains opportunity metadata, expected prepopulated field values,
  * and the form-specific test data builder.
+ * Uses a single E2E opportunity across environments to align with project-abstract-summary pattern.
  * Imported by load-opportunity-config.ts to build the opportunity registry.
  */
-export const SF424_SGG_OPPORTUNITY_DATA: PrintViewFormData = {
-  opportunityId: "c5de578a-b5e3-4a70-95ff-c97deb8793a0",
-  opportunityNumber: "SGG-104959096-2025-11-17",
+export const SF424_OPPORTUNITY_DATA: PrintViewFormData = {
+  opportunityId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  opportunityNumber: "E2E-SF424-OG-IND-01",
   formKey: "sf424",
   expectedPrepopulatedFields: {
-    funding_opportunity_number: "SGG-104959096-2025-11-17",
-    funding_opportunity_title: "Opportunity for form SF424_4_0",
+    funding_opportunity_number: "E2E-SF424-OG-IND-01",
+    funding_opportunity_title:
+      "E2E Application for Federal Assistance (SF-424) ORG IND OT01",
     assistance_listing_number: "10.960",
     agency_name: "Simpler Grants.gov",
     assistance_listing_program_title: "Technical Agricultural Assistance",
     competition_identification_title:
-      "Competition for Opportunity for form SF424_4_0",
-    certification_agree: "Yes",
-  },
-  buildTestData: buildSF424HappyPathTestData,
-};
-
-/**
- * Opportunity data for the SF-424 form — local test opportunity.
- * Contains opportunity metadata, expected prepopulated field values,
- * and the form-specific test data builder.
- * Imported by load-opportunity-config.ts to build the opportunity registry.
- */
-export const SF424_TEST_OPPORTUNITY_DATA: PrintViewFormData = {
-  opportunityId: "284c3eee-0686-453a-800e-9dce80079369",
-  opportunityNumber: "TEST-SF424-ORG-IND-01",
-  formKey: "sf424",
-  expectedPrepopulatedFields: {
-    funding_opportunity_number: "TEST-SF424-ORG-IND-01",
-    funding_opportunity_title: "TEST-SF424-ORG-IND-OT01",
-    assistance_listing_number: "10.960",
-    agency_name: "Simpler Grants.gov",
-    assistance_listing_program_title: "Technical Agricultural Assistance",
-    competition_identification_title: "TEST-SF424-ORG-IND-CT01",
+      "E2E Application for Federal Assistance (SF-424) ORG IND OT01",
     certification_agree: "Yes",
   },
   buildTestData: buildSF424HappyPathTestData,

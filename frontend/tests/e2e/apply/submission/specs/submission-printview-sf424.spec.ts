@@ -7,7 +7,7 @@
  * This spec validates the print view output instead of directly validating the generated ZIP/PDF artifact.
  * The print view acts as a pre-PDF rendering validation layer to confirm submitted data renders correctly.
  *
- * Opportunity: TEST-SF424-ORG-IND-01 (SF-424 form – local + staging)
+ * Opportunity: E2E-SF424-OG-IND-01 (unified E2E opportunity – local + staging)
  * Form: Application for Federal Assistance (SF-424)
  *
  * To add a new opportunity:
@@ -55,7 +55,8 @@ const { testOrgLabel, targetEnv } = playwrightEnv;
 
 // Only the opportunity number is declared here.
 // All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
-const OPPORTUNITY_NUMBER = "TEST-SF424-ORG-IND-01";
+// Unified opportunity for both local and staging environments.
+const OPPORTUNITY_NUMBER = "E2E-SF424-OG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
 const applicantScenarios = [
