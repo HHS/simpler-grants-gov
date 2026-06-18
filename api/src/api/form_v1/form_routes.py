@@ -1,10 +1,11 @@
 import logging
 
+import grants_shared.api.response as response
+
 import src.api.form_v1.form_schema as form_schema
-import src.api.response as response
 from src.api.form_v1.form_blueprint import form_v1_blueprint
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
-from src.form_schema.forms import get_active_forms
+from src.services.form_v1.get_forms import get_forms
 
 logger = logging.getLogger(__name__)
 
@@ -14,5 +15,4 @@ logger = logging.getLogger(__name__)
 @form_v1_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 def form_list() -> response.ApiResponse:
     logger.info("GET /v1/forms/")
-    forms = get_active_forms()
-    return response.ApiResponse(message="Success", data=forms)
+    return response.ApiResponse(message="Success", data=get_forms())
