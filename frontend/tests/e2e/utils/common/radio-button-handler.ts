@@ -7,7 +7,7 @@ import { getChoiceLocator } from "./choice-locator";
 import { FieldHandler } from "./types";
 
 export const radioButtonHandler: FieldHandler = async (
-  testInfo,
+  _testInfo,
   page,
   field,
   data,

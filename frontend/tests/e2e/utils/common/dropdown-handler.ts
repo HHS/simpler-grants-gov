@@ -7,7 +7,7 @@ import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropd
 import { FieldHandler } from "./types";
 
 export const dropdownHandler: FieldHandler = async (
-  testInfo,
+  _testInfo,
   page,
   field,
   data,
