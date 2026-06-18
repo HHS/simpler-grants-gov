@@ -1,3 +1,4 @@
+import uuid
 import zipfile
 from decimal import Decimal
 from io import BytesIO
@@ -6,8 +7,9 @@ import pytest
 from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
-from src.db.models.competition_models import Application
+from src.db.models.competition_models import Application, Form
 from src.form_schema.forms import SF424_v4_0
+from src.form_schema.registry.form_template_registry import form_template_registry
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     ApplicationSubmissionConfig,
@@ -65,6 +67,12 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             update(Application).values(application_status=ApplicationStatus.ACCEPTED)
         )
         db_session.commit()
+        # Track registry keys added by this test for cleanup
+        registry_keys_before = set(form_template_registry._registry.keys())
+        yield
+        # Remove any custom forms added to the singleton registry during this test
+        for key in set(form_template_registry._registry.keys()) - registry_keys_before:
+            del form_template_registry._registry[key]
 
     @pytest.fixture
     def create_submission_task(self, db_session, s3_config):
@@ -80,26 +88,81 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         return CreateApplicationSubmissionTask(db_session, pdf_generation_config=pdf_config)
 
     def test_run_task(self, db_session, create_submission_task):
+        main_form = Form(
+            form_id=uuid.uuid4(),
+            form_name="Main Test Form",
+            short_form_name="main_test",
+            form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema={},
+            json_to_xml_schema=None,
+        )
+        db_session.add(main_form)
+        db_session.flush()
+        form_template_registry.register(main_form, major_version=1)
+
         application_without_attachments = ApplicationFactory.create(
-            with_forms=True,
+            with_forms=False,
             application_status=ApplicationStatus.SUBMITTED,
             has_submitted_by_user=True,
+            competition__competition_forms=[],
+        )
+        ApplicationFormFactory.create(
+            application=application_without_attachments,
+            competition_form__competition=application_without_attachments.competition,
+            competition_form__form=main_form,
         )
         app_without_attachments_form_file_names = [
             f"{f.form.short_form_name}.pdf"
             for f in application_without_attachments.application_forms
         ]
         # Add another application form that is not required and was marked to not be included in submission
+        skip_form = Form(
+            form_id=uuid.uuid4(),
+            form_name="Skip Test Form",
+            short_form_name="skip_test",
+            form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema={},
+            json_to_xml_schema=None,
+        )
+        db_session.add(skip_form)
+        db_session.flush()
+        form_template_registry.register(skip_form, major_version=1)
         skipped_app_form = ApplicationFormFactory.create(
             application=application_without_attachments,
             competition_form__competition=application_without_attachments.competition,
+            competition_form__form=skip_form,
             competition_form__is_required=False,
             is_included_in_submission=False,
         )
         application_without_attachments.application_forms.append(skipped_app_form)
 
+        attachments_form = Form(
+            form_id=uuid.uuid4(),
+            form_name="Attachments Test Form",
+            short_form_name="attachments_test",
+            form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema={},
+            json_to_xml_schema=None,
+        )
+        db_session.add(attachments_form)
+        db_session.flush()
+        form_template_registry.register(attachments_form, major_version=1)
+
         application_with_attachments = ApplicationFactory.create(
-            with_forms=True, application_status=ApplicationStatus.SUBMITTED
+            with_forms=False,
+            application_status=ApplicationStatus.SUBMITTED,
+            competition__competition_forms=[],
+        )
+        ApplicationFormFactory.create(
+            application=application_with_attachments,
+            competition_form__competition=application_with_attachments.competition,
+            competition_form__form=attachments_form,
         )
         app_with_attachments_form_file_names = [
             f"{f.form.short_form_name}.pdf" for f in application_with_attachments.application_forms
@@ -198,8 +261,23 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
     def test_run_task_excludes_orphaned_attachments(self, db_session, create_submission_task):
         """Referenced attachments are included in the zip; orphaned ones are excluded."""
+        attachment_form = Form(
+            form_id=uuid.uuid4(),
+            form_name="Orphan Test Form",
+            short_form_name="orphan_test",
+            form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema={},
+            json_to_xml_schema=None,
+        )
+        db_session.add(attachment_form)
+        db_session.flush()
+        form_template_registry.register(attachment_form, major_version=1)
+
         application = ApplicationFactory.create(
             application_status=ApplicationStatus.SUBMITTED,
+            competition__competition_forms=[],
         )
 
         referenced_attachment = ApplicationAttachmentFactory.create(
@@ -216,6 +294,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         app_form = ApplicationFormFactory.create(
             application=application,
             competition_form__competition=application.competition,
+            competition_form__form=attachment_form,
             application_response={
                 "attachment_field": str(referenced_attachment.application_attachment_id),
             },
@@ -282,10 +361,31 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
     def test_xml_generation_unsupported_form(self, db_session, enable_factory_create, s3_config):
         """Test that submission succeeds gracefully when form doesn't support XML."""
+        # Create a form with no XML config
+        no_xml_form = Form(
+            form_id=uuid.uuid4(),
+            form_name="No XML Form",
+            short_form_name="no_xml_form",
+            form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema={},
+            json_to_xml_schema=None,
+        )
+        db_session.add(no_xml_form)
+        db_session.flush()
+        form_template_registry.register(no_xml_form, major_version=1)
+
         # Create application with a form that doesn't support XML
         application = ApplicationFactory.create(
-            with_forms=True,
+            with_forms=False,
             application_status=ApplicationStatus.SUBMITTED,
+            competition__competition_forms=[],
+        )
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form__competition=application.competition,
+            competition_form__form=no_xml_form,
         )
 
         # Create task with XML generation ENABLED
