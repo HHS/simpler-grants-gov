@@ -1,15 +1,14 @@
 import TopLevelError from "src/app/[locale]/(base)/error/page";
 import { AgencySelector } from "src/app/[locale]/(base)/grantor/opportunities/_components/AgencySelector";
-import { UnauthorizedError } from "src/errors";
+import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
+import { MissingAuthError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { searchOpportunitiesByAgency } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
-import {
-  fetchUserAgencies,
-  UserAgency,
-} from "src/services/fetch/fetchers/userAgenciesFetcher";
 import { LocalizedPageProps, TFn } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 import {
@@ -70,7 +69,11 @@ const OpportunitiesErrorPage = () => {
   );
 };
 
-const AgencyNotAuthorizedPage = ({ agencies }: { agencies: UserAgency[] }) => {
+const AgencyNotAuthorizedPage = ({
+  agencies,
+}: {
+  agencies: RelevantAgencyRecord[];
+}) => {
   const t = useTranslations("Opportunities");
   return (
     <OpportunitiesPageWrapper>
@@ -195,7 +198,7 @@ const OpportunitiesHeader = ({
 }: {
   userOpportunitiesCount: number;
   agencyName: string;
-  agencies: UserAgency[];
+  agencies: RelevantAgencyRecord[];
   currentAgencyId: string;
   isSingleAgency: boolean;
   canCreate: boolean;
@@ -368,13 +371,12 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   }
 
   // B. Get all Agencies this user belongs to
-  let userAgencies: UserAgency[];
+  let userAgencies: RelevantAgencyRecord[];
   try {
-    userAgencies = await fetchUserAgencies();
+    userAgencies = await getUserAgencies(userSession.user_id);
   } catch (error) {
-    console.error("Bad agencies", error);
-    if (error instanceof UnauthorizedError) {
-      throw error;
+    if (error instanceof MissingAuthError) {
+      return <Unauthenticated />;
     }
     return <OpportunitiesErrorPage />;
   }
@@ -390,7 +392,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
     redirect(`?agency=${sortedUserAgencies[0].agency_id}`);
   }
   const selectedAgency = sortedUserAgencies.find(
-    (a) => a.agency_id === selectedAgencyId,
+    (a) => a.agency_id.toString() === selectedAgencyId,
   );
   if (!selectedAgency) {
     return <AgencyNotAuthorizedPage agencies={sortedUserAgencies} />;
@@ -399,7 +401,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   // D. Check the user's privileges for the selected Agency
   let userPrivilegeResult: UserPrivilegeResult[];
   const userPrivilegeDef: UserPrivilegeRequest[] = getUserPrivilegeDefinition(
-    selectedAgency.agency_id,
+    selectedAgency.agency_id.toString(),
   );
   try {
     userPrivilegeResult = await checkRequiredPrivileges(
@@ -423,7 +425,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   if (agencyUserAcccess.canView) {
     try {
       const data = await fetchOpportunities(
-        selectedAgency.agency_id,
+        selectedAgency.agency_id.toString(),
         currentPage,
       );
       userOpportunities = data.opportunities;

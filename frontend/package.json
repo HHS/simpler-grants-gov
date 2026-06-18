@@ -123,9 +123,11 @@
     "flatted": "3.4.2",
     "axios": "^1.15.2",
     "follow-redirects": "^1.16.0",
-    "protobufjs": "^7.5.6",
+    "protobufjs": "^7.6.3",
     "uuid": "^14.0.0",
-    "ws": "^8.20.1",
+    "ws": "^8.21.0",
+    "form-data": "^4.0.6",
+    "@opentelemetry/core": "^2.8.0",
     "devEngines": {
       "packageManager": {
         "name": "npm"

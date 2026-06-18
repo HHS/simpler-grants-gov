@@ -154,7 +154,7 @@ def pre_sign_upload(
 
     metadata_fields = {f"x-amz-meta-{k}": v for k, v in metadata.items()}
 
-    return s3_client.generate_presigned_post(
+    presigned_post_result = s3_client.generate_presigned_post(
         Bucket=bucket,
         Key=key,
         Fields={"Content-Type": content_type, **metadata_fields},
@@ -166,6 +166,16 @@ def pre_sign_upload(
         ],
         ExpiresIn=s3_config.presigned_s3_duration,
     )
+
+    # When running locally, swap out the presigned url to replace s3mock with localhost
+    # We never set the endpoint url non-locally, this is local-only.
+    if s3_config.aws_s3_endpoint_url:
+        # Only relevant when local, due to docker path issues
+        presigned_post_result["url"] = presigned_post_result.get("url", "").replace(
+            s3_config.aws_s3_endpoint_url, "http://localhost:9090"
+        )
+
+    return presigned_post_result
 
 
 def get_file_length_bytes(path: str) -> int:
