@@ -2,8 +2,9 @@
 
 import uuid
 
-from src.api.response import ValidationErrorDetail
-from src.api.route_utils import raise_flask_error
+from grants_shared.api.response import ValidationErrorDetail
+from grants_shared.api.route_utils import raise_flask_error
+
 from src.db.models.award_recommendation_models import AwardRecommendationApplicationSubmission
 from src.validation.validation_constants import ValidationErrorType
 

@@ -3,9 +3,9 @@ from datetime import date, timedelta
 import apiflask
 import pytest
 from freezegun import freeze_time
+from grants_shared.api.response import ValidationErrorDetail
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 
-from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant
 from src.services.applications.application_validation import (
     ApplicationAction,

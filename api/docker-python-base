@@ -77,8 +77,8 @@ RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
 # Upgrade filelock to fix GHSA-w853-jp5j-5j7f
 RUN python3 -m pip install --no-cache-dir --upgrade "filelock>=3.20.1"
 
-# Upgrade cryptography to fix GHSA-m959-cc7f-wv43
-RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=46.0.7"
+# Upgrade cryptography to fix GHSA-m959-cc7f-wv43 and GHSA-537c-gmf6-5ccf
+RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=48.0.1"
 
 # Upgrade idna to fix GHSA-65pc-fj4g-8rjx
 RUN python3 -m pip install --no-cache-dir --upgrade "idna>=3.15"

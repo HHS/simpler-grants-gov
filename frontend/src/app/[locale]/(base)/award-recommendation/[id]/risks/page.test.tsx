@@ -15,6 +15,17 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+  }),
+}));
+
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   use: jest.fn(() => ({

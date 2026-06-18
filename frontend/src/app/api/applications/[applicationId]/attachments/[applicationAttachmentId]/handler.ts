@@ -1,5 +1,4 @@
-import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import { ApiRequestError, readError } from "src/errors";
 import { deleteAttachment } from "src/services/fetch/fetchers/applicationFetcher";
 
 import { revalidateTag } from "next/cache";
@@ -13,10 +12,6 @@ export const deleteAttachmentHandler = async (
   },
 ) => {
   try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      throw new UnauthorizedError("No active session");
-    }
     const applicationId = (await params).applicationId;
     const applicationAttachmentId = (await params).applicationAttachmentId;
 

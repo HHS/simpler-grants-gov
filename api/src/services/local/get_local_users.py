@@ -64,7 +64,7 @@ def _get_user_jwt(db_session: db.Session, user: User) -> str | None:
     if user_token_session is None:
         return None
 
-    return generate_jwt(user_token_session, datetime_util.utcnow(), user.email)
+    return generate_jwt(user_token_session, user, datetime_util.utcnow(), user.email)
 
 
 def _get_user_api_key(user: User) -> str | None:

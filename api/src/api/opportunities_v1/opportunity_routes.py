@@ -5,6 +5,7 @@ from uuid import UUID
 
 import grants_shared.adapters.db as db
 import grants_shared.adapters.db.flask_db as flask_db
+import grants_shared.api.response as response
 import grants_shared.util.datetime_util as datetime_util
 from flask import Response
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
@@ -13,7 +14,6 @@ from grants_shared.util.dict_util import flatten_dict
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
-import src.api.response as response
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.services.opportunities_v1.get_opportunity import (

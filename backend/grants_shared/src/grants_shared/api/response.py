@@ -4,10 +4,10 @@ from typing import Any, cast
 
 import apiflask
 import flask
-from grants_shared.api.schemas.extension import MarshmallowErrorContainer
-from grants_shared.util.dict_util import flatten_dict
 
-from src.pagination.pagination_models import PaginationInfo
+from grants_shared.api.schemas.extension import MarshmallowErrorContainer
+from grants_shared.pagination.pagination_models import PaginationInfo
+from grants_shared.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 
@@ -18,22 +18,6 @@ class ValidationErrorDetail:
     message: str = ""
     field: str | None = None
     value: Any | None = None
-
-
-class ValidationException(apiflask.exceptions.HTTPError):
-    def __init__(
-        self,
-        errors: list[ValidationErrorDetail],
-        message: str = "Invalid request",
-        detail: Any = None,
-    ):
-        super().__init__(
-            status_code=422,
-            message=message,
-            detail=detail,
-            extra_data={"validation_issues": errors},
-        )
-        self.errors = errors
 
 
 @dataclasses.dataclass

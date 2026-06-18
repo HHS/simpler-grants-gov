@@ -1,7 +1,7 @@
 import datetime
 import typing
 
-from src.pagination.pagination_models import SortDirection
+from grants_shared.pagination.pagination_models import SortDirection
 
 
 class SearchQueryBuilder:

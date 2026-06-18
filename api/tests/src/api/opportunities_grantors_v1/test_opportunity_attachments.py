@@ -24,26 +24,23 @@ def grantor_auth_data(db_session, enable_factory_create):
 def existing_opportunity(grantor_auth_data, enable_factory_create):
     """Create an opportunity belonging to the grantor's agency"""
     user, agency, _, _ = grantor_auth_data
-    return OpportunityFactory.create(agency_code=agency.agency_code, is_draft=True)
+    return OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=True, is_simpler_grants_opportunity=True
+    )
 
 
 @pytest.fixture
-def existing_attachment(db_session, existing_opportunity, enable_factory_create, mock_s3_bucket):
+def existing_attachment(existing_opportunity, enable_factory_create, mock_s3_bucket):
     """Create an attachment for the opportunity"""
-    attachment = opportunity_models.OpportunityAttachment(
-        attachment_id=uuid.uuid4(),
-        legacy_attachment_id=12345,
-        opportunity_id=existing_opportunity.opportunity_id,
+    return OpportunityAttachmentFactory.create(
+        opportunity=existing_opportunity,
         file_name="test_file.pdf",
         file_description="Test attachment",
         file_location=f"s3://{mock_s3_bucket}/test-file.pdf",
         mime_type="application/pdf",
         file_size_bytes=1024,
+        legacy_attachment_id=12345,
     )
-    db_session.add(attachment)
-    db_session.commit()
-
-    return attachment
 
 
 def test_upload_attachment_success(
@@ -136,15 +133,15 @@ def test_upload_attachment_nonexistent_opportunity(client, grantor_auth_data):
     )
 
 
-def test_upload_attachment_published_opportunity(
+def test_upload_attachment_published_non_sgm_opportunity(
     client, db_session, grantor_auth_data, enable_factory_create
 ):
-    """Test upload to a published (non-draft) opportunity"""
+    """Test upload to a published non-SGM opportunity"""
     _, agency, token, _ = grantor_auth_data
 
-    # Create a published opportunity
+    # Create a published non-SGM opportunity
     published_opportunity = OpportunityFactory.create(
-        agency_code=agency.agency_code, is_draft=False
+        agency_code=agency.agency_code, is_draft=False, is_simpler_grants_opportunity=False
     )
 
     file_content = b"This is a test file content"
@@ -157,7 +154,49 @@ def test_upload_attachment_published_opportunity(
 
     assert resp.status_code == 422
     response_json = resp.get_json()
-    assert response_json["message"] == "Only draft opportunities can be updated"
+    assert response_json["message"] == "Only opportunities created in Simpler Grants can be updated"
+
+
+def test_upload_attachment_published_sgm_opportunity(
+    client, db_session, grantor_auth_data, mock_s3_bucket, enable_factory_create
+):
+    """Test upload to a published SGM opportunity succeeds"""
+    _, agency, token, _ = grantor_auth_data
+
+    # Create a published SGM opportunity
+    published_sgm_opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=False, is_simpler_grants_opportunity=True
+    )
+
+    file_content = b"This is a test file content"
+
+    resp = client.post(
+        f"/v1/grantors/opportunities/{published_sgm_opportunity.opportunity_id}/attachments",
+        headers={"X-SGG-Token": token},
+        data={
+            "file_attachment": (BytesIO(file_content), "test_file.pdf", "application/pdf"),
+            "file_description": "Test file on published SGM opportunity",
+        },
+    )
+
+    assert resp.status_code == 200
+    response_json = resp.get_json()
+    assert response_json["message"] == "Attachment uploaded successfully"
+    assert "data" in response_json
+    assert "opportunity_attachment_id" in response_json["data"]
+
+    # Fetch the attachment from the database
+    attachment_id = response_json["data"]["opportunity_attachment_id"]
+    assert isinstance(attachment_id, str)
+
+    opportunity_attachment = (
+        db_session.query(opportunity_models.OpportunityAttachment)
+        .filter_by(attachment_id=attachment_id)
+        .first()
+    )
+
+    assert opportunity_attachment is not None
+    assert file_util.file_exists(opportunity_attachment.file_location) is True
 
 
 def test_upload_attachment_invalid_file(client, grantor_auth_data, existing_opportunity):
@@ -257,20 +296,20 @@ def test_delete_attachment_unauthorized(
     assert response_json["message"] == "Forbidden"
 
 
-def test_delete_attachment_published_opportunity(
+def test_delete_attachment_published_non_sgm_opportunity(
     client, db_session, grantor_auth_data, mock_s3_bucket, enable_factory_create
 ):
-    """Test deletion from a published (non-draft) opportunity"""
+    """Test deletion from a published non-SGM opportunity"""
     _, agency, token, _ = grantor_auth_data
 
-    # Create a published opportunity
+    # Create a published non-SGM opportunity
     published_opportunity = OpportunityFactory.create(
-        agency_code=agency.agency_code, is_draft=False
+        agency_code=agency.agency_code, is_draft=False, is_simpler_grants_opportunity=False
     )
 
     # Create an attachment for the published opportunity
     attachment = OpportunityAttachmentFactory.create(
-        opportunity_id=published_opportunity.opportunity_id,
+        opportunity=published_opportunity,
         file_name="test_file.pdf",
         file_description="Test attachment for published opportunity",
         file_location=f"s3://{mock_s3_bucket}/published-test-file.pdf",
@@ -286,4 +325,35 @@ def test_delete_attachment_published_opportunity(
 
     assert resp.status_code == 422
     response_json = resp.get_json()
-    assert response_json["message"] == "Only draft opportunities can be updated"
+    assert response_json["message"] == "Only opportunities created in Simpler Grants can be updated"
+
+
+def test_delete_attachment_published_sgm_opportunity(
+    client, db_session, grantor_auth_data, mock_s3_bucket, enable_factory_create
+):
+    """Test deletion from a published SGM opportunity succeeds"""
+    _, agency, token, _ = grantor_auth_data
+
+    # Create a published SGM opportunity
+    published_sgm_opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=False, is_simpler_grants_opportunity=True
+    )
+
+    # Create an attachment
+    attachment = OpportunityAttachmentFactory.create(
+        opportunity=published_sgm_opportunity,
+        file_name="test_file.pdf",
+        file_description="Test attachment for published SGM opportunity",
+        file_location=f"s3://{mock_s3_bucket}/published-sgm-test-file.pdf",
+        mime_type="application/pdf",
+        file_size_bytes=1024,
+        legacy_attachment_id=12346,
+    )
+
+    resp = client.delete(
+        f"/v1/grantors/opportunities/{published_sgm_opportunity.opportunity_id}/attachments/{attachment.attachment_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert resp.status_code == 200
+    assert resp.get_json()["message"] == "Attachment successfully deleted"

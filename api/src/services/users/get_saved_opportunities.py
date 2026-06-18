@@ -3,12 +3,18 @@ import uuid
 from collections.abc import Sequence
 
 from grants_shared.adapters import db
+from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.pagination.pagination_models import (
+    PaginationInfo,
+    PaginationParams,
+    SortDirection,
+)
+from grants_shared.pagination.paginator import Paginator
 from pydantic import BaseModel
 from sqlalchemy import asc, desc, func, nulls_last, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select, Subquery
 
-from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access, check_user_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import Organization, OrganizationSavedOpportunity
@@ -18,8 +24,6 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.db.models.user_models import User, UserSavedOpportunity
-from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
-from src.pagination.paginator import Paginator
 from src.search.search_models import StrSearchFilter, UuidSearchFilter
 
 logger = logging.getLogger(__name__)
