@@ -136,7 +136,7 @@ async function AwardRecommendationSubmissionEditPageContent({
         <input
           type="hidden"
           name="award_recommendation_application_submission_id"
-          value={submission.award_recommendation_application_submission_id}
+          value={applicationSubmissionId}
         />
         <RecommendationDetailsSection submission={submission} />
       </GridContainer>
