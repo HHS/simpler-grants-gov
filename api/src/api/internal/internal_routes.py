@@ -10,6 +10,10 @@ import src.api.internal.internal_schema as internal_schema
 from src.api.internal.internal_blueprint import internal_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
 from src.services.internal.create_e2e_token import create_e2e_token
+from src.services.internal.setup_file_scan_scanner_user import (
+    INTERNAL_S3_SCANNER_USER_ID,
+    setup_file_scan_scanner_user,
+)
 from src.services.internal.update_internal_user_role import update_internal_user_role
 
 logger = logging.getLogger(__name__)
@@ -36,6 +40,36 @@ def update_internal_roles(
         update_internal_user_role(db_session, internal_role_id, user_email, user)
 
     return response.ApiResponse(message="Success")
+
+
+@internal_blueprint.post("/file-scan-scanner-user")
+@internal_blueprint.input(internal_schema.FileScanScannerUserRequestSchema, location="json")
+@internal_blueprint.output(internal_schema.FileScanScannerUserResponseSchema)
+@internal_blueprint.auth_required(api_user_key_auth)
+@flask_db.with_db_session()
+def setup_file_scan_scanner_user_route(
+    db_session: db.Session, json_data: dict
+) -> response.ApiResponse:
+    """
+    Provision the internal user the file-scan scanner Lambda authenticates as,
+    along with its INTERNAL_S3_SCAN role and API key. Idempotent, so it can be
+    re-run after a key rotation. Gated on the manage_internal_roles privilege.
+    """
+    scanner_user_id = json_data.get("user_id", INTERNAL_S3_SCANNER_USER_ID)
+
+    # Intentionally do not log json_data["api_key"] — it is a secret.
+    add_extra_data_to_current_request_logs({"scanner_user_id": scanner_user_id})
+    logger.info("POST /v1/internal/file-scan-scanner-user")
+
+    with db_session.begin():
+        api_key_user = api_user_key_auth.get_user()
+        db_session.add(api_key_user)
+
+        scanner_user = setup_file_scan_scanner_user(
+            db_session, api_key_user, json_data["api_key"], scanner_user_id
+        )
+
+    return response.ApiResponse(message="Success", data={"user_id": str(scanner_user.user_id)})
 
 
 @internal_blueprint.post("/e2e-token")

@@ -23,6 +23,32 @@ class InternalRoleAssignmentResponseSchema(AbstractResponseSchema):
     pass
 
 
+class FileScanScannerUserRequestSchema(Schema):
+    api_key = fields.String(
+        required=True,
+        metadata={
+            "description": (
+                "The X-API-Key value to register for the file-scan scanner user. "
+                "Must match the key the scanner Lambda authenticates with."
+            ),
+        },
+    )
+    user_id = fields.UUID(
+        required=False,
+        metadata={
+            "description": (
+                "UUID to use for the scanner user. Defaults to the well-known "
+                "singleton scanner user id."
+            ),
+            "example": "f1c0b2a4-9d3e-4a7b-8c61-0e5d2f8a4b13",
+        },
+    )
+
+
+class FileScanScannerUserResponseSchema(AbstractResponseSchema):
+    pass
+
+
 class E2ETokenRequestSchema(Schema):
     user_id = fields.UUID(
         required=True,

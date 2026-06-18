@@ -448,7 +448,6 @@ JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
         LookupStr(JobType.LOAD_AGENCY_DATA_OPENSEARCH, 16),
         LookupStr(JobType.EXPORT_OPPORTUNITY_DATA, 17),
         LookupStr(JobType.LIST_FORMS, 18),
-        LookupStr(JobType.SETUP_FILE_SCAN_SCANNER_USER, 19),
     ]
 )
 
