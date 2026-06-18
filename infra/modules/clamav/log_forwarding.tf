@@ -45,6 +45,7 @@ resource "aws_lambda_function" "nr_log_forwarder" {
       NR_LICENSE_KEY_SSM_PATH = data.aws_ssm_parameter.newrelic_license_key.name
       NR_LOGS_ENDPOINT        = "https://log-api.newrelic.com/log/v1"
       AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
+      NR_ENTITY_GUID          = var.newrelic_entity_guid != null ? var.newrelic_entity_guid : ""
     }
   }
 

@@ -17,6 +17,8 @@ NR_LOGS_ENDPOINT = os.environ.get(
 AWS_ACCOUNT_ID = os.environ.get("AWS_ACCOUNT_ID", "")
 AWS_REGION = os.environ.get("AWS_REGION", "")
 
+NR_ENTITY_GUID = os.environ.get("NR_ENTITY_GUID", "")
+
 # Max log entries per New Relic Logs API request
 BATCH_SIZE = 1000
 
@@ -171,8 +173,6 @@ def handler(event, context):
             "aws.logStream": log_stream,
             "aws.logEventId": log_event.get("id", ""),
             "aws.lambda.functionName": function_name,
-            "entity.name": function_name,
-            "hostname": function_name,
         }
 
         parsed = parse_structured_message(raw_message)
@@ -201,9 +201,10 @@ def handler(event, context):
         "collector.name": "cloudwatch-lambda-forwarder",
         "aws.accountId": AWS_ACCOUNT_ID,
         "aws.region": AWS_REGION,
-        "entity.type": "AWSLAMBDAFUNCTION",
-        "provider": "LambdaFunction",
     }
+
+    if NR_ENTITY_GUID:
+        common_attributes["entity.guid"] = NR_ENTITY_GUID
 
     nr_license_key = get_nr_license_key()
 
