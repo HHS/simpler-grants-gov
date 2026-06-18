@@ -5,6 +5,7 @@ import {
   getAwardRecommendationSubmission,
   listAwardRecommendationSubmissions,
   listAwardRecommendationSubmissionsPaginated,
+  updateAwardRecommendationSubmissionDetails,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 import { APIResponse } from "src/types/apiResponseTypes";
 import {
@@ -146,6 +147,39 @@ describe("getAwardRecommendationSubmission", () => {
     );
 
     expect(result).toBeNull();
+  });
+});
+
+describe("updateAwardRecommendationSubmissionDetails", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls fetchAwardRecommendationWithMethod with the correct arguments", async () => {
+    const submissionId =
+      mockAwardRecommendationSubmissions[0]
+        .award_recommendation_application_submission_id;
+
+    await updateAwardRecommendationSubmissionDetails("an id", {
+      [submissionId]: {
+        award_recommendation_type: "recommended_for_funding",
+        recommended_amount: "50000.00",
+        has_exception: false,
+      },
+    });
+
+    expect(mockInnerFetch).toHaveBeenCalledWith({
+      subPath: "an id/submission-details",
+      body: {
+        award_recommendation_submissions: {
+          [submissionId]: {
+            award_recommendation_type: "recommended_for_funding",
+            recommended_amount: "50000.00",
+            has_exception: false,
+          },
+        },
+      },
+    });
   });
 });
 
