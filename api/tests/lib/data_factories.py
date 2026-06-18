@@ -5,6 +5,7 @@ with only a few alterations.
 """
 
 import io
+import uuid
 from datetime import timedelta
 from urllib import parse
 
@@ -16,8 +17,10 @@ from cryptography.x509.oid import NameOID
 
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import ApplicationForm
+from src.db.models.competition_models import ApplicationForm, Form
 from src.db.models.user_models import Role, User
+from src.form_schema.forms import init_form_registry
+from src.form_schema.registry.form_template_registry import form_template_registry
 from src.legacy_soap_api.legacy_soap_api_auth import (
     LOG_LOCAL_RESPONSE_HEADER_KEY,
     SOAPAuth,
@@ -35,7 +38,6 @@ from tests.src.db.models.factories import (
     ApplicationUserFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     LegacyAgencyCertificateFactory,
     LinkExternalUserFactory,
     OpportunityAssistanceListingFactory,
@@ -43,6 +45,7 @@ from tests.src.db.models.factories import (
     OrganizationFactory,
     RoleFactory,
     StagingTcertificatesFactory,
+    get_db_session,
 )
 
 DEFAULT_VALUE = object()
@@ -105,7 +108,24 @@ def setup_application_for_form_validation(
     }
 
     competition = CompetitionFactory.create(**competition_params)
-    form = FormFactory.create(form_json_schema=json_schema, form_rule_schema=rule_schema)
+
+    # TODO(#10274): remove db_session.add + flush once the form table is dropped
+    init_form_registry()
+    form = Form(
+        form_id=uuid.uuid4(),
+        form_name="Test Form",
+        short_form_name="TestForm",
+        form_version="1.0",
+        agency_code="SGG",
+        form_json_schema=json_schema,
+        form_ui_schema={},
+        form_rule_schema=rule_schema,
+        json_to_xml_schema=None,
+    )
+    session = get_db_session()
+    session.add(form)
+    session.flush()
+    form_template_registry.register(form, major_version=1)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     organization = None
