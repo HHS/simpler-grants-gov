@@ -156,62 +156,59 @@ export const SimplerFileInput = ({
   }, [filePendingDeletion, onDelete, filesWithDeleteError]);
 
   const readResponseStream = useCallback(
-    (reader: ReadableStreamDefaultReader<Uint8Array>) => {
+    async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
       // can't use state to track this because it would need to be both set and referenced within the same useCallback function call
       // and the function can't be recalculated to include updated state values while running
       let newFileId: string;
       let error: Error;
-      const process = (): Promise<string> => {
-        return reader
-          .read()
-          .then(({ value, done }) => {
-            let payloadJson: FileUploadStatusUpdate;
-            const payloadString = new TextDecoder().decode(value);
-            const payloadJsonStrings = unbatchStreamChunkJSON(payloadString);
-            // process each json chunk, since it's possible that chunks were batched
-            payloadJsonStrings.forEach(
-              (payloadString: string): string | undefined => {
-                try {
-                  payloadJson = JSON.parse(
-                    payloadString,
-                  ) as FileUploadStatusUpdate;
-                } catch (e) {
-                  console.error(
-                    "Error parsing json from file upload stream payload",
-                    payloadString,
-                  );
-                  throw e;
+      const process = async (): Promise<string> => {
+        return reader.read().then(({ value, done }) => {
+          let payloadJson: FileUploadStatusUpdate;
+          const payloadString = new TextDecoder().decode(value);
+          const payloadJsonStrings = unbatchStreamChunkJSON(payloadString);
+          // process each json chunk, since it's possible that chunks were batched
+          payloadJsonStrings.forEach(
+            (payloadString: string): string | undefined => {
+              try {
+                payloadJson = JSON.parse(
+                  payloadString,
+                ) as FileUploadStatusUpdate;
+              } catch (e) {
+                console.error(
+                  "Error parsing json from file upload stream payload",
+                  payloadString,
+                );
+                throw e;
+              }
+              if (payloadJson?.error) {
+                error = new Error(payloadJson.error);
+              } else if (payloadJson?.status) {
+                setCurrentStatus(payloadJson.status as FileUploadProcessStatus);
+                if (payloadJson.pendingFileId) {
+                  newFileId = payloadJson.pendingFileId;
                 }
-                if (payloadJson?.error) {
-                  error = new Error(payloadJson.error);
-                } else if (payloadJson?.status) {
-                  setCurrentStatus(
-                    payloadJson.status as FileUploadProcessStatus,
-                  );
-                  if (payloadJson.pendingFileId) {
-                    newFileId = payloadJson.pendingFileId;
-                  }
-                }
-                if (done) {
-                  return newFileId;
-                }
-              },
-            );
-            // if the stream ended, newFileId will be set. Return that and stop reading
-            if (newFileId) {
-              return newFileId;
-            }
-            if (error) {
-              throw error;
-            }
-            return process();
-          })
-          .catch((e) => {
-            console.error("error reading response stream", e);
-            throw e;
-          });
+              }
+              if (done) {
+                return newFileId;
+              }
+            },
+          );
+          // if the stream ended, newFileId will be set. Return that and stop reading
+          if (newFileId) {
+            return newFileId;
+          }
+          if (error) {
+            throw error;
+          }
+          return process();
+        });
       };
-      return process();
+      try {
+        return await process();
+      } catch (e) {
+        console.error("Error in file upload process stream response", e);
+        throw e;
+      }
     },
     [setCurrentStatus],
   );
