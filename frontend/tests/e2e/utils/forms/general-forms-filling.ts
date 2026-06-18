@@ -1,9 +1,9 @@
-// general-forms-filling.ts
-// Generic form-filling helpers that open forms, fill fields, and save when needed.
-// Usage: import { fillField, fillFormPartial, fillForm } from "tests/e2e/utils/forms/general-forms-filling";
+/**
+ * Generic form-filling helpers that open forms, fill fields, and save when needed.
+ * Usage: import { fillField, fillFormPartial, fillForm } from "tests/e2e/utils/forms/general-forms-filling";
+ */
 
 import { Page, TestInfo } from "@playwright/test";
-import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
 import { runSharedFieldFill } from "tests/e2e/utils/common/index";
 import {
   shouldFillField,
@@ -15,26 +15,26 @@ import {
 import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";
 import { clickSaveButton } from "./save-form-utils";
 
+type FillFieldOptions = {
+  attachmentNamePrefix?: string;
+  fieldContextLabel?: string;
+};
+
+/** Fills one field using the shared field-fill execution path. */
 export async function fillField(
-  testInfo: TestInfo,
+  testInfo: TestInfo | undefined,
   page: Page,
   field: FillFieldDefinition,
   data: string | boolean | undefined,
+  options?: FillFieldOptions,
 ): Promise<void> {
-  const fieldIdentifier = buildFieldIdentifier(field);
   await runSharedFieldFill({
     testInfo,
     page,
     field,
     data,
-    fieldIdentifier,
-    attachmentNames: {
-      skipped: "fillField",
-      success: "fillField",
-      error: "fillField",
-    },
-    notFoundHandlerMessage: `No handler found for field type: ${field.type}`,
-    wrappedErrorPrefix: `Failed to fill ${field.field}`,
+    attachmentNamePrefix: options?.attachmentNamePrefix,
+    fieldContextLabel: options?.fieldContextLabel,
   });
 }
 /**
@@ -94,7 +94,7 @@ export async function fillForm(
       ? formName
       : buildFlexibleFormNameRegex(formName);
   try {
-    // ── Navigation ──────────────────────────────────────────────────────────
+    // Navigation:
     // Delegate to openForm, which owns all navigation reliability:
     // table-scoped row lookup, scroll-to-reveal, testId/href/button/global
     // fallback selectors, trial-click check, force-click retry, direct href
@@ -103,7 +103,7 @@ export async function fillForm(
     if (!opened) {
       throw new Error(`Could not find or open form: ${formMatcher}`);
     }
-    // ── Form ready check ───────────────────────────────────────────────────
+    // Form ready check:
     // Confirm the form heading is visible before filling any fields.
     // Use buildFlexibleFormNameRegex for plain strings so special chars (parens,
     // hyphens) are properly escaped rather than treated as regex syntax.
@@ -116,7 +116,7 @@ export async function fillForm(
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
     for (const [fieldIdentifier, fieldConfig] of Object.entries(fields)) {
-      // ── Fill fields ────────────────────────────────────────────────────────
+      // Fill fields:
       const dataForField = data[fieldIdentifier];
       if (dataForField === undefined) {
         continue;

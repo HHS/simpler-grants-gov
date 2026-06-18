@@ -1,10 +1,12 @@
-// types.ts
-// Shared contracts for E2E field definitions, handlers, and form fill config.
-// Usage: import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
-// Usage: import { type FillFormConfig } from "tests/e2e/utils/common/types";
+/**
+ * Shared contracts for E2E field definitions, handlers, and form fill config.
+ * Usage: import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
+ * Usage: import { type FillFormConfig } from "tests/e2e/utils/common/types";
+ */
 
 import { Page, TestInfo } from "@playwright/test";
 
+/** Supported field input types used by E2E form handlers. */
 export type FieldType =
   | "text"
   | "checkbox"
@@ -18,7 +20,7 @@ export type FieldType =
   | "combo-box-input";
 
 export interface FillFieldDefinition {
-  // Field metadata used by type-specific handlers to locate and fill page fields.
+  /** Field metadata used by type-specific handlers to locate and fill page fields. */
   field: string;
   type: FieldType;
   testId?: string;
@@ -48,6 +50,12 @@ export interface FillFieldDefinition {
     field: string;
     value: string | boolean;
   };
+  /**
+   * Explicitly allow checkbox locators that intentionally match a group.
+   * When true and multiple checkboxes match, handlers select one option for
+   * truthy data instead of throwing an ambiguity error.
+   */
+  selectFirstInGroup?: boolean;
 }
 
 export type FormFillFieldDefinitions = {
@@ -67,10 +75,12 @@ export interface FillFormConfig {
   beforeSave?: (page: Page) => Promise<void>;
 }
 
+/** Optional behavior flags when filling a page with field metadata. */
 export type FillPageFieldsOptions = {
   continueOnError?: boolean;
 };
 
+/** Contract implemented by each field-type handler. */
 export type FieldHandler = (
   testInfo: TestInfo | undefined,
   page: Page,
@@ -78,7 +88,7 @@ export type FieldHandler = (
   data: string | boolean | undefined,
 ) => Promise<void>;
 
-// Returns true if the field has no dependency, or if its dependency is satisfied.
+/** Returns true when a field dependency is absent or currently satisfied. */
 export function shouldFillField(
   field: FillFieldDefinition,
   formData: Record<string, unknown>,

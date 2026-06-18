@@ -1,11 +1,33 @@
-// radio-button-handler.ts
-// Handles radio-button page fields using choice-locator field properties.
-// Usage: import { radioButtonHandler } from "tests/e2e/utils/common/radio-button-handler";
+/**
+ * Handles radio-button page fields using choice-locator field properties.
+ * Usage: import { radioButtonHandler } from "tests/e2e/utils/common/radio-button-handler";
+ */
+
+import { type Locator, type Page } from "@playwright/test";
 
 import { shouldActivateField } from "./activation";
 import { getChoiceLocator } from "./choice-locator";
 import { FieldHandler } from "./types";
 
+/** Checks a radio input by clicking its associated label when direct check fails. */
+async function checkRadioViaLabelFallback(
+  page: Page,
+  locator: Locator,
+  fieldName: string,
+): Promise<void> {
+  const inputId = await locator.getAttribute("id");
+  if (!inputId) {
+    throw new Error(
+      `Radio field ${fieldName} is offscreen and has no id for label fallback`,
+    );
+  }
+
+  const label = page.locator(`label[for="${inputId}"]`).first();
+  await label.waitFor({ state: "visible", timeout: 5000 });
+  await label.click();
+}
+
+/** Handles radio fields using shared locator resolution and fallback click paths. */
 export const radioButtonHandler: FieldHandler = async (
   testInfo,
   page,
@@ -29,23 +51,10 @@ export const radioButtonHandler: FieldHandler = async (
     return;
   }
 
-  const checkViaLabel = async () => {
-    const inputId = await locator.getAttribute("id");
-    if (!inputId) {
-      throw new Error(
-        `Radio field ${field.field} is offscreen and has no id for label fallback`,
-      );
-    }
-
-    const label = page.locator(`label[for="${inputId}"]`).first();
-    await label.waitFor({ state: "visible", timeout: 5000 });
-    await label.click();
-  };
-
   try {
     await locator.check({ timeout: 5000 });
   } catch {
-    await checkViaLabel();
+    await checkRadioViaLabelFallback(page, locator, field.field);
   }
 
   if (!(await locator.isChecked())) {

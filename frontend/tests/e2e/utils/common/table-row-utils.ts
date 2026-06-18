@@ -1,8 +1,11 @@
-// table-row-utils.ts
-// Waits for and interacts with table rows by title and status in list views.
-// Usage: import { waitForTableRow, waitForOpportunityRowByStatus, clickRowTitle } from "tests/e2e/utils/common/table-row-utils";
+/**
+ * Waits for and interacts with table rows by title and status in list views.
+ * Usage: import { waitForTableRow, waitForOpportunityRowByStatus, clickRowTitle } from "tests/e2e/utils/common/table-row-utils";
+ */
 
 import { expect, type Locator, type Page } from "@playwright/test";
+
+import { escapeRegex } from "./regex-utils";
 
 type WaitForTableRowOptions = {
   linkText: string;
@@ -22,16 +25,15 @@ type WaitForOpportunityRowByStatusOptions = {
   message?: string;
 };
 
-const escapeRegex = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
+/** Creates a case-insensitive status matcher with safe escaping. */
 const normalizeOpportunityStatusPattern = (status: string): RegExp => {
   const trimmed = status.trim();
 
   return new RegExp(`\\b${escapeRegex(trimmed)}\\b`, "i");
 };
 
-const getMatchingRowLocator = (
+/** Finds rows that match both title link and target status text. */
+const getMatchingRowByLinkAndStatusLocator = (
   page: Page,
   rowSelector: string,
   linkText: string,
@@ -50,9 +52,14 @@ const getMatchingRowLocator = (
       .filter({ hasText: statusText }),
   });
 
-  return rowsByStatusCell.or(rowsByTitle.filter({ hasText: statusText }));
+  // Fallback for table variants that render status text outside the canonical
+  // responsive-data "-2" status cell.
+  const rowsByStatusTextAnywhere = rowsByTitle.filter({ hasText: statusText });
+
+  return rowsByStatusCell.or(rowsByStatusTextAnywhere);
 };
 
+/** Detects probable logged-out state while polling long-running table updates. */
 const isLikelyLoggedOut = async (page: Page): Promise<boolean> => {
   if (/\/(sign-in|login|auth)(?:\/|$|\?)/i.test(page.url())) {
     return true;
@@ -86,6 +93,7 @@ const isLikelyLoggedOut = async (page: Page): Promise<boolean> => {
   return !hasAccountButton && (hasSignInLink || hasSignInHeading);
 };
 
+/** Polls until a table row with matching title and status is available. */
 export const waitForTableRow = async (
   page: Page,
   options: WaitForTableRowOptions,
@@ -118,7 +126,7 @@ export const waitForTableRow = async (
           logoutSignalCount = 0;
         }
 
-        const rowCount = await getMatchingRowLocator(
+        const rowCount = await getMatchingRowByLinkAndStatusLocator(
           page,
           rowSelector,
           linkText,
@@ -152,7 +160,7 @@ export const waitForTableRow = async (
           }
         }
 
-        return getMatchingRowLocator(
+        return getMatchingRowByLinkAndStatusLocator(
           page,
           rowSelector,
           linkText,
@@ -167,9 +175,15 @@ export const waitForTableRow = async (
     )
     .toBeGreaterThan(0);
 
-  return getMatchingRowLocator(page, rowSelector, linkText, statusText).first();
+  return getMatchingRowByLinkAndStatusLocator(
+    page,
+    rowSelector,
+    linkText,
+    statusText,
+  ).first();
 };
 
+/** Clicks a row title using link-first fallback to visible text. */
 export const clickRowTitle = async (
   row: Locator,
   title: string,
@@ -187,6 +201,7 @@ export const clickRowTitle = async (
   await row.getByText(title, { exact: true }).first().click();
 };
 
+/** Waits for an opportunity row by title and normalized status text. */
 export const waitForOpportunityRowByStatus = async (
   page: Page,
   options: WaitForOpportunityRowByStatusOptions,

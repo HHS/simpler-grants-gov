@@ -1,12 +1,13 @@
-// button-state-assertions.ts
-// Asserts enabled/disabled state for named action buttons on a page.
-// Usage: import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/button-state-assertions";
+/**
+ * Asserts enabled/disabled state for named action buttons on a page.
+ * Usage: import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/button-state-assertions";
+ */
 
 import { expect, type Page } from "@playwright/test";
 
-const escapeRegex = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+import { escapeRegex } from "./regex-utils";
 
+/** Verifies each named button is enabled or disabled as expected. */
 export const assertButtonEnabledDisabledStates = async (
   page: Page,
   buttonStates: Record<string, boolean>,

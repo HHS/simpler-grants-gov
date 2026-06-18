@@ -1,11 +1,13 @@
-// date-field.ts
-// Handles date page fields and date-input fill helpers using accessible labels.
-// Usage: import { dateHandler, fillDateByLabel } from "tests/e2e/utils/common/date-field";
+/**
+ * Handles date page fields and date-input fill helpers using accessible labels.
+ * Usage: import { dateHandler, fillDateByLabel } from "tests/e2e/utils/common/date-field";
+ */
 
 import { expect, type Page } from "@playwright/test";
 
 import { FieldHandler } from "./types";
 
+/** Fills a date input by label and blurs it to trigger validations. */
 export const fillDateByLabel = async (
   page: Page,
   label: string,
@@ -18,8 +20,9 @@ export const fillDateByLabel = async (
   await input.press("Tab");
 };
 
+/** Routes date-type fields through the shared date-label helper. */
 export const dateHandler: FieldHandler = async (
-  testInfo,
+  _testInfo,
   page,
   field,
   data,

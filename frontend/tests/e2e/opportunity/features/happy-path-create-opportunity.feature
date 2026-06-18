@@ -123,3 +123,4 @@ Feature: Opportunity happy path create and publish
 			| Opportunity details page | Email display text              | text       | Contact Email                              |
 
 		And I verify the opportunity visibility on search results page after publishing
+		

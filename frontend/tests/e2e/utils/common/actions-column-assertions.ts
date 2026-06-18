@@ -1,25 +1,37 @@
-// actions-column-assertions.ts
-// Asserts expected Actions-column links by row status on list views.
-// Usage: import { assertActionsColumnLinksByStatus } from "tests/e2e/utils/common/actions-column-assertions";
+/**
+ * Asserts expected Actions-column links by row status on list views.
+ * Usage: import { assertActionsColumnLinksByStatus } from "tests/e2e/utils/common/actions-column-assertions";
+ */
 
 import { expect, type Locator } from "@playwright/test";
 
-const escapeRegex = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+import { escapeRegex } from "./regex-utils";
 
 type StatusActionRule = {
   visible?: string[];
   hidden?: string[];
 };
 
+type ActionsColumnAssertionOptions = {
+  status: string;
+  statusTextMatches?: string[];
+} & (
+  | {
+      actionLinkVisibility: Record<string, boolean>;
+      statusActionRules?: never;
+    }
+  | {
+      statusActionRules: Record<string, StatusActionRule>;
+      actionLinkVisibility?: never;
+    }
+);
+
+/**
+ * Assert that a table row shows the expected status and the correct Actions links for that status.
+ */
 export const assertActionsColumnLinksByStatus = async (
   row: Locator,
-  options: {
-    status: string;
-    statusTextMatches?: string[];
-    actionLinkVisibility?: Record<string, boolean>;
-    statusActionRules?: Record<string, StatusActionRule>;
-  },
+  options: ActionsColumnAssertionOptions,
 ) => {
   const normalizedStatus = options.status.trim().toLowerCase();
   const statusTextMatches = (
@@ -61,12 +73,6 @@ export const assertActionsColumnLinksByStatus = async (
       }
     }
     return;
-  }
-
-  if (!options.statusActionRules) {
-    throw new Error(
-      "No statusActionRules provided. Pass statusActionRules, or use actionLinkVisibility.",
-    );
   }
 
   const statusRule = options.statusActionRules[normalizedStatus];

@@ -1,24 +1,30 @@
-// email-field.ts
-// Handles email page fields and label-based email input helpers.
-// Usage: import { emailHandler, fillEmailByLabel } from "tests/e2e/utils/common/email-field";
+/**
+ * Handles email page fields and label-based email input helpers.
+ * Usage: import { emailHandler, fillEmailByLabel } from "tests/e2e/utils/common/email-field";
+ */
 
-import { type Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
+import { fillTextByLabel } from "./text-handler";
 import { FieldHandler } from "./types";
 
+/** Fills an email input by label and validates the input type first. */
 export const fillEmailByLabel = async (
-  page: Page,
+  page: Parameters<FieldHandler>[1],
   label: string,
   value: string,
   exact?: boolean,
 ) => {
   const input = page.getByLabel(label, { exact }).first();
-  await input.waitFor({ state: "visible", timeout: 5000 });
-  await input.fill(value);
+  await expect(input).toBeVisible();
+  await expect(input).toHaveAttribute("type", "email");
+  await fillTextByLabel(page, label, value, exact);
+  await input.press("Tab");
 };
 
+/** Routes email-type fields through the shared email-label helper. */
 export const emailHandler: FieldHandler = async (
-  testInfo,
+  _testInfo,
   page,
   field,
   data,

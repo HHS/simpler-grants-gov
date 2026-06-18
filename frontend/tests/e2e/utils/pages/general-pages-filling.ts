@@ -1,42 +1,30 @@
-// general-pages-filling.ts
-// Generic page-field filling helpers that dispatch to shared field handlers.
-// Usage: import { fillPageField, fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
+/**
+ * Generic page-field filling helpers that dispatch to shared field handlers.
+ * Usage: import { fillPageField, fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
+ */
 
 import { type Page, type TestInfo } from "@playwright/test";
-import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
-import {
-  runFieldFillBatch,
-  runSharedFieldFill,
-} from "tests/e2e/utils/common/index";
+import { runFieldFillBatch } from "tests/e2e/utils/common/index";
 import {
   type FillFieldDefinition,
   type FillPageFieldsOptions,
 } from "tests/e2e/utils/common/types";
+import { fillField } from "tests/e2e/utils/forms/general-forms-filling";
 
 export type PageFillField = FillFieldDefinition & {
   value: string | boolean;
 };
 
+/** Fills a single page field using page-level attachment and context labels. */
 export async function fillPageField(
   testInfo: TestInfo | undefined,
   page: Page,
   field: PageFillField,
   data: string | boolean | undefined,
 ): Promise<void> {
-  const fieldIdentifier = buildFieldIdentifier(field);
-  await runSharedFieldFill({
-    testInfo,
-    page,
-    field,
-    data,
-    fieldIdentifier,
-    attachmentNames: {
-      skipped: "fillPageField",
-      success: "fillPageField",
-      error: "fillPageField",
-    },
-    notFoundHandlerMessage: `No handler found for page field type: ${field.type}`,
-    wrappedErrorPrefix: `Failed to fill page field ${field.label}`,
+  await fillField(testInfo, page, field, data, {
+    attachmentNamePrefix: "fillPageField",
+    fieldContextLabel: "page field",
   });
 }
 

@@ -1,6 +1,7 @@
-// field-identifier.ts
-// Builds consistent field identifiers for attachment names and error context.
-// Usage: import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
+/**
+ * Builds consistent field identifiers for attachment names and error context.
+ * Usage: import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
+ */
 
 import { type FieldType, type FillFieldDefinition } from "./types";
 
@@ -9,8 +10,7 @@ type PageIdentifierInput = {
   type: FieldType;
 };
 
-export function buildFieldIdentifier(field: FillFieldDefinition): string;
-export function buildFieldIdentifier(field: PageIdentifierInput): string;
+/** Creates a stable identifier for logging, attachments, and error messages. */
 export function buildFieldIdentifier(
   field: FillFieldDefinition | PageIdentifierInput,
 ): string {

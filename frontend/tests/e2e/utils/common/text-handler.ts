@@ -1,9 +1,11 @@
-// text-handler.ts
-// Handles text page fields using text-input field properties.
-// Usage: import { textHandler } from "tests/e2e/utils/common/text-handler";
+/**
+ * Handles text page fields using text-input field properties.
+ * Usage: import { textHandler } from "tests/e2e/utils/common/text-handler";
+ */
 
 import { FieldHandler } from "./types";
 
+/** Fills a text input resolved by its accessible label. */
 export const fillTextByLabel = async (
   page: Parameters<FieldHandler>[1],
   label: string,
@@ -15,15 +17,7 @@ export const fillTextByLabel = async (
   await input.fill(value);
 };
 
-export const fillTextareaByLabel = async (
-  page: Parameters<FieldHandler>[1],
-  label: string,
-  value: string,
-  exact?: boolean,
-) => {
-  await fillTextByLabel(page, label, value, exact);
-};
-
+/** Handles text-type fields using testId or label-based locators. */
 export const textHandler: FieldHandler = async (
   testInfo,
   page,
@@ -49,13 +43,4 @@ export const textHandler: FieldHandler = async (
 
   await locator.waitFor({ state: "attached", timeout: 5000 });
   await locator.fill(data);
-};
-
-export const textareaHandler: FieldHandler = async (
-  testInfo,
-  page,
-  field,
-  data,
-) => {
-  await textHandler(testInfo, page, field, data);
 };

@@ -1,13 +1,12 @@
-// dropdown-handler.ts
-// Handles dropdown page fields using selector and test ID properties.
-// Usage: import { dropdownHandler } from "tests/e2e/utils/common/dropdown-handler";
+/**
+ * Handles dropdown page fields using selector and test ID properties.
+ * Usage: import { dropdownHandler } from "tests/e2e/utils/common/dropdown-handler";
+ */
 
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
 
+import { escapeRegex } from "./regex-utils";
 import { FieldHandler } from "./types";
-
-const escapeRegex = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const dropdownHandler: FieldHandler = async (
   testInfo,

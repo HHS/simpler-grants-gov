@@ -26,7 +26,6 @@ import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-
 import {
   assertActionsColumnLinksByStatus,
   assertButtonEnabledDisabledStates,
-  assertLocatorVisible,
   assertPageHeadingAndTextsVisible,
   assertTextsVisibleOnPage,
   clickRowTitle,
@@ -157,9 +156,9 @@ test.describe("Grantor Opportunity Happy Path", () => {
       ).toBeVisible();
 
       // And I should see "Draft" status.
-      await assertLocatorVisible(
+      await expect(
         page.locator("span.display-inline-flex", { hasText: "Draft" }).first(),
-      );
+      ).toBeVisible();
 
       // And I should see Opportunity title / Opportunity number / Grant selection method values
       await assertTextsVisibleOnPage(page, [

@@ -1,56 +1,47 @@
-// shared-field-filling.ts
-// Shared helper for single-field fill execution with consistent attachments and errors.
-// Usage: import { runSharedFieldFill } from "tests/e2e/utils/common/shared-field-filling";
+/**
+ * Shared helper for single-field fill execution with consistent attachments and errors.
+ * Usage: import { runSharedFieldFill } from "tests/e2e/utils/common/shared-field-filling";
+ */
 
 import { type Page, type TestInfo } from "@playwright/test";
-import { fieldHandlerDispatcher } from "tests/e2e/utils/common/field-handler-dispatcher";
+import { fieldHandlerMap } from "tests/e2e/utils/common/field-handler-dispatcher";
+import { buildFieldIdentifier } from "tests/e2e/utils/common/field-identifier";
 import { type FillFieldDefinition } from "tests/e2e/utils/common/types";
-
-type SharedFillAttachmentNames = {
-  skipped: string;
-  success: string;
-  error: string;
-};
 
 type SharedFillOptions = {
   testInfo?: TestInfo;
   page: Page;
   field: FillFieldDefinition;
   data: string | boolean | undefined;
-  fieldIdentifier: string;
+  fieldIdentifier?: string;
   attachReports?: boolean;
-  attachmentNames?: SharedFillAttachmentNames;
-  notFoundHandlerMessage: string;
-  wrappedErrorPrefix: string;
+  attachmentNamePrefix?: string;
+  fieldContextLabel?: string;
 };
 
-const defaultAttachmentNames: SharedFillAttachmentNames = {
-  skipped: "fillField",
-  success: "fillField",
-  error: "fillField",
-};
+const defaultAttachmentNamePrefix = "fillField";
+const defaultFieldContextLabel = "field";
 
+/** Fills a single field through the shared handler map with consistent error wrapping and attachments. */
 export async function runSharedFieldFill(
   options: SharedFillOptions,
 ): Promise<void> {
-  const {
-    testInfo,
-    page,
-    field,
-    data,
-    fieldIdentifier,
-    attachReports,
-    notFoundHandlerMessage,
-    wrappedErrorPrefix,
-  } = options;
+  const { testInfo, page, field, data, attachReports } = options;
 
-  const attachmentNames = options.attachmentNames ?? defaultAttachmentNames;
+  const fieldIdentifier =
+    options.fieldIdentifier ?? buildFieldIdentifier(field);
+  const attachmentNamePrefix =
+    options.attachmentNamePrefix ?? defaultAttachmentNamePrefix;
+  const fieldContextLabel =
+    options.fieldContextLabel ?? defaultFieldContextLabel;
+  const notFoundHandlerMessage = `No handler found for ${fieldContextLabel} type: ${field.type}`;
+  const wrappedErrorPrefix = `Failed to fill ${fieldContextLabel} ${fieldIdentifier}`;
 
   try {
     if (data === undefined) {
       if (testInfo && attachReports) {
         await testInfo.attach(
-          attachmentNames.skipped + "-" + fieldIdentifier + "-skipped",
+          attachmentNamePrefix + "-" + fieldIdentifier + "-skipped",
           {
             body: "Skipped " + fieldIdentifier + ": no data provided",
             contentType: "text/plain",
@@ -60,7 +51,7 @@ export async function runSharedFieldFill(
       return;
     }
 
-    const handler = fieldHandlerDispatcher[field.type];
+    const handler = fieldHandlerMap[field.type];
     if (!handler) {
       throw new Error(notFoundHandlerMessage);
     }
@@ -69,7 +60,7 @@ export async function runSharedFieldFill(
 
     if (testInfo && attachReports) {
       await testInfo.attach(
-        attachmentNames.success + "-" + fieldIdentifier + "-success",
+        attachmentNamePrefix + "-" + fieldIdentifier + "-success",
         {
           body:
             "Successfully filled " +
@@ -96,7 +87,7 @@ export async function runSharedFieldFill(
 
     if (testInfo && attachReports) {
       await testInfo.attach(
-        attachmentNames.error + "-" + fieldIdentifier + "-error",
+        attachmentNamePrefix + "-" + fieldIdentifier + "-error",
         {
           body: "Failed to fill " + fieldIdentifier + ": " + errorMessage,
           contentType: "text/plain",
