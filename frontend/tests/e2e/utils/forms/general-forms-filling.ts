@@ -16,24 +16,20 @@ import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";
 import { clickSaveButton } from "./save-form-utils";
 
 type FillFieldOptions = {
-  attachmentNamePrefix?: string;
   fieldContextLabel?: string;
 };
 
 /** Fills one field using the shared field-fill execution path. */
 export async function fillField(
-  testInfo: TestInfo | undefined,
   page: Page,
   field: FillFieldDefinition,
   data: string | boolean | undefined,
   options?: FillFieldOptions,
 ): Promise<void> {
   await runSharedFieldFill({
-    testInfo,
     page,
     field,
     data,
-    attachmentNamePrefix: options?.attachmentNamePrefix,
     fieldContextLabel: options?.fieldContextLabel,
   });
 }
@@ -59,7 +55,7 @@ export async function fillFormPartial(
       continue;
     }
 
-    await fillField(testInfo, page, fieldDef, data[key]);
+    await fillField(page, fieldDef, data[key]);
   }
 }
 /**
@@ -128,7 +124,7 @@ export async function fillForm(
         });
         continue;
       }
-      await fillField(testInfo, page, fieldConfig, dataForField);
+      await fillField(page, fieldConfig, dataForField);
     }
 
     // Run form-specific pre-save hook if defined.

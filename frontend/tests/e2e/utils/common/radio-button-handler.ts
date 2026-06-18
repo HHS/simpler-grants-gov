@@ -7,7 +7,7 @@ import { type Locator, type Page } from "@playwright/test";
 
 import { shouldActivateField } from "./activation";
 import { getChoiceLocator } from "./choice-locator";
-import { FieldHandler } from "./types";
+import { type FillFieldDefinition, type FieldHandler } from "./types";
 
 /** Checks a radio input by clicking its associated label when direct check fails. */
 async function checkRadioViaLabelFallback(
@@ -29,10 +29,9 @@ async function checkRadioViaLabelFallback(
 
 /** Handles radio fields using shared locator resolution and fallback click paths. */
 export const radioButtonHandler: FieldHandler = async (
-  testInfo,
-  page,
-  field,
-  data,
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
 ) => {
   const hasExplicitChoiceLocator = Boolean(
     field.getByText || field.selector || field.testId,

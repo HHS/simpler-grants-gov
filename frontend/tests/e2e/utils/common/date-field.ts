@@ -5,7 +5,7 @@
 
 import { expect, type Page } from "@playwright/test";
 
-import { FieldHandler } from "./types";
+import { type FillFieldDefinition, type FieldHandler } from "./types";
 
 /** Fills a date input by label and blurs it to trigger validations. */
 export const fillDateByLabel = async (
@@ -22,10 +22,9 @@ export const fillDateByLabel = async (
 
 /** Routes date-type fields through the shared date-label helper. */
 export const dateHandler: FieldHandler = async (
-  _testInfo,
-  page,
-  field,
-  data,
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
 ) => {
   if (typeof data !== "string") {
     throw new Error(

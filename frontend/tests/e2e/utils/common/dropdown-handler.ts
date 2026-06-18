@@ -4,15 +4,15 @@
  */
 
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
+import { type Page } from "@playwright/test";
 
 import { escapeRegex } from "./regex-utils";
-import { FieldHandler } from "./types";
+import { type FillFieldDefinition, type FieldHandler } from "./types";
 
 export const dropdownHandler: FieldHandler = async (
-  testInfo,
-  page,
-  field,
-  data,
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
 ) => {
   if (typeof data !== "string") {
     throw new Error(

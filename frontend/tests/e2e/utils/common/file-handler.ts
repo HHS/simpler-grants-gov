@@ -2,13 +2,14 @@
 // Handles file-upload page fields using selector and test ID properties.
 // Usage: import { fileHandler } from "tests/e2e/utils/common/file-handler";
 
-import { FieldHandler } from "./types";
+import { type Page } from "@playwright/test";
+
+import { type FillFieldDefinition, type FieldHandler } from "./types";
 
 export const fileHandler: FieldHandler = async (
-  testInfo,
-  page,
-  field,
-  data,
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
 ) => {
   if (!field.testId && !field.selector) {
     throw new Error(`File field ${field.field} requires a selector or testId`);
@@ -20,7 +21,13 @@ export const fileHandler: FieldHandler = async (
   }
   const locator = field.selector
     ? page.locator(field.selector)
-    : page.getByTestId(field.testId!);
+    : field.testId
+      ? page.getByTestId(field.testId)
+      : (() => {
+          throw new Error(
+            `File field ${field.field} requires a selector or testId`,
+          );
+        })();
   await locator.waitFor({ state: "attached", timeout: 30000 });
   await locator.scrollIntoViewIfNeeded();
   const inputName = await locator.getAttribute("name");
@@ -49,7 +56,13 @@ export const fileHandler: FieldHandler = async (
   }
   if (hiddenInputSelector) {
     await page.waitForFunction(
-      ({ selector, uploadedFileName }) => {
+      ({
+        selector,
+        uploadedFileName,
+      }: {
+        selector: string;
+        uploadedFileName: string;
+      }) => {
         const hiddenInput = document.querySelector<HTMLInputElement>(selector);
         if (!hiddenInput?.value) {
           return false;

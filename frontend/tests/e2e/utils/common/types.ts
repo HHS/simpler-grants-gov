@@ -4,7 +4,7 @@
  * Usage: import { type FillFormConfig } from "tests/e2e/utils/common/types";
  */
 
-import { Page, TestInfo } from "@playwright/test";
+import { Page } from "@playwright/test";
 
 /** Supported field input types used by E2E form handlers. */
 export type FieldType =
@@ -82,7 +82,6 @@ export type FillPageFieldsOptions = {
 
 /** Contract implemented by each field-type handler. */
 export type FieldHandler = (
-  testInfo: TestInfo | undefined,
   page: Page,
   field: FillFieldDefinition,
   data: string | boolean | undefined,

@@ -3,14 +3,14 @@
  * Usage: import { emailHandler, fillEmailByLabel } from "tests/e2e/utils/common/email-field";
  */
 
-import { expect } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 import { fillTextByLabel } from "./text-handler";
-import { FieldHandler } from "./types";
+import { type FillFieldDefinition, type FieldHandler } from "./types";
 
 /** Fills an email input by label and validates the input type first. */
 export const fillEmailByLabel = async (
-  page: Parameters<FieldHandler>[1],
+  page: Page,
   label: string,
   value: string,
   exact?: boolean,
@@ -24,10 +24,9 @@ export const fillEmailByLabel = async (
 
 /** Routes email-type fields through the shared email-label helper. */
 export const emailHandler: FieldHandler = async (
-  _testInfo,
-  page,
-  field,
-  data,
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
 ) => {
   if (typeof data !== "string") {
     throw new Error(

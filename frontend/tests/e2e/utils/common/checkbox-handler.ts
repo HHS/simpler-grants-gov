@@ -3,13 +3,15 @@
  * Usage: import { checkboxHandler } from "tests/e2e/utils/common/checkbox-handler";
  */
 
+import { type Page } from "@playwright/test";
+
 import { shouldActivateField } from "./activation";
 import { getChoiceLocator } from "./choice-locator";
-import { FieldHandler } from "./types";
+import { type FillFieldDefinition, type FieldHandler } from "./types";
 
 /** Falls back to nested checkbox input interactions when primary locator actions fail. */
 const applyNestedCheckboxFallback = async (
-  page: Parameters<FieldHandler>[1],
+  page: Page,
   singleLocator: Awaited<ReturnType<typeof getChoiceLocator>>,
   fieldName: string,
   shouldBeChecked: boolean,
@@ -50,10 +52,9 @@ const applyNestedCheckboxFallback = async (
 
 /** Handles checkbox fields with support for grouped options and label-click fallbacks. */
 export const checkboxHandler: FieldHandler = async (
-  testInfo,
-  page,
-  field,
-  data,
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
 ) => {
   if (page.isClosed()) {
     throw new Error(

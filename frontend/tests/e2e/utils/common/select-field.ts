@@ -4,7 +4,7 @@
 
 import { type Page } from "@playwright/test";
 
-import { FieldHandler } from "./types";
+import { type FillFieldDefinition, type FieldHandler } from "./types";
 
 export const selectOptionByLabel = async (
   page: Page,
@@ -18,10 +18,9 @@ export const selectOptionByLabel = async (
 };
 
 export const selectHandler: FieldHandler = async (
-  testInfo,
-  page,
-  field,
-  data,
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
 ) => {
   if (typeof data !== "string") {
     throw new Error(

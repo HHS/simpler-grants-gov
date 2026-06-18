@@ -3,11 +3,13 @@
  * Usage: import { textHandler } from "tests/e2e/utils/common/text-handler";
  */
 
-import { FieldHandler } from "./types";
+import { type Page } from "@playwright/test";
+
+import { type FillFieldDefinition, type FieldHandler } from "./types";
 
 /** Fills a text input resolved by its accessible label. */
 export const fillTextByLabel = async (
-  page: Parameters<FieldHandler>[1],
+  page: Page,
   label: string,
   value: string,
   exact?: boolean,
@@ -19,10 +21,9 @@ export const fillTextByLabel = async (
 
 /** Handles text-type fields using testId or label-based locators. */
 export const textHandler: FieldHandler = async (
-  testInfo,
-  page,
-  field,
-  data,
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
 ) => {
   if (typeof data !== "string") {
     throw new Error(

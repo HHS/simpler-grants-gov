@@ -91,7 +91,6 @@ test.describe("Grantor Opportunity Happy Path", () => {
           CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
           fillData,
         ),
-        testInfo,
       );
 
       // And I click "Save and continue" button
@@ -119,14 +118,12 @@ test.describe("Grantor Opportunity Happy Path", () => {
           FUNDING_DETAILS_FIELD_DEFINITIONS,
           fillData,
         ),
-        testInfo,
       );
 
       // Fill required Eligibility values.
       await fillPageFields(
         page,
         buildPageFieldsFromDefinitions(ELIGIBILITY_FIELD_DEFINITIONS, fillData),
-        testInfo,
       );
 
       // Fill optional Additional information values.
@@ -136,7 +133,6 @@ test.describe("Grantor Opportunity Happy Path", () => {
           ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
           fillData,
         ),
-        testInfo,
       );
 
       // And I click "Save" button

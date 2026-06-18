@@ -3,7 +3,7 @@
  * Usage: import { fillPageField, fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
  */
 
-import { type Page, type TestInfo } from "@playwright/test";
+import { type Page } from "@playwright/test";
 import { runFieldFillBatch } from "tests/e2e/utils/common/index";
 import {
   type FillFieldDefinition,
@@ -15,15 +15,13 @@ export type PageFillField = FillFieldDefinition & {
   value: string | boolean;
 };
 
-/** Fills a single page field using page-level attachment and context labels. */
+/** Fills a single page field using page-level context labels. */
 export async function fillPageField(
-  testInfo: TestInfo | undefined,
   page: Page,
   field: PageFillField,
   data: string | boolean | undefined,
 ): Promise<void> {
-  await fillField(testInfo, page, field, data, {
-    attachmentNamePrefix: "fillPageField",
+  await fillField(page, field, data, {
     fieldContextLabel: "page field",
   });
 }
@@ -35,7 +33,6 @@ export async function fillPageField(
 export async function fillPageFields(
   page: Page,
   fields: PageFillField[],
-  testInfo?: TestInfo,
   options?: FillPageFieldsOptions,
 ): Promise<void> {
   const continueOnError = options?.continueOnError ?? false;
@@ -43,7 +40,7 @@ export async function fillPageFields(
     items: fields,
     continueOnError,
     fillItem: async (field) => {
-      await fillPageField(testInfo, page, field, field.value);
+      await fillPageField(page, field, field.value);
     },
     formatError: (field, error) => {
       const errorMessage =
