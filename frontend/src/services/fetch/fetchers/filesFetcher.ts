@@ -60,7 +60,8 @@ export const uploadFileToS3 = async (
     method: "POST",
     body: fileFormData,
   });
-  if (s3Response.ok) {
+  throw new Error("something");
+  if (!s3Response.ok) {
     throw new ApiRequestError("Error uploading file to S3");
   }
   return true;

@@ -7,6 +7,7 @@ import {
   UploadFileMetadata,
 } from "src/types/fileUploadTypes";
 import { createFormDataForFile } from "src/utils/fileUtils/createFormData";
+import { unbatchStreamChunkJSON } from "src/utils/streamUtils";
 
 import { ChangeEvent, useCallback, useRef, useState } from "react";
 import { FileInput, FileInputRef, ModalRef } from "@trussworks/react-uswds";
@@ -159,35 +160,49 @@ export const SimplerFileInput = ({
       // can't use state to track this because it would need to be both set and referenced within the same useCallback function call
       // and the function can't be recalculated to include updated state values while running
       let newFileId: string;
+      let error: Error;
       const process = (): Promise<string> => {
         return reader
           .read()
           .then(({ value, done }) => {
             let payloadJson: FileUploadStatusUpdate;
             const payloadString = new TextDecoder().decode(value);
-            try {
-              payloadJson = payloadString
-                ? (JSON.parse(payloadString) as FileUploadStatusUpdate)
-                : {};
-            } catch (e) {
-              console.error(
-                "Error parsing json from file upload stream payload",
-                payloadString,
-              );
-              throw e;
-            }
-            console.log("$$$", payloadJson);
-            if (payloadJson?.error) {
-              throw new Error(payloadJson.error);
-            } else if (payloadJson?.status) {
-              setCurrentStatus(payloadJson.status as FileUploadProcessStatus);
-              if (payloadJson.pendingFileId) {
-                console.log("~~ setting file id", payloadJson.pendingFileId);
-                newFileId = payloadJson.pendingFileId;
-              }
-            }
-            if (done) {
+            const payloadJsonStrings = unbatchStreamChunkJSON(payloadString);
+            // process each json chunk, since it's possible that chunks were batched
+            payloadJsonStrings.forEach(
+              (payloadString: string): string | undefined => {
+                try {
+                  payloadJson = JSON.parse(
+                    payloadString,
+                  ) as FileUploadStatusUpdate;
+                } catch (e) {
+                  console.error(
+                    "Error parsing json from file upload stream payload",
+                    payloadString,
+                  );
+                  throw e;
+                }
+                if (payloadJson?.error) {
+                  error = new Error(payloadJson.error);
+                } else if (payloadJson?.status) {
+                  setCurrentStatus(
+                    payloadJson.status as FileUploadProcessStatus,
+                  );
+                  if (payloadJson.pendingFileId) {
+                    newFileId = payloadJson.pendingFileId;
+                  }
+                }
+                if (done) {
+                  return newFileId;
+                }
+              },
+            );
+            // if the stream ended, newFileId will be set. Return that and stop reading
+            if (newFileId) {
               return newFileId;
+            }
+            if (error) {
+              throw error;
             }
             return process();
           })
