@@ -236,7 +236,11 @@ export default function AddRiskForm({
           >
             {t("cancelButton")}
           </Button>
-          <Button type="button" onClick={handleSave} disabled={isSubmitting}>
+          <Button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={isSubmitting}
+          >
             {isSubmitting ? t("savingButton") : t("saveButton")}
           </Button>
         </ButtonGroup>
