@@ -74,7 +74,9 @@ export async function runSharedFieldFill(
     }
   } catch (error) {
     const errorMessage =
-      error instanceof Error ? error.message : "Unknown error while filling field";
+      error instanceof Error
+        ? error.message
+        : "Unknown error while filling field";
 
     // Preserve Playwright timeout/page lifecycle errors so callers can handle them upstream.
     if (
