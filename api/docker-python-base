@@ -9,7 +9,7 @@ FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
-ARG PYTHON_VERSION=3.14.5
+ARG PYTHON_VERSION=3.14.6
 ARG PY_MM=3.14
 ARG PIP_VERSION=26.0
 
