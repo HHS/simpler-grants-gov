@@ -22,12 +22,12 @@ import uuid
 import click
 import grants_shared.adapters.db.flask_db as flask_db
 from grants_shared.adapters import db
+from grants_shared.task.ecs_background_task import ecs_background_task
 from sqlalchemy import select
 
 from src.constants.lookup_constants import JobType, UserType
 from src.constants.static_role_values import INTERNAL_S3_SCANNER_ROLE_ID
 from src.db.models.user_models import InternalUserRole, User, UserApiKey
-from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
 
