@@ -13,7 +13,7 @@ export const postAttachmentHandler = async (
   const session = await getSession();
 
   if (!session || !session.token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
   }
 
   const { applicationId } = await params;
