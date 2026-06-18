@@ -105,10 +105,10 @@ export const buildSF424HappyPathTestData = (
  */
 export const SF424_OPPORTUNITY_DATA: PrintViewFormData = {
   opportunityId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  opportunityNumber: "E2E-SF424-OG-IND-01",
+  opportunityNumber: "E2E-SF424-ORG-IND-01",
   formKey: "sf424",
   expectedPrepopulatedFields: {
-    funding_opportunity_number: "E2E-SF424-OG-IND-01",
+    funding_opportunity_number: "E2E-SF424-ORG-IND-01",
     funding_opportunity_title:
       "E2E Application for Federal Assistance (SF-424) ORG IND OT01",
     assistance_listing_number: "10.960",
