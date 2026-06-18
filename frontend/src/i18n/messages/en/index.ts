@@ -2258,6 +2258,7 @@ export const messages = {
       riskSummaryLabel: "Risk summary",
       riskSummaryHint:
         "Any program or organization risks already identified at this time",
+      riskSummaryRequired: "Risk summary is required.",
       recommendedConditionLabel: "Recommended term or condition",
       recommendedConditionHint:
         "Add any recommended conditions based on the risks identified",

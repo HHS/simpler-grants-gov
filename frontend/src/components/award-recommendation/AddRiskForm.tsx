@@ -11,6 +11,8 @@ import {
   Button,
   ButtonGroup,
   CharacterCount,
+  ErrorMessage,
+  FormGroup,
   Select,
 } from "@trussworks/react-uswds";
 
@@ -43,6 +45,7 @@ export default function AddRiskForm({
   const [selectedCondition, setSelectedCondition] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [riskSummaryError, setRiskSummaryError] = useState<string | null>(null);
 
   const { selectedSubmissions, hasSelections } = useSelectedSubmissions(
     awardRecommendationId,
@@ -52,14 +55,24 @@ export default function AddRiskForm({
     router.push(`/award-recommendation/${awardRecommendationId}/edit`);
   };
 
+  const handleRiskSummaryBlur = () => {
+    if (!riskSummary.trim()) {
+      setRiskSummaryError(t("riskSummaryRequired"));
+    } else {
+      setRiskSummaryError(null);
+    }
+  };
+
   const handleSave = async () => {
-    if (!riskSummary.trim() || !selectedCondition) {
+    if (!riskSummary.trim()) {
+      setRiskSummaryError(t("riskSummaryRequired"));
       setError(t("validationError"));
       return;
     }
 
     setIsSubmitting(true);
     setError(null);
+    setRiskSummaryError(null);
 
     const submissionIds = selectedSubmissions.map(
       (submission) => submission.award_recommendation_application_submission_id,
@@ -183,7 +196,7 @@ export default function AddRiskForm({
           {t("riskDetailsHeading")}
         </h2>
 
-        <div>
+        <FormGroup error={!!riskSummaryError}>
           <label className="usa-label text-bold" htmlFor="risk-summary">
             {t("riskSummaryLabel")}
             <span className="usa-hint usa-hint--required text-no-underline">
@@ -191,6 +204,7 @@ export default function AddRiskForm({
             </span>
           </label>
           <span className="usa-hint">{t("riskSummaryHint")}</span>
+          {riskSummaryError && <ErrorMessage>{riskSummaryError}</ErrorMessage>}
           <CharacterCount
             id="risk-summary"
             name="risk-summary"
@@ -201,9 +215,10 @@ export default function AddRiskForm({
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setRiskSummary(e.target.value)
             }
+            onBlur={handleRiskSummaryBlur}
             className="maxw-tablet-lg"
           />
-        </div>
+        </FormGroup>
 
         <div className="margin-top-3">
           <label

@@ -176,9 +176,43 @@ describe("AddRiskForm", () => {
 
     await waitFor(() => {
       expect(screen.getByText("validationError")).toBeInTheDocument();
+      expect(screen.getByText("riskSummaryRequired")).toBeInTheDocument();
     });
 
     expect(createRiskAction).not.toHaveBeenCalled();
+  });
+
+  it("shows field-level error on blur when risk summary is empty", async () => {
+    const user = userEvent.setup();
+    render(<AddRiskForm awardRecommendationId="test-award-id" />);
+
+    const textarea = screen.getByLabelText(/riskSummaryLabel/);
+    await user.click(textarea);
+    await user.tab();
+
+    await waitFor(() => {
+      expect(screen.getByText("riskSummaryRequired")).toBeInTheDocument();
+    });
+  });
+
+  it("clears field-level error when risk summary is provided", async () => {
+    const user = userEvent.setup();
+    render(<AddRiskForm awardRecommendationId="test-award-id" />);
+
+    const textarea = screen.getByLabelText(/riskSummaryLabel/);
+    await user.click(textarea);
+    await user.tab();
+
+    await waitFor(() => {
+      expect(screen.getByText("riskSummaryRequired")).toBeInTheDocument();
+    });
+
+    await user.type(textarea, "Test risk summary");
+    await user.tab();
+
+    await waitFor(() => {
+      expect(screen.queryByText("riskSummaryRequired")).not.toBeInTheDocument();
+    });
   });
 
   it("calls createRiskAction with correct data on save", async () => {
