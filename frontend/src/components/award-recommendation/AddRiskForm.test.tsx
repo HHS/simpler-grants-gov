@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { identity } from "lodash";
+import { createRiskAction } from "src/app/[locale]/(base)/award-recommendation/[id]/risks/actions";
 
 import AddRiskForm from "./AddRiskForm";
 
@@ -8,11 +9,20 @@ jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
 
+const mockPush = jest.fn();
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
-    push: jest.fn(),
+    push: mockPush,
   }),
 }));
+
+jest.mock(
+  "src/app/[locale]/(base)/award-recommendation/[id]/risks/actions",
+  () => ({
+    createRiskAction: jest.fn(),
+  }),
+);
 
 const mockSelectedSubmissions = [
   {
@@ -155,5 +165,171 @@ describe("AddRiskForm", () => {
       "href",
       "/award-recommendation/test-award-id/application-submissions/sub-1/edit",
     );
+  });
+
+  it("shows validation error when trying to save without required fields", async () => {
+    const user = userEvent.setup();
+    render(<AddRiskForm awardRecommendationId="test-award-id" />);
+
+    const saveButton = screen.getByText("saveButton");
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("validationError")).toBeInTheDocument();
+    });
+
+    expect(createRiskAction).not.toHaveBeenCalled();
+  });
+
+  it("calls createRiskAction with correct data on save", async () => {
+    const user = userEvent.setup();
+    (createRiskAction as jest.Mock).mockResolvedValue({
+      success: true,
+      riskId: "risk-123",
+    });
+
+    render(<AddRiskForm awardRecommendationId="test-award-id" />);
+
+    const textarea = screen.getByLabelText(/riskSummaryLabel/);
+    await user.type(textarea, "Test risk summary");
+
+    const select = screen.getByLabelText(/recommendedConditionLabel/);
+    await user.selectOptions(select, "condition1");
+
+    const saveButton = screen.getByText("saveButton");
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(createRiskAction).toHaveBeenCalledWith("test-award-id", {
+        comment: "Test risk summary",
+        award_recommendation_risk_type: "additional_monitoring",
+        award_recommendation_application_submission_ids: ["sub-1"],
+      });
+    });
+  });
+
+  it("redirects to edit page on successful save", async () => {
+    const user = userEvent.setup();
+    (createRiskAction as jest.Mock).mockResolvedValue({
+      success: true,
+      riskId: "risk-123",
+    });
+
+    render(<AddRiskForm awardRecommendationId="test-award-id" />);
+
+    const textarea = screen.getByLabelText(/riskSummaryLabel/);
+    await user.type(textarea, "Test risk summary");
+
+    const select = screen.getByLabelText(/recommendedConditionLabel/);
+    await user.selectOptions(select, "condition1");
+
+    const saveButton = screen.getByText("saveButton");
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith(
+        "/award-recommendation/test-award-id/edit",
+      );
+    });
+  });
+
+  it("displays error message when save fails", async () => {
+    const user = userEvent.setup();
+    (createRiskAction as jest.Mock).mockResolvedValue({
+      success: false,
+      errorMessage: "Failed to create risk",
+    });
+
+    render(<AddRiskForm awardRecommendationId="test-award-id" />);
+
+    const textarea = screen.getByLabelText(/riskSummaryLabel/);
+    await user.type(textarea, "Test risk summary");
+
+    const select = screen.getByLabelText(/recommendedConditionLabel/);
+    await user.selectOptions(select, "condition1");
+
+    const saveButton = screen.getByText("saveButton");
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Failed to create risk")).toBeInTheDocument();
+    });
+
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("disables buttons while submitting", async () => {
+    const user = userEvent.setup();
+    (createRiskAction as jest.Mock).mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ success: true, riskId: "risk-123" }), 100),
+        ),
+    );
+
+    render(<AddRiskForm awardRecommendationId="test-award-id" />);
+
+    const textarea = screen.getByLabelText(/riskSummaryLabel/);
+    await user.type(textarea, "Test risk summary");
+
+    const select = screen.getByLabelText(/recommendedConditionLabel/);
+    await user.selectOptions(select, "condition1");
+
+    const saveButton = screen.getByText("saveButton");
+    const cancelButton = screen.getByText("cancelButton");
+
+    await user.click(saveButton);
+
+    expect(saveButton).toBeDisabled();
+    expect(cancelButton).toBeDisabled();
+    expect(screen.getByText("savingButton")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalled();
+    });
+  });
+
+  it("navigates to edit page when cancel is clicked", async () => {
+    const user = userEvent.setup();
+    render(<AddRiskForm awardRecommendationId="test-award-id" />);
+
+    const cancelButton = screen.getByText("cancelButton");
+    await user.click(cancelButton);
+
+    expect(mockPush).toHaveBeenCalledWith(
+      "/award-recommendation/test-award-id/edit",
+    );
+  });
+
+  it("allows dismissing error alert", async () => {
+    const user = userEvent.setup();
+    (createRiskAction as jest.Mock).mockResolvedValue({
+      success: false,
+      errorMessage: "Failed to create risk",
+    });
+
+    render(<AddRiskForm awardRecommendationId="test-award-id" />);
+
+    const textarea = screen.getByLabelText(/riskSummaryLabel/);
+    await user.type(textarea, "Test risk summary");
+
+    const select = screen.getByLabelText(/recommendedConditionLabel/);
+    await user.selectOptions(select, "condition1");
+
+    const saveButton = screen.getByText("saveButton");
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Failed to create risk")).toBeInTheDocument();
+    });
+
+    const closeButton = screen.getByTestId("simpler-alert-close-button");
+    await user.click(closeButton);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Failed to create risk"),
+      ).not.toBeInTheDocument();
+    });
   });
 });
