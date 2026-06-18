@@ -160,12 +160,8 @@ function Budget424aSectionC<
       get(
         activityItems,
         `[${rowIndex}].non_federal_resources.applicant_amount`,
-      ) 
-      ||
-      get(activityItems, `[${rowIndex}].non_federal_resources.state_amount`
-
-      )
-       ||
+      ) ||
+      get(activityItems, `[${rowIndex}].non_federal_resources.state_amount`) ||
       get(activityItems, `[${rowIndex}].non_federal_resources.other_amount`);
 
     const displayTitle = title?.trim() ? title : hasAmounts ? "N/A" : "";
