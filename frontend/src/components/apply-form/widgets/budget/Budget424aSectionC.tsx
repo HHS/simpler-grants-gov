@@ -8,13 +8,16 @@ import {
 import React, { JSX } from "react";
 import { Table } from "@trussworks/react-uswds";
 
+import TextWidget from "src/components/apply-form/widgets/TextWidget";
 import { ACTIVITY_ITEMS } from "./budgetConstants";
 import { getBudgetErrors } from "./budgetErrorLabels";
+import { activityTitleSchema } from "./budgetSchemas";
 import { BaseActivityItem, MoneyString } from "./budgetTypes";
 import { CurrencyInput, HelperText } from "./budgetUiComponents";
 import { asMoney, getStringOrUndefined, isRecord } from "./budgetValueGuards";
 
 interface NonFederalResources {
+  grant_program?: string;
   applicant_amount?: MoneyString;
   state_amount?: MoneyString;
   other_amount?: MoneyString;
@@ -38,6 +41,8 @@ type NormalizedC = {
 function pickNonFederalResources(value: unknown): NonFederalResources {
   if (!isRecord(value)) return {};
   return {
+    grant_program:
+      typeof value.grant_program === "string" ? value.grant_program : undefined,
     applicant_amount: asMoney(value.applicant_amount),
     state_amount: asMoney(value.state_amount),
     other_amount: asMoney(value.other_amount),
@@ -146,26 +151,37 @@ function Budget424aSectionC<
   ];
 
   const titleCell = (rowIndex: number): JSX.Element => {
-    const title =
-      getStringOrUndefined(activityItems, `[${rowIndex}].activity_title`) ?? "";
-    const cfda =
-      getStringOrUndefined(
+    const title = getStringOrUndefined(
+      activityItems,
+      `[${rowIndex}].non_federal_resources.grant_program`,
+    );
+
+    const hasAmounts =
+      get(
         activityItems,
-        `[${rowIndex}].assistance_listing_number`,
-      ) ?? "";
+        `[${rowIndex}].non_federal_resources.applicant_amount`,
+      ) 
+      ||
+      get(activityItems, `[${rowIndex}].non_federal_resources.state_amount`
+
+      )
+       ||
+      get(activityItems, `[${rowIndex}].non_federal_resources.other_amount`);
+
+    const displayTitle = title?.trim() ? title : hasAmounts ? "N/A" : "";
 
     return (
-      <div className="display-flex flex-column">
-        {/* Display text only (no input). Fallback to dash. */}
-        <div className="minw-15 font-sans-sm text-italic">
-          {title.trim() ? title : "—"}
-        </div>
-        {cfda.trim() ? (
-          <div className="font-sans-3xs text-base-dark text-italic">
-            CFDA: {cfda}
-          </div>
-        ) : null}
-      </div>
+      <TextWidget
+        schema={activityTitleSchema}
+        id={`activity_line_items[${rowIndex}]--non_federal_resources--grant_program`}
+        rawErrors={getErrorMessagesForField(
+          `activity_line_items[${rowIndex}]--non_federal_resources--grant_program`,
+        )}
+        formClassName="margin-left-2"
+        inputClassName="minw-10 sf424a-section-a__activity-input"
+        value={displayTitle}
+        disabled={disabled}
+      />
     );
   };
 
