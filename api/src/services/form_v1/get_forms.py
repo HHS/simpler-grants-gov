@@ -25,18 +25,14 @@ def get_forms() -> list[FormCatalog]:
     versions_by_form: dict[uuid.UUID, list[tuple[int, Form]]] = {}
     for key, form in form_template_registry._registry.items():
         versions_by_form.setdefault(key.form_id, []).append((key.major_version, form))
-    import pdb
 
-    pdb.set_trace()
     entries = []
     for form_versions in versions_by_form.values():
         max_major, form = max(form_versions, key=lambda x: x[0])
-        form_version = form.form_version or ""
-        parts = form_version.split(".")
-        try:
-            minor = int(parts[1]) if len(parts) > 1 else 0
-        except ValueError:
-            minor = 0
+        # Parse the minor version from the form's own version string (e.g. "4.0" -> minor=0)
+        # major_version comes from the registry key, not this string
+        parts = (form.form_version or "").split(".")
+        minor = int(parts[1]) if len(parts) > 1 else 0
 
         entries.append(
             FormCatalog(
