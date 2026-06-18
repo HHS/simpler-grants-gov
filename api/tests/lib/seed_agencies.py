@@ -441,7 +441,7 @@ AGENCIES_TO_CREATE = [
     },
     {
         "agency_code": "SGG",
-        "agency_id": "00000000-0000-0000-0000-000000000001",
+        "agency_id": "7f4e3d2c-1b0a-4f9e-8d7c-6b5a4f3e2d1c",
         "agency_name": "Simpler Grants.gov",
     },
 ]
