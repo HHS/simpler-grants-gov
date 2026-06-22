@@ -8,13 +8,16 @@ import {
 import React, { JSX } from "react";
 import { Table } from "@trussworks/react-uswds";
 
+import TextWidget from "src/components/apply-form/widgets/TextWidget";
 import { ACTIVITY_ITEMS, BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
 import { getBudgetErrors } from "./budgetErrorLabels";
+import { activityTitleSchema } from "./budgetSchemas";
 import { BaseActivityItem, MoneyString } from "./budgetTypes";
 import { CurrencyInput, HelperText } from "./budgetUiComponents";
 import { asMoney, getStringOrUndefined, isRecord } from "./budgetValueGuards";
 
 interface FederalFundEstimates {
+  grant_program?: string;
   first_year_amount?: MoneyString;
   second_year_amount?: MoneyString;
   third_year_amount?: MoneyString;
@@ -34,6 +37,8 @@ type NormalizedE = {
 function pickFederalFundEstimates(value: unknown): FederalFundEstimates {
   if (!isRecord(value)) return {};
   return {
+    grant_program:
+      typeof value.grant_program === "string" ? value.grant_program : undefined,
     first_year_amount: asMoney(value.first_year_amount),
     second_year_amount: asMoney(value.second_year_amount),
     third_year_amount: asMoney(value.third_year_amount),
@@ -130,25 +135,42 @@ function Budget424aSectionE<
   type YearKey = (typeof YEARS)[number]["key"];
 
   const titleCell = (rowIndex: number): JSX.Element => {
-    const title =
-      getStringOrUndefined(activityItems, `[${rowIndex}].activity_title`) ?? "";
-    const assistanceListingNumber =
-      getStringOrUndefined(
-        activityItems,
-        `[${rowIndex}].assistance_listing_number`,
-      ) ?? "";
+    const title = getStringOrUndefined(
+      activityItems,
+      `[${rowIndex}].federal_fund_estimates.grant_program`,
+    );
 
+    const hasAmounts =
+      get(
+        activityItems,
+        `[${rowIndex}].federal_fund_estimates.first_year_amount`,
+      ) ||
+      get(
+        activityItems,
+        `[${rowIndex}].federal_fund_estimates.second_year_amount`,
+      ) ||
+      get(
+        activityItems,
+        `[${rowIndex}].federal_fund_estimates.third_year_amount`,
+      ) ||
+      get(
+        activityItems,
+        `[${rowIndex}].federal_fund_estimates.fourth_year_amount`,
+      );
+
+    const displayTitle = title?.trim() ? title : hasAmounts ? "N/A" : "";
     return (
-      <div className="display-flex flex-column">
-        <div className="minw-15 font-sans-sm text-italic">
-          {title.trim() ? title : "—"}
-        </div>
-        {assistanceListingNumber.trim() ? (
-          <div className="font-sans-3xs text-base-dark text-italic">
-            CFDA: {assistanceListingNumber}
-          </div>
-        ) : null}
-      </div>
+      <TextWidget
+        schema={activityTitleSchema}
+        id={`activity_line_items[${rowIndex}]--federal_fund_estimates--grant_program`}
+        rawErrors={getErrorMessagesForField(
+          `activity_line_items[${rowIndex}]--federal_fund_estimates--grant_program`,
+        )}
+        formClassName="margin-left-2"
+        inputClassName="minw-10 sf424a-section-a__activity-input"
+        value={displayTitle}
+        disabled={disabled}
+      />
     );
   };
 
