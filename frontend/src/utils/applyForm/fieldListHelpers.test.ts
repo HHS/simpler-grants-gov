@@ -97,7 +97,7 @@ describe("fieldListHelpers", () => {
           rawErrors: undefined,
           fieldListPath: "$.contact_people_test",
           entryIndex: 1,
-          storageKey: "first_name",
+          storagePath: ["first_name"],
           childDefinition,
         }),
       ).toEqual([]);
@@ -120,7 +120,7 @@ describe("fieldListHelpers", () => {
           rawErrors,
           fieldListPath: "$.contact_people_test",
           entryIndex: 1,
-          storageKey: "first_name",
+          storagePath: ["first_name"],
           childDefinition,
         }),
       ).toEqual(["First Name is required"]);
@@ -130,8 +130,44 @@ describe("fieldListHelpers", () => {
           rawErrors,
           fieldListPath: "$.contact_people_test",
           entryIndex: 0,
-          storageKey: "first_name",
+          storagePath: ["first_name"],
           childDefinition,
+        }),
+      ).toEqual([]);
+    });
+
+    it("returns row-aware warnings for nested child fields", () => {
+      const nestedChildDefinition =
+        "/properties/contact_people_test/items/properties/address/properties/street1";
+
+      const rawErrors: FormattedFormValidationWarning[] = [
+        {
+          field: "$.contact_people_test[2].address.street1",
+          message: "'street1' is a required property",
+          formatted: "Street 1 is required",
+          type: "required",
+          value: null,
+          definition: nestedChildDefinition,
+        },
+      ];
+
+      expect(
+        getFieldListChildErrors({
+          rawErrors,
+          fieldListPath: "$.contact_people_test",
+          entryIndex: 2,
+          storagePath: ["address", "street1"],
+          childDefinition: nestedChildDefinition,
+        }),
+      ).toEqual(["Street 1 is required"]);
+
+      expect(
+        getFieldListChildErrors({
+          rawErrors,
+          fieldListPath: "$.contact_people_test",
+          entryIndex: 1,
+          storagePath: ["address", "street1"],
+          childDefinition: nestedChildDefinition,
         }),
       ).toEqual([]);
     });
@@ -153,7 +189,7 @@ describe("fieldListHelpers", () => {
           rawErrors,
           fieldListPath: "$.contact_people_test",
           entryIndex: 1,
-          storageKey: "first_name",
+          storagePath: ["first_name"],
           childDefinition,
         }),
       ).toEqual([]);
@@ -176,7 +212,7 @@ describe("fieldListHelpers", () => {
           rawErrors,
           fieldListPath: "$.contact_people_test",
           entryIndex: 0,
-          storageKey: "first_name",
+          storagePath: ["first_name"],
           childDefinition,
         }),
       ).toEqual(["First Name is required"]);
@@ -199,7 +235,7 @@ describe("fieldListHelpers", () => {
           rawErrors,
           fieldListPath: "$.contact_people_test",
           entryIndex: 1,
-          storageKey: "first_name",
+          storagePath: ["first_name"],
           childDefinition,
         }),
       ).toEqual([]);
@@ -230,7 +266,7 @@ describe("fieldListHelpers", () => {
           rawErrors,
           fieldListPath: "$.contact_people_test",
           entryIndex: 1,
-          storageKey: "first_name",
+          storagePath: ["first_name"],
           childDefinition,
         }),
       ).toEqual(["First Name is required"]);
@@ -252,7 +288,7 @@ describe("fieldListHelpers", () => {
           rawErrors,
           fieldListPath: "$.contact_people_test",
           entryIndex: 1,
-          storageKey: "first_name",
+          storagePath: ["first_name"],
           childDefinition,
         }),
       ).toEqual(["'first_name' is a required property"]);
