@@ -57,7 +57,7 @@ type SimplerFileInputProps = {
   *
   * confirm error status displays [x]
   *
-  * properly format status display [ ]
+  * properly format status display [x]
   * properly format existing file display [ ]
 
 

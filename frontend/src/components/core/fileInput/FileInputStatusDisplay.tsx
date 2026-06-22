@@ -38,8 +38,21 @@ const StatusIcon = ({
       />
     );
   }
-  if (!status || status === "success") {
+  if (!status) {
     return null;
+  }
+
+  // this is not in the designs, but I think we want it here for this reason:
+  // the display of existing files is to some degree the responsibility of the parent component, and will very likely
+  // require re-fetching in order to refresh the list of existing files. In order to provide immediate feedback to the user
+  // we should not rely solely on the existing file list, but should also display a success message here
+  if (status === "success") {
+    return (
+      <USWDSIcon
+        name="check_circle_outline"
+        className="usa-icon--size-6 text-middle text-primary-dark"
+      />
+    );
   }
 
   return (

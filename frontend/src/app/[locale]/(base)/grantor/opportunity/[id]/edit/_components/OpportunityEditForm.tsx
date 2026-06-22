@@ -1014,7 +1014,7 @@ export default function OpportunityEditForm({
           initialAttachments={initialAttachmentsPlusFakeAttachments}
           isDraft={isDraft}
           addExistingFile={(fakeAttachment) => {
-            console.log("*** adding existing file");
+            console.log("*** adding existing file", fakeAttachment);
             setInitialAttachmentsPlusFakeAttachments(
               initialAttachmentsPlusFakeAttachments.concat([fakeAttachment]),
             );

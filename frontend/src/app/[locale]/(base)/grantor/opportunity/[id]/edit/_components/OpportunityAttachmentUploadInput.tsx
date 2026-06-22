@@ -19,10 +19,10 @@ interface OpportunityAttachmentUploadInputProps {
 
 const FakeFILE_____DELIETEmeeee = {
   id: "1",
-  fileName: "file name 1",
-  fileSize: 1,
-  mimeType: "file",
-  updatedAt: new Date().getTime(),
+  file_name: "file name 1",
+  file_size: 1,
+  mime_type: "file",
+  updated_at: new Date().getTime(),
 };
 
 const mapInitialAttachmentsToExistingFiles = (
@@ -34,7 +34,7 @@ const mapInitialAttachmentsToExistingFiles = (
       file_name,
       mime_type,
       file_size,
-      // updated_at, // this is not in the type, unsure if we need to update anything to get it sent back
+      // updated_at, // this is not in the API response type, unsure if we need to update anything to get it sent back
     } = initialAttachment;
 
     return {

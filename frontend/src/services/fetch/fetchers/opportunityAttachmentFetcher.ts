@@ -25,10 +25,10 @@ export const attachOpportunityFile = async ({
   pendingFileId: string;
 }) => {
   console.log("!!! attaching", opportunityId, pendingFileId);
-  // return await new Promise((resolve) => resolve(new Response()));
-  return new Promise((_resolve, reject) =>
-    reject(new Error("simluate post upload action error response")),
-  );
+  return await new Promise((resolve) => resolve(new Response()));
+  // return new Promise((_resolve, reject) =>
+  //   reject(new Error("simluate post upload action error response")),
+  // );
 };
 
 export const uploadOpportunityAttachment = async (
