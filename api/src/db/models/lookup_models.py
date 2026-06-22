@@ -425,6 +425,7 @@ FILE_SCAN_STATUS_CONFIG: LookupConfig[FileScanStatus] = LookupConfig(
         LookupStr(FileScanStatus.IN_PROGRESS, 2),
         LookupStr(FileScanStatus.COMPLETE, 3),
         LookupStr(FileScanStatus.INFECTED, 4),
+        LookupStr(FileScanStatus.PROCESSED, 5),
     ]
 )
 
