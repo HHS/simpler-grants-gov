@@ -1,6 +1,7 @@
 import logging
 
-from src.adapters.aws.sqs_adapter import SQSClient, SQSConfig
+from grants_shared.adapters.aws.sqs_adapter import SQSClient, SQSConfig
+
 from src.workflow.event.workflow_event import WorkflowEvent
 
 logger = logging.getLogger(__name__)
