@@ -67,9 +67,6 @@ const nestedWarningsForField = ({
     });
     const message = error.message.replace(/'\S+'/, fieldName);
     const formatted = formatValidationWarning(fieldName, message, fieldSchema);
-    const formattedWithParent = parentFieldDefinition.title
-      ? `${parentFieldDefinition.title} ${formatted}`
-      : formatted;
     const htmlField = getHtmlFieldForWarning({
       definition,
       field: error.field,
@@ -77,7 +74,7 @@ const nestedWarningsForField = ({
     });
     return {
       ...error,
-      formatted: formattedWithParent,
+      formatted,
       htmlField,
       definition,
       fieldListLabel,
