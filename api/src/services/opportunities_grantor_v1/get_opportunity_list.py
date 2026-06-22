@@ -1,11 +1,12 @@
 import uuid
 from collections.abc import Sequence
+from typing import Any
 
 import grants_shared.adapters.db as db
 from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
 from grants_shared.pagination.paginator import Paginator
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import Select, select
 from sqlalchemy.orm import selectinload
 
 from src.auth.endpoint_access_util import verify_access
@@ -17,7 +18,7 @@ from src.db.models.opportunity_models import (
     Opportunity,
     OpportunitySummary,
 )
-from src.db.models.user_models import User
+from src.db.models.user_models import AgencyUser, AgencyUserRole, LinkRolePrivilege, Role, User
 from src.search.search_models import BoolSearchFilter
 from src.services.opportunities_grantor_v1.get_agency import get_agency
 from src.services.service_utils import apply_sorting
@@ -38,23 +39,9 @@ class ListOpportunitiesParams(BaseModel):
     filters: OpportunityListFilterParams | None = Field(default=None)
 
 
-def list_opportunities_with_filters(
-    db_session: db.Session,
-    agency_id: uuid.UUID,
-    params: ListOpportunitiesParams,
-) -> tuple[Sequence[Opportunity], PaginationInfo]:
-    """
-    List opportunities with filtering, sorting, pagination.
-
-    Args:
-        db_session: Database session
-        agency_id: Agency ID to list opportunities for
-        params: Query parameters
-
-    Returns:
-        List of Opportunity objects and pagination_info
-    """
-    stmt = (
+def _base_opportunity_list_stmt() -> Select:
+    """Build the shared base opportunity list query."""
+    return (
         select(Opportunity)
         .options(
             selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency),
@@ -88,24 +75,40 @@ def list_opportunities_with_filters(
             (Opportunity.agency_id == Agency.agency_id)
             | ((Opportunity.agency_id.is_(None)) & (Opportunity.agency_code == Agency.agency_code)),
         )
-        .where(Agency.agency_id == agency_id)
     )
 
-    if (
+
+def _should_filter_award_recommendation_ready(params: ListOpportunitiesParams) -> bool:
+    return bool(
         params.filters
         and params.filters.award_recommendation_ready
         and params.filters.award_recommendation_ready.one_of
         and True in params.filters.award_recommendation_ready.one_of
-    ):
-        stmt = stmt.where(
-            Opportunity.is_draft.is_(False),
-            Opportunity.is_simpler_grants_opportunity.is_(True),
-            Opportunity.competitions.any(
-                Competition.applications.any(Application.application_submissions.any())
-            ),
-            ~Opportunity.award_recommendations.any(),
-        )
+    )
 
+
+def _apply_opportunity_filters(stmt: Any, params: ListOpportunitiesParams) -> Any:
+    """Apply optional opportunity list filters."""
+    if not _should_filter_award_recommendation_ready(params):
+        return stmt
+
+    return stmt.where(
+        Opportunity.is_draft.is_(False),
+        Opportunity.is_simpler_grants_opportunity.is_(True),
+        Opportunity.competitions.any(
+            Competition.applications.any(Application.application_submissions.any())
+        ),
+        ~Opportunity.award_recommendations.any(),
+    )
+
+
+def _paginate_opportunity_stmt(
+    db_session: db.Session,
+    stmt: Any,
+    params: ListOpportunitiesParams,
+) -> tuple[Sequence[Opportunity], PaginationInfo]:
+    """Apply filters, sorting, and pagination to an opportunity query."""
+    stmt = _apply_opportunity_filters(stmt, params)
     stmt = apply_sorting(stmt, Opportunity, params.pagination.sort_order)
 
     paginator: Paginator[Opportunity] = Paginator(
@@ -128,6 +131,34 @@ def list_opportunities_with_filters(
     return opportunities, pagination_info
 
 
+def list_opportunities_for_agency_with_filters(
+    db_session: db.Session,
+    agency_id: uuid.UUID,
+    params: ListOpportunitiesParams,
+) -> tuple[Sequence[Opportunity], PaginationInfo]:
+    """List opportunities for a single agency with filtering, sorting, and pagination."""
+    stmt = _base_opportunity_list_stmt().where(Agency.agency_id == agency_id)
+
+    return _paginate_opportunity_stmt(
+        db_session=db_session,
+        stmt=stmt,
+        params=params,
+    )
+
+
+def list_opportunities_with_filters(
+    db_session: db.Session,
+    agency_id: uuid.UUID,
+    params: ListOpportunitiesParams,
+) -> tuple[Sequence[Opportunity], PaginationInfo]:
+    """Backward-compatible wrapper for listing opportunities by agency."""
+    return list_opportunities_for_agency_with_filters(
+        db_session=db_session,
+        agency_id=agency_id,
+        params=params,
+    )
+
+
 def get_opportunity_list_for_grantors(
     db_session: db.Session,
     user: User,
@@ -135,7 +166,7 @@ def get_opportunity_list_for_grantors(
     json_data: dict,
 ) -> tuple[Sequence[Opportunity], PaginationInfo]:
     """
-    Get a paginated list of opportunities for grantors
+    Get a paginated list of opportunities for grantors.
 
     Args:
         db_session: Database session
@@ -146,20 +177,60 @@ def get_opportunity_list_for_grantors(
     Returns:
         Tuple of (opportunities, pagination_info)
     """
-    # Validate parameters
     params = ListOpportunitiesParams.model_validate(json_data)
 
-    # Get agency and verify it exists
     agency = get_agency(db_session, agency_id)
-
-    # Verify user has VIEW_OPPORTUNITY privilege for the agency
     verify_access(user, {Privilege.VIEW_OPPORTUNITY}, agency)
 
-    # Get opportunities with filters and pagination
-    opportunities, pagination_info = list_opportunities_with_filters(
+    return list_opportunities_for_agency_with_filters(
         db_session=db_session,
         agency_id=agency_id,
         params=params,
     )
 
-    return opportunities, pagination_info
+
+def _accessible_agency_ids_for_user_stmt(user: User) -> Any:
+    """Build a subquery for agencies where the user has VIEW_OPPORTUNITY."""
+    return (
+        select(AgencyUser.agency_id)
+        .join(AgencyUserRole, AgencyUserRole.agency_user_id == AgencyUser.agency_user_id)
+        .join(Role, Role.role_id == AgencyUserRole.role_id)
+        .join(LinkRolePrivilege, LinkRolePrivilege.role_id == Role.role_id)
+        .where(
+            AgencyUser.user_id == user.user_id,
+            LinkRolePrivilege.privilege == Privilege.VIEW_OPPORTUNITY,
+        )
+        .distinct()
+    )
+
+
+def list_opportunities_for_user_with_filters(
+    db_session: db.Session,
+    user: User,
+    params: ListOpportunitiesParams,
+) -> tuple[Sequence[Opportunity], PaginationInfo]:
+    """List opportunities across all agencies where the user has VIEW_OPPORTUNITY."""
+    stmt = _base_opportunity_list_stmt().where(
+        Agency.agency_id.in_(_accessible_agency_ids_for_user_stmt(user))
+    )
+
+    return _paginate_opportunity_stmt(
+        db_session=db_session,
+        stmt=stmt,
+        params=params,
+    )
+
+
+def get_opportunity_list_for_user(
+    db_session: db.Session,
+    user: User,
+    json_data: dict,
+) -> tuple[Sequence[Opportunity], PaginationInfo]:
+    """Get a paginated list of opportunities for all agencies the user can access."""
+    params = ListOpportunitiesParams.model_validate(json_data)
+
+    return list_opportunities_for_user_with_filters(
+        db_session=db_session,
+        user=user,
+        params=params,
+    )
