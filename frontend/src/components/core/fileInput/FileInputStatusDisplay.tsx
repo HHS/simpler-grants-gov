@@ -16,6 +16,7 @@ const errorStatuses = new Map([
   ["scanning", "scan-error"],
   ["complete", "file-id-error"], // assuming that any error in this state is due to a missing file id
   ["post-upload", "post-upload-error"],
+  ["infected", "infected"],
   // need to figure out how to disintguish between scan failure and scan error.
   // this will likely depend on the implementation of handling scan failures on the backend
   // Next API will return a specific error and we can return that error status before dealing with this map
@@ -130,6 +131,7 @@ export const FileInputStatusDisplay = ({
     uploading: t("uploading"),
     "starting-scan": t("startingScan"),
     pending: t("scanning"),
+    infected: t("infected"),
     complete: t("scanComplete"),
     "scan-complete": t("scanComplete"),
     "post-upload": postUploadActionProgressMessage,

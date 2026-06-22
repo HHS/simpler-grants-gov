@@ -181,6 +181,11 @@ export const SimplerFileInput = ({
                 throw e;
               }
               if (payloadJson?.error) {
+                // in order to distinguish "infected" cases from general failure during scan
+                // we need to specially set the status here
+                if (payloadJson.error.match("infected")) {
+                  setCurrentStatus("infected");
+                }
                 error = new Error(payloadJson.error);
               } else if (payloadJson?.status) {
                 setCurrentStatus(payloadJson.status as FileUploadProcessStatus);

@@ -35,6 +35,10 @@ const pipeStatusStreamToResponse = async (
     const statusOnRead = payloadJson.data.status;
     if (previousState !== statusOnRead) {
       console.log("4.", statusOnRead);
+      // infected status won't come through as an error, we'll have to throw our own
+      if (statusOnRead === "infected") {
+        throw new Error("Virus scan failed, file infected");
+      }
       responseState = statusOnRead;
       outputController.enqueue(JSON.stringify({ status: statusOnRead }));
     }
@@ -97,7 +101,6 @@ const processUploadInStream = (file: File): ReadableStream<string> => {
         responseStreamController.close();
       } catch (e) {
         console.error("Error in file upload orchestration stream", e);
-        // setTimeout(() => {
         responseStreamController.enqueue(
           JSON.stringify({
             status: "error",
@@ -105,7 +108,6 @@ const processUploadInStream = (file: File): ReadableStream<string> => {
           }),
         );
         responseStreamController.close();
-        // });
       }
     },
   });
