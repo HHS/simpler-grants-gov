@@ -594,7 +594,7 @@ export const messages = {
       unsavedChangesWarning:
         "You have unsaved changes or attachments that will be lost if you select OK.",
       fieldListWidget: {
-        deleteEntry: "Delete",
+        deleteEntry: "Delete this entry",
         addEntry: "Add another entry",
       },
     },
@@ -2224,22 +2224,47 @@ export const messages = {
       heading: "Risks and Conditions",
       description:
         "Review and manage risks and conditions for application submissions",
+      addPageTitle: "Add Risk or Condition",
+      addMetaDescription: "Add risk or condition to selected applications",
+      addHeading: "Add risk or condition",
+      addDescription:
+        "Add risk details and recommended terms or conditions for the selected applications",
       selectAll: "Select all",
       selectRow: "Select row for {appNumber}",
       selectedCount:
         "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      selectedApplications: "Selected applications",
       columns: {
         appNumber: "App #",
         projectTitle: "Project Title",
-        orgName: "Organization Name",
+        orgName: "Org Name",
         uei: "UEI",
+        score: "Score",
         recommendation: "Recommendation",
+        requested: "Requested",
+        recommended: "Recommended",
         risk: "Risk",
         condition: "Condition",
       },
       recommendationType: {
         recommended_for_funding: "Recommended",
       },
+      riskDetailsHeading: "Risk details",
+      riskSummaryLabel: "Risk summary",
+      riskSummaryHint:
+        "Any program or organization risks already identified at this time",
+      recommendedConditionLabel: "Recommended term or condition",
+      recommendedConditionHint:
+        "Add any recommended conditions based on the risks identified",
+      selectConditionPlaceholder: "Select a condition",
+      condition1: "Condition 1",
+      condition2: "Condition 2",
+      condition3: "Condition 3",
+      cancelButton: "Cancel",
+      saveButton: "Save",
+      errorMessage: "Unable to load application submissions. Please try again.",
+      noSelectionsMessage:
+        "No applications selected. Please select applications from the Risks and Conditions page first.",
       defaultNone: "None",
       loading: "Loading submissions...",
       errorLoading: "Error loading submissions. Please try again.",

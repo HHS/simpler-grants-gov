@@ -29,6 +29,7 @@ from src.constants.lookup_constants import Privilege, RoleType
 from src.constants.schema import Schemas
 from src.constants.static_role_values import NAVA_INTERNAL_ROLE
 from src.db import models
+from src.db.models.competition_models import Form as FormModel
 from src.db.models.competition_models import FormInstruction
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
@@ -36,6 +37,7 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
+from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
     init_workflow_client_registry,
@@ -741,6 +743,43 @@ def seed_form_registry(load_active_forms) -> None:
     factories._seed_form_registry_active = True
     yield
     factories._seed_form_registry_active = False
+
+
+@pytest.fixture
+def create_test_form(db_session):
+    """Factory fixture for custom-schema test forms with automatic registry cleanup.
+    # TODO(#10274): remove db_session.add + flush once the form table is dropped
+    """
+    init_form_registry()
+    registered_keys = []
+
+    def _make(
+        form_name: str = "Test Form",
+        form_json_schema: dict | None = None,
+        form_rule_schema: dict | None = None,
+        **kwargs,
+    ) -> FormModel:
+        form = FormModel(
+            form_id=uuid.uuid4(),
+            form_name=form_name,
+            short_form_name=kwargs.get("short_form_name", "TestForm"),
+            form_version=kwargs.get("form_version", "1.0"),
+            agency_code="SGG",
+            form_json_schema=form_json_schema or {"type": "object", "properties": {}},
+            form_ui_schema={},
+            form_rule_schema=form_rule_schema,
+            json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
+        )
+        db_session.add(form)
+        db_session.flush()
+        form_template_registry.register(form, major_version=1)
+        registered_keys.append(FormTemplateKey(form.form_id, 1))
+        return form
+
+    yield _make
+
+    for key in registered_keys:
+        form_template_registry._registry.pop(key, None)
 
 
 @pytest.fixture

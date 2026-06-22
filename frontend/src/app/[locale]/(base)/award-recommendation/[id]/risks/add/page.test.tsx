@@ -7,23 +7,12 @@ import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
 
 import { FunctionComponent, ReactNode } from "react";
 
-import AwardRecommendationRisksPageContent from "./page";
+import AddRiskPageContent from "./page";
 
 type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
-}));
-
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    prefetch: jest.fn(),
-    back: jest.fn(),
-    forward: jest.fn(),
-    refresh: jest.fn(),
-  }),
 }));
 
 jest.mock("react", () => ({
@@ -32,6 +21,17 @@ jest.mock("react", () => ({
     locale: "en",
   })),
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
+}));
+
+const mockGetAwardRecommendationDetails = jest
+  .fn()
+  .mockResolvedValue(mockAwardRecommendationDetails);
+
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
+  getAwardRecommendationDetails: (id: string) =>
+    mockGetAwardRecommendationDetails(
+      id,
+    ) as Promise<AwardRecommendationDetails>,
 }));
 
 const withFeatureFlagMock = jest.fn();
@@ -57,33 +57,24 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
       )(props) as FunctionComponent<LocalizedPageProps>,
 }));
 
-const mockGetAwardRecommendationDetails = jest
-  .fn()
-  .mockResolvedValue(mockAwardRecommendationDetails);
-
-jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
-  getAwardRecommendationDetails: (
-    id: string,
-  ): Promise<AwardRecommendationDetails> =>
-    mockGetAwardRecommendationDetails(
-      id,
-    ) as Promise<AwardRecommendationDetails>,
-}));
-
 jest.mock("src/services/auth/session", () => ({
   getSession: jest.fn().mockResolvedValue(null),
 }));
 
-jest.mock("src/hooks/useClientFetch", () => ({
-  useClientFetch: jest.fn(() => ({
-    clientFetch: jest.fn().mockResolvedValue({
-      data: [],
-      pagination_info: { total_pages: 1 },
-    }),
+jest.mock("src/hooks/useSelectedSubmissions", () => ({
+  useSelectedSubmissions: jest.fn(() => ({
+    selectedSubmissions: [],
+    hasSelections: false,
   })),
 }));
 
-describe("AwardRecommendationRisksPage", () => {
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
+describe("AddRiskPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     withFeatureFlagMock.mockImplementation(
@@ -100,17 +91,30 @@ describe("AwardRecommendationRisksPage", () => {
     );
   });
 
-  it("renders the risks page with table", async () => {
+  it("renders the add risk form page", async () => {
     const params = Promise.resolve({
       locale: "en",
       id: "test-award-id",
     });
 
-    const page = await AwardRecommendationRisksPageContent({ params });
+    const page = await AddRiskPageContent({ params });
     render(page);
 
-    expect(screen.getByText("risks.heading")).toBeInTheDocument();
-    expect(screen.getByText("risks.description")).toBeInTheDocument();
+    expect(screen.getByText("noSelectionsMessage")).toBeInTheDocument();
+  });
+
+  it("renders hero with back to edit button", async () => {
+    const params = Promise.resolve({
+      locale: "en",
+      id: "test-award-id",
+    });
+
+    const page = await AddRiskPageContent({ params });
+    render(page);
+
+    expect(
+      screen.getByTestId("award-recommendation-hero-fallback"),
+    ).toBeInTheDocument();
   });
 
   it("shows error when award recommendation is not found", async () => {
@@ -121,7 +125,7 @@ describe("AwardRecommendationRisksPage", () => {
       id: "invalid-id",
     });
 
-    const page = await AwardRecommendationRisksPageContent({ params });
+    const page = await AddRiskPageContent({ params });
     render(page);
 
     expect(
@@ -132,17 +136,20 @@ describe("AwardRecommendationRisksPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders hero fallback", async () => {
+  it("shows not found error when details are null", async () => {
+    mockGetAwardRecommendationDetails.mockResolvedValue(null);
+
     const params = Promise.resolve({
       locale: "en",
       id: "test-award-id",
     });
 
-    const page = await AwardRecommendationRisksPageContent({ params });
+    const page = await AddRiskPageContent({ params });
     render(page);
 
     expect(
-      screen.getByTestId("award-recommendation-hero-fallback"),
+      screen.getByText("errorHeadingAwardRecommendation"),
     ).toBeInTheDocument();
+    expect(screen.getByText("awardRecommendationNotFound")).toBeInTheDocument();
   });
 });

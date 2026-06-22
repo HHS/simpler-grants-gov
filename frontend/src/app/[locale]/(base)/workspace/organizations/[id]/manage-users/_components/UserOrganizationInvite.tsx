@@ -1,4 +1,4 @@
-import { getSession } from "src/services/auth/session";
+import { MissingAuthError } from "src/errors";
 import { getOrganizationRoles } from "src/services/fetch/fetchers/organizationsFetcher";
 import { UserRole } from "src/types/userTypes";
 
@@ -13,15 +13,14 @@ export async function UserOrganizationInvite({
 }) {
   // fetch roles for organization (this will happen in page gate eventually)
   const t = await getTranslations("ManageUsers.inviteUser");
-  const session = await getSession();
-  if (!session?.token) {
-    console.error("unable to display user invites, not logged in");
-    return;
-  }
   let organizationRoles: UserRole[] = [];
   try {
     organizationRoles = await getOrganizationRoles(organizationId);
   } catch (e) {
+    if (e instanceof MissingAuthError) {
+      console.error("unable to display user invites, not logged in");
+      return;
+    }
     console.error("unable to fetch organization roles", e);
   }
   return (

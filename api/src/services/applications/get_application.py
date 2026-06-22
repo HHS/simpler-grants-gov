@@ -13,8 +13,7 @@ from src.db.models.competition_models import (
     Application,
     ApplicationForm,
     Competition,
-    CompetitionForm,
-    Form,
+    FormInstruction,
 )
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, User
@@ -43,11 +42,10 @@ def get_application(
             # Load organization and its sam_gov_entity
             selectinload(Application.organization).selectinload(Organization.sam_gov_entity),
             selectinload(Application.organization).selectinload(Organization.organization_users),
-            # Load Application forms through to the form instructions
-            selectinload(Application.application_forms)
-            .selectinload(ApplicationForm.competition_form)
-            .selectinload(CompetitionForm.form)
-            .selectinload(Form.form_instruction),
+            # Load Application forms through to the competition form
+            selectinload(Application.application_forms).selectinload(
+                ApplicationForm.competition_form
+            ),
             # Load application forms app (which is the app we're fetching) to make sure it's connected
             selectinload(Application.application_forms).selectinload(ApplicationForm.application),
             # Load attachments
@@ -56,11 +54,8 @@ def get_application(
             selectinload(Application.application_users)
             .selectinload(ApplicationUser.user)
             .selectinload(User.linked_login_gov_external_user),
-            # Load competition and its forms, instructions, assistance listing, and who can apply
-            selectinload(Application.competition)
-            .selectinload(Competition.competition_forms)
-            .selectinload(CompetitionForm.form)
-            .selectinload(Form.form_instruction),
+            # Load competition and its forms, assistance listing, and who can apply
+            selectinload(Application.competition).selectinload(Competition.competition_forms),
             selectinload(Application.competition).selectinload(
                 Competition.competition_instructions
             ),
@@ -86,6 +81,34 @@ def get_application(
     # NOTE: Trying to put this in an order_by in the relationship doesn't work as we can't sort on a joined value
     #       Haven't found a way to sort this when querying above that doesn't break the query
     application.application_forms.sort(key=lambda app_form: app_form.form.form_name)
+
+    # Load form_instruction for each application form.
+    # CompetitionForm.form is a registry-backed @property returning an in-memory Form object
+    # with no DB session, so form_instruction cannot be selectinloaded through it.
+    # We load FormInstruction rows in one query and attach them to the registry form objects.
+    forms_needing_instruction = {
+        app_form.form.form_instruction_id: app_form.form
+        for app_form in application.application_forms
+        if app_form.form.form_instruction_id is not None
+    }
+    if forms_needing_instruction:
+        instructions = (
+            db_session.execute(
+                select(FormInstruction).where(
+                    FormInstruction.form_instruction_id.in_(forms_needing_instruction.keys())
+                )
+            )
+            .scalars()
+            .all()
+        )
+        for instruction in instructions:
+            # Expunge before assigning to prevent DetachedInstanceError when the
+            # session closes — form_instruction cannot be selectinloaded through
+            # the registry-backed CompetitionForm.form property.
+            db_session.expunge(instruction)
+            forms_needing_instruction[instruction.form_instruction_id].form_instruction = (
+                instruction
+            )
 
     # Add application metadata to logs
     add_application_metadata_to_logs(application)
