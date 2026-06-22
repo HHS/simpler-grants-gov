@@ -5,31 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Table } from "@trussworks/react-uswds";
 
-type FundingOpportunity = {
-  id: string;
-  opportunityNumber: string;
-  opportunityName: string;
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+
+type SelectFundingOpportunityContentProps = {
+  fundingOpportunities: BaseOpportunity[];
 };
 
-const fakeFundingOpportunities: FundingOpportunity[] = [
-  {
-    id: "1",
-    opportunityNumber: "FO-26-00001",
-    opportunityName: "Salute to America 250 – Outreach Across Japan",
-  },
-  {
-    id: "2",
-    opportunityNumber: "FO-26-00001",
-    opportunityName: "ACL National Falls Prevention Resource Center",
-  },
-  {
-    id: "3",
-    opportunityNumber: "FO-26-00001",
-    opportunityName: "U.S. Embassy Port Louis Public Diplomacy Small ...",
-  },
-];
-
-export const SelectFundingOpportunityContent = () => {
+export const SelectFundingOpportunityContent = ({
+  fundingOpportunities,
+}: SelectFundingOpportunityContentProps) => {
   const t = useTranslations("AwardRecommendationSelectFundingOpportunity");
   const router = useRouter();
 
@@ -56,27 +40,31 @@ export const SelectFundingOpportunityContent = () => {
           <tr>
             <th scope="col">{t("columns.fundingOpportunityNumber")}</th>
             <th scope="col">{t("columns.fundingOpportunityName")}</th>
+            <th scope="col">{t("columns.submittedApplications")}</th>
             <th scope="col">{t("columns.action")}</th>
           </tr>
         </thead>
         <tbody>
-          {fakeFundingOpportunities.map((fundingOpportunity) => (
-            <tr key={fundingOpportunity.id}>
+          {fundingOpportunities.map((fundingOpportunity) => (
+            <tr key={fundingOpportunity.opportunity_id}>
               <td>
                 <Link
-                  href={`/funding-opportunities/${fundingOpportunity.id}`}
+                  href={`/funding-opportunities/${fundingOpportunity.opportunity_id}`}
                   className="usa-link"
                 >
-                  {fundingOpportunity.opportunityNumber}
+                  {fundingOpportunity.opportunity_number}
                 </Link>
               </td>
-              <td>{fundingOpportunity.opportunityName}</td>
+              <td>{fundingOpportunity.opportunity_title}</td>
+              <td>0</td>
               <td>
                 <Button
                   type="button"
                   className="usa-button--outline margin-y-0"
                   onClick={() =>
-                    handleCreateAwardRecommendation(fundingOpportunity.id)
+                    handleCreateAwardRecommendation(
+                      fundingOpportunity.opportunity_id,
+                    )
                   }
                 >
                   {t("startButtonText")} <span aria-hidden="true">→</span>

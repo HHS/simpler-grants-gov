@@ -3,6 +3,8 @@ import { SelectFundingOpportunityContent } from "src/app/[locale]/(base)/award-r
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
+import { searchAccessibleOpportunities } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
@@ -25,6 +27,21 @@ export async function generateMetadata({
   return meta;
 }
 
+const fetchFundingOpportunities = async () => {
+  const json = await searchAccessibleOpportunities({
+    page_offset: 1,
+    page_size: 25,
+    sort_order: [
+      {
+        order_by: "created_at",
+        sort_direction: "descending",
+      },
+    ],
+  });
+
+  return json.data;
+};
+
 export type SelectOpportunityPageProps = {
   params: Promise<{ locale: string }>;
 } & WithFeatureFlagProps;
@@ -33,13 +50,15 @@ async function SelectOpportunityPageContent({
   params,
 }: SelectOpportunityPageProps) {
   await params;
-
+  const fundingOpportunities = await fetchFundingOpportunities();
   return (
     <>
       <CreateAwardRecommendationHeroContent />
 
       <GridContainer>
-        <SelectFundingOpportunityContent />
+        <SelectFundingOpportunityContent
+        fundingOpportunities={fundingOpportunities}
+         />
       </GridContainer>
     </>
   );

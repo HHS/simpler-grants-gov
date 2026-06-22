@@ -37,3 +37,14 @@ export const createOpportunity = async (
   const json = (await response.json()) as { data: CreateOpportunityRecord };
   return json.data;
 };
+
+export const searchAccessibleOpportunities = async (
+  pageInputs: PaginationRequestBody,
+): Promise<{ data: SearchResponseData; pagination_info: PaginationInfo }> => {
+  const response = await fetchGrantorWithMethod("POST")({
+    subPath: "opportunities/list",
+    body: { pagination: pageInputs },
+  });
+
+  return (await response.json()) as SearchAPIResponse;
+};
