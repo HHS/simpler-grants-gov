@@ -87,7 +87,7 @@ def join(*parts: str) -> str:
 
 
 ##################################
-#  File operat
+#  File operations
 ##################################
 
 
