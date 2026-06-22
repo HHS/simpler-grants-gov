@@ -12,6 +12,7 @@ jest.mock("src/components/apply-form/widgets/WidgetRenderers", () => ({
         id: string;
         value?: unknown;
         rawErrors?: string[];
+        additionalDescribedById?: string;
         onChange?: (value: unknown) => void;
       };
     }) => {
@@ -27,6 +28,7 @@ jest.mock("src/components/apply-form/widgets/WidgetRenderers", () => ({
           <input
             data-testid="mock-widget"
             data-widget-id={props.id}
+            data-entry-description-id={props.additionalDescribedById}
             aria-label={props.id}
             value={displayValue}
             onChange={(event) => props.onChange?.(event.target.value)}
@@ -45,8 +47,24 @@ const baseGroupDefinition = [
     widget: "Text" as const,
     baseId: "contacts[~~index~~]--first_name",
     definition: "/properties/contact_people_test/items/properties/first_name",
+    storagePath: ["first_name"],
     generalProps: {
       schema: { type: "string", title: "First Name" },
+      rawErrors: [],
+      options: {},
+    },
+  },
+];
+
+const nestedGroupDefinition = [
+  {
+    widget: "Text" as const,
+    baseId: "contacts[~~index~~]--address--street1",
+    definition:
+      "/properties/contact_people_test/items/properties/address/properties/street1",
+    storagePath: ["address", "street1"],
+    generalProps: {
+      schema: { type: "string", title: "Street 1" },
       rawErrors: [],
       options: {},
     },
@@ -70,9 +88,13 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.getByText("Contacts")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Contacts" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Add contacts")).toBeInTheDocument();
-    expect(screen.getByText(/contacts\s+1/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /contacts\s+1/i }),
+    ).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
@@ -91,7 +113,9 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.queryByText(/contacts\s+1/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /contacts\s+1/i }),
+    ).not.toBeInTheDocument();
     expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
   });
 
@@ -109,7 +133,9 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.queryByText(/contacts\s+1/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /contacts\s+1/i }),
+    ).not.toBeInTheDocument();
     expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
   });
 
@@ -128,8 +154,12 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.getByText(/contacts\s+1/i)).toBeInTheDocument();
-    expect(screen.getByText(/contacts\s+2/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /contacts\s+1/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /contacts\s+2/i }),
+    ).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
   });
 
@@ -152,7 +182,9 @@ describe("FieldListWidget", () => {
 
     await user.click(screen.getByRole("button", { name: /addEntry/i }));
 
-    expect(screen.getByText(/contacts\s+2/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /contacts\s+2/i }),
+    ).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
   });
 
@@ -199,7 +231,9 @@ describe("FieldListWidget", () => {
 
     await user.click(deleteButtons[0]);
 
-    expect(screen.queryByText(/contacts\s+2/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /contacts\s+2/i }),
+    ).not.toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
@@ -218,7 +252,9 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /deleteEntry/i })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /deleteEntry Contacts 1/i }),
+    ).toBeDisabled();
   });
 
   it("renders FieldList child errors inline", () => {
@@ -248,6 +284,82 @@ describe("FieldListWidget", () => {
     );
 
     expect(screen.getByText("First Name is required")).toBeInTheDocument();
+  });
+
+  it("passes the FieldList entry heading id to child widgets", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={1}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    const entryHeading = screen.getByRole("heading", {
+      name: /contacts\s+1/i,
+    });
+
+    expect(screen.getByTestId("mock-widget")).toHaveAttribute(
+      "data-entry-description-id",
+      entryHeading.id,
+    );
+  });
+
+  it("renders nested FieldList values from storagePath", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={1}
+        value={[{ address: { street1: "123 Main" } }]}
+        groupDefinition={nestedGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.getByLabelText("contacts[0]--address--street1")).toHaveValue(
+      "123 Main",
+    );
+  });
+
+  it("updates nested FieldList values using storagePath", async () => {
+    const user = userEvent.setup();
+    const onChangeMock = jest.fn();
+
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={1}
+        value={[{}]}
+        groupDefinition={nestedGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+        onChange={onChangeMock}
+      />,
+    );
+
+    await user.type(
+      screen.getByLabelText("contacts[0]--address--street1"),
+      "123 Main",
+    );
+
+    expect(onChangeMock).toHaveBeenLastCalledWith([
+      { address: { street1: "123 Main" } },
+    ]);
   });
 
   it("marks the form dirty when a FieldList child field changes", async () => {

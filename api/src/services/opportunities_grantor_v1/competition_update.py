@@ -8,7 +8,7 @@ from sqlalchemy.orm import selectinload
 
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
-from src.db.models.competition_models import Competition, CompetitionForm, Form
+from src.db.models.competition_models import Competition
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 
@@ -34,9 +34,7 @@ def update_competition(
         .where(Competition.competition_id == competition_id)
         .options(
             selectinload(Competition.opportunity_assistance_listing),
-            selectinload(Competition.competition_forms)
-            .selectinload(CompetitionForm.form)
-            .selectinload(Form.form_instruction),
+            selectinload(Competition.competition_forms),
             selectinload(Competition.competition_instructions),
         )
     )

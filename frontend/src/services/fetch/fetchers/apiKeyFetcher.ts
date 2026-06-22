@@ -1,43 +1,11 @@
 import "server-only";
 
-import { getSession } from "src/services/auth/session";
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
-import { ApiKey } from "src/types/apiKeyTypes";
-import { APIResponse } from "src/types/apiResponseTypes";
-
-// this is a duplicate - resolve with handleListApiKeys
-export const fetchApiKeys = async (): Promise<ApiKey[]> => {
-  const session = await getSession();
-  if (!session || !session.token) {
-    return [];
-  }
-
-  const body = {
-    pagination: {
-      page_offset: 1,
-      page_size: 25,
-      sort_order: [
-        {
-          order_by: "created_at",
-          sort_direction: "descending",
-        },
-      ],
-    },
-  };
-
-  const subPath = `${session.user_id}/api-keys/list`;
-  const resp = await fetchUserWithMethod("POST")({
-    subPath,
-    body,
-  });
-
-  const json = (await resp.json()) as { data: ApiKey[] };
-  return json.data;
-};
+import { ApiKeyResponse } from "src/types/apiKeyTypes";
 
 export const handleListApiKeys = async (
   userId: string,
-): Promise<APIResponse> => {
+): Promise<ApiKeyResponse> => {
   const body = {
     pagination: {
       page_offset: 1,
@@ -57,13 +25,13 @@ export const handleListApiKeys = async (
     body,
   });
 
-  return (await resp.json()) as APIResponse;
+  return (await resp.json()) as ApiKeyResponse;
 };
 
 export const handleCreateApiKey = async (
   userId: string,
   keyName: string,
-): Promise<APIResponse> => {
+): Promise<ApiKeyResponse> => {
   const body = {
     key_name: keyName,
   };
@@ -74,14 +42,14 @@ export const handleCreateApiKey = async (
     body,
   });
 
-  return (await resp.json()) as APIResponse;
+  return (await resp.json()) as ApiKeyResponse;
 };
 
 export const handleRenameApiKey = async (
   userId: string,
   apiKeyId: string,
   keyName: string,
-): Promise<APIResponse> => {
+): Promise<ApiKeyResponse> => {
   const body = {
     key_name: keyName,
   };
@@ -92,17 +60,17 @@ export const handleRenameApiKey = async (
     body,
   });
 
-  return (await resp.json()) as APIResponse;
+  return (await resp.json()) as ApiKeyResponse;
 };
 
 export const handleDeleteApiKey = async (
   userId: string,
   apiKeyId: string,
-): Promise<APIResponse> => {
+): Promise<ApiKeyResponse> => {
   const subPath = `${userId}/api-keys/${apiKeyId}`;
   const resp = await fetchUserWithMethod("DELETE")({
     subPath,
   });
 
-  return (await resp.json()) as APIResponse;
+  return (await resp.json()) as ApiKeyResponse;
 };

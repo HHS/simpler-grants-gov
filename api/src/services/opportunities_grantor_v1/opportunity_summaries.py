@@ -92,7 +92,6 @@ def update_opportunity_summary(
     agency = opportunity.agency_record
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, agency)
 
-    validate_opportunity_is_draft(opportunity)
     validate_opportunity_created_in_simpler_grants(opportunity)
 
     # Get and validate the opportunity summary

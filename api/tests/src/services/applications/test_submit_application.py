@@ -6,6 +6,9 @@ import pytest
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, Privilege
+from src.db.models.competition_models import Form as FormModel
+from src.form_schema.forms import init_form_registry
+from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
 from src.form_schema.rule_processing.json_rule_field_population import UNKNOWN_VALUE
 from src.services.applications.submit_application import submit_application
 from src.validation.validation_constants import ValidationErrorType
@@ -16,11 +19,45 @@ from tests.src.db.models.factories import (
     ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     LinkExternalUserFactory,
     RoleFactory,
     UserFactory,
 )
+
+
+@pytest.fixture
+def create_test_form(db_session):
+    """Factory fixture for custom-schema test forms with automatic registry cleanup.
+    # TODO(#10274): remove db_session.add + flush once the form table is dropped
+    """
+    init_form_registry()
+
+    registered_key = None
+
+    def _make(**kwargs) -> FormModel:
+        nonlocal registered_key
+        form = FormModel(
+            form_id=uuid.uuid4(),
+            form_name=kwargs.get("form_name", "Test Form"),
+            short_form_name=kwargs.get("short_form_name", "TestForm"),
+            form_version=kwargs.get("form_version", "1.0"),
+            agency_code="SGG",
+            form_json_schema=kwargs.get("form_json_schema", {"type": "object", "properties": {}}),
+            form_ui_schema={},
+            form_rule_schema=kwargs.get("form_rule_schema", None),
+            json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
+        )
+        db_session.add(form)
+        db_session.flush()
+        form_template_registry.register(form, major_version=1)
+        registered_key = FormTemplateKey(form.form_id, 1)
+        return form
+
+    yield _make
+
+    if registered_key:
+        form_template_registry._registry.pop(registered_key, None)
+
 
 # Simple JSON schema used for tests below
 SIMPLE_JSON_SCHEMA = {
@@ -34,13 +71,13 @@ SIMPLE_JSON_SCHEMA = {
 
 
 # Tests for the main submit_application function
-def test_submit_application_success(enable_factory_create, db_session):
+def test_submit_application_success(enable_factory_create, db_session, create_test_form):
     """Test successful submission of an application in IN_PROGRESS state."""
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -77,12 +114,14 @@ def test_submit_application_success(enable_factory_create, db_session):
     assert application.submitted_by == user.user_id
 
 
-def test_submit_application_with_missing_required_form(enable_factory_create, db_session):
+def test_submit_application_with_missing_required_form(
+    enable_factory_create, db_session, create_test_form
+):
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -107,9 +146,11 @@ def test_submit_application_with_missing_required_form(enable_factory_create, db
     )
 
 
-def test_submit_application_with_invalid_required_form(enable_factory_create, db_session, user):
+def test_submit_application_with_invalid_required_form(
+    enable_factory_create, db_session, user, create_test_form
+):
     competition = CompetitionFactory.create(competition_forms=[])
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -139,12 +180,12 @@ def test_submit_application_with_invalid_required_form(enable_factory_create, db
     )
 
 
-def test_submit_application_with_invalid_field(enable_factory_create, db_session):
+def test_submit_application_with_invalid_field(enable_factory_create, db_session, create_test_form):
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1), grace_period=3, competition_forms=[]
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -184,7 +225,9 @@ def test_submit_application_not_found(db_session, enable_factory_create):
     assert f"Application with ID {non_existent_id} not found" in excinfo.value.message
 
 
-def test_submit_application_organization_required_but_missing(enable_factory_create, db_session):
+def test_submit_application_organization_required_but_missing(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that submitting an application without an organization when required returns 422."""
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
@@ -193,7 +236,7 @@ def test_submit_application_organization_required_but_missing(enable_factory_cre
         competition_forms=[],
         open_to_applicants={CompetitionOpenToApplicant.ORGANIZATION},  # Only org allowed
     )
-    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    form = create_test_form(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     # Create application WITHOUT organization
@@ -231,13 +274,15 @@ def test_submit_application_organization_required_but_missing(enable_factory_cre
     )
 
 
-def test_submit_application_signature_post_processing(enable_factory_create, db_session):
+def test_submit_application_signature_post_processing(
+    enable_factory_create, db_session, create_test_form
+):
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1),
         competition_forms=[],
     )
-    form = FormFactory.create(
+    form = create_test_form(
         form_json_schema={
             "type": "object",
             "properties": {
