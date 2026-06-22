@@ -427,6 +427,8 @@ export const messages = {
       awardMaxLessThanTotal:
         "Award maximum cannot exceed the Estimated Total Program Funding.",
       awardMinLessThanMax: "Award minimum cannot exceed Award maximum.",
+      awardMaxGreaterThanMin:
+        "Award maximum cannot be less than Award minimum.",
     },
     attachments: {
       removeButton: "Remove",
