@@ -7,6 +7,7 @@ from src.db.models.workflow_models import WorkflowAudit
 from src.workflow.config.workflow_service_config import WorkflowServiceConfig
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_metric_context import WorkflowMetricContext
+from src.workflow.workflow_errors import UnexpectedStateError
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,10 @@ class WorkflowAuditListener:
         For subsequent automatic transitions, uses the system workflow user ID from config.
         """
 
+        target = event_data.target
+        if target is None:
+            raise UnexpectedStateError("Workflow transition is missing a target state")
+
         # Determine which user to use for this transition
         # If this is the first transition (transition_count == 0), use the original acting user
         # Otherwise, use the system user ID for automatic transitions
@@ -50,7 +55,7 @@ class WorkflowAuditListener:
             "workflow": state_machine_event.workflow,
             "transition_event": event_data.event.name,
             "source_state": event_data.source.value,
-            "target_state": event_data.target.value,
+            "target_state": target.value,
             "event": state_machine_event.workflow_history_event,
             "audit_metadata": state_machine_event.metadata,
         }

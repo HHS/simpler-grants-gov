@@ -9,7 +9,7 @@ from src.task.notifications.config import get_email_config
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.service.approval_service import get_agency_for_workflow
 from src.workflow.util.workflow_util import send_workflow_email
-from src.workflow.workflow_errors import OpportunityWithoutAgencyError
+from src.workflow.workflow_errors import OpportunityWithoutAgencyError, UnexpectedStateError
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +42,8 @@ class WorkflowApprovalEmailListener:
         """
         Listen for events when a workflow enters a state that is also an approval.
         """
+        if event_data.target is None:
+            raise UnexpectedStateError("Workflow transition is missing a target state")
         target_state = event_data.target.value
         log_extra = state_machine_event.get_log_extra() | {
             "source_state": event_data.source.value,
