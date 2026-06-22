@@ -16,7 +16,6 @@ export const FileInputExistingFiles = ({
   onDelete: (fileToDelete: UploadFileMetadata) => void;
   filesWithDeleteError?: string[];
 }) => {
-  console.log("$$ existing files", existingFiles);
   const t = useTranslations("FileInput.existingFiles");
   if (existingFiles && existingFiles.length) {
     const existingFilesList = existingFiles.map((existingFile) => {

@@ -12,7 +12,7 @@ export const attachOpportunityAttachmentHandler = async (
   try {
     const { opportunityId, pendingFileId } = await params;
 
-    const response = await attachOpportunityFile({
+    const response: Response = await attachOpportunityFile({
       opportunityId,
       pendingFileId,
     });

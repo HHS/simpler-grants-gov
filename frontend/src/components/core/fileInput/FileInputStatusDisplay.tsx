@@ -161,7 +161,6 @@ export const FileInputStatusDisplay = ({
     : status;
   const statusMessageForDisplay = messagesMap[adjustedStatus];
 
-  console.log("** display value", status, statusMessageForDisplay, error);
   return (
     <Grid
       row

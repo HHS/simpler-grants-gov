@@ -34,7 +34,6 @@ const pipeStatusStreamToResponse = async (
     // output stream when the state changes
     const statusOnRead = payloadJson.data.status;
     if (previousState !== statusOnRead) {
-      console.log("4.", statusOnRead);
       // infected status won't come through as an error, we'll have to throw our own
       if (statusOnRead === "infected") {
         throw new Error("Virus scan failed, file infected");
@@ -44,7 +43,6 @@ const pipeStatusStreamToResponse = async (
     }
   }
   if (done) {
-    console.log("5. DONE");
     return;
   }
   return pipeStatusStreamToResponse(

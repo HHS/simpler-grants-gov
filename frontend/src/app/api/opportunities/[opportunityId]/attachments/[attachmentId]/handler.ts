@@ -2,7 +2,7 @@ import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { deleteOpportunityAttachment } from "src/services/fetch/fetchers/opportunityAttachmentFetcher";
 
-export const newDeleteOpportunityAttachmentHandler = async (
+export const deleteOpportunityAttachmentHandler = async (
   _request: Request,
   {
     params,

@@ -1,6 +1,5 @@
 import "server-only";
 
-import { fileUploadProcessStatus } from "src/types/fileUploadTypes";
 import {
   OpportunityAttachmentListResponse,
   OpportunityAttachmentUploadResponse,
@@ -18,13 +17,14 @@ export const listOpportunityAttachments = async (
 };
 
 export const attachOpportunityFile = async ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   opportunityId,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   pendingFileId,
 }: {
   opportunityId: string;
   pendingFileId: string;
-}) => {
-  console.log("!!! attaching", opportunityId, pendingFileId);
+}): Promise<Response> => {
   return await new Promise((resolve) => resolve(new Response()));
   // return new Promise((_resolve, reject) =>
   //   reject(new Error("simluate post upload action error response")),
@@ -45,16 +45,6 @@ export const uploadOpportunityAttachment = async (
 };
 
 export const deleteOpportunityAttachment = async (
-  opportunityId: string,
-  attachmentId: string,
-): Promise<{ status_code: number; message: string }> => {
-  const response = await fetchGrantorOpportunityWithMethod("DELETE")({
-    subPath: `${opportunityId}/attachments/${attachmentId}`,
-  });
-  return (await response.json()) as { status_code: number; message: string };
-};
-
-export const newDeleteOpportunityAttachment = async (
   opportunityId: string,
   attachmentId: string,
 ): Promise<{ status_code: number; message: string }> => {

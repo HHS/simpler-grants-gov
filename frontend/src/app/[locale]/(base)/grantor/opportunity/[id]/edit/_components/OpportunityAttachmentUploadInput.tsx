@@ -104,6 +104,8 @@ export function OpportunityAttachmentUploadInput({
     setIsUploading(false);
   };
 
+  // note that this doesn't actually delete any files, just removes them from the
+  // dummy existing files array
   const confirmDelete = (fileToDeleteId: string) => {
     setErrorMessage(null);
 
