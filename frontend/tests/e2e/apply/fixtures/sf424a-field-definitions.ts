@@ -13,6 +13,14 @@ export const SF424A_FORM_MATCHER =
 // Expected post-save computed values - derived from FORM_RULE_SCHEMA
 // ---------------------------------------------------------------------------
 
+// Field ID mapping for API schema to test field IDs
+export const SF424A_FIELD_ID_MAP: Record<string, string> = {
+  "activity_line_items/0/activity_title": "activity_line_items--0--activity_title",
+  "activity_line_items/1/activity_title": "activity_line_items--1--activity_title",
+  "activity_line_items/2/activity_title": "activity_line_items--2--activity_title",
+  "activity_line_items/3/activity_title": "activity_line_items--3--activity_title",
+};
+
 const FILL = 1;
 const ROWS = 4;
 const QUARTERS = 4;

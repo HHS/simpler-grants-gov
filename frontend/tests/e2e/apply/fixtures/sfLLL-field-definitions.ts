@@ -3,6 +3,31 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 export const SFLLL_FORM_MATCHER =
   /SF\s*[-‑–—]?\s*LLL|Disclosure\s+of\s+Lobbying\s+Activities/i;
 
+// Field ID mapping for API schema to test field IDs
+export const SFLLL_FIELD_ID_MAP: Record<string, string> = {
+  "federal_action_type": "federal_action_type",
+  "federal_action_status": "federal_action_status",
+  "report_type": "report_type",
+  "reporting_entity/entity_type": "reporting_entity--entity_type",
+  "reporting_entity/applicant_reporting_entity/organization_name":
+    "reporting_entity--applicant_reporting_entity--organization_name",
+  "reporting_entity/applicant_reporting_entity/address/street1":
+    "reporting_entity--applicant_reporting_entity--address--street1",
+  "reporting_entity/applicant_reporting_entity/address/city":
+    "reporting_entity--applicant_reporting_entity--address--city",
+  "federal_agency_department": "federal_agency_department",
+  "lobbying_registrant/individual/first_name":
+    "lobbying_registrant--individual--first_name",
+  "lobbying_registrant/individual/last_name":
+    "lobbying_registrant--individual--last_name",
+  "individual_performing_service/individual/first_name":
+    "individual_performing_service--individual--first_name",
+  "individual_performing_service/individual/last_name":
+    "individual_performing_service--individual--last_name",
+  "signature_block/name/first_name": "signature_block--name--first_name",
+  "signature_block/name/last_name": "signature_block--name--last_name",
+};
+
 export const SFLLL_TEST_DATA = {
   federalAction_type: "Grant",
   federalAction_status: "BidOffer",

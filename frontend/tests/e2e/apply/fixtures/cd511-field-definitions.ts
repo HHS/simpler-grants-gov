@@ -4,6 +4,16 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 export const CD511_FORM_MATCHER = "CD511";
 
+// Field ID mapping for API schema to test field IDs
+export const CD511_FIELD_ID_MAP: Record<string, string> = {
+  "applicant_name": "applicant_name",
+  "award_number": "award_number",
+  "project_name": "project_name",
+  "contact_person/first_name": "contact_person--first_name",
+  "contact_person/last_name": "contact_person--last_name",
+  "contact_person_title": "contact_person_title",
+};
+
 export const fieldDefinitionsCD511: FormFillFieldDefinitions = {
   applicant_name: {
     testId: "applicant_name",

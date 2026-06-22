@@ -9,6 +9,26 @@ export const SF424_FORM_MATCHER =
 // api/src/form_schema/forms/sf424/1/0/form_json.py
 // api/src/form_schema/shared/common_shared.py
 // api/src/form_schema/shared/address_shared.py
+
+// Field ID mapping for API schema to test field IDs
+export const SF424_FIELD_ID_MAP: Record<string, string> = {
+  "submission_type": "submission_type",
+  "application_type": "application_type",
+  "organization_name": "organization_name",
+  "applicant/first_name": "applicant--first_name",
+  "applicant/last_name": "applicant--last_name",
+  "applicant/street1": "applicant--street1",
+  "applicant/city": "applicant--city",
+  "contact_person/first_name": "contact_person--first_name",
+  "contact_person/last_name": "contact_person--last_name",
+  "authorized_representative/first_name":
+    "authorized_representative--first_name",
+  "authorized_representative/last_name":
+    "authorized_representative--last_name",
+  "phone_number": "phone_number",
+  "email": "email",
+};
+
 export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   submission_type: {
     selector: "#submission_type",

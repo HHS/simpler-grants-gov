@@ -5,6 +5,13 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 export const PROJECT_ABSTRACT_SUMMARY_FORM_MATCHER =
   /Project\s+Abstract\s+Summary/i;
 
+// Field ID mapping for API schema to test field IDs
+export const PROJECT_ABSTRACT_SUMMARY_FIELD_ID_MAP: Record<string, string> = {
+  "applicant_name": "applicant_name",
+  "project_title": "project_title",
+  "project_abstract": "project_abstract",
+};
+
 // maxLength values sourced from:
 // api/src/form_schema/forms/project_abstract_summary/1/0/form_json.py
 // api/src/form_schema/shared/common_shared.py (organization_name)

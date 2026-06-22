@@ -4,6 +4,20 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 export const EPA4700_4_FORM_MATCHER = /EPA\s+Form\s+4700-4/i;
 
+// Field ID mapping for API schema to test field IDs
+export const EPA4700_4_FIELD_ID_MAP: Record<string, string> = {
+  "applicant_name": "applicant_name",
+  "applicant_address/address": "applicant_address--address",
+  "applicant_address/city": "applicant_address--city",
+  "applicant_address/state": "applicant_address--state",
+  "applicant_address/zip_code": "applicant_address--zip_code",
+  "point_of_contact_name": "point_of_contact_name",
+  "point_of_contact_phone_number": "point_of_contact_phone_number",
+  "point_of_contact_email": "point_of_contact_email",
+  "point_of_contact_title": "point_of_contact_title",
+  "applicant_signature/aor_title": "applicant_signature--aor_title",
+};
+
 export const fieldDefinitionsEPA47004: FormFillFieldDefinitions = {
   applicant_name: {
     testId: "applicant_name",

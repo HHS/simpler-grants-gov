@@ -7,6 +7,12 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 export const SF424B_FORM_MATCHER =
   /SF\s*[-‑–—]?\s*424B|Assurances\s+for\s+Non\s*[-‑–—]?\s*Construction\s+Programs/i;
 
+// Field ID mapping for API schema to test field IDs
+export const SF424B_FIELD_ID_MAP: Record<string, string> = {
+  "title": "title",
+  "applicant_organization": "applicant_organization",
+};
+
 export const fieldDefinitionsSF424B: FormFillFieldDefinitions = {
   title: {
     testId: "title",

@@ -5,6 +5,11 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 export const PROJECT_ABSTRACT_FORM_MATCHER =
   /Project\s+Abstract(?!\s+Summary)/i;
 
+// Field ID mapping for API schema to test field IDs
+export const PROJECT_ABSTRACT_FIELD_ID_MAP: Record<string, string> = {
+  "project_abstract_file": "project_abstract_file",
+};
+
 export const fieldDefinitionsProjectAbstract: FormFillFieldDefinitions = {
   attachment: {
     testId: "file-input-input",

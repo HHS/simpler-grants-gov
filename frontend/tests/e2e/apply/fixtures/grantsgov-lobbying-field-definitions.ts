@@ -6,6 +6,14 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 // buildFlexibleFormNameRegex will escape the dot — do NOT pre-escape here.
 export const GRANTSGOV_LOBBYING_FORM_MATCHER = "Grants.gov Lobbying Form";
 
+// Field ID mapping for API schema to test field IDs
+export const GRANTSGOV_LOBBYING_FIELD_ID_MAP: Record<string, string> = {
+  "authorized_representative_name/first_name":
+    "authorized_representative_name--first_name",
+  "authorized_representative_name/last_name":
+    "authorized_representative_name--last_name",
+};
+
 export const fieldDefinitionsGrantsGovLobbying: FormFillFieldDefinitions = {
   organization_name: {
     testId: "organization_name",

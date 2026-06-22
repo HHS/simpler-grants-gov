@@ -5,6 +5,34 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 // Regex matcher for the EPA Key Contacts form link in the forms table.
 export const EPA_KEY_CONTACTS_FORM_MATCHER = "EPA KEY CONTACTS FORM";
 
+// Field ID mapping for API schema to test field IDs
+export const EPA_KEY_CONTACTS_FIELD_ID_MAP: Record<string, string> = {
+  "authorized_representative/name/first_name":
+    "authorized_representative--name--first_name",
+  "authorized_representative/name/last_name":
+    "authorized_representative--name--last_name",
+  "authorized_representative/address/street1":
+    "authorized_representative--address--street1",
+  "authorized_representative/address/city":
+    "authorized_representative--address--city",
+  "payee/name/first_name": "payee--name--first_name",
+  "payee/name/last_name": "payee--name--last_name",
+  "payee/address/street1": "payee--address--street1",
+  "payee/address/city": "payee--address--city",
+  "administrative_contact/name/first_name":
+    "administrative_contact--name--first_name",
+  "administrative_contact/name/last_name":
+    "administrative_contact--name--last_name",
+  "administrative_contact/address/street1":
+    "administrative_contact--address--street1",
+  "administrative_contact/address/city":
+    "administrative_contact--address--city",
+  "project_manager/name/first_name": "project_manager--name--first_name",
+  "project_manager/name/last_name": "project_manager--name--last_name",
+  "project_manager/address/street1": "project_manager--address--street1",
+  "project_manager/address/city": "project_manager--address--city",
+};
+
 // ************ Field definitions ************
 // testId convention mirrors the JSON schema path using "--" as a level separator:
 //   <section>--<sub-object>--<field>

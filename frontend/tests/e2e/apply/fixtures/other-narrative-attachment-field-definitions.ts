@@ -6,6 +6,11 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 export const OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER =
   /Other Narrative Attachments/i;
 
+// Field ID mapping for API schema to test field IDs
+export const OTHER_NARRATIVE_ATTACHMENT_FIELD_ID_MAP: Record<string, string> = {
+  "other_narrative_files": "other_narrative_files",
+};
+
 export const fieldDefinitionsOtherNarrativeAttachment: FormFillFieldDefinitions =
   {
     attachments: {
