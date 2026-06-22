@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+// import { formatDateWithNoPreformattedExpectations } from "src/utils/dateUtil";
+
 import { FileInputExistingFiles } from "./FileInputExistingFiles";
 
 jest.mock("src/utils/fileUtils/formatFileSizeUtil", () => ({
@@ -9,8 +11,8 @@ jest.mock("src/utils/fileUtils/formatFileSizeUtil", () => ({
 
 jest.mock("src/utils/dateUtil", () => ({
   // for ease of testing, this will take the epoch ms, and return the year
-  formatDate: (dateMs: string) => {
-    return new Date(dateMs).getFullYear();
+  formatDateWithNoPreformattedExpectations: (date: Date) => {
+    return date.getFullYear();
   },
 }));
 

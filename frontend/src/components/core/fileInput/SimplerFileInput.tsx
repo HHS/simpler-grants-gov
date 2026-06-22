@@ -58,9 +58,7 @@ type SimplerFileInputProps = {
   * confirm error status displays [x]
   *
   * properly format status display [x]
-  * properly format existing file display [ ]
-
-
+  * properly format existing file display [x]
 */
 
 export const SimplerFileInput = ({
@@ -165,6 +163,10 @@ export const SimplerFileInput = ({
       let error: Error;
       const process = async (): Promise<string> => {
         return reader.read().then(({ value, done }) => {
+          console.log("RRRR", value, done);
+          if (done) {
+            return newFileId;
+          }
           let payloadJson: FileUploadStatusUpdate;
           const payloadString = new TextDecoder().decode(value);
           const payloadJsonStrings = unbatchStreamChunkJSON(payloadString);
@@ -194,9 +196,6 @@ export const SimplerFileInput = ({
                 if (payloadJson.pendingFileId) {
                   newFileId = payloadJson.pendingFileId;
                 }
-              }
-              if (done) {
-                return newFileId;
               }
             },
           );
@@ -290,7 +289,6 @@ export const SimplerFileInput = ({
             return;
           })
           .catch((e: Error) => {
-            console.error("WOW", e);
             handleError(e);
           })
           .finally(() => {

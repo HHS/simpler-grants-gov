@@ -14,6 +14,8 @@ import { SimplerFileInput } from "./SimplerFileInput";
 
 const clientFetchMock = jest.fn();
 const fakeAbortController = jest.fn();
+const fakeTextDecoder = jest.fn();
+const fakeFileReader = jest.fn();
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
@@ -32,14 +34,33 @@ const fakeExistingFile = {
 };
 
 let originalAbortController: typeof AbortController;
+let originalTextDecoder: typeof TextDecoder;
+let originalFileReader: typeof FileReader;
 
 describe("SimplerFileInput", () => {
   beforeEach(() => {
     originalAbortController = global.AbortController;
     global.AbortController = fakeAbortController;
+
+    fakeTextDecoder.mockImplementation(() => ({
+      decode: (value) => value,
+    }));
+    originalTextDecoder = global.TextDecoder;
+    global.TextDecoder = fakeTextDecoder;
+
+    // file reader needs to get mocked because it is used in the trussworks
+    // FilePreview (even though we are hiding this), and it doesn't play well with
+    // the JSDOM version of Blobs
+    fakeFileReader.mockImplementation(() => ({
+      readAsDataURL: jest.fn(),
+    }));
+    originalFileReader = global.FileReader;
+    global.FileReader = fakeFileReader;
   });
   afterEach(() => {
+    global.TextDecoder = originalTextDecoder;
     global.AbortController = originalAbortController;
+    global.FileReader = originalFileReader;
     jest.resetAllMocks();
   });
   describe("Status display", () => {
@@ -130,7 +151,7 @@ describe("SimplerFileInput", () => {
           makeAdvanceableTestStreamForTrigger(
             [
               JSON.stringify({ status: "uploading" }),
-              JSON.stringify({ status: "scanning" }),
+              JSON.stringify({ status: "pending" }),
             ],
             trigger,
           ),
@@ -173,7 +194,12 @@ describe("SimplerFileInput", () => {
       const trigger = createAdvanceStreamTrigger();
       // we're not concerned with the upload process here, so no need to mess with stream states
       clientFetchMock.mockResolvedValue(
-        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            [JSON.stringify({ status: "whatever", pendingFileId: "1" })],
+            trigger,
+          ),
+        ),
       );
       const delayedPostUploadAction = (): Promise<undefined> => {
         return new Promise((resolve) => {
@@ -268,7 +294,7 @@ describe("SimplerFileInput", () => {
       await waitFor(async () =>
         expect(
           await screen.findByTestId("file-upload-status-display"),
-        ).toHaveTextContent("error"),
+        ).toHaveTextContent("preUploadError"),
       );
     });
 
@@ -362,7 +388,12 @@ describe("SimplerFileInput", () => {
       const trigger = createAdvanceStreamTrigger();
       // we're not concerned with the upload process here, so no need to mess with stream states
       clientFetchMock.mockResolvedValue(
-        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            [JSON.stringify({ status: "whatever", pendingFileId: "1" })],
+            trigger,
+          ),
+        ),
       );
       const delayedPostUploadAction = (): Promise<undefined> => {
         return new Promise((_resolve, reject) => {
@@ -424,7 +455,12 @@ describe("SimplerFileInput", () => {
       const trigger = createAdvanceStreamTrigger();
       // we're not concerned with the upload process here, so no need to mess with stream states
       clientFetchMock.mockResolvedValue(
-        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            [JSON.stringify({ status: "whatever", pendingFileId: "1" })],
+            trigger,
+          ),
+        ),
       );
       const mockPostUploadAction = jest.fn();
       render(
@@ -453,7 +489,12 @@ describe("SimplerFileInput", () => {
       const trigger = createAdvanceStreamTrigger();
       // we're not concerned with the upload process here, so no need to mess with stream states
       clientFetchMock.mockResolvedValue(
-        new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            [JSON.stringify({ status: "whatever", pendingFileId: "1" })],
+            trigger,
+          ),
+        ),
       );
       const mockOnSuccess = jest.fn();
       render(
@@ -618,9 +659,10 @@ describe("SimplerFileInput", () => {
   });
   it("cancels post-upload in progress on cancel button click during post-upload action", async () => {
     const controllerAbortMock = jest.fn();
+    const firstControllerAbortMock = jest.fn();
     fakeAbortController
       .mockImplementationOnce(() => ({
-        abort: jest.fn(),
+        abort: firstControllerAbortMock,
         signal: {
           abort: jest.fn(),
         },
@@ -633,7 +675,12 @@ describe("SimplerFileInput", () => {
       }));
     const trigger = createAdvanceStreamTrigger();
     clientFetchMock.mockResolvedValue(
-      new Response(makeAdvanceableTestStreamForTrigger([], trigger)),
+      new Response(
+        makeAdvanceableTestStreamForTrigger(
+          [JSON.stringify({ status: "whatever", pendingFileId: "1" })],
+          trigger,
+        ),
+      ),
     );
     const delayedPostUploadAction = (): Promise<undefined> => {
       return new Promise((resolve) => {
@@ -652,12 +699,7 @@ describe("SimplerFileInput", () => {
       />,
     );
     const input = await screen.findByTestId("file-input-input");
-    await userEvent.upload(
-      input,
-      new File(["test content"], "test.txt", {
-        type: "text/plain",
-      }),
-    );
+    await userEvent.upload(input, new File(["test content"], "test.txt"));
     trigger.advance();
     await waitFor(async () => {
       expect(
@@ -670,6 +712,7 @@ describe("SimplerFileInput", () => {
     expect(cancelButton).toBeInTheDocument();
     await userEvent.click(cancelButton);
 
+    expect(firstControllerAbortMock).not.toHaveBeenCalled();
     expect(controllerAbortMock).toHaveBeenCalledTimes(1);
   });
   it("displays error message if error occurs during delete", async () => {

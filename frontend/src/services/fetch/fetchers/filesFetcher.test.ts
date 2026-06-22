@@ -33,7 +33,7 @@ describe("fetchFileUploadDetails", () => {
   });
   it("calls fetchFileUploadWithMethod with expected arguments including form data output from createFormData", async () => {
     mockFetchFileUpload.mockResolvedValue({
-      json: () => Promise.resolve("good return value"),
+      json: () => Promise.resolve({ data: "good return value" }),
     });
     mockFetchFileUploadWithMethod.mockImplementation(
       (_arg) => mockFetchFileUpload,
@@ -55,6 +55,7 @@ describe("uploadFileToS3", () => {
   beforeEach(() => {
     originalFetch = global.fetch;
     global.fetch = mockFetch;
+    // mocking this because in the jest env File objects don't have an array buffer
     mockCreateFormData.mockImplementation((fileName: string) => {
       const testFormData = new FormData();
       testFormData.append("file", fileName);

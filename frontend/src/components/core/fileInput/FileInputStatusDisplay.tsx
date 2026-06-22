@@ -137,6 +137,8 @@ export const FileInputStatusDisplay = ({
     return;
   }
 
+  // this relies on some magic strings, it's not great!
+  // refactor this to be more flexible in terms of tracking progress
   const messagesMap: { [key in FileUploadStatus]: string } = {
     queued: t("queued"),
     uploading: t("uploading"),
@@ -160,6 +162,7 @@ export const FileInputStatusDisplay = ({
     ? (errorStatuses.get(status) as FileUploadStatus) || "error"
     : status;
   const statusMessageForDisplay = messagesMap[adjustedStatus];
+  console.log("****", statusMessageForDisplay);
 
   return (
     <Grid
