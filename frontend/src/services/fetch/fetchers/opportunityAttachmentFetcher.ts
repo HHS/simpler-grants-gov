@@ -17,7 +17,6 @@ export const listOpportunityAttachments = async (
   return (await response.json()) as OpportunityAttachmentListResponse;
 };
 
-// for now this just iterates through the valid statuses and delivers them in a stream in 1 second intervals
 export const attachOpportunityFile = async ({
   opportunityId,
   pendingFileId,
@@ -26,7 +25,10 @@ export const attachOpportunityFile = async ({
   pendingFileId: string;
 }) => {
   console.log("!!! attaching", opportunityId, pendingFileId);
-  return await new Promise((resolve) => resolve(new Response()));
+  // return await new Promise((resolve) => resolve(new Response()));
+  return new Promise((_resolve, reject) =>
+    reject(new Error("simluate post upload action error response")),
+  );
 };
 
 export const uploadOpportunityAttachment = async (

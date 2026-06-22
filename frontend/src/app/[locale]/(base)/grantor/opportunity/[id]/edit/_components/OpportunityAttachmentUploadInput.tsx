@@ -99,6 +99,7 @@ export function OpportunityAttachmentUploadInput({
     } catch (e) {
       console.error("Attachment upload failed", e);
       setErrorMessage(t("errorUploadFailed"));
+      throw e;
     }
     setIsUploading(false);
   };
@@ -142,7 +143,9 @@ export function OpportunityAttachmentUploadInput({
       </Label>
       <SimplerFileInput
         postUploadAction={handleOpportunityAttachment}
-        postUploadActionProgressMessage="attaching to opportunity"
+        postUploadActionProgressMessage="ATTACHING TO OPPORTUNITY (custom message)"
+        postUploadActionErrorMessage="POST UPLOAD FAILED (custom message)"
+        postUploadActionSuccessMessage="POST UPLOAD SUCCESS (custom message)"
         id="opportunity-attachment-upload"
         labelId={"opportunity-attachment-upload-label"}
         onDelete={confirmDelete}

@@ -10,16 +10,14 @@ import { Button, Grid } from "@trussworks/react-uswds";
 import Spinner from "src/components/core/Spinner";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
+// maps upload statuses to the error message to show if error occurs while in those statuses
 const errorStatuses = new Map([
   ["queued", "pre-upload-error"],
   ["uploading", "upload-error"],
   ["scanning", "scan-error"],
+  ["infected", "infected"],
   ["complete", "file-id-error"], // assuming that any error in this state is due to a missing file id
   ["post-upload", "post-upload-error"],
-  ["infected", "infected"],
-  // need to figure out how to disintguish between scan failure and scan error.
-  // this will likely depend on the implementation of handling scan failures on the backend
-  // Next API will return a specific error and we can return that error status before dealing with this map
 ]);
 
 // if there's an error show the error icon

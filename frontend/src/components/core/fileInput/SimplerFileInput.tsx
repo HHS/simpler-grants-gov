@@ -17,6 +17,8 @@ import { FileInputExistingFiles } from "./FileInputExistingFiles";
 import { FileInputStatusDisplay } from "./FileInputStatusDisplay";
 
 type SimplerFileInputProps = {
+  // note that post upload actions must not swallow errors in order to properly
+  // trigger error handling logic within this component
   postUploadAction: PostUploadAction;
   postUploadActionProgressMessage: string;
   postUploadActionSuccessMessage?: string;
@@ -53,7 +55,7 @@ type SimplerFileInputProps = {
   * confirm cancel behavior [x]
   * confirm callback behavior [x]
   *
-  * confirm error status displays [ ]
+  * confirm error status displays [x]
   *
   * properly format status display [ ]
   * properly format existing file display [ ]
@@ -274,6 +276,7 @@ export const SimplerFileInput = ({
           })
           // run complete actions
           .then((postUploadResult: unknown) => {
+            console.log("6.", postUploadResult);
             setPostUploadController(undefined);
             // complete status will persist until refresh or form change
             setCurrentStatus("success");
@@ -288,6 +291,7 @@ export const SimplerFileInput = ({
             return;
           })
           .catch((e: Error) => {
+            console.error("WOW", e);
             handleError(e);
           })
           .finally(() => {
