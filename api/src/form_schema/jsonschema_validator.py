@@ -27,8 +27,11 @@ def _required(
 
     for field_name in required:
         if field_name not in instance:
+            # Build the full path by extending the validator's current path
+            # with the missing field name, to provide context for nested fields
+            error_path = list(validator.path) + [field_name]
             yield jsonschema.ValidationError(
-                f"{field_name!r} is a required property", path=[field_name]
+                f"{field_name!r} is a required property", path=error_path
             )
 
 

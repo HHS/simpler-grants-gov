@@ -372,12 +372,16 @@ export const EPA_KEY_CONTACTS_FORM_CONFIG = {
 
 // Required field validation errors for failure-path tests.
 // Each of the four sections requires: First Name, Last Name, Street 1, City, Country, Phone.
+// Note: Error messages now include parent field context (e.g. "Name First Name" instead of just "First Name")
 const SECTION_REQUIRED_ERRORS = (section: string): FieldError[] => [
   {
     fieldId: `${section}--name--first_name`,
-    message: "First Name is required",
+    message: "Name First Name is required",
   },
-  { fieldId: `${section}--name--last_name`, message: "Last Name is required" },
+  {
+    fieldId: `${section}--name--last_name`,
+    message: "Name Last Name is required",
+  },
   {
     fieldId: `${section}--address--street1`,
     message: "Address Street 1 is required",
