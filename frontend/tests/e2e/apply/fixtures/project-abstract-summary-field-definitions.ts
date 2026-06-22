@@ -44,17 +44,3 @@ export const PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG = {
   fields: fieldDefinitionsProjectAbstractSummary,
 } as const;
 
-export const PROJECT_ABSTRACT_SUMMARY_REQUIRED_FIELD_ERRORS: FieldError[] = [
-  {
-    fieldId: "applicant_name",
-    message: "Applicant Name is required",
-  },
-  {
-    fieldId: "project_title",
-    message: "Descriptive Title of Applicants Project is required",
-  },
-  {
-    fieldId: "project_abstract",
-    message: "Project Abstract is required",
-  },
-];

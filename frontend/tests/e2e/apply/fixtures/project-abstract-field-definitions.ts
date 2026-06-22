@@ -25,9 +25,3 @@ export const PROJECT_ABSTRACT_FORM_CONFIG = {
 } as const;
 
 // Required field validation errors for Project Abstract form
-export const PROJECT_ABSTRACT_REQUIRED_FIELD_ERRORS: FieldError[] = [
-  {
-    fieldId: "attachment",
-    message: "{} is not of type string",
-  },
-];

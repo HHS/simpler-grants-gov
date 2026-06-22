@@ -422,9 +422,3 @@ const SECTION_REQUIRED_ERRORS = (section: string): FieldError[] => [
   { fieldId: `${section}--phone`, message: "Phone Number is required" },
 ];
 
-export const EPA_KEY_CONTACTS_REQUIRED_FIELD_ERRORS: FieldError[] = [
-  ...SECTION_REQUIRED_ERRORS("authorized_representative"),
-  ...SECTION_REQUIRED_ERRORS("payee"),
-  ...SECTION_REQUIRED_ERRORS("administrative_contact"),
-  ...SECTION_REQUIRED_ERRORS("project_manager"),
-];

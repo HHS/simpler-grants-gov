@@ -27,9 +27,3 @@ export const OTHER_NARRATIVE_ATTACHMENT_FORM_CONFIG = {
 } as const;
 
 // Required field validation errors for Other Narrative Attachments form
-export const OTHER_NARRATIVE_ATTACHMENT_REQUIRED_FIELD_ERRORS: FieldError[] = [
-  {
-    fieldId: "attachments",
-    message: "Other Narrative Files is required",
-  },
-];

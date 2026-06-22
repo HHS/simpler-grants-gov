@@ -86,28 +86,3 @@ export const EPA4700_4_FORM_CONFIG = {
   formName: "EPA Form 4700-4",
   fields: fieldDefinitionsEPA47004,
 } as const;
-
-export const EPA4700_4_REQUIRED_FIELD_ERRORS: FieldError[] = [
-  { fieldId: "applicant_name", message: "Name is required" },
-  {
-    fieldId: "applicant_address--address",
-    message: "Address is required",
-  },
-  { fieldId: "applicant_address--city", message: "City is required" },
-  { fieldId: "applicant_address--state", message: "State is required" },
-  {
-    fieldId: "applicant_address--zip_code",
-    message: "Zip / Postal Code is required",
-  },
-  { fieldId: "point_of_contact_name", message: "Name is required" },
-  {
-    fieldId: "point_of_contact_phone_number",
-    message: "Phone is required",
-  },
-  { fieldId: "point_of_contact_email", message: "Email is required" },
-  { fieldId: "point_of_contact_title", message: "Title is required" },
-  {
-    fieldId: "applicant_signature--aor_title",
-    message: "B. Title of Authorized Official is required",
-  },
-];

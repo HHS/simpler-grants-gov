@@ -5,15 +5,14 @@
  */
 
 import {
-  test,
   type BrowserContext,
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { test } from "tests/e2e/apply/fixtures/form-validation-fixtures";
 import {
   SF424A_ALERT_ERRORS,
   SF424A_FORM_MATCHER,
-  SF424A_REQUIRED_FIELD_ERRORS,
 } from "tests/e2e/apply/fixtures/sf424a-field-definitions";
 import {
   testdata_local_environment,
@@ -53,7 +52,7 @@ test(
   "SF-424A error validation - required fields and inline errors",
   { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
-    { page, context }: { page: Page; context: BrowserContext },
+    { page, context, sf424aRequiredErrors }: { page: Page; context: BrowserContext; sf424aRequiredErrors: any },
     testInfo: TestInfo,
   ) => {
     test.setTimeout(300_000); // 5 min timeout
@@ -90,7 +89,7 @@ test(
     await verifyFormStatusAfterSave(
       page,
       "incomplete",
-      SF424A_REQUIRED_FIELD_ERRORS,
+      sf424aRequiredErrors,
       SF424A_ALERT_ERRORS,
     );
 

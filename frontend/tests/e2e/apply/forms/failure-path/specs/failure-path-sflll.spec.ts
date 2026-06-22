@@ -5,14 +5,13 @@
  */
 
 import {
-  test,
   type BrowserContext,
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { test } from "tests/e2e/apply/fixtures/form-validation-fixtures";
 import {
   SFLLL_FORM_MATCHER,
-  SFLLL_REQUIRED_FIELD_ERRORS,
 } from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
@@ -51,7 +50,7 @@ test(
   "SF-LLL - error validation on empty save",
   { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
-    { page, context }: { page: Page; context: BrowserContext },
+    { page, context, sflllRequiredErrors }: { page: Page; context: BrowserContext; sflllRequiredErrors: any },
     testInfo: TestInfo,
   ) => {
     test.setTimeout(300_000); // 5 min timeout
@@ -88,7 +87,7 @@ test(
     await verifyFormStatusAfterSave(
       page,
       "incomplete",
-      SFLLL_REQUIRED_FIELD_ERRORS,
+      sflllRequiredErrors,
     );
 
     // When the user navigates back to the application landing page

@@ -68,17 +68,3 @@ export const CD511_FORM_CONFIG = {
   fields: fieldDefinitionsCD511,
 } as const;
 
-export const CD511_REQUIRED_FIELD_ERRORS: FieldError[] = [
-  { fieldId: "applicant_name", message: "Name of Applicant is required" },
-  { fieldId: "award_number", message: "Award Number is required" },
-  { fieldId: "project_name", message: "Project Name is required" },
-  {
-    fieldId: "contact_person--first_name",
-    message: "First Name is required",
-  },
-  {
-    fieldId: "contact_person--last_name",
-    message: "Last Name is required",
-  },
-  { fieldId: "contact_person_title", message: "Title is required" },
-];

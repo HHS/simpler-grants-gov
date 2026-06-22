@@ -33,10 +33,3 @@ export const SF424B_FORM_CONFIG = {
 } as const;
 
 // Required field validation errors for SF-424B
-export const SF424B_REQUIRED_FIELD_ERRORS: FieldError[] = [
-  { fieldId: "title", message: "Title is required" },
-  {
-    fieldId: "applicant_organization",
-    message: "Applicant Organization is required",
-  },
-];

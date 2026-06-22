@@ -459,10 +459,6 @@ export const SF424_FORM_CONFIG = {
   formName: "Application for Federal Assistance (SF-424)",
   fields: fieldDefinitionsSF424,
 } as const;
-
-// Required field validation errors for SF-424
-export const SF424_REQUIRED_FIELD_ERRORS: FieldError[] = [
-  { fieldId: "submission_type", message: "Submission Type is required" },
   { fieldId: "application_type", message: "Application Type is required" },
   { fieldId: "organization_name", message: "Legal Name is required" },
   {

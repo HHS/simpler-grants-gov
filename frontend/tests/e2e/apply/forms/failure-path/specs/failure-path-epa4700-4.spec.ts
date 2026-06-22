@@ -5,14 +5,13 @@
  */
 
 import {
-  test,
   type BrowserContext,
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { test } from "tests/e2e/apply/fixtures/form-validation-fixtures";
 import {
   EPA4700_4_FORM_MATCHER,
-  EPA4700_4_REQUIRED_FIELD_ERRORS,
 } from "tests/e2e/apply/fixtures/epa4700-4-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
@@ -45,7 +44,7 @@ test(
   "EPA Form 4700-4 error validation - required fields and inline errors",
   { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
-    { page, context }: { page: Page; context: BrowserContext },
+    { page, context, epa4700_4RequiredErrors }: { page: Page; context: BrowserContext; epa4700_4RequiredErrors: any },
     testInfo: TestInfo,
   ) => {
     test.setTimeout(300_000); // 5 min timeout
@@ -82,7 +81,7 @@ test(
     await verifyFormStatusAfterSave(
       page,
       "incomplete",
-      EPA4700_4_REQUIRED_FIELD_ERRORS,
+      epa4700_4RequiredErrors,
     );
 
     // When the user navigates back to the application landing page

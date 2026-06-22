@@ -431,9 +431,3 @@ export const SF424A_ALERT_ERRORS: FieldError[] = [
 
 // Inline errors validated through the shared failure-path helper.
 // Restrict this list to field IDs that map to stable inline error elements.
-export const SF424A_REQUIRED_FIELD_ERRORS: FieldError[] = [
-  {
-    fieldId: "confirmation",
-    message: "'confirmation' is a required property",
-  },
-];
