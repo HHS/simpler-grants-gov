@@ -1,9 +1,4 @@
-import {
-  enumOptionsValueForIndex,
-  FormContextType,
-  RJSFSchema,
-  StrictRJSFSchema,
-} from "@rjsf/utils";
+import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { noop } from "lodash";
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 
@@ -47,6 +42,7 @@ function SelectWidget<
 >({
   id,
   disabled,
+  additionalDescribedById,
   options = {},
   readOnly,
   required,
@@ -80,41 +76,34 @@ function SelectWidget<
   const handleFocus = useCallback(
     (event: FocusEvent<HTMLSelectElement>) => {
       const newValue = getValue(event, multiple);
-      return onFocus(
-        id,
-        enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal),
-      );
+      return onFocus(id, newValue === "" ? optEmptyVal : newValue);
     },
-    [onFocus, id, multiple, enumOptions, optEmptyVal],
+    [onFocus, id, multiple, optEmptyVal],
   );
 
   const handleBlur = useCallback(
     (event: FocusEvent<HTMLSelectElement>) => {
       const newValue = getValue(event, multiple);
-      return onBlur(
-        id,
-        enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal),
-      );
+      return onBlur(id, newValue === "" ? optEmptyVal : newValue);
     },
-    [onBlur, id, multiple, enumOptions, optEmptyVal],
+    [onBlur, id, multiple, optEmptyVal],
   );
 
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLSelectElement>) => {
       const newValue = getValue(event, multiple);
-      return onChange(
-        enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal),
-      );
+      return onChange(newValue === "" ? optEmptyVal : newValue);
     },
-    [onChange, multiple, enumOptions, optEmptyVal],
+    [onChange, multiple, optEmptyVal],
   );
 
   const error = rawErrors.length ? true : undefined;
-  const describedby = error
-    ? `error-for-${id}`
-    : title
-      ? `label-for-${id}`
-      : undefined;
+  const describedby = [
+    error ? `error-for-${id}` : undefined,
+    additionalDescribedById,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const Widget = useCombo ? ComboBox : Select;
   // ComboBox widget changes the id which breaks handling of idFor and anchor links
