@@ -80,11 +80,11 @@ export const SFLLL_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   {
     fieldId: "reporting_entity--applicant_reporting_entity--address--street1",
-    message: "Address Street 1 is required",
+    message: "Street 1 is required",
   },
   {
     fieldId: "reporting_entity--applicant_reporting_entity--address--city",
-    message: "Address City is required",
+    message: "City is required",
   },
   {
     fieldId: "reporting_entity--prime_reporting_entity--organization_name",
@@ -92,11 +92,11 @@ export const SFLLL_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   {
     fieldId: "reporting_entity--prime_reporting_entity--address--street1",
-    message: "Address Street 1 is required",
+    message: "Street 1 is required",
   },
   {
     fieldId: "reporting_entity--prime_reporting_entity--address--city",
-    message: "Address City is required",
+    message: "City is required",
   },
   {
     fieldId: "federal_agency_department",
@@ -104,42 +104,42 @@ export const SFLLL_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   {
     fieldId: "lobbying_registrant--individual--first_name",
-    message: "Name and Contact Information First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "lobbying_registrant--individual--last_name",
-    message: "Name and Contact Information Last Name is required",
+    message: "Last Name is required",
   },
   {
     fieldId: "lobbying_registrant--address--street1",
-    message: "Address Street 1 is required",
+    message: "Street 1 is required",
   },
   {
     fieldId: "lobbying_registrant--address--city",
-    message: "Address City is required",
+    message: "City is required",
   },
   {
     fieldId: "individual_performing_service--individual--first_name",
-    message: "Name and Contact Information First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "individual_performing_service--individual--last_name",
-    message: "Name and Contact Information Last Name is required",
+    message: "Last Name is required",
   },
   {
     fieldId: "individual_performing_service--address--street1",
-    message: "Address Street 1 is required",
+    message: "Street 1 is required",
   },
   {
     fieldId: "individual_performing_service--address--city",
-    message: "Address City is required",
+    message: "City is required",
   },
   {
     fieldId: "signature_block--name--first_name",
-    message: "Name and Contact Information First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "signature_block--name--last_name",
-    message: "Name and Contact Information Last Name is required",
+    message: "Last Name is required",
   },
 ];
