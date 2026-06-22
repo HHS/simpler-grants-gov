@@ -569,3 +569,99 @@ def test_list_accessible_opportunities_empty_result(client, db_session, grantor_
     pagination = response_json["pagination_info"]
     assert pagination["total_records"] == 0
     assert pagination["total_pages"] == 0
+
+
+def _get_opportunity_by_id(data: list[dict], opportunity_id: uuid.UUID) -> dict:
+    return next(opp for opp in data if opp["opportunity_id"] == str(opportunity_id))
+
+
+def test_list_opportunities_includes_submitted_application_count(
+    client, db_session, grantor_auth_data
+):
+    user, agency, token, _ = grantor_auth_data
+
+    opp_with_submissions = OpportunityFactory.create(
+        agency_id=agency.agency_id,
+        agency_code=agency.agency_code,
+        opportunity_number="COUNT-2026-001",
+    )
+    competition = CompetitionFactory.create(opportunity=opp_with_submissions)
+    app1 = ApplicationFactory.create(competition=competition)
+    app2 = ApplicationFactory.create(competition=competition)
+
+    ApplicationSubmissionFactory.create(application=app1)
+    ApplicationSubmissionFactory.create(application=app1)
+    ApplicationSubmissionFactory.create(application=app2)
+
+    opp_without_submissions = OpportunityFactory.create(
+        agency_id=agency.agency_id,
+        agency_code=agency.agency_code,
+        opportunity_number="COUNT-2026-002",
+    )
+
+    response = client.post(
+        f"/v1/grantors/agencies/{agency.agency_id}/opportunities",
+        headers={"X-SGG-Token": token},
+        json={"pagination": {"page_offset": 1, "page_size": 25}},
+    )
+
+    assert response.status_code == 200
+
+    data = response.get_json()["data"]
+
+    opp_with_count = _get_opportunity_by_id(data, opp_with_submissions.opportunity_id)
+    opp_without_count = _get_opportunity_by_id(data, opp_without_submissions.opportunity_id)
+
+    assert opp_with_count["submitted_application_count"] == 3
+    assert opp_without_count["submitted_application_count"] == 0
+
+
+def test_list_accessible_opportunities_includes_submitted_application_count(
+    client, db_session, enable_factory_create
+):
+    user, agency1, token, _ = create_user_in_agency_with_jwt_and_api_key(
+        db_session=db_session,
+        privileges=[Privilege.VIEW_OPPORTUNITY],
+    )
+
+    agency2 = AgencyFactory.create()
+    give_user_privilege_in_agency(
+        user=user,
+        agency=agency2,
+        privileges=[Privilege.VIEW_OPPORTUNITY],
+    )
+
+    opp1 = OpportunityFactory.create(
+        agency_id=agency1.agency_id,
+        agency_code=agency1.agency_code,
+        opportunity_number="COUNT-ACCESSIBLE-2026-001",
+    )
+    competition1 = CompetitionFactory.create(opportunity=opp1)
+    app1 = ApplicationFactory.create(competition=competition1)
+    ApplicationSubmissionFactory.create(application=app1)
+    ApplicationSubmissionFactory.create(application=app1)
+
+    opp2 = OpportunityFactory.create(
+        agency_id=agency2.agency_id,
+        agency_code=agency2.agency_code,
+        opportunity_number="COUNT-ACCESSIBLE-2026-002",
+    )
+    competition2 = CompetitionFactory.create(opportunity=opp2)
+    app2 = ApplicationFactory.create(competition=competition2)
+    ApplicationSubmissionFactory.create(application=app2)
+
+    response = client.post(
+        "/v1/grantors/opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={"pagination": {"page_offset": 1, "page_size": 25}},
+    )
+
+    assert response.status_code == 200
+
+    data = response.get_json()["data"]
+
+    opp1_response = _get_opportunity_by_id(data, opp1.opportunity_id)
+    opp2_response = _get_opportunity_by_id(data, opp2.opportunity_id)
+
+    assert opp1_response["submitted_application_count"] == 2
+    assert opp2_response["submitted_application_count"] == 1

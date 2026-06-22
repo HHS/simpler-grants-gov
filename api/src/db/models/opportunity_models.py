@@ -40,6 +40,8 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
+    submitted_application_count: int = 0
+
     legacy_opportunity_id: Mapped[int | None] = mapped_column(BigInteger, index=True, unique=True)
 
     is_simpler_grants_opportunity: Mapped[bool | None] = mapped_column(index=True)

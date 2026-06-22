@@ -1,18 +1,17 @@
 import uuid
 from collections.abc import Sequence
-from typing import Any
 
 import grants_shared.adapters.db as db
 from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
 from grants_shared.pagination.paginator import Paginator
 from pydantic import BaseModel, Field
-from sqlalchemy import Select, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.orm import selectinload
 
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import Application, Competition
+from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -87,7 +86,7 @@ def _should_filter_award_recommendation_ready(params: ListOpportunitiesParams) -
     )
 
 
-def _apply_opportunity_filters(stmt: Any, params: ListOpportunitiesParams) -> Any:
+def _apply_opportunity_filters(stmt: Select, params: ListOpportunitiesParams) -> Select:
     """Apply optional opportunity list filters."""
     if not _should_filter_award_recommendation_ready(params):
         return stmt
@@ -102,12 +101,50 @@ def _apply_opportunity_filters(stmt: Any, params: ListOpportunitiesParams) -> An
     )
 
 
+def _add_submitted_application_counts(
+    db_session: db.Session,
+    opportunities: Sequence[Opportunity],
+) -> None:
+    """Attach submitted application counts to each opportunity in the current page."""
+    opportunity_ids = [opportunity.opportunity_id for opportunity in opportunities]
+
+    if not opportunity_ids:
+        return
+
+    count_stmt = (
+        select(
+            Competition.opportunity_id,
+            func.count(ApplicationSubmission.application_submission_id).label(
+                "submitted_application_count"
+            ),
+        )
+        .join(Application, Application.competition_id == Competition.competition_id)
+        .join(
+            ApplicationSubmission,
+            ApplicationSubmission.application_id == Application.application_id,
+        )
+        .where(Competition.opportunity_id.in_(opportunity_ids))
+        .group_by(Competition.opportunity_id)
+    )
+
+    counts_by_opportunity_id = {
+        opportunity_id: submitted_application_count
+        for opportunity_id, submitted_application_count in db_session.execute(count_stmt).all()
+    }
+
+    for opportunity in opportunities:
+        opportunity.submitted_application_count = counts_by_opportunity_id.get(
+            opportunity.opportunity_id,
+            0,
+        )
+
+
 def _paginate_opportunity_stmt(
     db_session: db.Session,
-    stmt: Any,
+    stmt: Select,
     params: ListOpportunitiesParams,
 ) -> tuple[Sequence[Opportunity], PaginationInfo]:
-    """Apply filters, sorting, and pagination to an opportunity query."""
+    """Apply filters, sorting, submitted application counts, and pagination."""
     stmt = _apply_opportunity_filters(stmt, params)
     stmt = apply_sorting(stmt, Opportunity, params.pagination.sort_order)
 
@@ -119,6 +156,7 @@ def _paginate_opportunity_stmt(
     )
 
     opportunities = paginator.page_at(params.pagination.page_offset)
+    _add_submitted_application_counts(db_session, opportunities)
 
     pagination_info = PaginationInfo(
         total_records=paginator.total_records,
@@ -189,7 +227,7 @@ def get_opportunity_list_for_grantors(
     )
 
 
-def _accessible_agency_ids_for_user_stmt(user: User) -> Any:
+def _accessible_agency_ids_for_user_stmt(user: User) -> Select:
     """Build a subquery for agencies where the user has VIEW_OPPORTUNITY."""
     return (
         select(AgencyUser.agency_id)
