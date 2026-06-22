@@ -115,7 +115,7 @@ export const SF424_OPPORTUNITY_DATA: PrintViewFormData = {
     agency_name: "Simpler Grants.gov",
     assistance_listing_program_title: "Technical Agricultural Assistance",
     competition_identification_title:
-      "E2E Application for Federal Assistance (SF-424) ORG IND OT01",
+      "E2E Application for Federal Assistance (SF-424) ORG IND CT01",
     certification_agree: "Yes",
   },
   buildTestData: buildSF424HappyPathTestData,
