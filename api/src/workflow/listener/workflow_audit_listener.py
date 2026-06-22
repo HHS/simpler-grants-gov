@@ -44,6 +44,8 @@ class WorkflowAuditListener:
         For subsequent automatic transitions, uses the system workflow user ID from config.
         """
 
+        # Target shouldn't be None with how we define state machines
+        # but the library allows for it, so we have to be careful
         target = event_data.target
         if target is None:
             raise UnexpectedStateError("Workflow transition is missing a target state")

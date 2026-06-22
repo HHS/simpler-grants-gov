@@ -42,6 +42,8 @@ class WorkflowApprovalEmailListener:
         """
         Listen for events when a workflow enters a state that is also an approval.
         """
+        # Target shouldn't be None with how we define state machines
+        # but the library allows for it, so we have to be careful
         if event_data.target is None:
             raise UnexpectedStateError("Workflow transition is missing a target state")
         target_state = event_data.target.value
