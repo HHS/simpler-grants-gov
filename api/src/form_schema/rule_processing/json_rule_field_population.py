@@ -183,6 +183,47 @@ def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
     return str(quantize_decimal(result))
 
 
+def subtract_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
+    """Subtract monetary amounts based on configuration
+
+    Mirrors sum_monetary, but the first field is the minuend and every
+    subsequent field is subtracted from it (fields ["a", "b", "c"] produces
+    a - b - c). Each field is resolved the same way as sum_monetary.
+
+    Value returned is a string of format "0.00" with two decimal points.
+    """
+    fields = json_rule.rule.get("fields", [])
+
+    result = ZERO_DECIMAL
+    for index, field in enumerate(fields):
+        # Resolve each field on its own so a missing field keeps its position
+        # (treated as 0.00) rather than collapsing the operands of the subtraction.
+        field_total = ZERO_DECIMAL
+        for value in get_field_values(context.json_data, [field], json_rule.path):
+            if value is None:
+                continue
+
+            # If a field cannot be converted to a monetary amount, we just
+            # won't include it in the amount. These fields should have validation
+            # on them that would flag it to a user.
+            try:
+                field_total += convert_monetary_field(value)
+            except ValueError:
+                logger.info(
+                    "Cannot convert monetary amount entered", extra=json_rule.get_log_context()
+                )
+                continue
+
+        # Every subsequent field is subtracted from the first field.
+        if index == 0:
+            result += field_total
+        else:
+            result -= field_total
+
+    # Make the value always contain 2 values after the decimal.
+    return str(quantize_decimal(result))
+
+
 population_func = Callable[[JsonRuleContext, JsonRule], Any]
 
 PRE_POPULATION_MAPPER: dict[str, population_func] = {
@@ -195,6 +236,7 @@ PRE_POPULATION_MAPPER: dict[str, population_func] = {
     "public_competition_id": get_public_competition_id,
     "competition_title": get_competition_title,
     "sum_monetary": sum_monetary_values,
+    "subtract_monetary": subtract_monetary_values,
 }
 
 POST_POPULATION_MAPPER: dict[str, population_func] = {
