@@ -10,10 +10,7 @@ import src.api.internal.internal_schema as internal_schema
 from src.api.internal.internal_blueprint import internal_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
 from src.services.internal.create_e2e_token import create_e2e_token
-from src.services.internal.setup_file_scan_scanner_user import (
-    INTERNAL_S3_SCANNER_USER_ID,
-    setup_file_scan_scanner_user,
-)
+from src.services.internal.setup_file_scan_scanner_user import setup_file_scan_scanner_user
 from src.services.internal.update_internal_user_role import update_internal_user_role
 
 logger = logging.getLogger(__name__)
@@ -52,12 +49,12 @@ def setup_file_scan_scanner_user_route(
 ) -> response.ApiResponse:
     """
     Provision the internal user the file-scan scanner Lambda authenticates as,
-    along with its INTERNAL_S3_SCAN role and API key. Idempotent, so it can be
-    re-run after a key rotation. Gated on the manage_internal_roles privilege.
+    along with its INTERNAL_S3_SCAN role, then mint and return a fresh API key.
+    Re-running rotates the key for the same user. Gated on the
+    manage_internal_roles privilege.
     """
-    scanner_user_id = json_data.get("user_id", INTERNAL_S3_SCANNER_USER_ID)
+    scanner_user_id = json_data["user_id"]
 
-    # Intentionally do not log json_data["api_key"] — it is a secret.
     add_extra_data_to_current_request_logs({"scanner_user_id": scanner_user_id})
     logger.info("POST /v1/internal/file-scan-scanner-user")
 
@@ -65,11 +62,17 @@ def setup_file_scan_scanner_user_route(
         api_key_user = api_user_key_auth.get_user()
         db_session.add(api_key_user)
 
-        scanner_user = setup_file_scan_scanner_user(
-            db_session, api_key_user, json_data["api_key"], scanner_user_id
-        )
+        scanner_api_key = setup_file_scan_scanner_user(db_session, api_key_user, scanner_user_id)
 
-    return response.ApiResponse(message="Success", data={"user_id": str(scanner_user.user_id)})
+        # Capture the generated key value while the row is still attached; this
+        # is the one and only time the plaintext key leaves the system.
+        data = {
+            "user_id": scanner_user_id,
+            "api_key_id": scanner_api_key.api_key_id,
+            "api_key": scanner_api_key.key_id,
+        }
+
+    return response.ApiResponse(message="Success", data=data)
 
 
 @internal_blueprint.post("/e2e-token")

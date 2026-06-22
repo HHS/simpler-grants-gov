@@ -5,23 +5,25 @@ The ClamAV scanner Lambda calls ``POST /v1/files/<file_id>`` with an
 holding the ``INTERNAL_S3_SCAN`` privilege. The privilege's role
 (``INTERNAL_S3_SCANNER_ROLE``) is synced into every database automatically by
 ``sync_lookup_values``; this service creates the *user*, links the role, and
-registers the API key.
+mints a fresh API key, returning the generated key to the caller (the only time
+the plaintext key is exposed -- store it in the scanner's secret).
 
 It is exposed through ``POST /v1/internal/file-scan-scanner-user`` rather than a
-CLI task so the API key value never lands in a logged command line (the task
-runner logs ``sys.argv``). The endpoint is gated on the ``MANAGE_INTERNAL_ROLES``
-privilege, which only our own internal admin role holds, and the key travels in
-the request body over TLS.
+CLI task so the generated key value never lands in a logged command line (the
+task runner logs ``sys.argv``). The endpoint is gated on the
+``MANAGE_INTERNAL_ROLES`` privilege, which only our own internal admin role
+holds, and the key travels back in the response body over TLS.
 
-The provisioning is idempotent so it can be re-run after a key rotation: the
-user, role link, and key are each created only if missing.
+The user and role link are idempotent -- created only if missing -- so the
+endpoint can be re-run to rotate the key: each call mints and returns a new key
+for the same scanner user.
 """
 
 import logging
 import uuid
 
 import grants_shared.adapters.db as db
-from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.util.api_key_gen import generate_api_key_id
 from sqlalchemy import select
 
 from src.auth.endpoint_access_util import verify_access
@@ -31,21 +33,24 @@ from src.db.models.user_models import InternalUserRole, User, UserApiKey
 
 logger = logging.getLogger(__name__)
 
-# Stable, well-known id for the singleton file-scan scanner user so callers
-# resolve the same identity on every run. Local development seeds its own
-# scanner user (LOCAL_FILE_SCANNER_USER_ID) separately.
-INTERNAL_S3_SCANNER_USER_ID = uuid.UUID("f1c0b2a4-9d3e-4a7b-8c61-0e5d2f8a4b13")
-
 SCANNER_API_KEY_NAME = "File scan scanner key"
+
+# Number of times to retry key generation if we happen to collide with an
+# existing key_id before giving up.
+MAX_KEY_GENERATION_RETRIES = 5
+
+
+class KeyGenerationError(Exception):
+    """Raised when unable to generate a unique API key after multiple retries."""
 
 
 def setup_file_scan_scanner_user(
     db_session: db.Session,
     requesting_user: User,
-    api_key: str,
-    user_id: uuid.UUID = INTERNAL_S3_SCANNER_USER_ID,
-) -> User:
-    """Create/ensure the scanner user, its INTERNAL_S3_SCAN role, and API key.
+    user_id: uuid.UUID,
+) -> UserApiKey:
+    """Create/ensure the scanner user and its INTERNAL_S3_SCAN role, then mint a
+    fresh API key for it and return the new key.
 
     Caller owns the transaction. ``requesting_user`` is the authenticated API-key
     user; access is gated on the ``MANAGE_INTERNAL_ROLES`` privilege.
@@ -54,9 +59,9 @@ def setup_file_scan_scanner_user(
 
     user = _ensure_user(db_session, user_id)
     _ensure_internal_role(user)
-    _ensure_api_key(db_session, user, api_key)
+    api_key = _create_api_key(db_session, user)
     logger.info("Finished provisioning file-scan scanner user", extra={"user_id": user_id})
-    return user
+    return api_key
 
 
 def _ensure_user(db_session: db.Session, user_id: uuid.UUID) -> User:
@@ -86,32 +91,38 @@ def _ensure_internal_role(user: User) -> None:
     )
 
 
-def _ensure_api_key(db_session: db.Session, user: User, api_key: str) -> None:
-    existing = db_session.scalars(
-        select(UserApiKey).where(UserApiKey.key_id == api_key)
-    ).one_or_none()
-    if existing is not None:
-        if existing.user_id != user.user_id:
-            # The key already belongs to someone else — refuse rather than
-            # silently authenticating the scanner as the wrong user.
-            raise_flask_error(409, "Provided API key is already registered to a different user")
-        # Re-running after the key was deactivated should re-enable it.
-        existing.is_active = True
-        logger.info("File-scan scanner API key already present", extra={"user_id": user.user_id})
-        return
-
+def _create_api_key(db_session: db.Session, user: User) -> UserApiKey:
     # Direct insert (no AWS API Gateway import): this key is validated only
     # against the user_api_key table by the X-API-Key auth, same as the
     # locally-seeded scanner key.
-    new_api_key = UserApiKey(
+    api_key = UserApiKey(
         api_key_id=uuid.uuid4(),
         user=user,
         key_name=SCANNER_API_KEY_NAME,
-        key_id=api_key,
+        key_id=_generate_unique_key_id(db_session),
         is_active=True,
     )
-    db_session.add(new_api_key)
+    db_session.add(api_key)
     logger.info(
         "Registered file-scan scanner API key",
-        extra={"user_id": user.user_id, "api_key_id": new_api_key.api_key_id},
+        extra={"user_id": user.user_id, "api_key_id": api_key.api_key_id},
+    )
+    return api_key
+
+
+def _generate_unique_key_id(db_session: db.Session) -> str:
+    for _attempt in range(MAX_KEY_GENERATION_RETRIES):
+        key_id = generate_api_key_id()
+        existing = db_session.scalars(
+            select(UserApiKey).where(UserApiKey.key_id == key_id)
+        ).one_or_none()
+        if existing is None:
+            return key_id
+
+    logger.error(
+        "Failed to generate unique key_id after maximum retries",
+        extra={"max_retries": MAX_KEY_GENERATION_RETRIES},
+    )
+    raise KeyGenerationError(
+        f"Unable to generate unique API key after {MAX_KEY_GENERATION_RETRIES} attempts"
     )
