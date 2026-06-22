@@ -345,7 +345,7 @@ def validate_grantors_get_submission_list_request(
 
 
 def validate_confirm_application_delivery_request(
-    soap_context: ValidateSoapContext, legacy_tracking_number
+    soap_context: ValidateSoapContext, legacy_tracking_number: int
 ) -> None:
     resp = get_response(soap_context, "ConfirmApplicationDeliveryRequest", legacy_tracking_number)
     assert (
@@ -360,7 +360,7 @@ def validate_confirm_application_delivery_request(
 
 
 def validate_update_application_info_request(
-    soap_context: ValidateSoapContext, legacy_tracking_number
+    soap_context: ValidateSoapContext, legacy_tracking_number: int
 ) -> None:
     resp = get_response(soap_context, "UpdateApplicationInfoRequest", legacy_tracking_number)
     assert (
@@ -534,7 +534,7 @@ VALIDATIONS = [
     validate_grantors_get_application_zip_request,
     validate_grantors_get_submission_list_expanded_request,
     validate_grantors_get_submission_list_request,
-    # Do ConfirmApplicationDelivery BEFORE UpdatApplicationInfo in order to get successful responses from both
+    # Do ConfirmApplicationDelivery BEFORE UpdateApplicationInfo in order to get successful responses from both
     validate_confirm_application_delivery_request,
     validate_update_application_info_request,
 ]
