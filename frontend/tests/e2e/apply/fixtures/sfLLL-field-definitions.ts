@@ -80,11 +80,11 @@ export const SFLLL_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   {
     fieldId: "reporting_entity--applicant_reporting_entity--address--street1",
-    message: "Street 1 is required",
+    message: "Address Street 1 is required",
   },
   {
     fieldId: "reporting_entity--applicant_reporting_entity--address--city",
-    message: "City is required",
+    message: "Address City is required",
   },
   {
     fieldId: "federal_agency_department",
@@ -92,26 +92,26 @@ export const SFLLL_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   {
     fieldId: "lobbying_registrant--individual--first_name",
-    message: "First Name is required",
+    message: "Name and Contact Information First Name is required",
   },
   {
     fieldId: "lobbying_registrant--individual--last_name",
-    message: "Last Name is required",
+    message: "Name and Contact Information Last Name is required",
   },
   {
     fieldId: "individual_performing_service--individual--first_name",
-    message: "First Name is required",
+    message: "Name and Contact Information First Name is required",
   },
   {
     fieldId: "individual_performing_service--individual--last_name",
-    message: "Last Name is required",
+    message: "Name and Contact Information Last Name is required",
   },
   {
     fieldId: "signature_block--name--first_name",
-    message: "First Name is required",
+    message: "Name and Contact Information First Name is required",
   },
   {
     fieldId: "signature_block--name--last_name",
-    message: "Last Name is required",
+    message: "Name and Contact Information Last Name is required",
   },
 ];
