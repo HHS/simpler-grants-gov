@@ -18,7 +18,6 @@ export type FileUploadErrorStatus =
   | "pre-upload-error"
   | "file-id-error"
   | "scan-error"
-  | "scan-fail"
   | "post-upload-error";
 
 export type FileUploadStatus = FileUploadErrorStatus | FileUploadProcessStatus;
