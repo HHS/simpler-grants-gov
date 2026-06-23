@@ -287,7 +287,6 @@ export const messages = {
       navTitle: "On this page",
     },
     sections: {
-      keyInformation: "Key information",
       fundingDetails: "Funding details",
       eligibility: "Eligibility",
       additionalInformation: "Additional information",
@@ -329,8 +328,6 @@ export const messages = {
       eligibilityMiscellaneous: "Miscellaneous",
     },
     content: {
-      keyInformationIntro:
-        "Below is a summary of the key information for this opportunity. You can edit specific fields directly in this section.",
       fundingDetailsIntro:
         "Provide the financial structure of this opportunity. This includes the total funding available, expected number of awards, and critical dates for the application window.",
       eligibilityIntro:
