@@ -104,16 +104,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   const pageTitle = tEdit("header.pageTitle", {
     number: opportunityData.opportunity_number ?? "",
   });
-  const opportunityKeyInformation = {
-    title: opportunityData.opportunity_title || "",
-    agency: opportunityData.agency_name || opportunityData.agency_code || "",
-    assistanceListings:
-      primaryAssistanceListing?.assistance_listing_number || "",
-    opportunityNumber: opportunityData.opportunity_number || "",
-    opportunityStage,
-    awardSelectionMethod: opportunityData.category || "",
-    awardSelectionMethodExplanation: opportunityData.category_explanation || "",
-  };
   const rawLastUpdated =
     [opportunityData.updated_at, activeSummary?.updated_at]
       .filter(Boolean)
@@ -127,7 +117,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
       })
     : "";
   const navigationItems = [
-    { text: tEdit("sections.keyInformation"), href: "key-information" },
     { text: tEdit("sections.fundingDetails"), href: "funding-details" },
     { text: tEdit("sections.eligibility"), href: "eligibility" },
     {
@@ -161,7 +150,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
                       name="schedule"
                       className="usa-icon width-2 height-2 margin-right-05"
                     />
-                    {opportunityKeyInformation.opportunityStage}
+                    {opportunityStage}
                   </span>
                 </div>
               </div>
@@ -185,7 +174,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
               initialValues={initialValues}
               isDraft={!!opportunityData.is_draft}
               initialAttachments={opportunityData.attachments ?? []}
-              opportunityKeyInformation={opportunityKeyInformation}
               isNewlyCreated={isNewlyCreated}
               saveLabel={tEdit("header.saveButton")}
               previewLabel={tEdit("header.previewButton")}

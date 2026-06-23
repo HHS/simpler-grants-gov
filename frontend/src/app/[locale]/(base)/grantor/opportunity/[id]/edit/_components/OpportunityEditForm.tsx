@@ -98,15 +98,6 @@ type OpportunityEditFormProps = {
   isDraft?: boolean;
   isNewlyCreated?: boolean;
   initialAttachments?: OpportunityAttachment[];
-  opportunityKeyInformation: {
-    title: string;
-    agency: string;
-    assistanceListings: string;
-    opportunityNumber: string;
-    opportunityStage: string;
-    awardSelectionMethod: string;
-    awardSelectionMethodExplanation: string;
-  };
   saveLabel: string;
   previewLabel: string;
   publishLabel: string;
@@ -120,7 +111,6 @@ export default function OpportunityEditForm({
   isDraft = false,
   isNewlyCreated = false,
   initialAttachments = [],
-  opportunityKeyInformation,
   saveLabel,
   previewLabel,
   publishLabel,
@@ -238,56 +228,6 @@ export default function OpportunityEditForm({
     }
   }, [formState.newOpportunitySummaryId]);
 
-  const awardSelectionMethodLabel =
-    OPPORTUNITY_CATEGORY_OPTIONS.find(
-      (option) => option.value === initialValues.awardSelectionMethod,
-    )?.label ??
-    initialValues.awardSelectionMethod ??
-    t("content.notAvailable");
-
-  const keyInformationItems = [
-    {
-      label: t("labels.title"),
-      value: opportunityKeyInformation.title || t("content.notAvailable"),
-    },
-    {
-      label: t("labels.agency"),
-      value: opportunityKeyInformation.agency || t("content.notAvailable"),
-    },
-    {
-      label: t("labels.assistanceListings"),
-      value:
-        opportunityKeyInformation.assistanceListings ||
-        t("content.notAvailable"),
-    },
-    {
-      label: t("labels.opportunityNumber"),
-      value:
-        opportunityKeyInformation.opportunityNumber ||
-        t("content.notAvailable"),
-    },
-    {
-      label: t("labels.opportunityStage"),
-      value:
-        opportunityKeyInformation.opportunityStage || t("content.notAvailable"),
-    },
-    {
-      label: t("labels.awardSelectionMethod"),
-      value:
-        awardSelectionMethodLabel ||
-        opportunityKeyInformation.awardSelectionMethod ||
-        t("content.notAvailable"),
-    },
-    {
-      label: t("labels.awardSelectionMethodExplanation"),
-      value:
-        opportunityKeyInformation.awardSelectionMethodExplanation ||
-        t("content.notAvailable"),
-    },
-  ];
-
-  const leftColumnItems = keyInformationItems.slice(0, 3);
-  const rightColumnItems = keyInformationItems.slice(3);
   const eligibilityGroups = ELIGIBILITY_OPTIONS.reduce(
     (acc, { label, value }) => {
       const group = eligbilityValueToGroup[value];
@@ -430,43 +370,6 @@ export default function OpportunityEditForm({
           </Alert>
         </div>
       ) : null}
-
-      <section
-        id="key-information"
-        className="margin-top-4 simpler-page-anchor-offset"
-      >
-        <h2 className="font-heading-xl margin-top-0 margin-bottom-2">
-          {t("sections.keyInformation")}
-        </h2>
-        <p className="margin-top-0 margin-bottom-4 font-sans-lg text-base-dark">
-          {t("content.keyInformationIntro")}
-        </p>
-
-        <Fieldset className="border border-base-lighter radius-lg padding-3">
-          <div className="grid-row grid-gap-2">
-            <div className="tablet:grid-col">
-              {leftColumnItems.map((item) => (
-                <FormGroup key={item.label} className="margin-bottom-2">
-                  <div className="font-sans-md text-bold">{item.label}</div>
-                  <p className="margin-0 font-sans-md text-base-dark">
-                    {item.value}
-                  </p>
-                </FormGroup>
-              ))}
-            </div>
-            <div className="tablet:grid-col">
-              {rightColumnItems.map((item) => (
-                <FormGroup key={item.label} className="margin-bottom-2">
-                  <div className="font-sans-md text-bold">{item.label}</div>
-                  <p className="margin-0 font-sans-md text-base-dark">
-                    {item.value}
-                  </p>
-                </FormGroup>
-              ))}
-            </div>
-          </div>
-        </Fieldset>
-      </section>
 
       <section
         id="funding-details"
