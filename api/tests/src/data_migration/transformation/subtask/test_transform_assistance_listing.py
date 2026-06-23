@@ -5,10 +5,12 @@ import tests.src.db.models.factories as f
 from src.data_migration.transformation.subtask.transform_assistance_listing import (
     TransformAssistanceListing,
 )
+from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
     setup_cfda,
+    setup_competition,
     validate_assistance_listing,
 )
 
@@ -253,3 +255,153 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         metrics = transform_assistance_listing.metrics
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 1
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_SKIPPED] == 1
+
+    def test_delete_assistance_listing_with_competition_reference_also_being_deleted(
+        self, db_session, transform_assistance_listing
+    ):
+        """Test that when deleting an assistance listing referenced by a competition that is also being deleted,
+        the competition reference is nullified"""
+        # Create an opportunity with an assistance listing
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
+        cfda_to_delete = setup_cfda(create_existing=True, opportunity=opportunity)
+
+        # Get the created assistance listing
+        assistance_listing = (
+            db_session.query(OpportunityAssistanceListing)
+            .filter(
+                OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
+                == cfda_to_delete.opp_cfda_id
+            )
+            .one()
+        )
+
+        # Create a competition that references this assistance listing
+        staging_competition = setup_competition(
+            db_session,
+            create_existing=True,
+            opportunity=opportunity,
+            legacy_opportunity_assistance_listing_id=cfda_to_delete.opp_cfda_id,
+            is_delete=True,  # This competition is also being deleted
+        )
+
+        # Get the created competition and set the assistance listing reference
+        competition = (
+            db_session.query(Competition)
+            .filter(Competition.legacy_competition_id == staging_competition.comp_id)
+            .one()
+        )
+        competition.opportunity_assistance_listing_id = (
+            assistance_listing.opportunity_assistance_listing_id
+        )
+        db_session.commit()
+
+        # Verify it references the assistance listing
+        assert (
+            competition.opportunity_assistance_listing_id
+            == assistance_listing.opportunity_assistance_listing_id
+        )
+
+        # Mark the assistance listing for deletion
+        cfda_to_delete.is_deleted = True
+        cfda_to_delete.transformed_at = None
+        db_session.commit()
+
+        # Run the transformation
+        transform_assistance_listing.run_subtask()
+
+        # Verify the assistance listing was deleted
+        validate_assistance_listing(db_session, cfda_to_delete, expect_in_db=False)
+
+        # Verify the competition's reference was nullified
+        competition_after = (
+            db_session.query(Competition)
+            .filter(Competition.legacy_competition_id == staging_competition.comp_id)
+            .one()
+        )
+        assert competition_after.opportunity_assistance_listing_id is None
+
+    def test_delete_assistance_listing_with_competition_reference_not_being_deleted(
+        self, db_session, transform_assistance_listing, caplog
+    ):
+        """Test that when deleting an assistance listing referenced by a competition that is NOT being deleted,
+        the competition reference is still nullified but an error is logged"""
+        # Create an opportunity with an assistance listing
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
+        cfda_to_delete = setup_cfda(create_existing=True, opportunity=opportunity)
+
+        # Get the created assistance listing
+        assistance_listing = (
+            db_session.query(OpportunityAssistanceListing)
+            .filter(
+                OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
+                == cfda_to_delete.opp_cfda_id
+            )
+            .one()
+        )
+
+        # Create a competition that references this assistance listing
+        staging_competition = setup_competition(
+            db_session,
+            create_existing=True,
+            opportunity=opportunity,
+            legacy_opportunity_assistance_listing_id=cfda_to_delete.opp_cfda_id,
+            is_delete=False,  # This competition is NOT being deleted
+        )
+
+        # Get the created competition and set the assistance listing reference
+        competition = (
+            db_session.query(Competition)
+            .filter(Competition.legacy_competition_id == staging_competition.comp_id)
+            .one()
+        )
+        competition.opportunity_assistance_listing_id = (
+            assistance_listing.opportunity_assistance_listing_id
+        )
+        db_session.commit()
+
+        # Verify it references the assistance listing
+        assert (
+            competition.opportunity_assistance_listing_id
+            == assistance_listing.opportunity_assistance_listing_id
+        )
+
+        # Mark the assistance listing for deletion
+        cfda_to_delete.is_deleted = True
+        cfda_to_delete.transformed_at = None
+        db_session.commit()
+
+        # Run the transformation
+        with caplog.at_level("ERROR"):
+            transform_assistance_listing.run_subtask()
+
+        # Verify an error was logged
+        assert any(
+            "Nullifying assistance listing reference on competition that is NOT being deleted"
+            in record.message
+            for record in caplog.records
+        )
+
+        # Verify the assistance listing was deleted
+        validate_assistance_listing(db_session, cfda_to_delete, expect_in_db=False)
+
+        # Verify the competition's reference was nullified despite the error
+        competition_after = (
+            db_session.query(Competition)
+            .filter(Competition.legacy_competition_id == staging_competition.comp_id)
+            .one()
+        )
+        assert competition_after.opportunity_assistance_listing_id is None
+
+    def test_delete_assistance_listing_without_competition_references(
+        self, db_session, transform_assistance_listing
+    ):
+        """Test that deleting an assistance listing without any competition references works normally"""
+        # Create an opportunity with an assistance listing
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
+        cfda_to_delete = setup_cfda(create_existing=True, opportunity=opportunity, is_delete=True)
+
+        # Run the transformation
+        transform_assistance_listing.run_subtask()
+
+        # Verify the assistance listing was deleted
+        validate_assistance_listing(db_session, cfda_to_delete, expect_in_db=False)
