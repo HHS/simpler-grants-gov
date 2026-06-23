@@ -27,7 +27,11 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+    get_soap_config,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from tests.lib.data_factories import setup_cert_user
@@ -472,6 +476,54 @@ class TestSimplerSOAPGetApplicationZip:
             assert result.headers == {
                 "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+            }
+
+    def test_get_simpler_soap_response_returns_soap_action_in_header_when_included_in_request(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        agency = AgencyFactory.create()
+        user, role, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        )
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
+        )
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationZipRequest>"
+            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        config = get_soap_config()
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={
+                "Soapaction": f"{config.grants_gov_uri}{config.soap_grantors_path}/GetApplicationZip"
+            },
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            assert result.headers == {
+                "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
+                "MIME-Version": "1.0",
+                "SOAPAction": soap_request.headers.get("Soapaction"),
             }
 
     def test_get_simpler_soap_response_can_access_endpoint_if_certificate_user_has_privileges(

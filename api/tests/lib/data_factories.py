@@ -26,7 +26,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPAuth,
     SOAPClientCertificate,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, get_soap_config
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -219,15 +219,23 @@ def create_soap_request(
     soap_payload: bytes,
     log_local: bool = False,
     operation_name: str = "GetApplicationZipRequest",
-    full_path="/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
-    api_name=SimplerSoapAPI.GRANTORS,
+    full_path: str = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
+    api_name: str = SimplerSoapAPI.GRANTORS,
+    with_soap_action: bool = False,
 ) -> SOAPRequest:
     _, _, soap_certificate, _ = setup_cert_user(
         AgencyFactory.create(), [Privilege.LEGACY_AGENCY_VIEWER]
     )
+    config = get_soap_config()
     headers = {
         "X-Gg-S2S-Uri": "https://google.com/xyz",
     }
+    if with_soap_action:
+        headers.update(
+            {
+                "Soapaction": f"{config.grants_gov_uri}/grantsws-agency/services/v2/AgencyWebServicesSoapPort/{operation_name[:-7]}"
+            }
+        )
     if log_local:
         headers.update({f"{LOG_LOCAL_RESPONSE_HEADER_KEY}": "1"})
     return SOAPRequest(

@@ -29,6 +29,8 @@ S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY = "S2S_PARTNER_CERTID_JWT_B64"
 LOG_LOCAL_RESPONSE_HEADER_KEY = "Log-Local-Response"
 USE_SIMPLER_OVERRIDE_KEY = "Use-Simpler-Override"
 ENABLE_SIMPLER_ROUTE_KEY = "Enable-Simpler-Route"
+REQUEST_SOAP_ACTION_KEY = "Soapaction"
+RESPONSE_SOAP_ACTION_KEY = "SOAPAction"
 
 
 class SOAPClientCertificateNotConfigured(Exception):

@@ -8,6 +8,7 @@ from freezegun import freeze_time
 
 import tests.src.db.models.factories as factories
 from src.legacy_soap_api.legacy_soap_api_auth import (
+    REQUEST_SOAP_ACTION_KEY,
     SOAPClientCertificate,
     SOAPClientMissingCertificate,
 )
@@ -42,6 +43,26 @@ def test_get_proxy_response(enable_factory_create, monkeypatch, db_session):
     with patch("src.legacy_soap_api.legacy_soap_api_proxy.Session.send") as mock_send:
         get_proxy_response(soap_request)
         mock_send.assert_called_once_with(ANY, stream=True, cert=None, timeout=3600)
+
+
+def test_get_proxy_response_preserves_soap_action(enable_factory_create, monkeypatch, db_session):
+    config = get_soap_config()
+    soap_request = create_soap_request(SOAP_PAYLOAD, with_soap_action=True)
+    with patch("src.legacy_soap_api.legacy_soap_api_proxy.Session.send") as mock_send:
+        get_proxy_response(soap_request)
+        assert (
+            mock_send.call_args_list[0][0][0].headers.get(REQUEST_SOAP_ACTION_KEY, "")
+            == f"{config.grants_gov_uri}/grantsws-agency/services/v2/AgencyWebServicesSoapPort/GetApplicationZip"
+        )
+
+
+def test_get_proxy_response_skips_soap_action_if_not_included(
+    enable_factory_create, monkeypatch, db_session
+):
+    soap_request = create_soap_request(SOAP_PAYLOAD, with_soap_action=False)
+    with patch("src.legacy_soap_api.legacy_soap_api_proxy.Session.send") as mock_send:
+        get_proxy_response(soap_request)
+        assert mock_send.call_args_list[0][0][0].headers.get(REQUEST_SOAP_ACTION_KEY, "") == ""
 
 
 @freeze_time("2024-04-03 12:00:00", tz_offset=0)

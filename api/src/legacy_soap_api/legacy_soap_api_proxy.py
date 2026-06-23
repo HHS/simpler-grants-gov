@@ -10,6 +10,7 @@ from requests import Request, Session
 from src.legacy_soap_api.legacy_soap_api_auth import (
     LOG_LOCAL_RESPONSE_HEADER_KEY,
     MTLS_CERT_HEADER_KEY,
+    REQUEST_SOAP_ACTION_KEY,
     S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY,
     SessionResumptionAdapter,
     SOAPAuth,
@@ -47,9 +48,12 @@ def get_proxy_headers(
         return filter_headers(
             soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
         )
-    return {
+    proxy_headers = {
         S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(config, soap_auth.certificate)
     }
+    if soap_action := soap_request.headers.get(REQUEST_SOAP_ACTION_KEY):
+        proxy_headers.update({REQUEST_SOAP_ACTION_KEY: soap_action})
+    return proxy_headers
 
 
 def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) -> SOAPResponse:

@@ -18,6 +18,10 @@ from src.legacy_soap_api.grantors.services import (
     get_update_application_info_response,
     update_application_info,
 )
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    REQUEST_SOAP_ACTION_KEY,
+    RESPONSE_SOAP_ACTION_KEY,
+)
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
@@ -347,6 +351,8 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             "MIME-Version": "1.0",
             "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{boundary_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
         }
+        if soap_action := self.soap_request.headers.get(REQUEST_SOAP_ACTION_KEY):
+            update_headers.update({RESPONSE_SOAP_ACTION_KEY: soap_action})
         boundary = "--uuid:" + boundary_uuid
         mime_message: Iterator[bytes] | bytes = b""
         mime_message = build_mtom_response_from_dict(
