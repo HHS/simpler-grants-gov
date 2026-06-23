@@ -404,6 +404,18 @@ export const SF424A_ALERT_ERRORS: FieldError[] = [
     message: "'activity_title' is a required property",
   },
   {
+    fieldId: "activity_line_items[1]--activity_title",
+    message: "'activity_title' is a required property",
+  },
+  {
+    fieldId: "activity_line_items[2]--activity_title",
+    message: "'activity_title' is a required property",
+  },
+  {
+    fieldId: "activity_line_items[3]--activity_title",
+    message: "'activity_title' is a required property",
+  },
+  {
     fieldId: "confirmation",
     message: "'confirmation' is a required property",
   },

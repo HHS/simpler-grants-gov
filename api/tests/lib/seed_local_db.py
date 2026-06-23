@@ -622,7 +622,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
     ) in isolated_form_competitions:
         opportunity_number = f"{prefix}-ORG-IND-01"
         opportunity_title = f"E2E {form_label} ORG IND OT01"
-        competition_title = f"E2E {form_label} ORG IND OT01"
+        competition_title = f"E2E {form_label} ORG IND CT01"
 
         competition = _build_seeded_competition_for_form(
             db_session,
