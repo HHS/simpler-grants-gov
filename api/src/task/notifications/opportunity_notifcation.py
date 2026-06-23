@@ -209,9 +209,22 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     (user_changed_opp.user_id, opp.opportunity_id)
                 )
                 if opp.previous is None:
+                    # This happens when a user saved an opportunity during the window between
+                    # it being created/published and the versioning task running. Their
+                    # last_notified_at was set to save time, so no version predates it.
+                    # No email is sent (nothing to diff), but we advance last_notified_at to
+                    # the latest version's timestamp so the next change produces a proper diff.
                     logger.warning(
                         "No previous version found for this opportunity",
                         extra={"user_id": user_id, "opportunity_id": opp.opportunity_id},
+                    )
+                    self.db_session.execute(
+                        update(UserSavedOpportunity)
+                        .where(
+                            UserSavedOpportunity.user_id == user_id,
+                            UserSavedOpportunity.opportunity_id == opp.opportunity_id,
+                        )
+                        .values(last_notified_at=opp.latest.created_at)
                     )
                     continue
                 updated_opps.append(opp)
