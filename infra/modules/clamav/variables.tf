@@ -88,3 +88,9 @@ variable "dlq_alarm_threshold" {
   type        = number
   default     = 1
 }
+
+variable "newrelic_entity_guid" {
+  description = "New Relic entity GUID to associate the forwarded ClamAV (scanner + freshclam) logs with. Set this to the API's New Relic entity GUID for the environment so ClamAV logs land on the same entity as the API logs. When null, logs are still shipped to the New Relic account but aren't bound to a specific entity."
+  type        = string
+  default     = null
+}
