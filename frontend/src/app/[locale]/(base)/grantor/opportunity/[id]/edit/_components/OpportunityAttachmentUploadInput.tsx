@@ -106,7 +106,8 @@ export function OpportunityAttachmentUploadInput({
 
   // note that this doesn't actually delete any files, just removes them from the
   // dummy existing files array
-  const confirmDelete = (fileToDeleteId: string) => {
+  // returning a promise to satisfy the interface
+  const confirmDelete = (fileToDeleteId: string): Promise<undefined> => {
     setErrorMessage(null);
 
     try {
@@ -120,6 +121,7 @@ export function OpportunityAttachmentUploadInput({
       console.error("Attachment delete failed", err);
       setErrorMessage(t("errorDeleteFailed"));
     }
+    return Promise.resolve(undefined);
   };
 
   console.log("!!! existing", existingFiles);
@@ -150,9 +152,15 @@ export function OpportunityAttachmentUploadInput({
         postUploadActionSuccessMessage="POST UPLOAD SUCCESS (custom message)"
         id="opportunity-attachment-upload"
         labelId={"opportunity-attachment-upload-label"}
-        onDelete={confirmDelete}
+        onDelete={(id) => {
+          console.log("onDelete callback");
+          return confirmDelete(id);
+        }}
         onStart={() => console.log("onStart callback")}
-        onSuccess={() => addExistingFile(FakeFILE_____DELIETEmeeee)}
+        onSuccess={() => {
+          console.log("onSuccess callback");
+          addExistingFile(FakeFILE_____DELIETEmeeee);
+        }}
         onComplete={() => console.log("onComplete callback")}
         onError={(e) => console.error("onError callback", e)}
         disabled={isUploading || !isDraft}
