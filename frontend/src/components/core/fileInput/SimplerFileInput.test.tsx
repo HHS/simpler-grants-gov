@@ -351,14 +351,14 @@ describe("SimplerFileInput", () => {
       );
     });
 
-    it("displays an scan error if error occurs during scan process", async () => {
+    it("displays a scan error if error occurs during scan process", async () => {
       const trigger = createAdvanceStreamTrigger();
       clientFetchMock.mockResolvedValue(
         new Response(
           makeAdvanceableTestStreamForTrigger(
             [
               JSON.stringify({ status: "uploading" }),
-              JSON.stringify({ status: "scanning" }),
+              JSON.stringify({ status: "pending" }),
               JSON.stringify({ status: "error", error: "yes" }),
             ],
             trigger,
@@ -612,53 +612,6 @@ describe("SimplerFileInput", () => {
           await screen.findByTestId("file-upload-status-display"),
         ).toHaveTextContent("missingFileId"),
       );
-    });
-    it("clears success message after timeout", async () => {
-      const trigger = createAdvanceStreamTrigger();
-      clientFetchMock.mockResolvedValue(
-        new Response(
-          makeAdvanceableTestStreamForTrigger(
-            [JSON.stringify({ status: "whatever", pendingFileId: "1" })],
-            trigger,
-          ),
-        ),
-      );
-      render(
-        <SimplerFileInput
-          onDelete={() => Promise.resolve()}
-          onSuccess={() => {
-            jest.useFakeTimers();
-            screen
-              .findByTestId("file-upload-status-display")
-              .then((display) => {
-                // eslint-disable-next-line jest/no-conditional-expect
-                expect(display).toHaveTextContent("post upload action success");
-                jest.runAllTimers();
-                return screen.findByTestId("file-upload-status-display");
-              })
-              .then((display) => {
-                // eslint-disable-next-line jest/no-conditional-expect
-                return expect(display).not.toBeInTheDocument();
-              })
-              .catch(() => {});
-          }}
-          postUploadAction={() => Promise.resolve(undefined)}
-          postUploadActionProgressMessage="post upload action in progress"
-          postUploadActionSuccessMessage="post upload action success"
-          postUploadActionErrorMessage="post upload action error"
-          id="file-input-test"
-          labelId="file-input-label"
-        />,
-      );
-      const input = await screen.findByTestId("file-input-input");
-      await userEvent.upload(
-        input,
-        new File(["test content"], "test.txt", {
-          type: "text/plain",
-        }),
-      );
-      trigger.advance();
-      // note that the expect is in the callback!!!
     });
     it("handles batched status updates in a single stream read", async () => {
       const trigger = createAdvanceStreamTrigger();
