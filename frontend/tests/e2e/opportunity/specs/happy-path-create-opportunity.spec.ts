@@ -19,7 +19,7 @@ import {
   FUNDING_DETAILS_FIELD_DEFINITIONS,
 } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
 import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixtures/opportunity-pages-fill-data";
-import { searchOpportunityByValue } from "tests/e2e/opportunity/search-opportunity-utils";
+import { verifyOpportunityInSearchByTitleAndNumber } from "tests/e2e/opportunity/search-opportunity-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
@@ -28,10 +28,10 @@ import {
   assertButtonEnabledDisabledStates,
   assertPageHeadingAndTextsVisible,
   assertTextsVisibleOnPage,
-  clickRowLinkByText,
+  clickRowTitle,
   formatNumberWithCommas,
   selectOptionByLabel,
-  waitForRowByColumns,
+  waitForOpportunityRowByStatus,
 } from "tests/e2e/utils/common/index";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 
@@ -199,16 +199,15 @@ test.describe("Grantor Opportunity Happy Path", () => {
       // Then I should return to the "Opportunities List" page.
       await expect(page).toHaveURL(/\/grantor\/opportunities/);
 
-      // Match the published opportunity row by title and status on the "Opportunities List" page
-      const matchingRow_opportunitylistpage = await waitForRowByColumns(page, {
-        columnValues: {
-          Title: opportunityTitle,
-          Status: "posted",
-        },
+      // And I should see "posted" status for the created opportunity row.
+      const matchingRow = await waitForOpportunityRowByStatus(page, {
+        title: opportunityTitle,
+        status: "posted",
+        message: 'Waiting for "posted" opportunity row to appear on list',
       });
 
       // And link visibility should match the expected "posted" actions behavior.
-      await assertActionsColumnLinksByStatus(matchingRow_opportunitylistpage, {
+      await assertActionsColumnLinksByStatus(matchingRow, {
         status: "posted",
         actionLinkVisibility: {
           Edit: true,
@@ -218,11 +217,9 @@ test.describe("Grantor Opportunity Happy Path", () => {
       });
 
       // When I open the "Opportunity details" page from the row title.
-      await clickRowLinkByText(
-        matchingRow_opportunitylistpage,
-        opportunityTitle,
-      );
+      await clickRowTitle(matchingRow, opportunityTitle);
 
+      // Then I should see all expected values on the "Opportunity details" page.
       const finalAssertions = [
         opportunityTitle,
         opportunityNumber,
@@ -246,39 +243,15 @@ test.describe("Grantor Opportunity Happy Path", () => {
         fillData.emailDisplayText,
       ];
 
-      // Then I should see the expected opportunity details on the "Opportunity details" page.
       await assertPageHeadingAndTextsVisible(page, {
         heading: opportunityTitle,
         texts: finalAssertions,
       });
 
-      // And I navigate to the "Search funding opportunities" page
-      await page.goto("/search");
-
-      // Then I should be on the "Search funding opportunities" page
-      await assertPageHeadingAndTextsVisible(page, {
-        heading: "Search funding opportunities",
-        texts: [],
-      });
-
-      // When I search for the published opportunity by title
-      await searchOpportunityByValue(page, opportunityTitle);
-
-      // Match the published opportunity row on Search page with generic-safe polling.
-      const matchingRow_searchFundingOpportunitiesPage =
-        await waitForRowByColumns(page, {
-          columnValues: {
-            Title: opportunityTitle,
-            Status: "Open",
-          },
-        });
-
-      // Then I should see the matching row and it should contain the expected opportunity.
-      await expect(matchingRow_searchFundingOpportunitiesPage).toBeVisible();
-      await expect(matchingRow_searchFundingOpportunitiesPage).toContainText(
-        "Open",
-      );
-      await expect(matchingRow_searchFundingOpportunitiesPage).toContainText(
+      // And I verify the opportunity visibility on search results page after publishing
+      await verifyOpportunityInSearchByTitleAndNumber(
+        page,
+        opportunityTitle,
         opportunityNumber,
       );
 
