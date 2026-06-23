@@ -3,11 +3,11 @@ import os
 import uuid
 
 import grants_shared.adapters.db as db
+from grants_shared.util.file_util import write_to_file
 from pydantic import Field
 
 from src.constants.static_role_values import E2E_TEST_USER_MANAGER_ROLE, E2E_TEST_USER_ROLE
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.file_util import write_to_file
 from tests.lib.seed_data_utils import UserBuilder
 
 logger = logging.getLogger(__name__)
