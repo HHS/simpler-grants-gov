@@ -449,16 +449,16 @@ export const SF424_REQUIRED_FIELD_ERRORS: FieldError[] = [
     fieldId: "employer_taxpayer_identification_number",
     message: "EIN/TIN is required",
   },
-  { fieldId: "applicant--street1", message: "Applicant Street 1 is required" },
-  { fieldId: "applicant--city", message: "Applicant City is required" },
-  { fieldId: "applicant--country", message: "Applicant Country is required" },
+  { fieldId: "applicant--street1", message: "Street 1 is required" },
+  { fieldId: "applicant--city", message: "City is required" },
+  { fieldId: "applicant--country", message: "Country is required" },
   {
     fieldId: "contact_person--first_name",
-    message: "Contact Person First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "contact_person--last_name",
-    message: "Contact Person Last Name is required",
+    message: "Last Name is required",
   },
   { fieldId: "phone_number", message: "Telephone Number is required" },
   { fieldId: "email", message: "Email is required" },
@@ -513,11 +513,11 @@ export const SF424_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   {
     fieldId: "authorized_representative--first_name",
-    message: "Authorized Representative First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "authorized_representative--last_name",
-    message: "Authorized Representative Last Name is required",
+    message: "Last Name is required",
   },
   { fieldId: "authorized_representative_title", message: "Title is required" },
   {
