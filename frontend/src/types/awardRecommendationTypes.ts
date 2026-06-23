@@ -123,6 +123,14 @@ export type AwardRecommendationSubmissionDetail = {
   exception_detail?: string;
 };
 
+export type AwardRecommendationSubmissionDetailUpdate = {
+  recommended_amount?: string;
+  general_comment?: string | null;
+  award_recommendation_type?: AwardRecommendationType;
+  has_exception?: boolean;
+  exception_detail?: string | null;
+};
+
 export type AwardRecommendationSubmission = {
   award_recommendation_application_submission_id: string;
   application_submission: AwardRecommendationApplicationSubmission;
