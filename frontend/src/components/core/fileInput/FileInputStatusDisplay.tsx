@@ -150,7 +150,6 @@ export const FileInputStatusDisplay = ({
     "post-upload": postUploadActionProgressMessage,
     success: postUploadActionSuccessMessage || t("success"),
     error: t("error"),
-    "scan-fail": t("scanFail"),
     "upload-error": t("uploadError"),
     "scan-error": t("scanError"),
     "file-id-error": t("missingFileId"),
