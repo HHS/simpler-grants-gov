@@ -8,6 +8,7 @@ from moto import mock_aws
 
 import tests.grants_shared.db.models.factories as factories
 from grants_shared.adapters import db
+from grants_shared.adapters.aws import S3Config
 from grants_shared.db.models.base import metadata
 from grants_shared.db.models.lookup import sync_lookup_values
 from grants_shared.util.local import load_local_env_vars
@@ -139,9 +140,82 @@ def enable_factory_create(monkeypatch, db_session) -> db.Session:
 
 
 @pytest.fixture
-def ses_client(monkeypatch):
+def reset_aws_env_vars(monkeypatch):
+    # Reset the env vars so you can't accidentally connect
+    # to a real AWS account if you were doing some local testing
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
+    monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+    monkeypatch.delenv("AWS_S3_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_SQS_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_DYNAMODB_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("CDN_URL", raising=False)
+    monkeypatch.setattr("grants_shared.adapters.aws.aws_session._aws_config", None)
+
+
+@pytest.fixture
+def mock_s3(reset_aws_env_vars):
+    # https://docs.getmoto.org/en/stable/docs/configuration/index.html#whitelist-services
+    with mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
+        yield boto3.resource("s3")
+
+
+@pytest.fixture
+def mock_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("local-mock-public-bucket")
+    bucket.create()
+    return bucket
+
+
+@pytest.fixture
+def mock_s3_bucket(mock_s3_bucket_resource):
+    return mock_s3_bucket_resource.name
+
+
+@pytest.fixture
+def other_mock_s3_bucket_resource(mock_s3):
+    # This second bucket exists for tests where we want there to be multiple buckets
+    # and/or test behavior when moving files between buckets.
+    bucket = mock_s3.Bucket("local-mock-draft-bucket")
+    bucket.create()
+    return bucket
+
+
+@pytest.fixture
+def other_mock_s3_bucket(other_mock_s3_bucket_resource):
+    return other_mock_s3_bucket_resource.name
+
+
+@pytest.fixture
+def mock_file_scan_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("local-mock-file-scan-bucket")
+    bucket.create()
+    return bucket
+
+
+@pytest.fixture
+def mock_file_scan_s3_bucket(mock_file_scan_s3_bucket_resource):
+    return mock_file_scan_s3_bucket_resource.name
+
+
+@pytest.fixture
+def s3_config(mock_s3_bucket, other_mock_s3_bucket, mock_file_scan_s3_bucket):
+    return S3Config(
+        PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+        DRAFT_FILES_BUCKET=f"s3://{other_mock_s3_bucket}",
+        FILE_SCAN_BUCKET=f"s3://{mock_file_scan_s3_bucket}",
+    )
+
+
+@pytest.fixture
+def ses_client(monkeypatch, reset_aws_env_vars):
     """
     Create a mocked SESv2 client using moto. The mock is automatically cleaned up after the test.
+
+    We call reset_aws_env_vars so that the aws_config gets remade for test that uses this
+    as we need the aws_config to be fresh.
     """
     monkeypatch.setenv("IS_LOCAL_AWS", "0")
 
@@ -149,3 +223,43 @@ def ses_client(monkeypatch):
         ses_client = boto3.client("sesv2", region_name="us-east-1")
         ses_client.create_email_identity(EmailIdentity=os.getenv("AWS_SES_FROM_EMAIL"))
         yield ses_client
+
+
+@pytest.fixture
+def mock_dynamodb(reset_aws_env_vars):
+    with mock_aws(config={"core": {"service_whitelist": ["dynamodb"]}}):
+        yield
+
+
+@pytest.fixture
+def file_scan_dynamodb_table(mock_dynamodb, monkeypatch):
+    dynamodb = boto3.client("dynamodb", region_name="us-east-1")
+    table_name = "test-local-virus-scan"
+    dynamodb.create_table(
+        TableName=table_name,
+        KeySchema=[
+            {"AttributeName": "file_id", "KeyType": "HASH"},
+        ],
+        AttributeDefinitions=[
+            {"AttributeName": "file_id", "AttributeType": "S"},
+        ],
+        BillingMode="PAY_PER_REQUEST",
+    )
+    monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
+    return table_name
+
+
+@pytest.fixture
+def mock_sqs(reset_aws_env_vars):
+    with mock_aws(config={"core": {"service_whitelist": ["sqs"]}}):
+        yield
+
+
+@pytest.fixture
+def workflow_sqs_queue(mock_sqs, monkeypatch):
+    sqs = boto3.client("sqs", region_name="us-east-1")
+    # Create a default queue for tests
+    queue = sqs.create_queue(QueueName="test-workflow-queue")
+    # Set the env var of this queue so the SQSConfig picks it up
+    monkeypatch.setenv("WORKFLOW_QUEUE_URL", queue["QueueUrl"])
+    return queue["QueueUrl"]

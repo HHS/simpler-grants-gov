@@ -2,6 +2,7 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+from grants_shared.util import file_util
 
 from src.constants.lookup_constants import AwardRecommendationAuditEvent
 from src.db.models.award_recommendation_models import AwardRecommendationAudit
@@ -12,7 +13,6 @@ from src.services.award_recommendations.get_award_recommendation import (
 from src.services.award_recommendations.get_award_recommendation_attachment import (
     get_award_recommendation_attachment,
 )
-from src.util import file_util
 
 logger = logging.getLogger(__name__)
 

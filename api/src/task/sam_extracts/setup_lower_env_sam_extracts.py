@@ -9,18 +9,17 @@ from datetime import date
 from enum import StrEnum
 
 import grants_shared.adapters.db as db
-from grants_shared.util import datetime_util
+from grants_shared.adapters.aws import S3Config
+from grants_shared.util import datetime_util, file_util
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.adapters.aws import S3Config
 from src.constants.lookup_constants import SamGovExtractType, SamGovProcessingStatus
 from src.db.models.entity_models import Organization, SamGovEntity
 from src.db.models.sam_extract_models import SamExtractFile
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
 from src.task.sam_extracts.process_sam_extracts import ExtractIndex
 from src.task.task import Task
-from src.util import file_util
 
 logger = logging.getLogger(__name__)
 

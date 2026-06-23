@@ -1,10 +1,13 @@
 from datetime import datetime
 
-from src.adapters.aws.sesv2_adapter import MockSESV2Client, SuppressedDestination
+from grants_shared.adapters.aws.ses_suppressed_email_adapter import (
+    MockSESV2Client,
+    SuppressedDestination,
+)
 
 
 def test_ses_adapter():
-    client = MockSESV2Client(page_size=2)
+    client = MockSESV2Client()
 
     client.add_mock_responses(
         SuppressedDestination(

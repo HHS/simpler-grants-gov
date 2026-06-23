@@ -3,10 +3,10 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import apiflask.exceptions
+import grants_shared.util.file_util as file_util
 import pytest
 from werkzeug.datastructures import FileStorage
 
-import src.util.file_util as file_util
 from src.constants.lookup_constants import Privilege
 from src.services.applications.update_application_attachment import update_application_attachment
 from tests.src.db.models.factories import (
