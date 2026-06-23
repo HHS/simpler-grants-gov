@@ -30,10 +30,10 @@ def get_forms() -> list[FormCatalog]:
     for form_versions in versions_by_form.values():
         form = max(
             form_versions,
-            key=lambda f: int((f.form_version or "0").split(".")[0]),
+            key=lambda f: int(f.form_version.split(".")[0]),
         )
-        parts = (form.form_version or "").split(".")
-        major = int(parts[0]) if len(parts) > 0 else 0
+        parts = form.form_version.split(".")
+        major = int(parts[0])
         minor = int(parts[1]) if len(parts) > 1 else 0
 
         entries.append(
