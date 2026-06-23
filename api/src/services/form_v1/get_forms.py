@@ -28,10 +28,12 @@ def get_forms() -> list[FormCatalog]:
 
     entries = []
     for form_versions in versions_by_form.values():
-        max_major, form = max(form_versions, key=lambda x: x[0])
-        # Parse the minor version from the form's own version string (e.g. "4.0" -> minor=0)
-        # major_version comes from the registry key, not this string
+        _registry_major, form = max(form_versions, key=lambda x: x[0])
+        # The registry key selects which form to serve (internal routing).
+        # Both major and minor are parsed from the form's own version string so
+        # users see the actual form version, not the internal registry key.
         parts = (form.form_version or "").split(".")
+        major = int(parts[0]) if len(parts) > 0 else 0
         minor = int(parts[1]) if len(parts) > 1 else 0
 
         entries.append(
@@ -40,7 +42,7 @@ def get_forms() -> list[FormCatalog]:
                 name=form.form_name,
                 short_name=form.short_form_name,
                 current_version=FormVersion(
-                    major_version=max_major,
+                    major_version=major,
                     minor_version=minor,
                     legacy_form_version=form.sgg_version,
                 ),

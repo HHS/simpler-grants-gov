@@ -17,7 +17,11 @@ def test_form_list_returns_all_registry_forms(
 def test_form_list_one_entry_per_form_id(
     client, user_api_key_id, enable_factory_create, seed_form_registry
 ):
-    """Only the highest major version is returned when multiple versions are registered."""
+    """Only one entry per form_id is returned; major_version reflects the form's own version string.
+
+    The registry key is an internal routing mechanism — users see the form's actual version,
+    not the registry key it was registered under.
+    """
     key_v2 = FormTemplateKey(SF424_v4_0.form_id, 2)
     form_template_registry._registry[key_v2] = SF424_v4_0
 
@@ -29,7 +33,8 @@ def test_form_list_one_entry_per_form_id(
 
         sf424_entries = [f for f in data if f["form_id"] == str(SF424_v4_0.form_id)]
         assert len(sf424_entries) == 1
-        assert sf424_entries[0]["current_version"]["major_version"] == 2
+        # SF424_v4_0 has form_version="4.0" — users see 4, not the registry key (2)
+        assert sf424_entries[0]["current_version"]["major_version"] == 4
     finally:
         del form_template_registry._registry[key_v2]
 
