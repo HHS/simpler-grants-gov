@@ -23,6 +23,6 @@ export const PROJECT_ABSTRACT_FORM_CONFIG = {
 export const PROJECT_ABSTRACT_REQUIRED_FIELD_ERRORS: FieldError[] = [
   {
     fieldId: "attachment",
-    message: "Project Abstract File is required",
+    message: "{} is not of type string",
   },
 ];
