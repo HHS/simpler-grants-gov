@@ -209,7 +209,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     (user_changed_opp.user_id, opp.opportunity_id)
                 )
                 if opp.previous is None:
-                    logger.error(
+                    logger.warning(
                         "No previous version found for this opportunity",
                         extra={"user_id": user_id, "opportunity_id": opp.opportunity_id},
                     )
