@@ -14,9 +14,11 @@ from src.util.env_config import PydanticBaseEnvConfig
 logger = logging.getLogger(__name__)
 
 
+# See Grantor wsdl for soap actions here: https://www.grants.gov/system-to-system/grantor-system-to-system/versions-wsdls
 GRANTOR_SOAP_ACTION_PATH = (
     "https://trainingws.grants.gov/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
 )
+# See Applicant wsdl for soap actions here: https://www.grants.gov/system-to-system/applicant-system-to-system/versions-wsdls
 APPLICANT_SOAP_ACTION_PATH = (
     "https://trainingws.grants.gov/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
 )
