@@ -151,6 +151,8 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
         metadata={"description": "List of competitions associated with the opportunity"},
     )
 
+    submitted_application_count = fields.Integer(dump_only=True)
+
 
 class OpportunityUpdateRequestSchema(Schema):
     """Schema for PUT /v1/grantors/opportunities/<opportunity_id> request"""
