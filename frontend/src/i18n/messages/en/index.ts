@@ -2071,6 +2071,10 @@ export const messages = {
       submitForReview: "Submit for review",
       backToEdit: "Back to Edit",
     },
+    submissionEdit: {
+      editTitle: "Edit {applicationSubmissionNumber}",
+      viewOriginalApplication: "View original application",
+    },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
     description: "Award Recommendation flow coming soon.",
