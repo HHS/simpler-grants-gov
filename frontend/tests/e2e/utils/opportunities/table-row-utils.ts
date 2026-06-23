@@ -1,11 +1,11 @@
 /**
- * Waits for and interacts with table rows by title and status in list views.
- * Usage: import { waitForTableRow, waitForOpportunityRowByStatus, clickRowTitle } from "tests/e2e/utils/common/table-row-utils";
+ * Opportunity list table helpers.
+ * Scope: grantor opportunities list pages that render title links and status text.
+ * Usage: import { waitForTableRow, waitForOpportunityRowByStatus, clickRowTitle } from "tests/e2e/utils/opportunities/table-row-utils";
  */
 
 import { expect, type Locator, type Page } from "@playwright/test";
-
-import { escapeRegex } from "./regex-utils";
+import { escapeRegex } from "tests/e2e/utils/common/regex-utils";
 
 type WaitForTableRowOptions = {
   linkText: string;
@@ -32,7 +32,7 @@ const normalizeOpportunityStatusPattern = (status: string): RegExp => {
   return new RegExp(`\\b${escapeRegex(trimmed)}\\b`, "i");
 };
 
-/** Finds rows that match both title link and target status text. */
+/** Finds opportunity rows that match both title link and target status text. */
 const getMatchingRowByLinkAndStatusLocator = (
   page: Page,
   rowSelector: string,
@@ -46,6 +46,7 @@ const getMatchingRowByLinkAndStatusLocator = (
     }),
   });
 
+  // Opportunity list tables usually render status in responsive-data "-2".
   const rowsByStatusCell = rowsByTitle.filter({
     has: page
       .locator('td [data-testid^="responsive-data-"][data-testid$="-2"]')
@@ -93,7 +94,7 @@ const isLikelyLoggedOut = async (page: Page): Promise<boolean> => {
   return !hasAccountButton && (hasSignInLink || hasSignInHeading);
 };
 
-/** Polls until a table row with matching title and status is available. */
+/** Polls until an opportunity row with matching title and status is available. */
 export const waitForTableRow = async (
   page: Page,
   options: WaitForTableRowOptions,

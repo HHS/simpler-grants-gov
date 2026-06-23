@@ -28,11 +28,13 @@ import {
   assertButtonEnabledDisabledStates,
   assertPageHeadingAndTextsVisible,
   assertTextsVisibleOnPage,
-  clickRowTitle,
   formatNumberWithCommas,
   selectOptionByLabel,
-  waitForOpportunityRowByStatus,
 } from "tests/e2e/utils/common/index";
+import {
+  clickRowTitle,
+  waitForOpportunityRowByStatus,
+} from "tests/e2e/utils/opportunities/table-row-utils";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 
 const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;

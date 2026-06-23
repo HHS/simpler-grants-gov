@@ -19,8 +19,3 @@ export { formatNumberWithCommas };
 export { runSharedFieldFill } from "./shared-field-filling";
 export { runFieldFillBatch } from "./field-batch-filling";
 export { fieldHandlerMap } from "./field-handler-dispatcher";
-export {
-  clickRowTitle,
-  waitForOpportunityRowByStatus,
-  waitForTableRow,
-} from "./table-row-utils";
