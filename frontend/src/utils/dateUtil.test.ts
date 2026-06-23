@@ -1,6 +1,7 @@
 import { identity } from "lodash";
 import {
   formatDate,
+  formatDateWithNoPreformattedExpectations,
   isExpired,
   isExpiring,
   toShortMonthDate,
@@ -9,6 +10,14 @@ import {
 jest.mock("src/constants/auth", () => ({
   clientTokenRefreshInterval: 1000,
 }));
+
+describe("formatDateWithNoPreformattedExpectations", () => {
+  it("returns a human readable string for properly formatted dates", () => {
+    expect(
+      formatDateWithNoPreformattedExpectations(new Date("10-10-2024")),
+    ).toEqual("October 10, 2024");
+  });
+});
 
 describe("formatDate", () => {
   beforeEach(() => {
