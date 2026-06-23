@@ -19,10 +19,13 @@ const originalConsoleError = console.error;
 const buildRequest = (fields: Record<string, string>): NextRequest => {
   const formData = new FormData();
   Object.entries(fields).forEach(([key, value]) => formData.set(key, value));
-  return new NextRequest("http://fake-newsletter-host.test/api/newsletter/subscribe", {
-    method: "POST",
-    body: formData,
-  });
+  return new NextRequest(
+    "http://fake-newsletter-host.test/api/newsletter/subscribe",
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
 };
 
 const mockMailchimpResponse = (
