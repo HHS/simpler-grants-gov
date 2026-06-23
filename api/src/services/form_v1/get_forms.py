@@ -21,17 +21,17 @@ class FormCatalog:
 
 
 def get_forms() -> list[FormCatalog]:
-    """Return one catalog entry per form_id at the highest registered major version."""
-    versions_by_form: dict[uuid.UUID, list[tuple[int, Form]]] = {}
-    for key, form in form_template_registry._registry.items():
-        versions_by_form.setdefault(key.form_id, []).append((key.major_version, form))
+    """Return one catalog entry per form_id at the highest major version."""
+    versions_by_form: dict[uuid.UUID, list[Form]] = {}
+    for form in form_template_registry.get_all():
+        versions_by_form.setdefault(form.form_id, []).append(form)
 
     entries = []
     for form_versions in versions_by_form.values():
-        _registry_major, form = max(form_versions, key=lambda x: x[0])
-        # The registry key selects which form to serve (internal routing).
-        # Both major and minor are parsed from the form's own version string so
-        # users see the actual form version, not the internal registry key.
+        form = max(
+            form_versions,
+            key=lambda f: int((f.form_version or "0").split(".")[0]),
+        )
         parts = (form.form_version or "").split(".")
         major = int(parts[0]) if len(parts) > 0 else 0
         minor = int(parts[1]) if len(parts) > 1 else 0
