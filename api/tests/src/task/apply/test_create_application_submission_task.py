@@ -4,6 +4,7 @@ from decimal import Decimal
 from io import BytesIO
 
 import pytest
+from grants_shared.util import file_util
 from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
@@ -18,7 +19,6 @@ from src.task.apply.create_application_submission_task import (
     SubmissionContainer,
     create_manifest_text,
 )
-from src.util import file_util
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,

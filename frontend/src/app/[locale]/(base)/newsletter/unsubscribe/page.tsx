@@ -7,7 +7,7 @@ import Link from "next/link";
 import { use } from "react";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";
+import NewsletterDisclaimer from "src/components/newsletter/NewsletterDisclaimer";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -35,7 +35,7 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
           <Link href="/newsletter">{t("buttonResub")}</Link>
         </p>
       </GridContainer>
-      <SendyDisclaimer />
+      <NewsletterDisclaimer />
     </div>
   );
 }

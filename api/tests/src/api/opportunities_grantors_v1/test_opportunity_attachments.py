@@ -2,10 +2,10 @@ import uuid
 from io import BytesIO
 
 import pytest
+from grants_shared.util import file_util
 
 from src.constants.lookup_constants import Privilege
 from src.db.models import opportunity_models
-from src.util import file_util
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import OpportunityAttachmentFactory, OpportunityFactory
 
