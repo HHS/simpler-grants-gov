@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 import boto3
 import pytest
+from grants_shared.adapters.aws.sqs_adapter import SQSClient, SQSMessage
 
-from src.adapters.aws.sqs_adapter import SQSClient, SQSMessage
 from src.constants.lookup_constants import (
     WorkflowEntityType,
     WorkflowEventProcessingResult,

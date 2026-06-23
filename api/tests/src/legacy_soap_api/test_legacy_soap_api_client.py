@@ -591,7 +591,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
-        with patch("src.util.file_util.smart_open.open") as mock_smart_open:
+        with patch("grants_shared.util.file_util.smart_open.open") as mock_smart_open:
             mock_smart_open.side_effect = ClientError(
                 {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}},
                 "GetObject",

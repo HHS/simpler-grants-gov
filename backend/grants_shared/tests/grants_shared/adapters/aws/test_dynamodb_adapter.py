@@ -6,7 +6,7 @@ import pytest
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 
-from src.adapters.aws.dynamodb_adapter import (
+from grants_shared.adapters.aws.dynamodb_adapter import (
     DynamoDBClient,
     DynamoDBConfig,
     DynamoDBGetItemResponse,
@@ -29,7 +29,7 @@ class TestDynamoDBConfig:
 
 class TestGetBotoDynamoDBClient:
 
-    @patch("src.adapters.aws.dynamodb_adapter.get_boto_session")
+    @patch("grants_shared.adapters.aws.dynamodb_adapter.get_boto_session")
     def test_uses_default_session(self, mock_get_session):
         """Verify the case when no session is provided, use the default AWS session"""
         mock_session = Mock()
@@ -39,9 +39,6 @@ class TestGetBotoDynamoDBClient:
         mock_session.client.assert_called_once_with(
             "dynamodb",
             region_name="us-east-1",
-            endpoint_url=DynamoDBConfig().aws_dynamodb_endpoint_url,
-            aws_access_key_id="local",
-            aws_secret_access_key="local",
         )
 
     def test_uses_provided_session(self):
@@ -51,7 +48,17 @@ class TestGetBotoDynamoDBClient:
         mock_session.client.assert_called_once_with(
             "dynamodb",
             region_name="us-east-1",
-            endpoint_url=DynamoDBConfig().aws_dynamodb_endpoint_url,
+        )
+
+    def test_uses_local_when_endpoint_url_set(self):
+        """Verify the case when the endpoint url is set"""
+        mock_session = Mock()
+        config = DynamoDBConfig(AWS_DYNAMODB_ENDPOINT_URL="http://example:8000")
+        get_boto_dynamodb_client(session=mock_session, dynamodb_config=config)
+        mock_session.client.assert_called_once_with(
+            "dynamodb",
+            region_name="us-east-1",
+            endpoint_url=config.aws_dynamodb_endpoint_url,
             aws_access_key_id="local",
             aws_secret_access_key="local",
         )

@@ -2,12 +2,12 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+import grants_shared.util.file_util as file_util
 from grants_shared.api.response import ValidationErrorDetail
 from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util import datetime_util
 from sqlalchemy import select
 
-import src.util.file_util as file_util
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import FileScanStatus, Privilege
 from src.db.models.file_upload_models import PendingFile
