@@ -282,6 +282,7 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
             opportunity=opportunity,
             legacy_opportunity_assistance_listing_id=cfda_to_delete.opp_cfda_id,
             is_delete=True,  # This competition is also being deleted
+            is_already_processed=True,  # Mark as processed to avoid interfering with other tests
         )
 
         # Get the created competition and set the assistance listing reference
@@ -346,6 +347,7 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
             opportunity=opportunity,
             legacy_opportunity_assistance_listing_id=cfda_to_delete.opp_cfda_id,
             is_delete=False,  # This competition is NOT being deleted
+            is_already_processed=True,  # Mark as processed to avoid interfering with other tests
         )
 
         # Get the created competition and set the assistance listing reference
