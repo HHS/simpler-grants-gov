@@ -30,23 +30,24 @@ export const FileInputExistingFiles = ({
       return (
         <Grid
           row
+          gap
           key={existingFile.id}
           className="bg-base-lightest padding-2 margin-top-2"
         >
-          <Grid col={1}>
+          <Grid col={"auto"}>
             <USWDSIcon
               name="file_present"
               className="usa-icon--size-6 text-middle text-primary-dark"
             />
           </Grid>
-          <Grid col={9}>
+          <Grid col={"fill"}>
             <div className="text-bold">{existingFile.fileName}</div>
             <div>
               {fileSizeDisplay}
               {timestampDisplay}
             </div>
           </Grid>
-          <Grid col={2} className="display-flex">
+          <Grid col={"auto"} className="display-flex">
             <Button
               type="button"
               unstyled

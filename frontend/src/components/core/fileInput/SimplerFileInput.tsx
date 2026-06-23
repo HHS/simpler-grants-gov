@@ -262,6 +262,11 @@ export const SimplerFileInput = ({
                 "upload stream completed without sending pending file id",
               );
             }
+            return new Promise((resolve) =>
+              setTimeout(() => resolve(pendingFileId), 100000),
+            );
+          })
+          .then((pendingFileId) => {
             const postUploadAbortController = new AbortController();
             setUploadController(undefined);
             setResponseReader(undefined);

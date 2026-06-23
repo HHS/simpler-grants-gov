@@ -167,6 +167,7 @@ export const FileInputStatusDisplay = ({
   return (
     <Grid
       row
+      gap
       data-testid="file-upload-status-display"
       className={clsx({
         "bg-secondary-lightest": !error,
@@ -177,14 +178,14 @@ export const FileInputStatusDisplay = ({
         "margin-top-2": true,
       })}
     >
-      <Grid col={1} className="display-flex flex-align-center">
+      <Grid col={"auto"} className="display-flex flex-align-center">
         <StatusIcon error={error} status={status} />
       </Grid>
-      <Grid col={9}>
+      <Grid col={"fill"}>
         <div className="text-bold">{fileName}</div>
         <div>{statusMessageForDisplay}</div>
       </Grid>
-      <Grid col={2} className="display-flex">
+      <Grid col={"auto"} className="display-flex">
         <ActionButton
           onDismiss={onDismiss}
           onCancel={onCancel}
