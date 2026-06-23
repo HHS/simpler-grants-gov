@@ -14,8 +14,9 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 const errorStatuses = new Map([
   ["queued", "pre-upload-error"],
   ["uploading", "upload-error"],
-  ["scanning", "scan-error"],
   ["infected", "infected"],
+  ["pending", "scan-error"],
+  ["starting-scan", "scan-error"],
   ["complete", "file-id-error"], // assuming that any error in this state is due to a missing file id
   ["post-upload", "post-upload-error"],
 ]);
