@@ -1,5 +1,6 @@
 "use client";
 
+import { createRiskAction } from "src/app/[locale]/(base)/award-recommendation/[id]/risks/actions";
 import { useSelectedSubmissions } from "src/hooks/useSelectedSubmissions";
 
 import { useTranslations } from "next-intl";
@@ -10,6 +11,8 @@ import {
   Button,
   ButtonGroup,
   CharacterCount,
+  ErrorMessage,
+  FormGroup,
   Select,
 } from "@trussworks/react-uswds";
 
@@ -40,6 +43,9 @@ export default function AddRiskForm({
   const router = useRouter();
   const [riskSummary, setRiskSummary] = useState("");
   const [selectedCondition, setSelectedCondition] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [riskSummaryError, setRiskSummaryError] = useState<string | null>(null);
 
   const { selectedSubmissions, hasSelections } = useSelectedSubmissions(
     awardRecommendationId,
@@ -49,8 +55,41 @@ export default function AddRiskForm({
     router.push(`/award-recommendation/${awardRecommendationId}/edit`);
   };
 
-  const handleSave = () => {
-    // TODO: Implement save functionality
+  const handleRiskSummaryBlur = () => {
+    if (!riskSummary.trim()) {
+      setRiskSummaryError(t("riskSummaryRequired"));
+    } else {
+      setRiskSummaryError(null);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!riskSummary.trim()) {
+      setRiskSummaryError(t("riskSummaryRequired"));
+      setError(t("validationError"));
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+    setRiskSummaryError(null);
+
+    const submissionIds = selectedSubmissions.map(
+      (submission) => submission.award_recommendation_application_submission_id,
+    );
+
+    const result = await createRiskAction(awardRecommendationId, {
+      comment: riskSummary,
+      award_recommendation_risk_type: "additional_monitoring",
+      award_recommendation_application_submission_ids: submissionIds,
+    });
+
+    if (result.success) {
+      router.push(`/award-recommendation/${awardRecommendationId}/edit`);
+    } else {
+      setError(result.errorMessage || t("saveError"));
+      setIsSubmitting(false);
+    }
   };
 
   if (!hasSelections) {
@@ -130,6 +169,17 @@ export default function AddRiskForm({
 
   return (
     <div>
+      {error && (
+        <div className="margin-bottom-4">
+          <SimplerAlert
+            alertClick={() => setError(null)}
+            buttonId="error-alert"
+            messageText={error}
+            type="error"
+          />
+        </div>
+      )}
+
       <h2 className="margin-top-0 margin-bottom-3">
         {t("selectedApplications")}
       </h2>
@@ -146,7 +196,7 @@ export default function AddRiskForm({
           {t("riskDetailsHeading")}
         </h2>
 
-        <div>
+        <FormGroup error={!!riskSummaryError}>
           <label className="usa-label text-bold" htmlFor="risk-summary">
             {t("riskSummaryLabel")}
             <span className="usa-hint usa-hint--required text-no-underline">
@@ -154,6 +204,7 @@ export default function AddRiskForm({
             </span>
           </label>
           <span className="usa-hint">{t("riskSummaryHint")}</span>
+          {riskSummaryError && <ErrorMessage>{riskSummaryError}</ErrorMessage>}
           <CharacterCount
             id="risk-summary"
             name="risk-summary"
@@ -164,9 +215,10 @@ export default function AddRiskForm({
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setRiskSummary(e.target.value)
             }
+            onBlur={handleRiskSummaryBlur}
             className="maxw-tablet-lg"
           />
-        </div>
+        </FormGroup>
 
         <div className="margin-top-3">
           <label
@@ -191,11 +243,20 @@ export default function AddRiskForm({
         </div>
 
         <ButtonGroup className="margin-top-4">
-          <Button type="button" onClick={handleCancel} outline>
+          <Button
+            type="button"
+            onClick={handleCancel}
+            outline
+            disabled={isSubmitting}
+          >
             {t("cancelButton")}
           </Button>
-          <Button type="button" onClick={handleSave}>
-            {t("saveButton")}
+          <Button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? t("savingButton") : t("saveButton")}
           </Button>
         </ButtonGroup>
       </div>

@@ -1,6 +1,7 @@
 import logging
 import uuid
 
+from grants_shared.util import file_util
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -14,7 +15,6 @@ from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging.competition import Tcompetition
 from src.db.models.staging.opportunity import TopportunityCfda
-from src.util import file_util
 
 logger = logging.getLogger(__name__)
 

@@ -33,20 +33,20 @@ locals {
   #   }
   # }
   secrets = {
-    # Sendy API key to pass with requests for sendy subscriber endpoints.
-    SENDY_API_KEY = {
+    # Mailchimp API key to pass with requests for newsletter subscriber endpoints.
+    MAILCHIMP_API_KEY = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/sendy-api-key"
+      secret_store_name = "/${var.app_name}/${var.environment}/mailchimp-api-key"
     },
-    # Sendy API base url for requests to manage subscribers.
-    SENDY_API_URL = {
+    # Mailchimp data center prefix (e.g. "us4") used to build the API base url.
+    MAILCHIMP_API_URL_PREFIX = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/sendy-api-url"
+      secret_store_name = "/${var.app_name}/${var.environment}/mailchimp-api-url-prefix"
     },
-    # Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list.
-    SENDY_LIST_ID = {
+    # Mailchimp list ID for requests to manage subscribers to the Simpler Grants distribution list.
+    MAILCHIMP_LIST_ID = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/sendy-list-id"
+      secret_store_name = "/${var.app_name}/${var.environment}/mailchimp-list-id"
     },
     # URL that the frontend uses to make fetch requests to the Grants API.
     API_URL = {

@@ -2,9 +2,9 @@ import logging
 from uuid import UUID
 
 from grants_shared.adapters import db
+from grants_shared.adapters.aws.api_gateway_adapter import ApiGatewayConfig, import_api_key
 from grants_shared.util.api_key_gen import generate_api_key_id
 
-from src.adapters.aws.api_gateway_adapter import ApiGatewayConfig, import_api_key
 from src.auth.auth_handler import get_auth_handler
 from src.db.models.auth_base_models import BaseUserApiKey
 

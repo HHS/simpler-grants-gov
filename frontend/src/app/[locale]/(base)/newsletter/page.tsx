@@ -8,7 +8,7 @@ import Image from "next/image";
 import { use } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";
+import NewsletterDisclaimer from "src/components/newsletter/NewsletterDisclaimer";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -67,7 +67,7 @@ export default function Subscribe({ params }: LocalizedPageProps) {
             </Grid>
           </Grid>
         </GridContainer>
-        <SendyDisclaimer />
+        <NewsletterDisclaimer />
       </div>
     </>
   );

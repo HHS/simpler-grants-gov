@@ -3,6 +3,7 @@ import {
   AwardRecommendationDetails,
   AwardRecommendationRisk,
   AwardRecommendationSubmission,
+  AwardRecommendationSubmissionDetailUpdate,
   AwardRecommendationSubmissionListFilters,
 } from "src/types/awardRecommendationTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
@@ -96,6 +97,22 @@ export const getAwardRecommendationRisks = async (
   };
 };
 
+export const createAwardRecommendationRisk = async (
+  awardRecommendationId: string,
+  riskData: {
+    comment: string;
+    award_recommendation_risk_type: string;
+    award_recommendation_application_submission_ids: string[];
+  },
+): Promise<AwardRecommendationRisk> => {
+  const response = await fetchAwardRecommendationWithMethod("POST")({
+    subPath: `${awardRecommendationId}/risks`,
+    body: riskData,
+  });
+  const responseBody = (await response.json()) as APIResponse;
+  return responseBody.data as AwardRecommendationRisk;
+};
+
 export const deleteAwardRecommendationRisk = async (
   awardRecommendationId: string,
   riskId: string,
@@ -108,4 +125,28 @@ export const deleteAwardRecommendationRisk = async (
     success: response.ok,
     message: responseBody.message,
   };
+};
+
+export const updateAwardRecommendationSubmissionDetails = async (
+  awardRecommendationId: string,
+  awardRecommendationSubmissions: Record<
+    string,
+    AwardRecommendationSubmissionDetailUpdate
+  >,
+): Promise<AwardRecommendationSubmission[]> => {
+  const response = await fetchAwardRecommendationWithMethod("PUT")({
+    subPath: `${awardRecommendationId}/submission-details`,
+    body: {
+      award_recommendation_submissions: awardRecommendationSubmissions,
+    },
+  });
+  const responseBody = (await response.json()) as APIResponse;
+
+  if (!response.ok) {
+    throw new Error(
+      responseBody.message || "Failed to save submission details",
+    );
+  }
+
+  return (responseBody.data as AwardRecommendationSubmission[]) || [];
 };

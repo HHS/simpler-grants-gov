@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 
 import grants_shared.util.datetime_util as datetime_util
+import grants_shared.util.file_util as file_util
 import pytest
 
-import src.util.file_util as file_util
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
 from tests.src.db.models.factories import ExtractMetadataFactory

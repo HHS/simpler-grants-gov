@@ -3,12 +3,14 @@ import uuid
 from urllib.parse import parse_qs, urlparse
 
 import boto3
+import faker
 import pytest
 from smart_open import open as smart_open
 
-import src.util.file_util as file_util
-import tests.src.db.models.factories as f
-from src.adapters.aws import S3Config
+import grants_shared.util.file_util as file_util
+from grants_shared.adapters.aws import S3Config
+
+fake = faker.Faker()
 
 
 def create_file(root_path, file_path):
@@ -172,7 +174,7 @@ def test_copy_file_s3(mock_s3_bucket, other_mock_s3_bucket):
     file_path = f"s3://{mock_s3_bucket}/my_file.txt"
 
     with file_util.open_stream(file_path, "w") as outfile:
-        outfile.write(f.fake.sentence(25))
+        outfile.write(fake.sentence(25))
 
     other_file_path = f"s3://{other_mock_s3_bucket}/my_new_file.txt"
     file_util.copy_file(file_path, other_file_path)
@@ -187,7 +189,7 @@ def test_copy_file_local_disk(tmp_path):
     file_path = tmp_path / "my_file.txt"
 
     with file_util.open_stream(file_path, "w") as outfile:
-        outfile.write(f.fake.sentence(25))
+        outfile.write(fake.sentence(25))
 
     other_file_path = tmp_path / "my_file2.txt"
     file_util.copy_file(file_path, other_file_path)
@@ -201,7 +203,7 @@ def test_copy_file_local_disk(tmp_path):
 def test_move_file_s3(mock_s3_bucket, other_mock_s3_bucket):
     file_path = f"s3://{mock_s3_bucket}/my_file_to_copy.txt"
 
-    contents = f.fake.sentence(25)
+    contents = fake.sentence(25)
     with file_util.open_stream(file_path, "w") as outfile:
         outfile.write(contents)
 
@@ -217,7 +219,7 @@ def test_move_file_s3(mock_s3_bucket, other_mock_s3_bucket):
 def test_move_file_local_disk(tmp_path):
     file_path = tmp_path / "my_file_to_move.txt"
 
-    contents = f.fake.sentence(25)
+    contents = fake.sentence(25)
     with file_util.open_stream(file_path, "w") as outfile:
         outfile.write(contents)
 
@@ -263,7 +265,7 @@ def test_convert_s3_to_cdn_url_invalid_path(s3_config):
 
 
 def test_write_to_file(tmp_path):
-    contents = f.fake.sentence(25)
+    contents = fake.sentence(25)
     file_path = tmp_path / "my_file_to_write.txt"
     assert file_util.file_exists(file_path) is False
     file_util.write_to_file(file_path, contents)
