@@ -34,6 +34,7 @@ type SimplerFileInputProps = {
   disabled?: boolean;
   readOnly?: boolean;
   labelId: string;
+  multiFile?: boolean;
 };
 
 /*
@@ -50,7 +51,7 @@ type SimplerFileInputProps = {
   * cancel a download [x]
   * delete a previously uploaded file [x]
 
-  * remove the "selected file" thing on single file inputs [x]
+  * remove the trussworks "selected file" input on single file inputs [x]
   * confirm delete behavior [x]
   * confirm cancel behavior [x]
   * confirm callback behavior [x]
@@ -58,7 +59,9 @@ type SimplerFileInputProps = {
   * confirm error status displays [x]
   *
   * properly format status display [x]
-  * properly format existing file display [x]
+  * properly format existing file display [x]'
+  *
+  *
 */
 
 export const SimplerFileInput = ({
@@ -77,6 +80,7 @@ export const SimplerFileInput = ({
   disabled = false,
   readOnly = false,
   required = false,
+  multiFile = false,
 }: SimplerFileInputProps) => {
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
@@ -86,6 +90,7 @@ export const SimplerFileInput = ({
     jsonResponse: false,
   });
 
+  // we're only using this for boolean checks - maybe we only need the message, in case we want to surface that somehow?
   const [uploadError, setUploadError] = useState<
     { status: FileUploadProcessStatus | undefined; message: string } | undefined
   >();
@@ -316,12 +321,8 @@ export const SimplerFileInput = ({
         }}
         aria-describedby={labelId}
         aria-invalid={!!uploadError}
-        className={
-          (currentStatus && currentStatus !== "success") ||
-          existingFiles?.length
-            ? "display-none"
-            : ""
-        }
+        className={currentStatus || existingFiles?.length ? "display-none" : ""}
+        multiple={multiFile}
       />
       {currentStatus ? (
         <FileInputStatusDisplay
