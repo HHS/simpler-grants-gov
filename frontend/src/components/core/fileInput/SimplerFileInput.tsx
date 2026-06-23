@@ -254,7 +254,7 @@ export const SimplerFileInput = ({
             );
           })
           // run post upload action
-          .then((pendingFileId) => {
+          .then((pendingFileId: string) => {
             if (!pendingFileId) {
               // note that the missing file id error display is predicated on the timing of
               // an error occurring in the "complete" state
@@ -262,11 +262,6 @@ export const SimplerFileInput = ({
                 "upload stream completed without sending pending file id",
               );
             }
-            return new Promise((resolve) =>
-              setTimeout(() => resolve(pendingFileId), 100000),
-            );
-          })
-          .then((pendingFileId) => {
             const postUploadAbortController = new AbortController();
             setUploadController(undefined);
             setResponseReader(undefined);
@@ -283,13 +278,6 @@ export const SimplerFileInput = ({
             // complete status will persist until refresh or form change
             setCurrentStatus("success");
             onSuccess(postUploadResult);
-            // wait 5 seconds then hide the progress display
-            // don't want to clear these in an error scenario
-            setTimeout(() => {
-              setFileName("");
-              setCurrentStatus(undefined);
-              fileInputRef.current?.clearFiles();
-            }, 5000);
             return;
           })
           .catch((e: Error) => {
@@ -328,7 +316,12 @@ export const SimplerFileInput = ({
         }}
         aria-describedby={labelId}
         aria-invalid={!!uploadError}
-        className={currentStatus || existingFiles?.length ? "display-none" : ""}
+        className={
+          (currentStatus && currentStatus !== "success") ||
+          existingFiles?.length
+            ? "display-none"
+            : ""
+        }
       />
       {currentStatus ? (
         <FileInputStatusDisplay

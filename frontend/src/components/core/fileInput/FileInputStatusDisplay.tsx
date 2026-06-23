@@ -43,14 +43,10 @@ const StatusIcon = ({
     return null;
   }
 
-  // this is not in the designs, but I think we want it here for this reason:
-  // the display of existing files is to some degree the responsibility of the parent component, and will very likely
-  // require re-fetching in order to refresh the list of existing files. In order to provide immediate feedback to the user
-  // we should not rely solely on the existing file list, but should also display a success message here
   if (status === "success") {
     return (
       <USWDSIcon
-        name="check_circle_outline"
+        name="file_present"
         className="usa-icon--size-6 text-middle text-primary-dark"
       />
     );
@@ -83,6 +79,7 @@ const ActionButton = ({
         onClick={() => {
           void onDismiss();
         }}
+        className="text-error-dark"
       >
         <USWDSIcon
           className="usa-icon margin-right-05 margin-left-neg-05"
@@ -103,6 +100,7 @@ const ActionButton = ({
       onClick={() => {
         void onCancel();
       }}
+      className="text-error-dark"
     >
       <USWDSIcon
         className="usa-icon margin-right-05 margin-left-neg-05"
@@ -164,34 +162,37 @@ export const FileInputStatusDisplay = ({
   const statusMessageForDisplay = messagesMap[adjustedStatus];
 
   return (
-    <Grid
-      row
-      gap
-      data-testid="file-upload-status-display"
-      className={clsx({
-        "bg-secondary-lightest": !error,
-        "bg-error-lighter": !!error,
-        "border-left-1": !!error,
-        "border-error-dark": !!error,
-        "padding-2": true,
-        "margin-top-2": true,
-      })}
-    >
-      <Grid col={"auto"} className="display-flex flex-align-center">
-        <StatusIcon error={error} status={status} />
+    <div className="margin-x-3">
+      <Grid
+        row
+        gap
+        data-testid="file-upload-status-display"
+        className={clsx({
+          "bg-base-lightest": status === "success",
+          "bg-secondary-lightest": !error && status !== "success",
+          "bg-error-lighter": !!error,
+          "border-left-1": !!error,
+          "border-error-dark": !!error,
+          "padding-2": true,
+          "margin-top-2": true,
+        })}
+      >
+        <Grid col={"auto"} className="display-flex flex-align-center">
+          <StatusIcon error={error} status={status} />
+        </Grid>
+        <Grid col={"fill"}>
+          <div className="text-bold">{fileName}</div>
+          <div>{statusMessageForDisplay}</div>
+        </Grid>
+        <Grid col={"auto"} className="display-flex">
+          <ActionButton
+            onDismiss={onDismiss}
+            onCancel={onCancel}
+            error={error}
+            status={status}
+          />
+        </Grid>
       </Grid>
-      <Grid col={"fill"}>
-        <div className="text-bold">{fileName}</div>
-        <div>{statusMessageForDisplay}</div>
-      </Grid>
-      <Grid col={"auto"} className="display-flex">
-        <ActionButton
-          onDismiss={onDismiss}
-          onCancel={onCancel}
-          error={error}
-          status={status}
-        />
-      </Grid>
-    </Grid>
+    </div>
   );
 };

@@ -29,9 +29,9 @@ export const FileInputExistingFiles = ({
       const timestampDisplay = `${t("savedOn")} ${formatDateWithNoPreformattedExpectations(new Date(existingFile.updatedAt))}`;
       return (
         <Grid
-          row
-          gap
           key={existingFile.id}
+          gap
+          row
           className="bg-base-lightest padding-2 margin-top-2"
         >
           <Grid col={"auto"}>
@@ -67,7 +67,9 @@ export const FileInputExistingFiles = ({
       );
     });
     return (
-      <div data-testid="file-input-existing-files">{existingFilesList}</div>
+      <div data-testid="file-input-existing-files" className="margin-x-3">
+        {existingFilesList}
+      </div>
     );
   }
 };
