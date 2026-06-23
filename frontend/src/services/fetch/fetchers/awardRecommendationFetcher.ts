@@ -3,6 +3,7 @@ import {
   AwardRecommendationDetails,
   AwardRecommendationRisk,
   AwardRecommendationSubmission,
+  AwardRecommendationSubmissionDetailUpdate,
   AwardRecommendationSubmissionListFilters,
 } from "src/types/awardRecommendationTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
@@ -108,4 +109,28 @@ export const deleteAwardRecommendationRisk = async (
     success: response.ok,
     message: responseBody.message,
   };
+};
+
+export const updateAwardRecommendationSubmissionDetails = async (
+  awardRecommendationId: string,
+  awardRecommendationSubmissions: Record<
+    string,
+    AwardRecommendationSubmissionDetailUpdate
+  >,
+): Promise<AwardRecommendationSubmission[]> => {
+  const response = await fetchAwardRecommendationWithMethod("PUT")({
+    subPath: `${awardRecommendationId}/submission-details`,
+    body: {
+      award_recommendation_submissions: awardRecommendationSubmissions,
+    },
+  });
+  const responseBody = (await response.json()) as APIResponse;
+
+  if (!response.ok) {
+    throw new Error(
+      responseBody.message || "Failed to save submission details",
+    );
+  }
+
+  return (responseBody.data as AwardRecommendationSubmission[]) || [];
 };
