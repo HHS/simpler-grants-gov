@@ -739,9 +739,9 @@ export const messages = {
     cta: "Change your mind?",
     buttonResub: "Re-subscribe",
   },
-  SendyDisclaimer: {
+  NewsletterDisclaimer: {
     disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "Simpler.Grants.gov newsletter subscriptions are powered by Mailchimp. Personal information is not stored within Simpler.Grants.gov.",
   },
   ErrorPages: {
     genericError: {
@@ -2070,6 +2070,10 @@ export const messages = {
       preview: "Preview",
       submitForReview: "Submit for review",
       backToEdit: "Back to Edit",
+    },
+    submissionEdit: {
+      editTitle: "Edit {applicationSubmissionNumber}",
+      viewOriginalApplication: "View original application",
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",

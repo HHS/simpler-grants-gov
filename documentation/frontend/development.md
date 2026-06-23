@@ -237,17 +237,17 @@ The `/api/auth/callback` route handler receives a JSON web token as query parame
 
 When clicking "Sign in" or other buttons that simulate the login flow locally, you should be redirected to the mock Oauth2 server at `http://localhost:5001`. Enter any text string in the screen provided to continue the login flow.
 
-### New Relic and Sendy (email)
+### New Relic and Mailchimp (email)
 
 Some functionality will not work locally without supplying the application environment variables containing secrets.
 
 - New Relic
   - `NEW_RELIC_APP_NAME`
   - `NEW_RELIC_LICENSE_KEY`
-- Email subscription form (Sendy)
-  - `SENDY_API_KEY`
-  - `SENDY_API_URL`
-  - `SENDY_LIST_ID`
+- Email subscription form (Mailchimp)
+  - `MAILCHIMP_API_KEY`
+  - `MAILCHIMP_API_URL_PREFIX`
+  - `MAILCHIMP_LIST_ID`
 
 If you need to access this functionality locally, contact an engineer on the team to get access to the necessary secrets.
 
