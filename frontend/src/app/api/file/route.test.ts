@@ -59,13 +59,15 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     });
 
     fakeTextDecoder.mockImplementation(() => ({
-      decode: (value) => value,
+      decode: (value: unknown) => value,
     }));
     originalTextDecoder = global.TextDecoder;
     global.TextDecoder = fakeTextDecoder;
   });
   afterEach(() => {
     jest.resetAllMocks();
+
+    global.TextDecoder = originalTextDecoder;
   });
   it("returns an error if no file is sent", async () => {
     const response = await handleFileUpload(
@@ -329,7 +331,104 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     const errorChunk = await reader?.read();
     expect(errorChunk?.value).toEqual('{"status":"error","error":"api error"}');
   });
+  it("expects an array buffer from status stream and decodes it on each read", async () => {
+    const testFile = new File(["file contents"], "file.txt");
+    const testFormData = new FormData();
+    testFormData.append("file_attachment", testFile);
+    const response = await handleFileUpload(
+      new NextRequest("http://arbitrary", {
+        method: "POST",
+        body: testFormData,
+      }),
+    );
+    expect(response.status).toEqual(200);
+    expect(response.body).toBeInstanceOf(ReadableStream);
 
+    const reader =
+      response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
+
+    // advance through queued, uploading, and starting-scan states
+    await reader?.read();
+    await reader?.read();
+    await reader?.read();
+
+    trigger.advance();
+    await reader?.read();
+
+    trigger.advance();
+    await reader?.read();
+
+    trigger.advance();
+    await reader?.read();
+
+    expect(fakeTextDecoder).toHaveBeenCalledTimes(3);
+  });
+  it("streams a pending file id on scan completion", async () => {
+    const testFile = new File(["file contents"], "file.txt");
+    const testFormData = new FormData();
+    testFormData.append("file_attachment", testFile);
+    const response = await handleFileUpload(
+      new NextRequest("http://arbitrary", {
+        method: "POST",
+        body: testFormData,
+      }),
+    );
+    expect(response.status).toEqual(200);
+    expect(response.body).toBeInstanceOf(ReadableStream);
+
+    const reader =
+      response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
+
+    // advance through queued, uploading, and starting-scan states
+    await reader?.read();
+    await reader?.read();
+    await reader?.read();
+
+    trigger.advance();
+    await reader?.read();
+    trigger.advance();
+    await reader?.read();
+    trigger.advance();
+    await reader?.read();
+    trigger.advance();
+    const scanCompleteChunk = await reader?.read();
+    expect(scanCompleteChunk.value).toEqual(
+      '{"status":"scan-complete","pendingFileId":"fake id"}',
+    );
+  });
+  it("sets infected error in stream when receiving infected status from API", async () => {
+    trigger = createAdvanceStreamTrigger();
+    testStream = makeAdvanceableTestStreamForTrigger(
+      [JSON.stringify({ data: { status: "infected" } })],
+      trigger,
+    );
+    mockFetchFileScanStatus.mockResolvedValue(testStream);
+    const testFile = new File(["file contents"], "file.txt");
+    const testFormData = new FormData();
+    testFormData.append("file_attachment", testFile);
+    const response = await handleFileUpload(
+      new NextRequest("http://arbitrary", {
+        method: "POST",
+        body: testFormData,
+      }),
+    );
+    expect(response.status).toEqual(200);
+    expect(response.body).toBeInstanceOf(ReadableStream);
+
+    const reader =
+      response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
+
+    // advance through queued, uploading, and starting-scan states
+    await reader?.read();
+    await reader?.read();
+    await reader?.read();
+
+    trigger.advance();
+    const firstChunk = await reader?.read();
+    expect(firstChunk?.value).toEqual(
+      '{"status":"error","error":"Virus scan failed, file infected"}',
+    );
+  });
   // waiting on implementing this since implementation depends on how the stream from /results will actually report errors
   it.skip("streams error data if fetchFileScanStatus encounters an error in the underlying response stream", async () => {
     testResponseChunks = [JSON.stringify({ status: "error" })];

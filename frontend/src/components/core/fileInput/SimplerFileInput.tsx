@@ -163,7 +163,6 @@ export const SimplerFileInput = ({
       let error: Error;
       const process = async (): Promise<string> => {
         return reader.read().then(({ value, done }) => {
-          console.log("RRRR", value, done);
           if (done) {
             return newFileId;
           }
@@ -171,34 +170,32 @@ export const SimplerFileInput = ({
           const payloadString = new TextDecoder().decode(value);
           const payloadJsonStrings = unbatchStreamChunkJSON(payloadString);
           // process each json chunk, since it's possible that chunks were batched
-          payloadJsonStrings.forEach(
-            (payloadString: string): string | undefined => {
-              try {
-                payloadJson = JSON.parse(
-                  payloadString,
-                ) as FileUploadStatusUpdate;
-              } catch (e) {
-                console.error(
-                  "Error parsing json from file upload stream payload",
-                  payloadString,
-                );
-                throw e;
+          // it may not be doing anything from the UI perspective to process anything except the final
+          // batched update, but leaving this just in case we need to process a file id from a batched update
+          payloadJsonStrings.forEach((payloadString: string) => {
+            try {
+              payloadJson = JSON.parse(payloadString) as FileUploadStatusUpdate;
+            } catch (e) {
+              console.error(
+                "Error parsing json from file upload stream payload",
+                payloadString,
+              );
+              throw e;
+            }
+            if (payloadJson?.error) {
+              // in order to distinguish "infected" cases from general failure during scan
+              // we need to specially set the status here
+              if (payloadJson.error.match("infected")) {
+                setCurrentStatus("infected");
               }
-              if (payloadJson?.error) {
-                // in order to distinguish "infected" cases from general failure during scan
-                // we need to specially set the status here
-                if (payloadJson.error.match("infected")) {
-                  setCurrentStatus("infected");
-                }
-                error = new Error(payloadJson.error);
-              } else if (payloadJson?.status) {
-                setCurrentStatus(payloadJson.status as FileUploadProcessStatus);
-                if (payloadJson.pendingFileId) {
-                  newFileId = payloadJson.pendingFileId;
-                }
+              error = new Error(payloadJson.error);
+            } else if (payloadJson?.status) {
+              setCurrentStatus(payloadJson.status as FileUploadProcessStatus);
+              if (payloadJson.pendingFileId) {
+                newFileId = payloadJson.pendingFileId;
               }
-            },
-          );
+            }
+          });
           // if the stream ended, newFileId will be set. Return that and stop reading
           if (newFileId) {
             return newFileId;
@@ -210,7 +207,7 @@ export const SimplerFileInput = ({
         });
       };
       try {
-        return await process();
+        return process();
       } catch (e) {
         console.error("Error in file upload process stream response", e);
         throw e;
@@ -259,6 +256,8 @@ export const SimplerFileInput = ({
           // run post upload action
           .then((pendingFileId) => {
             if (!pendingFileId) {
+              // note that the missing file id error display is predicated on the timing of
+              // an error occurring in the "complete" state
               throw new Error(
                 "upload stream completed without sending pending file id",
               );

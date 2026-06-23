@@ -162,7 +162,6 @@ export const FileInputStatusDisplay = ({
     ? (errorStatuses.get(status) as FileUploadStatus) || "error"
     : status;
   const statusMessageForDisplay = messagesMap[adjustedStatus];
-  console.log("****", statusMessageForDisplay);
 
   return (
     <Grid
