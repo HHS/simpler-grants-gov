@@ -5,6 +5,7 @@ import grants_shared.adapters.db as db
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, selectinload
 
+from src.constants.lookup_constants import OpportunityVersionChangeType
 from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit
 from src.services.opportunities_v1.opportunity_version import save_opportunity_version
 from src.task.task import Task
@@ -87,9 +88,18 @@ class StoreOpportunityVersionTask(Task):
             }
             logger.info("Preparing opportunity for versioning", extra=log_extra)
 
+            # Determine the change type based on whether versions exist
+            # If no versions exist and opportunity is not draft, it's a CREATE event
+            if len(opp_change_audit.opportunity.versions) == 0:
+                change_type = OpportunityVersionChangeType.CREATE
+            else:
+                change_type = OpportunityVersionChangeType.UPDATE
+
             # Store to OpportunityVersion table
-            if save_opportunity_version(self.db_session, opp_change_audit.opportunity):
-                logger.info("Opportunity has a new version", extra=log_extra)
+            if save_opportunity_version(self.db_session, opp_change_audit.opportunity, change_type):
+                logger.info(
+                    "Opportunity has a new version", extra=log_extra | {"change_type": change_type}
+                )
                 self.increment(self.Metrics.OPPORTUNITIES_VERSIONED)
 
             # Mark the change audit record so we don't pick it up again next batch

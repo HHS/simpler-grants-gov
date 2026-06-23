@@ -1,4 +1,4 @@
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import OpportunityCategory, OpportunityVersionChangeType
 from src.db.models.opportunity_models import OpportunityVersion
 from src.services.opportunities_v1.opportunity_version import save_opportunity_version
 from tests.src.db.models.factories import (
@@ -123,3 +123,53 @@ def test_save_opportunity_version_with_prior_versions(db_session, enable_factory
     save_opportunity_version(db_session, opp)
     db_session.refresh(opp)
     assert len(opp.versions) == 3
+
+
+def test_save_opportunity_version_with_create_type(db_session, enable_factory_create):
+    """Test that CREATE change type is stored correctly"""
+    opp = OpportunityFactory.create()
+    save_opportunity_version(db_session, opp, OpportunityVersionChangeType.CREATE)
+
+    saved_opp_version = (
+        db_session.query(OpportunityVersion)
+        .where(OpportunityVersion.opportunity_id == opp.opportunity_id)
+        .all()
+    )
+
+    assert len(saved_opp_version) == 1
+    assert saved_opp_version[0].change_type == OpportunityVersionChangeType.CREATE
+
+
+def test_save_opportunity_version_with_update_type(db_session, enable_factory_create):
+    """Test that UPDATE change type is stored correctly"""
+    opp = OpportunityFactory.create()
+    save_opportunity_version(db_session, opp, OpportunityVersionChangeType.CREATE)
+
+    opp.opportunity_title = "Updated Title"
+    save_opportunity_version(db_session, opp, OpportunityVersionChangeType.UPDATE)
+
+    saved_opp_versions = (
+        db_session.query(OpportunityVersion)
+        .where(OpportunityVersion.opportunity_id == opp.opportunity_id)
+        .order_by(OpportunityVersion.created_at)
+        .all()
+    )
+
+    assert len(saved_opp_versions) == 2
+    assert saved_opp_versions[0].change_type == OpportunityVersionChangeType.CREATE
+    assert saved_opp_versions[1].change_type == OpportunityVersionChangeType.UPDATE
+
+
+def test_save_opportunity_version_defaults_to_update(db_session, enable_factory_create):
+    """Test that change_type defaults to UPDATE when not specified"""
+    opp = OpportunityFactory.create()
+    save_opportunity_version(db_session, opp)
+
+    saved_opp_version = (
+        db_session.query(OpportunityVersion)
+        .where(OpportunityVersion.opportunity_id == opp.opportunity_id)
+        .all()
+    )
+
+    assert len(saved_opp_version) == 1
+    assert saved_opp_version[0].change_type == OpportunityVersionChangeType.UPDATE
