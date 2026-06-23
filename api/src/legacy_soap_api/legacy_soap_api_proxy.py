@@ -48,11 +48,10 @@ def get_proxy_headers(
     )
     if not soap_auth:
         return filtered_headers
-    proxy_headers = {
+    return {
         S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(config, soap_auth.certificate),
         **filtered_headers,
     }
-    return proxy_headers
 
 
 def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) -> SOAPResponse:

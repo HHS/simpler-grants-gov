@@ -7,7 +7,7 @@ from grants_shared.logs.flask_logger import add_extra_data_to_current_request_lo
 from src.legacy_soap_api.legacy_soap_api_auth import (
     ENABLE_SIMPLER_ROUTE_KEY,
     MTLS_CERT_HEADER_KEY,
-    REQUEST_SOAP_ACTION_KEY,
+    SOAP_ACTION_HEADER_KEY,
     USE_SIMPLER_OVERRIDE_KEY,
     SOAPClientCertificateIsExpired,
     SOAPClientMissingCertificate,
@@ -178,7 +178,7 @@ def process_simpler_request(
             "soap_client_certificate: header check",
             extra={
                 "soap_request_headers": soap_request.headers.keys(),
-                "soap_action": soap_request.headers.get(REQUEST_SOAP_ACTION_KEY, ""),
+                "soap_action": soap_request.headers.get(SOAP_ACTION_HEADER_KEY, ""),
             },
         )
         is_legacy_only_certificate = (

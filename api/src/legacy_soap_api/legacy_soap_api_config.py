@@ -14,6 +14,14 @@ from src.util.env_config import PydanticBaseEnvConfig
 logger = logging.getLogger(__name__)
 
 
+GRANTOR_SOAP_ACTION_PATH = (
+    "https://trainingws.grants.gov/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+)
+APPLICANT_SOAP_ACTION_PATH = (
+    "https://trainingws.grants.gov/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
+)
+
+
 class SOAPOperationConfigError(Exception):
     pass
 
@@ -80,6 +88,7 @@ class SimplerSoapAPI(StrEnum):
 class SOAPOperationConfig:
     request_operation_name: str
     response_operation_name: str
+    soap_action: str
     compare_endpoints: bool = False
     always_call_simpler: bool = False
 
@@ -121,6 +130,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             key_indexes={"OpportunityDetails": "CompetitionID"},
             compare_endpoints=True,
             always_call_simpler=True,
+            soap_action=f"{APPLICANT_SOAP_ACTION_PATH}/GetOpportunityList",
             namespace_keymap={
                 "GetOpportunityListResponse": "ns2",
                 "OpportunityDetails": "ns5",
@@ -146,27 +156,32 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
         "GetApplicationZipRequest": SOAPOperationConfig(
             request_operation_name="GetApplicationZipRequest",
             response_operation_name="GetApplicationZipResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetApplicationZip",
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         ),
         "GetSubmissionListRequest": SOAPOperationConfig(
             request_operation_name="GetSubmissionListRequest",
             response_operation_name="GetSubmissionListResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionList",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         ),
         "GetSubmissionListExpandedRequest": SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         ),
         "ConfirmApplicationDeliveryRequest": SOAPOperationConfig(
             request_operation_name="ConfirmApplicationDeliveryRequest",
             response_operation_name="ConfirmApplicationDeliveryResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/ConfirmApplicationDelivery",
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
             always_call_simpler=True,
         ),
         "UpdateApplicationInfoRequest": SOAPOperationConfig(
             request_operation_name="UpdateApplicationInfoRequest",
             response_operation_name="UpdateApplicationInfoResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/UpdateApplicationInfo",
             privileges={Privilege.LEGACY_AGENCY_ASSIGNER},
         ),
     },

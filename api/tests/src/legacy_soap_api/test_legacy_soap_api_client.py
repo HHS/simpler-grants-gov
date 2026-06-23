@@ -28,9 +28,9 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerGrantorsS2SClient,
 )
 from src.legacy_soap_api.legacy_soap_api_config import (
+    GRANTOR_SOAP_ACTION_PATH,
     SimplerSoapAPI,
     SOAPOperationConfig,
-    get_soap_config,
 )
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
@@ -383,6 +383,7 @@ class TestSimplerBaseSOAPClient:
                 force_list_attributes=("OpportunityDetails",),
                 key_indexes={"OpportunityDetails": "CompetitionID"},
                 compare_endpoints=False,
+                soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
                 namespace_keymap={
                     "GetOpportunityListResponse": "ns2",
                 },
@@ -476,9 +477,10 @@ class TestSimplerSOAPGetApplicationZip:
             assert result.headers == {
                 "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
             }
 
-    def test_get_simpler_soap_response_returns_soap_action_in_header_when_included_in_request(
+    def test_get_simpler_soap_response_returns_soap_action_in_header(
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
@@ -503,13 +505,10 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
-        config = get_soap_config()
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
-            headers={
-                "Soapaction": f"{config.grants_gov_uri}{config.soap_grantors_path}/GetApplicationZip"
-            },
+            headers={},
             method="POST",
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
@@ -523,7 +522,7 @@ class TestSimplerSOAPGetApplicationZip:
             assert result.headers == {
                 "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
-                "SOAPAction": soap_request.headers.get("Soapaction"),
+                "Soapaction": client.operation_config.soap_action,
             }
 
     def test_get_simpler_soap_response_can_access_endpoint_if_certificate_user_has_privileges(
@@ -801,6 +800,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects(
@@ -901,6 +901,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects_merges_response_from_proxy_and_simpler(
@@ -1552,6 +1553,7 @@ class TestSimplerSOAPGetSubmissionList:
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects(
@@ -1650,6 +1652,7 @@ class TestSimplerSOAPGetSubmissionList:
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects_merges_response_from_proxy_and_simpler(
