@@ -19,7 +19,7 @@ const originalConsoleError = console.error;
 const buildRequest = (fields: Record<string, string>): NextRequest => {
   const formData = new FormData();
   Object.entries(fields).forEach(([key, value]) => formData.set(key, value));
-  return new NextRequest("http://simpler.grants.gov/api/newsletter/subscribe", {
+  return new NextRequest("http://fake-newsletter-host.test/api/newsletter/subscribe", {
     method: "POST",
     body: formData,
   });
@@ -29,13 +29,13 @@ const mockMailchimpResponse = (
   body: unknown,
   { ok = true, status = 200 }: { ok?: boolean; status?: number } = {},
 ) => {
-  global.fetch = jest.fn(() =>
+  (global.fetch as jest.Mock).mockImplementation(() =>
     Promise.resolve({
       ok,
       status,
       json: () => Promise.resolve(body),
     }),
-  ) as jest.Mock;
+  );
 };
 
 describe("POST /api/newsletter/subscribe", () => {
@@ -43,6 +43,7 @@ describe("POST /api/newsletter/subscribe", () => {
 
   beforeAll(() => {
     originalFetch = global.fetch;
+    global.fetch = jest.fn();
     console.error = jest.fn();
   });
 
@@ -156,9 +157,9 @@ describe("POST /api/newsletter/subscribe", () => {
   });
 
   it("returns a server error when the fetch call throws", async () => {
-    global.fetch = jest.fn(() =>
+    (global.fetch as jest.Mock).mockImplementation(() =>
       Promise.reject(new Error("network down")),
-    ) as jest.Mock;
+    );
 
     const response = await POST(
       buildRequest({ name: "Apple", email: "apple@example.com" }),
