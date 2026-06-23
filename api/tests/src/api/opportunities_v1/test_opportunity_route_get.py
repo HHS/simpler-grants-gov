@@ -1,9 +1,9 @@
 import uuid
 
+import grants_shared.util.file_util as file_util
 import pytest
 import requests
 
-import src.util.file_util as file_util
 from tests.src.api.opportunities_v1.conftest import (
     validate_opportunity,
     validate_opportunity_with_attachments,

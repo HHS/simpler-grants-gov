@@ -2070,6 +2070,7 @@ export const messages = {
       preview: "Preview",
       submitForReview: "Submit for review",
       backToEdit: "Back to Edit",
+      backToSubmissions: "Back to submissions",
     },
     submissionEdit: {
       editTitle: "Edit {applicationSubmissionNumber}",
@@ -2228,8 +2229,12 @@ export const messages = {
       heading: "Risks and Conditions",
       description:
         "Review and manage risks and conditions for application submissions",
+      pageHeading: "Recommend submissions",
+      pageDescription: "Select one or more applications to add conditions.",
+      editTitle: "Edit risks and conditions",
       addPageTitle: "Add Risk or Condition",
       addMetaDescription: "Add risk or condition to selected applications",
+      addTitle: "Add risk or condition",
       addHeading: "Add risk or condition",
       addDescription:
         "Add risk details and recommended terms or conditions for the selected applications",
@@ -2257,6 +2262,7 @@ export const messages = {
       riskSummaryLabel: "Risk summary",
       riskSummaryHint:
         "Any program or organization risks already identified at this time",
+      riskSummaryRequired: "Risk summary is required.",
       recommendedConditionLabel: "Recommended term or condition",
       recommendedConditionHint:
         "Add any recommended conditions based on the risks identified",
@@ -2266,6 +2272,9 @@ export const messages = {
       condition3: "Condition 3",
       cancelButton: "Cancel",
       saveButton: "Save",
+      savingButton: "Saving...",
+      validationError: "Please fill in all required fields before saving.",
+      saveError: "Failed to save risk. Please try again.",
       errorMessage: "Unable to load application submissions. Please try again.",
       noSelectionsMessage:
         "No applications selected. Please select applications from the Risks and Conditions page first.",

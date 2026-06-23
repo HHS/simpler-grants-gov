@@ -1,4 +1,5 @@
 import pytest
+from grants_shared.util import file_util
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import tests.src.db.models.factories as f
@@ -8,7 +9,6 @@ from src.data_migration.transformation.subtask.transform_competition import (
     transform_form_family,
     transform_open_to_applicants,
 )
-from src.util import file_util
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
     setup_competition,
