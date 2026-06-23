@@ -96,6 +96,7 @@ def _create_api_key(db_session: db.Session, user: User) -> UserApiKey:
     # against the user_api_key table by the X-API-Key auth, same as the
     # locally-seeded scanner key.
     api_key = UserApiKey(
+        api_key_id=uuid.uuid4(),
         user_id=user.user_id,
         key_name=SCANNER_API_KEY_NAME,
         key_id=_generate_unique_key_id(db_session),
