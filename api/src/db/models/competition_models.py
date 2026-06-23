@@ -6,11 +6,13 @@ from typing import TYPE_CHECKING
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from grants_shared.db.models.base import TimestampMixin
 from grants_shared.util.datetime_util import get_now_us_eastern_date
+from grants_shared.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+import src.form_schema.registry.form_template_registry as form_template_registry_module
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,
     ApplicationStatus,
@@ -28,7 +30,6 @@ from src.db.models.lookup_models import (
     LkFormType,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
-from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
@@ -238,9 +239,15 @@ class CompetitionForm(ApiSchemaTable, TimestampMixin):
     competition: Mapped[Competition] = relationship(Competition)
 
     form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id))
-    form: Mapped[Form] = relationship(Form)
 
     is_required: Mapped[bool]
+
+    @property
+    def form(self) -> Form:
+        """Return the Form from the in-memory registry."""
+        return form_template_registry_module.form_template_registry.get_by_id_and_major_version(
+            form_template_registry_module.FormTemplateKey(self.form_id, 1)
+        )
 
 
 class Application(ApiSchemaTable, TimestampMixin):

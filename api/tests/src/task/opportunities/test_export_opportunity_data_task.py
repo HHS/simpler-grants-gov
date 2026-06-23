@@ -1,9 +1,9 @@
 import csv
 import json
 
+import grants_shared.util.file_util as file_util
 import pytest
 
-import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata

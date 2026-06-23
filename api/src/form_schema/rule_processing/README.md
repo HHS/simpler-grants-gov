@@ -96,6 +96,7 @@ rules currently implemented:
 * `competition_title` - from the competition
 * `sum_monetary` - calculated based on other fields in the JSON, see Monetary Summation section below for further details
 * `multiply_by_percentage` - a monetary amount multiplied by a whole-number percentage, see Multiply by Percentage section below for further details
+* `subtract_monetary` - calculated based on other fields in the JSON, see Monetary Subtraction section below for further details
 
 For post-population, this rule group is `gg_post_population` with the following
 rules currently implemented:
@@ -176,6 +177,25 @@ A few important details:
 * A missing `amount` or `percentage` is treated as zero, producing `"0.00"`.
 * Invalid data (a non-string amount, a non-integer percentage, or an unparseable
   value) raises a validation error rather than populating a bogus value.
+
+## Monetary Subtraction
+We support the ability to subtract monetary amounts from each other. This rule
+requires that you specify which fields to subtract like so:
+```json
+{
+  "my_field": {
+    "gg_pre_population": {
+      "rule": "subtract_monetary",
+      "fields": ["@THIS.a", "@THIS.b"]
+    }
+  }
+}
+```
+
+This mirrors `sum_monetary`, but every subsequent field is subtracted from the first. 
+The example above produces `a - b`, and fields of `["a", "b", "c"]` would produce `a - b - c`.
+
+For details on how the fields parameter works, see the Fields section below.
 
 ## Fields
 Some rules like our `sum_monetary` rule allow you to specify fields that

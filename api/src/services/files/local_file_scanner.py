@@ -7,12 +7,12 @@ from pathlib import Path
 from typing import Any
 
 import grants_shared.adapters.db as db
+import grants_shared.util.file_util as file_util
+from grants_shared.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
+from grants_shared.adapters.aws.s3_adapter import S3Config
 from pydantic import Field
 from sqlalchemy import select
 
-import src.util.file_util as file_util
-from src.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
-from src.adapters.aws.s3_adapter import S3Config
 from src.constants.lookup_constants import FileScanStatus
 from src.db.models.file_upload_models import PendingFile
 from src.db.models.user_models import User

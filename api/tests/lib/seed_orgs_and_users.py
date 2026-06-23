@@ -4,6 +4,7 @@ import zipfile
 
 import grants_shared.adapters.db as db
 from faker import Faker
+from grants_shared.util import file_util
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
@@ -32,7 +33,6 @@ from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
 )
-from src.util import file_util
 from tests.lib.legacy_user_test_utils import create_legacy_user_with_status
 from tests.lib.seed_data_utils import CompetitionContainer, UserBuilder
 

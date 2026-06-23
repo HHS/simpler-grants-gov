@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
 import { GridContainer } from "@trussworks/react-uswds";
 
-export default function SendyDisclaimer() {
-  const t = useTranslations("SendyDisclaimer");
+export default function NewsletterDisclaimer() {
+  const t = useTranslations("NewsletterDisclaimer");
 
   return (
     <GridContainer className="padding-y-3 border-top-2px border-base-lightest margin-top-4 tablet-lg:margin-top-6">

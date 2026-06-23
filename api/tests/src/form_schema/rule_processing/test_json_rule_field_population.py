@@ -229,6 +229,87 @@ def test_handle_field_population_pre_population_multiply_by_percentage(
 
 
 @pytest.mark.parametrize(
+    "rule,json_data,expected_value",
+    [
+        # Specifying no fields will get the default of 0
+        ({"rule": "subtract_monetary", "fields": []}, {}, "0.00"),
+        # Specifying fields that aren't set will get the default of 0
+        ({"rule": "subtract_monetary", "fields": ["x", "y", "z"]}, {}, "0.00"),
+        # Can subtract the second field from the first
+        ({"rule": "subtract_monetary", "fields": ["x", "y"]}, {"x": "5.43", "y": "2.61"}, "2.82"),
+        # Every subsequent field is subtracted from the first
+        (
+            {"rule": "subtract_monetary", "fields": ["x", "y", "z"]},
+            {"x": "10.00", "y": "2.50", "z": "1.25"},
+            "6.25",
+        ),
+        # A missing first field (minuend) is treated as 0.00
+        ({"rule": "subtract_monetary", "fields": ["x", "y"]}, {"y": "5.00"}, "-5.00"),
+        # A missing subsequent field (subtrahend) is treated as 0.00
+        ({"rule": "subtract_monetary", "fields": ["x", "y"]}, {"x": "5.00"}, "5.00"),
+        # Can fetch and subtract nested fields
+        (
+            {"rule": "subtract_monetary", "fields": ["x.nested_field", "y.other_field.z"]},
+            {"x": {"nested_field": "10.23"}, "y": {"other_field": {"z": "4"}}},
+            "6.23",
+        ),
+        # Can fetch from arrays, array values for a single field are summed first
+        (
+            {"rule": "subtract_monetary", "fields": ["x[*].z", "y"]},
+            {"x": [{"z": "10000.11"}, {"z": "200.33"}], "y": "56.70"},
+            "10143.74",
+        ),
+        # Can fetch from relative paths
+        (
+            {"rule": "subtract_monetary", "fields": ["@THIS.x", "@THIS.y"]},
+            {"x": "101.01", "y": "0.23"},
+            "100.78",
+        ),
+        # Result can be negative
+        (
+            {"rule": "subtract_monetary", "fields": ["x", "y"]},
+            {"x": "10.01", "y": "21.50"},
+            "-11.49",
+        ),
+        # Can handle negative inputs (subtracting a negative adds)
+        (
+            {"rule": "subtract_monetary", "fields": ["x", "y"]},
+            {"x": "10.01", "y": "-21.50"},
+            "31.51",
+        ),
+        # Subtracting equal values results in zero
+        (
+            {"rule": "subtract_monetary", "fields": ["x", "y"]},
+            {"x": "250.00", "y": "250.00"},
+            "0.00",
+        ),
+        # Values will be quantized
+        (
+            {"rule": "subtract_monetary", "fields": ["x", "y"]},
+            {"x": "456.560000", "y": "123.010000"},
+            "333.55",
+        ),
+        # Handles the max range of a monetary field
+        (
+            {"rule": "subtract_monetary", "fields": ["x", "y"]},
+            {"x": "999999999999.99", "y": "0.01"},
+            "999999999999.98",
+        ),
+    ],
+)
+def test_handle_field_population_pre_population_subtract_monetary(
+    rule, json_data, expected_value, enable_factory_create
+):
+    context = setup_context(json_data, {"my_field": rule})
+    handle_field_population(
+        context,
+        JsonRule(handler="gg_pre_population", rule=rule, path=["my_field"]),
+        PRE_POPULATION_MAPPER,
+    )
+    assert context.json_data["my_field"] == expected_value
+
+
+@pytest.mark.parametrize(
     "rule,json_data",
     [
         # Non-string amount
@@ -263,6 +344,28 @@ def test_handle_field_population_pre_population_multiply_by_percentage_invalid(
         PRE_POPULATION_MAPPER,
     )
     assert "my_field" not in context.json_data
+
+
+@pytest.mark.parametrize(
+    "rule,json_data",
+    [
+        ({"rule": "subtract_monetary", "fields": ["x"]}, {"x": 100}),
+        ({"rule": "subtract_monetary", "fields": ["x"]}, {"x": {"y": "200.00"}}),
+        ({"rule": "subtract_monetary", "fields": ["x"]}, {"x": True}),
+        ({"rule": "subtract_monetary", "fields": ["x"]}, {"x": "hello"}),
+    ],
+)
+def test_handle_field_population_pre_population_subtract_monetary_not_a_monetary_amount(
+    rule, json_data, enable_factory_create
+):
+    # Non-monetary amounts will be skipped resulting in 0.00 for all of these scenarios.
+    context = setup_context(json_data, {"my_field": rule})
+    handle_field_population(
+        context,
+        JsonRule(handler="gg_pre_population", rule=rule, path=["my_field"]),
+        PRE_POPULATION_MAPPER,
+    )
+    assert context.json_data["my_field"] == "0.00"
 
 
 @pytest.mark.parametrize(

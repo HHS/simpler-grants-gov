@@ -1,4 +1,5 @@
 import pytest
+from grants_shared.util import file_util
 
 import tests.src.db.models.factories as f
 from src.data_migration.transformation import transform_constants
@@ -6,7 +7,6 @@ from src.data_migration.transformation.subtask.transform_opportunity_attachment 
     TransformOpportunityAttachment,
 )
 from src.services.opportunity_attachments import attachment_util
-from src.util import file_util
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
     setup_opportunity_attachment,
