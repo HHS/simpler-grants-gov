@@ -95,7 +95,9 @@ def _create_api_key(db_session: db.Session, user: User) -> UserApiKey:
     # Direct insert (no AWS API Gateway import): this key is validated only
     # against the user_api_key table by the X-API-Key auth, same as the
     # locally-seeded scanner key.
-    get_auth_handler(db_session).create_api_key(user.user_id, SCANNER_API_KEY_NAME, _generate_unique_key_id(db_session))
+    get_auth_handler(db_session).create_api_key(
+        user.user_id, SCANNER_API_KEY_NAME, _generate_unique_key_id(db_session)
+    )
     logger.info(
         "Registered file-scan scanner API key",
         extra={"user_id": user.user_id, "api_key_id": api_key.api_key_id},
