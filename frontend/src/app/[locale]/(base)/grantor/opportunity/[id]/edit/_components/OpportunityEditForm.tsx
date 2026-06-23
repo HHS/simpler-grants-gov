@@ -10,7 +10,6 @@ import {
   eligbilityValueToGroup,
   ELIGIBILITY_OPTIONS,
   fundingOptions,
-  OPPORTUNITY_CATEGORY_OPTIONS,
 } from "src/constants/opportunity";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 import { getNumericAmountFromString } from "src/utils/formatCurrencyUtil";

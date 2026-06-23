@@ -74,8 +74,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     return <UnauthorizedMessage />;
   }
 
-  const primaryAssistanceListing =
-    opportunityData.opportunity_assistance_listings[0];
   const activeSummary =
     opportunityData.forecast_summary ??
     opportunityData.non_forecast_summary ??
