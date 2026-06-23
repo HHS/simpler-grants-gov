@@ -21,4 +21,6 @@ module "clamav" {
 
   vpc_id             = data.aws_vpc.network.id
   private_subnet_ids = data.aws_subnets.private.ids
+
+  newrelic_entity_guid = local.service_config.newrelic_host_entity_guid
 }

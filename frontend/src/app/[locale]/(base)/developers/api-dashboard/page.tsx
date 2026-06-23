@@ -1,6 +1,8 @@
 import ApiKeyTable from "src/app/[locale]/(base)/developers/api-dashboard/_components/ApiKeyTable";
 import { CreateApiKeyButton } from "src/app/[locale]/(base)/developers/api-dashboard/_components/CreateApiKeyButton";
-import { fetchApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
+import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
+import { getSession } from "src/services/auth/session";
+import { handleListApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
@@ -13,10 +15,15 @@ export const revalidate = 0;
 export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "ApiDashboard" });
-  let apiKeys;
+  let apiKeyResponse;
+
+  const session = await getSession();
+  if (!session?.token) {
+    return <Unauthenticated />;
+  }
 
   try {
-    apiKeys = await fetchApiKeys();
+    apiKeyResponse = await handleListApiKeys(session.user_id);
   } catch (e) {
     console.error("Failed to fetch API keys:", e);
     return (
@@ -36,7 +43,7 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
         <CreateApiKeyButton />
       </div>
 
-      <ApiKeyTable apiKeys={apiKeys} />
+      <ApiKeyTable apiKeys={apiKeyResponse.data} />
     </div>
   );
 }

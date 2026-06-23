@@ -2,6 +2,8 @@ import uuid
 from collections.abc import Sequence
 
 import grants_shared.adapters.db as db
+from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
+from grants_shared.pagination.paginator import Paginator
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -9,15 +11,13 @@ from sqlalchemy.orm import selectinload
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import Application, Competition, CompetitionForm, Form
+from src.db.models.competition_models import Application, Competition
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
     OpportunitySummary,
 )
 from src.db.models.user_models import User
-from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
-from src.pagination.paginator import Paginator
 from src.search.search_models import BoolSearchFilter
 from src.services.opportunities_grantor_v1.get_agency import get_agency
 from src.services.service_utils import apply_sorting
@@ -73,9 +73,7 @@ def list_opportunities_with_filters(
             ),
             selectinload(Opportunity.opportunity_attachments),
             selectinload(Opportunity.competitions).options(
-                selectinload(Competition.competition_forms)
-                .selectinload(CompetitionForm.form)
-                .selectinload(Form.form_instruction),
+                selectinload(Competition.competition_forms),
                 selectinload(Competition.competition_instructions),
                 selectinload(Competition.opportunity_assistance_listing),
                 selectinload(Competition.link_competition_open_to_applicant),

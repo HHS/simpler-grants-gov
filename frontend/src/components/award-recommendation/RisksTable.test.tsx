@@ -8,6 +8,17 @@ jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+  }),
+}));
+
 jest.mock("@trussworks/react-uswds", () => ({
   ...jest.requireActual<typeof import("@trussworks/react-uswds")>(
     "@trussworks/react-uswds",

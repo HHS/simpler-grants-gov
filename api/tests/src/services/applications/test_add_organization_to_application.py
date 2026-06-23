@@ -19,7 +19,6 @@ from tests.src.db.models.factories import (
     ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OrganizationFactory,
     OrganizationUserFactory,
     OrganizationUserRoleFactory,
@@ -28,7 +27,9 @@ from tests.src.db.models.factories import (
 )
 
 
-def test_add_organization_to_application_success(enable_factory_create, db_session):
+def test_add_organization_to_application_success(
+    enable_factory_create, db_session, create_test_form
+):
     """Test successfully adding an organization to an application."""
     # Create user with proper privileges
     user = UserFactory.create()
@@ -43,12 +44,12 @@ def test_add_organization_to_application_success(enable_factory_create, db_sessi
     )
 
     # Create a form with simple schema for testing pre-population
-    form = FormFactory.create(
+    form = create_test_form(
         form_json_schema={
             "type": "object",
             "properties": {"name": {"type": "string"}},
             "required": ["name"],
-        }
+        },
     )
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
@@ -354,7 +355,9 @@ def test_add_organization_removes_multiple_application_users(enable_factory_crea
     assert updated_application.organization_id == organization.organization_id
 
 
-def test_add_organization_triggers_form_prepopulation(enable_factory_create, db_session):
+def test_add_organization_triggers_form_prepopulation(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that adding organization triggers pre-population on application forms."""
     user = UserFactory.create()
 
@@ -364,12 +367,12 @@ def test_add_organization_triggers_form_prepopulation(enable_factory_create, db_
     )
 
     # Create a form with simple schema
-    form = FormFactory.create(
+    form = create_test_form(
         form_json_schema={
             "type": "object",
             "properties": {"test_field": {"type": "string"}},
             "required": ["test_field"],
-        }
+        },
     )
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
@@ -455,7 +458,7 @@ def test_add_organization_preserves_intends_to_add_organization(enable_factory_c
 
 
 def test_add_organization_repopulates_application_response_from_org(
-    enable_factory_create, db_session
+    enable_factory_create, db_session, create_test_form
 ):
     """Test that adding an organization repopulates application_response with org data (e.g., UEI)."""
 
@@ -467,16 +470,12 @@ def test_add_organization_repopulates_application_response_from_org(
     )
 
     # Create form schema that includes sam_uei
-    form = FormFactory.create(
+    form = create_test_form(
         form_json_schema={
             "type": "object",
-            "properties": {
-                "sam_uei": {"type": "string"},
-            },
+            "properties": {"sam_uei": {"type": "string"}},
         },
-        form_rule_schema={
-            "sam_uei": {"gg_pre_population": {"rule": "uei"}},
-        },
+        form_rule_schema={"sam_uei": {"gg_pre_population": {"rule": "uei"}}},
     )
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 

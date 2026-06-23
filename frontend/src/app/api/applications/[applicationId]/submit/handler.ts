@@ -1,5 +1,4 @@
-import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import { ApiRequestError, readError } from "src/errors";
 import { handleSubmitApplication } from "src/services/fetch/fetchers/applicationFetcher";
 
 export const submitApplicationHandler = async (
@@ -7,10 +6,6 @@ export const submitApplicationHandler = async (
   { params }: { params: Promise<{ applicationId: string }> },
 ) => {
   try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      throw new UnauthorizedError("No active session submit application");
-    }
     const applicationId = (await params).applicationId;
 
     const response = await handleSubmitApplication(applicationId);

@@ -1,10 +1,10 @@
 from uuid import UUID
 
 from grants_shared.adapters import db
+from grants_shared.api.route_utils import raise_flask_error
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from src.api.route_utils import raise_flask_error
 from src.db.models.user_models import UserSavedSearch
 
 
