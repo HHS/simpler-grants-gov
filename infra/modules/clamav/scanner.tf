@@ -56,7 +56,7 @@ data "aws_iam_policy_document" "scanner_s3" {
     ]
     resources = [
       "${var.s3_bucket_arn}/${var.scanned_prefix}*",
-      "${var.s3_bucket_arn}/${var.failed_prefix}*",
+      "${var.s3_bucket_arn}/${var.infected_prefix}*",
       "${var.s3_bucket_arn}/${var.unscanned_prefix}*",
     ]
   }
@@ -66,6 +66,13 @@ resource "aws_iam_role_policy" "scanner_s3" {
   name   = "${local.scanner_name}-s3"
   role   = aws_iam_role.scanner.id
   policy = data.aws_iam_policy_document.scanner_s3.json
+}
+
+# Lets the scanner upsert the DynamoDB scan-cache record (in_progress, then the
+# terminal status). Reuses the write policy exported by the file-scan-cache module.
+resource "aws_iam_role_policy_attachment" "scanner_dynamodb" {
+  role       = aws_iam_role.scanner.name
+  policy_arn = var.dynamodb_write_policy_arn
 }
 
 # Dead-letter queue for scanner invocations that fail after Lambda's
@@ -120,7 +127,7 @@ resource "aws_cloudwatch_log_group" "scanner" {
 }
 
 resource "aws_lambda_function" "scanner" {
-  # checkov:skip=CKV_AWS_173:Env vars contain no secrets
+  # checkov:skip=CKV_AWS_173:FILE_SCAN_API_KEY is the only secret; Lambda encrypts env vars at rest with the AWS-managed key, which is sufficient here
   # checkov:skip=CKV_AWS_272:Code signing not required for this scaffold
 
   function_name = local.scanner_name
@@ -158,11 +165,14 @@ resource "aws_lambda_function" "scanner" {
 
   environment {
     variables = {
-      CLAMAV_DB_DIR       = local.efs_mount_path
-      UNSCANNED_PREFIX    = var.unscanned_prefix
-      SCANNED_PREFIX      = var.scanned_prefix
-      FAILED_PREFIX       = var.failed_prefix
-      MAX_FILE_SIZE_BYTES = tostring(var.scanner_max_file_size_bytes)
+      CLAMAV_DB_DIR              = local.efs_mount_path
+      UNSCANNED_PREFIX           = var.unscanned_prefix
+      SCANNED_PREFIX             = var.scanned_prefix
+      INFECTED_PREFIX            = var.infected_prefix
+      MAX_FILE_SIZE_BYTES        = tostring(var.scanner_max_file_size_bytes)
+      API_BASE_URL               = var.api_base_url
+      FILE_SCAN_API_KEY          = var.file_scan_api_key
+      FILE_SCAN_CACHE_TABLE_NAME = var.file_scan_cache_table_name
     }
   }
 

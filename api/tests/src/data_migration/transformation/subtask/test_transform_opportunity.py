@@ -1,7 +1,7 @@
 import uuid
 
 import pytest
-from grants_shared.util import datetime_util
+from grants_shared.util import datetime_util, file_util
 from sqlalchemy import update
 
 import src.data_migration.transformation.transform_constants as transform_constants
@@ -15,7 +15,6 @@ from src.services.competition_alpha.competition_instruction_util import (
     get_s3_competition_instruction_path,
 )
 from src.services.opportunity_attachments import attachment_util
-from src.util import file_util
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
     setup_opportunity,

@@ -6,7 +6,7 @@ workflow logic.
 import logging
 import uuid
 
-from grants_shared.aws.ses_adapter import send_email
+from grants_shared.adapters.aws.ses_adapter import send_email
 
 from src.db.models.user_models import User
 from src.workflow.event.state_machine_event import StateMachineEvent

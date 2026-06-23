@@ -5,7 +5,7 @@ import botocore.client
 from botocore.exceptions import ClientError
 from pydantic import BaseModel, Field
 
-from grants_shared.aws.aws_session import get_boto_session, is_local_aws
+from grants_shared.adapters.aws.aws_session import get_boto_session, is_local_aws
 from grants_shared.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)

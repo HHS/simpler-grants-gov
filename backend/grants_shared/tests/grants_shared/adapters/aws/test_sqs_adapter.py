@@ -7,7 +7,7 @@ import pytest
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 
-from src.adapters.aws.sqs_adapter import (
+from grants_shared.adapters.aws.sqs_adapter import (
     SQSClient,
     SQSConfig,
     SQSDeleteBatchResponse,
@@ -35,23 +35,28 @@ class TestSQSConfig:
 class TestGetBotoSQSClient:
     """Tests for the SQS boto3 client factory function."""
 
-    @patch("src.adapters.aws.sqs_adapter.get_boto_session")
-    def test_uses_default_session(self, mock_get_session):
+    @patch("grants_shared.adapters.aws.sqs_adapter.get_boto_session")
+    def test_uses_default_session(self, mock_get_session, workflow_sqs_queue):
         """Verify that the factory function uses the default AWS session when none is provided."""
         mock_session = Mock()
         mock_get_session.return_value = mock_session
         get_boto_sqs_client()
         mock_get_session.assert_called_once()
-        mock_session.client.assert_called_once_with(
-            "sqs", region_name="us-east-1", endpoint_url=SQSConfig().aws_sqs_endpoint_url
-        )
+        mock_session.client.assert_called_once_with("sqs", region_name="us-east-1")
 
-    def test_uses_provided_session(self):
+    def test_uses_provided_session(self, workflow_sqs_queue):
         """Verify that the factory function uses a specifically provided AWS session."""
         mock_session = Mock()
         get_boto_sqs_client(session=mock_session)
+        mock_session.client.assert_called_once_with("sqs", region_name="us-east-1")
+
+    def test_uses_local_when_endpoint_url_set(self, workflow_sqs_queue):
+        """Verify the case when the endpoint url is set"""
+        mock_session = Mock()
+        config = SQSConfig(AWS_SQS_ENDPOINT_URL="http://example:8000")
+        get_boto_sqs_client(session=mock_session, sqs_config=config)
         mock_session.client.assert_called_once_with(
-            "sqs", region_name="us-east-1", endpoint_url=SQSConfig().aws_sqs_endpoint_url
+            "sqs", region_name="us-east-1", endpoint_url=config.aws_sqs_endpoint_url
         )
 
 

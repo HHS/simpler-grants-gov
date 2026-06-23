@@ -1,8 +1,8 @@
 import csv
 
+import grants_shared.util.file_util as file_util
 import pytest
 
-import src.util.file_util as file_util
 from src.db.models.lookup_models import LkOpportunityCategory, LkOpportunityStatus
 from src.db.models.user_models import User
 from src.task.analytics.create_analytics_db_csvs import (
