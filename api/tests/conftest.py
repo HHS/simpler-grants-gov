@@ -12,6 +12,7 @@ import pytest
 from apiflask import APIFlask
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from grants_shared.adapters.aws import S3Config
 from grants_shared.util.local import load_local_env_vars
 from moto.core import DEFAULT_ACCOUNT_ID
 from moto.ses.models import ses_backends
@@ -21,7 +22,6 @@ import src.app as app_entry
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
 from src.adapters import search
-from src.adapters.aws import S3Config
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.adapters.search import SearchClient
 from src.auth.api_jwt_auth import create_jwt_for_user
@@ -460,7 +460,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.delenv("AWS_SQS_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("AWS_DYNAMODB_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("CDN_URL", raising=False)
-    monkeypatch.setattr("src.adapters.aws.aws_session._aws_config", None)
+    monkeypatch.setattr("grants_shared.adapters.aws.aws_session._aws_config", None)
 
 
 @pytest.fixture

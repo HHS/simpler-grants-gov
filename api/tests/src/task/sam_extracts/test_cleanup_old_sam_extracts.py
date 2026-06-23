@@ -142,7 +142,7 @@ class TestCleanupOldSamExtractsTask(BaseTestClass):
         assert old_files[1] == old_file3  # 55 days ago
         assert old_files[2] == old_file2  # 50 days ago
 
-    @patch("src.util.file_util.delete_file")
+    @patch("grants_shared.util.file_util.delete_file")
     def test_cleanup_file_success(self, mock_delete_file, task, db_session):
         """Test successfully cleaning up a single file"""
         # Create an old file
@@ -165,7 +165,7 @@ class TestCleanupOldSamExtractsTask(BaseTestClass):
         db_session.refresh(old_file)
         assert old_file.processing_status == SamGovProcessingStatus.DELETED
 
-    @patch("src.util.file_util.delete_file")
+    @patch("grants_shared.util.file_util.delete_file")
     def test_cleanup_file_s3_error(self, mock_delete_file, task, db_session):
         """Test cleanup when S3 deletion fails"""
         # Create an old file
@@ -203,7 +203,7 @@ class TestCleanupOldSamExtractsTask(BaseTestClass):
         # Verify no metrics were incremented
         task.increment.assert_not_called()
 
-    @patch("src.util.file_util.delete_file")
+    @patch("grants_shared.util.file_util.delete_file")
     def test_run_task_with_files_to_cleanup(self, mock_delete_file, task, db_session):
         """Test running the task with files that need cleanup"""
         # Create old files
@@ -239,7 +239,7 @@ class TestCleanupOldSamExtractsTask(BaseTestClass):
         task.increment.assert_called_with(task.Metrics.FILES_DELETED_COUNT)
         assert task.increment.call_count == 2
 
-    @patch("src.util.file_util.delete_file")
+    @patch("grants_shared.util.file_util.delete_file")
     def test_run_task_with_mixed_success_and_failure(self, mock_delete_file, task, db_session):
         """Test running the task fails fast when any file cleanup fails"""
         # Create old files
