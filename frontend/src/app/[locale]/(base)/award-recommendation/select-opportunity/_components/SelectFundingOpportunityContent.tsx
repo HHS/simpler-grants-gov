@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Table } from "@trussworks/react-uswds";
 
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { createAwardRecommendationAction } from "../actions";
 
 type SelectFundingOpportunityContentProps = {
   fundingOpportunities: BaseOpportunity[];
@@ -16,16 +18,24 @@ export const SelectFundingOpportunityContent = ({
 }: SelectFundingOpportunityContentProps) => {
   const t = useTranslations("AwardRecommendationSelectFundingOpportunity");
   const router = useRouter();
+  const [creatingOpportunityId, setCreatingOpportunityId] = useState<string | null>(null);
 
   const handleCancel = () => {
     router.push("/");
   };
 
-  const handleCreateAwardRecommendation = (fundingOpportunityId: string) => {
-    router.push(
-      `/award-recommendations/create?fundingOpportunityId=${fundingOpportunityId}`,
-    );
-  };
+const handleCreateAwardRecommendation = async (fundingOpportunityId: string) => {
+  setCreatingOpportunityId(fundingOpportunityId);
+
+  try {
+    const { awardRecommendationId } =
+      await createAwardRecommendationAction(fundingOpportunityId);
+
+    router.push(`/award-recommendation/${awardRecommendationId}/edit`);
+  } finally {
+    setCreatingOpportunityId(null);
+  }
+};
 
   return (
     <>
@@ -45,33 +55,39 @@ export const SelectFundingOpportunityContent = ({
           </tr>
         </thead>
         <tbody>
-          {fundingOpportunities.map((fundingOpportunity) => (
-            <tr key={fundingOpportunity.opportunity_id}>
-              <td>
-                <Link
-                  href={`/funding-opportunities/${fundingOpportunity.opportunity_id}`}
-                  className="usa-link"
-                >
-                  {fundingOpportunity.opportunity_number}
-                </Link>
-              </td>
-              <td>{fundingOpportunity.opportunity_title}</td>
-              <td>0</td>
-              <td>
-                <Button
-                  type="button"
-                  className="usa-button--outline margin-y-0"
-                  onClick={() =>
-                    handleCreateAwardRecommendation(
-                      fundingOpportunity.opportunity_id,
-                    )
-                  }
-                >
-                  {t("startButtonText")} <span aria-hidden="true">→</span>
-                </Button>
-              </td>
-            </tr>
-          ))}
+          {fundingOpportunities.map((fundingOpportunity) => {
+            const isCreating =
+              creatingOpportunityId === fundingOpportunity.opportunity_id;
+
+            return (
+              <tr key={fundingOpportunity.opportunity_id}>
+                <td>
+                  <Link
+                    href={`/funding-opportunities/${fundingOpportunity.opportunity_id}`}
+                    className="usa-link"
+                  >
+                    {fundingOpportunity.opportunity_number}
+                  </Link>
+                </td>
+                <td>{fundingOpportunity.opportunity_title}</td>
+                <td>{fundingOpportunity.submitted_application_count ?? 0}</td>
+                <td>
+                  <Button
+                    type="button"
+                    className="usa-button--outline margin-y-0"
+                    disabled={isCreating}
+                    onClick={() =>
+                      handleCreateAwardRecommendation(
+                        fundingOpportunity.opportunity_id,
+                      )
+                    }
+                  >
+                    {t("startButtonText")} <span aria-hidden="true">→</span>
+                  </Button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </Table>
 

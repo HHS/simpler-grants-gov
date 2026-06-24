@@ -2478,6 +2478,7 @@ export const messages = {
     columns: {
       fundingOpportunityNumber: "Funding opp #",
       fundingOpportunityName: "Funding opp name",
+      submittedApplications: "Submitted applications",
       action: "Action"
     }
   },

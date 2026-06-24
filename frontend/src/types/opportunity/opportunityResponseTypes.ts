@@ -113,7 +113,7 @@ export interface BaseOpportunity extends MinimalOpportunity {
   is_draft: boolean;
   is_simpler_grants_opportunity: boolean | null;
   saved_to_organizations?: SavedToOrganization[];
-  competitions?: Competition[] | null;
+  submitted_application_count: number;
 }
 
 export interface OpportunityDetail extends BaseOpportunity {
