@@ -1,17 +1,20 @@
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
+import { ReactNode } from "react";
 
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type OpportunityDetailsHeaderProps = {
   opportunityData: GrantorOpportunityDetail;
   locale: string;
+  children?: ReactNode;
 };
 
 export function OpportunityDetailsHeader({
   opportunityData,
   locale,
+  children,
 }: OpportunityDetailsHeaderProps) {
   const t = useTranslations("OpportunityDetailsHeader");
 
@@ -40,37 +43,45 @@ export function OpportunityDetailsHeader({
   return (
     <section className="bg-base-lightest padding-y-6">
       <div className="grid-container">
-        <h1 className="margin-0 font-heading-2xl margin-bottom-2">
-          {t("opportunityNumber", { number: opportunityNumber })}
-        </h1>
-        <p className="margin-0 font-sans-md line-height-sans-5 margin-bottom-1">
-          <span className="text-bold">{t("title")}</span> {title || "--"}
-        </p>
-        <p className="margin-0 font-sans-md line-height-sans-5 margin-bottom-2">
-          <span className="text-bold">{t("agency")}</span> {agency || "--"}
-          {subAgency ? (
-            <>
-              {" | "}
-              <span className="text-bold">{t("subAgency")}</span> {subAgency}
-            </>
-          ) : null}
-        </p>
-        <div className="display-flex flex-align-center gap-1">
-          {opportunityData.is_draft && (
-            <span className="display-inline-flex flex-align-center bg-accent-warm text-ink padding-y-05 padding-x-1 radius-sm margin-right-1">
-              <USWDSIcon
-                name="schedule"
-                className="usa-icon width-2 height-2 margin-right-05"
-                aria-hidden="true"
-              />
-              {t("draft")}
-            </span>
-          )}
-          {lastUpdated && (
-            <span className="font-sans-md line-height-sans-5">
-              <span className="text-bold">{t("lastUpdated")}</span>{" "}
-              {lastUpdated}
-            </span>
+        <div className="display-flex flex-justify">
+          <div className="flex-1">
+            <h1 className="margin-0 font-heading-2xl margin-bottom-2">
+              {t("opportunityNumber", { number: opportunityNumber })}
+            </h1>
+            <p className="margin-0 font-sans-md line-height-sans-5 margin-bottom-1">
+              <span className="text-bold">{t("title")}</span> {title || "--"}
+            </p>
+            <p className="margin-0 font-sans-md line-height-sans-5 margin-bottom-2">
+              <span className="text-bold">{t("agency")}</span> {agency || "--"}
+              {subAgency ? (
+                <>
+                  {" | "}
+                  <span className="text-bold">{t("subAgency")}</span>{" "}
+                  {subAgency}
+                </>
+              ) : null}
+            </p>
+            <div className="display-flex flex-align-center gap-1">
+              {opportunityData.is_draft && (
+                <span className="display-inline-flex flex-align-center bg-accent-warm text-ink padding-y-05 padding-x-1 radius-sm margin-right-1">
+                  <USWDSIcon
+                    name="schedule"
+                    className="usa-icon width-2 height-2 margin-right-05"
+                    aria-hidden="true"
+                  />
+                  {t("draft")}
+                </span>
+              )}
+              {lastUpdated && (
+                <span className="font-sans-md line-height-sans-5">
+                  <span className="text-bold">{t("lastUpdated")}</span>{" "}
+                  {lastUpdated}
+                </span>
+              )}
+            </div>
+          </div>
+          {children && (
+            <div className="display-flex flex-align-end gap-1">{children}</div>
           )}
         </div>
       </div>
