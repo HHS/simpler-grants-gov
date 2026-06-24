@@ -19,8 +19,8 @@ import {
   FUNDING_DETAILS_FIELD_DEFINITIONS,
 } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
 import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixtures/opportunity-pages-fill-data";
-import { verifyOpportunityInSearchByTitleAndNumber } from "tests/e2e/opportunity/search-opportunity-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
+import { verifyOpportunityInSearchByTitleAndNumber } from "tests/e2e/search/searchSpecUtil";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import {
