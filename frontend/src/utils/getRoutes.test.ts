@@ -25,6 +25,7 @@ describe("getNextRoutes", () => {
       "/(base)/grantor/opportunities",
       "/(base)/grantor/opportunity/1/competition",
       "/(base)/grantor/opportunity/1/edit",
+      "/(base)/grantor/opportunity/1/overview",
       "/(base)/login",
       "/(base)/maintenance",
       "/(base)/newsletter/confirmation",

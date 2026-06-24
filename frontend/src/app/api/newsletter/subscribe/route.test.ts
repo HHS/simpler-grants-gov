@@ -14,7 +14,9 @@ jest.mock("src/constants/environments", () => ({
   },
 }));
 
-const originalConsoleError = console.error;
+jest.mock("src/services/logger/simplerLogger", () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+}));
 
 const buildRequest = (fields: Record<string, string>): NextRequest => {
   const formData = new FormData();
@@ -47,14 +49,12 @@ describe("POST /api/newsletter/subscribe", () => {
   beforeAll(() => {
     originalFetch = global.fetch;
     global.fetch = jest.fn();
-    console.error = jest.fn();
   });
 
   afterEach(() => jest.clearAllMocks());
 
   afterAll(() => {
     global.fetch = originalFetch;
-    console.error = originalConsoleError;
   });
 
   it("subscribes a valid user and calls Mailchimp with the expected request", async () => {
@@ -120,6 +120,72 @@ describe("POST /api/newsletter/subscribe", () => {
     });
   });
 
+  it("returns invalidEmail when Mailchimp rejects the email as fake or invalid", async () => {
+    mockMailchimpResponse({
+      total_created: 0,
+      total_updated: 0,
+      error_count: 1,
+      errors: [
+        {
+          email_address: "apple@example.com",
+          error:
+            "apple@example.com looks fake or invalid, please enter a real email address.",
+          error_code: "ERROR_GENERIC",
+        },
+      ],
+    });
+
+    const response = await POST(
+      buildRequest({ name: "Apple", email: "apple@example.com" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: false,
+      errorCode: "invalidEmail",
+    });
+  });
+
+  it("returns tooManyRequests when Mailchimp reports too many recent signups", async () => {
+    mockMailchimpResponse({
+      total_created: 0,
+      total_updated: 0,
+      error_count: 1,
+      errors: [
+        {
+          email_address: "apple@example.com",
+          error:
+            "apple@example.com has signed up for a lot of lists very recently; we're not allowing more signups for now.",
+          error_code: "ERROR_TOO_MANY_RECENT_SIGNUPS",
+        },
+      ],
+    });
+
+    const response = await POST(
+      buildRequest({ name: "Apple", email: "apple@example.com" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: false,
+      errorCode: "tooManyRequests",
+    });
+  });
+
+  it("returns tooManyRequests when Mailchimp responds with HTTP 429", async () => {
+    mockMailchimpResponse({}, { ok: false, status: 429 });
+
+    const response = await POST(
+      buildRequest({ name: "Apple", email: "apple@example.com" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: false,
+      errorCode: "tooManyRequests",
+    });
+  });
+
   it("returns a server error for other Mailchimp member errors", async () => {
     mockMailchimpResponse({
       total_created: 0,
@@ -145,8 +211,22 @@ describe("POST /api/newsletter/subscribe", () => {
     });
   });
 
-  it("returns a server error when Mailchimp responds with a non-ok status", async () => {
+  it("returns a server error when Mailchimp rejects our credentials (401)", async () => {
     mockMailchimpResponse({}, { ok: false, status: 401 });
+
+    const response = await POST(
+      buildRequest({ name: "Apple", email: "apple@example.com" }),
+    );
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({
+      success: false,
+      errorCode: "server",
+    });
+  });
+
+  it("returns a server error when Mailchimp has an upstream outage (5xx)", async () => {
+    mockMailchimpResponse({}, { ok: false, status: 503 });
 
     const response = await POST(
       buildRequest({ name: "Apple", email: "apple@example.com" }),
