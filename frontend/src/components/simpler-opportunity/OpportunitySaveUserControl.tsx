@@ -111,6 +111,7 @@ export const OpportunitySaveUserControl = ({
             modalRef={loginModalRef}
             opener
             className="usa-button--unstyled"
+            aria-label="Save opportunity"
             onClick={() => {
               setHelpText(t("saveloginModal.help"));
               setButtonText(t("saveloginModal.button"));
