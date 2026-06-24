@@ -1,7 +1,5 @@
-import { upload } from "@testing-library/user-event/dist/cjs/utility/upload.js";
 import { noop } from "lodash";
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { useFileUpload } from "src/hooks/useFileUpload";
 import {
   FileUploadProcessStatus,
   FileUploadStatusUpdate,
@@ -17,6 +15,7 @@ import { FileInput, FileInputRef, ModalRef } from "@trussworks/react-uswds";
 import { DeleteFileModal } from "./DeleteFileModal";
 import { FileInputExistingFiles } from "./FileInputExistingFiles";
 import { FileInputStatusDisplay } from "./FileInputStatusDisplay";
+import { FileUploadManager } from "./FileUploadManager";
 
 type SimplerFileInputProps = {
   // note that post upload actions must not swallow errors in order to properly
@@ -202,7 +201,7 @@ export const SimplerFileInput = ({
           trackUpload(e);
         }}
         aria-describedby={labelId}
-        aria-invalid={!!hasError}
+        aria-invalid={!!uploadErrors.length}
         className={hideNativeInput ? "display-none" : ""}
         multiple={multiFile}
       />
@@ -217,12 +216,12 @@ export const SimplerFileInput = ({
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
           onStart={onStart}
-          onUploadComplete={(uploadId: string) => {
+          onUploadComplete={() => {
             trackUploadComplete(uploadId);
             onSuccess(undefined);
           }}
           onComplete={onComplete}
-          onUploadError={(uploadId: string, e: Error) => {
+          onUploadError={(e: Error) => {
             trackUploadError(uploadId);
             onError(e);
           }}

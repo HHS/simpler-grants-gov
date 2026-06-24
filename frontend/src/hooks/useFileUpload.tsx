@@ -35,7 +35,7 @@ export const useFileUpload = ({
   onError = noop,
   onComplete = noop,
   postUploadAction,
-}: FileUploadInputs) => {
+}: FileUploadCallbacks) => {
   const { clientFetch } = useClientFetch<Response>("unable to upload file", {
     authGatedRequest: true,
     jsonResponse: false,
@@ -196,12 +196,7 @@ export const useFileUpload = ({
   );
 
   const uploadFile = useCallback(
-    (changeEvent: ChangeEvent<HTMLInputElement>) => {
-      // if (!changeEvent.target.files?.length) {
-      //   console.error("no files!");
-      //   return;
-      // }
-      // const fileToUpload = changeEvent.target.files[0];
+    (fileToUpload: File) => {
       const fileName = fileToUpload.name || "No Filename!";
       const uploadId = `${fileName}_${Date.now()}`;
       const uploadAbortController = new AbortController();
