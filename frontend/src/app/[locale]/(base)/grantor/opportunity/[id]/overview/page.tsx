@@ -16,14 +16,14 @@ async function OpportunityOverviewPage({ params }: PageProps) {
 
   return (
     <div className="bg-white">
-      {/* TODO: header here */}
+      {/* PLACEHOLDER: header here */}
       <div className="grid-container padding-top-4 padding-bottom-4">
         <div className="grid-row grid-gap-2 padding-top-2">
           <div className="tablet:grid-col">
             <Link href={editUrl}>{t("labels.editOpportunityLink")}</Link>
           </div>
           <div className="tablet:grid-col">
-            {/* TODO: status button here */}
+            {/* PLACEHOLDER: status icon here */}
           </div>
         </div>
         <hr />
@@ -32,7 +32,7 @@ async function OpportunityOverviewPage({ params }: PageProps) {
             <Link href={competitionUrl}>{t("labels.competitionLink")}</Link>
           </div>
           <div className="tablet:grid-col">
-            {/* TODO: status button here */}
+            {/* PLACEHOLDER: status icon here */}
           </div>
         </div>
         <hr />
