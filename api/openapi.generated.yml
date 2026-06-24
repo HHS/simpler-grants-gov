@@ -1133,6 +1133,45 @@ paths:
       security:
       - ApiJwtAuth: &id011 []
       - ApiUserKeyAuth: *id011
+  /v1/internal/file-scan-scanner-user:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileScanScannerUserResponseSchema'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Authentication error
+      tags:
+      - Internal v1 - Admin Only
+      summary: Provision the internal user the file-scan scanner Lambda authenticates
+        as,
+      description: 'along with its INTERNAL_S3_SCAN role, then mint and return a fresh
+        API key.
+
+        Re-running rotates the key for the same user. Gated on the
+
+        manage_internal_roles privilege.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileScanScannerUserRequestSchema'
+      security:
+      - ApiUserKeyAuth: []
   /v1/users/{user_id}/privileges:
     post:
       parameters:
@@ -8961,6 +9000,50 @@ components:
       required:
       - filters
       - pagination
+    FileScanScannerUserSchema:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: The provisioned scanner user's id
+          example: 123e4567-e89b-12d3-a456-426614174000
+        api_key_id:
+          type: string
+          format: uuid
+          description: Identifier of the newly created API key record
+          example: 123e4567-e89b-12d3-a456-426614174000
+        api_key:
+          type: string
+          description: The generated X-API-Key value the scanner Lambda authenticates
+            with. Returned only here -- store it in the scanner's secret.
+    FileScanScannerUserResponseSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The provisioned scanner user and its generated API key
+          type:
+          - object
+          $ref: '#/components/schemas/FileScanScannerUserSchema'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    FileScanScannerUserRequestSchema:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: UUID to provision as the file-scan scanner user. Re-running
+            with the same id mints a new key for that user (key rotation).
+          example: f1c0b2a4-9d3e-4a7b-8c61-0e5d2f8a4b13
+      required:
+      - user_id
     GetUserRolesAndPrivilegesOrganizationSchema:
       type: object
       properties:
@@ -14161,6 +14244,10 @@ components:
           description: The HTTP status code
           example: 200
   securitySchemes:
+    ApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Token
     InternalApiJwtAuth:
       type: apiKey
       in: header
@@ -14169,8 +14256,4 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-    ApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Token
 
