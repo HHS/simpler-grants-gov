@@ -16,8 +16,16 @@ import { rebaseFieldListWarningsAfterDelete } from "src/utils/applyForm/rebaseFi
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
-import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
-import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
+import { useRouter } from "next/navigation";
+import {
+  ReactNode,
+  useActionState,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Alert, Button, ButtonGroup, FormGroup } from "@trussworks/react-uswds";
 
 import { FormFields } from "src/components/apply-form/FormFields";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
@@ -51,6 +59,51 @@ interface ApplyFormFormContext {
   widgetSupport: WidgetSupport;
 }
 
+const FormActionButtons = ({
+  applicationId,
+  onSaveClick,
+  hasUnsavedChanges,
+  unsavedChangesWarning,
+}: {
+  applicationId: string;
+  onSaveClick: () => void;
+  hasUnsavedChanges: boolean;
+  unsavedChangesWarning: string;
+}) => {
+  const { pending } = useFormStatus();
+  const router = useRouter();
+
+  const handleReturnToApplication = () => {
+    router.push(`/workspace/applications/${applicationId}`);
+  };
+  return (
+    <ButtonGroup
+      className="apply-form__action-buttons display-flex flex-align-center flex-justify"
+      style={{ gap: "24px" }}
+    >
+      <Button
+        data-testid="apply-form-save"
+        type="submit"
+        name="apply-form-button"
+        className="margin-top-05 flex-1"
+        value="save"
+        onClick={onSaveClick}
+      >
+        {pending ? "Saving..." : "Save and refresh"}
+      </Button>
+      <Button
+        type="button"
+        outline
+        className="margin-top-0 flex-1"
+        data-testid="apply-form-return"
+        onClick={handleReturnToApplication}
+      >
+        Return to application
+      </Button>
+    </ButtonGroup>
+  );
+};
+
 const ApplyForm = ({
   applicationId,
   formId,
@@ -61,6 +114,8 @@ const ApplyForm = ({
   attachments,
   isBudgetForm = false,
   applicationStatus,
+  createdAt,
+  updatedAt,
 }: {
   applicationId: string;
   formId: string;
@@ -74,11 +129,57 @@ const ApplyForm = ({
   attachments: Attachment[];
   isBudgetForm?: boolean;
   applicationStatus?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }) => {
-  const { pending } = useFormStatus();
+  //const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
   const translate = t as unknown as Translator;
   const isFormLocked = applicationStatus !== "in_progress";
+  const [mounted, setMounted] = useState(false);
+  const cachedTimestampRef = useRef<string | undefined>(undefined);
+  const cachedStatusRef = useRef<"created" | "updated" | undefined>(undefined);
+
+  const timestampsEqual = (a?: string, b?: string): boolean => {
+    if (!a || !b) return false;
+    const at = new Date(a).getTime();
+    const bt = new Date(b).getTime();
+    return Number.isFinite(at) && Number.isFinite(bt) && at === bt;
+  };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const lastUpdatedAt: string | undefined = useMemo(() => {
+    const timestamp = updatedAt || createdAt;
+    if (timestamp) {
+      cachedTimestampRef.current = timestamp;
+      if (!cachedStatusRef.current) {
+        cachedStatusRef.current = updatedAt
+          ? timestampsEqual(updatedAt, createdAt)
+            ? "created"
+            : "updated"
+          : "created";
+      }
+    }
+    return cachedTimestampRef.current;
+  }, [createdAt, updatedAt]);
+
+  const isFormSaved = Boolean(lastUpdatedAt);
+
+  const formatLastUpdatedTime = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+    });
+  };
+
   const required = translate.rich("required", {
     abr: (content) => (
       <abbr
@@ -111,6 +212,14 @@ const ApplyForm = ({
   });
 
   const { error, saved } = formState;
+  useEffect(() => {
+    if (updatedAt) {
+      cachedTimestampRef.current = updatedAt;
+      if (!timestampsEqual(updatedAt, createdAt)) {
+        cachedStatusRef.current = "updated";
+      }
+    }
+  }, [updatedAt, createdAt]);
 
   /**
    * Marks the form as changed.
@@ -204,22 +313,27 @@ const ApplyForm = ({
       }}
       noValidate
     >
-      <div className="display-flex flex-justify">
-        <div>{required}</div>
-        {!isFormLocked && (
-          <Button
-            data-testid="apply-form-save"
-            type="submit"
-            name="apply-form-button"
-            className="margin-top-0"
-            value="save"
-            onClick={() => {
+      <div className="display-flex flex-align-center flex-justify margin-bottom-2">
+        <div>
+          {required}
+          {mounted && isFormSaved && lastUpdatedAt && (
+            <div className="margin-top-1">
+              {cachedStatusRef.current === "updated"
+                ? `This form was last updated on ${formatLastUpdatedTime(lastUpdatedAt)}`
+                : `This form was created on ${formatLastUpdatedTime(lastUpdatedAt)}`}
+            </div>
+          )}
+        </div>
+        {mounted && !isFormLocked && (
+          <FormActionButtons
+            applicationId={applicationId}
+            hasUnsavedChanges={formChanged || attachmentsChanged}
+            unsavedChangesWarning={translate("unsavedChangesWarning")}
+            onSaveClick={() => {
               setFormChanged(false);
               setAttachmentsChanged(false);
             }}
-          >
-            {pending ? "Saving..." : "Save"}
-          </Button>
+          />
         )}
       </div>
       <div className="usa-in-page-nav-container">
