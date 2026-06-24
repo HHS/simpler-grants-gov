@@ -723,6 +723,8 @@ export const messages = {
       server:
         "An error occurred when trying to save your subscription. If this continues to happen, email <email-link>simpler@grants.gov</email-link>.",
       alreadySubscribed: "This email address has already been subscribed.",
+      tooManyRequests:
+        "Too many recent attempts. Please wait a few minutes and try again.",
     },
   },
   SubscriptionConfirmation: {
