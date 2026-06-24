@@ -3,12 +3,8 @@
 // =========================
 
 import { expect, Locator, Page } from "@playwright/test";
-import { camelCase } from "lodash";
 import playwrightEnv from "tests/e2e/playwright-env";
-import {
-  waitForURLContainsQueryParam,
-  waitForURLContainsQueryParamValue,
-} from "tests/e2e/playwrightUtils";
+import { waitForURLContainsQueryParamValue } from "tests/e2e/playwrightUtils";
 
 const { targetEnv } = playwrightEnv;
 
@@ -392,9 +388,24 @@ export const getCountOfTopLevelFilterOptions = async (
 
 // returns the number of options available to be selected
 export const selectAllTopLevelFilterOptions = async (
-  page: Page,
-  filterType: string,
+  _page: Page,
+  _filterType: string,
 ): Promise<undefined> => {
   // gather number of (top level) filter options for filter type
   // click select all for filter type
+};
+
+export const waitForFilterOptions = async (
+  page: Page,
+  filterType: string,
+) => {
+  const filterButton = page.locator(
+    `button[aria-controls="opportunity-filter-${filterType}"]:visible`,
+  );
+  const timeout = FILTER_OPTIONS_TIMEOUT;
+  await filterButton.waitFor({ state: "visible", timeout });
+  await filterButton.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(100);
+  await filterButton.click();
+  await page.waitForTimeout(400);
 };
