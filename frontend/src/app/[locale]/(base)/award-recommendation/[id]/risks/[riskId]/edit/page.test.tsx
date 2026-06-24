@@ -3,6 +3,7 @@ import { identity } from "lodash";
 import {
   AwardRecommendationDetails,
   AwardRecommendationRisk,
+  AwardRecommendationSubmission,
 } from "src/types/awardRecommendationTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
@@ -68,7 +69,7 @@ jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
     mockGetAwardRecommendationSubmissionsForRisk(
       awardRecommendationId,
       submissionIds,
-    ),
+    ) as Promise<AwardRecommendationSubmission[]>,
 }));
 
 jest.mock(
