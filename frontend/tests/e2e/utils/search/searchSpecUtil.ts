@@ -3,8 +3,12 @@
 // =========================
 
 import { expect, Locator, Page } from "@playwright/test";
+import { camelCase } from "lodash";
 import playwrightEnv from "tests/e2e/playwright-env";
-import { waitForURLContainsQueryParamValue } from "tests/e2e/playwrightUtils";
+import {
+  waitForURLContainsQueryParam,
+  waitForURLContainsQueryParamValue,
+} from "tests/e2e/playwrightUtils";
 
 const { targetEnv } = playwrightEnv;
 
@@ -388,11 +392,43 @@ export const getCountOfTopLevelFilterOptions = async (
 
 // returns the number of options available to be selected
 export const selectAllTopLevelFilterOptions = async (
-  _page: Page,
-  _filterType: string,
+  page: Page,
+  filterType: string,
 ): Promise<undefined> => {
   // gather number of (top level) filter options for filter type
+
   // click select all for filter type
+  const selectAllButton = page
+    .locator(`#opportunity-filter-${filterType} button:has-text("Select All")`)
+    .first();
+  await selectAllButton.click();
+
+  // validate that url is updated
+  await waitForURLContainsQueryParam(page, filterType);
+};
+
+export const validateTopLevelAndNestedSelectedFilterCounts = async (
+  page: Page,
+  filterName: string,
+  expectedTopLevelCount: number,
+  expectedNestedCount: number,
+) => {
+  // validate that the correct number of filter options is displayed
+  const accordionButton = page.locator(
+    `button[data-testid="accordionButton_opportunity-filter-${camelCase(filterName)}"]`,
+  );
+
+  await expect(accordionButton).toHaveText(
+    `${filterName}${expectedTopLevelCount + expectedNestedCount}`,
+  );
+
+  const expanderButton = page.locator(
+    `#opportunity-filter-${camelCase(filterName)} > ul > li:first-child > div > button`,
+  );
+
+  if (expectedNestedCount) {
+    await expect(expanderButton).toContainText(`${expectedNestedCount}`);
+  }
 };
 
 export const waitForFilterOptions = async (page: Page, filterType: string) => {
@@ -405,4 +441,9 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   await page.waitForTimeout(100);
   await filterButton.click();
   await page.waitForTimeout(400);
+
+  const filterOptions = page.locator(
+    `#opportunity-filter-${filterType} label.usa-checkbox__label:visible`,
+  );
+  await filterOptions.first().waitFor({ state: "visible", timeout });
 };
