@@ -8,6 +8,8 @@ from grants_shared.adapters.aws.dynamodb_adapter import DynamoDBClient
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import FileScanStatus
 
+SCANNED_FILE_BODY = b"scanned file contents"
+
 
 @pytest.fixture(autouse=True)
 def fast_stream_config(monkeypatch):
@@ -24,6 +26,19 @@ def dynamodb_boto_client(file_scan_dynamodb_table):
 
 def _build_url(pending_file_id: uuid.UUID) -> str:
     return f"/v1/files/{pending_file_id}/results"
+
+
+def _create_complete_pending_file(bucket: str, user):
+    """Create a COMPLETE pending file record backed by a real s3 object so the
+    metadata lookup (presign + file size) has something to read."""
+    key = f"scanned/{uuid.uuid4()}/example.pdf"
+    boto3.client("s3").put_object(Bucket=bucket, Key=key, Body=SCANNED_FILE_BODY)
+    return factories.PendingFileFactory.create(
+        user=user,
+        file_name="example.pdf",
+        file_location=f"s3://{bucket}/{key}",
+        file_scan_status=FileScanStatus.COMPLETE,
+    )
 
 
 def _put_scan_record(
@@ -49,32 +64,40 @@ def _parse_chunks(resp) -> list[dict]:
 
 
 class TestGetFileScanResultsSuccess:
-    def test_terminal_status_complete_yields_once(
+    def test_terminal_status_complete_yields_metadata(
         self,
         client,
         user,
         user_auth_token,
-        dynamodb_boto_client,
-        file_scan_dynamodb_table,
+        mock_dynamodb_and_s3,
     ):
-        pending_file_id = uuid.uuid4()
+        pending_file = _create_complete_pending_file(mock_dynamodb_and_s3.bucket, user)
         _put_scan_record(
-            dynamodb_boto_client,
-            file_scan_dynamodb_table,
-            pending_file_id,
+            mock_dynamodb_and_s3.dynamodb_client,
+            mock_dynamodb_and_s3.table_name,
+            pending_file.pending_file_id,
             user.user_id,
             FileScanStatus.COMPLETE,
         )
 
         resp = client.get(
-            _build_url(pending_file_id),
+            _build_url(pending_file.pending_file_id),
             headers={"X-SGG-Token": user_auth_token},
         )
 
         assert resp.status_code == 200
         assert resp.mimetype == "application/x-ndjson"
         chunks = _parse_chunks(resp)
-        assert chunks == [{"data": {"status": FileScanStatus.COMPLETE.value}}]
+        assert len(chunks) == 1
+        data = chunks[0]["data"]
+        assert data["status"] == FileScanStatus.COMPLETE.value
+
+        metadata = data["file_metadata"]
+        assert metadata["file_name"] == "example.pdf"
+        assert metadata["file_size_bytes"] == len(SCANNED_FILE_BODY)
+        # A presigned GET URL pointing at the scanned object.
+        assert pending_file.file_location.split("/")[-1] in metadata["download_path"]
+        assert metadata["download_path"].startswith("http")
 
     def test_terminal_status_infected_yields_once(
         self,
@@ -100,22 +123,25 @@ class TestGetFileScanResultsSuccess:
 
         assert resp.status_code == 200
         chunks = _parse_chunks(resp)
-        assert chunks == [{"data": {"status": FileScanStatus.INFECTED.value}}]
+        # Metadata is only populated for a complete scan; infected stays null.
+        assert chunks == [
+            {"data": {"status": FileScanStatus.INFECTED.value, "file_metadata": None}}
+        ]
 
     def test_pending_then_terminal_yields_both(
         self,
         client,
         user,
         user_auth_token,
-        dynamodb_boto_client,
-        file_scan_dynamodb_table,
+        mock_dynamodb_and_s3,
         monkeypatch,
     ):
         """When the record transitions mid-stream we yield each status."""
-        pending_file_id = uuid.uuid4()
+        pending_file = _create_complete_pending_file(mock_dynamodb_and_s3.bucket, user)
+        pending_file_id = pending_file.pending_file_id
         _put_scan_record(
-            dynamodb_boto_client,
-            file_scan_dynamodb_table,
+            mock_dynamodb_and_s3.dynamodb_client,
+            mock_dynamodb_and_s3.table_name,
             pending_file_id,
             user.user_id,
             FileScanStatus.PENDING,
@@ -134,8 +160,8 @@ class TestGetFileScanResultsSuccess:
             next_status = next(transitions, None)
             if next_status is not None:
                 _put_scan_record(
-                    dynamodb_boto_client,
-                    file_scan_dynamodb_table,
+                    mock_dynamodb_and_s3.dynamodb_client,
+                    mock_dynamodb_and_s3.table_name,
                     pending_file_id,
                     user.user_id,
                     next_status,
@@ -151,11 +177,19 @@ class TestGetFileScanResultsSuccess:
 
         assert resp.status_code == 200
         chunks = _parse_chunks(resp)
-        assert chunks == [
-            {"data": {"status": FileScanStatus.PENDING.value}},
-            {"data": {"status": FileScanStatus.IN_PROGRESS.value}},
-            {"data": {"status": FileScanStatus.COMPLETE.value}},
+        assert [c["data"]["status"] for c in chunks] == [
+            FileScanStatus.PENDING.value,
+            FileScanStatus.IN_PROGRESS.value,
+            FileScanStatus.COMPLETE.value,
         ]
+        # Metadata is null until the scan completes, then populated on the final chunk.
+        assert chunks[0]["data"]["file_metadata"] is None
+        assert chunks[1]["data"]["file_metadata"] is None
+        final_metadata = chunks[2]["data"]["file_metadata"]
+        assert final_metadata["file_name"] == "example.pdf"
+        assert final_metadata["file_size_bytes"] == len(SCANNED_FILE_BODY)
+        assert pending_file.file_location.split("/")[-1] in final_metadata["download_path"]
+        assert final_metadata["download_path"].startswith("http")
 
     def test_stream_ends_when_max_duration_reached(
         self,
@@ -186,7 +220,7 @@ class TestGetFileScanResultsSuccess:
         chunks = _parse_chunks(resp)
         # With max_duration=0, we yield the first status and exit on the
         # elapsed-time check before sleeping or re-querying.
-        assert chunks == [{"data": {"status": FileScanStatus.PENDING.value}}]
+        assert chunks == [{"data": {"status": FileScanStatus.PENDING.value, "file_metadata": None}}]
 
     def test_record_disappearing_mid_stream_logs_error(
         self,
@@ -232,7 +266,7 @@ class TestGetFileScanResultsSuccess:
 
         assert resp.status_code == 200
         # First chunk was emitted before the record vanished; nothing after.
-        assert chunks == [{"data": {"status": FileScanStatus.PENDING.value}}]
+        assert chunks == [{"data": {"status": FileScanStatus.PENDING.value, "file_metadata": None}}]
 
         disappeared_records = [
             r
@@ -250,14 +284,14 @@ class TestGetFileScanResultsSuccess:
         client,
         user,
         user_auth_token,
-        dynamodb_boto_client,
-        file_scan_dynamodb_table,
+        mock_dynamodb_and_s3,
         caplog,
     ):
-        pending_file_id = uuid.uuid4()
+        pending_file = _create_complete_pending_file(mock_dynamodb_and_s3.bucket, user)
+        pending_file_id = pending_file.pending_file_id
         _put_scan_record(
-            dynamodb_boto_client,
-            file_scan_dynamodb_table,
+            mock_dynamodb_and_s3.dynamodb_client,
+            mock_dynamodb_and_s3.table_name,
             pending_file_id,
             user.user_id,
             FileScanStatus.COMPLETE,
@@ -368,6 +402,33 @@ class TestGetFileScanResults404:
 
 class TestGetFileScanResults500:
     """Malformed DynamoDB records are an infrastructure error -- fail fast."""
+
+    def test_complete_without_db_record_returns_500(
+        self,
+        client,
+        user,
+        user_auth_token,
+        dynamodb_boto_client,
+        file_scan_dynamodb_table,
+    ):
+        """A complete scan whose backing pending_file row is missing is a system
+        inconsistency, so we fail with a 500."""
+        pending_file_id = uuid.uuid4()
+        # No PendingFile row is created for this id.
+        _put_scan_record(
+            dynamodb_boto_client,
+            file_scan_dynamodb_table,
+            pending_file_id,
+            user.user_id,
+            FileScanStatus.COMPLETE,
+        )
+
+        resp = client.get(
+            _build_url(pending_file_id),
+            headers={"X-SGG-Token": user_auth_token},
+        )
+
+        assert resp.status_code == 500
 
     def test_missing_user_id_returns_500(
         self,
@@ -512,4 +573,6 @@ class TestGetFileScanResults500:
         # were yielded.
         if body:
             chunks = [json.loads(line) for line in body.splitlines() if line.strip()]
-            assert chunks == [{"data": {"status": FileScanStatus.PENDING.value}}]
+            assert chunks == [
+                {"data": {"status": FileScanStatus.PENDING.value, "file_metadata": None}}
+            ]
