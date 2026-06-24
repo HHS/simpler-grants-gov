@@ -351,7 +351,8 @@ jobs:
           {
             cat .env.development
             sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
-            cat ../api/e2e_token.tmp
+            # e2e_token.tmp may not exist once seeding moves to the new test user system; don't fail if it's absent
+            cat ../api/e2e_token.tmp 2>/dev/null || true
           } >> .env.local
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
@@ -398,9 +399,7 @@ jobs:
           current_shard: ${{ matrix.shard }}
           api_logs: ${{ inputs.api_logs && 'true' || 'false' }}
           playwright_tags: ${{ env.test_group_tags }}
-          staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
-          staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
-          staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
+          test_user_manager_api_key: ${{ secrets.LOCAL_TEST_USER_MANAGER_API_KEY }}
           # shard 2 is the firefox shard
           do-firefox-install: ${{ matrix.shard == 2 && 'true' || 'false' }}
           # shard 3 is the webkit shard
