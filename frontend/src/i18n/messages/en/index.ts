@@ -719,7 +719,7 @@ export const messages = {
       missingName: "Please enter a name.",
       missingEmail: "Please enter an email address.",
       invalidEmail:
-        "Enter an email address in the correct format, like name@example.com.",
+        "Enter an email address in the correct format, like <name>@<domain>.",
       server:
         "An error occurred when trying to save your subscription. If this continues to happen, email <email-link>simpler@grants.gov</email-link>.",
       alreadySubscribed: "This email address has already been subscribed.",
