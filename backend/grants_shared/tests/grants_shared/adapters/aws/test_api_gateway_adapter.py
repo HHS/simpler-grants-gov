@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.adapters.aws.api_gateway_adapter import (
+from grants_shared.adapters.aws.api_gateway_adapter import (
     ApiGatewayConfig,
     ApiKeyImportResponse,
     _clear_mock_import_responses,
@@ -37,7 +37,7 @@ class TestApiGatewayConfig:
 class TestGetBotoApiGatewayClient:
     """Test the boto3 client factory function."""
 
-    @patch("src.adapters.aws.api_gateway_adapter.get_boto_session")
+    @patch("grants_shared.adapters.aws.api_gateway_adapter.get_boto_session")
     def test_uses_default_session(self, mock_get_session):
         """Test that default session is used when none provided."""
         mock_session = Mock()
@@ -64,7 +64,7 @@ class TestImportApiKeyFunction:
         """Clear mock responses before each test."""
         _clear_mock_import_responses()
 
-    @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
+    @patch("grants_shared.adapters.aws.api_gateway_adapter.is_local_aws")
     def test_local_mock_import(self, mock_is_local):
         """Test that mock response is returned when running locally."""
         mock_is_local.return_value = True
@@ -96,8 +96,8 @@ class TestImportApiKeyFunction:
         assert request_data["enabled"] is True
         assert request_data["usage_plan_id"] == "test-plan-123"
 
-    @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
-    @patch("src.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
+    @patch("grants_shared.adapters.aws.api_gateway_adapter.is_local_aws")
+    @patch("grants_shared.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
     def test_real_aws_import_success(self, mock_get_client, mock_is_local):
         """Test successful API key import with real AWS client."""
         mock_is_local.return_value = False
@@ -143,8 +143,8 @@ class TestImportApiKeyFunction:
         assert response.description == "Test description"
         assert response.enabled is True
 
-    @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
-    @patch("src.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
+    @patch("grants_shared.adapters.aws.api_gateway_adapter.is_local_aws")
+    @patch("grants_shared.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
     def test_real_aws_import_with_usage_plan(self, mock_get_client, mock_is_local):
         """Test API key import with usage plan association via CSV format."""
         mock_is_local.return_value = False
@@ -185,8 +185,8 @@ class TestImportApiKeyFunction:
 
         assert response.id == "api-key-123"
 
-    @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
-    @patch("src.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
+    @patch("grants_shared.adapters.aws.api_gateway_adapter.is_local_aws")
+    @patch("grants_shared.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
     def test_real_aws_import_with_warnings(self, mock_get_client, mock_is_local, caplog):
         """Test API key import that generates warnings."""
         mock_is_local.return_value = False
@@ -223,8 +223,8 @@ class TestImportApiKeyFunction:
 
         assert response.id == "api-key-123"
 
-    @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
-    @patch("src.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
+    @patch("grants_shared.adapters.aws.api_gateway_adapter.is_local_aws")
+    @patch("grants_shared.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
     def test_real_aws_import_no_key_ids_returned(self, mock_get_client, mock_is_local):
         """Test error handling when no key IDs are returned."""
         mock_is_local.return_value = False
@@ -241,7 +241,9 @@ class TestImportApiKeyFunction:
     def test_csv_format_generation(self):
         """Test that CSV format is generated correctly for different inputs."""
         # Test with all fields
-        with patch("src.adapters.aws.api_gateway_adapter.is_local_aws", return_value=True):
+        with patch(
+            "grants_shared.adapters.aws.api_gateway_adapter.is_local_aws", return_value=True
+        ):
             import_api_key(
                 api_key="test-key-123",
                 name="My API Key",
@@ -254,7 +256,9 @@ class TestImportApiKeyFunction:
 
         # Test with no description
         _clear_mock_import_responses()
-        with patch("src.adapters.aws.api_gateway_adapter.is_local_aws", return_value=True):
+        with patch(
+            "grants_shared.adapters.aws.api_gateway_adapter.is_local_aws", return_value=True
+        ):
             import_api_key(
                 api_key="test-key-456", name="Another Key", description=None, enabled=False
             )
@@ -276,7 +280,9 @@ class TestMockResponseHelpers:
     def test_clear_mock_responses(self):
         """Test that mock responses can be cleared."""
         # Add some mock responses
-        with patch("src.adapters.aws.api_gateway_adapter.is_local_aws", return_value=True):
+        with patch(
+            "grants_shared.adapters.aws.api_gateway_adapter.is_local_aws", return_value=True
+        ):
             import_api_key("key1", "name1")
             import_api_key("key2", "name2")
 
@@ -290,7 +296,9 @@ class TestMockResponseHelpers:
         """Test that mock responses can be retrieved."""
         _clear_mock_import_responses()
 
-        with patch("src.adapters.aws.api_gateway_adapter.is_local_aws", return_value=True):
+        with patch(
+            "grants_shared.adapters.aws.api_gateway_adapter.is_local_aws", return_value=True
+        ):
             import_api_key("test-key", "Test Name", "Test Description")
 
         responses = _get_mock_import_responses()

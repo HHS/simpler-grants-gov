@@ -204,7 +204,7 @@ def get_opportunity_list_for_grantors(
     json_data: dict,
 ) -> tuple[Sequence[Opportunity], PaginationInfo]:
     """
-    Get a paginated list of opportunities for grantors.
+    Get a paginated list of opportunities for grantors
 
     Args:
         db_session: Database session
@@ -215,9 +215,13 @@ def get_opportunity_list_for_grantors(
     Returns:
         Tuple of (opportunities, pagination_info)
     """
+    # Validate parameters
     params = ListOpportunitiesParams.model_validate(json_data)
 
+    # Get agency and verify it exists
     agency = get_agency(db_session, agency_id)
+
+    # Verify user has VIEW_OPPORTUNITY privilege for the agency
     verify_access(user, {Privilege.VIEW_OPPORTUNITY}, agency)
 
     return list_opportunities_for_agency_with_filters(

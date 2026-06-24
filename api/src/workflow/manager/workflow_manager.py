@@ -10,13 +10,13 @@ from types import FrameType
 
 from flask import Flask, current_app
 from grants_shared.adapters import db
+from grants_shared.adapters.aws import SQSConfig
+from grants_shared.adapters.aws.sqs_adapter import SQSClient, SQSMessage
 from grants_shared.adapters.db import flask_db
 from grants_shared.util import datetime_util
 from grants_shared.util.json_util import json_encoder
 from pydantic import ValidationError
 
-from src.adapters.aws import SQSConfig
-from src.adapters.aws.sqs_adapter import SQSClient, SQSMessage
 from src.adapters.search import SearchClient, flask_opensearch
 from src.constants.lookup_constants import WorkflowEventProcessingResult
 from src.db.models.workflow_models import WorkflowEventHistory

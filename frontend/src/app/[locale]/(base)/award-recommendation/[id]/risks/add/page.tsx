@@ -43,11 +43,13 @@ async function AddRiskPageContent({ params }: AddRiskPageProps) {
   const heroButtons: HeroButtonConfig[] = [
     {
       type: "navigation",
-      label: t("heroButtons.backToEdit"),
-      href: `/award-recommendation/${awardRecommendationId}/edit`,
+      label: t("heroButtons.backToSubmissions"),
+      href: `/award-recommendation/${awardRecommendationId}/risks`,
       outline: true,
     },
   ];
+
+  const heroHeading = t("risks.addTitle");
 
   let awardRecommendationDetails: AwardRecommendationDetails | null = null;
   if (awardRecommendationId) {
@@ -112,6 +114,18 @@ async function AddRiskPageContent({ params }: AddRiskPageProps) {
         <AwardRecommendationHero
           awardRecommendationDetails={awardRecommendationDetails}
           buttons={heroButtons}
+          heading={heroHeading}
+          showDateAndStatus={false}
+          additionalBreadcrumbs={[
+            {
+              title: t("risks.editTitle"),
+              path: `/award-recommendation/${awardRecommendationId}/risks`,
+            },
+            {
+              title: heroHeading,
+              path: `/award-recommendation/${awardRecommendationId}/risks/add`,
+            },
+          ]}
         />
       </Suspense>
       <GridContainer>
