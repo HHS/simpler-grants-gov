@@ -176,4 +176,3 @@ export const updateAwardRecommendationSubmissionDetails = async (
 
   return (responseBody.data as AwardRecommendationSubmission[]) || [];
 };
-
