@@ -723,6 +723,8 @@ export const messages = {
       server:
         "An error occurred when trying to save your subscription. If this continues to happen, email <email-link>simpler@grants.gov</email-link>.",
       alreadySubscribed: "This email address has already been subscribed.",
+      tooManyRequests:
+        "Too many recent attempts. Please wait a few minutes and try again.",
     },
   },
   SubscriptionConfirmation: {
@@ -2368,6 +2370,15 @@ export const messages = {
       "At the end of the session, we will ask you for your verbal permission to use what we learn to make the product better.",
       "If you opt in to using what we learn, your feedback will be anonymized and included in our research findings as part of trends we see across many participants.",
     ],
+  },
+  OpportunityOverview: {
+    pageTitle: "Opportunity Overview",
+    pageApplication: "Smarter Grants Management",
+    metaDescription: "Opportunity publishing progress overview",
+    labels: {
+      editOpportunityLink: "Opportunity Summary",
+      competitionLink: "Application Package",
+    },
   },
   CreateOpportunity: {
     pageTitle: "Create Opportunity",
