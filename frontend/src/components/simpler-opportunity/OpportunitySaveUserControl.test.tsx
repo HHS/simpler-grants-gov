@@ -97,4 +97,20 @@ describe("OpportunitySaveUserControl", () => {
     expect(saveButtons).toHaveLength(0);
     expect(unsaveButtons).toHaveLength(1);
   });
+
+  it("adds an accessible name to the logged-out icon save control", async () => {
+    render(
+      <OpportunitySaveUserControl
+        opportunitySaved={false}
+        type="icon"
+        opportunityId="saved-id"
+      />,
+    );
+
+    const signInButton = await screen.findByRole("button", {
+      name: "Save opportunity",
+    });
+
+    expect(signInButton).toBeInTheDocument();
+  });
 });
