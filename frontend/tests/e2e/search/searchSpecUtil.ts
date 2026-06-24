@@ -263,12 +263,9 @@ export async function waitForSearchResultsInitialLoad(
     timeout = timeoutOverride;
   }
 
-  await expect(
-    page.getByRole("heading", {
-      name: "Search funding opportunities",
-      level: 1,
-    }),
-  ).toBeVisible({ timeout });
+  // Wait for the search route and core search UI controls to be available.
+  await page.waitForURL(/\/search(\?|$)/, { timeout });
+  await expect(getSearchInput(page)).toBeVisible({ timeout });
 
   // Wait for the result controls region, which indicates search data has rendered.
   await expect(
