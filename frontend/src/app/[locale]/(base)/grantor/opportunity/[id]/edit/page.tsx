@@ -16,7 +16,6 @@ import { Alert, GridContainer } from "@trussworks/react-uswds";
 
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
-import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
@@ -102,9 +101,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
         }
         return label;
       })();
-  const pageTitle = tEdit("header.pageTitle", {
-    number: opportunityData.opportunity_number ?? "",
-  });
   const opportunityKeyInformation = {
     title: opportunityData.opportunity_title || "",
     agency: opportunityData.agency_name || opportunityData.agency_code || "",
@@ -115,18 +111,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     awardSelectionMethod: opportunityData.category || "",
     awardSelectionMethodExplanation: opportunityData.category_explanation || "",
   };
-  const rawLastUpdated =
-    [opportunityData.updated_at, activeSummary?.updated_at]
-      .filter(Boolean)
-      .sort()
-      .at(-1) || "";
-  const lastUpdated = rawLastUpdated
-    ? new Date(rawLastUpdated).toLocaleDateString(locale, {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-      })
-    : "";
   const navigationItems = [
     { text: tEdit("sections.keyInformation"), href: "key-information" },
     { text: tEdit("sections.fundingDetails"), href: "funding-details" },
