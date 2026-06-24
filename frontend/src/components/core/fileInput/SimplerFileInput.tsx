@@ -1,3 +1,4 @@
+import { upload } from "@testing-library/user-event/dist/cjs/utility/upload.js";
 import { noop } from "lodash";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useFileUpload } from "src/hooks/useFileUpload";
@@ -86,27 +87,28 @@ export const SimplerFileInput = ({
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
 
-  const {
-    uploadFile,
-    cancelUploadFor,
-    dismissErrorFor,
-    getStateElementFor,
-    hasError,
-    activeUploads,
-  } = useFileUpload({
-    onStart,
-    onSuccess,
-    onComplete,
-    onError,
-    postUploadAction,
-  });
-
   const [filePendingDeletion, setFilePendingDeletion] =
     useState<UploadFileMetadata>();
   const [deletePending, setDeletePending] = useState(false);
   const [filesWithDeleteError, setFilesWithDeleteError] = useState<string[]>(
     [],
   );
+  const [activeUploads, setActiveUploads] = useState<
+    { uploadId: string; file: File }[]
+  >([]);
+  const [uploadErrors, setUploadErrors] = useState<string[]>([]);
+  const [completedUploads, setCompletedUploads] = useState<string[]>([]);
+
+  const trackUpload = (changeEvent: ChangeEvent<HTMLInputElement>) => {
+    if (!changeEvent.target.files?.length) {
+      console.error("no files!");
+      return;
+    }
+    const fileToUpload = changeEvent.target.files[0];
+    const fileName = fileToUpload.name || "No Filename!";
+    const uploadId = `${fileName}_${Date.now()}`;
+    setActiveUploads([...activeUploads, { uploadId, file: fileToUpload }]);
+  };
 
   // this does not update the list of existing / previously uploaded files internally,
   // and relies on the parent to update that list upon successful deletion
@@ -148,17 +150,45 @@ export const SimplerFileInput = ({
     if (existingFiles?.length) {
       return true;
     }
+    // if there is any active upload that has not yet completed
     if (
-      activeUploads.some((activeUploadId) => {
-        const status = getStateElementFor(activeUploadId, "currentStatus");
-        return status && status !== "success";
-      })
+      activeUploads.some(
+        ({ uploadId }) => !completedUploads.find((id) => id === uploadId),
+      )
     ) {
       return true;
     }
-  }, [multiFile, activeUploads, existingFiles, getStateElementFor]);
+  }, [multiFile, activeUploads, existingFiles, completedUploads]);
 
-  console.log("~~~ active uploads", activeUploads);
+  const trackUploadComplete = (uploadId: string) => {
+    setCompletedUploads([...completedUploads, uploadId]);
+  };
+  const trackUploadError = (uploadId: string) => {
+    setUploadErrors([...uploadErrors, uploadId]);
+  };
+
+  const dismissError = (uploadId: string) => {
+    const currentErrors = [...uploadErrors];
+    const errorIndex = currentErrors.indexOf(uploadId);
+    if (errorIndex > -1) {
+      currentErrors.splice(errorIndex, 1);
+      setUploadErrors(currentErrors);
+    }
+  };
+  const trackUploadCancel = (uploadId: string) => {
+    const currentUploads = [...activeUploads];
+    const canceledIndex = currentUploads.findIndex(
+      (item) => item.uploadId === uploadId,
+    );
+    if (canceledIndex > -1) {
+      currentUploads.splice(canceledIndex, 1);
+      setActiveUploads(currentUploads);
+    }
+  };
+
+  // needs to know ( can be tracked by state in this component)
+  // * how many uploads are active, so it can create a manager and status display for each one
+  // * know if any uploads have errors or success statuses so it can hide or show the input
   return (
     <>
       <FileInput
@@ -168,28 +198,42 @@ export const SimplerFileInput = ({
         required={required}
         disabled={disabled}
         readOnly={readOnly}
-        onChange={(e) => uploadFile(e)}
+        onChange={(e) => {
+          trackUpload(e);
+        }}
         aria-describedby={labelId}
         aria-invalid={!!hasError}
         className={hideNativeInput ? "display-none" : ""}
         multiple={multiFile}
       />
-      {activeUploads.map((activeUploadId) => (
-        <FileInputStatusDisplay
-          key={activeUploadId}
-          fileName={
-            getStateElementFor<string>(activeUploadId, "fileName") || ""
-          }
-          onCancel={() => cancelUploadFor(activeUploadId)}
-          onDismiss={() => dismissErrorFor(activeUploadId)}
-          error={!!hasError}
-          status={getStateElementFor<FileUploadProcessStatus | undefined>(
-            activeUploadId,
-            "currentStatus",
-          )}
+      {activeUploads.map(({ uploadId, file }) => (
+        <FileUploadManager
+          key={uploadId}
+          fileToUpload={file}
+          uploadId={uploadId}
+          onCancel={() => trackUploadCancel(uploadId)}
+          onDismiss={() => dismissError(uploadId)}
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
+          onStart={onStart}
+          onUploadComplete={(uploadId: string) => {
+            trackUploadComplete(uploadId);
+            onSuccess(undefined);
+          }}
+          onComplete={onComplete}
+          onUploadError={(uploadId: string, e: Error) => {
+            trackUploadError(uploadId);
+            onError(e);
+          }}
+          postUploadAction={postUploadAction}
+          // fileName={
+          //   getStateElementFor<string>(activeUploadId, "fileName") || ""
+          // }
+          // status={getStateElementFor<FileUploadProcessStatus | undefined>(
+          //   activeUploadId,
+          //   "currentStatus",
+          // )}
         />
       ))}
       <FileInputExistingFiles
