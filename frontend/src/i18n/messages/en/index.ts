@@ -2365,6 +2365,15 @@ export const messages = {
       "If you opt in to using what we learn, your feedback will be anonymized and included in our research findings as part of trends we see across many participants.",
     ],
   },
+  OpportunityOverview: {
+    pageTitle: "Opportunity Overview",
+    pageApplication: "Smarter Grants Management",
+    metaDescription: "Opportunity publishing progress overview",
+    labels: {
+      editOpportunityLink: "Opportunity Summary",
+      competitionLink: "Application Package",
+    },
+  },
   CreateOpportunity: {
     pageTitle: "Create Opportunity",
     pageApplication: "Smarter Grants Management",
