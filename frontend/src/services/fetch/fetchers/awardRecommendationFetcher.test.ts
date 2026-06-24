@@ -41,13 +41,13 @@ const setupDefaultInnerFetchMock = () => {
             : undefined,
           message: subPath.includes("/risks/") ? "Success" : undefined,
         } as APIResponse),
-      }) as Promise<Response>,
+      }) as unknown as Promise<Response>,
   );
 };
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAwardRecommendation: (params: unknown): Promise<Response> =>
-    mockFetchAwardRecommendation(params) as Promise<Response>,
+    mockFetchAwardRecommendation(params) as unknown as Promise<Response>,
   fetchAwardRecommendationWithMethod: (): jest.Mock => mockInnerFetch,
 }));
 
@@ -256,7 +256,7 @@ describe("getAwardRecommendationRisk", () => {
               : mockAwardRecommendationSubmissions,
             pagination_info: { total_pages: 1 },
           } as APIResponse),
-        }) as Promise<Response>,
+        }) as unknown as Promise<Response>,
     );
   });
 
