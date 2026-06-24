@@ -1,15 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { createAwardRecommendationAction } from "../actions";
+import { createAwardRecommendationAction } from
+  "src/app/[locale]/(base)/award-recommendation/select-opportunity/actions";
 import { SelectFundingOpportunityContent } from "./SelectFundingOpportunityContent";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 const pushMock = jest.fn();
 
-jest.mock("../actions", () => ({
-  createAwardRecommendationAction: jest.fn(),
-}));
+jest.mock(
+  "src/app/[locale]/(base)/award-recommendation/select-opportunity/actions",
+  () => ({
+    createAwardRecommendationAction: jest.fn(),
+  }),
+);
 
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => {
@@ -32,15 +36,6 @@ jest.mock("next/navigation", () => ({
     push: pushMock,
   }),
 }));
-
-const mockFundingOpportunities = [
-  {
-    opportunity_id: "opp-1",
-    opportunity_number: "OPP-001",
-    opportunity_title: "Test Opportunity",
-    submitted_application_count: 3,
-  },
-];
 
 describe("SelectFundingOpportunityContent", () => {
   beforeEach(() => {

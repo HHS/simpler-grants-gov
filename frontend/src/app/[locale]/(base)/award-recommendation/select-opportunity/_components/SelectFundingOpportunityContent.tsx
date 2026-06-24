@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import { Button, Table } from "@trussworks/react-uswds";
 
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
-import { createAwardRecommendationAction } from "../actions";
-
+import { createAwardRecommendationAction } from
+  "src/app/[locale]/(base)/award-recommendation/select-opportunity/actions";
 type SelectFundingOpportunityContentProps = {
   fundingOpportunities: BaseOpportunity[];
 };
@@ -63,7 +63,7 @@ const handleCreateAwardRecommendation = async (fundingOpportunityId: string) => 
               <tr key={fundingOpportunity.opportunity_id}>
                 <td>
                   <Link
-                    href={`/funding-opportunities/${fundingOpportunity.opportunity_id}`}
+                    href={`/opportunity/${fundingOpportunity.opportunity_id}`}
                     className="usa-link"
                   >
                     {fundingOpportunity.opportunity_number}
@@ -76,11 +76,11 @@ const handleCreateAwardRecommendation = async (fundingOpportunityId: string) => 
                     type="button"
                     className="usa-button--outline margin-y-0"
                     disabled={isCreating}
-                    onClick={() =>
-                      handleCreateAwardRecommendation(
+                    onClick={() => {
+                      void handleCreateAwardRecommendation(
                         fundingOpportunity.opportunity_id,
-                      )
-                    }
+                      );
+                    }}
                   >
                     {t("startButtonText")} <span aria-hidden="true">→</span>
                   </Button>
