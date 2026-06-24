@@ -114,14 +114,7 @@ export const AwardRecommendationAttachments = ({
         })(),
       },
       {
-        cellData: (
-          <Link
-            href={`/award-recommendation/${awardRecommendationId}/risks/${risk.award_recommendation_risk_id}/edit`}
-            className="usa-link"
-          >
-            {risk.condition_number || risk.condition || "-"}
-          </Link>
-        ),
+        cellData: risk.condition_number || risk.condition || "-",
       },
       ...(mode === "edit"
         ? [
