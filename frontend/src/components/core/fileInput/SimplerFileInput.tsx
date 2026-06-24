@@ -1,5 +1,6 @@
 import { noop } from "lodash";
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { useFileUpload } from "src/hooks/useFileUpload";
 import {
   FileUploadProcessStatus,
   FileUploadStatusUpdate,
@@ -85,49 +86,26 @@ export const SimplerFileInput = ({
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
 
-  const { clientFetch } = useClientFetch<Response>("unable to upload file", {
-    authGatedRequest: true,
-    jsonResponse: false,
+  const {
+    uploadFile,
+    cancelUploadFor,
+    dismissErrorFor,
+    getStateElementFor,
+    hasError,
+    activeUploads,
+  } = useFileUpload({
+    onStart,
+    onSuccess,
+    onComplete,
+    onError,
+    postUploadAction,
   });
 
-  // we're only using this for boolean checks - maybe we only need the message, in case we want to surface that somehow?
-  const [uploadError, setUploadError] = useState<
-    { status: FileUploadProcessStatus | undefined; message: string } | undefined
-  >();
-  const [currentStatus, setCurrentStatus] = useState<FileUploadProcessStatus>();
-  const [fileName, setFileName] = useState<string>();
-  const [uploadController, setUploadController] = useState<AbortController>();
-  const [postUploadController, setPostUploadController] =
-    useState<AbortController>();
-  const [responseReader, setResponseReader] =
-    useState<ReadableStreamDefaultReader>();
   const [filePendingDeletion, setFilePendingDeletion] =
     useState<UploadFileMetadata>();
   const [deletePending, setDeletePending] = useState(false);
   const [filesWithDeleteError, setFilesWithDeleteError] = useState<string[]>(
     [],
-  );
-
-  const handleCancel = async () => {
-    setCurrentStatus(undefined);
-    uploadController?.abort();
-    postUploadController?.abort();
-    fileInputRef.current?.clearFiles();
-    await responseReader?.cancel();
-  };
-
-  const handleDismiss = () => {
-    setCurrentStatus(undefined);
-    setUploadError(undefined);
-    fileInputRef.current?.clearFiles();
-  };
-
-  const handleError = useCallback(
-    (e: Error) => {
-      onError(e);
-      setUploadError({ status: currentStatus, message: e.message });
-    },
-    [currentStatus, setUploadError, onError],
   );
 
   // this does not update the list of existing / previously uploaded files internally,
@@ -160,152 +138,12 @@ export const SimplerFileInput = ({
       });
   }, [filePendingDeletion, onDelete, filesWithDeleteError]);
 
-  const readResponseStream = useCallback(
-    async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
-      // can't use state to track this because it would need to be both set and referenced within the same useCallback function call
-      // and the function can't be recalculated to include updated state values while running
-      let newFileId: string;
-      let error: Error;
-      const process = async (): Promise<string> => {
-        return reader.read().then(({ value, done }) => {
-          if (done) {
-            return newFileId;
-          }
-          let payloadJson: FileUploadStatusUpdate;
-          const payloadString = new TextDecoder().decode(value);
-          const payloadJsonStrings = unbatchStreamChunkJSON(payloadString);
-          // process each json chunk, since it's possible that chunks were batched
-          // it may not be doing anything from the UI perspective to process anything except the final
-          // batched update, but leaving this just in case we need to process a file id from a batched update
-          payloadJsonStrings.forEach((payloadString: string) => {
-            try {
-              payloadJson = JSON.parse(payloadString) as FileUploadStatusUpdate;
-            } catch (e) {
-              console.error(
-                "Error parsing json from file upload stream payload",
-                payloadString,
-              );
-              throw e;
-            }
-            if (payloadJson?.error) {
-              // in order to distinguish "infected" cases from general failure during scan
-              // we need to specially set the status here
-              if (payloadJson.error.match("infected")) {
-                setCurrentStatus("infected");
-              }
-              error = new Error(payloadJson.error);
-            } else if (payloadJson?.status) {
-              setCurrentStatus(payloadJson.status as FileUploadProcessStatus);
-              if (payloadJson.pendingFileId) {
-                newFileId = payloadJson.pendingFileId;
-              }
-            }
-          });
-          // if the stream ended, newFileId will be set. Return that and stop reading
-          if (newFileId) {
-            return newFileId;
-          }
-          if (error) {
-            throw error;
-          }
-          return process();
-        });
-      };
-      try {
-        return process();
-      } catch (e) {
-        console.error("Error in file upload process stream response", e);
-        throw e;
-      }
-    },
-    [setCurrentStatus],
-  );
-
-  const onFileSelect = useCallback(
-    (changeEvent: ChangeEvent<HTMLInputElement>) => {
-      if (!changeEvent.target.files?.length) {
-        console.error("no files!");
-        return;
-      }
-      setUploadError(undefined);
-      const fileName = changeEvent.target.files[0].name || "No Filename!";
-      const uploadAbortController = new AbortController();
-      setFileName(fileName);
-      setCurrentStatus("queued");
-      setUploadController(uploadAbortController);
-
-      try {
-        onStart();
-      } catch (e) {
-        handleError(e as Error);
-        return;
-      }
-      // start upload
-      return (
-        createFormDataForFile(changeEvent.target.files[0])
-          .then((fileFormData) => {
-            return clientFetch("/api/file", {
-              method: "POST",
-              body: fileFormData,
-              signal: uploadAbortController.signal,
-            });
-          })
-          // process streaming response
-          .then((response: Response) => {
-            const reader = response.body?.getReader();
-            setResponseReader(reader);
-            return readResponseStream(
-              reader as ReadableStreamDefaultReader<Uint8Array>,
-            );
-          })
-          // run post upload action
-          .then((pendingFileId: string) => {
-            if (!pendingFileId) {
-              // note that the missing file id error display is predicated on the timing of
-              // an error occurring in the "complete" state
-              throw new Error(
-                "upload stream completed without sending pending file id",
-              );
-            }
-            const postUploadAbortController = new AbortController();
-            setUploadController(undefined);
-            setResponseReader(undefined);
-            setCurrentStatus("post-upload");
-            setPostUploadController(postUploadAbortController);
-            return postUploadAction(
-              pendingFileId,
-              postUploadAbortController.signal,
-            );
-          })
-          // run complete actions
-          .then((postUploadResult: unknown) => {
-            setPostUploadController(undefined);
-            // complete status will persist until refresh or form change
-            setCurrentStatus("success");
-            onSuccess(postUploadResult);
-            return;
-          })
-          .catch((e: Error) => {
-            handleError(e);
-          })
-          .finally(() => {
-            setPostUploadController(undefined);
-            setUploadController(undefined);
-            setResponseReader(undefined);
-            onComplete();
-          })
-      );
-    },
-    [
-      clientFetch,
-      readResponseStream,
-      onStart,
-      onSuccess,
-      postUploadAction,
-      handleError,
-      onComplete,
-    ],
-  );
+  // hide the "select file" display if
+  //  * there are any existing files and not multifile uploader
+  //  * there are currently running uploads and not multifile uploader
+  const hideNativeInput = useMemo(() => {
+    (currentStatus && currentStatus !== "success") || existingFiles?.length;
+  }, [multiFile, activeUploads]);
 
   return (
     <>
@@ -316,26 +154,30 @@ export const SimplerFileInput = ({
         required={required}
         disabled={disabled}
         readOnly={readOnly}
-        onChange={(e) => {
-          void onFileSelect(e);
-        }}
+        onChange={(e) => uploadFile(e)}
         aria-describedby={labelId}
-        aria-invalid={!!uploadError}
-        className={currentStatus || existingFiles?.length ? "display-none" : ""}
+        aria-invalid={!!hasError}
+        className={hideNativeInput ? "display-none" : ""}
         multiple={multiFile}
       />
-      {currentStatus ? (
+      {activeUploads.map((activeUploadId) => {
         <FileInputStatusDisplay
-          fileName={fileName || ""}
-          onCancel={() => void handleCancel()}
-          onDismiss={handleDismiss}
-          error={!!uploadError}
-          status={currentStatus}
+          key={activeUploadId}
+          fileName={
+            getStateElementFor<string>(activeUploadId, "fileName") || ""
+          }
+          onCancel={() => cancelUploadFor(activeUploadId)}
+          onDismiss={() => dismissErrorFor(activeUploadId)}
+          error={!!hasError}
+          status={getStateElementFor<FileUploadProcessStatus | undefined>(
+            activeUploadId,
+            "currentStatus",
+          )}
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
-        />
-      ) : null}
+        />;
+      })}
       <FileInputExistingFiles
         existingFiles={existingFiles}
         onDelete={(fileToDelete: UploadFileMetadata) => {
