@@ -1,10 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
-import { createAwardRecommendationAction } from
-  "src/app/[locale]/(base)/award-recommendation/select-opportunity/actions";
-import { SelectFundingOpportunityContent } from "./SelectFundingOpportunityContent";
+import { createAwardRecommendationAction } from "src/app/[locale]/(base)/award-recommendation/select-opportunity/actions";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+
+import { SelectFundingOpportunityContent } from "./SelectFundingOpportunityContent";
 
 const pushMock = jest.fn();
 

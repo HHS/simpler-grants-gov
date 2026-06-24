@@ -1,9 +1,8 @@
 import { Metadata } from "next";
 import { SelectFundingOpportunityContent } from "src/app/[locale]/(base)/award-recommendation/select-opportunity/_components/SelectFundingOpportunityContent";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { WithFeatureFlagProps } from "src/types/uiTypes";
-
 import { searchAccessibleOpportunities } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
@@ -57,8 +56,8 @@ async function SelectOpportunityPageContent({
 
       <GridContainer>
         <SelectFundingOpportunityContent
-        fundingOpportunities={fundingOpportunities}
-         />
+          fundingOpportunities={fundingOpportunities}
+        />
       </GridContainer>
     </>
   );

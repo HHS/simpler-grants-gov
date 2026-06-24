@@ -2479,8 +2479,8 @@ export const messages = {
       fundingOpportunityNumber: "Funding opp #",
       fundingOpportunityName: "Funding opp name",
       submittedApplications: "Submitted applications",
-      action: "Action"
-    }
+      action: "Action",
+    },
   },
   FileInput: {
     existingFiles: {

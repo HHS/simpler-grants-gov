@@ -122,13 +122,15 @@ export const createAwardRecommendation = async (
       funding_strategy: null,
       selection_method_detail: null,
       other_key_information: null,
-    }
+    },
   });
 
   const responseBody = (await response.json()) as APIResponse;
 
   if (!response.ok) {
-    throw new Error(responseBody.message || "Failed to create award recommendation");
+    throw new Error(
+      responseBody.message || "Failed to create award recommendation",
+    );
   }
 
   return responseBody.data as AwardRecommendationDetails;

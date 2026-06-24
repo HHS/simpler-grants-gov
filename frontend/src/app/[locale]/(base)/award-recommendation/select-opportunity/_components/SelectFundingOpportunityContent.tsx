@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { createAwardRecommendationAction } from "src/app/[locale]/(base)/award-recommendation/select-opportunity/actions";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button, Table } from "@trussworks/react-uswds";
 
-import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
-import { createAwardRecommendationAction } from
-  "src/app/[locale]/(base)/award-recommendation/select-opportunity/actions";
 type SelectFundingOpportunityContentProps = {
   fundingOpportunities: BaseOpportunity[];
 };
@@ -18,24 +18,28 @@ export const SelectFundingOpportunityContent = ({
 }: SelectFundingOpportunityContentProps) => {
   const t = useTranslations("AwardRecommendationSelectFundingOpportunity");
   const router = useRouter();
-  const [creatingOpportunityId, setCreatingOpportunityId] = useState<string | null>(null);
+  const [creatingOpportunityId, setCreatingOpportunityId] = useState<
+    string | null
+  >(null);
 
   const handleCancel = () => {
     router.push("/");
   };
 
-const handleCreateAwardRecommendation = async (fundingOpportunityId: string) => {
-  setCreatingOpportunityId(fundingOpportunityId);
+  const handleCreateAwardRecommendation = async (
+    fundingOpportunityId: string,
+  ) => {
+    setCreatingOpportunityId(fundingOpportunityId);
 
-  try {
-    const { awardRecommendationId } =
-      await createAwardRecommendationAction(fundingOpportunityId);
+    try {
+      const { awardRecommendationId } =
+        await createAwardRecommendationAction(fundingOpportunityId);
 
-    router.push(`/award-recommendation/${awardRecommendationId}/edit`);
-  } finally {
-    setCreatingOpportunityId(null);
-  }
-};
+      router.push(`/award-recommendation/${awardRecommendationId}/edit`);
+    } finally {
+      setCreatingOpportunityId(null);
+    }
+  };
 
   return (
     <>
