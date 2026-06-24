@@ -27,7 +27,7 @@ type FileUploadInternalState = {
   responseReader?: ReadableStreamDefaultReader;
 };
 
-export const useFileUpload = ({
+export const useFileUploads = ({
   onStart = noop,
   onSuccess = noop,
   onComplete = noop,
@@ -47,9 +47,15 @@ export const useFileUpload = ({
   // create or return current state for a given upload
   const getCurrentStateFor = useCallback(
     (uploadId: string): FileUploadInternalState => {
-      if (!uploadStates[uploadId]) {
-        setUploadStates({ ...uploadStates, [uploadId]: {} });
-      }
+      // console.log("~~~~ currentState", uploadStates);
+      // if (!uploadStates[uploadId]) {
+      //   console.log("~~~~ setting currentState", {
+      //     ...uploadStates,
+      //     [uploadId]: {},
+      //   });
+      //   setUploadStates({ ...uploadStates, [uploadId]: {} });
+      // }
+      console.log("~~~~ reading currentState", uploadStates[uploadId]);
       return uploadStates[uploadId] ? { ...uploadStates[uploadId] } : {};
     },
     [uploadStates],
@@ -59,6 +65,7 @@ export const useFileUpload = ({
   const getStateElementFor = useCallback(
     <T,>(uploadId: string, element: keyof FileUploadInternalState) => {
       const currentState = getCurrentStateFor(uploadId);
+
       return currentState[element] as T;
     },
     [getCurrentStateFor],
@@ -345,6 +352,7 @@ export const useFileUpload = ({
     ],
   );
 
+  console.log("!!!! state", uploadStates);
   return {
     uploadStates,
     uploadFile,

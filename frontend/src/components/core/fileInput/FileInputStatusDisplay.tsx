@@ -131,6 +131,7 @@ export const FileInputStatusDisplay = ({
   postUploadActionErrorMessage?: string;
 }) => {
   const t = useTranslations("FileInput.statusDisplay");
+  console.log("$$$$$ active status", status);
 
   if (!status) {
     return;
@@ -160,7 +161,6 @@ export const FileInputStatusDisplay = ({
     ? (errorStatuses.get(status) as FileUploadStatus) || "error"
     : status;
   const statusMessageForDisplay = messagesMap[adjustedStatus];
-
   return (
     <div className="margin-x-3">
       <Grid

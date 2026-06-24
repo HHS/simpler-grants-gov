@@ -10,7 +10,7 @@ import {
 import { createFormDataForFile } from "src/utils/fileUtils/createFormData";
 import { unbatchStreamChunkJSON } from "src/utils/streamUtils";
 
-import { ChangeEvent, useCallback, useRef, useState } from "react";
+import { ChangeEvent, useCallback, useMemo, useRef, useState } from "react";
 import { FileInput, FileInputRef, ModalRef } from "@trussworks/react-uswds";
 
 import { DeleteFileModal } from "./DeleteFileModal";
@@ -140,11 +140,25 @@ export const SimplerFileInput = ({
 
   // hide the "select file" display if
   //  * there are any existing files and not multifile uploader
-  //  * there are currently running uploads and not multifile uploader
+  //  * there are currently running uploads that are not in a success or not started state and not multifile uploader
   const hideNativeInput = useMemo(() => {
-    (currentStatus && currentStatus !== "success") || existingFiles?.length;
-  }, [multiFile, activeUploads]);
+    if (multiFile) {
+      return false;
+    }
+    if (existingFiles?.length) {
+      return true;
+    }
+    if (
+      activeUploads.some((activeUploadId) => {
+        const status = getStateElementFor(activeUploadId, "currentStatus");
+        return status && status !== "success";
+      })
+    ) {
+      return true;
+    }
+  }, [multiFile, activeUploads, existingFiles, getStateElementFor]);
 
+  console.log("~~~ active uploads", activeUploads);
   return (
     <>
       <FileInput
@@ -160,7 +174,7 @@ export const SimplerFileInput = ({
         className={hideNativeInput ? "display-none" : ""}
         multiple={multiFile}
       />
-      {activeUploads.map((activeUploadId) => {
+      {activeUploads.map((activeUploadId) => (
         <FileInputStatusDisplay
           key={activeUploadId}
           fileName={
@@ -176,8 +190,8 @@ export const SimplerFileInput = ({
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
-        />;
-      })}
+        />
+      ))}
       <FileInputExistingFiles
         existingFiles={existingFiles}
         onDelete={(fileToDelete: UploadFileMetadata) => {
