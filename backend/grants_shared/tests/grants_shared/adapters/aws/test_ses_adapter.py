@@ -4,8 +4,8 @@ import pytest
 from moto.core import DEFAULT_ACCOUNT_ID
 from moto.ses.models import ses_backends
 
-import grants_shared.aws.aws_session as aws_session_module
-from grants_shared.aws import send_email
+import grants_shared.adapters.aws.aws_session as aws_session_module
+from grants_shared.adapters.aws import send_email
 
 
 def test_send_email_success(ses_client):
@@ -22,7 +22,6 @@ def test_send_email_success(ses_client):
     )
 
     assert message_id is not None
-
     ses_backend = ses_backends[DEFAULT_ACCOUNT_ID][ses_client.meta.region_name]
     assert len(ses_backend.sent_messages) == 1
 

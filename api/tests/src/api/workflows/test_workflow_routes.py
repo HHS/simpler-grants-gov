@@ -2,8 +2,8 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from grants_shared.adapters.aws.sqs_adapter import SQSClient
 
-from src.adapters.aws.sqs_adapter import SQSClient
 from src.constants.lookup_constants import (
     ApprovalResponseType,
     ApprovalType,

@@ -9,15 +9,22 @@ import smart_open
 from botocore.config import Config
 from werkzeug.utils import secure_filename
 
-from src.adapters.aws import S3Config, get_boto_session, get_s3_client
-from src.app_config import AppConfig
+from grants_shared.adapters.aws import S3Config, get_boto_session, get_s3_client
+from grants_shared.util.env_config import PydanticBaseEnvConfig
 
 ##################################
-# Path parsing utils
+# Configs
 ##################################
+
+
+class FileConfig(PydanticBaseEnvConfig):
+    # Maximum file upload size in bytes (2 GB)
+    max_file_upload_size_bytes: int = 2 * 1024 * 1024 * 1024
+
 
 # Module-level singleton for default S3Config
 _s3_config = None
+_file_config = None
 
 
 def get_default_s3_config() -> S3Config:
@@ -28,6 +35,21 @@ def get_default_s3_config() -> S3Config:
     if _s3_config is None:
         _s3_config = S3Config()
     return _s3_config
+
+
+def get_default_file_config() -> FileConfig:
+    """
+    Returns a singleton instance of FileConfig to avoid reading env vars repeatedly.
+    """
+    global _file_config
+    if _file_config is None:
+        _file_config = FileConfig()
+    return _file_config
+
+
+##################################
+# Path parsing utils
+##################################
 
 
 def is_s3_path(path: str | Path) -> bool:
@@ -65,7 +87,7 @@ def join(*parts: str) -> str:
 
 
 ##################################
-#  File operat
+#  File operations
 ##################################
 
 
@@ -149,6 +171,8 @@ def pre_sign_upload(
     if s3_config is None:
         s3_config = get_default_s3_config()
 
+    file_config = get_default_file_config()
+
     s3_client = get_s3_client(s3_config)
     bucket, key = split_s3_url(file_path)
 
@@ -159,7 +183,7 @@ def pre_sign_upload(
         Key=key,
         Fields={"Content-Type": content_type, **metadata_fields},
         Conditions=[
-            ["content-length-range", 1, AppConfig().max_file_upload_size_bytes],
+            ["content-length-range", 1, file_config.max_file_upload_size_bytes],
             {"Content-Type": content_type},
             *[{k: v} for k, v in metadata_fields.items()],
             {"IfNoneMatch": "*"},
