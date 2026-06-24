@@ -395,10 +395,7 @@ export const selectAllTopLevelFilterOptions = async (
   // click select all for filter type
 };
 
-export const waitForFilterOptions = async (
-  page: Page,
-  filterType: string,
-) => {
+export const waitForFilterOptions = async (page: Page, filterType: string) => {
   const filterButton = page.locator(
     `button[aria-controls="opportunity-filter-${filterType}"]:visible`,
   );
