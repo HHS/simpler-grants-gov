@@ -1,18 +1,15 @@
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 
-//import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@trussworks/react-uswds";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
-  searchParams?: Promise<Record<string, string>>;
 };
 
-async function OpportunityOverviewPage({ params, searchParams }: PageProps) {
+async function OpportunityOverviewPage({ params }: PageProps) {
   const { id, locale } = await params;
-  //const t = useTranslations("OpportunityOverview");
   const t = await getTranslations({ locale, namespace: "OpportunityOverview" });
   const editUrl = "../" + id + "/edit";
   const competitionUrl = "../" + id + "/competition";
