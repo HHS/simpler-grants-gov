@@ -94,9 +94,12 @@ export const AwardRecommendationAttachments = ({
     (risk: AwardRecommendationRisk) => [
       {
         cellData: (
-          <a href="#">
+          <Link
+            href={`/award-recommendation/${awardRecommendationId}/risks/${risk.award_recommendation_risk_id}/edit`}
+            className="usa-link"
+          >
             {risk.risk_number || risk.award_recommendation_risk_number}
-          </a>
+          </Link>
         ),
       },
       {
@@ -112,7 +115,12 @@ export const AwardRecommendationAttachments = ({
       },
       {
         cellData: (
-          <a href="#">{risk.condition_number || risk.condition || "-"}</a>
+          <Link
+            href={`/award-recommendation/${awardRecommendationId}/risks/${risk.award_recommendation_risk_id}/edit`}
+            className="usa-link"
+          >
+            {risk.condition_number || risk.condition || "-"}
+          </Link>
         ),
       },
       ...(mode === "edit"

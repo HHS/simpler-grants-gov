@@ -2169,6 +2169,9 @@ export const messages = {
       "Error fetching application submission details",
     awardRecommendationSubmissionFetchError:
       "Error fetching application submission data. Please try refreshing the page.",
+    errorHeadingAwardRecommendationRisk: "Error fetching risk details",
+    awardRecommendationRiskFetchError:
+      "Error fetching risk data. Please try refreshing the page.",
     recommendations: {
       heading: "Recommendations",
       editPageDescription:
@@ -2232,6 +2235,9 @@ export const messages = {
       pageHeading: "Recommend submissions",
       pageDescription: "Select one or more applications to add conditions.",
       editTitle: "Edit risks and conditions",
+      editPageTitle: "Edit Risk or Condition",
+      editMetaDescription: "Edit risk or condition for selected applications",
+      editRiskTitle: "Edit {riskNumber}",
       addPageTitle: "Add Risk or Condition",
       addMetaDescription: "Add risk or condition to selected applications",
       addTitle: "Add risk or condition",
