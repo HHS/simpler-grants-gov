@@ -1,4 +1,3 @@
-
 import getFormData from "src/utils/getFormData";
 
 const mockGetSession = jest.fn();
