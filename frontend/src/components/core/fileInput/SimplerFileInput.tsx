@@ -59,6 +59,13 @@ type SimplerFileInputProps = {
   *
 */
 
+const toUploadMetadata = (files: File[]) => {
+  return files.map((file) => {
+    const uploadId = `${file.name}_${Date.now()}`;
+    return { uploadId, file };
+  });
+};
+
 export const SimplerFileInput = ({
   postUploadAction,
   postUploadActionProgressMessage,
@@ -100,10 +107,17 @@ export const SimplerFileInput = ({
       console.error("no files!");
       return;
     }
-    const fileToUpload = changeEvent.target.files[0];
-    const fileName = fileToUpload.name || "No Filename!";
-    const uploadId = `${fileName}_${Date.now()}`;
-    setActiveUploads([...activeUploads, { uploadId, file: fileToUpload }]);
+
+    if (!multiFile && changeEvent.target.files.length > 1) {
+      console.error(
+        "attempting to upload multiple files to a single file input, only uploading first file in list",
+      );
+    }
+    const filesToUpload = !multiFile
+      ? [changeEvent.target.files[0]]
+      : Array.from(changeEvent.target.files);
+
+    setActiveUploads([...activeUploads, ...toUploadMetadata(filesToUpload)]);
   };
 
   // this does not update the list of existing / previously uploaded files internally,
@@ -199,6 +213,7 @@ export const SimplerFileInput = ({
         aria-invalid={!!uploadErrors.length}
         className={hideNativeInput ? "display-none" : ""}
         multiple={multiFile}
+        changeSelectedFileText="Add file"
       />
       {activeUploads.map(({ uploadId, file }) => (
         <FileUploadManager
