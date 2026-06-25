@@ -2525,7 +2525,7 @@ export const messages = {
       postUploadError: "Error processing file",
       missingFileId: "Error: missing file id",
       preUploadError: "Pre upload error",
-      infected: "Security scan failed. File infected",
+      infected: "Security scan failed. File removed",
     },
     deleteModal: {
       titleText: "Delete",

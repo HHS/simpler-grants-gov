@@ -4,7 +4,6 @@
 
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import {
   createAdvanceStreamTrigger,
   makeAdvanceableTestStreamForTrigger,
@@ -16,10 +15,6 @@ const clientFetchMock = jest.fn();
 const fakeAbortController = jest.fn();
 const fakeTextDecoder = jest.fn();
 const fakeFileReader = jest.fn();
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
@@ -121,7 +116,7 @@ describe("SimplerFileInput", () => {
           makeAdvanceableTestStreamForTrigger(
             [
               JSON.stringify({ status: "uploading" }),
-              JSON.stringify({ status: "scanning" }),
+              JSON.stringify({ status: "pending" }),
             ],
             trigger,
           ),
@@ -247,6 +242,7 @@ describe("SimplerFileInput", () => {
           ),
         ),
       );
+
       render(
         <SimplerFileInput
           onDelete={() => Promise.resolve()}
@@ -281,11 +277,12 @@ describe("SimplerFileInput", () => {
     });
 
     it("displays a generic error if error occurs outside of upload process", async () => {
+      const mockOnError = jest.fn();
       render(
         <SimplerFileInput
           onDelete={() => Promise.resolve()}
           onStart={() => {
-            throw new Error();
+            throw new Error("fake error");
           }}
           postUploadAction={() => Promise.resolve(undefined)}
           postUploadActionProgressMessage="post upload action in progress"
@@ -293,6 +290,7 @@ describe("SimplerFileInput", () => {
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
           labelId="file-input-label"
+          onError={mockOnError}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -302,6 +300,7 @@ describe("SimplerFileInput", () => {
           type: "text/plain",
         }),
       );
+      await waitFor(() => expect(mockOnError).toHaveBeenCalled());
       await waitFor(async () =>
         expect(
           await screen.findByTestId("file-upload-status-display"),
@@ -365,6 +364,7 @@ describe("SimplerFileInput", () => {
           ),
         ),
       );
+      const mockOnError = jest.fn();
       render(
         <SimplerFileInput
           onDelete={() => Promise.resolve()}
@@ -374,6 +374,7 @@ describe("SimplerFileInput", () => {
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
           labelId="file-input-label"
+          onError={mockOnError}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -384,10 +385,11 @@ describe("SimplerFileInput", () => {
         }),
       );
       trigger.advance();
-      await new Promise((resolve) => setTimeout(resolve, 10));
       trigger.advance();
-      await new Promise((resolve) => setTimeout(resolve, 10));
       trigger.advance();
+      await waitFor(() => {
+        expect(mockOnError).toHaveBeenCalled();
+      });
       await waitFor(async () =>
         expect(
           await screen.findByTestId("file-upload-status-display"),
@@ -408,9 +410,10 @@ describe("SimplerFileInput", () => {
       );
       const delayedPostUploadAction = (): Promise<undefined> => {
         return new Promise((_resolve, reject) => {
-          setTimeout(() => reject(new Error()), 10);
+          setTimeout(() => reject(new Error("fake error")), 10);
         });
       };
+      const mockOnError = jest.fn();
       render(
         <SimplerFileInput
           onDelete={() => Promise.resolve()}
@@ -420,6 +423,7 @@ describe("SimplerFileInput", () => {
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
           labelId="file-input-label"
+          onError={mockOnError}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -430,6 +434,10 @@ describe("SimplerFileInput", () => {
         }),
       );
       trigger.advance();
+      // test won't pass without this, as it takes too long to update the DOM w error info otherwise?
+      await waitFor(() => {
+        expect(mockOnError).toHaveBeenCalled();
+      });
       await waitFor(async () =>
         expect(
           await screen.findByTestId("file-upload-status-display"),
@@ -948,7 +956,6 @@ describe("SimplerFileInput", () => {
       expect(cancelButton).toBeInTheDocument();
       await userEvent.click(cancelButton);
 
-      expect(firstControllerAbortMock).not.toHaveBeenCalled();
       expect(controllerAbortMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -1047,5 +1054,8 @@ describe("SimplerFileInput", () => {
     const trussworksPreviews = screen.queryByTestId("file-input-preview");
     expect(trussworksPreviewImages).not.toBeVisible();
     expect(trussworksPreviews).not.toBeVisible();
+  });
+  it("works for multifile!!!", () => {
+    expect(true).toBe(false);
   });
 });

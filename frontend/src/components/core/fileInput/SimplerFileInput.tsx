@@ -231,9 +231,9 @@ export const SimplerFileInput = ({
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
           onStart={onStart}
-          onUploadComplete={() => {
+          onUploadComplete={(postUploadResult: unknown) => {
             trackUploadComplete(uploadId);
-            onSuccess(undefined);
+            onSuccess(postUploadResult);
           }}
           onComplete={onComplete}
           onUploadError={(e: Error) => {

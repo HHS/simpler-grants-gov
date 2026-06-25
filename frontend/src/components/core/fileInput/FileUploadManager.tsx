@@ -1,3 +1,4 @@
+import { upload } from "@testing-library/user-event/dist/cjs/utility/upload.js";
 import { useFileUpload } from "src/hooks/useFileUpload";
 import { PostUploadAction } from "src/types/fileUploadTypes";
 
@@ -8,7 +9,7 @@ import { FileInputStatusDisplay } from "./FileInputStatusDisplay";
 type FileUploadManagerProps = {
   onCancel: (uploadId: string) => void;
   onDismiss: (uploadId: string) => void;
-  onUploadComplete: () => void;
+  onUploadComplete: (postUploadResult: unknown) => void;
   onStart: () => void;
   onComplete: () => void;
   onUploadError: (e: Error) => void;
@@ -51,6 +52,7 @@ export const FileUploadManager = ({
 
   // eslint-disable-next-line
   useEffect(() => uploadFile(fileToUpload), []);
+  console.log("~~~ currentStatus", uploadError);
   return (
     <FileInputStatusDisplay
       fileName={fileName || ""}

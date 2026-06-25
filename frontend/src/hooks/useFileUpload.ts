@@ -123,15 +123,35 @@ export const useFileUpload = ({
     [setCurrentStatus],
   );
 
-  const performUpload = useCallback(
+  const uploadFile = useCallback(
     (fileToUpload: File) => {
+      if (alreadyCalled.current) {
+        console.warn(
+          "uploadFile is only meant to be called once per hook instance",
+        );
+        return;
+      }
+      alreadyCalled.current = true;
+      const fileName = fileToUpload.name || "No Filename!";
+      const uploadAbortController = new AbortController();
+
+      setFileName(fileName);
+      setCurrentStatus("queued");
+      setUploadController(uploadAbortController);
+
+      try {
+        onStart();
+      } catch (e) {
+        handleError(e as Error);
+        return;
+      }
       // start upload
       void createFormDataForFile(fileToUpload)
         .then((fileFormData) => {
           return clientFetch("/api/file", {
             method: "POST",
             body: fileFormData,
-            signal: uploadController?.signal,
+            signal: uploadAbortController?.signal,
           });
         })
         // process streaming response
@@ -176,7 +196,6 @@ export const useFileUpload = ({
     [
       clientFetch,
       handleError,
-      uploadController,
       onComplete,
       onSuccess,
       postUploadAction,
@@ -184,43 +203,7 @@ export const useFileUpload = ({
       setCurrentStatus,
       setPostUploadController,
       setResponseReader,
-    ],
-  );
-
-  // no great reason for this piece of the process to be its own function, but isolates the rest of the process
-  // to the promise chain
-  const uploadFile = useCallback(
-    (fileToUpload: File) => {
-      if (alreadyCalled.current) {
-        console.log(
-          "uploadFile is only meant to be called once per hook instance",
-        );
-        return;
-      }
-      alreadyCalled.current = true;
-      const fileName = fileToUpload.name || "No Filename!";
-      const uploadAbortController = new AbortController();
-
-      setFileName(fileName);
-      setCurrentStatus("queued");
-      setUploadController(uploadAbortController);
-
-      try {
-        onStart();
-      } catch (e) {
-        handleError(e as Error);
-        return;
-      }
-
-      performUpload(fileToUpload);
-    },
-    [
-      handleError,
       onStart,
-      performUpload,
-      setCurrentStatus,
-      setFileName,
-      setUploadController,
     ],
   );
 
@@ -241,6 +224,11 @@ export const useFileUpload = ({
       handleCancel,
       handleDismiss,
     ],
+  );
+  console.log(
+    `++++ hook return value`,
+    useFileUploadInterface.uploadError,
+    useFileUploadInterface.currentStatus,
   );
   return useFileUploadInterface;
 };

@@ -70,7 +70,6 @@ const ActionButton = ({
   onCancel: () => void;
   onDismiss: () => void;
 }) => {
-  console.log("-----", error, status);
   const t = useTranslations("FileInput.statusDisplay");
   if (error) {
     return (
@@ -132,7 +131,6 @@ export const FileInputStatusDisplay = ({
   postUploadActionErrorMessage?: string;
 }) => {
   const t = useTranslations("FileInput.statusDisplay");
-  console.log("$$$$$ active status", status);
 
   if (!status) {
     return;
