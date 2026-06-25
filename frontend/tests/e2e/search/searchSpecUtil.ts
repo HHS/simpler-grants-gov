@@ -269,7 +269,7 @@ export async function waitForSearchResultsInitialLoad(
 
   // Wait for the result controls region, which indicates search data has rendered.
   await expect(
-    page.locator("div[data-testid='search-results-controls'] h3"),
+    page.locator("div[data-testid='search-results-controls'] h3").first(),
   ).toBeVisible({ timeout });
 }
 

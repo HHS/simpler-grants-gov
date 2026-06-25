@@ -18,7 +18,7 @@ type WaitForTableRowOptions = {
 
 type WaitForOpportunityRowByStatusOptions = {
   title: string;
-  status: string;
+  status: string | string[];
   rowSelector?: string;
   timeoutMs?: number;
   intervalsMs?: number[];
@@ -26,10 +26,23 @@ type WaitForOpportunityRowByStatusOptions = {
 };
 
 /** Creates a case-insensitive status matcher with safe escaping. */
-const normalizeOpportunityStatusPattern = (status: string): RegExp => {
-  const trimmed = status.trim();
+const normalizeOpportunityStatusPattern = (status: string | string[]): RegExp => {
+  const statusValues = (Array.isArray(status) ? status : [status])
+    .map((value) => value.trim())
+    .filter(Boolean);
 
-  return new RegExp(`\\b${escapeRegex(trimmed)}\\b`, "i");
+  if (!statusValues.length) {
+    throw new Error("At least one opportunity status is required");
+  }
+
+  if (statusValues.length === 1) {
+    return new RegExp(`\\b${escapeRegex(statusValues[0])}\\b`, "i");
+  }
+
+  return new RegExp(
+    `\\b(?:${statusValues.map(escapeRegex).join("|")})\\b`,
+    "i",
+  );
 };
 
 /** Finds opportunity rows that match both title link and target status text. */
@@ -39,10 +52,11 @@ const getMatchingRowByLinkAndStatusLocator = (
   linkText: string,
   statusText: RegExp,
 ): Locator => {
+  const exactTitlePattern = new RegExp(`^\\s*${escapeRegex(linkText)}\\s*$`);
+
   const rowsByTitle = page.locator(rowSelector).filter({
     has: page.getByRole("link", {
-      name: linkText,
-      exact: true,
+      name: exactTitlePattern,
     }),
   });
 
@@ -53,11 +67,7 @@ const getMatchingRowByLinkAndStatusLocator = (
       .filter({ hasText: statusText }),
   });
 
-  // Fallback for table variants that render status text outside the canonical
-  // responsive-data "-2" status cell.
-  const rowsByStatusTextAnywhere = rowsByTitle.filter({ hasText: statusText });
-
-  return rowsByStatusCell.or(rowsByStatusTextAnywhere);
+  return rowsByStatusCell;
 };
 
 /** Detects probable logged-out state while polling long-running table updates. */
@@ -135,6 +145,12 @@ export const waitForTableRow = async (
         ).count();
 
         if (rowCount > 0) {
+          if (rowCount > 1) {
+            throw new Error(
+              `Found ${rowCount} matching rows for title "${linkText}"; expected a unique match`,
+            );
+          }
+
           return rowCount;
         }
 
@@ -213,7 +229,7 @@ export const waitForOpportunityRowByStatus = async (
     rowSelector,
     timeoutMs,
     intervalsMs,
-    message = `Waiting for ${status} opportunity row to appear on list`,
+    message = `Waiting for ${Array.isArray(status) ? status.join(" or ") : status} opportunity row to appear on list`,
   } = options;
 
   const row = await waitForTableRow(page, {
