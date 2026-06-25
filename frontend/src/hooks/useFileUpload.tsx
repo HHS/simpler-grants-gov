@@ -8,7 +8,14 @@ import {
 import { createFormDataForFile } from "src/utils/fileUtils/createFormData";
 import { unbatchStreamChunkJSON } from "src/utils/streamUtils";
 
-import { ChangeEvent, useCallback, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 type FileUploadCallbacks = {
   onError?: (err: Error) => void;
@@ -16,6 +23,7 @@ type FileUploadCallbacks = {
   onStart?: () => void;
   onComplete?: () => void;
   postUploadAction: PostUploadAction;
+  fileToUpload: File;
 };
 
 type FileUploadInputs = FileUploadCallbacks & { file: File; uploadId?: string };
@@ -35,11 +43,15 @@ export const useFileUpload = ({
   onError = noop,
   onComplete = noop,
   postUploadAction,
+  fileToUpload,
 }: FileUploadCallbacks) => {
   const { clientFetch } = useClientFetch<Response>("unable to upload file", {
     authGatedRequest: true,
     jsonResponse: false,
   });
+
+  const alreadyCalled = useRef<boolean>(false);
+
   const [uploadError, setUploadError] = useState<string | undefined>();
   const [currentStatus, setCurrentStatus] = useState<FileUploadProcessStatus>();
   const [fileName, setFileName] = useState<string>();
@@ -58,17 +70,17 @@ export const useFileUpload = ({
     [setUploadError, onError],
   );
 
-  const handleCancel = async () => {
+  const handleCancel = useCallback(async () => {
     setCurrentStatus(undefined);
     uploadController?.abort();
     postUploadController?.abort();
     await responseReader?.cancel();
-  };
+  }, [uploadController, postUploadController, responseReader]);
 
-  const handleDismiss = () => {
+  const handleDismiss = useCallback(() => {
     setCurrentStatus(undefined);
     setUploadError(undefined);
-  };
+  }, []);
 
   const readResponseStream = useCallback(
     async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
@@ -197,12 +209,18 @@ export const useFileUpload = ({
 
   const uploadFile = useCallback(
     (fileToUpload: File) => {
+      console.log("..... UPLOAD");
+      if (alreadyCalled.current) {
+        console.log("Only call upload file once per hook please");
+        return;
+      }
+      alreadyCalled.current = true;
       const fileName = fileToUpload.name || "No Filename!";
-      const uploadId = `${fileName}_${Date.now()}`;
       const uploadAbortController = new AbortController();
 
-      setUploadError(uploadId);
       setFileName(fileName);
+      // this is helpful in resetting the performUpload function with a positive status before running,
+      // that way we can prevent duplicate uploads by short circuiting within performUpload
       setCurrentStatus("queued");
       setUploadController(uploadAbortController);
 
@@ -222,17 +240,30 @@ export const useFileUpload = ({
       setCurrentStatus,
       setFileName,
       setUploadController,
-      setUploadError,
     ],
   );
-  return {
-    uploadError,
-    currentStatus,
-    fileName,
-    uploadFile,
-    handleCancel,
-    handleDismiss,
-  };
+
+  console.log("..... RENDER");
+  // useEffect(() => uploadFile(fileToUpload), []);
+  const useFileUploadInterface = useMemo(
+    () => ({
+      uploadError,
+      currentStatus,
+      fileName,
+      uploadFile,
+      handleCancel,
+      handleDismiss,
+    }),
+    [
+      uploadError,
+      currentStatus,
+      fileName,
+      uploadFile,
+      handleCancel,
+      handleDismiss,
+    ],
+  );
+  return useFileUploadInterface;
 };
 
 // export const useFileUpload = ({

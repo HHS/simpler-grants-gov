@@ -47,9 +47,13 @@ export const FileUploadManager = ({
     onError: onUploadError,
     onComplete: onComplete,
     postUploadAction,
+    fileToUpload,
   });
 
-  useEffect(() => uploadFile(fileToUpload), [uploadFile, fileToUpload]);
+  useEffect(() => {
+    console.log("UUUUUUSE effect");
+    uploadFile(fileToUpload);
+  }, []);
   return (
     <FileInputStatusDisplay
       fileName={fileName || ""}

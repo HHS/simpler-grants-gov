@@ -185,9 +185,7 @@ export const SimplerFileInput = ({
     }
   };
 
-  // needs to know ( can be tracked by state in this component)
-  // * how many uploads are active, so it can create a manager and status display for each one
-  // * know if any uploads have errors or success statuses so it can hide or show the input
+  console.log(".... ACTIVE UPLOADS", activeUploads);
   return (
     <>
       <FileInput
@@ -226,13 +224,6 @@ export const SimplerFileInput = ({
             onError(e);
           }}
           postUploadAction={postUploadAction}
-          // fileName={
-          //   getStateElementFor<string>(activeUploadId, "fileName") || ""
-          // }
-          // status={getStateElementFor<FileUploadProcessStatus | undefined>(
-          //   activeUploadId,
-          //   "currentStatus",
-          // )}
         />
       ))}
       <FileInputExistingFiles

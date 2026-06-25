@@ -70,6 +70,7 @@ const ActionButton = ({
   onCancel: () => void;
   onDismiss: () => void;
 }) => {
+  console.log("-----", error, status);
   const t = useTranslations("FileInput.statusDisplay");
   if (error) {
     return (
