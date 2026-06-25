@@ -144,6 +144,7 @@ def pre_sign_upload(
     content_type: str,
     metadata: dict[str, str],
     s3_config: S3Config | None = None,
+    include_if_none_match: bool = False,
 ) -> dict[str, Any]:
     """Generate a presigned POST URL + body for uploading a file to s3.
 
@@ -167,6 +168,8 @@ def pre_sign_upload(
         content_type: MIME type of the file being uploaded.
         metadata: Key→value pairs to attach as object metadata. Keys are
             passed through to s3 as ``x-amz-meta-<key>``.
+        s3_config: S3 configuration object, if not passed in, grabs the default s3_config
+        include_if_none_match: Whether to prevent a user from overwriting a file
     """
     if s3_config is None:
         s3_config = get_default_s3_config()
@@ -178,16 +181,20 @@ def pre_sign_upload(
 
     metadata_fields = {f"x-amz-meta-{k}": v for k, v in metadata.items()}
 
+    conditions = [
+        ["content-length-range", 1, file_config.max_file_upload_size_bytes],
+        {"Content-Type": content_type},
+        *[{k: v} for k, v in metadata_fields.items()],
+    ]
+
+    if include_if_none_match:
+        conditions.append({"IfNoneMatch": "*"})
+
     presigned_post_result = s3_client.generate_presigned_post(
         Bucket=bucket,
         Key=key,
         Fields={"Content-Type": content_type, **metadata_fields},
-        Conditions=[
-            ["content-length-range", 1, file_config.max_file_upload_size_bytes],
-            {"Content-Type": content_type},
-            *[{k: v} for k, v in metadata_fields.items()],
-            {"IfNoneMatch": "*"},
-        ],
+        Conditions=conditions,
         ExpiresIn=s3_config.presigned_s3_duration,
     )
 
