@@ -17,13 +17,7 @@ import { rebaseFieldListWarningsAfterDelete } from "src/utils/applyForm/rebaseFi
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
 import { useRouter } from "next/navigation";
-import {
-  ReactNode,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-  useActionState,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
 import { Alert, Button, ButtonGroup, FormGroup } from "@trussworks/react-uswds";
 
 import { FormFields } from "src/components/apply-form/FormFields";
@@ -61,11 +55,9 @@ interface ApplyFormFormContext {
 const FormActionButtons = ({
   applicationId,
   onSaveClick,
- 
 }: {
   applicationId: string;
   onSaveClick: () => void;
-
 }) => {
   const { pending } = useFormStatus();
   const router = useRouter();
@@ -191,7 +183,7 @@ const ApplyForm = ({
   });
 
   const { error, saved } = formState;
- 
+
   /**
    * Marks the form as changed.
    *
