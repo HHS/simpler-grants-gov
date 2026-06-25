@@ -39,15 +39,18 @@ locals {
 
   # Whether any of the applications in the network has enabled notifications
   enable_notifications = anytrue([for app in local.apps_in_network : app.enable_notifications])
+
+  # Whether any of the applications in the network has enabled SMS notifications
+  enable_sms_notifications = anytrue([for app in local.apps_in_network : app.enable_sms_notifications])
 }
 
 terraform {
-  required_version = ">= 1.10.0"
+  required_version = "~>1.10.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.46.0"
+      version = "~>5.6.0"
     }
   }
 
@@ -58,6 +61,15 @@ terraform {
 
 provider "aws" {
   region = local.region
+  default_tags {
+    tags = local.tags
+  }
+}
+
+provider "aws" {
+  alias  = "us-east-1"
+  region = "us-east-1"
+
   default_tags {
     tags = local.tags
   }
@@ -84,18 +96,21 @@ module "nofos_config" {
 }
 
 module "network" {
-  source                                  = "../modules/network"
-  name                                    = var.network_name
-  has_database                            = local.has_database
-  database_subnet_group_name              = var.network_name
-  aws_services_security_group_name_prefix = module.project_config.aws_services_security_group_name_prefix
-  second_octet                            = module.project_config.network_configs[var.network_name].second_octet
-  has_external_non_aws_service            = local.has_external_non_aws_service
-  enable_command_execution                = local.enable_command_execution
+  source                       = "../modules/network/resources"
+  name                         = var.network_name
+  has_database                 = local.has_database
+  has_external_non_aws_service = local.has_external_non_aws_service
+  enable_command_execution     = local.enable_command_execution
+  enable_notifications         = local.enable_notifications
 }
 
 module "domain" {
-  source              = "../modules/domain/resources"
+  source = "../modules/domain/resources"
+  providers = {
+    aws           = aws
+    aws.us-east-1 = aws.us-east-1
+  }
+
   name                = local.domain_config.hosted_zone
   manage_dns          = local.domain_config.manage_dns
   certificate_configs = local.domain_config.certificate_configs
