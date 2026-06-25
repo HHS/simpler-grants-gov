@@ -10,8 +10,8 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { sf424aHappyPathTestData } from "tests/e2e/apply/fixtures/sf424a-data";
 import { SF424A_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424a-field-definitions";
-import { sf424aHappyPathTestData } from "tests/e2e/apply/fixtures/sf424a-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";

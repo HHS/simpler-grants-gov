@@ -1,3 +1,6 @@
+import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
+import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
+
 /**
  * Test data for SF-424A happy path.
  *
@@ -127,8 +130,43 @@ export function sf424aHappyPathTestData(
 }
 
 /**
- * Pre-computed singleton for the default SF-424A happy path data.
- * Use this when no overrides are needed to avoid re-computing on each call.
+ * Happy-path test data builder for the SF-424A form (print view).
+ * Generates form data using the pre-computed sf424aHappyPathTestData() function.
+ *
+ * SF-424A is a complex budget form with rule-computed totals. The underlying
+ * sf424aHappyPathTestData() provides pre-computed values guaranteed to match expected totals.
+ * This builder maintains that guarantee while reserving the suffix parameter for future differentiation.
  */
-export const SF424A_HAPPY_PATH_DATA: Record<string, string> =
-  sf424aHappyPathTestData();
+export const buildSF424aHappyPathTestData = (
+  suffix: number,
+): Record<string, string> => {
+  // SF-424A uses hardcoded values ("1") for all numeric fields to ensure
+  // rule-computed totals are deterministic and match SF424A_EXPECTED in sf424a-field-definitions.ts.
+  // The suffix is not used in field values currently, but reserved for future form differentiation.
+  return sf424aHappyPathTestData();
+};
+
+/**
+ * Opportunity data for the SF-424A form — unified opportunity for both local and staging.
+ * Contains opportunity metadata, expected prepopulated field values,
+ * and the form-specific test data builder.
+ * Uses a single E2E opportunity across environments to align with SF-424 pattern.
+ * Imported by load-opportunity-config.ts to build the opportunity registry.
+ */
+export const SF424A_OPPORTUNITY_DATA: PrintViewFormData = {
+  opportunityId: "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+  opportunityNumber: "E2E-SF424A-ORG-IND-01",
+  formKey: "sf424a",
+  expectedPrepopulatedFields: {
+    funding_opportunity_number: "E2E-SF424A-ORG-IND-01",
+    funding_opportunity_title:
+      "E2E Budget Information for Non-Construction Programs (SF-424A) ORG IND OT01",
+    assistance_listing_number: "10.960",
+    agency_name: "Simpler Grants.gov",
+    assistance_listing_program_title: "Technical Agricultural Assistance",
+    competition_identification_title:
+      "E2E Budget Information for Non-Construction Programs (SF-424A) ORG IND CT01",
+    confirmation: "Yes",
+  },
+  buildTestData: buildSF424aHappyPathTestData,
+};
