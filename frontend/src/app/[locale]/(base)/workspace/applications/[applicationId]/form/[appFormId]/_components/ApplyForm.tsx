@@ -18,11 +18,10 @@ import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
 import { useRouter } from "next/navigation";
 import {
-  ReactNode,
+  ReactNode,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
   useActionState,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { Alert, Button, ButtonGroup, FormGroup } from "@trussworks/react-uswds";
@@ -62,13 +61,11 @@ interface ApplyFormFormContext {
 const FormActionButtons = ({
   applicationId,
   onSaveClick,
-  hasUnsavedChanges,
-  unsavedChangesWarning,
+ 
 }: {
   applicationId: string;
   onSaveClick: () => void;
-  hasUnsavedChanges: boolean;
-  unsavedChangesWarning: string;
+
 }) => {
   const { pending } = useFormStatus();
   const router = useRouter();
@@ -132,13 +129,9 @@ const ApplyForm = ({
   createdAt?: string;
   updatedAt?: string;
 }) => {
-  //const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
   const translate = t as unknown as Translator;
   const isFormLocked = applicationStatus !== "in_progress";
-  const [mounted, setMounted] = useState(false);
-  const cachedTimestampRef = useRef<string | undefined>(undefined);
-  const cachedStatusRef = useRef<"created" | "updated" | undefined>(undefined);
 
   const timestampsEqual = (a?: string, b?: string): boolean => {
     if (!a || !b) return false;
@@ -147,24 +140,10 @@ const ApplyForm = ({
     return Number.isFinite(at) && Number.isFinite(bt) && at === bt;
   };
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const lastUpdatedAt = updatedAt || createdAt;
 
-  const lastUpdatedAt: string | undefined = useMemo(() => {
-    const timestamp = updatedAt || createdAt;
-    if (timestamp) {
-      cachedTimestampRef.current = timestamp;
-      if (!cachedStatusRef.current) {
-        cachedStatusRef.current = updatedAt
-          ? timestampsEqual(updatedAt, createdAt)
-            ? "created"
-            : "updated"
-          : "created";
-      }
-    }
-    return cachedTimestampRef.current;
-  }, [createdAt, updatedAt]);
+  const formStatus =
+    updatedAt && !timestampsEqual(updatedAt, createdAt) ? "updated" : "created";
 
   const isFormSaved = Boolean(lastUpdatedAt);
 
@@ -212,15 +191,7 @@ const ApplyForm = ({
   });
 
   const { error, saved } = formState;
-  useEffect(() => {
-    if (updatedAt) {
-      cachedTimestampRef.current = updatedAt;
-      if (!timestampsEqual(updatedAt, createdAt)) {
-        cachedStatusRef.current = "updated";
-      }
-    }
-  }, [updatedAt, createdAt]);
-
+ 
   /**
    * Marks the form as changed.
    *
@@ -316,19 +287,17 @@ const ApplyForm = ({
       <div className="display-flex flex-align-center flex-justify margin-bottom-2">
         <div>
           {required}
-          {mounted && isFormSaved && lastUpdatedAt && (
+          {isFormSaved && lastUpdatedAt && (
             <div className="margin-top-1">
-              {cachedStatusRef.current === "updated"
+              {formStatus === "updated"
                 ? `This form was last updated on ${formatLastUpdatedTime(lastUpdatedAt)}`
                 : `This form was created on ${formatLastUpdatedTime(lastUpdatedAt)}`}
             </div>
           )}
         </div>
-        {mounted && !isFormLocked && (
+        {!isFormLocked && (
           <FormActionButtons
             applicationId={applicationId}
-            hasUnsavedChanges={formChanged || attachmentsChanged}
-            unsavedChangesWarning={translate("unsavedChangesWarning")}
             onSaveClick={() => {
               setFormChanged(false);
               setAttachmentsChanged(false);
