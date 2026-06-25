@@ -32,33 +32,6 @@ type SimplerFileInputProps = {
   multiFile?: boolean;
 };
 
-/*
-  things this needs to do
-
-  * show the custom progress indicator [x]
-  * show the correct progress based on what the API sends back [x]
-  * call onError on error [x]
-  * call onSuccess on success [x]
-  * call onStart on start [x]
-  * call postUploadAction on successful upload [x]
-  * hide the native progress indicator [x]
-  * display existing files as expected [x]
-  * cancel a download [x]
-  * delete a previously uploaded file [x]
-
-  * remove the trussworks "selected file" input on single file inputs [x]
-  * confirm delete behavior [x]
-  * confirm cancel behavior [x]
-  * confirm callback behavior [x]
-  *
-  * confirm error status displays [x]
-  *
-  * properly format status display [x]
-  * properly format existing file display [x]'
-  *
-  *
-*/
-
 const toUploadMetadata = (files: File[]) => {
   return files.map((file) => {
     const uploadId = `${file.name}_${Date.now()}`;
@@ -95,7 +68,7 @@ export const SimplerFileInput = ({
   );
   // upload id is only used for tracking internal to this component
   const [activeUploads, setActiveUploads] = useState<
-    { uploadId: string; file: File }[]
+    { uploadId: string; file: File; complete?: boolean }[]
   >([]);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
 
@@ -161,17 +134,20 @@ export const SimplerFileInput = ({
       return true;
     }
     // if there is any active upload that has not yet completed
-    if (
-      activeUploads.some(
-        ({ uploadId }) => !completedUploads.find((id) => id === uploadId),
-      )
-    ) {
+    if (activeUploads.some((activeUpload) => !activeUpload.complete)) {
       return true;
     }
-  }, [multiFile, activeUploads, existingFiles, completedUploads]);
+  }, [multiFile, activeUploads, existingFiles]);
 
   const trackUploadComplete = (uploadId: string) => {
-    setCompletedUploads([...completedUploads, uploadId]);
+    const currentUploads = [...activeUploads];
+    const completedIndex = currentUploads.findIndex(
+      (item) => item.uploadId === uploadId,
+    );
+    if (completedIndex > -1) {
+      currentUploads[completedIndex].complete = true;
+      setActiveUploads(currentUploads);
+    }
   };
   const trackUploadError = (uploadId: string) => {
     setUploadErrors([...uploadErrors, uploadId]);
