@@ -58,40 +58,27 @@ export function OpportunityAttachmentUploadInput({
   const [deletePending, setDeletePending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const fileInputRef = useRef<FileInputRef | null>(null);
-  const deleteModalRef = useRef<ModalRef | null>(null);
-
-  const handleFileChange = async (files: FileList | null): Promise<void> => {
-    if (!files) return;
-    setErrorMessage(null);
-    setIsUploading(true);
-
-    for (const file of Array.from(files)) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        setErrorMessage(t("errorFileTooLarge", { fileName: file.name }));
-        continue;
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const data = await uploadFetch(
-          `/api/opportunities/${opportunityId}/attachments`,
-          { method: "POST", body: formData },
-        );
-        setUploadedFiles((prev) => [
-          ...prev,
-          {
-            id: data.opportunity_attachment_id,
-            name: file.name,
-            deletable: true,
-          },
-        ]);
-      } catch (err) {
-        console.error("Attachment upload failed", err);
-        setErrorMessage(t("errorUploadFailed", { fileName: file.name }));
-      }
+  useEffect(
+    () =>
+      setExistingFiles(
+        mapInitialAttachmentsToExistingFiles(initialAttachments),
+      ),
+    [initialAttachments],
+  );
+  const handleOpportunityAttachment = async (
+    fileId: string,
+    abortSignal: AbortSignal,
+  ) => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await uploadFetch(
+        `/api/opportunities/${opportunityId}/attachments/attach/${fileId}`,
+        { method: "POST", signal: abortSignal },
+      );
+    } catch (e) {
+      console.error("Attachment upload failed", e);
+      setErrorMessage(t("errorUploadFailed"));
+      throw e;
     }
 
     setIsUploading(false);
@@ -142,54 +129,10 @@ export function OpportunityAttachmentUploadInput({
         type="file"
         multiple
         disabled={isUploading || !isDraft}
-        onChange={(e) => {
-          // Per-file upload errors are caught inside handleFileChange.
-          // This .catch() covers unexpected synchronous errors (e.g. FormData append failure).
-          handleFileChange(e.currentTarget.files).catch(() =>
-            setErrorMessage(t("errorUploadFailed", { fileName: "" })),
-          );
-        }}
-      />
-
-      {uploadedFiles.length > 0 && (
-        <ul className="usa-list usa-list--unstyled margin-top-2">
-          {uploadedFiles.map((file) => (
-            <li
-              key={file.id}
-              className="display-flex flex-align-center padding-y-1 border-bottom border-base-lighter"
-            >
-              <span className="flex-fill font-sans-sm">{file.name}</span>
-              {file.deletable && isDraft && (
-                <ModalToggleButton
-                  modalRef={deleteModalRef}
-                  opener
-                  className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
-                  onClick={() => setFileToDelete(file)}
-                >
-                  <USWDSIcon
-                    className="usa-icon margin-right-05 margin-left-neg-05"
-                    name="delete"
-                  />
-                  {t("removeButton")}
-                </ModalToggleButton>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <DeleteFileModal
-        deletePending={deletePending}
-        handleDeleteFile={() => {
-          confirmDelete().catch(() =>
-            setErrorMessage(
-              t("errorDeleteFailed", { fileName: fileToDelete?.name ?? "" }),
-            ),
-          );
-        }}
-        modalId="opportunity-attachment-delete-modal"
-        modalRef={deleteModalRef}
-        pendingDeleteName={fileToDelete?.name}
+        readOnly={false}
+        required={false}
+        existingFiles={existingFiles}
+        multiFile={true}
       />
     </FormGroup>
   );

@@ -47,13 +47,10 @@ export const FileUploadManager = ({
     onError: onUploadError,
     onComplete: onComplete,
     postUploadAction,
-    fileToUpload,
   });
 
-  useEffect(() => {
-    console.log("UUUUUUSE effect");
-    uploadFile(fileToUpload);
-  }, []);
+  // eslint-disable-next-line
+  useEffect(() => uploadFile(fileToUpload), []);
   return (
     <FileInputStatusDisplay
       fileName={fileName || ""}

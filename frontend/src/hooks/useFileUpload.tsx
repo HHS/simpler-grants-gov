@@ -8,14 +8,7 @@ import {
 import { createFormDataForFile } from "src/utils/fileUtils/createFormData";
 import { unbatchStreamChunkJSON } from "src/utils/streamUtils";
 
-import {
-  ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 type FileUploadCallbacks = {
   onError?: (err: Error) => void;
@@ -23,18 +16,6 @@ type FileUploadCallbacks = {
   onStart?: () => void;
   onComplete?: () => void;
   postUploadAction: PostUploadAction;
-  fileToUpload: File;
-};
-
-type FileUploadInputs = FileUploadCallbacks & { file: File; uploadId?: string };
-
-type FileUploadInternalState = {
-  fileName?: string;
-  uploadError?: string;
-  currentStatus?: FileUploadProcessStatus;
-  uploadController?: AbortController;
-  postUploadController?: AbortController;
-  responseReader?: ReadableStreamDefaultReader;
 };
 
 export const useFileUpload = ({
@@ -43,7 +24,6 @@ export const useFileUpload = ({
   onError = noop,
   onComplete = noop,
   postUploadAction,
-  fileToUpload,
 }: FileUploadCallbacks) => {
   const { clientFetch } = useClientFetch<Response>("unable to upload file", {
     authGatedRequest: true,
@@ -168,7 +148,7 @@ export const useFileUpload = ({
             // note that the missing file id error display is predicated on the timing of
             // an error occurring in the "complete" state
             throw new Error(
-              "upload stream completed without sending pending file id",
+              "upload stream completed without sending pending file id, possible due to upload cancellation",
             );
           }
           const postUploadAbortController = new AbortController();
@@ -207,11 +187,14 @@ export const useFileUpload = ({
     ],
   );
 
+  // no great reason for this piece of the process to be its own function, but isolates the rest of the process
+  // to the promise chain
   const uploadFile = useCallback(
     (fileToUpload: File) => {
-      console.log("..... UPLOAD");
       if (alreadyCalled.current) {
-        console.log("Only call upload file once per hook please");
+        console.log(
+          "uploadFile is only meant to be called once per hook instance",
+        );
         return;
       }
       alreadyCalled.current = true;
@@ -219,8 +202,6 @@ export const useFileUpload = ({
       const uploadAbortController = new AbortController();
 
       setFileName(fileName);
-      // this is helpful in resetting the performUpload function with a positive status before running,
-      // that way we can prevent duplicate uploads by short circuiting within performUpload
       setCurrentStatus("queued");
       setUploadController(uploadAbortController);
 
@@ -243,8 +224,6 @@ export const useFileUpload = ({
     ],
   );
 
-  console.log("..... RENDER");
-  // useEffect(() => uploadFile(fileToUpload), []);
   const useFileUploadInterface = useMemo(
     () => ({
       uploadError,
@@ -265,187 +244,3 @@ export const useFileUpload = ({
   );
   return useFileUploadInterface;
 };
-
-// export const useFileUpload = ({
-//   onStart = noop,
-//   onSuccess = noop,
-//   onComplete = noop,
-//   onError = noop,
-//   postUploadAction,
-// }: FileUploadCallbacks) => {
-//   // const { clientFetch } = useClientFetch<Response>("unable to upload file", {
-//   //   authGatedRequest: true,
-//   //   jsonResponse: false,
-//   // });
-
-//   // full state
-//   const [uploadStates, setUploadStates] = useState<
-//     Record<string, FileUploadInternalState>
-//   >({});
-
-//   // const updateStateFor = (uploadId) => (key, value) => {
-
-//   //         setUploadStates({
-//   //       ...uploadStates,
-//   //       [uploadId]: { ...currentState, [key]: value },
-//   //     });
-//   // }
-
-//   // create or return current state for a given upload
-//   const getCurrentStateFor = useCallback(
-//     (uploadId: string): FileUploadInternalState => {
-//       // console.log("~~~~ currentState", uploadStates);
-//       // if (!uploadStates[uploadId]) {
-//       //   console.log("~~~~ setting currentState", {
-//       //     ...uploadStates,
-//       //     [uploadId]: {},
-//       //   });
-//       //   setUploadStates({ ...uploadStates, [uploadId]: {} });
-//       // }
-//       // console.log("~ds~ 1. uploadId", uploadId);
-//       console.log("~ds~ 2. reading currentState", uploadStates[uploadId]);
-//       return uploadStates[uploadId] ? { ...uploadStates[uploadId] } : {};
-//     },
-//     [uploadStates],
-//   );
-
-//   // retrieve a specific state element for a specific upload
-//   const getStateElementFor = useCallback(
-//     <T,>(uploadId: string, element: keyof FileUploadInternalState) => {
-//       const currentState = getCurrentStateFor(uploadId);
-
-//       return currentState[element] as T;
-//     },
-//     [getCurrentStateFor],
-//   );
-
-//   // whether or not any uploads have errors
-//   const hasError = useMemo(() => {
-//     return Object.values(uploadStates).some((state) => state.uploadError);
-//   }, [uploadStates]);
-
-//   const activeUploads = useMemo(
-//     () => Object.keys(uploadStates),
-//     [uploadStates],
-//   );
-
-//   // setters for individual states per upload
-//   // "uploadStates" is stale in setters because the version of the setter functions used in the upload
-//   // functions do not update over the course of the function runtime
-//   const setUploadErrorFor = useCallback(
-//     (uploadId: string, errorMessage?: string) => {
-//       console.log("hihihi upload error", uploadStates);
-//       const currentState = getCurrentStateFor(uploadId);
-//       setUploadStates({
-//         ...uploadStates,
-//         [uploadId]: { ...currentState, uploadError: errorMessage },
-//       });
-//     },
-//     [uploadStates, getCurrentStateFor],
-//   );
-//   const setCurrentStatusFor = useCallback(
-//     (uploadId: string, currentStatus?: FileUploadProcessStatus) => {
-//       console.log("hihihi current status", uploadStates);
-//       const currentState = getCurrentStateFor(uploadId);
-//       setUploadStates({
-//         ...uploadStates,
-//         [uploadId]: { ...currentState, currentStatus },
-//       });
-//     },
-//     [uploadStates, getCurrentStateFor],
-//   );
-//   const setFileNameFor = useCallback(
-//     (uploadId: string, fileName: string) => {
-//       console.log("hihihi file name", uploadStates);
-//       const currentState = getCurrentStateFor(uploadId);
-//       setUploadStates({
-//         ...uploadStates,
-//         [uploadId]: { ...currentState, fileName },
-//       });
-//     },
-//     [uploadStates, getCurrentStateFor],
-//   );
-//   const setUploadControllerFor = useCallback(
-//     (uploadId: string, uploadController: AbortController) => {
-//       console.log("hihihi upload controller", uploadStates);
-//       const currentState = getCurrentStateFor(uploadId);
-//       setUploadStates({
-//         ...uploadStates,
-//         [uploadId]: { ...currentState, uploadController },
-//       });
-//     },
-//     [uploadStates, getCurrentStateFor],
-//   );
-//   const setPostUploadControllerFor = useCallback(
-//     (uploadId: string, postUploadController: AbortController) => {
-//       console.log("hihihi post upload controller", uploadStates);
-//       const currentState = getCurrentStateFor(uploadId);
-//       setUploadStates({
-//         ...uploadStates,
-//         [uploadId]: { ...currentState, postUploadController },
-//       });
-//     },
-//     [uploadStates, getCurrentStateFor],
-//   );
-//   const setResponseReaderFor = useCallback(
-//     (uploadId: string, responseReader: ReadableStreamDefaultReader) => {
-//       console.log("hihihi response reader", uploadStates);
-//       const currentState = getCurrentStateFor(uploadId);
-//       setUploadStates({
-//         ...uploadStates,
-//         [uploadId]: { ...currentState, responseReader },
-//       });
-//     },
-//     [uploadStates, getCurrentStateFor],
-//   );
-
-//   // internal convenience methods
-//   const abortUploadFor = (uploadId: string) => {
-//     const currentState = getCurrentStateFor(uploadId);
-//     currentState.uploadController?.abort();
-//   };
-
-//   const abortPostUploadFor = (uploadId: string) => {
-//     const currentState = getCurrentStateFor(uploadId);
-//     currentState.postUploadController?.abort();
-//   };
-
-//   const cancelResponseReaderFor = (uploadId: string) => {
-//     const currentState = getCurrentStateFor(uploadId);
-//     void currentState.responseReader?.cancel();
-//   };
-
-//   // // exposed methods for upload management
-//   // const handleErrorFor = useCallback(
-//   //   (uploadId: string, e: Error) => {
-//   //     onError(e);
-//   //     setUploadErrorFor(uploadId, e.message);
-//   //   },
-//   //   [setUploadErrorFor, onError],
-//   // );
-
-//   const cancelUploadFor = (uploadId: string) => {
-//     setCurrentStatusFor(uploadId);
-//     abortUploadFor(uploadId);
-//     abortPostUploadFor(uploadId);
-//     // fileInputRef.current?.clearFiles();
-//     cancelResponseReaderFor(uploadId);
-//   };
-
-//   const dismissErrorFor = (uploadId: string) => {
-//     setCurrentStatusFor(uploadId);
-//     setUploadErrorFor(uploadId);
-//     // fileInputRef.current?.clearFiles();
-//   };
-
-//   console.log("!!!! state", uploadStates);
-//   return {
-//     uploadStates,
-//     uploadFile,
-//     cancelUploadFor,
-//     dismissErrorFor,
-//     getStateElementFor,
-//     hasError,
-//     activeUploads,
-//   };
-// };

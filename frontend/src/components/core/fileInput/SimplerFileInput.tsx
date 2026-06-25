@@ -1,20 +1,14 @@
 import { noop } from "lodash";
-import { useClientFetch } from "src/hooks/useClientFetch";
 import {
-  FileUploadProcessStatus,
-  FileUploadStatusUpdate,
   PostUploadAction,
   UploadFileMetadata,
 } from "src/types/fileUploadTypes";
-import { createFormDataForFile } from "src/utils/fileUtils/createFormData";
-import { unbatchStreamChunkJSON } from "src/utils/streamUtils";
 
 import { ChangeEvent, useCallback, useMemo, useRef, useState } from "react";
 import { FileInput, FileInputRef, ModalRef } from "@trussworks/react-uswds";
 
 import { DeleteFileModal } from "./DeleteFileModal";
 import { FileInputExistingFiles } from "./FileInputExistingFiles";
-import { FileInputStatusDisplay } from "./FileInputStatusDisplay";
 import { FileUploadManager } from "./FileUploadManager";
 
 type SimplerFileInputProps = {
@@ -92,10 +86,13 @@ export const SimplerFileInput = ({
   const [filesWithDeleteError, setFilesWithDeleteError] = useState<string[]>(
     [],
   );
+  // upload id is only used for tracking internal to this component
   const [activeUploads, setActiveUploads] = useState<
     { uploadId: string; file: File }[]
   >([]);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
+
+  // track this to ensure we're showing the input at the right times
   const [completedUploads, setCompletedUploads] = useState<string[]>([]);
 
   const trackUpload = (changeEvent: ChangeEvent<HTMLInputElement>) => {
@@ -174,6 +171,7 @@ export const SimplerFileInput = ({
       setUploadErrors(currentErrors);
     }
   };
+  // remove cancelled uploads from the list
   const trackUploadCancel = (uploadId: string) => {
     const currentUploads = [...activeUploads];
     const canceledIndex = currentUploads.findIndex(
@@ -185,7 +183,6 @@ export const SimplerFileInput = ({
     }
   };
 
-  console.log(".... ACTIVE UPLOADS", activeUploads);
   return (
     <>
       <FileInput
@@ -208,7 +205,12 @@ export const SimplerFileInput = ({
           key={uploadId}
           fileToUpload={file}
           uploadId={uploadId}
-          onCancel={() => trackUploadCancel(uploadId)}
+          onCancel={() => {
+            trackUploadCancel(uploadId);
+            if (!multiFile) {
+              fileInputRef?.current?.clearFiles();
+            }
+          }}
           onDismiss={() => dismissError(uploadId)}
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
