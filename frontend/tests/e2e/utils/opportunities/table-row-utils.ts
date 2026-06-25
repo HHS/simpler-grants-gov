@@ -26,7 +26,9 @@ type WaitForOpportunityRowByStatusOptions = {
 };
 
 /** Creates a case-insensitive status matcher with safe escaping. */
-const normalizeOpportunityStatusPattern = (status: string | string[]): RegExp => {
+const normalizeOpportunityStatusPattern = (
+  status: string | string[],
+): RegExp => {
   const statusValues = (Array.isArray(status) ? status : [status])
     .map((value) => value.trim())
     .filter(Boolean);
