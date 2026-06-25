@@ -141,40 +141,46 @@ export const SimplerFileInput = ({
     }
   }, [multiFile, activeUploads, existingFiles]);
 
+  // note usage of functional state setters here to avoid referencing stale closed over state values
   const trackUploadSuccess = (uploadId: string) => {
-    const currentUploads = [...activeUploads];
-    const completedIndex = currentUploads.findIndex(
-      (item) => item.uploadId === uploadId,
-    );
-    if (completedIndex > -1) {
-      currentUploads[completedIndex].complete = true;
-      setActiveUploads(currentUploads);
-    }
+    setActiveUploads((previousActiveUploads) => {
+      const completedIndex = previousActiveUploads.findIndex(
+        (item) => item.uploadId === uploadId,
+      );
+      if (completedIndex > -1) {
+        previousActiveUploads[completedIndex].complete = true;
+      }
+      return previousActiveUploads;
+    });
   };
   const trackUploadError = (uploadId: string) => {
-    setUploadErrors([...uploadErrors, uploadId]);
+    setUploadErrors((previousUploadErrors) => [
+      ...previousUploadErrors,
+      uploadId,
+    ]);
   };
 
   const dismissError = (uploadId: string) => {
-    const currentErrors = [...uploadErrors];
-    const errorIndex = currentErrors.indexOf(uploadId);
-    if (errorIndex > -1) {
-      currentErrors.splice(errorIndex, 1);
-      setUploadErrors(currentErrors);
-    }
+    setUploadErrors((previousUploadErrors) => {
+      const errorIndex = previousUploadErrors.indexOf(uploadId);
+      if (errorIndex > -1) {
+        previousUploadErrors.splice(errorIndex, 1);
+      }
+      return previousUploadErrors;
+    });
   };
   // remove cancelled uploads from the list
   const trackUploadCancel = (uploadId: string) => {
-    const currentUploads = [...activeUploads];
-    const canceledIndex = currentUploads.findIndex(
-      (item) => item.uploadId === uploadId,
-    );
-    if (canceledIndex > -1) {
-      currentUploads.splice(canceledIndex, 1);
-      setActiveUploads(currentUploads);
-    }
+    setActiveUploads((previousActiveUploads) => {
+      const canceledIndex = previousActiveUploads.findIndex(
+        (item) => item.uploadId === uploadId,
+      );
+      if (canceledIndex > -1) {
+        previousActiveUploads.splice(canceledIndex, 1);
+      }
+      return previousActiveUploads;
+    });
   };
-
   return (
     <>
       <FileInput
