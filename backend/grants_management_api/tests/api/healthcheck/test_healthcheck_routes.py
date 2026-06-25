@@ -1,4 +1,5 @@
-import datetime
+from datetime import datetime
+
 
 def test_get_healthcheck_200(client):
     response = client.get("/health")

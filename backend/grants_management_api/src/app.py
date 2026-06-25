@@ -2,17 +2,17 @@
 import logging
 from typing import Any
 
-from src.api.healthcheck.healthcheck_blueprint import healthcheck_blueprint
-from grants_shared.api.schemas import response_schema
 import grants_shared.adapters.db as db
-from grants_shared.api.response import restructure_error_response
 import grants_shared.adapters.db.flask_db as flask_db
 import grants_shared.logs
 import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
 from flask_cors import CORS
+from grants_shared.api.response import restructure_error_response
+from grants_shared.api.schemas import response_schema
 
 from src.adapters.newrelic import init_newrelic
+from src.api.healthcheck.healthcheck_blueprint import healthcheck_blueprint
 from src.app_config import AppConfig
 
 logger = logging.getLogger(__name__)

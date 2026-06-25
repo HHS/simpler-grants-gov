@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 
+
 class AppConfig(BaseSettings):
     # Set HOST to 127.0.0.1 by default to avoid other machines on the network
     # from accessing the application. This is especially important if you are

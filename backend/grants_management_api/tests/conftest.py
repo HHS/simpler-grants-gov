@@ -1,14 +1,14 @@
 import uuid
-import src.app as app_entry
+
+import _pytest.monkeypatch
 import flask
 import pytest
-import _pytest.monkeypatch
 from apiflask import APIFlask
 from grants_shared.adapters import db
-
 from grants_shared.util.local import load_local_env_vars
-from tests.test_utils import db_testing
 
+import src.app as app_entry
+from tests.test_utils import db_testing
 
 ####################
 # General test setup/utils

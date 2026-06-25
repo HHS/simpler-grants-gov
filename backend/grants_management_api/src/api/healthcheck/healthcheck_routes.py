@@ -1,12 +1,11 @@
 from grants_shared.adapters import db
-
+from grants_shared.adapters.db import flask_db
 from grants_shared.api import response
+from grants_shared.util.deploy_metadata import get_deploy_metadata_config
 from werkzeug.exceptions import ServiceUnavailable
 
-from src.api.healthcheck.healthcheck_blueprint import healthcheck_blueprint
-from grants_shared.adapters.db import flask_db
-from grants_shared.util.deploy_metadata import get_deploy_metadata_config
 import src.api.healthcheck.healthcheck_schemas as healthcheck_schemas
+from src.api.healthcheck.healthcheck_blueprint import healthcheck_blueprint
 
 
 @healthcheck_blueprint.get("/health")

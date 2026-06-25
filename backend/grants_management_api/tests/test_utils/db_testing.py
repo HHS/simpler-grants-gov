@@ -3,10 +3,9 @@
 import contextlib
 import logging
 
-from sqlalchemy import text
-
 import grants_shared.adapters.db as db
 from grants_shared.adapters.db.clients.postgres_config import get_db_config
+from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
 

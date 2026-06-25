@@ -75,6 +75,9 @@ setup-local:
 	# Install dependencies
 	uv sync --all-groups --locked
 
+setup-env-override-file: ## Setup the override.env file which can be added to for any env var overrides from local.env
+	./bin/setup-env-override-file.sh $(args)
+
 ##################################################
 # API Build & Run
 ##################################################
@@ -88,6 +91,22 @@ start: ## Start the API for CI/CD or local Dev work
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
+init-components: init-db
+
+init: setup-env-override-file build init-components ## Run all of the init tasks (including build) to set up DB and other services. To do this "from scratch" use remake-backend instead
+
+init-ci-cd: setup-env-override-file init-components ## Do not build, but do run all of the init tasks to set up DB, and other services. To do this "from scratch" use remake-backend instead
+
+
+clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
+	docker compose down --volumes
+	docker compose -f ../docker-compose.db.yml down --volumes
+
+volume-recreate: clean-volumes init ## Destroy current volumes, setup new ones - will remove all existing data
+
+stop: ## Stop the docker containers
+	docker compose down
+	docker compose -f ../docker-compose.db.yml down
 
 ##################################################
 # Miscellaneous Utilities
@@ -118,6 +137,34 @@ test-coverage: ## Run tests and generate coverage report
 test-coverage-report: ## Open HTML test coverage report
 	$(PY_RUN_CMD) coverage html --directory .coverage_report
 	open .coverage_report/index.html
+
+##################################################
+# Formatting and linting
+##################################################
+
+format: ## Format files
+	$(PY_RUN_CMD) isort --atomic src tests bin
+	$(PY_RUN_CMD) black src tests bin
+
+format-check: ## Check file formatting
+	$(PY_RUN_CMD) isort --atomic --check-only src tests bin
+	$(PY_RUN_CMD) black --check src tests bin
+
+lint: lint-py ## Lint
+
+lint-py: lint-ruff lint-mypy
+
+lint-ruff:
+	$(PY_RUN_CMD) ruff check .
+
+lint-ruff-fix:
+	$(PY_RUN_CMD) ruff check . --fix
+
+lint-mypy:
+	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
+
+lint-security: # https://bandit.readthedocs.io/en/latest/index.html
+	$(PY_RUN_CMD) bandit -c pyproject.toml -r . --number 3 --skip B101 -ll -x ./.venv
 
 ##################################################
 # DB & migrations

@@ -1,6 +1,7 @@
 from grants_shared.api.schemas.extension import Schema, fields
 from grants_shared.api.schemas.response_schema import AbstractResponseSchema
 
+
 class HealthcheckMetadataSchema(Schema):
     commit_sha = fields.String(
         metadata={
