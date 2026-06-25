@@ -2,13 +2,13 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+from grants_shared.util import file_util
 
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from src.db.models.user_models import User
 from src.services.applications.application_audit import add_audit_event
 from src.services.applications.get_application_attachment import get_application_attachment
-from src.util import file_util
 
 logger = logging.getLogger(__name__)
 

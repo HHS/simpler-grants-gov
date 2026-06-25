@@ -3,8 +3,8 @@ import uuid
 import apiflask.exceptions
 import pytest
 from grants_shared.adapters import db
+from grants_shared.adapters.aws.sqs_adapter import SQSClient
 
-from src.adapters.aws.sqs_adapter import SQSClient
 from src.constants.lookup_constants import (
     ApprovalResponseType,
     Privilege,
