@@ -2528,4 +2528,9 @@ export const messages = {
       deleting: "Deleting...",
     },
   },
+  ProgressChecker: {
+    notStarted: "Not started",
+    inProgress: "In progress",
+    complete: "Complete",
+  },
 };
