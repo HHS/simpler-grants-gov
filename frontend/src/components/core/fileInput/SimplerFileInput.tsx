@@ -139,7 +139,7 @@ export const SimplerFileInput = ({
     }
   }, [multiFile, activeUploads, existingFiles]);
 
-  const trackUploadComplete = (uploadId: string) => {
+  const trackUploadSuccess = (uploadId: string) => {
     const currentUploads = [...activeUploads];
     const completedIndex = currentUploads.findIndex(
       (item) => item.uploadId === uploadId,
@@ -207,8 +207,8 @@ export const SimplerFileInput = ({
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
           onStart={onStart}
-          onUploadComplete={(postUploadResult: unknown) => {
-            trackUploadComplete(uploadId);
+          onUploadSuccess={(postUploadResult: unknown) => {
+            trackUploadSuccess(uploadId);
             onSuccess(postUploadResult);
           }}
           onComplete={onComplete}
