@@ -13,8 +13,6 @@ import { act } from "react";
 
 import { useFileUpload } from "./useFileUpload";
 
-// jest.setTimeout(100000000);
-
 const clientFetchMock = jest.fn<
   Promise<Response>,
   [string, { method: string; body: unknown; signal: unknown }]
@@ -79,7 +77,7 @@ describe("useFileUpload", () => {
     expect(result.current.currentStatus).toEqual(undefined);
     expect(result.current.fileName).toEqual(undefined);
     expect(result.current.handleCancel).toBeInstanceOf(Function);
-    expect(result.current.handleDismiss).toBeInstanceOf(Function);
+    expect(result.current.dismissError).toBeInstanceOf(Function);
     expect(result.current.uploadError).toEqual(undefined);
     expect(result.current.uploadFile).toBeInstanceOf(Function);
   });
@@ -299,7 +297,7 @@ describe("useFileUpload", () => {
       return expect(result.current.uploadError).toEqual("yes");
     });
   });
-  it.only("calls onError callback on error during post upload", async () => {
+  it("calls onError callback on error during post upload", async () => {
     const postUploadActionMock = jest.fn(() =>
       Promise.reject(new Error("yes")),
     );
@@ -332,9 +330,10 @@ describe("useFileUpload", () => {
   });
   it("calls abort controllers on cancel", async () => {
     const postUploadActionMock = jest.fn(() => Promise.resolve("return value"));
-    const mockAbortSignal = jest.fn();
+    const mockSignalAbort = jest.fn();
     fakeAbortController.mockImplementation(() => ({
-      signal: mockAbortSignal,
+      signal: "signal",
+      abort: mockSignalAbort,
     }));
     const trigger = createAdvanceStreamTrigger();
     clientFetchMock.mockResolvedValue(
@@ -361,7 +360,43 @@ describe("useFileUpload", () => {
     await waitFor(() =>
       expect(postUploadActionMock).toHaveBeenCalledWith("1", "signal"),
     );
-    await result.current.handleCancel();
+    await act(async () => await result.current.handleCancel());
+    expect(mockSignalAbort).toHaveBeenCalledTimes(2);
   });
-  it("clears status and errors on error dismiss", () => {});
+  it("clears status and errors on error dismiss", async () => {
+    const postUploadActionMock = jest.fn(() => Promise.resolve("return value"));
+
+    const trigger = createAdvanceStreamTrigger();
+    clientFetchMock.mockResolvedValue(
+      new Response(
+        makeAdvanceableTestStreamForTrigger(
+          [
+            JSON.stringify({ status: "uploading" }),
+            JSON.stringify({ status: "error", error: "yes" }),
+          ],
+          trigger,
+        ),
+      ),
+    );
+    const { result } = renderHook(() =>
+      useFileUpload({
+        onStart: noop,
+        onSuccess: noop,
+        onError: noop,
+        onComplete: noop,
+        postUploadAction: postUploadActionMock,
+      }),
+    );
+    act(() => {
+      result.current.uploadFile(fakeFile);
+    });
+    act(() => trigger.advance());
+    act(() => trigger.advance());
+    await waitFor(() => {
+      return expect(result.current.uploadError).toEqual("yes");
+    });
+    act(() => result.current.dismissError());
+    expect(result.current.currentStatus).toBeUndefined();
+    expect(result.current.uploadError).toBeUndefined();
+  });
 });

@@ -57,7 +57,7 @@ export const useFileUpload = ({
     await responseReader?.cancel();
   }, [uploadController, postUploadController, responseReader]);
 
-  const handleDismiss = useCallback(() => {
+  const dismissError = useCallback(() => {
     setCurrentStatus(undefined);
     setUploadError(undefined);
   }, []);
@@ -214,7 +214,7 @@ export const useFileUpload = ({
       fileName,
       uploadFile,
       handleCancel,
-      handleDismiss,
+      dismissError,
     }),
     [
       uploadError,
@@ -222,7 +222,7 @@ export const useFileUpload = ({
       fileName,
       uploadFile,
       handleCancel,
-      handleDismiss,
+      dismissError,
     ],
   );
   console.log(

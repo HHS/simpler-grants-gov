@@ -41,7 +41,7 @@ export const FileUploadManager = ({
     fileName,
     uploadFile,
     handleCancel,
-    handleDismiss,
+    dismissError,
   } = useFileUpload({
     onStart,
     onSuccess: onUploadComplete,
@@ -61,7 +61,7 @@ export const FileUploadManager = ({
         onCancel(uploadId); // update parent state
       }}
       onDismiss={() => {
-        handleDismiss(); // dismiss in hook
+        dismissError(); // dismiss in hook
         onDismiss(uploadId); // update parent state
       }}
       error={!!uploadError}
