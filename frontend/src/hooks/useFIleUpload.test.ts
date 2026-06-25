@@ -23,7 +23,10 @@ const fakeFileReader = jest.fn();
 
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
-    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
+    clientFetch: (
+      url: string,
+      options: { method: string; body: unknown; signal: unknown },
+    ) => clientFetchMock(url, options) as unknown,
   }),
 }));
 

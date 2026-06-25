@@ -14,7 +14,7 @@ const fakeFile = new File(["test content"], "test.txt", {
 });
 
 jest.mock("src/hooks/useFileUpload", () => ({
-  useFileUpload: (...args) => mockUseFileUpload(...args),
+  useFileUpload: (...args: unknown[]) => mockUseFileUpload(...args) as unknown,
 }));
 
 describe("FileUploadManager", () => {

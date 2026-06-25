@@ -72,9 +72,6 @@ export const SimplerFileInput = ({
   >([]);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
 
-  // track this to ensure we're showing the input at the right times
-  const [completedUploads, setCompletedUploads] = useState<string[]>([]);
-
   const trackUpload = (changeEvent: ChangeEvent<HTMLInputElement>) => {
     if (!changeEvent.target.files?.length) {
       console.error("no files!");
@@ -200,7 +197,6 @@ export const SimplerFileInput = ({
         <FileUploadManager
           key={uploadId}
           fileToUpload={file}
-          uploadId={uploadId}
           onCancel={() => {
             trackUploadCancel(uploadId);
             if (!multiFile) {
