@@ -1019,6 +1019,152 @@ describe("SimplerFileInput", () => {
       expect(screen.getByLabelText("cautionDeletingAttachment")).toBeVisible();
     });
   });
+  describe("Multifile v Non-multifile", () => {
+    it("[non-multifile] clears file input on cancel", async () => {
+      const controllerAbortMock = jest.fn();
+      fakeAbortController.mockImplementation(() => ({
+        abort: controllerAbortMock,
+        signal: {
+          abort: jest.fn(),
+        },
+      }));
+      const trigger = createAdvanceStreamTrigger();
+      clientFetchMock.mockResolvedValue(
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            [JSON.stringify({ status: "uploading" })],
+            trigger,
+          ),
+        ),
+      );
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          postUploadActionSuccessMessage="post upload action success"
+          postUploadActionErrorMessage="post upload action error"
+          id="file-input-test"
+          labelId="file-input-label"
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
+
+      trigger.advance();
+      await waitFor(async () => {
+        expect(
+          await screen.findByTestId("file-upload-status-display"),
+        ).toHaveTextContent("uploading");
+      });
+      const cancelButton = screen.getByRole("button", { name: "cancel" });
+
+      expect(cancelButton).toBeInTheDocument();
+      expect(input).toHaveValue("C:\\fakepath\\test.txt");
+
+      await userEvent.click(cancelButton);
+      expect(controllerAbortMock).toHaveBeenCalledTimes(1);
+      expect(input).toHaveValue();
+    });
+    it("[non-multifile] disallows uploading additional files if input already has a file", async () => {
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          postUploadActionSuccessMessage="post upload action success"
+          postUploadActionErrorMessage="post upload action error"
+          id="file-input-test"
+          labelId="file-input-label"
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, new File(["test content"], "test.txt"));
+      expect(
+        await screen.findAllByTestId("file-upload-status-display"),
+      ).toHaveLength(1);
+      await userEvent.upload(input, new File(["test content 2"], "test2.txt"));
+      expect(
+        await screen.findAllByTestId("file-upload-status-display"),
+      ).toHaveLength(1);
+    });
+    it("[non-multifile] only uploads the first file in the list if attempting to upload multiple", async () => {
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          postUploadActionSuccessMessage="post upload action success"
+          postUploadActionErrorMessage="post upload action error"
+          id="file-input-test"
+          labelId="file-input-label"
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, [
+        new File(["test content"], "test.txt"),
+        new File(["test content2"], "do_not_upload.txt"),
+      ]);
+      const statusDisplays = await screen.findAllByTestId(
+        "file-upload-status-display",
+      );
+      expect(statusDisplays).toHaveLength(1);
+      expect(statusDisplays[0]).toHaveTextContent("test.txt");
+    });
+    it("[multifile] allows multiple simultaneous uploads", async () => {
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          postUploadActionSuccessMessage="post upload action success"
+          postUploadActionErrorMessage="post upload action error"
+          id="file-input-test"
+          labelId="file-input-label"
+          multiFile={true}
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, [
+        new File(["test content"], "test.txt"),
+        new File(["test content2"], "test_2.txt"),
+      ]);
+      const statusDisplays = await screen.findAllByTestId(
+        "file-upload-status-display",
+      );
+      expect(statusDisplays).toHaveLength(2);
+      expect(statusDisplays[0]).toHaveTextContent("test.txt");
+      expect(statusDisplays[1]).toHaveTextContent("test_2.txt");
+    });
+    it("[multifile] allows adding uploads while upload is in progress", async () => {
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          postUploadActionSuccessMessage="post upload action success"
+          postUploadActionErrorMessage="post upload action error"
+          id="file-input-test"
+          labelId="file-input-label"
+          multiFile={true}
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, new File(["test content"], "test.txt"));
+      expect(
+        await screen.findAllByTestId("file-upload-status-display"),
+      ).toHaveLength(1);
+      await userEvent.upload(input, new File(["test content 2"], "test2.txt"));
+      expect(
+        await screen.findAllByTestId("file-upload-status-display"),
+      ).toHaveLength(2);
+    });
+  });
   // not able to test this since the only way to really hide this for now is with CSS, which is not
   // testable using testing-library tools.
   // aria-hidden seems to be the way to do this for testing, but is that possible?
@@ -1054,8 +1200,5 @@ describe("SimplerFileInput", () => {
     const trussworksPreviews = screen.queryByTestId("file-input-preview");
     expect(trussworksPreviewImages).not.toBeVisible();
     expect(trussworksPreviews).not.toBeVisible();
-  });
-  it("works for multifile!!!", () => {
-    expect(true).toBe(false);
   });
 });

@@ -225,10 +225,6 @@ export const useFileUpload = ({
       dismissError,
     ],
   );
-  console.log(
-    `++++ hook return value`,
-    useFileUploadInterface.uploadError,
-    useFileUploadInterface.currentStatus,
-  );
+
   return useFileUploadInterface;
 };

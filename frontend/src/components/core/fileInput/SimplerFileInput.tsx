@@ -86,6 +86,12 @@ export const SimplerFileInput = ({
         "attempting to upload multiple files to a single file input, only uploading first file in list",
       );
     }
+    if (!multiFile && fileInputRef.current?.files.length) {
+      console.error(
+        "attempting to upload additional files to a single file input, not uploading new file",
+      );
+      return;
+    }
     const filesToUpload = !multiFile
       ? [changeEvent.target.files[0]]
       : Array.from(changeEvent.target.files);
@@ -106,7 +112,6 @@ export const SimplerFileInput = ({
         setDeletePending(false);
         setFilePendingDeletion(undefined);
         deleteModalRef.current?.toggleModal();
-        fileInputRef.current?.clearFiles();
         // figured we may need to clear delete errors for the file here, but it should
         // be removed from the dom on successful delete so I don't think it's necessary
         return;

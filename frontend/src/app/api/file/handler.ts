@@ -63,12 +63,10 @@ const orchestrateFileUpload = async (
   responseStreamController.enqueue(JSON.stringify({ status: "queued" }));
   // call Simpler API to obtain details for S3 upload and pending file id
   const fileUploadDetails = await fetchFileUploadDetails(file.name, file.type);
-  await new Promise((resolve) => setTimeout(resolve, 2000));
   responseStreamController.enqueue(JSON.stringify({ status: "uploading" }));
 
   // upload file to s3
   await uploadFileToS3(fileUploadDetails.url, fileUploadDetails.body, file);
-  await new Promise((resolve) => setTimeout(resolve, 2000));
   responseStreamController.enqueue(JSON.stringify({ status: "starting-scan" }));
 
   // open stream to fetch upload and scan progress updates
@@ -82,7 +80,6 @@ const orchestrateFileUpload = async (
   );
 
   // this is here in order to send back the file id
-  await new Promise((resolve) => setTimeout(resolve, 2000));
   responseStreamController.enqueue(
     JSON.stringify({
       status: "scan-complete",
@@ -102,7 +99,6 @@ const processUploadInStream = (file: File): ReadableStream<string> => {
         responseStreamController.close();
       } catch (e) {
         console.error("Error in file upload orchestration stream", e);
-        await new Promise((resolve) => setTimeout(resolve, 2000));
         responseStreamController.enqueue(
           JSON.stringify({
             status: "error",
