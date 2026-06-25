@@ -13,15 +13,40 @@ const errorStatuses = new Map([
   ["uploading", "upload-error"],
   ["scanning", "scan-error"],
   ["post-upload", "post-upload-error"],
-  // need to figure out how to disintguish between scan failure and scan error.
-  // this will likely depend on the implementation of handling scan failures on the backend
-  // Next API will return a specific error and we can return that error status before dealing with this map
 ]);
+
+const scanFailureErrorPatterns = [
+  /scan[\s-]?fail(ed)?/i,
+  /infected/i,
+  /malware/i,
+  /virus/i,
+];
+
+const getErrorStatus = ({
+  status,
+  errorMessage,
+}: {
+  status: FileUploadProcessStatus;
+  errorMessage?: string;
+}): FileUploadStatus => {
+  const scanFailed =
+    status === "scanning" &&
+    scanFailureErrorPatterns.some((pattern) =>
+      pattern.test((errorMessage || "").toLowerCase()),
+    );
+
+  if (scanFailed) {
+    return "scan-fail";
+  }
+
+  return (errorStatuses.get(status) as FileUploadStatus) || "error";
+};
 
 export const FileInputStatusDisplay = ({
   fileName,
   status,
   error,
+  errorMessage,
   postUploadActionProgressMessage,
   postUploadActionSuccessMessage,
   postUploadActionErrorMessage,
@@ -33,6 +58,7 @@ export const FileInputStatusDisplay = ({
   onDismiss: () => void;
   status?: FileUploadProcessStatus;
   error: boolean;
+  errorMessage?: string;
   postUploadActionProgressMessage: string;
   postUploadActionSuccessMessage?: string;
   postUploadActionErrorMessage?: string;
@@ -57,7 +83,7 @@ export const FileInputStatusDisplay = ({
   };
 
   const adjustedStatus = error
-    ? (errorStatuses.get(status) as FileUploadStatus) || "error"
+    ? getErrorStatus({ status, errorMessage })
     : status;
   const statusMessageForDisplay = messagesMap[adjustedStatus];
 

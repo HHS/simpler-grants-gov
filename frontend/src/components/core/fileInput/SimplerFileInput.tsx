@@ -267,6 +267,7 @@ export const SimplerFileInput = ({
           onCancel={() => void handleCancel()}
           onDismiss={handleDismiss}
           error={!!uploadError}
+          errorMessage={uploadError?.message}
           status={currentStatus}
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}

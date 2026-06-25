@@ -358,6 +358,53 @@ describe("SimplerFileInput", () => {
       );
     });
 
+    it("displays a scan failed message when scan failure error occurs", async () => {
+      const trigger = createAdvanceStreamTrigger();
+      clientFetchMock.mockResolvedValue(
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            [
+              JSON.stringify({ status: "uploading" }),
+              JSON.stringify({ status: "scanning" }),
+              JSON.stringify({
+                status: "error",
+                error: "scan failed: file infected",
+              }),
+            ],
+            trigger,
+          ),
+        ),
+      );
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          postUploadActionSuccessMessage="post upload action success"
+          postUploadActionErrorMessage="post upload action error"
+          id="file-input-test"
+          labelId="file-input-label"
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(
+        input,
+        new File(["test content"], "test.txt", {
+          type: "text/plain",
+        }),
+      );
+      trigger.advance();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      trigger.advance();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      trigger.advance();
+      await waitFor(async () =>
+        expect(
+          await screen.findByTestId("file-upload-status-display"),
+        ).toHaveTextContent("scanFail"),
+      );
+    });
+
     it("displays a post-upload error if error occurs during post-upload process", async () => {
       const trigger = createAdvanceStreamTrigger();
       // we're not concerned with the upload process here, so no need to mess with stream states
