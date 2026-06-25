@@ -2,11 +2,11 @@ import jsonschema
 import pytest
 from grants_shared.api.response import ValidationErrorDetail
 
+from src.db.models.competition_models import Form
 from src.form_schema.jsonschema_validator import validate_json_schema, validate_json_schema_for_form
-from tests.src.db.models.factories import FormFactory
 
 # Form with a fairly simple JsonSchema
-SIMPLE_FORM = FormFactory.build(
+SIMPLE_FORM = Form(
     form_json_schema={
         "type": "object",
         "properties": {
@@ -18,7 +18,7 @@ SIMPLE_FORM = FormFactory.build(
     }
 )
 
-IF_THEN_FORM = FormFactory.build(
+IF_THEN_FORM = Form(
     form_json_schema={
         "type": "object",
         "properties": {"StrField": {"type": "string"}, "IntField": {"type": "integer"}},
@@ -28,7 +28,7 @@ IF_THEN_FORM = FormFactory.build(
     }
 )
 
-NESTED_REQUIRED = FormFactory.build(
+NESTED_REQUIRED = Form(
     form_json_schema={
         "type": "object",
         "properties": {
