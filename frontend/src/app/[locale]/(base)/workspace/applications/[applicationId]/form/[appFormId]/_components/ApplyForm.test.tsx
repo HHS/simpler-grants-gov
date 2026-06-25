@@ -3,6 +3,19 @@ import { render, screen, waitFor } from "@testing-library/react";
 import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyForm";
 import { UiSchema } from "src/types/applyForm/types";
 
+const pushMock = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: pushMock,
+    replace: jest.fn(),
+    refresh: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+  }),
+}));
+
 type FormActionArgs = [
   {
     applicationId: string;

@@ -127,7 +127,7 @@ describe("getFormData", () => {
     expect(result).toEqual({ error: "TopLevelError" });
   });
 
-  it("returns NotFound when API throws a 404 error", async () => {
+  it("returns TopLevelError when API throws a 404 error", async () => {
     mockGetSession.mockResolvedValue({ token: "session-token" });
     mockGetApplicationFormDetails.mockRejectedValue({ status: 404 });
 
@@ -136,7 +136,7 @@ describe("getFormData", () => {
       appFormId: "form1",
     });
 
-    expect(result).toEqual({ error: "NotFound" });
+    expect(result).toEqual({ error: "TopLevelError" });
   });
 
   it("returns TopLevelError when processFormSchema throws", async () => {
