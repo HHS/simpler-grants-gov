@@ -173,7 +173,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         }
 
         // SF-424A has no attachment sections (unlike SF-424)
-        // All sections (A–F) contain computed totals that are derived from user-entered values
+        // All sections (A-F) contain computed totals that are derived from user-entered values
         // and validated implicitly by the above checks on user-entered fields.
         if (formKey === "sf424a") {
           // Verify computed totals are rendered in print view
