@@ -1,13 +1,17 @@
 "use client";
 
 import { createAwardRecommendationAction } from "src/app/[locale]/(base)/award-recommendation/select-opportunity/actions";
+import {
+  TableCellData,
+  TableWithResponsiveHeader,
+} from "src/components/core/TableWithResponsiveHeader";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, Table } from "@trussworks/react-uswds";
+import { Button } from "@trussworks/react-uswds";
 
 type SelectFundingOpportunityContentProps = {
   fundingOpportunities: BaseOpportunity[];
@@ -41,6 +45,51 @@ export const SelectFundingOpportunityContent = ({
     }
   };
 
+  const headerContent: TableCellData[] = [
+    { cellData: t("columns.fundingOpportunityNumber") },
+    { cellData: t("columns.fundingOpportunityName") },
+    { cellData: t("columns.submittedApplications") },
+    { cellData: t("columns.action") },
+  ];
+
+  const tableRowData: TableCellData[][] = fundingOpportunities.map(
+    (fundingOpportunity) => {
+      const isCreating =
+        creatingOpportunityId === fundingOpportunity.opportunity_id;
+
+      return [
+        {
+          cellData: (
+            <Link
+              href={`/opportunity/${fundingOpportunity.opportunity_id}`}
+              className="usa-link"
+            >
+              {fundingOpportunity.opportunity_number}
+            </Link>
+          ),
+        },
+        { cellData: fundingOpportunity.opportunity_title },
+        { cellData: fundingOpportunity.submitted_application_count ?? 0 },
+        {
+          cellData: (
+            <Button
+              type="button"
+              className="usa-button--outline margin-y-0"
+              disabled={isCreating}
+              onClick={() => {
+                void handleCreateAwardRecommendation(
+                  fundingOpportunity.opportunity_id,
+                );
+              }}
+            >
+              {t("startButtonText")} <span aria-hidden="true">→</span>
+            </Button>
+          ),
+        },
+      ];
+    },
+  );
+
   return (
     <>
       <div className="margin-top-5 margin-bottom-5">
@@ -49,51 +98,10 @@ export const SelectFundingOpportunityContent = ({
         </h2>
       </div>
 
-      <Table fullWidth>
-        <thead>
-          <tr>
-            <th scope="col">{t("columns.fundingOpportunityNumber")}</th>
-            <th scope="col">{t("columns.fundingOpportunityName")}</th>
-            <th scope="col">{t("columns.submittedApplications")}</th>
-            <th scope="col">{t("columns.action")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {fundingOpportunities.map((fundingOpportunity) => {
-            const isCreating =
-              creatingOpportunityId === fundingOpportunity.opportunity_id;
-
-            return (
-              <tr key={fundingOpportunity.opportunity_id}>
-                <td>
-                  <Link
-                    href={`/opportunity/${fundingOpportunity.opportunity_id}`}
-                    className="usa-link"
-                  >
-                    {fundingOpportunity.opportunity_number}
-                  </Link>
-                </td>
-                <td>{fundingOpportunity.opportunity_title}</td>
-                <td>{fundingOpportunity.submitted_application_count ?? 0}</td>
-                <td>
-                  <Button
-                    type="button"
-                    className="usa-button--outline margin-y-0"
-                    disabled={isCreating}
-                    onClick={() => {
-                      void handleCreateAwardRecommendation(
-                        fundingOpportunity.opportunity_id,
-                      );
-                    }}
-                  >
-                    {t("startButtonText")} <span aria-hidden="true">→</span>
-                  </Button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table>
+      <TableWithResponsiveHeader
+        headerContent={headerContent}
+        tableRowData={tableRowData}
+      />
 
       <div className="margin-top-5">
         <Button
