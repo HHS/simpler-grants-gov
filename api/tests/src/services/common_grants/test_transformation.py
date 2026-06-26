@@ -7,6 +7,7 @@ from uuid import uuid4
 from common_grants_sdk.schemas.pydantic import (
     ArrayOperator,
     CustomFieldType,
+    DefaultFilter,
     Money,
     MoneyRange,
     MoneyRangeFilter,
@@ -30,6 +31,7 @@ from src.api.common_grants.schemas.pydantic.custom_fields import (
 )
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
+    build_custom_filters,
     build_filter_info,
     build_money_range_filter,
     populate_custom_fields,
@@ -1485,3 +1487,53 @@ class TestValidateCustomField:
         )
         assert result is not None
         assert result.value[0].downloadUrl is None
+
+
+def _cf(operator, value):
+    return DefaultFilter(operator=operator, value=value)
+
+
+def test_build_custom_filters_agency_passthrough():
+    applied, errors = build_custom_filters({"agency": _cf("in", ["USAID", "DOC"])})
+    assert applied == {"agency": {"one_of": ["USAID", "DOC"]}}
+    assert errors == []
+
+
+def test_build_custom_filters_applicant_type_maps_cg_to_native():
+    applied, errors = build_custom_filters(
+        {"applicantType": _cf("in", ["government_state", "individual"])}
+    )
+    assert applied == {"applicant_type": {"one_of": ["state_governments", "individuals"]}}
+    assert errors == []
+
+
+def test_build_custom_filters_funding_instrument_passthrough():
+    applied, errors = build_custom_filters(
+        {"fundingInstrument": _cf("in", ["grant", "cooperative_agreement"])}
+    )
+    assert applied == {"funding_instrument": {"one_of": ["grant", "cooperative_agreement"]}}
+    assert errors == []
+
+
+def test_build_custom_filters_cost_sharing_boolean():
+    applied, errors = build_custom_filters({"costSharing": _cf("eq", True)})
+    assert applied == {"is_cost_sharing": {"one_of": [True]}}
+    assert errors == []
+
+
+def test_build_custom_filters_unsupported_key_reported():
+    applied, errors = build_custom_filters({"bogus": _cf("in", ["x"])})
+    assert applied == {}
+    assert errors == ["customFilters.bogus: unsupported filter"]
+
+
+def test_build_custom_filters_unmappable_applicant_type_reported():
+    applied, errors = build_custom_filters(
+        {"applicantType": _cf("in", ["not_a_real_type"])}
+    )
+    assert applied == {}
+    assert errors == ["customFilters.applicantType: unmappable value not_a_real_type"]
+
+
+def test_build_custom_filters_none_is_noop():
+    assert build_custom_filters(None) == ({}, [])

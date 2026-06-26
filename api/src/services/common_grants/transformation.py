@@ -6,6 +6,7 @@ from datetime import date, datetime
 import grants_shared.util.datetime_util as datetime_util
 from common_grants_sdk.schemas.pydantic import (
     CustomField,
+    DefaultFilter,
     FilterInfo,
     Money,
     MoneyRangeFilter,
@@ -99,6 +100,93 @@ def transform_status_from_cg(cg_status: OppStatusOptions) -> str:
         v1_status = OpportunityStatus.FORECASTED
 
     return v1_status
+
+
+# CommonGrants applicant-type vocabulary -> native ApplicantType values.
+# Ported verbatim from ts-cg-grants-gov/src/transforms.ts APPLICANT_TYPE_FROM_COMMON
+# (the authoritative cross-SDK pairing). Keep in sync with that table.
+APPLICANT_TYPE_FROM_CG = {
+    "individual": "individuals",
+    "organization": "other",
+    "government_state": "state_governments",
+    "government_county": "county_governments",
+    "government_municipal": "city_or_township_governments",
+    "government_special_district": "special_district_governments",
+    "government_tribal": "federally_recognized_native_american_tribal_governments",
+    "organization_tribal_other": "other_native_american_tribal_organizations",
+    "school_district_independent": "independent_school_districts",
+    "higher_education_public": "public_and_state_institutions_of_higher_education",
+    "higher_education_private": "private_institutions_of_higher_education",
+    "non_profit_with_501c3": "nonprofits_non_higher_education_with_501c3",
+    "nonprofit_without_501c3": "nonprofits_non_higher_education_without_501c3",
+    "for_profit_small_business": "small_businesses",
+    "for_profit_not_small_business": "for_profit_organizations_other_than_small_businesses",
+    "unrestricted": "unrestricted",
+    "custom": "other",
+}
+
+# Recognized customFilters key -> native v1 search field.
+_CUSTOM_FILTER_NATIVE_FIELD = {
+    "agency": "agency",
+    "applicantType": "applicant_type",
+    "fundingInstrument": "funding_instrument",
+    "costSharing": "is_cost_sharing",
+}
+
+
+def build_custom_filters(
+    custom_filters: dict | None,
+) -> tuple[dict, list[str]]:
+    """Translate CommonGrants customFilters into native v1 filter entries.
+
+    Returns (applied, errors). `applied` maps native field -> {"one_of": [...]}.
+    `errors` are ADR-0012 messages for unsupported keys / invalid values; never
+    raises.
+    """
+    applied: dict = {}
+    errors: list[str] = []
+    if not custom_filters:
+        return applied, errors
+
+    for key, filt in custom_filters.items():
+        native_field = _CUSTOM_FILTER_NATIVE_FIELD.get(key)
+        if native_field is None:
+            errors.append(f"customFilters.{key}: unsupported filter")
+            continue
+
+        if key == "costSharing":
+            if filt.operator != "eq":
+                errors.append(f"customFilters.{key}: unsupported operator {filt.operator}")
+                continue
+            value = filt.value
+            if isinstance(value, str):  # tolerate string-encoded booleans
+                value = value.strip().lower() in ("true", "t", "yes", "1")
+            applied[native_field] = {"one_of": [bool(value)]}
+            continue
+
+        # string-array filters: agency, applicantType, fundingInstrument
+        if filt.operator != "in":
+            errors.append(f"customFilters.{key}: unsupported operator {filt.operator}")
+            continue
+        if not isinstance(filt.value, list):
+            errors.append(f"customFilters.{key}: expected an array value")
+            continue
+
+        if key == "applicantType":
+            values = []
+            for v in filt.value:
+                native = APPLICANT_TYPE_FROM_CG.get(v)
+                if native is None:
+                    errors.append(f"customFilters.{key}: unmappable value {v}")
+                    continue
+                values.append(native)
+        else:
+            values = list(filt.value)
+
+        if values:
+            applied[native_field] = {"one_of": values}
+
+    return applied, errors
 
 
 def transform_sorting_from_cg(cg_sort_by: OppSortBy) -> str:
