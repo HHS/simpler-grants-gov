@@ -93,7 +93,7 @@ variable "scanner_reserved_concurrency" {
 }
 
 variable "scanner_provisioned_concurrency" {
-  description = "Number of execution environments to keep warm for the scanner Lambda via provisioned concurrency. Each warmed environment runs its INIT ahead of time -- which starts clamd and loads the signature database into memory -- so scans it serves skip the multi-second cold-start DB load. 0 (the default) leaves the scanner fully on-demand. Provisioned concurrency is billed continuously, so reserve it for environments that need consistently low scan latency. Must not exceed scanner_reserved_concurrency."
+  description = "Number of execution environments to keep warm for the scanner Lambda via provisioned concurrency."
   type        = number
   default     = 0
 }
