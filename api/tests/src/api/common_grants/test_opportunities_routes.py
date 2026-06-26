@@ -8,11 +8,15 @@ import pytest
 from flask.testing import FlaskClient
 
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
-from src.constants.lookup_constants import ApplicantType, FundingCategory, FundingInstrument, OpportunityStatus
+from src.constants.lookup_constants import (
+    ApplicantType,
+    FundingCategory,
+    FundingInstrument,
+    OpportunityStatus,
+)
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
-    OpportunityAssistanceListingFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
 )
@@ -563,7 +567,13 @@ class TestSearchCustomFilters(BaseTestClass):
         resp = self._search(
             client,
             user_api_key_id,
-            {"filters": {"customFilters": {"applicantType": {"operator": "in", "value": ["government_state"]}}}},
+            {
+                "filters": {
+                    "customFilters": {
+                        "applicantType": {"operator": "in", "value": ["government_state"]}
+                    }
+                }
+            },
         )
         assert resp.status_code == 200
         ids = {item["id"] for item in resp.get_json()["items"]}
@@ -574,7 +584,11 @@ class TestSearchCustomFilters(BaseTestClass):
         resp = self._search(
             client,
             user_api_key_id,
-            {"filters": {"customFilters": {"fundingInstrument": {"operator": "in", "value": ["grant"]}}}},
+            {
+                "filters": {
+                    "customFilters": {"fundingInstrument": {"operator": "in", "value": ["grant"]}}
+                }
+            },
         )
         assert resp.status_code == 200
         ids = {item["id"] for item in resp.get_json()["items"]}

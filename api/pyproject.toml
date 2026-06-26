@@ -209,6 +209,7 @@ allowed-confusables = [
 "tests/lib/seed_local_soap_certificate.py" = ["T201"]
 "src/task/forms/list_forms_task.py" = ["T201"]
 "src/form_schema/dat_to_jsonschema_cli.py" = ["T201"]
+"examples/*.py" = ["T201"]
 
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]

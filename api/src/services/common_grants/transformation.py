@@ -6,7 +6,6 @@ from datetime import date, datetime
 import grants_shared.util.datetime_util as datetime_util
 from common_grants_sdk.schemas.pydantic import (
     CustomField,
-    DefaultFilter,
     FilterInfo,
     Money,
     MoneyRangeFilter,
