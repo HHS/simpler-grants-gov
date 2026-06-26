@@ -47,6 +47,7 @@ dependencies = [
     "python-statemachine>=3.0.0,<4",
     "beautifulsoup4>=4.14.3,<5",
     "grants-shared==0.2.8",
+    "gevent>=25.5.0,<26",
 ]
 
 [project.scripts]

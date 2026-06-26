@@ -22,8 +22,14 @@ bind = app_config.host + ':' + str(app_config.port)
 # os.sched_getaffinity(pid): Return the set of CPUs the process with PID pid is restricted to.
 # os.cpu_count(): Return the number of CPUs in the system.
 
+# Use gevent async workers to handle concurrent requests without blocking during streaming.
+# Sync workers (default) block during long-running streaming responses, exhausting the
+# worker pool and making the entire API unresponsive. Gevent workers use greenlets to
+# handle thousands of concurrent connections efficiently, allowing streaming requests
+# to run without blocking other API endpoints.
+# See: https://docs.gunicorn.org/en/stable/design.html#async-workers
+worker_class = 'gevent'
 workers = (len(os.sched_getaffinity(0)) * 2) + 1
-threads = 4
 
 # Set keepalive higher than ALB idle timeout (120s) to prevent connection pool exhaustion.
 # When gunicorn's keepalive is lower than ALB's idle timeout, gunicorn closes connections

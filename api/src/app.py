@@ -1,3 +1,10 @@
+# Monkey patch standard library for gevent compatibility.
+# This must be done before any other imports to ensure all blocking operations
+# (sockets, SSL, threading, etc.) are replaced with gevent's async versions.
+# See: https://www.gevent.org/api/gevent.monkey.html
+from gevent import monkey
+monkey.patch_all()
+
 import json
 import logging
 import os
