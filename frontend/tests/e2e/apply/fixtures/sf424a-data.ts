@@ -146,9 +146,12 @@ export const buildSF424aHappyPathTestData = (
  * and the form-specific test data builder.
  * Uses a single E2E opportunity across environments to align with SF-424 pattern.
  * Imported by load-opportunity-config.ts to build the opportunity registry.
+ *
+ * Note: opportunityNumber matches the database field (created via _create_isolated_form_opportunity
+ * in build_automatic_opportunities.py which appends "-ORG-IND-01" to the opportunity prefix).
  */
 export const SF424A_OPPORTUNITY_DATA: PrintViewFormData = {
-  opportunityId: "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+  opportunityId: "6c25cd41-660e-473f-abff-654083b7795d",
   opportunityNumber: "E2E-SF424A-ORG-IND-01",
   formKey: "sf424a",
   expectedPrepopulatedFields: {
