@@ -12,6 +12,7 @@ import {
   fetchAwardRecommendation,
   fetchAwardRecommendationWithMethod,
 } from "./fetchers";
+import { AwardSelectionMethod } from "src/constants/awardRecommendation";
 
 export const getAwardRecommendationDetails = async (
   id: string,
@@ -129,12 +130,13 @@ export const deleteAwardRecommendationRisk = async (
 
 export const createAwardRecommendation = async (
   opportunityId: string,
+  awardSelectionMethod: AwardSelectionMethod,
 ): Promise<AwardRecommendationDetails> => {
   const response = await fetchAwardRecommendationWithMethod("POST")({
     subPath: "",
     body: {
       opportunity_id: opportunityId,
-      award_selection_method: "merit_review_ranking_only",
+      award_selection_method: awardSelectionMethod,
       additional_info: null,
       funding_strategy: null,
       selection_method_detail: null,
