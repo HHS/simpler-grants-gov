@@ -547,7 +547,7 @@ class TestSearchCustomFilters(BaseTestClass):
             json=body,
         )
 
-    def test_agency_filter(self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id):
+    def test_agency_filter(self, client: FlaskClient, user_api_key_id):
         """agency filter with operator=in returns only the matching opportunity."""
         resp = self._search(
             client,
@@ -558,7 +558,7 @@ class TestSearchCustomFilters(BaseTestClass):
         ids = {item["id"] for item in resp.get_json()["items"]}
         assert ids == {self.opp_a_id}
 
-    def test_applicant_type_filter(self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id):
+    def test_applicant_type_filter(self, client: FlaskClient, user_api_key_id):
         """applicantType filter with CG vocab value returns only the matching opportunity."""
         resp = self._search(
             client,
@@ -569,7 +569,7 @@ class TestSearchCustomFilters(BaseTestClass):
         ids = {item["id"] for item in resp.get_json()["items"]}
         assert ids == {self.opp_a_id}
 
-    def test_funding_instrument_filter(self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id):
+    def test_funding_instrument_filter(self, client: FlaskClient, user_api_key_id):
         """fundingInstrument filter with value=grant returns only the matching opportunity."""
         resp = self._search(
             client,
@@ -580,7 +580,7 @@ class TestSearchCustomFilters(BaseTestClass):
         ids = {item["id"] for item in resp.get_json()["items"]}
         assert ids == {self.opp_b_id}
 
-    def test_cost_sharing_filter(self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id):
+    def test_cost_sharing_filter(self, client: FlaskClient, user_api_key_id):
         """costSharing filter with operator=eq value=true returns only the cost-sharing opp."""
         resp = self._search(
             client,
@@ -592,7 +592,7 @@ class TestSearchCustomFilters(BaseTestClass):
         assert ids == {self.opp_a_id}
 
     def test_unsupported_custom_filter_key_returns_error(
-        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
+        self, client: FlaskClient, user_api_key_id
     ):
         """An unrecognized customFilters key yields status 200 with an error in filterInfo.errors."""
         resp = self._search(
