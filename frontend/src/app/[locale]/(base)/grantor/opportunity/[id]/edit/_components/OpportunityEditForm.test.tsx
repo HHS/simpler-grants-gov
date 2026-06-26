@@ -249,51 +249,6 @@ describe("OpportunityEditForm — alert banners", () => {
     jest.resetAllMocks();
   });
 
-  it("shows the newly created success alert when isNewlyCreated=true and no action messages", () => {
-    mockUseActionState.mockReturnValue([
-      { validationErrors: {} },
-      jest.fn(),
-      false,
-    ]);
-
-    renderOpportunityEditForm({ isNewlyCreated: true });
-
-    expect(
-      screen.getByText("content.alerts.newOpportunityHeading"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("content.alerts.newOpportunityBody"),
-    ).toBeInTheDocument();
-  });
-
-  it("hides the newly created alert when formState.successMessage is present", () => {
-    mockUseActionState.mockReturnValue([
-      { validationErrors: {}, successMessage: "Saved!" },
-      jest.fn(),
-      false,
-    ]);
-
-    renderOpportunityEditForm({ isNewlyCreated: true });
-
-    expect(
-      screen.queryByText("content.alerts.newOpportunityHeading"),
-    ).not.toBeInTheDocument();
-  });
-
-  it("hides the newly created alert when formState.errorMessage is present", () => {
-    mockUseActionState.mockReturnValue([
-      { validationErrors: {}, errorMessage: "Something failed" },
-      jest.fn(),
-      false,
-    ]);
-
-    renderOpportunityEditForm({ isNewlyCreated: true });
-
-    expect(
-      screen.queryByText("content.alerts.newOpportunityHeading"),
-    ).not.toBeInTheDocument();
-  });
-
   it("shows the error alert when formState.errorMessage is set", () => {
     mockUseActionState.mockReturnValue([
       { validationErrors: {}, errorMessage: "Save failed" },

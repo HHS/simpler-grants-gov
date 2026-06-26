@@ -19,15 +19,12 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
-  searchParams?: Promise<Record<string, string>>;
 };
 
 export const dynamic = "force-dynamic";
 
-async function OpportunityEditPage({ params, searchParams }: PageProps) {
+async function OpportunityEditPage({ params }: PageProps) {
   const { id, locale } = await params;
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const isNewlyCreated = resolvedSearchParams.fromCreate === "true";
   const t = await getTranslations({ locale, namespace: "Errors" });
   const tEdit = await getTranslations({ locale, namespace: "OpportunityEdit" });
 
@@ -186,7 +183,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
               isDraft={!!opportunityData.is_draft}
               initialAttachments={opportunityData.attachments ?? []}
               opportunityKeyInformation={opportunityKeyInformation}
-              isNewlyCreated={isNewlyCreated}
               saveLabel={tEdit("header.saveButton")}
               previewLabel={tEdit("header.previewButton")}
               publishLabel={tEdit("header.publishButton")}
