@@ -1528,9 +1528,7 @@ def test_build_custom_filters_unsupported_key_reported():
 
 
 def test_build_custom_filters_unmappable_applicant_type_reported():
-    applied, errors = build_custom_filters(
-        {"applicantType": _cf("in", ["not_a_real_type"])}
-    )
+    applied, errors = build_custom_filters({"applicantType": _cf("in", ["not_a_real_type"])})
     assert applied == {}
     assert errors == ["customFilters.applicantType: unmappable value not_a_real_type"]
 
