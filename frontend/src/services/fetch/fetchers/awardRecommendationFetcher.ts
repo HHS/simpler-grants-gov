@@ -1,3 +1,4 @@
+import { AwardSelectionMethod } from "src/constants/awardRecommendation";
 import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 import {
   AwardRecommendationDetails,
@@ -12,7 +13,6 @@ import {
   fetchAwardRecommendation,
   fetchAwardRecommendationWithMethod,
 } from "./fetchers";
-import { AwardSelectionMethod } from "src/constants/awardRecommendation";
 
 export const getAwardRecommendationDetails = async (
   id: string,

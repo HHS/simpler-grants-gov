@@ -8,7 +8,10 @@ export const createAwardRecommendationAction = async (
 ) => {
   const awardRecommendation =
     // TODO - make the award selection method dynamic based on user input
-    await createAwardRecommendation(fundingOpportunityId, AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY);
+    await createAwardRecommendation(
+      fundingOpportunityId,
+      AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY,
+    );
 
   return {
     awardRecommendationId: awardRecommendation.award_recommendation_id,

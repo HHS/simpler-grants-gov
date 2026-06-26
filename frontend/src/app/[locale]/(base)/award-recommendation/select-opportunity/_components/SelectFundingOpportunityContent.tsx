@@ -1,10 +1,6 @@
 "use client";
 
 import { createAwardRecommendationAction } from "src/app/[locale]/(base)/award-recommendation/select-opportunity/actions";
-import {
-  TableCellData,
-  TableWithResponsiveHeader,
-} from "src/components/core/TableWithResponsiveHeader";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -12,6 +8,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@trussworks/react-uswds";
+
+import {
+  TableCellData,
+  TableWithResponsiveHeader,
+} from "src/components/core/TableWithResponsiveHeader";
 
 type SelectFundingOpportunityContentProps = {
   fundingOpportunities: BaseOpportunity[];
