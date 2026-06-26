@@ -141,29 +141,21 @@ export const buildSF424aHappyPathTestData = (
 };
 
 /**
- * Opportunity data for the SF-424A form — unified opportunity for both local and staging.
+ * Opportunity data for the SF-424A form - unified opportunity for both local and staging.
  * Contains opportunity metadata, expected prepopulated field values,
  * and the form-specific test data builder.
  * Uses a single E2E opportunity across environments to align with SF-424 pattern.
  * Imported by load-opportunity-config.ts to build the opportunity registry.
  *
- * Note: opportunityNumber matches the database field (created via _create_isolated_form_opportunity
+ * Note: SF-424A is a budget form with no prepopulated opportunity metadata fields
+ * (unlike SF-424 which displays funding_opportunity_number, agency_name, etc.).
+ * opportunityNumber matches the database field (created via _create_isolated_form_opportunity
  * in build_automatic_opportunities.py which appends "-ORG-IND-01" to the opportunity prefix).
  */
 export const SF424A_OPPORTUNITY_DATA: PrintViewFormData = {
   opportunityId: "6c25cd41-660e-473f-abff-654083b7795d",
   opportunityNumber: "E2E-SF424A-ORG-IND-01",
   formKey: "sf424a",
-  expectedPrepopulatedFields: {
-    funding_opportunity_number: "E2E-SF424A-ORG-IND-01",
-    funding_opportunity_title:
-      "E2E Budget Information for Non-Construction Programs (SF-424A) ORG IND OT01",
-    assistance_listing_number: "10.960",
-    agency_name: "Simpler Grants.gov",
-    assistance_listing_program_title: "Technical Agricultural Assistance",
-    competition_identification_title:
-      "E2E Budget Information for Non-Construction Programs (SF-424A) ORG IND CT01",
-    confirmation: "Yes",
-  },
+  expectedPrepopulatedFields: {},
   buildTestData: buildSF424aHappyPathTestData,
 };
