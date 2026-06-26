@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { OpportunityDetailsHeader } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/OpportunityDetailsHeader";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+
+import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
 
 jest.mock("next-intl", () => ({
   useTranslations: jest

@@ -1,4 +1,5 @@
 import { environment } from "src/constants/environments";
+import { logger } from "src/services/logger/simplerLogger";
 import { z } from "zod";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -11,9 +12,30 @@ const subscribeSchema = z.object({
     .email("Please enter a valid email address."),
 });
 
-// Mailchimp returns this error_code in the batch-subscribe response when the
-// email address is already a member of the list.
+// Member-level error_codes returned in the batch-subscribe response body (the
+// request itself succeeds with HTTP 200). Mailchimp doesn't formally document
+// this enum, so any unrecognized code falls through to the generic server path.
 const ALREADY_SUBSCRIBED_CODE = "ERROR_CONTACT_EXISTS";
+const TOO_MANY_SIGNUPS_CODE = "ERROR_TOO_MANY_RECENT_SIGNUPS";
+
+// HTTP status Mailchimp returns when the API key's connection/rate limits are
+// exceeded.
+const RATE_LIMITED_STATUS = 429;
+
+// Mailchimp flags fake/undeliverable addresses (including test domains like
+// example.com) with the generic ERROR_GENERIC code, surfacing the detail only
+// in the human-readable message (e.g. "<email> looks fake or invalid, please
+// enter a real email address."). Matching the message is the only available
+// signal; this is intentionally fragile -- an ERROR_GENERIC whose message
+// doesn't match falls through to the generic server error rather than being
+// misclassified as an invalid email.
+const INVALID_EMAIL_MESSAGE = /looks fake or invalid|valid email address/i;
+
+// Client-correctable outcomes are returned as HTTP 200 with a distinguishing
+// errorCode (rather than a 4xx) because the shared useClientFetch hook throws on
+// any non-200 response, which would prevent the form from reading the errorCode.
+// The errorCode -- not the HTTP status -- is the signal the frontend branches on.
+const SUCCESS_STATUS = 200;
 
 type MailchimpBatchResponse = {
   total_created: number;
@@ -78,8 +100,20 @@ export async function POST(request: NextRequest) {
     );
 
     if (!mailchimpResponse.ok) {
-      console.error(
-        `Error subscribing user: Mailchimp returned an error response: Status: ${mailchimpResponse.status}`,
+      if (mailchimpResponse.status === RATE_LIMITED_STATUS) {
+        logger.warn(
+          { mailchimpStatus: mailchimpResponse.status },
+          "Newsletter subscription rate-limited by Mailchimp (HTTP status)",
+        );
+        return NextResponse.json(
+          { success: false, errorCode: "tooManyRequests" },
+          { status: SUCCESS_STATUS },
+        );
+      }
+
+      logger.error(
+        { mailchimpStatus: mailchimpResponse.status },
+        "Newsletter subscription failed: Mailchimp returned a non-ok status",
       );
       return NextResponse.json(
         { success: false, errorCode: "server" },
@@ -93,15 +127,45 @@ export async function POST(request: NextRequest) {
       (await mailchimpResponse.json()) as MailchimpBatchResponse;
 
     if (responseData.error_count > 0) {
-      if (responseData.errors[0]?.error_code === ALREADY_SUBSCRIBED_CODE) {
+      const memberError = responseData.errors[0];
+      const memberErrorCode = memberError?.error_code;
+
+      if (memberErrorCode === ALREADY_SUBSCRIBED_CODE) {
+        logger.info(
+          { mailchimpErrorCode: memberErrorCode },
+          "Newsletter subscription skipped: contact already subscribed",
+        );
         return NextResponse.json(
           { success: false, errorCode: "alreadySubscribed" },
-          { status: 200 },
+          { status: SUCCESS_STATUS },
         );
       }
 
-      console.error(
-        `Error subscribing user: Mailchimp returned a member error: ${responseData.errors[0]?.error_code}`,
+      if (memberErrorCode === TOO_MANY_SIGNUPS_CODE) {
+        logger.warn(
+          { mailchimpErrorCode: memberErrorCode },
+          "Newsletter subscription rate-limited by Mailchimp (member error)",
+        );
+        return NextResponse.json(
+          { success: false, errorCode: "tooManyRequests" },
+          { status: SUCCESS_STATUS },
+        );
+      }
+
+      if (memberError && INVALID_EMAIL_MESSAGE.test(memberError.error)) {
+        logger.info(
+          { mailchimpErrorCode: memberErrorCode },
+          "Newsletter subscription rejected: invalid email address",
+        );
+        return NextResponse.json(
+          { success: false, errorCode: "invalidEmail" },
+          { status: SUCCESS_STATUS },
+        );
+      }
+
+      logger.error(
+        { mailchimpErrorCode: memberErrorCode },
+        "Newsletter subscription failed: unrecognized Mailchimp member error",
       );
       return NextResponse.json(
         { success: false, errorCode: "server" },
@@ -112,8 +176,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (e) {
     const error = e as Error;
-    console.error(
-      `Error subscribing user: Exception: ${error.message} ${error.cause?.toString() ?? ""}`,
+    logger.error(
+      { error: error.message, cause: error.cause?.toString() },
+      "Newsletter subscription failed: exception calling Mailchimp",
     );
     return NextResponse.json(
       { success: false, errorCode: "server" },
