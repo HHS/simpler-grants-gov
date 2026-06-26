@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy import select
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import tests.src.db.models.factories as f
@@ -266,14 +267,12 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         cfda_to_delete = setup_cfda(create_existing=True, opportunity=opportunity)
 
         # Get the created assistance listing
-        assistance_listing = (
-            db_session.query(OpportunityAssistanceListing)
-            .filter(
+        assistance_listing = db_session.execute(
+            select(OpportunityAssistanceListing).where(
                 OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
                 == cfda_to_delete.opp_cfda_id
             )
-            .one()
-        )
+        ).scalar_one()
 
         # Create a competition that references this assistance listing
         staging_competition = setup_competition(
@@ -286,11 +285,11 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         )
 
         # Get the created competition and set the assistance listing reference
-        competition = (
-            db_session.query(Competition)
-            .filter(Competition.legacy_competition_id == staging_competition.comp_id)
-            .one()
-        )
+        competition = db_session.execute(
+            select(Competition).where(
+                Competition.legacy_competition_id == staging_competition.comp_id
+            )
+        ).scalar_one()
         competition.opportunity_assistance_listing_id = (
             assistance_listing.opportunity_assistance_listing_id
         )
@@ -314,11 +313,11 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         validate_assistance_listing(db_session, cfda_to_delete, expect_in_db=False)
 
         # Verify the competition's reference was nullified
-        competition_after = (
-            db_session.query(Competition)
-            .filter(Competition.legacy_competition_id == staging_competition.comp_id)
-            .one()
-        )
+        competition_after = db_session.execute(
+            select(Competition).where(
+                Competition.legacy_competition_id == staging_competition.comp_id
+            )
+        ).scalar_one()
         assert competition_after.opportunity_assistance_listing_id is None
 
     def test_delete_assistance_listing_with_competition_reference_not_being_deleted(
@@ -331,14 +330,12 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         cfda_to_delete = setup_cfda(create_existing=True, opportunity=opportunity)
 
         # Get the created assistance listing
-        assistance_listing = (
-            db_session.query(OpportunityAssistanceListing)
-            .filter(
+        assistance_listing = db_session.execute(
+            select(OpportunityAssistanceListing).where(
                 OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
                 == cfda_to_delete.opp_cfda_id
             )
-            .one()
-        )
+        ).scalar_one()
 
         # Create a competition that references this assistance listing
         staging_competition = setup_competition(
@@ -351,11 +348,11 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         )
 
         # Get the created competition and set the assistance listing reference
-        competition = (
-            db_session.query(Competition)
-            .filter(Competition.legacy_competition_id == staging_competition.comp_id)
-            .one()
-        )
+        competition = db_session.execute(
+            select(Competition).where(
+                Competition.legacy_competition_id == staging_competition.comp_id
+            )
+        ).scalar_one()
         competition.opportunity_assistance_listing_id = (
             assistance_listing.opportunity_assistance_listing_id
         )
@@ -387,11 +384,11 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         validate_assistance_listing(db_session, cfda_to_delete, expect_in_db=False)
 
         # Verify the competition's reference was nullified despite the error
-        competition_after = (
-            db_session.query(Competition)
-            .filter(Competition.legacy_competition_id == staging_competition.comp_id)
-            .one()
-        )
+        competition_after = db_session.execute(
+            select(Competition).where(
+                Competition.legacy_competition_id == staging_competition.comp_id
+            )
+        ).scalar_one()
         assert competition_after.opportunity_assistance_listing_id is None
 
     def test_delete_assistance_listing_without_competition_references(

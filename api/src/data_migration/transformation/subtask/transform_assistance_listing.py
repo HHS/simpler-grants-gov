@@ -139,13 +139,9 @@ class TransformAssistanceListing(AbstractTransformSubTask):
         self, target_assistance_listing: OpportunityAssistanceListing, extra: dict
     ) -> None:
         """
-        Handle competitions that reference the assistance listing being deleted, for api tables.
+        Handle reference from competitions when deleting the assistance listing.
 
-        From api side, when deleting an assistance listing, need to check if any competition(s) reference it.
-        If yes, check against to staging competition tables to see if each competition is being deleted there.
-        For each competition in staging:
-            - If it is being deleted, nullify the reference to avoid foreign key constraint violations.
-            - If it is not, same nullify the reference, but also log an error. A conflict is happening though it is not expected.
+        We always null the reference in the api table, the check being done at the staging is purely for error handling.
         """
         # Find all competitions that reference this assistance listing
         competitions_with_reference = (
