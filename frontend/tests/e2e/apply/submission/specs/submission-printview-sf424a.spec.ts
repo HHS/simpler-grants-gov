@@ -168,10 +168,18 @@ for (const { testName, orgLabel } of applicantScenarios) {
           userEnteredFieldTestIds,
         )) {
           if (testData[dataKey] === undefined) continue;
-          await expect(page.getByTestId(testId)).toBeVisible();
-          await expect(page.getByTestId(testId)).toContainText(
-            testData[dataKey],
+          const locator = page.getByTestId(testId);
+          await expect(locator).toBeVisible();
+
+          // For input elements, check the value attribute; for other elements, check visible text
+          const elementType = await locator.evaluate((el) =>
+            el.tagName.toLowerCase(),
           );
+          if (elementType === "input") {
+            await expect(locator).toHaveValue(testData[dataKey]);
+          } else {
+            await expect(locator).toContainText(testData[dataKey]);
+          }
         }
 
         // SF-424A has no attachment sections (unlike SF-424)
