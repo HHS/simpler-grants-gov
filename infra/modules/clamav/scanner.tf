@@ -143,6 +143,8 @@ resource "aws_lambda_function" "scanner" {
   memory_size = var.scanner_memory_size
   timeout     = var.scanner_timeout
 
+  publish = true
+
   # Bound parallel scans so a burst of uploads can't exhaust the account
   # Lambda quota or overwhelm EFS. Tune via var.scanner_reserved_concurrency.
   reserved_concurrent_executions = var.scanner_reserved_concurrency
@@ -173,6 +175,8 @@ resource "aws_lambda_function" "scanner" {
       API_BASE_URL               = var.api_base_url
       FILE_SCAN_API_KEY          = var.file_scan_api_key
       FILE_SCAN_CACHE_TABLE_NAME = var.file_scan_cache_table_name
+
+      CLAMD_WARM_ON_INIT = var.scanner_provisioned_concurrency > 0 ? "true" : "false"
     }
   }
 
@@ -187,10 +191,26 @@ resource "aws_lambda_function" "scanner" {
   ]
 }
 
+resource "aws_lambda_alias" "scanner_live" {
+  name             = "live"
+  description      = "Target of the S3 trigger and of provisioned concurrency."
+  function_name    = aws_lambda_function.scanner.function_name
+  function_version = aws_lambda_function.scanner.version
+}
+
+resource "aws_lambda_provisioned_concurrency_config" "scanner" {
+  count = var.scanner_provisioned_concurrency > 0 ? 1 : 0
+
+  function_name                     = aws_lambda_function.scanner.function_name
+  qualifier                         = aws_lambda_alias.scanner_live.name
+  provisioned_concurrent_executions = var.scanner_provisioned_concurrency
+}
+
 resource "aws_lambda_permission" "allow_s3_invoke" {
   statement_id  = "AllowS3Invoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.scanner.function_name
+  qualifier     = aws_lambda_alias.scanner_live.name
   principal     = "s3.amazonaws.com"
   source_arn    = var.s3_bucket_arn
 }
@@ -199,7 +219,7 @@ resource "aws_s3_bucket_notification" "scanner" {
   bucket = var.s3_bucket_id
 
   lambda_function {
-    lambda_function_arn = aws_lambda_function.scanner.arn
+    lambda_function_arn = aws_lambda_alias.scanner_live.arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = var.unscanned_prefix
   }

@@ -265,6 +265,12 @@ variable "workflow_service_desired_count" {
   default     = 1
 }
 
+variable "scanner_provisioned_concurrency" {
+  description = "Number of execution environments to keep warm for the ClamAV scanner Lambda via provisioned concurrency. Each warmed environment loads the signature database into memory ahead of time, so scans skip the multi-second cold-start load. 0 (the default) leaves the scanner fully on-demand. Billed continuously, so set this only in environments that need consistently low scan latency. Must not exceed the scanner's reserved concurrency (10)."
+  type        = number
+  default     = 0
+}
+
 variable "service_newrelic_entity_guid" {
   type        = string
   description = "New Relic entity GUID for the primary ALB, used to correlate logs with the infrastructure entity in New Relic."
