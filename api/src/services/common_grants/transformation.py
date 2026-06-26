@@ -102,9 +102,7 @@ def transform_status_from_cg(cg_status: OppStatusOptions) -> str:
     return v1_status
 
 
-# CommonGrants applicant-type vocabulary -> native ApplicantType values.
-# Ported verbatim from ts-cg-grants-gov/src/transforms.ts APPLICANT_TYPE_FROM_COMMON
-# (the authoritative cross-SDK pairing). Keep in sync with that table.
+# CommonGrants applicant-type values -> native ApplicantType values.
 APPLICANT_TYPE_FROM_CG = {
     "individual": "individuals",
     "organization": "other",

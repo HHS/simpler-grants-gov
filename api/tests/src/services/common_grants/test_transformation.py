@@ -1533,5 +1533,13 @@ def test_build_custom_filters_unmappable_applicant_type_reported():
     assert errors == ["customFilters.applicantType: unmappable value not_a_real_type"]
 
 
+def test_build_custom_filters_applicant_type_partial_map():
+    applied, errors = build_custom_filters(
+        {"applicantType": _cf("in", ["government_state", "not_a_real_type"])}
+    )
+    assert applied == {"applicant_type": {"one_of": ["state_governments"]}}
+    assert errors == ["customFilters.applicantType: unmappable value not_a_real_type"]
+
+
 def test_build_custom_filters_none_is_noop():
     assert build_custom_filters(None) == ({}, [])
