@@ -266,7 +266,7 @@ variable "workflow_service_desired_count" {
 }
 
 variable "scanner_provisioned_concurrency" {
-  description = "Number of execution environments to keep warm for the ClamAV scanner Lambda via provisioned concurrency. Each warmed environment loads the signature database into memory ahead of time, so scans skip the multi-second cold-start load. 0 (the default) leaves the scanner fully on-demand. Billed continuously, so set this only in environments that need consistently low scan latency. Must not exceed the scanner's reserved concurrency (10)."
+  description = "Number of execution environments to keep warm for the ClamAV scanner Lambda via provisioned concurrency."
   type        = number
   default     = 0
 }
