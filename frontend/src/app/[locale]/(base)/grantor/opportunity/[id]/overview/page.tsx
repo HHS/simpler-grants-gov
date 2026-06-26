@@ -1,9 +1,10 @@
-import { CompetitionForm } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/CompetitionForm";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 
+import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
+import { Link } from "@trussworks/react-uswds";
 
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
@@ -12,11 +13,9 @@ type PageProps = {
   params: Promise<{ id: string; locale: string }>;
 };
 
-export const dynamic = "force-dynamic";
-
-async function OpportunityCompetitionPage({ params }: PageProps) {
+async function OpportunityOverviewPage({ params }: PageProps) {
   const { id, locale } = await params;
-
+  const t = await getTranslations({ locale, namespace: "OpportunityOverview" });
   let opportunityData;
   try {
     const response = await getOpportunityForGrantor(id);
@@ -31,20 +30,41 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
     }
     throw error;
   }
+  const editUrl = "../" + id + "/edit";
+  const competitionUrl = "../" + id + "/competition";
 
   return (
-    <>
+    <div className="bg-white">
       <OpportunityDetailsHeader
         opportunityData={opportunityData}
         locale={locale}
       />
-      <CompetitionForm />
-    </>
+      <div className="grid-container padding-top-4 padding-bottom-4">
+        <div className="grid-row grid-gap-2 padding-top-2">
+          <div className="tablet:grid-col">
+            <Link href={editUrl}>{t("labels.editOpportunityLink")}</Link>
+          </div>
+          <div className="tablet:grid-col">
+            {/* PLACEHOLDER: status icon here */}
+          </div>
+        </div>
+        <hr />
+        <div className="grid-row grid-gap-2 padding-top-2">
+          <div className="tablet:grid-col">
+            <Link href={competitionUrl}>{t("labels.competitionLink")}</Link>
+          </div>
+          <div className="tablet:grid-col">
+            {/* PLACEHOLDER: status icon here */}
+          </div>
+        </div>
+        <hr />
+      </div>
+    </div>
   );
 }
 
 export default withFeatureFlag<PageProps, never>(
-  OpportunityCompetitionPage,
+  OpportunityOverviewPage,
   "opportunitiesListOff",
   () => redirect("/maintenance"),
 );

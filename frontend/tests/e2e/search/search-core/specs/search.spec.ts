@@ -9,6 +9,7 @@
 
 import { expect, test } from "@playwright/test";
 import { waitForAnyURLChange } from "tests/e2e/playwrightUtils";
+import { VALID_TAGS } from "tests/e2e/tags";
 import {
   clickAccordionWithTitle,
   clickLastPaginationPage,
@@ -21,8 +22,7 @@ import {
   toggleFilterDrawer,
   waitForFilterOptions,
   waitForSearchResultsInitialLoad,
-} from "tests/e2e/search/searchSpecUtil";
-import { VALID_TAGS } from "tests/e2e/tags";
+} from "tests/e2e/utils/search/searchSpecUtil";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION, CORE_REGRESSION } =
   VALID_TAGS;

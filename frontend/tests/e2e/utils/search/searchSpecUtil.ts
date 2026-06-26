@@ -348,6 +348,10 @@ export async function waitForLoaderToBeHidden(page: Page) {
   );
 }
 
+export async function clickSearchNavLink(page: Page) {
+  await page.click("nav >> text=Search");
+}
+
 export async function ensureAccordionExpanded(
   page: Page,
   accordionTitle: string,
@@ -368,6 +372,11 @@ export async function ensureAccordionExpanded(
 
 export async function getNumberOfOpportunitySearchResults(page: Page) {
   await waitForLoaderToBeHidden(page);
+  // The results table has its own Suspense boundary (keyed on searchParams, see SearchResults.tsx)
+  // so we need to wait for it to finish loading before we can get the number of results
+  await page
+    .locator("text=Loading the table")
+    .waitFor({ state: "hidden", timeout: 30000 });
   const opportunitiesText = await page
     .locator("div[data-testid='search-results-controls'] h3")
     .textContent();

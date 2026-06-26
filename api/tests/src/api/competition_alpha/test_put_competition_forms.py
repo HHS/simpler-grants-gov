@@ -189,11 +189,18 @@ def test_put_competition_forms_form_deprecated(
 
     competition = factories.CompetitionFactory.create(competition_forms=[])
     existing_form = db_session.get(Form, SF424_v4_0.form_id)
-    deprecated_form = factories.FormFactory.create(
+    deprecated_form = Form(
+        form_id=uuid4(),
         form_name="Deprecated Form",
         short_form_name="DEPR_1_0",
+        form_version="1.0",
+        agency_code="SGG",
+        form_json_schema={"type": "object", "properties": {}},
+        form_ui_schema={},
         is_deprecated=True,
     )
+    db_session.add(deprecated_form)
+    db_session.flush()
 
     payload = {
         "forms": [

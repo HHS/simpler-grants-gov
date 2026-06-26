@@ -1,5 +1,7 @@
 import uuid
 from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import Any
 
 import grants_shared.adapters.db as db
 from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
@@ -36,6 +38,26 @@ class ListOpportunitiesParams(BaseModel):
         default_factory=lambda: PaginationParams(page_offset=1, page_size=25)
     )
     filters: OpportunityListFilterParams | None = Field(default=None)
+
+
+@dataclass(frozen=True)
+class OpportunityListItem:
+    opportunity: Opportunity
+    submitted_application_count: int
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.opportunity, name)
+
+
+def _to_opportunity_list_item(
+    opportunity: Opportunity,
+    submitted_application_count: int,
+) -> OpportunityListItem:
+    """Convert an Opportunity ORM model into a list response item."""
+    return OpportunityListItem(
+        opportunity=opportunity,
+        submitted_application_count=submitted_application_count,
+    )
 
 
 def _base_opportunity_list_stmt() -> Select:
@@ -101,15 +123,15 @@ def _apply_opportunity_filters(stmt: Select, params: ListOpportunitiesParams) ->
     )
 
 
-def _add_submitted_application_counts(
+def _get_submitted_application_counts(
     db_session: db.Session,
     opportunities: Sequence[Opportunity],
-) -> None:
-    """Attach submitted application counts to each opportunity in the current page."""
+) -> dict[uuid.UUID, int]:
+    """Get submitted application counts keyed by opportunity ID."""
     opportunity_ids = [opportunity.opportunity_id for opportunity in opportunities]
 
     if not opportunity_ids:
-        return
+        return {}
 
     count_stmt = (
         select(
@@ -127,23 +149,17 @@ def _add_submitted_application_counts(
         .group_by(Competition.opportunity_id)
     )
 
-    counts_by_opportunity_id = {
+    return {
         opportunity_id: submitted_application_count
         for opportunity_id, submitted_application_count in db_session.execute(count_stmt).all()
     }
-
-    for opportunity in opportunities:
-        opportunity.submitted_application_count = counts_by_opportunity_id.get(
-            opportunity.opportunity_id,
-            0,
-        )
 
 
 def _paginate_opportunity_stmt(
     db_session: db.Session,
     stmt: Select,
     params: ListOpportunitiesParams,
-) -> tuple[Sequence[Opportunity], PaginationInfo]:
+) -> tuple[Sequence[OpportunityListItem], PaginationInfo]:
     """Apply filters, sorting, submitted application counts, and pagination."""
     stmt = _apply_opportunity_filters(stmt, params)
     stmt = apply_sorting(stmt, Opportunity, params.pagination.sort_order)
@@ -156,7 +172,18 @@ def _paginate_opportunity_stmt(
     )
 
     opportunities = paginator.page_at(params.pagination.page_offset)
-    _add_submitted_application_counts(db_session, opportunities)
+    counts_by_opportunity_id = _get_submitted_application_counts(db_session, opportunities)
+
+    opportunity_list_items = [
+        _to_opportunity_list_item(
+            opportunity=opportunity,
+            submitted_application_count=counts_by_opportunity_id.get(
+                opportunity.opportunity_id,
+                0,
+            ),
+        )
+        for opportunity in opportunities
+    ]
 
     pagination_info = PaginationInfo(
         total_records=paginator.total_records,
@@ -166,14 +193,14 @@ def _paginate_opportunity_stmt(
         sort_order=[SortOrder(p.order_by, p.sort_direction) for p in params.pagination.sort_order],
     )
 
-    return opportunities, pagination_info
+    return opportunity_list_items, pagination_info
 
 
 def list_opportunities_for_agency_with_filters(
     db_session: db.Session,
     agency_id: uuid.UUID,
     params: ListOpportunitiesParams,
-) -> tuple[Sequence[Opportunity], PaginationInfo]:
+) -> tuple[Sequence[OpportunityListItem], PaginationInfo]:
     """List opportunities for a single agency with filtering, sorting, and pagination."""
     stmt = _base_opportunity_list_stmt().where(Agency.agency_id == agency_id)
 
@@ -188,7 +215,7 @@ def list_opportunities_with_filters(
     db_session: db.Session,
     agency_id: uuid.UUID,
     params: ListOpportunitiesParams,
-) -> tuple[Sequence[Opportunity], PaginationInfo]:
+) -> tuple[Sequence[OpportunityListItem], PaginationInfo]:
     """Backward-compatible wrapper for listing opportunities by agency."""
     return list_opportunities_for_agency_with_filters(
         db_session=db_session,
@@ -202,7 +229,7 @@ def get_opportunity_list_for_grantors(
     user: User,
     agency_id: uuid.UUID,
     json_data: dict,
-) -> tuple[Sequence[Opportunity], PaginationInfo]:
+) -> tuple[Sequence[OpportunityListItem], PaginationInfo]:
     """
     Get a paginated list of opportunities for grantors
 
@@ -250,7 +277,7 @@ def list_opportunities_for_user_with_filters(
     db_session: db.Session,
     user: User,
     params: ListOpportunitiesParams,
-) -> tuple[Sequence[Opportunity], PaginationInfo]:
+) -> tuple[Sequence[OpportunityListItem], PaginationInfo]:
     """List opportunities across all agencies where the user has VIEW_OPPORTUNITY."""
     stmt = _base_opportunity_list_stmt().where(
         Agency.agency_id.in_(_accessible_agency_ids_for_user_stmt(user))
@@ -267,7 +294,7 @@ def get_opportunity_list_for_user(
     db_session: db.Session,
     user: User,
     json_data: dict,
-) -> tuple[Sequence[Opportunity], PaginationInfo]:
+) -> tuple[Sequence[OpportunityListItem], PaginationInfo]:
     """Get a paginated list of opportunities for all agencies the user can access."""
     params = ListOpportunitiesParams.model_validate(json_data)
 
