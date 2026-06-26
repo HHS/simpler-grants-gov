@@ -14,6 +14,7 @@ from src.db.models.lookup_models import LkUserType
 class User(GrantorSchemaTable, TimestampMixin):
     # TODO - once we've moved the auth related functionality to grants_shared
     # change this to be derived from BaseUser
+    # https://github.com/HHS/simpler-grants-gov/issues/11022
     __tablename__ = "user"
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)

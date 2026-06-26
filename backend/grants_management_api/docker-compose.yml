@@ -9,15 +9,7 @@ services:
         - RUN_USER=${RUN_USER:-api}
     command:
       [
-        "flask",
-        "--app",
-        "src.app",
-        "run",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "8089",
-        "--reload",
+        "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8089", "--reload"
       ]
     container_name: grants-management-api
     env_file:

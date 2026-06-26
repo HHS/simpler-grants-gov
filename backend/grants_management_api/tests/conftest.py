@@ -165,6 +165,7 @@ def app(
     monkeypatch_session,
 ) -> APIFlask:
     # TODO - when we add auth, need to add connections here and mock out oauth
+    # https://github.com/HHS/simpler-grants-gov/issues/11022
     app = app_entry.create_app()
 
     return app

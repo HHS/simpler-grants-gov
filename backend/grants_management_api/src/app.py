@@ -95,7 +95,7 @@ def configure_app(app: APIFlask) -> None:
     # Set the security schema and define the header param
     # where we expect the API token to reside.
     # See: https://apiflask.com/authentication/#use-external-authentication-library
-    # TODO - when we add auth
+    # TODO - https://github.com/HHS/simpler-grants-gov/issues/11022
     # app.security_schemes = get_app_security_scheme()
 
     @app.error_processor
