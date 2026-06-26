@@ -134,7 +134,9 @@ export function sf424aHappyPathTestData(
  * are deterministic and match SF424A_EXPECTED. The suffix parameter is
  * reserved for future differentiation but not currently used.
  */
-export const buildSF424aHappyPathTestData = (_suffix: number): Record<string, string> => {
+export const buildSF424aHappyPathTestData = (
+  _suffix: number,
+): Record<string, string> => {
   return sf424aHappyPathTestData();
 };
 
