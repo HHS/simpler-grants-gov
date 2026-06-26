@@ -161,7 +161,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
           await expect(page.getByTestId(testId)).toContainText(expectedValue);
         }
 
-        // User-entered fields - testIds derived from formConfig.fields (printTestId ?? testId)
+        // User-entered fields - uses formConfig.fields (printTestId ?? testId)
         // Skip fields not present in testData (e.g. revision_type for non-Revision applications)
         for (const [dataKey, testId] of Object.entries(
           userEnteredFieldTestIds,
@@ -173,8 +173,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
           );
         }
 
-        // SF-424 attachment sections - filenames appear in list items inside the
-        // section, not in testId elements, so validated by section locator.
+        // SF-424 attachments - filenames are in the section, not testId elements, so use the section locator
         if (formKey === "sf424") {
           const attachmentFileName = (filePath: string) =>
             filePath.split(/[/\\]/).pop() ?? filePath;
