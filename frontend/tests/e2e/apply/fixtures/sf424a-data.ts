@@ -1,5 +1,4 @@
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
-import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
 
 /**
  * Test data for SF-424A happy path.
@@ -130,19 +129,12 @@ export function sf424aHappyPathTestData(
 }
 
 /**
- * Happy-path test data builder for the SF-424A form (print view).
- * Generates form data using the pre-computed sf424aHappyPathTestData() function.
- *
- * SF-424A is a complex budget form with rule-computed totals. The underlying
- * sf424aHappyPathTestData() provides pre-computed values guaranteed to match expected totals.
- * This builder maintains that guarantee while reserving the suffix parameter for future differentiation.
+ * Happy-path test data builder for the SF-424A form.
+ * All numeric fields are hardcoded to "1" to ensure rule-computed totals
+ * are deterministic and match SF424A_EXPECTED. The suffix parameter is
+ * reserved for future differentiation but not currently used.
  */
-export const buildSF424aHappyPathTestData = (
-  suffix: number,
-): Record<string, string> => {
-  // SF-424A uses hardcoded values ("1") for all numeric fields to ensure
-  // rule-computed totals are deterministic and match SF424A_EXPECTED in sf424a-field-definitions.ts.
-  // The suffix is not used in field values currently, but reserved for future form differentiation.
+export const buildSF424aHappyPathTestData = (_suffix: number): Record<string, string> => {
   return sf424aHappyPathTestData();
 };
 
