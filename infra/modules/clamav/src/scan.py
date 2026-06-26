@@ -11,7 +11,10 @@ For each triggering object the scanner:
      log an error and stop -- nothing downstream can correlate the result, and
      a retry can't make the metadata appear.
   2. Marks the DynamoDB scan-cache record ``in_progress``.
-  3. Runs clamscan against the downloaded object.
+  3. Scans the downloaded object with clamd -- a resident daemon that loads the
+     signature database into memory once and keeps it there across warm
+     invocations (see ``_ensure_clamd_running``), so only the first scan on a
+     cold container pays the multi-second DB load.
   4. Copies the object to scanned/ (clean) or infected/ (virus found).
   5. Reports the outcome to the API (POST /v1/files/<file_id>) and *then*
      updates the DynamoDB record to the terminal status. The API call lands
@@ -23,12 +26,13 @@ For each triggering object the scanner:
      the API call, and the DynamoDB write are all idempotent.
 
 The signature database lives on EFS at CLAMAV_DB_DIR and is refreshed
-out-of-band by the freshclam Lambda.
+out-of-band by the freshclam Lambda. clamd loads it at startup and picks up
+freshclam's updates on its periodic self-check.
 
 Behavior on failure:
   - Files larger than MAX_FILE_SIZE_BYTES are not downloaded; they can't be
     certified clean, so they are quarantined to infected/ rather than passed.
-  - A clamscan execution error (exit code >= 2, as opposed to a virus hit) is
+  - A clamd scan error (exit code >= 2, as opposed to a virus hit) is
     raised so Lambda retries the event and, after the retry budget, routes the
     original S3 payload to the DLQ for manual replay.
   - Duplicate S3 deliveries for a key whose source has already been moved are
@@ -37,7 +41,10 @@ Behavior on failure:
 
 import json
 import os
+import socket
 import subprocess
+import threading
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -72,14 +79,41 @@ USER_ID_METADATA_KEY = "user-id"
 
 # Layer drops binaries at /opt/bin and libs at /opt/lib — Lambda adds both
 # to PATH and LD_LIBRARY_PATH automatically.
-CLAMSCAN_BIN = "/opt/bin/clamscan"
+#
+# We scan via clamd (the resident daemon) rather than clamscan (the one-shot
+# CLI). clamscan reloads the ~hundreds-of-MB signature database into memory on
+# *every* invocation, and that load dominates scan latency. clamd loads the DB
+# once when it starts and keeps it resident, so warm invocations just connect
+# to the already-loaded daemon over a local socket via the thin clamdscan
+# client and finish in well under a second.
+CLAMD_BIN = "/opt/bin/clamd"
+CLAMDSCAN_BIN = "/opt/bin/clamdscan"
 
-# Fail fast at cold start rather than discovering a bad layer mid-scan,
-# where the error surfaces as a confusing subprocess failure.
-if not Path(CLAMSCAN_BIN).exists():
-    raise RuntimeError(
-        f"ClamAV binary not found at {CLAMSCAN_BIN}; layer build is missing or corrupted"
-    )
+# clamd is configured and run entirely out of /tmp — the only writable path in
+# the Lambda filesystem. The config is generated at startup so it can point
+# DatabaseDirectory at the EFS mount and raise the scan-size limits.
+CLAMD_SOCKET = "/tmp/clamd.sock"
+CLAMD_CONFIG = "/tmp/clamd.conf"
+CLAMD_PID = "/tmp/clamd.pid"
+CLAMD_LOG = "/tmp/clamd.log"
+
+# How long to wait for clamd to load the signature DB and start accepting
+# connections on a cold container. The load is bounded by EFS read throughput;
+# 120s leaves generous headroom under the Lambda timeout.
+CLAMD_STARTUP_TIMEOUT_SECONDS = int(os.environ.get("CLAMD_STARTUP_TIMEOUT_SECONDS", "120"))
+
+# Guards clamd startup. A Lambda container only ever handles one invocation at
+# a time, so this is effectively uncontended — it just protects the global.
+_clamd_lock = threading.Lock()
+_clamd_process = None
+
+# Fail fast at cold start rather than discovering a bad layer mid-scan, where
+# the error surfaces as a confusing subprocess failure.
+for _required_bin in (CLAMD_BIN, CLAMDSCAN_BIN):
+    if not Path(_required_bin).exists():
+        raise RuntimeError(
+            f"ClamAV binary not found at {_required_bin}; layer build is missing or corrupted"
+        )
 
 # Scan statuses, mirroring the API's FileScanStatus values. The scanner only
 # ever sets these three: in_progress on start, then complete or infected.
@@ -87,7 +121,7 @@ STATUS_IN_PROGRESS = "in_progress"
 STATUS_COMPLETE = "complete"
 STATUS_INFECTED = "infected"
 
-# clamscan exit codes: 0 = clean, 1 = virus found, 2 = scanning error.
+# clamscan / clamdscan exit codes: 0 = clean, 1 = virus found, 2 = scan error.
 _STATUS_BY_EXIT = {0: STATUS_COMPLETE, 1: STATUS_INFECTED}
 
 # Clean files go to scanned/, anything quarantined goes to infected/.
@@ -211,7 +245,7 @@ def _process_record(bucket, key):
 
 def _determine_status(bucket, key, size_bytes):
     """Return ``(status, detail)`` for the object. ``status`` is one of the
-    terminal scan statuses; ``detail`` carries clamscan output for logging."""
+    terminal scan statuses; ``detail`` carries clamdscan output for logging."""
     if size_bytes > MAX_FILE_SIZE_BYTES:
         # Too large to pull into /tmp for scanning. We can't certify it clean,
         # so quarantine it as infected rather than letting it through.
@@ -225,16 +259,21 @@ def _determine_status(bucket, key, size_bytes):
 
 
 def _scan_object(bucket, key):
+    _ensure_clamd_running()
+
     local_path = Path("/tmp") / Path(key).name
     s3.download_file(bucket, key, str(local_path))
 
     try:
         completed = subprocess.run(
             [
-                CLAMSCAN_BIN,
+                CLAMDSCAN_BIN,
+                "--config-file",
+                CLAMD_CONFIG,
+                # Hand clamd the open file descriptor so it reads the file
+                # directly (rather than streaming the bytes over the socket).
+                "--fdpass",
                 "--no-summary",
-                "--database",
-                CLAMAV_DB_DIR,
                 str(local_path),
             ],
             capture_output=True,
@@ -246,19 +285,99 @@ def _scan_object(bucket, key):
 
     status = _STATUS_BY_EXIT.get(completed.returncode)
     if status is None:
-        # clamscan exit code >= 2 means the scanner itself failed, not that
-        # the file is infected. Raise so the event retries and eventually
-        # lands on the DLQ for manual replay.
+        # clamdscan exit code >= 2 means the scan itself failed, not that the
+        # file is infected. Raise so the event retries and eventually lands on
+        # the DLQ for manual replay.
         raise ScanError(
-            f"clamscan failed for {bucket}/{key} "
+            f"clamdscan failed for {bucket}/{key} "
             f"(exit={completed.returncode}, stderr={completed.stderr.strip()!r})"
         )
 
     return status, {
-        "clamscan_exit_code": completed.returncode,
-        "clamscan_stdout": completed.stdout.strip(),
-        "clamscan_stderr": completed.stderr.strip(),
+        "clamdscan_exit_code": completed.returncode,
+        "clamdscan_stdout": completed.stdout.strip(),
+        "clamdscan_stderr": completed.stderr.strip(),
     }
+
+
+def _ensure_clamd_running():
+    """Start clamd if it isn't already serving, then block until it accepts
+    connections. Cheap and idempotent on warm containers (a single PING):
+    clamd loads the signature DB once at startup and stays resident across
+    invocations, so the DB-load cost is paid only on the first scan after a
+    cold start (or if clamd died and has to be restarted)."""
+    global _clamd_process
+    with _clamd_lock:
+        if _clamd_responds():
+            return
+
+        _write_clamd_config()
+        _clamd_process = subprocess.Popen(
+            [CLAMD_BIN, "--config-file", CLAMD_CONFIG],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+        deadline = time.monotonic() + CLAMD_STARTUP_TIMEOUT_SECONDS
+        while time.monotonic() < deadline:
+            if _clamd_process.poll() is not None:
+                raise ScanError(
+                    f"clamd exited during startup (code={_clamd_process.returncode}); "
+                    f"log tail: {_read_clamd_log()}"
+                )
+            if _clamd_responds():
+                return
+            time.sleep(0.5)
+
+        raise ScanError(
+            f"clamd did not become ready within {CLAMD_STARTUP_TIMEOUT_SECONDS}s; "
+            f"log tail: {_read_clamd_log()}"
+        )
+
+
+def _write_clamd_config():
+    """Generate clamd's config in /tmp (the only writable path). Points the
+    daemon at the EFS-mounted signature DB and raises the scan-size limits to
+    MAX_FILE_SIZE_BYTES so files up to the handler's size threshold are fully
+    scanned -- clamd's defaults (25M file / 100M scan) sit well below that, and
+    anything over a default limit would otherwise be passed through unscanned."""
+    config_lines = [
+        f"LocalSocket {CLAMD_SOCKET}",
+        f"PidFile {CLAMD_PID}",
+        f"LogFile {CLAMD_LOG}",
+        "LogTime yes",
+        f"DatabaseDirectory {CLAMAV_DB_DIR}",
+        "TemporaryDirectory /tmp",
+        # Run in the foreground so the Popen handle tracks the real process
+        # (clamd does not double-fork), which the liveness check relies on.
+        "Foreground yes",
+        # One invocation per container, so a couple of threads is plenty.
+        "MaxThreads 2",
+        f"MaxFileSize {MAX_FILE_SIZE_BYTES}",
+        f"MaxScanSize {MAX_FILE_SIZE_BYTES}",
+        f"StreamMaxLength {MAX_FILE_SIZE_BYTES}",
+    ]
+    Path(CLAMD_CONFIG).write_text("\n".join(config_lines) + "\n")
+
+
+def _clamd_responds():
+    """True if clamd answers PING on its local socket."""
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+            sock.settimeout(5)
+            sock.connect(CLAMD_SOCKET)
+            sock.sendall(b"nPING\n")
+            return sock.recv(16).strip() == b"PONG"
+    except OSError:
+        return False
+
+
+def _read_clamd_log(max_chars=2000):
+    """Best-effort tail of clamd's log, for surfacing startup failures."""
+    try:
+        return Path(CLAMD_LOG).read_text()[-max_chars:].strip()
+    except OSError:
+        return "<no clamd log>"
 
 
 def _set_scan_status(file_id, user_id, status):
