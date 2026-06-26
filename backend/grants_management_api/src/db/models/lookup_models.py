@@ -31,6 +31,7 @@ USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
 # Base table that all lookup tables are derived from
 #######################################################
 
+
 class GrantorLookupTable(LookupTable, GrantorSchemaTable):
     """
     Base lookup table class that includes the GrantorSchemasTable as well
@@ -39,12 +40,14 @@ class GrantorLookupTable(LookupTable, GrantorSchemaTable):
 
     __abstract__ = True
 
+
 #######################################################
 # Lookup Tables
 #
 # Put all lookup table definitions in this section and
 # connect them to the lookup configurations defined above
 #######################################################
+
 
 @LookupRegistry.register_lookup(USER_TYPE_CONFIG)
 class LkUserType(GrantorLookupTable, TimestampMixin):
@@ -56,4 +59,3 @@ class LkUserType(GrantorLookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> LkUserType:
         return LkUserType(user_type_id=lookup.lookup_val, description=lookup.get_description())
-

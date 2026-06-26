@@ -1,18 +1,24 @@
 import uuid
 
 import _pytest.monkeypatch
+import boto3
 import flask
+import moto
 import pytest
 from apiflask import APIFlask
 from grants_shared.adapters import db
 from grants_shared.util.local import load_local_env_vars
 
 import src.app as app_entry
+import tests.db.models.factories as factories
+from src.db import models
+from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from tests.test_utils import db_testing
 
 ####################
 # General test setup/utils
 ####################
+
 
 @pytest.fixture(scope="session", autouse=True)
 def env_vars():
@@ -61,7 +67,6 @@ def set_env_var_defaults(monkeypatch_session):
     monkeypatch_session.setenv("ENABLE_LOCAL_FILE_SCANNER", "FALSE")
 
 
-
 # From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="session")
 def monkeypatch_session():
@@ -73,6 +78,7 @@ def monkeypatch_session():
     mpatch = _pytest.monkeypatch.MonkeyPatch()
     yield mpatch
     mpatch.undo()
+
 
 # From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="class")
@@ -94,13 +100,16 @@ def monkeypatch_module():
     yield mpatch
     mpatch.undo()
 
+
 ####################
 # Database
 ####################
 
+
 @pytest.fixture(scope="session")
 def db_schema_prefix():
     return f"test_{uuid.uuid4().int}_"
+
 
 @pytest.fixture(scope="session")
 def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
@@ -115,20 +124,38 @@ def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
 
     with db_testing.create_isolated_db(monkeypatch_session, db_schema_prefix) as db_client:
         with db_client.get_connection() as conn, conn.begin():
-            # TODO
-            # models.metadata.create_all(bind=conn)
-            # staging_metadata.create_all(bind=conn)
-            # foreign_metadata.create_all(bind=conn)
-            pass
+            models.metadata.create_all(bind=conn)
 
-        # TODO
-        # sync_lookup_values(db_client)
+        sync_lookup_values(db_client)
         yield db_client
+
+
+@pytest.fixture
+def db_session(db_client: db.DBClient) -> db.Session:
+    """
+    Returns a database session connected to the schema used for the test session.
+    """
+    with db_client.get_session() as session:
+        yield session
+
+
+@pytest.fixture
+def enable_factory_create(monkeypatch, db_session, mock_s3_bucket) -> db.Session:
+    """
+    Allows the create method of factories to be called. By default, the create
+    throws an exception to prevent accidental creation of database objects for tests
+    that do not need persistence. This fixture only allows the create method to be
+    called for the current test. Each test that needs to call Factory.create should pull in
+    this fixture.
+    """
+    monkeypatch.setattr(factories, "_db_session", db_session)
+    return db_session
 
 
 ####################
 # Test App & Client
 ####################
+
 
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
@@ -146,3 +173,48 @@ def app(
 @pytest.fixture
 def client(app: flask.Flask) -> flask.testing.FlaskClient:
     return app.test_client()
+
+
+@pytest.fixture
+def cli_runner(app: flask.Flask) -> flask.testing.CliRunner:
+    return app.test_cli_runner()
+
+
+####################
+# AWS Mock Fixtures
+####################
+
+
+@pytest.fixture
+def reset_aws_env_vars(monkeypatch):
+    # Reset the env vars so you can't accidentally connect
+    # to a real AWS account if you were doing some local testing
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
+    monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+    monkeypatch.delenv("AWS_S3_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_SQS_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_DYNAMODB_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("CDN_URL", raising=False)
+    monkeypatch.setattr("grants_shared.adapters.aws.aws_session._aws_config", None)
+
+
+@pytest.fixture
+def mock_s3(reset_aws_env_vars):
+    # https://docs.getmoto.org/en/stable/docs/configuration/index.html#whitelist-services
+    with moto.mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
+        yield boto3.resource("s3")
+
+
+@pytest.fixture
+def mock_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("local-mock-public-bucket")
+    bucket.create()
+    return bucket
+
+
+@pytest.fixture
+def mock_s3_bucket(mock_s3_bucket_resource):
+    return mock_s3_bucket_resource.name

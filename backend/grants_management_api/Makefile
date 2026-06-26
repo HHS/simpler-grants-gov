@@ -116,7 +116,7 @@ login: start ## Start shell in running container
 	docker exec -it $(APP_NAME) bash
 
 console: ## Start interactive Python console
-	$(PY_RUN_CMD) python3 -i -m tool.console.interactive
+	$(PY_RUN_CMD) python -i -m tool.console.interactive
 
 help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -221,3 +221,21 @@ db-migrate-history: ## Show migration history
 
 db-migrate-heads: ## Show migrations marked as a head
 	$(alembic_cmd) heads $(args)
+
+db-seed-local: ## Generate test records into your local database
+	$(PY_RUN_CMD) db-seed-local $(args)
+
+db-check-migrations: ## Verify the DB schema matches the DB migrations generated
+	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
+
+##################################################
+# CLI Commands
+##################################################
+
+cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of CLI commands)
+	$(FLASK_CMD) $(args)
+
+# TODO - in the API side, we use the openapi-tools docker image
+# We haven't set that up yet on this side, so changed it to grants-management-api for now
+openapi-spec: ## Generate OpenAPI spec
+	docker compose run --rm -e DB_CHECK_CONNECTION_ON_INIT=false grants-management-api flask --app src.app spec --format yaml --output openapi.generated.yml

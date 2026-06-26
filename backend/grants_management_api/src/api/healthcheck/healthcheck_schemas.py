@@ -31,5 +31,6 @@ class HealthcheckMetadataSchema(Schema):
         metadata={"description": "The latest user to deploy the application", "example": "runner"}
     )
 
+
 class HealthcheckResponseSchema(AbstractResponseSchema):
     data = fields.Nested(HealthcheckMetadataSchema())

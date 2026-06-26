@@ -1,4 +1,3 @@
-
 import logging
 from typing import Any
 
@@ -14,6 +13,7 @@ from grants_shared.api.schemas import response_schema
 from src.adapters.newrelic import init_newrelic
 from src.api.healthcheck.healthcheck_blueprint import healthcheck_blueprint
 from src.app_config import AppConfig
+from src.task.task_blueprint import task_blueprint
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,7 @@ Back end API for Grants Management.
 
 This API is in early development, and is not yet ready for public use.
 """
+
 
 def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
@@ -38,8 +39,9 @@ def create_app() -> APIFlask:
     register_index(app)
     register_robots_txt(app)
 
-
+    logger.info("Finished setting up Flask app")
     return app
+
 
 def setup_logging(app: APIFlask) -> None:
     grants_shared.logs.init(__package__)
@@ -50,9 +52,12 @@ def register_db_client(app: APIFlask) -> None:
     db_client = db.PostgresDBClient()
     flask_db.register_db_client(db_client, app)
 
+
 def register_blueprints(app: APIFlask) -> None:
 
     app.register_blueprint(healthcheck_blueprint)
+
+    app.register_blueprint(task_blueprint)
 
 
 def configure_app(app: APIFlask) -> None:
@@ -70,7 +75,6 @@ def configure_app(app: APIFlask) -> None:
     }
     # Removing because the server dropdown has accessibility issues.
     app.config["SERVERS"] = "."
-    # TODO - we'll probably want something separate for grants-management
     app.config["DOCS_FAVICON"] = "https://simpler.grants.gov/img/favicon.ico"
 
     # Set a few values for the Swagger endpoint
@@ -113,6 +117,7 @@ def register_index(app: APIFlask) -> None:
                 </body>
             </html>
         """
+
 
 def register_robots_txt(app: APIFlask) -> None:
     @app.route("/robots.txt")

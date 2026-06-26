@@ -54,6 +54,7 @@ dev = [
     "debugpy>=1.8.1,<2",
     "freezegun>=1.5.0,<2",
     "types-requests>=2.31,<3",
+    "eralchemy>=1.7.0",
 ]
 
 [project.scripts]
