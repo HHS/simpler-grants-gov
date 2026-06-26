@@ -162,7 +162,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
         }
 
         // User-entered fields - uses formConfig.fields (printTestId ?? testId)
-        // Skip fields not present in testData (e.g. revision_type for non-Revision applications)
         for (const [dataKey, testId] of Object.entries(
           userEnteredFieldTestIds,
         )) {
