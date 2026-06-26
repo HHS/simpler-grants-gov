@@ -13,8 +13,9 @@ def get_form(db_session: db.Session, form_id: uuid.UUID) -> Form:
     If the form has a form_instruction_id, fetch the FormInstruction from the DB.
     """
 
-    form = form_template_registry.get_by_id_and_major_version(FormTemplateKey(form_id, 1))
-    if form is None:
+    try:
+        form = form_template_registry.get_by_id_and_major_version(FormTemplateKey(form_id, 1))
+    except ValueError:
         raise_flask_error(404, message=f"Could not find Form with ID {form_id}")
 
     if form.form_instruction_id is not None:
