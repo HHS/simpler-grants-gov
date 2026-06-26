@@ -6,7 +6,7 @@
 import { expect, test } from "@playwright/test";
 import { chromium } from "playwright-core";
 import { generateRandomString } from "tests/e2e/playwrightUtils";
-import { fillSearchInputAndSubmit } from "tests/e2e/search/searchSpecUtil";
+import { fillSearchInputAndSubmit } from "tests/e2e/utils/search/searchSpecUtil";
 
 test.describe("Search page loading state", () => {
   // Scenario: Loading indicator appears and disappears for each search in a session

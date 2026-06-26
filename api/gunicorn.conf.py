@@ -24,3 +24,10 @@ bind = app_config.host + ':' + str(app_config.port)
 
 workers = (len(os.sched_getaffinity(0)) * 2) + 1
 threads = 4
+
+# Set keepalive higher than ALB idle timeout (120s) to prevent connection pool exhaustion.
+# When gunicorn's keepalive is lower than ALB's idle timeout, gunicorn closes connections
+# that ALB thinks are still alive, leading to 502 errors and worker exhaustion during
+# long-running streaming requests. Setting this to 125s ensures ALB always closes first.
+# See: https://lincolnloop.com/blog/gunicorn-keepalive-and-aws-elb-502-errors/
+keepalive = 125
