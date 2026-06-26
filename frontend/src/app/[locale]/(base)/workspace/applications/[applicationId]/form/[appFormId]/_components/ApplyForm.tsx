@@ -13,6 +13,7 @@ import {
 import { Attachment } from "src/types/attachmentTypes";
 import { getFieldsForNav } from "src/utils/applyForm/applyFormUtils";
 import { rebaseFieldListWarningsAfterDelete } from "src/utils/applyForm/rebaseFieldListWarningsAfterDelete";
+import { formatTimestamp } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
@@ -55,9 +56,15 @@ interface ApplyFormFormContext {
 const FormActionButtons = ({
   applicationId,
   onSaveClick,
+  returnToApplicationText,
+  savingText,
+  savingAndRefreshingText,
 }: {
   applicationId: string;
   onSaveClick: () => void;
+  returnToApplicationText: string;
+  savingText: string;
+  savingAndRefreshingText: string;
 }) => {
   const { pending } = useFormStatus();
   const router = useRouter();
@@ -78,7 +85,7 @@ const FormActionButtons = ({
         value="save"
         onClick={onSaveClick}
       >
-        {pending ? "Saving..." : "Save and refresh"}
+        {pending ? savingText : savingAndRefreshingText}
       </Button>
       <Button
         type="button"
@@ -87,7 +94,7 @@ const FormActionButtons = ({
         data-testid="apply-form-return"
         onClick={handleReturnToApplication}
       >
-        Return to application
+        {returnToApplicationText}
       </Button>
     </ButtonGroup>
   );
@@ -138,18 +145,6 @@ const ApplyForm = ({
     updatedAt && !timestampsEqual(updatedAt, createdAt) ? "updated" : "created";
 
   const isFormSaved = Boolean(lastUpdatedAt);
-
-  const formatLastUpdatedTime = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZoneName: "short",
-    });
-  };
 
   const required = translate.rich("required", {
     abr: (content) => (
@@ -282,8 +277,8 @@ const ApplyForm = ({
           {isFormSaved && lastUpdatedAt && (
             <div className="margin-top-1">
               {formStatus === "updated"
-                ? `This form was last updated on ${formatLastUpdatedTime(lastUpdatedAt)}`
-                : `This form was created on ${formatLastUpdatedTime(lastUpdatedAt)}`}
+                ? `${translate("lastUpdatedMessage")} ${formatTimestamp(lastUpdatedAt)}`
+                : `${translate("createdMessage")} ${formatTimestamp(lastUpdatedAt)}`}
             </div>
           )}
         </div>
@@ -294,6 +289,9 @@ const ApplyForm = ({
               setFormChanged(false);
               setAttachmentsChanged(false);
             }}
+            returnToApplicationText={translate("returnToApplication")}
+            savingText={translate("saving")}
+            savingAndRefreshingText={translate("savingAndRefreshing")}
           />
         )}
       </div>
