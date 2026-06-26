@@ -130,9 +130,7 @@ export function sf424aHappyPathTestData(
 
 /**
  * Happy-path test data builder for the SF-424A form.
- * All numeric fields are hardcoded to "1" to ensure rule-computed totals
- * are deterministic and match SF424A_EXPECTED. The suffix parameter is
- * reserved for future differentiation but not currently used.
+ * The suffix parameter is reserved for future differentiation but not currently used.
  */
 export const buildSF424aHappyPathTestData = (
   _suffix: number,
@@ -141,16 +139,10 @@ export const buildSF424aHappyPathTestData = (
 };
 
 /**
- * Opportunity data for the SF-424A form - unified opportunity for both local and staging.
- * Contains opportunity metadata, expected prepopulated field values,
- * and the form-specific test data builder.
- * Uses a single E2E opportunity across environments to align with SF-424 pattern.
+ * Contains opportunity metadata, expected prepopulated field values, and the form-specific test data builder.
  * Imported by load-opportunity-config.ts to build the opportunity registry.
  *
- * Note: SF-424A is a budget form with no prepopulated opportunity metadata fields
- * (unlike SF-424 which displays funding_opportunity_number, agency_name, etc.).
- * opportunityNumber matches the database field (created via _create_isolated_form_opportunity
- * in build_automatic_opportunities.py which appends "-ORG-IND-01" to the opportunity prefix).
+ * Note: SF-424A is a budget form with no prepopulated opportunity metadata fields(unlike SF-424 which displays funding_opportunity_number, agency_name, etc.).
  */
 export const SF424A_OPPORTUNITY_DATA: PrintViewFormData = {
   opportunityId: "6c25cd41-660e-473f-abff-654083b7795d",

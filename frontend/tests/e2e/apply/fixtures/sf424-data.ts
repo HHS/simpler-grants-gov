@@ -3,7 +3,7 @@ import type { fieldDefinitionsSF424 } from "tests/e2e/apply/fixtures/sf424-field
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
 
-// Attachment fields - uploaded files validated by section locator in print view.
+// Uploaded files validated by section locator in print view.
 const TEST_UPLOAD_DIR = path.resolve(__dirname, "../../test-upload-files");
 const SF424_TEST_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
 
@@ -89,7 +89,6 @@ export const buildSF424HappyPathTestData = (
     authorized_representative_phone_number: "2222222222",
     authorized_representative_fax: "3333333333",
     authorized_representative_email: `aor${shortSuffix}@test.com`,
-    // Attachment fields - uploaded files validated by section locator in print view
     areas_affected_attachment: SF424_TEST_UPLOAD_FILE,
     additional_project_title_attachment: SF424_TEST_UPLOAD_FILE,
     additional_congressional_attachment: SF424_TEST_UPLOAD_FILE,
@@ -97,10 +96,7 @@ export const buildSF424HappyPathTestData = (
 };
 
 /**
- * Opportunity data for the SF-424 form - unified opportunity for both local and staging.
- * Contains opportunity metadata, expected prepopulated field values,
- * and the form-specific test data builder.
- * Uses a single E2E opportunity across environments to align with project-abstract-summary pattern.
+ * Contains opportunity metadata, expected prepopulated field values, and the form-specific test data builder.
  * Imported by load-opportunity-config.ts to build the opportunity registry.
  */
 export const SF424_OPPORTUNITY_DATA: PrintViewFormData = {

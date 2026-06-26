@@ -25,6 +25,7 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
+  validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
 
@@ -168,18 +169,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
           userEnteredFieldTestIds,
         )) {
           if (testData[dataKey] === undefined) continue;
-          const locator = page.getByTestId(testId);
-          await expect(locator).toBeVisible();
-
-          // For input elements, check the value attribute; for other elements, check visible text
-          const elementType = await locator.evaluate((el) =>
-            el.tagName.toLowerCase(),
-          );
-          if (elementType === "input") {
-            await expect(locator).toHaveValue(testData[dataKey]);
-          } else {
-            await expect(locator).toContainText(testData[dataKey]);
-          }
+          await validatePrintViewField(page, testId, testData[dataKey]);
         }
 
         // SF-424A has no attachment sections (unlike SF-424)
