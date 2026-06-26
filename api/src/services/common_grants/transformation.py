@@ -674,6 +674,7 @@ def build_filter_info(filters: OppFilters | None) -> FilterInfo:
         FilterInfo: The filter info for the response
     """
     applied_filters = {}
+    errors: list[str] = []
     if filters:
         if filters.status is not None:
             applied_filters["status"] = filters.status.model_dump()
@@ -689,10 +690,11 @@ def build_filter_info(filters: OppFilters | None) -> FilterInfo:
             applied_filters["maxAwardAmountRange"] = filters.max_award_amount_range.model_dump()
         if filters.custom_filters is not None:
             applied_filters["customFilters"] = filters.custom_filters
+            _, errors = build_custom_filters(filters.custom_filters)
 
     return FilterInfo(
         filters=applied_filters,
-        errors=[],
+        errors=errors,
     )
 
 
@@ -750,6 +752,10 @@ def transform_search_request_from_cg(
     )
     build_money_range_filter(filters.min_award_amount_range, "award_floor", v1_filters)
     build_money_range_filter(filters.max_award_amount_range, "award_ceiling", v1_filters)
+
+    # Apply recognized customFilters (agency, applicantType, fundingInstrument, costSharing)
+    applied_custom, _ = build_custom_filters(filters.custom_filters)
+    v1_filters.update(applied_custom)
 
     # Build the complete v1 search parameters
     v1_params: dict[str, object] = {

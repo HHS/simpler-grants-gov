@@ -1543,3 +1543,21 @@ def test_build_custom_filters_applicant_type_partial_map():
 
 def test_build_custom_filters_none_is_noop():
     assert build_custom_filters(None) == ({}, [])
+
+
+def test_transform_applies_custom_filters_into_v1():
+    filters = OppFilters.model_validate(
+        {"customFilters": {"agency": {"operator": "in", "value": ["USAID"]}}}
+    )
+    params = transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+    assert params["filters"]["agency"] == {"one_of": ["USAID"]}
+
+
+def test_build_filter_info_reports_unsupported_custom_filter():
+    filters = OppFilters.model_validate(
+        {"customFilters": {"bogus": {"operator": "in", "value": ["x"]}}}
+    )
+    info = build_filter_info(filters)
+    assert "customFilters.bogus: unsupported filter" in info.errors
