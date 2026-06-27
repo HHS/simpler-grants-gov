@@ -5,7 +5,7 @@
 import { FieldHandler } from "./types";
 
 export const fileHandler: FieldHandler = async (
-  testInfo,
+  _testInfo,
   page,
   field,
   data,

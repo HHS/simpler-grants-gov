@@ -83,7 +83,7 @@ export default function SearchPagination({
           maxSlots={MAX_SLOTS}
           onClickNext={() => updatePage(page + 1)}
           onClickPrevious={() => updatePage(page > 1 ? page - 1 : 0)}
-          onClickPageNumber={(event: React.MouseEvent, page: number) =>
+          onClickPageNumber={(_event: React.MouseEvent, page: number) =>
             updatePage(page)
           }
         />

@@ -114,6 +114,7 @@ export default defineConfig(...vitalsPlugin, [
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
+          args: "all",
         },
       ],
 

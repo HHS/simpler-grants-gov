@@ -5,7 +5,7 @@
 import { FieldHandler } from "./types";
 
 export const comboBoxInputHandler: FieldHandler = async (
-  testInfo,
+  _testInfo,
   page,
   field,
   data,
