@@ -162,7 +162,7 @@ The search endpoint accepts a `filters.customFilters` map that extends the stand
 | `fundingInstrument` | `in` | array of funding instrument values (e.g. `["grant"]`) | native values (passthrough) |
 | `costSharing` | `eq` | boolean | matches `is_cost_sharing` |
 
-**Error behavior**: unsupported keys and invalid values are silently skipped — the search still runs with the valid filters applied. Any skipped filters are reported in `filterInfo.errors` in the response (per ADR-0012).
+**Error behavior**: unsupported keys and invalid values are skipped — the search still runs with the valid filters applied — and the skipped filters are reported in `filterInfo.errors` in the response.
 
 **Example request body** (agency + applicant type):
 

@@ -34,6 +34,7 @@ response = requests.post(
     f"{BASE_URL}/common-grants/opportunities/search",
     headers=HEADERS,
     json=basic_search,
+    timeout=30,
 )
 print("Basic search status:", response.status_code)
 data = response.json()
@@ -62,6 +63,7 @@ response = requests.post(
     f"{BASE_URL}/common-grants/opportunities/search",
     headers=HEADERS,
     json=custom_filter_search,
+    timeout=30,
 )
 print("\ncustomFilters search status:", response.status_code)
 data = response.json()

@@ -137,8 +137,7 @@ def build_custom_filters(
     """Translate CommonGrants customFilters into native v1 filter entries.
 
     Returns (applied, errors). `applied` maps native field -> {"one_of": [...]}.
-    `errors` are ADR-0012 messages for unsupported keys / invalid values; never
-    raises.
+    `errors` describe unsupported keys / invalid values; never raises.
     """
     applied: dict = {}
     errors: list[str] = []
