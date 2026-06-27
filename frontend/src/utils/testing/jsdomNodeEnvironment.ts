@@ -1,5 +1,5 @@
 /**
- * Polyfill fetch globals to test environment
+ * Polyfill necessary globals to test environment
  *
  * https://github.com/jsdom/jsdom/issues/1724#issuecomment-1446858041
  */
@@ -12,5 +12,8 @@ export default class JsdomNodeEnvironment extends JsDomEnvironment {
     this.global.Response = Response;
     this.global.ReadableStream = ReadableStream;
     this.global.AbortController = AbortController;
+    this.global.File = File;
+    this.global.FormData = FormData;
+    // this.global.TextDecoder = TextDecoder; // mock this instead
   }
 }

@@ -148,6 +148,10 @@ export default function OpportunityEditForm({
       validationErrors: {},
     },
   );
+  const [
+    initialAttachmentsPlusFakeAttachments,
+    setInitialAttachmentsPlusFakeAttachments,
+  ] = useState(initialAttachments);
 
   const publishEnabled =
     publishDate.trim() !== "" &&
@@ -233,7 +237,7 @@ export default function OpportunityEditForm({
   useEffect(() => {
     if (formState.newOpportunitySummaryId) {
       // TODO #9633
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+
       setCurrentSummaryId(formState.newOpportunitySummaryId);
     }
   }, [formState.newOpportunitySummaryId]);
@@ -1007,8 +1011,14 @@ export default function OpportunityEditForm({
         </div>
         <OpportunityAttachmentUploadInput
           opportunityId={opportunityId}
-          initialAttachments={initialAttachments}
+          initialAttachments={initialAttachmentsPlusFakeAttachments}
           isDraft={isDraft}
+          addExistingFile={(fakeAttachment) => {
+            console.log("*** adding existing file", fakeAttachment);
+            setInitialAttachmentsPlusFakeAttachments(
+              initialAttachmentsPlusFakeAttachments.concat([fakeAttachment]),
+            );
+          }}
         />
       </section>
     </form>

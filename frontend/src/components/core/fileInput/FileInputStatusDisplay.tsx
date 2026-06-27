@@ -1,22 +1,115 @@
+import clsx from "clsx";
 import {
   FileUploadProcessStatus,
   FileUploadStatus,
 } from "src/types/fileUploadTypes";
 
 import { useTranslations } from "next-intl";
-import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
+import { Button, Grid } from "@trussworks/react-uswds";
 
 import Spinner from "src/components/core/Spinner";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
+// maps upload statuses to the error message to show if error occurs while in those statuses
 const errorStatuses = new Map([
+  ["queued", "pre-upload-error"],
   ["uploading", "upload-error"],
-  ["scanning", "scan-error"],
+  ["infected", "infected"],
+  ["pending", "scan-error"],
+  ["starting-scan", "scan-error"],
+  ["complete", "file-id-error"], // assuming that any error in this state is due to a missing file id
   ["post-upload", "post-upload-error"],
-  // need to figure out how to disintguish between scan failure and scan error.
-  // this will likely depend on the implementation of handling scan failures on the backend
-  // Next API will return a specific error and we can return that error status before dealing with this map
 ]);
+
+// if there's an error show the error icon
+// if upload is in progress, show a spinner
+// otherwise show nothing
+const StatusIcon = ({
+  error,
+  status,
+}: {
+  status?: FileUploadProcessStatus;
+  error: boolean;
+}) => {
+  if (error) {
+    return (
+      <USWDSIcon
+        name="error"
+        className="usa-icon--size-6 text-middle text-error-dark"
+      />
+    );
+  }
+  if (!status) {
+    return null;
+  }
+
+  if (status === "success") {
+    return (
+      <USWDSIcon
+        name="file_present"
+        className="usa-icon--size-6 text-middle text-primary-dark"
+      />
+    );
+  }
+
+  return (
+    <div className="display-flex">
+      <Spinner />
+    </div>
+  );
+};
+
+const ActionButton = ({
+  error,
+  status,
+  onDismiss,
+  onCancel,
+}: {
+  error: boolean;
+  status: FileUploadProcessStatus;
+  onCancel: () => void;
+  onDismiss: () => void;
+}) => {
+  const t = useTranslations("FileInput.statusDisplay");
+  if (error) {
+    return (
+      <Button
+        type="button"
+        unstyled
+        onClick={() => {
+          void onDismiss();
+        }}
+        className="text-error-dark"
+      >
+        <USWDSIcon
+          className="usa-icon margin-right-05 margin-left-neg-05"
+          name="close"
+        />
+        {t("dismiss")}
+      </Button>
+    );
+  }
+  if (!status || status === "success") {
+    return null;
+  }
+
+  return (
+    <Button
+      type="button"
+      unstyled
+      onClick={() => {
+        void onCancel();
+      }}
+      className="text-error-dark"
+    >
+      <USWDSIcon
+        className="usa-icon margin-right-05 margin-left-neg-05"
+        name="close"
+      />
+      {t("cancel")}
+    </Button>
+  );
+};
 
 export const FileInputStatusDisplay = ({
   fileName,
@@ -37,22 +130,30 @@ export const FileInputStatusDisplay = ({
   postUploadActionSuccessMessage?: string;
   postUploadActionErrorMessage?: string;
 }) => {
-  const t = useTranslations("FileUpload.statusDisplay");
+  const t = useTranslations("FileInput.statusDisplay");
 
   if (!status) {
     return;
   }
 
+  // this relies on some magic strings, it's not great!
+  // refactor this to be more flexible in terms of tracking progress
   const messagesMap: { [key in FileUploadStatus]: string } = {
     queued: t("queued"),
     uploading: t("uploading"),
-    scanning: t("scanning"),
+    "starting-scan": t("startingScan"),
+    pending: t("scanning"),
+    infected: t("infected"),
+    complete: t("scanComplete"),
+    "scan-complete": t("scanComplete"),
     "post-upload": postUploadActionProgressMessage,
-    complete: postUploadActionSuccessMessage || t("success"),
+    success: postUploadActionSuccessMessage || t("success"),
     error: t("error"),
     "scan-fail": t("scanFail"),
     "upload-error": t("uploadError"),
     "scan-error": t("scanError"),
+    "file-id-error": t("missingFileId"),
+    "pre-upload-error": t("preUploadError"),
     "post-upload-error": postUploadActionErrorMessage || t("postUploadError"),
   };
 
@@ -61,44 +162,38 @@ export const FileInputStatusDisplay = ({
     : status;
   const statusMessageForDisplay = messagesMap[adjustedStatus];
 
-  const ActionButton = error ? (
-    <Button
-      type="button"
-      unstyled
-      onClick={() => {
-        void onDismiss();
-      }}
-    >
-      <USWDSIcon
-        className="usa-icon margin-right-05 margin-left-neg-05"
-        name="error"
-      />
-      {t("dismiss")}
-    </Button>
-  ) : (
-    <Button
-      type="button"
-      unstyled
-      onClick={() => {
-        void onCancel();
-      }}
-    >
-      <USWDSIcon
-        className="usa-icon margin-right-05 margin-left-neg-05"
-        name="close"
-      />
-      {t("cancel")}
-    </Button>
-  );
-  const IconDisplay = error ? <USWDSIcon name="error" /> : <Spinner />;
   return (
-    <GridContainer data-testid="file-upload-status-display">
-      <Grid col={2}>{IconDisplay}</Grid>
-      <Grid>
-        <div className="text-bold">{fileName}</div>
-        <div>{statusMessageForDisplay}</div>
+    <div className="margin-x-3">
+      <Grid
+        row
+        gap
+        data-testid="file-upload-status-display"
+        className={clsx({
+          "bg-base-lightest": status === "success",
+          "bg-secondary-lightest": !error && status !== "success",
+          "bg-error-lighter": !!error,
+          "border-left-1": !!error,
+          "border-error-dark": !!error,
+          "padding-2": true,
+          "margin-top-2": true,
+        })}
+      >
+        <Grid col={"auto"} className="display-flex flex-align-center">
+          <StatusIcon error={error} status={status} />
+        </Grid>
+        <Grid col={"fill"}>
+          <div className="text-bold">{fileName}</div>
+          <div>{statusMessageForDisplay}</div>
+        </Grid>
+        <Grid col={"auto"} className="display-flex">
+          <ActionButton
+            onDismiss={onDismiss}
+            onCancel={onCancel}
+            error={error}
+            status={status}
+          />
+        </Grid>
       </Grid>
-      <Grid col={3}>{ActionButton}</Grid>
-    </GridContainer>
+    </div>
   );
 };

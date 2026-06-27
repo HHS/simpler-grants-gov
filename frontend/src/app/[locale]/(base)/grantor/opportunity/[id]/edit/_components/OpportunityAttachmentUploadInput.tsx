@@ -1,125 +1,130 @@
 "use client";
 
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { UploadFileMetadata } from "src/types/fileUploadTypes";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
-import {
-  Alert,
-  FileInput,
-  FileInputRef,
-  FormGroup,
-  Label,
-  ModalRef,
-  ModalToggleButton,
-} from "@trussworks/react-uswds";
+import { useEffect, useState } from "react";
+import { Alert, FormGroup, Label } from "@trussworks/react-uswds";
 
-import { DeleteFileModal } from "src/components/core/fileInput/DeleteFileModal";
-import { USWDSIcon } from "src/components/core/USWDSIcon";
-
-const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
-
-interface UploadedFile {
-  id: string;
-  name: string;
-  deletable: boolean;
-}
+import { SimplerFileInput } from "src/components/core/fileInput/SimplerFileInput";
 
 interface OpportunityAttachmentUploadInputProps {
   opportunityId: string;
   initialAttachments?: OpportunityAttachment[];
   isDraft?: boolean;
+  addExistingFile: (fakeFile: UploadFileMetadata) => void;
 }
+
+const FakeFILE_____DELIETEmeeee = {
+  id: "1",
+  file_name: "file name 1",
+  file_size: 1,
+  mime_type: "file",
+  updated_at: new Date().getTime(),
+};
+
+const mapInitialAttachmentsToExistingFiles = (
+  initialAttachments: OpportunityAttachment[],
+) => {
+  return initialAttachments.map((initialAttachment) => {
+    const {
+      opportunity_attachment_id,
+      file_name,
+      mime_type,
+      file_size,
+      // updated_at, // this is not in the API response type, unsure if we need to update anything to get it sent back
+    } = initialAttachment;
+
+    return {
+      id: opportunity_attachment_id,
+      fileName: file_name,
+      fileSize: file_size,
+      mimeType: mime_type,
+      // updatedAt: updated_at,
+      updatedAt: new Date().getTime(),
+    };
+  });
+};
+
+/*
+  - [x] translate initialAttachments into proper metadata format
+  - [x] integrate delete behavior (build delete route?)
+  - [x] integrate upload behavior (build upload route(s)?)
+
+  for failure path scenario testing, use these filenames:
+  - "scenario-infected"
+  - "scenario-wait10s"
+*/
 
 export function OpportunityAttachmentUploadInput({
   opportunityId,
   initialAttachments = [],
   isDraft = false,
+  addExistingFile,
 }: OpportunityAttachmentUploadInputProps) {
+  console.log("!!! initial", initialAttachments);
   const t = useTranslations("OpportunityEdit.attachments");
 
   const { clientFetch: uploadFetch } = useClientFetch<{
     opportunity_attachment_id: string;
   }>("Error uploading opportunity attachment");
-  const { clientFetch: deleteFetch } = useClientFetch<{
-    message: string;
-  }>("Error deleting opportunity attachment");
+  // const { clientFetch: deleteFetch } = useClientFetch<{
+  //   message: string;
+  // }>("Error deleting opportunity attachment");
 
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>(
-    initialAttachments.map((attachment) => ({
-      id: attachment.opportunity_attachment_id || crypto.randomUUID(),
-      name: attachment.file_name,
-      deletable: !!attachment.opportunity_attachment_id,
-    })),
-  );
   const [isUploading, setIsUploading] = useState(false);
-  const [fileToDelete, setFileToDelete] = useState<UploadedFile | null>(null);
-  const [deletePending, setDeletePending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [existingFiles, setExistingFiles] = useState<UploadFileMetadata[]>(
+    mapInitialAttachmentsToExistingFiles(initialAttachments),
+  );
 
-  const fileInputRef = useRef<FileInputRef | null>(null);
-  const deleteModalRef = useRef<ModalRef | null>(null);
-
-  const handleFileChange = async (files: FileList | null): Promise<void> => {
-    if (!files) return;
-    setErrorMessage(null);
-    setIsUploading(true);
-
-    for (const file of Array.from(files)) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        setErrorMessage(t("errorFileTooLarge", { fileName: file.name }));
-        continue;
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const data = await uploadFetch(
-          `/api/opportunities/${opportunityId}/attachments`,
-          { method: "POST", body: formData },
-        );
-        setUploadedFiles((prev) => [
-          ...prev,
-          {
-            id: data.opportunity_attachment_id,
-            name: file.name,
-            deletable: true,
-          },
-        ]);
-      } catch (err) {
-        console.error("Attachment upload failed", err);
-        setErrorMessage(t("errorUploadFailed", { fileName: file.name }));
-      }
+  useEffect(
+    () =>
+      setExistingFiles(
+        mapInitialAttachmentsToExistingFiles(initialAttachments),
+      ),
+    [initialAttachments],
+  );
+  const handleOpportunityAttachment = async (
+    fileId: string,
+    abortSignal: AbortSignal,
+  ) => {
+    try {
+      await uploadFetch(
+        `/api/opportunities/${opportunityId}/attachments/attach/${fileId}`,
+        { method: "POST", signal: abortSignal },
+      );
+    } catch (e) {
+      console.error("Attachment upload failed", e);
+      setErrorMessage(t("errorUploadFailed"));
+      throw e;
     }
-
     setIsUploading(false);
-    fileInputRef.current?.clearFiles();
   };
 
-  const confirmDelete = async (): Promise<void> => {
-    if (!fileToDelete) return;
+  // note that this doesn't actually delete any files, just removes them from the
+  // dummy existing files array
+  // returning a promise to satisfy the interface
+  const confirmDelete = (fileToDeleteId: string): Promise<undefined> => {
     setErrorMessage(null);
-    setDeletePending(true);
 
     try {
-      await deleteFetch(
-        `/api/opportunities/${opportunityId}/attachments/${fileToDelete.id}`,
-        { method: "DELETE" },
+      const deleteAtIndex = existingFiles.findIndex(
+        (existingFile) => existingFile.id === fileToDeleteId,
       );
-      setUploadedFiles((prev) => prev.filter((f) => f.id !== fileToDelete.id));
-      setFileToDelete(null);
+      existingFiles.splice(deleteAtIndex, 1);
+      console.log("!!! removed", existingFiles);
+      setExistingFiles(([] as UploadFileMetadata[]).concat(existingFiles));
     } catch (err) {
       console.error("Attachment delete failed", err);
-      setErrorMessage(
-        t("errorDeleteFailed", { fileName: fileToDelete?.name ?? "" }),
-      );
-    } finally {
-      setDeletePending(false);
-      deleteModalRef.current?.toggleModal();
+      setErrorMessage(t("errorDeleteFailed"));
     }
+    return Promise.resolve(undefined);
   };
+
+  console.log("!!! existing", existingFiles);
 
   return (
     <FormGroup>
@@ -134,62 +139,34 @@ export function OpportunityAttachmentUploadInput({
         </Alert>
       )}
 
-      <Label htmlFor="opportunity-attachment-upload">{t("uploadLabel")}</Label>
-      <FileInput
+      <Label
+        htmlFor="opportunity-attachment-upload"
+        id="opportunity-attachment-upload-label"
+      >
+        {t("uploadLabel")}
+      </Label>
+      <SimplerFileInput
+        postUploadAction={handleOpportunityAttachment}
+        postUploadActionProgressMessage="ATTACHING TO OPPORTUNITY (custom message)"
+        postUploadActionErrorMessage="POST UPLOAD FAILED (custom message)"
+        postUploadActionSuccessMessage="POST UPLOAD SUCCESS (custom message)"
         id="opportunity-attachment-upload"
-        name="opportunity-attachment-upload"
-        ref={fileInputRef}
-        type="file"
-        multiple
+        labelId={"opportunity-attachment-upload-label"}
+        onDelete={(id) => {
+          console.log("onDelete callback");
+          return confirmDelete(id);
+        }}
+        onStart={() => console.log("onStart callback")}
+        onSuccess={() => {
+          console.log("onSuccess callback");
+          addExistingFile(FakeFILE_____DELIETEmeeee);
+        }}
+        onComplete={() => console.log("onComplete callback")}
+        onError={(e) => console.error("onError callback", e)}
         disabled={isUploading || !isDraft}
-        onChange={(e) => {
-          // Per-file upload errors are caught inside handleFileChange.
-          // This .catch() covers unexpected synchronous errors (e.g. FormData append failure).
-          handleFileChange(e.currentTarget.files).catch(() =>
-            setErrorMessage(t("errorUploadFailed", { fileName: "" })),
-          );
-        }}
-      />
-
-      {uploadedFiles.length > 0 && (
-        <ul className="usa-list usa-list--unstyled margin-top-2">
-          {uploadedFiles.map((file) => (
-            <li
-              key={file.id}
-              className="display-flex flex-align-center padding-y-1 border-bottom border-base-lighter"
-            >
-              <span className="flex-fill font-sans-sm">{file.name}</span>
-              {file.deletable && isDraft && (
-                <ModalToggleButton
-                  modalRef={deleteModalRef}
-                  opener
-                  className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
-                  onClick={() => setFileToDelete(file)}
-                >
-                  <USWDSIcon
-                    className="usa-icon margin-right-05 margin-left-neg-05"
-                    name="delete"
-                  />
-                  {t("removeButton")}
-                </ModalToggleButton>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <DeleteFileModal
-        deletePending={deletePending}
-        handleDeleteFile={() => {
-          confirmDelete().catch(() =>
-            setErrorMessage(
-              t("errorDeleteFailed", { fileName: fileToDelete?.name ?? "" }),
-            ),
-          );
-        }}
-        modalId="opportunity-attachment-delete-modal"
-        modalRef={deleteModalRef}
-        pendingDeleteName={fileToDelete?.name}
+        readOnly={false}
+        required={false}
+        existingFiles={existingFiles}
       />
     </FormGroup>
   );
