@@ -56,10 +56,6 @@ jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
 }));
 
-jest.mock("src/services/auth/session", () => ({
-  getSession: (): unknown => getSessionMock(),
-}));
-
 jest.mock("next-navigation-guard", () => ({
   useNavigationGuard: () => jest.fn(),
 }));
@@ -134,6 +130,11 @@ const uiSchema: UiSchema = [
 ];
 
 describe("ApplyForm", () => {
+  beforeEach(() => {
+    pushMock.mockClear();
+    mockHandleFormAction.mockClear();
+  });
+
   it("renders form correctly", () => {
     render(
       <ApplyForm
@@ -188,6 +189,10 @@ describe("ApplyForm", () => {
 
     const button = screen.getByTestId("apply-form-save");
     expect(button).toBeInTheDocument();
+
+    expect(screen.getByTestId("apply-form-return")).toBeInTheDocument();
+    expect(screen.getByText("savingAndRefreshing")).toBeInTheDocument();
+    expect(screen.getByText("returnToApplication")).toBeInTheDocument();
   });
 
   it("cannot be edited or saved when application is submitted", () => {
@@ -213,6 +218,66 @@ describe("ApplyForm", () => {
 
     const selectField = screen.getByTestId("Select");
     expect(selectField).toBeDisabled();
+  });
+  it("displays created message when createdAt equals updatedAt", () => {
+    const timestamp = "2026-06-27T12:34:56.000Z";
+
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+        createdAt={timestamp}
+        updatedAt={timestamp}
+      />,
+    );
+
+    expect(screen.getByText(/createdMessage/i)).toBeInTheDocument();
+  });
+
+  it("displays last updated message when updatedAt differs from createdAt", () => {
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+        createdAt="2026-06-26T12:34:56.000Z"
+        updatedAt="2026-06-27T12:34:56.000Z"
+      />,
+    );
+
+    expect(screen.getByText(/lastUpdatedMessage/i)).toBeInTheDocument();
+  });
+  it("navigates back to application when return button is clicked", () => {
+    render(
+      <ApplyForm
+        applicationId="application-123"
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+      />,
+    );
+
+    const returnButton = screen.getByTestId("apply-form-return");
+    returnButton.click();
+
+    expect(pushMock).toHaveBeenCalledWith(
+      "/workspace/applications/application-123",
+    );
   });
 
   it("calls handleFormAction action on save", () => {
