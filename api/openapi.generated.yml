@@ -14129,10 +14129,6 @@ components:
           description: The HTTP status code
           example: 200
   securitySchemes:
-    ApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Token
     InternalApiJwtAuth:
       type: apiKey
       in: header
@@ -14141,4 +14137,8 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
+    ApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Token
 
