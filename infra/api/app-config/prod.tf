@@ -102,6 +102,8 @@ module "prod_config" {
   instance_cpu    = 2048
   instance_memory = 4096
 
+  scanner_provisioned_concurrency = 1
+
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.
   # ⚠️ Warning! It is not recommended to enable this in a production environment.
