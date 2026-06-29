@@ -444,6 +444,7 @@ class FileScanStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     COMPLETE = "complete"
     INFECTED = "infected"
+    PROCESSED = "processed"
 
 
 class JobType(StrEnum):
@@ -458,10 +459,8 @@ class JobType(StrEnum):
     CREATE_APPLICATION_SUBMISSION = "create-application-submission"
     SETUP_CERT_USER = "setup-cert-user"
     UPDATE_FORM_INSTRUCTION = "update-form-instruction"
-    UPDATE_FORM = "update-form"
     EMAIL_NOTIFICATIONS = "email-notifications"
     BUILD_AUTOMATIC_OPPORTUNITIES = "build-automatic-opportunities"
     SAM_EXTRACTS = "sam-extracts"
     LOAD_AGENCY_DATA_OPENSEARCH = "load-agency-data-opensearch"
     EXPORT_OPPORTUNITY_DATA = "export-opportunity-data"
-    LIST_FORMS = "list-forms"

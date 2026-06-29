@@ -5,14 +5,9 @@
 import { logoutUser } from "src/app/api/auth/logout/handler";
 import { UnauthorizedError } from "src/errors";
 
-const getSessionMock = jest.fn();
 const deleteSessionMock = jest.fn();
 const postLogoutMock = jest.fn();
 const clearCorrelationIdMock = jest.fn();
-
-jest.mock("src/services/auth/session", () => ({
-  getSession: (): unknown => getSessionMock(),
-}));
 
 jest.mock("src/services/auth/sessionUtils", () => ({
   deleteSession: (): unknown => deleteSessionMock(),
@@ -31,33 +26,12 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 // is to throw an error
 describe("/api/auth/logout POST handler", () => {
   afterEach(() => jest.clearAllMocks());
-  it("errors if there is no current session token", async () => {
-    getSessionMock.mockImplementation(() => ({
-      token: "",
-    }));
-    const response = await logoutUser();
-
-    expect(postLogoutMock).toHaveBeenCalledTimes(0);
-    expect(response.status).toEqual(401);
-    // correlation_id is only rotated on explicit successful logout
-    expect(clearCorrelationIdMock).not.toHaveBeenCalled();
-    const json = (await response.json()) as { message: string };
-    expect(json.message).toEqual(
-      "Error logging out: Expired token or no active session to logout",
-    );
-  });
-  it("calls postLogout with token from session", async () => {
-    getSessionMock.mockImplementation(() => ({
-      token: "fakeToken",
-    }));
+  it("calls postUserLogout", async () => {
     await logoutUser();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
   });
   it("errors if API logout call errors", async () => {
-    getSessionMock.mockImplementation(() => ({
-      token: "fakeToken",
-    }));
     postLogoutMock.mockImplementation(() => {
       throw new Error("the API threw this error");
     });
@@ -70,9 +44,6 @@ describe("/api/auth/logout POST handler", () => {
     expect(json.message).toEqual("Error logging out: the API threw this error");
   });
   it("errors if API logout call returns nothing", async () => {
-    getSessionMock.mockImplementation(() => ({
-      token: "fakeToken",
-    }));
     postLogoutMock.mockImplementation(() => null);
     const response = await logoutUser();
 
@@ -85,18 +56,12 @@ describe("/api/auth/logout POST handler", () => {
     );
   });
   it("calls deleteSession", async () => {
-    getSessionMock.mockImplementation(() => ({
-      token: "fakeToken",
-    }));
     postLogoutMock.mockImplementation(() => "success");
     await logoutUser();
 
     expect(deleteSessionMock).toHaveBeenCalledTimes(1);
   });
   it("clears the correlation id on successful logout", async () => {
-    getSessionMock.mockImplementation(() => ({
-      token: "fakeToken",
-    }));
     postLogoutMock.mockImplementation(() => "success");
     await logoutUser();
 
@@ -106,9 +71,6 @@ describe("/api/auth/logout POST handler", () => {
     );
   });
   it("calls deleteSession if token expired", async () => {
-    getSessionMock.mockImplementation(() => ({
-      token: "fakeToken",
-    }));
     postLogoutMock.mockImplementation(() => {
       throw new UnauthorizedError("Token expired");
     });
@@ -123,9 +85,6 @@ describe("/api/auth/logout POST handler", () => {
     expect(json.message).toEqual("session previously expired");
   });
   it("returns sucess message on success", async () => {
-    getSessionMock.mockImplementation(() => ({
-      token: "fakeToken",
-    }));
     postLogoutMock.mockImplementation(() => "success");
     const response = await logoutUser();
 

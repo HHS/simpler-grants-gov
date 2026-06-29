@@ -1,6 +1,9 @@
 import OpportunityEditForm from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/_components/OpportunityEditForm";
-import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import {
+  ApiRequestError,
+  MissingAuthError,
+  parseErrorStatus,
+} from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
@@ -12,7 +15,7 @@ import { Alert, GridContainer } from "@trussworks/react-uswds";
 
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
-import { USWDSIcon } from "src/components/core/USWDSIcon";
+import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
@@ -27,11 +30,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   const isNewlyCreated = resolvedSearchParams.fromCreate === "true";
   const t = await getTranslations({ locale, namespace: "Errors" });
   const tEdit = await getTranslations({ locale, namespace: "OpportunityEdit" });
-
-  const session = await getSession();
-  if (!session || !session.token) {
-    return; // the AuthenticationGate in layout.tsx will take care of this
-  }
 
   // TODO(#8601): Replace this fail-closed placeholder with a real grantor authorization
   // check once the frontend has a way to verify whether the current session can edit
@@ -48,6 +46,10 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
       response.data.non_forecast_summary?.opportunity_summary_id ??
       "";
   } catch (error) {
+    if (error instanceof MissingAuthError) {
+      // TODO: should be an anauthenticated message
+      return <UnauthorizedMessage />;
+    }
     const status = parseErrorStatus(error as ApiRequestError);
     if (status === 404) {
       notFound();
@@ -99,9 +101,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
         }
         return label;
       })();
-  const pageTitle = tEdit("header.pageTitle", {
-    number: opportunityData.opportunity_number ?? "",
-  });
   const opportunityKeyInformation = {
     title: opportunityData.opportunity_title || "",
     agency: opportunityData.agency_name || opportunityData.agency_code || "",
@@ -112,18 +111,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     awardSelectionMethod: opportunityData.category || "",
     awardSelectionMethodExplanation: opportunityData.category_explanation || "",
   };
-  const rawLastUpdated =
-    [opportunityData.updated_at, activeSummary?.updated_at]
-      .filter(Boolean)
-      .sort()
-      .at(-1) || "";
-  const lastUpdated = rawLastUpdated
-    ? new Date(rawLastUpdated).toLocaleDateString(locale, {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-      })
-    : "";
   const navigationItems = [
     { text: tEdit("sections.keyInformation"), href: "key-information" },
     { text: tEdit("sections.fundingDetails"), href: "funding-details" },
@@ -136,37 +123,10 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   ];
   return (
     <div className="bg-white">
-      <section className="bg-base-lightest border-bottom border-base-lightest padding-y-6">
-        <div className="grid-container">
-          <div className="display-flex flex-column width-full">
-            <div className="maxw-tablet-lg margin-bottom-2">
-              <h1 className="margin-0 font-heading-2xl">{pageTitle}</h1>
-            </div>
-            <div className="display-flex flex-column width-full desktop:display-flex desktop:flex-row desktop:flex-justify desktop:flex-align-end">
-              <div className="display-flex flex-column maxw-mobile-lg">
-                <div className="font-sans-md line-height-sans-5 margin-bottom-2">
-                  <span className="text-bold">
-                    {tEdit("header.lastUpdated")}
-                  </span>{" "}
-                  {lastUpdated}
-                </div>
-                <div className="display-flex flex-align-center">
-                  <span className="text-bold font-sans-md line-height-sans-5 margin-right-1">
-                    {tEdit("header.status")}
-                  </span>
-                  <span className="display-inline-flex flex-align-center bg-accent-warm text-ink padding-y-05 padding-x-1 radius-sm">
-                    <USWDSIcon
-                      name="schedule"
-                      className="usa-icon width-2 height-2 margin-right-05"
-                    />
-                    {opportunityKeyInformation.opportunityStage}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <OpportunityDetailsHeader
+        opportunityData={opportunityData}
+        locale={locale}
+      />
 
       <div className="grid-container padding-bottom-4">
         <div className="usa-in-page-nav-container">

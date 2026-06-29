@@ -606,7 +606,7 @@ wheels = [
 
 [[package]]
 name = "grants-shared"
-version = "0.2.7"
+version = "0.2.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apiflask" },
@@ -629,9 +629,9 @@ dependencies = [
     { name = "smart-open" },
     { name = "sqlalchemy", extra = ["mypy"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/36/db/7e6696e14c2b9036f91d10ed2e9216b948dabc92ead6613f5add7493fc2d/grants_shared-0.2.7.tar.gz", hash = "sha256:ec246f939fed16146ecec0832c4771ed24b0d31a5e8820654998bff6e9eaf94c", size = 49428, upload-time = "2026-06-11T17:26:25.25Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/eb/4d/428f661359588a0b993af884fce1b8057abac33990f25fdfab766b31747e/grants_shared-0.2.9.tar.gz", hash = "sha256:b51615632eead1c3f5bcc05f52d7c26680abdcdf73dd77de9de266db88272813", size = 57872, upload-time = "2026-06-25T17:42:36.87Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4e/b5/2396a19498d265567bc414648ca8052809661a614e934fd74660d84fcc6a/grants_shared-0.2.7-py3-none-any.whl", hash = "sha256:b2951d770be8390612c824e2823d82b18874ed9d415b957242b2b5f473d8215b", size = 61691, upload-time = "2026-06-11T17:26:24.105Z" },
+    { url = "https://files.pythonhosted.org/packages/21/9d/90d61adf46ab65c7a0ef1f2b489a7fb2af3719df864e4e12c4b0a7615d04/grants_shared-0.2.9-py3-none-any.whl", hash = "sha256:d8e578e2a29d6ad593692e347946960c6309dd799b69a7709082c522130c2d89", size = 73424, upload-time = "2026-06-25T17:42:35.631Z" },
 ]
 
 [[package]]
@@ -1359,16 +1359,16 @@ wheels = [
 
 [[package]]
 name = "pydantic-settings"
-version = "2.14.1"
+version = "2.14.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "typing-inspection" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/07/60/1d1e59c9c90d54591469ada7d268251f71c24bdb765f1a8a832cee8c6653/pydantic_settings-2.14.1.tar.gz", hash = "sha256:e874d3bec7e787b0c9958277956ed9b4dd5de6a80e162188fdaff7c5e26fd5fa", size = 235551, upload-time = "2026-05-08T13:40:06.542Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5c/b5/8f48e906c3e0205276e8bd8cb7512217a87b2685304d64be27cad5b3019f/pydantic_settings-2.14.2.tar.gz", hash = "sha256:c19dd64b19097f1de80184f0cc7b0272a13ae6e170cbf240a3e27e381ed14a5f", size = 237700, upload-time = "2026-06-19T13:44:56.324Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ae/8d/f1af3832f5e6eb13ba94ee809e72b8ecb5eef226d27ee0bef7d963d943c7/pydantic_settings-2.14.1-py3-none-any.whl", hash = "sha256:6e3c7edfd8277687cdc598f56e5cff0e9bfff0910a3749deaa8d4401c3a2b9de", size = 60964, upload-time = "2026-05-08T13:40:04.958Z" },
+    { url = "https://files.pythonhosted.org/packages/77/c1/6e422f34e569cf8e18df68d1939c81c099d2b61e4f7d9621c8a77560799c/pydantic_settings-2.14.2-py3-none-any.whl", hash = "sha256:a20c97b37910b6550d5ea50fbcc2d4187defe58cd57070b73863d069419c9440", size = 61715, upload-time = "2026-06-19T13:44:55.02Z" },
 ]
 
 [[package]]
@@ -1454,11 +1454,11 @@ wheels = [
 
 [[package]]
 name = "python-statemachine"
-version = "3.0.0"
+version = "3.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f4/a6/d0626b1efb56d9502fe8686fa5dbf23d444b5985adac974be2aa8780c956/python_statemachine-3.0.0.tar.gz", hash = "sha256:91523f9ead73c1d6fecc975d5c6e0bfe363fbf537c5f0bf309bcd0f94f9441b2", size = 852800, upload-time = "2026-02-24T18:06:04.908Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/88/d24d2475069c96bbd752414863d8ffc26ef25f5179c87fda5869ba8cb5d5/python_statemachine-3.2.0.tar.gz", hash = "sha256:44b98cb9bb1081891ef6efa907c821d05cae5314a2b99713e56d56a9c962de08", size = 745821, upload-time = "2026-06-17T02:25:41.347Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/ba/9863be42c209d66623e188223484c1502f25a2412f258f00505c613f6e5d/python_statemachine-3.0.0-py3-none-any.whl", hash = "sha256:f967ee864cfd26375c91f49560e790357613482811efcec8b2020c1f874a5eaf", size = 103801, upload-time = "2026-02-24T18:06:03.31Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/e3/25d1076e47554b559332bba62fb4abdc01704ea960f773c8db21b4ea1952/python_statemachine-3.2.0-py3-none-any.whl", hash = "sha256:8909916fc21208680f737d33c891a5331a1a0eeeaf3fe40efa278cb056855aee", size = 152809, upload-time = "2026-06-17T02:25:39.766Z" },
 ]
 
 [[package]]
@@ -1773,7 +1773,7 @@ requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1,<0.8" },
     { name = "docraptor", specifier = ">=3.0.0,<4" },
     { name = "flask-cors", specifier = ">=6.0.0,<7" },
-    { name = "grants-shared", specifier = "==0.2.7" },
+    { name = "grants-shared", specifier = "==0.2.9" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
     { name = "jinja2", specifier = ">=3.1.5" },
     { name = "jsonpath-ng", specifier = ">=1.7.0,<2" },

@@ -3,14 +3,18 @@ import { JSONSchema7 } from "json-schema";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
 
 /*
-  ex:
+  Extracted conditional validation rules are keyed by schema path.
+
+  Example:
   {
-    "path/to/field": [
+    "additional_sites/items": [
       {
         if: {...},
         then: {...}
-      },{
-        ...
+      },
+      {
+        if: {...},
+        else: {...}
       }
     ]
   }
@@ -29,47 +33,34 @@ type ConditionalRuleArrayReduceResult = {
   updatedValue: unknown[];
 };
 
-const isIfThenElement = (schemaNode: object) => {
-  return (
-    Object.hasOwn(schemaNode, "if") &&
-    Object.hasOwn(schemaNode, "then") &&
-    Object.keys(schemaNode).length === 2
+// Supports valid JSON Schema conditional forms: if/then, if/else, and if/then/else.
+const isConditionalElement = (schemaNode: object) => {
+  const hasIf = Object.hasOwn(schemaNode, "if");
+  const hasThen = Object.hasOwn(schemaNode, "then");
+  const hasElse = Object.hasOwn(schemaNode, "else");
+
+  if (!hasIf || (!hasThen && !hasElse)) {
+    return false;
+  }
+
+  return Object.keys(schemaNode).every((key) =>
+    ["if", "then", "else"].includes(key),
   );
 };
 
 /*
-  Since the mergeAllOf library cannot handle merging something like complex conditionals like:
-    "allOf": [
-      {
-          "if": {"not": {"required": ["outright_funds"]}},
-          "then": {"required": ["federal_match"]},
-      },
-      {
-          "if": {"not": {"required": ["federal_match"]}},
-          "then": {"required": ["outright_funds"]},
-      },
-    ]
-  This function will remove any complex allOfs from the form schema, and preserve them in a separate
-  conditional validation object to be used later (not used anywhere yet)
+  mergeAllOf cannot safely merge schemas that contain conditional keywords
+  such as if/then/else. To keep form rendering stable, this function removes
+  conditional-only allOf entries from the renderable schema and preserves them
+  separately as conditional validation rules.
 
-  logic:
-    for each node
-      if it's an allOf
-        and all elements are they if / then conditionals
-          remove it from properties
-          determine full path to property
-          add it to the conditional validation rules
-        if not
-          remove the allOf completely (we don't know what it is but it'll break things)
-      if it's an object
-        recurse
-      if it's an array
-        recurse over any object properties
-      otherwise, pass through
+  This lets the frontend:
+    - flatten safe allOf usage for rendering
+    - avoid crashing on conditional schemas
+    - keep conditionals available for validation-related workflows
 
-  Note that even though our current system handles single conditional allOfs fine,
-  we will remove and track them here as it's easier to do and sets us up better to
-  use the conditional validation rules later
+  Any allOf made entirely of conditional entries is extracted. Non-conditional
+  allOf entries continue through the normal recursive path.
 */
 export const extricateConditionalValidationRules = (
   properties: RJSFSchema,
@@ -82,7 +73,7 @@ export const extricateConditionalValidationRules = (
     ) => {
       if (key === "allOf") {
         if (Array.isArray(value) && value.length) {
-          if (value.every(isIfThenElement)) {
+          if (value.every(isConditionalElement)) {
             conditionalValidationRules[parentPath] = value;
             return {
               conditionalValidationRules,

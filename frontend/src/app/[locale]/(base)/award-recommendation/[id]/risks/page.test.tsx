@@ -15,6 +15,17 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+  }),
+}));
+
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   use: jest.fn(() => ({
@@ -98,8 +109,8 @@ describe("AwardRecommendationRisksPage", () => {
     const page = await AwardRecommendationRisksPageContent({ params });
     render(page);
 
-    expect(screen.getByText("risks.heading")).toBeInTheDocument();
-    expect(screen.getByText("risks.description")).toBeInTheDocument();
+    expect(screen.getByText("risks.pageHeading")).toBeInTheDocument();
+    expect(screen.getByText("risks.pageDescription")).toBeInTheDocument();
   });
 
   it("shows error when award recommendation is not found", async () => {

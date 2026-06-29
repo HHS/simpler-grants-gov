@@ -6,10 +6,10 @@ import grants_shared.adapters.db as db
 import grants_shared.adapters.db.flask_db as flask_db
 import grants_shared.api.response as response
 from flask import Response, stream_with_context
+from grants_shared.adapters.aws.dynamodb_adapter import DynamoDBClient
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 import src.api.files_v1.file_schemas as file_schemas
-from src.adapters.aws.dynamodb_adapter import DynamoDBClient
 from src.api.files_v1.file_blueprint import file_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth

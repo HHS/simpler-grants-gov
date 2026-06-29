@@ -5,87 +5,113 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 export const SF424_FORM_MATCHER =
   /SF\s*[-‑–—]?\s*424(?![A-Za-z0-9])|Application\s+for\s+Federal\s+Assistance/i;
 
+// maxLength values sourced from:
+// api/src/form_schema/forms/sf424/1/0/form_json.py
+// api/src/form_schema/shared/common_shared.py
+// api/src/form_schema/shared/address_shared.py
 export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   submission_type: {
     selector: "#submission_type",
+    printTestId: "submission_type",
     type: "dropdown",
     section: "Section 1",
     field: "Submission Type",
   },
   application_type: {
     selector: "#application_type",
+    printTestId: "application_type",
     type: "dropdown",
     section: "Section 2",
     field: "Application Type",
   },
   revision_type: {
+    dependsOn: {
+      field: "application_type",
+      value: "Revision",
+    },
     selector: "#revision_type",
+    printTestId: "revision_type",
     type: "dropdown",
     section: "Section 2",
     field: "Revision Type",
   },
   revision_other_specify: {
+    dependsOn: {
+      field: "revision_type",
+      value: "E: Other (specify)",
+    },
     testId: "revision_other_specify",
     type: "text",
+    maxLength: 100, // FORM_JSON_SCHEMA.properties.revision_other_specify
     section: "Section 2",
     field: "Revision Other Specify",
   },
   applicant_id: {
     testId: "applicant_id",
     type: "text",
+    maxLength: 30, // FORM_JSON_SCHEMA.properties.applicant_id
     section: "Section 4",
     field: "Applicant Identifier",
   },
   federal_entity_identifier: {
     testId: "federal_entity_identifier",
     type: "text",
+    maxLength: 30, // FORM_JSON_SCHEMA.properties.federal_entity_identifier
     section: "Section 5a",
     field: "Federal Entity Identifier",
   },
   federal_award_identifier: {
     testId: "federal_award_identifier",
     type: "text",
+    maxLength: 25, // FORM_JSON_SCHEMA.properties.federal_award_identifier
     section: "Section 5b",
     field: "Federal Award Identifier",
   },
   organization_name: {
     testId: "organization_name",
     type: "text",
+    maxLength: 60, // common_shared.py.organization_name
     section: "Section 6",
     field: "Organization Name",
   },
   employer_taxpayer_identification_number: {
     testId: "employer_taxpayer_identification_number",
     type: "text",
+    maxLength: 30, // FORM_JSON_SCHEMA.properties.employer_taxpayer_identification_number
     section: "Section 7",
     field: "Employer Taxpayer Identification Number",
   },
   applicant_street1: {
     testId: "applicant--street1",
     type: "text",
+    maxLength: 55, // address_shared.py.street1
     section: "Section 8",
     field: "Street 1",
   },
   applicant_street2: {
     testId: "applicant--street2",
     type: "text",
+    maxLength: 55, // address_shared.py.street2
     section: "Section 8",
     field: "Street 2",
   },
   applicant_city: {
     testId: "applicant--city",
     type: "text",
+    maxLength: 35, // address_shared.py.city
     section: "Section 8",
     field: "City",
   },
   applicant_state: {
     selector: "#applicant--state",
+    printTestId: "applicant--state",
     type: "dropdown",
     section: "Section 8",
     field: "Applicant State",
   },
   applicant_country: {
     selector: "#applicant--country",
+    printTestId: "applicant--country",
     type: "dropdown",
     section: "Section 8",
     field: "Applicant Country",
@@ -93,83 +119,97 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   applicant_zip_code: {
     testId: "applicant--zip_code",
     type: "text",
+    maxLength: 30, // address_shared.py.zip_code
     section: "Section 8",
     field: "Applicant Zip Code",
   },
   department_name: {
     testId: "department_name",
     type: "text",
+    maxLength: 30, // FORM_JSON_SCHEMA.properties.department_name
     section: "Section 8e",
     field: "Department Name",
   },
   division_name: {
     testId: "division_name",
     type: "text",
+    maxLength: 100, // FORM_JSON_SCHEMA.properties.division_name
     section: "Section 8e",
     field: "Division Name",
   },
   contact_person_prefix: {
     testId: "contact_person--prefix",
     type: "text",
+    maxLength: 10, // common_shared.py.person_name.prefix
     section: "Section 8f",
     field: "Contact Person Prefix",
   },
   contact_person_first_name: {
     testId: "contact_person--first_name",
     type: "text",
+    maxLength: 35, // common_shared.py.person_name.first_name
     section: "Section 8f",
     field: "Contact Person First Name",
   },
   contact_person_middle_name: {
     testId: "contact_person--middle_name",
     type: "text",
+    maxLength: 25, // common_shared.py.person_name.middle_name
     section: "Section 8f",
     field: "Contact Person Middle Name",
   },
   contact_person_last_name: {
     testId: "contact_person--last_name",
     type: "text",
+    maxLength: 60, // common_shared.py.person_name.last_name
     section: "Section 8f",
     field: "Contact Person Last Name",
   },
   contact_person_suffix: {
     testId: "contact_person--suffix",
     type: "text",
+    maxLength: 10, // common_shared.py.person_name.suffix
     section: "Section 8f",
     field: "Contact Person Suffix",
   },
   contact_person_title: {
     testId: "contact_person_title",
     type: "text",
+    maxLength: 45, // common_shared.py.contact_person_title
     section: "Section 8f",
     field: "Contact Person Title",
   },
   organization_affiliation: {
     testId: "organization_affiliation",
     type: "text",
+    maxLength: 60, // FORM_JSON_SCHEMA.properties.organization_affiliation
     section: "Section 8f",
     field: "Organization Affiliation",
   },
   phone_number: {
     testId: "phone_number",
     type: "text",
+    maxLength: 25, // common_shared.py.phone_number
     section: "Section 8f",
     field: "Phone Number",
   },
   fax: {
     testId: "fax",
     type: "text",
+    maxLength: 25, // common_shared.py.phone_number
     section: "Section 8f",
     field: "Fax",
   },
   email: {
     testId: "email",
     type: "text",
+    maxLength: 60, // common_shared.py.contact_email
     section: "Section 8f",
     field: "Email",
   },
   applicant_type_code__combobox: {
     testId: "combo-box-toggle",
+    printTestId: "applicant_type_code",
     optionTestIdPrefix: "combo-box-option-",
     type: "combo-box-input",
     section: "Section 9",
@@ -178,18 +218,21 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   applicant_type_other_specify: {
     testId: "applicant_type_other_specify",
     type: "text",
+    maxLength: 30, // FORM_JSON_SCHEMA.properties.applicant_type_other_specify
     section: "Section 9",
     field: "Applicant Type Other Specify",
   },
   agency_name: {
     testId: "agency_name",
     type: "text",
+    maxLength: 60, // FORM_JSON_SCHEMA.properties.agency_name
     section: "Section 11",
     field: "Agency Name",
   },
   assistance_listing_program_title: {
     testId: "assistance_listing_program_title",
     type: "text",
+    maxLength: 120, // FORM_JSON_SCHEMA.properties.assistance_listing_program_title
     section: "Section 12",
     field: "Assistance Listing Program Title",
   },
@@ -202,6 +245,7 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   project_title: {
     testId: "project_title",
     type: "text",
+    maxLength: 200, // FORM_JSON_SCHEMA.properties.project_title
     section: "Section 15",
     field: "Project Title",
   },
@@ -214,12 +258,14 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   congressional_district_applicant: {
     testId: "congressional_district_applicant",
     type: "text",
+    maxLength: 6, // FORM_JSON_SCHEMA.properties.congressional_district_applicant
     section: "Section 16",
     field: "Congressional District Applicant",
   },
   congressional_district_program_project: {
     testId: "congressional_district_program_project",
     type: "text",
+    maxLength: 6, // FORM_JSON_SCHEMA.properties.congressional_district_program_project
     section: "Section 16",
     field: "Congressional District Program Project",
   },
@@ -232,53 +278,62 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   project_start_date: {
     testId: "project_start_date",
     type: "text",
+    maxLength: 10, // Date format MM/DD/YYYY
     section: "Section 17",
     field: "Project Start Date",
   },
   project_end_date: {
     testId: "project_end_date",
     type: "text",
+    maxLength: 10, // Date format MM/DD/YYYY
     section: "Section 17",
     field: "Project End Date",
   },
   federal_estimated_funding: {
     testId: "federal_estimated_funding",
     type: "text",
+    maxLength: 14, // common_shared.py.budget_monetary_amount
     section: "Section 18",
     field: "Federal Estimated Funding",
   },
   applicant_estimated_funding: {
     testId: "applicant_estimated_funding",
     type: "text",
+    maxLength: 14, // common_shared.py.budget_monetary_amount
     section: "Section 18",
     field: "Applicant Estimated Funding",
   },
   state_estimated_funding: {
     testId: "state_estimated_funding",
     type: "text",
+    maxLength: 14, // common_shared.py.budget_monetary_amount
     section: "Section 18",
     field: "State Estimated Funding",
   },
   local_estimated_funding: {
     testId: "local_estimated_funding",
     type: "text",
+    maxLength: 14, // common_shared.py.budget_monetary_amount
     section: "Section 18",
     field: "Local Estimated Funding",
   },
   other_estimated_funding: {
     testId: "other_estimated_funding",
     type: "text",
+    maxLength: 14, // common_shared.py.budget_monetary_amount
     section: "Section 18",
     field: "Other Estimated Funding",
   },
   program_income_estimated_funding: {
     testId: "program_income_estimated_funding",
     type: "text",
+    maxLength: 14, // common_shared.py.budget_monetary_amount
     section: "Section 18",
     field: "Program Income Estimated Funding",
   },
   application_subject_to: {
     selector: "#state_review",
+    printTestId: "state_review",
     type: "dropdown",
     section: "Section 19",
     field:
@@ -287,11 +342,13 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   state_review_available_date: {
     testId: "state_review_available_date",
     type: "text",
+    maxLength: 10, // Date format MM/DD/YYYY
     section: "Section 19",
     field: "State Review Available Date",
   },
   delinquent_federal_debt: {
     useDataAsText: true,
+    printTestId: "delinquent_federal_debt",
     type: "radiobutton",
     section: "Section 20",
     field: "Applicant Delinquent on Federal Debt",
@@ -315,54 +372,63 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   authorized_representative_prefix: {
     testId: "authorized_representative--prefix",
     type: "text",
+    maxLength: 10, // common_shared.py.person_name.prefix
     section: "Section 21",
     field: "Authorized Representative Prefix",
   },
   authorized_representative_first_name: {
     testId: "authorized_representative--first_name",
     type: "text",
+    maxLength: 35, // common_shared.py.person_name.first_name
     section: "Section 21",
     field: "Authorized Representative First Name",
   },
   authorized_representative_middle_name: {
     testId: "authorized_representative--middle_name",
     type: "text",
+    maxLength: 25, // common_shared.py.person_name.middle_name
     section: "Section 21",
     field: "Authorized Representative Middle Name",
   },
   authorized_representative_last_name: {
     testId: "authorized_representative--last_name",
     type: "text",
+    maxLength: 60, // common_shared.py.person_name.last_name
     section: "Section 21",
     field: "Authorized Representative Last Name",
   },
   authorized_representative_suffix: {
     testId: "authorized_representative--suffix",
     type: "text",
+    maxLength: 10, // common_shared.py.person_name.suffix
     section: "Section 21",
     field: "Authorized Representative Suffix",
   },
   authorized_representative_title: {
     testId: "authorized_representative_title",
     type: "text",
+    maxLength: 45, // common_shared.py.contact_person_title
     section: "Section 21",
     field: "Authorized Representative Title",
   },
   authorized_representative_phone_number: {
     testId: "authorized_representative_phone_number",
     type: "text",
+    maxLength: 25, // common_shared.py.phone_number
     section: "Section 21",
     field: "Authorized Representative Phone Number",
   },
   authorized_representative_fax: {
     testId: "authorized_representative_fax",
     type: "text",
+    maxLength: 25, // common_shared.py.phone_number
     section: "Section 21",
     field: "Authorized Representative Fax",
   },
   authorized_representative_email: {
     testId: "authorized_representative_email",
     type: "text",
+    maxLength: 60, // common_shared.py.contact_email
     section: "Section 21",
     field: "Authorized Representative Email",
   },
@@ -383,16 +449,16 @@ export const SF424_REQUIRED_FIELD_ERRORS: FieldError[] = [
     fieldId: "employer_taxpayer_identification_number",
     message: "EIN/TIN is required",
   },
-  { fieldId: "applicant--street1", message: "Applicant Street 1 is required" },
-  { fieldId: "applicant--city", message: "Applicant City is required" },
-  { fieldId: "applicant--country", message: "Applicant Country is required" },
+  { fieldId: "applicant--street1", message: "Street 1 is required" },
+  { fieldId: "applicant--city", message: "City is required" },
+  { fieldId: "applicant--country", message: "Country is required" },
   {
     fieldId: "contact_person--first_name",
-    message: "Contact Person First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "contact_person--last_name",
-    message: "Contact Person Last Name is required",
+    message: "Last Name is required",
   },
   { fieldId: "phone_number", message: "Telephone Number is required" },
   { fieldId: "email", message: "Email is required" },
@@ -447,11 +513,11 @@ export const SF424_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   {
     fieldId: "authorized_representative--first_name",
-    message: "Authorized Representative First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "authorized_representative--last_name",
-    message: "Authorized Representative Last Name is required",
+    message: "Last Name is required",
   },
   { fieldId: "authorized_representative_title", message: "Title is required" },
   {

@@ -218,7 +218,9 @@ def test_get_raises_for_wrong_major_version():
 
 
 def test_all_forms_are_registered_on_startup():
-
+    # Clear any forms accumulated by other tests (this singleton is shared across the suite)
+    # then re-initialize to verify exactly the expected forms are registered.
+    form_template_registry._registry.clear()
     init_form_registry()
 
     forms = form_template_registry.get_all()

@@ -104,6 +104,12 @@ type PropertyPath = `/properties/${string}`;
  *   The FieldList field name. Used to derive the base field path
  *   (e.g. $.fieldListName) for mapping validation warnings to the list.
  *
+ * additionalDescribedById
+ *   Optional accessibility identifier used to associate widgets rendered
+ *   inside a FieldList entry with that entry's heading. This allows
+ *   assistive technologies to announce both the field label and the
+ *   entry context (for example "Street 1, Additional Location 3").
+ *
  * groupDefinition
  *   Describes the fields that appear in each repeatable row.
  *
@@ -111,8 +117,8 @@ type PropertyPath = `/properties/${string}`;
  *   The current array of row values for the FieldList.
  *
  * minItems / maxItems
- *   Optional constraints for the number of rows allowed in the list.
- *   Used for validation and future control of add/remove behavior.
+ *   Constraints controlling the minimum and maximum number of entries
+ *   that can be rendered and submitted.
  *
  * rawErrors / requiredFields
  *   Validation information passed down from the form engine.
@@ -140,6 +146,7 @@ export type FieldListWidgetProps = {
   };
   label: string;
   description?: string;
+  additionalDescribedById?: string;
   name: string;
   minItems?: number;
   minItemsHeading?: string;
@@ -174,11 +181,28 @@ export type FieldListWidgetProps = {
 
 export type FieldListChildWidgetTypes = Exclude<WidgetTypes, "FieldList">;
 
+/**
+ * Configuration for a single child field rendered within a FieldList entry.
+ *
+ * baseId
+ *   Template id containing the entry index placeholder. The placeholder
+ *   is replaced at render time with the actual entry index.
+ *
+ * storagePath
+ *   Path used to read and write values within the entry object. Supports
+ *   nested object structures such as:
+ *
+ *     address.street1
+ *     address.city
+ *     address.country
+ */
+
 export type FieldListGroupItem = {
   widget: FieldListChildWidgetTypes;
   generalProps: Omit<UswdsWidgetProps, "id" | "value" | "key">;
   baseId: string;
   definition: string;
+  storagePath: string[];
 };
 
 export type DefinitionPath = PropertyPath | PropertyPath[];
@@ -207,6 +231,11 @@ export interface UiSchemaSection {
   description?: string;
 }
 
+/**
+ * Optional accessibility identifier applied to widgets rendered within
+ * each FieldList entry so child inputs can reference their entry heading.
+ */
+
 export interface UiSchemaFieldList {
   type: "fieldList";
   label: string;
@@ -216,6 +245,7 @@ export interface UiSchemaFieldList {
   maxItemsHelperText?: string;
   name: string;
   description?: string;
+  additionalDescribedById?: string;
   children: UiSchemaField[];
 }
 
@@ -265,6 +295,7 @@ export interface UswdsWidgetProps<
     enumDisabled?: unknown;
     emptyValue?: string | undefined;
   };
+  additionalDescribedById?: string;
   formClassName?: string;
   inputClassName?: string;
   hideLabel?: boolean;

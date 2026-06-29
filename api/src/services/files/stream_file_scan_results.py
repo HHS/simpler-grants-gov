@@ -5,11 +5,11 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Any
 
+from grants_shared.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
 from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util import datetime_util
 from pydantic import Field
 
-from src.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
 from src.constants.lookup_constants import FileScanStatus
 from src.db.models.user_models import User
 from src.util.env_config import PydanticBaseEnvConfig
@@ -31,8 +31,8 @@ SCAN_RECORD_STATUS_ATTR = "status"
 
 
 class FileScanStreamConfig(PydanticBaseEnvConfig):
-    poll_interval_seconds: float = Field(alias="FILE_SCAN_RESULTS_POLL_INTERVAL_SECONDS")
-    max_duration_seconds: float = Field(alias="FILE_SCAN_RESULTS_MAX_DURATION_SECONDS")
+    poll_interval_seconds: float = Field(alias="FILE_SCAN_RESULTS_POLL_INTERVAL_SECONDS", default=3)
+    max_duration_seconds: float = Field(alias="FILE_SCAN_RESULTS_MAX_DURATION_SECONDS", default=60)
 
 
 @dataclass(frozen=True)

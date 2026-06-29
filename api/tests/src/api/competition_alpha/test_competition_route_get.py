@@ -1,10 +1,10 @@
 import uuid
 from datetime import date
 
+import grants_shared.util.file_util as file_util
 import pytest
 from freezegun import freeze_time
 
-import src.util.file_util as file_util
 from tests.src.db.models.factories import CompetitionFactory
 
 

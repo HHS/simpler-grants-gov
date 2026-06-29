@@ -91,11 +91,16 @@ def get_or_create_legacy_certificate(db_session, agency, serial_number):
         select(LegacyCertificate).where(LegacyCertificate.serial_number == serial_number)
     )
     if legacy_certificate is None:
+        tcertificate = factories.StagingTcertificatesFactory.create(
+            agencyid=agency.agency_code,
+            serial_num=serial_number,
+            expirationdate=UTC_NOW.date() + timedelta(days=365),
+        )
         legacy_certificate = factories.LegacyAgencyCertificateFactory(
             agency_id=agency.agency_id,
             agency=agency,
-            serial_number=serial_number,
-            expiration_date=UTC_NOW.date() + timedelta(days=365),
+            serial_number=tcertificate.serial_num,
+            expiration_date=tcertificate.expirationdate,
         )
         agency_user = factories.AgencyUserFactory.create(
             agency=agency, user=legacy_certificate.user
@@ -141,6 +146,7 @@ def _build_legacy_certificate_and_submission(
     print(encoded)
 
     print("\nFOR LOCAL VALIDATION TESTING USE THESE IN THE SOAP-API.ENV:")
+
     print(f"CERT_DATA={cert_text!r}\n")
     with open(path_key) as f:
         key_text = f.read()

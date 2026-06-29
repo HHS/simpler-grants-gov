@@ -7,11 +7,11 @@ from enum import StrEnum
 
 import grants_shared.adapters.db as db
 from botocore.client import BaseClient
+from grants_shared.adapters.aws import S3Config
+from grants_shared.adapters.aws.s3_adapter import get_s3_client
 from grants_shared.util import datetime_util
 from sqlalchemy import select
 
-from src.adapters.aws import S3Config
-from src.adapters.aws.s3_adapter import get_s3_client
 from src.adapters.sam_gov.client import BaseSamGovClient
 from src.adapters.sam_gov.models import SamExtractRequest
 from src.constants.lookup_constants import SamGovExtractType, SamGovProcessingStatus

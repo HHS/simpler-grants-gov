@@ -2,22 +2,24 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+from grants_shared.adapters.aws import S3Config
 from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.util import file_util
 from sqlalchemy import select
 from werkzeug.datastructures import FileStorage
 
-from src.adapters.aws import S3Config
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.opportunity_models import OpportunityAttachment
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
-from src.services.opportunities_grantor_v1.opportunity_utils import validate_opportunity_is_draft
+from src.services.opportunities_grantor_v1.opportunity_utils import (
+    validate_opportunity_created_in_simpler_grants,
+)
 from src.services.opportunity_attachments.attachment_util import (
     adjust_legacy_file_name,
     get_s3_attachment_path,
 )
-from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +38,8 @@ def upload_opportunity_attachment(
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
-    # Verify opportunity is in draft state
-    validate_opportunity_is_draft(opportunity)
+    # Verify opportunity was created in Simpler Grants
+    validate_opportunity_created_in_simpler_grants(opportunity)
 
     attachment_id = uuid.uuid4()
 
@@ -104,8 +106,8 @@ def delete_opportunity_attachment(
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
-    # Verify opportunity is in draft state
-    validate_opportunity_is_draft(opportunity)
+    # Verify opportunity was created in Simpler Grants
+    validate_opportunity_created_in_simpler_grants(opportunity)
 
     # Find the attachment
     attachment = db_session.execute(

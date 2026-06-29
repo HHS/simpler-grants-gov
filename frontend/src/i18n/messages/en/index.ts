@@ -273,14 +273,6 @@ export const messages = {
     metaDescription:
       "Edit draft opportunity information and non-forecast summary fields.",
     header: {
-      pageTitle: "Opportunity #: {number}",
-      lastUpdated: "Last updated:",
-      status: "Status:",
-      stageDraft: "Draft",
-      stageArchived: "Archived",
-      stageClosed: "Closed",
-      stageForecasted: "Forecasted",
-      stagePosted: "Open for applications",
       saveButton: "Save",
       previewButton: "Preview",
       publishButton: "Publish",
@@ -594,7 +586,7 @@ export const messages = {
       unsavedChangesWarning:
         "You have unsaved changes or attachments that will be lost if you select OK.",
       fieldListWidget: {
-        deleteEntry: "Delete",
+        deleteEntry: "Delete this entry",
         addEntry: "Add another entry",
       },
     },
@@ -723,6 +715,8 @@ export const messages = {
       server:
         "An error occurred when trying to save your subscription. If this continues to happen, email <email-link>simpler@grants.gov</email-link>.",
       alreadySubscribed: "This email address has already been subscribed.",
+      tooManyRequests:
+        "Too many recent attempts. Please wait a few minutes and try again.",
     },
   },
   SubscriptionConfirmation: {
@@ -739,9 +733,9 @@ export const messages = {
     cta: "Change your mind?",
     buttonResub: "Re-subscribe",
   },
-  SendyDisclaimer: {
+  NewsletterDisclaimer: {
     disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "Simpler.Grants.gov newsletter subscriptions are powered by Mailchimp. Personal information is not stored within Simpler.Grants.gov.",
   },
   ErrorPages: {
     genericError: {
@@ -2070,6 +2064,11 @@ export const messages = {
       preview: "Preview",
       submitForReview: "Submit for review",
       backToEdit: "Back to Edit",
+      backToSubmissions: "Back to submissions",
+    },
+    submissionEdit: {
+      editTitle: "Edit {applicationSubmissionNumber}",
+      viewOriginalApplication: "View original application",
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -2164,6 +2163,9 @@ export const messages = {
       "Error fetching application submission details",
     awardRecommendationSubmissionFetchError:
       "Error fetching application submission data. Please try refreshing the page.",
+    errorHeadingAwardRecommendationRisk: "Error fetching risk details",
+    awardRecommendationRiskFetchError:
+      "Error fetching risk data. Please try refreshing the page.",
     recommendations: {
       heading: "Recommendations",
       editPageDescription:
@@ -2224,22 +2226,58 @@ export const messages = {
       heading: "Risks and Conditions",
       description:
         "Review and manage risks and conditions for application submissions",
+      pageHeading: "Recommend submissions",
+      pageDescription: "Select one or more applications to add conditions.",
+      editTitle: "Edit risks and conditions",
+      editPageTitle: "Edit Risk or Condition",
+      editMetaDescription: "Edit risk or condition for selected applications",
+      editRiskTitle: "Edit {riskNumber}",
+      addPageTitle: "Add Risk or Condition",
+      addMetaDescription: "Add risk or condition to selected applications",
+      addTitle: "Add risk or condition",
+      addHeading: "Add risk or condition",
+      addDescription:
+        "Add risk details and recommended terms or conditions for the selected applications",
       selectAll: "Select all",
       selectRow: "Select row for {appNumber}",
       selectedCount:
         "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      selectedApplications: "Selected applications",
       columns: {
         appNumber: "App #",
         projectTitle: "Project Title",
-        orgName: "Organization Name",
+        orgName: "Org Name",
         uei: "UEI",
+        score: "Score",
         recommendation: "Recommendation",
+        requested: "Requested",
+        recommended: "Recommended",
         risk: "Risk",
         condition: "Condition",
       },
       recommendationType: {
         recommended_for_funding: "Recommended",
       },
+      riskDetailsHeading: "Risk details",
+      riskSummaryLabel: "Risk summary",
+      riskSummaryHint:
+        "Any program or organization risks already identified at this time",
+      riskSummaryRequired: "Risk summary is required.",
+      recommendedConditionLabel: "Recommended term or condition",
+      recommendedConditionHint:
+        "Add any recommended conditions based on the risks identified",
+      selectConditionPlaceholder: "Select a condition",
+      condition1: "Condition 1",
+      condition2: "Condition 2",
+      condition3: "Condition 3",
+      cancelButton: "Cancel",
+      saveButton: "Save",
+      savingButton: "Saving...",
+      validationError: "Please fill in all required fields before saving.",
+      saveError: "Failed to save risk. Please try again.",
+      errorMessage: "Unable to load application submissions. Please try again.",
+      noSelectionsMessage:
+        "No applications selected. Please select applications from the Risks and Conditions page first.",
       defaultNone: "None",
       loading: "Loading submissions...",
       errorLoading: "Error loading submissions. Please try again.",
@@ -2324,6 +2362,15 @@ export const messages = {
       "At the end of the session, we will ask you for your verbal permission to use what we learn to make the product better.",
       "If you opt in to using what we learn, your feedback will be anonymized and included in our research findings as part of trends we see across many participants.",
     ],
+  },
+  OpportunityOverview: {
+    pageTitle: "Opportunity Overview",
+    pageApplication: "Smarter Grants Management",
+    metaDescription: "Opportunity publishing progress overview",
+    labels: {
+      editOpportunityLink: "Opportunity Summary",
+      competitionLink: "Application Package",
+    },
   },
   CreateOpportunity: {
     pageTitle: "Create Opportunity",
@@ -2449,6 +2496,13 @@ export const messages = {
       "Select a funding opportunity for your award recommendation",
     whichFundingOpportunity: "Which funding opportunity is this for?",
     cancelButtonText: "Cancel",
+    startButtonText: "Start",
+    columns: {
+      fundingOpportunityNumber: "Funding opp #",
+      fundingOpportunityName: "Funding opp name",
+      submittedApplications: "Submitted applications",
+      action: "Action",
+    },
   },
   FileInput: {
     existingFiles: {

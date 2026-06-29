@@ -50,7 +50,7 @@ def init_form_registry() -> None:
         for _form in _ALL_FORMS:
             form_template_registry.register(_form, major_version=1)
 
-    logger.info("Finished registering forms")
+        logger.info("Finished registering forms")
 
 
 def get_active_forms() -> list[Form]:
