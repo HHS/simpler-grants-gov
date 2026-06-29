@@ -2034,6 +2034,16 @@ export const messages = {
     breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
+    list: {
+      pageTitle: "Award recommendations",
+      pageHeading: "Award recommendations",
+      numAwardRecommendations:
+        "{num, plural, =1 {1 Award recommendation} other {# Award recommendations}}",
+      createRecommendationButton: "Create recommendation",
+      agencyNotAuthorized:
+        "You do not have access to this agency's award recommendations.",
+      noAgencies: "You are not associated with any agencies.",
+    },
     summary: {
       showDescription: "Show full description",
       hideSummaryDescription: "Hide full description",
