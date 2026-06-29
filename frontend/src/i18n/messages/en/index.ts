@@ -2080,6 +2080,13 @@ export const messages = {
       editTitle: "Edit {applicationSubmissionNumber}",
       viewOriginalApplication: "View original application",
     },
+    editRecommendations: {
+      pageTitle: "Edit recommendations",
+      metaDescription: "Edit award recommendations for multiple applications",
+      heading: "Edit recommendations",
+      description:
+        "Select one or more applications to edit recommendations. Search by App #, program title, org name of UEI",
+    },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
     description: "Award Recommendation flow coming soon.",
