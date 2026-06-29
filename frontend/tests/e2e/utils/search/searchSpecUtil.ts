@@ -263,11 +263,36 @@ export async function waitForSearchResultsInitialLoad(
     timeout = timeoutOverride;
   }
 
-  // Using Playwright's text= selector for robust cross-browser support (especially Webkit).
-  await page.waitForSelector("text=Opportunities", {
-    state: "visible",
-    timeout,
-  });
+  // Wait for the search route and core search UI controls to be available.
+  await page.waitForURL(/\/search(\?|$)/, { timeout });
+  await expect(getSearchInput(page)).toBeVisible({ timeout });
+
+  // Wait for the result controls region, which indicates search data has rendered.
+  await expect(
+    page.locator("div[data-testid='search-results-controls'] h3").first(),
+  ).toBeVisible({ timeout });
+}
+
+export async function verifyOpportunityInSearchByTitleAndNumber(
+  page: Page,
+  opportunityTitle: string,
+  opportunityNumber: string,
+  expectedStatus: string = "Open",
+): Promise<void> {
+  await page.goto("/search");
+  await waitForSearchResultsInitialLoad(page);
+  await fillSearchInputAndSubmit(opportunityTitle, page);
+
+  const matchingSearchRow = page
+    .locator("tr", {
+      has: page.getByRole("link", { name: opportunityTitle }),
+    })
+    .first();
+
+  await expect(matchingSearchRow).toBeVisible();
+  await expect(matchingSearchRow).toContainText(opportunityTitle);
+  await expect(matchingSearchRow).toContainText(opportunityNumber);
+  await expect(matchingSearchRow).toContainText(expectedStatus);
 }
 
 export async function clickAccordionWithTitle(
