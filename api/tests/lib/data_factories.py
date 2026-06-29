@@ -227,7 +227,7 @@ def create_soap_request(
     )
     headers = {
         "X-Gg-S2S-Uri": "https://google.com/xyz",
-        "Soapaction": f"{GRANTOR_SOAP_ACTION_PATH}/{operation_name[:-7]}",
+        "Soapaction": f"{GRANTOR_SOAP_ACTION_PATH}/{operation_name.removesuffix('Request')}",
     }
     if log_local:
         headers.update({f"{LOG_LOCAL_RESPONSE_HEADER_KEY}": "1"})
