@@ -420,7 +420,7 @@ class AwardRecommendationSubmissionDetailSchema(Schema):
     award_recommendation_submission_detail_id = fields.UUID(
         metadata={"description": "The submission detail ID"}
     )
-    
+
     recommended_amount = fields.Decimal(
         allow_none=True,
         as_string=True,
