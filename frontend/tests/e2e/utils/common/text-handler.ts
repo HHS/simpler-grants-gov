@@ -1,24 +1,47 @@
-// text-handler.ts
-// Handles text page fields using text-input field properties.
-// Usage: import { textHandler } from "tests/e2e/utils/common/text-handler";
+/**
+ * Handles text page fields using text-input field properties.
+ * Usage: import { textHandler } from "tests/e2e/utils/common/text-handler";
+ */
 
-import { FieldHandler } from "./types";
+import { type Page } from "@playwright/test";
 
-export const textHandler: FieldHandler = async (
-  testInfo,
-  page,
-  field,
-  data,
+import { type FieldHandler, type FillFieldDefinition } from "./types";
+
+/** Fills a text input resolved by its accessible label. */
+export const fillTextByLabel = async (
+  page: Page,
+  label: string,
+  value: string,
+  exact?: boolean,
 ) => {
-  if (!field.testId) {
-    throw new Error(`Text field ${field.field} requires a testId`);
-  }
+  const input = page.getByLabel(label, { exact }).first();
+  await input.waitFor({ state: "visible", timeout: 5000 });
+  await input.fill(value);
+};
+
+/** Handles text-type fields using testId or label-based locators. */
+export const textHandler: FieldHandler = async (
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
+) => {
   if (typeof data !== "string") {
     throw new Error(
       `Text field ${field.field} requires string data, received ${typeof data}`,
     );
   }
-  const locator = page.getByTestId(field.testId);
+  const locator = field.testId
+    ? page.getByTestId(field.testId)
+    : field.label
+      ? page.getByLabel(field.label, { exact: field.labelExact })
+      : null;
+
+  if (!locator) {
+    throw new Error(
+      `Text field ${field.field} requires either testId or label`,
+    );
+  }
+
   await locator.waitFor({ state: "attached", timeout: 5000 });
   await locator.fill(data);
 };

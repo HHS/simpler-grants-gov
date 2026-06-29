@@ -1,10 +1,13 @@
 import {
   deleteAwardRecommendationRisk,
   getAwardRecommendationDetails,
+  getAwardRecommendationRisk,
   getAwardRecommendationRisks,
   getAwardRecommendationSubmission,
+  getAwardRecommendationSubmissionsForRisk,
   listAwardRecommendationSubmissions,
   listAwardRecommendationSubmissionsPaginated,
+  updateAwardRecommendationRisk,
   updateAwardRecommendationSubmissionDetails,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 import { APIResponse } from "src/types/apiResponseTypes";
@@ -22,23 +25,35 @@ const mockFetchAwardRecommendation = jest.fn().mockResolvedValue({
 });
 const mockInnerFetch = jest.fn();
 
+const setupDefaultInnerFetchMock = () => {
+  mockInnerFetch.mockImplementation(
+    ({ subPath }: { subPath: string }) =>
+      Promise.resolve({
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          data: subPath.endsWith("/submissions/list")
+            ? mockAwardRecommendationSubmissions
+            : subPath.endsWith("/risks/list")
+              ? []
+              : null,
+          pagination_info: subPath.endsWith("/list")
+            ? { total_pages: 1 }
+            : undefined,
+          message: subPath.includes("/risks/") ? "Success" : undefined,
+        } as APIResponse),
+      }) as unknown as Promise<Response>,
+  );
+};
+
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAwardRecommendation: (params: unknown): Promise<Response> =>
-    mockFetchAwardRecommendation(params) as Promise<Response>,
-  fetchAwardRecommendationWithMethod: (
-    type: "POST" | "PUT" | "DELETE",
-  ): jest.Mock => {
-    mockInnerFetch.mockResolvedValue({
-      ok: true,
-      json: jest.fn().mockResolvedValue({
-        data: type === "POST" ? mockAwardRecommendationSubmissions : null,
-        pagination_info: type === "POST" ? { total_pages: 1 } : undefined,
-        message: type === "DELETE" ? "Success" : undefined,
-      } as APIResponse),
-    });
-    return mockInnerFetch;
-  },
+    mockFetchAwardRecommendation(params) as unknown as Promise<Response>,
+  fetchAwardRecommendationWithMethod: (): jest.Mock => mockInnerFetch,
 }));
+
+beforeEach(() => {
+  setupDefaultInnerFetchMock();
+});
 
 describe("getAwardRecommendationDetails", () => {
   afterEach(() => {
@@ -192,7 +207,12 @@ describe("getAwardRecommendationRisks", () => {
     const result = await getAwardRecommendationRisks("award-id", {
       page_offset: 1,
       page_size: 10,
-      sort_order: [],
+      sort_order: [
+        {
+          order_by: "created_at",
+          sort_direction: "ascending",
+        },
+      ],
     });
     expect(result.risks).toBeDefined();
     expect(result.paginationInfo).toBeDefined();
@@ -210,5 +230,107 @@ describe("deleteAwardRecommendationRisk", () => {
     expect(result.success).toBe(true);
     expect(result.message).toBeDefined();
     expect(mockInnerFetch).toHaveBeenCalled();
+  });
+});
+
+describe("getAwardRecommendationRisk", () => {
+  const mockRisk = {
+    award_recommendation_risk_id: "risk-id-123",
+    award_recommendation_risk_number: "RSK-26-00001",
+    risk_number: 1,
+    comment: "Test risk",
+    condition: "Condition 1",
+    award_recommendation_application_submission_ids: [],
+    applications: [],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockInnerFetch.mockImplementation(
+      ({ subPath }: { subPath: string }) =>
+        Promise.resolve({
+          ok: true,
+          json: jest.fn().mockResolvedValue({
+            data: subPath.endsWith("/risks/list")
+              ? [mockRisk]
+              : mockAwardRecommendationSubmissions,
+            pagination_info: { total_pages: 1 },
+          } as APIResponse),
+        }) as unknown as Promise<Response>,
+    );
+  });
+
+  it("returns the matching risk", async () => {
+    const result = await getAwardRecommendationRisk("award-id", "risk-id-123");
+
+    expect(mockInnerFetch).toHaveBeenCalledWith({
+      subPath: "award-id/risks/list",
+      body: {
+        pagination: {
+          page_offset: 1,
+          page_size: 100,
+          sort_order: [
+            {
+              order_by: "created_at",
+              sort_direction: "ascending",
+            },
+          ],
+        },
+      },
+    });
+    expect(result).toEqual(mockRisk);
+  });
+
+  it("returns null when no risk matches", async () => {
+    const result = await getAwardRecommendationRisk("award-id", "missing-id");
+
+    expect(result).toBeNull();
+  });
+});
+
+describe("getAwardRecommendationSubmissionsForRisk", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockInnerFetch.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        data: mockAwardRecommendationSubmissions,
+      } as APIResponse),
+    });
+  });
+
+  it("returns submissions linked to the risk", async () => {
+    const submissionId =
+      mockAwardRecommendationSubmissions[0]
+        .award_recommendation_application_submission_id;
+
+    const result = await getAwardRecommendationSubmissionsForRisk("award-id", [
+      submissionId,
+    ]);
+
+    expect(result).toEqual(mockAwardRecommendationSubmissions);
+  });
+});
+
+describe("updateAwardRecommendationRisk", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls fetchAwardRecommendationWithMethod with the correct arguments", async () => {
+    await updateAwardRecommendationRisk("award-id", "risk-id", {
+      comment: "Updated risk",
+      award_recommendation_risk_type: "additional_monitoring",
+      award_recommendation_application_submission_ids: ["submission-id"],
+    });
+
+    expect(mockInnerFetch).toHaveBeenCalledWith({
+      subPath: "award-id/risks/risk-id",
+      body: {
+        comment: "Updated risk",
+        award_recommendation_risk_type: "additional_monitoring",
+        award_recommendation_application_submission_ids: ["submission-id"],
+      },
+    });
   });
 });
