@@ -285,13 +285,6 @@ export const messages = {
       attachments: "Attachments",
     },
     labels: {
-      title: "Title",
-      agency: "Agency",
-      assistanceListings: "Assistance listings:",
-      opportunityNumber: "Opportunity number",
-      opportunityStage: "Opportunity stage",
-      awardSelectionMethod: "Award selection method",
-      awardSelectionMethodExplanation: "Award selection method explanation",
       fundingType: "Funding type",
       costSharing: "Cost sharing or matching requirements?",
       category: "Category",
