@@ -168,7 +168,7 @@ The search endpoint accepts a `filters.customFilters` map that extends the stand
 
 ```json
 {
-  "pagination": { "page_offset": 1, "page_size": 25 },
+  "pagination": { "page": 1, "pageSize": 25 },
   "filters": {
     "customFilters": {
       "agency": { "operator": "in", "value": ["USAID"] },
