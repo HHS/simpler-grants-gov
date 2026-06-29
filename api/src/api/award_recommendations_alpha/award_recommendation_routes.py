@@ -30,8 +30,13 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationSubmissionListRequestSchema,
     AwardRecommendationSubmissionListResponseSchema,
     AwardRecommendationUpdateRequestSchema,
+    BulkUpdateSubmissionDetailsRequestSchema,
+    BulkUpdateSubmissionDetailsResponseSchema,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
+from src.services.award_recommendations.bulk_update_submission_details import (
+    bulk_update_submission_details,
+)
 from src.services.award_recommendations.create_award_recommendation import (
     create_award_recommendation,
 )
@@ -547,3 +552,29 @@ def award_recommendation_delete(
         delete_award_recommendation(db_session, user, award_recommendation_id)
 
     return response.ApiResponse(message="Success", data=None)
+
+
+@award_recommendation_blueprint.put("/award-recommendations/submission-details/bulk")
+@award_recommendation_blueprint.input(BulkUpdateSubmissionDetailsRequestSchema, location="json")
+@award_recommendation_blueprint.output(BulkUpdateSubmissionDetailsResponseSchema)
+@award_recommendation_blueprint.doc(
+    summary="Bulk Update Award Recommendation Submission Details",
+    description="Update multiple award recommendation submission details in a single request. "
+    "Applies shared bulk updates to all selected records and individual updates to specific records. "
+    "All records must belong to the same award recommendation.",
+    responses=[200, 401, 403, 404, 422],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def bulk_update_submission_details_route(
+    db_session: db.Session, json_data: dict
+) -> response.ApiResponse:
+    logger.info("PUT /alpha/award-recommendations/submission-details/bulk")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        updated_details = bulk_update_submission_details(db_session, user, json_data)
+
+    return response.ApiResponse(message="Success", data=updated_details)

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import AddRiskForm from "src/app/[locale]/(base)/award-recommendation/[id]/risks/add/_components/AddRiskForm";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
@@ -10,7 +11,6 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import AddRiskForm from "src/components/award-recommendation/AddRiskForm";
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";

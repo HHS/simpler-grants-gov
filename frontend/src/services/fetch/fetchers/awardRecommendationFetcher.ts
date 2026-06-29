@@ -1,3 +1,4 @@
+import { AwardSelectionMethod } from "src/constants/awardRecommendation";
 import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 import {
   AwardRecommendationDetails,
@@ -79,6 +80,51 @@ export const getAwardRecommendationSubmission = async (
   );
 };
 
+const defaultRisksListPagination: PaginationRequestBody = {
+  page_offset: 1,
+  page_size: 100,
+  sort_order: [
+    {
+      order_by: "created_at",
+      sort_direction: "ascending",
+    },
+  ],
+};
+
+export const getAwardRecommendationRisk = async (
+  awardRecommendationId: string,
+  riskId: string,
+): Promise<AwardRecommendationRisk | null> => {
+  const { risks } = await getAwardRecommendationRisks(
+    awardRecommendationId,
+    defaultRisksListPagination,
+  );
+
+  return (
+    risks.find((risk) => risk.award_recommendation_risk_id === riskId) ?? null
+  );
+};
+
+export const getAwardRecommendationSubmissionsForRisk = async (
+  awardRecommendationId: string,
+  submissionIds: string[],
+): Promise<AwardRecommendationSubmission[]> => {
+  if (submissionIds.length === 0) {
+    return [];
+  }
+
+  const submissions = await listAwardRecommendationSubmissions(
+    awardRecommendationId,
+  );
+  const submissionIdSet = new Set(submissionIds);
+
+  return submissions.filter((submission) =>
+    submissionIdSet.has(
+      submission.award_recommendation_application_submission_id,
+    ),
+  );
+};
+
 export const getAwardRecommendationRisks = async (
   id: string,
   pagination: PaginationRequestBody,
@@ -113,6 +159,28 @@ export const createAwardRecommendationRisk = async (
   return responseBody.data as AwardRecommendationRisk;
 };
 
+export const updateAwardRecommendationRisk = async (
+  awardRecommendationId: string,
+  riskId: string,
+  riskData: {
+    comment: string;
+    award_recommendation_risk_type: string;
+    award_recommendation_application_submission_ids: string[];
+  },
+): Promise<AwardRecommendationRisk> => {
+  const response = await fetchAwardRecommendationWithMethod("PUT")({
+    subPath: `${awardRecommendationId}/risks/${riskId}`,
+    body: riskData,
+  });
+  const responseBody = (await response.json()) as APIResponse;
+
+  if (!response.ok) {
+    throw new Error(responseBody.message || "Failed to update risk");
+  }
+
+  return responseBody.data as AwardRecommendationRisk;
+};
+
 export const deleteAwardRecommendationRisk = async (
   awardRecommendationId: string,
   riskId: string,
@@ -125,6 +193,33 @@ export const deleteAwardRecommendationRisk = async (
     success: response.ok,
     message: responseBody.message,
   };
+};
+
+export const createAwardRecommendation = async (
+  opportunityId: string,
+  awardSelectionMethod: AwardSelectionMethod,
+): Promise<AwardRecommendationDetails> => {
+  const response = await fetchAwardRecommendationWithMethod("POST")({
+    subPath: "",
+    body: {
+      opportunity_id: opportunityId,
+      award_selection_method: awardSelectionMethod,
+      additional_info: null,
+      funding_strategy: null,
+      selection_method_detail: null,
+      other_key_information: null,
+    },
+  });
+
+  const responseBody = (await response.json()) as APIResponse;
+
+  if (!response.ok) {
+    throw new Error(
+      responseBody.message || "Failed to create award recommendation",
+    );
+  }
+
+  return responseBody.data as AwardRecommendationDetails;
 };
 
 export const updateAwardRecommendationSubmissionDetails = async (
