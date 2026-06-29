@@ -145,7 +145,7 @@ describe("AddRiskForm", () => {
   it("displays recommended tag for recommended submissions", () => {
     render(<AddRiskForm awardRecommendationId="test-award-id" />);
 
-    const tag = screen.getByText("recommendationType.recommended_for_funding");
+    const tag = screen.getByText("recommended");
     expect(tag).toBeInTheDocument();
     expect(tag).toHaveClass("bg-info-lighter");
   });
