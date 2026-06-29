@@ -100,7 +100,11 @@ CLAMD_LOG = "/tmp/clamd.log"
 # How long to wait for clamd to load the signature DB and start accepting
 # connections on a cold container. The load is bounded by EFS read throughput;
 # 120s leaves generous headroom under the Lambda timeout.
-CLAMD_STARTUP_TIMEOUT_SECONDS = int(os.environ.get("CLAMD_STARTUP_TIMEOUT_SECONDS", "120"))
+CLAMD_STARTUP_TIMEOUT_SECONDS = int(
+    os.environ.get("CLAMD_STARTUP_TIMEOUT_SECONDS", "120")
+)
+
+WARM_CLAMD_ON_INIT = os.environ.get("CLAMD_WARM_ON_INIT", "false").lower() == "true"
 
 # Guards clamd startup. A Lambda container only ever handles one invocation at
 # a time, so this is effectively uncontended — it just protects the global.
@@ -471,3 +475,10 @@ def _delete_object(bucket, key):
 
 def _log(payload):
     print(json.dumps(payload), flush=True)
+
+
+if WARM_CLAMD_ON_INIT:
+    try:
+        _ensure_clamd_running()
+    except Exception as err:  # noqa: BLE001 - init warm-up must not crash the container
+        _log({"outcome": "clamd_init_warmup_skipped", "error": str(err)})

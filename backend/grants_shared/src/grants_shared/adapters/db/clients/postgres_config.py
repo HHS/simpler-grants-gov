@@ -18,7 +18,6 @@ class PostgresDBConfig(PydanticBaseEnvConfig):
     hide_sql_parameter_logs: bool = Field(True, alias="HIDE_SQL_PARAMETER_LOGS")
     ssl_mode: str = Field("require", alias="DB_SSL_MODE")
 
-    # TODO - need to set on the API side for this to work
     all_db_schemas: str = Field(alias="ALL_DB_SCHEMAS")
 
     schema_prefix_override: str | None = Field(None)
@@ -28,7 +27,6 @@ class PostgresDBConfig(PydanticBaseEnvConfig):
         if self.schema_prefix_override is not None:
             prefix = self.schema_prefix_override
 
-        # TODO - test this
         schemas = self.all_db_schemas.split(",")
 
         return {schema: f"{prefix}{schema}" for schema in schemas}
