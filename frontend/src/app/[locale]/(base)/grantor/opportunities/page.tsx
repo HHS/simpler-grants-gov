@@ -362,7 +362,8 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   )
     ? selectedAgencyParam[0]
     : selectedAgencyParam;
-  const currentPage = Number(resolvedSearchParams.page) || 1;
+  const parsedPage = Number(resolvedSearchParams.page);
+  const currentPage = parsedPage > 0 ? parsedPage : 1;
 
   // A. Check the user's session
   const userSession = await getSession();
@@ -438,6 +439,15 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       }
       return <OpportunitiesErrorPage />;
     }
+  }
+
+  if (
+    agencyUserAcccess.canView &&
+    !userOpportunities.length &&
+    totalPages > 0 &&
+    currentPage > totalPages
+  ) {
+    redirect(`?agency=${selectedAgency.agency_id}&page=${totalPages}`);
   }
 
   // F. Render the page
