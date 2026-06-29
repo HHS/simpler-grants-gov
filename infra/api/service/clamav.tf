@@ -37,4 +37,6 @@ module "clamav" {
   dynamodb_write_policy_arn  = module.file_scan_cache.write_access_policy_arn
 
   newrelic_entity_guid = local.service_config.newrelic_host_entity_guid
+
+  scanner_provisioned_concurrency = local.service_config.scanner_provisioned_concurrency
 }
