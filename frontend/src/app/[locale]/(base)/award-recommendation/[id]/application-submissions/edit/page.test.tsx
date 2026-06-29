@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import EditRecommendationsPage, {
   generateMetadata,
+  dynamic,
 } from "src/app/[locale]/(base)/award-recommendation/[id]/application-submissions/edit/page";
 import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { LocalizedPageProps } from "src/types/intl";
@@ -321,8 +322,7 @@ describe("EditRecommendationsPage", () => {
 
   describe("dynamic export", () => {
     it("exports dynamic as force-dynamic", () => {
-      const pageModule = require("src/app/[locale]/(base)/award-recommendation/[id]/application-submissions/edit/page");
-      expect(pageModule.dynamic).toBe("force-dynamic");
+      expect(dynamic).toBe("force-dynamic");
     });
   });
 });
