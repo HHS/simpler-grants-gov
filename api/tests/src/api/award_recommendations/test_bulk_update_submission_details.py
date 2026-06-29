@@ -9,9 +9,7 @@ from src.constants.lookup_constants import (
     AwardRecommendationType,
     Privilege,
 )
-from src.db.models.award_recommendation_models import (
-    AwardRecommendationSubmissionDetail,
-)
+from src.db.models.award_recommendation_models import AwardRecommendationSubmissionDetail
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt
 from tests.src.db.models.factories import (
     AgencyFactory,
