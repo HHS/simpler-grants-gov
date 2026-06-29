@@ -87,18 +87,6 @@ export const SFLLL_REQUIRED_FIELD_ERRORS: FieldError[] = [
     message: "Address City is required",
   },
   {
-    fieldId: "reporting_entity--prime_reporting_entity--organization_name",
-    message: "Organization Name is required",
-  },
-  {
-    fieldId: "reporting_entity--prime_reporting_entity--address--street1",
-    message: "Address Street 1 is required",
-  },
-  {
-    fieldId: "reporting_entity--prime_reporting_entity--address--city",
-    message: "Address City is required",
-  },
-  {
     fieldId: "federal_agency_department",
     message: "Federal Department/Agency is required",
   },
@@ -111,28 +99,12 @@ export const SFLLL_REQUIRED_FIELD_ERRORS: FieldError[] = [
     message: "Name and Contact Information Last Name is required",
   },
   {
-    fieldId: "lobbying_registrant--address--street1",
-    message: "Address Street 1 is required",
-  },
-  {
-    fieldId: "lobbying_registrant--address--city",
-    message: "Address City is required",
-  },
-  {
     fieldId: "individual_performing_service--individual--first_name",
     message: "Name and Contact Information First Name is required",
   },
   {
     fieldId: "individual_performing_service--individual--last_name",
     message: "Name and Contact Information Last Name is required",
-  },
-  {
-    fieldId: "individual_performing_service--address--street1",
-    message: "Address Street 1 is required",
-  },
-  {
-    fieldId: "individual_performing_service--address--city",
-    message: "Address City is required",
   },
   {
     fieldId: "signature_block--name--first_name",

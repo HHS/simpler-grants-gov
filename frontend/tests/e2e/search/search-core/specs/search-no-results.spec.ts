@@ -9,11 +9,11 @@ import {
   generateRandomString,
   waitForURLContainsQueryParamValue,
 } from "tests/e2e/playwrightUtils";
+import { VALID_TAGS } from "tests/e2e/tags";
 import {
   fillSearchInputAndSubmit,
   waitForSearchResultsInitialLoad,
-} from "tests/e2e/search/searchSpecUtil";
-import { VALID_TAGS } from "tests/e2e/tags";
+} from "tests/e2e/utils/search/searchSpecUtil";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
 

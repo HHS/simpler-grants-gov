@@ -1,6 +1,6 @@
 import pytest
+from grants_shared.adapters.aws import S3Config
 
-from src.adapters.aws import S3Config
 from src.services.opportunity_attachments import attachment_util
 from tests.src.db.models.factories import OpportunityFactory
 

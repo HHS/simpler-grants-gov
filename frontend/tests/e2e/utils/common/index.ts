@@ -1,20 +1,21 @@
-// index.ts
-// Dispatches each page field to a handler by field type.
-// Usage: import { fieldHandlerDispatcher } from "tests/e2e/utils/common/index";
+/**
+ * Shared re-exports for common E2E helper modules.
+ * Usage: import { ... } from "tests/e2e/utils/common";
+ */
+import { formatNumberWithCommas } from "./number-formatters";
 
-import { checkboxHandler } from "./checkbox-handler";
-import { comboBoxInputHandler } from "./combo-box-input-handler";
-import { dropdownHandler } from "./dropdown-handler";
-import { fileHandler } from "./file-handler";
-import { radioButtonHandler } from "./radio-button-handler";
-import { textHandler } from "./text-handler";
-import { FieldHandler, FieldType } from "./types";
-
-export const fieldHandlerDispatcher: Record<FieldType, FieldHandler> = {
-  text: textHandler,
-  dropdown: dropdownHandler,
-  file: fileHandler,
-  radiobutton: radioButtonHandler,
-  checkbox: checkboxHandler,
-  "combo-box-input": comboBoxInputHandler,
-};
+export { fillEmailByLabel } from "./email-field";
+export { selectOptionByLabel } from "./select-field";
+export { fillDateByLabel } from "./date-field";
+export { assertButtonEnabledDisabledStates } from "./button-state-assertions";
+export { assertActionsColumnLinksByStatus } from "./actions-column-assertions";
+export {
+  assertPageHeadingAndTextsVisible,
+  assertPageDetailsVisible,
+  assertTextVisible,
+  assertTextsVisibleOnPage,
+} from "./visibility-assertions";
+export { formatNumberWithCommas };
+export { runSharedFieldFill } from "./shared-field-filling";
+export { runFieldFillBatch } from "./field-batch-filling";
+export { fieldHandlerMap } from "./field-handler-dispatcher";

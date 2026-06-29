@@ -1,8 +1,11 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from grants_shared.adapters.aws.ses_suppressed_email_adapter import (
+    MockSESV2Client,
+    SuppressedDestination,
+)
 
-from src.adapters.aws.sesv2_adapter import MockSESV2Client, SuppressedDestination
 from src.db.models.user_models import LinkExternalUser, SuppressedEmail
 from src.task.notifications.constants import Metrics
 from src.task.notifications.sync_suppressed_emails import SyncSuppressedEmailsTask

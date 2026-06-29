@@ -4,12 +4,12 @@ import uuid
 import grants_shared.adapters.db as db
 from grants_shared.api.response import ValidationErrorDetail
 from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.util import file_util
 from sqlalchemy import select
 
 from src.constants.lookup_constants import FileScanStatus
 from src.db.models.file_upload_models import PendingFile
 from src.db.models.user_models import User
-from src.util import file_util
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)

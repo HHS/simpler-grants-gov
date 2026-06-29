@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Callable
+from decimal import Decimal
 from typing import Any
 
 from grants_shared.util.datetime_util import get_now_us_eastern_date
@@ -183,6 +184,62 @@ def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
     return str(quantize_decimal(result))
 
 
+def _get_single_field_value(context: JsonRuleContext, json_rule: JsonRule, config_key: str) -> Any:
+    """Resolve a single value for a configured path on a rule.
+
+    The path is fetched the same way as sum_monetary's fields (absolute or
+    relative paths supported). A configured path is expected to point at a
+    single scalar value, so if it is missing we return None and if it happens
+    to resolve to multiple values we only use the first.
+    """
+    path = json_rule.rule.get(config_key)
+    if path is None:
+        raise ValueError(f"multiply_by_percentage requires a '{config_key}' path")
+
+    values = get_field_values(context.json_data, [path], json_rule.path)
+    if not values:
+        return None
+    return values[0]
+
+
+def multiply_by_percentage(context: JsonRuleContext, json_rule: JsonRule) -> str:
+    """Multiply a monetary amount by a whole-number percentage.
+
+    Config: ``{"amount": "<path>", "percentage": "<path>"}``, where amount is a
+    monetary string and percentage is an integer 0-100 (the ``percentage``
+    shared type). The percentage is whole-number, so N means N%: 1000 x 5 is
+    "50.00", not "5000.00".
+
+    Missing values are treated as zero; invalid data raises ValueError.
+    """
+    amount_value = _get_single_field_value(context, json_rule, "amount")
+    percentage_value = _get_single_field_value(context, json_rule, "percentage")
+
+    amount = convert_monetary_field(amount_value)
+    percentage = _convert_percentage(percentage_value)
+
+    result = amount * (percentage / Decimal(100))
+
+    return str(quantize_decimal(result))
+
+
+def _convert_percentage(value: Any) -> Decimal:
+    """Convert a whole-number percentage to a Decimal. Raises ValueError if invalid.
+
+    A missing value (None) is treated as 0. The value must be an integer (the
+    percentage shared type stores 5 for 5%); booleans and other types are
+    rejected since they are not valid percentages.
+    """
+    if value is None:
+        return ZERO_DECIMAL
+
+    # bool is a subclass of int, but True/False are not valid percentages.
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError("Percentage must be a whole-number integer")
+
+    return Decimal(value)
+
+
 def subtract_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
     """Subtract monetary amounts based on configuration
 
@@ -236,6 +293,7 @@ PRE_POPULATION_MAPPER: dict[str, population_func] = {
     "public_competition_id": get_public_competition_id,
     "competition_title": get_competition_title,
     "sum_monetary": sum_monetary_values,
+    "multiply_by_percentage": multiply_by_percentage,
     "subtract_monetary": subtract_monetary_values,
 }
 

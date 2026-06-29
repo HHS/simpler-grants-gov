@@ -469,26 +469,38 @@ class TestOpportunityNotification:
     def test_with_no_prior_version_email_collections_with_latest_version(
         self, db_session, user, set_env_var_for_email_notification_config, caplog, notification_task
     ):
-        """Test that no notification is created when a new version exists but no prior version exist"""
+        """Test that when a new version exists but no prior version predates last_notified_at:
+        - no email is sent (nothing to diff)
+        - last_notified_at is advanced to the latest version's created_at so the
+          next change produces a proper diff (self-healing for the save-before-versioning race)
+        """
+        base_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         opportunity = factories.OpportunityFactory.create(no_current_summary=True)
-        factories.UserSavedOpportunityFactory.create(
+        saved_opp = factories.UserSavedOpportunityFactory.create(
             user=user,
             opportunity=opportunity,
+            last_notified_at=base_time,
         )
-        factories.OpportunityVersionFactory.create(opportunity=opportunity)
+        # Version created after last_notified_at — triggers the notification check —
+        # but no version exists before last_notified_at, so opp.previous will be None.
+        latest_version = factories.OpportunityVersionFactory.create(
+            opportunity=opportunity, created_at=base_time + timedelta(minutes=30)
+        )
 
         results = notification_task.collect_email_notifications()
 
         assert len(results) == 0
-        # Verify the log contains the correct metrics
         log_records = [
             r
             for r in caplog.records
-            if "No previous version found for this opportunity"
-            and "No opportunities with prior versions for user" in r.message
+            if "No previous version found for this opportunity" in r.message
         ]
-
         assert len(log_records) == 1
+
+        # last_notified_at must advance to latest_version.created_at so that
+        # the next change has a valid baseline and the user is not silently skipped forever.
+        db_session.refresh(saved_opp)
+        assert saved_opp.last_notified_at == latest_version.created_at
 
     def test_no_updates_email_collections(
         self, db_session, user, set_env_var_for_email_notification_config, notification_task

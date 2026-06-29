@@ -2,11 +2,11 @@ import uuid
 from io import BytesIO
 from pathlib import Path
 
+import grants_shared.util.file_util as file_util
 import pytest
 import requests
 from sqlalchemy import select
 
-import src.util.file_util as file_util
 from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from src.db.models.competition_models import ApplicationAttachment
 from tests.lib.application_test_utils import create_user_in_app

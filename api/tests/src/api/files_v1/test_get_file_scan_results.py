@@ -3,9 +3,9 @@ import uuid
 
 import boto3
 import pytest
+from grants_shared.adapters.aws.dynamodb_adapter import DynamoDBClient
 
 import tests.src.db.models.factories as factories
-from src.adapters.aws.dynamodb_adapter import DynamoDBClient
 from src.constants.lookup_constants import FileScanStatus
 
 

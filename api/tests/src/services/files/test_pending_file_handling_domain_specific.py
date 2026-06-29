@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 from apiflask.exceptions import HTTPError
+from grants_shared.util import file_util
 
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import FileScanStatus
@@ -9,7 +10,6 @@ from src.services.files.pending_file_handling_domain_specific import (
     fetch_and_validate_scan_complete_file,
     move_pending_file_to_destination,
 )
-from src.util import file_util
 from tests.conftest import BaseTestClass
 
 
