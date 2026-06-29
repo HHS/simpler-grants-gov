@@ -2,13 +2,14 @@
 // Handles combo-box page fields using test ID and option-prefix properties.
 // Usage: import { comboBoxInputHandler } from "tests/e2e/utils/common/combo-box-input-handler";
 
-import { FieldHandler } from "./types";
+import { type Page } from "@playwright/test";
+
+import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 export const comboBoxInputHandler: FieldHandler = async (
-  testInfo,
-  page,
-  field,
-  data,
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
 ) => {
   if (!field.testId) {
     throw new Error(`Combo box field ${field.field} requires a testId`);
