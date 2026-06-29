@@ -192,16 +192,19 @@ def build_custom_filters(
             errors.append(f"customFilters.{key}: expected an array value")
             continue
 
-        if key == "applicantType":
-            values = []
-            for v in filt.value:
+        values = []
+        for v in filt.value:
+            if not isinstance(v, str):
+                errors.append(f"customFilters.{key}: invalid value {v}")
+                continue
+            if key == "applicantType":
                 native = APPLICANT_TYPE_FROM_CG.get(v)
                 if native is None:
                     errors.append(f"customFilters.{key}: unmappable value {v}")
                     continue
                 values.append(native)
-        else:
-            values = list(filt.value)
+            else:
+                values.append(v)
 
         if values:
             applied[native_field] = {"one_of": values}

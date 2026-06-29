@@ -1609,3 +1609,27 @@ def test_build_filter_info_reports_invalid_cost_sharing_via_request_path():
     )
     info = build_filter_info(filters)
     assert "customFilters.costSharing: invalid boolean value maybe" in info.errors
+
+
+def test_build_custom_filters_non_string_applicant_type_element_reported():
+    # DefaultFilter.value permits list-of-dict; a non-string element must be
+    # reported, not raise (the fail-soft contract).
+    applied, errors = build_custom_filters({"applicantType": _cf("in", [{}])})
+    assert applied == {}
+    assert errors == ["customFilters.applicantType: invalid value {}"]
+
+
+def test_build_custom_filters_non_string_array_element_reported():
+    applied, errors = build_custom_filters({"agency": _cf("in", ["USAID", 123])})
+    assert applied == {"agency": {"one_of": ["USAID"]}}
+    assert errors == ["customFilters.agency: invalid value 123"]
+
+
+def test_build_custom_filters_applies_valid_filter_when_other_key_invalid():
+    # Headline behavior: an unsupported key is reported but valid filters still apply.
+    # Invalid key first so a stray break (instead of continue) would drop the valid one.
+    applied, errors = build_custom_filters(
+        {"bogus": _cf("in", ["x"]), "agency": _cf("in", ["USAID"])}
+    )
+    assert applied == {"agency": {"one_of": ["USAID"]}}
+    assert errors == ["customFilters.bogus: unsupported filter"]
