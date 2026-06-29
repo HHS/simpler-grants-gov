@@ -1,8 +1,13 @@
+import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Link } from "@trussworks/react-uswds";
+
+import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
+import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
@@ -11,12 +16,29 @@ type PageProps = {
 async function OpportunityOverviewPage({ params }: PageProps) {
   const { id, locale } = await params;
   const t = await getTranslations({ locale, namespace: "OpportunityOverview" });
+  let opportunityData;
+  try {
+    const response = await getOpportunityForGrantor(id);
+    opportunityData = response.data;
+  } catch (error) {
+    const status = parseErrorStatus(error as ApiRequestError);
+    if (status === 404) {
+      notFound();
+    }
+    if (status === 403) {
+      return <UnauthorizedMessage />;
+    }
+    throw error;
+  }
   const editUrl = "../" + id + "/edit";
   const competitionUrl = "../" + id + "/competition";
 
   return (
     <div className="bg-white">
-      {/* PLACEHOLDER: header here */}
+      <OpportunityDetailsHeader
+        opportunityData={opportunityData}
+        locale={locale}
+      />
       <div className="grid-container padding-top-4 padding-bottom-4">
         <div className="grid-row grid-gap-2 padding-top-2">
           <div className="tablet:grid-col">
