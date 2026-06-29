@@ -45,7 +45,6 @@ from tests.src.db.models.factories import (
     OrganizationFactory,
     RoleFactory,
     StagingTcertificatesFactory,
-    get_db_session,
 )
 
 DEFAULT_VALUE = object()
