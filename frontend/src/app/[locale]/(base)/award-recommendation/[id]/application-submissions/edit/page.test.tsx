@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import EditRecommendationsPage, {
-  generateMetadata,
   dynamic,
+  generateMetadata,
 } from "src/app/[locale]/(base)/award-recommendation/[id]/application-submissions/edit/page";
 import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { LocalizedPageProps } from "src/types/intl";
@@ -60,30 +60,33 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
       )(props) as FunctionComponent<LocalizedPageProps>,
 }));
 
-jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => ({
-  __esModule: true,
-  default: ({
-    heading,
-    showDateAndStatus,
-    additionalBreadcrumbs,
-  }: {
-    heading: string;
-    showDateAndStatus: boolean;
-    additionalBreadcrumbs: Array<{ title: string; path: string }>;
-  }) => (
-    <div data-testid="award-recommendation-hero">
-      <div data-testid="hero-heading">{heading}</div>
-      <div data-testid="hero-show-date-status">
-        {showDateAndStatus.toString()}
-      </div>
-      {additionalBreadcrumbs.map((crumb, idx) => (
-        <div key={idx} data-testid={`breadcrumb-${idx}`}>
-          {crumb.title} - {crumb.path}
+jest.mock(
+  "src/components/award-recommendation/AwardRecommendationHero",
+  () => ({
+    __esModule: true,
+    default: ({
+      heading,
+      showDateAndStatus,
+      additionalBreadcrumbs,
+    }: {
+      heading: string;
+      showDateAndStatus: boolean;
+      additionalBreadcrumbs: Array<{ title: string; path: string }>;
+    }) => (
+      <div data-testid="award-recommendation-hero">
+        <div data-testid="hero-heading">{heading}</div>
+        <div data-testid="hero-show-date-status">
+          {showDateAndStatus.toString()}
         </div>
-      ))}
-    </div>
-  ),
-}));
+        {additionalBreadcrumbs.map((crumb, idx) => (
+          <div key={idx} data-testid={`breadcrumb-${idx}`}>
+            {crumb.title} - {crumb.path}
+          </div>
+        ))}
+      </div>
+    ),
+  }),
+);
 
 const mockGetAwardRecommendationDetails = jest
   .fn()
@@ -142,9 +145,7 @@ describe("EditRecommendationsPage", () => {
       expect(
         screen.getByTestId("award-recommendation-hero"),
       ).toBeInTheDocument();
-      expect(screen.getByTestId("hero-heading")).toHaveTextContent(
-        "heading",
-      );
+      expect(screen.getByTestId("hero-heading")).toHaveTextContent("heading");
       expect(screen.getByTestId("hero-show-date-status")).toHaveTextContent(
         "false",
       );
@@ -253,7 +254,9 @@ describe("EditRecommendationsPage", () => {
       });
       render(component);
 
-      expect(screen.getByText("errorHeadingAuthentication")).toBeInTheDocument();
+      expect(
+        screen.getByText("errorHeadingAuthentication"),
+      ).toBeInTheDocument();
       expect(screen.getByText("authenticationError")).toBeInTheDocument();
       consoleSpy.mockRestore();
     });

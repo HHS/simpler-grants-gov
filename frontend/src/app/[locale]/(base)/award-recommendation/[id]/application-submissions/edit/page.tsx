@@ -1,13 +1,12 @@
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Alert } from "@trussworks/react-uswds";
 
@@ -112,7 +111,7 @@ async function EditRecommendationsPageContent({
             },
           ]}
         />
-      </Suspense>    
+      </Suspense>
     </>
   );
 }
