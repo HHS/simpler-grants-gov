@@ -1,5 +1,6 @@
 import { validSearchQueryParamKeys } from "src/types/search/searchQueryTypes";
 import {
+  setNewRelicCorrelationIdAttribute,
   setNewRelicCustomAttribute,
   unsetAllNewRelicQueryAttributes,
   waitForNewRelic,
@@ -93,6 +94,31 @@ describe("unsetAllNewRelicQueryAttributes", () => {
     expect(mockSetCustomAttribute).toHaveBeenCalledWith(
       "search_param_query_length",
       0,
+    );
+  });
+});
+describe("setNewRelicCorrelationIdAttribute", () => {
+  afterEach(() => {
+    // eslint-disable-next-line
+    // @ts-ignore
+    window.newrelic = undefined;
+    jest.resetAllMocks();
+  });
+  it("does not attempt to call new relic if new relic does not exist", () => {
+    setNewRelicCorrelationIdAttribute("cid-value");
+    expect(mockSetCustomAttribute).not.toHaveBeenCalled();
+  });
+  it("sets the correlation_id custom attribute on New Relic", () => {
+    // eslint-disable-next-line
+    // @ts-ignore
+    window.newrelic = {
+      setCustomAttribute: mockSetCustomAttribute,
+    };
+
+    setNewRelicCorrelationIdAttribute("cid-value");
+    expect(mockSetCustomAttribute).toHaveBeenCalledWith(
+      "correlation_id",
+      "cid-value",
     );
   });
 });
