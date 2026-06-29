@@ -5,56 +5,80 @@ type RequiredFieldsMap = {
 };
 
 export const progressType = {
-  notStarted: "Not Started",
-  inProgress: "In Progress",
-  complete: "Complete", // NOT completed, which is not supported at this time
+  notStarted: "Not Started", // If all fields are null, undefined or have an empty string
+  inProgress: "In Progress", // If any of the fields contain a non-empty string or non-undefined value
+  complete: "Complete", // If all REQUIRED fields are provided
+  // completed is not supported at this time
 };
 
-// This function checks the dataToCheck for required fields listed
-// in the requiredFieldsJson and returns a progressType.
-export function checkProgress(
+// Recursively check for required fields
+function checkRequiredFields(
   requiredFields: RequiredFieldsMap,
   dataToCheck: Record<string, unknown>,
-) {
-  let requiredValuesFound = false;
+): boolean {
   let missingRequiredField = false;
   for (const [key, value] of Object.entries(requiredFields)) {
-    // console.log(`Key: ${key}, Value: ${value}, data: ${dataToCheck[key]}`);
-    if (!dataToCheck[key]) {
+    const dataValue = dataToCheck[key];
+    // console.log(`Key: ${key}, Value: ${value}, dataValue: ${dataValue}`);
+    if (
+      dataValue === undefined ||
+      dataValue === null ||
+      (typeof dataValue === "string" && dataValue.trim() === "")
+    ) {
       missingRequiredField = true;
+      break; // we only need to know that one required field is missing
+    } else if (typeof value !== "boolean") {
+      // Recursively check nested objects!
+      missingRequiredField = checkRequiredFields(
+        value,
+        dataToCheck[key] as Record<string, unknown>,
+      );
+      if (missingRequiredField) break;
+    }
+  }
+  return missingRequiredField;
+}
+// Recursively check the data for any values
+function checkDataValues(dataToCheck: Record<string, unknown>): boolean {
+  let dataValuesFound = false;
+  for (const value of Object.values(dataToCheck)) {
+    if (
+      value === undefined ||
+      value === null ||
+      (typeof value === "string" && value.trim() === "")
+    ) {
+      // Value not found
     } else {
-      if (typeof value === "boolean") {
-        requiredValuesFound = true;
-      } else {
+      // Value found
+      if (typeof value === "object" && !Array.isArray(value)) {
         // Recursively check nested objects!
-        const status = checkProgress(
-          value,
-          dataToCheck[key] as Record<string, unknown>,
-        );
-        if (status === progressType.notStarted) {
-          // don't update requiredValuesFound here
-          // it is already defaulted to false and other values may override it
-        }
-        if (status === progressType.inProgress) {
-          requiredValuesFound = true;
-          missingRequiredField = true;
-        }
-        if (status === progressType.complete) {
-          requiredValuesFound = true;
-          // don't update missingRequiredField here
-          // it is already defaulted to false and other values may override it
-        }
+        dataValuesFound = checkDataValues(value as Record<string, unknown>);
+        if (dataValuesFound) break;
+      } else {
+        dataValuesFound = true;
+        break; // we only need to know that progress has started
       }
     }
   }
-  if (!requiredValuesFound) return progressType.notStarted;
-  if (requiredValuesFound && missingRequiredField)
-    return progressType.inProgress;
-  if (requiredValuesFound && !missingRequiredField)
-    return progressType.complete;
+  return dataValuesFound;
 }
 
-// This function will return an HTML component after checking the progress
+// Check dataToCheck and return the appropriate progressType as defined above.
+export function getProgess(
+  requiredFields: RequiredFieldsMap,
+  dataToCheck: Record<string, unknown>,
+) {
+  const missingRequiredField = checkRequiredFields(requiredFields, dataToCheck);
+  const dataValuesFound = checkDataValues(dataToCheck);
+  // 'not started' if all fields are null, undefined or have an empty string
+  if (!dataValuesFound) return progressType.notStarted;
+  // 'complete' if all REQUIRED fields are provided
+  if (!missingRequiredField) return progressType.complete;
+  // 'in progress' if any of the fields contain a non-empty string or non-undefined value
+  return progressType.inProgress;
+}
+
+// This function will return an HTML component after checking the data entry progress
 export function ProgressChecker({
   requiredFields,
   dataToCheck,
@@ -63,7 +87,7 @@ export function ProgressChecker({
   dataToCheck: Record<string, unknown>;
 }) {
   const t = useTranslations("ProgressChecker");
-  const status = checkProgress(requiredFields, dataToCheck);
+  const status = getProgess(requiredFields, dataToCheck);
   return (
     <>
       {status === progressType.notStarted && (

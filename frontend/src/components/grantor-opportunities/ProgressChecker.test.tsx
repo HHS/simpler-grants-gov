@@ -5,11 +5,7 @@ import {
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
 
-import {
-  checkProgress,
-  ProgressChecker,
-  progressType,
-} from "./ProgressChecker";
+import { getProgess, ProgressChecker, progressType } from "./ProgressChecker";
 
 // These objects define the required fields
 const summaryRequiredFields = {
@@ -70,37 +66,29 @@ const summaryData: Summary = {
   version_number: null,
 };
 
-// Test the function on a single object
+// A. Test the function on a single object
 describe("checkProgress", () => {
   const opportunityData: Partial<BaseOpportunity> = {};
   it("is a function", () => {
-    expect(typeof checkProgress).toBe("function");
+    expect(typeof getProgess).toBe("function");
   });
 
   it("returns 'not started' if all fields do not have values", () => {
-    const status = checkProgress(
-      baseOpportunityRequiredFields,
-      opportunityData,
-    );
+    const status = getProgess(baseOpportunityRequiredFields, opportunityData);
     expect(status).toEqual(progressType.notStarted);
   });
-  it("returns 'not started' if all required fields do not have values", () => {
+
+  it("returns 'in progress' if some data has values", () => {
     opportunityData.category_explanation = "Some explanation here";
     opportunityData.top_level_agency_name = "Top Level Agency";
-    const status = checkProgress(
-      baseOpportunityRequiredFields,
-      opportunityData,
-    );
-    expect(status).toEqual(progressType.notStarted);
+    const status = getProgess(baseOpportunityRequiredFields, opportunityData);
+    expect(status).toEqual(progressType.inProgress);
   });
 
   it("returns 'in progress' if some required fields have values", () => {
     opportunityData.agency_code = "ABCD";
     opportunityData.category = "Discretionary";
-    const status = checkProgress(
-      baseOpportunityRequiredFields,
-      opportunityData,
-    );
+    const status = getProgess(baseOpportunityRequiredFields, opportunityData);
     expect(status).toEqual(progressType.inProgress);
   });
 
@@ -108,31 +96,36 @@ describe("checkProgress", () => {
     opportunityData.opportunity_assistance_listings = [testALN];
     opportunityData.opportunity_number = "DAO-TEST-001";
     opportunityData.opportunity_title = "Dao's Test 001";
-    const status = checkProgress(
-      baseOpportunityRequiredFields,
-      opportunityData,
-    );
+    const status = getProgess(baseOpportunityRequiredFields, opportunityData);
     expect(status).toEqual(progressType.complete);
   });
 });
 
 // Test the function with nested objects
 describe("checkProgress with nested objects", () => {
-  const opportunityWithSummaryData: Partial<BaseOpportunity> = {
-    summary: summaryData,
-  };
+  const opportunityWithSummaryData: Partial<BaseOpportunity> = {};
   it("nested objects: returns 'not started' if all required fields do not have values", () => {
-    const status = checkProgress(
+    const status = getProgess(
       opportunityWithSummaryRequiredFields,
       opportunityWithSummaryData,
     );
     expect(status).toEqual(progressType.notStarted);
   });
 
+  it("nested objects: returns 'in progress' if some fields have values", () => {
+    opportunityWithSummaryData.summary = summaryData;
+    summaryData.agency_email_address = "someone@somewhere.com";
+    const status = getProgess(
+      opportunityWithSummaryRequiredFields,
+      opportunityWithSummaryData,
+    );
+    expect(status).toEqual(progressType.inProgress);
+  });
+
   it("nested objects: returns 'in progress' if some required fields have values", () => {
     summaryData.funding_instruments = ["Grant"];
     summaryData.funding_categories = ["Other"];
-    const status = checkProgress(
+    const status = getProgess(
       opportunityWithSummaryRequiredFields,
       opportunityWithSummaryData,
     );
@@ -147,7 +140,7 @@ describe("checkProgress with nested objects", () => {
     opportunityWithSummaryData.opportunity_assistance_listings = [testALN];
     opportunityWithSummaryData.opportunity_number = "DAO-TEST-001";
     opportunityWithSummaryData.opportunity_title = "Dao's Test 001";
-    const status = checkProgress(
+    const status = getProgess(
       opportunityWithSummaryRequiredFields,
       opportunityWithSummaryData,
     );
