@@ -128,6 +128,19 @@ describe("AwardRecommendationHero", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders only the heading when no award recommendation details are provided", async () => {
+    const customHeading = "Award recommendations";
+    const component = await AwardRecommendationHero({
+      heading: customHeading,
+      showDateAndStatus: false,
+    });
+    render(component);
+
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent(customHeading);
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+  });
+
   it("shows date and status when showDateAndStatus is true", async () => {
     const component = await AwardRecommendationHero({
       awardRecommendationDetails: mockAwardRecommendationDetails,
