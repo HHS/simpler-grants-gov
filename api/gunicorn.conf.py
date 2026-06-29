@@ -15,7 +15,7 @@ from src.app_config import AppConfig
 
 app_config = AppConfig()
 
-bind = app_config.host + ':' + str(app_config.port)
+bind = app_config.host + ":" + str(app_config.port)
 # Calculates the number of usable cores and doubles it. Recommended number of workers per core is two.
 # https://docs.gunicorn.org/en/latest/design.html#how-many-workers
 # We use 'os.sched_getaffinity(pid)' not 'os.cpu_count()' because it returns only allowable CPUs.
@@ -24,6 +24,8 @@ bind = app_config.host + ':' + str(app_config.port)
 
 workers = (len(os.sched_getaffinity(0)) * 2) + 1
 threads = 4
+
+worker_class = "gthread"
 
 # Set keepalive higher than ALB idle timeout (120s) to prevent connection pool exhaustion.
 # When gunicorn's keepalive is lower than ALB's idle timeout, gunicorn closes connections

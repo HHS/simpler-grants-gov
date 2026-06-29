@@ -26,6 +26,8 @@ RUN rm -rf /api/.venv || true
 COPY src /api/src
 COPY newrelic.ini /api/newrelic.ini
 
+COPY gunicorn.conf.py /api/gunicorn.conf.py
+
 # Disable dev dependencies in UV sync
 ENV UV_NO_DEV=1
 # Compile python to *.pyc files for performance
@@ -135,4 +137,4 @@ ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
 # Run as the non-root user
 USER ${RUN_USER}
 
-CMD ["gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()", "--log-level", "debug", "--limit-request-field_size", "16384", "--limit-request-fields", "50"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "--worker-tmp-dir=/dev/shm", "src.app:create_app()", "--log-level", "debug", "--limit-request-field_size", "16384", "--limit-request-fields", "50"]
