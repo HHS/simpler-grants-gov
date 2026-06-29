@@ -29,8 +29,9 @@ from src.api.common_grants.schemas.pydantic.custom_fields import (
     FiscalYearField,
     LegacySerialIdField,
 )
-from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
+from src.constants.lookup_constants import ApplicantType, CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
+    APPLICANT_TYPE_FROM_CG,
     build_custom_filters,
     build_filter_info,
     build_money_range_filter,
@@ -1521,6 +1522,12 @@ def test_build_custom_filters_cost_sharing_boolean():
     assert errors == []
 
 
+def test_build_custom_filters_cost_sharing_invalid_value_reported():
+    applied, errors = build_custom_filters({"costSharing": _cf("eq", "maybe")})
+    assert applied == {}
+    assert errors == ["customFilters.costSharing: invalid boolean value maybe"]
+
+
 def test_build_custom_filters_unsupported_key_reported():
     applied, errors = build_custom_filters({"bogus": _cf("in", ["x"])})
     assert applied == {}
@@ -1545,6 +1552,12 @@ def test_build_custom_filters_none_is_noop():
     assert build_custom_filters(None) == ({}, [])
 
 
+def test_applicant_type_mapping_targets_are_valid_native_values():
+    valid = {e.value for e in ApplicantType}
+    unknown = set(APPLICANT_TYPE_FROM_CG.values()) - valid
+    assert unknown == set(), f"mapping targets not in ApplicantType enum: {unknown}"
+
+
 def test_transform_applies_custom_filters_into_v1():
     filters = OppFilters.model_validate(
         {"customFilters": {"agency": {"operator": "in", "value": ["USAID"]}}}
@@ -1561,3 +1574,38 @@ def test_build_filter_info_reports_unsupported_custom_filter():
     )
     info = build_filter_info(filters)
     assert "customFilters.bogus: unsupported filter" in info.errors
+
+
+def test_build_custom_filters_cost_sharing_unsupported_operator():
+    applied, errors = build_custom_filters({"costSharing": _cf("in", True)})
+    assert applied == {}
+    assert errors == ["customFilters.costSharing: unsupported operator in"]
+
+
+def test_build_custom_filters_array_key_unsupported_operator():
+    applied, errors = build_custom_filters({"agency": _cf("eq", ["USAID"])})
+    assert applied == {}
+    assert errors == ["customFilters.agency: unsupported operator eq"]
+
+
+def test_build_custom_filters_array_key_non_list_value():
+    applied, errors = build_custom_filters({"agency": _cf("in", "USAID")})
+    assert applied == {}
+    assert errors == ["customFilters.agency: expected an array value"]
+
+
+def test_build_custom_filters_cost_sharing_string_booleans():
+    assert build_custom_filters({"costSharing": _cf("eq", "true")})[0] == {
+        "is_cost_sharing": {"one_of": [True]}
+    }
+    assert build_custom_filters({"costSharing": _cf("eq", "false")})[0] == {
+        "is_cost_sharing": {"one_of": [False]}
+    }
+
+
+def test_build_filter_info_reports_invalid_cost_sharing_via_request_path():
+    filters = OppFilters.model_validate(
+        {"customFilters": {"costSharing": {"operator": "eq", "value": "maybe"}}}
+    )
+    info = build_filter_info(filters)
+    assert "customFilters.costSharing: invalid boolean value maybe" in info.errors

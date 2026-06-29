@@ -6,6 +6,7 @@ from datetime import date, datetime
 import grants_shared.util.datetime_util as datetime_util
 from common_grants_sdk.schemas.pydantic import (
     CustomField,
+    DefaultFilter,
     FilterInfo,
     Money,
     MoneyRangeFilter,
@@ -130,9 +131,31 @@ _CUSTOM_FILTER_NATIVE_FIELD = {
     "costSharing": "is_cost_sharing",
 }
 
+_TRUE_STRINGS = frozenset({"true", "t", "yes", "1"})
+_FALSE_STRINGS = frozenset({"false", "f", "no", "0"})
+
+
+def _coerce_cg_bool(value: object) -> bool | None:
+    """Coerce a costSharing value to bool, or None if unrecognized.
+
+    JSON booleans arrive as int 0/1 (the SDK value union has no bool member).
+    None lets the caller report the bad value instead of silently defaulting.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int) and value in (0, 1):
+        return bool(value)
+    if isinstance(value, str):
+        s = value.strip().lower()
+        if s in _TRUE_STRINGS:
+            return True
+        if s in _FALSE_STRINGS:
+            return False
+    return None
+
 
 def build_custom_filters(
-    custom_filters: dict | None,
+    custom_filters: dict[str, DefaultFilter] | None,
 ) -> tuple[dict, list[str]]:
     """Translate CommonGrants customFilters into native v1 filter entries.
 
@@ -154,10 +177,11 @@ def build_custom_filters(
             if filt.operator != "eq":
                 errors.append(f"customFilters.{key}: unsupported operator {filt.operator}")
                 continue
-            value = filt.value
-            if isinstance(value, str):  # tolerate string-encoded booleans
-                value = value.strip().lower() in ("true", "t", "yes", "1")
-            applied[native_field] = {"one_of": [bool(value)]}
+            parsed = _coerce_cg_bool(filt.value)
+            if parsed is None:
+                errors.append(f"customFilters.{key}: invalid boolean value {filt.value}")
+                continue
+            applied[native_field] = {"one_of": [parsed]}
             continue
 
         # string-array filters: agency, applicantType, fundingInstrument
@@ -688,6 +712,7 @@ def build_filter_info(filters: OppFilters | None) -> FilterInfo:
             applied_filters["maxAwardAmountRange"] = filters.max_award_amount_range.model_dump()
         if filters.custom_filters is not None:
             applied_filters["customFilters"] = filters.custom_filters
+            # errors only; the filters themselves are applied in transform_search_request_from_cg
             _, errors = build_custom_filters(filters.custom_filters)
 
     return FilterInfo(
