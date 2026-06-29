@@ -1,3 +1,4 @@
+import { AwardSelectionMethod } from "src/constants/awardRecommendation";
 import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 import {
   AwardRecommendationDetails,
@@ -125,6 +126,33 @@ export const deleteAwardRecommendationRisk = async (
     success: response.ok,
     message: responseBody.message,
   };
+};
+
+export const createAwardRecommendation = async (
+  opportunityId: string,
+  awardSelectionMethod: AwardSelectionMethod,
+): Promise<AwardRecommendationDetails> => {
+  const response = await fetchAwardRecommendationWithMethod("POST")({
+    subPath: "",
+    body: {
+      opportunity_id: opportunityId,
+      award_selection_method: awardSelectionMethod,
+      additional_info: null,
+      funding_strategy: null,
+      selection_method_detail: null,
+      other_key_information: null,
+    },
+  });
+
+  const responseBody = (await response.json()) as APIResponse;
+
+  if (!response.ok) {
+    throw new Error(
+      responseBody.message || "Failed to create award recommendation",
+    );
+  }
+
+  return responseBody.data as AwardRecommendationDetails;
 };
 
 export const updateAwardRecommendationSubmissionDetails = async (
