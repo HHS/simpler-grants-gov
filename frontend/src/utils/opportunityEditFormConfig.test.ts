@@ -40,6 +40,7 @@ function makeOpportunity(
     attachments: [],
     competitions: null,
     saved_to_organizations: [],
+    submitted_application_count: 0,
     summary: {
       close_date: "2026-06-01",
       is_forecast: false,

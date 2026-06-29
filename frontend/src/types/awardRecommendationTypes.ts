@@ -63,6 +63,8 @@ export type AwardRecommendationRisk = {
   award_recommendation_risk_id: string;
   award_recommendation_risk_number?: string;
   risk_number: number;
+  comment?: string;
+  award_recommendation_risk_type?: string;
   condition: string;
   condition_number?: string;
   award_recommendation_application_submission_ids: string[];
