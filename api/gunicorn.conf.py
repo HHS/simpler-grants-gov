@@ -25,6 +25,10 @@ bind = app_config.host + ":" + str(app_config.port)
 workers = (len(os.sched_getaffinity(0)) * 2) + 1
 threads = 4
 
+# Set the worker class explicitly. This is redundant: gunicorn already auto-promotes the
+# default 'sync' worker to 'gthread' whenever threads > 1. We state it
+# anyway so the concurrency model is obvious and doesn't silently revert to one-request-
+# per-worker 'sync' if the thread count is ever lowered to 1.
 worker_class = "gthread"
 
 # Set keepalive higher than ALB idle timeout (120s) to prevent connection pool exhaustion.
