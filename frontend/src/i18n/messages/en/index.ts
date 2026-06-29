@@ -279,20 +279,12 @@ export const messages = {
       navTitle: "On this page",
     },
     sections: {
-      keyInformation: "Key information",
       fundingDetails: "Funding details",
       eligibility: "Eligibility",
       additionalInformation: "Additional information",
       attachments: "Attachments",
     },
     labels: {
-      title: "Title",
-      agency: "Agency",
-      assistanceListings: "Assistance listings:",
-      opportunityNumber: "Opportunity number",
-      opportunityStage: "Opportunity stage",
-      awardSelectionMethod: "Award selection method",
-      awardSelectionMethodExplanation: "Award selection method explanation",
       fundingType: "Funding type",
       costSharing: "Cost sharing or matching requirements?",
       category: "Category",
@@ -321,8 +313,6 @@ export const messages = {
       eligibilityMiscellaneous: "Miscellaneous",
     },
     content: {
-      keyInformationIntro:
-        "Below is a summary of the key information for this opportunity. You can edit specific fields directly in this section.",
       fundingDetailsIntro:
         "Provide the financial structure of this opportunity. This includes the total funding available, expected number of awards, and critical dates for the application window.",
       eligibilityIntro:
@@ -2034,6 +2024,16 @@ export const messages = {
     breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
+    list: {
+      pageTitle: "Award recommendations",
+      pageHeading: "Award recommendations",
+      numAwardRecommendations:
+        "{num, plural, =1 {1 Award recommendation} other {# Award recommendations}}",
+      createRecommendationButton: "Create recommendation",
+      agencyNotAuthorized:
+        "You do not have access to this agency's award recommendations.",
+      noAgencies: "You are not associated with any agencies.",
+    },
     summary: {
       showDescription: "Show full description",
       hideSummaryDescription: "Hide full description",
