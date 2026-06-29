@@ -5,8 +5,8 @@ import AwardRecommendationsListPage, {
 } from "src/app/[locale]/(base)/award-recommendation/page";
 import { MissingAuthError } from "src/errors";
 import { LocalizedPageProps } from "src/types/intl";
-import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
+import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 
 import { FunctionComponent, ReactNode } from "react";
 
@@ -64,12 +64,15 @@ jest.mock(
   }),
 );
 
-jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => ({
-  __esModule: true,
-  default: ({ heading }: { heading?: string }) => (
-    <div data-testid="award-recommendation-hero">{heading}</div>
-  ),
-}));
+jest.mock(
+  "src/components/award-recommendation/AwardRecommendationHero",
+  () => ({
+    __esModule: true,
+    default: ({ heading }: { heading?: string }) => (
+      <div data-testid="award-recommendation-hero">{heading}</div>
+    ),
+  }),
+);
 
 const mockGetSession = jest.fn();
 const mockGetUserAgencies = jest.fn();
