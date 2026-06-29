@@ -4,6 +4,7 @@ import AwardRecommendationsListPage, {
   generateMetadata,
 } from "src/app/[locale]/(base)/award-recommendation/page";
 import { MissingAuthError } from "src/errors";
+import { UserSession } from "src/types/authTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
@@ -78,11 +79,12 @@ const mockGetSession = jest.fn();
 const mockGetUserAgencies = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
-  getSession: () => mockGetSession(),
+  getSession: () => mockGetSession() as Promise<UserSession | null>,
 }));
 
 jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
-  getUserAgencies: (userId: string) => mockGetUserAgencies(userId),
+  getUserAgencies: (userId: string) =>
+    mockGetUserAgencies(userId) as Promise<RelevantAgencyRecord[]>,
 }));
 
 const agencies: RelevantAgencyRecord[] = [
