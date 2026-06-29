@@ -2,6 +2,7 @@ import logging
 import os
 import uuid
 from os import path
+from types import SimpleNamespace
 
 import _pytest.monkeypatch
 import boto3
@@ -555,6 +556,36 @@ def file_scan_dynamodb_table(mock_dynamodb, monkeypatch):
     )
     monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
     return table_name
+
+
+@pytest.fixture
+def mock_dynamodb_and_s3(reset_aws_env_vars, monkeypatch):
+    """A single moto context whitelisting both dynamodb and s3.
+
+    The single-service ``mock_dynamodb`` / ``mock_s3`` fixtures each enter their
+    own ``moto.mock_aws`` context with a one-service whitelist, and the
+    innermost-entered context wins -- so they can't both be active at once.
+    Flows that touch both services (e.g. the file-scan-complete path: read the
+    dynamodb scan record, then presign/size the s3 object) need this combined
+    context instead.
+
+    Yields a namespace with ``table_name``, ``bucket``, and a ``dynamodb_client``
+    for seeding scan records.
+    """
+    table_name = "test-local-virus-scan"
+    bucket = "local-mock-public-bucket"
+    with moto.mock_aws(config={"core": {"service_whitelist": ["dynamodb", "s3"]}}):
+        dynamodb_client = boto3.client("dynamodb", region_name="us-east-1")
+        dynamodb_client.create_table(
+            TableName=table_name,
+            KeySchema=[{"AttributeName": "file_id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "file_id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+        monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
+        boto3.client("s3").create_bucket(Bucket=bucket)
+
+        yield SimpleNamespace(table_name=table_name, bucket=bucket, dynamodb_client=dynamodb_client)
 
 
 @pytest.fixture
