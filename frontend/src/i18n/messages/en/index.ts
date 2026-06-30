@@ -279,20 +279,12 @@ export const messages = {
       navTitle: "On this page",
     },
     sections: {
-      keyInformation: "Key information",
       fundingDetails: "Funding details",
       eligibility: "Eligibility",
       additionalInformation: "Additional information",
       attachments: "Attachments",
     },
     labels: {
-      title: "Title",
-      agency: "Agency",
-      assistanceListings: "Assistance listings:",
-      opportunityNumber: "Opportunity number",
-      opportunityStage: "Opportunity stage",
-      awardSelectionMethod: "Award selection method",
-      awardSelectionMethodExplanation: "Award selection method explanation",
       fundingType: "Funding type",
       costSharing: "Cost sharing or matching requirements?",
       category: "Category",
@@ -321,8 +313,6 @@ export const messages = {
       eligibilityMiscellaneous: "Miscellaneous",
     },
     content: {
-      keyInformationIntro:
-        "Below is a summary of the key information for this opportunity. You can edit specific fields directly in this section.",
       fundingDetailsIntro:
         "Provide the financial structure of this opportunity. This includes the total funding available, expected number of awards, and critical dates for the application window.",
       eligibilityIntro:
@@ -2034,6 +2024,16 @@ export const messages = {
     breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
+    list: {
+      pageTitle: "Award recommendations",
+      pageHeading: "Award recommendations",
+      numAwardRecommendations:
+        "{num, plural, =1 {1 Award recommendation} other {# Award recommendations}}",
+      createRecommendationButton: "Create recommendation",
+      agencyNotAuthorized:
+        "You do not have access to this agency's award recommendations.",
+      noAgencies: "You are not associated with any agencies.",
+    },
     summary: {
       showDescription: "Show full description",
       hideSummaryDescription: "Hide full description",
@@ -2069,6 +2069,13 @@ export const messages = {
     submissionEdit: {
       editTitle: "Edit {applicationSubmissionNumber}",
       viewOriginalApplication: "View original application",
+    },
+    editRecommendations: {
+      pageTitle: "Edit recommendations",
+      metaDescription: "Edit award recommendations for multiple applications",
+      heading: "Edit recommendations",
+      description:
+        "Select one or more applications to edit recommendations. Search by App #, program title, org name of UEI",
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -2159,6 +2166,8 @@ export const messages = {
       "You are not authenticated. Please sign in to view award recommendations.",
     awardRecommendationFetchError:
       "Error fetching award recommendation data. Please try refreshing the page.",
+    awardRecommendationNotFound:
+      "Award recommendation not found. Please check the ID and try again.",
     errorHeadingAwardRecommendationSubmission:
       "Error fetching application submission details",
     awardRecommendationSubmissionFetchError:
@@ -2508,19 +2517,24 @@ export const messages = {
     existingFiles: {
       savedOn: "Saved on",
       delete: "Delete",
+      deleteError: "File could not be deleted. Please try again.",
     },
     statusDisplay: {
       cancel: "Cancel",
       dismiss: "Dismiss",
       queued: "Queued",
-      uploading: "Uploading",
-      scanning: "Scanning",
-      success: "Success",
+      uploading: "Uploading...",
+      startingScan: "Upload complete. Starting security scan",
+      scanning: "Upload complete. Running security scan...",
+      scanComplete: "Scan complete",
+      success: "Success. File uploaded and scanned",
       error: "Error",
-      scanFail: "Scan failed",
-      uploadError: "Upload error",
-      scanError: "Scan error",
-      postUploadError: "Post upload error",
+      uploadError: "Upload failed",
+      scanError: "Error running security scan",
+      postUploadError: "Error processing file",
+      missingFileId: "Error: missing file id",
+      preUploadError: "Pre upload error",
+      infected: "Security scan failed. File infected",
     },
     deleteModal: {
       titleText: "Delete",

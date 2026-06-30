@@ -74,8 +74,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     return <UnauthorizedMessage />;
   }
 
-  const primaryAssistanceListing =
-    opportunityData.opportunity_assistance_listings[0];
   const activeSummary =
     opportunityData.forecast_summary ??
     opportunityData.non_forecast_summary ??
@@ -85,34 +83,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     attachments: [],
     summary: activeSummary,
   });
-  const stageLabels: Record<string, string> = {
-    archived: tEdit("header.stageArchived"),
-    closed: tEdit("header.stageClosed"),
-    forecasted: tEdit("header.stageForecasted"),
-    posted: tEdit("header.stagePosted"),
-  };
-  const opportunityStage = opportunityData.is_draft
-    ? tEdit("header.stageDraft")
-    : (() => {
-        const status = opportunityData.opportunity_status ?? "";
-        const label = stageLabels[status];
-        if (!label) {
-          throw new Error(`Unexpected opportunity status: ${status}`);
-        }
-        return label;
-      })();
-  const opportunityKeyInformation = {
-    title: opportunityData.opportunity_title || "",
-    agency: opportunityData.agency_name || opportunityData.agency_code || "",
-    assistanceListings:
-      primaryAssistanceListing?.assistance_listing_number || "",
-    opportunityNumber: opportunityData.opportunity_number || "",
-    opportunityStage,
-    awardSelectionMethod: opportunityData.category || "",
-    awardSelectionMethodExplanation: opportunityData.category_explanation || "",
-  };
   const navigationItems = [
-    { text: tEdit("sections.keyInformation"), href: "key-information" },
     { text: tEdit("sections.fundingDetails"), href: "funding-details" },
     { text: tEdit("sections.eligibility"), href: "eligibility" },
     {
@@ -143,7 +114,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
               initialValues={initialValues}
               isDraft={!!opportunityData.is_draft}
               initialAttachments={opportunityData.attachments ?? []}
-              opportunityKeyInformation={opportunityKeyInformation}
               isNewlyCreated={isNewlyCreated}
               saveLabel={tEdit("header.saveButton")}
               previewLabel={tEdit("header.previewButton")}
