@@ -39,4 +39,5 @@ class AuthHandler(AbstractAuthHandler):
 
     def create_user_with_external_link(self, external_user_id: str): ...
 
-    def get_user_for_external_link(self, external_user): ...
+    def get_user_for_external_link(self, external_user):
+        return external_user.user

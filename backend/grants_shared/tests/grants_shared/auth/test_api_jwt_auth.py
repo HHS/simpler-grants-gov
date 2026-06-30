@@ -11,18 +11,6 @@ from tests.grants_shared.db_test_models.db_test_models import UserTokenSession
 from tests.grants_shared.test_utils.auth_handler import AuthHandler
 
 
-def get_auth_handler(db_session):
-    return AuthHandler(db_session)
-
-
-def create_jwt_for_user(user, db_session, config, email=None):
-    return JwtAuth(get_auth_handler(db_session), config).create_jwt_for_user(user, email)
-
-
-def parse_jwt_for_user(token, db_session, config):
-    return JwtAuth(get_auth_handler(db_session), config).parse_jwt_for_user(token)
-
-
 @pytest.fixture
 def jwt_config(private_rsa_key, public_rsa_key):
     return ApiJwtConfig(
@@ -35,7 +23,9 @@ def jwt_config(private_rsa_key, public_rsa_key):
 def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
     user = UserFactory.create()
     linked_external_user = LinkExternalUserFactory.create(user=user)
-    token, token_session = create_jwt_for_user(user, db_session, jwt_config)
+    token, token_session = JwtAuth(AuthHandler(db_session), jwt_config).create_jwt_for_user(
+        user, None
+    )
     decoded_token = jwt.decode(
         token, algorithms=[jwt_config.algorithm], options={"verify_signature": False}
     )
@@ -50,9 +40,9 @@ def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
     assert decoded_token["iss"] == jwt_config.issuer
     assert decoded_token["aud"] == jwt_config.audience
 
-    token_with_email, _ = create_jwt_for_user(
-        user, db_session, jwt_config, email=linked_external_user.email
-    )
+    token_with_email, token_session = JwtAuth(
+        AuthHandler(db_session), jwt_config
+    ).create_jwt_for_user(user, linked_external_user.email)
     decoded_token_with_email = jwt.decode(
         token_with_email, algorithms=[jwt_config.algorithm], options={"verify_signature": False}
     )
@@ -71,5 +61,19 @@ def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
     assert token_session.expires_at == datetime.fromisoformat("2024-11-14 12:30:00+00:00")
 
     # Basic testing that the JWT we create for a user can in turn be fetched and processed later
-    user_session = parse_jwt_for_user(token, db_session, jwt_config)
+    user_session = JwtAuth(AuthHandler(db_session), jwt_config).parse_jwt_for_user(token)
     assert user_session.user_id == user.user_id
+
+
+# TODO: Unit tests that need to be added:
+# * JwtAuth.parse_jwt_for_user succeeds
+# * JwtAuth.parse_jwt_for_user fails when token is not yet valid
+# * JwtAuth.parse_jwt_for_user fails when token has unknown issuer
+# * JwtAuth.parse_jwt_for_user fails when token has unknown audience
+# * JwtAuth.parse_jwt_for_user fails when unable to process token
+# * JwtAuth.parse_jwt_for_user fails when token is missing sub field
+# * JwtAuth.parse_jwt_for_user fails when token session is none
+# * JwtAuth.parse_jwt_for_user fails when token is expired
+# * JwtAuth.parse_jwt_for_user fails when token is no longer valid
+# * refresh_token_experience succeeds
+# * refresh_token_experience handles a config of None

@@ -179,10 +179,6 @@ class LinkFriendType(OtherSchemaTable, TimestampMixin):
     )
 
 
-class ExternalUserType(StrEnum):
-    LOGIN_GOV = "login_gov"
-
-
 class User(BaseUser, OtherSchemaTable, TimestampMixin):
     __tablename__ = "user"
 
@@ -190,7 +186,6 @@ class User(BaseUser, OtherSchemaTable, TimestampMixin):
         "LinkExternalUser",
         primaryjoin=lambda: and_(
             LinkExternalUser.user_id == User.user_id,
-            # LinkExternalUser.external_user_type == ExternalUserType.LOGIN_GOV,
         ),
         uselist=False,
         viewonly=True,
