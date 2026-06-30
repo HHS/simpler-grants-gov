@@ -2070,6 +2070,13 @@ export const messages = {
       editTitle: "Edit {applicationSubmissionNumber}",
       viewOriginalApplication: "View original application",
     },
+    editRecommendations: {
+      pageTitle: "Edit recommendations",
+      metaDescription: "Edit award recommendations for multiple applications",
+      heading: "Edit recommendations",
+      description:
+        "Select one or more applications to edit recommendations. Search by App #, program title, org name of UEI",
+    },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
     description: "Award Recommendation flow coming soon.",
@@ -2159,6 +2166,8 @@ export const messages = {
       "You are not authenticated. Please sign in to view award recommendations.",
     awardRecommendationFetchError:
       "Error fetching award recommendation data. Please try refreshing the page.",
+    awardRecommendationNotFound:
+      "Award recommendation not found. Please check the ID and try again.",
     errorHeadingAwardRecommendationSubmission:
       "Error fetching application submission details",
     awardRecommendationSubmissionFetchError:
