@@ -314,7 +314,7 @@ The only impact on our system at this state will be that we've generated a row i
 
 ## How do I test with an infected file?
 
-[!CAUTION]
+> [!CAUTION]
 > Although this file is not actually infected, it will trigger
 > all virus scanners. It is probable that you can trigger virus scanners
 > on your own machine, or that are administered by your IT department.
@@ -322,7 +322,7 @@ The only impact on our system at this state will be that we've generated a row i
 Our virus scanner will trigger for [EICAR](https://www.eicar.org/download-anti-malware-testfile/) files
 which are standard files that will trip the virus scanner.
 
-[!CAUTION]
+> [!CAUTION]
 > Reiterating the warning above, you will probably trigger any virus scanners that your IT department has setup.
 > Speaking from experience, it might be a good idea to give them a heads up to avoid any concerned emails.
 
