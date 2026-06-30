@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from grants_shared.db.models.base import TimestampMixin
+from grants_shared.util.file_util import pre_sign_file_location
 from sqlalchemy import ForeignKey, Numeric, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -30,7 +31,6 @@ from src.db.models.lookup_models import (
     LkAwardSelectionMethod,
 )
 from src.db.models.user_models import User
-from src.util.file_util import pre_sign_file_location
 
 if TYPE_CHECKING:
     from src.db.models.competition_models import ApplicationSubmission

@@ -2,6 +2,7 @@ import logging
 import os
 import uuid
 from os import path
+from types import SimpleNamespace
 
 import _pytest.monkeypatch
 import boto3
@@ -12,6 +13,7 @@ import pytest
 from apiflask import APIFlask
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from grants_shared.adapters.aws import S3Config
 from grants_shared.util.local import load_local_env_vars
 from moto.core import DEFAULT_ACCOUNT_ID
 from moto.ses.models import ses_backends
@@ -21,7 +23,6 @@ import src.app as app_entry
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
 from src.adapters import search
-from src.adapters.aws import S3Config
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.adapters.search import SearchClient
 from src.auth.api_jwt_auth import create_jwt_for_user
@@ -29,6 +30,7 @@ from src.constants.lookup_constants import Privilege, RoleType
 from src.constants.schema import Schemas
 from src.constants.static_role_values import NAVA_INTERNAL_ROLE
 from src.db import models
+from src.db.models.competition_models import Form as FormModel
 from src.db.models.competition_models import FormInstruction
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
@@ -36,6 +38,7 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
+from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
     init_workflow_client_registry,
@@ -458,7 +461,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.delenv("AWS_SQS_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("AWS_DYNAMODB_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("CDN_URL", raising=False)
-    monkeypatch.setattr("src.adapters.aws.aws_session._aws_config", None)
+    monkeypatch.setattr("grants_shared.adapters.aws.aws_session._aws_config", None)
 
 
 @pytest.fixture
@@ -553,6 +556,36 @@ def file_scan_dynamodb_table(mock_dynamodb, monkeypatch):
     )
     monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
     return table_name
+
+
+@pytest.fixture
+def mock_dynamodb_and_s3(reset_aws_env_vars, monkeypatch):
+    """A single moto context whitelisting both dynamodb and s3.
+
+    The single-service ``mock_dynamodb`` / ``mock_s3`` fixtures each enter their
+    own ``moto.mock_aws`` context with a one-service whitelist, and the
+    innermost-entered context wins -- so they can't both be active at once.
+    Flows that touch both services (e.g. the file-scan-complete path: read the
+    dynamodb scan record, then presign/size the s3 object) need this combined
+    context instead.
+
+    Yields a namespace with ``table_name``, ``bucket``, and a ``dynamodb_client``
+    for seeding scan records.
+    """
+    table_name = "test-local-virus-scan"
+    bucket = "local-mock-public-bucket"
+    with moto.mock_aws(config={"core": {"service_whitelist": ["dynamodb", "s3"]}}):
+        dynamodb_client = boto3.client("dynamodb", region_name="us-east-1")
+        dynamodb_client.create_table(
+            TableName=table_name,
+            KeySchema=[{"AttributeName": "file_id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "file_id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+        monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
+        boto3.client("s3").create_bucket(Bucket=bucket)
+
+        yield SimpleNamespace(table_name=table_name, bucket=bucket, dynamodb_client=dynamodb_client)
 
 
 @pytest.fixture
@@ -741,6 +774,39 @@ def seed_form_registry(load_active_forms) -> None:
     factories._seed_form_registry_active = True
     yield
     factories._seed_form_registry_active = False
+
+
+@pytest.fixture
+def create_test_form(db_session):
+    """Factory fixture for custom-schema test forms with automatic registry cleanup."""
+    init_form_registry()
+    registered_keys = []
+
+    def _make(
+        form_name: str = "Test Form",
+        form_json_schema: dict | None = None,
+        form_rule_schema: dict | None = None,
+        **kwargs,
+    ) -> FormModel:
+        form = FormModel(
+            form_id=uuid.uuid4(),
+            form_name=form_name,
+            short_form_name=kwargs.get("short_form_name", "TestForm"),
+            form_version=kwargs.get("form_version", "1.0"),
+            agency_code="SGG",
+            form_json_schema=form_json_schema or {"type": "object", "properties": {}},
+            form_ui_schema={},
+            form_rule_schema=form_rule_schema,
+            json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
+        )
+        form_template_registry.register(form, major_version=1)
+        registered_keys.append(FormTemplateKey(form.form_id, 1))
+        return form
+
+    yield _make
+
+    for key in registered_keys:
+        form_template_registry._registry.pop(key, None)
 
 
 @pytest.fixture

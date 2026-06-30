@@ -4,13 +4,13 @@ from uuid import UUID
 import flask
 from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
+from grants_shared.api import response
+from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from grants_shared.util.dict_util import flatten_dict
 
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.adapters import search
-from src.api import response
-from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (

@@ -10,6 +10,7 @@ import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
 from flask import Response
 from flask_cors import CORS
+from grants_shared.api.response import restructure_error_response
 from grants_shared.api.schemas import response_schema
 from grants_shared.util.local import error_if_not_local
 from pydantic import Field
@@ -26,6 +27,7 @@ from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.files_v1 import file_blueprint as files_v1_blueprint
 from src.api.form_alpha import form_blueprint
+from src.api.form_v1 import form_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
@@ -34,7 +36,6 @@ from src.api.opportunities_grantor_v1 import (
 )
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
-from src.api.response import restructure_error_response
 from src.api.users.user_blueprint import user_blueprint
 from src.api.workflows import workflow_blueprint
 from src.app_config import AppConfig
@@ -204,6 +205,7 @@ def register_blueprints(app: APIFlask) -> None:
     # Endpoints for apply functionality
     app.register_blueprint(application_blueprint)
     app.register_blueprint(form_blueprint)
+    app.register_blueprint(form_v1_blueprint)
     app.register_blueprint(competition_blueprint)
 
     if endpoint_config.enable_award_recommendation_endpoints:

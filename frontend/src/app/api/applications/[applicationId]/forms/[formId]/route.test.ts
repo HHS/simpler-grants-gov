@@ -3,7 +3,6 @@
  */
 import { updateApplicationIncludeFormInSubmissionHandler } from "src/app/api/applications/[applicationId]/forms/[formId]/handler";
 
-const getSessionMock = jest.fn();
 const mockUpdateApplicationFormIncludeInSubmission = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/applicationFetcher", () => ({
@@ -17,10 +16,6 @@ jest.mock("src/services/fetch/fetchers/applicationFetcher", () => ({
       formId,
       is_included_in_submission,
     ) as unknown,
-}));
-
-jest.mock("src/services/auth/session", () => ({
-  getSession: (): unknown => getSessionMock(),
 }));
 
 describe("PUT request", () => {
@@ -39,7 +34,6 @@ describe("PUT request", () => {
   });
 
   it("returns success response when update is successful", async () => {
-    getSessionMock.mockResolvedValue({ token: "token123" });
     mockUpdateApplicationFormIncludeInSubmission.mockResolvedValue({
       status_code: 200,
       data: {
@@ -54,7 +48,6 @@ describe("PUT request", () => {
     );
     const json = (await response.json()) as unknown;
 
-    expect(getSessionMock).toHaveBeenCalled();
     expect(mockUpdateApplicationFormIncludeInSubmission).toHaveBeenCalledWith(
       "app123",
       "form456",
@@ -68,25 +61,7 @@ describe("PUT request", () => {
     });
   });
 
-  it("throws UnauthorizedError if no session token", async () => {
-    getSessionMock.mockResolvedValue(null);
-
-    const req = mockRequest({ is_included_in_submission: false });
-    const response = await updateApplicationIncludeFormInSubmissionHandler(
-      req,
-      { params: mockParams },
-    );
-    const json = (await response.json()) as { message: string };
-
-    expect(response.status).toBe(401);
-    expect(json.message).toMatch(
-      /No active session to update including form in application submission/,
-    );
-    expect(getSessionMock).toHaveBeenCalled();
-  });
-
   it("returns error if API response is not 200", async () => {
-    getSessionMock.mockResolvedValue({ token: "token123" });
     mockUpdateApplicationFormIncludeInSubmission.mockResolvedValue({
       status_code: 400,
       message: "Invalid update",

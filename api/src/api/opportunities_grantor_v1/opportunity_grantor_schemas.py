@@ -2,8 +2,9 @@ from datetime import timedelta
 
 from grants_shared.api.schemas.extension import Schema, fields, validators
 from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from grants_shared.api.schemas.search_schema import BoolSearchSchemaBuilder
+from grants_shared.pagination.pagination_schema import generate_pagination_schema
 from marshmallow import ValidationError, validates_schema
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
@@ -12,7 +13,6 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySummaryV1Schema,
     OpportunityV1Schema,
 )
-from src.api.schemas.response_schema import PaginationMixinSchema
 from src.constants.lookup_constants import (
     ApplicantType,
     CompetitionOpenToApplicant,
@@ -20,7 +20,6 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     OpportunityCategory,
 )
-from src.pagination.pagination_schema import generate_pagination_schema
 from src.validation.validation_constants import ValidationErrorType
 
 
@@ -151,6 +150,8 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
         fields.Nested(CompetitionAlphaSchema),
         metadata={"description": "List of competitions associated with the opportunity"},
     )
+
+    submitted_application_count = fields.Integer(dump_only=True)
 
 
 class OpportunityUpdateRequestSchema(Schema):

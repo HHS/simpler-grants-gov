@@ -75,9 +75,12 @@ export type WidgetTypes =
   | "Budget424aSectionD"
   | "Budget424aSectionE"
   | "Budget424aSectionF"
-  | "FieldList";
+  | "FieldList"
+  | "Table";
 
 type PropertyPath = `/properties/${string}`;
+
+export type DefinitionPath = PropertyPath | PropertyPath[];
 
 /**
  * Props passed to the FieldList widget.
@@ -104,6 +107,12 @@ type PropertyPath = `/properties/${string}`;
  *   The FieldList field name. Used to derive the base field path
  *   (e.g. $.fieldListName) for mapping validation warnings to the list.
  *
+ * additionalDescribedById
+ *   Optional accessibility identifier used to associate widgets rendered
+ *   inside a FieldList entry with that entry's heading. This allows
+ *   assistive technologies to announce both the field label and the
+ *   entry context (for example "Street 1, Additional Location 3").
+ *
  * groupDefinition
  *   Describes the fields that appear in each repeatable row.
  *
@@ -111,8 +120,8 @@ type PropertyPath = `/properties/${string}`;
  *   The current array of row values for the FieldList.
  *
  * minItems / maxItems
- *   Optional constraints for the number of rows allowed in the list.
- *   Used for validation and future control of add/remove behavior.
+ *   Constraints controlling the minimum and maximum number of entries
+ *   that can be rendered and submitted.
  *
  * rawErrors / requiredFields
  *   Validation information passed down from the form engine.
@@ -140,6 +149,7 @@ export type FieldListWidgetProps = {
   };
   label: string;
   description?: string;
+  additionalDescribedById?: string;
   name: string;
   minItems?: number;
   minItemsHeading?: string;
@@ -172,19 +182,88 @@ export type FieldListWidgetProps = {
   };
 };
 
-export type FieldListChildWidgetTypes = Exclude<WidgetTypes, "FieldList">;
+export type FieldListChildWidgetTypes = Exclude<
+  WidgetTypes,
+  "FieldList" | "Table"
+>;
 
+/**
+ * Configuration for a single child field rendered within a FieldList entry.
+ *
+ * baseId
+ *   Template id containing the entry index placeholder. The placeholder
+ *   is replaced at render time with the actual entry index.
+ *
+ * storagePath
+ *   Path used to read and write values within the entry object. Supports
+ *   nested object structures such as:
+ *
+ *     address.street1
+ *     address.city
+ *     address.country
+ */
 export type FieldListGroupItem = {
   widget: FieldListChildWidgetTypes;
   generalProps: Omit<UswdsWidgetProps, "id" | "value" | "key">;
   baseId: string;
   definition: string;
+  storagePath: string[];
 };
 
-export type DefinitionPath = PropertyPath | PropertyPath[];
+export type UiSchemaTableCellType = "input" | "readOnly" | "plainText";
 
-export type UiSchemaField = {
-  type: "field" | "multiField" | "null";
+export type UiSchemaTableColumn = {
+  columnHeader: string;
+
+  /**
+   * Optional column width as a percentage.
+   * Configured column widths cannot total more than 100.
+   */
+  width?: number;
+};
+
+export type UiSchemaTableCell =
+  | {
+      type: "input" | "readOnly";
+      definition: PropertyPath;
+      staticContent?: undefined;
+    }
+  | {
+      type: "plainText";
+      staticContent: string;
+      definition?: undefined;
+    };
+
+export type UiSchemaTableRow = {
+  /**
+   * Human-readable row heading displayed by the table renderer.
+   */
+  rowHeader: string;
+
+  /**
+   * Cell position determines its column. Every row must contain the same
+   * number of cells as the table has columns.
+   */
+  cells: UiSchemaTableCell[];
+};
+
+export type UiSchemaTableConfig = {
+  columns: UiSchemaTableColumn[];
+  rows: UiSchemaTableRow[];
+};
+
+export type TableWidgetProps = {
+  id: string;
+  key: string;
+  name: string;
+  label?: string;
+  description?: string;
+  columns: UiSchemaTableColumn[];
+  rows: UiSchemaTableRow[];
+};
+
+type UiSchemaBasicField = {
+  type: "field" | "null";
   widget?: WidgetTypes;
   name?: string;
 } & (
@@ -199,6 +278,40 @@ export type UiSchemaField = {
     }
 );
 
+/**
+ * Existing specialized multiField widgets retain their flat definition array.
+ * Table derives its definitions from definition-backed cells in `table`.
+ */
+type UiSchemaMultiField = {
+  type: "multiField";
+  widget?: Exclude<WidgetTypes, "Table">;
+  name?: string;
+} & (
+  | {
+      definition: DefinitionPath;
+      schema?: undefined;
+    }
+  | { schema: SchemaField; definition?: undefined }
+  | {
+      definition: DefinitionPath;
+      schema: SchemaField;
+    }
+);
+
+export type UiSchemaTableMultiField = {
+  type: "multiField";
+  widget: "Table";
+  name: string;
+  table: UiSchemaTableConfig;
+  definition?: undefined;
+  schema?: undefined;
+};
+
+export type UiSchemaField =
+  | UiSchemaBasicField
+  | UiSchemaMultiField
+  | UiSchemaTableMultiField;
+
 export interface UiSchemaSection {
   type: "section";
   label: string;
@@ -207,6 +320,10 @@ export interface UiSchemaSection {
   description?: string;
 }
 
+/**
+ * Optional accessibility identifier applied to widgets rendered within
+ * each FieldList entry so child inputs can reference their entry heading.
+ */
 export interface UiSchemaFieldList {
   type: "fieldList";
   label: string;
@@ -216,10 +333,12 @@ export interface UiSchemaFieldList {
   maxItemsHelperText?: string;
   name: string;
   description?: string;
-  children: UiSchemaField[];
+  additionalDescribedById?: string;
+  children: Exclude<UiSchemaField, UiSchemaTableMultiField>[];
 }
 
 export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;
+
 export type UiSchema = UiSchemaNode[];
 
 export type TextTypes =
@@ -265,6 +384,7 @@ export interface UswdsWidgetProps<
     enumDisabled?: unknown;
     emptyValue?: string | undefined;
   };
+  additionalDescribedById?: string;
   formClassName?: string;
   inputClassName?: string;
   hideLabel?: boolean;

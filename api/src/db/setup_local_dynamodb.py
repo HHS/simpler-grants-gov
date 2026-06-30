@@ -2,9 +2,8 @@ import logging
 
 import boto3
 import grants_shared.logs
+from grants_shared.adapters.aws.dynamodb_adapter import DynamoDBConfig
 from grants_shared.util.local import error_if_not_local
-
-from src.adapters.aws.dynamodb_adapter import DynamoDBConfig
 
 logger = logging.getLogger(__name__)
 

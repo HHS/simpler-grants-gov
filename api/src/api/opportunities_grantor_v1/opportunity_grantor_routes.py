@@ -3,10 +3,10 @@ from uuid import UUID
 
 import grants_shared.adapters.db as db
 import grants_shared.adapters.db.flask_db as flask_db
+import grants_shared.api.response as response
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 import src.api.opportunities_grantor_v1.opportunity_grantor_schemas as opportunity_grantor_schemas
-import src.api.response as response
 from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
     opportunity_grantor_blueprint,
 )
@@ -16,6 +16,7 @@ from src.services.opportunities_grantor_v1.competition_update import update_comp
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 from src.services.opportunities_grantor_v1.get_opportunity_list import (
     get_opportunity_list_for_grantors,
+    get_opportunity_list_for_user,
 )
 from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
 from src.services.opportunities_grantor_v1.opportunity_summaries import (
@@ -76,6 +77,29 @@ def opportunity_get_list_by_agency(
         opportunities, pagination_info = get_opportunity_list_for_grantors(
             db_session, user, agency_id, json_data
         )
+
+    return response.ApiResponse(
+        message="Success", data=opportunities, pagination_info=pagination_info
+    )
+
+
+@opportunity_grantor_blueprint.post("/opportunities/list")
+@opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.OpportunityListRequestSchema, location="json"
+)
+@opportunity_grantor_blueprint.output(opportunity_grantor_schemas.OpportunityListResponseSchema())
+@opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_grantor_blueprint.doc(responses=[200, 403, 500])
+@flask_db.with_db_session()
+def opportunity_get_list_for_user(db_session: db.Session, json_data: dict) -> response.ApiResponse:
+    """Get paginated list of opportunities for agencies the user can access"""
+    logger.info("POST /v1/grantors/opportunities")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        opportunities, pagination_info = get_opportunity_list_for_user(db_session, user, json_data)
 
     return response.ApiResponse(
         message="Success", data=opportunities, pagination_info=pagination_info

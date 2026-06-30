@@ -6,12 +6,12 @@ from datetime import date, timedelta
 from enum import StrEnum
 
 import grants_shared.adapters.db as db
+from grants_shared.util import file_util
 from sqlalchemy import select
 
 from src.constants.lookup_constants import SamGovProcessingStatus
 from src.db.models.sam_extract_models import SamExtractFile
 from src.task.task import Task
-from src.util import file_util
 
 logger = logging.getLogger(__name__)
 

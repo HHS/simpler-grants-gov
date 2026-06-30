@@ -76,6 +76,134 @@ describe("validateFormData", () => {
       expect(schemaErrors).toBeFalsy();
     });
 
+    it("should validate a Table multiField UI schema", () => {
+      const validUiSchema: UiSchema = [
+        {
+          type: "section",
+          name: "table_demo",
+          label: "Table Demo",
+          children: [
+            {
+              type: "multiField",
+              name: "summary_table",
+              widget: "Table",
+              table: {
+                columns: [
+                  {
+                    columnHeader: "Item",
+                    width: 40,
+                  },
+                  {
+                    columnHeader: "First Value",
+                    width: 30,
+                  },
+                  {
+                    columnHeader: "Second Value",
+                    width: 30,
+                  },
+                ],
+                rows: [
+                  {
+                    rowHeader: "First Row",
+                    cells: [
+                      {
+                        type: "plainText",
+                        staticContent: "First Row",
+                      },
+                      {
+                        type: "input",
+                        definition: "/properties/first_value",
+                      },
+                      {
+                        type: "readOnly",
+                        definition: "/properties/second_value",
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ];
+
+      const schemaErrors = validateUiSchema(validUiSchema);
+
+      expect(schemaErrors).toBeFalsy();
+    });
+
+    it("should invalidate a Table multiField without table configuration", () => {
+      const invalidUiSchema = [
+        {
+          type: "multiField",
+          name: "summary_table",
+          widget: "Table",
+        },
+      ] as unknown as UiSchema;
+
+      const schemaErrors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(schemaErrors)).toBe(true);
+
+      const hasMissingTableError =
+        Array.isArray(schemaErrors) &&
+        schemaErrors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          const message =
+            typeof error.message === "string" ? error.message : "";
+          return instancePath === "/0" && message.includes("table");
+        });
+
+      expect(hasMissingTableError).toBe(true);
+    });
+
+    it("should invalidate a plainText table cell without staticContent", () => {
+      const invalidUiSchema = [
+        {
+          type: "multiField",
+          name: "summary_table",
+          widget: "Table",
+          table: {
+            columns: [
+              {
+                columnHeader: "Item",
+              },
+            ],
+            rows: [
+              {
+                rowHeader: "First Row",
+                cells: [
+                  {
+                    type: "plainText",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ] as unknown as UiSchema;
+
+      const schemaErrors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(schemaErrors)).toBe(true);
+
+      const hasMissingStaticContentError =
+        Array.isArray(schemaErrors) &&
+        schemaErrors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          const message =
+            typeof error.message === "string" ? error.message : "";
+          return (
+            instancePath === "/0/table/rows/0/cells/0" &&
+            message.includes("staticContent")
+          );
+        });
+
+      expect(hasMissingStaticContentError).toBe(true);
+    });
+
     it("should show an error for an invalid UI schema", () => {
       const invalidUiSchema: UiSchema = [
         {

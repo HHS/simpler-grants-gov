@@ -21,15 +21,24 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { renderWidget } from "./WidgetRenderers";
 
 /**
- * Params for updating a specific field within a FieldList entry.
+ * Path to this child field's value inside a single FieldList entry object.
  *
- * `nextValue` is typed as `unknown` because widget `onChange` handlers
- * emit `unknown` by contract. This value is normalized to
- * `BroadlyDefinedWidgetValue` inside `handleFieldChange`.
+ * Flat fields use a one-item path:
+ *   ["organization_name"] -> entry.organization_name
+ *
+ * Nested fields use multiple path parts:
+ *   ["address", "street1"] -> entry.address.street1
+ *
+ * This is an array so the widget can read and update nested values without
+ * flattening them into keys like "address--street1".
  */
 type FieldListChangeParams = {
   entryId: string;
-  storageKey: string;
+  /**
+   * Path to the field being updated within the entry object.
+   * Example: ["address", "street1"] updates entry.address.street1.
+   */
+  storagePath: string[];
   nextValue: unknown;
 };
 
@@ -39,14 +48,6 @@ type FieldListEntry = {
 };
 
 const FIELD_LIST_INDEX_TOKEN = "~~index~~";
-
-let fieldListEntryValueIdCounter = 0;
-
-const createFieldListEntryValueId = (): string => {
-  fieldListEntryValueIdCounter += 1;
-
-  return `field-list-entry-${fieldListEntryValueIdCounter}`;
-};
 
 /**
  * Builds the initial entries rendered by FieldList.
@@ -71,8 +72,8 @@ const normalizeFieldListEntries = ({
         .filter((entryValue): entryValue is GeneralRecord => {
           return typeof entryValue === "object" && entryValue !== null;
         })
-        .map((entryValue) => ({
-          entryId: createFieldListEntryValueId(),
+        .map((entryValue, entryIndex) => ({
+          entryId: `field-list-entry-${entryIndex}`,
           value: entryValue,
         }))
     : [];
@@ -87,8 +88,8 @@ const normalizeFieldListEntries = ({
 
   return [
     ...startingEntries,
-    ...Array.from({ length: missingEntryCount }, () => ({
-      entryId: createFieldListEntryValueId(),
+    ...Array.from({ length: missingEntryCount }, (_, missingEntryIndex) => ({
+      entryId: `field-list-entry-${startingEntries.length + missingEntryIndex}`,
       value: {},
     })),
   ];
@@ -114,15 +115,12 @@ const replaceFieldListIndexPlaceholder = ({
 };
 
 /**
- * Extracts the field key used to store a child value within an entry object.
+ * Extracts the final field name from a FieldList base id.
  *
- * Example:
- *   contact_people_test[~~index~~]--first_name
- *
- * yields:
- *   first_name
+ * This is only used to build a stable React key for the rendered child widget.
+ * Field values are read and written using `storagePath`.
  */
-const getFieldListStorageKey = ({ baseId }: { baseId: string }): string => {
+const getFieldListChildKey = ({ baseId }: { baseId: string }): string => {
   const baseIdParts = baseId.split("--");
   return baseIdParts[baseIdParts.length - 1];
 };
@@ -138,7 +136,7 @@ const addFieldListEntry = ({
   return [
     ...entries,
     {
-      entryId: createFieldListEntryValueId(),
+      entryId: `field-list-entry-${entries.length}`,
       value: {},
     },
   ];
@@ -194,6 +192,74 @@ const getFieldListValues = (entries: FieldListEntry[]): GeneralRecord[] => {
   return entries.map((entry) => entry.value);
 };
 
+/**
+ * Reads a nested value from a FieldList entry using the storage path generated
+ * from the child field definition.
+ */
+const getValueAtPath = ({
+  value,
+  path,
+}: {
+  value: GeneralRecord;
+  path: string[];
+}): unknown => {
+  return path.reduce<unknown>((currentValue, pathPart) => {
+    if (
+      typeof currentValue === "object" &&
+      currentValue !== null &&
+      !Array.isArray(currentValue)
+    ) {
+      return (currentValue as GeneralRecord)[pathPart];
+    }
+
+    return undefined;
+  }, value);
+};
+
+/**
+ * Writes a child value into a FieldList entry while preserving nested object
+ * structure, for example address.street1.
+ */
+const setValueAtPath = ({
+  value,
+  path,
+  nextValue,
+}: {
+  value: GeneralRecord;
+  path: string[];
+  nextValue: BroadlyDefinedWidgetValue | undefined;
+}): GeneralRecord => {
+  const [currentPathPart, ...remainingPathParts] = path;
+
+  if (!currentPathPart) {
+    return value;
+  }
+
+  if (remainingPathParts.length === 0) {
+    return {
+      ...value,
+      [currentPathPart]: nextValue,
+    };
+  }
+
+  const currentNestedValue = value[currentPathPart];
+  const nestedValue =
+    typeof currentNestedValue === "object" &&
+    currentNestedValue !== null &&
+    !Array.isArray(currentNestedValue)
+      ? (currentNestedValue as GeneralRecord)
+      : {};
+
+  return {
+    ...value,
+    [currentPathPart]: setValueAtPath({
+      value: nestedValue,
+      path: remainingPathParts,
+      nextValue,
+    }),
+  };
+};
+
 function FieldListEntry({
   entryId,
   entryIndex,
@@ -202,6 +268,7 @@ function FieldListEntry({
   canDeleteEntry,
   handleDeleteEntry,
   handleFieldChange,
+  isInteractionDisabled,
   rawErrors,
   fieldListPath,
   groupDefinition,
@@ -216,6 +283,7 @@ function FieldListEntry({
   canDeleteEntry: boolean;
   handleDeleteEntry: (entryId: string) => void;
   handleFieldChange: (params: FieldListChangeParams) => void;
+  isInteractionDisabled: boolean;
   rawErrors?: FormattedFormValidationWarning[];
   fieldListPath: string;
   groupDefinition: FieldListGroupItem[];
@@ -224,13 +292,15 @@ function FieldListEntry({
   minItemsHelperText?: string;
 }) {
   const t = useTranslations("Application.applyForm.fieldListWidget");
+  const fieldListId = fieldListPath.replace("$.", "").replace(/\W/g, "-");
+  const entryHeadingId = `${fieldListId}-entry-${entryIndex + 1}-heading`;
 
   return (
     <div className="field-list-widget__entry padding-y-2 padding-bottom-3">
       <div className="field-list-widget__entry-header margin-bottom-2">
-        <strong>
+        <h4 id={entryHeadingId} className="margin-bottom-2">
           {entryLabel} {entryIndex + 1}
-        </strong>
+        </h4>
       </div>
 
       {groupDefinition.map((groupItem: FieldListGroupItem) => {
@@ -244,7 +314,7 @@ function FieldListEntry({
           entryIndex,
         });
 
-        const storageKey = getFieldListStorageKey({
+        const childKey = getFieldListChildKey({
           baseId: groupItem.baseId,
         });
 
@@ -252,38 +322,40 @@ function FieldListEntry({
           rawErrors,
           fieldListPath,
           entryIndex,
-          storageKey,
+          storagePath: groupItem.storagePath,
           childDefinition: groupItem.definition,
         });
 
         const currentValue = toBroadlyDefinedWidgetValue(
-          entryValue[storageKey],
+          getValueAtPath({
+            value: entryValue,
+            path: groupItem.storagePath,
+          }),
         );
 
-        /**
-         * FieldList children need to be reactive so local entry state stays in sync
-         * while users type. Standard form fields can remain non-reactive, but FieldList
-         * must update local state before add/delete operations so unsaved entry values
-         * are not lost when indexes shift.
-         */
         const childWidgetProps: UswdsWidgetProps = {
           ...groupItem.generalProps,
           schema: groupItem.generalProps.schema as RJSFSchema,
           id: generatedId,
           name: generatedId,
-          key: `${entryId}-${storageKey}`,
+          key: `${entryId}-${childKey}`,
           value: currentValue,
           rawErrors: childErrors,
           required: isRequired,
           updateOnInput: true,
+          additionalDescribedById: entryHeadingId,
+          disabled: isInteractionDisabled,
+          readOnly: isInteractionDisabled,
+          isFormLocked: isInteractionDisabled,
           onChange: (nextValue) => {
             handleFieldChange({
               entryId,
-              storageKey,
+              storagePath: groupItem.storagePath,
               nextValue,
             });
           },
         };
+
         return renderWidget({
           type: groupItem.widget,
           props: childWidgetProps,
@@ -312,6 +384,7 @@ function FieldListEntry({
           disabled={!canDeleteEntry}
           className="button--danger margin-left-auto"
           outline
+          aria-label={`${t("deleteEntry")} ${entryLabel} ${entryIndex + 1}`}
         >
           <USWDSIcon name="delete" />
           {t("deleteEntry")}
@@ -479,7 +552,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    * row and field, and preserves immutability of the entries array.
    */
   const handleFieldChange = useCallback(
-    ({ entryId, storageKey, nextValue }: FieldListChangeParams): void => {
+    ({ entryId, storagePath, nextValue }: FieldListChangeParams): void => {
       const normalizedNextValue = toBroadlyDefinedWidgetValue(nextValue);
 
       handleEntriesChange((previousEntries) =>
@@ -490,10 +563,11 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
 
           return {
             ...previousEntry,
-            value: {
-              ...previousEntry.value,
-              [storageKey]: normalizedNextValue,
-            },
+            value: setValueAtPath({
+              value: previousEntry.value,
+              path: storagePath,
+              nextValue: normalizedNextValue,
+            }),
           };
         }),
       );
@@ -530,6 +604,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
             canDeleteEntry={canDeleteEntry}
             handleDeleteEntry={handleDeleteEntry}
             handleFieldChange={handleFieldChange}
+            isInteractionDisabled={isInteractionDisabled}
             groupDefinition={groupDefinition}
             rawErrors={rawErrors}
             fieldListPath={fieldListPath}

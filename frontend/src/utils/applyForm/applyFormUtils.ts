@@ -10,6 +10,7 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaNode,
+  UiSchemaTableMultiField,
 } from "src/types/applyForm/types";
 import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
@@ -126,15 +127,16 @@ export const findValidationErrors = (
       return true;
     }
     const fieldListMatch = definition?.match(
-      /^\/properties\/([^/]+)\/items\/properties\/([^/]+)$/,
+      /^\/properties\/([^/]+)\/items\/properties\/(.+)$/,
     );
 
     if (!fieldListMatch) {
       return false;
     }
-    const [, fieldListName, childFieldName] = fieldListMatch;
+    const [, fieldListName, childDefinitionPath] = fieldListMatch;
+    const childFieldPath = childDefinitionPath.replace(/\/properties\//g, ".");
     return new RegExp(
-      `^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldName}$`,
+      `^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldPath}$`,
     ).test(error.field);
   });
 
@@ -178,6 +180,30 @@ export const findValidationErrors = (
   return [];
 };
 
+const isTableMultiField = (
+  node: UiSchemaField,
+): node is UiSchemaTableMultiField => {
+  return node.type === "multiField" && node.widget === "Table";
+};
+
+/**
+ * Identifies UI-schema nodes that are handled through the normal
+ * definition-backed field validation path.
+ *
+ * `multiField` is still a field node: it combines multiple definition paths
+ * for one specialized widget, such as an SF-424A budget section. Table is a
+ * specialized multiField widget whose definitions live in table cells.
+ */
+const isDefinitionBackedFieldNode = (
+  node: UiSchemaNode,
+): node is Exclude<UiSchemaField, UiSchemaTableMultiField> => {
+  return (
+    node.type === "field" ||
+    node.type === "multiField" ||
+    node.type === "null"
+  ) && !(node.type === "multiField" && isTableMultiField(node));
+};
+
 export const buildWarningTree = (
   uiSchema: UiSchema | UiSchemaField[] | UiSchemaNode,
   parent: UiSchema | UiSchemaField[] | UiSchemaNode | null,
@@ -212,7 +238,7 @@ export const buildWarningTree = (
             resolvedRootUiSchema,
           );
           return errors.concat(nodeError);
-        } else if (!parent && ("definition" in node || "schema" in node)) {
+        } else if (!parent && isDefinitionBackedFieldNode(node)) {
           const matchingWarnings = findValidationErrors(
             formValidationWarnings,
             Array.isArray(node.definition)
@@ -242,7 +268,7 @@ export const buildWarningTree = (
               resolvedRootUiSchema,
             );
             return errors.concat(nodeError);
-          } else {
+          } else if (isDefinitionBackedFieldNode(node)) {
             const matchingWarnings = findValidationErrors(
               formValidationWarnings,
               Array.isArray(node.definition)
@@ -257,6 +283,7 @@ export const buildWarningTree = (
             }
             return errors;
           }
+          return errors;
         },
         [],
       );
@@ -314,7 +341,7 @@ export function getHtmlFieldForWarning({
   schema?: SchemaField;
 }): string | undefined {
   const match = definition
-    ? definition.match(/^\/properties\/([^/]+)\/items\/properties\/([^/]+)$/)
+    ? definition.match(/^\/properties\/([^/]+)\/items\/properties\/(.+)$/)
     : null;
 
   if (!match) {
@@ -324,19 +351,20 @@ export function getHtmlFieldForWarning({
     });
   }
 
-  const [, fieldListName, childFieldName] = match;
+  const [, fieldListName, childDefinitionPath] = match;
+  const childFieldPath = childDefinitionPath.replace(/\/properties\//g, ".");
+  const childHtmlPath = childFieldPath.replace(/\./g, "--");
 
   const entryMatch = field?.match(
-    new RegExp(`^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldName}$`),
+    new RegExp(`^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldPath}$`),
   );
 
   if (entryMatch) {
     const [, entryIndex] = entryMatch;
-    return `${fieldListName}[${entryIndex}]--${childFieldName}`;
+    return `${fieldListName}[${entryIndex}]--${childHtmlPath}`;
   }
 
-  // Fallback: default to first row when no index is present
-  return `${fieldListName}[0]--${childFieldName}`;
+  return `${fieldListName}[0]--${childHtmlPath}`;
 }
 
 // Finds the parent FieldList label for a child field definition so it can be
@@ -353,7 +381,7 @@ export function getFieldListLabelFromDefinition({
   }
 
   const match = definition.match(
-    /^\/properties\/([^/]+)\/items\/properties\/[^/]+$/,
+    /^\/properties\/([^/]+)\/items\/properties\/.+$/,
   );
 
   if (!match) {
@@ -457,11 +485,14 @@ export function getFieldsForNav(
       if (item.name && item.label) {
         results.push({ href: `form-section-${item.name}`, text: item.label });
       }
-      if (
-        Array.isArray(item.children) &&
-        item.children.every((child) => "label" in child && "name" in child)
-      ) {
-        results.push(...getFieldsForNav(item.children as unknown as UiSchema));
+      if (Array.isArray(item.children)) {
+        results.push(
+          ...getFieldsForNav(
+            item.children.filter(
+              (child) => child.type === "section",
+            ) as unknown as UiSchema,
+          ),
+        );
       }
     }
   }
@@ -479,6 +510,28 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
     }
     return !nestedValue;
   });
+};
+
+const getObjectItemSchema = (schema?: RJSFSchema): RJSFSchema | undefined => {
+  if (
+    schema?.items &&
+    !Array.isArray(schema.items) &&
+    typeof schema.items === "object"
+  ) {
+    return schema.items as RJSFSchema;
+  }
+
+  return undefined;
+};
+
+const shouldPreserveEmptyNestedObject = ({
+  key,
+  parentSchema,
+}: {
+  key: string;
+  parentSchema?: RJSFSchema;
+}): boolean => {
+  return Boolean(parentSchema?.required?.includes(key));
 };
 
 /**
@@ -521,44 +574,47 @@ const getChildSchema = ({
  * while extra empty entry beyond `minItems` can still be pruned.
  */
 export const pruneEmptyNestedFields = (
-  structuredFormData: object,
+  structuredFormData: object | undefined | null,
   schema?: RJSFSchema,
 ): object => {
+  if (!structuredFormData || typeof structuredFormData !== "object") {
+    return {};
+  }
+
   return Object.entries(structuredFormData).reduce(
     (acc, [key, value]) => {
       const fieldSchema = getChildSchema({ schema, key });
 
       if (Array.isArray(value)) {
-        // Preserve empty object rows required by minItems. Without this,
-        // required FieldList rows can be pruned before backend validation,
-        // causing array-level minItems errors instead of child-field errors.
         const minimumItems =
           typeof fieldSchema?.minItems === "number" ? fieldSchema.minItems : 0;
+
+        const itemSchema = getObjectItemSchema(fieldSchema);
+
+        const isObjectArray = Boolean(
+          itemSchema && itemSchema.type === "object",
+        );
 
         const pruned = value.reduce(
           (prunedArray: unknown[], arrayItem, index) => {
             if (isBasicallyAnObject(arrayItem)) {
-              const itemSchema =
-                fieldSchema?.items &&
-                !Array.isArray(fieldSchema.items) &&
-                typeof fieldSchema.items === "object"
-                  ? (fieldSchema.items as RJSFSchema)
-                  : undefined;
-
               const prunedItem = pruneEmptyNestedFields(
                 arrayItem as object,
                 itemSchema,
               );
 
-              // Keep non-empty rows. Also keep empty rows while they are within
-              // the schema-required minimum item count.
-              if (!isEmptyField(prunedItem) || index < minimumItems) {
+              if (
+                !isEmptyField(prunedItem) ||
+                index < minimumItems ||
+                isObjectArray
+              ) {
                 prunedArray.push(prunedItem);
               }
-            } else if (
-              !isEmptyField(arrayItem) ||
-              (!isBasicallyAnObject(arrayItem) && arrayItem !== undefined)
-            ) {
+
+              return prunedArray;
+            }
+
+            if (arrayItem !== undefined && arrayItem !== null) {
               prunedArray.push(arrayItem);
             }
             return prunedArray;
@@ -568,15 +624,27 @@ export const pruneEmptyNestedFields = (
         acc[key] = pruned;
         return acc;
       }
-      if (!isBasicallyAnObject(value) && value !== undefined) {
-        acc[key] = value;
+      if (value === undefined || value === null) {
         return acc;
       }
-      if (isEmptyField(value)) {
+      if (!isBasicallyAnObject(value)) {
+        acc[key] = value;
         return acc;
       }
 
       const pruned = pruneEmptyNestedFields(value as object, fieldSchema);
+      if (isEmptyField(pruned)) {
+        if (
+          shouldPreserveEmptyNestedObject({
+            key,
+            parentSchema: schema,
+          })
+        ) {
+          acc[key] = {};
+        }
+
+        return acc;
+      }
 
       acc[key] = pruned;
       return acc;
@@ -720,7 +788,7 @@ export const processFormSchema = (
   within a json schema without traversing nested "properties". Any other object attributes
   and values are unchanged
 
-  ex. { properties: { path: { properties: { nested: 'value' } } } } becomes
+  ex. { properties: { path: { properties: { nested: 'value' } } } becomes
       { path: { nested: 'value' } }
 */
 

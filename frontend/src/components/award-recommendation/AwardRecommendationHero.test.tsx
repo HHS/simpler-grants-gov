@@ -81,4 +81,79 @@ describe("AwardRecommendationHero", () => {
     const buttons = screen.queryAllByRole("button");
     expect(buttons.length).toEqual(0);
   });
+
+  it("renders custom heading when heading prop is provided", async () => {
+    const customHeading = "Add risk or condition";
+    const component = await AwardRecommendationHero({
+      awardRecommendationDetails: mockAwardRecommendationDetails,
+      heading: customHeading,
+    });
+    render(component);
+
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent(customHeading);
+    expect(heading).not.toHaveTextContent(
+      mockAwardRecommendationDetails.award_recommendation_number,
+    );
+  });
+
+  it("hides date and status when showDateAndStatus is false", async () => {
+    const component = await AwardRecommendationHero({
+      awardRecommendationDetails: mockAwardRecommendationDetails,
+      showDateAndStatus: false,
+    });
+    render(component);
+
+    const formattedDate = mockAwardRecommendationDetails.created_at
+      ? new Date(mockAwardRecommendationDetails.created_at).toLocaleDateString()
+      : new Date().toLocaleDateString();
+    expect(screen.queryByText(formattedDate)).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("award-recommendation-status-pending-review"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows date and status by default when showDateAndStatus is not provided", async () => {
+    const component = await AwardRecommendationHero({
+      awardRecommendationDetails: mockAwardRecommendationDetails,
+    });
+    render(component);
+
+    const formattedDate = mockAwardRecommendationDetails.created_at
+      ? new Date(mockAwardRecommendationDetails.created_at).toLocaleDateString()
+      : new Date().toLocaleDateString();
+    expect(screen.getByText(formattedDate)).toBeInTheDocument();
+    expect(
+      screen.getByTestId("award-recommendation-status-pending-review"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders only the heading when no award recommendation details are provided", async () => {
+    const customHeading = "Award recommendations";
+    const component = await AwardRecommendationHero({
+      heading: customHeading,
+      showDateAndStatus: false,
+    });
+    render(component);
+
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent(customHeading);
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+  });
+
+  it("shows date and status when showDateAndStatus is true", async () => {
+    const component = await AwardRecommendationHero({
+      awardRecommendationDetails: mockAwardRecommendationDetails,
+      showDateAndStatus: true,
+    });
+    render(component);
+
+    const formattedDate = mockAwardRecommendationDetails.created_at
+      ? new Date(mockAwardRecommendationDetails.created_at).toLocaleDateString()
+      : new Date().toLocaleDateString();
+    expect(screen.getByText(formattedDate)).toBeInTheDocument();
+    expect(
+      screen.getByTestId("award-recommendation-status-pending-review"),
+    ).toBeInTheDocument();
+  });
 });

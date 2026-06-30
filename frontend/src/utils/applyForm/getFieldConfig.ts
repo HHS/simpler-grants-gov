@@ -10,8 +10,10 @@ import {
   FormattedFormValidationWarning,
   GeneralRecord,
   SchemaField,
+  TableWidgetProps,
   UiSchemaField,
   UiSchemaFieldList,
+  UiSchemaTableMultiField,
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/types/applyForm/types";
@@ -36,65 +38,69 @@ type FieldInfo<V extends BroadlyDefinedWidgetValue> = {
 const FIELD_LIST_INDEX_TOKEN = "~~index~~" as const;
 
 /**
- * Builds the "baseId" used by FieldList widgets for each child field.
+ * Builds the template id used by FieldList child widgets.
  *
- * FieldList rows represent an array of grouped field values, where each row
- * is stored as an object and each child field maps to a single property
- * within that object.
+ * FieldList entries are array items, so each rendered child needs an id that
+ * includes the entry index:
  *
- * Instead of generating a concrete id for a specific row (for example `[0]`),
- * we generate a template id containing an index placeholder:
+ *   additional_sites[0]--address--street1
  *
- *   contact_people_test[~~index~~]--first_name
+ * At config-build time we do not know the rendered entry index yet, so this
+ * helper creates a template id with a placeholder:
  *
- * The FieldList widget later replaces `~~index~~` with the actual row index
- * when rendering each row.
+ *   additional_sites[~~index~~]--address--street1
  *
- * If the child field id already contains the FieldList segment, this helper
- * replaces that segment with the indexed version.
- *
- * Example:
- *
- *   childId: "topField--contacts--firstName"
- *
- * becomes:
- *
- *   "topField--contacts[~~index~~]--firstName"
- *
- * If the FieldList segment is not present in the child id, the helper falls
- * back to building the id from the FieldList name and the final field key.
- *
- * Example fallback:
- *
- *   childId: "topField--firstName"
- *
- * becomes:
- *
- *   "contacts[~~index~~]--firstName"
+ * The FieldList widget replaces `~~index~~` with the actual entry index while
+ * rendering.
  */
 export function buildFieldListBaseId({
   fieldListName,
-  childId,
+  storagePath,
 }: {
   fieldListName: string;
-  childId: string;
+  storagePath: string[];
 }): string {
-  const token = `--${fieldListName}--`;
-
-  if (childId.includes(token)) {
-    return childId.replace(
-      token,
-      `--${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--`,
-    );
-  }
-
-  const childIdParts = childId.split("--");
-  const finalFieldKey = childIdParts[childIdParts.length - 1];
-
-  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
+  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${storagePath.join("--")}`;
 }
 
-// Assumes the FieldList field exists at the root of formSchema.properties.
+/**
+ * Converts a FieldList child definition into the path where that child value
+ * lives inside a single entry object.
+ *
+ * Example:
+ *
+ *   /properties/additional_sites/items/properties/address/properties/street1
+ *
+ * becomes:
+ *
+ *   ["address", "street1"]
+ *
+ * Flat children still become a one-part path:
+ *
+ *   /properties/additional_sites/items/properties/organization_name
+ *   -> ["organization_name"]
+ */
+export function buildFieldListStoragePath({
+  fieldListName,
+  childDefinition,
+}: {
+  fieldListName: string;
+  childDefinition: string;
+}): string[] {
+  const fieldListPrefix = `/properties/${fieldListName}/items/properties/`;
+
+  if (!childDefinition.startsWith(fieldListPrefix)) {
+    const childDefinitionParts = childDefinition.split("/");
+    return [childDefinitionParts[childDefinitionParts.length - 1]];
+  }
+
+  return childDefinition
+    .replace(fieldListPrefix, "")
+    .split("/properties/")
+    .filter((pathPart) => pathPart.length > 0);
+}
+
+// FieldList currently supports root-level array fields only.
 const getFieldListRequiredFields = ({
   formSchema,
   fieldListName,
@@ -136,9 +142,24 @@ type FieldListConfig = {
   props: FieldListWidgetProps;
 };
 
-type FieldConfig = FieldWidgetConfig | FieldListConfig;
+type TableConfig = {
+  type: "Table";
+  props: TableWidgetProps;
+};
 
-// json schema doesn't describe UI so types are infered if widget not supplied
+type FieldConfig = FieldWidgetConfig | FieldListConfig | TableConfig;
+
+const isTableMultiField = (
+  uiFieldObject: UiSchemaField,
+): uiFieldObject is UiSchemaTableMultiField => {
+  return (
+    uiFieldObject.type === "multiField" &&
+    uiFieldObject.widget === "Table" &&
+    "table" in uiFieldObject
+  );
+};
+
+// JSON schema doesn't describe UI, so widget types are inferred when not supplied.
 export const determineFieldType = ({
   uiFieldObject,
   fieldSchema,
@@ -253,9 +274,8 @@ const getBasicFieldInfo = ({
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<string> => {
   const { schema } = uiFieldObject;
-  // the definition can be many things, but in this case we should have done the
-  // work ahead of time to determine that this definition will be a string
   const definition = uiFieldObject.definition as string;
+
   if (typeof definition !== "string") {
     throw new Error("attempting to get basic field info for complex field");
   }
@@ -304,16 +324,19 @@ export const getBasicMultifieldInfo = ({
   formData: object;
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<Record<string, unknown>> => {
+  if (isTableMultiField(uiFieldObject)) {
+    throw new Error("attempting to get multifield info for table field");
+  }
   const { schema } = uiFieldObject;
   // the definition can be many things, but in this case we should have done the
-  // work ahead of time to determine that this definition will be an array
+  // work ahead of time to determine that this definition will be a string
   const definition = uiFieldObject.definition;
   if (!Array.isArray(definition)) {
     throw new Error("attempting to get multifield field info for basic field");
   }
   const fieldName = uiFieldObject.name ? uiFieldObject.name : "";
   if (!fieldName) {
-    console.error("name misssing from multiField definition");
+    console.error("name missing from multiField definition");
     throw new Error("Could not build field");
   }
   const fieldSchema = definition
@@ -425,6 +448,9 @@ const getFieldInfo = ({
   formData: object;
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<BroadlyDefinedWidgetValue> => {
+  if (isTableMultiField(uiFieldObject)) {
+    throw new Error("attempting to get field info for table field");
+  }
   const { definition, type: uiSchemaFieldType } = uiFieldObject;
 
   if (
@@ -438,7 +464,9 @@ const getFieldInfo = ({
       errors,
       formSchema,
     });
-  } else if (typeof definition === "string") {
+  }
+
+  if (typeof definition === "string") {
     return getBasicFieldInfo({
       uiFieldObject,
       formData,
@@ -490,19 +518,24 @@ const getFieldListConfig = ({
         throw new Error("nested fieldList is not supported");
       }
 
-      const {
-        id: childId,
-        value: _value,
-        key: _key,
-        ...rest
-      } = childWidgetConfig.props;
+      if (childWidgetConfig.type === "Table") {
+        throw new Error("table inside fieldList is not supported");
+      }
+
+      const { value: _value, key: _key, ...rest } = childWidgetConfig.props;
+
+      const storagePath = buildFieldListStoragePath({
+        fieldListName: uiFieldObject.name,
+        childDefinition: childNode.definition,
+      });
 
       return {
         widget: childWidgetConfig.type,
         baseId: buildFieldListBaseId({
           fieldListName: uiFieldObject.name,
-          childId,
+          storagePath,
         }),
+        storagePath,
         generalProps: rest,
         definition: childNode.definition,
       };
@@ -549,6 +582,51 @@ const getFieldListConfig = ({
     },
   };
 };
+
+/**
+ * Validates static table configuration and prepares props for the Table widget.
+ *
+ * Table cell definitions will be resolved through the shared multiField path
+ * when editable and read-only table cell rendering is implemented.
+ */
+const getTableConfig = ({
+  uiFieldObject,
+}: {
+  uiFieldObject: UiSchemaTableMultiField;
+}): TableConfig => {
+  const { columns, rows } = uiFieldObject.table;
+  let columnWidthTotal = 0;
+
+  columns.forEach((column) => {
+    if (typeof column.width === "number") {
+      columnWidthTotal += column.width;
+    }
+  });
+
+  if (columnWidthTotal > 100) {
+    throw new Error("Table column widths cannot total more than 100.");
+  }
+
+  rows.forEach((row, rowIndex) => {
+    if (row.cells.length !== columns.length) {
+      throw new Error(
+        `Table row ${rowIndex + 1} must contain exactly ${columns.length} cells.`,
+      );
+    }
+  });
+
+  return {
+    type: "Table",
+    props: {
+      id: uiFieldObject.name,
+      key: uiFieldObject.name,
+      name: uiFieldObject.name,
+      columns,
+      rows,
+    },
+  };
+};
+
 // returns widget type and props for rendering data for a given JSON schema field
 export const getFieldConfig = <V extends string | Record<string, unknown>>({
   errors,
@@ -568,6 +646,12 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
       errors,
       formSchema,
       formData,
+      uiFieldObject,
+    });
+  }
+
+  if (isTableMultiField(uiFieldObject)) {
+    return getTableConfig({
       uiFieldObject,
     });
   }
@@ -593,7 +677,6 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
     throw new Error("Could not build field");
   }
 
-  // should filter and match warnings to field earlier in the process
   const widgetType = determineFieldType({
     uiFieldObject,
     fieldSchema,

@@ -7,6 +7,7 @@ from grants_shared.logs.flask_logger import add_extra_data_to_current_request_lo
 from src.legacy_soap_api.legacy_soap_api_auth import (
     ENABLE_SIMPLER_ROUTE_KEY,
     MTLS_CERT_HEADER_KEY,
+    SOAP_ACTION_HEADER_KEY,
     USE_SIMPLER_OVERRIDE_KEY,
     SOAPClientCertificateIsExpired,
     SOAPClientMissingCertificate,
@@ -175,7 +176,10 @@ def process_simpler_request(
         )
         logger.info(
             "soap_client_certificate: header check",
-            extra={"soap_request_headers": soap_request.headers.keys()},
+            extra={
+                "soap_request_headers": soap_request.headers.keys(),
+                "soap_action": soap_request.headers.get(SOAP_ACTION_HEADER_KEY, ""),
+            },
         )
         is_legacy_only_certificate = (
             auth and auth.certificate and not auth.certificate.legacy_certificate
@@ -195,12 +199,14 @@ def process_simpler_request(
 
         # If it is GetOpportunityList or is valid legacy certificate but not configured in Simpler
         # call legacy and don't call simpler
+        is_alternate_response: bool = False
         if is_get_opportunity_list or is_legacy_only_certificate:
             soap_legacy_response = get_legacy_response(soap_request)
             write_debug_data_to_s3(soap_request, soap_legacy_response)
             return soap_legacy_response.to_flask_response()
         # If it has a Simpler GrantsGovTrackingNumber then don't call legacy
         elif alternate_legacy_response := get_alternate_legacy_response(soap_request):
+            is_alternate_response = True
             logger.info(
                 "simpler_soap_api: skipping legacy call",
             )
@@ -238,8 +244,26 @@ def process_simpler_request(
             simpler_soap_response = get_simpler_soap_response(
                 soap_request, soap_legacy_response, db_session
             )
-            write_debug_data_to_s3(soap_request, simpler_soap_response)
-            return simpler_soap_response.to_flask_response()
+            # In the event where there's a successful simpler response
+            # but the legacy response failed (and not just skipped
+            # with the alternate response) then surface the legacy response
+            if (
+                simpler_soap_response.status_code == 200
+                and soap_legacy_response.status_code != 200
+                and not is_alternate_response
+            ):
+                logger.info(
+                    msg="simpler_soap_api: override simpler response with legacy response",
+                    extra={
+                        "simpler_status_code": simpler_soap_response.status_code,
+                        "legacy_status_code": soap_legacy_response.status_code,
+                    },
+                )
+                write_debug_data_to_s3(soap_request, soap_legacy_response)
+                return soap_legacy_response.to_flask_response()
+            else:
+                write_debug_data_to_s3(soap_request, simpler_soap_response)
+                return simpler_soap_response.to_flask_response()
         except SOAPClientUserDoesNotHavePermission:
             msg = "soap_client_certificate: User did not have permission to access this application"
             logger.info(

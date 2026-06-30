@@ -1,11 +1,11 @@
 import logging
 
 import boto3
+from grants_shared.util import file_util
 
 from src.legacy_soap_api import legacy_soap_api_config as soap_api_config
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import write_debug_data_to_s3
-from src.util import file_util
 from tests.lib.data_factories import create_soap_request
 
 NSMAP = {

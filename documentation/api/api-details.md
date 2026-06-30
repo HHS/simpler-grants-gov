@@ -112,7 +112,7 @@ define it like so:
 ```py
 from apiflask import APIBlueprint
 
-import src.api.response as response
+import grants_shared.api.response as response
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 
 example_blueprint = APIBlueprint("Example", __name__, tag="Example")

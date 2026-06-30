@@ -9,6 +9,7 @@ from grants_shared.api.schemas.extension import (
     fields,
     validators,
 )
+from grants_shared.util import dict_util
 
 #############################
 # Validation Error Messages
@@ -127,6 +128,42 @@ def validate_errors(actual_errors, expected_errors):
         assert (
             expected_errors[field_name] == actual_errors[field_name]
         ), f"Actual error for {field_name}: {str(actual_errors[field_name])} but received {str(expected_errors[field_name])}"
+
+
+def validate_expected_errors(issues: dict, expected_errors: dict[str, str]):
+    """
+    Validate that the expected errors are present for each field when validating
+    against a Marshmallow schema.
+
+    Use as:
+
+        expected_errors = {"path.to.field": "validation_error"}
+
+        issues = MySchema().validate({ ... })
+        validate_expected_errors(issues, expected_errors)
+
+    """
+    flattened_issues = dict_util.flatten_dict(issues)
+
+    assert len(flattened_issues) == len(
+        expected_errors
+    ), f"{','.join(flattened_issues)} != {','.join(expected_errors)}"
+
+    validation_issues = []
+    for k, expected_error in expected_errors.items():
+        actual_error = flattened_issues.get(k, None)
+
+        if actual_error is not None:
+            err = actual_error[0].key
+
+            if err != expected_error:
+                validation_issues.append(f"Field {k} does not match. {err} != {expected_error}")
+        else:
+            validation_issues.append(
+                f"Field {k} not present in actual errors. The following are {', '.join(flattened_issues)}"
+            )
+
+    assert len(validation_issues) == 0, "\n".join(validation_issues)
 
 
 ########################

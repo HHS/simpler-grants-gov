@@ -1,13 +1,15 @@
 from grants_shared.api.schemas.extension import Schema, fields
 from grants_shared.api.schemas.extension.field_validators import Length
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from grants_shared.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     StrSearchSchemaBuilder,
     UuidSearchSchemaBuilder,
 )
+from grants_shared.pagination.pagination_schema import generate_pagination_schema
+from marshmallow import ValidationError, validates_schema
 
-from src.api.schemas.response_schema import PaginationMixinSchema
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApprovalResponseType,
@@ -21,7 +23,7 @@ from src.constants.lookup_constants import (
     AwardSelectionMethod,
     OpportunityStatus,
 )
-from src.pagination.pagination_schema import generate_pagination_schema
+from src.validation.validation_constants import ValidationErrorType
 
 
 class AwardRecommendationCreateRequestSchema(Schema):
@@ -414,6 +416,10 @@ class AwardRecommendationApplicationSubmissionSchema(Schema):
 
 class AwardRecommendationSubmissionDetailSchema(Schema):
     """Schema for the award recommendation submission detail"""
+
+    award_recommendation_submission_detail_id = fields.UUID(
+        metadata={"description": "The submission detail ID"}
+    )
 
     recommended_amount = fields.Decimal(
         allow_none=True,
@@ -870,3 +876,172 @@ class AwardRecommendationAuditResponseSchema(AbstractResponseSchema, PaginationM
     """Schema for POST /alpha/award-recommendations/:award_recommendation_id/audit_history response"""
 
     data = fields.List(fields.Nested(AwardRecommendationAuditDataSchema()))
+
+
+####################################
+# Bulk Update Submission Details
+####################################
+
+
+class BulkFieldUpdatesSchema(Schema):
+    """
+    Shared fields applied to all submission detail records in bulk update.
+
+    Note: Fields with null values will not be updated (partial update behavior).
+    """
+
+    award_recommendation_type = fields.Enum(
+        AwardRecommendationType,
+        allow_none=True,
+        metadata={
+            "description": "The recommendation type to apply to all selected submissions. "
+            "Set to null to skip updating this field."
+        },
+    )
+    has_exception = fields.Boolean(
+        allow_none=True,
+        metadata={
+            "description": "Whether submissions have an exception. "
+            "Set to null to skip updating this field."
+        },
+    )
+    general_comment = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "General comment to apply to all selected submissions. "
+            "Set to null to skip updating this field.",
+            "example": "Recommended for funding based on panel review.",
+        },
+    )
+    exception_detail = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Exception details to apply to all selected submissions. "
+            "Set to null to skip updating this field.",
+            "example": "Funding exceeds standard threshold.",
+        },
+    )
+
+
+class IndividualUpdateSchema(Schema):
+    """
+    Record-specific fields for individual submission details.
+
+    Note: Fields with null values will not be updated (partial update behavior).
+    """
+
+    recommended_amount = fields.Decimal(
+        allow_none=True,
+        as_string=True,
+        metadata={
+            "description": "The recommended funding amount for this specific submission. "
+            "Set to null to skip updating this field.",
+            "example": "500000.00",
+        },
+    )
+
+
+class BulkUpdateSubmissionDetailsRequestSchema(Schema):
+    """Schema for PUT /alpha/award-recommendations/submission-details/bulk request"""
+
+    record_ids = fields.List(
+        fields.UUID(),
+        required=True,
+        validate=Length(min=1, max=100),
+        metadata={
+            "description": "List of Award Recommendation Submission Detail IDs to update",
+            "example": [
+                "11d313ee-cbcf-4dd3-8777-5fcf788422a0",
+                "c36824d7-81df-44f3-b312-8623f2c458bb",
+            ],
+        },
+    )
+    bulk_field_updates = fields.Nested(
+        BulkFieldUpdatesSchema,
+        required=True,
+        metadata={"description": "Shared values to apply to all selected records"},
+    )
+    individual_updates = fields.Dict(
+        keys=fields.UUID(),
+        values=fields.Nested(IndividualUpdateSchema),
+        required=True,
+        metadata={
+            "description": "Record-specific updates keyed by submission detail ID",
+            "example": {
+                "11d313ee-cbcf-4dd3-8777-5fcf788422a0": {"recommended_amount": "500000.00"},
+                "c36824d7-81df-44f3-b312-8623f2c458bb": {"recommended_amount": "1000000.00"},
+            },
+        },
+    )
+
+    @validates_schema
+    def validate_ids_match(self, data: dict, **kwargs: dict) -> None:
+        """Ensure record_ids and individual_updates match exactly"""
+        record_ids = set(data["record_ids"])
+        individual_ids = set(data["individual_updates"].keys())
+
+        if record_ids != individual_ids:
+            missing_in_individual = record_ids - individual_ids
+            extra_in_individual = individual_ids - record_ids
+
+            error_messages = []
+            if missing_in_individual:
+                error_messages.append(
+                    f"Missing individual_updates for record_ids: {[str(id) for id in missing_in_individual]}"
+                )
+            if extra_in_individual:
+                error_messages.append(
+                    f"Extra individual_updates for IDs not in record_ids: {[str(id) for id in extra_in_individual]}"
+                )
+
+            raise ValidationError(
+                [
+                    MarshmallowErrorContainer(
+                        ValidationErrorType.INVALID,
+                        " ".join(error_messages),
+                    )
+                ]
+            )
+
+
+class BulkUpdateSubmissionDetailsResponseDataSchema(Schema):
+    """Schema for a single updated submission detail in bulk update response"""
+
+    award_recommendation_submission_detail_id = fields.UUID(
+        dump_only=True,
+        metadata={"description": "The submission detail ID"},
+    )
+    award_recommendation_type = fields.Enum(
+        AwardRecommendationType,
+        allow_none=True,
+        metadata={"description": "The recommendation type"},
+    )
+    recommended_amount = fields.Decimal(
+        allow_none=True,
+        as_string=True,
+        metadata={"description": "The recommended funding amount"},
+    )
+    scoring_comment = fields.String(
+        allow_none=True,
+        metadata={"description": "Comments from the scoring process"},
+    )
+    general_comment = fields.String(
+        allow_none=True,
+        metadata={"description": "General comment"},
+    )
+    has_exception = fields.Boolean(
+        metadata={"description": "Whether the submission has an exception"},
+    )
+    exception_detail = fields.String(
+        allow_none=True,
+        metadata={"description": "Exception details"},
+    )
+
+
+class BulkUpdateSubmissionDetailsResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /alpha/award-recommendations/submission-details/bulk response"""
+
+    data = fields.List(
+        fields.Nested(BulkUpdateSubmissionDetailsResponseDataSchema),
+        metadata={"description": "The updated award recommendation submission details"},
+    )

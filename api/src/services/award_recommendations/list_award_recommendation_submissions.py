@@ -2,6 +2,9 @@ import uuid
 from collections.abc import Sequence
 
 import grants_shared.adapters.db as db
+from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams
+from grants_shared.pagination.paginator import Paginator
+from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -14,9 +17,6 @@ from src.db.models.award_recommendation_models import (
 from src.db.models.competition_models import Application, ApplicationSubmission
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import User
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
-from src.pagination.paginator import Paginator
-from src.pagination.sorting_util import apply_sorting
 from src.search.search_models import BoolSearchFilter, StrSearchFilter
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,

@@ -2,8 +2,8 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+import grants_shared.util.file_util as file_util
 
-import src.util.file_util as file_util
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from src.db.models.competition_models import ApplicationAttachment

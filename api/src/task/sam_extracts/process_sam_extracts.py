@@ -9,6 +9,7 @@ from enum import StrEnum
 from typing import IO
 
 import grants_shared.adapters.db as db
+from grants_shared.util import file_util
 from sqlalchemy import select
 
 from src.constants.lookup_constants import (
@@ -19,7 +20,6 @@ from src.constants.lookup_constants import (
 from src.db.models.entity_models import SamGovEntity, SamGovEntityImportType
 from src.db.models.sam_extract_models import SamExtractFile
 from src.task.task import Task
-from src.util import file_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)

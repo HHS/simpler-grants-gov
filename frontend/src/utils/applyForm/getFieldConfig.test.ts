@@ -1,6 +1,10 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { identity } from "lodash";
-import { UiSchemaField, UiSchemaFieldList } from "src/types/applyForm/types";
+import {
+  UiSchemaField,
+  UiSchemaFieldList,
+  UiSchemaTableMultiField,
+} from "src/types/applyForm/types";
 import {
   buildFieldListBaseId,
   determineFieldType,
@@ -28,11 +32,13 @@ describe("getNameFromDef", () => {
       getNameFromDef({ definition: "/properties/foo", schema: undefined }),
     ).toBe("foo");
   });
+
   it("gets name from schema title", () => {
     expect(
       getNameFromDef({ definition: undefined, schema: { title: "My Field" } }),
     ).toBe("My-Field");
   });
+
   it("returns 'untitled' if no info", () => {
     expect(getNameFromDef({ definition: undefined, schema: {} })).toBe(
       "untitled",
@@ -50,6 +56,7 @@ describe("getWarningsForField", () => {
         definition: "/properties/field_name",
       }),
     ).toEqual([]);
+
     expect(
       getWarningsForField({
         errors: null,
@@ -61,6 +68,7 @@ describe("getWarningsForField", () => {
   });
 
   it.skip("does something with arrays?", () => {});
+
   it("returns warnings that directly reference the field name", () => {
     expect(
       getWarningsForField({
@@ -81,7 +89,8 @@ describe("getWarningsForField", () => {
       }),
     ).toEqual(["something went wrong"]);
   });
-  it("if a field is required, returns `required` warnings that reference the field's parent paths", () => {
+
+  it("returns required warnings that reference the field's parent paths", () => {
     expect(
       getWarningsForField({
         errors: [
@@ -109,39 +118,43 @@ describe("determineFieldType", () => {
       type: "field",
       definition: "/properties/test",
     };
+
     const fieldSchema: RJSFSchema = {
       type: "string" as const,
       title: "test",
     };
-    const textField = determineFieldType({ uiFieldObject, fieldSchema });
-    expect(textField).toEqual("Text");
-    const selectFieldSchema: RJSFSchema = {
-      ...fieldSchema,
-      enum: ["test"],
-    };
-    const selectField = determineFieldType({
-      uiFieldObject,
-      fieldSchema: selectFieldSchema,
-    });
-    expect(selectField).toEqual("Select");
-    const checkboxFieldSchema: RJSFSchema = {
-      ...fieldSchema,
-      type: "boolean",
-    };
-    const checkboxField = determineFieldType({
-      uiFieldObject,
-      fieldSchema: checkboxFieldSchema,
-    });
-    expect(checkboxField).toEqual("Checkbox");
-    const textAreaFieldSchema: RJSFSchema = {
-      ...fieldSchema,
-      maxLength: 256,
-    };
-    const textAreaField = determineFieldType({
-      uiFieldObject,
-      fieldSchema: textAreaFieldSchema,
-    });
-    expect(textAreaField).toEqual("TextArea");
+
+    expect(determineFieldType({ uiFieldObject, fieldSchema })).toEqual("Text");
+
+    expect(
+      determineFieldType({
+        uiFieldObject,
+        fieldSchema: {
+          ...fieldSchema,
+          enum: ["test"],
+        },
+      }),
+    ).toEqual("Select");
+
+    expect(
+      determineFieldType({
+        uiFieldObject,
+        fieldSchema: {
+          ...fieldSchema,
+          type: "boolean",
+        },
+      }),
+    ).toEqual("Checkbox");
+
+    expect(
+      determineFieldType({
+        uiFieldObject,
+        fieldSchema: {
+          ...fieldSchema,
+          maxLength: 256,
+        },
+      }),
+    ).toEqual("TextArea");
   });
 });
 
@@ -165,14 +178,11 @@ describe("getFieldConfig", () => {
       required: ["name"],
     };
 
-    const errors = null;
-    const formData = { name: "Jane Doe" };
-
     const { type, props } = getFieldConfig({
       uiFieldObject,
       formSchema,
-      errors,
-      formData,
+      errors: null,
+      formData: { name: "Jane Doe" },
       requiredField: true,
     });
 
@@ -183,6 +193,7 @@ describe("getFieldConfig", () => {
       disabled: false,
       required: true,
       maxLength: 50,
+      minLength: undefined,
       schema: { type: "string", title: "Name", maxLength: 50 },
       rawErrors: [],
       value: "Jane Doe",
@@ -215,13 +226,11 @@ describe("getFieldConfig", () => {
       },
     ];
 
-    const formData = { email: "invalid-email" };
-
     const { type, props } = getFieldConfig({
       uiFieldObject,
       formSchema,
       errors,
-      formData,
+      formData: { email: "invalid-email" },
       requiredField: false,
     });
 
@@ -231,6 +240,8 @@ describe("getFieldConfig", () => {
       key: "email",
       disabled: false,
       required: false,
+      maxLength: undefined,
+      minLength: undefined,
       schema: { type: "string", title: "Email" },
       rawErrors: ["Invalid email format"],
       value: "invalid-email",
@@ -255,16 +266,13 @@ describe("getFieldConfig", () => {
       },
     };
 
-    const errors = null;
-    const formData = {
-      pickOneOfTheOptions: "first option",
-    };
-
     const { type, props } = getFieldConfig({
       uiFieldObject,
       formSchema,
-      errors,
-      formData,
+      errors: null,
+      formData: {
+        pickOneOfTheOptions: "first option",
+      },
       requiredField: false,
     });
 
@@ -297,22 +305,22 @@ describe("getFieldConfig", () => {
   });
 
   describe("buildFieldListBaseId", () => {
-    it("inserts the index placeholder when the fieldList token exists in the child id", () => {
+    it("builds a base id for a flat FieldList child field", () => {
       expect(
         buildFieldListBaseId({
           fieldListName: "contacts",
-          childId: "topField--contacts--firstName",
-        }),
-      ).toBe("topField--contacts[~~index~~]--firstName");
-    });
-
-    it("falls back to prefixing the fieldList name when the token is not present", () => {
-      expect(
-        buildFieldListBaseId({
-          fieldListName: "contacts",
-          childId: "topField--firstName",
+          storagePath: ["firstName"],
         }),
       ).toBe("contacts[~~index~~]--firstName");
+    });
+
+    it("builds a base id for a nested FieldList child field", () => {
+      expect(
+        buildFieldListBaseId({
+          fieldListName: "contacts",
+          storagePath: ["address", "street1"],
+        }),
+      ).toBe("contacts[~~index~~]--address--street1");
     });
   });
 
@@ -320,7 +328,22 @@ describe("getFieldConfig", () => {
     const formSchema: RJSFSchema = {
       type: "object",
       properties: {
-        firstName: { type: "string", title: "First Name" },
+        contacts: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["firstName"],
+            properties: {
+              firstName: { type: "string", title: "First Name" },
+              address: {
+                type: "object",
+                properties: {
+                  street1: { type: "string", title: "Street 1" },
+                },
+              },
+            },
+          },
+        },
         docs: { type: "array", items: { type: "string", format: "uuid" } },
       },
     };
@@ -333,7 +356,7 @@ describe("getFieldConfig", () => {
         children: [
           {
             type: "field",
-            definition: "/properties/firstName",
+            definition: "/properties/contacts/items/properties/firstName",
           },
         ],
       };
@@ -357,6 +380,48 @@ describe("getFieldConfig", () => {
       expect(result.props.groupDefinition[0].baseId).toBe(
         "contacts[~~index~~]--firstName",
       );
+      expect(result.props.groupDefinition[0].storagePath).toEqual([
+        "firstName",
+      ]);
+    });
+
+    it("returns nested storagePath and baseId for nested FieldList child fields", () => {
+      const uiFieldObject: UiSchemaFieldList = {
+        type: "fieldList",
+        name: "contacts",
+        label: "Contacts",
+        children: [
+          {
+            type: "field",
+            definition:
+              "/properties/contacts/items/properties/address/properties/street1",
+          },
+        ],
+      };
+
+      const result = getFieldConfig({
+        errors: null,
+        formSchema,
+        formData: {},
+        uiFieldObject,
+        requiredField: false,
+      });
+
+      expect(result.type).toBe("FieldList");
+
+      if (result.type !== "FieldList") {
+        throw new Error("Expected FieldList");
+      }
+
+      expect(result.props.groupDefinition).toHaveLength(1);
+      expect(result.props.groupDefinition[0].widget).toBe("Text");
+      expect(result.props.groupDefinition[0].baseId).toBe(
+        "contacts[~~index~~]--address--street1",
+      );
+      expect(result.props.groupDefinition[0].storagePath).toEqual([
+        "address",
+        "street1",
+      ]);
     });
 
     it("throws if fieldList contains unsupported node types", () => {
@@ -411,12 +476,161 @@ describe("getFieldConfig", () => {
       ).toThrow();
     });
   });
+
+  describe("table", () => {
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        personnel_federal_share: {
+          type: "number",
+          title: "Personnel Federal Share",
+        },
+        personnel_non_federal_share: {
+          type: "number",
+          title: "Personnel Non-Federal Share",
+          readOnly: true,
+        },
+      },
+    };
+
+    const tableUiSchema: UiSchemaTableMultiField = {
+      type: "multiField",
+      name: "budget_summary_table",
+      widget: "Table",
+      table: {
+        columns: [
+          {
+            columnHeader: "Category",
+            width: 40,
+          },
+          {
+            columnHeader: "Federal Share",
+            width: 30,
+          },
+          {
+            columnHeader: "Non-Federal Share",
+            width: 30,
+          },
+        ],
+        rows: [
+          {
+            rowHeader: "Personnel",
+            cells: [
+              {
+                type: "plainText",
+                staticContent: "Personnel",
+              },
+              {
+                type: "input",
+                definition: "/properties/personnel_federal_share",
+              },
+              {
+                type: "readOnly",
+                definition: "/properties/personnel_non_federal_share",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    it("returns Table config with table metadata, columns, and rows", () => {
+      const result = getFieldConfig({
+        errors: null,
+        formSchema,
+        formData: {
+          personnel_federal_share: 2500,
+          personnel_non_federal_share: 1000,
+        },
+        uiFieldObject: tableUiSchema,
+        requiredField: false,
+      });
+
+      expect(result.type).toBe("Table");
+
+      if (result.type !== "Table") {
+        throw new Error("Expected Table");
+      }
+
+      expect(result.props).toEqual({
+        id: "budget_summary_table",
+        key: "budget_summary_table",
+        name: "budget_summary_table",
+        columns: tableUiSchema.table.columns,
+        rows: tableUiSchema.table.rows,
+      });
+    });
+
+    it("throws when a row does not contain one cell for each column", () => {
+      const uiFieldObject: UiSchemaTableMultiField = {
+        ...tableUiSchema,
+        table: {
+          ...tableUiSchema.table,
+          rows: [
+            {
+              ...tableUiSchema.table.rows[0],
+              cells: [
+                {
+                  type: "plainText",
+                  staticContent: "Personnel",
+                },
+                {
+                  type: "input",
+                  definition: "/properties/personnel_federal_share",
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      expect(() =>
+        getFieldConfig({
+          errors: null,
+          formSchema,
+          formData: {},
+          uiFieldObject,
+          requiredField: false,
+        }),
+      ).toThrow("Table row 1 must contain exactly 3 cells.");
+    });
+
+    it("throws when specified column widths total more than 100", () => {
+      const uiFieldObject: UiSchemaTableMultiField = {
+        ...tableUiSchema,
+        table: {
+          ...tableUiSchema.table,
+          columns: [
+            {
+              columnHeader: "Category",
+              width: 50,
+            },
+            {
+              columnHeader: "Federal Share",
+              width: 51,
+            },
+          ],
+        },
+      };
+
+      expect(() =>
+        getFieldConfig({
+          errors: null,
+          formSchema,
+          formData: {},
+          uiFieldObject,
+          requiredField: false,
+        }),
+      ).toThrow("Table column widths cannot total more than 100.");
+    });
+  });
 });
 
 describe("getEnumOptions", () => {
   it("returns empty object if widget type does not support an enum option", () => {
     expect(getEnumOptions({ widgetType: "Text", fieldSchema: {} })).toEqual({});
   });
+
   it("returns correct enum for boolean field", () => {
     expect(
       getEnumOptions({
@@ -430,7 +644,8 @@ describe("getEnumOptions", () => {
       ],
     });
   });
-  it("handles array field type (multiple items)", () => {
+
+  it("handles array field type with tuple items", () => {
     expect(
       getEnumOptions({
         widgetType: "MultiSelect",
@@ -450,7 +665,7 @@ describe("getEnumOptions", () => {
     });
   });
 
-  it("handles array field type (single item)", () => {
+  it("handles array field type with a single item schema", () => {
     expect(
       getEnumOptions({
         widgetType: "MultiSelect",
@@ -525,7 +740,7 @@ describe("getBasicMultifieldInfo", () => {
       getBasicMultifieldInfo({
         uiFieldObject: {
           definition: "/properties/not-an-array",
-          type: "multiField", // note that this function doesn't assert on type
+          type: "multiField",
           name: "name",
         },
         formSchema: {},
@@ -534,12 +749,13 @@ describe("getBasicMultifieldInfo", () => {
       }),
     ).toThrow();
   });
+
   it("errors on missing name", () => {
     expect(() =>
       getBasicMultifieldInfo({
         uiFieldObject: {
           definition: ["/properties/not-an-array"],
-          type: "multiField", // note that this function doesn't assert on type
+          type: "multiField",
         },
         formSchema: {},
         formData: {},
@@ -547,13 +763,13 @@ describe("getBasicMultifieldInfo", () => {
       }),
     ).toThrow();
   });
+
   it("handles basic schema case", () => {
     const expected = {
       value: {
         nested_field_one: "value one",
         nested_field_two: "value two",
       },
-      // note that the current logic clobbers the first nested field entirely see https://github.com/HHS/simpler-grants-gov/issues/8624
       fieldSchema: {
         properties: {
           nested_field_two: {

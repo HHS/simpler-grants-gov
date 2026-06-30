@@ -2,8 +2,8 @@ import logging
 from uuid import UUID
 
 from grants_shared.adapters import db
+from grants_shared.api.route_utils import raise_flask_error
 
-from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
@@ -92,7 +92,6 @@ def update_opportunity_summary(
     agency = opportunity.agency_record
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, agency)
 
-    validate_opportunity_is_draft(opportunity)
     validate_opportunity_created_in_simpler_grants(opportunity)
 
     # Get and validate the opportunity summary

@@ -1,5 +1,6 @@
 import {
   FieldListWidgetProps,
+  TableWidgetProps,
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/types/applyForm/types";
@@ -21,6 +22,7 @@ import PrintAttachmentWidget from "./PrintAttachmentWidget";
 import PrintWidget from "./PrintWidget";
 import RadioWidget from "./RadioWidget";
 import SelectWidget from "./SelectWidget";
+import TableWidget from "./TableWidget";
 import TextAreaWidget from "./TextAreaWidget";
 import TextWidget from "./TextWidget";
 
@@ -54,4 +56,6 @@ export const widgetComponents: Record<
   MultiSelect: (widgetProps: UswdsWidgetProps) => MultiSelect(widgetProps),
   FieldList: (widgetProps: UswdsWidgetProps) =>
     FieldListWidget(widgetProps as unknown as FieldListWidgetProps),
+  Table: (widgetProps: UswdsWidgetProps) =>
+    TableWidget(widgetProps as unknown as TableWidgetProps),
 };
