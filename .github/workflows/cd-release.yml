@@ -1,5 +1,5 @@
 name: Release Deploy
-run-name: Release Deploy to ${{ github.event_name == 'release' && 'prod + training' || inputs.environment }}
+run-name: Release Deploy ${{ inputs.version || github.ref_name }} to ${{ github.event_name == 'release' && 'prod + training' || inputs.environment }}
 
 # This workflow orchestrates deployments across all services in a specific order:
 # API first, then FE and Analytics after API.
@@ -8,6 +8,11 @@ run-name: Release Deploy to ${{ github.event_name == 'release' && 'prod + traini
 # For releases (prod + training), all prod services deploy first, then all
 # training services. This ensures prod is fully deployed and verified before
 # training begins.
+#
+# The git ref that is built and deployed is determined as follows:
+#   - release event: the published release's tag (github.ref)
+#   - workflow_dispatch: the optional `version` input (a tag, branch, or SHA),
+#     falling back to the branch/tag the workflow was run from (github.ref).
 #
 # All CI checks and vulnerability scans run in parallel for speed.
 # Only the deployment phase is serialized.
@@ -29,6 +34,11 @@ on:
           - grantee1
           - grantee2
           - prod
+      version:
+        description: "Git tag to release"
+        required: false
+        default: ""
+        type: string
 
 jobs:
   # =====================================================
@@ -48,7 +58,7 @@ jobs:
     name: NOFOs Checks
     uses: ./.github/workflows/ci-nofos.yml
     with:
-      version: ${{ github.ref }}
+      version: ${{ inputs.version || github.ref }}
 
   analytics-checks:
     name: Analytics Checks
@@ -120,7 +130,7 @@ jobs:
     with:
       app_name: "api"
       environment: ${{ inputs.environment || 'prod' }}
-      version: ${{ github.ref }}
+      version: ${{ inputs.version || github.ref }}
 
   # 2. Deploy Frontend after API completes successfully
   deploy-frontend:
@@ -130,7 +140,7 @@ jobs:
     with:
       app_name: "frontend"
       environment: ${{ inputs.environment || 'prod' }}
-      version: ${{ github.ref }}
+      version: ${{ inputs.version || github.ref }}
 
   # 3. Deploy Analytics after API completes successfully
   deploy-analytics:
@@ -140,7 +150,7 @@ jobs:
     with:
       app_name: "analytics"
       environment: ${{ inputs.environment || 'prod' }}
-      version: ${{ github.ref }}
+      version: ${{ inputs.version || github.ref }}
 
   # 3b. Deploy NOFOs (skipped - they deploy manually)
   deploy-nofos:
@@ -151,7 +161,7 @@ jobs:
     uses: ./.github/workflows/deploy-nofos.yml
     with:
       environment: ${{ inputs.environment || 'prod' }}
-      version: ${{ github.ref }}
+      version: ${{ inputs.version || github.ref }}
 
   # =====================================================
   # PHASE 3: Deploy to training (release only)
@@ -177,7 +187,7 @@ jobs:
     with:
       app_name: "api"
       environment: "training"
-      version: ${{ github.ref }}
+      version: ${{ inputs.version || github.ref }}
 
   # 5. Deploy Frontend to training after training API completes
   deploy-frontend-training:
@@ -188,7 +198,7 @@ jobs:
     with:
       app_name: "frontend"
       environment: "training"
-      version: ${{ github.ref }}
+      version: ${{ inputs.version || github.ref }}
 
   # 6. Deploy Analytics to training after training API completes
   deploy-analytics-training:
@@ -200,7 +210,7 @@ jobs:
     with:
       app_name: "analytics"
       environment: "training"
-      version: ${{ github.ref }}
+      version: ${{ inputs.version || github.ref }}
 
   # =====================================================
   # Notification on failure
