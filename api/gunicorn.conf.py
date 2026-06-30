@@ -37,3 +37,11 @@ worker_class = "gthread"
 # long-running streaming requests. Setting this to 125s ensures ALB always closes first.
 # See: https://lincolnloop.com/blog/gunicorn-keepalive-and-aws-elb-502-errors/
 keepalive = 125
+
+# Limit the size (in bytes) of an individual HTTP request header field. Default is 8190.
+# We raise it to 16384 to accommodate large headers (e.g. JWT/Authorization tokens, cookies).
+limit_request_field_size = 16384
+
+# Limit the number of header fields in a single request. Default is 100.
+# We tighten it to 50 as a defense against header-based denial-of-service attacks.
+limit_request_fields = 50
