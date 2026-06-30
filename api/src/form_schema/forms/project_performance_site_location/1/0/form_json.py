@@ -246,10 +246,6 @@ FORM_UI_SCHEMA = [
 ]
 
 FORM_RULE_SCHEMA = {
-    "primary_site": {
-        # Pre-populate UEI from the applicant organization
-        "uei": {"gg_pre_population": {"rule": "uei"}},
-    },
     # Validate the attachment ID exists on the application
     "additional_locations_attachment": {"gg_validation": {"rule": "attachment"}},
 }
