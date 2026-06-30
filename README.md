@@ -1,5 +1,7 @@
 # [Simpler.Grants.gov](https://simpler.grants.gov/)
 
+[![A badge which reads We pay for contributions](https://img.shields.io/badge/We%20pay%20for%20contributions-8A2BE2)](CONTRIBUTING.md#paid-contributions)
+
 A modernization effort for [Grants.gov](https://grants.gov/)
 
 ## About the Project
@@ -40,6 +42,21 @@ Documentation and development instructions for the front-end are provided in the
 Thank you for considering contributing to an Open Source project of the US
 Government! For more information about our contribution guidelines, see
 [CONTRIBUTING.md](CONTRIBUTING.md) to learn more and join our community see our [wiki](https://wiki.simpler.hhs.gov).
+
+### Paid contributions
+After some amazing work from our community members offering their time and expertise to make Simpler Grants better, we're pleased to offer bounties on key issues.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md#paid-contributions) to learn more.
+
+#### Bounty Board
+
+| Size | Amount | Name | Status | Age |
+| ---- | ------ | ---- | ------ | --- |
+| M | $200 | Fix focus order in the search filters sidebar | open, unclaimed! | 2 weeks |
+| L | $400 | Add keyboard navigation to the application status stepper | open, unclaimed! | 3 weeks |
+| XL | $750 | Migrate legacy opportunity cards to the USWDS card component | open, unclaimed! | 2 weeks |
+
+[See a list of all open bounties.](https://github.com/HHS/simpler-grants-gov/issues?q=state%3Aopen%20label%3A%22status%3A%20open%20bounty%22)
 
 ## Community
 
