@@ -10224,6 +10224,21 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    FileMetadataSchema:
+      type: object
+      properties:
+        file_size_bytes:
+          type: integer
+          description: The size of the scanned file in bytes
+        file_name:
+          type: string
+          description: The name of the scanned file
+          example: example.pdf
+        download_path:
+          type: string
+          description: A presigned URL the caller can use to download the scanned
+            file
+          example: https://example-bucket.s3.amazonaws.com/scanned/abc/example.pdf
     FileScanResultsDataSchema:
       type: object
       properties:
@@ -10239,6 +10254,15 @@ components:
           - processed
           type:
           - string
+        file_metadata:
+          description: Metadata for the scanned file. Populated only once the scan
+            status is complete; null for any other status.
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/FileMetadataSchema'
+          - type: 'null'
       required:
       - status
     FileScanResultsResponseSchema:
@@ -13648,6 +13672,11 @@ components:
     AwardRecommendationSubmissionDetailSchema:
       type: object
       properties:
+        award_recommendation_submission_detail_id:
+          type: string
+          format: uuid
+          description: The submission detail ID
+          example: 123e4567-e89b-12d3-a456-426614174000
         recommended_amount:
           type:
           - number
