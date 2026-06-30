@@ -349,15 +349,12 @@ export const RecommendationSubmissionsSection = ({
               {t("recommendedAwards.heading")}
             </h3>
             {showRecommended && (
-              <a
+              <Link
                 className="text-bold text-underline"
-                href="#"
-                onClick={(event) => {
-                  event.preventDefault();
-                }}
+                href={`/award-recommendation/${awardRecommendationId}/application-submissions/edit`}
               >
                 {t("recommendedAwards.editLink")}
-              </a>
+              </Link>
             )}
           </div>
           <p className="text-base-dark margin-top-0">
@@ -370,15 +367,12 @@ export const RecommendationSubmissionsSection = ({
             />
           ) : (
             <div className="bg-base-lighter radius-md padding-y-2 padding-x-3">
-              <a
+              <Link
                 className="text-bold text-left display-block width-full text-underline"
-                href="#"
-                onClick={(event) => {
-                  event.preventDefault();
-                }}
+                href={`/award-recommendation/${awardRecommendationId}/application-submissions/edit`}
               >
                 {t("recommendedAwards.editLink")}
-              </a>
+              </Link>
             </div>
           )}
         </div>

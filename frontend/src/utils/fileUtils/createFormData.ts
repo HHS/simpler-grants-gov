@@ -1,3 +1,9 @@
+export const createFormDataForFile = async (file: File) => {
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  return createFormData(file.name, buffer, file.type);
+};
+
 export const createFormData = (
   filename: string,
   buffer: Buffer,
