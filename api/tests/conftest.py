@@ -778,9 +778,7 @@ def seed_form_registry(load_active_forms) -> None:
 
 @pytest.fixture
 def create_test_form(db_session):
-    """Factory fixture for custom-schema test forms with automatic registry cleanup.
-    # TODO(#10274): remove db_session.add + flush once the form table is dropped
-    """
+    """Factory fixture for custom-schema test forms with automatic registry cleanup."""
     init_form_registry()
     registered_keys = []
 
@@ -801,8 +799,6 @@ def create_test_form(db_session):
             form_rule_schema=form_rule_schema,
             json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
         )
-        db_session.add(form)
-        db_session.flush()
         form_template_registry.register(form, major_version=1)
         registered_keys.append(FormTemplateKey(form.form_id, 1))
         return form
