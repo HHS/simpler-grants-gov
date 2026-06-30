@@ -8,7 +8,7 @@ To claim and receive payment for a bounty in the Simpler Grants Funded Open Sour
 
 1. Be at least 18 years of age.  
 2. Be a United States citizen.  
-3. Not be a current or former employee, contractor, or subcontractor of Nava Public Benefit Corporation.  
+3. Not be a current or former employee, contractor, or subcontractor of Bounty Program Administrator.  
 4. Not be a current employee, contractor, or subcontractor of the US Department of Health and Human Services.  
 5. Not be a current US federal employee whose participation would violate the Hatch Act or any other moonlighting restriction applicable to your role.  
 6. Not appear on the US Treasury Office of Foreign Assets Control (OFAC) Specially Designated Nationals list.
@@ -27,14 +27,14 @@ To claim and receive payment for a bounty in the Simpler Grants Funded Open Sour
 1. Payment is issued through Tremendous to the email address on your verified GitHub account. You are responsible for providing correct payment details.  
 2. Payment is released only after your pull request has been merged, all program checks have passed, and any required tax documentation has been provided.  
 3. If your cumulative calendar-year payments from the program will reach or exceed $600, you must provide a completed IRS Form W-9 before the payment that would cross the threshold is released. Payments are paused pending W-9 receipt.  
-4. Nava issues IRS Form 1099-NEC at calendar year end for any contributor who received $600 or more in the year.  
-5. Nava does not make payments to third parties on your behalf (LLCs, family members, etc.). Payment is made to the individual who submitted the contribution, under the name and tax ID provided.
+4. Bounty Prgroam Administrator issues IRS Form 1099-NEC at calendar year end for any contributor who received $600 or more in the year.  
+5. Bounty Prgroam Administrator does not make payments to third parties on your behalf (LLCs, family members, etc.). Payment is made to the individual who submitted the contribution, under the name and tax ID provided.
 
 ## 1.4 Conduct
 
 1. You agree to comply with the Simpler Grants project Code of Conduct at all times during your participation.  
 2. You agree not to harass, threaten, intimidate, or discriminate against any other contributor, or staff member.  
-3. You agree to communicate about bounty decisions through the designated channels defined by the program. Public campaigns, social media pressure, or off-channel escalation to Nava or HHS personnel are not acceptable means of dispute resolution.  
+3. You agree to communicate about bounty decisions through the designated channels defined by the program. Public campaigns, social media pressure, or off-channel escalation to Bounty Prgroam Administrator or HHS personnel are not acceptable means of dispute resolution.  
 4. Violations may result in a warning, temporary suspension, or permanent removal from the program. Permanent removal forfeits any unpaid bounties.
 
 ## 1.5 Intellectual Property
@@ -51,8 +51,8 @@ To claim and receive payment for a bounty in the Simpler Grants Funded Open Sour
 
 ## 1.7 Privacy and Data
 
-1. Nava collects only the information necessary to administer the program: GitHub handle, email, tax documentation when required, and contribution history.  
-2. Tax documentation is handled per Nava's standard data-retention policy and applicable IRS record-keeping requirements (retained for at least 7 years).  
+1. Bounty Prgroam Administrator collects only the information necessary to administer the program: GitHub handle, email, tax documentation when required, and contribution history.  
+2. Tax documentation is handled per Bounty Prgroam Administrator's standard data-retention policy and applicable IRS record-keeping requirements (retained for at least 7 years).  
 3. Public contribution history in the repository is part of the public record. Comments and the contributor tracking table remain public. You may request redaction of personal information (real name, email) from the tracking table by contacting the program owners; commit history cannot be altered.
 
 ## 1.8 Program Changes and Termination
@@ -65,4 +65,4 @@ To claim and receive payment for a bounty in the Simpler Grants Funded Open Sour
 
 To claim a bounty, post a comment on the issue with the following text before your /claim comment:
 
-I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former Nava or HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.
+I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former Bounty Prgroam Administrator or HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.

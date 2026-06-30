@@ -11,7 +11,7 @@ drives most of these; escalations are noted per snippet. Replace every placehold
 - **Private** (email to the contributor; never on the public issue): eligibility
   declines, W-9 request, post-payout survey. Identity/eligibility outcomes are
   logged in the internal tracker row, not on the issue (SOP Part 5.2).
-- **Internal** (the Tremendous handoff note) goes to Nava finance, not the contributor.
+- **Internal** (the Tremendous handoff note) goes to Bounty Prgroam Administrator finance, not the contributor.
 
 ---
 
@@ -212,7 +212,7 @@ Hi <name>,
 
 Congratulations on your merged contribution to #NNN — the $AMOUNT bounty is approved and ready to pay.
 
-One more step: with this payment, your total bounty payments from the program this calendar year will reach or exceed $600. US tax rules require us to collect an IRS Form W-9 before releasing a payment that crosses that threshold. (At year end, Nava issues a Form 1099-NEC to any contributor paid $600 or more.)
+One more step: with this payment, your total bounty payments from the program this calendar year will reach or exceed $600. US tax rules require us to collect an IRS Form W-9 before releasing a payment that crosses that threshold. (At year end, the Bounty Prgroam Administrator issues a Form 1099-NEC to any contributor paid $600 or more.)
 
 Please complete and return a W-9 by <date — 14 days out>:
 - Blank form and instructions: https://www.irs.gov/forms-pubs/about-form-w-9
@@ -228,10 +228,10 @@ Questions are welcome. Thanks for your work on Simpler Grants.
 
 ## Tremendous handoff note
 
-> Internal note to Nava finance to initiate payment, following Nava's existing
+> Internal note to Bounty Prgroam Administrator finance to initiate payment, following Bounty Prgroam Administrator's existing
 > Tremendous SOP (SOP Part 5.1). Target: submitted within 24h of merge, confirmed
 > sent within 48h. **Not sent to the contributor.** Governance: OS Associate
-> initiates; Nava finance processes.
+> initiates; Bounty Prgroam Administrator finance processes.
 
 ```
 Bounty payout request — Simpler Grants Funded OSS Contributor Program
