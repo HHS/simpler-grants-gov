@@ -13,29 +13,36 @@ import { NextRequest, NextResponse } from "next/server";
 // apparently the API response stream will timeout after 60 seconds, and deliver chunks every 3 seconds
 const pipeStatusStreamToResponse = async (
   outputController: ReadableStreamDefaultController,
-  inputStream: ReadableStreamDefaultReader<string>,
+  inputStream: ReadableStreamDefaultReader<Uint8Array>,
   previousState?: string,
 ) => {
   const { value, done } = await inputStream.read();
   let responseState = previousState;
   // this structure is dependent on what the API will actually send back, and will need to be adjusted
   if (value) {
-    let payloadJson: FileUploadStatusUpdate;
+    let payloadJson: { data: FileUploadStatusUpdate };
     try {
-      payloadJson = value ? (JSON.parse(value) as FileUploadStatusUpdate) : {};
+      const payloadString = new TextDecoder().decode(value);
+      payloadJson = JSON.parse(payloadString) as {
+        data: FileUploadStatusUpdate;
+      };
     } catch (e) {
       console.error("Error parsing json from file upload stream payload");
       throw e;
     }
     // we will expect the API to deliver duplicate chunks until a state change, but will only write to our
     // output stream when the state changes
-    if (previousState !== payloadJson.status) {
-      responseState = payloadJson.status;
-      outputController.enqueue({ status: payloadJson.status });
+    const statusOnRead = payloadJson.data.status;
+    if (previousState !== statusOnRead) {
+      // infected status won't come through as an error, we'll have to throw our own
+      if (statusOnRead === "infected") {
+        throw new Error("Virus scan failed, file infected");
+      }
+      responseState = statusOnRead;
+      outputController.enqueue(JSON.stringify({ status: statusOnRead }));
     }
   }
   if (done) {
-    outputController.close();
     return;
   }
   return pipeStatusStreamToResponse(
@@ -53,14 +60,14 @@ const orchestrateFileUpload = async (
   responseStreamController: ReadableStreamDefaultController,
   file: File,
 ) => {
-  responseStreamController.enqueue({ status: "queued" });
+  responseStreamController.enqueue(JSON.stringify({ status: "queued" }));
   // call Simpler API to obtain details for S3 upload and pending file id
   const fileUploadDetails = await fetchFileUploadDetails(file.name, file.type);
-  responseStreamController.enqueue({ status: "uploading" });
+  responseStreamController.enqueue(JSON.stringify({ status: "uploading" }));
 
   // upload file to s3
   await uploadFileToS3(fileUploadDetails.url, fileUploadDetails.body, file);
-  responseStreamController.enqueue({ status: "starting-scan" });
+  responseStreamController.enqueue(JSON.stringify({ status: "starting-scan" }));
 
   // open stream to fetch upload and scan progress updates
   const fileUploadStatusResponse = await fetchFileScanStatus(
@@ -71,23 +78,33 @@ const orchestrateFileUpload = async (
     responseStreamController,
     fileUploadStatusResponse.getReader(),
   );
+
+  // this is here in order to send back the file id
+  responseStreamController.enqueue(
+    JSON.stringify({
+      status: "scan-complete",
+      pendingFileId: fileUploadDetails.pending_file_id,
+    }),
+  );
+  return fileUploadDetails.pending_file_id;
 };
 
 // creates a new stream to use for the client response and makes all
 // upload related calls within the context of the stream
-const processUploadInStream = (
-  file: File,
-): ReadableStream<FileUploadStatusUpdate> => {
-  const responseStream = new ReadableStream<FileUploadStatusUpdate>({
+const processUploadInStream = (file: File): ReadableStream<string> => {
+  const responseStream = new ReadableStream<string>({
     start: async (responseStreamController) => {
       try {
         await orchestrateFileUpload(responseStreamController, file);
+        responseStreamController.close();
       } catch (e) {
         console.error("Error in file upload orchestration stream", e);
-        responseStreamController.enqueue({
-          status: "error",
-          error: (e as Error).message,
-        });
+        responseStreamController.enqueue(
+          JSON.stringify({
+            status: "error",
+            error: (e as Error).message,
+          }),
+        );
         responseStreamController.close();
       }
     },
@@ -99,9 +116,10 @@ const processUploadInStream = (
 export const handleFileUpload = async (request: NextRequest) => {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file_attachment") as File;
 
     if (!file) {
+      console.error("File upload attempt missing file");
       return Response.json(
         { message: "File upload attempt missing file" },
         { status: 400 },
