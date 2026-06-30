@@ -1,16 +1,95 @@
 "use client";
 
+import { createAwardRecommendationAction } from "src/app/[locale]/(base)/award-recommendation/select-opportunity/actions";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
-export const SelectFundingOpportunityContent = () => {
+import {
+  TableCellData,
+  TableWithResponsiveHeader,
+} from "src/components/core/TableWithResponsiveHeader";
+
+type SelectFundingOpportunityContentProps = {
+  fundingOpportunities: BaseOpportunity[];
+};
+
+export const SelectFundingOpportunityContent = ({
+  fundingOpportunities,
+}: SelectFundingOpportunityContentProps) => {
   const t = useTranslations("AwardRecommendationSelectFundingOpportunity");
   const router = useRouter();
+  const [creatingOpportunityId, setCreatingOpportunityId] = useState<
+    string | null
+  >(null);
 
   const handleCancel = () => {
     router.push("/");
   };
+
+  const handleCreateAwardRecommendation = async (
+    fundingOpportunityId: string,
+  ) => {
+    setCreatingOpportunityId(fundingOpportunityId);
+
+    try {
+      const { awardRecommendationId } =
+        await createAwardRecommendationAction(fundingOpportunityId);
+
+      router.push(`/award-recommendation/${awardRecommendationId}/edit`);
+    } finally {
+      setCreatingOpportunityId(null);
+    }
+  };
+
+  const headerContent: TableCellData[] = [
+    { cellData: t("columns.fundingOpportunityNumber") },
+    { cellData: t("columns.fundingOpportunityName") },
+    { cellData: t("columns.submittedApplications") },
+    { cellData: t("columns.action") },
+  ];
+
+  const tableRowData: TableCellData[][] = fundingOpportunities.map(
+    (fundingOpportunity) => {
+      const isCreating =
+        creatingOpportunityId === fundingOpportunity.opportunity_id;
+
+      return [
+        {
+          cellData: (
+            <Link
+              href={`/opportunity/${fundingOpportunity.opportunity_id}`}
+              className="usa-link"
+            >
+              {fundingOpportunity.opportunity_number}
+            </Link>
+          ),
+        },
+        { cellData: fundingOpportunity.opportunity_title },
+        { cellData: fundingOpportunity.submitted_application_count ?? 0 },
+        {
+          cellData: (
+            <Button
+              type="button"
+              className="usa-button--outline margin-y-0"
+              disabled={isCreating}
+              onClick={() => {
+                void handleCreateAwardRecommendation(
+                  fundingOpportunity.opportunity_id,
+                );
+              }}
+            >
+              {t("startButtonText")} <span aria-hidden="true">→</span>
+            </Button>
+          ),
+        },
+      ];
+    },
+  );
 
   return (
     <>
@@ -19,6 +98,11 @@ export const SelectFundingOpportunityContent = () => {
           {t("whichFundingOpportunity")}
         </h2>
       </div>
+
+      <TableWithResponsiveHeader
+        headerContent={headerContent}
+        tableRowData={tableRowData}
+      />
 
       <div className="margin-top-5">
         <Button

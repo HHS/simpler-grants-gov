@@ -31,7 +31,10 @@ export const fetchFileUploadDetails = async (
       mime_type: mimeType,
     },
   });
-  return (await uploadDetailsResponse.json()) as FileUploadDetailsResponse;
+  const responseJson = (await uploadDetailsResponse.json()) as {
+    data: FileUploadDetailsResponse;
+  };
+  return responseJson.data;
 };
 
 // uses the url and body parameters return by the API in the fetchFileUploadDetails call
@@ -40,38 +43,36 @@ export const uploadFileToS3 = async (
   body: OptionalStringDict,
   file: File,
 ): Promise<boolean> => {
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+  // TODO: throwing here will cause a batched chunk, I believe because the behavior is to batch chunks queued between
+  // asynchronous calls. We can either make this asynchronous somehow, or build behavior into the stream reader to split batched
+  // chunks on read (ex. split at `}{`)
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
 
-    const fileFormData = createFormData(file.name, buffer, file.type, "file");
-    Object.entries(body).forEach(([key, value]) => {
-      // don't overwrite the file field
-      if (value && key !== "file") {
-        fileFormData.append(key, value);
-      }
-    });
-    const s3Response = await fetch(url, {
-      method: "POST",
-      body: fileFormData,
-    });
-    if (s3Response.ok) {
-      return true;
+  const fileFormData = createFormData(file.name, buffer, file.type, "file");
+  Object.entries(body).forEach(([key, value]) => {
+    // don't overwrite the file field
+    if (value && key !== "file") {
+      fileFormData.append(key, value);
     }
+  });
+  const s3Response = await fetch(url, {
+    method: "POST",
+    body: fileFormData,
+  });
+  if (!s3Response.ok) {
     throw new ApiRequestError("Error uploading file to S3");
-  } catch (e) {
-    console.error(e);
-    throw e;
   }
+  return true;
 };
 
 // opens a stream with the API to fetch scan status
 export const fetchFileScanStatus = async (
   pendingFileId: string,
-): Promise<ReadableStream<string>> => {
+): Promise<ReadableStream<Uint8Array>> => {
   const fileScanStatusResponse = await fetchFileUploadWithMethod("GET")({
     subPath: `/${pendingFileId}/results`,
   });
   // may need to do some work here if the body isn't readable as a string in the end
-  return fileScanStatusResponse.body as unknown as ReadableStream<string>;
+  return fileScanStatusResponse.body as unknown as ReadableStream<Uint8Array>;
 };
