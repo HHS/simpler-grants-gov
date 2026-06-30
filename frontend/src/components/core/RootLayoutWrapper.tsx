@@ -67,6 +67,58 @@ export default async function RootLayoutWrapper({
         />
       </head>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var cid = ${JSON.stringify(correlationId)};
+                if (!cid) return;
+
+                window.__SGG_CORRELATION_ID = cid;
+
+                function attachCorrelationId() {
+                  if (
+                    window.newrelic &&
+                    typeof window.newrelic.setCustomAttribute === "function"
+                  ) {
+                    window.newrelic.setCustomAttribute("correlation_id", cid);
+                    return true;
+                  }
+                  return false;
+                }
+
+                if (!attachCorrelationId()) {
+                  var tries = 0;
+                  var interval = setInterval(function() {
+                    if (attachCorrelationId() || ++tries > 100) {
+                      clearInterval(interval);
+                    }
+                  }, 50);
+                }
+
+                if (typeof window.fetch === "function") {
+                  var originalFetch = window.fetch.bind(window);
+                  window.fetch = function(input, init) {
+                    try {
+                      var request = input instanceof Request ? input : new Request(input, init);
+                      var url = new URL(request.url, window.location.href);
+                      if (url.origin === window.location.origin) {
+                        var headers = new Headers(request.headers);
+                        if (!headers.has("X-Correlation-Id")) {
+                          headers.set("X-Correlation-Id", cid);
+                        }
+                        request = new Request(request, { headers });
+                      }
+                      return originalFetch(request);
+                    } catch (e) {
+                      return originalFetch(input, init);
+                    }
+                  };
+                }
+              })();
+            `,
+          }}
+        />
         <NextIntlClientProvider messages={messages}>
           <CorrelationIdTracker correlationId={correlationId} />
           {children}
