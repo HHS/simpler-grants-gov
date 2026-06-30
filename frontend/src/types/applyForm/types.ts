@@ -202,6 +202,7 @@ export type FieldListChildWidgetTypes = Exclude<
  *     address.city
  *     address.country
  */
+
 export type FieldListGroupItem = {
   widget: FieldListChildWidgetTypes;
   generalProps: Omit<UswdsWidgetProps, "id" | "value" | "key">;
@@ -324,6 +325,7 @@ export interface UiSchemaSection {
  * Optional accessibility identifier applied to widgets rendered within
  * each FieldList entry so child inputs can reference their entry heading.
  */
+
 export interface UiSchemaFieldList {
   type: "fieldList";
   label: string;
