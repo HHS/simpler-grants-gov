@@ -168,7 +168,7 @@ export function OpportunityAttachmentUploadInput({
         readOnly={false}
         required={false}
         existingFiles={existingFiles}
-        multiFile={true}
+        // multiFile={true}
       />
     </FormGroup>
   );
