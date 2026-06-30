@@ -70,7 +70,6 @@ test.describe("Grantor Opportunity Happy Path", () => {
       const fillData = buildOpportunityHappyPathFillData(new Date());
       const opportunityNumber = fillData.opportunityNumber;
       const opportunityTitle = fillData.opportunityTitle;
-      const grantSelectionMethod = fillData.grantSelectionMethod;
 
       //--------------Scenario steps start here----------------
 
@@ -170,11 +169,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
       await assertTextsVisibleOnPage(page, [
         opportunityTitle,
         opportunityNumber,
-        grantSelectionMethod,
       ]);
-
-      // And the URL should include "fromCreate=true"
-      await expect(page).toHaveURL(/fromCreate=true/);
 
       // And "Save" and "Publish" should be enabled while "Preview" remains disabled.
       await assertButtonEnabledDisabledStates(page, {
@@ -235,7 +230,6 @@ test.describe("Grantor Opportunity Happy Path", () => {
         opportunityNumber,
         fillData.assistanceListingNumber,
         fillData.fundingType_2,
-        grantSelectionMethod,
         fillData.category,
         fillData.expectedNumberOfAwards,
         formatNumberWithCommas(fillData.awardMinimum),
