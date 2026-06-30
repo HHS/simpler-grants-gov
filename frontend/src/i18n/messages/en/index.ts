@@ -2368,11 +2368,6 @@ export const messages = {
       editOpportunityLink: "Opportunity Summary",
       competitionLink: "Application Package",
     },
-    alerts: {
-      newOpportunityHeading: "Opportunity draft started",
-      newOpportunityBody:
-        "Your initial information has been saved. Complete the sections below to finish your opportunity details",
-    },
   },
   CreateOpportunity: {
     pageTitle: "Create Opportunity",
@@ -2490,6 +2485,11 @@ export const messages = {
     subAgency: "Sub-agency:",
     draft: "Draft",
     lastUpdated: "Last updated:",
+    alerts: {
+      newOpportunityHeading: "Opportunity draft started",
+      newOpportunityBody:
+        "Your initial information has been saved. Complete the sections below to finish your opportunity details",
+    },
   },
   AwardRecommendationSelectFundingOpportunity: {
     pageTitle: "Select funding opportunity | Simpler.Grants.gov",

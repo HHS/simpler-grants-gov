@@ -29,9 +29,11 @@ Feature: Opportunity happy path create and publish
 			| Create Opportunity page | Grant selection method    | select     | Discretionary              |
 			| Create Opportunity page | Assistance listing number | text       | 00.000                     |
 		And I click "Save and continue" button
-		Then I should be on the "Edit Opportunity" page
+		Then I should be on the "Opportunity Overview" page
 		And the URL should include "fromCreate=true"
 		And I should see "Opportunity draft started" confirmation message
+		and I click "Opportunity Summary"
+		Then I should be on the "Edit Opportunity" page
 		And the "Save" button should be enabled
 		And the "Publish" button should be disabled
 		And the "Preview" button should be disabled

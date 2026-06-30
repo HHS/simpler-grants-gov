@@ -98,13 +98,21 @@ test.describe("Grantor Opportunity Happy Path", () => {
       // And I click "Save and continue" button
       await page.getByRole("button", { name: "Save and continue" }).click();
 
-      // Then I should be on the "Edit Opportunity" page and the URL should include "fromCreate=true".
-      await expect(page).toHaveURL(/fromCreate=true/);
+      // Then I should be on the "Opportunity Overview" page and the URL should include "fromCreate=true".
+      await expect(page).toHaveURL(/overview\?fromCreate=true/);
 
       // And I should see the "Opportunity draft started" confirmation message.
       await expect(
         page.getByText("Opportunity draft started", { exact: true }),
       ).toBeVisible();
+
+      // And I click "Opportunity Summary" button
+      await page.getByRole("button", { name: "Opportunity Summary" }).click();
+
+      // Then I should be on the "Edit Opportunity" page
+      await expect(page).toHaveURL(
+        /\/grantor\/opportunity\/([a-z0-9-]+?)\/edit/,
+      );
 
       // And "Save" should be enabled while "Publish" and "Preview" remain disabled.
       await assertButtonEnabledDisabledStates(page, {

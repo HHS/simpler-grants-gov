@@ -111,7 +111,6 @@ async function OpportunityEditPage({ params }: PageProps) {
               initialValues={initialValues}
               isDraft={!!opportunityData.is_draft}
               initialAttachments={opportunityData.attachments ?? []}
-              opportunityKeyInformation={opportunityKeyInformation}
               saveLabel={tEdit("header.saveButton")}
               previewLabel={tEdit("header.previewButton")}
               publishLabel={tEdit("header.publishButton")}
