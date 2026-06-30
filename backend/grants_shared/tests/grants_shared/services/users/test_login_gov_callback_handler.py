@@ -40,3 +40,14 @@ def test_login_callback_handler_handle_callback_request(
     login_gov_data_container = login_gov_callback_handler.handle_callback_request(query)
     assert login_gov_data_container.code == query["code"]
     assert login_gov_data_container.nonce == str(login_gov_state.nonce)
+
+
+# TODO: Unit tests that need to be added:
+# * login_callback_handler.handle_callback_request fails due to invalid callback params
+# * login_callback_handler.handle_callback_request fails due to code being none
+# * login_callback_handler.handle_callback_request fails due to state being none
+# * login_callback_handler.handle_callback_request fails due to invalid uuid for state
+# * login_callback_handler.handle_callback_request fails due to login gov state being none
+# * login_callback_handler.handle_token succeeds
+# * login_callback_handler.handle_token when oauth token reponse is error
+# * login_callback_handler.handle_token when login.gov validation fails

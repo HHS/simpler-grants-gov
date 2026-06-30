@@ -268,9 +268,9 @@ def workflow_sqs_queue(mock_sqs, monkeypatch):
     return queue["QueueUrl"]
 
 
-@pytest.fixture(scope="session")
-def other_rsa_key_pair():
-    return _generate_rsa_key_pair()
+#################
+# Auth
+#################
 
 
 def _generate_rsa_key_pair():
@@ -290,21 +290,6 @@ def _generate_rsa_key_pair():
     return private_key, public_key
 
 
-@pytest.fixture(scope="session")
-def rsa_key_pair():
-    return _generate_rsa_key_pair()
-
-
-@pytest.fixture(scope="session")
-def private_rsa_key(rsa_key_pair):
-    return rsa_key_pair[0]
-
-
-@pytest.fixture(scope="session")
-def public_rsa_key(rsa_key_pair):
-    return rsa_key_pair[1]
-
-
 @pytest.fixture
 def login_gov_config(public_rsa_key, private_rsa_key):
     # Note this isn't session scoped so it gets remade
@@ -319,3 +304,23 @@ def login_gov_config(public_rsa_key, private_rsa_key):
         LOGIN_GOV_TOKEN_ENDPOINT="http://localhost:3000/token",
         LOGIN_FINAL_DESTINATION="http://localhost:3000/final",
     )
+
+
+@pytest.fixture(scope="session")
+def rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
+@pytest.fixture(scope="session")
+def other_rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
+@pytest.fixture(scope="session")
+def public_rsa_key(rsa_key_pair):
+    return rsa_key_pair[1]
+
+
+@pytest.fixture(scope="session")
+def private_rsa_key(rsa_key_pair):
+    return rsa_key_pair[0]
