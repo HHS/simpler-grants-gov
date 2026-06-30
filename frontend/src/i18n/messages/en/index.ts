@@ -2166,6 +2166,8 @@ export const messages = {
       "You are not authenticated. Please sign in to view award recommendations.",
     awardRecommendationFetchError:
       "Error fetching award recommendation data. Please try refreshing the page.",
+    awardRecommendationNotFound:
+      "Award recommendation not found. Please check the ID and try again.",
     errorHeadingAwardRecommendationSubmission:
       "Error fetching application submission details",
     awardRecommendationSubmissionFetchError:
