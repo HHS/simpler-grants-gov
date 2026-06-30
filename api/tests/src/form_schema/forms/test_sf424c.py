@@ -91,7 +91,7 @@ def test_sf424c_v2_0_no_required_fields(sf424c_v2_0):
 
 
 def test_sf424c_v2_0_negative_monetary_amount(sf424c_v2_0):
-    """Negative monetary amounts fail schema validation with a minimum error."""
+    """Negative monetary amounts fail schema validation (caught by pattern constraint on the monetary string format)."""
     data = {
         "budget_information": {
             "construction": {
@@ -101,7 +101,7 @@ def test_sf424c_v2_0_negative_monetary_amount(sf424c_v2_0):
     }
     validation_issues = validate_json_schema_for_form(data, sf424c_v2_0)
     assert len(validation_issues) == 1
-    assert validation_issues[0].type == "minimum"
+    assert validation_issues[0].type == "pattern"
     assert validation_issues[0].field == "$.budget_information.construction.total_cost"
 
 
@@ -134,7 +134,11 @@ def test_sf424c_v2_0_percentage_negative(sf424c_v2_0):
 def test_sf424c_v2_0_rules_empty_state(
     enable_factory_create, verify_no_warning_error_logs, sf424c_v2_0
 ):
-    """With no user input, all calculated fields default to '0.00'."""
+    """With no user input, all calculated fields default to '0.00'.
+
+    User-input rows get total_allowable_cost = 0.00 (0 - 0).
+    Calculated rows (subtotal_1, subtotal_2, total_project_costs) get all three columns.
+    """
     application_form = setup_application_for_form_validation(
         {},
         json_schema=sf424c_v2_0.form_json_schema,
@@ -145,10 +149,25 @@ def test_sf424c_v2_0_rules_empty_state(
     app_json = application_form.application_response
 
     zero_row = {"total_cost": "0.00", "non_allowable_cost": "0.00", "total_allowable_cost": "0.00"}
+    # User-input rows: rules engine writes only total_allowable_cost = total_cost - non_allowable_cost
+    user_input_zero = {"total_allowable_cost": "0.00"}
     assert app_json == {
         "budget_information": {
+            "administrative_and_legal_expenses": user_input_zero,
+            "land_structures_rights_of_way": user_input_zero,
+            "relocation_expenses": user_input_zero,
+            "architectural_engineering_fees": user_input_zero,
+            "other_architectural_engineering_fees": user_input_zero,
+            "project_inspection_fees": user_input_zero,
+            "site_work": user_input_zero,
+            "demolition_and_removal": user_input_zero,
+            "construction": user_input_zero,
+            "equipment": user_input_zero,
+            "miscellaneous": user_input_zero,
             "subtotal_1": zero_row,
+            "contingencies": user_input_zero,
             "subtotal_2": zero_row,
+            "project_income": user_input_zero,
             "total_project_costs": zero_row,
         },
         "federal_funding": {
