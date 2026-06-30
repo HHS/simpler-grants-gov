@@ -8,6 +8,10 @@ import { notFound, redirect } from "next/navigation";
 import { Link } from "@trussworks/react-uswds";
 
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
+import {
+  competitionRequiredFields,
+  summaryRequiredFields,
+} from "./RequiredFields";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
@@ -19,6 +23,7 @@ async function OpportunityOverviewPage({ params }: PageProps) {
   const editUrl = "../" + id + "/edit";
   const competitionUrl = "../" + id + "/competition";
 
+  // Get the opportunity detailed data in order to calculate the statuses
   let opportunityData = {} as GrantorOpportunityDetail;
   try {
     const response = await getOpportunityForGrantor(id);
