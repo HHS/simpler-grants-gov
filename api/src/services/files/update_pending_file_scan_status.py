@@ -2,12 +2,12 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+import grants_shared.util.file_util as file_util
 from grants_shared.api.response import ValidationErrorDetail
 from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util import datetime_util
 from sqlalchemy import select
 
-import src.util.file_util as file_util
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import FileScanStatus, Privilege
 from src.db.models.file_upload_models import PendingFile
@@ -52,6 +52,15 @@ def update_pending_file_scan_status(
     now = datetime_util.utcnow()
     scan_duration_seconds = (now - pending_file.created_at).total_seconds()
 
+    # Calculate the file length of the file for logging purposes
+    # If this fails for whatever reason, we don't want to fail
+    # the API call, just log the error and move on.
+    try:
+        file_length = file_util.get_file_length_bytes(file_location)
+    except Exception:
+        logger.exception("Failed to get file length")
+        file_length = None
+
     logger.info(
         "Updated pending file scan status",
         extra={
@@ -61,5 +70,6 @@ def update_pending_file_scan_status(
             "prior_file_scan_status": prior_file_scan_status,
             "file_scan_status": file_scan_status,
             "scan_duration_seconds": scan_duration_seconds,
+            "file_length_bytes": file_length,
         },
     )

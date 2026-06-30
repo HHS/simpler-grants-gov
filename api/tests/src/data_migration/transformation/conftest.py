@@ -2,9 +2,10 @@ import uuid
 from datetime import date, datetime
 
 import pytest
+from grants_shared.adapters.aws import S3Config
+from grants_shared.util import file_util
 
 import tests.src.db.models.factories as f
-from src.adapters.aws import S3Config
 from src.constants.lookup_constants import (
     ApplicantType,
     CompetitionOpenToApplicant,
@@ -32,7 +33,6 @@ from src.services.competition_alpha.competition_instruction_util import (
     get_s3_competition_instruction_path,
 )
 from src.services.opportunity_attachments import attachment_util
-from src.util import file_util
 from tests.conftest import BaseTestClass
 
 

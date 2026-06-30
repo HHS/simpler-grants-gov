@@ -17,7 +17,6 @@ from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import get_active_forms, init_form_registry
-from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_agencies_and_users import _build_agencies_and_users
 from tests.lib.seed_award_recommendations import _build_award_recommendations
@@ -126,15 +125,17 @@ def _build_opportunities(
 
 
 def _build_forms(db_session: db.Session) -> dict[str, Form]:
-    """Load all of our forms into the DB"""
+    """Seed form instructions and return in-memory form objects from the registry.
+
+    The form table has been dropped — forms live in the in-memory registry only.
+    We still need to seed FormInstruction rows for forms that have instructions
+    so that S3 files exist for local dev.
+    """
     logger.info("Rebuilding forms")
 
     active_forms = get_active_forms()
     forms = {}
 
-    # For each form we need to sync the form record into
-    # the database. If the form has form instructions
-    # we'll create that if it doesn't already exist.
     existing_form_instruction_ids = set(
         db_session.execute(select(FormInstruction.form_instruction_id)).scalars()
     )
@@ -153,8 +154,7 @@ def _build_forms(db_session: db.Session) -> dict[str, Form]:
                 file_name=f"{form.short_form_name}.txt",
             )
 
-        form.form_json_schema = resolve_jsonschema(form.form_json_schema)
-        forms[form.short_form_name] = db_session.merge(form, load=True)
+        forms[form.short_form_name] = form
 
     return forms
 
@@ -622,7 +622,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
     ) in isolated_form_competitions:
         opportunity_number = f"{prefix}-ORG-IND-01"
         opportunity_title = f"E2E {form_label} ORG IND OT01"
-        competition_title = f"E2E {form_label} ORG IND OT01"
+        competition_title = f"E2E {form_label} ORG IND CT01"
 
         competition = _build_seeded_competition_for_form(
             db_session,

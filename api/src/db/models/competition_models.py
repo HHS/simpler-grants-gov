@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from grants_shared.db.models.base import TimestampMixin
 from grants_shared.util.datetime_util import get_now_us_eastern_date
+from grants_shared.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -29,7 +30,6 @@ from src.db.models.lookup_models import (
     LkFormType,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
-from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 
 # Add conditional import for type checking
 if TYPE_CHECKING:

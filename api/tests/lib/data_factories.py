@@ -45,7 +45,6 @@ from tests.src.db.models.factories import (
     OrganizationFactory,
     RoleFactory,
     StagingTcertificatesFactory,
-    get_db_session,
 )
 
 DEFAULT_VALUE = object()
@@ -109,7 +108,6 @@ def setup_application_for_form_validation(
 
     competition = CompetitionFactory.create(**competition_params)
 
-    # TODO(#10274): remove db_session.add + flush once the form table is dropped
     init_form_registry()
     form = Form(
         form_id=uuid.uuid4(),
@@ -122,9 +120,6 @@ def setup_application_for_form_validation(
         form_rule_schema=rule_schema,
         json_to_xml_schema=None,
     )
-    session = get_db_session()
-    session.add(form)
-    session.flush()
     form_template_registry.register(form, major_version=1)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
