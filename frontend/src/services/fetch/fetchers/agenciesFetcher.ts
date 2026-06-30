@@ -1,6 +1,6 @@
 "server only";
 
-import { ApiRequestError, UnauthorizedError } from "src/errors";
+import { ApiRequestError, MissingAuthError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import {
   fetchUserWithMethod,
@@ -97,7 +97,9 @@ export const fetchUserAgencies = async (): Promise<RelevantAgencyRecord[]> => {
     const session = await getSession();
     if (!session || !session.token) {
       // we shouldn't get there because the page should be checking authentication
-      throw new UnauthorizedError("No active session");
+      throw new MissingAuthError(
+        "Error fetching user agencies - not logged in",
+      );
     }
     const agencies = await getUserAgencies(session.user_id);
     return agencies;

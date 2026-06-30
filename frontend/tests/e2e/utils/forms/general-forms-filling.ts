@@ -1,55 +1,37 @@
+/**
+ * Generic form-filling helpers that open forms, fill fields, and save when needed.
+ * Usage: import { fillField, fillFormPartial, fillForm } from "tests/e2e/utils/forms/general-forms-filling";
+ */
+
 import { Page, TestInfo } from "@playwright/test";
-// Orchestrates page-field filling by dispatching handlers from each field type and properties.
-import { fieldHandlerDispatcher } from "tests/e2e/utils/common/index";
+import { runSharedFieldFill } from "tests/e2e/utils/common/index";
 import {
-  FillFieldDefinition,
-  FillFormConfig,
-  FormFillFieldDefinitions,
   shouldFillField,
+  type FillFieldDefinition,
+  type FillFormConfig,
+  type FormFillFieldDefinitions,
 } from "tests/e2e/utils/common/types";
 
 import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";
 import { clickSaveButton } from "./save-form-utils";
 
+type FillFieldOptions = {
+  fieldContextLabel?: string;
+};
+
+/** Fills one field using the shared field-fill execution path. */
 export async function fillField(
-  testInfo: TestInfo,
   page: Page,
   field: FillFieldDefinition,
   data: string | boolean | undefined,
+  options?: FillFieldOptions,
 ): Promise<void> {
-  const fieldIdentifier = field.section
-    ? `${field.section}-${field.field}`
-    : field.field;
-  try {
-    if (data === undefined) {
-      await testInfo.attach(`fillField-${fieldIdentifier}-skipped`, {
-        body: `Skipped ${fieldIdentifier}: no data provided`,
-        contentType: "text/plain",
-      });
-      return;
-    }
-    const handler = fieldHandlerDispatcher[field.type];
-    if (!handler) {
-      throw new Error(`No handler found for field type: ${field.type}`);
-    }
-    await handler(testInfo, page, field, data);
-    await testInfo.attach(`fillField-${fieldIdentifier}-success`, {
-      body: `Successfully filled ${fieldIdentifier}: "${data}"`,
-      contentType: "text/plain",
-    });
-  } catch (error) {
-    await testInfo.attach(`fillField-${fieldIdentifier}-error`, {
-      body: `Failed to fill ${fieldIdentifier}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-      contentType: "text/plain",
-    });
-    throw new Error(
-      `Failed to fill ${field.field}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-  }
+  await runSharedFieldFill({
+    page,
+    field,
+    data,
+    fieldContextLabel: options?.fieldContextLabel,
+  });
 }
 /**
  * Fills a subset of fields on the current form page without navigating or saving.
@@ -65,9 +47,15 @@ export async function fillFormPartial(
 ): Promise<void> {
   for (const key of Object.keys(data)) {
     const fieldDef = fieldDefinitions[key as keyof FormFillFieldDefinitions];
-    if (fieldDef) {
-      await fillField(testInfo, page, fieldDef, data[key]);
+    if (!fieldDef) {
+      await testInfo.attach(`fillFormPartial-${key}-unknown-key`, {
+        body: `Skipped ${key}: no matching field definition found`,
+        contentType: "text/plain",
+      });
+      continue;
     }
+
+    await fillField(page, fieldDef, data[key]);
   }
 }
 /**
@@ -102,7 +90,7 @@ export async function fillForm(
       ? formName
       : buildFlexibleFormNameRegex(formName);
   try {
-    // ── Navigation ──────────────────────────────────────────────────────────
+    // Navigation:
     // Delegate to openForm, which owns all navigation reliability:
     // table-scoped row lookup, scroll-to-reveal, testId/href/button/global
     // fallback selectors, trial-click check, force-click retry, direct href
@@ -111,7 +99,7 @@ export async function fillForm(
     if (!opened) {
       throw new Error(`Could not find or open form: ${formMatcher}`);
     }
-    // ── Form ready check ───────────────────────────────────────────────────
+    // Form ready check:
     // Confirm the form heading is visible before filling any fields.
     // Use buildFlexibleFormNameRegex for plain strings so special chars (parens,
     // hyphens) are properly escaped rather than treated as regex syntax.
@@ -124,7 +112,7 @@ export async function fillForm(
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
     for (const [fieldIdentifier, fieldConfig] of Object.entries(fields)) {
-      // ── Fill fields ────────────────────────────────────────────────────────
+      // Fill fields:
       const dataForField = data[fieldIdentifier];
       if (dataForField === undefined) {
         continue;
@@ -136,7 +124,7 @@ export async function fillForm(
         });
         continue;
       }
-      await fillField(testInfo, page, fieldConfig, dataForField);
+      await fillField(page, fieldConfig, dataForField);
     }
 
     // Run form-specific pre-save hook if defined.

@@ -5,6 +5,7 @@ with only a few alterations.
 """
 
 import io
+import uuid
 from datetime import timedelta
 from urllib import parse
 
@@ -16,14 +17,16 @@ from cryptography.x509.oid import NameOID
 
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import ApplicationForm
+from src.db.models.competition_models import ApplicationForm, Form
 from src.db.models.user_models import Role, User
+from src.form_schema.forms import init_form_registry
+from src.form_schema.registry.form_template_registry import form_template_registry
 from src.legacy_soap_api.legacy_soap_api_auth import (
     LOG_LOCAL_RESPONSE_HEADER_KEY,
     SOAPAuth,
     SOAPClientCertificate,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_config import GRANTOR_SOAP_ACTION_PATH, SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -35,7 +38,6 @@ from tests.src.db.models.factories import (
     ApplicationUserFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     LegacyAgencyCertificateFactory,
     LinkExternalUserFactory,
     OpportunityAssistanceListingFactory,
@@ -105,7 +107,20 @@ def setup_application_for_form_validation(
     }
 
     competition = CompetitionFactory.create(**competition_params)
-    form = FormFactory.create(form_json_schema=json_schema, form_rule_schema=rule_schema)
+
+    init_form_registry()
+    form = Form(
+        form_id=uuid.uuid4(),
+        form_name="Test Form",
+        short_form_name="TestForm",
+        form_version="1.0",
+        agency_code="SGG",
+        form_json_schema=json_schema,
+        form_ui_schema={},
+        form_rule_schema=rule_schema,
+        json_to_xml_schema=None,
+    )
+    form_template_registry.register(form, major_version=1)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     organization = None
@@ -199,14 +214,15 @@ def create_soap_request(
     soap_payload: bytes,
     log_local: bool = False,
     operation_name: str = "GetApplicationZipRequest",
-    full_path="/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
-    api_name=SimplerSoapAPI.GRANTORS,
+    full_path: str = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
+    api_name: str = SimplerSoapAPI.GRANTORS,
 ) -> SOAPRequest:
     _, _, soap_certificate, _ = setup_cert_user(
         AgencyFactory.create(), [Privilege.LEGACY_AGENCY_VIEWER]
     )
     headers = {
         "X-Gg-S2S-Uri": "https://google.com/xyz",
+        "Soapaction": f"{GRANTOR_SOAP_ACTION_PATH}/{operation_name.removesuffix('Request')}",
     }
     if log_local:
         headers.update({f"{LOG_LOCAL_RESPONSE_HEADER_KEY}": "1"})

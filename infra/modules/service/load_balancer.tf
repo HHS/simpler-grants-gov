@@ -180,7 +180,7 @@ resource "aws_lb_target_group" "app_tg" {
     port                = var.container_port
     healthy_threshold   = 2
     unhealthy_threshold = 10
-    interval            = 30
+    interval            = 60
     timeout             = 29
     matcher             = "200-299"
   }
@@ -208,7 +208,7 @@ resource "aws_lb_target_group" "mtls_tg" {
     port                = var.container_port
     healthy_threshold   = 2
     unhealthy_threshold = 10
-    interval            = 30
+    interval            = 60
     timeout             = 29
     matcher             = "200-299"
   }

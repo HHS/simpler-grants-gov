@@ -51,6 +51,8 @@ async function AwardRecommendationRisksPageContent({
     },
   ];
 
+  const heroHeading = t("risks.editTitle");
+
   let awardRecommendationDetails: AwardRecommendationDetails | null = null;
   if (awardRecommendationId) {
     try {
@@ -114,16 +116,26 @@ async function AwardRecommendationRisksPageContent({
         <AwardRecommendationHero
           awardRecommendationDetails={awardRecommendationDetails}
           buttons={heroButtons}
+          heading={heroHeading}
+          showDateAndStatus={false}
+          additionalBreadcrumbs={[
+            {
+              title: heroHeading,
+              path: `/award-recommendation/${awardRecommendationId}/risks`,
+            },
+          ]}
         />
       </Suspense>
       <GridContainer>
         <Grid row>
           <Grid col={12}>
             <div className="margin-top-4">
-              <h1 className="margin-top-0 margin-bottom-3">
-                {t("risks.heading")}
-              </h1>
-              <p className="margin-bottom-4">{t("risks.description")}</p>
+              <h2 className="margin-top-0 margin-bottom-1 font-sans-md">
+                {t("risks.pageHeading")}
+              </h2>
+              <p className="text-base-dark margin-top-0 margin-bottom-4">
+                {t("risks.pageDescription")}
+              </p>
               {awardRecommendationId && (
                 <RisksTable awardRecommendationId={awardRecommendationId} />
               )}

@@ -83,7 +83,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.81.0, < 6.0.0"
+      version = ">= 6.27.0, < 7.0.0"
     }
   }
 
@@ -255,8 +255,9 @@ module "service" {
   extra_policies = merge(
     {
       # storage_access = module.storage.access_policy_arn
-      sqs_access           = module.sqs_queue.access_policy_arn
-      file_scan_cache_read = module.file_scan_cache.read_access_policy_arn
+      sqs_access            = module.sqs_queue.access_policy_arn
+      file_scan_cache_read  = module.file_scan_cache.read_access_policy_arn
+      file_scan_cache_write = module.file_scan_cache.write_access_policy_arn
     },
     module.app_config.enable_identity_provider ? {
       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,

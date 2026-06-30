@@ -65,4 +65,6 @@ module "training_config" {
   # enable_command_execution = true
 
   enable_workflow_service = true
+
+  scanner_provisioned_concurrency = 1
 }

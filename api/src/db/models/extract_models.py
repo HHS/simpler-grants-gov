@@ -2,13 +2,13 @@ import uuid
 
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from grants_shared.db.models.base import TimestampMixin
+from grants_shared.util.file_util import presign_or_s3_cdnify_url
 from sqlalchemy import UUID, BigInteger, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.constants.lookup_constants import ExtractType
 from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.lookup_models import LkExtractType
-from src.util.file_util import presign_or_s3_cdnify_url
 
 
 class ExtractMetadata(ApiSchemaTable, TimestampMixin):

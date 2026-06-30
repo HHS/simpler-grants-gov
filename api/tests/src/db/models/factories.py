@@ -20,6 +20,7 @@ import grants_shared.adapters.db as db
 import grants_shared.util.datetime_util as datetime_util
 from faker.providers import BaseProvider
 from grants_shared.db.models.lookup.lookup_registry import LookupRegistry
+from grants_shared.util import file_util
 from sqlalchemy import func, select
 from sqlalchemy.orm import scoped_session
 
@@ -56,7 +57,6 @@ from src.constants.lookup_constants import (
     ExternalUserType,
     ExtractType,
     FileScanStatus,
-    FormType,
     FundingCategory,
     FundingInstrument,
     JobStatus,
@@ -84,8 +84,7 @@ from src.constants.static_role_values import (
 from src.db.models import agency_models
 from src.db.models.agency_models import Agency
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
-from src.form_schema.forms import SF424_v4_0
-from src.util import file_util
+from src.form_schema.forms import SF424_v4_0, init_form_registry
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
 SCHEMA = OpportunityVersionSchema()
@@ -1507,7 +1506,7 @@ class CompetitionFactory(BaseFactory):
     competition_forms = factory.RelatedFactoryList(
         "tests.src.db.models.factories.CompetitionFormFactory",
         factory_related_name="competition",
-        size=lambda: random.randint(1, 2),
+        size=1,
     )
 
     # Default to allowing both individual and organization applicants
@@ -1630,152 +1629,52 @@ class LinkCompetitionOpenToApplicantFactory(BaseFactory):
     )
 
 
-class FormFactory(BaseFactory):
-    class Meta:
-        model = competition_models.Form
-
-    form_id = Generators.UuidObj
-    form_name = "Test form"
-
-    # short_form_name will look like AB123A_1_2
-    short_form_name = factory.LazyAttribute(
-        lambda f: f"{fake.pystr_format(string_format="??###?")}_{f.form_version.replace('.', '_')}"
-    )
-    # Form version will be like 1.0, 4.5, etc.
-    form_version = factory.Faker("pystr_format", string_format="#.#")
-    agency_code = factory.Faker("agency_code")
-    form_instruction = None  # By default no instruction, use with_instruction trait for this
-
-    form_json_schema = {
-        "type": "object",
-        "title": "Test form for testing",
-        "required": ["Title", "Email", "Agreement"],
-        "properties": {
-            "Date": {"type": "string", "title": "Date of application ", "format": "date"},
-            "Email": {
-                "type": "string",
-                "title": "Email",
-                "format": "email",
-                "maxLength": 60,
-                "minLength": 1,
-            },
-            "Title": {"type": "string", "title": "Title", "maxLength": 60, "minLength": 1},
-            "Description": {
-                "type": "string",
-                "title": "Description for application",
-                "maxLength": 500,
-                "minLength": 0,
-            },
-            "ApplicationNumber": {
-                "type": "number",
-                "title": "Application number",
-                "maxLength": 120,
-                "minLength": 1,
-            },
-            "Location": {
-                "type": "string",
-                "title": "Location",
-                "description": "This should be overwritten",
-                "enum": ["Earth", "Moon", "Ort Cloud"],
-            },
-            "Vibe": {
-                "type": "string",
-                "title": "Vibe",
-                "description": "This describes the current state",
-                "enum": ["Vibing", "Not vibing"],
-            },
-            "Agreement": {
-                "type": "boolean",
-                "title": "I agree",
-                "description": "Agree to agree that the thing is the thing",
-            },
-        },
-    }
-    form_ui_schema = [
-        {"type": "field", "definition": "/properties/Title"},
-        {"type": "field", "definition": "/properties/Date"},
-        {"type": "field", "definition": "/properties/Description"},
-        {"type": "field", "definition": "/properties/Email"},
-        {
-            "type": "field",
-            "definition": "/properties/Location",
-            "schema": {"description": "Let us know where you are"},
-        },
-        {"type": "field", "definition": "/properties/ApplicationNumber"},
-        {"type": "field", "definition": "/properties/Vibe", "widget": "Radio"},
-        {"type": "field", "definition": "/properties/Agreement"},
-        {
-            "type": "field",
-            "schema": {
-                "type": "null",
-                "title": "Post populated",
-                "description": "Completed by Grants.gov upon submission.",
-            },
-        },
-    ]
-
-    form_type = FormType.SF424
-    sgg_version = "1.0"
-    is_deprecated = False
-
-    class Params:
-        with_instruction = factory.Trait(
-            form_instruction=factory.SubFactory(FormInstructionFactory),
-            form_instruction_id=factory.LazyAttribute(
-                lambda o: o.form_instruction.form_instruction_id if o.form_instruction else None
-            ),
-        )
-
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        warnings.warn(
-            "FormFactory is deprecated. Use seed_form_registry + registry forms "
-            "or direct Form(...) instantiation instead.",
-            DeprecationWarning,
-            stacklevel=3,
-        )
-        return super()._create(model_class, *args, **kwargs)
-
-    @classmethod
-    def _build(cls, model_class, *args, **kwargs):
-        warnings.warn(
-            "FormFactory is deprecated. Use Form(...) instantiation instead.",
-            DeprecationWarning,
-            stacklevel=3,
-        )
-        return super()._build(model_class, *args, **kwargs)
-
-
 def _get_default_competition_form() -> competition_models.Form:
-    """Return SF424 from the DB if seed_form_registry is active, else fall back to FormFactory."""
+    """Return SF424 for use as the default CompetitionForm form_id.
+
+    CompetitionForm.form is a registry-backed @property — form_id must resolve
+    to a registered form. SF424 is used as the fixed default for determinism.
+
+    Tests that need multiple CompetitionForms for the same competition must pass
+    form= explicitly with different forms. Tests that need a form with specific
+    behavior (e.g. no XML config) should construct Form(...) directly.
+    """
     if _db_session is None:
-        return FormFactory.build()
+        # Build mode (no DB session) only needs form_id; return the registry SF424
+        # so build() and create() resolve to the same deterministic default form.
+        return SF424_v4_0
 
     if not _seed_form_registry_active:
         warnings.warn(
-            "CompetitionFormFactory: SF424 not in DB — add seed_form_registry to your test. "
-            "Falling back to FormFactory (deprecated).",
+            "CompetitionFormFactory: seed_form_registry not active — seeding SF424 automatically. "
+            "Add seed_form_registry to your test for explicit control.",
             DeprecationWarning,
             stacklevel=4,
         )
-        return FormFactory.create()
+
+    init_form_registry()
 
     session = get_db_session()
-    form = session.get(competition_models.Form, SF424_v4_0.form_id)
-    if form is None:
-        warnings.warn(
-            "CompetitionFormFactory: SF424 not in DB — add seed_form_registry to your test. "
-            "Falling back to FormFactory (deprecated).",
-            DeprecationWarning,
-            stacklevel=4,
+
+    if (
+        SF424_v4_0.form_instruction_id is not None
+        and session.get(competition_models.FormInstruction, SF424_v4_0.form_instruction_id) is None
+    ):
+        FormInstructionFactory.create(
+            form_instruction_id=SF424_v4_0.form_instruction_id,
+            file_name=f"{SF424_v4_0.short_form_name}.txt",
         )
-        return FormFactory.create()
-    return form
+
+    return SF424_v4_0
 
 
 class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
+        # `form` is excluded so factory-boy uses it only to derive `form_id`
+        # and never tries to set it on the model. CompetitionForm.form is a
+        # read-only @property backed by the registry — it has no setter.
+        exclude = ["form"]
 
     competition = factory.SubFactory(CompetitionFactory, competition_forms=[])
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
@@ -1816,7 +1715,7 @@ class ApplicationFactory(BaseFactory):
             application_forms=factory.RelatedFactoryList(
                 "tests.src.db.models.factories.ApplicationFormFactory",
                 factory_related_name="application",
-                size=lambda: random.randint(1, 3),
+                size=1,
                 # This SelfAttribute gets the competition we just made above
                 competition_form=factory.SubFactory(
                     CompetitionFormFactory,

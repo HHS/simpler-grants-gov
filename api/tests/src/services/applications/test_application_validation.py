@@ -21,7 +21,6 @@ from tests.src.db.models.factories import (
     ApplicationFormFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OrganizationFactory,
     SamGovEntityFactory,
 )
@@ -34,10 +33,10 @@ VALID_FORM_C_RESPONSE = {"str_c": "text"}
 
 
 @pytest.fixture
-def form_a():
-    return FormFactory.build(
-        form_name="form_a",
-        form_json_schema={
+def form_a(create_test_form):
+    return create_test_form(
+        "form_a",
+        {
             "type": "object",
             "required": ["str_a", "obj_a"],
             "properties": {
@@ -45,9 +44,7 @@ def form_a():
                 "obj_a": {
                     "type": "object",
                     "required": ["int_a"],
-                    "properties": {
-                        "int_a": {"type": "integer"},
-                    },
+                    "properties": {"int_a": {"type": "integer"}},
                 },
             },
         },
@@ -55,10 +52,10 @@ def form_a():
 
 
 @pytest.fixture
-def form_b():
-    return FormFactory.build(
-        form_name="form_b",
-        form_json_schema={
+def form_b(create_test_form):
+    return create_test_form(
+        "form_b",
+        {
             "type": "object",
             "required": ["str_b"],
             "properties": {
@@ -70,10 +67,10 @@ def form_b():
 
 
 @pytest.fixture
-def form_c():
-    return FormFactory.build(
-        form_name="form_c",
-        form_json_schema={
+def form_c(create_test_form):
+    return create_test_form(
+        "form_c",
+        {
             "type": "object",
             "required": ["str_c"],
             "properties": {"str_c": {"type": "string"}},
@@ -699,10 +696,12 @@ def test_validate_is_included_in_submission_behavior(
 
 
 @freeze_time("2023-02-20 12:00:00", tz_offset=0)
-def test_validate_application_form_submit_post_population(enable_factory_create):
+def test_validate_application_form_submit_post_population(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that post-population occurs and updates application_response during submit action"""
-    # Create a form with post-population rules
-    form = FormFactory.create(
+    form = create_test_form(
+        form_name="PostPopForm",
         form_json_schema={
             "type": "object",
             "properties": {
@@ -751,10 +750,12 @@ def test_validate_application_form_submit_post_population(enable_factory_create)
     assert application_form.application_response["date_field"] == "2023-02-20"
 
 
-def test_validate_application_form_get_no_post_population(enable_factory_create):
+def test_validate_application_form_get_no_post_population(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that post-population does NOT occur during GET action"""
-    # Create a form with post-population rules
-    form = FormFactory.create(
+    form = create_test_form(
+        form_name="PostPopForm",
         form_json_schema={
             "type": "object",
             "properties": {
@@ -796,10 +797,12 @@ def test_validate_application_form_get_no_post_population(enable_factory_create)
     assert "date_field" not in application_form.application_response
 
 
-def test_validate_application_form_modify_no_post_population(enable_factory_create):
+def test_validate_application_form_modify_no_post_population(
+    enable_factory_create, db_session, create_test_form
+):
     """Test that post-population does NOT occur during MODIFY action"""
-    # Create a form with post-population rules
-    form = FormFactory.create(
+    form = create_test_form(
+        form_name="PostPopForm",
         form_json_schema={
             "type": "object",
             "properties": {

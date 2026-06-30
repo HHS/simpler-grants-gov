@@ -101,7 +101,7 @@ FORM_JSON_SCHEMA = {
             ],
             "properties": _SITE_LOCATION_PROPERTIES,
         },
-        # Additional site: address required when the site object is present.
+        # Additional site: address is required for each additional location entry.
         "site_location": {
             "type": "object",
             "required": ["address"],
@@ -173,8 +173,60 @@ FORM_UI_SCHEMA = [
         "name": "additional_sites",
         "children": [
             {
-                "type": "field",
-                "definition": "/properties/additional_sites",
+                "type": "fieldList",
+                "name": "additional_sites",
+                "label": "Additional Project/Performance Site Location",
+                "description": "Add up to 299 additional project/performance site locations.",
+                "children": [
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/submitting_as_individual",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/organization_name",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/uei",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/street1",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/street2",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/city",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/county",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/state",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/province",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/country",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/address/properties/zip_code",
+                    },
+                    {
+                        "type": "field",
+                        "definition": "/properties/additional_sites/items/properties/congressional_district",
+                    },
+                ],
             },
         ],
     },
@@ -194,10 +246,6 @@ FORM_UI_SCHEMA = [
 ]
 
 FORM_RULE_SCHEMA = {
-    "primary_site": {
-        # Pre-populate UEI from the applicant organization
-        "uei": {"gg_pre_population": {"rule": "uei"}},
-    },
     # Validate the attachment ID exists on the application
     "additional_locations_attachment": {"gg_validation": {"rule": "attachment"}},
 }
