@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import AddRiskForm from "src/app/[locale]/(base)/award-recommendation/[id]/risks/add/_components/AddRiskForm";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
@@ -10,7 +11,6 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import AddRiskForm from "src/components/award-recommendation/AddRiskForm";
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
@@ -43,11 +43,13 @@ async function AddRiskPageContent({ params }: AddRiskPageProps) {
   const heroButtons: HeroButtonConfig[] = [
     {
       type: "navigation",
-      label: t("heroButtons.backToEdit"),
-      href: `/award-recommendation/${awardRecommendationId}/edit`,
+      label: t("heroButtons.backToSubmissions"),
+      href: `/award-recommendation/${awardRecommendationId}/risks`,
       outline: true,
     },
   ];
+
+  const heroHeading = t("risks.addTitle");
 
   let awardRecommendationDetails: AwardRecommendationDetails | null = null;
   if (awardRecommendationId) {
@@ -112,6 +114,18 @@ async function AddRiskPageContent({ params }: AddRiskPageProps) {
         <AwardRecommendationHero
           awardRecommendationDetails={awardRecommendationDetails}
           buttons={heroButtons}
+          heading={heroHeading}
+          showDateAndStatus={false}
+          additionalBreadcrumbs={[
+            {
+              title: t("risks.editTitle"),
+              path: `/award-recommendation/${awardRecommendationId}/risks`,
+            },
+            {
+              title: heroHeading,
+              path: `/award-recommendation/${awardRecommendationId}/risks/add`,
+            },
+          ]}
         />
       </Suspense>
       <GridContainer>

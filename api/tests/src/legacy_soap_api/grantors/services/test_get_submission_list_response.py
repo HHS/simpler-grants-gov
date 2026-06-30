@@ -7,7 +7,11 @@ from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.grantors.services import get_submission_list, get_submission_list_response
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    GRANTOR_SOAP_ACTION_PATH,
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPRequest,
     SoapRequestStreamer,
@@ -76,6 +80,7 @@ def _make_operation_config():
         response_operation_name="GetSubmissionListResponse",
         privileges={Privilege.LEGACY_AGENCY_VIEWER},
         always_call_simpler=True,
+        soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionList",
     )
 
 

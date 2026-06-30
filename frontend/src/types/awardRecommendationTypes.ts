@@ -63,6 +63,8 @@ export type AwardRecommendationRisk = {
   award_recommendation_risk_id: string;
   award_recommendation_risk_number?: string;
   risk_number: number;
+  comment?: string;
+  award_recommendation_risk_type?: string;
   condition: string;
   condition_number?: string;
   award_recommendation_application_submission_ids: string[];
@@ -121,6 +123,14 @@ export type AwardRecommendationSubmissionDetail = {
   award_recommendation_type?: AwardRecommendationType;
   has_exception?: boolean;
   exception_detail?: string;
+};
+
+export type AwardRecommendationSubmissionDetailUpdate = {
+  recommended_amount?: string;
+  general_comment?: string | null;
+  award_recommendation_type?: AwardRecommendationType;
+  has_exception?: boolean;
+  exception_detail?: string | null;
 };
 
 export type AwardRecommendationSubmission = {

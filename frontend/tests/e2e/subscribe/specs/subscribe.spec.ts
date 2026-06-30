@@ -52,7 +52,7 @@ test("client side errors", async ({ page }) => {
  * @scenario Subscribe with valid name and email
  */
 test("successful signup", async ({ page }) => {
-  // Mock the newsletter subscribe API so the test doesn't call Sendy
+  // Mock the newsletter subscribe API so the test doesn't call Mailchimp
   await page.route("**/api/newsletter/subscribe", async (route) => {
     await route.fulfill({
       status: 200,

@@ -3,12 +3,18 @@ import os
 import uuid
 
 import grants_shared.adapters.db as db
+from grants_shared.util.file_util import write_to_file
 from pydantic import Field
 
-from src.constants.static_role_values import E2E_TEST_USER_MANAGER_ROLE, E2E_TEST_USER_ROLE
+from src.constants.static_role_values import (
+    E2E_TEST_USER_MANAGER_ROLE,
+    E2E_TEST_USER_ROLE,
+    OPPORTUNITY_PUBLISHER,
+)
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.file_util import write_to_file
+from tests.lib.seed_agencies_and_users import setup_agency
 from tests.lib.seed_data_utils import UserBuilder
+from tests.src.db.models.factories import AssistanceListingFactory
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +31,17 @@ logger = logging.getLogger(__name__)
 # test user UUIDs.
 E2E_MANAGER_USER_ID = uuid.UUID("c3d4e5f6-a7b8-4c5d-9e0f-1a2b3c4d5e6f")
 
+# Dedicated agency for the E2E test user's grantor role. Kept separate from the
+# agencies in seed_agencies_and_users so opportunities created by E2E runs stay
+# isolated, and so the grantor opportunities page auto-selects a single agency.
+E2E_AGENCY_ID = uuid.UUID("d4e5f6a7-b8c9-4d5e-9f0a-1b2c3d4e5f60")
+
+# Fixed assistance listing the opportunity-creation E2E test enters on the
+# Create Opportunity page. Staging has real ALN data; local/CI must seed this
+# specific number or the create endpoint returns a 404.
+E2E_ASSISTANCE_LISTING_ID = uuid.UUID("e5f6a7b8-c9d0-4e5f-a0b1-2c3d4e5f6a70")
+E2E_ASSISTANCE_LISTING_NUMBER = "00.000"
+
 
 class _SeedE2EConfig(PydanticBaseEnvConfig):
     local_test_user_manager_api_key: str = Field(alias="LOCAL_TEST_USER_MANAGER_API_KEY")
@@ -39,6 +56,25 @@ def _write_token_to_file(token: str) -> None:
 def _build_users_and_tokens(db_session: db.Session) -> None:
     config = _SeedE2EConfig()
 
+    # Seed the assistance listing the create-opportunity E2E test references.
+    # merge() on a fixed id keeps this idempotent across repeated seed runs so
+    # get_assistance_listing's scalar_one_or_none lookup stays unambiguous.
+    db_session.merge(
+        AssistanceListingFactory.build(
+            assistance_listing_id=E2E_ASSISTANCE_LISTING_ID,
+            assistance_listing_number=E2E_ASSISTANCE_LISTING_NUMBER,
+            program_title="Test ALN",
+        ),
+        load=True,
+    )
+
+    e2e_agency = setup_agency(
+        db_session,
+        agency_id=E2E_AGENCY_ID,
+        agency_code="E2E",
+        agency_name="E2E Test Agency",
+    )
+
     builder = (
         # Reuse the seeded one_org_user so the spoofed E2E session always has
         # organization membership in local/CI runs.
@@ -46,6 +82,9 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
         .with_jwt_auth()
         .with_api_key("e2e-test-key")
         .with_internal_role(E2E_TEST_USER_ROLE)
+        # Grantor role so the Create Opportunity link shows and opportunity
+        # creation E2E tests can create and publish opportunities.
+        .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
     )
 
     builder.build()

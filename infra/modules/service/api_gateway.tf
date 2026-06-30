@@ -53,6 +53,7 @@ locals {
         }
       }],
       "v1/users" = [],
+      "v1/files" = [],
   }][var.enable_api_gateway ? 1 : 0]
 
   second_level_endpoints = [
@@ -74,6 +75,7 @@ locals {
       "v1/users/login"                      = [{ "method" : "GET" }],
       "v1/users/logout"                     = [{ "method" : "GET" }],
       "v1/users/token"                      = [],
+      "v1/files/{file_id}"                  = [],
   }][var.enable_api_gateway ? 1 : 0]
 
   third_level_endpoints = [
@@ -115,6 +117,17 @@ locals {
       "v1/users/login/result"   = [{ "method" : "GET" }],
       "v1/users/token/logout"   = [{ "method" : "GET" }],
       "v1/users/token/refresh"  = [{ "method" : "GET" }],
+      "v1/files/{file_id}/results" = [{
+        "method" : "GET",
+        "api_key_required" : true,
+        "enable_streaming" : true,
+        "method_parameters" : {
+          "method.request.path.file_id" = true
+        },
+        "request_parameters" : {
+          "integration.request.path.file_id" : "method.request.path.file_id",
+        }
+      }],
   }][var.enable_api_gateway ? 1 : 0]
 
   fourth_level_endpoints = [
@@ -200,6 +213,7 @@ locals {
         "endpoint" : endpoint,
         "method" : config.method,
         "api_key_required" : lookup(config, "api_key_required", false),
+        "enable_streaming" : lookup(config, "enable_streaming", false),
         "method_parameters" : lookup(config, "method_parameters", {}),
         "request_parameters" : lookup(config, "request_parameters", {}),
         "request_models" : lookup(config, "request_models", {}),
@@ -448,7 +462,10 @@ resource "aws_api_gateway_integration" "third_level_endpoints" {
   type        = "HTTP_PROXY"
 
   passthrough_behavior = "WHEN_NO_MATCH"
-  timeout_milliseconds = 29000
+  # Use extended timeout for streaming endpoints (up to 15 minutes), otherwise use default 29 seconds
+  timeout_milliseconds = each.value.enable_streaming ? 900000 : 29000
+  # Enable streaming mode for endpoints that support it
+  response_transfer_mode = each.value.enable_streaming ? "STREAM" : null
 
   uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters

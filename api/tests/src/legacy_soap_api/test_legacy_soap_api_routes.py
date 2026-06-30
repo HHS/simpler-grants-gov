@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 from unittest import mock
 
+from grants_shared.util import file_util
 from lxml import etree
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
@@ -20,7 +21,6 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPResponse,
 )
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
-from src.util import file_util
 from tests.lib.data_factories import get_mtls_urlencoded_str_and_serial_number, setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,

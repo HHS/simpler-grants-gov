@@ -171,6 +171,66 @@ def test_handle_field_population_pre_population_sum_monetary_not_a_monetary_amou
 @pytest.mark.parametrize(
     "rule,json_data,expected_value",
     [
+        # The percentage is a whole number, so 1000 * 5 is 50.00, not 5000
+        (
+            {"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"},
+            {"x": "1000.00", "p": 5},
+            "50.00",
+        ),
+        (
+            {"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"},
+            {"x": "0.00", "p": 25},
+            "0.00",
+        ),
+        (
+            {"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"},
+            {"x": "1000.00", "p": 0},
+            "0.00",
+        ),
+        (
+            {"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"},
+            {"x": "1234.56", "p": 100},
+            "1234.56",
+        ),
+        # Missing amount or percentage is treated as zero
+        (
+            {"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"},
+            {"p": 50},
+            "0.00",
+        ),
+        (
+            {"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"},
+            {"x": "1000.00"},
+            "0.00",
+        ),
+        (
+            {"rule": "multiply_by_percentage", "amount": "x.nested", "percentage": "@THIS.p"},
+            {"x": {"nested": "200.00"}, "p": 10},
+            "20.00",
+        ),
+        # 333.33 * 33% is 109.9989, which quantizes (rounding half up) to 110.00
+        (
+            {"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"},
+            {"x": "333.33", "p": 33},
+            "110.00",
+        ),
+    ],
+)
+def test_handle_field_population_pre_population_multiply_by_percentage(
+    rule, json_data, expected_value, enable_factory_create
+):
+    context = setup_context(json_data, {"my_field": rule})
+    handle_field_population(
+        context,
+        JsonRule(handler="gg_pre_population", rule=rule, path=["my_field"]),
+        PRE_POPULATION_MAPPER,
+    )
+    assert context.json_data["my_field"] == expected_value
+
+
+@pytest.mark.parametrize(
+    "rule,json_data,expected_value",
+    [
         # Specifying no fields will get the default of 0
         ({"rule": "subtract_monetary", "fields": []}, {}, "0.00"),
         # Specifying fields that aren't set will get the default of 0
@@ -247,6 +307,43 @@ def test_handle_field_population_pre_population_subtract_monetary(
         PRE_POPULATION_MAPPER,
     )
     assert context.json_data["my_field"] == expected_value
+
+
+@pytest.mark.parametrize(
+    "rule,json_data",
+    [
+        # Non-string amount
+        ({"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"}, {"x": 100, "p": 5}),
+        # Non-numeric amount string
+        (
+            {"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"},
+            {"x": "hello", "p": 5},
+        ),
+        # Non-integer percentage
+        (
+            {"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"},
+            {"x": "1000.00", "p": "5"},
+        ),
+        # bool is a subclass of int, so guard against it being accepted as a percentage
+        (
+            {"rule": "multiply_by_percentage", "amount": "x", "percentage": "p"},
+            {"x": "1000.00", "p": True},
+        ),
+        # Missing config path
+        ({"rule": "multiply_by_percentage", "percentage": "p"}, {"p": 5}),
+    ],
+)
+def test_handle_field_population_pre_population_multiply_by_percentage_invalid(
+    rule, json_data, enable_factory_create
+):
+    # handle_field_population swallows the ValueError, so the field is left unpopulated
+    context = setup_context(json_data, {"my_field": rule})
+    handle_field_population(
+        context,
+        JsonRule(handler="gg_pre_population", rule=rule, path=["my_field"]),
+        PRE_POPULATION_MAPPER,
+    )
+    assert "my_field" not in context.json_data
 
 
 @pytest.mark.parametrize(

@@ -12,6 +12,9 @@ dayjs.extend(timezone);
 
 export const getConfiguredDayJs = () => dayjs;
 
+export const formatDateWithNoPreformattedExpectations = (date: Date) =>
+  dayjs(date).format("LL");
+
 // Convert "2024-02-21" to "February 21, 2024"
 export function formatDate(dateStr: string | null): string {
   if (!dateStr || !dayjs(dateStr, "YYYY-MM-DD", true).isValid()) {
