@@ -45,6 +45,27 @@ graph TD
   cd-app-->|calls|deploy-->|calls|database-migrations-->|calls|build-and-publish
 ```
 
+### Releases
+
+[`cd-release`](./cd-release.yml) ("Release Deploy") orchestrates deploys and it runs in two ways:
+
+- **On a published GitHub release:** builds and deploys the release's tag to prod,
+  then to training.
+- **Manually (`workflow_dispatch`):** deploys to the chosen `environment`.
+
+#### Releasing a specific tag
+
+The manual run accepts an optional `version` input so you can release a specific tag
+on demand. When `version` is left blank, the
+workflow falls back to the branch/tag it was run from.
+
+To release a tag:
+
+1. Go to **Actions → Release Deploy → Run workflow**.
+2. Keep **Use workflow from** set to `main` so the latest workflow definitions are used.
+3. Set **environment** to the target environment.
+4. Set **version** to the tag to release (e.g. `2026.07.01`).
+
 ## ⛑️ Helper workflows
 
 - [`check-ci-cd-auth`](./check-ci-cd-auth.yml): verifes that the project's Github repo is able to connect to AWS
