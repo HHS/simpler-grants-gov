@@ -43,12 +43,14 @@ def get_proxy_headers(
     soap_auth: SOAPAuth | None,
 ) -> dict:
     # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
+    filtered_headers = filter_headers(
+        soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
+    )
     if not soap_auth:
-        return filter_headers(
-            soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
-        )
+        return filtered_headers
     return {
-        S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(config, soap_auth.certificate)
+        S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(config, soap_auth.certificate),
+        **filtered_headers,
     }
 
 
