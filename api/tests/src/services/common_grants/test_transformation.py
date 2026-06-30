@@ -1036,7 +1036,7 @@ class TestTransformation:
 
         search_query = "test query"
 
-        result = transform_search_request_from_cg(filters, sorting, pagination, search_query)
+        result, _ = transform_search_request_from_cg(filters, sorting, pagination, search_query)
 
         assert result is not None
         # Check pagination
@@ -1065,7 +1065,7 @@ class TestTransformation:
         sorting = OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT, sort_order="desc")
         pagination = PaginatedBodyParams(page=1, page_size=10)
 
-        result = transform_search_request_from_cg(filters, sorting, pagination, None)
+        result, _ = transform_search_request_from_cg(filters, sorting, pagination, None)
 
         assert result is not None
         # Check pagination
@@ -1562,7 +1562,7 @@ def test_transform_applies_custom_filters_into_v1():
     filters = OppFilters.model_validate(
         {"customFilters": {"agency": {"operator": "in", "value": ["USAID"]}}}
     )
-    params = transform_search_request_from_cg(
+    params, _ = transform_search_request_from_cg(
         filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
     )
     assert params["filters"]["agency"] == {"one_of": ["USAID"]}
@@ -1572,7 +1572,10 @@ def test_build_filter_info_reports_unsupported_custom_filter():
     filters = OppFilters.model_validate(
         {"customFilters": {"bogus": {"operator": "in", "value": ["x"]}}}
     )
-    info = build_filter_info(filters)
+    _, errors = transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+    info = build_filter_info(filters, errors)
     assert "customFilters.bogus: unsupported filter" in info.errors
 
 
@@ -1607,7 +1610,10 @@ def test_build_filter_info_reports_invalid_cost_sharing_via_request_path():
     filters = OppFilters.model_validate(
         {"customFilters": {"costSharing": {"operator": "eq", "value": "maybe"}}}
     )
-    info = build_filter_info(filters)
+    _, errors = transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+    info = build_filter_info(filters, errors)
     assert "customFilters.costSharing: invalid boolean value maybe" in info.errors
 
 

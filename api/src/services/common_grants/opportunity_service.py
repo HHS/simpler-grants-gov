@@ -55,8 +55,8 @@ class CommonGrantsOpportunityService:
         filters = OppFilters()
         sorting = OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT)
 
-        # Convert search request to v1 format
-        v1_search_params = transform_search_request_from_cg(filters, sorting, pagination, "")
+        # Convert search request to v1 format (list never has customFilters)
+        v1_search_params, _ = transform_search_request_from_cg(filters, sorting, pagination, "")
 
         # Get response data from v1 service
         opportunity_data_v1, _aggregations, pagination_data_v1 = search_opportunities(
@@ -84,7 +84,7 @@ class CommonGrantsOpportunityService:
     def search_opportunities(
         search_client: search.SearchClient,
         search_request: OpportunitySearchRequest,
-    ) -> tuple[list[OpportunityBase], PaginatedResultsInfo]:
+    ) -> tuple[list[OpportunityBase], PaginatedResultsInfo, list[str]]:
         """Search for opportunities based on the provided search request."""
 
         # Extract components from search request for response building
@@ -93,7 +93,7 @@ class CommonGrantsOpportunityService:
         pagination = search_request.pagination or PaginatedBodyParams()
 
         # Convert search request to v1 format
-        v1_search_params = transform_search_request_from_cg(
+        v1_search_params, custom_filter_errors = transform_search_request_from_cg(
             filters, sorting, pagination, search_request.search
         )
 
@@ -117,4 +117,4 @@ class CommonGrantsOpportunityService:
             totalPages=pagination_data_v1.total_pages,
         )
 
-        return opportunity_data_cg, paginated_results_info_cg
+        return opportunity_data_cg, paginated_results_info_cg, custom_filter_errors

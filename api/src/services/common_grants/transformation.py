@@ -688,18 +688,22 @@ def build_money_range_filter(
         v1_filters[v1_field_name]["max"] = int(float(money_range_filter.value.max.amount))
 
 
-def build_filter_info(filters: OppFilters | None) -> FilterInfo:
+def build_filter_info(
+    filters: OppFilters | None,
+    custom_filter_errors: list[str] | None = None,
+) -> FilterInfo:
     """
     Helper function to build FilterInfo from CommonGrants filters.
 
     Args:
         filters: The CommonGrants filters to transform
+        custom_filter_errors: customFilters errors already derived by
+            transform_search_request_from_cg; surfaced here instead of re-parsing
 
     Returns:
         FilterInfo: The filter info for the response
     """
     applied_filters = {}
-    errors: list[str] = []
     if filters:
         if filters.status is not None:
             applied_filters["status"] = filters.status.model_dump()
@@ -715,12 +719,10 @@ def build_filter_info(filters: OppFilters | None) -> FilterInfo:
             applied_filters["maxAwardAmountRange"] = filters.max_award_amount_range.model_dump()
         if filters.custom_filters is not None:
             applied_filters["customFilters"] = filters.custom_filters
-            # errors only; the filters themselves are applied in transform_search_request_from_cg
-            _, errors = build_custom_filters(filters.custom_filters)
 
     return FilterInfo(
         filters=applied_filters,
-        errors=errors,
+        errors=custom_filter_errors or [],
     )
 
 
@@ -729,7 +731,7 @@ def transform_search_request_from_cg(
     sorting: OppSorting,
     pagination: PaginatedBodyParams,
     search_term: str | None,
-) -> dict:
+) -> tuple[dict, list[str]]:
     """
     Transform CG search request to v1 search format.
 
@@ -740,7 +742,7 @@ def transform_search_request_from_cg(
         search_query: Optional search query string
 
     Returns:
-        dict: search parameters in v1 format
+        tuple: (v1 search parameters, customFilters errors for the response)
     """
     # Convert pagination
     v1_pagination = {
@@ -779,8 +781,8 @@ def transform_search_request_from_cg(
     build_money_range_filter(filters.min_award_amount_range, "award_floor", v1_filters)
     build_money_range_filter(filters.max_award_amount_range, "award_ceiling", v1_filters)
 
-    # Apply recognized customFilters (agency, applicantType, fundingInstrument, costSharing)
-    applied_custom, _ = build_custom_filters(filters.custom_filters)
+    # Apply recognized customFilters; surface errors for the response's filterInfo
+    applied_custom, custom_filter_errors = build_custom_filters(filters.custom_filters)
     v1_filters.update(applied_custom)
 
     # Build the complete v1 search parameters
@@ -796,7 +798,7 @@ def transform_search_request_from_cg(
     if v1_filters:
         v1_params["filters"] = v1_filters
 
-    return v1_params
+    return v1_params, custom_filter_errors
 
 
 def transform_validation_error_from_cg(
