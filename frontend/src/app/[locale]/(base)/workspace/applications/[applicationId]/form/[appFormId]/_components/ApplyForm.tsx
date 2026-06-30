@@ -13,7 +13,10 @@ import {
 import { Attachment } from "src/types/attachmentTypes";
 import { getFieldsForNav } from "src/utils/applyForm/applyFormUtils";
 import { rebaseFieldListWarningsAfterDelete } from "src/utils/applyForm/rebaseFieldListWarningsAfterDelete";
-import { formatTimestamp } from "src/utils/generalUtils";
+import {
+  formatTimestamp,
+  getModifiedTimeDisplay,
+} from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
@@ -132,18 +135,13 @@ const ApplyForm = ({
   const translate = t as unknown as Translator;
   const isFormLocked = applicationStatus !== "in_progress";
 
-  const timestampsEqual = (a?: string, b?: string): boolean => {
-    if (!a || !b) return false;
-    const at = new Date(a).getTime();
-    const bt = new Date(b).getTime();
-    return Number.isFinite(at) && Number.isFinite(bt) && at === bt;
-  };
-
   const lastUpdatedAt = updatedAt || createdAt;
 
-  const formStatus =
-    updatedAt && !timestampsEqual(updatedAt, createdAt) ? "updated" : "created";
-
+  const isCreated =
+    !updatedAt ||
+    getModifiedTimeDisplay(updatedAt, createdAt || updatedAt, "created") ===
+      "created";
+  const formStatus = isCreated ? "created" : "updated";
   const isFormSaved = Boolean(lastUpdatedAt);
 
   const required = translate.rich("required", {

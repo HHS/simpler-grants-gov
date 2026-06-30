@@ -219,7 +219,27 @@ describe("ApplyForm", () => {
     const selectField = screen.getByTestId("Select");
     expect(selectField).toBeDisabled();
   });
-  it("displays created message when createdAt equals updatedAt", () => {
+  it("displays created message when updatedAt is missing", () => {
+    const timestamp = "2026-06-27T12:34:56.000Z";
+
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+        createdAt={timestamp}
+      />,
+    );
+
+    expect(screen.getByText(/createdMessage/i)).toBeInTheDocument();
+  });
+
+  it("displays created message when createdAt equals updatedAt exactly", () => {
     const timestamp = "2026-06-27T12:34:56.000Z";
 
     render(
@@ -234,6 +254,25 @@ describe("ApplyForm", () => {
         applicationStatus="in_progress"
         createdAt={timestamp}
         updatedAt={timestamp}
+      />,
+    );
+
+    expect(screen.getByText(/createdMessage/i)).toBeInTheDocument();
+  });
+
+  it("displays created message when createdAt and updatedAt differ by <= 1s", () => {
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+        createdAt="2026-06-27T12:34:56.000Z"
+        updatedAt="2026-06-27T12:34:56.500Z"
       />,
     );
 
@@ -258,6 +297,7 @@ describe("ApplyForm", () => {
 
     expect(screen.getByText(/lastUpdatedMessage/i)).toBeInTheDocument();
   });
+
   it("navigates back to application when return button is clicked", () => {
     render(
       <ApplyForm
