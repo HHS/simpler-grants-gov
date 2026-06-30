@@ -51,6 +51,7 @@ module "dev_config" {
     ENABLE_WORKFLOW_ENDPOINTS             = 1
     ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
     ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
+    ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"

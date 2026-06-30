@@ -5,12 +5,17 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Any
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
+import grants_shared.util.file_util as file_util
+from grants_shared.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
 from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util import datetime_util
 from pydantic import Field
+from sqlalchemy import select
 
-from src.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
 from src.constants.lookup_constants import FileScanStatus
+from src.db.models.file_upload_models import PendingFile
 from src.db.models.user_models import User
 from src.util.env_config import PydanticBaseEnvConfig
 
@@ -31,8 +36,8 @@ SCAN_RECORD_STATUS_ATTR = "status"
 
 
 class FileScanStreamConfig(PydanticBaseEnvConfig):
-    poll_interval_seconds: float = Field(alias="FILE_SCAN_RESULTS_POLL_INTERVAL_SECONDS")
-    max_duration_seconds: float = Field(alias="FILE_SCAN_RESULTS_MAX_DURATION_SECONDS")
+    poll_interval_seconds: float = Field(alias="FILE_SCAN_RESULTS_POLL_INTERVAL_SECONDS", default=3)
+    max_duration_seconds: float = Field(alias="FILE_SCAN_RESULTS_MAX_DURATION_SECONDS", default=60)
 
 
 @dataclass(frozen=True)
@@ -41,6 +46,15 @@ class FileScanRecord:
 
     user_id: str
     status: FileScanStatus
+
+
+@dataclass(frozen=True)
+class FileMetadata:
+    """File metadata returned to the caller once a scan reaches a complete status."""
+
+    file_name: str
+    file_size_bytes: int
+    download_path: str
 
 
 class InvalidFileScanRecordError(Exception):
@@ -131,6 +145,45 @@ def _fetch_next_record(
     return next_record
 
 
+@flask_db.with_db_session()
+def get_file_metadata(db_session: db.Session, pending_file_id: uuid.UUID) -> FileMetadata:
+    """Build the file metadata returned once a scan reaches a complete status.
+
+    The DB session is only checked out when this is called -- after the scan
+    completes -- so a long-polling stream doesn't hold a connection from the
+    threadpool while it waits for the scan to finish.
+    """
+    with db_session.begin():
+        pending_file = db_session.execute(
+            select(PendingFile).where(PendingFile.pending_file_id == pending_file_id)
+        ).scalar_one_or_none()
+
+        if pending_file is None:
+            # The scan reached a complete status but the backing DB row is
+            # missing, so fail loudly with a 500.
+            raise_flask_error(500, "Pending file not found")
+
+        file_name = pending_file.file_name
+        file_location = pending_file.file_location
+
+    return FileMetadata(
+        file_name=file_name,
+        file_size_bytes=file_util.get_file_length_bytes(file_location),
+        download_path=file_util.pre_sign_file_location(file_location),
+    )
+
+
+def _metadata_for_status(status: FileScanStatus, pending_file_id: uuid.UUID) -> FileMetadata | None:
+    """Look up file metadata once the scan completes; null for any other status.
+
+    The DB session is only checked out for a complete scan, so a stream that
+    sits polling a pending scan never holds a connection.
+    """
+    if status != FileScanStatus.COMPLETE:
+        return None
+    return get_file_metadata(pending_file_id)
+
+
 def stream_file_scan_results(
     pending_file_id: uuid.UUID,
     user: User,
@@ -140,13 +193,15 @@ def stream_file_scan_results(
 ) -> Iterator[dict[str, Any]]:
     """Stream file scan status updates for the given pending file.
 
-    The initial DynamoDB lookup happens before any chunks are yielded so we can
+    The initial DynamoDB lookup -- and, if that scan is already complete, the
+    file metadata lookup -- happens before any chunks are yielded so we can
     return a 404 / 403 / 500 with the proper HTTP status. After streaming
     starts, a missing record or user mismatch just ends the stream; a malformed
     record raises (terminating the connection) and is logged.
 
     Yields chunks shaped like ``FileScanResultsResponseSchema``; the caller is
-    responsible for serializing each chunk through that schema.
+    responsible for serializing each chunk through that schema. The
+    ``file_metadata`` field is populated only once the scan completes.
     """
     if config is None:
         config = FileScanStreamConfig()
@@ -174,13 +229,21 @@ def stream_file_scan_results(
         )
         raise_flask_error(403, "Forbidden")
 
+    # Resolve metadata for the initial record outside the generator so that an
+    # already-complete scan with a missing DB row surfaces as a proper 500 (the
+    # common small-file case is complete on the very first poll) rather than a
+    # truncated stream.
+    initial_metadata = _metadata_for_status(record.status, pending_file_id)
+
     def generate() -> Iterator[dict[str, Any]]:
         current_record = record
+        file_metadata = initial_metadata
         start_time = datetime_util.utcnow()
 
         while True:
             status = current_record.status
-            yield {"data": {"status": status.value}}
+
+            yield {"data": {"status": status.value, "file_metadata": file_metadata}}
 
             elapsed = (datetime_util.utcnow() - start_time).total_seconds()
 
@@ -232,5 +295,6 @@ def stream_file_scan_results(
                 return
 
             current_record = next_record
+            file_metadata = _metadata_for_status(current_record.status, pending_file_id)
 
     return generate()

@@ -27,7 +27,11 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    GRANTOR_SOAP_ACTION_PATH,
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from tests.lib.data_factories import setup_cert_user
@@ -379,6 +383,7 @@ class TestSimplerBaseSOAPClient:
                 force_list_attributes=("OpportunityDetails",),
                 key_indexes={"OpportunityDetails": "CompetitionID"},
                 compare_endpoints=False,
+                soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
                 namespace_keymap={
                     "GetOpportunityListResponse": "ns2",
                 },
@@ -472,6 +477,52 @@ class TestSimplerSOAPGetApplicationZip:
             assert result.headers == {
                 "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
+            }
+
+    def test_get_simpler_soap_response_returns_soap_action_in_header(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        agency = AgencyFactory.create()
+        user, role, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        )
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
+        )
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationZipRequest>"
+            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            assert result.headers == {
+                "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
+                "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
             }
 
     def test_get_simpler_soap_response_can_access_endpoint_if_certificate_user_has_privileges(
@@ -591,7 +642,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
-        with patch("src.util.file_util.smart_open.open") as mock_smart_open:
+        with patch("grants_shared.util.file_util.smart_open.open") as mock_smart_open:
             mock_smart_open.side_effect = ClientError(
                 {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}},
                 "GetObject",
@@ -749,6 +800,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects(
@@ -849,6 +901,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects_merges_response_from_proxy_and_simpler(
@@ -1500,6 +1553,7 @@ class TestSimplerSOAPGetSubmissionList:
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects(
@@ -1598,6 +1652,7 @@ class TestSimplerSOAPGetSubmissionList:
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
+                "Soapaction": client.operation_config.soap_action,
             }
 
     def test_get_simpler_soap_response_returns_multiple_objects_merges_response_from_proxy_and_simpler(

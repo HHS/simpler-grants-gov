@@ -3,6 +3,15 @@ import SelectOpportunityPage, {
   generateMetadata,
 } from "src/app/[locale]/(base)/award-recommendation/select-opportunity/page";
 
+jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
+  searchAccessibleOpportunities: jest.fn(() =>
+    Promise.resolve({
+      data: [],
+      pagination_info: undefined,
+    }),
+  ),
+}));
+
 jest.mock("next-intl/server", () => ({
   getTranslations: jest.fn(() =>
     Promise.resolve((key: string) => {

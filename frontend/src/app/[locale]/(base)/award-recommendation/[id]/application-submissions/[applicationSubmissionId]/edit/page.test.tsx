@@ -55,6 +55,10 @@ const mockGetAwardRecommendationSubmission = jest
   .fn()
   .mockResolvedValue(mockAwardRecommendationSubmissions[0]);
 
+const mockGetAwardRecommendationDetails = jest.fn().mockResolvedValue({
+  award_recommendation_number: "AR-26-0002",
+});
+
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
   getAwardRecommendationSubmission: (
     awardRecommendationId: string,
@@ -64,6 +68,13 @@ jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
       awardRecommendationId,
       applicationSubmissionId,
     ) as Promise<AwardRecommendationSubmission | null>,
+  getAwardRecommendationDetails: (
+    awardRecommendationId: string,
+  ): Promise<{ award_recommendation_number: string }> =>
+    mockGetAwardRecommendationDetails(awardRecommendationId) as Promise<{
+      award_recommendation_number: string;
+    }>,
+  updateAwardRecommendationSubmissionDetails: jest.fn(),
 }));
 
 const pageParams = Promise.resolve({
@@ -94,6 +105,9 @@ describe("AwardRecommendationSubmissionEditPage", () => {
       mockGetAwardRecommendationSubmission.mockResolvedValue(
         mockAwardRecommendationSubmissions[0],
       );
+      mockGetAwardRecommendationDetails.mockResolvedValue({
+        award_recommendation_number: "AR-26-0002",
+      });
     });
 
     it("fetches the application submission details", async () => {
@@ -102,10 +116,35 @@ describe("AwardRecommendationSubmissionEditPage", () => {
         searchParams: Promise.resolve({}),
       });
 
+      expect(mockGetAwardRecommendationDetails).toHaveBeenCalledWith(
+        "AR-26-0001",
+      );
       expect(mockGetAwardRecommendationSubmission).toHaveBeenCalledWith(
         "AR-26-0001",
         mockAwardRecommendationSubmissions[0]
           .award_recommendation_application_submission_id,
+      );
+    });
+
+    it("renders the submission edit hero", async () => {
+      const component = await AwardRecommendationSubmissionEditPage({
+        params: pageParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByTestId("award-recommendation-submission-edit-hero"),
+      ).toBeVisible();
+      expect(
+        screen.getByRole("link", {
+          name: /submissionEdit.viewOriginalApplication/i,
+        }),
+      ).toHaveAttribute(
+        "href",
+        "/workspace/applications/63588df8-f2d1-44ed-a201-5804abba696d",
+      );
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+        "submissionEdit.editTitle",
       );
     });
 
@@ -187,7 +226,7 @@ describe("AwardRecommendationSubmissionEditPage", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("renders cancel and save buttons", async () => {
+    it("renders cancel and save buttons in the hero", async () => {
       const component = await AwardRecommendationSubmissionEditPage({
         params: pageParams,
       });

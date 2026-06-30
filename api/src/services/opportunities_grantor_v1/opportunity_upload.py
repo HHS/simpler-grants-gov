@@ -2,11 +2,12 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+from grants_shared.adapters.aws import S3Config
 from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.util import file_util
 from sqlalchemy import select
 from werkzeug.datastructures import FileStorage
 
-from src.adapters.aws import S3Config
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.opportunity_models import OpportunityAttachment
@@ -19,7 +20,6 @@ from src.services.opportunity_attachments.attachment_util import (
     adjust_legacy_file_name,
     get_s3_attachment_path,
 )
-from src.util import file_util
 
 logger = logging.getLogger(__name__)
 

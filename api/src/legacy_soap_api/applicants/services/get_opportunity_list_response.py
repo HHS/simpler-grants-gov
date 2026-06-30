@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 import grants_shared.adapters.db as db
+from grants_shared.util import file_util
 from sqlalchemy import select
 
 from src.db.models.competition_models import Competition
@@ -17,7 +18,6 @@ from src.legacy_soap_api.applicants.schemas import (
 )
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_utils import bool_to_string, ensure_dot_prefix
-from src.util import file_util
 
 logger = logging.getLogger(__name__)
 

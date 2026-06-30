@@ -1,16 +1,18 @@
-// dropdown-handler.ts
-// Handles dropdown page fields using selector and test ID properties.
-// Usage: import { dropdownHandler } from "tests/e2e/utils/common/dropdown-handler";
+/**
+ * Handles dropdown page fields using selector and test ID properties.
+ * Usage: import { dropdownHandler } from "tests/e2e/utils/common/dropdown-handler";
+ */
 
+import { type Page } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
 
-import { FieldHandler } from "./types";
+import { escapeRegex } from "./regex-utils";
+import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 export const dropdownHandler: FieldHandler = async (
-  testInfo,
-  page,
-  field,
-  data,
+  page: Page,
+  field: FillFieldDefinition,
+  data: string | boolean | undefined,
 ) => {
   if (typeof data !== "string") {
     throw new Error(
@@ -27,7 +29,37 @@ export const dropdownHandler: FieldHandler = async (
     await locator.click();
     return;
   }
+  if (field.label) {
+    const control = page
+      .getByLabel(field.label, { exact: field.labelExact })
+      .first();
+    await control.waitFor({ state: "visible", timeout: 5000 });
+
+    const tagName = await control.evaluate((node) =>
+      node.tagName.toLowerCase(),
+    );
+    if (tagName === "select") {
+      await control.selectOption({ label: data });
+      return;
+    }
+
+    await control.click();
+    const option = page
+      .getByRole("option", {
+        name: new RegExp(`^${escapeRegex(data)}$`, "i"),
+      })
+      .first();
+
+    if (await option.isVisible().catch(() => false)) {
+      await option.click();
+      return;
+    }
+
+    await control.fill(data);
+    await control.press("Enter");
+    return;
+  }
   throw new Error(
-    `Dropdown field ${field.field} is missing selector or testId`,
+    `Dropdown field ${field.field} is missing selector, testId, or label`,
   );
 };

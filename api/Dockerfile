@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:b6b5679@sha256:988d748c408a3af9a485c73998a68e60121e1708620ca1473a67e733f89fbd37 AS base
+FROM ghcr.io/hhs/python-base-image:8dc0b48@sha256:4875ffafd9b316c757354255e810e9b4a37771c2131070ec48839b3ce1c32652 AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -25,6 +25,8 @@ RUN rm -rf /api/.venv || true
 
 COPY src /api/src
 COPY newrelic.ini /api/newrelic.ini
+
+COPY gunicorn.conf.py /api/gunicorn.conf.py
 
 # Disable dev dependencies in UV sync
 ENV UV_NO_DEV=1
@@ -135,4 +137,8 @@ ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
 # Run as the non-root user
 USER ${RUN_USER}
 
-CMD ["gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()", "--log-level", "debug", "--limit-request-field_size", "16384", "--limit-request-fields", "50"]
+# `-c gunicorn.conf.py` is technically redundant: gunicorn auto-loads ./gunicorn.conf.py
+# from the WORKDIR (/api) when the file is present. We pass it explicitly as a guardrail --
+# if the config is ever dropped from the image again, gunicorn fails fast at startup
+# instead of silently falling back to its defaults (1 sync worker, 1 thread).
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "--worker-tmp-dir=/dev/shm", "src.app:create_app()", "--log-level", "debug"]

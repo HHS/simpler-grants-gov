@@ -2,10 +2,10 @@ import logging
 import zipfile
 from datetime import date
 
+import grants_shared.util.file_util as file_util
 import pytest
 from sqlalchemy import select
 
-import src.util.file_util as file_util
 from src.constants.lookup_constants import SamGovExtractType, SamGovProcessingStatus
 from src.db.models.entity_models import SamGovEntity
 from src.db.models.sam_extract_models import SamExtractFile

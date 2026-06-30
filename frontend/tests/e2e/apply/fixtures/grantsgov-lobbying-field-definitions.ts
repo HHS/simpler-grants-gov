@@ -58,11 +58,11 @@ export const GRANTSGOV_LOBBYING_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   {
     fieldId: "authorized_representative_name--first_name",
-    message: "Name and Contact Information First Name is required",
+    message: "First Name is required",
   },
   {
     fieldId: "authorized_representative_name--last_name",
-    message: "Name and Contact Information Last Name is required",
+    message: "Last Name is required",
   },
   {
     fieldId: "authorized_representative_title",
