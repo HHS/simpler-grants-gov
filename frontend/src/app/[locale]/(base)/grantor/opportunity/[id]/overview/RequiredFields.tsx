@@ -1,6 +1,5 @@
 // These objects define the required fields for each step
 // of the opportunity publishing workflow.
-import { Competition } from "src/types/competitionsResponseTypes";
 
 export const summaryRequiredFields = {
   funding_instruments: true,
