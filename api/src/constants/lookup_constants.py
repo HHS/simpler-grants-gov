@@ -158,6 +158,7 @@ class FormType(StrEnum):
     SF424 = "SF424"
     SF424A = "SF424A"
     SF424B = "SF424B"
+    SF424C = "SF424C"
     SF424D = "SF424D"
     SFLLL = "SFLLL"
     PROJECT_NARRATIVE_ATTACHMENT = "ProjectNarrativeAttachment"
