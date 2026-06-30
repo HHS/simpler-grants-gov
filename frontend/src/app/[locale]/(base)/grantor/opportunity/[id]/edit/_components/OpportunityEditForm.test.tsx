@@ -63,16 +63,6 @@ const initialValues: OpportunityEditFormValues = {
   contactEmailText: "Email the grants team",
 };
 
-const testOpportunityKeyInformation = {
-  title: "Test opportunity",
-  agency: "Test agency",
-  assistanceListings: "12.345",
-  opportunityNumber: "ABC-123",
-  opportunityStage: "Forecasted",
-  awardSelectionMethod: "discretionary",
-  awardSelectionMethodExplanation: "Standard review",
-};
-
 const emptyInitialValues: OpportunityEditFormValues = {
   ...initialValues,
   publishDate: "",
@@ -90,7 +80,6 @@ const renderOpportunityEditForm = (
       opportunitySummaryId="summary-456"
       initialValues={initialValues}
       isDraft
-      opportunityKeyInformation={testOpportunityKeyInformation}
       saveLabel="Save"
       previewLabel="Preview"
       publishLabel="Publish"
@@ -800,53 +789,6 @@ describe("OpportunityEditForm — inline validation errors", () => {
     expect(
       screen.getAllByText("Additional eligibility info required"),
     ).toHaveLength(2);
-  });
-});
-
-// ─── Key information display ──────────────────────────────────────────────────
-// The read-only panel resolves values through fallbacks: empty fields show the
-// "not available" placeholder; unknown enum values render as-is.
-describe("OpportunityEditForm — key information display", () => {
-  beforeEach(() => {
-    mockUseActionState.mockReturnValue([
-      { validationErrors: {} },
-      jest.fn(),
-      false,
-    ]);
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
-  it("renders 'not available' fallback when all key information fields are empty", () => {
-    renderOpportunityEditForm({
-      opportunityKeyInformation: {
-        title: "",
-        agency: "",
-        assistanceListings: "",
-        opportunityNumber: "",
-        opportunityStage: "",
-        awardSelectionMethod: "",
-        awardSelectionMethodExplanation: "",
-      },
-    });
-
-    // The || fallback fires for each field — all should show the not-available key
-    const notAvailableEls = screen.getAllByText("content.notAvailable");
-    expect(notAvailableEls.length).toBeGreaterThan(0);
-  });
-
-  it("falls back to the raw value when awardSelectionMethod is not a known enum", () => {
-    renderOpportunityEditForm({
-      initialValues: {
-        ...initialValues,
-        awardSelectionMethod: "unknown_method",
-      },
-    });
-
-    // find() returns undefined → ?.label is undefined → falls back to awardSelectionMethod value
-    expect(screen.getByText("unknown_method")).toBeInTheDocument();
   });
 });
 
