@@ -105,8 +105,13 @@ test.describe("Grantor Opportunity Happy Path", () => {
         page.getByText("Opportunity draft started", { exact: true }),
       ).toBeVisible();
 
-      // And I click "Opportunity Summary" button
-      await page.getByRole("button", { name: "Opportunity Summary" }).click();
+      // And I should see the "Opportunity Summary" link
+      await expect(
+        page.getByRole("link", { name: "Opportunity Summary" }),
+      ).toBeVisible();
+
+      // And I click "Opportunity Summary" link
+      await page.getByRole("link", { name: "Opportunity Summary" }).click();
 
       // Then I should be on the "Edit Opportunity" page
       await expect(page).toHaveURL(
@@ -147,17 +152,14 @@ test.describe("Grantor Opportunity Happy Path", () => {
       // And I click "Save" button
       await page.getByRole("button", { name: "Save" }).click();
 
-      // Then I should see the "Opportunity draft started" confirmation message.
+      // Then I should see the edit-page save confirmation.
       await expect(
-        page.getByText("Opportunity draft started", { exact: true }),
+        page.getByText("Saved successfully", { exact: true }),
       ).toBeVisible();
 
-      // And I should see the save confirmation message "Your initial information has been saved...".
+      // And I should see the save confirmation body.
       await expect(
-        page.getByText(
-          "Your initial information has been saved. Complete the sections below to finish your opportunity details",
-          { exact: true },
-        ),
+        page.getByText("Your changes have been saved.", { exact: true }),
       ).toBeVisible();
 
       // And I should see "Draft" status.
