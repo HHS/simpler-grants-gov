@@ -78,11 +78,15 @@ export const SimplerFileInput = ({
       return;
     }
 
+    // log if trying to upload more than one file to a single file input
+    // note that this isn't an error - we'll just only accept the first file in the list
     if (!multiFile && changeEvent.target.files.length > 1) {
       console.error(
         "attempting to upload multiple files to a single file input, only uploading first file in list",
       );
     }
+
+    // no-op / early return if single file input and the input already has files in it
     if (!multiFile && fileInputRef.current?.files.length) {
       console.error(
         "attempting to upload additional files to a single file input, not uploading new file",
@@ -141,7 +145,8 @@ export const SimplerFileInput = ({
     }
   }, [multiFile, activeUploads, existingFiles]);
 
-  // note usage of functional state setters here to avoid referencing stale closed over state values
+  // note the usage of functional state setters in these functions
+  // it's necessary to avoid referencing stale closed over state values up the call stack
   const trackUploadSuccess = (uploadId: string) => {
     setActiveUploads((previousActiveUploads) => {
       const completedIndex = previousActiveUploads.findIndex(
@@ -169,7 +174,7 @@ export const SimplerFileInput = ({
       return previousUploadErrors;
     });
   };
-  // remove cancelled uploads from the list
+
   const trackUploadCancel = (uploadId: string) => {
     setActiveUploads((previousActiveUploads) => {
       const canceledIndex = previousActiveUploads.findIndex(
@@ -235,9 +240,7 @@ export const SimplerFileInput = ({
         filesWithDeleteError={filesWithDeleteError}
       />
       <DeleteFileModal
-        // this only supports deleting one file at a time.
-        // in order to support deleting more than one file at a time we'd
-        // need to switch things up a bit, and I don't know if that's a requirement
+        // note that this only supports deleting one file at a time.
         deletePending={deletePending}
         handleDeleteFile={handleDeleteFile}
         modalId={`${id}-delete-file-modal`}
