@@ -3,8 +3,7 @@
 import { Button, Alert } from "@trussworks/react-uswds";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
-import { publishFromOverview } from "../actions";
-
+import { publishFromOverview } from "src/app/[locale]/(base)/grantor/opportunity/[id]/overview/actions";
 type OverviewButtonsProps = {
   opportunityId: string;
   publishEnabled: boolean;
