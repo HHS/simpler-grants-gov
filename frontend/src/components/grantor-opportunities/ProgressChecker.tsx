@@ -12,13 +12,19 @@ export const progressType = {
 };
 
 // Recursively check for required fields
-function checkRequiredFields(
+function checkRequiredFields<T extends object>(
   requiredFields: RequiredFieldsMap,
-  dataToCheck: Record<string, unknown>,
+  dataToCheck: T,
 ): boolean {
   let missingRequiredField = false;
+  const data = dataToCheck as Record<string, unknown>;
+
+  if (!data && requiredFields) {
+    return true; // missingRequiredField is true
+  }
+
   for (const [key, value] of Object.entries(requiredFields)) {
-    const dataValue = dataToCheck[key];
+    const dataValue = data[key];
     // console.log(`Key: ${key}, Value: ${value}, dataValue: ${dataValue}`);
     if (
       dataValue === undefined ||
@@ -31,7 +37,7 @@ function checkRequiredFields(
       // Recursively check nested objects!
       missingRequiredField = checkRequiredFields(
         value,
-        dataToCheck[key] as Record<string, unknown>,
+        data[key] as Record<string, unknown>,
       );
       if (missingRequiredField) break;
     }
@@ -39,9 +45,14 @@ function checkRequiredFields(
   return missingRequiredField;
 }
 // Recursively check the data for any values
-function checkDataValues(dataToCheck: Record<string, unknown>): boolean {
+function checkDataValues<T extends object>(dataToCheck: T): boolean {
   let dataValuesFound = false;
-  for (const value of Object.values(dataToCheck)) {
+
+  if (!dataToCheck) {
+    return false; // dataValuesFound is false
+  }
+
+  for (const value of Object.values(dataToCheck as Record<string, unknown>)) {
     if (
       value === undefined ||
       value === null ||
@@ -64,9 +75,9 @@ function checkDataValues(dataToCheck: Record<string, unknown>): boolean {
 }
 
 // Check dataToCheck and return the appropriate progressType as defined above.
-export function getProgess(
+export function getProgress<T extends object>(
   requiredFields: RequiredFieldsMap,
-  dataToCheck: Record<string, unknown>,
+  dataToCheck: T,
 ) {
   const missingRequiredField = checkRequiredFields(requiredFields, dataToCheck);
   const dataValuesFound = checkDataValues(dataToCheck);
@@ -79,15 +90,15 @@ export function getProgess(
 }
 
 // This function will return an HTML component after checking the data entry progress
-export function ProgressChecker({
+export function ProgressChecker<T extends object>({
   requiredFields,
   dataToCheck,
 }: {
   requiredFields: RequiredFieldsMap;
-  dataToCheck: Record<string, unknown>;
+  dataToCheck: T;
 }) {
   const t = useTranslations("ProgressChecker");
-  const status = getProgess(requiredFields, dataToCheck);
+  const status = getProgress(requiredFields, dataToCheck);
   return (
     <>
       {status === progressType.notStarted && (
