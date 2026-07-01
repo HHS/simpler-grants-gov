@@ -164,7 +164,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
         // User-entered fields - testIds derived from formConfig.fields (printTestId ?? testId)
         // Skip fields not present in testData (e.g. conditional fields that weren't filled)
-        // Note: SF-424A has computed total fields that may not appear in testData
         for (const [dataKey, testId] of Object.entries(
           userEnteredFieldTestIds,
         )) {
@@ -173,7 +172,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         }
 
         // SF-424A validation - strict computed totals checks with activity-specific expectations
-        // Test data uses unique values per activity (01, 02, 03, 04) to satisfy "unique data"
+        // Test data uses unique values per activity (01, 02, 03, 04)
         // requirement. Totals are still deterministic and calculated per activity index.
         if (formKey === "sf424a") {
           // Helper to format numeric activity value to two decimal places
@@ -269,6 +268,18 @@ for (const { testName, orgLabel } of applicantScenarios) {
           // grandTotal: sum of row totals (3+6+9+12)
           const sectionCGrandTotal = toTwoDecimals(3 + 6 + 9 + 12);
 
+          // Column totals for each resource type
+          await expect(
+            page.getByTestId("total_non_federal_resources--applicant_amount"),
+          ).toContainText(sectionCColumnTotal);
+          await expect(
+            page.getByTestId("total_non_federal_resources--state_amount"),
+          ).toContainText(sectionCColumnTotal);
+          await expect(
+            page.getByTestId("total_non_federal_resources--other_amount"),
+          ).toContainText(sectionCColumnTotal);
+
+          // Grand total across all activities and resource types
           await expect(
             page.getByTestId("total_non_federal_resources--total_amount"),
           ).toContainText(sectionCGrandTotal);
@@ -283,6 +294,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
           const sectionDQuarterTotal = toTwoDecimals(2);
           const sectionDGrandTotal = toTwoDecimals(2 * 4);
 
+          // Federal and Non-federal row totals
           await expect(
             page.getByTestId(
               "total_forecasted_cash_needs--federal_forecasted_cash_needs--total_amount",
@@ -293,6 +305,22 @@ for (const { testName, orgLabel } of applicantScenarios) {
               "total_forecasted_cash_needs--non_federal_forecasted_cash_needs--total_amount",
             ),
           ).toContainText(sectionDRowTotal);
+
+          // Quarter column totals (federal + non-federal per quarter)
+          const quarterFields = [
+            "first_quarter_amount",
+            "second_quarter_amount",
+            "third_quarter_amount",
+            "fourth_quarter_amount",
+          ];
+          for (const quarterField of quarterFields) {
+            const quarterTotalId = `total_forecasted_cash_needs--${quarterField}`;
+            await expect(page.getByTestId(quarterTotalId)).toContainText(
+              sectionDQuarterTotal,
+            );
+          }
+
+          // Grand total
           await expect(
             page.getByTestId("total_forecasted_cash_needs--total_amount"),
           ).toContainText(sectionDGrandTotal);
