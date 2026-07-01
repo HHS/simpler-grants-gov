@@ -222,6 +222,29 @@ for (const { testName, orgLabel } of applicantScenarios) {
           );
 
           // Section B - Budget Categories totals
+          // Individual category row totals (Column 5: sum of 1-4)
+          // Each category sums across the 4 activities: 1+2+3+4 = 10.00
+          const categoryRowTotal = toTwoDecimals(1 + 2 + 3 + 4);
+          const categoryFields = [
+            "personnel_amount",
+            "fringe_benefits_amount",
+            "travel_amount",
+            "equipment_amount",
+            "supplies_amount",
+            "contractual_amount",
+            "construction_amount",
+            "other_amount",
+          ];
+          for (const categoryField of categoryFields) {
+            const categoryTotalId = `total_budget_categories--${categoryField}`;
+            await validatePrintViewField(
+              page,
+              categoryTotalId,
+              categoryRowTotal,
+            );
+          }
+
+          // Total direct charges and indirect charges
           // directChargeColumnSum: (1+2+3+4) × 8 fields
           const sectionBDirectChargeTotal = toTwoDecimals((1 + 2 + 3 + 4) * 8);
           // indirectChargeColumnSum: 1+2+3+4
@@ -258,6 +281,19 @@ for (const { testName, orgLabel } of applicantScenarios) {
           // grandTotal: sum of row totals (3+6+9+12)
           const sectionCGrandTotal = toTwoDecimals(3 + 6 + 9 + 12);
 
+          // Row-level totals for each activity (Column E: sum of B-D per row)
+          // Each activity has applicant + state + other = 3 fields
+          // Activity 0 (value 1): 1+1+1 = 3.00
+          // Activity 1 (value 2): 2+2+2 = 6.00
+          // Activity 2 (value 3): 3+3+3 = 9.00
+          // Activity 3 (value 4): 4+4+4 = 12.00
+          for (let i = 0; i < 4; i++) {
+            const activityValue = i + 1;
+            const rowTotal = toTwoDecimals(activityValue * 3);
+            const rowTotalId = `activity_line_items[${i}]--non_federal_resources--total_amount`;
+            await validatePrintViewField(page, rowTotalId, rowTotal);
+          }
+
           // Column totals for each resource type
           await validatePrintViewField(
             page,
@@ -283,16 +319,43 @@ for (const { testName, orgLabel } of applicantScenarios) {
           );
 
           // Section D - Forecasted Cash Needs
-          // All quarters use "01" (value 1), so totals are consistent
+          // All quarters use "01" (value 1), so quarterly amounts are consistent
           // Federal total: 1+1+1+1 = 4.00
           // Non-federal total: 1+1+1+1 = 4.00
           // quarterColumnSum: federal + non-federal per quarter = 2.00
           // grandTotal: federal total + non-federal total = 8.00
+          const sectionDQuarterlyAmount = toTwoDecimals(1);
           const sectionDRowTotal = toTwoDecimals(1 + 1 + 1 + 1);
           const sectionDQuarterTotal = toTwoDecimals(2);
           const sectionDGrandTotal = toTwoDecimals(2 * 4);
 
-          // Federal and Non-federal row totals
+          // Individual quarterly amounts for Federal row
+          const quarterFields = [
+            "first_quarter_amount",
+            "second_quarter_amount",
+            "third_quarter_amount",
+            "fourth_quarter_amount",
+          ];
+          for (const quarterField of quarterFields) {
+            const federalQuarterId = `total_forecasted_cash_needs--federal_forecasted_cash_needs--${quarterField}`;
+            await validatePrintViewField(
+              page,
+              federalQuarterId,
+              sectionDQuarterlyAmount,
+            );
+          }
+
+          // Individual quarterly amounts for Non-federal row
+          for (const quarterField of quarterFields) {
+            const nonFederalQuarterId = `total_forecasted_cash_needs--non_federal_forecasted_cash_needs--${quarterField}`;
+            await validatePrintViewField(
+              page,
+              nonFederalQuarterId,
+              sectionDQuarterlyAmount,
+            );
+          }
+
+          // Federal and Non-federal row totals (Column E)
           await validatePrintViewField(
             page,
             "total_forecasted_cash_needs--federal_forecasted_cash_needs--total_amount",
@@ -304,13 +367,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
             sectionDRowTotal,
           );
 
-          // Quarter column totals (federal + non-federal per quarter)
-          const quarterFields = [
-            "first_quarter_amount",
-            "second_quarter_amount",
-            "third_quarter_amount",
-            "fourth_quarter_amount",
-          ];
+          // Quarter column totals (Row 15: sum of federal + non-federal per quarter)
           for (const quarterField of quarterFields) {
             const quarterTotalId = `total_forecasted_cash_needs--${quarterField}`;
             await validatePrintViewField(
@@ -326,6 +383,35 @@ for (const { testName, orgLabel } of applicantScenarios) {
             "total_forecasted_cash_needs--total_amount",
             sectionDGrandTotal,
           );
+
+          // Section E - Federal Fund Estimates
+          // Each year column has 4 activities (value 1, 2, 3, 4)
+          // Column sum per year: 1+2+3+4 = 10.00
+          // Row total per activity: 1+1+1+1 = 4.00 (4 years)
+          const sectionEColumnTotal = toTwoDecimals(1 + 2 + 3 + 4);
+          const sectionERowTotal = toTwoDecimals(1 + 1 + 1 + 1);
+
+          // Row totals for each activity (sum of Year 1-4)
+          for (let i = 0; i < 4; i++) {
+            const rowTotalId = `activity_line_items[${i}]--federal_fund_estimates--total_amount`;
+            await validatePrintViewField(page, rowTotalId, sectionERowTotal);
+          }
+
+          // Column totals for each year (Year 1-4: sum of activities 1-4)
+          const yearFields = [
+            "year_1_amount",
+            "year_2_amount",
+            "year_3_amount",
+            "year_4_amount",
+          ];
+          for (const yearField of yearFields) {
+            const yearTotalId = `total_federal_fund_estimates--${yearField}`;
+            await validatePrintViewField(
+              page,
+              yearTotalId,
+              sectionEColumnTotal,
+            );
+          }
         }
       }
     },
