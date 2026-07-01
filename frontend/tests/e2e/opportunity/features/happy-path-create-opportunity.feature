@@ -26,7 +26,6 @@ Feature: Opportunity happy path create and publish
 			| Page Name               | Label                     | Field Type | Value                      |
 			| Create Opportunity page | Opportunity number        | text       | Opp-mm-dd-yyyy-hh-mm-sec   |
 			| Create Opportunity page | Opportunity title         | text       | Title-mm-dd-yyyy-hh-mm-sec |
-			| Create Opportunity page | Grant selection method    | select     | Discretionary              |
 			| Create Opportunity page | Assistance listing number | text       | 00.000                     |
 		And I click "Save and continue" button
 		Then I should be on the "Opportunity Overview" page

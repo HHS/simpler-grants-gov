@@ -167,7 +167,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
         page.locator("span.display-inline-flex", { hasText: "Draft" }).first(),
       ).toBeVisible();
 
-      // And I should see Opportunity title / Opportunity number / Grant selection method values
+      // And I should see Opportunity title / Opportunity number values
       await assertTextsVisibleOnPage(page, [
         opportunityTitle,
         opportunityNumber,
