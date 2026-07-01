@@ -344,7 +344,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
           // Non-federal total: 1+1+1+1 = 4.00
           // quarterColumnSum: federal + non-federal per quarter = 2.00
           // grandTotal: federal total + non-federal total = 8.00
-          const sectionDQuarterlyAmount = toTwoDecimals(1);
+          const sectionDQuarterlyAmount = "01"; // Raw test data value
           const sectionDRowTotal = toTwoDecimals(1 + 1 + 1 + 1);
           const sectionDQuarterTotal = toTwoDecimals(2);
           const sectionDGrandTotal = toTwoDecimals(2 * 4);
