@@ -21,12 +21,12 @@ export const waitForNewRelic = async (): Promise<boolean> => {
   let timedOut = false;
 
   while (!present && !timedOut) {
-    elapsed += NEW_RELIC_POLL_INTERVAL;
     await new Promise((resolve) => {
       setTimeout(() => {
         return resolve(null);
-      }, elapsed);
+      }, NEW_RELIC_POLL_INTERVAL);
     });
+    elapsed += NEW_RELIC_POLL_INTERVAL;
     present = !!window.newrelic;
     if (elapsed >= NEW_RELIC_POLL_TIMEOUT) {
       console.error("Timed out waiting for new relic browser object");
