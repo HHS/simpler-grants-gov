@@ -203,6 +203,7 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.EPA_KEY_CONTACTS, 15),
         LookupStr(FormType.ATTACHMENT_FORM, 16),
         LookupStr(FormType.PROJECT_PERFORMANCE_SITE_LOCATION, 17),
+        LookupStr(FormType.KEY_CONTACTS, 18),
     ]
 )
 

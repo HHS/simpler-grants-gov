@@ -70,7 +70,6 @@ test.describe("Grantor Opportunity Happy Path", () => {
       const fillData = buildOpportunityHappyPathFillData(new Date());
       const opportunityNumber = fillData.opportunityNumber;
       const opportunityTitle = fillData.opportunityTitle;
-      const grantSelectionMethod = fillData.grantSelectionMethod;
 
       //--------------Scenario steps start here----------------
 
@@ -98,13 +97,26 @@ test.describe("Grantor Opportunity Happy Path", () => {
       // And I click "Save and continue" button
       await page.getByRole("button", { name: "Save and continue" }).click();
 
-      // Then I should be on the "Edit Opportunity" page and the URL should include "fromCreate=true".
-      await expect(page).toHaveURL(/fromCreate=true/);
+      // Then I should be on the "Opportunity Overview" page and the URL should include "fromCreate=true".
+      await expect(page).toHaveURL(/overview\?fromCreate=true/);
 
       // And I should see the "Opportunity draft started" confirmation message.
       await expect(
         page.getByText("Opportunity draft started", { exact: true }),
       ).toBeVisible();
+
+      // And I should see the "Opportunity Summary" link
+      await expect(
+        page.getByRole("link", { name: "Opportunity Summary" }),
+      ).toBeVisible();
+
+      // And I click "Opportunity Summary" link
+      await page.getByRole("link", { name: "Opportunity Summary" }).click();
+
+      // Then I should be on the "Edit Opportunity" page
+      await expect(page).toHaveURL(
+        /\/grantor\/opportunity\/([a-z0-9-]+?)\/edit/,
+      );
 
       // And "Save" should be enabled while "Publish" and "Preview" remain disabled.
       await assertButtonEnabledDisabledStates(page, {
@@ -140,17 +152,14 @@ test.describe("Grantor Opportunity Happy Path", () => {
       // And I click "Save" button
       await page.getByRole("button", { name: "Save" }).click();
 
-      // Then I should see the "Opportunity draft started" confirmation message.
+      // Then I should see the edit-page save confirmation.
       await expect(
-        page.getByText("Opportunity draft started", { exact: true }),
+        page.getByText("Saved successfully", { exact: true }),
       ).toBeVisible();
 
-      // And I should see the save confirmation message "Your initial information has been saved...".
+      // And I should see the save confirmation body.
       await expect(
-        page.getByText(
-          "Your initial information has been saved. Complete the sections below to finish your opportunity details",
-          { exact: true },
-        ),
+        page.getByText("Your changes have been saved.", { exact: true }),
       ).toBeVisible();
 
       // And I should see "Draft" status.
@@ -158,15 +167,11 @@ test.describe("Grantor Opportunity Happy Path", () => {
         page.locator("span.display-inline-flex", { hasText: "Draft" }).first(),
       ).toBeVisible();
 
-      // And I should see Opportunity title / Opportunity number / Grant selection method values
+      // And I should see Opportunity title / Opportunity number values
       await assertTextsVisibleOnPage(page, [
         opportunityTitle,
         opportunityNumber,
-        grantSelectionMethod,
       ]);
-
-      // And the URL should include "fromCreate=true"
-      await expect(page).toHaveURL(/fromCreate=true/);
 
       // And "Save" and "Publish" should be enabled while "Preview" remains disabled.
       await assertButtonEnabledDisabledStates(page, {
@@ -227,7 +232,6 @@ test.describe("Grantor Opportunity Happy Path", () => {
         opportunityNumber,
         fillData.assistanceListingNumber,
         fillData.fundingType_2,
-        grantSelectionMethod,
         fillData.category,
         fillData.expectedNumberOfAwards,
         formatNumberWithCommas(fillData.awardMinimum),
