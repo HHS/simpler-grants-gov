@@ -254,7 +254,7 @@ const NavLinks = ({
           key="sign-in"
           href={LOGIN_URL}
           onClick={() => {
-            storeCurrentPage();
+            storeCurrentPage(location.pathname, location.search);
             closeDropdownAndMobileNav();
           }}
           text={t("login")}
