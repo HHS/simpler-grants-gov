@@ -9,15 +9,18 @@ const mockGetApplicationFormDetailsForPrint = jest.fn();
 jest.mock("src/services/auth/session", () => ({
   getSession: () => mockGetSession() as unknown,
 }));
+
 jest.mock("src/services/fetch/fetchers/applicationFetcher", () => ({
   getApplicationFormDetails: (...args: unknown[]) =>
     mockGetApplicationFormDetails(...args) as unknown,
   getApplicationFormDetailsForPrint: (...args: unknown[]) =>
     mockGetApplicationFormDetailsForPrint(...args) as unknown,
 }));
+
 jest.mock("src/utils/applyForm/applyFormUtils", () => ({
   processFormSchema: () => mockProcessFormSchema() as unknown,
 }));
+
 jest.mock("src/utils/applyForm/validateUiSchema", () => ({
   validateUiSchema: () => mockValidateUISchema() as unknown,
 }));
@@ -30,16 +33,19 @@ describe("getFormData", () => {
     });
     mockValidateUISchema.mockReturnValue(null);
   });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it("returns UnauthorizedError if no session and no internalToken", async () => {
     mockGetSession.mockResolvedValue(null);
+
     const result = await getFormData({
       applicationId: "app1",
       appFormId: "form1",
     });
+
     expect(result).toEqual({ error: "UnauthorizedError" });
   });
 
@@ -49,10 +55,12 @@ describe("getFormData", () => {
       status_code: 500,
       data: {},
     });
+
     const result = await getFormData({
       applicationId: "app1",
       appFormId: "form1",
     });
+
     expect(result).toEqual({ error: "TopLevelError" });
   });
 
@@ -62,10 +70,12 @@ describe("getFormData", () => {
       status_code: 200,
       data: {},
     });
+
     const result = await getFormData({
       applicationId: "app1",
       appFormId: "form1",
     });
+
     expect(result).toEqual({ error: "TopLevelError" });
   });
 
@@ -83,10 +93,76 @@ describe("getFormData", () => {
         application_form_id: "wrong-id",
       },
     });
+
     const result = await getFormData({
       applicationId: "app1",
       appFormId: "form1",
     });
+
+    expect(result).toEqual({ error: "TopLevelError" });
+  });
+
+  it("returns TopLevelError if ui schema validation fails", async () => {
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockValidateUISchema.mockReturnValue(["invalid ui schema"]);
+    mockGetApplicationFormDetails.mockResolvedValue({
+      status_code: 200,
+      data: {
+        form: {
+          form_id: "form1",
+          form_name: "Test",
+          form_json_schema: {},
+          form_ui_schema: {},
+        },
+        application_form_id: "form1",
+      },
+      warnings: [],
+    });
+
+    const result = await getFormData({
+      applicationId: "app1",
+      appFormId: "form1",
+    });
+
+    expect(result).toEqual({ error: "TopLevelError" });
+  });
+
+  it("returns TopLevelError when API throws a 404 error", async () => {
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockGetApplicationFormDetails.mockRejectedValue({ status: 404 });
+
+    const result = await getFormData({
+      applicationId: "app1",
+      appFormId: "form1",
+    });
+
+    expect(result).toEqual({ error: "TopLevelError" });
+  });
+
+  it("returns TopLevelError when processFormSchema throws", async () => {
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockProcessFormSchema.mockImplementation(() => {
+      throw new Error("invalid schema");
+    });
+    mockGetApplicationFormDetails.mockResolvedValue({
+      status_code: 200,
+      data: {
+        form: {
+          form_id: "form1",
+          form_name: "Test",
+          form_json_schema: {},
+          form_ui_schema: {},
+        },
+        application_form_id: "form1",
+      },
+      warnings: [],
+    });
+
+    const result = await getFormData({
+      applicationId: "app1",
+      appFormId: "form1",
+    });
+
     expect(result).toEqual({ error: "TopLevelError" });
   });
 
@@ -109,13 +185,17 @@ describe("getFormData", () => {
         application_response: { foo: "bar" },
         application_name: "cool application",
         application_attachments: ["fake attachment"],
+        created_at: "2024-01-01T12:00:00Z",
+        updated_at: "2024-01-15T14:30:00Z",
       },
       warnings: [],
     });
+
     const result = await getFormData({
       applicationId: "app1",
       appFormId: "form1",
     });
+
     expect(mockGetApplicationFormDetailsForPrint).not.toHaveBeenCalled();
     expect(mockGetApplicationFormDetails).toHaveBeenCalledWith("app1", "form1");
     expect(result).toEqual({
@@ -128,9 +208,12 @@ describe("getFormData", () => {
         formSchema: {},
         formUiSchema: {},
         formValidationWarnings: [],
+        createdAt: "2024-01-01T12:00:00Z",
+        updatedAt: "2024-01-15T14:30:00Z",
       },
     });
   });
+
   it("calls print version of function when internal token is present", async () => {
     mockGetSession.mockResolvedValue({ token: "session-token" });
     mockProcessFormSchema.mockReturnValue({
@@ -150,14 +233,19 @@ describe("getFormData", () => {
         application_response: { foo: "bar" },
         application_name: "cool application",
         application_attachments: ["fake attachment"],
+        created_at: "2024-01-01T12:00:00Z",
+        updated_at: "2024-01-15T14:30:00Z",
       },
       warnings: [],
     });
+
     const result = await getFormData({
       applicationId: "app1",
       appFormId: "form1",
       internalToken: "internal-token",
     });
+
+    expect(mockGetSession).not.toHaveBeenCalled();
     expect(mockGetApplicationFormDetails).not.toHaveBeenCalled();
     expect(mockGetApplicationFormDetailsForPrint).toHaveBeenCalledWith(
       "internal-token",
@@ -174,6 +262,8 @@ describe("getFormData", () => {
         formSchema: {},
         formUiSchema: {},
         formValidationWarnings: [],
+        createdAt: "2024-01-01T12:00:00Z",
+        updatedAt: "2024-01-15T14:30:00Z",
       },
     });
   });
