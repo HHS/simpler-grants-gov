@@ -8,6 +8,7 @@ import _pytest.monkeypatch
 import boto3
 import flask.testing
 import grants_shared.adapters.db as db
+import grants_shared.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import moto
 import pytest
 from apiflask import APIFlask
@@ -20,7 +21,6 @@ from moto.ses.models import ses_backends
 from sqlalchemy import select, text
 
 import src.app as app_entry
-import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
 from src.adapters import search
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
