@@ -579,6 +579,11 @@ export const messages = {
         deleteEntry: "Delete this entry",
         addEntry: "Add another entry",
       },
+      returnToApplication: "Return to application",
+      saving: "Saving...",
+      savingAndRefreshing: "Save and refresh",
+      lastUpdatedMessage: "This form was last updated on",
+      createdMessage: "This form was created on",
     },
     transferOwnershipModal: {
       title: "Transfer application ownership",
@@ -2546,5 +2551,10 @@ export const messages = {
       deleteFilesCta: "Delete files",
       deleting: "Deleting...",
     },
+  },
+  ProgressChecker: {
+    notStarted: "Not started",
+    inProgress: "In progress",
+    complete: "Complete",
   },
 };

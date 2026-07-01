@@ -1,6 +1,10 @@
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+import {
+  GrantorOpportunityDetail,
+  Summary,
+} from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
@@ -8,6 +12,11 @@ import { Link } from "@trussworks/react-uswds";
 
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
+import { ProgressChecker } from "src/components/grantor-opportunities/ProgressChecker";
+import {
+  competitionRequiredFields,
+  summaryRequiredFields,
+} from "./RequiredFields";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
@@ -16,7 +25,7 @@ type PageProps = {
 async function OpportunityOverviewPage({ params }: PageProps) {
   const { id, locale } = await params;
   const t = await getTranslations({ locale, namespace: "OpportunityOverview" });
-  let opportunityData;
+  let opportunityData: GrantorOpportunityDetail;
   try {
     const response = await getOpportunityForGrantor(id);
     opportunityData = response.data;
@@ -32,6 +41,12 @@ async function OpportunityOverviewPage({ params }: PageProps) {
   }
   const editUrl = "../" + id + "/edit";
   const competitionUrl = "../" + id + "/competition";
+  const summary: Summary = opportunityData.summary;
+  let competition = {};
+  if (opportunityData.competitions && opportunityData.competitions.length > 0) {
+    // For now, use the first competition
+    competition = opportunityData.competitions[0];
+  }
 
   return (
     <div className="bg-white">
@@ -45,7 +60,10 @@ async function OpportunityOverviewPage({ params }: PageProps) {
             <Link href={editUrl}>{t("labels.editOpportunityLink")}</Link>
           </div>
           <div className="tablet:grid-col">
-            {/* PLACEHOLDER: status icon here */}
+            <ProgressChecker
+              requiredFields={summaryRequiredFields}
+              dataToCheck={summary}
+            />
           </div>
         </div>
         <hr />
@@ -54,7 +72,10 @@ async function OpportunityOverviewPage({ params }: PageProps) {
             <Link href={competitionUrl}>{t("labels.competitionLink")}</Link>
           </div>
           <div className="tablet:grid-col">
-            {/* PLACEHOLDER: status icon here */}
+            <ProgressChecker
+              requiredFields={competitionRequiredFields}
+              dataToCheck={competition}
+            />{" "}
           </div>
         </div>
         <hr />
