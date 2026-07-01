@@ -35,7 +35,15 @@ describe("TableWidget", () => {
   };
 
   it("renders the table placeholder with its name", () => {
-    render(<TableWidget {...props} />);
+    render(
+      <TableWidget
+        {...props}
+        schema={{}}
+        rawErrors={[]}
+        value={{}}
+        options={{}}
+      />,
+    );
 
     const placeholder = screen.getByTestId("table-widget-placeholder");
 

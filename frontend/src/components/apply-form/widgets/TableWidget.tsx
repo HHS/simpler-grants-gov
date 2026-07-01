@@ -1,11 +1,8 @@
-import { TableWidgetProps } from "src/types/applyForm/types";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
 
-function TableWidget({
-  label,
-  uiSchemaField,
-}: TableWidgetProps) {
+function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
   if (
-    uiSchemaField.type !== "multiField" ||
+    uiSchemaField?.type !== "multiField" ||
     uiSchemaField.widget !== "Table"
   ) {
     return null;

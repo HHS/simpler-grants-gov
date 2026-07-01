@@ -1,6 +1,5 @@
 import {
   FieldListWidgetProps,
-  TableWidgetProps,
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/types/applyForm/types";
@@ -28,7 +27,7 @@ import TextWidget from "./TextWidget";
 
 export const widgetComponents: Record<
   WidgetTypes,
-  (widgetProps: UswdsWidgetProps) => JSX.Element
+  (widgetProps: UswdsWidgetProps) => JSX.Element | null
 > = {
   Text: (widgetProps: UswdsWidgetProps) => TextWidget(widgetProps),
   TextArea: (widgetProps: UswdsWidgetProps) => TextAreaWidget(widgetProps),
@@ -56,6 +55,5 @@ export const widgetComponents: Record<
   MultiSelect: (widgetProps: UswdsWidgetProps) => MultiSelect(widgetProps),
   FieldList: (widgetProps: UswdsWidgetProps) =>
     FieldListWidget(widgetProps as unknown as FieldListWidgetProps),
-  Table: (widgetProps: UswdsWidgetProps) =>
-    TableWidget(widgetProps as unknown as TableWidgetProps),
+  Table: (widgetProps: UswdsWidgetProps) => TableWidget(widgetProps),
 };

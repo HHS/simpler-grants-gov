@@ -256,7 +256,7 @@ export type UiSchemaTableChildren = {
 export type TableWidgetProps = {
   id: string;
   key: string;
-  name: string;
+  name?: string;
   label?: string;
   description?: string;
   uiSchemaField: UiSchemaTableMultiField;
