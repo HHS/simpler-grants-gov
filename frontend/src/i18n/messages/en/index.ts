@@ -2384,6 +2384,8 @@ export const messages = {
     labels: {
       editOpportunityLink: "Opportunity Summary",
       competitionLink: "Application Package",
+      previewButton: "Preview",
+      publishButton: "Publish",
     },
   },
   CreateOpportunity: {
