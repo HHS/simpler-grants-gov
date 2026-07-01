@@ -69,14 +69,13 @@ async function OpportunityOverviewPage({ params, searchParams }: PageProps) {
       <OpportunityDetailsHeader
         opportunityData={opportunityData}
         locale={locale}
-        >
+        isNewlyCreated={isNewlyCreated}
+      >
         <OverviewButtons
           opportunityId={id}
           publishEnabled={publishEnabled}
         />
       </OpportunityDetailsHeader>
-        isNewlyCreated={isNewlyCreated}
-      />
       <div className="grid-container padding-top-4 padding-bottom-4">
         <div className="grid-row grid-gap-2 padding-top-2">
           <div className="tablet:grid-col">
