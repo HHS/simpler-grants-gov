@@ -19,6 +19,7 @@ from src.form_schema.forms import (
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
+    SF424c_v2_0,
     SF424d_v1_1,
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
@@ -76,6 +77,11 @@ def sf424a_v1_0():
 @pytest.fixture(scope="session")
 def sf424b_v1_1():
     return setup_resolved_form(SF424b_v1_1)
+
+
+@pytest.fixture(scope="session")
+def sf424c_v2_0():
+    return setup_resolved_form(SF424c_v2_0)
 
 
 @pytest.fixture(scope="session")

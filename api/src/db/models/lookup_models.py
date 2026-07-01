@@ -204,6 +204,7 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.ATTACHMENT_FORM, 16),
         LookupStr(FormType.PROJECT_PERFORMANCE_SITE_LOCATION, 17),
         LookupStr(FormType.KEY_CONTACTS, 18),
+        LookupStr(FormType.SF424C, 19),
     ]
 )
 
