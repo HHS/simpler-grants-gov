@@ -11,8 +11,8 @@ const mockLocation = {
   search: "?param=value",
 };
 
-// Save the original location
-const originalLocation = global.location;
+// // Save the original location
+// const originalLocation = global.location;
 
 jest.mock("src/services/sessionStorage/sessionStorage", () => {
   return {
@@ -67,37 +67,37 @@ describe("userRoleForOrganization", () => {
 });
 
 describe("storeCurrentPage", () => {
-  beforeEach(() => {
-    Object.defineProperty(global, "location", {
-      configurable: true,
-      value: { ...mockLocation },
-      writable: true,
-    });
+  // beforeEach(() => {
+  //   Object.defineProperty(global, "location", {
+  //     configurable: true,
+  //     value: { ...mockLocation },
+  //     writable: true,
+  //   });
 
+  //   jest.clearAllMocks();
+  // });
+
+  // afterAll(() => {
+  //   Object.defineProperty(global, "location", {
+  //     configurable: true,
+  //     value: originalLocation,
+  //     writable: true,
+  //   });
+  // });
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
-  afterAll(() => {
-    Object.defineProperty(global, "location", {
-      configurable: true,
-      value: originalLocation,
-      writable: true,
-    });
-  });
-
   it("should store URL in session storage if pathname and search", () => {
-    Object.defineProperty(global, "location", {
-      value: { pathname: "path", search: "/search" },
-    });
-    storeCurrentPage();
+    // Object.defineProperty(global, "location", {
+    //   value: { pathname: "path", search: "/search" },
+    // });
+    storeCurrentPage("path", "/search");
     expect(mockSetItem).toHaveBeenCalledWith("login-redirect", "path/search");
   });
 
   it("should not store URL in session storage if pathname and search are empty", () => {
-    Object.defineProperty(global, "location", {
-      value: { pathname: "", search: "" },
-    });
-    storeCurrentPage();
+    storeCurrentPage("", "");
     expect(mockSetItem).not.toHaveBeenCalled();
   });
 });
