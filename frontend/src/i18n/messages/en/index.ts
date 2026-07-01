@@ -363,9 +363,6 @@ export const messages = {
       alerts: {
         success: "Saved successfully",
         successBody: "Your changes have been saved.",
-        newOpportunityHeading: "Opportunity draft started",
-        newOpportunityBody:
-          "Your initial information has been saved. Complete the sections below to finish your opportunity details",
         genericError: "Unable to save draft opportunity details.",
         missingSummaryContext: "Missing opportunity summary context for save.",
         unauthenticated: "You must be signed in to update this opportunity.",
@@ -409,6 +406,8 @@ export const messages = {
       awardMaxLessThanTotal:
         "Award maximum cannot exceed the Estimated Total Program Funding.",
       awardMinLessThanMax: "Award minimum cannot exceed Award maximum.",
+      awardMaxGreaterThanMin:
+        "Award maximum cannot be less than Award minimum.",
     },
     attachments: {
       removeButton: "Remove",
@@ -2504,6 +2503,11 @@ export const messages = {
     subAgency: "Sub-agency:",
     draft: "Draft",
     lastUpdated: "Last updated:",
+    alerts: {
+      newOpportunityHeading: "Opportunity draft started",
+      newOpportunityBody:
+        "Your initial information has been saved. Complete the sections below to finish your opportunity details",
+    },
   },
   AwardRecommendationSelectFundingOpportunity: {
     pageTitle: "Select funding opportunity | Simpler.Grants.gov",

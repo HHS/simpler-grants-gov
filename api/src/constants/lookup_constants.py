@@ -174,6 +174,8 @@ class FormType(StrEnum):
     EPA_FORM_4700_4 = "EPAForm4700-4"
     EPA_KEY_CONTACTS = "EPAKeyContacts"
 
+    KEY_CONTACTS = "KeyContacts"
+
     ATTACHMENT_FORM = "AttachmentForm"
 
     PROJECT_PERFORMANCE_SITE_LOCATION = "ProjectPerformanceSiteLocation"
