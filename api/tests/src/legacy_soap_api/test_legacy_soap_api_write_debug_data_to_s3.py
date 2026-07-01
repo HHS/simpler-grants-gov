@@ -1,3 +1,4 @@
+import json
 import logging
 
 import boto3
@@ -62,7 +63,7 @@ def test_write_debug_data_to_s3(
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     soap_legacy_response = SOAPResponse(
-        data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
+        data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={"xyz": "abc"}
     )
     soap_request = create_soap_request(
         SOAP_PAYLOAD, operation_name="GetSubmissionListExpandedRequest"
@@ -77,10 +78,14 @@ def test_write_debug_data_to_s3(
     response_contents = file_util.read_file(
         f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
     )
+    headers_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/headers.txt"
+    )
     assert request_contents.replace("\n", "") == SOAP_PAYLOAD.decode().replace("\n", "")
     assert response_contents.replace("\r", "") == SOAP_LEGACY_RESPONSE_PAYLOAD.decode().replace(
         "\r", ""
     )
+    assert headers_contents.replace("\r", "") == json.dumps({"xyz": "abc"})
 
 
 def test_write_debug_data_to_s3_handles_a_null_soap_request(
@@ -160,4 +165,4 @@ def test_write_debug_data_to_s3_runs_on_any_endpoint(
         create_soap_request(SOAP_PAYLOAD, operation_name="Y"), soap_legacy_response
     )
     objects = s3_client.list_objects_v2(Bucket="local-mock-draft-bucket")
-    assert len(objects.get("Contents")) == 14
+    assert len(objects.get("Contents")) == 21

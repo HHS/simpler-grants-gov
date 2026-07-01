@@ -569,6 +569,15 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
                 soap_response.to_bytes().decode("utf-8"),
                 content_type=text_content_type,
             )
+            response_s3_path = file_util.join(
+                base_path,
+                "headers.txt",
+            )
+            file_util.write_to_file(
+                response_s3_path,
+                json.dumps(soap_response.headers),
+                content_type=text_content_type,
+            )
             logger.info(
                 "soap_client: debug info uploaded to s3",
                 extra={"debug_identifier": debug_identifier},

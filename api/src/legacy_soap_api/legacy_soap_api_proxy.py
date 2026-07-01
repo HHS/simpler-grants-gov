@@ -48,7 +48,7 @@ def get_proxy_headers(
     )
     logger.info(
         "soap_client: filtered headers being sent to legacy",
-        extra={"filtered_headers": filtered_headers},
+        extra={"filtered_header_keys": filtered_headers.keys()},
     )
     if not soap_auth:
         return filtered_headers

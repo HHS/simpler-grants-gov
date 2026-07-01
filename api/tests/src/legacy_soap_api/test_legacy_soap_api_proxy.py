@@ -169,7 +169,7 @@ def test_request_gets_correct_proxy_headers_when_no_auth(enable_factory_create, 
         for r in caplog.records
         if r.message == "soap_client: filtered headers being sent to legacy"
     )
-    assert record.filtered_headers == {"x": "1"}
+    assert list(record.filtered_header_keys) == ["x"]
 
 
 def test_request_gets_correct_proxy_headers_when_there_is_auth(enable_factory_create):
