@@ -405,25 +405,28 @@ for (const { testName, orgLabel } of applicantScenarios) {
           );
 
           // Section E - Federal Fund Estimates
-          // Each year column has 4 activities (value 1, 2, 3, 4)
-          // Column sum per year: 1+2+3+4 = 10.00
-          // Row total per activity: 1+1+1+1 = 4.00 (4 years)
-          const sectionEColumnTotal = toTwoDecimals(1 + 2 + 3 + 4);
-          const sectionERowTotal = toTwoDecimals(1 + 1 + 1 + 1);
+          // Section E has individual year amounts per activity, no row totals
+          // All 4 activities are filled with "1" for all 4 years
+          // Each year column sum: 1+1+1+1 = 4.00
+          const sectionEYearAmount = "1.00";
+          const sectionEColumnTotal = toTwoDecimals(1 + 1 + 1 + 1);
 
-          // Row totals for each activity (sum of Year 1-4)
-          for (let i = 0; i < 4; i++) {
-            const rowTotalId = `activity_line_items[${i}]--federal_fund_estimates--total_amount`;
-            await validatePrintViewField(page, rowTotalId, sectionERowTotal);
-          }
-
-          // Column totals for each year (Year 1-4: sum of activities 1-4)
+          // Individual year amounts for each activity (all filled with "1")
           const yearFields = [
             "first_year_amount",
             "second_year_amount",
             "third_year_amount",
             "fourth_year_amount",
           ];
+
+          for (let i = 0; i < 4; i++) {
+            for (const yearField of yearFields) {
+              const fieldId = `activity_line_items[${i}]--federal_fund_estimates--${yearField}`;
+              await validatePrintViewField(page, fieldId, sectionEYearAmount);
+            }
+          }
+
+          // Column totals for each year (Year 1-4: sum of activities 1-4)
           for (const yearField of yearFields) {
             const yearTotalId = `total_federal_fund_estimates--${yearField}`;
             await validatePrintViewField(
