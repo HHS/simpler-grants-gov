@@ -6,8 +6,7 @@ from typing import Any, ParamSpec
 import flask
 from apiflask.exceptions import HTTPError
 from grants_shared.api import response
-
-from src.auth.login_gov_jwt_auth import get_final_redirect_uri
+from grants_shared.auth.login_gov_jwt_auth import get_final_redirect_uri
 
 logger = logging.getLogger(__name__)
 

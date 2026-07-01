@@ -20,9 +20,9 @@ import click
 import grants_shared.adapters.db as db
 import grants_shared.util.datetime_util as datetime_util
 from grants_shared.adapters.db import flask_db
+from grants_shared.auth.api_jwt_auth import initialize_jwt_auth
 from grants_shared.util.local import error_if_not_local
 
-from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.task.task_blueprint import task_blueprint
 

@@ -545,7 +545,7 @@ def test_agency_user_without_piv_fails_when_required(
 ):
     """Agency user logging in without PIV should fail when IS_PIV_REQUIRED=true"""
     # Enable PIV requirement
-    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
+    monkeypatch.setattr("grants_shared.auth.login_gov_jwt_auth._config.is_piv_required", True)
 
     # Create state and existing agency user
     login_gov_state = LoginGovStateFactory.create()
@@ -586,7 +586,7 @@ def test_agency_user_with_piv_succeeds_when_required(
 ):
     """Agency user logging in with PIV should succeed when IS_PIV_REQUIRED=true"""
     # Enable PIV requirement
-    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
+    monkeypatch.setattr("grants_shared.auth.login_gov_jwt_auth._config.is_piv_required", True)
 
     # Create state and existing agency user
     login_gov_state = LoginGovStateFactory.create()
@@ -627,7 +627,7 @@ def test_non_agency_user_without_piv_succeeds_when_required(
 ):
     """Non-agency user logging in without PIV should succeed even when IS_PIV_REQUIRED=true"""
     # Enable PIV requirement
-    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
+    monkeypatch.setattr("grants_shared.auth.login_gov_jwt_auth._config.is_piv_required", True)
 
     # Create state (user will be created as new, non-agency user)
     login_gov_state = LoginGovStateFactory.create()
@@ -662,7 +662,7 @@ def test_agency_user_without_piv_succeeds_when_not_required(
 ):
     """Agency user logging in without PIV should succeed when IS_PIV_REQUIRED=false"""
     # Disable PIV requirement (default behavior)
-    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", False)
+    monkeypatch.setattr("grants_shared.auth.login_gov_jwt_auth._config.is_piv_required", False)
 
     # Create state and existing agency user
     login_gov_state = LoginGovStateFactory.create()
