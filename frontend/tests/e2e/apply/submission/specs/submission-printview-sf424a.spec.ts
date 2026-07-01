@@ -187,7 +187,9 @@ for (const { testName, orgLabel } of applicantScenarios) {
             // rowTotal = activity_value × 4 columns
             const sectionARowTotal = toTwoDecimals(activityValue * 4);
             const sectionARowTotalId = `activity_line_items[${i}]--budget_summary--total_amount`;
-            await expect(page.getByTestId(sectionARowTotalId)).toContainText(
+            await validatePrintViewField(
+              page,
+              sectionARowTotalId,
               sectionARowTotal,
             );
 
@@ -195,7 +197,9 @@ for (const { testName, orgLabel } of applicantScenarios) {
             // rowTotal = activity_value × 10 budget category fields
             const sectionBRowTotal = toTwoDecimals(activityValue * 10);
             const sectionBRowTotalId = `activity_line_items[${i}]--budget_categories--total_amount`;
-            await expect(page.getByTestId(sectionBRowTotalId)).toContainText(
+            await validatePrintViewField(
+              page,
+              sectionBRowTotalId,
               sectionBRowTotal,
             );
 
@@ -203,7 +207,9 @@ for (const { testName, orgLabel } of applicantScenarios) {
             // rowTotal = activity_value × 3 fields (applicant, state, other)
             const sectionCRowTotal = toTwoDecimals(activityValue * 3);
             const sectionCRowTotalId = `activity_line_items[${i}]--non_federal_resources--total_amount`;
-            await expect(page.getByTestId(sectionCRowTotalId)).toContainText(
+            await validatePrintViewField(
+              page,
+              sectionCRowTotalId,
               sectionCRowTotal,
             );
 
@@ -211,7 +217,9 @@ for (const { testName, orgLabel } of applicantScenarios) {
             // rowTotal = activity_value × 4 year fields
             const sectionERowTotal = toTwoDecimals(activityValue * 4);
             const sectionERowTotalId = `activity_line_items[${i}]--federal_fund_estimates--total_amount`;
-            await expect(page.getByTestId(sectionERowTotalId)).toContainText(
+            await validatePrintViewField(
+              page,
+              sectionERowTotalId,
               sectionERowTotal,
             );
           }
@@ -227,13 +235,13 @@ for (const { testName, orgLabel } of applicantScenarios) {
           ];
           for (const col of budgetSummaryCols) {
             const totalId = `total_budget_summary--${col}`;
-            await expect(page.getByTestId(totalId)).toContainText(
-              sectionATotalColumns,
-            );
+            await validatePrintViewField(page, totalId, sectionATotalColumns);
           }
-          await expect(
-            page.getByTestId("total_budget_summary--total_amount"),
-          ).toContainText(sectionAGrandTotal);
+          await validatePrintViewField(
+            page,
+            "total_budget_summary--total_amount",
+            sectionAGrandTotal,
+          );
 
           // Section B - Budget Categories totals
           // directChargeColumnSum: (1+2+3+4) × 8 fields
@@ -245,22 +253,26 @@ for (const { testName, orgLabel } of applicantScenarios) {
           // programIncomeSum: 1+2+3+4
           const sectionBProgramIncomeSum = toTwoDecimals(1 + 2 + 3 + 4);
 
-          await expect(
-            page.getByTestId(
-              "total_budget_categories--total_direct_charge_amount",
-            ),
-          ).toContainText(sectionBDirectChargeTotal);
-          await expect(
-            page.getByTestId(
-              "total_budget_categories--total_indirect_charge_amount",
-            ),
-          ).toContainText(sectionBIndirectChargeTotal);
-          await expect(
-            page.getByTestId("total_budget_categories--total_amount"),
-          ).toContainText(sectionBGrandTotal);
-          await expect(
-            page.getByTestId("total_budget_categories--program_income_amount"),
-          ).toContainText(sectionBProgramIncomeSum);
+          await validatePrintViewField(
+            page,
+            "total_budget_categories--total_direct_charge_amount",
+            sectionBDirectChargeTotal,
+          );
+          await validatePrintViewField(
+            page,
+            "total_budget_categories--total_indirect_charge_amount",
+            sectionBIndirectChargeTotal,
+          );
+          await validatePrintViewField(
+            page,
+            "total_budget_categories--total_amount",
+            sectionBGrandTotal,
+          );
+          await validatePrintViewField(
+            page,
+            "total_budget_categories--program_income_amount",
+            sectionBProgramIncomeSum,
+          );
 
           // Section C - Non-Federal Resources totals
           // columnBCD: sum of activity values (1+2+3+4)
@@ -269,20 +281,28 @@ for (const { testName, orgLabel } of applicantScenarios) {
           const sectionCGrandTotal = toTwoDecimals(3 + 6 + 9 + 12);
 
           // Column totals for each resource type
-          await expect(
-            page.getByTestId("total_non_federal_resources--applicant_amount"),
-          ).toContainText(sectionCColumnTotal);
-          await expect(
-            page.getByTestId("total_non_federal_resources--state_amount"),
-          ).toContainText(sectionCColumnTotal);
-          await expect(
-            page.getByTestId("total_non_federal_resources--other_amount"),
-          ).toContainText(sectionCColumnTotal);
+          await validatePrintViewField(
+            page,
+            "total_non_federal_resources--applicant_amount",
+            sectionCColumnTotal,
+          );
+          await validatePrintViewField(
+            page,
+            "total_non_federal_resources--state_amount",
+            sectionCColumnTotal,
+          );
+          await validatePrintViewField(
+            page,
+            "total_non_federal_resources--other_amount",
+            sectionCColumnTotal,
+          );
 
           // Grand total across all activities and resource types
-          await expect(
-            page.getByTestId("total_non_federal_resources--total_amount"),
-          ).toContainText(sectionCGrandTotal);
+          await validatePrintViewField(
+            page,
+            "total_non_federal_resources--total_amount",
+            sectionCGrandTotal,
+          );
 
           // Section D - Forecasted Cash Needs
           // All quarters use "01" (value 1), so totals are consistent
@@ -295,16 +315,16 @@ for (const { testName, orgLabel } of applicantScenarios) {
           const sectionDGrandTotal = toTwoDecimals(2 * 4);
 
           // Federal and Non-federal row totals
-          await expect(
-            page.getByTestId(
-              "total_forecasted_cash_needs--federal_forecasted_cash_needs--total_amount",
-            ),
-          ).toContainText(sectionDRowTotal);
-          await expect(
-            page.getByTestId(
-              "total_forecasted_cash_needs--non_federal_forecasted_cash_needs--total_amount",
-            ),
-          ).toContainText(sectionDRowTotal);
+          await validatePrintViewField(
+            page,
+            "total_forecasted_cash_needs--federal_forecasted_cash_needs--total_amount",
+            sectionDRowTotal,
+          );
+          await validatePrintViewField(
+            page,
+            "total_forecasted_cash_needs--non_federal_forecasted_cash_needs--total_amount",
+            sectionDRowTotal,
+          );
 
           // Quarter column totals (federal + non-federal per quarter)
           const quarterFields = [
@@ -315,15 +335,19 @@ for (const { testName, orgLabel } of applicantScenarios) {
           ];
           for (const quarterField of quarterFields) {
             const quarterTotalId = `total_forecasted_cash_needs--${quarterField}`;
-            await expect(page.getByTestId(quarterTotalId)).toContainText(
+            await validatePrintViewField(
+              page,
+              quarterTotalId,
               sectionDQuarterTotal,
             );
           }
 
           // Grand total
-          await expect(
-            page.getByTestId("total_forecasted_cash_needs--total_amount"),
-          ).toContainText(sectionDGrandTotal);
+          await validatePrintViewField(
+            page,
+            "total_forecasted_cash_needs--total_amount",
+            sectionDGrandTotal,
+          );
         }
       }
     },
