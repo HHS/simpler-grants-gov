@@ -266,8 +266,11 @@ for (const { testName, orgLabel } of applicantScenarios) {
           const sectionBDirectChargeTotal = toTwoDecimals((1 + 2 + 3 + 4) * 8);
           // indirectChargeColumnSum: 1+2+3+4
           const sectionBIndirectChargeTotal = toTwoDecimals(1 + 2 + 3 + 4);
-          // grandTotal: sum of row totals (10+20+30+40)
-          const sectionBGrandTotal = toTwoDecimals(10 + 20 + 30 + 40);
+          // grandTotal: sum of direct and indirect charges (80 + 10)
+          const sectionBGrandTotal = toTwoDecimals(
+            parseFloat(sectionBDirectChargeTotal) +
+              parseFloat(sectionBIndirectChargeTotal),
+          );
           // programIncomeSum: 1+2+3+4
           const sectionBProgramIncomeSum = toTwoDecimals(1 + 2 + 3 + 4);
 
