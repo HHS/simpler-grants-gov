@@ -406,12 +406,12 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
           // Section E - Federal Fund Estimates
           // Section E has individual year amounts per activity, no row totals
-          // All 4 activities are filled with "1" for all 4 years
-          // Each year column sum: 1+1+1+1 = 4.00
-          const sectionEYearAmount = "1.00";
+          // All 4 activities are filled with "01" (index + 1 format for activity 1, 2, 3, 4)
+          // Column total should be "01" + "01" + "01" + "01" = "4.00" (sum of 4 ones)
+          const sectionEYearAmount = "01"; // Raw test data value (activity index)
           const sectionEColumnTotal = toTwoDecimals(1 + 1 + 1 + 1);
 
-          // Individual year amounts for each activity (all filled with "1")
+          // Individual year amounts for each activity (all filled with "01")
           const yearFields = [
             "first_year_amount",
             "second_year_amount",
