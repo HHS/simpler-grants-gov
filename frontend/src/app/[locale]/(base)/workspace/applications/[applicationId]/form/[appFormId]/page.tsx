@@ -85,6 +85,8 @@ async function FormPage({ params }: formPageProps) {
     formSchema,
     formUiSchema,
     formValidationWarnings,
+    createdAt,
+    updatedAt,
   } = data;
 
   const isBudgetForm = formName.includes("SF-424A");
@@ -131,6 +133,8 @@ async function FormPage({ params }: formPageProps) {
           attachments={applicationAttachments}
           isBudgetForm={isBudgetForm}
           applicationStatus={application_status}
+          createdAt={createdAt}
+          updatedAt={updatedAt}
         />
       </GridContainer>
     </>

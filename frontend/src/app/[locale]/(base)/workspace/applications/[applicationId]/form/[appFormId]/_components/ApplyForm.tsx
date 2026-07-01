@@ -13,11 +13,16 @@ import {
 import { Attachment } from "src/types/attachmentTypes";
 import { getFieldsForNav } from "src/utils/applyForm/applyFormUtils";
 import { rebaseFieldListWarningsAfterDelete } from "src/utils/applyForm/rebaseFieldListWarningsAfterDelete";
+import {
+  formatTimestamp,
+  getModifiedTimeDisplay,
+} from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
+import { useRouter } from "next/navigation";
 import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
-import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
+import { Alert, Button, ButtonGroup, FormGroup } from "@trussworks/react-uswds";
 
 import { FormFields } from "src/components/apply-form/FormFields";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
@@ -51,6 +56,53 @@ interface ApplyFormFormContext {
   widgetSupport: WidgetSupport;
 }
 
+const FormActionButtons = ({
+  applicationId,
+  onSaveClick,
+  returnToApplicationText,
+  savingText,
+  savingAndRefreshingText,
+}: {
+  applicationId: string;
+  onSaveClick: () => void;
+  returnToApplicationText: string;
+  savingText: string;
+  savingAndRefreshingText: string;
+}) => {
+  const { pending } = useFormStatus();
+  const router = useRouter();
+
+  const handleReturnToApplication = () => {
+    router.push(`/workspace/applications/${applicationId}`);
+  };
+  return (
+    <ButtonGroup
+      className="apply-form__action-buttons display-flex flex-align-center flex-justify"
+      style={{ gap: "24px" }}
+    >
+      <Button
+        data-testid="apply-form-save"
+        type="submit"
+        name="apply-form-button"
+        className="margin-top-05 flex-1"
+        value="save"
+        onClick={onSaveClick}
+      >
+        {pending ? savingText : savingAndRefreshingText}
+      </Button>
+      <Button
+        type="button"
+        outline
+        className="margin-top-0 flex-1"
+        data-testid="apply-form-return"
+        onClick={handleReturnToApplication}
+      >
+        {returnToApplicationText}
+      </Button>
+    </ButtonGroup>
+  );
+};
+
 const ApplyForm = ({
   applicationId,
   formId,
@@ -61,6 +113,8 @@ const ApplyForm = ({
   attachments,
   isBudgetForm = false,
   applicationStatus,
+  createdAt,
+  updatedAt,
 }: {
   applicationId: string;
   formId: string;
@@ -74,11 +128,22 @@ const ApplyForm = ({
   attachments: Attachment[];
   isBudgetForm?: boolean;
   applicationStatus?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }) => {
-  const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
   const translate = t as unknown as Translator;
   const isFormLocked = applicationStatus !== "in_progress";
+
+  const lastUpdatedAt = updatedAt || createdAt;
+
+  const isCreated =
+    !updatedAt ||
+    getModifiedTimeDisplay(updatedAt, createdAt || updatedAt, "created") ===
+      "created";
+  const formStatus = isCreated ? "created" : "updated";
+  const isFormSaved = Boolean(lastUpdatedAt);
+
   const required = translate.rich("required", {
     abr: (content) => (
       <abbr
@@ -204,22 +269,28 @@ const ApplyForm = ({
       }}
       noValidate
     >
-      <div className="display-flex flex-justify">
-        <div>{required}</div>
+      <div className="display-flex flex-align-center flex-justify margin-bottom-2">
+        <div>
+          {required}
+          {isFormSaved && lastUpdatedAt && (
+            <div className="margin-top-1">
+              {formStatus === "updated"
+                ? `${translate("lastUpdatedMessage")} ${formatTimestamp(lastUpdatedAt)}`
+                : `${translate("createdMessage")} ${formatTimestamp(lastUpdatedAt)}`}
+            </div>
+          )}
+        </div>
         {!isFormLocked && (
-          <Button
-            data-testid="apply-form-save"
-            type="submit"
-            name="apply-form-button"
-            className="margin-top-0"
-            value="save"
-            onClick={() => {
+          <FormActionButtons
+            applicationId={applicationId}
+            onSaveClick={() => {
               setFormChanged(false);
               setAttachmentsChanged(false);
             }}
-          >
-            {pending ? "Saving..." : "Save"}
-          </Button>
+            returnToApplicationText={translate("returnToApplication")}
+            savingText={translate("saving")}
+            savingAndRefreshingText={translate("savingAndRefreshing")}
+          />
         )}
       </div>
       <div className="usa-in-page-nav-container">
