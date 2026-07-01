@@ -15,7 +15,6 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
-import { validateSF424ARowTotals } from "tests/e2e/utils/forms/validate-form-totals-utils";
 import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
@@ -29,6 +28,9 @@ import {
   validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
+
+// TODO: Uncomment when bug #11223 is fixed (row totals and grand total)
+// import { validateSF424ARowTotals } from "tests/e2e/utils/forms/validate-form-totals-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 
