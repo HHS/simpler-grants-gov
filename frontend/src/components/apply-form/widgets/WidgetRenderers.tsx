@@ -43,6 +43,7 @@ export function renderWidget<V>({
   definition?: DefinitionPath;
 }) {
   const Widget = widgetComponents[type];
+
   // light debugging for unknown widgets
   if (typeof Widget !== "function") {
     console.error(`Unknown widget type: ${type}`, definition);
