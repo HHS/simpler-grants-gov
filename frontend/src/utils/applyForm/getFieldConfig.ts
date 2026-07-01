@@ -274,8 +274,9 @@ const getBasicFieldInfo = ({
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<string> => {
   const { schema } = uiFieldObject;
+  // the definition can be many things, but in this case we should have done the
+  // work ahead of time to determine that this definition will be a string
   const definition = uiFieldObject.definition as string;
-
   if (typeof definition !== "string") {
     throw new Error("attempting to get basic field info for complex field");
   }
@@ -524,6 +525,8 @@ const getFieldListConfig = ({
 
       const { value: _value, key: _key, ...rest } = childWidgetConfig.props;
 
+      // Build once so the renderer can use the same path for id generation,
+      // value lookup, and nested value updates.
       const storagePath = buildFieldListStoragePath({
         fieldListName: uiFieldObject.name,
         childDefinition: childNode.definition,
