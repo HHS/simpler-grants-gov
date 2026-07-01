@@ -725,7 +725,7 @@ export const getRequiredProperties = (
         acc.push(getKeyParentPath(requiredPropertyKey, parentPath));
       });
     }
-    return requiredPaths;
+    return acc;
   }, [] as string[]);
 };
 

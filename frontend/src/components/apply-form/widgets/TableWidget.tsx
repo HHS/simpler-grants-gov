@@ -1,7 +1,13 @@
 import { TableWidgetProps } from "src/types/applyForm/types";
 
-function TableWidget({ label, name, uiSchemaField }: TableWidgetProps) {
-  if (uiSchemaField.type !== "multiField" || uiSchemaField.widget !== "Table") {
+function TableWidget({
+  label,
+  uiSchemaField,
+}: TableWidgetProps) {
+  if (
+    uiSchemaField.type !== "multiField" ||
+    uiSchemaField.widget !== "Table"
+  ) {
     return null;
   }
 
@@ -10,7 +16,7 @@ function TableWidget({ label, name, uiSchemaField }: TableWidgetProps) {
   return (
     <div
       data-testid="table-widget-placeholder"
-      data-table-name={name}
+      data-table-name={uiSchemaField.name}
       data-table-column-count={columns.length}
       data-table-row-count={rows.length}
     >
