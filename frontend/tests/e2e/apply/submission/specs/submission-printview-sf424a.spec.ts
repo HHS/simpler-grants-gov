@@ -211,7 +211,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
           // Helper to format numeric activity value to two decimal places
           const toTwoDecimals = (num: number): string => num.toFixed(2);
           const sectionATotalColumns = toTwoDecimals(1 + 2 + 3 + 4);
-          const sectionAGrandTotal = toTwoDecimals(4 + 8 + 12 + 16); // row totals per activity
           const budgetSummaryCols = [
             "federal_estimated_unobligated_amount",
             "non_federal_estimated_unobligated_amount",
@@ -225,6 +224,9 @@ for (const { testName, orgLabel } of applicantScenarios) {
           /**  TODO: Uncomment when bug #11223 is fixed (row totals and grand total)
            // Section A - Grand total (Column G: sum of row totals = 40.00)
            // See: https://github.com/HHS/simpler-grants-gov/issues/11223
+
+           const sectionAGrandTotal = toTwoDecimals(4 + 8 + 12 + 16); // row totals per activity
+
            await validatePrintViewField(
              page,
              "total_budget_summary--total_amount",
