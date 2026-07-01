@@ -15,6 +15,7 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
+import { validateSF424ARowTotals } from "tests/e2e/utils/forms/validate-form-totals-utils";
 import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
@@ -100,6 +101,11 @@ for (const { testName, orgLabel } of applicantScenarios) {
         // Verify save succeeded while still on the form page
         await verifyFormStatusAfterSave(page, "complete");
 
+        // Verify SF-424A row totals are calculated after save
+        if (form.formKey === "sf424a") {
+          await validateSF424ARowTotals(page);
+        }
+
         // Capture the form URL now - verifyFormStatusOnApplication navigates away
         const formUrl = page.url();
 
@@ -128,6 +134,22 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // When the user clicks "Submit application"
       // Then the application is submitted successfully
       await submitApplicationAndVerify(page, "success");
+
+      // Verify SF-424A row totals persist after submission (before print view)
+      // Navigate to each SF-424A form's print view to validate totals survived submission
+      for (const { formKey, printUrl } of filledForms) {
+        if (formKey === "sf424a") {
+          await navigateToPrintView(page, printUrl);
+          await validateSF424ARowTotals(page);
+          // Navigate back to confirmation page for next form
+          await page.goBack();
+          await page.waitForLoadState("domcontentloaded");
+        }
+      }
+
+      // Return to application/confirmation page
+      await page.goto(applicationUrl);
+      await page.waitForLoadState("domcontentloaded");
 
       // --- Confirmation Page Validation ---
       await expect(
@@ -175,56 +197,12 @@ for (const { testName, orgLabel } of applicantScenarios) {
         // Test data uses unique values per activity (01, 02, 03, 04)
         // requirement. Totals are still deterministic and calculated per activity index.
         if (formKey === "sf424a") {
+          // Validate SF-424A row-level totals (Section A budget summary totals)
+          // Also catches the bug where row totals aren't calculated (issue #11223)
+          await validateSF424ARowTotals(page);
+
           // Helper to format numeric activity value to two decimal places
           const toTwoDecimals = (num: number): string => num.toFixed(2);
-
-          // For each of 4 activities, validate computed totals with activity-specific expected values
-          for (let i = 0; i < 4; i++) {
-            // Activity value is activity index + 1: activity 0 = "01" (1), activity 1 = "02" (2), etc.
-            const activityValue = i + 1;
-
-            // Section A - Budget Summary Row Totals per activity
-            // rowTotal = activity_value × 4 columns
-            const sectionARowTotal = toTwoDecimals(activityValue * 4);
-            const sectionARowTotalId = `activity_line_items[${i}]--budget_summary--total_amount`;
-            await validatePrintViewField(
-              page,
-              sectionARowTotalId,
-              sectionARowTotal,
-            );
-
-            // Section B - Budget Categories Row Totals per activity
-            // rowTotal = activity_value × 10 budget category fields
-            const sectionBRowTotal = toTwoDecimals(activityValue * 10);
-            const sectionBRowTotalId = `activity_line_items[${i}]--budget_categories--total_amount`;
-            await validatePrintViewField(
-              page,
-              sectionBRowTotalId,
-              sectionBRowTotal,
-            );
-
-            // Section C - Non-Federal Resources Row Totals per activity
-            // rowTotal = activity_value × 3 fields (applicant, state, other)
-            const sectionCRowTotal = toTwoDecimals(activityValue * 3);
-            const sectionCRowTotalId = `activity_line_items[${i}]--non_federal_resources--total_amount`;
-            await validatePrintViewField(
-              page,
-              sectionCRowTotalId,
-              sectionCRowTotal,
-            );
-
-            // Section E - Federal Fund Estimates Row Totals per activity
-            // rowTotal = activity_value × 4 year fields
-            const sectionERowTotal = toTwoDecimals(activityValue * 4);
-            const sectionERowTotalId = `activity_line_items[${i}]--federal_fund_estimates--total_amount`;
-            await validatePrintViewField(
-              page,
-              sectionERowTotalId,
-              sectionERowTotal,
-            );
-          }
-
-          // Section A - Total Budget Summary (Column totals: sum of 1+2+3+4 per column)
           const sectionATotalColumns = toTwoDecimals(1 + 2 + 3 + 4);
           const sectionAGrandTotal = toTwoDecimals(4 + 8 + 12 + 16); // row totals per activity
           const budgetSummaryCols = [
