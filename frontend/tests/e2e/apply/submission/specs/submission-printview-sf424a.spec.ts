@@ -172,48 +172,130 @@ for (const { testName, orgLabel } of applicantScenarios) {
           await validatePrintViewField(page, testId, testData[dataKey]);
         }
 
-        // SF-424A has no attachment sections (unlike SF-424)
-        // All sections (A-F) contain computed totals that are derived from user-entered values
-        // and validated implicitly by the above checks on user-entered fields.
+        // SF-424A validation - strict computed totals checks with activity-specific expectations
+        // Test data uses unique values per activity (01, 02, 03, 04) to satisfy "unique data"
+        // requirement. Totals are still deterministic and calculated per activity index.
         if (formKey === "sf424a") {
-          // Verify computed totals are rendered in print view
-          // These totals are rule-computed on the form and reflected in print view
-          // The test data uses values that produce deterministic totals (all fields = "1")
-          // so we can reliably validate them here.
+          // Helper to format numeric activity value to two decimal places
+          const toTwoDecimals = (num: number): string => num.toFixed(2);
 
-          // Section A - Budget Summary totals (activity row totals and column totals)
-          // Activity row totals: 4 columns × 1 = "4.00"
-          const activityTotals = page.locator(
-            '[data-testid*="activity_line_items"][data-testid*="budget_summary"][data-testid*="total"]',
-          );
-          if ((await activityTotals.count()) > 0) {
-            // Verify at least some computed totals are rendered
-            await expect(activityTotals.first()).toBeVisible();
+          // For each of 4 activities, validate computed totals with activity-specific expected values
+          for (let i = 0; i < 4; i++) {
+            // Activity value is activity index + 1: activity 0 = "01" (1), activity 1 = "02" (2), etc.
+            const activityValue = i + 1;
+
+            // Section A - Budget Summary Row Totals per activity
+            // rowTotal = activity_value × 4 columns
+            const sectionARowTotal = toTwoDecimals(activityValue * 4);
+            const sectionARowTotalId = `activity_line_items[${i}]--budget_summary--total_amount`;
+            await expect(page.getByTestId(sectionARowTotalId)).toContainText(
+              sectionARowTotal,
+            );
+
+            // Section B - Budget Categories Row Totals per activity
+            // rowTotal = activity_value × 10 budget category fields
+            const sectionBRowTotal = toTwoDecimals(activityValue * 10);
+            const sectionBRowTotalId = `activity_line_items[${i}]--budget_categories--total_amount`;
+            await expect(page.getByTestId(sectionBRowTotalId)).toContainText(
+              sectionBRowTotal,
+            );
+
+            // Section C - Non-Federal Resources Row Totals per activity
+            // rowTotal = activity_value × 3 fields (applicant, state, other)
+            const sectionCRowTotal = toTwoDecimals(activityValue * 3);
+            const sectionCRowTotalId = `activity_line_items[${i}]--non_federal_resources--total_amount`;
+            await expect(page.getByTestId(sectionCRowTotalId)).toContainText(
+              sectionCRowTotal,
+            );
+
+            // Section E - Federal Fund Estimates Row Totals per activity
+            // rowTotal = activity_value × 4 year fields
+            const sectionERowTotal = toTwoDecimals(activityValue * 4);
+            const sectionERowTotalId = `activity_line_items[${i}]--federal_fund_estimates--total_amount`;
+            await expect(page.getByTestId(sectionERowTotalId)).toContainText(
+              sectionERowTotal,
+            );
           }
 
-          // Section B - Budget Categories totals (category row sums and grand total)
-          const budgetCategoryTotals = page.locator(
-            '[data-testid*="budget_categories"][data-testid*="total"]',
-          );
-          if ((await budgetCategoryTotals.count()) > 0) {
-            await expect(budgetCategoryTotals.first()).toBeVisible();
+          // Section A - Total Budget Summary (Column totals: sum of 1+2+3+4 per column)
+          const sectionATotalColumns = toTwoDecimals(1 + 2 + 3 + 4);
+          const sectionAGrandTotal = toTwoDecimals(4 + 8 + 12 + 16); // row totals per activity
+          const budgetSummaryCols = [
+            "federal_estimated_unobligated_amount",
+            "non_federal_estimated_unobligated_amount",
+            "federal_new_or_revised_amount",
+            "non_federal_new_or_revised_amount",
+          ];
+          for (const col of budgetSummaryCols) {
+            const totalId = `total_budget_summary--${col}`;
+            await expect(page.getByTestId(totalId)).toContainText(
+              sectionATotalColumns,
+            );
           }
+          await expect(
+            page.getByTestId("total_budget_summary--total_amount"),
+          ).toContainText(sectionAGrandTotal);
+
+          // Section B - Budget Categories totals
+          // directChargeColumnSum: (1+2+3+4) × 8 fields
+          const sectionBDirectChargeTotal = toTwoDecimals((1 + 2 + 3 + 4) * 8);
+          // indirectChargeColumnSum: 1+2+3+4
+          const sectionBIndirectChargeTotal = toTwoDecimals(1 + 2 + 3 + 4);
+          // grandTotal: sum of row totals (10+20+30+40)
+          const sectionBGrandTotal = toTwoDecimals(10 + 20 + 30 + 40);
+          // programIncomeSum: 1+2+3+4
+          const sectionBProgramIncomeSum = toTwoDecimals(1 + 2 + 3 + 4);
+
+          await expect(
+            page.getByTestId(
+              "total_budget_categories--total_direct_charge_amount",
+            ),
+          ).toContainText(sectionBDirectChargeTotal);
+          await expect(
+            page.getByTestId(
+              "total_budget_categories--total_indirect_charge_amount",
+            ),
+          ).toContainText(sectionBIndirectChargeTotal);
+          await expect(
+            page.getByTestId("total_budget_categories--total_amount"),
+          ).toContainText(sectionBGrandTotal);
+          await expect(
+            page.getByTestId("total_budget_categories--program_income_amount"),
+          ).toContainText(sectionBProgramIncomeSum);
 
           // Section C - Non-Federal Resources totals
-          const nonFederalTotals = page.locator(
-            '[data-testid*="non_federal_resources"][data-testid*="total"]',
-          );
-          if ((await nonFederalTotals.count()) > 0) {
-            await expect(nonFederalTotals.first()).toBeVisible();
-          }
+          // columnBCD: sum of activity values (1+2+3+4)
+          const sectionCColumnTotal = toTwoDecimals(1 + 2 + 3 + 4);
+          // grandTotal: sum of row totals (3+6+9+12)
+          const sectionCGrandTotal = toTwoDecimals(3 + 6 + 9 + 12);
 
-          // Section D - Forecasted Cash Needs totals
-          const cashNeedsTotals = page.locator(
-            '[data-testid*="forecasted_cash_needs"][data-testid*="total"]',
-          );
-          if ((await cashNeedsTotals.count()) > 0) {
-            await expect(cashNeedsTotals.first()).toBeVisible();
-          }
+          await expect(
+            page.getByTestId("total_non_federal_resources--total_amount"),
+          ).toContainText(sectionCGrandTotal);
+
+          // Section D - Forecasted Cash Needs
+          // All quarters use "01" (value 1), so totals are consistent
+          // Federal total: 1+1+1+1 = 4.00
+          // Non-federal total: 1+1+1+1 = 4.00
+          // quarterColumnSum: federal + non-federal per quarter = 2.00
+          // grandTotal: federal total + non-federal total = 8.00
+          const sectionDRowTotal = toTwoDecimals(1 + 1 + 1 + 1);
+          const sectionDQuarterTotal = toTwoDecimals(2);
+          const sectionDGrandTotal = toTwoDecimals(2 * 4);
+
+          await expect(
+            page.getByTestId(
+              "total_forecasted_cash_needs--federal_forecasted_cash_needs--total_amount",
+            ),
+          ).toContainText(sectionDRowTotal);
+          await expect(
+            page.getByTestId(
+              "total_forecasted_cash_needs--non_federal_forecasted_cash_needs--total_amount",
+            ),
+          ).toContainText(sectionDRowTotal);
+          await expect(
+            page.getByTestId("total_forecasted_cash_needs--total_amount"),
+          ).toContainText(sectionDGrandTotal);
         }
       }
     },
