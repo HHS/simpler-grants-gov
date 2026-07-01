@@ -4,21 +4,23 @@ from sqlalchemy import asc, desc
 from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.sql.selectable import Select
 
+from grants_shared.db.models.base import Base
 from grants_shared.pagination.pagination_models import SortDirection, SortOrderParams
 
 
 def _resolve_column(
-    model_or_mapping: type | dict[str, InstrumentedAttribute], order_by: str
+    model_or_mapping: type[Base] | dict[str, InstrumentedAttribute], order_by: str
 ) -> InstrumentedAttribute:
     if isinstance(model_or_mapping, dict):
         column = model_or_mapping.get(order_by)
         if column is None:
             # This indicates a configuration error - the schema allows a sort field
             # that we don't have a mapping for. This should be caught early.
-            raise ValueError(
+            msg = (
                 f"Sort field '{order_by}' not found in column mapping. "
                 f"Available fields: {list(model_or_mapping.keys())}"
             )
+            raise ValueError(msg)
         return column
 
     return getattr(model_or_mapping, order_by)
@@ -27,7 +29,7 @@ def _resolve_column(
 def apply_sorting(
     stmt: Select,
     sort_order: list[SortOrderParams],
-    model_or_mapping: type | dict[str, InstrumentedAttribute],
+    model_or_mapping: type[Base] | dict[str, InstrumentedAttribute],
     nulls_last: bool = False,
 ) -> Select:
     """Apply sorting to a SQLAlchemy select statement.
