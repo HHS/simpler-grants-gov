@@ -75,7 +75,7 @@ function checkDataValues<T extends object>(dataToCheck: T): boolean {
 }
 
 // Check dataToCheck and return the appropriate progressType as defined above.
-export function getProgess<T extends object>(
+export function getProgress<T extends object>(
   requiredFields: RequiredFieldsMap,
   dataToCheck: T,
 ) {
@@ -98,7 +98,7 @@ export function ProgressChecker<T extends object>({
   dataToCheck: T;
 }) {
   const t = useTranslations("ProgressChecker");
-  const status = getProgess(requiredFields, dataToCheck);
+  const status = getProgress(requiredFields, dataToCheck);
   return (
     <>
       {status === progressType.notStarted && (
