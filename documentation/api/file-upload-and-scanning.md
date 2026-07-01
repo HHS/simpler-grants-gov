@@ -32,7 +32,7 @@ We have the following file scan statuses that represent states of the file scan 
 * `infected` - A file was rejected by our scanning process, and cannot be used by domain specific logic
 * `processed` - A file has been converted to a domain specific file, and is no longer available
 
-## Data Flow General
+## General Data Flow
 
 This is the general flow of the file upload logic that all approaches share.
 
@@ -121,7 +121,7 @@ We will return a 429 if they exceed this quota.
 
 For this, we use AWS's [Boto3 library to generate a presigned POST url](https://docs.aws.amazon.com/boto3/latest/reference/services/s3/client/generate_presigned_post.html).
 Importantly, we are not using presigned PUT, which while similar, doesn't
-allow you to specify conditions on the file being uploaded as well. The conditions
+allow you to specify conditions on the file being uploaded. The conditions
 that we include are:
 * Content length, must be between 1b and 2gb
 * Content type, must match what the user passed in
@@ -133,14 +133,14 @@ what we generated or what they passed in initially before uploading the file.
 
 The presigned url we generate is in our file scan bucket under `/unscanned/{pending_file_id}/{file_name}`.
 
-We create a record in the `pending_file` table about the record, and connect it to only the user.
+We create a record in the `pending_file` table about the file, and connect to only the user.
 A file is not connected to any entity like an opportunity or application until the very end.
 
 We also create a record in the DynamoDB table and set the status to `pending`.
 
 In our response we return two key values:
 * The URL that they need to upload to which will look like `https://s3.amazonaws.com/{the bucket name}`
-* The body of the request to call the presigned URL endpoint with which includes:
+* The request body to send to the presigned URL path, which includes:
 
 ```python
 {
@@ -265,7 +265,7 @@ This endpoint will return its results as `\n` separated chunks like so:
 
 ## Scan Callback
 We have a `POST /v1/files/{pending_file_id}` endpoint which the file scanning
-lambda calls to update the files status in our pending_file table.
+lambda calls to update the file's status in our pending_file table.
 
 It fetches the pending file with the provided ID, and updates the file scan status & file location
 of the pending file as provided by the calling lambda.
@@ -339,7 +339,7 @@ the corresponding kind of file.
 Pre-requisites
 * Python 3 (tested with 3.14, but anything fairly recent should work)
 * The requests library installed (`pip install requests`)
-* Whichever environment/API you are running this against, you first need an API key which you can get by logging in and going to the correspond [developers](https://simpler.grants.gov/developers) page (adjust the URL accordingly for the environment).
+* Whichever environment/API you are running this against, you first need an API key which you can get by logging in and going to the corresponding [developers](https://simpler.grants.gov/developers) page (adjust the URL accordingly for the environment).
 * A file to upload, assumed to be in the same directory as the script
 
 ```python
