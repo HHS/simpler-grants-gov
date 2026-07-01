@@ -38,3 +38,18 @@ export const deleteOpportunityAttachment = async (
   });
   return (await response.json()) as { status_code: number; message: string };
 };
+
+export const attachOpportunityFile = async ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  opportunityId,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  pendingFileId,
+}: {
+  opportunityId: string;
+  pendingFileId: string;
+}): Promise<Response> => {
+  return await new Promise((resolve) => resolve(new Response()));
+  // return new Promise((_resolve, reject) =>
+  //   reject(new Error("simluate post upload action error response")),
+  // );
+};

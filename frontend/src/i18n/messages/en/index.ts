@@ -413,9 +413,9 @@ export const messages = {
       removeButton: "Remove",
       uploadLabel: "Upload files",
       errorHeading: "Upload error",
-      errorUploadFailed: "Failed to upload {fileName}.",
-      errorDeleteFailed: "Failed to delete {fileName}.",
-      errorFileTooLarge: "{fileName} exceeds the 2GB file size limit.",
+      errorUploadFailed: "Failed to upload file.",
+      errorDeleteFailed: "Failed to delete file.",
+      errorFileTooLarge: "file exceeds the 2GB file size limit.",
     },
   },
   Application: {
@@ -2543,7 +2543,7 @@ export const messages = {
       postUploadError: "Error processing file",
       missingFileId: "Error: missing file id",
       preUploadError: "Pre upload error",
-      infected: "Security scan failed. File infected",
+      infected: "Security scan failed. File removed",
     },
     deleteModal: {
       titleText: "Delete",
