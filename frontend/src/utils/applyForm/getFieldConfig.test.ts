@@ -198,6 +198,7 @@ describe("getFieldConfig", () => {
       rawErrors: [],
       value: "Jane Doe",
       options: {},
+      uiSchemaField: uiFieldObject,
     });
   });
 
@@ -246,6 +247,7 @@ describe("getFieldConfig", () => {
       rawErrors: ["Invalid email format"],
       value: "invalid-email",
       options: {},
+      uiSchemaField: uiFieldObject,
     });
   });
 
@@ -301,6 +303,7 @@ describe("getFieldConfig", () => {
         ],
         emptyValue: "- Select -",
       },
+      uiSchemaField: uiFieldObject,
     });
   });
 
@@ -497,7 +500,11 @@ describe("getFieldConfig", () => {
       type: "multiField",
       name: "budget_summary_table",
       widget: "Table",
-      table: {
+      definition: [
+        "/properties/personnel_federal_share",
+        "/properties/personnel_non_federal_share",
+      ],
+      children: {
         columns: [
           {
             columnHeader: "Category",
@@ -534,7 +541,7 @@ describe("getFieldConfig", () => {
       },
     };
 
-    it("returns Table config with table metadata, columns, and rows", () => {
+    it("returns normal multiField config with Table UI-schema metadata", () => {
       const result = getFieldConfig({
         errors: null,
         formSchema,
@@ -555,73 +562,20 @@ describe("getFieldConfig", () => {
       expect(result.props).toEqual({
         id: "budget_summary_table",
         key: "budget_summary_table",
-        name: "budget_summary_table",
-        columns: tableUiSchema.table.columns,
-        rows: tableUiSchema.table.rows,
+        disabled: false,
+        required: false,
+        minLength: undefined,
+        maxLength: undefined,
+        schema: {
+          type: "number",
+          title: "Personnel Non-Federal Share",
+          readOnly: true,
+        },
+        rawErrors: [],
+        value: {},
+        options: {},
+        uiSchemaField: tableUiSchema,
       });
-    });
-
-    it("throws when a row does not contain one cell for each column", () => {
-      const uiFieldObject: UiSchemaTableMultiField = {
-        ...tableUiSchema,
-        table: {
-          ...tableUiSchema.table,
-          rows: [
-            {
-              ...tableUiSchema.table.rows[0],
-              cells: [
-                {
-                  type: "plainText",
-                  staticContent: "Personnel",
-                },
-                {
-                  type: "input",
-                  definition: "/properties/personnel_federal_share",
-                },
-              ],
-            },
-          ],
-        },
-      };
-
-      expect(() =>
-        getFieldConfig({
-          errors: null,
-          formSchema,
-          formData: {},
-          uiFieldObject,
-          requiredField: false,
-        }),
-      ).toThrow("Table row 1 must contain exactly 3 cells.");
-    });
-
-    it("throws when specified column widths total more than 100", () => {
-      const uiFieldObject: UiSchemaTableMultiField = {
-        ...tableUiSchema,
-        table: {
-          ...tableUiSchema.table,
-          columns: [
-            {
-              columnHeader: "Category",
-              width: 50,
-            },
-            {
-              columnHeader: "Federal Share",
-              width: 51,
-            },
-          ],
-        },
-      };
-
-      expect(() =>
-        getFieldConfig({
-          errors: null,
-          formSchema,
-          formData: {},
-          uiFieldObject,
-          requiredField: false,
-        }),
-      ).toThrow("Table column widths cannot total more than 100.");
     });
   });
 });

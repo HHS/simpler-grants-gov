@@ -214,7 +214,8 @@ describe("buildFormTreeRecursive", () => {
             type: "multiField",
             name: "summary_table_test",
             widget: "Table",
-            table: {
+            definition: ["/properties/first_value", "/properties/second_value"],
+            children: {
               columns: [
                 {
                   columnHeader: "Item",
@@ -277,6 +278,8 @@ describe("buildFormTreeRecursive", () => {
       "data-table-name",
       "summary_table_test",
     );
+    expect(tableWidget).toHaveAttribute("data-table-column-count", "3");
+    expect(tableWidget).toHaveAttribute("data-table-row-count", "1");
   });
 
   describe("FormFields formContext forwarding", () => {

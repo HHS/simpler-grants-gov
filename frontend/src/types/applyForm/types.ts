@@ -248,7 +248,7 @@ export type UiSchemaTableRow = {
   cells: UiSchemaTableCell[];
 };
 
-export type UiSchemaTableConfig = {
+export type UiSchemaTableChildren = {
   columns: UiSchemaTableColumn[];
   rows: UiSchemaTableRow[];
 };
@@ -259,8 +259,7 @@ export type TableWidgetProps = {
   name: string;
   label?: string;
   description?: string;
-  columns: UiSchemaTableColumn[];
-  rows: UiSchemaTableRow[];
+  uiSchemaField: UiSchemaTableMultiField;
 };
 
 type UiSchemaBasicField = {
@@ -281,7 +280,8 @@ type UiSchemaBasicField = {
 
 /**
  * Existing specialized multiField widgets retain their flat definition array.
- * Table derives its definitions from definition-backed cells in `table`.
+ * Table uses the same definition-backed multiField contract while `children`
+ * describes the Table widget's column, row, and cell layout.
  */
 type UiSchemaMultiField = {
   type: "multiField";
@@ -303,8 +303,8 @@ export type UiSchemaTableMultiField = {
   type: "multiField";
   widget: "Table";
   name: string;
-  table: UiSchemaTableConfig;
-  definition?: undefined;
+  definition: PropertyPath[];
+  children: UiSchemaTableChildren;
   schema?: undefined;
 };
 
@@ -364,6 +364,7 @@ export interface UswdsWidgetProps<
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
   id: string;
+  uiSchemaField?: UiSchemaField;
   // this needs to be locked down using a generic eventually
   value?: BroadlyDefinedWidgetValue;
   type?: string;

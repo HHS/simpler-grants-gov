@@ -8,22 +8,30 @@ describe("TableWidget", () => {
     id: "summary-table-test",
     key: "summary-table-test",
     name: "summary_table_test",
-    columns: [
-      {
-        columnHeader: "Item",
-      },
-    ],
-    rows: [
-      {
-        rowHeader: "First Row",
-        cells: [
+    uiSchemaField: {
+      type: "multiField",
+      name: "summary_table_test",
+      widget: "Table",
+      definition: ["/properties/first_value"],
+      children: {
+        columns: [
           {
-            type: "plainText",
-            staticContent: "First Row",
+            columnHeader: "Item",
+          },
+        ],
+        rows: [
+          {
+            rowHeader: "First Row",
+            cells: [
+              {
+                type: "plainText",
+                staticContent: "First Row",
+              },
+            ],
           },
         ],
       },
-    ],
+    },
   };
 
   it("renders the table placeholder with its name", () => {
@@ -36,5 +44,7 @@ describe("TableWidget", () => {
       "data-table-name",
       "summary_table_test",
     );
+    expect(placeholder).toHaveAttribute("data-table-column-count", "1");
+    expect(placeholder).toHaveAttribute("data-table-row-count", "1");
   });
 });

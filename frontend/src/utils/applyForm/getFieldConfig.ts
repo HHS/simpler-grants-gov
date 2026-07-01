@@ -4,16 +4,13 @@ import { get } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 import {
   BroadlyDefinedWidgetValue,
-  FieldListChildWidgetTypes,
   FieldListGroupItem,
   FieldListWidgetProps,
   FormattedFormValidationWarning,
   GeneralRecord,
   SchemaField,
-  TableWidgetProps,
   UiSchemaField,
   UiSchemaFieldList,
-  UiSchemaTableMultiField,
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/types/applyForm/types";
@@ -133,7 +130,7 @@ const getFieldListRequiredFields = ({
 };
 
 type FieldWidgetConfig = {
-  type: FieldListChildWidgetTypes;
+  type: Exclude<WidgetTypes, "FieldList">;
   props: UswdsWidgetProps;
 };
 
@@ -142,22 +139,7 @@ type FieldListConfig = {
   props: FieldListWidgetProps;
 };
 
-type TableConfig = {
-  type: "Table";
-  props: TableWidgetProps;
-};
-
-type FieldConfig = FieldWidgetConfig | FieldListConfig | TableConfig;
-
-const isTableMultiField = (
-  uiFieldObject: UiSchemaField,
-): uiFieldObject is UiSchemaTableMultiField => {
-  return (
-    uiFieldObject.type === "multiField" &&
-    uiFieldObject.widget === "Table" &&
-    "table" in uiFieldObject
-  );
-};
+type FieldConfig = FieldWidgetConfig | FieldListConfig;
 
 // JSON schema doesn't describe UI, so widget types are inferred when not supplied.
 export const determineFieldType = ({
@@ -325,9 +307,6 @@ export const getBasicMultifieldInfo = ({
   formData: object;
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<Record<string, unknown>> => {
-  if (isTableMultiField(uiFieldObject)) {
-    throw new Error("attempting to get multifield info for table field");
-  }
   const { schema } = uiFieldObject;
   // the definition can be many things, but in this case we should have done the
   // work ahead of time to determine that this definition will be a string
@@ -449,9 +428,6 @@ const getFieldInfo = ({
   formData: object;
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<BroadlyDefinedWidgetValue> => {
-  if (isTableMultiField(uiFieldObject)) {
-    throw new Error("attempting to get field info for table field");
-  }
   const { definition, type: uiSchemaFieldType } = uiFieldObject;
 
   if (
@@ -586,50 +562,6 @@ const getFieldListConfig = ({
   };
 };
 
-/**
- * Validates static table configuration and prepares props for the Table widget.
- *
- * Table cell definitions will be resolved through the shared multiField path
- * when editable and read-only table cell rendering is implemented.
- */
-const getTableConfig = ({
-  uiFieldObject,
-}: {
-  uiFieldObject: UiSchemaTableMultiField;
-}): TableConfig => {
-  const { columns, rows } = uiFieldObject.table;
-  let columnWidthTotal = 0;
-
-  columns.forEach((column) => {
-    if (typeof column.width === "number") {
-      columnWidthTotal += column.width;
-    }
-  });
-
-  if (columnWidthTotal > 100) {
-    throw new Error("Table column widths cannot total more than 100.");
-  }
-
-  rows.forEach((row, rowIndex) => {
-    if (row.cells.length !== columns.length) {
-      throw new Error(
-        `Table row ${rowIndex + 1} must contain exactly ${columns.length} cells.`,
-      );
-    }
-  });
-
-  return {
-    type: "Table",
-    props: {
-      id: uiFieldObject.name,
-      key: uiFieldObject.name,
-      name: uiFieldObject.name,
-      columns,
-      rows,
-    },
-  };
-};
-
 // returns widget type and props for rendering data for a given JSON schema field
 export const getFieldConfig = <V extends string | Record<string, unknown>>({
   errors,
@@ -649,12 +581,6 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
       errors,
       formSchema,
       formData,
-      uiFieldObject,
-    });
-  }
-
-  if (isTableMultiField(uiFieldObject)) {
-    return getTableConfig({
       uiFieldObject,
     });
   }
@@ -696,11 +622,13 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
         })
       : {};
 
+  const widgetId = htmlFieldName || uiFieldObject.name || fieldName;
+
   return {
-    type: widgetType as FieldListChildWidgetTypes,
+    type: widgetType as Exclude<WidgetTypes, "FieldList">,
     props: {
-      id: htmlFieldName,
-      key: htmlFieldName,
+      id: widgetId,
+      key: widgetId,
       disabled: uiFieldObject.type === "null",
       required: requiredField,
       minLength: fieldSchema?.minLength,
@@ -709,6 +637,7 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
       rawErrors,
       value: value as V,
       options,
+      uiSchemaField: uiFieldObject,
     },
   };
 };

@@ -123,8 +123,8 @@ export const UiJsonSchema: RJSFSchema = {
             "Table",
           ],
         },
-        table: {
-          $ref: "#/$defs/table",
+        children: {
+          $ref: "#/$defs/tableChildren",
         },
       },
       required: ["type"],
@@ -139,16 +139,19 @@ export const UiJsonSchema: RJSFSchema = {
             required: ["widget"],
           },
           then: {
-            required: ["name", "table"],
+            required: ["name", "definition", "children"],
+            properties: {
+              definition: {
+                type: "array",
+                minItems: 1,
+                items: {
+                  type: "string",
+                  pattern: "^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$",
+                },
+              },
+            },
             not: {
-              anyOf: [
-                {
-                  required: ["definition"],
-                },
-                {
-                  required: ["schema"],
-                },
-              ],
+              required: ["schema"],
             },
           },
           else: {
@@ -258,7 +261,21 @@ export const UiJsonSchema: RJSFSchema = {
                 $ref: "#/$defs/field",
               },
               {
-                $ref: "#/$defs/multiField",
+                allOf: [
+                  {
+                    $ref: "#/$defs/multiField",
+                  },
+                  {
+                    not: {
+                      properties: {
+                        widget: {
+                          const: "Table",
+                        },
+                      },
+                      required: ["widget"],
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -267,7 +284,7 @@ export const UiJsonSchema: RJSFSchema = {
       required: ["type", "label", "name", "children"],
       additionalProperties: false,
     },
-    table: {
+    tableChildren: {
       type: "object",
       properties: {
         columns: {

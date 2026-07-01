@@ -10,7 +10,6 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaNode,
-  UiSchemaTableMultiField,
 } from "src/types/applyForm/types";
 import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
@@ -180,28 +179,18 @@ export const findValidationErrors = (
   return [];
 };
 
-const isTableMultiField = (
-  node: UiSchemaField,
-): node is UiSchemaTableMultiField => {
-  return node.type === "multiField" && node.widget === "Table";
-};
-
 /**
  * Identifies UI-schema nodes that are handled through the normal
  * definition-backed field validation path.
  *
- * `multiField` is still a field node: it combines multiple definition paths
- * for one specialized widget, such as an SF-424A budget section. Table is a
- * specialized multiField widget whose definitions live in table cells.
+ * `multiField` combines multiple definition paths for one specialized widget,
+ * such as an SF-424A budget section or Table.
  */
 const isDefinitionBackedFieldNode = (
   node: UiSchemaNode,
-): node is Exclude<UiSchemaField, UiSchemaTableMultiField> => {
+): node is UiSchemaField => {
   return (
-    (node.type === "field" ||
-      node.type === "multiField" ||
-      node.type === "null") &&
-    !(node.type === "multiField" && isTableMultiField(node))
+    node.type === "field" || node.type === "multiField" || node.type === "null"
   );
 };
 
@@ -217,7 +206,7 @@ export const buildWarningTree = (
   if (
     !Array.isArray(uiSchema) &&
     typeof uiSchema === "object" &&
-    "children" in uiSchema
+    (uiSchema.type === "section" || uiSchema.type === "fieldList")
   ) {
     return buildWarningTree(
       uiSchema.children,
@@ -229,7 +218,7 @@ export const buildWarningTree = (
   } else if (Array.isArray(uiSchema)) {
     const childErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
       (errors, node) => {
-        if ("children" in node) {
+        if (node.type === "section" || node.type === "fieldList") {
           const children = node.children;
           const nodeError = buildWarningTree(
             children,
@@ -260,7 +249,7 @@ export const buildWarningTree = (
     if (parent) {
       const parentErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
         (errors, node) => {
-          if ("children" in node) {
+          if (node.type === "section" || node.type === "fieldList") {
             const nodeError = buildWarningTree(
               node.children,
               uiSchema,
@@ -397,7 +386,10 @@ export function getFieldListLabelFromDefinition({
         return node.label;
       }
 
-      if ("children" in node && Array.isArray(node.children)) {
+      if (
+        (node.type === "section" || node.type === "fieldList") &&
+        Array.isArray(node.children)
+      ) {
         const nestedLabel = findFieldListLabel(node.children as UiSchema);
         if (nestedLabel) {
           return nestedLabel;
@@ -482,7 +474,10 @@ export function getFieldsForNav(
 
   if (!Array.isArray(schema)) return results;
   for (const item of schema) {
-    if ("children" in item && Array.isArray(item.children)) {
+    if (
+      (item.type === "section" || item.type === "fieldList") &&
+      Array.isArray(item.children)
+    ) {
       if (item.name && item.label) {
         results.push({ href: `form-section-${item.name}`, text: item.label });
       }
@@ -730,7 +725,7 @@ export const getRequiredProperties = (
         acc.push(getKeyParentPath(requiredPropertyKey, parentPath));
       });
     }
-    return acc;
+    return requiredPaths;
   }, [] as string[]);
 };
 
@@ -854,10 +849,10 @@ export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
             (child.widget === "AttachmentArray" ||
               child.widget === "Attachment")
           ) {
-            return { ...child, widget: "PrintAttachment" };
+            return { ...child, widget: "PrintAttachment" as const };
           }
 
-          return { ...child, widget: "Print" };
+          return { ...child, widget: "Print" as const };
         }),
       };
     }

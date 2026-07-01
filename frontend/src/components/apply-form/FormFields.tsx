@@ -4,7 +4,6 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaFieldList,
-  UiSchemaTableMultiField,
   UswdsWidgetProps,
 } from "src/types/applyForm/types";
 import {
@@ -71,12 +70,6 @@ const isRenderableFieldNode = (
   );
 };
 
-const isTableMultiField = (
-  node: UiSchemaField | UiSchemaFieldList,
-): node is UiSchemaTableMultiField => {
-  return node.type === "multiField" && node.widget === "Table";
-};
-
 /*
   Runs through the UI Schema to produce a rendered array of field widgets and sections
 */
@@ -137,7 +130,7 @@ export const FormFields = ({
         // FieldList is a renderable composite widget and does not have its own
         // field definition path in the same way a standard field node does.
         const requiredField =
-          node.type === "fieldList" || isTableMultiField(node)
+          node.type === "fieldList"
             ? false
             : isFieldRequired(
                 (node.definition || node.schema?.title || "") as string,
@@ -211,7 +204,7 @@ export const FormFields = ({
         // FieldList is a renderable composite widget and does not have its own
         // field definition path in the same way a standard field node does.
         const requiredField =
-          node.type === "fieldList" || isTableMultiField(node)
+          node.type === "fieldList"
             ? false
             : isFieldRequired(
                 (node.definition || node.schema?.title || "") as string,

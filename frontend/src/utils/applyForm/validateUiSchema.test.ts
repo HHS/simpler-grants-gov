@@ -87,7 +87,11 @@ describe("validateFormData", () => {
               type: "multiField",
               name: "summary_table",
               widget: "Table",
-              table: {
+              definition: [
+                "/properties/first_value",
+                "/properties/second_value",
+              ],
+              children: {
                 columns: [
                   {
                     columnHeader: "Item",
@@ -132,7 +136,7 @@ describe("validateFormData", () => {
       expect(schemaErrors).toBeFalsy();
     });
 
-    it("should invalidate a Table multiField without table configuration", () => {
+    it("should invalidate a Table multiField without required configuration", () => {
       const invalidUiSchema = [
         {
           type: "multiField",
@@ -145,17 +149,66 @@ describe("validateFormData", () => {
 
       expect(Array.isArray(schemaErrors)).toBe(true);
 
-      const hasMissingTableError =
+      const hasMissingTableConfigurationError =
         Array.isArray(schemaErrors) &&
         schemaErrors.some((error) => {
           const instancePath =
             typeof error.instancePath === "string" ? error.instancePath : "";
           const message =
             typeof error.message === "string" ? error.message : "";
-          return instancePath === "/0" && message.includes("table");
+
+          return (
+            instancePath === "/0" &&
+            (message.includes("definition") || message.includes("children"))
+          );
         });
 
-      expect(hasMissingTableError).toBe(true);
+      expect(hasMissingTableConfigurationError).toBe(true);
+    });
+
+    it("should invalidate a Table multiField without definition", () => {
+      const invalidUiSchema = [
+        {
+          type: "multiField",
+          name: "summary_table",
+          widget: "Table",
+          children: {
+            columns: [
+              {
+                columnHeader: "Item",
+              },
+            ],
+            rows: [
+              {
+                rowHeader: "First Row",
+                cells: [
+                  {
+                    type: "plainText",
+                    staticContent: "First Row",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ] as unknown as UiSchema;
+
+      const schemaErrors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(schemaErrors)).toBe(true);
+
+      const hasMissingDefinitionError =
+        Array.isArray(schemaErrors) &&
+        schemaErrors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          const message =
+            typeof error.message === "string" ? error.message : "";
+
+          return instancePath === "/0" && message.includes("definition");
+        });
+
+      expect(hasMissingDefinitionError).toBe(true);
     });
 
     it("should invalidate a plainText table cell without staticContent", () => {
@@ -164,7 +217,8 @@ describe("validateFormData", () => {
           type: "multiField",
           name: "summary_table",
           widget: "Table",
-          table: {
+          definition: ["/properties/first_value"],
+          children: {
             columns: [
               {
                 columnHeader: "Item",
@@ -195,8 +249,9 @@ describe("validateFormData", () => {
             typeof error.instancePath === "string" ? error.instancePath : "";
           const message =
             typeof error.message === "string" ? error.message : "";
+
           return (
-            instancePath === "/0/table/rows/0/cells/0" &&
+            instancePath === "/0/children/rows/0/cells/0" &&
             message.includes("staticContent")
           );
         });
@@ -271,6 +326,56 @@ describe("validateFormData", () => {
         });
 
       expect(hasFieldListChildrenError).toBe(true);
+    });
+
+    it("should invalidate fieldList with a Table child", () => {
+      const invalidUiSchema = [
+        {
+          type: "fieldList",
+          label: "Test",
+          name: "test",
+          children: [
+            {
+              type: "multiField",
+              name: "summary_table",
+              widget: "Table",
+              definition: ["/properties/first_value"],
+              children: {
+                columns: [
+                  {
+                    columnHeader: "Item",
+                  },
+                ],
+                rows: [
+                  {
+                    rowHeader: "First Row",
+                    cells: [
+                      {
+                        type: "plainText",
+                        staticContent: "First Row",
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ] as unknown as UiSchema;
+
+      const errors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(errors)).toBe(true);
+
+      const hasFieldListTableError =
+        Array.isArray(errors) &&
+        errors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          return instancePath.startsWith("/0/children/0");
+        });
+
+      expect(hasFieldListTableError).toBe(true);
     });
   });
 });

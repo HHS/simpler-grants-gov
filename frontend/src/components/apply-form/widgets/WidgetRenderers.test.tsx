@@ -46,28 +46,37 @@ describe("renderWidget", () => {
     const { key: _key, ...withoutKey } = fakeWidgetProps;
     expect(mockWidget).toHaveBeenCalledWith(withoutKey);
   });
+
   it("renders the table widget with correct props", () => {
     const tableProps: TableWidgetProps = {
-      id: "summary-table-test",
-      key: "summary-table-test",
-      name: "summary_table_test",
-      columns: [
-        {
-          columnHeader: "Item",
-          width: 40,
-        },
-      ],
-      rows: [
-        {
-          rowHeader: "First Row",
-          cells: [
+      id: "budget_summary_table",
+      key: "budget_summary_table",
+      name: "budget_summary_table",
+      uiSchemaField: {
+        type: "multiField",
+        name: "budget_summary_table",
+        widget: "Table",
+        definition: ["/properties/first_value"],
+        children: {
+          columns: [
             {
-              type: "plainText",
-              staticContent: "First Row",
+              columnHeader: "Item",
+              width: 40,
+            },
+          ],
+          rows: [
+            {
+              rowHeader: "First Row",
+              cells: [
+                {
+                  type: "plainText",
+                  staticContent: "First Row",
+                },
+              ],
             },
           ],
         },
-      ],
+      },
     };
 
     render(
