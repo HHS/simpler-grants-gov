@@ -198,10 +198,11 @@ const isDefinitionBackedFieldNode = (
   node: UiSchemaNode,
 ): node is Exclude<UiSchemaField, UiSchemaTableMultiField> => {
   return (
-    node.type === "field" ||
-    node.type === "multiField" ||
-    node.type === "null"
-  ) && !(node.type === "multiField" && isTableMultiField(node));
+    (node.type === "field" ||
+      node.type === "multiField" ||
+      node.type === "null") &&
+    !(node.type === "multiField" && isTableMultiField(node))
+  );
 };
 
 export const buildWarningTree = (
