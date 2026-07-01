@@ -12,8 +12,13 @@ import { Link } from "@trussworks/react-uswds";
 
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
+import {
+  getProgress,
+  ProgressChecker,
+  progressType,
+} from "src/components/grantor-opportunities/ProgressChecker";
 import { OverviewButtons } from "./_components/OverviewButtons";
-import { ProgressChecker, getProgress, progressType } from "src/components/grantor-opportunities/ProgressChecker";import {
+import {
   competitionRequiredFields,
   summaryRequiredFields,
 } from "./RequiredFields";
@@ -71,10 +76,7 @@ async function OpportunityOverviewPage({ params, searchParams }: PageProps) {
         locale={locale}
         isNewlyCreated={isNewlyCreated}
       >
-        <OverviewButtons
-          opportunityId={id}
-          publishEnabled={publishEnabled}
-        />
+        <OverviewButtons opportunityId={id} publishEnabled={publishEnabled} />
       </OpportunityDetailsHeader>
       <div className="grid-container padding-top-4 padding-bottom-4">
         <div className="grid-row grid-gap-2 padding-top-2">
