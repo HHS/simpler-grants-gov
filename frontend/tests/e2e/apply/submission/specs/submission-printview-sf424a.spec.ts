@@ -406,12 +406,11 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
           // Section E - Federal Fund Estimates
           // Section E has individual year amounts per activity, no row totals
-          // All 4 activities are filled with "01" (index + 1 format for activity 1, 2, 3, 4)
-          // Column total should be "01" + "01" + "01" + "01" = "4.00" (sum of 4 ones)
-          const sectionEYearAmount = "01"; // Raw test data value (activity index)
-          const sectionEColumnTotal = toTwoDecimals(1 + 1 + 1 + 1);
+          // Each activity is filled with its index + 1: activity[0]="01", [1]="02", [2]="03", [3]="04"
+          // Column total: 1+2+3+4 = 10.00
+          const sectionEColumnTotal = toTwoDecimals(1 + 2 + 3 + 4);
 
-          // Individual year amounts for each activity (all filled with "01")
+          // Individual year amounts for each activity (different value per activity)
           const yearFields = [
             "first_year_amount",
             "second_year_amount",
@@ -420,9 +419,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
           ];
 
           for (let i = 0; i < 4; i++) {
+            const activityValue = String(i + 1).padStart(2, "0"); // "01", "02", "03", "04"
             for (const yearField of yearFields) {
               const fieldId = `activity_line_items[${i}]--federal_fund_estimates--${yearField}`;
-              await validatePrintViewField(page, fieldId, sectionEYearAmount);
+              await validatePrintViewField(page, fieldId, activityValue);
             }
           }
 
