@@ -357,7 +357,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
             "fourth_quarter_amount",
           ];
           for (const quarterField of quarterFields) {
-            const federalQuarterId = `total_forecasted_cash_needs--federal_forecasted_cash_needs--${quarterField}`;
+            const federalQuarterId = `forecasted_cash_needs--federal_forecasted_cash_needs--${quarterField}`;
             await validatePrintViewField(
               page,
               federalQuarterId,
@@ -367,7 +367,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
           // Individual quarterly amounts for Non-federal row
           for (const quarterField of quarterFields) {
-            const nonFederalQuarterId = `total_forecasted_cash_needs--non_federal_forecasted_cash_needs--${quarterField}`;
+            const nonFederalQuarterId = `forecasted_cash_needs--non_federal_forecasted_cash_needs--${quarterField}`;
             await validatePrintViewField(
               page,
               nonFederalQuarterId,
@@ -378,18 +378,18 @@ for (const { testName, orgLabel } of applicantScenarios) {
           // Federal and Non-federal row totals (Column E)
           await validatePrintViewField(
             page,
-            "total_forecasted_cash_needs--federal_forecasted_cash_needs--total_amount",
+            "forecasted_cash_needs--federal_forecasted_cash_needs--total_amount",
             sectionDRowTotal,
           );
           await validatePrintViewField(
             page,
-            "total_forecasted_cash_needs--non_federal_forecasted_cash_needs--total_amount",
+            "forecasted_cash_needs--non_federal_forecasted_cash_needs--total_amount",
             sectionDRowTotal,
           );
 
           // Quarter column totals (Row 15: sum of federal + non-federal per quarter)
           for (const quarterField of quarterFields) {
-            const quarterTotalId = `total_forecasted_cash_needs--${quarterField}`;
+            const quarterTotalId = `forecasted_cash_needs--total_forecasted_cash_needs--${quarterField}`;
             await validatePrintViewField(
               page,
               quarterTotalId,
@@ -400,7 +400,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
           // Grand total
           await validatePrintViewField(
             page,
-            "total_forecasted_cash_needs--total_amount",
+            "forecasted_cash_needs--total_forecasted_cash_needs--total_amount",
             sectionDGrandTotal,
           );
 
@@ -419,10 +419,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
           // Column totals for each year (Year 1-4: sum of activities 1-4)
           const yearFields = [
-            "year_1_amount",
-            "year_2_amount",
-            "year_3_amount",
-            "year_4_amount",
+            "first_year_amount",
+            "second_year_amount",
+            "third_year_amount",
+            "fourth_year_amount",
           ];
           for (const yearField of yearFields) {
             const yearTotalId = `total_federal_fund_estimates--${yearField}`;
