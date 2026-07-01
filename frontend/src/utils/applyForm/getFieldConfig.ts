@@ -325,9 +325,6 @@ export const getBasicMultifieldInfo = ({
   formData: object;
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<Record<string, unknown>> => {
-  if (isTableMultiField(uiFieldObject)) {
-    throw new Error("attempting to get multifield info for table field");
-  }
   const { schema } = uiFieldObject;
   // the definition can be many things, but in this case we should have done the
   // work ahead of time to determine that this definition will be a string
@@ -449,9 +446,6 @@ const getFieldInfo = ({
   formData: object;
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<BroadlyDefinedWidgetValue> => {
-  if (isTableMultiField(uiFieldObject)) {
-    throw new Error("attempting to get field info for table field");
-  }
   const { definition, type: uiSchemaFieldType } = uiFieldObject;
 
   if (

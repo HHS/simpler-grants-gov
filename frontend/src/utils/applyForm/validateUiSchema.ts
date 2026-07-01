@@ -258,7 +258,21 @@ export const UiJsonSchema: RJSFSchema = {
                 $ref: "#/$defs/field",
               },
               {
-                $ref: "#/$defs/multiField",
+                allOf: [
+                  {
+                    $ref: "#/$defs/multiField",
+                  },
+                  {
+                    not: {
+                      properties: {
+                        widget: {
+                          const: "Table",
+                        },
+                      },
+                      required: ["widget"],
+                    },
+                  },
+                ],
               },
             ],
           },

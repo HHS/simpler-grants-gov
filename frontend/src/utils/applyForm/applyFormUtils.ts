@@ -10,7 +10,6 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaNode,
-  UiSchemaTableMultiField,
 } from "src/types/applyForm/types";
 import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
@@ -180,29 +179,46 @@ export const findValidationErrors = (
   return [];
 };
 
-const isTableMultiField = (
-  node: UiSchemaField,
-): node is UiSchemaTableMultiField => {
-  return node.type === "multiField" && node.widget === "Table";
-};
-
 /**
- * Identifies UI-schema nodes that are handled through the normal
- * definition-backed field validation path.
+ * Returns the definition-backed fields represented by a UI-schema node for
+ * validation-warning traversal.
  *
- * `multiField` is still a field node: it combines multiple definition paths
- * for one specialized widget, such as an SF-424A budget section. Table is a
- * specialized multiField widget whose definitions live in table cells.
+ * Standard fields and existing multiField widgets expose a top-level
+ * definition. Composite widgets may expose definitions through their own
+ * configuration; Table exposes them through its cells.
  */
-const isDefinitionBackedFieldNode = (
+const getDefinitionsForWarningTraversal = (
   node: UiSchemaNode,
-): node is Exclude<UiSchemaField, UiSchemaTableMultiField> => {
-  return (
-    (node.type === "field" ||
-      node.type === "multiField" ||
-      node.type === "null") &&
-    !(node.type === "multiField" && isTableMultiField(node))
-  );
+): { definition: string; schema: SchemaField | undefined }[] => {
+  if ("definition" in node && node.definition) {
+    return [
+      {
+        definition: Array.isArray(node.definition)
+          ? node.definition[0]
+          : node.definition,
+        schema: node.schema,
+      },
+    ];
+  }
+
+  if (node.type === "multiField" && node.widget === "Table") {
+    return node.table.rows.flatMap((row) =>
+      row.cells.flatMap((cell) => {
+        if ("definition" in cell && cell.definition) {
+          return [
+            {
+              definition: cell.definition,
+              schema: undefined,
+            },
+          ];
+        }
+
+        return [];
+      }),
+    );
+  }
+
+  return [];
 };
 
 export const buildWarningTree = (
@@ -239,15 +255,17 @@ export const buildWarningTree = (
             resolvedRootUiSchema,
           );
           return errors.concat(nodeError);
-        } else if (!parent && isDefinitionBackedFieldNode(node)) {
-          const matchingWarnings = findValidationErrors(
-            formValidationWarnings,
-            Array.isArray(node.definition)
-              ? node.definition[0]
-              : node.definition,
-            node.schema,
-            formSchema,
-            resolvedRootUiSchema,
+        } else if (!parent) {
+          const matchingWarnings = getDefinitionsForWarningTraversal(
+            node,
+          ).flatMap(({ definition, schema }) =>
+            findValidationErrors(
+              formValidationWarnings,
+              definition,
+              schema,
+              formSchema,
+              resolvedRootUiSchema,
+            ),
           );
           if (matchingWarnings.length > 0) {
             return errors.concat(matchingWarnings);
@@ -269,20 +287,20 @@ export const buildWarningTree = (
               resolvedRootUiSchema,
             );
             return errors.concat(nodeError);
-          } else if (isDefinitionBackedFieldNode(node)) {
-            const matchingWarnings = findValidationErrors(
+          }
+          const matchingWarnings = getDefinitionsForWarningTraversal(
+            node,
+          ).flatMap(({ definition, schema }) =>
+            findValidationErrors(
               formValidationWarnings,
-              Array.isArray(node.definition)
-                ? node.definition[0]
-                : node.definition,
-              node.schema,
+              definition,
+              schema,
               formSchema,
               resolvedRootUiSchema,
-            );
-            if (matchingWarnings.length > 0) {
-              return errors.concat(matchingWarnings);
-            }
-            return errors;
+            ),
+          );
+          if (matchingWarnings.length > 0) {
+            return errors.concat(matchingWarnings);
           }
           return errors;
         },
