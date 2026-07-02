@@ -4,26 +4,38 @@ import { OpenAndCloseDates } from "src/app/[locale]/(base)/grantor/opportunity/[
 import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
 
 import { useTranslations } from "next-intl";
-import { Button } from "@trussworks/react-uswds";
+import { Button, Link } from "@trussworks/react-uswds";
 
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 
-export function CompetitionForm() {
-  const t = useTranslations("OpportunityCompetition.sections");
+export function CompetitionForm({
+  opportunity_id,
+}: {
+  opportunity_id: string;
+}) {
+  const t = useTranslations("OpportunityCompetition");
+  const editUrl = "../" + opportunity_id + "/edit";
+  const overviewUrl = "../" + opportunity_id + "/overview";
 
   const navigationItems = [
     {
       text: t("applicationRequirements"),
       href: "application-requirements",
     },
-    { text: t("submissionSetUp"), href: "submission-set-up" },
-    { text: t("openAndCloseDates"), href: "open-and-close-dates" },
     {
-      text: t("applicationChecklist"),
+      text: t("sectionSubmissionSetUp.header"),
+      href: "submission-set-up",
+    },
+    {
+      text: t("sectionOpenAndCloseDates.header"),
+      href: "open-and-close-dates",
+    },
+    {
+      text: t("sectionApplicationChecklist.header"),
       href: "application-checklist",
     },
     {
-      text: t("narrativeFormatInstructions"),
+      text: t("sectionNarrativeFormatInstructions.header"),
       href: "narrative-format-instructions",
     },
   ];
@@ -33,7 +45,7 @@ export function CompetitionForm() {
       {/* TODO(#10507): remove minh-viewport once the competition page has enough content that sticky nav no longer releases */}
       <div className="grid-container padding-bottom-4 minh-viewport">
         <div className="usa-in-page-nav-container">
-          <LeftHandFormNav title={t("navTitle")} fields={navigationItems} />
+          <LeftHandFormNav title={t("leftNavTitle")} fields={navigationItems} />
           <section className="order-2 width-full maxw-tablet-xl padding-top-4">
             <div
               id="application-requirements"
@@ -50,14 +62,15 @@ export function CompetitionForm() {
             </div>
             <div className="display-flex flex-justify margin-top-4">
               <div className="display-flex gap-2">
-                <Button type="button" className="usa-button--outline">
-                  {t("back")}
-                </Button>
-                <Button type="button" className="usa-button--outline">
-                  {t("saveAndFinishLater")}
-                </Button>
+                <Link href={editUrl}>
+                  <Button type="button" className="usa-button--outline">
+                    {t("button.back")}
+                  </Button>
+                </Link>
               </div>
-              <Button type="button">{t("saveAndContinue")}</Button>
+              <Link href={overviewUrl}>
+                <Button type="button">{t("button.saveAndContinue")}</Button>
+              </Link>
             </div>
           </section>
         </div>

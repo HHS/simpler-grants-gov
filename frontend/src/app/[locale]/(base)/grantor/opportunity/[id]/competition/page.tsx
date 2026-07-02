@@ -3,7 +3,9 @@ import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 
+import { useTranslations } from "next-intl";
 import { notFound, redirect } from "next/navigation";
+import { Button, Link } from "@trussworks/react-uswds";
 
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
@@ -14,8 +16,20 @@ type PageProps = {
 
 export const dynamic = "force-dynamic";
 
+const ButtonSaveAndExit = ({ url }: { url: string }) => {
+  const t = useTranslations("OpportunityCompetition.button");
+  return (
+    <Link href={url}>
+      <Button type="button" className="usa-button--outline">
+        {t("saveAndExit")}
+      </Button>
+    </Link>
+  );
+};
+
 async function OpportunityCompetitionPage({ params }: PageProps) {
   const { id, locale } = await params;
+  const overviewUrl = "../" + id + "/overview";
 
   let opportunityData;
   try {
@@ -37,8 +51,10 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
       <OpportunityDetailsHeader
         opportunityData={opportunityData}
         locale={locale}
-      />
-      <CompetitionForm />
+      >
+        <ButtonSaveAndExit url={overviewUrl} />
+      </OpportunityDetailsHeader>
+      <CompetitionForm opportunity_id={id} />
     </>
   );
 }
