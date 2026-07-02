@@ -39,7 +39,6 @@ const ACTIVITY_TITLES = [
 
 /**
  * Pre-computed test data for SF-424A happy path.
- * All numeric fields are "1" so computed totals match SF424A_EXPECTED.
  * Pass `overrides` to selectively change fields for error-case tests.
  */
 export function sf424aHappyPathTestData(
