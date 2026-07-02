@@ -52,7 +52,7 @@ def list_award_recommendation_risks(
             .selectinload(AwardRecommendationApplicationSubmission.application_submission)
         )
     )
-    stmt = apply_sorting(stmt, params.pagination.sort_order, COLUMN_MAPPING)
+    stmt = apply_sorting(stmt, params.pagination.sort_order, COLUMN_MAPPING, nulls_last=True)
 
     paginator: Paginator[AwardRecommendationRisk] = Paginator(
         AwardRecommendationRisk,
