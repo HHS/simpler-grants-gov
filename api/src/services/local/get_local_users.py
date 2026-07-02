@@ -1,10 +1,10 @@
 import grants_shared.adapters.db as db
+from grants_shared.auth.api_jwt_auth import generate_jwt
 from grants_shared.util import datetime_util
 from grants_shared.util.local import error_if_not_local
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.auth.api_jwt_auth import generate_jwt
 from src.db.models.user_models import User, UserTokenSession
 
 

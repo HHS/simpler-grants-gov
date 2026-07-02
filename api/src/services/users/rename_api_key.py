@@ -2,8 +2,8 @@ import logging
 from uuid import UUID
 
 from grants_shared.adapters import db
+from grants_shared.db.models.auth_base_models import BaseUserApiKey
 
-from src.db.models.auth_base_models import BaseUserApiKey
 from src.services.users.get_user_api_keys import get_user_api_key
 
 logger = logging.getLogger(__name__)
