@@ -378,7 +378,7 @@ describe("EditRecommendationsTable", () => {
 
     const requestBody = JSON.parse(
       mockClientFetch.mock.calls[0][1].body as string,
-    );
+    ) as { filters?: unknown };
     expect(requestBody.filters).toBeUndefined();
   });
 
@@ -512,7 +512,7 @@ describe("EditRecommendationsTable", () => {
 
     const requestBody = JSON.parse(
       mockClientFetch.mock.calls[0][1].body as string,
-    );
+    ) as { pagination: { page_size: number } };
     expect(requestBody.pagination.page_size).toBe(50);
   });
 
