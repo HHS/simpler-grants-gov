@@ -45,7 +45,7 @@ export const fillRequiredFieldsAndAssertButtonState = async <
   const mergedFillData = {
     ...fillData,
     ...(options.overridesByValueKey ?? {}),
-  } as Record<TValueKey, FieldValue>;
+  };
 
   // Fill one required field per step and validate expected button states.
   for (let i = 0; i < requiredFields.length; i++) {
