@@ -6,7 +6,7 @@ import { DatePicker, FormGroup, Radio } from "@trussworks/react-uswds";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 
 export function OpenAndCloseDates() {
-  const t = useTranslations("OpportunityCompetition.sections");
+  const t = useTranslations("OpportunityCompetition.sectionOpenAndCloseDates");
 
   return (
     <div
@@ -14,7 +14,7 @@ export function OpenAndCloseDates() {
       className="padding-bottom-4 border-bottom border-base-lighter margin-top-4 simpler-page-anchor-offset"
     >
       <h2 className="font-heading-lg margin-top-0 margin-bottom-1">
-        {t("openAndCloseDates")}
+        {t("header")}
       </h2>
       <FormGroup>
         <DynamicFieldLabel
