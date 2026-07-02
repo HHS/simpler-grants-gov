@@ -1,8 +1,5 @@
 import { type Page } from "@playwright/test";
-import {
-  fillPageFields,
-  type PageFillField,
-} from "tests/e2e/utils/pages/general-pages-filling";
+import { fillPageFields, type PageFillField } from "tests/e2e/utils/pages/general-pages-filling";
 
 type DefinitionWithValueKey = {
   valueKey: string;
@@ -44,12 +41,7 @@ export const clearPageFieldsFromDefinitions = async <
     fillData: TFillData,
   ) => PageFillField[],
 ): Promise<void> => {
-  const emptyFillData = buildEmptyFillDataFromDefinitions(
-    definitions,
-  ) as TFillData;
+  const emptyFillData = buildEmptyFillDataFromDefinitions(definitions) as TFillData;
 
-  await fillPageFields(
-    page,
-    buildPageFields(definitions, emptyFillData),
-  );
+  await fillPageFields(page, buildPageFields(definitions, emptyFillData));
 };
