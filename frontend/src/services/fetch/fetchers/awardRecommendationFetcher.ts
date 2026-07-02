@@ -2,7 +2,6 @@ import { AwardSelectionMethod } from "src/constants/awardRecommendation";
 import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 import {
   AwardRecommendationDetails,
-  AwardRecommendationListFilters,
   AwardRecommendationListItem,
   AwardRecommendationListRequestBody,
   AwardRecommendationRisk,
