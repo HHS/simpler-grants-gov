@@ -1,9 +1,11 @@
+import json
 import logging
 
 import boto3
 from grants_shared.util import file_util
 
 from src.legacy_soap_api import legacy_soap_api_config as soap_api_config
+from src.legacy_soap_api.legacy_soap_api_config import GRANTOR_SOAP_ACTION_PATH
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import write_debug_data_to_s3
 from tests.lib.data_factories import create_soap_request
@@ -62,7 +64,7 @@ def test_write_debug_data_to_s3(
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     soap_legacy_response = SOAPResponse(
-        data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
+        data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={"xyz": "abc"}
     )
     soap_request = create_soap_request(
         SOAP_PAYLOAD, operation_name="GetSubmissionListExpandedRequest"
@@ -77,9 +79,22 @@ def test_write_debug_data_to_s3(
     response_contents = file_util.read_file(
         f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
     )
+    response_headers_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response_headers.txt"
+    )
+    request_headers_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request_headers.txt"
+    )
     assert request_contents.replace("\n", "") == SOAP_PAYLOAD.decode().replace("\n", "")
     assert response_contents.replace("\r", "") == SOAP_LEGACY_RESPONSE_PAYLOAD.decode().replace(
         "\r", ""
+    )
+    assert response_headers_contents.replace("\r", "") == json.dumps({"xyz": "abc"})
+    assert request_headers_contents.replace("\r", "") == json.dumps(
+        {
+            "X-Gg-S2S-Uri": "https://google.com/xyz",
+            "Soapaction": f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
+        }
     )
 
 
@@ -160,4 +175,4 @@ def test_write_debug_data_to_s3_runs_on_any_endpoint(
         create_soap_request(SOAP_PAYLOAD, operation_name="Y"), soap_legacy_response
     )
     objects = s3_client.list_objects_v2(Bucket="local-mock-draft-bucket")
-    assert len(objects.get("Contents")) == 14
+    assert len(objects.get("Contents")) == 28

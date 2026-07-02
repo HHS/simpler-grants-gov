@@ -6,6 +6,7 @@ from datetime import date, datetime
 import grants_shared.util.datetime_util as datetime_util
 from common_grants_sdk.schemas.pydantic import (
     CustomField,
+    DefaultFilter,
     FilterInfo,
     Money,
     MoneyRangeFilter,
@@ -99,6 +100,116 @@ def transform_status_from_cg(cg_status: OppStatusOptions) -> str:
         v1_status = OpportunityStatus.FORECASTED
 
     return v1_status
+
+
+# CommonGrants applicant-type values -> native ApplicantType values.
+APPLICANT_TYPE_FROM_CG = {
+    "individual": "individuals",
+    "organization": "other",
+    "government_state": "state_governments",
+    "government_county": "county_governments",
+    "government_municipal": "city_or_township_governments",
+    "government_special_district": "special_district_governments",
+    "government_tribal": "federally_recognized_native_american_tribal_governments",
+    "organization_tribal_other": "other_native_american_tribal_organizations",
+    "school_district_independent": "independent_school_districts",
+    "higher_education_public": "public_and_state_institutions_of_higher_education",
+    "higher_education_private": "private_institutions_of_higher_education",
+    "non_profit_with_501c3": "nonprofits_non_higher_education_with_501c3",
+    "nonprofit_without_501c3": "nonprofits_non_higher_education_without_501c3",
+    "for_profit_small_business": "small_businesses",
+    "for_profit_not_small_business": "for_profit_organizations_other_than_small_businesses",
+    "unrestricted": "unrestricted",
+    "custom": "other",
+}
+
+# Recognized customFilters key -> native v1 search field.
+_CUSTOM_FILTER_NATIVE_FIELD = {
+    "agency": "agency",
+    "applicantType": "applicant_type",
+    "fundingInstrument": "funding_instrument",
+    "costSharing": "is_cost_sharing",
+}
+
+_TRUE_STRINGS = frozenset({"true", "t", "yes", "1"})
+_FALSE_STRINGS = frozenset({"false", "f", "no", "0"})
+
+
+def _coerce_cg_bool(value: object) -> bool | None:
+    """Coerce a costSharing value to bool, or None if unrecognized.
+
+    JSON booleans arrive as int 0/1 (the SDK value union has no bool member).
+    None lets the caller report the bad value instead of silently defaulting.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int) and value in (0, 1):
+        return bool(value)
+    if isinstance(value, str):
+        s = value.strip().lower()
+        if s in _TRUE_STRINGS:
+            return True
+        if s in _FALSE_STRINGS:
+            return False
+    return None
+
+
+def build_custom_filters(
+    custom_filters: dict[str, DefaultFilter] | None,
+) -> tuple[dict, list[str]]:
+    """Translate CommonGrants customFilters into native v1 filter entries.
+
+    Returns (applied, errors). `applied` maps native field -> {"one_of": [...]}.
+    `errors` describe unsupported keys / invalid values; never raises.
+    """
+    applied: dict = {}
+    errors: list[str] = []
+    if not custom_filters:
+        return applied, errors
+
+    for key, filt in custom_filters.items():
+        native_field = _CUSTOM_FILTER_NATIVE_FIELD.get(key)
+        if native_field is None:
+            errors.append(f"customFilters.{key}: unsupported filter")
+            continue
+
+        if key == "costSharing":
+            if filt.operator != "eq":
+                errors.append(f"customFilters.{key}: unsupported operator {filt.operator}")
+                continue
+            parsed = _coerce_cg_bool(filt.value)
+            if parsed is None:
+                errors.append(f"customFilters.{key}: invalid boolean value {filt.value}")
+                continue
+            applied[native_field] = {"one_of": [parsed]}
+            continue
+
+        # string-array filters: agency, applicantType, fundingInstrument
+        if filt.operator != "in":
+            errors.append(f"customFilters.{key}: unsupported operator {filt.operator}")
+            continue
+        if not isinstance(filt.value, list):
+            errors.append(f"customFilters.{key}: expected an array value")
+            continue
+
+        values = []
+        for v in filt.value:
+            if not isinstance(v, str):
+                errors.append(f"customFilters.{key}: invalid value {v}")
+                continue
+            if key == "applicantType":
+                native = APPLICANT_TYPE_FROM_CG.get(v)
+                if native is None:
+                    errors.append(f"customFilters.{key}: unmappable value {v}")
+                    continue
+                values.append(native)
+            else:
+                values.append(v)
+
+        if values:
+            applied[native_field] = {"one_of": values}
+
+    return applied, errors
 
 
 def transform_sorting_from_cg(cg_sort_by: OppSortBy) -> str:
@@ -577,12 +688,17 @@ def build_money_range_filter(
         v1_filters[v1_field_name]["max"] = int(float(money_range_filter.value.max.amount))
 
 
-def build_filter_info(filters: OppFilters | None) -> FilterInfo:
+def build_filter_info(
+    filters: OppFilters | None,
+    custom_filter_errors: list[str] | None = None,
+) -> FilterInfo:
     """
     Helper function to build FilterInfo from CommonGrants filters.
 
     Args:
         filters: The CommonGrants filters to transform
+        custom_filter_errors: customFilters errors already derived by
+            transform_search_request_from_cg; surfaced here instead of re-parsing
 
     Returns:
         FilterInfo: The filter info for the response
@@ -606,7 +722,7 @@ def build_filter_info(filters: OppFilters | None) -> FilterInfo:
 
     return FilterInfo(
         filters=applied_filters,
-        errors=[],
+        errors=custom_filter_errors or [],
     )
 
 
@@ -615,7 +731,7 @@ def transform_search_request_from_cg(
     sorting: OppSorting,
     pagination: PaginatedBodyParams,
     search_term: str | None,
-) -> dict:
+) -> tuple[dict, list[str]]:
     """
     Transform CG search request to v1 search format.
 
@@ -626,7 +742,7 @@ def transform_search_request_from_cg(
         search_query: Optional search query string
 
     Returns:
-        dict: search parameters in v1 format
+        tuple: (v1 search parameters, customFilters errors for the response)
     """
     # Convert pagination
     v1_pagination = {
@@ -665,6 +781,10 @@ def transform_search_request_from_cg(
     build_money_range_filter(filters.min_award_amount_range, "award_floor", v1_filters)
     build_money_range_filter(filters.max_award_amount_range, "award_ceiling", v1_filters)
 
+    # Apply recognized customFilters; surface errors for the response's filterInfo
+    applied_custom, custom_filter_errors = build_custom_filters(filters.custom_filters)
+    v1_filters.update(applied_custom)
+
     # Build the complete v1 search parameters
     v1_params: dict[str, object] = {
         "pagination": v1_pagination,
@@ -678,7 +798,7 @@ def transform_search_request_from_cg(
     if v1_filters:
         v1_params["filters"] = v1_filters
 
-    return v1_params
+    return v1_params, custom_filter_errors
 
 
 def transform_validation_error_from_cg(

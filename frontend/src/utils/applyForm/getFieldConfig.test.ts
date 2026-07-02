@@ -1,6 +1,10 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { identity } from "lodash";
-import { UiSchemaField, UiSchemaFieldList } from "src/types/applyForm/types";
+import {
+  UiSchemaField,
+  UiSchemaFieldList,
+  UiSchemaTableMultiField,
+} from "src/types/applyForm/types";
 import {
   buildFieldListBaseId,
   determineFieldType,
@@ -194,6 +198,7 @@ describe("getFieldConfig", () => {
       rawErrors: [],
       value: "Jane Doe",
       options: {},
+      uiSchemaField: uiFieldObject,
     });
   });
 
@@ -242,6 +247,7 @@ describe("getFieldConfig", () => {
       rawErrors: ["Invalid email format"],
       value: "invalid-email",
       options: {},
+      uiSchemaField: uiFieldObject,
     });
   });
 
@@ -297,6 +303,7 @@ describe("getFieldConfig", () => {
         ],
         emptyValue: "- Select -",
       },
+      uiSchemaField: uiFieldObject,
     });
   });
 
@@ -470,6 +477,105 @@ describe("getFieldConfig", () => {
           requiredField: false,
         }),
       ).toThrow();
+    });
+  });
+
+  describe("table", () => {
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        personnel_federal_share: {
+          type: "number",
+          title: "Personnel Federal Share",
+        },
+        personnel_non_federal_share: {
+          type: "number",
+          title: "Personnel Non-Federal Share",
+          readOnly: true,
+        },
+      },
+    };
+
+    const tableUiSchema: UiSchemaTableMultiField = {
+      type: "multiField",
+      name: "budget_summary_table",
+      widget: "Table",
+      definition: [
+        "/properties/personnel_federal_share",
+        "/properties/personnel_non_federal_share",
+      ],
+      children: {
+        columns: [
+          {
+            columnHeader: "Category",
+            width: 40,
+          },
+          {
+            columnHeader: "Federal Share",
+            width: 30,
+          },
+          {
+            columnHeader: "Non-Federal Share",
+            width: 30,
+          },
+        ],
+        rows: [
+          {
+            rowHeader: "Personnel",
+            cells: [
+              {
+                type: "plainText",
+                staticContent: "Personnel",
+              },
+              {
+                type: "input",
+                definition: "/properties/personnel_federal_share",
+              },
+              {
+                type: "readOnly",
+                definition: "/properties/personnel_non_federal_share",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    it("returns normal multiField config with Table UI-schema metadata", () => {
+      const result = getFieldConfig({
+        errors: null,
+        formSchema,
+        formData: {
+          personnel_federal_share: 2500,
+          personnel_non_federal_share: 1000,
+        },
+        uiFieldObject: tableUiSchema,
+        requiredField: false,
+      });
+
+      expect(result.type).toBe("Table");
+
+      if (result.type !== "Table") {
+        throw new Error("Expected Table");
+      }
+
+      expect(result.props).toEqual({
+        id: "budget_summary_table",
+        key: "budget_summary_table",
+        disabled: false,
+        required: false,
+        minLength: undefined,
+        maxLength: undefined,
+        schema: {
+          type: "number",
+          title: "Personnel Non-Federal Share",
+          readOnly: true,
+        },
+        rawErrors: [],
+        value: {},
+        options: {},
+        uiSchemaField: tableUiSchema,
+      });
     });
   });
 });

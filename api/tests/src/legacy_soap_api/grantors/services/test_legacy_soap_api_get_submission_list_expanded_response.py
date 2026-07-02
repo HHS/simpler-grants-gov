@@ -15,7 +15,11 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientCertificateLookupError,
     SOAPClientUserDoesNotHavePermission,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    GRANTOR_SOAP_ACTION_PATH,
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPInvalidEnvelope, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_dict
@@ -90,6 +94,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
         )
         _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml = (
@@ -171,6 +176,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
         )
         WRONG_PRIVLEGES = {Privilege.GET_SUBMITTED_APPLICATIONS}
         _, _, soap_client_certificate, _ = setup_cert_user(agency, WRONG_PRIVLEGES)
@@ -222,6 +228,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
         )
         WRONG_PRIVLEGES = {Privilege.GET_SUBMITTED_APPLICATIONS}
         _, _, soap_client_certificate, _ = setup_cert_user(agency, WRONG_PRIVLEGES)
@@ -275,6 +282,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
         )
         legacy_certificate = LegacyOrganizationCertificateFactory.create(agency=None)
         soap_client_certificate = SOAPClientCertificate(
@@ -356,6 +364,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         request_xml = (
@@ -463,6 +472,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         request_xml = (
@@ -579,6 +589,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         request_xml = (
@@ -660,6 +671,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         submission_2 = setup_application_submission(agency, legacy_package_id="PKG00000001")
@@ -749,6 +761,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         db_session.commit()
@@ -840,6 +853,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         submission_2 = setup_application_submission(agency, legacy_package_id="PKG00000001")
@@ -931,6 +945,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         setup_application_submission(
@@ -1024,6 +1039,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         setup_application_submission(
@@ -1117,6 +1133,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         setup_application_submission(
@@ -1210,6 +1227,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         setup_application_submission(
@@ -1320,6 +1338,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         db_session.commit()
@@ -1425,6 +1444,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         request_xml = (
@@ -1500,6 +1520,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         db_session.commit()
@@ -1602,6 +1623,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         request_xml = (
@@ -1673,6 +1695,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         setup_application_submission(
@@ -1767,6 +1790,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         setup_application_submission(
@@ -1857,6 +1881,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         setup_application_submission(agency, legacy_competition_id=2)
@@ -1921,6 +1946,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         setup_application_submission(
@@ -1989,6 +2015,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
+            soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         setup_application_submission(

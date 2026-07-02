@@ -10,6 +10,7 @@ from src.form_schema.forms import (
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
     GG_LobbyingForm_v1_1,
+    KeyContacts_v2_0,
     OtherNarrativeAttachment_v1_2,
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -18,6 +19,7 @@ from src.form_schema.forms import (
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
+    SF424c_v2_0,
     SF424d_v1_1,
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
@@ -78,6 +80,11 @@ def sf424b_v1_1():
 
 
 @pytest.fixture(scope="session")
+def sf424c_v2_0():
+    return setup_resolved_form(SF424c_v2_0)
+
+
+@pytest.fixture(scope="session")
 def sf424d_v1_1():
     return setup_resolved_form(SF424d_v1_1)
 
@@ -135,6 +142,11 @@ def epa_form_4700_4_v5_0():
 @pytest.fixture(scope="session")
 def epa_key_contact_v2_0():
     return setup_resolved_form(EPA_KEY_CONTACT_v2_0)
+
+
+@pytest.fixture(scope="session")
+def key_contacts_v2_0():
+    return setup_resolved_form(KeyContacts_v2_0)
 
 
 @pytest.fixture(scope="session")

@@ -560,6 +560,15 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
                     soap_request.data.head().decode("utf-8"),
                     content_type=text_content_type,
                 )
+                request_headers_s3_path = file_util.join(
+                    base_path,
+                    "request_headers.txt",
+                )
+                file_util.write_to_file(
+                    request_headers_s3_path,
+                    json.dumps(soap_request.headers),
+                    content_type=text_content_type,
+                )
             response_s3_path = file_util.join(
                 base_path,
                 "response.txt",
@@ -567,6 +576,15 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
             file_util.write_to_file(
                 response_s3_path,
                 soap_response.to_bytes().decode("utf-8"),
+                content_type=text_content_type,
+            )
+            response_headers_s3_path = file_util.join(
+                base_path,
+                "response_headers.txt",
+            )
+            file_util.write_to_file(
+                response_headers_s3_path,
+                json.dumps(soap_response.headers),
                 content_type=text_content_type,
             )
             logger.info(

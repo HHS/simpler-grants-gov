@@ -7,6 +7,7 @@ from uuid import uuid4
 from common_grants_sdk.schemas.pydantic import (
     ArrayOperator,
     CustomFieldType,
+    DefaultFilter,
     Money,
     MoneyRange,
     MoneyRangeFilter,
@@ -28,8 +29,10 @@ from src.api.common_grants.schemas.pydantic.custom_fields import (
     FiscalYearField,
     LegacySerialIdField,
 )
-from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
+from src.constants.lookup_constants import ApplicantType, CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
+    APPLICANT_TYPE_FROM_CG,
+    build_custom_filters,
     build_filter_info,
     build_money_range_filter,
     populate_custom_fields,
@@ -1033,7 +1036,7 @@ class TestTransformation:
 
         search_query = "test query"
 
-        result = transform_search_request_from_cg(filters, sorting, pagination, search_query)
+        result, _ = transform_search_request_from_cg(filters, sorting, pagination, search_query)
 
         assert result is not None
         # Check pagination
@@ -1062,7 +1065,7 @@ class TestTransformation:
         sorting = OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT, sort_order="desc")
         pagination = PaginatedBodyParams(page=1, page_size=10)
 
-        result = transform_search_request_from_cg(filters, sorting, pagination, None)
+        result, _ = transform_search_request_from_cg(filters, sorting, pagination, None)
 
         assert result is not None
         # Check pagination
@@ -1485,3 +1488,154 @@ class TestValidateCustomField:
         )
         assert result is not None
         assert result.value[0].downloadUrl is None
+
+
+def _cf(operator, value):
+    return DefaultFilter(operator=operator, value=value)
+
+
+def test_build_custom_filters_agency_passthrough():
+    applied, errors = build_custom_filters({"agency": _cf("in", ["USAID", "DOC"])})
+    assert applied == {"agency": {"one_of": ["USAID", "DOC"]}}
+    assert errors == []
+
+
+def test_build_custom_filters_applicant_type_maps_cg_to_native():
+    applied, errors = build_custom_filters(
+        {"applicantType": _cf("in", ["government_state", "individual"])}
+    )
+    assert applied == {"applicant_type": {"one_of": ["state_governments", "individuals"]}}
+    assert errors == []
+
+
+def test_build_custom_filters_funding_instrument_passthrough():
+    applied, errors = build_custom_filters(
+        {"fundingInstrument": _cf("in", ["grant", "cooperative_agreement"])}
+    )
+    assert applied == {"funding_instrument": {"one_of": ["grant", "cooperative_agreement"]}}
+    assert errors == []
+
+
+def test_build_custom_filters_cost_sharing_boolean():
+    applied, errors = build_custom_filters({"costSharing": _cf("eq", True)})
+    assert applied == {"is_cost_sharing": {"one_of": [True]}}
+    assert errors == []
+
+
+def test_build_custom_filters_cost_sharing_invalid_value_reported():
+    applied, errors = build_custom_filters({"costSharing": _cf("eq", "maybe")})
+    assert applied == {}
+    assert errors == ["customFilters.costSharing: invalid boolean value maybe"]
+
+
+def test_build_custom_filters_unsupported_key_reported():
+    applied, errors = build_custom_filters({"bogus": _cf("in", ["x"])})
+    assert applied == {}
+    assert errors == ["customFilters.bogus: unsupported filter"]
+
+
+def test_build_custom_filters_unmappable_applicant_type_reported():
+    applied, errors = build_custom_filters({"applicantType": _cf("in", ["not_a_real_type"])})
+    assert applied == {}
+    assert errors == ["customFilters.applicantType: unmappable value not_a_real_type"]
+
+
+def test_build_custom_filters_applicant_type_partial_map():
+    applied, errors = build_custom_filters(
+        {"applicantType": _cf("in", ["government_state", "not_a_real_type"])}
+    )
+    assert applied == {"applicant_type": {"one_of": ["state_governments"]}}
+    assert errors == ["customFilters.applicantType: unmappable value not_a_real_type"]
+
+
+def test_build_custom_filters_none_is_noop():
+    assert build_custom_filters(None) == ({}, [])
+
+
+def test_applicant_type_mapping_targets_are_valid_native_values():
+    valid = {e.value for e in ApplicantType}
+    unknown = set(APPLICANT_TYPE_FROM_CG.values()) - valid
+    assert unknown == set(), f"mapping targets not in ApplicantType enum: {unknown}"
+
+
+def test_transform_applies_custom_filters_into_v1():
+    filters = OppFilters.model_validate(
+        {"customFilters": {"agency": {"operator": "in", "value": ["USAID"]}}}
+    )
+    params, _ = transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+    assert params["filters"]["agency"] == {"one_of": ["USAID"]}
+
+
+def test_build_filter_info_reports_unsupported_custom_filter():
+    filters = OppFilters.model_validate(
+        {"customFilters": {"bogus": {"operator": "in", "value": ["x"]}}}
+    )
+    _, errors = transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+    info = build_filter_info(filters, errors)
+    assert "customFilters.bogus: unsupported filter" in info.errors
+
+
+def test_build_custom_filters_cost_sharing_unsupported_operator():
+    applied, errors = build_custom_filters({"costSharing": _cf("in", True)})
+    assert applied == {}
+    assert errors == ["customFilters.costSharing: unsupported operator in"]
+
+
+def test_build_custom_filters_array_key_unsupported_operator():
+    applied, errors = build_custom_filters({"agency": _cf("eq", ["USAID"])})
+    assert applied == {}
+    assert errors == ["customFilters.agency: unsupported operator eq"]
+
+
+def test_build_custom_filters_array_key_non_list_value():
+    applied, errors = build_custom_filters({"agency": _cf("in", "USAID")})
+    assert applied == {}
+    assert errors == ["customFilters.agency: expected an array value"]
+
+
+def test_build_custom_filters_cost_sharing_string_booleans():
+    assert build_custom_filters({"costSharing": _cf("eq", "true")})[0] == {
+        "is_cost_sharing": {"one_of": [True]}
+    }
+    assert build_custom_filters({"costSharing": _cf("eq", "false")})[0] == {
+        "is_cost_sharing": {"one_of": [False]}
+    }
+
+
+def test_build_filter_info_reports_invalid_cost_sharing_via_request_path():
+    filters = OppFilters.model_validate(
+        {"customFilters": {"costSharing": {"operator": "eq", "value": "maybe"}}}
+    )
+    _, errors = transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+    info = build_filter_info(filters, errors)
+    assert "customFilters.costSharing: invalid boolean value maybe" in info.errors
+
+
+def test_build_custom_filters_non_string_applicant_type_element_reported():
+    # DefaultFilter.value permits list-of-dict; a non-string element must be
+    # reported, not raise (the fail-soft contract).
+    applied, errors = build_custom_filters({"applicantType": _cf("in", [{}])})
+    assert applied == {}
+    assert errors == ["customFilters.applicantType: invalid value {}"]
+
+
+def test_build_custom_filters_non_string_array_element_reported():
+    applied, errors = build_custom_filters({"agency": _cf("in", ["USAID", 123])})
+    assert applied == {"agency": {"one_of": ["USAID"]}}
+    assert errors == ["customFilters.agency: invalid value 123"]
+
+
+def test_build_custom_filters_applies_valid_filter_when_other_key_invalid():
+    # Headline behavior: an unsupported key is reported but valid filters still apply.
+    # Invalid key first so a stray break (instead of continue) would drop the valid one.
+    applied, errors = build_custom_filters(
+        {"bogus": _cf("in", ["x"]), "agency": _cf("in", ["USAID"])}
+    )
+    assert applied == {"agency": {"one_of": ["USAID"]}}
+    assert errors == ["customFilters.bogus: unsupported filter"]

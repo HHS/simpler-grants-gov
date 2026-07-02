@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import type { FillFormConfig } from "tests/e2e/utils/common/types";
 
 /**
@@ -95,4 +95,32 @@ export function buildHappyPathTestData(
       ];
     }),
   );
+}
+
+/**
+ * Validates that a form field on the print view contains the expected value.
+ * Handles both input elements (checks value attribute) and other elements (checks visible text).
+ *
+ * For input elements: Uses toHaveValue() to check the value attribute
+ * For other elements (divs, spans, etc.): Uses toContainText() to check visible text
+ *
+ * @param page          - The Playwright page object.
+ * @param testId        - The test ID of the field to validate.
+ * @param expectedValue - The expected value to find.
+ */
+export async function validatePrintViewField(
+  page: Page,
+  testId: string,
+  expectedValue: string,
+): Promise<void> {
+  const locator = page.getByTestId(testId);
+  await expect(locator).toBeVisible();
+
+  // For input elements, check the value attribute; for other elements, check visible text
+  const elementType = await locator.evaluate((el) => el.tagName.toLowerCase());
+  if (elementType === "input") {
+    await expect(locator).toHaveValue(expectedValue);
+  } else {
+    await expect(locator).toContainText(expectedValue);
+  }
 }
