@@ -1,4 +1,4 @@
-import { type Page, type TestInfo } from "@playwright/test";
+import { type Page } from "@playwright/test";
 import {
   fillPageFields,
   type PageFillField,
@@ -43,7 +43,6 @@ export const clearPageFieldsFromDefinitions = async <
     definitions: TDefinition[],
     fillData: TFillData,
   ) => PageFillField[],
-  testInfo?: TestInfo,
 ): Promise<void> => {
   const emptyFillData = buildEmptyFillDataFromDefinitions(
     definitions,
