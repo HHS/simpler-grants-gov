@@ -20,9 +20,7 @@ const ButtonSaveAndExit = ({ url }: { url: string }) => {
   const t = useTranslations("OpportunityCompetition.button");
   return (
     <Link href={url}>
-      <Button type="button" className="usa-button--outline">
-        {t("saveAndExit")}
-      </Button>
+      <Button type="button">{t("saveAndExit")}</Button>
     </Link>
   );
 };
