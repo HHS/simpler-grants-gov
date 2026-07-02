@@ -2037,6 +2037,17 @@ export const messages = {
       agencyNotAuthorized:
         "You do not have access to this agency's award recommendations.",
       noAgencies: "You are not associated with any agencies.",
+      empty: "No award recommendations found.",
+      fetchError:
+        "We have encountered an error loading award recommendations. Please try again.",
+      columns: {
+        awardRecId: "Award Rec ID",
+        opportunityName: "Opportunity name",
+        opportunityId: "Opportunity ID",
+        applicationsReceived: "Applications received",
+        status: "Status",
+        action: "Action",
+      },
     },
     summary: {
       showDescription: "Show full description",

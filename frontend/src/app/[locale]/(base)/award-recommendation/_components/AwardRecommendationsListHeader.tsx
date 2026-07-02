@@ -1,3 +1,5 @@
+"use client";
+
 import { AgencySelector } from "src/app/[locale]/(base)/grantor/opportunities/_components/AgencySelector";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 
@@ -30,7 +32,7 @@ export default function AwardRecommendationsListHeader({
           <AgencySelector
             agencies={agencies}
             currentAgencyId={currentAgencyId}
-            className="usa-form-group margin-bottom-0"
+            className="usa-form-group margin-bottom-0 margin-top-4"
           />
         </div>
         {showHeaderControls && (

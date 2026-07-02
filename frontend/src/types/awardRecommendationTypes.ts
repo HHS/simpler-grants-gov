@@ -1,3 +1,5 @@
+import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
+
 export type AwardRecommendationStatus = "draft" | "in_review" | "approved";
 
 export type AwardSelectionMethod = "merit-review-only" | "merit-review-other";
@@ -14,6 +16,11 @@ export type AwardRecommendationSummary = {
   not_recommended_count: number;
   total_recommended_amount: number;
 };
+
+export type AwardRecommendationListSummary = Pick<
+  AwardRecommendationSummary,
+  "total_received_count"
+>;
 
 export type AwardRecommendationUser = {
   user_id: string;
@@ -89,6 +96,29 @@ export type AwardRecommendationDetails = {
   award_recommendation_attachments?: AwardRecommendationAttachment[];
   award_recommendation_reviews?: AwardRecommendationReview[];
   award_recommendation_summary?: AwardRecommendationSummary;
+};
+
+export type AwardRecommendationListItem = Omit<
+  Pick<
+    AwardRecommendationDetails,
+    | "award_recommendation_id"
+    | "award_recommendation_number"
+    | "award_recommendation_status"
+    | "opportunity"
+    | "award_recommendation_summary"
+  >,
+  "award_recommendation_summary"
+> & {
+  award_recommendation_summary?: AwardRecommendationListSummary;
+};
+
+export type AwardRecommendationListFilters = {
+  agency_id: { one_of: string[] };
+};
+
+export type AwardRecommendationListRequestBody = {
+  filters: AwardRecommendationListFilters;
+  pagination: PaginationRequestBody;
 };
 
 export type AwardRecommendationOrganization = {
