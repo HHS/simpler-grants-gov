@@ -109,6 +109,18 @@ jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
 
+jest.mock(
+  "src/components/award-recommendation/EditRecommendationsTable",
+  () => ({
+    __esModule: true,
+    default: ({ awardRecommendationId }: { awardRecommendationId: string }) => (
+      <div data-testid="edit-recommendations-table">
+        <span data-testid="table-award-rec-id">{awardRecommendationId}</span>
+      </div>
+    ),
+  }),
+);
+
 const editRecommendationsParams = Promise.resolve({
   locale: "en",
   id: "AR-26-0001",
@@ -191,6 +203,38 @@ describe("EditRecommendationsPage", () => {
       });
 
       expect(mockGetAwardRecommendationDetails).toHaveBeenCalledWith(
+        "AR-26-0001",
+      );
+    });
+
+    it("renders the page heading and description", async () => {
+      const component = await EditRecommendationsPage({
+        params: editRecommendationsParams,
+      });
+      render(component);
+
+      expect(screen.getByText("pageHeading")).toBeInTheDocument();
+      expect(screen.getByText("pageDescription")).toBeInTheDocument();
+    });
+
+    it("renders the EditRecommendationsTable component", async () => {
+      const component = await EditRecommendationsPage({
+        params: editRecommendationsParams,
+      });
+      render(component);
+
+      expect(
+        screen.getByTestId("edit-recommendations-table"),
+      ).toBeInTheDocument();
+    });
+
+    it("passes correct award recommendation ID to table", async () => {
+      const component = await EditRecommendationsPage({
+        params: editRecommendationsParams,
+      });
+      render(component);
+
+      expect(screen.getByTestId("table-award-rec-id")).toHaveTextContent(
         "AR-26-0001",
       );
     });
