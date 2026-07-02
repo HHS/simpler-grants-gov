@@ -71,7 +71,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
 
       //------------------------Test steps start-----------------
       // Given I create a new opportunity.
-      await createOpportunity(page, fillData, testInfo);
+      await createOpportunity(page, fillData);
 
       // When I start a second create flow with duplicate values.
       await page.goto("/grantor/opportunities");

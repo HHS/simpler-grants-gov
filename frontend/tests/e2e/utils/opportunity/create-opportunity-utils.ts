@@ -1,4 +1,4 @@
-import { expect, type Page, type TestInfo } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import {
   buildPageFieldsFromDefinitions,
   CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
@@ -11,12 +11,10 @@ import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
  *
  * @param page Playwright page instance.
  * @param fillData Field values mapped by opportunity metadata keys.
- * @param testInfo Optional test context passed through to shared field-filling utilities.
  */
 export async function createOpportunity(
   page: Page,
   fillData: Record<OpportunityFieldValueKey, string>,
-  testInfo?: TestInfo,
 ): Promise<void> {
   // Given I navigate to the opportunities list.
   await page.goto("/grantor/opportunities");
