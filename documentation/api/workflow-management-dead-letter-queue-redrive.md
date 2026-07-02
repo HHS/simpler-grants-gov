@@ -3,6 +3,8 @@
 ## Overview
 This guide explains how to manage messages in the Dead Letter Queue (DLQ), including understanding why messages end up in the DLQ, when to redrive vs delete, and step-by-step procedures for both operations.
 
+**Note**: An AWS account is required for all DLQ operations (check, redrive, and delete).
+
 
 ## What is a Dead Letter Queue?
 A Dead Letter Queue (DLQ) is a special SQS queue that receives messages that cannot be successfully processed after multiple attempts. It prevents problematic messages from blocking the processing of valid messages.
