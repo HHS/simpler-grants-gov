@@ -6925,6 +6925,7 @@ components:
           - SF424
           - SF424A
           - SF424B
+          - SF424C
           - SF424D
           - SFLLL
           - ProjectNarrativeAttachment
@@ -6937,6 +6938,7 @@ components:
           - GGLobbyingForm
           - EPAForm4700-4
           - EPAKeyContacts
+          - KeyContacts
           - AttachmentForm
           - ProjectPerformanceSiteLocation
           type:
