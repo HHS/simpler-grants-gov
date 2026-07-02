@@ -15,12 +15,12 @@ export const buildEmptyFillDataFromDefinitions = <
   TDefinition extends DefinitionWithValueKey,
 >(
   definitions: TDefinition[],
-): Record => {
+): Record<string, string> => {
   const uniqueValueKeys = Array.from(
     new Set(definitions.map((definition) => definition.valueKey)),
   );
 
-  return uniqueValueKeys.reduce<Record>((fillData, valueKey) => {
+  return uniqueValueKeys.reduce<Record<string, string>>((fillData, valueKey) => {
     fillData[valueKey] = "";
     return fillData;
   }, {});
@@ -32,7 +32,7 @@ export const buildEmptyFillDataFromDefinitions = <
  */
 export const clearPageFieldsFromDefinitions = async <
   TDefinition extends DefinitionWithValueKey,
-  TFillData extends Record,
+  TFillData extends Record<string, string>,
 >(
   page: Page,
   definitions: TDefinition[],
@@ -40,7 +40,7 @@ export const clearPageFieldsFromDefinitions = async <
     definitions: TDefinition[],
     fillData: TFillData,
   ) => PageFillField[],
-): Promise => {
+): Promise<void> => {
   const emptyFillData = buildEmptyFillDataFromDefinitions(
     definitions,
   ) as TFillData;
