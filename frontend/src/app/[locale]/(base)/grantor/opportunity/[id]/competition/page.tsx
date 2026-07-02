@@ -84,7 +84,7 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
       >
         <ButtonSaveAndExit url={overviewUrl} />
       </OpportunityDetailsHeader>
-      <CompetitionForm opportunity_id={id} />
+      <CompetitionForm opportunityId={id} competitionId={competitionId} />
     </>
   );
 }

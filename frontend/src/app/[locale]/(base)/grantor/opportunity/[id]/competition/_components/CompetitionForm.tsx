@@ -8,16 +8,18 @@ import { Button, Link } from "@trussworks/react-uswds";
 
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 
-export function CompetitionForm({
-  opportunity_id,
-  competitionId,
-}: {
-  opportunity_id: string;
+type CompetitionFormProps = {
+  opportunityId: string;
   competitionId: string;
-}) {
+};
+
+export function CompetitionForm({
+  opportunityId: _opportunityId,
+  competitionId: _competitionId,
+}: CompetitionFormProps) {
   const t = useTranslations("OpportunityCompetition");
-  const editUrl = "../" + opportunity_id + "/edit";
-  const overviewUrl = "../" + opportunity_id + "/overview";
+  const editUrl = "../" + _opportunityId + "/edit";
+  const overviewUrl = "../" + _opportunityId + "/overview";
 
   const navigationItems = [
     {
