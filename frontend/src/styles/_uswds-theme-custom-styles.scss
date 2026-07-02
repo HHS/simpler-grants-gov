@@ -1570,8 +1570,9 @@ $simpler-switch-transition-easing: ease;
   height: calc(100% + 1rem);
 }
 
-// Teal green checkboxes for RisksTable
-.risks-table-checkbox {
+// Teal green checkboxes for RisksTable and EditRecommendationsTable
+.risks-table-checkbox,
+.edit-recommendations-table-checkbox {
   accent-color: color("mint-50");
 
   &:checked {

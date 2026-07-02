@@ -11,6 +11,7 @@ import { Suspense } from "react";
 import { Alert } from "@trussworks/react-uswds";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
+import EditRecommendationsTable from "src/components/award-recommendation/EditRecommendationsTable";
 
 export async function generateMetadata({
   params,
@@ -112,6 +113,27 @@ async function EditRecommendationsPageContent({
           ]}
         />
       </Suspense>
+
+      <div className="grid-container">
+        <div className="grid-row">
+          <div className="desktop:grid-col-12">
+            <h2 className="margin-top-4 margin-bottom-1 font-sans-md">
+              {tEdit("pageHeading")}
+            </h2>
+            <p className="text-base-dark margin-top-0 margin-bottom-4">
+              {tEdit("pageDescription")}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid-row margin-top-2">
+          <div className="desktop:grid-col-12">
+            <EditRecommendationsTable
+              awardRecommendationId={awardRecommendationId}
+            />
+          </div>
+        </div>
+      </div>
     </>
   );
 }
