@@ -10,8 +10,10 @@ import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 
 export function CompetitionForm({
   opportunity_id,
+  competitionId,
 }: {
   opportunity_id: string;
+  competitionId: string;
 }) {
   const t = useTranslations("OpportunityCompetition");
   const editUrl = "../" + opportunity_id + "/edit";

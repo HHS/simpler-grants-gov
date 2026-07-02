@@ -76,6 +76,28 @@ def test_get_opportunity_success(client, db_session, grantor_auth_data, opportun
     assert response_data["category"] == opportunity.category.value
 
 
+def test_get_opportunity_with_competition_and_forms(
+    client, db_session, enable_factory_create, grantor_auth_data, opportunity
+):
+    """Regression test: GET should not 500 when opportunity has a competition with competition_forms.
+    Before the fix, competition_forms was lazy-loaded after the session closed, causing a
+    DetachedInstanceError. See Issue #11012."""
+    user, agency, token, _ = grantor_auth_data
+
+    from tests.src.db.models.factories import CompetitionFactory
+
+    CompetitionFactory.create(opportunity=opportunity)
+
+    response = client.get(
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    response_data = response.get_json()["data"]
+    assert len(response_data["competitions"]) == 1
+
+
 def test_get_opportunity_with_invalid_jwt_token(client, opportunity):
     """Test 401 response for opportunity retrieval with invalid JWT token"""
     response = client.get(
