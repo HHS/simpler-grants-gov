@@ -20,6 +20,11 @@ const deleteNewRelic = () => {
   delete win.newrelic;
 };
 
+const setMockNewRelic = (value: NewRelicBrowser) => {
+  const win = window as WindowWithNewRelic;
+  win.newrelic = value;
+};
+
 describe("analyticsUtil", () => {
   let consoleErrorSpy: jest.SpyInstance;
 
@@ -39,10 +44,7 @@ describe("analyticsUtil", () => {
 
   describe("waitForNewRelic", () => {
     it("returns true immediately if newrelic is already present", async () => {
-      const mockNewRelic = {
-        setCustomAttribute: jest.fn(),
-      } as unknown as NonNullable<Window["newrelic"]>;
-      window.newrelic = mockNewRelic;
+      setMockNewRelic({ setCustomAttribute: jest.fn() });
 
       const result = await waitForNewRelic();
       expect(result).toBe(true);
@@ -54,9 +56,7 @@ describe("analyticsUtil", () => {
 
       // Simulate newrelic becoming available after a few ticks
       setTimeout(() => {
-        window.newrelic = {
-          setCustomAttribute: jest.fn(),
-        } as unknown as Window["newrelic"];
+        setMockNewRelic({ setCustomAttribute: jest.fn() });
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -85,9 +85,7 @@ describe("analyticsUtil", () => {
   describe("setNewRelicCustomAttribute", () => {
     it("sets a custom attribute when newrelic is available", () => {
       const mockSetCustomAttribute = jest.fn();
-      window.newrelic = {
-        setCustomAttribute: mockSetCustomAttribute,
-      } as unknown as Window["newrelic"];
+      setMockNewRelic({ setCustomAttribute: mockSetCustomAttribute });
 
       setNewRelicCustomAttribute("test_key", "test_value");
 
@@ -99,9 +97,7 @@ describe("analyticsUtil", () => {
 
     it("sets a numeric custom attribute when newrelic is available", () => {
       const mockSetCustomAttribute = jest.fn();
-      window.newrelic = {
-        setCustomAttribute: mockSetCustomAttribute,
-      } as unknown as Window["newrelic"];
+      setMockNewRelic({ setCustomAttribute: mockSetCustomAttribute });
 
       setNewRelicCustomAttribute("test_key", 42);
 
@@ -129,9 +125,7 @@ describe("analyticsUtil", () => {
   describe("setNewRelicCorrelationIdAttribute", () => {
     it("sets correlation_id attribute when newrelic is available", () => {
       const mockSetCustomAttribute = jest.fn();
-      window.newrelic = {
-        setCustomAttribute: mockSetCustomAttribute,
-      } as unknown as Window["newrelic"];
+      setMockNewRelic({ setCustomAttribute: mockSetCustomAttribute });
 
       const correlationId = "test-correlation-id-123";
       setNewRelicCorrelationIdAttribute(correlationId);
@@ -159,9 +153,7 @@ describe("analyticsUtil", () => {
   describe("unsetAllNewRelicQueryAttributes", () => {
     it("unsets all query attributes and query_length", () => {
       const mockSetCustomAttribute = jest.fn();
-      window.newrelic = {
-        setCustomAttribute: mockSetCustomAttribute,
-      } as unknown as Window["newrelic"];
+      setMockNewRelic({ setCustomAttribute: mockSetCustomAttribute });
 
       unsetAllNewRelicQueryAttributes();
 
