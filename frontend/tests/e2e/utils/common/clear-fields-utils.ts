@@ -8,6 +8,10 @@ type DefinitionWithValueKey = {
   valueKey: string;
 };
 
+type StringByKey = {
+  [key: string]: string;
+};
+
 /**
  * Builds a fill-data object with empty strings for each unique metadata valueKey.
  */
@@ -15,12 +19,12 @@ export const buildEmptyFillDataFromDefinitions = <
   TDefinition extends DefinitionWithValueKey,
 >(
   definitions: TDefinition[],
-): Record<string, string> => {
+): StringByKey => {
   const uniqueValueKeys = Array.from(
     new Set(definitions.map((definition) => definition.valueKey)),
   );
 
-  return uniqueValueKeys.reduce<Record<string, string>>((fillData, valueKey) => {
+  return uniqueValueKeys.reduce<StringByKey>((fillData, valueKey) => {
     fillData[valueKey] = "";
     return fillData;
   }, {});
@@ -32,7 +36,7 @@ export const buildEmptyFillDataFromDefinitions = <
  */
 export const clearPageFieldsFromDefinitions = async <
   TDefinition extends DefinitionWithValueKey,
-  TFillData extends Record<string, string>,
+  TFillData extends StringByKey,
 >(
   page: Page,
   definitions: TDefinition[],
@@ -40,7 +44,7 @@ export const clearPageFieldsFromDefinitions = async <
     definitions: TDefinition[],
     fillData: TFillData,
   ) => PageFillField[],
-): Promise<void> => {
+) => {
   const emptyFillData = buildEmptyFillDataFromDefinitions(
     definitions,
   ) as TFillData;
