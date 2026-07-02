@@ -278,7 +278,7 @@ describe("EditRecommendationsTable", () => {
 
     const noneBadges = screen.getAllByText("None");
     expect(noneBadges.length).toBe(2);
-    
+
     // Verify badge styling
     noneBadges.forEach((badge) => {
       expect(badge).toHaveClass("usa-tag");
