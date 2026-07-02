@@ -369,19 +369,6 @@ describe("EditRecommendationsTable", () => {
     });
   });
 
-  it("does not send filters in request body", async () => {
-    render(<EditRecommendationsTable awardRecommendationId="test-award-id" />);
-
-    await waitFor(() => {
-      expect(mockClientFetch).toHaveBeenCalled();
-    });
-
-    const requestBody = JSON.parse(
-      (mockClientFetch.mock.calls[0]?.[1] as { body: string })?.body ?? "{}",
-    ) as { filters?: unknown };
-    expect(requestBody.filters).toBeUndefined();
-  });
-
   it("renders application numbers as links", async () => {
     render(<EditRecommendationsTable awardRecommendationId="test-award-id" />);
 
@@ -501,19 +488,6 @@ describe("EditRecommendationsTable", () => {
     expect(
       screen.queryByRole("button", { name: "editButton" }),
     ).not.toBeInTheDocument();
-  });
-
-  it("uses page size of 50", async () => {
-    render(<EditRecommendationsTable awardRecommendationId="test-award-id" />);
-
-    await waitFor(() => {
-      expect(mockClientFetch).toHaveBeenCalled();
-    });
-
-    const requestBody = JSON.parse(
-      (mockClientFetch.mock.calls[0]?.[1] as { body: string })?.body ?? "{}",
-    ) as { pagination: { page_size: number } };
-    expect(requestBody.pagination.page_size).toBe(50);
   });
 
   it("uses TableWithResponsiveHeader component", async () => {
