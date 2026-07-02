@@ -30,6 +30,7 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
+  validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
 
@@ -171,10 +172,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         for (const [dataKey, testId] of Object.entries(
           userEnteredFieldTestIds,
         )) {
-          await expect(page.getByTestId(testId)).toBeVisible();
-          await expect(page.getByTestId(testId)).toContainText(
-            testData[dataKey],
-          );
+          await validatePrintViewField(page, testId, testData[dataKey]);
         }
       }
     },
