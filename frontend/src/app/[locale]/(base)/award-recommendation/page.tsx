@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import AwardRecommendationsListHeader from "src/app/[locale]/(base)/award-recommendation/_components/AwardRecommendationsListHeader";
+import AwardRecommendationsListContent from "src/app/[locale]/(base)/award-recommendation/_components/AwardRecommendationsListContent";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
 import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
 import { MissingAuthError } from "src/errors";
@@ -103,9 +103,8 @@ async function AwardRecommendationsListPage({
         showDateAndStatus={false}
       />
       <GridContainer>
-        <div className="margin-top-4">
-          <AwardRecommendationsListHeader
-            awardRecommendationsCount={0}
+        <div className="margin-top-6">
+          <AwardRecommendationsListContent
             agencies={sortedUserAgencies}
             currentAgencyId={selectedAgencyId}
           />

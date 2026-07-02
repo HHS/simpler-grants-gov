@@ -28,13 +28,14 @@ describe("AwardRecommendationStatusTag", () => {
     expect(tag).toBeInTheDocument();
   });
 
-  it("renders in review status tag", () => {
+  it("renders in review status tag without wrapping text", () => {
     render(<AwardRecommendationStatusTag status="in_review" />);
 
     const tag = screen.getByTestId(
       "award-recommendation-status-pending-review",
     );
     expect(tag).toBeInTheDocument();
+    expect(tag).toHaveStyle({ whiteSpace: "nowrap" });
   });
 
   it("renders approved status tag", () => {

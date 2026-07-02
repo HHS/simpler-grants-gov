@@ -7,6 +7,7 @@ import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import { UserProfile } from "src/types/authTypes";
 import {
   AwardRecommendationDetails,
+  AwardRecommendationListItem,
   AwardRecommendationStatus,
   AwardRecommendationSubmission,
 } from "src/types/awardRecommendationTypes";
@@ -71,6 +72,37 @@ export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
   },
   created_at: "2026-01-01T00:00:00Z",
 };
+
+export const mockAwardRecommendationListItem: AwardRecommendationListItem = {
+  award_recommendation_id:
+    mockAwardRecommendationDetails.award_recommendation_id,
+  award_recommendation_number:
+    mockAwardRecommendationDetails.award_recommendation_number,
+  award_recommendation_status:
+    mockAwardRecommendationDetails.award_recommendation_status,
+  opportunity: mockAwardRecommendationDetails.opportunity,
+  award_recommendation_summary: {
+    total_received_count:
+      mockAwardRecommendationDetails.award_recommendation_summary
+        ?.total_received_count ?? 0,
+  },
+};
+
+export const mockAwardRecommendationListItemNoSubmissions: AwardRecommendationListItem =
+  {
+    ...mockAwardRecommendationListItem,
+    award_recommendation_id: "no-submissions-award-rec-id",
+    award_recommendation_number: "AR-26-0003",
+    award_recommendation_summary: { total_received_count: 0 },
+  };
+
+export const mockDraftAwardRecommendationListItem: AwardRecommendationListItem =
+  {
+    ...mockAwardRecommendationListItem,
+    award_recommendation_id: "draft-award-rec-id",
+    award_recommendation_number: "AR-26-0002",
+    award_recommendation_status: "draft",
+  };
 
 export const mockAwardRecommendationSubmissions: AwardRecommendationSubmission[] =
   [
