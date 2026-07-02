@@ -5,6 +5,7 @@ import boto3
 from grants_shared.util import file_util
 
 from src.legacy_soap_api import legacy_soap_api_config as soap_api_config
+from src.legacy_soap_api.legacy_soap_api_config import GRANTOR_SOAP_ACTION_PATH
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import write_debug_data_to_s3
 from tests.lib.data_factories import create_soap_request
@@ -78,14 +79,23 @@ def test_write_debug_data_to_s3(
     response_contents = file_util.read_file(
         f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
     )
-    headers_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/headers.txt"
+    response_headers_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response_headers.txt"
+    )
+    request_headers_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request_headers.txt"
     )
     assert request_contents.replace("\n", "") == SOAP_PAYLOAD.decode().replace("\n", "")
     assert response_contents.replace("\r", "") == SOAP_LEGACY_RESPONSE_PAYLOAD.decode().replace(
         "\r", ""
     )
-    assert headers_contents.replace("\r", "") == json.dumps({"xyz": "abc"})
+    assert response_headers_contents.replace("\r", "") == json.dumps({"xyz": "abc"})
+    assert request_headers_contents.replace("\r", "") == json.dumps(
+        {
+            "X-Gg-S2S-Uri": "https://google.com/xyz",
+            "Soapaction": f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
+        }
+    )
 
 
 def test_write_debug_data_to_s3_handles_a_null_soap_request(
@@ -165,4 +175,4 @@ def test_write_debug_data_to_s3_runs_on_any_endpoint(
         create_soap_request(SOAP_PAYLOAD, operation_name="Y"), soap_legacy_response
     )
     objects = s3_client.list_objects_v2(Bucket="local-mock-draft-bucket")
-    assert len(objects.get("Contents")) == 21
+    assert len(objects.get("Contents")) == 28
