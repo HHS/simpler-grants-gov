@@ -3,7 +3,9 @@
  * Usage: import { buildPageFieldsFromDefinitions } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
  */
 
-import { buildPageFieldsFromDefinitions as buildSharedPageFieldsFromDefinitions } from "tests/e2e/utils/common/build-page-fields-from-definitions";
+import {
+  buildPageFieldsFromDefinitions as buildSharedPageFieldsFromDefinitions,
+} from "tests/e2e/utils/common/build-page-fields-from-definitions";
 import {
   type DuplicateValidationMetadata,
   type MetadataPageFieldDefinition,
@@ -64,8 +66,7 @@ export const buildPageFieldsFromDefinitions = (
 ) => buildSharedPageFieldsFromDefinitions(definitions, fillData);
 
 /** Core required fields for create-opportunity validation and duplicate checks. */
-export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
-  [
+export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
     {
       label: "Opportunity number",
       type: "text",
@@ -101,8 +102,7 @@ export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinitio
   ];
 
 /** Funding details section fields used by opportunity create/edit flows. */
-export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
-  [
+export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
     {
       label: "Funding type",
       type: "select",
@@ -170,8 +170,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
   ];
 
 /** Metadata scenarios for cross-field funding validations. */
-export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[] =
-  [
+export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[] = [
     {
       name: "award min greater than award max",
       fieldsToSet: [
