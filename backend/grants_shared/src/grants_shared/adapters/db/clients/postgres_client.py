@@ -54,7 +54,7 @@ class PostgresDBClient(DBClient):
 
     def check_db_connection(self) -> None:
         with self.get_connection() as conn:
-            conn_info = conn.connection.dbapi_connection.info  # type: ignore
+            conn_info = conn.connection.dbapi_connection.info
 
             logger.info(
                 "connected to postgres db",
