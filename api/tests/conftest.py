@@ -23,7 +23,7 @@ from sqlalchemy import select, text
 import src.app as app_entry
 import tests.src.db.models.factories as factories
 from src.adapters import search
-from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
+from grants_shared.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.adapters.search import SearchClient
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege, RoleType

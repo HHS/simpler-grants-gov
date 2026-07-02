@@ -15,9 +15,6 @@ from src.auth.auth_handler import get_auth_handler
 
 logger = logging.getLogger(__name__)
 
-# Initialize a config at startup
-_config: LoginGovConfig | None = None
-
 
 def get_login_gov_redirect_uri(
     query_data: dict, db_session: db.Session, config: LoginGovConfig | None = None

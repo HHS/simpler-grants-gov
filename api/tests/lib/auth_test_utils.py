@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import flask
 import jwt
 
-from src.adapters.oauth.oauth_client_models import OauthTokenResponse
+from grants_shared.adapters.oauth.oauth_client_models import OauthTokenResponse
 from src.auth.login_gov_jwt_auth import get_config
 
 
