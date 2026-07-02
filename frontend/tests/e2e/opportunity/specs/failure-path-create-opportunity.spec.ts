@@ -23,9 +23,9 @@ import {
   assertButtonEnabledDisabledStates,
   assertCharacterLimitMessageCount,
   assertDuplicateValidationMessages,
-  buildOverLimitOpportunityFillData,
+  buildOverLimitFillData,
   fillRequiredFieldsAndAssertButtonState,
-  getCharacterLimitedOpportunityFields,
+  getCharacterLimitedFields,
 } from "tests/e2e/utils/common/index";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
@@ -113,12 +113,11 @@ test.describe("Opportunity failure path - create opportunity", () => {
         page,
         CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
         fillData,
-        testInfo,
         {
-          buttonStatesByStep: (isAllRequiredFieldsFilled) => ({
-            "Save and continue": isAllRequiredFieldsFilled,
+          triggerButtonName: "Save and continue",
+          additionalButtonStates: {
             Cancel: true,
-          }),
+          },
         },
       );
 
@@ -130,7 +129,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
         page,
         buildPageFieldsFromDefinitions(
           CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
-          buildOverLimitOpportunityFillData(
+          buildOverLimitFillData(
             CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
             fillData,
           ),
@@ -147,7 +146,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
       await assertCharacterLimitMessageCount(
         page,
         CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
-        getCharacterLimitedOpportunityFields(
+        getCharacterLimitedFields(
           CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
         ).length,
       );

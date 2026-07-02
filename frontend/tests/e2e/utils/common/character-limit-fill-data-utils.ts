@@ -1,27 +1,35 @@
 import { expect, type Page } from "@playwright/test";
-import {
-  type OpportunityFieldValueKey,
-  type OpportunityPageFieldDefinition,
-} from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
+import { type ValidationMetadata } from "tests/e2e/utils/common/types";
+
+/** Minimum metadata needed to generate and assert character-limit failures. */
+type CharacterLimitedField<TValueKey extends string = string> = {
+  valueKey: TValueKey;
+  maxLength?: number;
+} & ValidationMetadata;
 
 /** Returns fields that define a maxLength constraint in metadata. */
-export const getCharacterLimitedOpportunityFields = (
-  definitions: OpportunityPageFieldDefinition[],
-): OpportunityPageFieldDefinition[] => {
+export const getCharacterLimitedFields = <
+  TValueKey extends string,
+  TDefinition extends CharacterLimitedField<TValueKey>,
+>(
+  definitions: TDefinition[],
+): TDefinition[] => {
   return definitions.filter((field) => typeof field.maxLength === "number");
 };
 
 /** Resolves the shared character-limit validation message from field metadata. */
-export const getCharacterLimitValidationMessage = (
-  definitions: OpportunityPageFieldDefinition[],
+export const getCharacterLimitValidationMessage = <
+  TValueKey extends string,
+  TDefinition extends CharacterLimitedField<TValueKey>,
+>(
+  definitions: TDefinition[],
 ): string => {
-  const message =
-    getCharacterLimitedOpportunityFields(definitions)[0]
-      ?.characterLimitValidationMessage;
+  const message = getCharacterLimitedFields(definitions)[0]
+    ?.characterLimitValidationMessage;
 
   if (!message) {
     throw new Error(
-      "Missing character-limit validation message in create-opportunity field metadata",
+      "Missing character-limit validation message in field metadata",
     );
   }
 
@@ -32,17 +40,21 @@ export const getCharacterLimitValidationMessage = (
  * Builds over-limit fill data by replacing each character-limited field with a
  * value that exceeds maxLength by one character.
  */
-export const buildOverLimitOpportunityFillData = (
-  definitions: OpportunityPageFieldDefinition[],
-  fillData: Record<OpportunityFieldValueKey, string>,
-): Record<OpportunityFieldValueKey, string> => {
+export const buildOverLimitFillData = <
+  TValueKey extends string,
+  TDefinition extends CharacterLimitedField<TValueKey>,
+>(
+  definitions: TDefinition[],
+  fillData: Record<TValueKey, string>,
+): Record<TValueKey, string> => {
   const overLimitFillData = { ...fillData };
   const characterLimitValidationMessage =
     getCharacterLimitValidationMessage(definitions);
+  // Keep generated values deterministic by seeding with the first message character.
   const overLimitFillCharacter =
     characterLimitValidationMessage.trim().charAt(0) || "X";
 
-  for (const field of getCharacterLimitedOpportunityFields(definitions)) {
+  for (const field of getCharacterLimitedFields(definitions)) {
     overLimitFillData[field.valueKey] = overLimitFillCharacter.repeat(
       (field.maxLength ?? 0) + 1,
     );
@@ -54,7 +66,7 @@ export const buildOverLimitOpportunityFillData = (
 /** Asserts the exact count of visible character-limit validation messages. */
 export const assertCharacterLimitMessageCount = async (
   page: Page,
-  definitions: OpportunityPageFieldDefinition[],
+  definitions: CharacterLimitedField[],
   expectedCount: number,
 ): Promise<void> => {
   const message = getCharacterLimitValidationMessage(definitions);

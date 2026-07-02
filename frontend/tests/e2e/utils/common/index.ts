@@ -22,6 +22,7 @@ export {
 export { formatNumberWithCommas };
 export { runSharedFieldFill } from "./shared-field-filling";
 export { runFieldFillBatch } from "./field-batch-filling";
+export { buildPageFieldsFromDefinitions } from "./build-page-fields-from-definitions";
 
 // Metadata-driven page utilities.
 export {
@@ -36,14 +37,16 @@ export {
   buildDuplicateDataRegexFromDefinitions,
 } from "./duplicate-data-validation-utils";
 
-// Opportunity-specific validation helpers.
+// Validation helpers (global metadata-driven assertions and fill-data builders).
 export {
   assertCharacterLimitMessageCount,
-  buildOverLimitOpportunityFillData,
+  buildOverLimitFillData,
   getCharacterLimitValidationMessage,
-  getCharacterLimitedOpportunityFields,
+  getCharacterLimitedFields,
 } from "./character-limit-fill-data-utils";
 export {
+  getRequiredFields,
+} from "./required-fields-button-state-utils";
+export {
   fillRequiredFieldsAndAssertButtonState,
-  getRequiredOpportunityFields,
 } from "./required-fields-button-state-utils";

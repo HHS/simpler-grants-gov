@@ -1,17 +1,24 @@
-import { type Page, type TestInfo } from "@playwright/test";
-import {
-  buildPageFieldsFromDefinitions,
-  type OpportunityFieldValueKey,
-  type OpportunityPageFieldDefinition,
-} from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
+import { type Page } from "@playwright/test";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 
 import { assertButtonEnabledDisabledStates } from "./button-state-assertions";
+import { buildPageFieldsFromDefinitions } from "./build-page-fields-from-definitions";
+import {
+  type FieldValue,
+  type MetadataPageFieldDefinition,
+} from "./types";
 
-/** Returns only create-opportunity fields marked as required in metadata. */
-export const getRequiredOpportunityFields = (
-  definitions: OpportunityPageFieldDefinition[],
-): OpportunityPageFieldDefinition[] => {
+/** Required-field gating expects shared metadata shape with `required` and `valueKey`. */
+type RequiredFieldDefinition<TValueKey extends string = string> =
+  MetadataPageFieldDefinition<TValueKey>;
+
+/** Returns only fields marked as required in metadata. */
+export const getRequiredFields = <
+  TValueKey extends string,
+  TDefinition extends RequiredFieldDefinition<TValueKey>,
+>(
+  definitions: TDefinition[],
+): TDefinition[] => {
   return definitions.filter((field) => field.required);
 };
 
@@ -21,23 +28,24 @@ export const getRequiredOpportunityFields = (
  * This helper supports progressive Save/Cancel gating assertions while keeping
  * field-filling logic metadata-driven.
  */
-export const fillRequiredFieldsAndAssertButtonState = async (
+export const fillRequiredFieldsAndAssertButtonState = async <
+  TValueKey extends string,
+  TDefinition extends RequiredFieldDefinition<TValueKey>,
+>(
   page: Page,
-  definitions: OpportunityPageFieldDefinition[],
-  fillData: Record<OpportunityFieldValueKey, string>,
-  testInfo: TestInfo | undefined,
+  definitions: TDefinition[],
+  fillData: Record<TValueKey, FieldValue>,
   options: {
-    overridesByValueKey?: Partial<Record<OpportunityFieldValueKey, string>>;
-    buttonStatesByStep: (
-      isAllRequiredFieldsFilled: boolean,
-    ) => Record<string, boolean>;
+    triggerButtonName: string;
+    overridesByValueKey?: Partial<Record<TValueKey, FieldValue>>;
+    additionalButtonStates?: Record<string, boolean>;
   },
 ): Promise<void> => {
-  const requiredFields = getRequiredOpportunityFields(definitions);
+  const requiredFields = getRequiredFields(definitions);
   const mergedFillData = {
     ...fillData,
     ...(options.overridesByValueKey ?? {}),
-  } as Record<OpportunityFieldValueKey, string>;
+  } as Record<TValueKey, FieldValue>;
 
   // Fill one required field per step and validate expected button states.
   for (let i = 0; i < requiredFields.length; i++) {
@@ -46,9 +54,11 @@ export const fillRequiredFieldsAndAssertButtonState = async (
       buildPageFieldsFromDefinitions([requiredFields[i]], mergedFillData),
     );
 
+    // Trigger button stays disabled until the final required field is filled.
     const isAllRequiredFieldsFilled = i === requiredFields.length - 1;
     await assertButtonEnabledDisabledStates(page, {
-      ...options.buttonStatesByStep(isAllRequiredFieldsFilled),
+      [options.triggerButtonName]: isAllRequiredFieldsFilled,
+      ...(options.additionalButtonStates ?? {}),
     });
   }
 };

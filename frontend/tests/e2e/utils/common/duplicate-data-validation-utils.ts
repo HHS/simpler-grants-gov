@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { type DuplicateValidationMetadata } from "tests/e2e/utils/common/types";
 
 /**
  * Builds a case-insensitive duplicate-validation regex by injecting an escaped value
@@ -40,8 +41,7 @@ export const buildDuplicateDataRegexFromDefinitions = <
 /** Metadata contract for fields that can emit duplicate-validation messages. */
 export type DuplicateValidationField = {
   valueKey: string;
-  duplicateValidationPattern?: string;
-};
+} & DuplicateValidationMetadata;
 
 /** Builds a duplicate-validation regex for a single field keyed by valueKey. */
 export const buildDuplicateDataRegexForField = (

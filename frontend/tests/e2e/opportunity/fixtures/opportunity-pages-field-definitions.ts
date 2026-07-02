@@ -3,8 +3,12 @@
  * Usage: import { buildPageFieldsFromDefinitions } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
  */
 
-import { type FieldType } from "tests/e2e/utils/common/types";
-import { type PageFillField } from "tests/e2e/utils/pages/general-pages-filling";
+import { buildPageFieldsFromDefinitions as buildSharedPageFieldsFromDefinitions } from "tests/e2e/utils/common/build-page-fields-from-definitions";
+import {
+  type DuplicateValidationMetadata,
+  type MetadataPageFieldDefinition,
+  type ValidationMetadata,
+} from "tests/e2e/utils/common/types";
 
 /** Keys supported by the create-opportunity fill-data object. */
 export type OpportunityFieldValueKey =
@@ -35,26 +39,9 @@ export type OpportunityFieldValueKey =
   | "emailDisplayText";
 
 /** Metadata describing how a single UI field should be filled and validated. */
-export type OpportunityPageFieldDefinition = {
-  label: string;
-  type: FieldType;
-  valueKey: OpportunityFieldValueKey;
-  selector?: string;
-  selectFirstInGroup?: boolean;
-  testId?: string;
-  getByText?: string;
-  textExact?: boolean;
-  useDataAsText?: boolean;
-  hasTextRegex?: string;
-  required?: boolean;
-  requiredFieldMessage?: string;
-  emailValidationMessage?: string;
-  negativeNumberValidationMessage?: string;
-  maxLength?: number;
-  characterLimitValidationMessage?: string;
-  duplicateValidationPattern?: string;
-  exact?: boolean;
-};
+export type OpportunityPageFieldDefinition = MetadataPageFieldDefinition<OpportunityFieldValueKey> &
+  ValidationMetadata &
+  DuplicateValidationMetadata;
 
 export type CrossFieldValidationDefinition = {
   name: string;
@@ -73,22 +60,8 @@ export type CrossFieldValidationDefinition = {
 export const buildPageFieldsFromDefinitions = (
   definitions: OpportunityPageFieldDefinition[],
   fillData: Record<OpportunityFieldValueKey, string>,
-): PageFillField[] => {
-  return definitions.map((definition) => ({
-    field: definition.label,
-    type: definition.type,
-    value: fillData[definition.valueKey],
-    label: definition.label,
-    labelExact: definition.exact,
-    selector: definition.selector,
-    selectFirstInGroup: definition.selectFirstInGroup,
-    testId: definition.testId,
-    getByText: definition.getByText,
-    textExact: definition.textExact,
-    useDataAsText: definition.useDataAsText,
-    hasTextRegex: definition.hasTextRegex,
-  }));
-};
+  // Preserve legacy import path while delegating to the global builder.
+) => buildSharedPageFieldsFromDefinitions(definitions, fillData);
 
 /** Core required fields for create-opportunity validation and duplicate checks. */
 export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
