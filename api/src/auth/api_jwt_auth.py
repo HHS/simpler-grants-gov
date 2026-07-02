@@ -18,10 +18,6 @@ api_jwt_auth = JwtUserHttpTokenAuth(
 )
 
 
-# Initialize a config at startup that we'll use below
-_config: ApiJwtConfig | None = None
-
-
 def create_jwt_for_user(
     user: BaseUser,
     db_session: db.Session,

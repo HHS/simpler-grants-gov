@@ -2,9 +2,9 @@ import json
 
 import requests
 
-from src.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
-from src.adapters.oauth.oauth_client_models import OauthTokenRequest
-from src.auth.login_gov_jwt_auth import LoginGovConfig
+from grants_shared.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
+from grants_shared.adapters.oauth.oauth_client_models import OauthTokenRequest
+from grants_sharred.auth.login_gov_jwt_auth import LoginGovConfig
 
 
 def mock_response(monkeypatch, mocked_response: dict):
