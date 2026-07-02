@@ -4,6 +4,7 @@ from collections.abc import Sequence
 import grants_shared.adapters.db as db
 from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams
 from grants_shared.pagination.paginator import Paginator
+from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -15,7 +16,6 @@ from src.db.models.competition_models import ApplicationAudit, ApplicationForm
 from src.db.models.user_models import User
 from src.search.search_models import StrSearchFilter
 from src.services.applications.get_application import get_application
-from src.services.service_utils import apply_sorting
 
 
 class ApplicationAuditFilters(BaseModel):
@@ -77,7 +77,7 @@ def list_application_audit(
         )
     )
     stmt = apply_filters(stmt, params.filters)
-    stmt = apply_sorting(stmt, ApplicationAudit, params.pagination.sort_order)
+    stmt = apply_sorting(stmt, params.pagination.sort_order, ApplicationAudit)
 
     # Paginate the results
     paginator: Paginator[ApplicationAudit] = Paginator(

@@ -6,6 +6,7 @@ from typing import Any
 import grants_shared.adapters.db as db
 from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
 from grants_shared.pagination.paginator import Paginator
+from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel, Field
 from sqlalchemy import Select, func, select
 from sqlalchemy.orm import selectinload
@@ -22,7 +23,6 @@ from src.db.models.opportunity_models import (
 from src.db.models.user_models import AgencyUser, AgencyUserRole, LinkRolePrivilege, Role, User
 from src.search.search_models import BoolSearchFilter
 from src.services.opportunities_grantor_v1.get_agency import get_agency
-from src.services.service_utils import apply_sorting
 
 
 class OpportunityListFilterParams(BaseModel):
@@ -162,7 +162,7 @@ def _paginate_opportunity_stmt(
 ) -> tuple[Sequence[OpportunityListItem], PaginationInfo]:
     """Apply filters, sorting, submitted application counts, and pagination."""
     stmt = _apply_opportunity_filters(stmt, params)
-    stmt = apply_sorting(stmt, Opportunity, params.pagination.sort_order)
+    stmt = apply_sorting(stmt, params.pagination.sort_order, Opportunity)
 
     paginator: Paginator[Opportunity] = Paginator(
         table_model=Opportunity,
