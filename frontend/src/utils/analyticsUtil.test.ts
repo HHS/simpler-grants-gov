@@ -13,6 +13,13 @@ declare global {
   }
 }
 
+type WindowWithNewRelic = Window & { newrelic?: NewRelicBrowser };
+
+const deleteNewRelic = () => {
+  const win = window as WindowWithNewRelic;
+  delete win.newrelic;
+};
+
 describe("analyticsUtil", () => {
   let consoleErrorSpy: jest.SpyInstance;
 
@@ -20,7 +27,7 @@ describe("analyticsUtil", () => {
     consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
     // Clean up the mock newrelic object
     if (window.newrelic) {
-      delete window.newrelic;
+      deleteNewRelic();
     }
   });
 
@@ -32,7 +39,7 @@ describe("analyticsUtil", () => {
 
   describe("waitForNewRelic", () => {
     it("returns true immediately if newrelic is already present", async () => {
-      const mockNewRelic: NewRelicBrowser = { setCustomAttribute: jest.fn() };
+      const mockNewRelic = { setCustomAttribute: jest.fn() } as unknown as Window["newrelic"];
       window.newrelic = mockNewRelic;
 
       const result = await waitForNewRelic();
@@ -45,7 +52,8 @@ describe("analyticsUtil", () => {
 
       // Simulate newrelic becoming available after a few ticks
       setTimeout(() => {
-        window.newrelic = { setCustomAttribute: jest.fn() };
+        window.newrelic =
+          ({ setCustomAttribute: jest.fn() } as unknown) as Window["newrelic"];
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -74,9 +82,9 @@ describe("analyticsUtil", () => {
   describe("setNewRelicCustomAttribute", () => {
     it("sets a custom attribute when newrelic is available", () => {
       const mockSetCustomAttribute = jest.fn();
-      window.newrelic = {
-        setCustomAttribute: mockSetCustomAttribute,
-      };
+      window.newrelic =
+        ({ setCustomAttribute: mockSetCustomAttribute } as unknown) as
+          Window["newrelic"];
 
       setNewRelicCustomAttribute("test_key", "test_value");
 
@@ -88,9 +96,9 @@ describe("analyticsUtil", () => {
 
     it("sets a numeric custom attribute when newrelic is available", () => {
       const mockSetCustomAttribute = jest.fn();
-      window.newrelic = {
-        setCustomAttribute: mockSetCustomAttribute,
-      };
+      window.newrelic =
+        ({ setCustomAttribute: mockSetCustomAttribute } as unknown) as
+          Window["newrelic"];
 
       setNewRelicCustomAttribute("test_key", 42);
 
@@ -103,7 +111,7 @@ describe("analyticsUtil", () => {
     it("logs error and returns undefined when newrelic is not available", () => {
       // Ensure newrelic is not defined
       if (window.newrelic) {
-        delete window.newrelic;
+        deleteNewRelic();
       }
 
       const result = setNewRelicCustomAttribute("test_key", "test_value");
@@ -118,9 +126,9 @@ describe("analyticsUtil", () => {
   describe("setNewRelicCorrelationIdAttribute", () => {
     it("sets correlation_id attribute when newrelic is available", () => {
       const mockSetCustomAttribute = jest.fn();
-      window.newrelic = {
-        setCustomAttribute: mockSetCustomAttribute,
-      };
+      window.newrelic =
+        ({ setCustomAttribute: mockSetCustomAttribute } as unknown) as
+          Window["newrelic"];
 
       const correlationId = "test-correlation-id-123";
       setNewRelicCorrelationIdAttribute(correlationId);
@@ -133,7 +141,7 @@ describe("analyticsUtil", () => {
 
     it("logs error and returns undefined when newrelic is not available", () => {
       if (window.newrelic) {
-        delete window.newrelic;
+        deleteNewRelic();
       }
 
       const result = setNewRelicCorrelationIdAttribute("test-correlation-id");
@@ -148,9 +156,9 @@ describe("analyticsUtil", () => {
   describe("unsetAllNewRelicQueryAttributes", () => {
     it("unsets all query attributes and query_length", () => {
       const mockSetCustomAttribute = jest.fn();
-      window.newrelic = {
-        setCustomAttribute: mockSetCustomAttribute,
-      };
+      window.newrelic =
+        ({ setCustomAttribute: mockSetCustomAttribute } as unknown) as
+          Window["newrelic"];
 
       unsetAllNewRelicQueryAttributes();
 
@@ -176,7 +184,7 @@ describe("analyticsUtil", () => {
 
     it("handles when newrelic is not available", () => {
       if (window.newrelic) {
-        delete window.newrelic;
+        deleteNewRelic();
       }
 
       // Should not throw an error
