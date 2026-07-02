@@ -29,7 +29,6 @@ locals {
   log_group_name          = "service/${var.service_name}"
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
-  fluent_bit_repo_arn     = "arn:aws:ecr:us-east-1:${data.aws_caller_identity.current.account_id}:repository/simpler-grants-gov-fluentbit"
   image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 
