@@ -85,17 +85,6 @@ data "aws_iam_policy_document" "task_executor" {
     }
   }
 
-  # Allow ECS to download images for fluentbit
-  statement {
-    sid = "ECRPullAccessFluentbit"
-    actions = [
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:BatchGetImage",
-      "ecr:GetDownloadUrlForLayer",
-    ]
-    resources = [local.fluent_bit_repo_arn]
-  }
-
   # Allow ECS to download images for GuardDuty agent
   statement {
     sid = "ECRPullAccessGuardDuty"
