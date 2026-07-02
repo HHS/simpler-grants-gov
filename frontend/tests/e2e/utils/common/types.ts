@@ -58,6 +58,36 @@ export interface FillFieldDefinition {
   selectFirstInGroup?: boolean;
 }
 
+/** Primitive value types supported by metadata-driven field filling. */
+export type FieldValue = string | boolean;
+
+/**
+ * Domain-level metadata shape used by shared page-fill builders.
+ * Omits runtime-only props and adds required/value-key semantics.
+ */
+export type MetadataPageFieldDefinition<TValueKey extends string = string> = Omit<
+  FillFieldDefinition,
+  "field" | "label" | "labelExact"
+> & {
+  label: string;
+  valueKey: TValueKey;
+  exact?: boolean;
+  required?: boolean;
+};
+
+/** Validation messages commonly reused across feature metadata definitions. */
+export type ValidationMetadata = {
+  requiredFieldMessage?: string;
+  emailValidationMessage?: string;
+  negativeNumberValidationMessage?: string;
+  characterLimitValidationMessage?: string;
+};
+
+/** Optional duplicate-check pattern for metadata-driven uniqueness assertions. */
+export type DuplicateValidationMetadata = {
+  duplicateValidationPattern?: string;
+};
+
 export type FormFillFieldDefinitions = {
   [fieldIdentifier: string]: FillFieldDefinition;
 };
