@@ -18,7 +18,7 @@ import {
 import { SF424B_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424b-field-definitions";
 import { sf424BHappyPathTestData } from "tests/e2e/apply/fixtures/sf424b-fill-data";
 import { SFLLL_TEST_DATA } from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
-import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sfLLL-fill-data";
+import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sfLLL-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
