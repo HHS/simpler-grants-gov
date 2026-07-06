@@ -7,7 +7,6 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 

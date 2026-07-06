@@ -9,7 +9,6 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
@@ -216,9 +215,7 @@ class TestGGLobbyingFormXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def gg_lobbying_form_application(
-        self, enable_factory_create, seed_form_registry
-    ):
+    def gg_lobbying_form_application(self, enable_factory_create, seed_form_registry):
         """Create an application with GG_LobbyingForm form and realistic data."""
         agency = AgencyFactory.create()
 

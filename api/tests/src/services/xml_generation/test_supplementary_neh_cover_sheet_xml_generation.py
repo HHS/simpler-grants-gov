@@ -3,7 +3,6 @@
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
@@ -496,9 +495,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def neh_cover_sheet_application(
-        self, enable_factory_create, seed_form_registry
-    ):
+    def neh_cover_sheet_application(self, enable_factory_create, seed_form_registry):
         """Create an application with NEH Cover Sheet form and realistic data."""
         agency = AgencyFactory.create()
 

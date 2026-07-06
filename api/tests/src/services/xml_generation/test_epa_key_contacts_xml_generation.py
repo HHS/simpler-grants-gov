@@ -9,7 +9,6 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
@@ -442,9 +441,7 @@ class TestEPAKeyContactsXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def epa_key_contacts_application(
-        self, enable_factory_create, seed_form_registry
-    ):
+    def epa_key_contacts_application(self, enable_factory_create, seed_form_registry):
         """Create an application with EPA Key Contacts form and realistic data."""
         agency = AgencyFactory.create()
 

@@ -9,7 +9,6 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
@@ -317,9 +316,7 @@ class TestCD511XSDValidation:
 
         return application
 
-    def test_cd511_submission_xml_validates_against_xsd(
-        self, cd511_application, xsd_validator
-    ):
+    def test_cd511_submission_xml_validates_against_xsd(self, cd511_application, xsd_validator):
         """Test that complete CD511 submission XML validates against XSD schema."""
         # Create application submission
         application_submission = ApplicationSubmissionFactory.create(

@@ -95,8 +95,12 @@ def test_put_competition_forms_remove_missing(
     add_manage_competition_privilege(db_session, internal_admin_user)
     competition = factories.CompetitionFactory.create(competition_forms=[])
 
-    factories.CompetitionFormFactory.create(competition=competition, form=SF424_v4_0, is_required=True)
-    factories.CompetitionFormFactory.create(competition=competition, form=SF424a_v1_0, is_required=True)
+    factories.CompetitionFormFactory.create(
+        competition=competition, form=SF424_v4_0, is_required=True
+    )
+    factories.CompetitionFormFactory.create(
+        competition=competition, form=SF424a_v1_0, is_required=True
+    )
 
     payload = {
         "forms": [

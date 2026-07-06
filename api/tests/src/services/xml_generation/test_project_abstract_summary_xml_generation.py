@@ -9,7 +9,6 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSu
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
@@ -238,9 +237,7 @@ class TestProjectAbstractSummaryXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def project_abstract_summary_application(
-        self, enable_factory_create, seed_form_registry
-    ):
+    def project_abstract_summary_application(self, enable_factory_create, seed_form_registry):
         """Create an application with Project Abstract Summary form and realistic data."""
         agency = AgencyFactory.create()
 

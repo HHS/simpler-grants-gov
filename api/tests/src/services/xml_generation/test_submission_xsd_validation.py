@@ -6,7 +6,6 @@ using SubmissionXMLAssembler, and validate the output against XSD schemas.
 
 from datetime import date
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
@@ -218,9 +217,7 @@ class TestSubmissionXSDValidation:
 
         return application
 
-    def test_sf424_submission_xml_validates_against_xsd(
-        self, sf424_application, xsd_validator
-    ):
+    def test_sf424_submission_xml_validates_against_xsd(self, sf424_application, xsd_validator):
         """Test that complete SF-424 submission XML validates against XSD schema."""
         # Create application submission
         application_submission = ApplicationSubmissionFactory.create(
@@ -266,9 +263,7 @@ class TestSubmissionXSDValidation:
         )
 
     @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
-    def test_sf424a_submission_xml_validates_against_xsd(
-        self, sf424a_application, xsd_validator
-    ):
+    def test_sf424a_submission_xml_validates_against_xsd(self, sf424a_application, xsd_validator):
         """Test that complete SF-424A submission XML validates against XSD schema."""
         # Create application submission
         application_submission = ApplicationSubmissionFactory.create(

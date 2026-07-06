@@ -9,7 +9,6 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
@@ -445,9 +444,7 @@ class TestSF424BXSDValidation:
 
         return application
 
-    def test_sf424b_submission_xml_validates_against_xsd(
-        self, sf424b_application, xsd_validator
-    ):
+    def test_sf424b_submission_xml_validates_against_xsd(self, sf424b_application, xsd_validator):
         """Test that complete SF-424B submission XML validates against XSD schema."""
         # Create application submission
         application_submission = ApplicationSubmissionFactory.create(

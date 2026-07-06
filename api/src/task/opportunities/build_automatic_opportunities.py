@@ -22,12 +22,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityStatus,
 )
-from src.db.models.competition_models import (
-    Competition,
-    CompetitionForm,
-    CompetitionInstruction,
-)
-from src.form_schema.forms import get_active_forms
+from src.db.models.competition_models import Competition, CompetitionForm, CompetitionInstruction
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -52,6 +47,7 @@ from src.form_schema.forms import (
     SF424d_v1_1,
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
+    get_active_forms,
 )
 from src.services.opportunity_attachments.attachment_util import get_s3_attachment_path
 from src.task.task import Task
