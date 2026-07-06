@@ -91,10 +91,9 @@ export const SFLLL_OPPORTUNITY_DATA: PrintViewFormData = {
   opportunityNumber: "E2E-SFLLL-ORG-IND-01",
   formKey: "sfLLL",
   expectedPrepopulatedFields: {
-    // Section 7 - Federal Program Name / Assistance Listing
-    federalInfo_assistanceListingNumber: "10.960",
-    federalInfo_agencyName: "Simpler Grants.gov",
-    federalInfo_name: "Technical Agricultural Assistance",
+    // Section 7 - Federal Program Name / Assistance Listing (testIds must match form)
+    assistance_listing_number: "10.960",
+    federal_program_name: "Technical Agricultural Assistance",
   },
   buildTestData: buildSFLLLHappyPathTestData,
 };
