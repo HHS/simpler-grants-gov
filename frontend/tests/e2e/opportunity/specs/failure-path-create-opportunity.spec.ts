@@ -111,7 +111,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
       // And "Save and continue" button should be disabled, "Cancel" button should remain enabled
       await assertButtonEnabledDisabledStates(page, {
         "Save and continue": false,
-        "Cancel": true,
+        Cancel: true,
       });
 
       // Shard 3: validate progressive required-field gating.
@@ -126,7 +126,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
         {
           triggerButtonName: "Save and continue",
           additionalButtonStates: {
-          "Cancel": true,
+            Cancel: true,
           },
         },
       );
@@ -163,7 +163,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
       // And "Save and continue" button should be enabled, "Cancel" button should remain enabled
       await assertButtonEnabledDisabledStates(page, {
         "Save and continue": true,
-        "Cancel": true,
+        Cancel: true,
       });
     },
   );
