@@ -2,6 +2,12 @@
  * @feature Opportunity - failure path create opportunity
  * @featureFile e2e/opportunity/features/failure-path-create-opportunity.feature
  * @scenario Validate duplicate data, required fields, and character limits on create opportunity
+ *
+ * Shards covered in this spec:
+ * - Shard 1: seed a baseline opportunity.
+ * - Shard 2: validate duplicate-data errors in a second create flow.
+ * - Shard 3: validate required-field gating for Save and continue.
+ * - Shard 4: validate character-limit errors with over-limit metadata.
  */
 
 import {
@@ -33,6 +39,7 @@ import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
 
+/** Resets create-opportunity state by canceling and reopening a fresh create page. */
 const openFreshCreateOpportunityForm = async (page: Page): Promise<void> => {
   await page.getByRole("button", { name: "Cancel" }).click();
   await expect(page).toHaveURL(/\/grantor\/opportunities/);
@@ -70,9 +77,11 @@ test.describe("Opportunity failure path - create opportunity", () => {
       const fillData = buildOpportunityHappyPathFillData(new Date());
 
       //------------------------Test steps start-----------------
+      // Shard 1: create a baseline opportunity for downstream negative checks.
       // Given I create a new opportunity.
       await createOpportunity(page, fillData);
 
+      // Shard 2: rerun create flow with the same values and assert duplicate behavior.
       // When I start a second create flow with duplicate values.
       await page.goto("/grantor/opportunities");
       await expect(page).toHaveURL(/\/grantor\/opportunities/);
@@ -105,6 +114,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
         Cancel: true,
       });
 
+      // Shard 3: validate progressive required-field gating.
       // When I reset to a fresh create form via UI.
       await openFreshCreateOpportunityForm(page);
 
@@ -121,6 +131,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
         },
       );
 
+      // Shard 4: validate character-limit errors with generated over-limit values.
       // When I reset to a fresh create form via UI.
       await openFreshCreateOpportunityForm(page);
 

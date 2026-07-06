@@ -1,6 +1,11 @@
 /**
- * Opportunity field definitions and page-field mapping for happy-path filling.
+ * Opportunity metadata definitions and page-field mapping helpers.
  * Usage: import { buildPageFieldsFromDefinitions } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
+ *
+ * Shards in this fixture:
+ * - Shard 1: shared type contracts for opportunity value keys and metadata.
+ * - Shard 2: legacy-path adapter for shared page-field builder.
+ * - Remaining shards: section-level metadata groups for create/edit validation and filling.
  */
 
 import { buildPageFieldsFromDefinitions as buildSharedPageFieldsFromDefinitions } from "tests/e2e/utils/common/build-page-fields-from-definitions";
@@ -44,6 +49,7 @@ export type OpportunityPageFieldDefinition =
     ValidationMetadata &
     DuplicateValidationMetadata;
 
+/** Cross-field validation scenarios used by funding relationship checks. */
 export type CrossFieldValidationDefinition = {
   name: string;
   fieldsToSet: Array<{
@@ -64,7 +70,7 @@ export const buildPageFieldsFromDefinitions = (
   // Preserve legacy import path while delegating to the global builder.
 ) => buildSharedPageFieldsFromDefinitions(definitions, fillData);
 
-/** Core required fields for create-opportunity validation and duplicate checks. */
+/** Shard 3: required create-opportunity fields with duplicate and max-length metadata. */
 export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
   [
     {
@@ -101,7 +107,7 @@ export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinitio
     },
   ];
 
-/** Funding details section fields used by opportunity create/edit flows. */
+/** Shard 4: funding details fields used by create/edit flows. */
 export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
   [
     {
@@ -170,7 +176,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
     },
   ];
 
-/** Metadata scenarios for cross-field funding validations. */
+/** Shard 5: cross-field funding validation scenarios. */
 export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[] =
   [
     {
@@ -233,7 +239,7 @@ export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[
     },
   ];
 
-/** Eligibility section checkbox definitions for supported applicant categories. */
+/** Shard 6: eligibility checkbox definitions for applicant categories. */
 export const ELIGIBILITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
   {
     label: "Eligible applicants",
@@ -276,7 +282,7 @@ export const ELIGIBILITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
   },
 ];
 
-/** Additional information section fields, including contact and link metadata. */
+/** Shard 7: optional additional-info/contact fields with length/email metadata. */
 export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
   [
     {
