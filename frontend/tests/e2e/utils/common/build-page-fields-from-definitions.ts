@@ -2,6 +2,15 @@ import { type PageFillField } from "tests/e2e/utils/pages/general-pages-filling"
 
 import { type FieldValue, type MetadataPageFieldDefinition } from "./types";
 
+/**
+ * Shared mapper from metadata definitions to runtime page-fill fields.
+ *
+ * How this file works:
+ * - Accepts metadata definitions (labels, selectors, types, dependencies).
+ * - Reads runtime values from the keyed fill-data object.
+ * - Produces PageFillField records consumed by shared fill helpers.
+ */
+
 /** Builds page-fill fields from metadata definitions and a value dictionary. */
 export const buildPageFieldsFromDefinitions = <TValueKey extends string>(
   definitions: MetadataPageFieldDefinition<TValueKey>[],
@@ -9,6 +18,7 @@ export const buildPageFieldsFromDefinitions = <TValueKey extends string>(
 ): PageFillField[] => {
   // Keep metadata-to-runtime mapping in one place so domain fixtures stay declarative.
   return definitions.map((definition) => ({
+    // Field identity and value resolution.
     field: definition.label,
     type: definition.type,
     value: fillData[definition.valueKey],

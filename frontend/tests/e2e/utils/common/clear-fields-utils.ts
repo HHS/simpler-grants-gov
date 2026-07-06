@@ -4,6 +4,15 @@ import {
   type PageFillField,
 } from "tests/e2e/utils/pages/general-pages-filling";
 
+/**
+ * Shared utilities for clearing metadata-driven page fields.
+ *
+ * How this file works:
+ * - Derive unique value keys from field metadata definitions.
+ * - Build an empty fill-data object keyed by those value keys.
+ * - Reuse page-field builders + shared fill routine to clear fields on the page.
+ */
+
 type DefinitionWithValueKey = {
   valueKey: string;
 };
@@ -20,10 +29,12 @@ export const buildEmptyFillDataFromDefinitions = <
 >(
   definitions: TDefinition[],
 ): StringByKey => {
+  // One empty value is needed per unique valueKey, even if multiple fields share a key.
   const uniqueValueKeys = Array.from(
     new Set(definitions.map((definition) => definition.valueKey)),
   );
 
+  // Build a reusable empty fill-data map consumed by metadata-driven field builders.
   return uniqueValueKeys.reduce<StringByKey>((fillData, valueKey) => {
     fillData[valueKey] = "";
     return fillData;
@@ -45,9 +56,11 @@ export const clearPageFieldsFromDefinitions = async <
     fillData: TFillData,
   ) => PageFillField[],
 ) => {
+  // Convert metadata definitions into an empty fill-data payload for clearing.
   const emptyFillData = buildEmptyFillDataFromDefinitions(
     definitions,
   ) as TFillData;
 
+  // Reuse existing fill pipeline so clear behavior stays consistent with normal filling.
   await fillPageFields(page, buildPageFields(definitions, emptyFillData));
 };

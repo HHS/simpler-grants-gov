@@ -1,7 +1,10 @@
 /**
- * Shared contracts for E2E field definitions, handlers, and form fill config.
- * Usage: import { FormFillFieldDefinitions } from "tests/e2e/utils/common/types";
- * Usage: import { type FillFormConfig } from "tests/e2e/utils/common/types";
+ * Shared E2E type contracts used across metadata fixtures and common helpers.
+ *
+ * Sections in this file:
+ * - Field interaction types used by page-fill handlers.
+ * - Metadata types used by feature field-definition fixtures.
+ * - Form/page config types used by reusable fill utilities.
  */
 
 import { Page } from "@playwright/test";
@@ -58,7 +61,7 @@ export interface FillFieldDefinition {
   selectFirstInGroup?: boolean;
 }
 
-/** Primitive value types supported by metadata-driven field filling. */
+/** Value primitives accepted by metadata-driven fill helpers. */
 export type FieldValue = string | boolean;
 
 /**
@@ -86,10 +89,12 @@ export type DuplicateValidationMetadata = {
   duplicateValidationPattern?: string;
 };
 
+/** Map of logical field identifiers to their runtime fill definitions. */
 export type FormFillFieldDefinitions = {
   [fieldIdentifier: string]: FillFieldDefinition;
 };
 
+/** Shared config contract for form-level fill/save helper utilities. */
 export interface FillFormConfig {
   formName: string | RegExp;
   fields: FormFillFieldDefinitions;

@@ -1,3 +1,11 @@
+/**
+ * Shared helper utilities for required-field gating checks.
+ *
+ * How this file works:
+ * - Extract required fields from metadata definitions.
+ * - Fill required fields incrementally.
+ * - Assert trigger/additional button states after each fill step.
+ */
 import { type Page } from "@playwright/test";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 
@@ -38,13 +46,16 @@ export const fillRequiredFieldsAndAssertButtonState = async <
     additionalButtonStates?: Record<string, boolean>;
   },
 ): Promise<void> => {
+  // Shared required-field subset used for progressive gating assertions.
   const requiredFields = getRequiredFields(definitions);
+
+  // Allows test-specific overrides without mutating the base fixture fill data.
   const mergedFillData = {
     ...fillData,
     ...(options.overridesByValueKey ?? {}),
   };
 
-  // Fill one required field per step and validate expected button states.
+  // Fill one required field per step to model real user progression.
   for (let i = 0; i < requiredFields.length; i++) {
     await fillPageFields(
       page,
@@ -52,6 +63,7 @@ export const fillRequiredFieldsAndAssertButtonState = async <
     );
 
     // Trigger button stays disabled until the final required field is filled.
+    // Additional button states are asserted on every step for full gating coverage.
     const isAllRequiredFieldsFilled = i === requiredFields.length - 1;
     await assertButtonEnabledDisabledStates(page, {
       [options.triggerButtonName]: isAllRequiredFieldsFilled,

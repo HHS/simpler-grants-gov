@@ -1,6 +1,16 @@
 import { expect, type Page } from "@playwright/test";
 import { type ValidationMetadata } from "tests/e2e/utils/common/types";
 
+/**
+ * Shared helpers for metadata-driven character-limit validation.
+ *
+ * How this file works:
+ * - Select fields that define maxLength in metadata.
+ * - Resolve the shared character-limit validation message.
+ * - Build deterministic over-limit fill data for those fields.
+ * - Assert expected counts of visible character-limit messages.
+ */
+
 /** Minimum metadata needed to generate and assert character-limit failures. */
 type CharacterLimitedField<TValueKey extends string = string> = {
   valueKey: TValueKey;
@@ -14,6 +24,7 @@ export const getCharacterLimitedFields = <
 >(
   definitions: TDefinition[],
 ): TDefinition[] => {
+  // A field participates only when maxLength is explicitly numeric.
   return definitions.filter((field) => typeof field.maxLength === "number");
 };
 
@@ -24,6 +35,7 @@ export const getCharacterLimitValidationMessage = <
 >(
   definitions: TDefinition[],
 ): string => {
+  // Reuse the first character-limited field as the canonical message source.
   const message =
     getCharacterLimitedFields(definitions)[0]?.characterLimitValidationMessage;
 
@@ -47,6 +59,7 @@ export const buildOverLimitFillData = <
   definitions: TDefinition[],
   fillData: Record<TValueKey, string>,
 ): Record<TValueKey, string> => {
+  // Start from baseline fill data and override only character-limited fields.
   const overLimitFillData = { ...fillData };
   const characterLimitValidationMessage =
     getCharacterLimitValidationMessage(definitions);
@@ -54,6 +67,7 @@ export const buildOverLimitFillData = <
   const overLimitFillCharacter =
     characterLimitValidationMessage.trim().charAt(0) || "X";
 
+  // For each constrained field, generate a value that is exactly one char over maxLength.
   for (const field of getCharacterLimitedFields(definitions)) {
     overLimitFillData[field.valueKey] = overLimitFillCharacter.repeat(
       (field.maxLength ?? 0) + 1,
@@ -69,6 +83,7 @@ export const assertCharacterLimitMessageCount = async (
   definitions: CharacterLimitedField[],
   expectedCount: number,
 ): Promise<void> => {
+  // Assert total visible occurrences of the shared character-limit message.
   const message = getCharacterLimitValidationMessage(definitions);
   await expect(page.getByText(message, { exact: true })).toHaveCount(
     expectedCount,

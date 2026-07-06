@@ -1,7 +1,15 @@
 import { expect, type Page } from "@playwright/test";
 import { type DuplicateValidationMetadata } from "tests/e2e/utils/common/types";
+import { escapeRegex } from "tests/e2e/utils/common/regex-utils";
 
 /**
+ * Shared helpers for duplicate-data validation.
+ *
+ * How this file works:
+ * - Build duplicate-message regexes from metadata patterns and runtime values.
+ * - Resolve one or many field-level duplicate regex expectations.
+ * - Assert duplicate validation messages are visible on the page.
+ *
  * Builds a case-insensitive duplicate-validation regex by injecting an escaped value
  * into a metadata-provided pattern.
  */
@@ -10,11 +18,16 @@ export const buildDuplicateDataRegex = (
   value: string,
   placeholder = "{{value}}",
 ): RegExp => {
-  const escapedValue = value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // Escape user/test data so regex special characters are treated as literal input.
+  const escapedValue = escapeRegex(value);
 
   return new RegExp(duplicatePattern.replace(placeholder, escapedValue), "i");
 };
 
+/**
+ * Resolves a field definition by value key, reads its duplicate-pattern metadata,
+ * and builds the expected duplicate-validation regex.
+ */
 export const buildDuplicateDataRegexFromDefinitions = <
   T extends { valueKey: string },
 >(
@@ -24,6 +37,7 @@ export const buildDuplicateDataRegexFromDefinitions = <
   getPattern: (definition: T) => string | undefined,
   placeholder = "{{value}}",
 ): RegExp => {
+  // Resolve the metadata definition for the requested value key.
   const definition = definitions.find(
     (currentDefinition) => currentDefinition.valueKey === valueKey,
   );
@@ -49,6 +63,7 @@ export const buildDuplicateDataRegexForField = (
   valueKey: string,
   value: string,
 ): RegExp => {
+  // Resolve one duplicate-enabled field definition by key.
   const definition = definitions.find(
     (currentDefinition) => currentDefinition.valueKey === valueKey,
   );
@@ -70,6 +85,7 @@ export const buildDuplicateDataRegexesForDefinitions = <
   definitions: T[],
   valuesByKey: Record<string, string>,
 ): RegExp[] => {
+  // Only fields with duplicate patterns participate in duplicate-message assertions.
   const duplicateValidationDefinitions = definitions.filter(
     (definition) => !!definition.duplicateValidationPattern,
   );
@@ -80,6 +96,7 @@ export const buildDuplicateDataRegexesForDefinitions = <
     );
   }
 
+  // Build one regex per duplicate-enabled field using its mapped runtime value.
   return duplicateValidationDefinitions.map((definition) => {
     const value = valuesByKey[definition.valueKey];
 
@@ -104,11 +121,13 @@ export const assertDuplicateValidationMessages = async <
   definitions: T[],
   valuesByKey: Record<string, string>,
 ): Promise<void> => {
+  // Build all expected duplicate-message regexes from metadata + values.
   const duplicateValidationRegexes = buildDuplicateDataRegexesForDefinitions(
     definitions,
     valuesByKey,
   );
 
+  // Assert every expected duplicate message is visible to confirm validation coverage.
   for (const duplicateValidationRegex of duplicateValidationRegexes) {
     await expect(
       page.getByText(duplicateValidationRegex).first(),
