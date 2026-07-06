@@ -28,7 +28,6 @@ from src.db.models.lookup_models import (
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
     LkFormFamily,
-    LkFormType,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 
