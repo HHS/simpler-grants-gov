@@ -18,6 +18,7 @@ on:
         options:
           - grantee1
           - grantee2
+          - grantor1
       dry_run:
         description: "Dry run: preview what would be copied without making changes"
         required: false

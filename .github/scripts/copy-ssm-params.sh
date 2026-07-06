@@ -23,7 +23,7 @@ for arg in "${@:3}"; do
 done
 
 VALID_SOURCES=("dev" "staging")
-VALID_TARGETS=("grantee1" "grantee2")
+VALID_TARGETS=("grantee1" "grantee2" "grantor1")
 
 if [[ ! " ${VALID_SOURCES[*]} " =~ " ${SOURCE_ENV} " ]]; then
   echo "ERROR: source_env must be one of: ${VALID_SOURCES[*]}"
