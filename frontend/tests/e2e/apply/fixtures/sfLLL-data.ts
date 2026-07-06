@@ -42,7 +42,9 @@ export const buildSFLLLHappyPathTestData = (
     primeEntity_district: "VA-001",
     // Section 6 - Federal Agency/Department
     federalInfo_agencyDepartment: `FedDept ${shortSuffix}`,
-    // Section 7 - Federal Program Name / Assistance Listing - these are prepopulated from opportunity
+    // Section 7 - Federal Program Name / Assistance Listing (prepopulated from opportunity)
+    federalInfo_name: "Technical Agricultural Assistance",
+    federalInfo_assistanceListingNumber: "10.960",
     // Section 8 - Federal Action Number
     federalInfo_actionNumber: `ACT-${shortSuffix}`,
     // Section 9 - Award Amount
