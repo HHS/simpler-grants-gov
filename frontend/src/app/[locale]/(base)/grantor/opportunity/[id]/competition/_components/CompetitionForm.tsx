@@ -1,7 +1,7 @@
 "use client";
 
-import { OpenAndCloseDates } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/OpenAndCloseDates";
 import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
+import { SubmissionWindow } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionWindow";
 
 import { useTranslations } from "next-intl";
 import { Button, Link } from "@trussworks/react-uswds";
@@ -31,8 +31,8 @@ export function CompetitionForm({
       href: "submission-set-up",
     },
     {
-      text: t("sectionOpenAndCloseDates.header"),
-      href: "open-and-close-dates",
+      text: t("sectionSubmissionWindow.header"),
+      href: "submission-window",
     },
     {
       text: t("sectionApplicationChecklist.header"),
@@ -62,7 +62,7 @@ export function CompetitionForm({
                 {t("applicationRequirementsSubheader")}
               </p>
               <SubmissionSetUp />
-              <OpenAndCloseDates />
+              <SubmissionWindow />
             </div>
             <div className="display-flex flex-justify margin-top-4">
               <div className="display-flex gap-2">

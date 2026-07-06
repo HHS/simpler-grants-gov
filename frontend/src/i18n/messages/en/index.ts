@@ -2468,27 +2468,21 @@ export const messages = {
       whoCanApplyOrganizationsOnly: "Organizations only",
       whoCanApplyIndividualsOnly: "Individuals only",
       whoCanApplyBoth: "Both organizations and individuals",
-      expectedNumberOfApplicants: "Expected number of applicants",
-      expectedNumberOfApplicantsHint: "A best estimate to plan for capacity",
-      expectedApplicationSize: "Expected application size",
-      expectedApplicationSizeHint:
-        "Approximate file size of a typical submission",
     },
-    sectionOpenAndCloseDates: {
-      header: "Open and close dates",
-      howDoesThisClose: "How does this opportunity close?",
-      howDoesThisCloseHint:
-        "Most federal opportunities have a single hard deadline. Choose another option only when the program runs differently.",
-      openDate: "Open date",
-      openDateHint: "First day to start applying.",
-      closeDate: "Close date",
-      closeDateHint: "Final deadline for all applications",
-      hardDeadline: "Hard deadline",
-      hardDeadlineHint: "All applications must be in by the close date.",
-      rollingDeadline: "Rolling deadline",
-      rollingDeadlineHint: "Applications are reviewed in cycles.",
-      continuousReview: "Continuous review",
-      continuousReviewHint: "No close date, open until further notice",
+    sectionSubmissionWindow: {
+      header: "Submission window",
+      subHeader: "When applicants can submit through this package.",
+      submissionsOpen: "Submissions open",
+      submissionsOpenHint:
+        "First day applicants can submit. Defaults to publish date.",
+      submissionsClose: "Submissions close",
+      submissionsCloseHint:
+        "Final deadline for all applications. Defaults to the close date.",
+      howManyApplications: "How many applications do you expect?",
+      howManyApplicationsHint:
+        "We use it to plan capacity for your competition. You can change it later.",
+      expectedNumberOfApplicants: "Expected number of applicants",
+      expectedNumberOfApplicantsHint: "A best estimate is fine.",
     },
     sectionApplicationChecklist: {
       header: "Application checklist",
