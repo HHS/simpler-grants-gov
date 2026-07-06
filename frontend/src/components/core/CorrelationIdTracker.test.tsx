@@ -132,7 +132,7 @@ describe("CorrelationIdTracker", () => {
     ).toHaveBeenCalledTimes(2);
   });
 
-  it("removes correlation tracking when correlationId changes to empty", async () => {
+  it("does not set a new Correlation ID when correlationId becomes empty", async () => {
     analyticsUtil.waitForNewRelic.mockResolvedValue(true);
 
     const { rerender } = render(
