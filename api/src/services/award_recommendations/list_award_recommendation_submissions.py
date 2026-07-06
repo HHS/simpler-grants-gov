@@ -105,7 +105,7 @@ def list_award_recommendation_submissions(
     )
 
     stmt = apply_filters(stmt, params.filters)
-    stmt = apply_sorting(stmt, params.pagination.sort_order, COLUMN_MAPPING)
+    stmt = apply_sorting(stmt, params.pagination.sort_order, COLUMN_MAPPING, nulls_last=True)
 
     paginator: Paginator[AwardRecommendationApplicationSubmission] = Paginator(
         AwardRecommendationApplicationSubmission,

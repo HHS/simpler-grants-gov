@@ -723,22 +723,14 @@ def fixture_file_path():
 @pytest.fixture
 def load_active_forms(db_session, enable_factory_create) -> None:
     """
-    Load the active forms into the DB.
+    Initialize the form registry and seed any required FormInstruction DB records.
 
-    This will make it so a test can explicitly use one of our defined forms
-    without needing to define a new form like it.
+    Forms now live entirely in the in-memory registry (the form table has been dropped).
+    Use the registry directly to access forms in tests:
 
-    To use this do the following with whatever form you want to use
-
-    def test_example(db_session, load_active_forms):
-        sf424 = db_session.merge(SF424_v4_0, load=True)
-
-        # use the form object returned from the merge function
-        # it'll actually work with our DB / factories
-        CompetitionFormFactory.create(form=sf424)
-
-    Note that because these are all in the same DB, don't
-    modify these forms otherwise you might break other tests that use them.
+        def test_example(load_active_forms):
+            from src.form_schema.forms import SF424_v4_0
+            CompetitionFormFactory.create(form_id=SF424_v4_0.form_id)
     """
     init_form_registry()
 
@@ -747,7 +739,6 @@ def load_active_forms(db_session, enable_factory_create) -> None:
     )
 
     for form in get_active_forms():
-
         form_instruction_id = form.form_instruction_id
         if (
             form_instruction_id is not None
@@ -759,17 +750,13 @@ def load_active_forms(db_session, enable_factory_create) -> None:
                 file_name=f"{form.short_form_name}.txt",
             )
 
-        # Session.merge() does not modify the source object; schemas are already
-        # resolved by init_form_registry() so no deepcopy or re-resolve needed.
-        db_session.merge(form, load=True)
-
 
 @pytest.fixture
 def seed_form_registry(load_active_forms) -> None:
-    """Populate the test DB with all registry forms.
+    """Populate the in-memory form registry for tests.
 
-    Preferred alias for load_active_forms in new tests. After this fixture runs,
-    any registered form (e.g. SF424_v4_0) can be retrieved via db_session.get().
+    After this fixture runs, all registered forms are accessible via the registry.
+    Use form objects directly (e.g. SF424_v4_0) rather than db_session.get().
     """
     factories._seed_form_registry_active = True
     yield

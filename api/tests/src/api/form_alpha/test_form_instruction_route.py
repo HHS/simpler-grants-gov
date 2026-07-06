@@ -6,7 +6,7 @@ import grants_shared.util.file_util as file_util
 import pytest
 from werkzeug.datastructures import FileStorage
 
-from src.db.models.competition_models import Form, FormInstruction
+from src.db.models.competition_models import FormInstruction
 from src.form_schema.forms import SF424_v4_0
 from tests.src.db.models.factories import FormInstructionFactory
 
@@ -29,7 +29,7 @@ def test_form_instruction_upsert_create_new(
     internal_admin_user_api_key,
     mock_s3_bucket,
 ):
-    form = db_session.get(Form, SF424_v4_0.form_id)
+    form = SF424_v4_0
     form_instruction_id = uuid.uuid4()
 
     # Execute
@@ -64,7 +64,7 @@ def test_form_instruction_upsert_update_existing(
     internal_admin_user_api_key,
     mock_s3_bucket,
 ):
-    form = db_session.get(Form, SF424_v4_0.form_id)
+    form = SF424_v4_0
     existing_instruction = FormInstructionFactory.create()
     old_location = f"s3://{mock_s3_bucket}/old/path/file.pdf"
     existing_instruction.file_location = old_location
