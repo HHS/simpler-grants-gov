@@ -3,10 +3,10 @@ from uuid import UUID
 
 from grants_shared.adapters import db
 from grants_shared.adapters.aws.api_gateway_adapter import ApiGatewayConfig, import_api_key
+from grants_shared.db.models.auth_base_models import BaseUserApiKey
 from grants_shared.util.api_key_gen import generate_api_key_id
 
 from src.auth.auth_handler import get_auth_handler
-from src.db.models.auth_base_models import BaseUserApiKey
 
 logger = logging.getLogger(__name__)
 

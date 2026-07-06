@@ -46,7 +46,7 @@ dependencies = [
     "urllib3>=2.7.0,<3",
     "python-statemachine>=3.0.0,<4",
     "beautifulsoup4>=4.14.3,<5",
-    "grants-shared==0.2.11",
+    "grants-shared==0.2.12",
 ]
 
 [project.scripts]
