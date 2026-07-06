@@ -134,7 +134,8 @@ data "aws_acm_certificate" "s3_cdn_cert" {
 }
 
 data "aws_acm_certificate" "mtls_cert" {
-  count       = local.service_config.mtls_domain_name != null ? 1 : 0
+  # Gated on enable_https (like the primary cert) so the mTLS ALB can be stood up
+  count       = local.service_config.mtls_domain_name != null && local.service_config.enable_https ? 1 : 0
   domain      = local.service_config.mtls_domain_name
   most_recent = true
   key_types   = ["RSA_2048", "RSA_4096"]
@@ -195,7 +196,7 @@ module "service" {
   # This is used by the API when hosting a side-by-side ALB for mTLS traffic to the API
   enable_mtls_load_balancer = local.service_config.mtls_domain_name != null
   mtls_domain_name          = local.service_config.mtls_domain_name
-  mtls_certificate_arn      = local.service_config.mtls_domain_name != null ? data.aws_acm_certificate.mtls_cert[0].arn : null
+  mtls_certificate_arn      = local.service_config.mtls_domain_name != null && local.service_config.enable_https ? data.aws_acm_certificate.mtls_cert[0].arn : null
 
 
   fargate_cpu                   = local.service_config.cpu

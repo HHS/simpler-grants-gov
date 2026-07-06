@@ -10,12 +10,9 @@ module "grantor1_config" {
   # TEMP: ACM certs for the grantor1 endpoints are not yet issued (CSRs pending HHS
   # signing), so all cert usage is disabled until they are imported into ACM.
   #  - enable_https = false disables the primary (api.) and secondary (alb.) cert
-  #    lookups, the ALB HTTPS listener, and the API Gateway custom domain.
-  #  - s3_cdn_domain_name (files.) and mtls_domain_name (soap.) cert lookups are gated
-  #    on the domain being set (NOT on enable_https), so they must be left unset here.
-  # To re-enable: set enable_https = true and uncomment the two lines below.
+
   # s3_cdn_domain_name                = "files.grantor1.teams.simpler.grants.gov"
-  # mtls_domain_name                  = "soap.grantor1.teams.simpler.grants.gov"
+  mtls_domain_name                  = "soap.grantor1.teams.simpler.grants.gov"
   enable_https                      = false
   has_database                      = local.has_database
   database_enable_http_endpoint     = true

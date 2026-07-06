@@ -128,6 +128,8 @@ resource "aws_ecs_service" "app" {
       container_port   = var.container_port
     }
   }
+
+  depends_on = [aws_lb_listener.mtls_alb_listener_http]
 }
 
 resource "aws_ecs_task_definition" "app" {
