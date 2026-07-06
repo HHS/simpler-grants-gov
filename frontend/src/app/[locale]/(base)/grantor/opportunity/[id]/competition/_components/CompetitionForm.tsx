@@ -8,7 +8,13 @@ import { Button } from "@trussworks/react-uswds";
 
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 
-export function CompetitionForm() {
+type CompetitionFormProps = {
+  competitionId: string;
+};
+
+export function CompetitionForm({
+  competitionId: _competitionId,
+}: CompetitionFormProps) {
   const t = useTranslations("OpportunityCompetition.sections");
 
   const navigationItems = [

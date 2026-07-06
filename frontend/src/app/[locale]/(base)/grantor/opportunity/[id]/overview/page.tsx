@@ -20,10 +20,13 @@ import {
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
+  searchParams?: Promise<Record<string, string>>;
 };
 
-async function OpportunityOverviewPage({ params }: PageProps) {
+async function OpportunityOverviewPage({ params, searchParams }: PageProps) {
   const { id, locale } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const isNewlyCreated = resolvedSearchParams.fromCreate === "true";
   const t = await getTranslations({ locale, namespace: "OpportunityOverview" });
   let opportunityData: GrantorOpportunityDetail;
   try {
@@ -53,6 +56,7 @@ async function OpportunityOverviewPage({ params }: PageProps) {
       <OpportunityDetailsHeader
         opportunityData={opportunityData}
         locale={locale}
+        isNewlyCreated={isNewlyCreated}
       />
       <div className="grid-container padding-top-4 padding-bottom-4">
         <div className="grid-row grid-gap-2 padding-top-2">

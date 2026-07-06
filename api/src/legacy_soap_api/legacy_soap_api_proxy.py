@@ -46,6 +46,10 @@ def get_proxy_headers(
     filtered_headers = filter_headers(
         soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
     )
+    logger.info(
+        "soap_client: filtered headers being sent to legacy",
+        extra={"filtered_header_keys": filtered_headers.keys()},
+    )
     if not soap_auth:
         return filtered_headers
     return {

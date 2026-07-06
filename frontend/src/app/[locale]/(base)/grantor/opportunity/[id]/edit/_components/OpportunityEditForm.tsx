@@ -95,7 +95,6 @@ type OpportunityEditFormProps = {
   isForecast?: boolean;
   initialValues: OpportunityEditFormValues;
   isDraft?: boolean;
-  isNewlyCreated?: boolean;
   initialAttachments?: OpportunityAttachment[];
   saveLabel: string;
   previewLabel: string;
@@ -108,7 +107,6 @@ export default function OpportunityEditForm({
   isForecast = false,
   initialValues,
   isDraft = false,
-  isNewlyCreated = false,
   initialAttachments = [],
   saveLabel,
   previewLabel,
@@ -274,20 +272,6 @@ export default function OpportunityEditForm({
         <div className="margin-top-2">
           <Alert type="warning" headingLevel="h3" noIcon>
             {t("content.draftOnlyWarning")}
-          </Alert>
-        </div>
-      ) : null}
-
-      {isNewlyCreated &&
-      !formState.successMessage &&
-      !formState.errorMessage ? (
-        <div className="margin-top-2">
-          <Alert
-            type="success"
-            heading={t("content.alerts.newOpportunityHeading")}
-            headingLevel="h3"
-          >
-            {t("content.alerts.newOpportunityBody")}
           </Alert>
         </div>
       ) : null}

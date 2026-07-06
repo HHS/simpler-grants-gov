@@ -75,9 +75,12 @@ export type WidgetTypes =
   | "Budget424aSectionD"
   | "Budget424aSectionE"
   | "Budget424aSectionF"
-  | "FieldList";
+  | "FieldList"
+  | "Table";
 
 type PropertyPath = `/properties/${string}`;
+
+export type DefinitionPath = PropertyPath | PropertyPath[];
 
 /**
  * Props passed to the FieldList widget.
@@ -179,7 +182,10 @@ export type FieldListWidgetProps = {
   };
 };
 
-export type FieldListChildWidgetTypes = Exclude<WidgetTypes, "FieldList">;
+export type FieldListChildWidgetTypes = Exclude<
+  WidgetTypes,
+  "FieldList" | "Table"
+>;
 
 /**
  * Configuration for a single child field rendered within a FieldList entry.
@@ -205,10 +211,59 @@ export type FieldListGroupItem = {
   storagePath: string[];
 };
 
-export type DefinitionPath = PropertyPath | PropertyPath[];
+export type UiSchemaTableCellType = "input" | "readOnly" | "plainText";
 
-export type UiSchemaField = {
-  type: "field" | "multiField" | "null";
+export type UiSchemaTableColumn = {
+  columnHeader: string;
+
+  /**
+   * Optional column width as a percentage.
+   * Configured column widths cannot total more than 100.
+   */
+  width?: number;
+};
+
+export type UiSchemaTableCell =
+  | {
+      type: "input" | "readOnly";
+      definition: PropertyPath;
+      staticContent?: undefined;
+    }
+  | {
+      type: "plainText";
+      staticContent: string;
+      definition?: undefined;
+    };
+
+export type UiSchemaTableRow = {
+  /**
+   * Human-readable row heading displayed by the table renderer.
+   */
+  rowHeader: string;
+
+  /**
+   * Cell position determines its column. Every row must contain the same
+   * number of cells as the table has columns.
+   */
+  cells: UiSchemaTableCell[];
+};
+
+export type UiSchemaTableChildren = {
+  columns: UiSchemaTableColumn[];
+  rows: UiSchemaTableRow[];
+};
+
+export type TableWidgetProps = {
+  id: string;
+  key: string;
+  name?: string;
+  label?: string;
+  description?: string;
+  uiSchemaField: UiSchemaTableMultiField;
+};
+
+type UiSchemaBasicField = {
+  type: "field" | "null";
   widget?: WidgetTypes;
   name?: string;
 } & (
@@ -222,6 +277,41 @@ export type UiSchemaField = {
       schema: SchemaField;
     }
 );
+
+/**
+ * Existing specialized multiField widgets retain their flat definition array.
+ * Table uses the same definition-backed multiField contract while `children`
+ * describes the Table widget's column, row, and cell layout.
+ */
+type UiSchemaMultiField = {
+  type: "multiField";
+  widget?: Exclude<WidgetTypes, "Table">;
+  name?: string;
+} & (
+  | {
+      definition: DefinitionPath;
+      schema?: undefined;
+    }
+  | { schema: SchemaField; definition?: undefined }
+  | {
+      definition: DefinitionPath;
+      schema: SchemaField;
+    }
+);
+
+export type UiSchemaTableMultiField = {
+  type: "multiField";
+  widget: "Table";
+  name: string;
+  definition: PropertyPath[];
+  children: UiSchemaTableChildren;
+  schema?: undefined;
+};
+
+export type UiSchemaField =
+  | UiSchemaBasicField
+  | UiSchemaMultiField
+  | UiSchemaTableMultiField;
 
 export interface UiSchemaSection {
   type: "section";
@@ -246,10 +336,11 @@ export interface UiSchemaFieldList {
   name: string;
   description?: string;
   additionalDescribedById?: string;
-  children: UiSchemaField[];
+  children: Exclude<UiSchemaField, UiSchemaTableMultiField>[];
 }
 
 export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;
+
 export type UiSchema = UiSchemaNode[];
 
 export type TextTypes =
@@ -273,6 +364,7 @@ export interface UswdsWidgetProps<
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
   id: string;
+  uiSchemaField?: UiSchemaField;
   // this needs to be locked down using a generic eventually
   value?: BroadlyDefinedWidgetValue;
   type?: string;

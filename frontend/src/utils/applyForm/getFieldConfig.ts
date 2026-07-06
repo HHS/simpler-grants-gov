@@ -4,7 +4,6 @@ import { get } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 import {
   BroadlyDefinedWidgetValue,
-  FieldListChildWidgetTypes,
   FieldListGroupItem,
   FieldListWidgetProps,
   FormattedFormValidationWarning,
@@ -131,7 +130,7 @@ const getFieldListRequiredFields = ({
 };
 
 type FieldWidgetConfig = {
-  type: FieldListChildWidgetTypes;
+  type: Exclude<WidgetTypes, "FieldList">;
   props: UswdsWidgetProps;
 };
 
@@ -310,14 +309,14 @@ export const getBasicMultifieldInfo = ({
 }): FieldInfo<Record<string, unknown>> => {
   const { schema } = uiFieldObject;
   // the definition can be many things, but in this case we should have done the
-  // work ahead of time to determine that this definition will be an array
+  // work ahead of time to determine that this definition will be a string
   const definition = uiFieldObject.definition;
   if (!Array.isArray(definition)) {
     throw new Error("attempting to get multifield field info for basic field");
   }
   const fieldName = uiFieldObject.name ? uiFieldObject.name : "";
   if (!fieldName) {
-    console.error("name misssing from multiField definition");
+    console.error("name missing from multiField definition");
     throw new Error("Could not build field");
   }
   const fieldSchema = definition
@@ -442,7 +441,9 @@ const getFieldInfo = ({
       errors,
       formSchema,
     });
-  } else if (typeof definition === "string") {
+  }
+
+  if (typeof definition === "string") {
     return getBasicFieldInfo({
       uiFieldObject,
       formData,
@@ -492,6 +493,10 @@ const getFieldListConfig = ({
 
       if (childWidgetConfig.type === "FieldList") {
         throw new Error("nested fieldList is not supported");
+      }
+
+      if (childWidgetConfig.type === "Table") {
+        throw new Error("table inside fieldList is not supported");
       }
 
       const { value: _value, key: _key, ...rest } = childWidgetConfig.props;
@@ -556,6 +561,7 @@ const getFieldListConfig = ({
     },
   };
 };
+
 // returns widget type and props for rendering data for a given JSON schema field
 export const getFieldConfig = <V extends string | Record<string, unknown>>({
   errors,
@@ -600,7 +606,6 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
     throw new Error("Could not build field");
   }
 
-  // should filter and match warnings to field earlier in the process
   const widgetType = determineFieldType({
     uiFieldObject,
     fieldSchema,
@@ -617,11 +622,13 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
         })
       : {};
 
+  const widgetId = htmlFieldName || uiFieldObject.name || fieldName;
+
   return {
-    type: widgetType as FieldListChildWidgetTypes,
+    type: widgetType as Exclude<WidgetTypes, "FieldList">,
     props: {
-      id: htmlFieldName,
-      key: htmlFieldName,
+      id: widgetId,
+      key: widgetId,
       disabled: uiFieldObject.type === "null",
       required: requiredField,
       minLength: fieldSchema?.minLength,
@@ -630,6 +637,7 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
       rawErrors,
       value: value as V,
       options,
+      uiSchemaField: uiFieldObject,
     },
   };
 };

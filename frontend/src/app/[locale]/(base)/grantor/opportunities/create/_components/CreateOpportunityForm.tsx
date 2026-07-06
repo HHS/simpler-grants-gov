@@ -55,7 +55,7 @@ export function CreateOpportunityForm({
     // If success, redirect to the edit page (Part 2 of create)
     if (response?.success && response.data?.opportunity_id) {
       router.push(
-        `/grantor/opportunity/${response.data.opportunity_id}/edit?fromCreate=true`,
+        `/grantor/opportunity/${response.data.opportunity_id}/overview?fromCreate=true`,
       );
     } else if (response?.errorMessage) {
       // Scroll to top to show the error message

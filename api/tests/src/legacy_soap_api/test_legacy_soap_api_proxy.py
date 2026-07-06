@@ -155,7 +155,8 @@ def test_request_gets_correct_proxy_url_when_request_has_auth_for_applicants(ena
         assert mock_request.call_args_list[0][0][0].url == expected
 
 
-def test_request_gets_correct_proxy_headers_when_no_auth(enable_factory_create):
+def test_request_gets_correct_proxy_headers_when_no_auth(enable_factory_create, caplog):
+    caplog.set_level(logging.INFO)
     soap_request = create_soap_request(SOAP_PAYLOAD)
     soap_request.auth = None
     soap_request.headers = {"X-Gg-S2S-Uri": "https://google.com/xyz", "x": "1"}
@@ -163,6 +164,12 @@ def test_request_gets_correct_proxy_headers_when_no_auth(enable_factory_create):
     headers = get_proxy_headers(soap_request, config, soap_request.auth)
     expected = {"x": "1"}
     assert headers == expected
+    record = next(
+        r
+        for r in caplog.records
+        if r.message == "soap_client: filtered headers being sent to legacy"
+    )
+    assert list(record.filtered_header_keys) == ["x"]
 
 
 def test_request_gets_correct_proxy_headers_when_there_is_auth(enable_factory_create):

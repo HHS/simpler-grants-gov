@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
+from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -44,7 +45,12 @@ def _get_opportunity_for_grantors(
                 CurrentOpportunitySummary.opportunity_summary
             ),
             selectinload(Opportunity.opportunity_attachments),
-            selectinload(Opportunity.competitions),
+            selectinload(Opportunity.competitions).options(
+                selectinload(Competition.competition_instructions),
+                selectinload(Competition.opportunity_assistance_listing),
+                selectinload(Competition.link_competition_open_to_applicant),
+                selectinload(Competition.competition_forms),
+            ),
         )
     )
 

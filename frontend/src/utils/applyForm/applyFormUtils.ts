@@ -179,6 +179,21 @@ export const findValidationErrors = (
   return [];
 };
 
+/**
+ * Identifies UI-schema nodes that are handled through the normal
+ * definition-backed field validation path.
+ *
+ * `multiField` combines multiple definition paths for one specialized widget,
+ * such as an SF-424A budget section or Table.
+ */
+const isDefinitionBackedFieldNode = (
+  node: UiSchemaNode,
+): node is UiSchemaField => {
+  return (
+    node.type === "field" || node.type === "multiField" || node.type === "null"
+  );
+};
+
 export const buildWarningTree = (
   uiSchema: UiSchema | UiSchemaField[] | UiSchemaNode,
   parent: UiSchema | UiSchemaField[] | UiSchemaNode | null,
@@ -191,7 +206,7 @@ export const buildWarningTree = (
   if (
     !Array.isArray(uiSchema) &&
     typeof uiSchema === "object" &&
-    "children" in uiSchema
+    (uiSchema.type === "section" || uiSchema.type === "fieldList")
   ) {
     return buildWarningTree(
       uiSchema.children,
@@ -203,7 +218,7 @@ export const buildWarningTree = (
   } else if (Array.isArray(uiSchema)) {
     const childErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
       (errors, node) => {
-        if ("children" in node) {
+        if (node.type === "section" || node.type === "fieldList") {
           const children = node.children;
           const nodeError = buildWarningTree(
             children,
@@ -213,7 +228,7 @@ export const buildWarningTree = (
             resolvedRootUiSchema,
           );
           return errors.concat(nodeError);
-        } else if (!parent && ("definition" in node || "schema" in node)) {
+        } else if (!parent && isDefinitionBackedFieldNode(node)) {
           const matchingWarnings = findValidationErrors(
             formValidationWarnings,
             Array.isArray(node.definition)
@@ -234,7 +249,7 @@ export const buildWarningTree = (
     if (parent) {
       const parentErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
         (errors, node) => {
-          if ("children" in node) {
+          if (node.type === "section" || node.type === "fieldList") {
             const nodeError = buildWarningTree(
               node.children,
               uiSchema,
@@ -243,7 +258,7 @@ export const buildWarningTree = (
               resolvedRootUiSchema,
             );
             return errors.concat(nodeError);
-          } else {
+          } else if (isDefinitionBackedFieldNode(node)) {
             const matchingWarnings = findValidationErrors(
               formValidationWarnings,
               Array.isArray(node.definition)
@@ -258,6 +273,7 @@ export const buildWarningTree = (
             }
             return errors;
           }
+          return errors;
         },
         [],
       );
@@ -370,7 +386,10 @@ export function getFieldListLabelFromDefinition({
         return node.label;
       }
 
-      if ("children" in node && Array.isArray(node.children)) {
+      if (
+        (node.type === "section" || node.type === "fieldList") &&
+        Array.isArray(node.children)
+      ) {
         const nestedLabel = findFieldListLabel(node.children as UiSchema);
         if (nestedLabel) {
           return nestedLabel;
@@ -455,7 +474,10 @@ export function getFieldsForNav(
 
   if (!Array.isArray(schema)) return results;
   for (const item of schema) {
-    if ("children" in item && Array.isArray(item.children)) {
+    if (
+      (item.type === "section" || item.type === "fieldList") &&
+      Array.isArray(item.children)
+    ) {
       if (item.name && item.label) {
         results.push({ href: `form-section-${item.name}`, text: item.label });
       }
@@ -762,7 +784,7 @@ export const processFormSchema = (
   within a json schema without traversing nested "properties". Any other object attributes
   and values are unchanged
 
-  ex. { properties: { path: { properties: { nested: 'value' } } } } becomes
+  ex. { properties: { path: { properties: { nested: 'value' } } } becomes
       { path: { nested: 'value' } }
 */
 
@@ -827,10 +849,10 @@ export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
             (child.widget === "AttachmentArray" ||
               child.widget === "Attachment")
           ) {
-            return { ...child, widget: "PrintAttachment" };
+            return { ...child, widget: "PrintAttachment" as const };
           }
 
-          return { ...child, widget: "Print" };
+          return { ...child, widget: "Print" as const };
         }),
       };
     }
