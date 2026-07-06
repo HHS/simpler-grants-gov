@@ -133,7 +133,6 @@ class FormAlphaSchema(Schema):
     )
 
 
-
 class FormResponseAlphaSchema(WarningMixinSchema, AbstractResponseSchema):
     data = fields.Nested(FormAlphaSchema)
 
