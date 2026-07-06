@@ -42,9 +42,7 @@ export const buildSFLLLHappyPathTestData = (
     primeEntity_district: "VA-001",
     // Section 6 - Federal Agency/Department
     federalInfo_agencyDepartment: `FedDept ${shortSuffix}`,
-    // Section 7 - Federal Program Name / Assistance Listing
-    federalInfo_name: `Program ${shortSuffix}`,
-    federalInfo_assistanceListingNumber: "15.92800000",
+    // Section 7 - Federal Program Name / Assistance Listing - these are prepopulated from opportunity
     // Section 8 - Federal Action Number
     federalInfo_actionNumber: `ACT-${shortSuffix}`,
     // Section 9 - Award Amount
@@ -90,6 +88,11 @@ export const SFLLL_OPPORTUNITY_DATA: PrintViewFormData = {
   opportunityId: "f3e438ee-ff4c-475b-a058-8049aee9abda",
   opportunityNumber: "E2E-SFLLL-ORG-IND-01",
   formKey: "sfLLL",
-  expectedPrepopulatedFields: {},
+  expectedPrepopulatedFields: {
+    // Section 7 - Federal Program Name / Assistance Listing
+    federalInfo_assistanceListingNumber: "10.960",
+    federalInfo_agencyName: "Simpler Grants.gov",
+    federalInfo_name: "Technical Agricultural Assistance",
+  },
   buildTestData: buildSFLLLHappyPathTestData,
 };
