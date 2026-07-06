@@ -24,8 +24,8 @@ export const getCharacterLimitValidationMessage = <
 >(
   definitions: TDefinition[],
 ): string => {
-  const message = getCharacterLimitedFields(definitions)[0]
-    ?.characterLimitValidationMessage;
+  const message =
+    getCharacterLimitedFields(definitions)[0]?.characterLimitValidationMessage;
 
   if (!message) {
     throw new Error(

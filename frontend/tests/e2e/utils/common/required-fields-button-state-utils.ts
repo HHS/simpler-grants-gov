@@ -1,12 +1,9 @@
 import { type Page } from "@playwright/test";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 
-import { assertButtonEnabledDisabledStates } from "./button-state-assertions";
 import { buildPageFieldsFromDefinitions } from "./build-page-fields-from-definitions";
-import {
-  type FieldValue,
-  type MetadataPageFieldDefinition,
-} from "./types";
+import { assertButtonEnabledDisabledStates } from "./button-state-assertions";
+import { type FieldValue, type MetadataPageFieldDefinition } from "./types";
 
 /** Required-field gating expects shared metadata shape with `required` and `valueKey`. */
 type RequiredFieldDefinition<TValueKey extends string = string> =

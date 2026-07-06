@@ -146,9 +146,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
       await assertCharacterLimitMessageCount(
         page,
         CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
-        getCharacterLimitedFields(
-          CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
-        ).length,
+        getCharacterLimitedFields(CREATE_OPPORTUNITY_FIELD_DEFINITIONS).length,
       );
 
       // And "Save and continue" button should be enabled, "Cancel" button should remain enabled

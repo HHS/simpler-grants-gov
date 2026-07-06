@@ -1,9 +1,6 @@
 import { type PageFillField } from "tests/e2e/utils/pages/general-pages-filling";
 
-import {
-  type FieldValue,
-  type MetadataPageFieldDefinition,
-} from "./types";
+import { type FieldValue, type MetadataPageFieldDefinition } from "./types";
 
 /** Builds page-fill fields from metadata definitions and a value dictionary. */
 export const buildPageFieldsFromDefinitions = <TValueKey extends string>(

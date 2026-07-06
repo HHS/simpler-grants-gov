@@ -65,15 +65,13 @@ export type FieldValue = string | boolean;
  * Domain-level metadata shape used by shared page-fill builders.
  * Omits runtime-only props and adds required/value-key semantics.
  */
-export type MetadataPageFieldDefinition<TValueKey extends string = string> = Omit<
-  FillFieldDefinition,
-  "field" | "label" | "labelExact"
-> & {
-  label: string;
-  valueKey: TValueKey;
-  exact?: boolean;
-  required?: boolean;
-};
+export type MetadataPageFieldDefinition<TValueKey extends string = string> =
+  Omit<FillFieldDefinition, "field" | "label" | "labelExact"> & {
+    label: string;
+    valueKey: TValueKey;
+    exact?: boolean;
+    required?: boolean;
+  };
 
 /** Validation messages commonly reused across feature metadata definitions. */
 export type ValidationMetadata = {
