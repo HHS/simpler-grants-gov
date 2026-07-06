@@ -2,7 +2,9 @@ import { validSearchQueryParamKeys } from "src/types/search/searchQueryTypes";
 
 // note that the `newrelic` referenced here is the newrelic object added to window when
 // client side new relic scripts are loaded and run, rather than anything explicity imported
-type NewRelicBrowser = typeof newrelic;
+export type NewRelicBrowser = {
+  setCustomAttribute?: (key: string, value: string | number) => void;
+};
 
 const NEW_RELIC_POLL_INTERVAL = 2;
 const NEW_RELIC_POLL_TIMEOUT = 500;
@@ -19,12 +21,12 @@ export const waitForNewRelic = async (): Promise<boolean> => {
   let timedOut = false;
 
   while (!present && !timedOut) {
-    elapsed += NEW_RELIC_POLL_INTERVAL;
     await new Promise((resolve) => {
       setTimeout(() => {
         return resolve(null);
-      }, elapsed);
+      }, NEW_RELIC_POLL_INTERVAL);
     });
+    elapsed += NEW_RELIC_POLL_INTERVAL;
     present = !!window.newrelic;
     if (elapsed >= NEW_RELIC_POLL_TIMEOUT) {
       console.error("Timed out waiting for new relic browser object");
@@ -48,7 +50,17 @@ export const setNewRelicCustomAttribute = (
     return;
   }
   // using underscores since NR has problems with querying fields with dashes
-  newRelic.setCustomAttribute(`search_param_${key}`, value);
+  newRelic.setCustomAttribute!(`search_param_${key}`, value);
+};
+export const setNewRelicCorrelationIdAttribute = (
+  correlationId: string,
+): undefined => {
+  const newRelic = getNewRelicBrowserInstance();
+  if (!newRelic) {
+    console.error("New Relic not defined setting correlation_id attribute");
+    return;
+  }
+  newRelic.setCustomAttribute!("correlation_id", correlationId);
 };
 
 // TODO does setting "" as the value effectively `unset` the attribute?

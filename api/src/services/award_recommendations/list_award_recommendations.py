@@ -95,7 +95,7 @@ def list_award_recommendations(
             selectinload(AwardRecommendation.award_recommendation_reviews),
         )
     )
-    stmt = apply_sorting(stmt, params.pagination.sort_order, COLUMN_MAPPING)
+    stmt = apply_sorting(stmt, params.pagination.sort_order, COLUMN_MAPPING, nulls_last=True)
 
     paginator: Paginator[AwardRecommendation] = Paginator(
         AwardRecommendation,
