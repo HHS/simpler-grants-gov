@@ -237,18 +237,26 @@ export type UiSchemaTableCell =
 
 export type UiSchemaTableRow = {
   /**
-   * Human-readable row heading displayed by the table renderer.
+   * Label for the first table column.
+   *
+   * The renderer displays this as a semantic row header using
+   * `<th scope="row">` rather than as a cell in `cells`.
    */
   rowHeader: string;
 
   /**
-   * Cell position determines its column. Every row must contain the same
-   * number of cells as the table has columns.
+   * Data cells rendered after the row header.
+   *
+   * Each row must contain one cell for every configured column after the
+   * first row-header column.
    */
   cells: UiSchemaTableCell[];
 };
 
 export type UiSchemaTableChildren = {
+  /**
+   * Includes the first column represented by each row's `rowHeader`.
+   */
   columns: UiSchemaTableColumn[];
   rows: UiSchemaTableRow[];
 };

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { TableWidgetProps } from "src/types/applyForm/types";
+import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 import TableWidget from "./TableWidget";
 
@@ -12,11 +13,17 @@ describe("TableWidget", () => {
       type: "multiField",
       name: "summary_table_test",
       widget: "Table",
-      definition: ["/properties/first_value"],
+      definition: ["/properties/first_value", "/properties/second_value"],
       children: {
         columns: [
           {
             columnHeader: "Item",
+          },
+          {
+            columnHeader: "First Value",
+          },
+          {
+            columnHeader: "Second Value",
           },
         ],
         rows: [
@@ -25,7 +32,11 @@ describe("TableWidget", () => {
             cells: [
               {
                 type: "plainText",
-                staticContent: "First Row",
+                staticContent: "First value text",
+              },
+              {
+                type: "readOnly",
+                definition: "/properties/second_value",
               },
             ],
           },
@@ -34,7 +45,7 @@ describe("TableWidget", () => {
     },
   };
 
-  it("renders the table placeholder with its name", () => {
+  it("renders configured table headers, row headers, and cells", () => {
     render(
       <TableWidget
         {...props}
@@ -45,14 +56,65 @@ describe("TableWidget", () => {
       />,
     );
 
-    const placeholder = screen.getByTestId("table-widget-placeholder");
+    const table = screen.getByTestId("table");
 
-    expect(placeholder).toBeInTheDocument();
-    expect(placeholder).toHaveAttribute(
-      "data-table-name",
-      "summary_table_test",
-    );
-    expect(placeholder).toHaveAttribute("data-table-column-count", "1");
-    expect(placeholder).toHaveAttribute("data-table-row-count", "1");
+    expect(table).toBeInTheDocument();
+    expect(screen.getAllByRole("columnheader")).toHaveLength(3);
+    expect(screen.getAllByRole("row")).toHaveLength(2);
+
+    expect(
+      screen.getByRole("columnheader", { name: "Item" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "First Value" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Second Value" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("rowheader", { name: "First Row" }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("First value text")).toBeInTheDocument();
+  });
+
+  it("throws when a row does not contain one cell for each data column", async () => {
+    const { children: tableChildren, ...tableUiSchema } = props.uiSchemaField;
+
+    const invalidProps: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        ...tableUiSchema,
+        children: {
+          ...tableChildren,
+          rows: [
+            {
+              rowHeader: "First Row",
+              cells: [
+                {
+                  type: "plainText",
+                  staticContent: "Only one cell",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    const error = await wrapForExpectedError(() => {
+      render(
+        <TableWidget
+          {...invalidProps}
+          schema={{}}
+          rawErrors={[]}
+          value={{}}
+          options={{}}
+        />,
+      );
+    });
+
+    expect(error.message).toBe("Table row 1 must contain exactly 2 cells.");
   });
 });

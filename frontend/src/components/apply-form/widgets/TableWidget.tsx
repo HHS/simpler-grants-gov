@@ -1,5 +1,7 @@
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 
+import { Table } from "@trussworks/react-uswds";
+
 function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
   if (
     uiSchemaField?.type !== "multiField" ||
@@ -8,17 +10,61 @@ function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
     return null;
   }
 
+  // The first configured column is rendered from rowHeader, so cells only
+  // represent the remaining data columns.
   const { columns, rows } = uiSchemaField.children;
+  const expectedCellCount = columns.length - 1;
+
+  rows.forEach((row, rowIndex) => {
+    if (row.cells.length !== expectedCellCount) {
+      throw new Error(
+        `Table row ${rowIndex + 1} must contain exactly ${expectedCellCount} cells.`,
+      );
+    }
+  });
 
   return (
-    <div
-      data-testid="table-widget-placeholder"
+    <Table
+      bordered
+      fullWidth
+      scrollable
+      data-testid="table-widget"
       data-table-name={uiSchemaField.name}
       data-table-column-count={columns.length}
       data-table-row-count={rows.length}
+      caption={
+        <span className="usa-sr-only">{label ?? uiSchemaField.name}</span>
+      }
     >
-      {label}
-    </div>
+      <thead>
+        <tr>
+          {columns.map((column) => (
+            <th
+              key={column.columnHeader}
+              scope="col"
+              style={column.width ? { width: `${column.width}%` } : undefined}
+            >
+              {column.columnHeader}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr key={row.rowHeader}>
+            <th scope="row">{row.rowHeader}</th>
+            {row.cells.map((cell, cellIndex) => (
+              <td
+                key={`${row.rowHeader}-${cellIndex}`}
+                data-table-cell-type={cell.type}
+              >
+                {cell.type === "plainText" ? cell.staticContent : null}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </Table>
   );
 }
 
