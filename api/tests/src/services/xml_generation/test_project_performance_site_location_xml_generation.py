@@ -7,11 +7,9 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Form
 from src.form_schema.forms.project_performance_site_location import (
     FORM_XML_TRANSFORM_RULES as PERFORMANCE_SITE_TRANSFORM_RULES,
 )
@@ -378,7 +376,7 @@ class TestPerformanceSiteXSDValidation:
         xsd_path = xsd_validator.xsd_dir / "PerformanceSite_4_0-V4.0.xsd"
         return xsd_validator.validate_xml(form_xml, xsd_path)
 
-    def _make_application(self, enable_factory_create, db_session: db.Session, response: dict):
+    def _make_application(self, enable_factory_create, response: dict):
         agency = AgencyFactory.create()
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
         assistance_listing = OpportunityAssistanceListingFactory.create(opportunity=opportunity)
@@ -389,7 +387,7 @@ class TestPerformanceSiteXSDValidation:
             opportunity_assistance_listing=assistance_listing,
             competition_forms=[],
         )
-        form = db_session.get(Form, ProjectPerformanceSiteLocation_v4_0.form_id)
+        form = ProjectPerformanceSiteLocation_v4_0
         application = ApplicationFactory.create(competition=competition)
         competition_form = CompetitionFormFactory.create(competition=competition, form=form)
         ApplicationFormFactory.create(
@@ -400,11 +398,10 @@ class TestPerformanceSiteXSDValidation:
         return application
 
     def test_us_site_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         application = self._make_application(
             enable_factory_create,
-            db_session,
             {"primary_site": _US_SITE},
         )
         submission = ApplicationSubmissionFactory.create(
@@ -419,11 +416,10 @@ class TestPerformanceSiteXSDValidation:
         ], f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
 
     def test_international_site_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         application = self._make_application(
             enable_factory_create,
-            db_session,
             {"primary_site": _INTL_SITE},
         )
         submission = ApplicationSubmissionFactory.create(
@@ -438,11 +434,10 @@ class TestPerformanceSiteXSDValidation:
         ], f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
 
     def test_with_additional_sites_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         application = self._make_application(
             enable_factory_create,
-            db_session,
             {
                 "primary_site": _US_SITE,
                 "additional_sites": [_INTL_SITE, _INDIVIDUAL_US_SITE],
