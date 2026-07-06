@@ -9,7 +9,7 @@ import { formatCurrencyString } from "src/utils/formatCurrencyUtil";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
 import {
@@ -60,7 +60,7 @@ export default function EditRecommendationsTable({
     setCurrentPage(newPage);
   };
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     setIsLoading(true);
     setApiError(false);
     const pagination = {
@@ -97,12 +97,11 @@ export default function EditRecommendationsTable({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [awardRecommendationId, currentPage, pageSize, clientFetch]);
 
   useEffect(() => {
     void fetchSubmissions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [awardRecommendationId, currentPage, pageSize, clientFetch]);
+  }, [fetchSubmissions]);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
