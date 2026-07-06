@@ -4,6 +4,7 @@ from collections.abc import Sequence
 import grants_shared.adapters.db as db
 from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams
 from grants_shared.pagination.paginator import Paginator
+from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -18,7 +19,6 @@ from src.search.search_models import StrSearchFilter
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
 )
-from src.services.service_utils import apply_sorting
 
 
 class AwardRecommendationAuditFilters(BaseModel):
@@ -78,7 +78,7 @@ def list_award_recommendation_audit(
         )
     )
     stmt = apply_filters(stmt, params.filters)
-    stmt = apply_sorting(stmt, AwardRecommendationAudit, params.pagination.sort_order)
+    stmt = apply_sorting(stmt, params.pagination.sort_order, AwardRecommendationAudit)
 
     paginator: Paginator[AwardRecommendationAudit] = Paginator(
         AwardRecommendationAudit, stmt, db_session, page_size=params.pagination.page_size

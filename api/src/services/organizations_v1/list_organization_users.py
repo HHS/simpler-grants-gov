@@ -167,6 +167,7 @@ def get_organization_users_and_verify_access(
             "last_name": UserProfile.last_name,
             "created_at": OrganizationUser.created_at,
         },
+        nulls_last=True,
     )
 
     # Paginate
