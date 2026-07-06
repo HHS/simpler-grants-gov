@@ -53,11 +53,6 @@ def include_object(
         return False
     if type_ == "table" and getattr(object, "schema", None) == Schemas.LEGACY:
         return False
-    if type_ == "table" and name == "form":
-        # The Form SQLAlchemy model is kept as a data structure (Phase 1).
-        # The DB table is dropped via migration — exclude it from autogenerate
-        # so Alembic does not try to recreate it.
-        return False
     else:
         return True
 
