@@ -13,16 +13,16 @@ export const buildSFLLLHappyPathTestData = (
   const shortSuffix = toHappyPathSuffix(suffix);
 
   return {
-    // Section 1 – Type of Federal Action
+    // Section 1 - Type of Federal Action
     federalAction_type: "Grant",
-    // Section 2 – Status of Federal Action
+    // Section 2 - Status of Federal Action
     federalAction_status: "BidOffer",
-    // Section 3 – Report Type
+    // Section 3 - Report Type
     federalAction_reportType: "MaterialChange",
     materialChange_year: "2025",
     materialChange_quarter: "1",
     materialChange_lastReportDate: "2025-03-31",
-    // Section 4 – Reporting Entity
+    // Section 4 - Reporting Entity
     reportingEntity_type: "Prime",
     reportingEntity_tier: "1",
     reportingEntity_orgName: `ReportOrg ${shortSuffix}`,
@@ -32,7 +32,7 @@ export const buildSFLLLHappyPathTestData = (
     reportingEntity_state: "AL: Alabama",
     reportingEntity_zip: "11111",
     reportingEntity_district: "AL-001",
-    // Section 5 – Prime Entity
+    // Section 5 - Prime Entity
     primeEntity_orgName: `PrimeOrg ${shortSuffix}`,
     primeEntity_street1: `${shortSuffix} Prime St`,
     primeEntity_street2: `Suite ${shortSuffix}`,
@@ -40,16 +40,16 @@ export const buildSFLLLHappyPathTestData = (
     primeEntity_state: "VA: Virginia",
     primeEntity_zip: "44444",
     primeEntity_district: "VA-001",
-    // Section 6 – Federal Agency/Department
+    // Section 6 - Federal Agency/Department
     federalInfo_agencyDepartment: `FedDept ${shortSuffix}`,
-    // Section 7 – Federal Program Name / Assistance Listing
+    // Section 7 - Federal Program Name / Assistance Listing
     federalInfo_name: `Program ${shortSuffix}`,
     federalInfo_assistanceListingNumber: "15.92800000",
-    // Section 8 – Federal Action Number
+    // Section 8 - Federal Action Number
     federalInfo_actionNumber: `ACT-${shortSuffix}`,
-    // Section 9 – Award Amount
+    // Section 9 - Award Amount
     federalInfo_awardAmount: "9999999",
-    // Section 10a – Lobbying Registrant
+    // Section 10a - Lobbying Registrant
     lobbyingRegistrant_prefix: `LP${shortSuffix}`,
     lobbyingRegistrant_firstName: `LRFirst${shortSuffix}`,
     lobbyingRegistrant_middleName: `LRMid${shortSuffix}`,
@@ -60,7 +60,7 @@ export const buildSFLLLHappyPathTestData = (
     lobbyingRegistrant_city: `City ${shortSuffix}`,
     lobbyingRegistrant_state: "AK: Alaska",
     lobbyingRegistrant_zip: "55555",
-    // Section 10b – Individual Performing Service
+    // Section 10b - Individual Performing Service
     performingService_prefix: `PP${shortSuffix}`,
     performingService_firstName: `PSFirst${shortSuffix}`,
     performingService_middleName: `PSMid${shortSuffix}`,
@@ -71,7 +71,7 @@ export const buildSFLLLHappyPathTestData = (
     performingService_city: `City ${shortSuffix}`,
     performingService_state: "AK: Alaska",
     performingService_zip: "66666",
-    // Section 11 – Signature Block
+    // Section 11 - Signature Block
     signature_prefix: `SP${shortSuffix}`,
     signature_firstName: `SigFirst${shortSuffix}`,
     signature_middleName: `SigMid${shortSuffix}`,
