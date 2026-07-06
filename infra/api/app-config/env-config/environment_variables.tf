@@ -126,7 +126,7 @@ locals {
       secret_store_name = "/api/${var.environment}/enable-simpler-route"
     }
 
-    MAINTENANCE_MODE = {
+    ENABLE_MAINTENANCE_MODE = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/maintenance-mode"
     }
