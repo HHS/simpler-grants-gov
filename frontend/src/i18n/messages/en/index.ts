@@ -2445,12 +2445,18 @@ export const messages = {
   OpportunityCompetition: {
     pageTitle: "Competition",
     metaDescription: "Set up competition details for this opportunity.",
-    sections: {
-      applicationRequirements: "Application requirements",
-      applicationRequirementsSubheader:
-        "What applicants must submit, how they'll be scored, and the format rules.",
-      submissionSetUp: "Submission set-up",
-      submissionSetUpSubheader:
+    leftNavTitle: "On this page",
+    applicationRequirements: "Application requirements",
+    applicationRequirementsSubheader:
+      "What applicants must submit, how they'll be scored, and the format rules.",
+    button: {
+      back: "Back",
+      saveAndExit: "Save and exit",
+      saveAndContinue: "Save and continue",
+    },
+    sectionSubmissionSetUp: {
+      header: "Submission set-up",
+      subHeader:
         "A competition is one apply-window inside an opportunity. Most opportunities have only one.",
       competitionId: "Competition ID",
       competitionIdHint: "An ID if this opportunity has multiple competitions.",
@@ -2467,26 +2473,28 @@ export const messages = {
       expectedApplicationSize: "Expected application size",
       expectedApplicationSizeHint:
         "Approximate file size of a typical submission",
+    },
+    sectionOpenAndCloseDates: {
+      header: "Open and close dates",
+      howDoesThisClose: "How does this opportunity close?",
+      howDoesThisCloseHint:
+        "Most federal opportunities have a single hard deadline. Choose another option only when the program runs differently.",
       openDate: "Open date",
       openDateHint: "First day to start applying.",
       closeDate: "Close date",
       closeDateHint: "Final deadline for all applications",
-      back: "Back",
-      saveAndFinishLater: "Save and finish later",
-      saveAndContinue: "Save and continue",
-      howDoesThisClose: "How does this opportunity close?",
-      howDoesThisCloseHint:
-        "Most federal opportunities have a single hard deadline. Choose another option only when the program runs differently.",
       hardDeadline: "Hard deadline",
       hardDeadlineHint: "All applications must be in by the close date.",
       rollingDeadline: "Rolling deadline",
       rollingDeadlineHint: "Applications are reviewed in cycles.",
       continuousReview: "Continuous review",
       continuousReviewHint: "No close date, open until further notice",
-      openAndCloseDates: "Open and close dates",
-      applicationChecklist: "Application checklist",
-      narrativeFormatInstructions: "Narrative format instructions",
-      navTitle: "On this page",
+    },
+    sectionApplicationChecklist: {
+      header: "Application checklist",
+    },
+    sectionNarrativeFormatInstructions: {
+      header: "Narrative format instructions",
     },
   },
   FeatureFlagsAdmin: {
