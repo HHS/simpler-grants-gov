@@ -26,8 +26,8 @@ from src.db.models.competition_models import (
     Competition,
     CompetitionForm,
     CompetitionInstruction,
-    Form,
 )
+from src.form_schema.forms import get_active_forms
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -205,7 +205,7 @@ class BuildAutomaticOpportunitiesTask(Task):
 
     def create_opportunities(self) -> None:
         # Fetch all non-deprecated forms
-        forms = self.db_session.scalars(select(Form).where(Form.is_deprecated.isnot(True))).all()
+        forms = [form for form in get_active_forms() if not form.is_deprecated]
 
         # For each form, create an opportunity with just that form
         # Use uuid5 to create deterministic UUIDs based on form ID
