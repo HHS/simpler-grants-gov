@@ -423,9 +423,8 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             competition__competition_forms=[],
         )
 
-        sf424 = db_session.merge(SF424_v4_0, load=True)
         competition_form = CompetitionFormFactory.create(
-            competition=application.competition, form=sf424, is_required=True
+            competition=application.competition, form=SF424_v4_0, is_required=True
         )
         ApplicationFormFactory.create(
             application=application,
