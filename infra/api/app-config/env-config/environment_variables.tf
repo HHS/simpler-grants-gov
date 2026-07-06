@@ -128,7 +128,7 @@ locals {
 
     ENABLE_MAINTENANCE_MODE = {
       manage_method     = "manual"
-      secret_store_name = "/api/${var.environment}/maintenance-mode"
+      secret_store_name = "/api/${var.environment}/enable-maintenance-mode"
     }
 
     SAVE_SOAP_MESSAGES_TO_S3 = {
