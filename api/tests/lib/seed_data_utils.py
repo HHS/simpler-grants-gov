@@ -7,6 +7,7 @@ import grants_shared.adapters.db as db
 
 import tests.src.db.models.factories as factories
 from src.auth.api_jwt_auth import ApiJwtConfig, create_jwt_for_user
+from src.constants.static_role_values import E2E_TEST_USER_ROLE
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, Form
 from src.db.models.entity_models import Organization
@@ -156,6 +157,14 @@ class UserBuilder:
             )
 
         return self
+
+    def with_e2e_test_user(self) -> Self:
+        """Flag the user as an E2E test user.
+
+        Grants E2E_TEST_USER_ROLE (the READ_TEST_USER_TOKEN privilege) so the user's auth token
+        can be fetched by the manager API key via POST /v1/internal/e2e-token.
+        """
+        return self.with_internal_role(E2E_TEST_USER_ROLE)
 
     def with_profile(self, first_name: str, last_name: str, middle_name: str | None = None) -> Self:
         """Add a profile to the user."""

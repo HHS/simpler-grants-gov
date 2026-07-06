@@ -10,7 +10,11 @@ from src.legacy_soap_api.grantors.services.confirm_application_delivery_response
     get_confirm_application_delivery_response,
 )
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    GRANTOR_SOAP_ACTION_PATH,
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 from tests.lib.data_factories import setup_cert_user
@@ -54,6 +58,7 @@ def _make_operation_config():
         response_operation_name="ConfirmApplicationDeliveryResponse",
         privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         always_call_simpler=True,
+        soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/ConfirmApplicationDelivery",
     )
 
 

@@ -141,4 +141,4 @@ USER ${RUN_USER}
 # from the WORKDIR (/api) when the file is present. We pass it explicitly as a guardrail --
 # if the config is ever dropped from the image again, gunicorn fails fast at startup
 # instead of silently falling back to its defaults (1 sync worker, 1 thread).
-CMD ["gunicorn", "-c", "gunicorn.conf.py", "--worker-tmp-dir=/dev/shm", "src.app:create_app()", "--log-level", "debug", "--limit-request-field_size", "16384", "--limit-request-fields", "50"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "--worker-tmp-dir=/dev/shm", "src.app:create_app()", "--log-level", "debug"]

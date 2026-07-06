@@ -19,7 +19,11 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     validate_certificate,
     verify_certificate_access,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    GRANTOR_SOAP_ACTION_PATH,
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+)
 from tests.lib.data_factories import get_mtls_urlencoded_str_and_serial_number, setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -185,6 +189,7 @@ def test_verify_certificate_access_fails_if_there_is_no_agency(
         request_operation_name="GetSubmissionListExpandedRequest",
         response_operation_name="GetSubmissionListExpandedResponse",
         privileges={Privilege.LEGACY_AGENCY_VIEWER},
+        soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/UpdateApplicationInfo",
     )
     with pytest.raises(SOAPClientUserDoesNotHavePermission, match="Agency cannot be None"):
         verify_certificate_access(legacy_certificate, soap_config, None)
@@ -204,6 +209,7 @@ def test_verify_certificate_access_fails_if_there_are_no_privileges_set(
         request_operation_name="GetSubmissionListExpandedRequest",
         response_operation_name="GetSubmissionListExpandedResponse",
         privileges=None,
+        soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
     )
     with pytest.raises(SOAPClientUserDoesNotHavePermission, match="Soap Config privileges not set"):
         verify_certificate_access(
@@ -227,6 +233,7 @@ def test_verify_certificate_access_fails_if_users_do_not_have_privileges(
         request_operation_name="GetSubmissionListExpandedRequest",
         response_operation_name="GetSubmissionListExpandedResponse",
         privileges={Privilege.LEGACY_AGENCY_VIEWER},
+        soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
     )
     with pytest.raises(
         SOAPClientUserDoesNotHavePermission,
@@ -257,6 +264,7 @@ def test_verify_certificate_access_does_not_raise_exception_if_user_has_correct_
         request_operation_name="GetSubmissionListExpandedRequest",
         response_operation_name="GetSubmissionListExpandedResponse",
         privileges={Privilege.LEGACY_AGENCY_VIEWER},
+        soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
     )
     verify_certificate_access(
         legacy_certificate,

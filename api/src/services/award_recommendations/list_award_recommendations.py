@@ -8,13 +8,16 @@ from grants_shared.pagination.pagination_models import PaginationInfo, Paginatio
 from grants_shared.pagination.paginator import Paginator
 from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.award_recommendation_models import AwardRecommendation
+from src.db.models.award_recommendation_models import (
+    AwardRecommendation,
+    AwardRecommendationApplicationSubmission,
+)
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.db.models.user_models import User
 from src.search.search_models import UuidSearchFilter
@@ -103,4 +106,43 @@ def list_award_recommendations(
     paginated_results = paginator.page_at(page_offset=params.pagination.page_offset)
     pagination_info = PaginationInfo.from_pagination_params(params.pagination, paginator)
 
+    add_total_received_count_to_award_recommendations(db_session, paginated_results)
+
     return paginated_results, pagination_info
+
+
+def add_total_received_count_to_award_recommendations(
+    db_session: db.Session, award_recommendations: Sequence[AwardRecommendation]
+) -> None:
+    award_recommendation_ids = [
+        award_recommendation.award_recommendation_id
+        for award_recommendation in award_recommendations
+    ]
+
+    if not award_recommendation_ids:
+        return
+
+    count_rows = db_session.execute(
+        select(
+            AwardRecommendationApplicationSubmission.award_recommendation_id,
+            func.count(
+                AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id
+            ).label("total_received_count"),
+        )
+        .where(
+            AwardRecommendationApplicationSubmission.award_recommendation_id.in_(
+                award_recommendation_ids
+            )
+        )
+        .group_by(AwardRecommendationApplicationSubmission.award_recommendation_id)
+    ).all()
+    total_received_counts = {
+        row.award_recommendation_id: int(row.total_received_count) for row in count_rows
+    }
+
+    for award_recommendation in award_recommendations:
+        award_recommendation.award_recommendation_summary = {  # type: ignore[attr-defined]
+            "total_received_count": total_received_counts.get(
+                award_recommendation.award_recommendation_id, 0
+            )
+        }

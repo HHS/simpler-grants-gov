@@ -29,9 +29,12 @@ Feature: Opportunity happy path create and publish
 			| Create Opportunity page | Grant selection method    | select     | Discretionary              |
 			| Create Opportunity page | Assistance listing number | text       | 00.000                     |
 		And I click "Save and continue" button
-		Then I should be on the "Edit Opportunity" page
+		Then I should be on the "Opportunity Overview" page
 		And the URL should include "fromCreate=true"
 		And I should see "Opportunity draft started" confirmation message
+		And I should see the "Opportunity Summary" link
+		And I click "Opportunity Summary"
+		Then I should be on the "Edit Opportunity" page
 		And the "Save" button should be enabled
 		And the "Publish" button should be disabled
 		And the "Preview" button should be disabled
@@ -41,7 +44,7 @@ Feature: Opportunity happy path create and publish
 			| Page Name             | Label                           | Field Type | Value             |
 			| Opportunity edit page | Funding type                    | select     | Grant             |
 			| Opportunity edit page | Category                        | select     | Recovery Act      |
-			| Opportunity edit page | Expected number of awards       | text       | 10                |
+			| Opportunity edit page | Expected number of awards       | text       | 20                |
 			| Opportunity edit page | Estimated total program funding | text       | 1000000           |
 			| Opportunity edit page | Award minimum                   | text       | 50000             |
 			| Opportunity edit page | Award maximum                   | text       | 100000            |
@@ -68,16 +71,14 @@ Feature: Opportunity happy path create and publish
 			| Opportunity edit page | Email display text             | text       | Contact Email                              |
 
 		And I click "Save" button
-		Then I should see "Opportunity draft started" confirmation message
+		Then I should see "Saved successfully"
+		And I should see "Your changes have been saved."
 		And I should see the following values
-			| Page Name             | Label                        | Field Type | Value                                                                                     |
-			| Opportunity edit page | Save confirmation message    | text       | Your initial information has been saved. Complete the sections below to finish your opportunity details |
-			| Opportunity edit page | Opportunity status           | text       | Draft                                                                                     |
-			| Opportunity edit page | Opportunity title            | text       | Title-mm-dd-yyyy-hh-mm-sec                                                                |
-			| Opportunity edit page | Opportunity number           | text       | Opp-mm-dd-yyyy-hh-mm-sec                                                                  |
-			| Opportunity edit page | Grant selection method       | select     | Discretionary                                                                             |
+			| Page Name             | Label              | Field Type | Value                      |
+			| Opportunity edit page | Opportunity status | text       | Draft                      |
+			| Opportunity edit page | Opportunity title  | text       | Title-mm-dd-yyyy-hh-mm-sec |
+			| Opportunity edit page | Opportunity number | text       | Opp-mm-dd-yyyy-hh-mm-sec   |
 
-		And the URL should include "fromCreate=true"
 		And the "Save" button should be enabled
 		And the "Publish" button should be enabled
 		And the "Preview" button should be disabled
@@ -95,7 +96,8 @@ Feature: Opportunity happy path create and publish
 		And I click "Publish" button
 		Then I should be on the "Opportunities List" page
 		And I should see "posted" status in the "Status" column for "Title-mm-dd-yyyy-hh-mm-sec"
-		And I should not see "Edit", "Copy", "Delete" under Actions column for "Title-mm-dd-yyyy-hh-mm-sec"
+		And I should see "Edit" under Actions column for "Title-mm-dd-yyyy-hh-mm-sec"
+		And I should not see "Copy", "Delete" under Actions column for "Title-mm-dd-yyyy-hh-mm-sec"
 
 		When I click on "Title-mm-dd-yyyy-hh-mm-sec"
 		Then I should be on the "Title-mm-dd-yyyy-hh-mm-sec" page
@@ -103,11 +105,10 @@ Feature: Opportunity happy path create and publish
 			| Page Name                | Label                           | Field Type | Value                                      |
 			| Opportunity details page | Opportunity title               | text       | Title-mm-dd-yyyy-hh-mm-sec                |
 			| Opportunity details page | Funding opportunity number      | text       | Opp-mm-dd-yyyy-hh-mm-sec                  |
-			| Opportunity details page | Assistance Listings:            | text       | 00.000 -- Test ALN                         |
+			| Opportunity details page | Assistance Listings:            | text       | 00.000                                    |
 			| Opportunity details page | Funding instrument type         | select     | Cooperative agreement                      |
-			| Opportunity details page | Opportunity Category            | select     | Discretionary                              |
 			| Opportunity details page | Category of Funding Activity    | select     | Recovery act                               |
-			| Opportunity details page | Expected awards                 | text       | 10                                         |
+			| Opportunity details page | Expected awards                 | text       | 20                                         |
 			| Opportunity details page | Award Minimum                   | currency   | $50,000                                    |
 			| Opportunity details page | Award Maximum                   | currency   | $100,000                                   |
 			| Opportunity details page | Program Funding                 | currency   | $1,000,000                                 |

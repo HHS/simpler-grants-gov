@@ -72,6 +72,9 @@ inputs:
   staging_client_session_secret:
     description: "encode key for client side JWTs, used in spoofing staging user logins"
     default: ""
+  test_user_manager_api_key:
+    description: "manager API key for the new multi-user test system, used to request auth tokens for test users via POST /v1/internal/e2e-token"
+    default: ""
 
 outputs:
   artifact-id:
@@ -149,6 +152,7 @@ runs:
         STAGING_TEST_USER_MANAGER_API_KEY: ${{ inputs.staging_test_user_manager_api_key }}
         STAGING_TEST_USER_ID: ${{ inputs.staging_test_user_id }}
         SESSION_SECRET_OVERRIDE: ${{ inputs.staging_client_session_secret }}
+        TEST_USER_MANAGER_API_KEY: ${{ inputs.test_user_manager_api_key }}
 
       run: |
         npm run test:e2e
@@ -170,6 +174,7 @@ runs:
         STAGING_TEST_USER_MANAGER_API_KEY: ${{ inputs.staging_test_user_manager_api_key }}
         STAGING_TEST_USER_ID: ${{ inputs.staging_test_user_id }}
         SESSION_SECRET_OVERRIDE: ${{ inputs.staging_client_session_secret }}
+        TEST_USER_MANAGER_API_KEY: ${{ inputs.test_user_manager_api_key }}
 
       run: |
         npm run test:e2e -- --grep "${{ inputs.playwright_tags }}"

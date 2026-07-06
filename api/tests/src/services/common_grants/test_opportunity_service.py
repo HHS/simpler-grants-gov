@@ -118,8 +118,10 @@ class TestCommonGrantsOpportunityService:
             mock_search.return_value = ([], {}, mock_pagination)
 
             search_request = OpportunitySearchRequest()
-            opportunities, pagination_info = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, search_request
+            opportunities, pagination_info, _filter_errors = (
+                CommonGrantsOpportunityService.search_opportunities(
+                    mock_search_client, search_request
+                )
             )
 
             assert isinstance(opportunities, list)
@@ -141,8 +143,10 @@ class TestCommonGrantsOpportunityService:
 
             pagination = PaginatedBodyParams(page=2, page_size=5)
             search_request = OpportunitySearchRequest(pagination=pagination)
-            opportunities, pagination_info = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, search_request
+            opportunities, pagination_info, _filter_errors = (
+                CommonGrantsOpportunityService.search_opportunities(
+                    mock_search_client, search_request
+                )
             )
 
             assert isinstance(opportunities, list)
@@ -164,8 +168,10 @@ class TestCommonGrantsOpportunityService:
 
             sorting = OppSorting(sort_by=OppSortBy.TITLE, sort_order=SortOrder.ASC)
             search_request = OpportunitySearchRequest(sorting=sorting)
-            opportunities, pagination_info = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, search_request
+            opportunities, pagination_info, _filter_errors = (
+                CommonGrantsOpportunityService.search_opportunities(
+                    mock_search_client, search_request
+                )
             )
 
             assert isinstance(opportunities, list)
@@ -190,12 +196,38 @@ class TestCommonGrantsOpportunityService:
             )
             filters = OppFilters(status=status_filter)
             search_request = OpportunitySearchRequest(filters=filters)
-            opportunities, pagination_info = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, search_request
+            opportunities, pagination_info, _filter_errors = (
+                CommonGrantsOpportunityService.search_opportunities(
+                    mock_search_client, search_request
+                )
             )
 
             assert isinstance(opportunities, list)
             # Note: We can't easily verify the filter was applied without checking the actual data
+
+    def test_search_opportunities_surfaces_custom_filter_errors(self, mock_search_client):
+        """Custom-filter errors derived in the transform surface through the service."""
+        with patch(
+            "src.services.common_grants.opportunity_service.search_opportunities"
+        ) as mock_search:
+            mock_pagination = Mock()
+            mock_pagination.page_offset = 1
+            mock_pagination.page_size = 10
+            mock_pagination.total_records = 0
+            mock_pagination.total_pages = 0
+            mock_search.return_value = ([], {}, mock_pagination)
+
+            filters = OppFilters.model_validate(
+                {"customFilters": {"bogus": {"operator": "in", "value": ["x"]}}}
+            )
+            search_request = OpportunitySearchRequest(filters=filters)
+            _opportunities, _pagination_info, filter_errors = (
+                CommonGrantsOpportunityService.search_opportunities(
+                    mock_search_client, search_request
+                )
+            )
+
+            assert "customFilters.bogus: unsupported filter" in filter_errors
 
     def test_search_opportunities_with_text_search(self, mock_search_client):
         """Test searching opportunities with text search."""
@@ -210,8 +242,10 @@ class TestCommonGrantsOpportunityService:
             mock_search.return_value = ([], {}, mock_pagination)
 
             search_request = OpportunitySearchRequest(search="test")
-            opportunities, pagination_info = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, search_request
+            opportunities, pagination_info, _filter_errors = (
+                CommonGrantsOpportunityService.search_opportunities(
+                    mock_search_client, search_request
+                )
             )
 
             assert isinstance(opportunities, list)
@@ -244,8 +278,10 @@ class TestCommonGrantsOpportunityService:
                 pagination=pagination,
                 search="test",
             )
-            opportunities, pagination_info = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, search_request
+            opportunities, pagination_info, _filter_errors = (
+                CommonGrantsOpportunityService.search_opportunities(
+                    mock_search_client, search_request
+                )
             )
 
             assert isinstance(opportunities, list)
@@ -331,8 +367,10 @@ class TestCommonGrantsOpportunityService:
             )
 
             search_request = OpportunitySearchRequest()
-            opportunities, pagination_info = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, search_request
+            opportunities, pagination_info, _filter_errors = (
+                CommonGrantsOpportunityService.search_opportunities(
+                    mock_search_client, search_request
+                )
             )
 
             # Verify that only valid opportunities are in the result
@@ -431,8 +469,10 @@ class TestCommonGrantsOpportunityService:
             mock_search.return_value = ([invalid_opp_1, invalid_opp_2], {}, mock_pagination)
 
             search_request = OpportunitySearchRequest()
-            opportunities, pagination_info = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, search_request
+            opportunities, pagination_info, _filter_errors = (
+                CommonGrantsOpportunityService.search_opportunities(
+                    mock_search_client, search_request
+                )
             )
 
             # Verify that result is empty

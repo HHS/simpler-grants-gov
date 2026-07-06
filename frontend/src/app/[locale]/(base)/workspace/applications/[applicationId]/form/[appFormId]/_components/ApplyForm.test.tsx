@@ -3,6 +3,19 @@ import { render, screen, waitFor } from "@testing-library/react";
 import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyForm";
 import { UiSchema } from "src/types/applyForm/types";
 
+const pushMock = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: pushMock,
+    replace: jest.fn(),
+    refresh: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+  }),
+}));
+
 type FormActionArgs = [
   {
     applicationId: string;
@@ -37,10 +50,6 @@ const getSessionMock = jest.fn();
 
 jest.mock("next/cache", () => ({
   revalidateTag: (tag: string) => mockRevalidateTag(tag),
-}));
-
-jest.mock("src/services/auth/session", () => ({
-  getSession: (): unknown => getSessionMock(),
 }));
 
 jest.mock("src/services/auth/session", () => ({
@@ -121,6 +130,11 @@ const uiSchema: UiSchema = [
 ];
 
 describe("ApplyForm", () => {
+  beforeEach(() => {
+    pushMock.mockClear();
+    mockHandleFormAction.mockClear();
+  });
+
   it("renders form correctly", () => {
     render(
       <ApplyForm
@@ -175,6 +189,10 @@ describe("ApplyForm", () => {
 
     const button = screen.getByTestId("apply-form-save");
     expect(button).toBeInTheDocument();
+
+    expect(screen.getByTestId("apply-form-return")).toBeInTheDocument();
+    expect(screen.getByText("savingAndRefreshing")).toBeInTheDocument();
+    expect(screen.getByText("returnToApplication")).toBeInTheDocument();
   });
 
   it("cannot be edited or saved when application is submitted", () => {
@@ -200,6 +218,106 @@ describe("ApplyForm", () => {
 
     const selectField = screen.getByTestId("Select");
     expect(selectField).toBeDisabled();
+  });
+  it("displays created message when updatedAt is missing", () => {
+    const timestamp = "2026-06-27T12:34:56.000Z";
+
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+        createdAt={timestamp}
+      />,
+    );
+
+    expect(screen.getByText(/createdMessage/i)).toBeInTheDocument();
+  });
+
+  it("displays created message when createdAt equals updatedAt exactly", () => {
+    const timestamp = "2026-06-27T12:34:56.000Z";
+
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+        createdAt={timestamp}
+        updatedAt={timestamp}
+      />,
+    );
+
+    expect(screen.getByText(/createdMessage/i)).toBeInTheDocument();
+  });
+
+  it("displays created message when createdAt and updatedAt differ by <= 1s", () => {
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+        createdAt="2026-06-27T12:34:56.000Z"
+        updatedAt="2026-06-27T12:34:56.500Z"
+      />,
+    );
+
+    expect(screen.getByText(/createdMessage/i)).toBeInTheDocument();
+  });
+
+  it("displays last updated message when updatedAt differs from createdAt", () => {
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+        createdAt="2026-06-26T12:34:56.000Z"
+        updatedAt="2026-06-27T12:34:56.000Z"
+      />,
+    );
+
+    expect(screen.getByText(/lastUpdatedMessage/i)).toBeInTheDocument();
+  });
+
+  it("navigates back to application when return button is clicked", () => {
+    render(
+      <ApplyForm
+        applicationId="application-123"
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="in_progress"
+      />,
+    );
+
+    const returnButton = screen.getByTestId("apply-form-return");
+    returnButton.click();
+
+    expect(pushMock).toHaveBeenCalledWith(
+      "/workspace/applications/application-123",
+    );
   });
 
   it("calls handleFormAction action on save", () => {

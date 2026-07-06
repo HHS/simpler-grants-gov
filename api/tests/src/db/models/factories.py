@@ -1634,7 +1634,6 @@ def _get_default_competition_form() -> competition_models.Form:
 
     CompetitionForm.form is a registry-backed @property — form_id must resolve
     to a registered form. SF424 is used as the fixed default for determinism.
-    The DB row is seeded on first use to satisfy the FK constraint on competition_form.form_id.
 
     Tests that need multiple CompetitionForms for the same competition must pass
     form= explicitly with different forms. Tests that need a form with specific
@@ -1657,23 +1656,16 @@ def _get_default_competition_form() -> competition_models.Form:
 
     session = get_db_session()
 
-    # TODO(#10274): remove db_session.add + flush once the form table is dropped
-    form = session.get(competition_models.Form, SF424_v4_0.form_id)
-    if form is None:
-        # Seed FormInstruction first to satisfy the FK constraint on form.form_instruction_id
-        if (
-            SF424_v4_0.form_instruction_id is not None
-            and session.get(competition_models.FormInstruction, SF424_v4_0.form_instruction_id)
-            is None
-        ):
-            FormInstructionFactory.create(
-                form_instruction_id=SF424_v4_0.form_instruction_id,
-                file_name=f"{SF424_v4_0.short_form_name}.txt",
-            )
-        form = session.merge(SF424_v4_0, load=True)
-        session.flush()
+    if (
+        SF424_v4_0.form_instruction_id is not None
+        and session.get(competition_models.FormInstruction, SF424_v4_0.form_instruction_id) is None
+    ):
+        FormInstructionFactory.create(
+            form_instruction_id=SF424_v4_0.form_instruction_id,
+            file_name=f"{SF424_v4_0.short_form_name}.txt",
+        )
 
-    return form
+    return SF424_v4_0
 
 
 class CompetitionFormFactory(BaseFactory):

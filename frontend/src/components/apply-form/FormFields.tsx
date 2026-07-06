@@ -4,6 +4,7 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaFieldList,
+  UswdsWidgetProps,
 } from "src/types/applyForm/types";
 import {
   getRequiredProperties,
@@ -29,6 +30,7 @@ type RootBudgetFormContext = {
  * - section        > container for grouping fields
  * - field          > a standard renderable field
  * - fieldList      > a repeatable group of fields
+ * - multiField     > a specialized widget that can render multiple fields
  * - null           > placeholder / intentionally empty node
  *
  * When traversing the UiSchema tree we must ensure that we only attempt
@@ -54,12 +56,18 @@ type RootBudgetFormContext = {
  *
  * - `fieldList` nodes are always renderable
  * - `field` nodes contain either `definition` or `schema`
+ * - `multiField` nodes can represent specialized widgets such as Table
  * - `section` nodes contain `children` instead and are excluded
  */
 const isRenderableFieldNode = (
   node: UiSchema[number],
 ): node is UiSchemaField | UiSchemaFieldList => {
-  return node.type === "fieldList" || "definition" in node || "schema" in node;
+  return (
+    node.type === "fieldList" ||
+    node.type === "multiField" ||
+    "definition" in node ||
+    "schema" in node
+  );
 };
 
 /*
@@ -137,13 +145,31 @@ export const FormFields = ({
           requiredField,
         });
 
+        /*
+         * Standard widgets, FieldList, and Table currently share the existing
+         * widget-rendering pipeline.
+         *
+         * Composite widget props are intentionally bridged through
+         * `UswdsWidgetProps` here because renderWidget/widgetComponents is the
+         * existing shared integration point. The individual widgets receive
+         * their more specific prop types inside their component adapters.
+         */
         const field = renderWidget({
           type: widgetConfig.type,
-          props: { ...widgetConfig.props, formContext, isFormLocked },
+          props: {
+            ...widgetConfig.props,
+            formContext,
+            isFormLocked,
+          } as unknown as UswdsWidgetProps,
           definition: "definition" in node ? node.definition : undefined,
         });
 
         if (field) {
+          /*
+           * Prefer a schema-supplied name for stable React keys.
+           * Definition-based fields may not have a name, so their definition
+           * is used as the fallback stable identifier.
+           */
           const nodeKey =
             node.name ??
             ("definition" in node ? node.definition?.toString() : undefined);
@@ -195,7 +221,11 @@ export const FormFields = ({
 
         return renderWidget({
           type: widgetConfig.type,
-          props: { ...widgetConfig.props, formContext, isFormLocked },
+          props: {
+            ...widgetConfig.props,
+            formContext,
+            isFormLocked,
+          } as unknown as UswdsWidgetProps,
           definition: "definition" in node ? node.definition : undefined,
         });
       });

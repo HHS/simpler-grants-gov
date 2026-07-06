@@ -21,12 +21,13 @@ import PrintAttachmentWidget from "./PrintAttachmentWidget";
 import PrintWidget from "./PrintWidget";
 import RadioWidget from "./RadioWidget";
 import SelectWidget from "./SelectWidget";
+import TableWidget from "./TableWidget";
 import TextAreaWidget from "./TextAreaWidget";
 import TextWidget from "./TextWidget";
 
 export const widgetComponents: Record<
   WidgetTypes,
-  (widgetProps: UswdsWidgetProps) => JSX.Element
+  (widgetProps: UswdsWidgetProps) => JSX.Element | null
 > = {
   Text: (widgetProps: UswdsWidgetProps) => TextWidget(widgetProps),
   TextArea: (widgetProps: UswdsWidgetProps) => TextAreaWidget(widgetProps),
@@ -54,4 +55,5 @@ export const widgetComponents: Record<
   MultiSelect: (widgetProps: UswdsWidgetProps) => MultiSelect(widgetProps),
   FieldList: (widgetProps: UswdsWidgetProps) =>
     FieldListWidget(widgetProps as unknown as FieldListWidgetProps),
+  Table: (widgetProps: UswdsWidgetProps) => TableWidget(widgetProps),
 };
