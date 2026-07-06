@@ -1,6 +1,6 @@
 import { expect, type Page } from "@playwright/test";
-import { type DuplicateValidationMetadata } from "tests/e2e/utils/common/types";
 import { escapeRegex } from "tests/e2e/utils/common/regex-utils";
+import { type DuplicateValidationMetadata } from "tests/e2e/utils/common/types";
 
 /**
  * Shared helpers for duplicate-data validation.

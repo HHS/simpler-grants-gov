@@ -55,6 +55,4 @@ export {
   getCharacterLimitedFields,
 } from "./character-limit-fill-data-utils";
 export { getRequiredFields } from "./required-fields-button-state-utils";
-export {
-  fillRequiredFieldsAndAssertButtonState,
-} from "./required-fields-button-state-utils";
+export { fillRequiredFieldsAndAssertButtonState } from "./required-fields-button-state-utils";
