@@ -467,7 +467,7 @@ wheels = [
 
 [[package]]
 name = "grants-shared"
-version = "0.2.11"
+version = "0.2.12"
 source = { virtual = "." }
 dependencies = [
     { name = "apiflask" },

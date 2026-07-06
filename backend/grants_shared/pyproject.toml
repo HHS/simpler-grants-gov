@@ -1,6 +1,6 @@
 [project]
 name = "grants-shared"
-version = "0.2.11"
+version = "0.2.12"
 description = "Shared code used by the Simpler Grants.gov repo"
 readme = "README.md"
 license = "CC0-1.0"
