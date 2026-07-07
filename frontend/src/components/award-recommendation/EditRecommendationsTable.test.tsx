@@ -276,13 +276,14 @@ describe("EditRecommendationsTable", () => {
       expect(screen.getByText("APP-001")).toBeInTheDocument();
     });
 
-    const noneBadges = screen.getAllByText("None");
+    const noneBadges = screen.getAllByText("none");
     expect(noneBadges.length).toBe(2);
 
     // Verify badge styling
     noneBadges.forEach((badge) => {
       expect(badge).toHaveClass("usa-tag");
       expect(badge).toHaveClass("bg-base-lighter");
+      expect(badge).toHaveClass("text-no-wrap");
     });
   });
 

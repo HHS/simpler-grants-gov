@@ -3,7 +3,10 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useSelectedSubmissions } from "src/hooks/useSelectedSubmissions";
 import { PaginationInfo } from "src/types/apiResponseTypes";
-import { AwardRecommendationSubmission } from "src/types/awardRecommendationTypes";
+import {
+  AwardRecommendationSubmission,
+  AwardRecommendationType,
+} from "src/types/awardRecommendationTypes";
 import { formatCurrencyString } from "src/utils/formatCurrencyUtil";
 
 import { useTranslations } from "next-intl";
@@ -26,6 +29,52 @@ const tableCell = (
   cellData,
   className,
 });
+
+const recommendationTypeTagBaseClass =
+  "usa-tag font-sans-sm text-no-uppercase text-ink radius-2 text-no-wrap";
+
+const RecommendationTypeTag = ({
+  recommendationType,
+}: {
+  recommendationType?: AwardRecommendationType;
+}) => {
+  const t = useTranslations(
+    "AwardRecommendation.recommendations.submissions.recommendationOptions",
+  );
+
+  if (!recommendationType) {
+    return (
+      <span className={`${recommendationTypeTagBaseClass} bg-base-lighter`}>
+        {t("none")}
+      </span>
+    );
+  }
+
+  switch (recommendationType) {
+    case "recommended_for_funding":
+      return (
+        <span className={`${recommendationTypeTagBaseClass} bg-info-lighter`}>
+          {t("recommended")}
+        </span>
+      );
+    case "recommended_without_funding":
+      return (
+        <span
+          className={`${recommendationTypeTagBaseClass} bg-accent-warm-lightest`}
+        >
+          {t("recommendedWithoutFunding")}
+        </span>
+      );
+    case "not_recommended":
+      return (
+        <span className={`${recommendationTypeTagBaseClass} bg-error-lighter`}>
+          {t("notRecommended")}
+        </span>
+      );
+    default:
+      return null;
+  }
+};
 
 interface EditRecommendationsTableProps {
   awardRecommendationId: string;
@@ -228,9 +277,9 @@ export default function EditRecommendationsTable({
       ),
       tableCell(detail?.scoring_comment || EMPTY_CELL),
       tableCell(
-        <span className="usa-tag font-sans-sm text-no-uppercase text-ink radius-2 bg-base-lighter">
-          None
-        </span>,
+        <RecommendationTypeTag
+          recommendationType={detail?.award_recommendation_type}
+        />,
       ),
       tableCell(
         formatCurrencyString(appSubmission.total_requested_amount) ||
