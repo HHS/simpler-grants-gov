@@ -25,7 +25,7 @@ export const CommonTextInput = ({
   onTextChange,
   onKeyDown = () => {},
   defaultValue = "",
-  value = "",
+  value,
   rawErrors = [],
 }: {
   labelText: string;
@@ -124,7 +124,7 @@ export const CommonCharacterCount = ({
   isRequired,
   fieldMaxLength,
   defaultValue = "",
-  value = "",
+  value,
   onTextChange,
   onFieldBlur = () => {},
   rawErrors = [],
