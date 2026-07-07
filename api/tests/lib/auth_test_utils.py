@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 
 import flask
 import jwt
+from grants_shared.adapters.oauth.oauth_client_models import OauthTokenResponse
 
-from src.adapters.oauth.oauth_client_models import OauthTokenResponse
 from src.auth.login_gov_jwt_auth import get_config
 
 
@@ -119,5 +119,6 @@ def mock_oauth_endpoint(app, monkeypatch, private_key, mock_oauth_client):
         return mock_oauth_client
 
     monkeypatch.setattr(
-        "src.services.users.login_gov_callback_handler.get_login_gov_client", override_get_client
+        "grants_shared.services.users.login_gov_callback_handler.get_login_gov_client",
+        override_get_client,
     )

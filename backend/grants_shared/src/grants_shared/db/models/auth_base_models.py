@@ -11,9 +11,10 @@ without it referencing the concrete API tables directly.
 import uuid
 from datetime import datetime
 
-from grants_shared.db.models.base import Base
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
+
+from grants_shared.db.models.base import Base
 
 
 class BaseUser(Base):

@@ -126,6 +126,11 @@ locals {
       secret_store_name = "/api/${var.environment}/enable-simpler-route"
     }
 
+    ENABLE_MAINTENANCE_MODE = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/enable-maintenance-mode"
+    }
+
     SAVE_SOAP_MESSAGES_TO_S3 = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/save-soap-messages-to-s3"
