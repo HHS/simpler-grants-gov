@@ -2078,8 +2078,27 @@ export const messages = {
       pageTitle: "Edit recommendations",
       metaDescription: "Edit award recommendations for multiple applications",
       heading: "Edit recommendations",
-      description:
+      pageHeading: "Recommend awards",
+      pageDescription:
         "Select one or more applications to edit recommendations. Search by App #, program title, org name of UEI",
+      selectAll: "Select all",
+      selectRow: "Select row for {appNumber}",
+      selectedCount:
+        "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      showingRange: "Showing {start}-{end} of {total}",
+      loading: "Loading...",
+      errorLoading: "Error loading submissions. Please try again.",
+      editButton: "Edit",
+      columns: {
+        appNumber: "App #",
+        projectTitle: "Project Title",
+        orgName: "Org Name",
+        uei: "UEI",
+        score: "Score",
+        recommendation: "Recommendation",
+        requested: "Requested",
+        recommended: "Recommended",
+      },
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",

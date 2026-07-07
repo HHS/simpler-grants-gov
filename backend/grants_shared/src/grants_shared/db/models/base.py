@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import TIMESTAMP, MetaData, Text, inspect
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import DeclarativeBase, Mapped, declarative_mixin, mapped_column
+from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.functions import now as sqlnow
 
 from grants_shared.util import datetime_util
@@ -84,6 +85,11 @@ class Base(DeclarativeBase):
         See https://rich.readthedocs.io/en/latest/pretty.html#rich-repr-protocol
         """
         return self._dict().items()
+
+    def get_primary_key_value(self) -> tuple:
+        """Get the primary key value for the model as a tuple."""
+        # Note that identity_key returns some other info, but we just return the primary key tuple
+        return identity_key(instance=self)[1]
 
 
 def same_as_created_at(context: Any) -> Any:

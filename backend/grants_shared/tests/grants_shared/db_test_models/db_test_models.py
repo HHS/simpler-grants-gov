@@ -179,13 +179,15 @@ class LinkFriendType(OtherSchemaTable, TimestampMixin):
     )
 
 
-class User(BaseUser, OtherSchemaTable, TimestampMixin):
-    __tablename__ = "user"
+class SharedUser(BaseUser, OtherSchemaTable, TimestampMixin):
+    __tablename__ = "shared_user"
 
-    linked_login_gov_external_user: Mapped[LinkExternalUser | None] = relationship(
-        "LinkExternalUser",
+    shared_user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+
+    linked_login_gov_external_user: Mapped[SharedLinkExternalUser | None] = relationship(
+        "SharedLinkExternalUser",
         primaryjoin=lambda: and_(
-            LinkExternalUser.user_id == User.user_id,
+            SharedLinkExternalUser.shared_user_id == SharedUser.shared_user_id,
         ),
         uselist=False,
         viewonly=True,
@@ -198,22 +200,28 @@ class User(BaseUser, OtherSchemaTable, TimestampMixin):
         return None
 
 
-class LinkExternalUser(BaseLinkExternalUser, OtherSchemaTable, TimestampMixin):
-    __tablename__ = "link_external_user"
+class SharedLinkExternalUser(BaseLinkExternalUser, OtherSchemaTable, TimestampMixin):
+    __tablename__ = "shared_link_external_user"
 
     link_external_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
-    user: Mapped[User] = relationship(User)
+    shared_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(SharedUser.shared_user_id), index=True
+    )
+    shared_user: Mapped[SharedUser] = relationship(SharedUser)
 
 
-class UserTokenSession(BaseUserTokenSession, OtherSchemaTable, TimestampMixin):
-    __tablename__ = "user_token_session"
+class SharedUserTokenSession(BaseUserTokenSession, OtherSchemaTable, TimestampMixin):
+    __tablename__ = "shared_user_token_session"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
-    user: Mapped[User] = relationship(User)
+    shared_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(SharedUser.shared_user_id), primary_key=True
+    )
+    shared_user: Mapped[SharedUser] = relationship(SharedUser)
 
 
-class LoginGovState(BaseLoginGovState, OtherSchemaTable, TimestampMixin):
+class SharedLoginGovState(BaseLoginGovState, OtherSchemaTable, TimestampMixin):
     """Table used to store temporary state during the OAuth login flow"""
 
-    __tablename__ = "login_gov_state"
+    __tablename__ = "shared_login_gov_state"
+
+    shared_login_gov_state_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)

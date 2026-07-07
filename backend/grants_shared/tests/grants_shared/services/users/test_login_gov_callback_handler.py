@@ -1,7 +1,7 @@
 import pytest
 
 from grants_shared.auth.api_jwt_auth import ApiJwtConfig, JwtAuth
-from tests.grants_shared.db.models.factories import LoginGovStateFactory
+from tests.grants_shared.db.models.factories import SharedLoginGovStateFactory
 from tests.grants_shared.test_utils.auth_handler import AuthHandler
 from tests.grants_shared.test_utils.login_gov_callback_handler import LoginGovCallbackHandler
 
@@ -32,10 +32,10 @@ def test_login_callback_handler_handle_callback_request(
     auth_handler = AuthHandler(db_session)
     jwt_auth = JwtAuth(auth_handler, jwt_config)
     login_gov_callback_handler = LoginGovCallbackHandler(auth_handler, jwt_auth)
-    login_gov_state = LoginGovStateFactory.create()
+    login_gov_state = SharedLoginGovStateFactory.create()
     query = {
         "code": "1234",
-        "state": str(login_gov_state.login_gov_state_id),
+        "state": str(login_gov_state.shared_login_gov_state_id),
     }
     login_gov_data_container = login_gov_callback_handler.handle_callback_request(query)
     assert login_gov_data_container.code == query["code"]
