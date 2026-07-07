@@ -3,8 +3,14 @@
 #===================================
 
 # Import existing CloudTrail trails:
-# terraform import aws_cloudtrail.management_events management-events
-# terraform import aws_cloudtrail.pinpoint_events pinpoint-events
+# terraform import 'aws_cloudtrail.management_events[0]' management-events
+# terraform import 'aws_cloudtrail.pinpoint_events[0]' pinpoint-events
+
+locals {
+  # The CloudTrail trails below point at prod-specific S3 log buckets and KMS
+  # keys (account 315341936575)
+  create_cloudtrail = data.aws_caller_identity.current.account_id == "315341936575"
+}
 
 # CloudTrail.5: CloudTrail trails should be integrated with CloudWatch Logs
 
@@ -75,7 +81,13 @@ resource "aws_iam_role_policy" "cloudtrail_cloudwatch" {
 }
 
 # Management events trail
+moved {
+  from = aws_cloudtrail.management_events
+  to   = aws_cloudtrail.management_events[0]
+}
+
 resource "aws_cloudtrail" "management_events" {
+  count = local.create_cloudtrail ? 1 : 0
   #checkov:skip=CKV_AWS_252:Existing trail - SNS topic not currently configured
   name                          = "management-events"
   s3_bucket_name                = "aws-cloudtrail-logs-315341936575-e0de0810"
@@ -98,7 +110,13 @@ resource "aws_cloudtrail" "management_events" {
 }
 
 # Pinpoint events trail
+moved {
+  from = aws_cloudtrail.pinpoint_events
+  to   = aws_cloudtrail.pinpoint_events[0]
+}
+
 resource "aws_cloudtrail" "pinpoint_events" {
+  count = local.create_cloudtrail ? 1 : 0
   #checkov:skip=CKV_AWS_252:Existing trail - SNS topic not currently configured
   name                          = "pinpoint-events"
   s3_bucket_name                = "aws-cloudtrail-logs-315341936575-c2cbd385"
