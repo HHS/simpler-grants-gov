@@ -32,51 +32,22 @@ Users can check messages in DLQ for further analysis, identify the issue, and ma
 - Validation errors
 
 
-## Investigating DLQ Messages
+## Investigating on root cause of the DLQ messages
 
-Before taking action on DLQ messages, investigate the root cause:
-
-### What to check:
-
-1. Message content in AWS Console
-- Go to AWS Console → SQS → `local-workflow-queue-dlq` (or your environment's DLQ)
-- Click "Send and receive messages" → "Poll for messages"
-- Review message body for:
-  - Missing required fields (e.g. `event_id`, `acting_user_id`)
-  - Invalid `workflow_id` or `event_type`
-  - Malformed JSON structure
-
-2. Workflow service logs
-- `"Failed to validate SQS message as WorkflowEvent"` - Validation errors
-- `"Encountered retryable workflow error"` - Retryable errors (UnexpectedStateError, ImplementationMissingError)
-- `"Encountered non-retryable workflow error"` - Non-retryable errors (these don't go to DLQ)
-- `"Workflow event handler exceeded timeout"` - Processing timeouts
-- `"Unexpected error processing workflow event"` - General exceptions
-
-3. Workflow data in database
-- Check workflow state and history:
-  ```sql
-  -- Find workflow by ID from the message
-  SELECT * FROM workflow WHERE id = '<workflow_id>';
-  
-  -- Check workflow event history
-  SELECT * FROM workflow_event_history 
-  WHERE workflow_id = '<workflow_id>' 
-  ORDER BY created_at DESC;
-  
-  -- Check if workflow is in unexpected state
-  SELECT id, current_state, entity_type 
-  FROM workflow 
-  WHERE id = '<workflow_id>';
-  ```
-
-4. Related entity data, depending on `entity_type`
-  - **Opportunity**: Check `opportunity` table
-  - **Award Recommendation**: Check `award_recommendation` table
-  - Verify the entity still exists and is in a valid state
-
-5. Application monitoring and logs
+Primarily check the application monitoring and logs:
   - Check New Relic for additional context and error details, on either API or workflow dashboard
+    - `"Failed to validate SQS message as WorkflowEvent"` - Validation errors
+    - `"Encountered retryable workflow error"` - Retryable errors (UnexpectedStateError, ImplementationMissingError)
+    - `"Encountered non-retryable workflow error"` - Non-retryable errors (these don't go to DLQ)
+    - `"Workflow event handler exceeded timeout"` - Processing timeouts
+    - `"Unexpected error processing workflow event"` - General exceptions
+
+Other checks when necessary:
+  - Message content in AWS Console
+    1. Poll for messages from DLQ in AWS Console
+    2. Review message body for missing field, invalid value or malformed JSON structure
+  - Workflow data in database
+    - DB tables `workflow` and `workflow_event_history`
 
 
 ## DLQ message redrive
@@ -90,20 +61,14 @@ Before taking action on DLQ messages, investigate the root cause:
 ![DLQ redrive step 2](images/DLQ-redrive-2.png)
 
 ### What happens after redrive:
-- Messages are moved back to the main queue (`local-workflow-queue`)
-- Workflow service picks them up automatically (polls every 10 seconds by default)
-- If processing succeeds → messages are deleted and you'll see success message from the log
-- If processing fails again → messages return to DLQ after 3 more attempts
+1. Messages are moved back to the main queue (`local-workflow-queue`)
+2. Workflow service picks them up automatically (polls every 10 seconds by default) and processes again
+    - If processing succeeds → messages are deleted and you'll see success message from the log
+    - If processing fails again → messages return to DLQ after 3 more attempts
 
 ### Verifying the fix worked:
-1. Check workflow service logs for successful processing
-2. Query database to verify workflow state changed:
-   ```sql
-   SELECT id, current_state, updated_at 
-   FROM workflow 
-   WHERE id = '<workflow_id>';
-   ```
-3. Confirm DLQ is empty (or only expected messages remain)
+- Check workflow service logs for successful processing
+- Confirm DLQ is empty (or only expected messages remain)
 
 
 ## DLQ message delete
