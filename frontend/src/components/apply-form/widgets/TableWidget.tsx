@@ -13,6 +13,8 @@ function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
   const { columns, rows } = uiSchemaField.children;
   const expectedCellCount = columns.length;
 
+  // A Table row must provide one cell for each configured column.
+  // Throw early so malformed UI schema configuration does not render a misaligned table.
   rows.forEach((row, rowIndex) => {
     if (!Array.isArray(row.cells) || row.cells.length !== expectedCellCount) {
       throw new Error(
