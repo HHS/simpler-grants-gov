@@ -1,5 +1,6 @@
 "use client";
 
+import { AgencyContact } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/AgencyContact";
 import { OpenAndCloseDates } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/OpenAndCloseDates";
 import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
 
@@ -53,6 +54,7 @@ export function CompetitionForm({
               </p>
               <SubmissionSetUp />
               <OpenAndCloseDates />
+              <AgencyContact />
             </div>
             <div className="display-flex flex-justify margin-top-4">
               <div className="display-flex gap-2">

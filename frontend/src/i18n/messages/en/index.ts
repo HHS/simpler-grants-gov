@@ -2488,6 +2488,22 @@ export const messages = {
       narrativeFormatInstructions: "Narrative format instructions",
       navTitle: "On this page",
     },
+    sectionAgencyContact: {
+      header: "Agency contact",
+      subHeader:
+        "Grantor contact details. Provide the name, email, and phone number for the agency contact.",
+      fullName: "Full name",
+      personTitle: "Title",
+      emailAddress: "Email address",
+      emailAddressHint: "For example: example@mail.com",
+      phoneNumber: "Phone number",
+      phoneNumberHint: "10-digit, for example: (999) 999-9999",
+      error: {
+        requiredEmail: "Email address is required.",
+        invalidEmail:
+          "Please enter a valid email address (e.g., name@example.com).",
+      },
+    },
   },
   FeatureFlagsAdmin: {
     heading: "Refresh your page",

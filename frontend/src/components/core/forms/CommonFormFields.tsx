@@ -23,7 +23,9 @@ export const CommonTextInput = ({
   isRequired,
   fieldMaxLength,
   onTextChange,
+  onKeyDown = () => {},
   defaultValue = "",
+  value = "",
   rawErrors = [],
 }: {
   labelText: string;
@@ -32,7 +34,9 @@ export const CommonTextInput = ({
   isRequired: boolean;
   fieldMaxLength: number;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   defaultValue?: string;
+  value?: string;
   rawErrors?: string[];
 }) => {
   const error = rawErrors.length ? true : undefined;
@@ -51,9 +55,11 @@ export const CommonTextInput = ({
           name={fieldId}
           id={fieldId}
           onChange={onTextChange}
+          onKeyDown={onKeyDown}
           maxLength={fieldMaxLength}
           style={{ maxWidth: "550px" }}
           defaultValue={defaultValue}
+          value={value}
         />
       </FormGroup>
     </>
@@ -118,7 +124,9 @@ export const CommonCharacterCount = ({
   isRequired,
   fieldMaxLength,
   defaultValue = "",
+  value = "",
   onTextChange,
+  onFieldBlur = () => {},
   rawErrors = [],
   disabled = false,
 }: {
@@ -130,7 +138,9 @@ export const CommonCharacterCount = ({
   isRequired: boolean;
   fieldMaxLength: number;
   defaultValue?: string;
+  value?: string;
   onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onFieldBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   rawErrors?: string[];
   disabled?: boolean;
 }) => {
@@ -150,7 +160,9 @@ export const CommonCharacterCount = ({
           name={fieldId}
           maxLength={fieldMaxLength}
           defaultValue={defaultValue}
+          value={value}
           onChange={onTextChange}
+          onBlur={onFieldBlur}
           isTextArea={isTextArea}
           aria-describedby={`label-for-${fieldId}`}
           disabled={disabled}
