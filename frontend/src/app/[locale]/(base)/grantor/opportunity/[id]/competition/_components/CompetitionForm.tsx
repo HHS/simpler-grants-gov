@@ -32,6 +32,10 @@ export function CompetitionForm({
       href: "submission-set-up",
     },
     {
+      text: t("sectionAgencyContact.header"),
+      href: "agency-contact",
+    },
+    {
       text: t("sectionOpenAndCloseDates.header"),
       href: "open-and-close-dates",
     },
@@ -63,8 +67,8 @@ export function CompetitionForm({
                 {t("applicationRequirementsSubheader")}
               </p>
               <SubmissionSetUp />
-              <OpenAndCloseDates />
               <AgencyContact />
+              <OpenAndCloseDates />
             </div>
             <div className="display-flex flex-justify margin-top-4">
               <div className="display-flex gap-2">
