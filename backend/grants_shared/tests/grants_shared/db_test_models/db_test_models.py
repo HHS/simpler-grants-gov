@@ -2,11 +2,17 @@ import uuid
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import UUID, ForeignKey
+from sqlalchemy import UUID, ForeignKey, and_
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from grants_shared.db.models.auth_base_models import (
+    BaseLinkExternalUser,
+    BaseLoginGovState,
+    BaseUser,
+    BaseUserTokenSession,
+)
 from grants_shared.db.models.base import Base, TimestampMixin
 from grants_shared.db.models.lookup import (
     Lookup,
@@ -171,3 +177,43 @@ class LinkFriendType(OtherSchemaTable, TimestampMixin):
         ForeignKey(LkFriendType.friend_type_id),
         primary_key=True,
     )
+
+
+class User(BaseUser, OtherSchemaTable, TimestampMixin):
+    __tablename__ = "user"
+
+    linked_login_gov_external_user: Mapped[LinkExternalUser | None] = relationship(
+        "LinkExternalUser",
+        primaryjoin=lambda: and_(
+            LinkExternalUser.user_id == User.user_id,
+        ),
+        uselist=False,
+        viewonly=True,
+    )
+
+    @property
+    def email(self) -> str | None:
+        if self.linked_login_gov_external_user is not None:
+            return self.linked_login_gov_external_user.email
+        return None
+
+
+class LinkExternalUser(BaseLinkExternalUser, OtherSchemaTable, TimestampMixin):
+    __tablename__ = "link_external_user"
+
+    link_external_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
+    user: Mapped[User] = relationship(User)
+
+
+class UserTokenSession(BaseUserTokenSession, OtherSchemaTable, TimestampMixin):
+    __tablename__ = "user_token_session"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
+    user: Mapped[User] = relationship(User)
+
+
+class LoginGovState(BaseLoginGovState, OtherSchemaTable, TimestampMixin):
+    """Table used to store temporary state during the OAuth login flow"""
+
+    __tablename__ = "login_gov_state"

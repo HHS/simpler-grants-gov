@@ -9,11 +9,9 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Form
 from src.form_schema.forms.epa_key_contacts import (
     FORM_XML_TRANSFORM_RULES as EPA_KEY_CONTACTS_TRANSFORM_RULES,
 )
@@ -443,9 +441,7 @@ class TestEPAKeyContactsXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def epa_key_contacts_application(
-        self, enable_factory_create, db_session: db.Session, seed_form_registry
-    ):
+    def epa_key_contacts_application(self, enable_factory_create, seed_form_registry):
         """Create an application with EPA Key Contacts form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -468,7 +464,7 @@ class TestEPAKeyContactsXSDValidation:
             competition_forms=[],
         )
 
-        epa_kc_form = db_session.get(Form, EPA_KEY_CONTACT_v2_0.form_id)
+        epa_kc_form = EPA_KEY_CONTACT_v2_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="EPA Key Contacts Test Application"
@@ -525,7 +521,7 @@ class TestEPAKeyContactsXSDValidation:
 
     @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_submission_xml_validates_against_xsd(
-        self, epa_key_contacts_application, xsd_validator, db_session
+        self, epa_key_contacts_application, xsd_validator
     ):
         """Test that complete EPA Key Contacts submission XML validates against XSD schema."""
         application_submission = ApplicationSubmissionFactory.create(
@@ -568,7 +564,7 @@ class TestEPAKeyContactsXSDValidation:
 
     @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_empty_form_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that EPA Key Contacts with no contacts validates against XSD (all elements are optional)."""
         agency = AgencyFactory.create()
@@ -592,7 +588,7 @@ class TestEPAKeyContactsXSDValidation:
             competition_forms=[],
         )
 
-        epa_kc_form = db_session.get(Form, EPA_KEY_CONTACT_v2_0.form_id)
+        epa_kc_form = EPA_KEY_CONTACT_v2_0
 
         application = ApplicationFactory.create(
             competition=competition,

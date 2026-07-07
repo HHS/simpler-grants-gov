@@ -8,7 +8,7 @@ import {
 } from "src/components/core/forms/CommonFormFields";
 
 export function SubmissionSetUp() {
-  const t = useTranslations("OpportunityCompetition.sections");
+  const t = useTranslations("OpportunityCompetition.sectionSubmissionSetUp");
 
   return (
     <div
@@ -16,10 +16,10 @@ export function SubmissionSetUp() {
       className="margin-top-4 padding-bottom-4 border-bottom border-base-lighter simpler-page-anchor-offset"
     >
       <h2 className="font-heading-lg margin-top-0 margin-bottom-1">
-        {t("submissionSetUp")}
+        {t("header")}
       </h2>
       <p className="font-body-md text-base-dark margin-top-0">
-        {t("submissionSetUpSubheader")}
+        {t("subHeader")}
       </p>
       <div className="grid-row grid-gap-2">
         <div className="tablet:grid-col">

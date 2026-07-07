@@ -8,6 +8,7 @@ from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import Competition, CompetitionForm, Form
 from src.db.models.user_models import User
+from src.form_schema.forms import get_active_forms
 from src.services.competition_alpha.get_competition import get_competition
 
 logger = logging.getLogger(__name__)
@@ -72,13 +73,12 @@ def set_competition_forms(
     requested_forms = json_data["forms"]
     requested_form_ids = [f["form_id"] for f in requested_forms]
 
-    # Validate all forms exist and are not deprecated
-    forms_db = (
-        db_session.query(Form)
-        .filter(Form.form_id.in_(requested_form_ids), Form.is_deprecated.isnot(True))
-        .all()
-    )
-    if len(forms_db) != len(requested_form_ids):
+    # Validate all requested forms exist in the registry and are not deprecated
+    active_forms_by_id = {
+        form.form_id: form for form in get_active_forms() if not form.is_deprecated
+    }
+    invalid_ids = [fid for fid in requested_form_ids if fid not in active_forms_by_id]
+    if invalid_ids:
         raise_flask_error(404, "One or more forms were not found or is deprecated")
 
     # Reconcile competition forms (add/update/remove)
@@ -86,7 +86,7 @@ def set_competition_forms(
         db_session,
         competition=competition,
         requested_forms=requested_forms,
-        forms_by_id={form.form_id: form for form in forms_db},
+        forms_by_id={fid: active_forms_by_id[fid] for fid in requested_form_ids},
     )
 
     return competition

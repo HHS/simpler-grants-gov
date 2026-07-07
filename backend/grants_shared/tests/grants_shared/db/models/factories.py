@@ -83,3 +83,29 @@ class FriendTableFactory(BaseFactory):
         elements=[f for f in db_test_models.FriendType],
         unique=True,
     )
+
+
+class UserFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.User
+
+    user_id = Generators.UuidObj
+
+
+class LinkExternalUserFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.LinkExternalUser
+
+    link_external_user_id = Generators.UuidObj
+    external_user_id = Generators.UuidObj
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+    email = factory.Faker("email")
+
+
+class LoginGovStateFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.LoginGovState
+
+    login_gov_state_id = Generators.UuidObj
+    nonce = Generators.UuidObj

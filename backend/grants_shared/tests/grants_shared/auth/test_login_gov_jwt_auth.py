@@ -5,25 +5,12 @@ import freezegun
 import jwt
 import pytest
 
-import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
-from src.auth.login_gov_jwt_auth import JwtValidationError, LoginGovConfig, validate_token
+import grants_shared.auth.login_gov_jwt_auth as login_gov_jwt_auth
+from grants_shared.auth.login_gov_jwt_auth import JwtValidationError, validate_token
 
 DEFAULT_CLIENT_ID = "urn:gov:unit-test"
 DEFAULT_ISSUER = "http://localhost:3000"
 DEFAULT_NONCE = "abc123"
-
-
-@pytest.fixture
-def login_gov_config(public_rsa_key, private_rsa_key):
-    # Note this isn't session scoped so it gets remade
-    # for every test in the event of changes to it
-    return LoginGovConfig(
-        LOGIN_GOV_PUBLIC_KEY_MAP={"test-key-id": public_rsa_key},
-        LOGIN_GOV_JWK_ENDPOINT="not_used",
-        LOGIN_GOV_ENDPOINT=DEFAULT_ISSUER,
-        LOGIN_GOV_CLIENT_ID=DEFAULT_CLIENT_ID,
-        LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY=private_rsa_key,
-    )
 
 
 def create_jwt(
