@@ -232,8 +232,11 @@ describe("buildFormTreeRecursive", () => {
               ],
               rows: [
                 {
-                  rowHeader: "First Row",
                   cells: [
+                    {
+                      type: "plainText",
+                      staticContent: "First Row",
+                    },
                     {
                       type: "input",
                       definition: "/properties/first_value",
@@ -272,13 +275,13 @@ describe("buildFormTreeRecursive", () => {
     expect(table).toBeInTheDocument();
     expect(screen.getAllByRole("columnheader")).toHaveLength(3);
     expect(screen.getAllByRole("row")).toHaveLength(2);
+    expect(screen.getAllByRole("cell")).toHaveLength(3);
 
     expect(
       screen.getByRole("columnheader", { name: "Item" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("rowheader", { name: "First Row" }),
-    ).toBeInTheDocument();
+
+    expect(screen.getByText("First Row")).toBeInTheDocument();
   });
 
   describe("FormFields formContext forwarding", () => {

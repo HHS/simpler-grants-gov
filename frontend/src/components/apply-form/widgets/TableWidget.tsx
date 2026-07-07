@@ -10,13 +10,11 @@ function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
     return null;
   }
 
-  // The first configured column is rendered from rowHeader, so cells only
-  // represent the remaining data columns.
   const { columns, rows } = uiSchemaField.children;
-  const expectedCellCount = columns.length - 1;
+  const expectedCellCount = columns.length;
 
   rows.forEach((row, rowIndex) => {
-    if (row.cells.length !== expectedCellCount) {
+    if (!Array.isArray(row.cells) || row.cells.length !== expectedCellCount) {
       throw new Error(
         `Table row ${rowIndex + 1} must contain exactly ${expectedCellCount} cells.`,
       );
@@ -50,12 +48,11 @@ function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
         </tr>
       </thead>
       <tbody>
-        {rows.map((row) => (
-          <tr key={row.rowHeader}>
-            <th scope="row">{row.rowHeader}</th>
+        {rows.map((row, rowIndex) => (
+          <tr key={`table-row-${rowIndex}`}>
             {row.cells.map((cell, cellIndex) => (
               <td
-                key={`${row.rowHeader}-${cellIndex}`}
+                key={`table-row-${rowIndex}-cell-${cellIndex}`}
                 data-table-cell-type={cell.type}
               >
                 {cell.type === "plainText" ? cell.staticContent : null}
