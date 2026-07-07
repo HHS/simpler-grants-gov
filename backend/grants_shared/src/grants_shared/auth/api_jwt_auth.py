@@ -76,7 +76,7 @@ def generate_jwt(
         "aud": config.audience,
         "iss": config.issuer,
         "email": email,
-        "user_id": str(user.user_id),
+        "user_id": str(user.get_user_id()),
         "session_duration_minutes": config.token_expiration_minutes,
     }
 
@@ -116,7 +116,7 @@ class JwtAuth[USER: BaseUser, USER_TOKEN_SESSION: BaseUserTokenSession]:
         logger.info(
             "Created JWT token",
             extra={
-                "auth.user_id": user.user_id,
+                "auth.user_id": user.get_user_id(),
                 "auth.token_id": user_token_session.token_id,
             },
         )
