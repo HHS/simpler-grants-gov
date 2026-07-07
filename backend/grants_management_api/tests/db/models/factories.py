@@ -1,13 +1,14 @@
 from datetime import datetime
 
 import factory
+import factory.fuzzy
 import faker
 import grants_shared.adapters.db as db
 from grants_shared.util import datetime_util
 from sqlalchemy.orm import scoped_session
 
 import src.db.models.user_models as user_models
-from src.constants.lookup_constants import UserType
+from src.constants.lookup_constants import ExternalUserType, UserType
 
 fake = faker.Faker()
 
@@ -54,9 +55,51 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = "commit"
 
 
+###################
+# User & Auth Factories
+###################
+
+
 class UserFactory(BaseFactory):
     class Meta:
         model = user_models.User
 
     user_id = Generators.UuidObj
     user_type = UserType.STANDARD
+
+
+class LinkExternalUserFactory(BaseFactory):
+    class Meta:
+        model = user_models.LinkExternalUser
+
+    link_external_user_id = Generators.UuidObj
+    external_user_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    external_user_type = factory.fuzzy.FuzzyChoice(ExternalUserType)
+
+    email = factory.Faker("email")
+
+
+class LoginGovStateFactory(BaseFactory):
+    class Meta:
+        model = user_models.LoginGovState
+
+    login_gov_state_id = Generators.UuidObj
+    nonce = Generators.UuidObj
+
+
+class UserTokenSessionFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserTokenSession
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    token_id = Generators.UuidObj
+
+    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+10d")
+
+    is_valid = True

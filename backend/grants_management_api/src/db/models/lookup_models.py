@@ -8,7 +8,7 @@ from grants_shared.db.models.lookup import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.constants.lookup_constants import UserType
+from src.constants.lookup_constants import ExternalUserType, UserType
 from src.db.models.grantor_schema_table import GrantorSchemaTable
 
 #######################################################
@@ -23,6 +23,10 @@ USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
         LookupStr(UserType.STANDARD, 1),
         LookupStr(UserType.INTERNAL_FRONTEND, 2),
     ]
+)
+
+EXTERNAL_USER_TYPE_CONFIG: LookupConfig[ExternalUserType] = LookupConfig(
+    [LookupStr(ExternalUserType.LOGIN_GOV, 1)]
 )
 
 #######################################################
@@ -59,3 +63,17 @@ class LkUserType(GrantorLookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> LkUserType:
         return LkUserType(user_type_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(EXTERNAL_USER_TYPE_CONFIG)
+class LkExternalUserType(GrantorLookupTable, TimestampMixin):
+    __tablename__ = "lk_external_user_type"
+
+    external_user_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkExternalUserType:
+        return LkExternalUserType(
+            external_user_type_id=lookup.lookup_val, description=lookup.get_description()
+        )

@@ -10,3 +10,7 @@ class JobType(StrEnum):
 class UserType(StrEnum):
     STANDARD = "standard"
     INTERNAL_FRONTEND = "internal_frontend"
+
+
+class ExternalUserType(StrEnum):
+    LOGIN_GOV = "login_gov"
