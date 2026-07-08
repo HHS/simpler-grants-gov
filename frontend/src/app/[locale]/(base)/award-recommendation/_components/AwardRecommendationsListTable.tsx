@@ -163,14 +163,6 @@ export default function AwardRecommendationsListTable({
     },
   );
 
-  if (loading && awardRecommendations.length === 0) {
-    return (
-      <div className="display-flex flex-justify-center padding-y-4">
-        <Spinner className="height-3 width-3" />
-      </div>
-    );
-  }
-
   return (
     <>
       {apiError && (
@@ -184,24 +176,40 @@ export default function AwardRecommendationsListTable({
       {!loading && awardRecommendations.length === 0 ? (
         <p>{t("empty")}</p>
       ) : (
-        <>
-          <TableWithResponsiveHeader
-            headerContent={headers}
-            tableRowData={rows}
-          />
+        <div className="position-relative" aria-busy={loading}>
+          {loading && (
+            <div
+              className="position-absolute top-0 left-0 width-full height-full display-flex flex-justify-center flex-align-center"
+              style={{ backgroundColor: "rgba(255, 255, 255, 0.65)" }}
+            >
+              <Spinner className="height-3 width-3" />
+            </div>
+          )}
+
+          <TableWithResponsiveHeader headerContent={headers} tableRowData={rows} />
+
           {awardRecommendations.length > 0 && (
             <Pagination
               pathname=""
               totalPages={totalPages}
               currentPage={page}
               maxSlots={7}
-              onClickNext={() => setPage(page + 1)}
-              onClickPrevious={() => setPage(page > 1 ? page - 1 : 1)}
-              onClickPageNumber={(_, nextPage) => setPage(nextPage)}
+              onClickNext={() => {
+                if (loading) return;
+                setPage(page + 1);
+              }}
+              onClickPrevious={() => {
+                if (loading) return;
+                setPage(page > 1 ? page - 1 : 1);
+              }}
+              onClickPageNumber={(_, nextPage) => {
+                if (loading) return;
+                setPage(nextPage);
+              }}
               aria-disabled={loading}
             />
           )}
-        </>
+        </div>
       )}
     </>
   );
