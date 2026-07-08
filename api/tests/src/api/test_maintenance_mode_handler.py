@@ -1,8 +1,7 @@
 import logging
 
 import pytest
-
-from src.maintenance_mode import MaintenanceModeLogEvent, get_maintenance_mode_config
+from grants_shared.api.maintenance_mode import MaintenanceModeLogEvent, get_maintenance_mode_config
 
 
 @pytest.fixture

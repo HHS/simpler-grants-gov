@@ -606,7 +606,7 @@ wheels = [
 
 [[package]]
 name = "grants-shared"
-version = "0.2.14"
+version = "0.2.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apiflask" },
@@ -629,9 +629,9 @@ dependencies = [
     { name = "smart-open" },
     { name = "sqlalchemy", extra = ["mypy"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8d/9c/9d5a3b5e2e8d0c8e08d1f28832dca7b6c1f6c30a716a1eb978bfa1b2ba0e/grants_shared-0.2.14.tar.gz", hash = "sha256:a24882c586c2d9ad9c61788b4bf613e2a7b66ffa6f0233fa019a142e4a116500", size = 69312, upload-time = "2026-07-08T14:03:27.122Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/bb/4c62e4513325c224ce417fa557776767a0bf4e938bd9f24ecfad57076a6b/grants_shared-0.2.15.tar.gz", hash = "sha256:48e362d6fac924572660cef59ea733f57f8d1791f810e3b45660aa100cd52159", size = 70335, upload-time = "2026-07-08T16:44:05.939Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9b/22/19683889d0e18c467c5f0f1d74d353b341ac6fce5ec3ba174ea2c5442a4b/grants_shared-0.2.14-py3-none-any.whl", hash = "sha256:582b4e0443b6fe5ead5efa0c2d1a292d16276fe2d089dc95c595a0746f80e30f", size = 89865, upload-time = "2026-07-08T14:03:25.96Z" },
+    { url = "https://files.pythonhosted.org/packages/96/31/ba34b74e614018d8c49881b9cb4bc99fdb5ed8d991adcd75c9572cce4867/grants_shared-0.2.15-py3-none-any.whl", hash = "sha256:760188ef6a293599441c5b1be68a4bf4d24195fb6e89948fe8492973609f4ee3", size = 91269, upload-time = "2026-07-08T16:44:04.744Z" },
 ]
 
 [[package]]
@@ -1773,7 +1773,7 @@ requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1,<0.8" },
     { name = "docraptor", specifier = ">=3.0.0,<4" },
     { name = "flask-cors", specifier = ">=6.0.0,<7" },
-    { name = "grants-shared", specifier = "==0.2.14" },
+    { name = "grants-shared", specifier = "==0.2.15" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
     { name = "jinja2", specifier = ">=3.1.5" },
     { name = "jsonpath-ng", specifier = ">=1.7.0,<2" },

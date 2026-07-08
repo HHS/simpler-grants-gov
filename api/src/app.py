@@ -8,10 +8,10 @@ import grants_shared.adapters.db.flask_db as flask_db
 import grants_shared.logs
 import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
-from flask import Response, request
+from flask import Response
 from flask_cors import CORS
+from grants_shared.api.maintenance_mode import register_maintenance_mode_handler
 from grants_shared.api.response import restructure_error_response
-from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.api.schemas import response_schema
 from grants_shared.auth.api_jwt_auth import initialize_jwt_auth
 from grants_shared.auth.login_gov_jwt_auth import initialize_login_gov_config
@@ -46,11 +46,6 @@ from src.auth.auth_utils import get_app_security_scheme
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.form_schema.forms import init_form_registry
 from src.legacy_soap_api import init_app as init_legacy_soap_api
-from src.maintenance_mode import (
-    MaintenanceModeLogEvent,
-    get_maintenance_mode_config,
-    is_maintenance_mode_enabled,
-)
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.services.files.local_file_scanner import setup_local_file_scanner
 from src.task import task_blueprint
@@ -111,7 +106,7 @@ def create_app() -> APIFlask:
     # Registered after setup_logging so the logging before_request handlers run
     # first (rejections still produce start/end request logs), and before auth so
     # unauthenticated clients see a 503 rather than a 401 during maintenance.
-    register_maintenance_mode_handler(app)
+    register_maintenance_mode_handler(app, MAINTENANCE_MODE_ALLOWLIST)
     init_newrelic()
     register_db_client(app)
 
@@ -142,26 +137,6 @@ def create_app() -> APIFlask:
 def setup_logging(app: APIFlask) -> None:
     grants_shared.logs.init(__package__)
     flask_logger.init_app(logging.root, app, "simpler-grants")
-
-
-def register_maintenance_mode_handler(app: APIFlask) -> None:
-    @app.before_request
-    def reject_if_maintenance_mode() -> None:
-        if not is_maintenance_mode_enabled():
-            return
-
-        if request.path in MAINTENANCE_MODE_ALLOWLIST:
-            return
-
-        logger.info(
-            "Request rejected due to maintenance mode",
-            extra={"maintenance_mode_event": MaintenanceModeLogEvent.REQUEST_REJECTED},
-        )
-        raise_flask_error(
-            503,
-            message="API is undergoing scheduled maintenance",
-            headers={"Retry-After": str(get_maintenance_mode_config().retry_after_seconds)},
-        )
 
 
 def register_db_client(app: APIFlask) -> None:
