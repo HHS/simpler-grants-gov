@@ -27,7 +27,6 @@ export async function listAwardRecommendations(request: NextRequest) {
     });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
-    console.error(e);
     return Response.json(
       {
         message: `Error attempting to fetch award recommendations: ${message}`,
