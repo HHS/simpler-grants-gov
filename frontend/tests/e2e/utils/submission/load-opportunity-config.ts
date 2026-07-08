@@ -2,6 +2,10 @@ import { PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtu
 import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import { SF424_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424-data";
 import { SF424_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424-field-definitions";
+import { SF424A_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424a-data";
+import { SF424A_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424a-field-definitions";
+import { SFLLL_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sfLLL-data";
+import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
 import type { FillFormConfig } from "tests/e2e/utils/common/types";
 
 import type {
@@ -17,6 +21,8 @@ import type {
 const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
   SF424_OPPORTUNITY_DATA,
+  SF424A_OPPORTUNITY_DATA,
+  SFLLL_OPPORTUNITY_DATA,
 ];
 
 /**
@@ -26,6 +32,8 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
 const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   projectAbstractSummary: PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,
   sf424: SF424_FORM_CONFIG,
+  sf424a: SF424A_FORM_CONFIG,
+  sfLLL: SFLLL_FORM_CONFIG,
 };
 
 /**

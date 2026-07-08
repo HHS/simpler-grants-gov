@@ -3,11 +3,9 @@
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Form
 from src.form_schema.forms.supplementary_neh_cover_sheet import (
     FORM_XML_TRANSFORM_RULES as NEH_COVER_SHEET_TRANSFORM_RULES,
 )
@@ -497,9 +495,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def neh_cover_sheet_application(
-        self, enable_factory_create, db_session: db.Session, seed_form_registry
-    ):
+    def neh_cover_sheet_application(self, enable_factory_create, seed_form_registry):
         """Create an application with NEH Cover Sheet form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -522,7 +518,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
             competition_forms=[],
         )
 
-        neh_form = db_session.get(Form, SupplementaryNEHCoverSheet_v3_0.form_id)
+        neh_form = SupplementaryNEHCoverSheet_v3_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="NEH Cover Sheet Test Application"
@@ -559,7 +555,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
 
     @pytest.mark.skip(reason="Fix existing skipped XSD validation tests #10424")
     def test_neh_cover_sheet_submission_xml_validates_against_xsd(
-        self, neh_cover_sheet_application, xsd_validator, db_session
+        self, neh_cover_sheet_application, xsd_validator
     ):
         """Test that complete NEH Cover Sheet submission XML validates against XSD schema."""
         # Create application submission
@@ -614,7 +610,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
         )
 
     def test_neh_cover_sheet_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that NEH Cover Sheet with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -638,7 +634,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
             competition_forms=[],
         )
 
-        neh_form = db_session.get(Form, SupplementaryNEHCoverSheet_v3_0.form_id)
+        neh_form = SupplementaryNEHCoverSheet_v3_0
 
         application = ApplicationFactory.create(
             competition=competition,

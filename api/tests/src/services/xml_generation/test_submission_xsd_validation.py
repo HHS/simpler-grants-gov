@@ -6,11 +6,9 @@ using SubmissionXMLAssembler, and validate the output against XSD schemas.
 
 from datetime import date
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Form
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
 from src.form_schema.forms.sflll import SFLLL_v2_0
@@ -47,7 +45,7 @@ class TestSubmissionXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def sf424_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
+    def sf424_application(self, enable_factory_create, seed_form_registry):
         """Create an application with SF-424 form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -70,7 +68,7 @@ class TestSubmissionXSDValidation:
             competition_forms=[],
         )
 
-        sf424_form = db_session.get(Form, SF424_v4_0.form_id)
+        sf424_form = SF424_v4_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="End-to-End Test Application"
@@ -135,7 +133,7 @@ class TestSubmissionXSDValidation:
         return application
 
     @pytest.fixture
-    def sf424a_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
+    def sf424a_application(self, enable_factory_create, seed_form_registry):
         """Create an application with SF-424A form and realistic budget data."""
         agency = AgencyFactory.create()
 
@@ -158,7 +156,7 @@ class TestSubmissionXSDValidation:
             competition_forms=[],
         )
 
-        sf424a_form = db_session.get(Form, SF424a_v1_0.form_id)
+        sf424a_form = SF424a_v1_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="Budget Test Application"
@@ -219,9 +217,7 @@ class TestSubmissionXSDValidation:
 
         return application
 
-    def test_sf424_submission_xml_validates_against_xsd(
-        self, sf424_application, xsd_validator, db_session
-    ):
+    def test_sf424_submission_xml_validates_against_xsd(self, sf424_application, xsd_validator):
         """Test that complete SF-424 submission XML validates against XSD schema."""
         # Create application submission
         application_submission = ApplicationSubmissionFactory.create(
@@ -267,9 +263,7 @@ class TestSubmissionXSDValidation:
         )
 
     @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
-    def test_sf424a_submission_xml_validates_against_xsd(
-        self, sf424a_application, xsd_validator, db_session
-    ):
+    def test_sf424a_submission_xml_validates_against_xsd(self, sf424a_application, xsd_validator):
         """Test that complete SF-424A submission XML validates against XSD schema."""
         # Create application submission
         application_submission = ApplicationSubmissionFactory.create(
@@ -317,7 +311,7 @@ class TestSubmissionXSDValidation:
 
     @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_multi_form_submission_xml_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that submission with multiple forms validates all forms against XSD schemas."""
         # Create application with both SF-424 and SF-424A
@@ -347,7 +341,7 @@ class TestSubmissionXSDValidation:
         )
 
         # Add SF-424 form
-        sf424_form = db_session.get(Form, SF424_v4_0.form_id)
+        sf424_form = SF424_v4_0
         comp_form_424 = CompetitionFormFactory.create(competition=competition, form=sf424_form)
         ApplicationFormFactory.create(
             application=application,
@@ -402,7 +396,7 @@ class TestSubmissionXSDValidation:
         )
 
         # Add SF-424A form
-        sf424a_form = db_session.get(Form, SF424a_v1_0.form_id)
+        sf424a_form = SF424a_v1_0
         comp_form_424a = CompetitionFormFactory.create(competition=competition, form=sf424a_form)
         ApplicationFormFactory.create(
             application=application,
@@ -494,7 +488,7 @@ class TestSubmissionXSDValidation:
             "valid"
         ], f"SF-424A validation failed: {sf424a_validation['error_message']}"
 
-    def test_submission_xml_structure_is_well_formed(self, sf424_application, db_session):
+    def test_submission_xml_structure_is_well_formed(self, sf424_application):
         """Test that generated submission XML has proper structure even without XSD validation."""
         application_submission = ApplicationSubmissionFactory.create(
             application=sf424_application,
@@ -541,7 +535,7 @@ class TestSubmissionXSDValidation:
         assert header_idx < forms_idx < footer_idx, "Elements not in correct order"
 
     @pytest.fixture
-    def sflll_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
+    def sflll_application(self, enable_factory_create, seed_form_registry):
         """Create an application with SF-LLL form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -564,7 +558,7 @@ class TestSubmissionXSDValidation:
             competition_forms=[],
         )
 
-        sflll_form = db_session.get(Form, SFLLL_v2_0.form_id)
+        sflll_form = SFLLL_v2_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-LLL Test Application"
@@ -641,7 +635,7 @@ class TestSubmissionXSDValidation:
 
         return application
 
-    def test_sflll_xsd_validation(self, sflll_application, xsd_validator, db_session):
+    def test_sflll_xsd_validation(self, sflll_application, xsd_validator):
         """Test that SF-LLL form XML passes XSD validation."""
         # Create submission
         application_submission = ApplicationSubmissionFactory.create(
@@ -679,7 +673,7 @@ class TestSubmissionXSDValidation:
         ], f"SF-LLL validation failed: {sflll_validation['error_message']}"
 
     def test_sflll_with_subawardee_xsd_validation(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that SF-LLL with subawardee data passes XSD validation."""
         agency = AgencyFactory.create()
@@ -703,7 +697,7 @@ class TestSubmissionXSDValidation:
             competition_forms=[],
         )
 
-        sflll_form = db_session.get(Form, SFLLL_v2_0.form_id)
+        sflll_form = SFLLL_v2_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-LLL Subawardee Test Application"

@@ -3,9 +3,8 @@ from copy import deepcopy
 
 import pytest
 from freezegun import freeze_time
-from sqlalchemy import select, update
+from sqlalchemy import select
 
-from src.db.models.competition_models import Form
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import (
     BudgetNarrativeAttachment_v1_2,
@@ -32,29 +31,24 @@ FORMS_USED = [
 
 
 @pytest.fixture
-def forms(db_session):
-    # To avoid picking up a bunch of forms from other tests
-    # set every existing form to be deprecated
-    # so that the logic here doesn't see them
-    # This is simpler than trying to delete all the forms.
-    db_session.execute(update(Form).values(is_deprecated=True))
-    db_session.commit()
-
-    # However, we do need some forms setup for these tests
-    # Add any forms we reference here. We don't just add ALL
-    # forms to avoid this test iterating over 20+ forms in the future.
-    forms = []
+def forms(monkeypatch):
+    # Build the subset of forms this test cares about (no instruction IDs needed).
+    # We don't use all registry forms to avoid this test iterating over 20+ forms.
+    forms_to_use = []
     for form in FORMS_USED:
         # deep copy to not change the global form definition
         # when we null-out the instruction ID to avoid setting up
         # things we won't need in this test
         f = deepcopy(form)
         f.form_instruction_id = None
-        db_session.merge(f)
-        forms.append(f)
-    db_session.commit()
+        forms_to_use.append(f)
 
-    return forms
+    # Patch the task so it only sees the forms defined above.
+    monkeypatch.setattr(
+        "src.task.opportunities.build_automatic_opportunities.get_active_forms",
+        lambda: forms_to_use,
+    )
+    return forms_to_use
 
 
 def test_build_automatic_opportunities(enable_factory_create, db_session, forms):

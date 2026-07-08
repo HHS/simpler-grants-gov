@@ -1,3 +1,5 @@
+import uuid
+
 import jsonschema
 import pytest
 from grants_shared.api.response import ValidationErrorDetail
@@ -7,6 +9,12 @@ from src.form_schema.jsonschema_validator import validate_json_schema, validate_
 
 # Form with a fairly simple JsonSchema
 SIMPLE_FORM = Form(
+    form_id=uuid.UUID("00000000-0000-0000-0000-000000000001"),
+    form_name="Simple Test Form",
+    short_form_name="simple_test",
+    form_version="1.0",
+    agency_code="SGG",
+    form_ui_schema={},
     form_json_schema={
         "type": "object",
         "properties": {
@@ -15,20 +23,32 @@ SIMPLE_FORM = Form(
             "IntField": {"type": "integer", "maximum": 1000},
         },
         "required": ["StrField"],
-    }
+    },
 )
 
 IF_THEN_FORM = Form(
+    form_id=uuid.UUID("00000000-0000-0000-0000-000000000002"),
+    form_name="If Then Test Form",
+    short_form_name="if_then_test",
+    form_version="1.0",
+    agency_code="SGG",
+    form_ui_schema={},
     form_json_schema={
         "type": "object",
         "properties": {"StrField": {"type": "string"}, "IntField": {"type": "integer"}},
         "if": {"properties": {"StrField": {"const": "BigValue"}}},
         "then": {"properties": {"IntField": {"minimum": 500}}},
         "else": {"properties": {"IntField": {"maximum": 10}}},
-    }
+    },
 )
 
 NESTED_REQUIRED = Form(
+    form_id=uuid.UUID("00000000-0000-0000-0000-000000000003"),
+    form_name="Nested Required Test Form",
+    short_form_name="nested_required_test",
+    form_version="1.0",
+    agency_code="SGG",
+    form_ui_schema={},
     form_json_schema={
         "type": "object",
         "properties": {
@@ -43,7 +63,7 @@ NESTED_REQUIRED = Form(
             "other_field": {"type": "string"},
         },
         "required": ["other_field"],
-    }
+    },
 )
 
 

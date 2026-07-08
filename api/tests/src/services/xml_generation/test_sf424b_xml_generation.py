@@ -9,11 +9,9 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Form
 from src.form_schema.forms.sf424b import FORM_XML_TRANSFORM_RULES as SF424B_TRANSFORM_RULES
 from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.services.xml_generation.models import XMLGenerationRequest
@@ -400,7 +398,7 @@ class TestSF424BXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def sf424b_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
+    def sf424b_application(self, enable_factory_create, seed_form_registry):
         """Create an application with SF-424B form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -423,7 +421,7 @@ class TestSF424BXSDValidation:
             competition_forms=[],
         )
 
-        sf424b_form = db_session.get(Form, SF424b_v1_1.form_id)
+        sf424b_form = SF424b_v1_1
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-424B Test Application"
@@ -446,9 +444,7 @@ class TestSF424BXSDValidation:
 
         return application
 
-    def test_sf424b_submission_xml_validates_against_xsd(
-        self, sf424b_application, xsd_validator, db_session
-    ):
+    def test_sf424b_submission_xml_validates_against_xsd(self, sf424b_application, xsd_validator):
         """Test that complete SF-424B submission XML validates against XSD schema."""
         # Create application submission
         application_submission = ApplicationSubmissionFactory.create(
@@ -495,7 +491,7 @@ class TestSF424BXSDValidation:
 
     @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sf424b_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that SF-424B with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -519,7 +515,7 @@ class TestSF424BXSDValidation:
             competition_forms=[],
         )
 
-        sf424b_form = db_session.get(Form, SF424b_v1_1.form_id)
+        sf424b_form = SF424b_v1_1
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-424B Minimal Test Application"

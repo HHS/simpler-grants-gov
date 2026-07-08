@@ -11,10 +11,13 @@ import Script from "next/script";
 
 import "src/styles/styles.scss";
 
+import { getCorrelationId } from "src/services/correlationId/correlationId";
 import { LayoutProps } from "src/types/generalTypes";
 
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
+
+import { CorrelationIdTracker } from "src/components/core/CorrelationIdTracker";
 
 const typedNewRelic = newrelic as NewRelicWithCorrectTypes;
 
@@ -50,6 +53,8 @@ export default async function RootLayoutWrapper({
       })
     : "";
 
+  const correlationId = await getCorrelationId();
+
   // note that if we need to conditionally include third party scripts on the page, a component was implemented
   // to do that in commit 46566b4c0ad but later removed. We can bring it back if it is ever useful. - DWS
   return (
@@ -65,6 +70,7 @@ export default async function RootLayoutWrapper({
       </head>
       <body>
         <NextIntlClientProvider messages={messages}>
+          <CorrelationIdTracker correlationId={correlationId} />
           {children}
         </NextIntlClientProvider>
         {environment.IS_CI !== "true" && (

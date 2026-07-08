@@ -2,6 +2,13 @@ import uuid
 from datetime import date, datetime
 
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from grants_shared.db.models.auth_base_models import (
+    BaseLinkExternalUser,
+    BaseLoginGovState,
+    BaseUser,
+    BaseUserApiKey,
+    BaseUserTokenSession,
+)
 from grants_shared.db.models.base import TimestampMixin
 from grants_shared.util import datetime_util
 from sqlalchemy import ForeignKey, UniqueConstraint, and_
@@ -13,13 +20,6 @@ from sqlalchemy.sql.functions import now as sqlnow
 from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType, UserType
 from src.db.models.agency_models import Agency
 from src.db.models.api_schema_table import ApiSchemaTable
-from src.db.models.auth_base_models import (
-    BaseLinkExternalUser,
-    BaseLoginGovState,
-    BaseUser,
-    BaseUserApiKey,
-    BaseUserTokenSession,
-)
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType, LkUserType
