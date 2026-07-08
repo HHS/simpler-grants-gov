@@ -1,5 +1,6 @@
 import uuid
 from datetime import date, datetime
+from typing import Any
 
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from grants_shared.db.models.auth_base_models import (
@@ -28,6 +29,8 @@ from src.db.models.opportunity_models import Opportunity
 
 class User(BaseUser, ApiSchemaTable, TimestampMixin):
     __tablename__ = "user"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
     saved_opportunities: Mapped[list[UserSavedOpportunity]] = relationship(
         "UserSavedOpportunity",
@@ -131,13 +134,24 @@ class UserTokenSession(BaseUserTokenSession, ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_token_session"
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
+    token_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
+
     user: Mapped[User] = relationship(User)
+
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info"""
+        return {
+            "auth.token_id": self.token_id,
+            "auth.user_id": self.user_id,
+        }
 
 
 class LoginGovState(BaseLoginGovState, ApiSchemaTable, TimestampMixin):
     """Table used to store temporary state during the OAuth login flow"""
 
     __tablename__ = "login_gov_state"
+
+    login_gov_state_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
 
 
 class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
@@ -347,9 +361,18 @@ class UserApiKey(BaseUserApiKey, ApiSchemaTable, TimestampMixin):
 
     __tablename__ = "user_api_key"
 
+    api_key_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
 
     user: Mapped[User] = relationship(User, back_populates="api_keys", uselist=False)
+
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info"""
+        return {
+            "auth.api_key_id": self.api_key_id,
+            "auth.user_id": self.user_id,
+        }
 
 
 class Role(ApiSchemaTable, TimestampMixin):
