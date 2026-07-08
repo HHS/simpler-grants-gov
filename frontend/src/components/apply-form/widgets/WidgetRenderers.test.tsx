@@ -66,7 +66,6 @@ describe("renderWidget", () => {
           ],
           rows: [
             {
-              rowHeader: "First Row",
               cells: [
                 {
                   type: "plainText",

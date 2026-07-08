@@ -58,10 +58,10 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
 }));
 
 jest.mock(
-  "src/app/[locale]/(base)/award-recommendation/_components/AwardRecommendationsListHeader",
+  "src/app/[locale]/(base)/award-recommendation/_components/AwardRecommendationsListContent",
   () => ({
     __esModule: true,
-    default: () => <div data-testid="award-recommendations-list-header" />,
+    default: () => <div data-testid="award-recommendations-list-content" />,
   }),
 );
 
@@ -138,7 +138,7 @@ describe("AwardRecommendationsListPage", () => {
     expect(redirectMock).toHaveBeenCalledWith("?agency=1");
   });
 
-  it("renders the list header when an agency is selected", async () => {
+  it("renders the list content when an agency is selected", async () => {
     const page = await AwardRecommendationsListPage({
       params: Promise.resolve({ locale: "en" }),
       searchParams: Promise.resolve({ agency: "1" }),
@@ -150,7 +150,7 @@ describe("AwardRecommendationsListPage", () => {
       "list.pageHeading",
     );
     expect(
-      screen.getByTestId("award-recommendations-list-header"),
+      screen.getByTestId("award-recommendations-list-content"),
     ).toBeInTheDocument();
   });
 

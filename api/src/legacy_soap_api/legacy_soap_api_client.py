@@ -344,7 +344,6 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         )
         boundary_uuid = str(uuid.uuid4())
         update_headers = {
-            "MIME-Version": "1.0",
             "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{boundary_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
             # TODO: removing till we can confirm GS needs this
             # "Soapaction": self.operation_config.soap_action,

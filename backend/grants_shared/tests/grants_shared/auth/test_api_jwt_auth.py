@@ -6,8 +6,8 @@ import pytest
 from freezegun import freeze_time
 
 from grants_shared.auth.api_jwt_auth import ApiJwtConfig, JwtAuth
-from tests.grants_shared.db.models.factories import LinkExternalUserFactory, UserFactory
-from tests.grants_shared.db_test_models.db_test_models import UserTokenSession
+from tests.grants_shared.db.models.factories import SharedLinkExternalUserFactory, SharedUserFactory
+from tests.grants_shared.db_test_models.db_test_models import SharedUserTokenSession
 from tests.grants_shared.test_utils.auth_handler import AuthHandler
 
 
@@ -21,8 +21,8 @@ def jwt_config(private_rsa_key, public_rsa_key):
 
 @freeze_time("2024-11-14 12:00:00", tz_offset=0)
 def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
-    user = UserFactory.create()
-    linked_external_user = LinkExternalUserFactory.create(user=user)
+    user = SharedUserFactory.create()
+    linked_external_user = SharedLinkExternalUserFactory.create(shared_user=user)
     token, token_session = JwtAuth(AuthHandler(db_session), jwt_config).create_jwt_for_user(
         user, None
     )
@@ -35,7 +35,7 @@ def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
     assert decoded_token["iat"] == timegm(
         datetime.fromisoformat("2024-11-14 12:00:00+00:00").utctimetuple()
     )
-    assert decoded_token["user_id"] == str(user.user_id)
+    assert decoded_token["user_id"] == str(user.shared_user_id)
     assert decoded_token["email"] is None
     assert decoded_token["iss"] == jwt_config.issuer
     assert decoded_token["aud"] == jwt_config.audience
@@ -50,19 +50,19 @@ def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
 
     # Verify that the sub_id returned can be used to fetch a UserTokenSession object
     token_session = (
-        db_session.query(UserTokenSession)
-        .filter(UserTokenSession.token_id == decoded_token["sub"])
+        db_session.query(SharedUserTokenSession)
+        .filter(SharedUserTokenSession.token_id == decoded_token["sub"])
         .one_or_none()
     )
 
-    assert token_session.user_id == user.user_id
+    assert token_session.shared_user_id == user.shared_user_id
     assert token_session.is_valid is True
     # Verify expires_at is set to 30 minutes after now by default
     assert token_session.expires_at == datetime.fromisoformat("2024-11-14 12:30:00+00:00")
 
     # Basic testing that the JWT we create for a user can in turn be fetched and processed later
     user_session = JwtAuth(AuthHandler(db_session), jwt_config).parse_jwt_for_user(token)
-    assert user_session.user_id == user.user_id
+    assert user_session.shared_user_id == user.shared_user_id
 
 
 # TODO: Unit tests that need to be added:
