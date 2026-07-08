@@ -2,10 +2,15 @@
  * Opportunity metadata definitions and page-field mapping helpers.
  * Usage: import { buildPageFieldsFromDefinitions } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
  *
- * Shards in this fixture:
- * - Shard 1: shared type contracts for opportunity value keys and metadata.
- * - Shard 2: legacy-path adapter for shared page-field builder.
- * - Remaining shards: section-level metadata groups for create/edit validation and filling.
+ * Reviewer guide:
+ * - This fixture is the source of truth for field selectors, value keys,
+ *   and validation messages used by failure-path and happy-path tests.
+ * - Prefer metadata changes here over hardcoded values in spec files.
+ *
+ * Tester parameter guide:
+ * - Required-field gating: FUNDING_DETAILS_FIELD_DEFINITIONS + ELIGIBILITY_FIELD_DEFINITIONS.
+ * - Character limits/email/contact checks: ADDITIONAL_INFORMATION_FIELD_DEFINITIONS.
+ * - Numeric and cross-field rules: FUNDING_DETAILS_FIELD_DEFINITIONS + CROSS_FIELD_VALIDATION_DEFINITIONS.
  */
 
 import { buildPageFieldsFromDefinitions as buildSharedPageFieldsFromDefinitions } from "tests/e2e/utils/common/build-page-fields-from-definitions";
@@ -56,8 +61,9 @@ export type CrossFieldValidationDefinition = {
     selector: string;
     valueKey: OpportunityFieldValueKey;
     invalidValue: string;
+    expectedErrorMessage?: string;
   }>;
-  expectedErrors: Array<{
+  expectedErrors?: Array<{
     valueKey: OpportunityFieldValueKey;
     message: string;
   }>;
@@ -186,22 +192,13 @@ export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[
           selector: "#award-minimum",
           valueKey: "awardMinimum",
           invalidValue: "100",
+          expectedErrorMessage: "Award minimum cannot exceed Award maximum.",
         },
         {
           selector: "#award-maximum",
           valueKey: "awardMaximum",
           invalidValue: "50",
-        },
-      ],
-      expectedErrors: [
-        {
-          valueKey: "awardMinimum",
-          message: "Award minimum cannot exceed Award maximum.",
-        },
-        {
-          valueKey: "awardMaximum",
-          message: "Award minimum cannot exceed Award maximum.",
-          // message: "Award maximum cannot be less than Award minimum.", un-comment after bug fixed
+          expectedErrorMessage: "Award maximum cannot be less than Award minimum.",
         },
       ],
     },
@@ -217,22 +214,14 @@ export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[
           selector: "#award-minimum",
           valueKey: "awardMinimum",
           invalidValue: "200",
+          expectedErrorMessage:
+            "Award minimum cannot exceed the Estimated Total Program Funding.",
         },
         {
           selector: "#award-maximum",
           valueKey: "awardMaximum",
           invalidValue: "300",
-        },
-      ],
-      expectedErrors: [
-        {
-          valueKey: "awardMinimum",
-          message:
-            "Award minimum cannot exceed the Estimated Total Program Funding.",
-        },
-        {
-          valueKey: "awardMaximum",
-          message:
+          expectedErrorMessage:
             "Award maximum cannot exceed the Estimated Total Program Funding.",
         },
       ],
