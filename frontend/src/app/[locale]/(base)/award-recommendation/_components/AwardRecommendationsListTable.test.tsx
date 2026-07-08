@@ -157,24 +157,26 @@ describe("AwardRecommendationsListTable", () => {
 
   it("calls delete endpoint when delete is clicked", async () => {
     let deleted = false;
-    mockClientFetch.mockImplementation(async (_url, options) => {
-      if (options?.method === "DELETE") {
-        deleted = true;
-        return {};
-      }
+    mockClientFetch.mockImplementation(
+      (_url: string, options?: RequestInit): unknown => {
+        if (options?.method === "DELETE") {
+          deleted = true;
+          return {};
+        }
 
-      if (deleted) {
+        if (deleted) {
+          return {
+            data: [],
+            pagination_info: { total_pages: 1, total_records: 0 },
+          };
+        }
+
         return {
-          data: [],
-          pagination_info: { total_pages: 1, total_records: 0 },
+          data: [mockDraftAwardRecommendationListItem],
+          pagination_info: { total_pages: 1, total_records: 1 },
         };
-      }
-
-      return {
-        data: [mockDraftAwardRecommendationListItem],
-        pagination_info: { total_pages: 1, total_records: 1 },
-      };
-    });
+      },
+    );
 
     render(<AwardRecommendationsListTable currentAgencyId="1" />);
 
