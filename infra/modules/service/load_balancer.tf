@@ -163,22 +163,6 @@ resource "aws_lb_listener_rule" "app_https_forward" {
   }
 }
 
-# Interim HTTP listener for the mTLS ALB
-resource "aws_lb_listener" "mtls_alb_listener_http" {
-  # checkov:skip=CKV_AWS_2:Interim HTTP listener; HTTPS + mTLS passthrough replaces it once the cert is issued
-  # checkov:skip=CKV_AWS_103:TLS 1.2+ is enforced by the HTTPS listener that replaces this one
-  count = var.enable_load_balancer && var.enable_mtls_load_balancer && var.certificate_arn == null ? 1 : 0
-
-  load_balancer_arn = aws_lb.alb[1].arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.mtls_tg[0].arn
-  }
-}
-
 # these get referenced from the service/main file so we want two distinct ones for easier referencing by app_tg vs mtls_tg names
 resource "aws_lb_target_group" "app_tg" {
   # you must use a prefix, to facilitate successful tg changes
