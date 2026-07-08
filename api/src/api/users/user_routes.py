@@ -591,7 +591,11 @@ def user_create_api_key(
 
     logger.info(
         "Created API key for user",
-        extra=api_key.get_log_extra(),
+        extra={
+            "user_id": user_id,
+            "api_key_id": api_key.api_key_id,
+            "key_name": api_key.key_name,
+        },
     )
 
     return response.ApiResponse(message="Success", data=api_key)
