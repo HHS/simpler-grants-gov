@@ -44,17 +44,33 @@ export const useFileUpload = ({
   // exposed methods for upload management
   const handleError = useCallback(
     (e: Error) => {
-      onError(e);
-      setUploadError(e.message);
+      // skip handling for expected abort related errors
+      if (e.name !== "AbortError") {
+        onError(e);
+        setUploadError(e.message);
+      }
     },
     [setUploadError, onError],
   );
 
   const handleCancel = useCallback(async () => {
     setCurrentStatus(undefined);
-    uploadController?.abort();
-    postUploadController?.abort();
-    await responseReader?.cancel();
+    try {
+      uploadController?.abort();
+    } catch (_e) {
+      // if the controller has already been aborted, no problem
+    }
+    try {
+      postUploadController?.abort();
+    } catch (_e) {
+      // if the controller has already been aborted, no problem
+    }
+    try {
+      await responseReader?.cancel();
+    } catch (_e) {
+      // if the reader is already closed, no problem
+      return;
+    }
   }, [uploadController, postUploadController, responseReader]);
 
   const dismissError = useCallback(() => {

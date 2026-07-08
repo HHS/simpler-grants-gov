@@ -68,7 +68,7 @@ export const SimplerFileInput = ({
   );
   // upload id is only used for tracking internal to this component
   const [activeUploads, setActiveUploads] = useState<
-    { uploadId: string; file: File; complete?: boolean }[]
+    { uploadId: string; file: File; complete?: boolean; canceled?: boolean }[]
   >([]);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
 
@@ -118,7 +118,6 @@ export const SimplerFileInput = ({
         return;
       })
       .catch((e) => {
-        // do we want to do anything else here to surface the error?
         console.error("Error deleting file", e);
         setDeletePending(false);
         setFilePendingDeletion(undefined);
@@ -139,23 +138,23 @@ export const SimplerFileInput = ({
     if (existingFiles?.length) {
       return true;
     }
-    // if there is any active upload that has not yet completed
-    if (activeUploads.some((activeUpload) => !activeUpload.complete)) {
+    if (activeUploads.length) {
       return true;
     }
-  }, [multiFile, activeUploads, existingFiles]);
+  }, [multiFile, existingFiles?.length, activeUploads.length]);
 
   // note the usage of functional state setters in these functions
   // it's necessary to avoid referencing stale closed over state values up the call stack
   const trackUploadSuccess = (uploadId: string) => {
     setActiveUploads((previousActiveUploads) => {
-      const completedIndex = previousActiveUploads.findIndex(
+      const previousCopy = [...previousActiveUploads];
+      const successIndex = previousCopy.findIndex(
         (item) => item.uploadId === uploadId,
       );
-      if (completedIndex > -1) {
-        previousActiveUploads[completedIndex].complete = true;
+      if (successIndex > -1) {
+        previousCopy.splice(successIndex, 1);
       }
-      return previousActiveUploads;
+      return previousCopy;
     });
   };
   const trackUploadError = (uploadId: string) => {
@@ -177,15 +176,17 @@ export const SimplerFileInput = ({
 
   const trackUploadCancel = (uploadId: string) => {
     setActiveUploads((previousActiveUploads) => {
-      const canceledIndex = previousActiveUploads.findIndex(
+      const previousCopy = [...previousActiveUploads];
+      const canceledIndex = previousCopy.findIndex(
         (item) => item.uploadId === uploadId,
       );
       if (canceledIndex > -1) {
-        previousActiveUploads.splice(canceledIndex, 1);
+        previousCopy.splice(canceledIndex, 1);
       }
-      return previousActiveUploads;
+      return previousCopy;
     });
   };
+
   return (
     <>
       <FileInput
@@ -209,12 +210,16 @@ export const SimplerFileInput = ({
           key={uploadId}
           fileToUpload={file}
           onCancel={() => {
+            // this runs but does not cause an update to render if error logic is removed
+            // I guess the error logic is doing something else that is triggering a render, and the other state is picked up along with it?
             trackUploadCancel(uploadId);
             if (!multiFile) {
               fileInputRef?.current?.clearFiles();
             }
           }}
-          onDismiss={() => dismissError(uploadId)}
+          onDismiss={() => {
+            dismissError(uploadId);
+          }}
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
@@ -225,8 +230,8 @@ export const SimplerFileInput = ({
           }}
           onComplete={onComplete}
           onUploadError={(e: Error) => {
-            trackUploadError(uploadId);
             onError(e);
+            trackUploadError(uploadId);
           }}
           postUploadAction={postUploadAction}
         />
