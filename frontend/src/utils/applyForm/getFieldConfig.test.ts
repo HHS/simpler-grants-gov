@@ -11,6 +11,7 @@ import {
   getBasicMultifieldInfo,
   getEnumOptions,
   getFieldConfig,
+  getFieldListRequiredFields,
   getNameFromDef,
   getWarningsForField,
 } from "src/utils/applyForm/getFieldConfig";
@@ -477,6 +478,327 @@ describe("getFieldConfig", () => {
           requiredField: false,
         }),
       ).toThrow();
+    });
+  });
+
+  describe("getFieldListRequiredFields", () => {
+    it("returns empty array for fieldList with no required fields", () => {
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: {
+          contacts: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                firstName: { type: "string", title: "First Name" },
+                lastName: { type: "string", title: "Last Name" },
+              },
+            },
+          },
+        },
+      };
+
+      const result = getFieldListRequiredFields({
+        formSchema,
+        fieldListName: "contacts",
+      });
+      expect(result).toEqual([]);
+    });
+
+    it("returns shallow required fields", () => {
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: {
+          contacts: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["firstName", "lastName"],
+              properties: {
+                firstName: { type: "string", title: "First Name" },
+                lastName: { type: "string", title: "Last Name" },
+              },
+            },
+          },
+        },
+      };
+
+      const result = getFieldListRequiredFields({
+        formSchema,
+        fieldListName: "contacts",
+      });
+      expect(result.sort()).toEqual([
+        "contacts/firstName",
+        "contacts/lastName",
+      ]);
+    });
+
+    it("returns nested required fields from objects", () => {
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: {
+          contacts: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["name", "address"],
+              properties: {
+                name: {
+                  type: "object",
+                  required: ["firstName", "lastName"],
+                  properties: {
+                    firstName: { type: "string", title: "First Name" },
+                    lastName: { type: "string", title: "Last Name" },
+                  },
+                },
+                address: {
+                  type: "object",
+                  required: ["street1", "city"],
+                  properties: {
+                    street1: { type: "string", title: "Street 1" },
+                    city: { type: "string", title: "City" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const result = getFieldListRequiredFields({
+        formSchema,
+        fieldListName: "contacts",
+      });
+      const expectedPaths = [
+        "contacts/name",
+        "contacts/name/firstName",
+        "contacts/name/lastName",
+        "contacts/address",
+        "contacts/address/street1",
+        "contacts/address/city",
+      ];
+      expect(result.sort()).toEqual(expectedPaths.sort());
+    });
+
+    it("returns both shallow and nested required fields", () => {
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: {
+          contacts: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["email", "phone", "name"],
+              properties: {
+                email: { type: "string", title: "Email" },
+                phone: { type: "string", title: "Phone" },
+                name: {
+                  type: "object",
+                  required: ["firstName", "lastName"],
+                  properties: {
+                    firstName: { type: "string", title: "First Name" },
+                    lastName: { type: "string", title: "Last Name" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const result = getFieldListRequiredFields({
+        formSchema,
+        fieldListName: "contacts",
+      });
+      const expectedPaths = [
+        "contacts/email",
+        "contacts/phone",
+        "contacts/name",
+        "contacts/name/firstName",
+        "contacts/name/lastName",
+      ];
+      expect(result.sort()).toEqual(expectedPaths.sort());
+    });
+
+    it("handles nested objects without required fields", () => {
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: {
+          contacts: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["name"],
+              properties: {
+                name: {
+                  type: "object",
+                  properties: {
+                    firstName: { type: "string", title: "First Name" },
+                    lastName: { type: "string", title: "Last Name" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const result = getFieldListRequiredFields({
+        formSchema,
+        fieldListName: "contacts",
+      });
+      expect(result).toEqual(["contacts/name"]);
+    });
+
+    it("ignores non-object required properties", () => {
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: {
+          contacts: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["email", "name"],
+              properties: {
+                email: { type: "string", title: "Email" },
+                name: {
+                  type: "object",
+                  required: ["firstName"],
+                  properties: {
+                    firstName: { type: "string", title: "First Name" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const result = getFieldListRequiredFields({
+        formSchema,
+        fieldListName: "contacts",
+      });
+      const expectedPaths = [
+        "contacts/email",
+        "contacts/name",
+        "contacts/name/firstName",
+      ];
+      expect(result.sort()).toEqual(expectedPaths.sort());
+    });
+
+    it("handles deeply nested required fields", () => {
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: {
+          contacts: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["info"],
+              properties: {
+                info: {
+                  type: "object",
+                  required: ["name"],
+                  properties: {
+                    name: {
+                      type: "object",
+                      required: ["firstName"],
+                      properties: {
+                        firstName: { type: "string", title: "First Name" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const result = getFieldListRequiredFields({
+        formSchema,
+        fieldListName: "contacts",
+      });
+      const expectedPaths = [
+        "contacts/info",
+        "contacts/info/name",
+        "contacts/info/name/firstName",
+      ];
+      expect(result.sort()).toEqual(expectedPaths.sort());
+    });
+
+    it("returns empty array for non-existent fieldList", () => {
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: {
+          contacts: {
+            type: "array",
+            items: { type: "object" },
+          },
+        },
+      };
+
+      const result = getFieldListRequiredFields({
+        formSchema,
+        fieldListName: "nonExistent",
+      });
+      expect(result).toEqual([]);
+    });
+
+    it("handles Key Contacts form structure with name and address", () => {
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: {
+          key_contacts: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["project_role", "name", "address", "phone", "email"],
+              properties: {
+                project_role: { type: "string", title: "Project Role" },
+                name: {
+                  type: "object",
+                  required: ["first_name", "last_name"],
+                  properties: {
+                    first_name: { type: "string", title: "First Name" },
+                    last_name: { type: "string", title: "Last Name" },
+                  },
+                },
+                address: {
+                  type: "object",
+                  required: ["street1", "city", "country"],
+                  properties: {
+                    street1: { type: "string", title: "Street 1" },
+                    city: { type: "string", title: "City" },
+                    country: { type: "string", title: "Country" },
+                  },
+                },
+                phone: { type: "string", title: "Phone Number" },
+                email: { type: "string", title: "Email" },
+              },
+            },
+          },
+        },
+      };
+
+      const result = getFieldListRequiredFields({
+        formSchema,
+        fieldListName: "key_contacts",
+      });
+      const expectedPaths = [
+        "key_contacts/project_role",
+        "key_contacts/name",
+        "key_contacts/name/first_name",
+        "key_contacts/name/last_name",
+        "key_contacts/address",
+        "key_contacts/address/street1",
+        "key_contacts/address/city",
+        "key_contacts/address/country",
+        "key_contacts/phone",
+        "key_contacts/email",
+      ];
+      expect(result.sort()).toEqual(expectedPaths.sort());
     });
   });
 

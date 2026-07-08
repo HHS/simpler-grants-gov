@@ -98,7 +98,7 @@ export function buildFieldListStoragePath({
 }
 
 // FieldList currently supports root-level array fields only.
-const getFieldListRequiredFields = ({
+export const getFieldListRequiredFields = ({
   formSchema,
   fieldListName,
 }: {
@@ -124,9 +124,42 @@ const getFieldListRequiredFields = ({
     return [];
   }
 
-  return itemSchema.required.map(
-    (requiredFieldName) => `${fieldListName}/${requiredFieldName}`,
-  );
+  const expandRequiredFields = (
+    requiredFieldNames: string[],
+    properties: RJSFSchema["properties"],
+    pathPrefix: string = "",
+  ): string[] => {
+    const result: string[] = [];
+
+    for (const fieldName of requiredFieldNames) {
+      const fieldPath = pathPrefix ? `${pathPrefix}/${fieldName}` : fieldName;
+      const fullPath = `${fieldListName}/${fieldPath}`;
+
+      result.push(fullPath);
+
+      // Check if this field is an object with nested required fields
+      const fieldSchema = properties?.[fieldName] as RJSFSchema | undefined;
+      if (
+        fieldSchema &&
+        fieldSchema.type === "object" &&
+        fieldSchema.properties &&
+        fieldSchema.required &&
+        Array.isArray(fieldSchema.required)
+      ) {
+        // Recursively expand nested required fields
+        const nestedRequired = expandRequiredFields(
+          fieldSchema.required,
+          fieldSchema.properties,
+          fieldPath,
+        );
+        result.push(...nestedRequired);
+      }
+    }
+
+    return result;
+  };
+
+  return expandRequiredFields(itemSchema.required, itemSchema.properties);
 };
 
 type FieldWidgetConfig = {
