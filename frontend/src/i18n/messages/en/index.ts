@@ -2089,6 +2089,20 @@ export const messages = {
       loading: "Loading...",
       errorLoading: "Error loading submissions. Please try again.",
       editButton: "Edit",
+      bulkEditPageTitle: "Bulk Edit Recommendations",
+      bulkEditMetaDescription:
+        "Bulk edit award recommendations for selected applications",
+      bulkEditTitle: "Bulk Edit Recommendations",
+      selectedApplications: "Selected Applications",
+      bulkEditHeading: "Update Recommendation",
+      bulkEditDescription:
+        "Select a recommendation type to apply to all selected applications.",
+      recommendationType: "Recommendation Type",
+      noSelectionsMessage:
+        "No submissions selected. Please select submissions to edit.",
+      saveButton: "Save",
+      saving: "Saving...",
+      cancelButton: "Cancel",
       columns: {
         appNumber: "App #",
         projectTitle: "Project Title",
