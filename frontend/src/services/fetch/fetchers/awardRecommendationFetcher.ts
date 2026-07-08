@@ -47,6 +47,20 @@ export const listAwardRecommendationsPaginated = async (
   };
 };
 
+export const deleteAwardRecommendation = async (
+  awardRecommendationId: string,
+): Promise<{ success: boolean; message?: string }> => {
+  const response = await fetchAwardRecommendationWithMethod("DELETE")({
+    subPath: awardRecommendationId,
+  });
+  const responseBody = (await response.json()) as APIResponse;
+
+  return {
+    success: response.ok,
+    message: responseBody.message,
+  };
+};
+
 export const listAwardRecommendationSubmissionsPaginated = async (
   id: string,
   pagination: PaginationRequestBody,

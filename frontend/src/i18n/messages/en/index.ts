@@ -2048,6 +2048,9 @@ export const messages = {
         status: "Status",
         action: "Action",
       },
+      actions: {
+        delete: "Delete",
+      },
     },
     summary: {
       showDescription: "Show full description",
