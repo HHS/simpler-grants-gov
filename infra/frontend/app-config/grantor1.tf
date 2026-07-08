@@ -1,15 +1,12 @@
 module "grantor1_config" {
-  source         = "./env-config"
-  project_name   = local.project_name
-  app_name       = local.app_name
-  default_region = module.project_config.default_region
-  environment    = "grantor1"
-  network_name   = "grantor1"
-  domain_name    = "grantor1.teams.simpler.grants.gov"
-  # TEMP: ACM cert for grantor1 is not yet issued (CSR pending HHS signing). HTTPS is
-  # disabled so the environment can be applied without an ACM cert; the cert lookup is
-  # gated on enable_https. Set back to true once the cert is imported into ACM.
-  enable_https                    = false
+  source                          = "./env-config"
+  project_name                    = local.project_name
+  app_name                        = local.app_name
+  default_region                  = module.project_config.default_region
+  environment                     = "grantor1"
+  network_name                    = "grantor1"
+  domain_name                     = "grantor1.teams.simpler.grants.gov"
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider

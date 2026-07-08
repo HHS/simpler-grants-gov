@@ -1,19 +1,15 @@
 module "grantor1_config" {
-  source                 = "./env-config"
-  project_name           = local.project_name
-  app_name               = local.app_name
-  default_region         = module.project_config.default_region
-  environment            = "grantor1"
-  network_name           = "grantor1"
-  domain_name            = "api.grantor1.teams.simpler.grants.gov"
-  secondary_domain_names = ["alb.grantor1.teams.simpler.grants.gov"]
-  # TEMP: ACM certs for the grantor1 endpoints are not yet issued (CSRs pending HHS
-  # signing), so all cert usage is disabled until they are imported into ACM.
-  #  - enable_https = false disables the primary (api.) and secondary (alb.) cert
-
-  # s3_cdn_domain_name                = "files.grantor1.teams.simpler.grants.gov"
+  source                            = "./env-config"
+  project_name                      = local.project_name
+  app_name                          = local.app_name
+  default_region                    = module.project_config.default_region
+  environment                       = "grantor1"
+  network_name                      = "grantor1"
+  domain_name                       = "api.grantor1.teams.simpler.grants.gov"
+  secondary_domain_names            = ["alb.grantor1.teams.simpler.grants.gov"]
+  s3_cdn_domain_name                = "files.grantor1.teams.simpler.grants.gov"
   mtls_domain_name                  = "soap.grantor1.teams.simpler.grants.gov"
-  enable_https                      = false
+  enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
   database_engine_version           = "17.7"
