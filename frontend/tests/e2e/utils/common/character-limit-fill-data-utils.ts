@@ -4,11 +4,16 @@ import { type ValidationMetadata } from "tests/e2e/utils/common/types";
 /**
  * Shared helpers for metadata-driven character-limit validation.
  *
- * How this file works:
- * - Select fields that define maxLength in metadata.
- * - Resolve the shared character-limit validation message.
- * - Build deterministic over-limit fill data for those fields.
- * - Assert expected counts of visible character-limit messages.
+ * Reviewer guide (what logic):
+ * 1. Pick fields that define maxLength.
+ * 2. Get the shared character-limit validation message from metadata.
+ * 3. Build over-limit values (maxLength + 1) for those fields.
+ * 4. Assert the expected count of character-limit messages.
+ *
+ * Tester parameter guide (what to update):
+ * - definitions: controls which fields participate via maxLength metadata.
+ * - fillData: baseline values used as source for generated over-limit values.
+ * - expectedCount: expected visible message count in the current scenario.
  */
 
 /** Minimum metadata needed to generate and assert character-limit failures. */
@@ -83,9 +88,9 @@ export const assertCharacterLimitMessageCount = async (
   definitions: CharacterLimitedField[],
   expectedCount: number,
 ): Promise<void> => {
-  // Assert total visible occurrences of the shared character-limit message.
+  // Assert occurrences in the field status element only, excluding SR/live-region duplicates.
   const message = getCharacterLimitValidationMessage(definitions);
-  await expect(page.getByText(message, { exact: true })).toHaveCount(
-    expectedCount,
-  );
+  await expect(
+    page.getByTestId("characterCountMessage").filter({ hasText: message }),
+  ).toHaveCount(expectedCount);
 };
