@@ -101,7 +101,7 @@ def _create_api_key(db_session: db.Session, user: User) -> UserApiKey:
     )
     logger.info(
         "Registered file-scan scanner API key",
-        extra={"user_id": user.user_id, "api_key_id": api_key.api_key_id},
+        extra={"user_id": user.user_id} | api_key.get_log_extra(),
     )
     return api_key
 
