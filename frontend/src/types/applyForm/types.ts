@@ -213,6 +213,13 @@ export type FieldListGroupItem = {
 
 export type UiSchemaTableCellType = "input" | "readOnly" | "plainText";
 
+export type UiSchemaTableNumberFormat =
+  | "integer"
+  | "decimal"
+  | "currency"
+  | "dollar"
+  | "percentage";
+
 export type UiSchemaTableColumn = {
   columnHeader: string;
 
@@ -227,12 +234,21 @@ export type UiSchemaTableCell =
   | {
       type: "input" | "readOnly";
       definition: PropertyPath;
+
+      /**
+       * Optional display format for numeric values.
+       *
+       * Input cells should continue to use an editable numeric representation
+       * while read-only cells use this value for display formatting.
+       */
+      format?: UiSchemaTableNumberFormat;
       staticContent?: undefined;
     }
   | {
       type: "plainText";
       staticContent: string;
       definition?: undefined;
+      format?: undefined;
     };
 
 export type UiSchemaTableRow = {

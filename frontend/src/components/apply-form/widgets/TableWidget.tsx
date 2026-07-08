@@ -2,6 +2,8 @@ import { UswdsWidgetProps } from "src/types/applyForm/types";
 
 import { Table } from "@trussworks/react-uswds";
 
+import TableCell from "../TableCell";
+
 function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
   if (
     uiSchemaField?.type !== "multiField" ||
@@ -53,14 +55,18 @@ function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
         {rows.map((row) => (
           <tr key={row.rowHeader}>
             <th scope="row">{row.rowHeader}</th>
-            {row.cells.map((cell, cellIndex) => (
-              <td
-                key={`${row.rowHeader}-${cellIndex}`}
-                data-table-cell-type={cell.type}
-              >
-                {cell.type === "plainText" ? cell.staticContent : null}
-              </td>
-            ))}
+            {row.cells.map((cell, cellIndex) => {
+              const cellId = `${uiSchemaField.name}-${row.rowHeader}-${cellIndex}`;
+
+              return (
+                <td
+                  key={`${row.rowHeader}-${cellIndex}`}
+                  data-table-cell-type={cell.type}
+                >
+                  <TableCell cell={cell} id={cellId} />
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>

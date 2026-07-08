@@ -37,6 +37,7 @@ describe("TableWidget", () => {
               {
                 type: "readOnly",
                 definition: "/properties/second_value",
+                format: "dollar",
               },
             ],
           },
@@ -61,6 +62,7 @@ describe("TableWidget", () => {
     expect(table).toBeInTheDocument();
     expect(screen.getAllByRole("columnheader")).toHaveLength(3);
     expect(screen.getAllByRole("row")).toHaveLength(2);
+    expect(screen.getAllByRole("cell")).toHaveLength(2);
 
     expect(
       screen.getByRole("columnheader", { name: "Item" }),
@@ -77,6 +79,10 @@ describe("TableWidget", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText("First value text")).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("summary_table_test-First Row-1-read-only"),
+    ).toHaveTextContent("");
   });
 
   it("throws when a row does not contain one cell for each data column", async () => {
