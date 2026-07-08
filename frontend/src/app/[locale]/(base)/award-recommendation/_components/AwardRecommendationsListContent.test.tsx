@@ -2,8 +2,19 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import AwardRecommendationsListContent from "src/app/[locale]/(base)/award-recommendation/_components/AwardRecommendationsListContent";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 
-const mockHeader = jest.fn();
-const mockTable = jest.fn();
+type HeaderProps = {
+  awardRecommendationsCount: number;
+  agencies: RelevantAgencyRecord[];
+  currentAgencyId: string;
+};
+
+type TableProps = {
+  currentAgencyId: string;
+  onTotalRecordsChange: (totalRecords: number) => void;
+};
+
+const mockHeader = jest.fn<void, [HeaderProps]>();
+const mockTable = jest.fn<void, [TableProps]>();
 
 jest.mock(
   "src/app/[locale]/(base)/award-recommendation/_components/AwardRecommendationsListHeader",
@@ -85,10 +96,9 @@ describe("AwardRecommendationsListContent", () => {
       agencies,
       currentAgencyId: "1",
     });
-    expect(mockTable).toHaveBeenLastCalledWith({
-      currentAgencyId: "1",
-      onTotalRecordsChange: expect.any(Function),
-    });
+    const lastTableCall = mockTable.mock.calls.at(-1)?.[0];
+    expect(lastTableCall?.currentAgencyId).toBe("1");
+    expect(typeof lastTableCall?.onTotalRecordsChange).toBe("function");
   });
 
   it("updates the header count when the table reports total records", () => {
