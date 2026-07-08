@@ -186,7 +186,10 @@ export default function AwardRecommendationsListTable({
             </div>
           )}
 
-          <TableWithResponsiveHeader headerContent={headers} tableRowData={rows} />
+          <TableWithResponsiveHeader
+            headerContent={headers}
+            tableRowData={rows}
+          />
 
           {awardRecommendations.length > 0 && (
             <Pagination
