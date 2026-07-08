@@ -12,6 +12,8 @@ from flask import Response
 from flask_cors import CORS
 from grants_shared.api.response import restructure_error_response
 from grants_shared.api.schemas import response_schema
+from grants_shared.auth.api_jwt_auth import initialize_jwt_auth
+from grants_shared.auth.login_gov_jwt_auth import initialize_login_gov_config
 from grants_shared.util.local import error_if_not_local
 from pydantic import Field
 
@@ -39,9 +41,7 @@ from src.api.organizations_v1 import organization_blueprint as organizations_v1_
 from src.api.users.user_blueprint import user_blueprint
 from src.api.workflows import workflow_blueprint
 from src.app_config import AppConfig
-from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.auth_utils import get_app_security_scheme
-from src.auth.login_gov_jwt_auth import initialize_login_gov_config
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.form_schema.forms import init_form_registry
 from src.legacy_soap_api import init_app as init_legacy_soap_api

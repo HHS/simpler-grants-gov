@@ -164,18 +164,26 @@ RUN dnf install -y \
       libgcrypt-1.10.2-1.amzn2023.0.3 \
       libsolv-0.7.22-1.amzn2023.0.4 \
       gnutls-3.8.10-4.amzn2023.0.2 && \
-    # CVE-2026-1757: libxml2 memory leak in xmllint (ALAS2023-2026-1446)
-    dnf update -y --releasever=2023.10.20260302 \
-      libxml2-2.10.4-1.amzn2023.0.18 \
-      libxml2-devel-2.10.4-1.amzn2023.0.18 && \
     dnf update -y --releasever=2023.12.20260622 \
       openssl-3.5.5-1.amzn2023.0.5 \
       openssl-libs-3.5.5-1.amzn2023.0.5 \
       openssl-devel-3.5.5-1.amzn2023.0.5 \
       openssl-fips-provider-latest-3.5.5-1.amzn2023.0.5 \
-      kernel6.18-headers-6.18.35-68.127.amzn2023 \
       python3-pip-wheel-21.3.1-2.amzn2023.0.20 \
       rust-toolset-srpm-macros-1.96.0-1.amzn2023.0.2 && \
+
+    dnf update -y --releasever=2023.12.20260706 \
+      libxml2-2.10.4-1.amzn2023.0.19 \
+      libxml2-devel-2.10.4-1.amzn2023.0.19 \
+      sqlite-3.40.0-1.amzn2023.0.8 \
+      sqlite-libs-3.40.0-1.amzn2023.0.8 \
+      kernel6.18-headers-6.18.36-69.136.amzn2023 \
+      expat-2.6.3-1.amzn2023.0.6 \
+      gnupg2-minimal-2.3.7-1.amzn2023.0.9 \
+      libblkid-2.37.4-1.amzn2023.0.5 \
+      libmount-2.37.4-1.amzn2023.0.5 \
+      libsmartcols-2.37.4-1.amzn2023.0.5 \
+      libuuid-2.37.4-1.amzn2023.0.5 && \
     dnf clean all && \
     # Remove the system Python RPMs
     (dnf remove -y python3 python3-libs || rpm -e --nodeps python3 python3-libs || true) && \

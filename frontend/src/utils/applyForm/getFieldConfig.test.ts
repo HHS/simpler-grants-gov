@@ -843,7 +843,6 @@ describe("getFieldConfig", () => {
         ],
         rows: [
           {
-            rowHeader: "Personnel",
             cells: [
               {
                 type: "plainText",
