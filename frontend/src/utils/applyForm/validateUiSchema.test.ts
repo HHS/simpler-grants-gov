@@ -108,7 +108,6 @@ describe("validateFormData", () => {
                 ],
                 rows: [
                   {
-                    rowHeader: "First Row",
                     cells: [
                       {
                         type: "plainText",
@@ -180,7 +179,6 @@ describe("validateFormData", () => {
             ],
             rows: [
               {
-                rowHeader: "First Row",
                 cells: [
                   {
                     type: "plainText",
@@ -226,7 +224,6 @@ describe("validateFormData", () => {
             ],
             rows: [
               {
-                rowHeader: "First Row",
                 cells: [
                   {
                     type: "plainText",
@@ -348,7 +345,6 @@ describe("validateFormData", () => {
                 ],
                 rows: [
                   {
-                    rowHeader: "First Row",
                     cells: [
                       {
                         type: "plainText",

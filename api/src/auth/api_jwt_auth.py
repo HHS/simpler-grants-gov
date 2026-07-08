@@ -60,12 +60,7 @@ def decode_token(db_session: db.Session, token: str) -> BaseUserTokenSession:
     try:
         user_token_session = parse_jwt_for_user(token, db_session)
 
-        add_extra_data_to_current_request_logs(
-            {
-                "auth.user_id": user_token_session.user_id,
-                "auth.token_id": user_token_session.token_id,
-            }
-        )
+        add_extra_data_to_current_request_logs(user_token_session.get_log_extra())
         logger.info("JWT Authentication Successful")
 
         # Return the user token session object

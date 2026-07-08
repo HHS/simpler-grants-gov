@@ -237,13 +237,9 @@ export type UiSchemaTableCell =
 
 export type UiSchemaTableRow = {
   /**
-   * Human-readable row heading displayed by the table renderer.
-   */
-  rowHeader: string;
-
-  /**
-   * Cell position determines its column. Every row must contain the same
-   * number of cells as the table has columns.
+   * Cells rendered in the same order as the configured table columns.
+   *
+   * Each row must contain one cell for every configured column.
    */
   cells: UiSchemaTableCell[];
 };

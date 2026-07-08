@@ -49,12 +49,7 @@ def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> Ba
 
     logger.info(
         "Created new API key",
-        extra={
-            "api_key_id": api_key.api_key_id,
-            "user_id": user_id,
-            "key_name": key_name,
-            "is_active": api_key.is_active,
-        },
+        extra=api_key.get_log_extra(),
     )
 
     return api_key
@@ -65,10 +60,17 @@ def _import_api_key_to_aws_gateway(api_key: BaseUserApiKey) -> None:
     try:
         config = ApiGatewayConfig()
 
+        # Use the log extra to get info for the description we put in api gateway
+        # Will look like "api_key_id=<uuid>, user_id=<uuid>" depending on what is added to the
+        # log extra function of the derived implementation.
+        description_info = ", ".join(
+            [f"{k.removeprefix('auth.')}={v}" for k, v in api_key.get_log_extra().items()]
+        )
+
         gateway_response = import_api_key(
             api_key=api_key.key_id,
             name=api_key.key_name,
-            description=f"API key for user {api_key.user_id}",
+            description=f"API key for {description_info}",
             enabled=api_key.is_active,
             usage_plan_id=config.default_usage_plan_id,
         )
@@ -76,10 +78,10 @@ def _import_api_key_to_aws_gateway(api_key: BaseUserApiKey) -> None:
         logger.info(
             "Successfully imported API key to AWS API Gateway and associated with usage plan",
             extra={
-                "api_key_id": api_key.api_key_id,
                 "gateway_key_id": gateway_response.id,
                 "usage_plan_id": config.default_usage_plan_id,
-            },
+            }
+            | api_key.get_log_extra(),
         )
 
     except Exception as e:

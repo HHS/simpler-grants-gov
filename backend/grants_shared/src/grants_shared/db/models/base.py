@@ -91,6 +91,11 @@ class Base(DeclarativeBase):
         # Note that identity_key returns some other info, but we just return the primary key tuple
         return identity_key(instance=self)[1]
 
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info, do not include anything secretive in this function - extend it in derived classes to add more"""
+        # nothing at this layer, derived classes can extend
+        return {}
+
 
 def same_as_created_at(context: Any) -> Any:
     return context.get_current_parameters()["created_at"]

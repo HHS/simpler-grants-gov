@@ -10,6 +10,7 @@ without it referencing the concrete API tables directly.
 
 import uuid
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -31,6 +32,10 @@ class BaseUser(Base):
 
         return primary_key[0]
 
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info, do not include anything secretive in this function - extend it in derived classes to add more"""
+        return {"auth.user_id": self.get_user_id()}
+
 
 class BaseUserTokenSession(Base):
     __abstract__ = True
@@ -42,6 +47,13 @@ class BaseUserTokenSession(Base):
     # When a user logs out, we set this flag to False.
     is_valid: Mapped[bool] = mapped_column(default=True)
 
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info, do not include anything secretive in this function - extend it in derived classes to add more"""
+        return {
+            "auth.token_id": self.token_id,
+            "auth.expires_at": self.expires_at,
+        }
+
 
 class BaseUserApiKey(Base):
     __abstract__ = True
@@ -50,8 +62,6 @@ class BaseUserApiKey(Base):
     key_id: Mapped[str] = mapped_column(
         unique=True, index=True, comment="AWS API Gateway key identifier"
     )
-    # The concrete table redeclares this with a ForeignKey to the user table.
-    user_id: Mapped[uuid.UUID] = mapped_column(index=True)
     last_used: Mapped[datetime | None]
     is_active: Mapped[bool] = mapped_column(default=True)
 
