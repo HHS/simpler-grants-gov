@@ -125,7 +125,7 @@ def generate_pagination_schema(
             **page_offset_params,
         ),
     }
-    return BasePaginationSchema.from_dict(pagination_schema_fields, name=cls_name)  # type: ignore
+    return BasePaginationSchema.from_dict(pagination_schema_fields, name=cls_name)
 
 
 class SortOrderSchema(Schema):

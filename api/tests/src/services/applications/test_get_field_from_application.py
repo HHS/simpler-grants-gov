@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from grants_shared.adapters import db
 
-from src.db.models.competition_models import Application, ApplicationForm, Form
+from src.db.models.competition_models import Application, ApplicationForm
 from src.form_schema.forms import (
     ProjectAbstractSummary_v2_0,
     SF424_v4_0,
@@ -24,16 +24,13 @@ from tests.src.db.models.factories import (
 def add_form_to_application(
     db_session: db.Session,
     application: Application,
-    form: Form,
+    form,
     application_response: dict,
     is_required_form: bool = True,
     is_included_in_submission: bool = True,
 ) -> ApplicationForm:
-    # We do this so the form is attached to the session
-    # and uses whatever is already in the DB
-    attached_form = db_session.merge(form, load=True)
     competition_form = CompetitionFormFactory.create(
-        competition=application.competition, form=attached_form, is_required=is_required_form
+        competition=application.competition, form=form, is_required=is_required_form
     )
     application_form = ApplicationFormFactory.create(
         application=application,

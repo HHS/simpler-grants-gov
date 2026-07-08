@@ -2,8 +2,8 @@ import logging
 from uuid import UUID
 
 from grants_shared.adapters import db
+from grants_shared.db.models.auth_base_models import BaseUserApiKey
 
-from src.db.models.auth_base_models import BaseUserApiKey
 from src.services.users.get_user_api_keys import get_user_api_key
 
 logger = logging.getLogger(__name__)
@@ -28,10 +28,7 @@ def rename_api_key(
 
     logger.info(
         "Renamed API key",
-        extra={
-            "api_key_id": api_key.api_key_id,
-            "user_id": user_id,
-        },
+        extra=api_key.get_log_extra(),
     )
 
     return api_key

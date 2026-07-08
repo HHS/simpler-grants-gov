@@ -188,6 +188,102 @@ describe("buildFormTreeRecursive", () => {
     expect(screen.getByTestId("section--field2")).toBeInTheDocument();
   });
 
+  it("should render a Table multiField widget inside a section", () => {
+    const schema: RJSFSchema = {
+      type: "object",
+      properties: {
+        first_value: {
+          type: "number",
+          title: "First Value",
+        },
+        second_value: {
+          type: "number",
+          title: "Second Value",
+          readOnly: true,
+        },
+      },
+    };
+
+    const uiSchema: UiSchema = [
+      {
+        type: "section",
+        name: "table_demo",
+        label: "Table Demo",
+        children: [
+          {
+            type: "multiField",
+            name: "summary_table_test",
+            widget: "Table",
+            definition: ["/properties/first_value", "/properties/second_value"],
+            children: {
+              columns: [
+                {
+                  columnHeader: "Item",
+                  width: 40,
+                },
+                {
+                  columnHeader: "First Value",
+                  width: 30,
+                },
+                {
+                  columnHeader: "Second Value",
+                  width: 30,
+                },
+              ],
+              rows: [
+                {
+                  cells: [
+                    {
+                      type: "plainText",
+                      staticContent: "First Row",
+                    },
+                    {
+                      type: "input",
+                      definition: "/properties/first_value",
+                    },
+                    {
+                      type: "readOnly",
+                      definition: "/properties/second_value",
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    render(
+      <FormFields
+        errors={null}
+        formData={{
+          first_value: 2500,
+          second_value: 1000,
+        }}
+        schema={schema}
+        uiSchema={uiSchema}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Table Demo" }),
+    ).toBeInTheDocument();
+
+    const table = screen.getByTestId("table");
+
+    expect(table).toBeInTheDocument();
+    expect(screen.getAllByRole("columnheader")).toHaveLength(3);
+    expect(screen.getAllByRole("row")).toHaveLength(2);
+    expect(screen.getAllByRole("cell")).toHaveLength(3);
+
+    expect(
+      screen.getByRole("columnheader", { name: "Item" }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("First Row")).toBeInTheDocument();
+  });
+
   describe("FormFields formContext forwarding", () => {
     it("forwards formContext to rendered widgets", () => {
       const schema: RJSFSchema = {

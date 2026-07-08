@@ -129,7 +129,7 @@ const EditAction = ({
   const t = useTranslations("Opportunities");
   return canUpdate ? (
     <span>
-      <a href={`/grantor/opportunity/${opportunityId}/edit`}>
+      <a href={`/grantor/opportunity/${opportunityId}/overview`}>
         {t("actionButtons.edit")}
       </a>
     </span>

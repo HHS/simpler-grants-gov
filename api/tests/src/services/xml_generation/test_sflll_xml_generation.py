@@ -10,7 +10,6 @@ import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Form
 from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
@@ -56,9 +55,7 @@ class TestSFLLLXMLGeneration:
             competition=competition, application_name="SF-LLL Test Application"
         )
 
-        sflll_form = db_session.get(Form, SFLLL_v2_0.form_id)
-
-        comp_form_lll = CompetitionFormFactory.create(competition=competition, form=sflll_form)
+        comp_form_lll = CompetitionFormFactory.create(competition=competition, form=SFLLL_v2_0)
 
         # SF-LLL test data
         ApplicationFormFactory.create(

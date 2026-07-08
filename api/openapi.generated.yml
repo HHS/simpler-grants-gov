@@ -6925,6 +6925,7 @@ components:
           - SF424
           - SF424A
           - SF424B
+          - SF424C
           - SF424D
           - SFLLL
           - ProjectNarrativeAttachment
@@ -6937,6 +6938,7 @@ components:
           - GGLobbyingForm
           - EPAForm4700-4
           - EPAKeyContacts
+          - KeyContacts
           - AttachmentForm
           - ProjectPerformanceSiteLocation
           type:
@@ -6955,14 +6957,6 @@ components:
           - 'null'
           description: Whether the form is deprecated
           example: false
-        created_at:
-          type: string
-          format: date-time
-          description: The timestamp when the form was created
-        updated_at:
-          type: string
-          format: date-time
-          description: The timestamp when the form was last updated
     CompetitionFormAlphaSchema:
       type: object
       properties:
@@ -14394,6 +14388,10 @@ components:
           description: The HTTP status code
           example: 200
   securitySchemes:
+    ApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Token
     InternalApiJwtAuth:
       type: apiKey
       in: header
@@ -14402,8 +14400,4 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-    ApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Token
 
