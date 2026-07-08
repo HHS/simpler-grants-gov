@@ -11,6 +11,40 @@ import {
 export function AgencyContact() {
   const t = useTranslations("OpportunityCompetition.sectionAgencyContact");
 
+  //--- Validation for Full Name ---
+  const [nameValue, setNameValue] = useState<string>("");
+  const [hasNameError, setHasNameError] = useState<boolean>(false);
+  const [nameErrorMsg, setNameErrorMsg] = useState<string[]>([]);
+
+  // Proactively clear error states as the user types
+  const handleNameInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setNameValue(e.target.value);
+
+    if (hasNameError) {
+      setHasNameError(false);
+      setNameErrorMsg([]);
+    }
+  };
+
+  // Validate on exit (onBlur) using the regular expression
+  const handleNameFieldBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const value = e.target.value.trim();
+
+    if (!value) {
+      setHasNameError(true);
+      setNameErrorMsg([t("error.requiredFullName")]);
+      return;
+    }
+
+    // Success state
+    setHasNameError(false);
+    setNameErrorMsg([]);
+  };
+
   //--- Validation for Email Address ---
   const [emailValue, setEmailValue] = useState<string>("");
   const [hasEmailError, setHasEmailError] = useState<boolean>(false);
@@ -18,20 +52,19 @@ export function AgencyContact() {
   // Production-grade email layout validation regex
   const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-  // A. Maintain input state changes
+  // Proactively clear error states as the user types
   const handleEmailInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setEmailValue(e.target.value);
 
-    // Proactively clear error states as the user types
     if (hasEmailError) {
       setHasEmailError(false);
       setEmailErrorMsg([]);
     }
   };
 
-  // B. Validate on exit (onBlur) using the regular expression
+  // Validate on exit (onBlur) using the regular expression
   const handleEmailFieldBlur = (
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -54,10 +87,29 @@ export function AgencyContact() {
     setEmailErrorMsg([]);
   };
 
-  //--- Special formatting for Phone Number ---
-  const [phone, setPhone] = useState<string>("");
+  //--- Validation & Special formatting for Phone Number ---
+  const [phone, setPhoneValue] = useState<string>("");
+  const [hasPhoneError, setHasPhoneError] = useState<boolean>(false);
+  const [phoneErrorMsg, setPhoneErrorMsg] = useState<string[]>([]);
 
-  // A. Prevent non-numeric characters from being typed on PC keyboards
+  // Validate on exit (onBlur) using the regular expression
+  const handlePhoneFieldBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const value = e.target.value.trim();
+
+    if (!value) {
+      setHasPhoneError(true);
+      setPhoneErrorMsg([t("error.requiredPhoneNumber")]);
+      return;
+    }
+
+    // Success state
+    setHasPhoneError(false);
+    setPhoneErrorMsg([]);
+  };
+
+  // Prevent non-numeric characters from being typed on PC keyboards
   const handlePhoneKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Allow navigation, control, and deletion shortcut keys
     const allowedKeys = [
@@ -82,7 +134,7 @@ export function AgencyContact() {
     }
   };
 
-  // B. Format the numbers and safeguard against pasted content
+  // Format the numbers and safeguard against pasted content
   const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
     // 1. Strip all non-digits and limit to 10 characters
     const cleanValue = e.target.value.replace(/\D/g, "").slice(0, 10);
@@ -98,7 +150,13 @@ export function AgencyContact() {
       },
     );
 
-    setPhone(formattedValue);
+    setPhoneValue(formattedValue);
+
+    // Proactively clear error states as the user types
+    if (hasPhoneError) {
+      setHasPhoneError(false);
+      setPhoneErrorMsg([]);
+    }
   };
 
   //--- Render the component ---
@@ -124,8 +182,11 @@ export function AgencyContact() {
             fieldId="fullName"
             fieldMaxLength={255}
             isRequired={true}
-            onTextChange={() => {}}
             defaultValue=""
+            value={nameValue}
+            onTextChange={handleNameInputChange}
+            onFieldBlur={handleNameFieldBlur}
+            rawErrors={nameErrorMsg}
           />
         </div>
 
@@ -155,9 +216,9 @@ export function AgencyContact() {
             fieldMaxLength={255}
             isRequired={true}
             defaultValue=""
+            value={emailValue}
             onTextChange={handleEmailInputChange}
             onFieldBlur={handleEmailFieldBlur}
-            value={emailValue}
             rawErrors={emailErrorMsg}
           />
         </div>
@@ -170,9 +231,11 @@ export function AgencyContact() {
             description={t("phoneNumberHint")}
             isRequired={true}
             fieldMaxLength={14}
+            value={phone}
             onTextChange={handlePhoneChange}
             onKeyDown={handlePhoneKeyDown}
-            value={phone}
+            onFieldBlur={handlePhoneFieldBlur}
+            rawErrors={phoneErrorMsg}
           />
         </div>
       </div>

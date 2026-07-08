@@ -24,6 +24,7 @@ export const CommonTextInput = ({
   fieldMaxLength,
   onTextChange,
   onKeyDown = () => {},
+  onFieldBlur = () => {},
   defaultValue = "",
   value,
   rawErrors = [],
@@ -35,6 +36,7 @@ export const CommonTextInput = ({
   fieldMaxLength: number;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onFieldBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   defaultValue?: string;
   value?: string;
   rawErrors?: string[];
@@ -56,6 +58,7 @@ export const CommonTextInput = ({
           id={fieldId}
           onChange={onTextChange}
           onKeyDown={onKeyDown}
+          onBlur={onFieldBlur}
           maxLength={fieldMaxLength}
           style={{ maxWidth: "550px" }}
           defaultValue={defaultValue}

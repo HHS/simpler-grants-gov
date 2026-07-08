@@ -2507,6 +2507,8 @@ export const messages = {
       phoneNumber: "Phone number",
       phoneNumberHint: "10-digit, for example: (999) 999-9999",
       error: {
+        requiredFullName: "Full name is required.",
+        requiredPhoneNumber: "Phone number is required.",
         requiredEmail: "Email address is required.",
         invalidEmail:
           "Please enter a valid email address (e.g., name@example.com).",
