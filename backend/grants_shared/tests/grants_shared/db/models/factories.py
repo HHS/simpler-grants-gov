@@ -85,27 +85,27 @@ class FriendTableFactory(BaseFactory):
     )
 
 
-class UserFactory(BaseFactory):
+class SharedUserFactory(BaseFactory):
     class Meta:
-        model = db_test_models.User
+        model = db_test_models.SharedUser
 
-    user_id = Generators.UuidObj
+    shared_user_id = Generators.UuidObj
 
 
-class LinkExternalUserFactory(BaseFactory):
+class SharedLinkExternalUserFactory(BaseFactory):
     class Meta:
-        model = db_test_models.LinkExternalUser
+        model = db_test_models.SharedLinkExternalUser
 
     link_external_user_id = Generators.UuidObj
     external_user_id = Generators.UuidObj
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+    shared_user = factory.SubFactory(SharedUserFactory)
+    shared_user_id = factory.LazyAttribute(lambda s: s.shared_user.shared_user_id)
     email = factory.Faker("email")
 
 
-class LoginGovStateFactory(BaseFactory):
+class SharedLoginGovStateFactory(BaseFactory):
     class Meta:
-        model = db_test_models.LoginGovState
+        model = db_test_models.SharedLoginGovState
 
-    login_gov_state_id = Generators.UuidObj
+    shared_login_gov_state_id = Generators.UuidObj
     nonce = Generators.UuidObj
