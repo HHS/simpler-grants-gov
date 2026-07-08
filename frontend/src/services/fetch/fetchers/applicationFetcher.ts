@@ -186,7 +186,7 @@ export const getApplicationFormDetailsForPrint = async (
   //   additionalHeaders,
   // });
 
-  const response = getApplicationForPrint({
+  const response = await getApplicationForPrint({
     subPath: `${applicationId}/application_form/${applicationFormId}`,
     additionalHeaders,
   });
