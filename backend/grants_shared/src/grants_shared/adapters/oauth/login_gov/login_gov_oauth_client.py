@@ -2,9 +2,9 @@ from typing import Any
 
 import requests
 
-from src.adapters.oauth.oauth_client import BaseOauthClient
-from src.adapters.oauth.oauth_client_models import OauthTokenRequest, OauthTokenResponse
-from src.auth.login_gov_jwt_auth import LoginGovConfig, get_config
+from grants_shared.adapters.oauth.oauth_client import BaseOauthClient
+from grants_shared.adapters.oauth.oauth_client_models import OauthTokenRequest, OauthTokenResponse
+from grants_shared.auth.login_gov_jwt_auth import LoginGovConfig, get_config
 
 
 class LoginGovOauthClient(BaseOauthClient):

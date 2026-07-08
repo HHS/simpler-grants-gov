@@ -4,11 +4,14 @@ import uuid
 import _pytest.monkeypatch
 import boto3
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from moto import mock_aws
 
 import tests.grants_shared.db.models.factories as factories
 from grants_shared.adapters import db
 from grants_shared.adapters.aws import S3Config
+from grants_shared.auth.login_gov_jwt_auth import LoginGovConfig
 from grants_shared.db.models.base import metadata
 from grants_shared.db.models.lookup import sync_lookup_values
 from grants_shared.util.local import load_local_env_vars
@@ -263,3 +266,61 @@ def workflow_sqs_queue(mock_sqs, monkeypatch):
     # Set the env var of this queue so the SQSConfig picks it up
     monkeypatch.setenv("WORKFLOW_QUEUE_URL", queue["QueueUrl"])
     return queue["QueueUrl"]
+
+
+#################
+# Auth
+#################
+
+
+def _generate_rsa_key_pair():
+    # Rather than define a private/public key, generate one for the tests
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    private_key = key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+
+    public_key = key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    return private_key, public_key
+
+
+@pytest.fixture
+def login_gov_config(public_rsa_key, private_rsa_key):
+    # Note this isn't session scoped so it gets remade
+    # for every test in the event of changes to it
+    return LoginGovConfig(
+        LOGIN_GOV_PUBLIC_KEY_MAP={"test-key-id": public_rsa_key},
+        LOGIN_GOV_JWK_ENDPOINT="not_used",
+        LOGIN_GOV_ENDPOINT="http://localhost:3000",
+        LOGIN_GOV_CLIENT_ID="urn:gov:unit-test",
+        LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY=private_rsa_key,
+        LOGIN_GOV_AUTH_ENDPOINT="http://localhost:3000/auth",
+        LOGIN_GOV_TOKEN_ENDPOINT="http://localhost:3000/token",
+        LOGIN_FINAL_DESTINATION="http://localhost:3000/final",
+    )
+
+
+@pytest.fixture(scope="session")
+def rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
+@pytest.fixture(scope="session")
+def other_rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
+@pytest.fixture(scope="session")
+def public_rsa_key(rsa_key_pair):
+    return rsa_key_pair[1]
+
+
+@pytest.fixture(scope="session")
+def private_rsa_key(rsa_key_pair):
+    return rsa_key_pair[0]

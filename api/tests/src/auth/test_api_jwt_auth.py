@@ -5,14 +5,10 @@ import grants_shared.logs
 import jwt
 import pytest
 from freezegun import freeze_time
+from grants_shared.auth.api_jwt_auth import ApiJwtConfig
 
 import src.app as app_entry
-from src.auth.api_jwt_auth import (
-    ApiJwtConfig,
-    api_jwt_auth,
-    create_jwt_for_user,
-    parse_jwt_for_user,
-)
+from src.auth.api_jwt_auth import api_jwt_auth, create_jwt_for_user, parse_jwt_for_user
 from src.db.models.user_models import UserTokenSession
 from tests.src.db.models.factories import LinkExternalUserFactory, UserFactory
 

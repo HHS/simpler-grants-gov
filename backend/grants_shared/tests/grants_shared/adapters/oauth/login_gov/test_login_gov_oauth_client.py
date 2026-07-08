@@ -2,9 +2,8 @@ import json
 
 import requests
 
-from src.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
-from src.adapters.oauth.oauth_client_models import OauthTokenRequest
-from src.auth.login_gov_jwt_auth import LoginGovConfig
+from grants_shared.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
+from grants_shared.adapters.oauth.oauth_client_models import OauthTokenRequest
 
 
 def mock_response(monkeypatch, mocked_response: dict):
@@ -17,14 +16,14 @@ def mock_response(monkeypatch, mocked_response: dict):
     monkeypatch.setattr("requests.Session.request", mock_post)
 
 
-def test_get_token(monkeypatch):
+def test_get_token(monkeypatch, login_gov_config):
 
     mock_response(
         monkeypatch,
         {"id_token": "abc123", "access_token": "xyz456", "token_type": "Bearer", "expires_in": 300},
     )
 
-    client = LoginGovOauthClient(LoginGovConfig())
+    client = LoginGovOauthClient(login_gov_config)
     resp = client.get_token(OauthTokenRequest(code="abc123", client_assertion="fake_token"))
 
     assert resp.id_token == "abc123"
@@ -36,13 +35,13 @@ def test_get_token(monkeypatch):
     assert resp.is_error_response() is False
 
 
-def test_get_token_error(monkeypatch):
+def test_get_token_error(monkeypatch, login_gov_config):
     mock_response(
         monkeypatch,
         {"error": "invalid_request", "error_description": "missing required parameter grant_type"},
     )
 
-    client = LoginGovOauthClient(LoginGovConfig())
+    client = LoginGovOauthClient(login_gov_config)
     resp = client.get_token(OauthTokenRequest(code="abc123", client_assertion="fake_token"))
 
     assert resp.id_token == ""

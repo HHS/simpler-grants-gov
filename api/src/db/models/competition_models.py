@@ -1,3 +1,4 @@
+import dataclasses
 import uuid
 from datetime import date, datetime, timedelta
 from decimal import Decimal
@@ -27,7 +28,6 @@ from src.db.models.lookup_models import (
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
     LkFormFamily,
-    LkFormType,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 
@@ -186,38 +186,29 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
         return presign_or_s3_cdnify_url(self.file_location)
 
 
-class Form(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "form"
+@dataclasses.dataclass
+class Form:
+    """In-memory form definition. The form DB table has been dropped; forms live in the registry."""
 
-    form_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    form_name: Mapped[str]
+    form_id: uuid.UUID
+    form_name: str
     # This is used for making files and should not contain spaces
-    short_form_name: Mapped[str]
-    form_version: Mapped[str]
-    agency_code: Mapped[str]
-    omb_number: Mapped[str | None]
-    legacy_form_id: Mapped[int | None] = mapped_column(index=True, unique=True)
-    active_at: Mapped[datetime | None]
-    inactive_at: Mapped[datetime | None]
-    form_json_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
-    form_ui_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
-    form_instruction_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID, ForeignKey(FormInstruction.form_instruction_id), nullable=True
-    )
-    form_instruction: Mapped[FormInstruction | None] = relationship(
-        FormInstruction, cascade="all, delete-orphan", single_parent=True
-    )
-
-    form_rule_schema: Mapped[dict | None] = mapped_column(JSONB)
-    json_to_xml_schema: Mapped[dict | None] = mapped_column(JSONB)
-
-    form_type: Mapped[FormType | None] = mapped_column(
-        "form_type_id",
-        LookupColumn(LkFormType),
-        ForeignKey(LkFormType.form_type_id),
-    )
-    sgg_version: Mapped[str | None]
-    is_deprecated: Mapped[bool | None]
+    short_form_name: str
+    form_version: str
+    agency_code: str
+    form_json_schema: dict
+    form_ui_schema: dict
+    omb_number: str | None = None
+    legacy_form_id: int | None = None
+    active_at: datetime | None = None
+    inactive_at: datetime | None = None
+    form_instruction_id: uuid.UUID | None = None
+    form_instruction: FormInstruction | None = None  # populated at runtime by get_form service
+    form_rule_schema: dict | None = None
+    json_to_xml_schema: dict | None = None
+    form_type: FormType | None = None
+    sgg_version: str | None = None
+    is_deprecated: bool | None = None
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):

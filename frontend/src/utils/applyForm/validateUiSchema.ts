@@ -325,9 +325,6 @@ export const UiJsonSchema: RJSFSchema = {
     tableRow: {
       type: "object",
       properties: {
-        rowHeader: {
-          type: "string",
-        },
         cells: {
           type: "array",
           minItems: 1,
@@ -336,7 +333,7 @@ export const UiJsonSchema: RJSFSchema = {
           },
         },
       },
-      required: ["rowHeader", "cells"],
+      required: ["cells"],
       additionalProperties: false,
     },
     tableCell: {
