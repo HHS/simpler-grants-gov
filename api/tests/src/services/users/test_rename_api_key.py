@@ -122,10 +122,8 @@ def test_rename_api_key_logging_success(enable_factory_create, db_session: db.Se
     assert any("Renamed API key" in record.message for record in caplog.records)
 
     log_record = next(record for record in caplog.records if "Renamed API key" in record.message)
-    assert hasattr(log_record, "api_key_id")
-    assert str(log_record.api_key_id) == str(api_key.api_key_id)
-    assert hasattr(log_record, "user_id")
-    assert str(log_record.user_id) == str(user.user_id)
+    assert str(getattr(log_record, "auth.api_key_id")) == str(api_key.api_key_id)
+    assert str(getattr(log_record, "auth.user_id")) == str(api_key.user_id)
 
 
 def test_rename_api_key_multiple_keys_same_user(enable_factory_create, db_session: db.Session):

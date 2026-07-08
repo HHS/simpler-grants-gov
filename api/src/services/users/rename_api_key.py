@@ -28,10 +28,7 @@ def rename_api_key(
 
     logger.info(
         "Renamed API key",
-        extra={
-            "api_key_id": api_key.api_key_id,
-            "user_id": user_id,
-        },
+        extra=api_key.get_log_extra(),
     )
 
     return api_key
