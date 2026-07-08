@@ -181,11 +181,6 @@ export const getApplicationFormDetailsForPrint = async (
   const additionalHeaders = {
     "X-SGG-Internal-Token": internalToken,
   };
-  // const response = await fetchApplicationWithMethod("GET")({
-  //   subPath: `${applicationId}/application_form/${applicationFormId}`,
-  //   additionalHeaders,
-  // });
-
   const response = await getApplicationForPrint({
     subPath: `${applicationId}/application_form/${applicationFormId}`,
     additionalHeaders,
