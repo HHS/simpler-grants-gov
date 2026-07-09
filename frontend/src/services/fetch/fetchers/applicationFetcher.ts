@@ -1,4 +1,7 @@
-import { fetchApplicationWithMethod } from "src/services/fetch/fetchers/fetchers";
+import {
+  fetchApplicationWithMethod,
+  getApplicationForPrint,
+} from "src/services/fetch/fetchers/fetchers";
 import { ApplicationSubmissionsRequestBody } from "src/types/application/applicationSubmissionRequestTypes";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
@@ -178,7 +181,7 @@ export const getApplicationFormDetailsForPrint = async (
   const additionalHeaders = {
     "X-SGG-Internal-Token": internalToken,
   };
-  const response = await fetchApplicationWithMethod("GET")({
+  const response = await getApplicationForPrint({
     subPath: `${applicationId}/application_form/${applicationFormId}`,
     additionalHeaders,
   });
