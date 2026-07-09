@@ -2543,7 +2543,7 @@ export const messages = {
         requiredPhoneNumber: "Phone number is required.",
         requiredEmail: "Email address is required.",
         invalidEmail:
-          "Please enter a valid email address (e.g., name@example.com).",
+          "Incorrect text format. Please ensure there are no spaces or missing characters.",
       },
     },
   },
