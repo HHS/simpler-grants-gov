@@ -145,7 +145,7 @@ export const SimplerFileInput = ({
 
   // note the usage of functional state setters in these functions
   // it's necessary to avoid referencing stale closed over state values up the call stack
-  const trackUploadSuccess = (uploadId: string) => {
+  const trackUploadComplete = (uploadId: string) => {
     setActiveUploads((previousActiveUploads) =>
       previousActiveUploads.filter(
         (activeUpload) => activeUpload.uploadId !== uploadId,
@@ -163,14 +163,11 @@ export const SimplerFileInput = ({
     setUploadErrors((previousUploadErrors) =>
       previousUploadErrors.filter((uploadError) => uploadError !== uploadId),
     );
-  };
-
-  const trackUploadCancel = (uploadId: string) => {
-    setActiveUploads((previousActiveUploads) =>
-      previousActiveUploads.filter(
-        (activeUpload) => activeUpload.uploadId !== uploadId,
-      ),
-    );
+    // we want to show the upload input again after dismissing a single error
+    trackUploadComplete(uploadId);
+    if (!multiFile) {
+      fileInputRef?.current?.clearFiles();
+    }
   };
 
   return (
@@ -196,7 +193,7 @@ export const SimplerFileInput = ({
           key={uploadId}
           fileToUpload={file}
           onCancel={() => {
-            trackUploadCancel(uploadId);
+            trackUploadComplete(uploadId);
             if (!multiFile) {
               fileInputRef?.current?.clearFiles();
             }
@@ -209,7 +206,7 @@ export const SimplerFileInput = ({
           postUploadActionErrorMessage={postUploadActionErrorMessage}
           onStart={onStart}
           onUploadSuccess={(postUploadResult: unknown) => {
-            trackUploadSuccess(uploadId);
+            trackUploadComplete(uploadId);
             onSuccess(postUploadResult);
           }}
           onComplete={onComplete}
