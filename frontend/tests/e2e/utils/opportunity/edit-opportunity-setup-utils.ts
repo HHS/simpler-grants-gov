@@ -18,6 +18,7 @@ import {
 } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
 import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
+
 import { createOpportunity } from "./create-opportunity-utils";
 
 export const EDIT_OPPORTUNITY_URL_PATTERN =

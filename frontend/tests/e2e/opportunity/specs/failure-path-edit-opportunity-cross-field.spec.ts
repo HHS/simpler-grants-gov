@@ -16,7 +16,12 @@
  *
  */
 
-import { test, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
+import {
+  test,
+  type BrowserContext,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import {
   CROSS_FIELD_VALIDATION_DEFINITIONS,
   ELIGIBILITY_FIELD_DEFINITIONS,

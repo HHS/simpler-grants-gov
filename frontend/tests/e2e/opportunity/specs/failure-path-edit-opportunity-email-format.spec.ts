@@ -17,7 +17,13 @@
  *
  */
 
-import { expect, test, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
+import {
+  expect,
+  test,
+  type BrowserContext,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import {
   ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
   buildPageFieldsFromDefinitions,
@@ -87,10 +93,13 @@ test.describe("Opportunity failure path - edit opportunity email format", () => 
       // When I enter an invalid email and click Save.
       await fillPageFields(
         page,
-        buildPageFieldsFromDefinitions(ADDITIONAL_INFORMATION_FIELD_DEFINITIONS, {
-          ...fillData,
-          contactEmail: INVALID_CONTACT_EMAIL,
-        }),
+        buildPageFieldsFromDefinitions(
+          ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
+          {
+            ...fillData,
+            contactEmail: INVALID_CONTACT_EMAIL,
+          },
+        ),
       );
       await page.getByRole("button", { name: "Save" }).click();
 

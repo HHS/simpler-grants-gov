@@ -198,7 +198,8 @@ export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[
           selector: "#award-maximum",
           valueKey: "awardMaximum",
           invalidValue: "50",
-          expectedErrorMessage: "Award maximum cannot be less than Award minimum.",
+          expectedErrorMessage:
+            "Award maximum cannot be less than Award minimum.",
         },
       ],
     },

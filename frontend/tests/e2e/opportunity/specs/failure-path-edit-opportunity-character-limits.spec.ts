@@ -17,7 +17,13 @@
  *
  */
 
-import { expect, test, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
+import {
+  expect,
+  test,
+  type BrowserContext,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import {
   ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
   buildPageFieldsFromDefinitions,

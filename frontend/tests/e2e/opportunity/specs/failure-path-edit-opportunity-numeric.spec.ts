@@ -17,7 +17,12 @@
  *
  */
 
-import { test, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
+import {
+  test,
+  type BrowserContext,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import {
   ELIGIBILITY_FIELD_DEFINITIONS,
   FUNDING_DETAILS_FIELD_DEFINITIONS,

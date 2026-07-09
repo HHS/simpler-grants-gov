@@ -15,6 +15,7 @@
  */
 
 import { expect, Page } from "@playwright/test";
+
 import { resolveTextLocator } from "./text-locator-utils";
 
 export type NegativeValidationFieldDefinition = {
@@ -49,8 +50,9 @@ export async function assertNegativeNumberValidationsFromDefinitions(
   const negativeValue = options?.negativeValue ?? "-10";
   const triggerValidationWithButtonClick =
     options?.triggerValidationWithButtonClick ?? true;
-  const triggerButtonNames =
-    options?.triggerButtonNames ?? [options?.saveButtonName ?? "Save"];
+  const triggerButtonNames = options?.triggerButtonNames ?? [
+    options?.saveButtonName ?? "Save",
+  ];
   const hasNoTriggerSentinel = triggerButtonNames.some(
     (buttonName) => buttonName.toLowerCase() === "no",
   );
