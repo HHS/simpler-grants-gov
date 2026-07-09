@@ -146,16 +146,11 @@ export const SimplerFileInput = ({
   // note the usage of functional state setters in these functions
   // it's necessary to avoid referencing stale closed over state values up the call stack
   const trackUploadSuccess = (uploadId: string) => {
-    setActiveUploads((previousActiveUploads) => {
-      const previousCopy = [...previousActiveUploads];
-      const successIndex = previousCopy.findIndex(
-        (item) => item.uploadId === uploadId,
-      );
-      if (successIndex > -1) {
-        previousCopy.splice(successIndex, 1);
-      }
-      return previousCopy;
-    });
+    setActiveUploads((previousActiveUploads) =>
+      previousActiveUploads.filter(
+        (activeUpload) => activeUpload.uploadId !== uploadId,
+      ),
+    );
   };
   const trackUploadError = (uploadId: string) => {
     setUploadErrors((previousUploadErrors) => [
@@ -165,26 +160,17 @@ export const SimplerFileInput = ({
   };
 
   const dismissError = (uploadId: string) => {
-    setUploadErrors((previousUploadErrors) => {
-      const errorIndex = previousUploadErrors.indexOf(uploadId);
-      if (errorIndex > -1) {
-        previousUploadErrors.splice(errorIndex, 1);
-      }
-      return previousUploadErrors;
-    });
+    setUploadErrors((previousUploadErrors) =>
+      previousUploadErrors.filter((uploadError) => uploadError !== uploadId),
+    );
   };
 
   const trackUploadCancel = (uploadId: string) => {
-    setActiveUploads((previousActiveUploads) => {
-      const previousCopy = [...previousActiveUploads];
-      const canceledIndex = previousCopy.findIndex(
-        (item) => item.uploadId === uploadId,
-      );
-      if (canceledIndex > -1) {
-        previousCopy.splice(canceledIndex, 1);
-      }
-      return previousCopy;
-    });
+    setActiveUploads((previousActiveUploads) =>
+      previousActiveUploads.filter(
+        (activeUpload) => activeUpload.uploadId !== uploadId,
+      ),
+    );
   };
 
   return (
