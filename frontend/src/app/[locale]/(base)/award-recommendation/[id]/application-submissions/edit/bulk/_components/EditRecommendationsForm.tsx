@@ -1,13 +1,13 @@
 "use client";
 
 import { useSelectedSubmissions } from "src/hooks/useSelectedSubmissions";
-import { AwardRecommendationType } from "src/types/awardRecommendationTypes";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, ButtonGroup, Label, Select } from "@trussworks/react-uswds";
+import { Button, ButtonGroup } from "@trussworks/react-uswds";
 
+import { RecommendationDetailForm } from "src/app/[locale]/(base)/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
 import SelectedApplicationsTable from "src/components/award-recommendation/SelectedApplicationsTable";
 import SimplerAlert from "src/components/core/SimplerAlert";
 
@@ -19,18 +19,16 @@ export default function EditRecommendationsForm({
   awardRecommendationId,
 }: EditRecommendationsFormProps) {
   const t = useTranslations("AwardRecommendation.editRecommendations");
-  const tOptions = useTranslations(
-    "AwardRecommendation.recommendations.submissions.recommendationOptions",
-  );
   const router = useRouter();
-  const [selectedRecommendation, setSelectedRecommendation] =
-    useState<AwardRecommendationType>("recommended_for_funding");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { selectedSubmissions, hasSelections } = useSelectedSubmissions(
     awardRecommendationId,
   );
+
+  const isSingleSubmission = selectedSubmissions.length === 1;
+  const isMultipleSubmissions = selectedSubmissions.length > 1;
 
   const handleCancel = () => {
     router.push(
@@ -83,41 +81,22 @@ export default function EditRecommendationsForm({
         {t("selectedApplications")}
       </h2>
 
+      {isMultipleSubmissions && (
+        <p className="margin-top-0 margin-bottom-2 text-base">
+          {selectedSubmissions.length} {t("submissionsSelected")}
+        </p>
+      )}
+
       <SelectedApplicationsTable
         awardRecommendationId={awardRecommendationId}
         submissions={selectedSubmissions}
       />
 
       <div className="margin-top-4">
-        <h3 className="margin-top-0 margin-bottom-2">
-          {t("bulkEditHeading")}
-        </h3>
-        <p className="text-base-dark margin-top-0 margin-bottom-3">
-          {t("bulkEditDescription")}
-        </p>
-
-        <div className="maxw-tablet">
-          <Label htmlFor="recommendation-type">{t("recommendationType")}</Label>
-          <Select
-            id="recommendation-type"
-            name="recommendation-type"
-            value={selectedRecommendation}
-            onChange={(e) =>
-              setSelectedRecommendation(e.target.value as AwardRecommendationType)
-            }
-            disabled={isSubmitting}
-          >
-            <option value="recommended_for_funding">
-              {tOptions("recommended")}
-            </option>
-            <option value="recommended_without_funding">
-              {tOptions("recommendedWithoutFunding")}
-            </option>
-            <option value="not_recommended">
-              {tOptions("notRecommended")}
-            </option>
-          </Select>
-        </div>
+        <RecommendationDetailForm
+          submission={isSingleSubmission ? selectedSubmissions[0] : undefined}
+          submissions={isMultipleSubmissions ? selectedSubmissions : undefined}
+        />
 
         <ButtonGroup className="margin-top-4">
           <Button

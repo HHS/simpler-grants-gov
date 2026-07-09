@@ -2094,6 +2094,7 @@ export const messages = {
         "Bulk edit award recommendations for selected applications",
       bulkEditTitle: "Bulk Edit Recommendations",
       selectedApplications: "Selected Applications",
+      submissionsSelected: "submissions selected",
       bulkEditHeading: "Update Recommendation",
       bulkEditDescription:
         "Select a recommendation type to apply to all selected applications.",
@@ -2193,8 +2194,12 @@ export const messages = {
       exceptionDetailDescription:
         "Select one or more applications and explain any exceptions to the general selection method. For example, the reasons for any applications skipped on the merit review ranking or other similar exceptions.",
       fundingHeading: "Funding recommendations",
+      fundingDescription:
+        "Review and provide the updates to recommended funding as needed.",
+      applicationIdLabel: "Application ID",
       amountRequestedLabel: "Amount Requested",
       amountRecommendedLabel: "Amount Recommended",
+      totalLabel: "Total",
     },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
