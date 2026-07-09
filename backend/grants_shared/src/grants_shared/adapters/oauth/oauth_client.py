@@ -1,6 +1,6 @@
 import abc
 
-from src.adapters.oauth.oauth_client_models import OauthTokenRequest, OauthTokenResponse
+from grants_shared.adapters.oauth.oauth_client_models import OauthTokenRequest, OauthTokenResponse
 
 
 class BaseOauthClient(abc.ABC, metaclass=abc.ABCMeta):

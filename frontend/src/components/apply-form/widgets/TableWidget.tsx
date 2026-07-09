@@ -1,6 +1,5 @@
-import { UswdsWidgetProps } from "src/types/applyForm/types";
-
 import { Table } from "@trussworks/react-uswds";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
 
 import TableCell from "../TableCell";
 
@@ -12,13 +11,13 @@ function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
     return null;
   }
 
-  // The first configured column is rendered from rowHeader, so cells only
-  // represent the remaining data columns.
   const { columns, rows } = uiSchemaField.children;
-  const expectedCellCount = columns.length - 1;
+  const expectedCellCount = columns.length;
 
+  // A Table row must provide one cell for each configured column.
+  // Throw early so malformed UI schema configuration does not render a misaligned table.
   rows.forEach((row, rowIndex) => {
-    if (row.cells.length !== expectedCellCount) {
+    if (!Array.isArray(row.cells) || row.cells.length !== expectedCellCount) {
       throw new Error(
         `Table row ${rowIndex + 1} must contain exactly ${expectedCellCount} cells.`,
       );
@@ -52,15 +51,14 @@ function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
         </tr>
       </thead>
       <tbody>
-        {rows.map((row) => (
-          <tr key={row.rowHeader}>
-            <th scope="row">{row.rowHeader}</th>
+        {rows.map((row, rowIndex) => (
+          <tr key={`table-row-${rowIndex}`}>
             {row.cells.map((cell, cellIndex) => {
-              const cellId = `${uiSchemaField.name}-${row.rowHeader}-${cellIndex}`;
+              const cellId = `${uiSchemaField.name}-${rowIndex}-${cellIndex}`;
 
               return (
                 <td
-                  key={`${row.rowHeader}-${cellIndex}`}
+                  key={`table-row-${rowIndex}-cell-${cellIndex}`}
                   data-table-cell-type={cell.type}
                 >
                   <TableCell cell={cell} id={cellId} />

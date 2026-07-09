@@ -2,6 +2,8 @@ import { AwardSelectionMethod } from "src/constants/awardRecommendation";
 import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 import {
   AwardRecommendationDetails,
+  AwardRecommendationListItem,
+  AwardRecommendationListRequestBody,
   AwardRecommendationRisk,
   AwardRecommendationSubmission,
   AwardRecommendationSubmissionDetailUpdate,
@@ -20,6 +22,29 @@ export const getAwardRecommendationDetails = async (
   const response = await fetchAwardRecommendation({ subPath: id });
   const responseBody = (await response.json()) as APIResponse;
   return responseBody.data as AwardRecommendationDetails;
+};
+
+export const listAwardRecommendationsPaginated = async (
+  agencyId: string,
+  pagination: PaginationRequestBody,
+): Promise<{
+  awardRecommendations: AwardRecommendationListItem[];
+  paginationInfo: PaginationInfo | undefined;
+}> => {
+  const response = await fetchAwardRecommendationWithMethod("POST")({
+    subPath: "list",
+    body: {
+      filters: { agency_id: { one_of: [agencyId] } },
+      pagination,
+    } satisfies AwardRecommendationListRequestBody,
+  });
+  const responseBody = (await response.json()) as APIResponse;
+
+  return {
+    awardRecommendations:
+      (responseBody.data as AwardRecommendationListItem[]) || [],
+    paginationInfo: responseBody.pagination_info,
+  };
 };
 
 export const listAwardRecommendationSubmissionsPaginated = async (

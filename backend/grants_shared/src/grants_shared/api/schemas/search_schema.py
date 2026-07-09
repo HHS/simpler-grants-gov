@@ -50,7 +50,7 @@ class BaseSearchSchemaBuilder:
         self.schema_class_name = schema_class_name
 
     def build(self) -> Schema:
-        return BaseSearchSchema.from_dict(self.schema_fields, name=self.schema_class_name)  # type: ignore
+        return BaseSearchSchema.from_dict(self.schema_fields, name=self.schema_class_name)
 
 
 class StrSearchSchemaBuilder(BaseSearchSchemaBuilder):

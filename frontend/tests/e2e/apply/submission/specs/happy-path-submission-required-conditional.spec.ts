@@ -17,8 +17,8 @@ import {
 } from "@playwright/test";
 import { SF424B_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424b-field-definitions";
 import { sf424BHappyPathTestData } from "tests/e2e/apply/fixtures/sf424b-fill-data";
-import { SFLLL_TEST_DATA } from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
-import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sfLLL-fill-data";
+import { buildSFLLLHappyPathTestData } from "tests/e2e/apply/fixtures/sfLLL-data";
+import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -116,7 +116,13 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // Then the form opens
       // And the user fills out the form with valid test data
       // And the user clicks Save
-      await fillForm(testInfo, page, SFLLL_FORM_CONFIG, SFLLL_TEST_DATA, false);
+      await fillForm(
+        testInfo,
+        page,
+        SFLLL_FORM_CONFIG,
+        buildSFLLLHappyPathTestData(Date.now()),
+        false,
+      );
 
       // Verify SF-LLL save success alert on form page
       await verifyFormStatusAfterSave(page, "complete");
