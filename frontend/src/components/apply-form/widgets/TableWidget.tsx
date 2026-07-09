@@ -1,7 +1,8 @@
 import { Table } from "@trussworks/react-uswds";
 import { UswdsWidgetProps } from "src/types/applyForm/types";
+import TableCell from "src/components/apply-form/TableCell";
 
-import TableCell from "../TableCell";
+
 
 function TableWidget({ label, uiSchemaField }: UswdsWidgetProps) {
   if (
