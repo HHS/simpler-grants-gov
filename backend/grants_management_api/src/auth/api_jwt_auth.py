@@ -29,7 +29,6 @@ class JwtUserHttpTokenAuth(APIKeyHeaderAuth):
 
 
 api_jwt_auth = JwtUserHttpTokenAuth(
-    # TODO - fix
     "ApiKey",
     param_name="X-MGMT-Token",
     security_scheme_name="ApiJwtAuth",
