@@ -20,7 +20,6 @@ import {
   test,
   type BrowserContext,
   type Page,
-  type TestInfo,
 } from "@playwright/test";
 import {
   CROSS_FIELD_VALIDATION_DEFINITIONS,
@@ -55,7 +54,7 @@ test.describe("Opportunity failure path - edit opportunity cross-field", () => {
     { tag: [GRANTOR, CORE_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
-      testInfo: TestInfo,
+      testInfo,
     ) => {
       test.setTimeout(300_000);
 
