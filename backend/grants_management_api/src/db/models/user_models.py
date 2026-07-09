@@ -97,11 +97,6 @@ class MgmtUserTokenSession(BaseUserTokenSession, GrantorSchemaTable, TimestampMi
             "auth.user_id": self.mgmt_user_id,
         }
 
-    # TODO - remove, hacky workaround fix for logging
-    @property
-    def user_id(self) -> uuid.UUID:
-        return self.mgmt_user_id
-
 
 class MgmtLoginGovState(BaseLoginGovState, GrantorSchemaTable, TimestampMixin):
     """Table used to store temporary state during the OAuth login flow"""
