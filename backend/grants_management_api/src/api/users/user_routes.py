@@ -26,7 +26,7 @@ you to an OAuth provider where you can sign into an account.
 
 Do not try to use the execute option below as OpenAPI will not redirect your browser for you.
 
-The token you receive can then be set to the X-SGG-Token header for authenticating with endpoints.
+The token you receive can then be set to the X-MGMT-Token header for authenticating with endpoints.
 """
 
 

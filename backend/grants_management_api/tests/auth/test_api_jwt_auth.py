@@ -99,7 +99,7 @@ def test_api_jwt_auth_happy_path(mini_app, enable_factory_create, db_session):
     token, _ = create_jwt_for_user(user, db_session)
     db_session.commit()  # need to commit here to push the session to the DB
 
-    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-SGG-Token": token})
+    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-MGMT-Token": token})
 
     assert resp.status_code == 200
     assert resp.get_json()["message"] == "ok"
@@ -111,7 +111,7 @@ def test_api_jwt_auth_expired_token(mini_app, enable_factory_create, db_session)
     session.expires_at = datetime.fromisoformat("1980-01-01 12:00:00+00:00")
     db_session.commit()
 
-    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-SGG-Token": token})
+    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-MGMT-Token": token})
 
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token expired"
@@ -123,7 +123,7 @@ def test_api_jwt_auth_invalid_token(mini_app, enable_factory_create, db_session)
     session.is_valid = False
     db_session.commit()
 
-    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-SGG-Token": token})
+    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-MGMT-Token": token})
 
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token is no longer valid"
@@ -134,7 +134,7 @@ def test_api_jwt_auth_token_missing_in_db(mini_app, enable_factory_create, db_se
     token, session = create_jwt_for_user(user, db_session)
     db_session.expunge(session)  # Just drop it, never sending to the DB
 
-    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-SGG-Token": token})
+    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-MGMT-Token": token})
 
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token session does not exist"
@@ -142,7 +142,7 @@ def test_api_jwt_auth_token_missing_in_db(mini_app, enable_factory_create, db_se
 
 def test_api_jwt_auth_token_not_jwt(mini_app, enable_factory_create, db_session):
     # Just call with a random set of characters
-    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-SGG-Token": "abc123"})
+    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-MGMT-Token": "abc123"})
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unable to process token"
 
@@ -156,7 +156,7 @@ def test_api_jwt_auth_token_created_with_different_key(
     token, _ = create_jwt_for_user(user, db_session, jwt_config)
     db_session.commit()
 
-    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-SGG-Token": token})
+    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-MGMT-Token": token})
 
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unable to process token"
@@ -171,7 +171,7 @@ def test_api_jwt_auth_token_iat_future(mini_app, enable_factory_create, db_sessi
 
     # Set time to the 12th when calling the API so the iat will be in the future now
     with freeze_time("2024-11-12 12:00:00", tz_offset=0):
-        resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-SGG-Token": token})
+        resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-MGMT-Token": token})
 
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token not yet valid"
@@ -183,7 +183,7 @@ def test_api_jwt_auth_token_unknown_issuer(mini_app, enable_factory_create, db_s
     token, _ = create_jwt_for_user(user, db_session, config)
     db_session.commit()
 
-    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-SGG-Token": token})
+    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-MGMT-Token": token})
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unknown Issuer"
 
@@ -194,7 +194,7 @@ def test_api_jwt_auth_token_unknown_audience(mini_app, enable_factory_create, db
     token, _ = create_jwt_for_user(user, db_session, config)
     db_session.commit()
 
-    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-SGG-Token": token})
+    resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-MGMT-Token": token})
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unknown Audience"
 

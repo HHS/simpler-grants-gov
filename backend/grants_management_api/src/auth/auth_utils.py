@@ -27,7 +27,7 @@ INTERNAL_ERROR = "internal error"
 
 def get_app_security_scheme() -> dict[str, Any]:
     return {
-        "ApiJwtAuth": {"type": "apiKey", "in": "header", "name": "X-SGG-Token"},
+        "ApiJwtAuth": {"type": "apiKey", "in": "header", "name": "X-MGMT-Token"},
         "ApiUserKeyAuth": {"type": "apiKey", "in": "header", "name": "X-API-Key"},
     }
 
