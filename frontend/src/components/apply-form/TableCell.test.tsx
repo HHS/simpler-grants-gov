@@ -116,7 +116,7 @@ describe("TableCell", () => {
     expect(screen.getByTestId("input-cell-input")).toHaveClass("width-full");
 
     expect(screen.getByTestId("read-only-cell-read-only")).toHaveClass(
-    "bg-base-lightest",
+      "bg-base-lightest",
     );
   });
 });
