@@ -146,7 +146,7 @@ FORM_UI_SCHEMA = [
                         "type": "field",
                         "definition": "/properties/key_contacts/items/properties/address/properties/province",
                     },
-                     {
+                    {
                         "type": "field",
                         "definition": "/properties/key_contacts/items/properties/address/properties/country",
                     },
@@ -154,7 +154,6 @@ FORM_UI_SCHEMA = [
                         "type": "field",
                         "definition": "/properties/key_contacts/items/properties/address/properties/zip_code",
                     },
-                   
                     {
                         "type": "field",
                         "definition": "/properties/key_contacts/items/properties/phone",
