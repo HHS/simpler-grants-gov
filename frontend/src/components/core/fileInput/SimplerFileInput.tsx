@@ -68,7 +68,7 @@ export const SimplerFileInput = ({
   );
   // upload id is only used for tracking internal to this component
   const [activeUploads, setActiveUploads] = useState<
-    { uploadId: string; file: File; complete?: boolean; canceled?: boolean }[]
+    { uploadId: string; file: File }[]
   >([]);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
 
@@ -210,8 +210,6 @@ export const SimplerFileInput = ({
           key={uploadId}
           fileToUpload={file}
           onCancel={() => {
-            // this runs but does not cause an update to render if error logic is removed
-            // I guess the error logic is doing something else that is triggering a render, and the other state is picked up along with it?
             trackUploadCancel(uploadId);
             if (!multiFile) {
               fileInputRef?.current?.clearFiles();
