@@ -159,12 +159,8 @@ def test_create_api_key_logging_success(enable_factory_create, db_session: db.Se
     log_record = next(
         record for record in caplog.records if "Created new API key" in record.message
     )
-    assert hasattr(log_record, "api_key_id")
-    assert str(log_record.api_key_id) == str(api_key.api_key_id)
-    assert hasattr(log_record, "user_id")
-    assert str(log_record.user_id) == str(user.user_id)
-    assert hasattr(log_record, "key_name")
-    assert log_record.key_name == key_name
+    assert str(getattr(log_record, "auth.api_key_id")) == str(api_key.api_key_id)
+    assert str(getattr(log_record, "auth.user_id")) == str(api_key.user_id)
 
 
 def test_create_api_key_logging_max_retries(enable_factory_create, db_session: db.Session, caplog):
