@@ -433,7 +433,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
         competition = CompetitionFactory.create(
-            opportunity=opportunity,
+            opportunity=opportunity, public_competition_id="CDE-123"
         )
         application = ApplicationFactory.create(competition=competition)
         submission = ApplicationSubmissionFactory.create(application=application)
@@ -490,8 +490,8 @@ class TestSimplerSOAPGetApplicationZip:
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
-        competition = CompetitionFactory(
-            opportunity=opportunity,
+        competition = CompetitionFactory.create(
+            opportunity=opportunity, public_competition_id="CDE-123"
         )
         application = ApplicationFactory.create(competition=competition)
         submission = ApplicationSubmissionFactory.create(application=application)
@@ -533,8 +533,8 @@ class TestSimplerSOAPGetApplicationZip:
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
-        competition = CompetitionFactory(
-            opportunity=opportunity,
+        competition = CompetitionFactory.create(
+            opportunity=opportunity, public_competition_id="CDE-123"
         )
         application = ApplicationFactory.create(competition=competition)
         submission = ApplicationSubmissionFactory.create(application=application)
@@ -699,12 +699,14 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         has_organization=True,
         legacy_competition_id=1234,
         submitted_at=DT_EST_AWARE,
+        public_competition_id="ABC-324",
     ):
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
         competition = CompetitionFactory.create(
             opportunity=opportunity,
             legacy_package_id=legacy_package_id,
             legacy_competition_id=legacy_competition_id,
+            public_competition_id=public_competition_id,
             opportunity_assistance_listing=(
                 OpportunityAssistanceListingFactory.create(opportunity=opportunity)
                 if opportunity_assistance_listing
@@ -786,7 +788,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
@@ -873,7 +875,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
@@ -887,7 +889,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application_2.competition.opportunity.opportunity_number}-{application_2.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application_2.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity_2.uei}</UEI>"
@@ -970,7 +972,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
-            "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+            "<CompetitionID>ABC-324</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "<UEI>E9T7F9N2ERR4</UEI>"
@@ -1016,7 +1018,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
-                f"<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+                f"<CompetitionID>ABC-324</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "<UEI>E9T7F9N2ERR4</UEI>"
@@ -1030,7 +1032,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
@@ -1044,7 +1046,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application_2.competition.opportunity.opportunity_number}-{application_2.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application_2.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity_2.uei}</UEI>"
@@ -1111,7 +1113,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
-            "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+            "<CompetitionID>ABC-123</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "<UEI>E9T7F9N2ERR4</UEI>"
@@ -1157,7 +1159,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
-                "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+                "<CompetitionID>ABC-123</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "<UEI>E9T7F9N2ERR4</UEI>"
@@ -1230,7 +1232,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
@@ -1307,7 +1309,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
@@ -1380,7 +1382,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
-            "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+            "<CompetitionID>ABC-123</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "<UEI>E9T7F9N2ERR4</UEI>"
@@ -1424,7 +1426,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
-                "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+                "<CompetitionID>ABC-123</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "<UEI>E9T7F9N2ERR4</UEI>"
@@ -1438,7 +1440,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity.uei}</UEI>"
@@ -1463,12 +1465,14 @@ class TestSimplerSOAPGetSubmissionList:
         has_organization=True,
         legacy_competition_id=1234,
         submitted_at=DT_EST_AWARE,
+        public_competition_id="ABC-123",
     ):
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
         competition = CompetitionFactory.create(
             opportunity=opportunity,
             legacy_package_id=legacy_package_id,
             legacy_competition_id=legacy_competition_id,
+            public_competition_id=public_competition_id,
             opportunity_assistance_listing=(
                 OpportunityAssistanceListingFactory.create(opportunity=opportunity)
                 if opportunity_assistance_listing
@@ -1550,7 +1554,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -1636,7 +1640,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -1649,7 +1653,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application_2.competition.opportunity.opportunity_number}-{application_2.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application_2.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -1731,7 +1735,7 @@ class TestSimplerSOAPGetSubmissionList:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
-            "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+            "<CompetitionID>ABC-123</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "</ns2:SubmissionInfo>"
@@ -1776,7 +1780,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
-                "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+                "<CompetitionID>ABC-123</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -1789,7 +1793,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -1802,7 +1806,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application_2.competition.opportunity.opportunity_number}-{application_2.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application_2.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -1868,7 +1872,7 @@ class TestSimplerSOAPGetSubmissionList:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
-            "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+            "<CompetitionID>ABC-123</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "</ns2:SubmissionInfo>"
@@ -1913,7 +1917,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
-                "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+                "<CompetitionID>ABC-123</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -1985,7 +1989,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -2061,7 +2065,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -2133,7 +2137,7 @@ class TestSimplerSOAPGetSubmissionList:
             "<SubmissionMethod>Workspace</SubmissionMethod>"
             "<SubmissionTitle>My Test App</SubmissionTitle>"
             "<PackageID>PKG00119475</PackageID>"
-            "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+            "<CompetitionID>ABC-123</CompetitionID>"
             "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
             "<ActiveExclusions>No</ActiveExclusions>"
             "</ns2:SubmissionInfo>"
@@ -2176,7 +2180,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>Workspace</SubmissionMethod>"
                 "<SubmissionTitle>My Test App</SubmissionTitle>"
                 "<PackageID>PKG00119475</PackageID>"
-                "<CompetitionID>SIMP-CD511-11202025-1234</CompetitionID>"
+                "<CompetitionID>ABC-123</CompetitionID>"
                 "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
                 "<ActiveExclusions>No</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"
@@ -2189,7 +2193,7 @@ class TestSimplerSOAPGetSubmissionList:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                f"<CompetitionID>{application.competition.opportunity.opportunity_number}-{application.competition.legacy_competition_id}</CompetitionID>"
+                f"<CompetitionID>{application.competition.public_competition_id}</CompetitionID>"
                 "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
                 "<ActiveExclusions>Yes</ActiveExclusions>"
                 "</ns2:SubmissionInfo>"

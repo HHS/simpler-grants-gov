@@ -81,8 +81,8 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
         "SubmissionTitle": application.application_name,
         "PackageID": competition.legacy_package_id or "simpler",
         "CompetitionID": (
-            f"{opportunity.opportunity_number}-{competition.legacy_competition_id}"
-            if competition.legacy_competition_id
+            f"{competition.public_competition_id}"
+            if competition.public_competition_id
             else "simpler"
         ),
         "ns2:ReceivedDateTime": (
