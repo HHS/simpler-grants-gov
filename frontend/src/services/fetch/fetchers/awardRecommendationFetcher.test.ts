@@ -12,7 +12,6 @@ import {
   updateAwardRecommendationRisk,
   updateAwardRecommendationSubmissionDetails,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
-import { APIResponse } from "src/types/apiResponseTypes";
 import {
   mockAwardRecommendationDetails,
   mockAwardRecommendationListItem,
@@ -21,7 +20,7 @@ import {
 
 const mockJson = jest.fn().mockResolvedValue({
   data: mockAwardRecommendationDetails,
-} as APIResponse);
+});
 
 const mockFetchAwardRecommendation = jest.fn().mockResolvedValue({
   json: mockJson,
@@ -29,28 +28,27 @@ const mockFetchAwardRecommendation = jest.fn().mockResolvedValue({
 const mockInnerFetch = jest.fn();
 
 const setupDefaultInnerFetchMock = () => {
-  mockInnerFetch.mockImplementation(
-    ({ subPath }: { subPath: string }) =>
-      Promise.resolve({
-        ok: true,
-        json: jest.fn().mockResolvedValue({
-          data: subPath.endsWith("/submissions/list")
-            ? mockAwardRecommendationSubmissions
-            : subPath.endsWith("/risks/list")
-              ? []
-              : null,
-          pagination_info: subPath.endsWith("/list")
-            ? { total_pages: 1 }
-            : undefined,
-          message: subPath.includes("/risks/") ? "Success" : undefined,
-        } as APIResponse),
-      }) as unknown as Promise<Response>,
+  mockInnerFetch.mockImplementation(({ subPath }: { subPath: string }) =>
+    Promise.resolve({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        data: subPath.endsWith("/submissions/list")
+          ? mockAwardRecommendationSubmissions
+          : subPath.endsWith("/risks/list")
+            ? []
+            : null,
+        pagination_info: subPath.endsWith("/list")
+          ? { total_pages: 1 }
+          : undefined,
+        message: subPath.includes("/risks/") ? "Success" : undefined,
+      }),
+    }),
   );
 };
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
-  fetchAwardRecommendation: (params: unknown): Promise<Response> =>
-    mockFetchAwardRecommendation(params) as unknown as Promise<Response>,
+  fetchAwardRecommendation: (params: unknown) =>
+    mockFetchAwardRecommendation(params) as unknown,
   fetchAwardRecommendationWithMethod: (): jest.Mock => mockInnerFetch,
 }));
 
@@ -341,17 +339,16 @@ describe("getAwardRecommendationRisk", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockInnerFetch.mockImplementation(
-      ({ subPath }: { subPath: string }) =>
-        Promise.resolve({
-          ok: true,
-          json: jest.fn().mockResolvedValue({
-            data: subPath.endsWith("/risks/list")
-              ? [mockRisk]
-              : mockAwardRecommendationSubmissions,
-            pagination_info: { total_pages: 1 },
-          } as APIResponse),
-        }) as unknown as Promise<Response>,
+    mockInnerFetch.mockImplementation(({ subPath }: { subPath: string }) =>
+      Promise.resolve({
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          data: subPath.endsWith("/risks/list")
+            ? [mockRisk]
+            : mockAwardRecommendationSubmissions,
+          pagination_info: { total_pages: 1 },
+        }),
+      }),
     );
   });
 
@@ -390,7 +387,7 @@ describe("getAwardRecommendationSubmissionsForRisk", () => {
       ok: true,
       json: jest.fn().mockResolvedValue({
         data: mockAwardRecommendationSubmissions,
-      } as APIResponse),
+      }),
     });
   });
 

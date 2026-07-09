@@ -34,10 +34,10 @@ let testResponseChunks = [
 // normally wouldn't bother typing these, but it makes asserting arguments easier in this case
 jest.mock("src/services/fetch/fetchers/filesFetcher", () => ({
   fetchFileUploadDetails: (fileName: string, mimeType: string) =>
-    mockFetchFileUploadDetails(fileName, mimeType) as unknown,
+    mockFetchFileUploadDetails(fileName, mimeType),
   fetchFileScanStatus: (id: string) => mockFetchFileScanStatus(id) as unknown,
   uploadFileToS3: (url: string, body: unknown[], file: File) =>
-    mockUploadFileToS3(url, body, file) as unknown,
+    mockUploadFileToS3(url, body, file),
 }));
 
 let originalTextDecoder: typeof TextDecoder;

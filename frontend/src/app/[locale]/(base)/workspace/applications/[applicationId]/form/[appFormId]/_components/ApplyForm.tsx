@@ -40,8 +40,7 @@ type Translator = ((
 
 interface WidgetSupport {
   validationWarnings:
-    | FormattedFormValidationWarning[]
-    | FormValidationWarning[];
+    FormattedFormValidationWarning[] | FormValidationWarning[];
   deletedEntryIndexesByFieldListPath: Record<string, number[]>;
   onFieldListEntryDelete: (
     fieldListPath: string,
@@ -122,9 +121,7 @@ const ApplyForm = ({
   savedFormData: object;
   uiSchema: UiSchema;
   validationWarnings:
-    | FormattedFormValidationWarning[]
-    | FormValidationWarning[]
-    | null;
+    FormattedFormValidationWarning[] | FormValidationWarning[] | null;
   attachments: Attachment[];
   isBudgetForm?: boolean;
   applicationStatus?: string;
@@ -219,7 +216,7 @@ const ApplyForm = ({
         FormattedFormValidationWarning[] | FormValidationWarning[] | null
       >((rebasedWarnings, deletedEntryIndex) => {
         return rebaseFieldListWarningsAfterDelete({
-          rawErrors: rebasedWarnings as FormattedFormValidationWarning[] | null,
+          rawErrors: rebasedWarnings,
           fieldListPath,
           deletedEntryIndex,
         });
@@ -298,11 +295,7 @@ const ApplyForm = ({
           <ApplyFormMessage
             saved={saved}
             error={error}
-            validationWarnings={
-              displayValidationWarnings as
-                | FormattedFormValidationWarning[]
-                | null
-            }
+            validationWarnings={displayValidationWarnings}
             isBudgetForm={isBudgetForm}
           />
           <AttachmentsProvider
@@ -310,13 +303,7 @@ const ApplyForm = ({
           >
             <FormFields
               key={saved ? "after-save" : "before-save"}
-              errors={
-                saved
-                  ? (displayValidationWarnings as
-                      | FormattedFormValidationWarning[]
-                      | null)
-                  : null
-              }
+              errors={saved ? displayValidationWarnings : null}
               formData={formObject}
               schema={formSchema}
               uiSchema={uiSchema}

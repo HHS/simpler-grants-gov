@@ -149,6 +149,8 @@ export default function EditRecommendationsTable({
   }, [awardRecommendationId, currentPage, pageSize, clientFetch]);
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchSubmissions();
   }, [fetchSubmissions]);
 
