@@ -208,6 +208,9 @@ export const SimplerFileInput = ({
           onUploadSuccess={(postUploadResult: unknown) => {
             trackUploadComplete(uploadId);
             onSuccess(postUploadResult);
+            if (!multiFile) {
+              fileInputRef?.current?.clearFiles();
+            }
           }}
           onComplete={onComplete}
           onUploadError={(e: Error) => {
