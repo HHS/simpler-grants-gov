@@ -7,13 +7,18 @@ from grants_shared.services.users.login_gov_callback_handler import (
     LoginGovDataContainer,
 )
 
-from src.auth.auth_handler import GrantsMgmtAuthHandler
-from src.db.models.user_models import GrantsMgmtLinkExternalUser, GrantsMgmtLoginGovState, GrantsMgmtUser, GrantsMgmtUserTokenSession
+from src.auth.auth_handler import MgmtAuthHandler
+from src.db.models.user_models import (
+    MgmtLinkExternalUser,
+    MgmtLoginGovState,
+    MgmtUser,
+    MgmtUserTokenSession,
+)
 
 
-def get_callback_handler(db_session: db.Session) -> GrantsMgmtLoginGovCallbackHandler:
-    auth_handler = GrantsMgmtAuthHandler(db_session)
-    return GrantsMgmtLoginGovCallbackHandler(auth_handler, JwtAuth(auth_handler))
+def get_callback_handler(db_session: db.Session) -> MgmtLoginGovCallbackHandler:
+    auth_handler = MgmtAuthHandler(db_session)
+    return MgmtLoginGovCallbackHandler(auth_handler, JwtAuth(auth_handler))
 
 
 def handle_login_gov_callback_request(
@@ -28,20 +33,25 @@ def handle_login_gov_token(
     return get_callback_handler(db_session).handle_token(login_gov_data)
 
 
-class GrantsMgmtLoginGovCallbackHandler(
-    AbstractLoginGovCallbackHandler[GrantsMgmtUser, GrantsMgmtLinkExternalUser, GrantsMgmtLoginGovState, GrantsMgmtUserTokenSession]
+class MgmtLoginGovCallbackHandler(
+    AbstractLoginGovCallbackHandler[
+        MgmtUser,
+        MgmtLinkExternalUser,
+        MgmtLoginGovState,
+        MgmtUserTokenSession,
+    ]
 ):
     """Applicant-side login.gov callback handler."""
 
     def handle_post_login(
-        self, user: GrantsMgmtUser, is_user_new: bool, login_gov_user: LoginGovUser
+        self, user: MgmtUser, is_user_new: bool, login_gov_user: LoginGovUser
     ) -> None:
         # Validate PIV requirement for agency users
         # NOTE: PIV/agency-user handling likely belongs on the grantor side once that exists.
         # Leaving it here for now so we don't break existing publish setup.
         self._validate_piv_requirement(user, login_gov_user.x509_presented)
 
-    def _validate_piv_requirement(self, user: GrantsMgmtUser, x509_presented: bool | None) -> None:
+    def _validate_piv_requirement(self, user: MgmtUser, x509_presented: bool | None) -> None:
         """Validate that agency users authenticate with PIV/CAC when required.
 
         Args:

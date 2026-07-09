@@ -9,8 +9,8 @@ from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util import datetime_util
 
 from src.auth.api_jwt_auth import parse_jwt_for_user
-from src.db.models.user_models import GrantsMgmtLinkExternalUser, GrantsMgmtLoginGovState
-from tests.db.models.factories import GrantsMgmtLinkExternalUserFactory, GrantsMgmtLoginGovStateFactory
+from src.db.models.user_models import MgmtLinkExternalUser, MgmtLoginGovState
+from tests.db.models.factories import MgmtLinkExternalUserFactory, MgmtLoginGovStateFactory
 from tests.test_utils.auth_test_utils import create_jwt
 
 ##########################################
@@ -220,7 +220,7 @@ def test_user_callback_new_user_302(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
 ):
     # Create state so the callback gets past the check
-    login_gov_state = GrantsMgmtLoginGovStateFactory.create()
+    login_gov_state = MgmtLoginGovStateFactory.create()
 
     code = str(uuid.uuid4())
     id_token = create_jwt(
@@ -236,7 +236,7 @@ def test_user_callback_new_user_302(
     )
 
     resp = client.get(
-        f"/v1/users/login/callback?state={login_gov_state.grants_mgmt_login_gov_state_id}&code={code}",
+        f"/v1/users/login/callback?state={login_gov_state.mgmt_login_gov_state_id}&code={code}",
         follow_redirects=True,
     )
 
@@ -252,10 +252,10 @@ def test_user_callback_new_user_302(
 
     # Make sure the external user record is created with expected IDs
     external_user = (
-        db_session.query(GrantsMgmtLinkExternalUser)
+        db_session.query(MgmtLinkExternalUser)
         .filter(
-            GrantsMgmtLinkExternalUser.grants_mgmt_user_id == user_token_session.grants_mgmt_user_id,
-            GrantsMgmtLinkExternalUser.external_user_id == "bob-xyz",
+            MgmtLinkExternalUser.mgmt_user_id == user_token_session.mgmt_user_id,
+            MgmtLinkExternalUser.external_user_id == "bob-xyz",
         )
         .one_or_none()
     )
@@ -263,8 +263,10 @@ def test_user_callback_new_user_302(
 
     # Make sure the login gov state was deleted
     db_state = (
-        db_session.query(GrantsMgmtLoginGovState)
-        .filter(GrantsMgmtLoginGovState.grants_mgmt_login_gov_state_id == login_gov_state.grants_mgmt_login_gov_state_id)
+        db_session.query(MgmtLoginGovState)
+        .filter(
+            MgmtLoginGovState.mgmt_login_gov_state_id == login_gov_state.mgmt_login_gov_state_id
+        )
         .one_or_none()
     )
     assert db_state is None
@@ -280,10 +282,10 @@ def test_user_callback_existing_user_302(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
 ):
     # Create state so the callback gets past the check
-    login_gov_state = GrantsMgmtLoginGovStateFactory.create()
+    login_gov_state = MgmtLoginGovStateFactory.create()
 
     login_gov_id = str(uuid.uuid4())
-    external_user = GrantsMgmtLinkExternalUserFactory.create(
+    external_user = MgmtLinkExternalUserFactory.create(
         external_user_id=login_gov_id, email="some_old_email@mail.com"
     )
 
@@ -301,7 +303,7 @@ def test_user_callback_existing_user_302(
     )
 
     resp = client.get(
-        f"/v1/users/login/callback?state={login_gov_state.grants_mgmt_login_gov_state_id}&code={code}",
+        f"/v1/users/login/callback?state={login_gov_state.mgmt_login_gov_state_id}&code={code}",
         follow_redirects=True,
     )
 
@@ -314,12 +316,14 @@ def test_user_callback_existing_user_302(
     user_token_session = parse_jwt_for_user(resp_json["token"], db_session)
     assert user_token_session.expires_at > datetime_util.utcnow()
     assert user_token_session.is_valid is True
-    assert user_token_session.grants_mgmt_user_id == external_user.user_id
+    assert user_token_session.mgmt_user_id == external_user.mgmt_user_id
 
     # Make sure the login gov state was deleted
     db_state = (
-        db_session.query(GrantsMgmtLoginGovState)
-        .filter(GrantsMgmtLoginGovState.grants_mgmt_login_gov_state_id == login_gov_state.grants_mgmt_login_gov_state_id)
+        db_session.query(MgmtLoginGovState)
+        .filter(
+            MgmtLoginGovState.mgmt_login_gov_state_id == login_gov_state.mgmt_login_gov_state_id
+        )
         .one_or_none()
     )
     assert db_state is None
@@ -359,10 +363,10 @@ def test_user_callback_error_in_token_302(client, enable_factory_create, caplog)
     """Test behavior when we call the callback endpoint, but the oauth token endpoint has nothing"""
 
     # Create state so the callback gets past the check
-    login_gov_state = GrantsMgmtLoginGovStateFactory.create()
+    login_gov_state = MgmtLoginGovStateFactory.create()
 
     resp = client.get(
-        f"/v1/users/login/callback?state={login_gov_state.grants_mgmt_login_gov_state_id}&code=xyz456",
+        f"/v1/users/login/callback?state={login_gov_state.mgmt_login_gov_state_id}&code=xyz456",
         follow_redirects=True,
     )
 
@@ -400,7 +404,7 @@ def test_user_callback_token_fails_validation_302(
     error_description,
 ):
     # Create state so the callback gets past the check
-    login_gov_state = GrantsMgmtLoginGovStateFactory.create()
+    login_gov_state = MgmtLoginGovStateFactory.create()
 
     code = str(uuid.uuid4())
     id_token = create_jwt(
@@ -417,7 +421,7 @@ def test_user_callback_token_fails_validation_302(
     )
 
     resp = client.get(
-        f"/v1/users/login/callback?state={login_gov_state.grants_mgmt_login_gov_state_id}&code={code}",
+        f"/v1/users/login/callback?state={login_gov_state.mgmt_login_gov_state_id}&code={code}",
         follow_redirects=True,
     )
 
@@ -428,8 +432,10 @@ def test_user_callback_token_fails_validation_302(
 
     # Make sure the login gov state was deleted even though it errored
     db_state = (
-        db_session.query(GrantsMgmtLoginGovState)
-        .filter(GrantsMgmtLoginGovState.grants_mgmt_login_gov_state_id == login_gov_state.grants_mgmt_login_gov_state_id)
+        db_session.query(MgmtLoginGovState)
+        .filter(
+            MgmtLoginGovState.mgmt_login_gov_state_id == login_gov_state.mgmt_login_gov_state_id
+        )
         .one_or_none()
     )
     assert db_state is None
@@ -439,7 +445,7 @@ def test_user_callback_token_fails_validation_bad_token_302(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
 ):
     # Create state so the callback gets past the check
-    login_gov_state = GrantsMgmtLoginGovStateFactory.create()
+    login_gov_state = MgmtLoginGovStateFactory.create()
 
     code = str(uuid.uuid4())
 
@@ -451,7 +457,7 @@ def test_user_callback_token_fails_validation_bad_token_302(
     )
 
     resp = client.get(
-        f"/v1/users/login/callback?state={login_gov_state.grants_mgmt_login_gov_state_id}&code={code}",
+        f"/v1/users/login/callback?state={login_gov_state.mgmt_login_gov_state_id}&code={code}",
         follow_redirects=True,
     )
 
@@ -462,8 +468,10 @@ def test_user_callback_token_fails_validation_bad_token_302(
 
     # Make sure the login gov state was deleted even though it errored
     db_state = (
-        db_session.query(GrantsMgmtLoginGovState)
-        .filter(GrantsMgmtLoginGovState.grants_mgmt_login_gov_state_id == login_gov_state.grants_mgmt_login_gov_state_id)
+        db_session.query(MgmtLoginGovState)
+        .filter(
+            MgmtLoginGovState.mgmt_login_gov_state_id == login_gov_state.mgmt_login_gov_state_id
+        )
         .one_or_none()
     )
     assert db_state is None
@@ -474,7 +482,7 @@ def test_user_callback_token_fails_validation_no_valid_key_302(
 ):
     """Create the token with a different key than we check against"""
     # Create state so the callback gets past the check
-    login_gov_state = GrantsMgmtLoginGovStateFactory.create()
+    login_gov_state = MgmtLoginGovStateFactory.create()
 
     code = str(uuid.uuid4())
     id_token = create_jwt(
@@ -490,7 +498,7 @@ def test_user_callback_token_fails_validation_no_valid_key_302(
     )
 
     resp = client.get(
-        f"/v1/users/login/callback?state={login_gov_state.grants_mgmt_login_gov_state_id}&code={code}",
+        f"/v1/users/login/callback?state={login_gov_state.mgmt_login_gov_state_id}&code={code}",
         follow_redirects=True,
     )
 
@@ -501,8 +509,10 @@ def test_user_callback_token_fails_validation_no_valid_key_302(
 
     # Make sure the login gov state was deleted even though it errored
     db_state = (
-        db_session.query(GrantsMgmtLoginGovState)
-        .filter(GrantsMgmtLoginGovState.grants_mgmt_login_gov_state_id == login_gov_state.grants_mgmt_login_gov_state_id)
+        db_session.query(MgmtLoginGovState)
+        .filter(
+            MgmtLoginGovState.mgmt_login_gov_state_id == login_gov_state.mgmt_login_gov_state_id
+        )
         .one_or_none()
     )
     assert db_state is None
@@ -534,7 +544,7 @@ def test_user_callback_retries_success(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
 ):
     # Create state so the callback gets past the check
-    login_gov_state = GrantsMgmtLoginGovStateFactory.create()
+    login_gov_state = MgmtLoginGovStateFactory.create()
 
     code = str(uuid.uuid4())
     id_token = create_jwt(
@@ -551,7 +561,7 @@ def test_user_callback_retries_success(
     )
 
     resp = client.get(
-        f"/v1/users/login/callback?state={login_gov_state.grants_mgmt_login_gov_state_id}&code={code}",
+        f"/v1/users/login/callback?state={login_gov_state.mgmt_login_gov_state_id}&code={code}",
         follow_redirects=True,
     )
 
@@ -567,10 +577,10 @@ def test_user_callback_retries_success(
 
     # Make sure the external user record is created with expected IDs
     external_user = (
-        db_session.query(GrantsMgmtLinkExternalUser)
+        db_session.query(MgmtLinkExternalUser)
         .filter(
-            GrantsMgmtLinkExternalUser.grants_mgmt_user_id == user_token_session.grants_mgmt_user_id,
-            GrantsMgmtLinkExternalUser.external_user_id == "bob-xyz",
+            MgmtLinkExternalUser.mgmt_user_id == user_token_session.mgmt_user_id,
+            MgmtLinkExternalUser.external_user_id == "bob-xyz",
         )
         .one_or_none()
     )
@@ -578,8 +588,10 @@ def test_user_callback_retries_success(
 
     # Make sure the login gov state was deleted
     db_state = (
-        db_session.query(GrantsMgmtLoginGovState)
-        .filter(GrantsMgmtLoginGovState.grants_mgmt_login_gov_state_id == login_gov_state.grants_mgmt_login_gov_state_id)
+        db_session.query(MgmtLoginGovState)
+        .filter(
+            MgmtLoginGovState.mgmt_login_gov_state_id == login_gov_state.mgmt_login_gov_state_id
+        )
         .one_or_none()
     )
     assert db_state is None
@@ -589,7 +601,7 @@ def test_user_callback_retries_failure(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
 ):
     # Create state so the callback gets past the check
-    login_gov_state = GrantsMgmtLoginGovStateFactory.create()
+    login_gov_state = MgmtLoginGovStateFactory.create()
 
     code = str(uuid.uuid4())
     id_token = create_jwt(
@@ -606,7 +618,7 @@ def test_user_callback_retries_failure(
     )
 
     resp = client.get(
-        f"/v1/users/login/callback?state={login_gov_state.grants_mgmt_login_gov_state_id}&code={code}",
+        f"/v1/users/login/callback?state={login_gov_state.mgmt_login_gov_state_id}&code={code}",
         follow_redirects=True,
     )
 

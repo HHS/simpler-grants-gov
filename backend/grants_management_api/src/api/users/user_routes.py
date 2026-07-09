@@ -12,7 +12,7 @@ from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import UserTokenLogoutResponseSchema, UserTokenRefreshResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.auth.auth_utils import get_login_gov_redirect_uri, with_login_redirect_error_handler
-from src.db.models.user_models import GrantsMgmtUserTokenSession
+from src.db.models.user_models import MgmtUserTokenSession
 from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
     handle_login_gov_token,
@@ -83,7 +83,7 @@ def login_result() -> flask.Response:
 def user_token_logout(db_session: db.Session) -> response.ApiResponse:
     logger.info("POST /v1/users/token/logout")
 
-    user_token_session: GrantsMgmtUserTokenSession = api_jwt_auth.get_user_token_session()
+    user_token_session: MgmtUserTokenSession = api_jwt_auth.get_user_token_session()
     with db_session.begin():
         user_token_session.is_valid = False
         db_session.add(user_token_session)
@@ -104,7 +104,7 @@ def user_token_logout(db_session: db.Session) -> response.ApiResponse:
 def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
     logger.info("POST /v1/users/token/refresh")
 
-    user_token_session: GrantsMgmtUserTokenSession = api_jwt_auth.get_user_token_session()
+    user_token_session: MgmtUserTokenSession = api_jwt_auth.get_user_token_session()
 
     with db_session.begin():
         refresh_token_expiration(user_token_session)

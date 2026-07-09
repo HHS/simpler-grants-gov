@@ -8,7 +8,7 @@ from grants_shared.db.models.lookup import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.constants.lookup_constants import ExternalUserType, GrantsMgmtUserType
+from src.constants.lookup_constants import ExternalUserType, MgmtUserType
 from src.db.models.grantor_schema_table import GrantorSchemaTable
 
 #######################################################
@@ -18,10 +18,10 @@ from src.db.models.grantor_schema_table import GrantorSchemaTable
 # representations in this section
 #######################################################
 
-GRANTS_MGMT_USER_TYPE_CONFIG: LookupConfig[GrantsMgmtUserType] = LookupConfig(
+MGMT_USER_TYPE_CONFIG: LookupConfig[MgmtUserType] = LookupConfig(
     [
-        LookupStr(GrantsMgmtUserType.STANDARD, 1),
-        LookupStr(GrantsMgmtUserType.INTERNAL_FRONTEND, 2),
+        LookupStr(MgmtUserType.STANDARD, 1),
+        LookupStr(MgmtUserType.INTERNAL_FRONTEND, 2),
     ]
 )
 
@@ -53,16 +53,18 @@ class GrantorLookupTable(LookupTable, GrantorSchemaTable):
 #######################################################
 
 
-@LookupRegistry.register_lookup(GRANTS_MGMT_USER_TYPE_CONFIG)
-class LkGrantsMgmtUserType(GrantorLookupTable, TimestampMixin):
-    __tablename__ = "lk_user_type"
+@LookupRegistry.register_lookup(MGMT_USER_TYPE_CONFIG)
+class LkMgmtUserType(GrantorLookupTable, TimestampMixin):
+    __tablename__ = "lk_mgmt_user_type"
 
-    grants_mgmt_user_type_id: Mapped[int] = mapped_column(primary_key=True)
+    mgmt_user_type_id: Mapped[int] = mapped_column(primary_key=True)
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkGrantsMgmtUserType:
-        return LkGrantsMgmtUserType(grants_mgmt_user_type_id=lookup.lookup_val, description=lookup.get_description())
+    def from_lookup(cls, lookup: Lookup) -> LkMgmtUserType:
+        return LkMgmtUserType(
+            mgmt_user_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
 
 
 @LookupRegistry.register_lookup(EXTERNAL_USER_TYPE_CONFIG)

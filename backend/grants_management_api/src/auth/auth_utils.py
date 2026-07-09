@@ -17,7 +17,7 @@ from grants_shared.auth.login_gov_jwt_auth import (
     get_final_redirect_uri,
 )
 
-from src.auth.auth_handler import GrantsMgmtAuthHandler
+from src.auth.auth_handler import MgmtAuthHandler
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +128,6 @@ def get_login_gov_redirect_uri(
     encoded_params = urllib.parse.urlencode(url_params)
 
     # Add the state to the DB
-    GrantsMgmtAuthHandler(db_session).create_login_gov_state(state, nonce)
+    MgmtAuthHandler(db_session).create_login_gov_state(state, nonce)
 
     return f"{config.login_gov_auth_endpoint}?{encoded_params}"

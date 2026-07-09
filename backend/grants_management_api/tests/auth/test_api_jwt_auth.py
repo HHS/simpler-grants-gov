@@ -9,8 +9,8 @@ from grants_shared.auth.api_jwt_auth import ApiJwtConfig
 
 import src.app as app_entry
 from src.auth.api_jwt_auth import api_jwt_auth, create_jwt_for_user, parse_jwt_for_user
-from src.db.models.user_models import GrantsMgmtUserTokenSession
-from tests.db.models.factories import GrantsMgmtLinkExternalUserFactory, GrantsMgmtUserFactory
+from src.db.models.user_models import MgmtUserTokenSession
+from tests.db.models.factories import MgmtLinkExternalUserFactory, MgmtUserFactory
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def mini_app(monkeypatch_module):
         # For the tests that actually get past auth
         # make sure the current user is set to the user session
         assert api_jwt_auth.current_user is not None
-        assert isinstance(api_jwt_auth.current_user, GrantsMgmtUserTokenSession)
+        assert isinstance(api_jwt_auth.current_user, MgmtUserTokenSession)
 
         return {"message": "ok"}
 
@@ -52,8 +52,8 @@ def mini_app(monkeypatch_module):
 
 @freeze_time("2024-11-14 12:00:00", tz_offset=0)
 def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
-    user = GrantsMgmtUserFactory.create()
-    linked_external_user = GrantsMgmtLinkExternalUserFactory.create(grants_mgmt_user=user)
+    user = MgmtUserFactory.create()
+    linked_external_user = MgmtLinkExternalUserFactory.create(mgmt_user=user)
     token, token_session = create_jwt_for_user(user, db_session, jwt_config)
     decoded_token = jwt.decode(
         token, algorithms=[jwt_config.algorithm], options={"verify_signature": False}
@@ -64,7 +64,7 @@ def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
     assert decoded_token["iat"] == timegm(
         datetime.fromisoformat("2024-11-14 12:00:00+00:00").utctimetuple()
     )
-    assert decoded_token["user_id"] == str(user.grants_mgmt_user_id)
+    assert decoded_token["user_id"] == str(user.mgmt_user_id)
     assert decoded_token["email"] is None
     assert decoded_token["iss"] == jwt_config.issuer
     assert decoded_token["aud"] == jwt_config.audience
@@ -79,23 +79,23 @@ def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
 
     # Verify that the sub_id returned can be used to fetch a UserTokenSession object
     token_session = (
-        db_session.query(GrantsMgmtUserTokenSession)
-        .filter(GrantsMgmtUserTokenSession.token_id == decoded_token["sub"])
+        db_session.query(MgmtUserTokenSession)
+        .filter(MgmtUserTokenSession.token_id == decoded_token["sub"])
         .one_or_none()
     )
 
-    assert token_session.grants_mgmt_user_id == user.grants_mgmt_user_id
+    assert token_session.mgmt_user_id == user.mgmt_user_id
     assert token_session.is_valid is True
     # Verify expires_at is set to 30 minutes after now by default
     assert token_session.expires_at == datetime.fromisoformat("2024-11-14 12:30:00+00:00")
 
     # Basic testing that the JWT we create for a user can in turn be fetched and processed later
     user_session = parse_jwt_for_user(token, db_session, jwt_config)
-    assert user_session.grants_mgmt_user_id == user.grants_mgmt_user_id
+    assert user_session.mgmt_user_id == user.mgmt_user_id
 
 
 def test_api_jwt_auth_happy_path(mini_app, enable_factory_create, db_session):
-    user = GrantsMgmtUserFactory.create()
+    user = MgmtUserFactory.create()
     token, _ = create_jwt_for_user(user, db_session)
     db_session.commit()  # need to commit here to push the session to the DB
 
@@ -106,7 +106,7 @@ def test_api_jwt_auth_happy_path(mini_app, enable_factory_create, db_session):
 
 
 def test_api_jwt_auth_expired_token(mini_app, enable_factory_create, db_session):
-    user = GrantsMgmtUserFactory.create()
+    user = MgmtUserFactory.create()
     token, session = create_jwt_for_user(user, db_session)
     session.expires_at = datetime.fromisoformat("1980-01-01 12:00:00+00:00")
     db_session.commit()
@@ -118,7 +118,7 @@ def test_api_jwt_auth_expired_token(mini_app, enable_factory_create, db_session)
 
 
 def test_api_jwt_auth_invalid_token(mini_app, enable_factory_create, db_session):
-    user = GrantsMgmtUserFactory.create()
+    user = MgmtUserFactory.create()
     token, session = create_jwt_for_user(user, db_session)
     session.is_valid = False
     db_session.commit()
@@ -130,7 +130,7 @@ def test_api_jwt_auth_invalid_token(mini_app, enable_factory_create, db_session)
 
 
 def test_api_jwt_auth_token_missing_in_db(mini_app, enable_factory_create, db_session):
-    user = GrantsMgmtUserFactory.create()
+    user = MgmtUserFactory.create()
     token, session = create_jwt_for_user(user, db_session)
     db_session.expunge(session)  # Just drop it, never sending to the DB
 
@@ -152,7 +152,7 @@ def test_api_jwt_auth_token_created_with_different_key(
 ):
     # Note - jwt_config uses a key generated in the conftest within this directory
     # while the config the app picks up grabs a key from our override.env file
-    user = GrantsMgmtUserFactory.create()
+    user = MgmtUserFactory.create()
     token, _ = create_jwt_for_user(user, db_session, jwt_config)
     db_session.commit()
 
@@ -165,7 +165,7 @@ def test_api_jwt_auth_token_created_with_different_key(
 def test_api_jwt_auth_token_iat_future(mini_app, enable_factory_create, db_session):
     # Set time to the 14th so the iat value will be then
     with freeze_time("2024-11-14 12:00:00", tz_offset=0):
-        user = GrantsMgmtUserFactory.create()
+        user = MgmtUserFactory.create()
         token, _ = create_jwt_for_user(user, db_session)
         db_session.commit()
 
@@ -179,7 +179,7 @@ def test_api_jwt_auth_token_iat_future(mini_app, enable_factory_create, db_sessi
 
 def test_api_jwt_auth_token_unknown_issuer(mini_app, enable_factory_create, db_session):
     config = ApiJwtConfig(API_JWT_ISSUER="some-guy")
-    user = GrantsMgmtUserFactory.create()
+    user = MgmtUserFactory.create()
     token, _ = create_jwt_for_user(user, db_session, config)
     db_session.commit()
 
@@ -190,7 +190,7 @@ def test_api_jwt_auth_token_unknown_issuer(mini_app, enable_factory_create, db_s
 
 def test_api_jwt_auth_token_unknown_audience(mini_app, enable_factory_create, db_session):
     config = ApiJwtConfig(API_JWT_AUDIENCE="someone-else")
-    user = GrantsMgmtUserFactory.create()
+    user = MgmtUserFactory.create()
     token, _ = create_jwt_for_user(user, db_session, config)
     db_session.commit()
 
