@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from grants_shared.db.models.auth_base_models import (
@@ -9,58 +10,38 @@ from grants_shared.db.models.auth_base_models import (
     BaseUserTokenSession,
 )
 from grants_shared.db.models.base import TimestampMixin
-from sqlalchemy import ForeignKey, and_
+from sqlalchemy import ForeignKey, and_, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.constants.lookup_constants import ExternalUserType, UserType
+from src.constants.lookup_constants import ExternalUserType, GrantsMgmtUserType
 from src.db.models.grantor_schema_table import GrantorSchemaTable
-from src.db.models.lookup_models import LkExternalUserType, LkUserType
-
-######################
-# NOTE
-#
-# We are having ongoing discussions around how we want to name these tables
-# as we have equivalent tables on both sides of the system. Ideally each service
-# would have its user table be named something more specific. As we aren't yet
-# certain what we want that naming split to be, I'm leaving these the very generic
-# names at the moment.
-#
-# Once we've decided how we want to name these, we'll need to first alter our
-# grants_shared library for auth & the base tables to adjust the primary key columns
-# as we always name our primary keys "<table_name>_id", so something like "user_id"
-# can't be the primary key anymore. This will require some rework of the authN logic
-# as well.
-#
-# Once we've adjusted the library, we'll need to rename all of these tables, their columns
-# and adjust all our tests/routes accordingly. As long as we do this before there's any
-# meaningful use of these tables, it's fine if we drop and fully remake them.
-######################
+from src.db.models.lookup_models import LkExternalUserType, LkGrantsMgmtUserType
 
 
-class User(BaseUser, GrantorSchemaTable, TimestampMixin):
-    __tablename__ = "user"
+class GrantsMgmtUser(BaseUser, GrantorSchemaTable, TimestampMixin):
+    __tablename__ = "grants_mgmt_user"
 
-    # user_id primary key defined in BaseUser
+    grants_mgmt_user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
-    user_type: Mapped[UserType | None] = mapped_column(
-        "user_type_id",
-        LookupColumn(LkUserType),
-        ForeignKey(LkUserType.user_type_id),
-        default=UserType.STANDARD,
+    user_type: Mapped[GrantsMgmtUserType | None] = mapped_column(
+        "grants_mgmt_user_type_id",
+        LookupColumn(LkGrantsMgmtUserType),
+        ForeignKey(LkGrantsMgmtUserType.grants_mgmt_user_type_id),
+        default=GrantsMgmtUserType.STANDARD,
     )
 
-    linked_login_gov_external_user: Mapped[LinkExternalUser | None] = relationship(
-        "LinkExternalUser",
+    linked_login_gov_external_user: Mapped[GrantsMgmtLinkExternalUser | None] = relationship(
+        "GrantsMgmtLinkExternalUser",
         primaryjoin=lambda: and_(
-            LinkExternalUser.user_id == User.user_id,
-            LinkExternalUser.external_user_type == ExternalUserType.LOGIN_GOV,
+            GrantsMgmtLinkExternalUser.grants_mgmt_user_id == GrantsMgmtUser.grants_mgmt_user_id,
+            GrantsMgmtLinkExternalUser.external_user_type == ExternalUserType.LOGIN_GOV,
         ),
         uselist=False,
         viewonly=True,
     )
 
-    api_keys: Mapped[list[UserApiKey]] = relationship(
-        "UserApiKey", back_populates="user", uselist=True, cascade="all, delete-orphan"
+    api_keys: Mapped[list[GrantsMgmtUserApiKey]] = relationship(
+        "GrantsMgmtUserApiKey", back_populates="grants_mgmt_user", uselist=True, cascade="all, delete-orphan"
     )
 
     @property
@@ -70,10 +51,10 @@ class User(BaseUser, GrantorSchemaTable, TimestampMixin):
         return None
 
 
-class LinkExternalUser(BaseLinkExternalUser, GrantorSchemaTable, TimestampMixin):
-    __tablename__ = "link_external_user"
+class GrantsMgmtLinkExternalUser(BaseLinkExternalUser, GrantorSchemaTable, TimestampMixin):
+    __tablename__ = "grants_mgmt_link_external_user"
 
-    link_external_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    grants_mgmt_link_external_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
 
     external_user_type: Mapped[ExternalUserType] = mapped_column(
         "external_user_type_id",
@@ -82,47 +63,63 @@ class LinkExternalUser(BaseLinkExternalUser, GrantorSchemaTable, TimestampMixin)
         index=True,
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
-    user: Mapped[User] = relationship(User)
+    grants_mgmt_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(GrantsMgmtUser.grants_mgmt_user_id), index=True)
+    grants_mgmt_user: Mapped[GrantsMgmtUser] = relationship(GrantsMgmtUser)
 
     # Columns defined in base table
     # external_user_id
     # email
 
 
-class UserTokenSession(BaseUserTokenSession, GrantorSchemaTable, TimestampMixin):
-    __tablename__ = "user_token_session"
+class GrantsMgmtUserTokenSession(BaseUserTokenSession, GrantorSchemaTable, TimestampMixin):
+    __tablename__ = "grants_mgmt_user_token_session"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
-    user: Mapped[User] = relationship(User)
+    grants_mgmt_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(GrantsMgmtUser.grants_mgmt_user_id), primary_key=True)
+    grants_mgmt_user: Mapped[GrantsMgmtUser] = relationship(GrantsMgmtUser)
+
+    token_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
 
     # Columns defined in base table:
-    # token_id
     # expires_at
     # is_valid
 
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info"""
+        return {
+            "auth.token_id": self.token_id,
+            "auth.user_id": self.grants_mgmt_user_id,
+        }
 
-class LoginGovState(BaseLoginGovState, GrantorSchemaTable, TimestampMixin):
+class GrantsMgmtLoginGovState(BaseLoginGovState, GrantorSchemaTable, TimestampMixin):
     """Table used to store temporary state during the OAuth login flow"""
 
-    __tablename__ = "login_gov_state"
+    __tablename__ = "grants_mgmt_login_gov_state"
 
-    # login_gov_state_id primary key in base table
+    grants_mgmt_login_gov_state_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+
     # nonce in base table
 
 
-class UserApiKey(BaseUserApiKey, GrantorSchemaTable, TimestampMixin):
+class GrantsMgmtUserApiKey(BaseUserApiKey, GrantorSchemaTable, TimestampMixin):
     """API Key table for user authentication to the API"""
 
-    __tablename__ = "user_api_key"
+    __tablename__ = "grants_mgmt_user_api_key"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
+    grants_mgmt_api_key_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
 
-    user: Mapped[User] = relationship(User, back_populates="api_keys", uselist=False)
+    grants_mgmt_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(GrantsMgmtUser.grants_mgmt_user_id), index=True)
+
+    grants_mgmt_user: Mapped[GrantsMgmtUser] = relationship(GrantsMgmtUser, back_populates="api_keys", uselist=False)
 
     # Defined in base table
-    # api_key_id
     # key_name
     # key_id
     # last_used
     # is_active
+
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info"""
+        return {
+            "auth.api_key_id": self.grants_mgmt_api_key_id,
+            "auth.user_id": self.grants_mgmt_user_id,
+        }

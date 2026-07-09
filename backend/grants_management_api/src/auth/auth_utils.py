@@ -17,7 +17,7 @@ from grants_shared.auth.login_gov_jwt_auth import (
     get_final_redirect_uri,
 )
 
-from src.auth.auth_handler import AuthHandler
+from src.auth.auth_handler import GrantsMgmtAuthHandler
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,6 @@ def get_app_security_scheme() -> dict[str, Any]:
     }
 
 
-# TODO - could this go to the shared util?
 def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Response]]:
     """Wrapper function to handle catching errors and redirecting
 
@@ -129,6 +128,6 @@ def get_login_gov_redirect_uri(
     encoded_params = urllib.parse.urlencode(url_params)
 
     # Add the state to the DB
-    AuthHandler(db_session).create_login_gov_state(state, nonce)
+    GrantsMgmtAuthHandler(db_session).create_login_gov_state(state, nonce)
 
     return f"{config.login_gov_auth_endpoint}?{encoded_params}"

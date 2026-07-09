@@ -8,7 +8,7 @@ from grants_shared.util import datetime_util
 from sqlalchemy.orm import scoped_session
 
 import src.db.models.user_models as user_models
-from src.constants.lookup_constants import ExternalUserType, UserType
+from src.constants.lookup_constants import ExternalUserType, GrantsMgmtUserType
 
 fake = faker.Faker()
 
@@ -60,43 +60,43 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
 ###################
 
 
-class UserFactory(BaseFactory):
+class GrantsMgmtUserFactory(BaseFactory):
     class Meta:
-        model = user_models.User
+        model = user_models.GrantsMgmtUser
 
-    user_id = Generators.UuidObj
-    user_type = UserType.STANDARD
+    grants_mgmt_user_id = Generators.UuidObj
+    user_type = GrantsMgmtUserType.STANDARD
 
 
-class LinkExternalUserFactory(BaseFactory):
+class GrantsMgmtLinkExternalUserFactory(BaseFactory):
     class Meta:
-        model = user_models.LinkExternalUser
+        model = user_models.GrantsMgmtLinkExternalUser
 
-    link_external_user_id = Generators.UuidObj
+    grants_mgmt_link_external_user_id = Generators.UuidObj
     external_user_id = Generators.UuidObj
 
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+    grants_mgmt_user = factory.SubFactory(GrantsMgmtUserFactory)
+    grants_mgmt_user_id = factory.LazyAttribute(lambda s: s.grants_mgmt_user.grants_mgmt_user_id)
 
     external_user_type = factory.fuzzy.FuzzyChoice(ExternalUserType)
 
     email = factory.Faker("email")
 
 
-class LoginGovStateFactory(BaseFactory):
+class GrantsMgmtLoginGovStateFactory(BaseFactory):
     class Meta:
-        model = user_models.LoginGovState
+        model = user_models.GrantsMgmtLoginGovState
 
-    login_gov_state_id = Generators.UuidObj
+    grants_mgmt_login_gov_state_id = Generators.UuidObj
     nonce = Generators.UuidObj
 
 
-class UserTokenSessionFactory(BaseFactory):
+class GrantsMgmtUserTokenSessionFactory(BaseFactory):
     class Meta:
-        model = user_models.UserTokenSession
+        model = user_models.GrantsMgmtUserTokenSession
 
-    user = factory.SubFactory(UserFactory)
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+    grants_mgmt_user = factory.SubFactory(GrantsMgmtUserFactory)
+    grants_mgmt_user_id = factory.LazyAttribute(lambda s: s.grants_mgmt_user.grants_mgmt_user_id)
 
     token_id = Generators.UuidObj
 

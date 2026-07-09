@@ -8,7 +8,7 @@ from grants_shared.db.models.lookup import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.constants.lookup_constants import ExternalUserType, UserType
+from src.constants.lookup_constants import ExternalUserType, GrantsMgmtUserType
 from src.db.models.grantor_schema_table import GrantorSchemaTable
 
 #######################################################
@@ -18,10 +18,10 @@ from src.db.models.grantor_schema_table import GrantorSchemaTable
 # representations in this section
 #######################################################
 
-USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
+GRANTS_MGMT_USER_TYPE_CONFIG: LookupConfig[GrantsMgmtUserType] = LookupConfig(
     [
-        LookupStr(UserType.STANDARD, 1),
-        LookupStr(UserType.INTERNAL_FRONTEND, 2),
+        LookupStr(GrantsMgmtUserType.STANDARD, 1),
+        LookupStr(GrantsMgmtUserType.INTERNAL_FRONTEND, 2),
     ]
 )
 
@@ -53,16 +53,16 @@ class GrantorLookupTable(LookupTable, GrantorSchemaTable):
 #######################################################
 
 
-@LookupRegistry.register_lookup(USER_TYPE_CONFIG)
-class LkUserType(GrantorLookupTable, TimestampMixin):
+@LookupRegistry.register_lookup(GRANTS_MGMT_USER_TYPE_CONFIG)
+class LkGrantsMgmtUserType(GrantorLookupTable, TimestampMixin):
     __tablename__ = "lk_user_type"
 
-    user_type_id: Mapped[int] = mapped_column(primary_key=True)
+    grants_mgmt_user_type_id: Mapped[int] = mapped_column(primary_key=True)
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkUserType:
-        return LkUserType(user_type_id=lookup.lookup_val, description=lookup.get_description())
+    def from_lookup(cls, lookup: Lookup) -> LkGrantsMgmtUserType:
+        return LkGrantsMgmtUserType(grants_mgmt_user_type_id=lookup.lookup_val, description=lookup.get_description())
 
 
 @LookupRegistry.register_lookup(EXTERNAL_USER_TYPE_CONFIG)

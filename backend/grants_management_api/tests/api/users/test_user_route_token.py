@@ -3,12 +3,12 @@ from datetime import datetime
 from freezegun import freeze_time
 
 from src.auth.api_jwt_auth import create_jwt_for_user
-from tests.db.models.factories import UserFactory
+from tests.db.models.factories import GrantsMgmtUserFactory
 
 
 @freeze_time("2024-11-22 12:00:00", tz_offset=0)
 def test_post_user_route_token_refresh_200(enable_factory_create, client, db_session):
-    user = UserFactory.create()
+    user = GrantsMgmtUserFactory.create()
     token, user_token_session = create_jwt_for_user(user, db_session)
     db_session.commit()
 
@@ -21,7 +21,7 @@ def test_post_user_route_token_refresh_200(enable_factory_create, client, db_ses
 
 
 def test_post_user_route_token_refresh_expired(enable_factory_create, client, db_session):
-    user = UserFactory.create()
+    user = GrantsMgmtUserFactory.create()
 
     token, session = create_jwt_for_user(user, db_session)
     session.expires_at = datetime.fromisoformat("1980-01-01 12:00:00+00:00")
@@ -34,7 +34,7 @@ def test_post_user_route_token_refresh_expired(enable_factory_create, client, db
 
 
 def test_post_user_route_token_logout_200(enable_factory_create, client, db_session):
-    user = UserFactory.create()
+    user = GrantsMgmtUserFactory.create()
     token, user_token_session = create_jwt_for_user(user, db_session)
     db_session.commit()
 
@@ -47,7 +47,7 @@ def test_post_user_route_token_logout_200(enable_factory_create, client, db_sess
 
 
 def test_post_user_route_token_logout_invalid(enable_factory_create, client, db_session):
-    user = UserFactory.create()
+    user = GrantsMgmtUserFactory.create()
 
     token, session = create_jwt_for_user(user, db_session)
     session.is_valid = False

@@ -7,7 +7,7 @@ class JobType(StrEnum):
     MIGRATE_DOWNALL = "migrate-downall"
 
 
-class UserType(StrEnum):
+class GrantsMgmtUserType(StrEnum):
     STANDARD = "standard"
     INTERNAL_FRONTEND = "internal_frontend"
 
