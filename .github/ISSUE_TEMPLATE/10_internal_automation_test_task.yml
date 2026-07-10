@@ -1,0 +1,160 @@
+name: Internal - Automation Test Task
+description: Define automation testing scope, happy path, and failure path scenarios
+type: Task
+labels:
+  - automation-test
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Automation Test Ticket
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the workflow or business behavior that requires automated testing.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## User Role
+        Select all that apply.
+
+  - type: checkboxes
+    id: user_roles
+    attributes:
+      label: User Role
+      options:
+        - label: Applicant
+        - label: Grantor
+        - label: Admin
+        - label: System User
+        - label: Any Authenticated User
+        - label: Anonymous User
+        - label: Other
+
+  - type: input
+    id: user_role_other
+    attributes:
+      label: User Role - Other (if selected)
+      placeholder: Enter additional user role details
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Data Setup
+        Select all that apply.
+
+  - type: checkboxes
+    id: data_setup
+    attributes:
+      label: Data Setup
+      options:
+        - label: Create new data through the application
+        - label: Use existing data
+        - label: Data inserted directly into the database
+        - label: Not Applicable
+        - label: Other
+
+  - type: input
+    id: data_setup_other
+    attributes:
+      label: Data Setup - Other (if selected)
+      placeholder: Enter additional data setup details
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Starting Point
+
+  - type: input
+    id: starting_point_workflow
+    attributes:
+      label: Page / Screen / Workflow
+    validations:
+      required: true
+
+  - type: input
+    id: starting_point_url
+    attributes:
+      label: URL (if applicable)
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        # Happy Path
+
+  - type: textarea
+    id: happy_path_scenarios
+    attributes:
+      label: Happy Path Scenarios
+      description: List the happy path scenarios that should be automated.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        # Failure Path / Negative Scenarios
+
+  - type: textarea
+    id: failure_path_scenarios
+    attributes:
+      label: Failure Path / Negative Scenarios
+      description: List the failure path or negative scenarios that should be automated.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Supporting Documentation
+
+        | Document Type | Link | POC | Status |
+        |--------------|------|------|--------|
+        | Product Ticket |  | Product Owner | Draft / In Review / Approved |
+        | Design Documents |  | Designer | Draft / In Review / Approved |
+        | Mockup Page |  | Designer | Draft / In Review / Approved |
+        | Business Logic |  | Product Owner | Draft / In Review / Approved |
+        | Technical Design |  | Developer / Tech Lead | Draft / In Review / Approved |
+        | Related Tickets |  | Product Owner | Draft / In Review / Approved |
+        | Additional Documentation |  |  | Draft / In Review / Approved |
+
+  - type: textarea
+    id: supporting_documentation_notes
+    attributes:
+      label: Supporting Documentation Details
+      description: Add links, POCs, and statuses for the documentation listed above.
+    validations:
+      required: true
+
+  - type: textarea
+    id: open_questions
+    attributes:
+      label: Open Questions
+      description: List unresolved questions (numbered list preferred).
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: product_owner_checklist
+    attributes:
+      label: Product Owner Checklist
+      options:
+        - label: Happy path scenarios defined
+          required: true
+        - label: Failure path scenarios defined
+          required: true
+        - label: Supporting documents linked
+          required: true
+        - label: Test engineer included in the refinement session
+          required: true
