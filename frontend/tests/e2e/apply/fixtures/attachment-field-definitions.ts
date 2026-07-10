@@ -6,6 +6,7 @@ export const fieldDefinitionsAttachment: FormFillFieldDefinitions = {
     selector: 'input[name="att1"][type="file"]',
     type: "file",
     field: "Attachment 1",
+    testId: "att1",
   },
 };
 
