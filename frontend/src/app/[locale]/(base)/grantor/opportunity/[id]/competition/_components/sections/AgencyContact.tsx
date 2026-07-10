@@ -51,7 +51,7 @@ export function AgencyContact() {
   const [emailErrorMsg, setEmailErrorMsg] = useState<string[]>([]);
   // Production-grade email layout validation regex
   const EMAIL_REGEX =
-    /^(?!\.)(?!.*\.\.)([a-z0-9_'+\-\.]*)[a-z0-9_+\-]@([a-z0-9][a-z0-9\-]*\.)+[a-z]{2,}$/i;
+    /^(?!\.)(?!.*\.\.)([a-z0-9_'+-]*)[a-z0-9_+-]@([a-z0-9][a-z0-9-]*\.)+[a-z]{2,}$/i;
 
   // Proactively clear error states as the user types
   const handleEmailInputChange = (
