@@ -76,7 +76,7 @@ const RecommendationFields = ({
         </Label>
         <Select
           id={`award_recommendation_type_${submissionId}`}
-          name={`${namePrefix}award_recommendation_type`}
+          name={`${namePrefix}[award_recommendation_type]`}
           value={recommendationType}
           onChange={(event) => {
             const nextRecommendationType = event.target
@@ -104,7 +104,7 @@ const RecommendationFields = ({
       {canHaveException && (
         <Checkbox
           id={`has_exception_${submissionId}`}
-          name={`${namePrefix}has_exception`}
+          name={`${namePrefix}[has_exception]`}
           label={t("hasExceptionLabel")}
           checked={hasException}
           onChange={(event) => setHasException(event.target.checked)}
@@ -120,7 +120,7 @@ const RecommendationFields = ({
         </p>
         <CharacterCount
           id={`general_comment_${submissionId}`}
-          name={`${namePrefix}general_comment`}
+          name={`${namePrefix}[general_comment]`}
           maxLength={1000}
           isTextArea
           defaultValue={generalCommentDefaultValue || ""}
@@ -141,7 +141,7 @@ const RecommendationFields = ({
           </p>
           <CharacterCount
             id={`exception_detail_${submissionId}`}
-            name={`${namePrefix}exception_detail`}
+            name={`${namePrefix}[exception_detail]`}
             maxLength={1000}
             isTextArea
             defaultValue={exceptionDetailDefaultValue || ""}
