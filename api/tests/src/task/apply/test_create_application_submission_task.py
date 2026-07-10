@@ -98,8 +98,6 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             form_ui_schema={},
             json_to_xml_schema=None,
         )
-        db_session.add(main_form)
-        db_session.flush()
         form_template_registry.register(main_form, major_version=1)
 
         application_without_attachments = ApplicationFactory.create(
@@ -128,8 +126,6 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             form_ui_schema={},
             json_to_xml_schema=None,
         )
-        db_session.add(skip_form)
-        db_session.flush()
         form_template_registry.register(skip_form, major_version=1)
         skipped_app_form = ApplicationFormFactory.create(
             application=application_without_attachments,
@@ -150,8 +146,6 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             form_ui_schema={},
             json_to_xml_schema=None,
         )
-        db_session.add(attachments_form)
-        db_session.flush()
         form_template_registry.register(attachments_form, major_version=1)
 
         application_with_attachments = ApplicationFactory.create(
@@ -271,8 +265,6 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             form_ui_schema={},
             json_to_xml_schema=None,
         )
-        db_session.add(attachment_form)
-        db_session.flush()
         form_template_registry.register(attachment_form, major_version=1)
 
         application = ApplicationFactory.create(
@@ -372,8 +364,6 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             form_ui_schema={},
             json_to_xml_schema=None,
         )
-        db_session.add(no_xml_form)
-        db_session.flush()
         form_template_registry.register(no_xml_form, major_version=1)
 
         # Create application with a form that doesn't support XML
@@ -433,9 +423,8 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             competition__competition_forms=[],
         )
 
-        sf424 = db_session.merge(SF424_v4_0, load=True)
         competition_form = CompetitionFormFactory.create(
-            competition=application.competition, form=sf424, is_required=True
+            competition=application.competition, form=SF424_v4_0, is_required=True
         )
         ApplicationFormFactory.create(
             application=application,

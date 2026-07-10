@@ -7,6 +7,7 @@ import {
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
+  getApplicationForPrintEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
@@ -171,3 +172,7 @@ export const fetchGrantorWithMethod = (type: "POST") =>
 
 export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
   requesterForEndpoint(toDynamicFilesEndpoint(type));
+
+export const getApplicationForPrint = requesterForEndpoint(
+  getApplicationForPrintEndpoint,
+);

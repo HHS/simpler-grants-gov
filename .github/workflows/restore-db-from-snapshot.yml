@@ -22,6 +22,7 @@ on:
         options:
           - grantee1
           - grantee2
+          - grantor1
       snapshot_id:
         description: "Snapshot ID to restore from (leave blank to use the latest staging snapshot)"
         required: false

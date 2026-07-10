@@ -232,7 +232,6 @@ describe("buildFormTreeRecursive", () => {
               ],
               rows: [
                 {
-                  rowHeader: "First Row",
                   cells: [
                     {
                       type: "plainText",
@@ -271,15 +270,18 @@ describe("buildFormTreeRecursive", () => {
       screen.getByRole("heading", { name: "Table Demo" }),
     ).toBeInTheDocument();
 
-    const tableWidget = screen.getByTestId("table-widget-placeholder");
+    const table = screen.getByTestId("table");
 
-    expect(tableWidget).toBeInTheDocument();
-    expect(tableWidget).toHaveAttribute(
-      "data-table-name",
-      "summary_table_test",
-    );
-    expect(tableWidget).toHaveAttribute("data-table-column-count", "3");
-    expect(tableWidget).toHaveAttribute("data-table-row-count", "1");
+    expect(table).toBeInTheDocument();
+    expect(screen.getAllByRole("columnheader")).toHaveLength(3);
+    expect(screen.getAllByRole("row")).toHaveLength(2);
+    expect(screen.getAllByRole("cell")).toHaveLength(3);
+
+    expect(
+      screen.getByRole("columnheader", { name: "Item" }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("First Row")).toBeInTheDocument();
   });
 
   describe("FormFields formContext forwarding", () => {

@@ -160,7 +160,6 @@ export const FileInputStatusDisplay = ({
     ? (errorStatuses.get(status) as FileUploadStatus) || "error"
     : status;
   const statusMessageForDisplay = messagesMap[adjustedStatus];
-
   return (
     <div className="margin-x-3">
       <Grid

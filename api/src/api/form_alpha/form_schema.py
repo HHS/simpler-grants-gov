@@ -132,13 +132,6 @@ class FormAlphaSchema(Schema):
         },
     )
 
-    created_at = fields.DateTime(
-        metadata={"description": "The timestamp when the form was created"}
-    )
-    updated_at = fields.DateTime(
-        metadata={"description": "The timestamp when the form was last updated"}
-    )
-
 
 class FormResponseAlphaSchema(WarningMixinSchema, AbstractResponseSchema):
     data = fields.Nested(FormAlphaSchema)

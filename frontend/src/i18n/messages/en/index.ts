@@ -2037,6 +2037,20 @@ export const messages = {
       agencyNotAuthorized:
         "You do not have access to this agency's award recommendations.",
       noAgencies: "You are not associated with any agencies.",
+      empty: "No award recommendations found.",
+      fetchError:
+        "We have encountered an error loading award recommendations. Please try again.",
+      columns: {
+        awardRecId: "Award Rec ID",
+        opportunityName: "Opportunity name",
+        opportunityId: "Opportunity ID",
+        applicationsReceived: "Applications received",
+        status: "Status",
+        action: "Action",
+      },
+      actions: {
+        delete: "Delete",
+      },
     },
     summary: {
       showDescription: "Show full description",
@@ -2078,8 +2092,27 @@ export const messages = {
       pageTitle: "Edit recommendations",
       metaDescription: "Edit award recommendations for multiple applications",
       heading: "Edit recommendations",
-      description:
+      pageHeading: "Recommend awards",
+      pageDescription:
         "Select one or more applications to edit recommendations. Search by App #, program title, org name of UEI",
+      selectAll: "Select all",
+      selectRow: "Select row for {appNumber}",
+      selectedCount:
+        "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      showingRange: "Showing {start}-{end} of {total}",
+      loading: "Loading...",
+      errorLoading: "Error loading submissions. Please try again.",
+      editButton: "Edit",
+      columns: {
+        appNumber: "App #",
+        projectTitle: "Project Title",
+        orgName: "Org Name",
+        uei: "UEI",
+        score: "Score",
+        recommendation: "Recommendation",
+        requested: "Requested",
+        recommended: "Recommended",
+      },
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -2383,6 +2416,8 @@ export const messages = {
     labels: {
       editOpportunityLink: "Opportunity Summary",
       competitionLink: "Application Package",
+      previewButton: "Preview",
+      publishButton: "Publish",
     },
   },
   CreateOpportunity: {
@@ -2496,6 +2531,24 @@ export const messages = {
     sectionNarrativeFormatInstructions: {
       header: "Narrative format instructions",
     },
+    sectionAgencyContact: {
+      header: "Agency contact",
+      subHeader:
+        "Grantor contact details. Provide the name, email, and phone number for the agency contact.",
+      fullName: "Full name",
+      personTitle: "Title",
+      emailAddress: "Email address",
+      emailAddressHint: "For example: example@mail.com",
+      phoneNumber: "Phone number",
+      phoneNumberHint: "10-digit, for example: (999) 999-9999",
+      error: {
+        requiredFullName: "Full name is required.",
+        requiredPhoneNumber: "Phone number is required.",
+        requiredEmail: "Email address is required.",
+        invalidEmail:
+          "Incorrect text format. Please ensure there are no spaces or missing characters.",
+      },
+    },
   },
   FeatureFlagsAdmin: {
     heading: "Refresh your page",
@@ -2551,7 +2604,7 @@ export const messages = {
       postUploadError: "Error processing file",
       missingFileId: "Error: missing file id",
       preUploadError: "Pre upload error",
-      infected: "Security scan failed. File infected",
+      infected: "Security scan failed. File removed",
     },
     deleteModal: {
       titleText: "Delete",
