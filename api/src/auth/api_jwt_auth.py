@@ -5,11 +5,12 @@ from grants_shared.adapters.db import flask_db
 from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.auth.api_jwt_auth import ApiJwtConfig, JwtAuth
 from grants_shared.auth.auth_errors import JwtValidationError
-from grants_shared.db.models.auth_base_models import BaseUser, BaseUserTokenSession
+from grants_shared.db.models.auth_base_models import BaseUserTokenSession
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-from src.auth.auth_handler import get_auth_handler
+from src.auth.auth_handler import AuthHandler
 from src.auth.jwt_user_http_token_auth import JwtUserHttpTokenAuth
+from src.db.models.user_models import User
 
 logger = logging.getLogger(__name__)
 
@@ -19,18 +20,18 @@ api_jwt_auth = JwtUserHttpTokenAuth(
 
 
 def create_jwt_for_user(
-    user: BaseUser,
+    user: User,
     db_session: db.Session,
     config: ApiJwtConfig | None = None,
     email: str | None = None,
 ) -> tuple[str, BaseUserTokenSession]:
-    return JwtAuth(get_auth_handler(db_session), config).create_jwt_for_user(user, email)
+    return JwtAuth(AuthHandler(db_session), config).create_jwt_for_user(user, email)
 
 
 def parse_jwt_for_user(
     token: str, db_session: db.Session, config: ApiJwtConfig | None = None
 ) -> BaseUserTokenSession:
-    return JwtAuth(get_auth_handler(db_session), config).parse_jwt_for_user(token)
+    return JwtAuth(AuthHandler(db_session), config).parse_jwt_for_user(token)
 
 
 @api_jwt_auth.verify_token

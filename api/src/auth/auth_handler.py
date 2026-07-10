@@ -15,7 +15,6 @@ from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
-from grants_shared.adapters import db
 from grants_shared.auth.auth_handler import AbstractAuthHandler
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -127,15 +126,3 @@ class AuthHandler(
 
     def get_user_for_external_link(self, external_user: LinkExternalUser) -> User:
         return external_user.user
-
-
-# TODO: When the generic auth logic moves to grants_shared, the shared code can no longer
-# instantiate the concrete AuthHandler. This hardcoded factory must move to the API side --
-# replace it with a registration/injection hook where the API registers its concrete handler.
-#
-# The return type is the unparameterized AbstractAuthHandler on purpose: the generic auth
-# layer interacts with it through the abstract base models, not the concrete tables. Binding
-# the concrete type params here would force the generic callers (which hold BaseUser, etc.)
-# to know about the real tables.
-def get_auth_handler(db_session: db.Session) -> AbstractAuthHandler:
-    return AuthHandler(db_session)
