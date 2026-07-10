@@ -10,6 +10,7 @@ describe("getNextRoutes", () => {
     expect(result).toEqual([
       "/(base)/[...not-found]",
       "/(base)/award-recommendation/1/application-submissions/[applicationSubmissionId]/edit",
+      "/(base)/award-recommendation/1/application-submissions/edit/bulk",
       "/(base)/award-recommendation/1/application-submissions/edit",
       "/(base)/award-recommendation/1/edit",
       "/(base)/award-recommendation/1",
