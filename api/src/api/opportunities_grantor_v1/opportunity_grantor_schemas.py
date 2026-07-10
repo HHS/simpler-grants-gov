@@ -711,3 +711,34 @@ class CompetitionUpdateResponseSchema(AbstractResponseSchema):
     """Schema for PUT /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id response"""
 
     data = fields.Nested(CompetitionAlphaSchema())
+
+
+class CompetitionInstructionUploadRequestV1Schema(Schema):
+    """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id/instructions request"""
+
+    file_attachment = fields.List(
+        fields.File(
+            required=True,
+            allow_none=False,
+            metadata={"description": "The file attachments to upload"},
+        ),
+        required=True,
+        validate=validators.Length(min=1),
+        metadata={"description": "List of instruction files to upload"},
+    )
+
+
+class CompetitionInstructionUploadResponseDataV1Schema(Schema):
+    """Data schema for competition instruction upload response"""
+
+    competition_instruction_id = fields.List(
+        fields.String(),
+        required=True,
+        metadata={"description": "List of created competition instruction IDs"},
+    )
+
+
+class CompetitionInstructionUploadResponseV1Schema(ResponseWithErrorsSchema):
+    """Response Schema for Upload Competition Instructions Endpoint"""
+
+    data = fields.Nested(CompetitionInstructionUploadResponseDataV1Schema())
