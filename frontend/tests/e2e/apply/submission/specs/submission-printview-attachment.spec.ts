@@ -176,7 +176,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
             filePath.split(/[/\\]/).pop() ?? filePath;
 
           const attachmentSections = [
-            { fieldKey: "att1", sectionId: "form-section-att1" },
+            { fieldKey: "att1", sectionId: "form-section-attachment1" },
           ] as const;
 
           for (const { fieldKey, sectionId } of attachmentSections) {
