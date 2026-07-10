@@ -324,7 +324,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
                     break
         finally:
             mtom_file_stream.close()
-        yield b"\n" + boundary.encode("utf-8") + b"--"
+        yield b"\r\n" + boundary.encode("utf-8") + b"--"
 
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
         # MTOM message is assembled here
@@ -357,13 +357,13 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             root=self.operation_config.response_operation_name,
         )
         if self.operation_config.response_operation_name != "GetApplicationZipResponse":
-            mime_message += f"\n--uuid:{boundary_uuid}--".encode("utf-8")
+            mime_message += f"\r\n--uuid:{boundary_uuid}--".encode("utf-8")
             return get_soap_response(
                 data=mime_message,
                 headers=update_headers,
             )
         if mtom_file_stream:
-            mime_message += ("\n" + boundary + "\n").encode("utf8")
+            mime_message += ("\r\n" + boundary + "\r\n").encode("utf8")
             return get_soap_response(
                 data=self._gen_response_data(mime_message, boundary, mtom_file_stream),
                 headers=update_headers,
