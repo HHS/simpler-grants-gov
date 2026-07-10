@@ -183,13 +183,13 @@ for (const { testName, orgLabel } of applicantScenarios) {
             if (testData[fieldKey]) {
               const fileName = attachmentFileName(testData[fieldKey]);
               const section = page.locator(`#${sectionId}`);
-              
+
               // Verify section exists and renders the attachment list
               await expect(section).toBeVisible();
               await expect(section.getByRole("listitem")).toBeVisible({
                 timeout: 15000,
               });
-              
+
               // Verify filename is displayed
               await expect(section).toContainText(fileName);
             }
