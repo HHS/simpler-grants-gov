@@ -22,7 +22,7 @@ class TestListOrganizationInvitations:
     ):
         """Test successful invitation listing without filters"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -58,8 +58,6 @@ class TestListOrganizationInvitations:
             role=role,
         )
 
-        db_session.commit()
-
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
@@ -85,7 +83,7 @@ class TestListOrganizationInvitations:
     ):
         """Test successful invitation listing with status filtering"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -113,8 +111,6 @@ class TestListOrganizationInvitations:
             rejected_at=None,
         )
 
-        db_session.commit()
-
         # Filter for only pending invitations
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
@@ -140,7 +136,7 @@ class TestListOrganizationInvitations:
     ):
         """Test successful response with no invitations"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -163,7 +159,7 @@ class TestListOrganizationInvitations:
     def test_list_invitations_401_no_token(self, client, db_session, enable_factory_create):
         """Test that accessing endpoint without auth token returns 401"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -210,7 +206,6 @@ class TestListOrganizationInvitations:
         # Create a different organization
 
         other_organization = OrganizationFactory.create()
-        db_session.commit()
 
         resp = client.post(
             f"/v1/organizations/{other_organization.organization_id}/invitations/list",
@@ -250,7 +245,7 @@ class TestListOrganizationInvitations:
     ):
         """Test that invalid status filter values return 400"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -273,7 +268,7 @@ class TestListOrganizationInvitations:
     ):
         """Test that response includes all required fields per specification"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -296,8 +291,6 @@ class TestListOrganizationInvitations:
             organization_invitation=invitation,
             role=role,
         )
-
-        db_session.commit()
 
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
@@ -356,7 +349,10 @@ class TestListOrganizationInvitations:
     @pytest.mark.parametrize(
         "privilege_set,expected_status",
         [
-            ([Privilege.MANAGE_ORG_MEMBERS], 200),  # Correct privilege
+            (
+                [Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
+                200,
+            ),  # Correct privilege
             ([Privilege.VIEW_ORG_MEMBERSHIP], 403),  # Wrong privilege
             ([], 403),  # No privileges
         ],
@@ -383,7 +379,7 @@ class TestListOrganizationInvitations:
     ):
         """Test that expired invitations are properly identified and can be filtered"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -399,8 +395,6 @@ class TestListOrganizationInvitations:
             accepted_at=None,
             rejected_at=None,
         )
-
-        db_session.commit()
 
         # Filter for expired invitations
         resp = client.post(
@@ -420,7 +414,7 @@ class TestListOrganizationInvitations:
     def test_list_invitations_default_sorting(self, client, db_session, enable_factory_create):
         """Test default sorting: email"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -458,7 +452,7 @@ class TestListOrganizationInvitations:
     ):
         """Test multi-field sorting: invitee_email ASC, created_at DESC"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -512,7 +506,7 @@ class TestListOrganizationInvitations:
     ):
         """Test sorting when some invitations have accepted_at as None"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -565,7 +559,7 @@ class TestListOrganizationInvitations:
         """Test pagination: page_offset & page_size apply correctly"""
 
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 

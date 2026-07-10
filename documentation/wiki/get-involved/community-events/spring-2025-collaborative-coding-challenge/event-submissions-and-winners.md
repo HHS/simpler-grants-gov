@@ -12,8 +12,7 @@ GrantFinder is a tool built onto the existing Simpler.Grants.gov which makes the
 
 [Proposal](https://drive.google.com/file/d/1T0bJ4Fm0AchTWDn0iQDL8eSW1WnuGOhN/view?usp=share_link)
 
-[Code](https://github.com/GlennTatum/simpler-grants-gov)\
-
+[Code](https://github.com/GlennTatum/simpler-grants-gov)<br>
 
 </details>
 

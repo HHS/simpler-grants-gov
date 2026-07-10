@@ -1,8 +1,16 @@
 import { JSONSchema7 } from "json-schema";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import { Organization } from "src/types/applicationResponseTypes";
+import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import { UserProfile } from "src/types/authTypes";
+import {
+  AwardRecommendationDetails,
+  AwardRecommendationListItem,
+  AwardRecommendationStatus,
+  AwardRecommendationSubmission,
+} from "src/types/awardRecommendationTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -28,6 +36,104 @@ import {
   UserRole,
 } from "src/types/userTypes";
 
+export const mockAwardRecommendationStatus: AwardRecommendationStatus =
+  "in_review";
+
+export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
+  award_recommendation_id: "63588df8-f2d1-44ed-a201-5804abba696a",
+  award_recommendation_number: "AR-26-0001",
+  award_recommendation_status: mockAwardRecommendationStatus,
+  award_selection_method: "merit-review-other",
+  selection_method_detail:
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
+  funding_strategy:
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
+  other_key_information:
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
+  additional_info:
+    "Additional contextual information about the award recommendation",
+  review_workflow_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  award_recommendation_summary: {
+    total_received_count: 200,
+    recommended_for_funding_count: 150,
+    recommended_without_funding_count: 25,
+    not_recommended_count: 25,
+    total_recommended_amount: 250000,
+  },
+  opportunity: {
+    opportunity_id: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
+    opportunity_number: "OPP-2024-001",
+    opportunity_title: "Test Funding Opportunity",
+    summary: {
+      opportunity_status: "posted",
+      summary_description:
+        "This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.",
+    },
+  },
+  created_at: "2026-01-01T00:00:00Z",
+};
+
+export const mockAwardRecommendationListItem: AwardRecommendationListItem = {
+  award_recommendation_id:
+    mockAwardRecommendationDetails.award_recommendation_id,
+  award_recommendation_number:
+    mockAwardRecommendationDetails.award_recommendation_number,
+  award_recommendation_status:
+    mockAwardRecommendationDetails.award_recommendation_status,
+  opportunity: mockAwardRecommendationDetails.opportunity,
+  award_recommendation_summary: {
+    total_received_count:
+      mockAwardRecommendationDetails.award_recommendation_summary
+        ?.total_received_count ?? 0,
+  },
+};
+
+export const mockAwardRecommendationListItemNoSubmissions: AwardRecommendationListItem =
+  {
+    ...mockAwardRecommendationListItem,
+    award_recommendation_id: "no-submissions-award-rec-id",
+    award_recommendation_number: "AR-26-0003",
+    award_recommendation_summary: { total_received_count: 0 },
+  };
+
+export const mockDraftAwardRecommendationListItem: AwardRecommendationListItem =
+  {
+    ...mockAwardRecommendationListItem,
+    award_recommendation_id: "draft-award-rec-id",
+    award_recommendation_number: "AR-26-0002",
+    award_recommendation_status: "draft",
+  };
+
+export const mockAwardRecommendationSubmissions: AwardRecommendationSubmission[] =
+  [
+    {
+      award_recommendation_application_submission_id:
+        "63588df8-f2d1-44ed-a201-5804abba696b",
+      application_submission: {
+        application_submission_id: "63588df8-f2d1-44ed-a201-5804abba696c",
+        application_submission_number: "SUB-26-0001",
+        project_title: "Test project",
+        total_requested_amount: "50000.00",
+        application: {
+          application_id: "63588df8-f2d1-44ed-a201-5804abba696d",
+          competition_id: "63588df8-f2d1-44ed-a201-5804abba696e",
+          organization: {
+            organization_id: "63588df8-f2d1-44ed-a201-5804abba696f",
+            organization_name: "Test Org",
+            uei: "UEI000001",
+          },
+        },
+      },
+      submission_detail: {
+        award_recommendation_type: "recommended_for_funding",
+        recommended_amount: "50000.00",
+        general_comment: "",
+        has_exception: false,
+        exception_detail: "",
+      },
+    },
+  ];
+
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",
   legacy_opportunity_id: 12345,
@@ -44,14 +150,29 @@ export const mockOpportunity: BaseOpportunity = {
   opportunity_number: "OPP-12345",
 } as BaseOpportunity;
 
+export const createMockOpportunity = (
+  overrides: Partial<BaseOpportunity> = {},
+): BaseOpportunity => ({
+  ...mockOpportunity,
+  // ensure required nested objects are safe to override
+  summary: {
+    ...mockOpportunity.summary,
+    ...(overrides.summary ?? {}),
+  },
+  saved_to_organizations: [],
+  ...overrides,
+});
+
 export const searchFetcherParams: QueryParamData = {
   page: 1,
   status: new Set(["forecasted", "posted"]),
   fundingInstrument: new Set(["grant", "cooperative_agreement"]),
   agency: new Set(),
+  assistanceListingNumber: new Set(),
   category: new Set(),
   eligibility: new Set(),
   closeDate: new Set(),
+  postedDate: new Set(),
   costSharing: new Set(),
   topLevelAgency: new Set(),
   query: "research",
@@ -59,6 +180,57 @@ export const searchFetcherParams: QueryParamData = {
   actionType: "fun" as SearchFetcherActionType,
   fieldChanged: "baseball",
   andOr: "OR",
+};
+
+export const mockOpportunityDetail = {
+  opportunity_id: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
+  legacy_opportunity_id: 1,
+  opportunity_status: "posted" as const,
+  opportunity_title: "Test Funding Opportunity",
+  opportunity_number: "OPP-2024-001",
+  agency_code: "ABC",
+  agency_name: "Test Agency",
+  top_level_agency_name: "Test Top Level Agency",
+  category: "test-category",
+  category_explanation: "This is a test category",
+  created_at: "2024-01-01T00:00:00Z",
+  updated_at: "2024-01-01T00:00:00Z",
+  opportunity_assistance_listings: [],
+  attachments: [],
+  competitions: null,
+  summary: {
+    summary_description: "",
+    close_date: null,
+    is_forecast: false,
+    post_date: "2024-01-01",
+    additional_info_url: null,
+    additional_info_url_description: null,
+    agency_code: "ABC",
+    agency_contact_description: null,
+    agency_email_address: null,
+    agency_email_address_description: null,
+    agency_name: "Test Agency",
+    agency_phone_number: null,
+    applicant_eligibility_description: null,
+    applicant_types: null,
+    archive_date: null,
+    award_ceiling: null,
+    award_floor: null,
+    close_date_description: null,
+    estimated_total_program_funding: null,
+    expected_number_of_awards: null,
+    fiscal_year: null,
+    forecasted_award_date: null,
+    forecasted_close_date: null,
+    forecasted_close_date_description: null,
+    forecasted_post_date: null,
+    forecasted_project_start_date: null,
+    funding_categories: null,
+    funding_category_description: null,
+    funding_instruments: null,
+    is_cost_sharing: null,
+    version_number: 1,
+  },
 };
 
 export const arbitrarySearchPagination = {
@@ -120,6 +292,9 @@ export const fakeFacetCounts = {
     posted: 1,
     forecasted: 1,
   },
+  assistance_listing_number: {
+    "15.808": 1,
+  },
   funding_instrument: {
     arbitraryKey: 1,
   },
@@ -133,6 +308,9 @@ export const fakeFacetCounts = {
     arbitraryKey: 1,
   },
   close_date: {
+    arbitraryKey: 1,
+  },
+  post_date: {
     arbitraryKey: 1,
   },
   is_cost_sharing: {
@@ -711,4 +889,21 @@ export const fakeTestUser: TestUser = {
 export const fakeUserProfile: UserProfile = {
   token: "a token",
   user_id: "an id",
+};
+
+export const mockApplicationSubmission: ApplicationSubmission = {
+  application_submission_id: "uuid-13",
+  download_path: "http://s3signedurl.com/download.zip",
+  file_size_bytes: 10,
+  legacy_tracking_number: 1,
+};
+
+export const fakeValidationError: FormattedFormValidationWarning = {
+  definition: "/properties/field_one",
+  field: "$.field_one",
+  formatted: "Submission Type is required",
+  htmlField: "field_one",
+  message: "'field_one' is a required property",
+  type: "required",
+  value: null,
 };

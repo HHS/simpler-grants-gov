@@ -52,10 +52,12 @@ class AttachmentTransformer:
             field_type = field_config["type"]
             field_value = data[field_name]
 
-            if field_type == "single":
+            if field_type == "single" or field_type == "single_with_wrapper":
                 # Single attachment field - expect UUID string
                 attachment_dict = self._resolve_attachment_uuid(field_value, field_name)
-                self._add_single_attachment_element(parent, xml_element, attachment_dict, nsmap)
+                self._add_single_attachment_element(
+                    parent, xml_element, attachment_dict, nsmap, field_config
+                )
             elif field_type == "multiple":
                 # Multiple attachment field - expect list of UUIDs
                 self._add_multiple_attachment_from_uuids(
@@ -130,17 +132,81 @@ class AttachmentTransformer:
         element_name: str,
         attachment_data: dict[str, Any],
         nsmap: dict[str, str],
+        field_config: dict[str, Any] | None = None,
     ) -> None:
         """Add a single attachment element.
 
+        For forms that use the 'single_with_wrapper' type, each attachment slot is
+        wrapped in a nested structure with a File element.
+
+        Example structure with wrapper (type='single_with_wrapper'):
+        <AttachmentForm_1_2:ATT1>
+            <AttachmentForm_1_2:ATT1File>
+                <att:FileName>...</att:FileName>
+                ...
+            </AttachmentForm_1_2:ATT1File>
+        </AttachmentForm_1_2:ATT1>
+
+        When 'file_element' is set in field_config, that name is used instead of '{element_name}File':
+        <Project_Abstract_1_2:ProjectAbstractAddAttachment>
+            <Project_Abstract_1_2:AttachedFile>
+                <att:FileName>...</att:FileName>
+                ...
+            </Project_Abstract_1_2:AttachedFile>
+        </Project_Abstract_1_2:ProjectAbstractAddAttachment>
+
+        Example structure without wrapper (type='single'):
+        <att:FileName>...</att:FileName>
+        <att:MimeType>...</att:MimeType>
+        ...
+
         Args:
             parent: Parent XML element
-            element_name: Name of the attachment element
+            element_name: Name of the attachment element (e.g., "ATT1")
             attachment_data: Attachment data dictionary
             nsmap: Namespace map
+            field_config: Field configuration containing type and optional file_element
         """
-        attachment_elem = lxml_etree.SubElement(parent, element_name)
-        self._populate_attachment_content(attachment_elem, attachment_data, nsmap)
+        # Check if this field requires wrapper elements based on configuration
+        uses_wrapper = field_config and field_config.get("type") == "single_with_wrapper"
+
+        if uses_wrapper:
+            # Determine inner element name: config override or default to '{element_name}File'.
+            # Empty string means no inner wrapper — content goes directly in the outer element.
+            file_element_name = (
+                field_config.get("file_element", f"{element_name}File")
+                if field_config
+                else f"{element_name}File"
+            )
+
+            default_ns = next(iter(nsmap.values()), None) if nsmap else None
+
+            # Create the outer wrapper element (e.g., <ATT1>) in the default namespace
+            if default_ns:
+                attachment_elem = lxml_etree.SubElement(parent, f"{{{default_ns}}}{element_name}")
+            else:
+                attachment_elem = lxml_etree.SubElement(parent, element_name)
+
+            if file_element_name:
+                # Create inner file element (e.g., <ATT1File>) and populate it
+                if default_ns:
+                    file_elem = lxml_etree.SubElement(
+                        attachment_elem, f"{{{default_ns}}}{file_element_name}"
+                    )
+                else:
+                    file_elem = lxml_etree.SubElement(attachment_elem, file_element_name)
+                self._populate_attachment_content(file_elem, attachment_data, nsmap)
+            else:
+                # No inner wrapper — populate content directly in the outer element
+                self._populate_attachment_content(attachment_elem, attachment_data, nsmap)
+        else:
+            # No wrapper needed - populate content directly on parent
+            self._populate_attachment_content(parent, attachment_data, nsmap)
+
+    def _get_namespace(self, tag: str) -> str | None:
+        if tag.startswith("{"):
+            return tag.split("}")[0][1:]
+        return None
 
     def _add_multiple_attachment_element(
         self,
@@ -157,7 +223,13 @@ class AttachmentTransformer:
             attachment_data: Attachment group data dictionary
             nsmap: Namespace map
         """
-        group_elem = lxml_etree.SubElement(parent, element_name)
+
+        form_ns = self._get_namespace(parent.tag)
+
+        if form_ns:
+            group_elem = lxml_etree.SubElement(parent, f"{{{form_ns}}}{element_name}")
+        else:
+            group_elem = lxml_etree.SubElement(parent, element_name)
 
         # Normalize to list of file data
         files_to_add: list[Any] = []
@@ -177,7 +249,10 @@ class AttachmentTransformer:
         file_data: Any,
         nsmap: dict[str, str],
     ) -> None:
-        file_elem = lxml_etree.SubElement(parent, "AttachedFile")
+
+        att_ns = nsmap.get("att", self.attachment_namespace)
+
+        file_elem = lxml_etree.SubElement(parent, f"{{{att_ns}}}AttachedFile")
         self._populate_attachment_content(file_elem, file_data, nsmap)
 
     def _populate_attachment_content(
@@ -196,36 +271,42 @@ class AttachmentTransformer:
         if not isinstance(attachment_data, dict):
             return
 
-        # Add FileName
+        # Get namespace URIs from nsmap
+        att_ns = nsmap.get("att", self.attachment_namespace)
+        glob_ns = nsmap.get("glob", "http://apply.grants.gov/system/Global-V1.0")
+
+        # Add FileName with att: namespace prefix
         if "FileName" in attachment_data:
-            filename_elem = lxml_etree.SubElement(attachment_elem, "FileName")
+            filename_elem = lxml_etree.SubElement(attachment_elem, f"{{{att_ns}}}FileName")
             filename_elem.text = str(attachment_data["FileName"])
 
-        # Add MimeType
+        # Add MimeType with att: namespace prefix
         if "MimeType" in attachment_data:
-            mimetype_elem = lxml_etree.SubElement(attachment_elem, "MimeType")
+            mimetype_elem = lxml_etree.SubElement(attachment_elem, f"{{{att_ns}}}MimeType")
             mimetype_elem.text = str(attachment_data["MimeType"])
 
-        # Add FileLocation with href attribute
+        # Add FileLocation with att:href attribute
         if "FileLocation" in attachment_data:
-            filelocation_elem = lxml_etree.SubElement(attachment_elem, "FileLocation")
+            filelocation_elem = lxml_etree.SubElement(attachment_elem, f"{{{att_ns}}}FileLocation")
             file_location_data = attachment_data["FileLocation"]
 
             if isinstance(file_location_data, dict) and "@href" in file_location_data:
-                filelocation_elem.set("href", str(file_location_data["@href"]))
+                filelocation_elem.set(f"{{{att_ns}}}href", str(file_location_data["@href"]))
             elif isinstance(file_location_data, str):
-                filelocation_elem.set("href", file_location_data)
+                filelocation_elem.set(f"{{{att_ns}}}href", file_location_data)
 
-        # Add HashValue with hashAlgorithm attribute and text content
+        # Add HashValue with glob: prefix and glob:hashAlgorithm attribute
         if "HashValue" in attachment_data:
-            hashvalue_elem = lxml_etree.SubElement(attachment_elem, "HashValue")
+            hashvalue_elem = lxml_etree.SubElement(attachment_elem, f"{{{glob_ns}}}HashValue")
             hash_data = attachment_data["HashValue"]
 
             if isinstance(hash_data, dict):
                 if "@hashAlgorithm" in hash_data:
-                    hashvalue_elem.set("hashAlgorithm", str(hash_data["@hashAlgorithm"]))
+                    hashvalue_elem.set(
+                        f"{{{glob_ns}}}hashAlgorithm", str(hash_data["@hashAlgorithm"])
+                    )
                 if "#text" in hash_data:
                     hashvalue_elem.text = str(hash_data["#text"])
             elif isinstance(hash_data, str):
-                hashvalue_elem.set("hashAlgorithm", "SHA-1")  # Default
+                hashvalue_elem.set(f"{{{glob_ns}}}hashAlgorithm", "SHA-1")  # Default
                 hashvalue_elem.text = hash_data

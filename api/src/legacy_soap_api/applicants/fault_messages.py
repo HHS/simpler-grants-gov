@@ -10,3 +10,9 @@ OpportunityListRequestInvalidParams = FaultMessage(
     faultstring="Unable to Get Opportunity List: At least one filter is required. Filtering by Competition ID requires Opportunity Number and/or CFDA.",
     faultcode="soap:Server",
 )
+
+
+ConfirmApplicationDeliveryInvalidTrackingNumber = FaultMessage(
+    faultstring="Failed to validate request. cvc-pattern-valid: Value is not facet-valid with respect to pattern 'GRANT[0-9]{8}' for type 'GrantsGovTrackingNumberType'.",
+    faultcode="soap:Server",
+)

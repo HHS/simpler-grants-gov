@@ -22,7 +22,7 @@ class TestListLegacyUsers:
     ):
         """Test successful legacy user listing without filters returns all statuses"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -54,8 +54,6 @@ class TestListLegacyUsers:
             inviter=user,
         )
 
-        db_session.commit()
-
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
             headers={"X-SGG-Token": token},
@@ -84,7 +82,7 @@ class TestListLegacyUsers:
     ):
         """Test successful legacy user listing with single status filter"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -106,8 +104,6 @@ class TestListLegacyUsers:
             status=LegacyUserStatus.MEMBER,
             organization=organization,
         )
-
-        db_session.commit()
 
         # Filter for only available users
         resp = client.post(
@@ -133,7 +129,7 @@ class TestListLegacyUsers:
     ):
         """Test successful legacy user listing with multiple status filters"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -153,8 +149,6 @@ class TestListLegacyUsers:
             organization=organization,
             inviter=user,
         )
-
-        db_session.commit()
 
         # Filter for member and pending invitation (exclude available)
         resp = client.post(
@@ -186,7 +180,7 @@ class TestListLegacyUsers:
     ):
         """Test successful response with no legacy users"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -210,7 +204,7 @@ class TestListLegacyUsers:
     ):
         """Test that default sort_order is applied when not provided"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -220,8 +214,6 @@ class TestListLegacyUsers:
         create_legacy_user_with_status(uei, "zebra@example.com")
         create_legacy_user_with_status(uei, "apple@example.com")
         create_legacy_user_with_status(uei, "banana@example.com")
-
-        db_session.commit()
 
         # Call without sort_order - should use default (email ascending)
         resp = client.post(
@@ -249,7 +241,7 @@ class TestListLegacyUsers:
     ):
         """Test that ignored users are excluded from results"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -267,8 +259,6 @@ class TestListLegacyUsers:
             email="ignored@example.com",
         )
 
-        db_session.commit()
-
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
             headers={"X-SGG-Token": token},
@@ -285,7 +275,7 @@ class TestListLegacyUsers:
     ):
         """Test that duplicate emails return only the most recent record"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -307,8 +297,6 @@ class TestListLegacyUsers:
             created_date=datetime(2024, 1, 1, tzinfo=UTC),
         )
 
-        db_session.commit()
-
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
             headers={"X-SGG-Token": token},
@@ -328,7 +316,7 @@ class TestListLegacyUsers:
     ):
         """Test that member status takes precedence over pending invitation status"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -355,8 +343,6 @@ class TestListLegacyUsers:
             rejected_at=None,
         )
 
-        db_session.commit()
-
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
             headers={"X-SGG-Token": token},
@@ -375,7 +361,7 @@ class TestListLegacyUsers:
     ):
         """Test pagination with different page sizes"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -384,8 +370,6 @@ class TestListLegacyUsers:
         # Create 5 legacy users
         for i in range(5):
             create_legacy_user_with_status(uei, f"user{i}@example.com")
-
-        db_session.commit()
 
         # Request page 1 with page size 2
         resp = client.post(
@@ -406,7 +390,7 @@ class TestListLegacyUsers:
     ):
         """Test pagination with different page offsets"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -415,8 +399,6 @@ class TestListLegacyUsers:
         # Create 5 legacy users with predictable emails for sorting
         for i in range(5):
             create_legacy_user_with_status(uei, f"user{i}@example.com")
-
-        db_session.commit()
 
         # Request page 2 with page size 2
         resp = client.post(
@@ -446,7 +428,7 @@ class TestListLegacyUsers:
     ):
         """Test pagination with different sort orders"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -457,8 +439,6 @@ class TestListLegacyUsers:
             create_legacy_user_with_status(
                 uei, f"{name.lower()}@example.com", first_name=name, last_name="User"
             )
-
-        db_session.commit()
 
         # Sort by first_name ascending
         resp = client.post(
@@ -486,7 +466,7 @@ class TestListLegacyUsers:
     ):
         """Test that response includes all required fields per specification"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -526,7 +506,7 @@ class TestListLegacyUsers:
     def test_list_legacy_users_401_no_token(self, client, db_session, enable_factory_create):
         """Test that accessing endpoint without auth token returns 401"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -592,7 +572,7 @@ class TestListLegacyUsers:
     ):
         """Test that organization without UEI returns 400"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -615,7 +595,7 @@ class TestListLegacyUsers:
     ):
         """Test that invalid status filter values return 422"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -637,7 +617,7 @@ class TestListLegacyUsers:
     ):
         """Test that omitting sort_order uses the default (email ascending)"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             with_sam_gov_entity=True,
         )
@@ -669,7 +649,10 @@ class TestListLegacyUsers:
     @pytest.mark.parametrize(
         "privilege_set,expected_status",
         [
-            ([Privilege.MANAGE_ORG_MEMBERS], 200),  # Correct privilege
+            (
+                [Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
+                200,
+            ),  # Correct privilege
             ([Privilege.VIEW_ORG_MEMBERSHIP], 403),  # Wrong privilege
             ([], 403),  # No privileges
         ],

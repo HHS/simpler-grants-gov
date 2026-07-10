@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from src.form_schema.forms import get_active_forms
+from src.form_schema.forms import get_active_forms, init_form_registry
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,7 @@ def _build_xml_form_map() -> dict[str, dict[str, Any]]:
 def load_xml_transform_config(form_name: str) -> dict[str, Any]:
     """Load XML transformation rules for a given form."""
     try:
+        init_form_registry()
         xml_form_map = _build_xml_form_map()
         form_name_upper = form_name.upper()
 

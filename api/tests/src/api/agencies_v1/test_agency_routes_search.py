@@ -1,8 +1,8 @@
 import pytest
+from grants_shared.pagination.pagination_models import SortDirection
 
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.constants.lookup_constants import OpportunityStatus
-from src.pagination.pagination_models import SortDirection
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import AgencyFactory
 
@@ -178,9 +178,9 @@ class TestAgencyRoutesSearch(BaseTestClass):
             ),
         ],
     )
-    def test_search_agencies(self, client, api_auth_token, search_request, expected_result):
+    def test_search_agencies(self, client, user_api_key_id, search_request, expected_result):
         resp = client.post(
-            "/v1/agencies/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/agencies/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         data = resp.json["data"]
         assert resp.status_code == 200

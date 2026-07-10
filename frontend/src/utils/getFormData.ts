@@ -1,20 +1,20 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { getApplicationFormDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import {
+  getApplicationFormDetails,
+  getApplicationFormDetailsForPrint,
+} from "src/services/fetch/fetchers/applicationFetcher";
 import {
   ApplicationFormDetail,
   ApplicationResponseDetail,
 } from "src/types/applicationResponseTypes";
+import { FormValidationWarning, UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
-import {
-  FormValidationWarning,
-  UiSchema,
-} from "src/components/applyForm/types";
-import { processFormSchema } from "src/components/applyForm/utils";
-import { validateUiSchema } from "src/components/applyForm/validate";
+import { processFormSchema } from "./applyForm/applyFormUtils";
+import { validateUiSchema } from "./applyForm/validateUiSchema";
 
 // either return error or data, not both
 type FormDataResult =
@@ -30,8 +30,17 @@ type FormDataResult =
         formUiSchema: UiSchema;
         formValidationWarnings: FormValidationWarning[] | null;
         applicationAttachments: Attachment[];
+        createdAt?: string;
+        updatedAt?: string;
       };
     };
+
+/*
+  fetches application form data
+  validates ui schema
+  formats / processes form schema
+  returns all relevant data
+*/
 
 export default async function getFormData({
   applicationId,
@@ -45,28 +54,23 @@ export default async function getFormData({
   let applicationFormData = {} as ApplicationFormDetail;
   let formValidationWarnings: FormValidationWarning[] | null;
   let formData: FormDetail | null;
-  const useInternalToken = !!internalToken;
-  let sessionToken = "";
 
   // API can take either internal token or session token to auth
-  if (internalToken) sessionToken = internalToken;
-  else {
+  if (!internalToken) {
     const session = await getSession();
 
     if (!session || !session.token) {
       console.error("No active session to access form");
       return { error: "UnauthorizedError" };
     }
-    sessionToken = session.token;
   }
 
+  const formDetailsPromise = internalToken
+    ? getApplicationFormDetailsForPrint(internalToken, applicationId, appFormId)
+    : getApplicationFormDetails(applicationId, appFormId);
+
   try {
-    const response = await getApplicationFormDetails(
-      sessionToken,
-      applicationId,
-      appFormId,
-      useInternalToken,
-    );
+    const response = await formDetailsPromise;
 
     if (response.status_code !== 200) {
       console.error(
@@ -86,7 +90,9 @@ export default async function getFormData({
     }
 
     if (applicationFormData.application_form_id !== appFormId) {
-      console.error(`Application form ids do not match`);
+      console.error(
+        `Application form ids do not match: ${applicationFormData.application_form_id} & ${appFormId}`,
+      );
       return { error: "TopLevelError" };
     }
     formValidationWarnings =
@@ -113,30 +119,31 @@ export default async function getFormData({
   const schemaErrors = validateUiSchema(formUiSchema);
   if (schemaErrors) {
     console.error(
-      "Error validating form ui schema",
+      `Error validating form ui schema for form id: ${formId}`,
       formUiSchema,
       schemaErrors,
     );
     return { error: "TopLevelError" };
   }
 
-  let formSchema = {};
   try {
-    formSchema = await processFormSchema(form_json_schema);
+    const result = processFormSchema(form_json_schema);
+    return {
+      data: {
+        applicationAttachments: applicationFormData.application_attachments,
+        applicationResponse,
+        applicationName: applicationFormData.application_name,
+        formId,
+        formName,
+        formSchema: result.formSchema,
+        formUiSchema,
+        formValidationWarnings,
+        createdAt: applicationFormData.created_at,
+        updatedAt: applicationFormData.updated_at,
+      },
+    };
   } catch (e) {
-    console.error("Error parsing JSON schema", e);
+    console.error(`Error parsing JSON schema for form id: ${formId}`, e);
     return { error: "TopLevelError" };
   }
-  return {
-    data: {
-      applicationAttachments: applicationFormData.application_attachments,
-      applicationResponse,
-      applicationName: applicationFormData.application_name,
-      formId,
-      formName,
-      formSchema,
-      formUiSchema,
-      formValidationWarnings,
-    },
-  };
 }

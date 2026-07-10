@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:BudgetNarrativeAttachments_1_2="http://apply.grants.gov/forms/BudgetNarrativeAttachments_1_2-V1.2" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" targetNamespace="http://apply.grants.gov/forms/BudgetNarrativeAttachments_1_2-V1.2" elementFormDefault="qualified" attributeFormDefault="qualified" version="1.2">
+	<xs:import namespace="http://apply.grants.gov/system/Attachments-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<!-- MAIN ELEMENT GROUP -->
+	<xs:element name="BudgetNarrativeAttachments_1_2">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Attachments" type="att:AttachmentGroupMin1Max100DataType"/>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="1.2"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

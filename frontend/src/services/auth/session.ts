@@ -13,7 +13,6 @@ import { postTokenRefresh } from "src/services/fetch/fetchers/fetchers";
 import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import { encodeText } from "src/utils/generalUtils";
 
-// note that cookies will be async in Next 15
 import { cookies } from "next/headers";
 
 let clientJwtKey: Uint8Array;
@@ -121,9 +120,7 @@ export const refreshSession = async (
   apiSessionToken: string,
 ): Promise<UserSession | null> => {
   // update expiration on the API side
-  await postTokenRefresh({
-    additionalHeaders: { "X-SGG-Token": apiSessionToken },
-  });
+  await postTokenRefresh();
   // re-encrypt the existing API token with a refreshed expiration date
   // and return decrypted user info
   return createAndReturnSession(apiSessionToken, newExpirationDate());

@@ -1,10 +1,17 @@
+import logging
 import uuid
+from unittest import mock
 
 import opensearchpy
 import pytest
 
 from src.adapters.search import get_opensearch_config
-from src.adapters.search.opensearch_client import _get_connection_parameters
+from src.adapters.search.opensearch_client import SearchClient, _get_connection_parameters
+from tests.src.adapters.search.test_opensearch_query_builder import (
+    CALL_OF_WINTER,
+    WINTER,
+    WINTERBORN_LEGACY,
+)
 
 ########################################################################
 # These tests are primarily looking to validate
@@ -41,6 +48,87 @@ def test_create_and_delete_index_duplicate(search_client):
     search_client.delete_index(index_name)
     with pytest.raises(Exception, match="no such index"):
         search_client.delete_index(index_name)
+
+
+def _snapshot_in_progress_error() -> opensearchpy.exceptions.RequestError:
+    return opensearchpy.exceptions.RequestError(
+        400,
+        "snapshot_in_progress_exception",
+        {"error": {"reason": "Cannot delete indices that are being snapshotted: [[some-index]]."}},
+    )
+
+
+@pytest.fixture
+def instant_delete_retries(monkeypatch):
+    # Avoid real waits between retries in delete_index
+    monkeypatch.setattr(
+        SearchClient._delete_index_with_retry.retry, "sleep", lambda *args, **kwargs: None
+    )
+
+
+def test_delete_index_snapshot_in_progress_is_skipped(
+    search_client, monkeypatch, instant_delete_retries, caplog
+):
+    caplog.set_level(logging.INFO)
+    index_name = f"test-index-{uuid.uuid4().int}"
+    search_client.create_index(index_name)
+
+    delete_mock = mock.MagicMock(side_effect=_snapshot_in_progress_error())
+    monkeypatch.setattr(search_client._client.indices, "delete", delete_mock)
+
+    # A snapshot in progress should not fail the call
+    search_client.delete_index(index_name)
+
+    # Retried up to the max attempts before giving up
+    assert delete_mock.call_count == 3
+
+    skip_logs = [
+        r
+        for r in caplog.records
+        if r.message == "Skipping search index delete, snapshot in progress"
+    ]
+    assert len(skip_logs) == 1
+    assert skip_logs[0].index_name == index_name
+
+
+def test_delete_index_succeeds_after_snapshot_clears(
+    search_client, monkeypatch, instant_delete_retries
+):
+    index_name = f"test-index-{uuid.uuid4().int}"
+    search_client.create_index(index_name)
+
+    real_delete = search_client._client.indices.delete
+    call_count = 0
+
+    def flaky_delete(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count < 3:
+            raise _snapshot_in_progress_error()
+        return real_delete(*args, **kwargs)
+
+    monkeypatch.setattr(search_client._client.indices, "delete", flaky_delete)
+
+    search_client.delete_index(index_name)
+
+    assert call_count == 3
+    assert search_client.index_exists(index_name) is False
+
+
+def test_delete_index_other_request_error_is_raised(
+    search_client, monkeypatch, instant_delete_retries
+):
+    index_name = f"test-index-{uuid.uuid4().int}"
+
+    other_error = opensearchpy.exceptions.RequestError(400, "some_other_exception", {})
+    delete_mock = mock.MagicMock(side_effect=other_error)
+    monkeypatch.setattr(search_client._client.indices, "delete", delete_mock)
+
+    with pytest.raises(opensearchpy.exceptions.RequestError, match="some_other_exception"):
+        search_client.delete_index(index_name)
+
+    # Non-snapshot errors are not retried
+    assert delete_mock.call_count == 1
 
 
 def test_bulk_upsert(search_client, generic_index):
@@ -239,3 +327,74 @@ def test_cleanup_old_indices(search_client):
     assert search_client.index_exists(index_name_2) is False
     assert search_client.index_exists(index_name_3) is True
     assert search_client.index_exists(index_name_4) is True
+
+
+def test_get(search_client, generic_index):
+    records = [
+        {"id": 1, "title": "Green Eggs & Ham", "notes": "why are the eggs green?"},
+        {"id": 2, "title": "The Cat in the Hat", "notes": "silly cat wears a hat"},
+        {"id": 3, "title": "One Fish, Two Fish, Red Fish, Blue Fish", "notes": "fish"},
+    ]
+
+    search_client.bulk_upsert(generic_index, records, primary_key_field="id")
+
+    assert search_client.get(generic_index, 1) == records[0]
+    assert search_client.get(generic_index, 2) == records[1]
+    assert search_client.get(generic_index, 3) == records[2]
+    assert search_client.get(generic_index, 121212121) is None
+
+
+def test_search_returns_expected_metadata(search_client, generic_index):
+
+    search_client.bulk_upsert(
+        generic_index,
+        [WINTERBORN_LEGACY, WINTER, CALL_OF_WINTER],
+        primary_key_field="id",
+    )
+
+    response = search_client.search(
+        index_name=generic_index,
+        search_query={"query": {"match_all": {}}},
+    )
+
+    # Performance metadata
+    assert isinstance(response.took_ms, int)
+    assert response.took_ms >= 0
+    assert response.timed_out is False
+    assert response.shards_failed == 0
+    assert response.total_records == 3
+
+    # Relevance metadata
+    assert isinstance(response.max_score, float)
+    assert response.total_relation == "eq"
+
+    # Score stats
+    score_stats = response.score_stats
+    for key in ("search.score_min", "search.score_max", "search.score_mean", "search.score_stdev"):
+        assert key in score_stats
+        assert score_stats[key] is not None
+
+
+def test_search_agg_overflow(search_client, generic_index):
+    # 3 records with distinct authors
+    search_client.bulk_upsert(
+        generic_index,
+        [WINTERBORN_LEGACY, WINTER, CALL_OF_WINTER],
+        primary_key_field="id",
+    )
+
+    # Aggregate on author with size=1 to force overflow
+    response = search_client.search(
+        index_name=generic_index,
+        search_query={
+            "query": {"match_all": {}},
+            "aggs": {
+                "author": {
+                    "terms": {"field": "author.keyword", "size": 1},
+                },
+            },
+        },
+    )
+
+    assert "author" in response.agg_overflow
+    assert response.agg_overflow["author"] > 0

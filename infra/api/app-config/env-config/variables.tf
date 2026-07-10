@@ -35,6 +35,7 @@ variable "mtls_domain_name" {
   description = "The domain name for the mTLS side-by-side ALB for the API"
   default     = null
 }
+
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"
@@ -173,6 +174,18 @@ variable "instance_scaling_min_capacity" {
   type        = number
 }
 
+variable "instance_scaling_cpu_target" {
+  description = "Target CPU utilization percentage for autoscaling"
+  type        = number
+  default     = 70
+}
+
+variable "instance_scaling_memory_target" {
+  description = "Target memory utilization percentage for autoscaling"
+  type        = number
+  default     = 70
+}
+
 variable "has_incident_management_service" {
   type = bool
 }
@@ -192,8 +205,86 @@ variable "database_engine_version" {
   default     = "17.5"
 }
 
+variable "database_newrelic_entity_guid" {
+  type        = string
+  description = "New Relic entity GUID for the RDS cluster, used to correlate logs with the infrastructure entity in New Relic."
+  default     = null
+}
+
+variable "database_deletion_protection" {
+  type        = bool
+  description = "Whether to enable deletion protection on the RDS cluster. When null, derives from whether the environment is grantee1 or grantee2."
+  default     = true
+}
+
 variable "secondary_domain_names" {
   type        = list(string)
   description = "A list of domain names the ALB can also use"
   default     = []
+}
+
+variable "sqs_visibility_timeout_seconds" {
+  description = "The visibility timeout for the SQS queue in seconds"
+  type        = number
+  default     = 600
+}
+
+variable "sqs_message_retention_seconds" {
+  description = "The number of seconds Amazon SQS retains a message"
+  type        = number
+  default     = 1209600
+}
+
+variable "sqs_max_receive_count" {
+  description = "The number of times a message can be received before being sent to the dead letter queue"
+  type        = number
+  default     = 3
+}
+
+variable "enable_workflow_service" {
+  description = "Enable workflow manager"
+  type        = bool
+  default     = false
+}
+
+variable "workflow_service_cpu" {
+  description = "CPU units for the workflow ECS task"
+  type        = number
+  default     = 1024
+}
+
+variable "workflow_service_memory" {
+  description = "Memory in MiB for the workflow ECS task"
+  type        = number
+  default     = 2048
+}
+
+variable "workflow_service_desired_count" {
+  description = "Workflow services counter count"
+  type        = number
+  default     = 1
+}
+
+variable "scanner_provisioned_concurrency" {
+  description = "Number of execution environments to keep warm for the ClamAV scanner Lambda via provisioned concurrency."
+  type        = number
+  default     = 0
+}
+
+variable "service_newrelic_entity_guid" {
+  type        = string
+  description = "New Relic entity GUID for the primary ALB, used to correlate logs with the infrastructure entity in New Relic."
+  default     = null
+}
+
+variable "service_newrelic_mtls_entity_guid" {
+  type        = string
+  description = "New Relic entity GUID for the mTLS ALB, used to correlate logs with the infrastructure entity in New Relic."
+  default     = null
+}
+
+variable "api_host_newrelic_entity_guid" {
+  type        = string
+  description = "New Relic entity GUID for the ECS service host, used to correlate container logs with the infrastructure entity in New Relic."
+  default     = null
 }

@@ -1,11 +1,11 @@
+import grants_shared.adapters.db as db
+from grants_shared.auth.api_jwt_auth import generate_jwt
+from grants_shared.util import datetime_util
+from grants_shared.util.local import error_if_not_local
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
-from src.auth.api_jwt_auth import generate_jwt
 from src.db.models.user_models import User, UserTokenSession
-from src.util import datetime_util
-from src.util.local import error_if_not_local
 
 
 def get_local_users(db_session: db.Session) -> list[dict]:
@@ -25,12 +25,6 @@ def get_local_users(db_session: db.Session) -> list[dict]:
         .scalars()
         .all()
     )
-
-    # This is an extra check to make certain we aren't running
-    # in any other environment. At the time of writing this (Oct 2025)
-    # we have nearly 8000 users in prod, so this would always fail.
-    if len(users) > 500:
-        raise Exception(f"Too many users ({len(users)}), this isn't local, is it?")
 
     user_dicts = []
 
@@ -70,7 +64,7 @@ def _get_user_jwt(db_session: db.Session, user: User) -> str | None:
     if user_token_session is None:
         return None
 
-    return generate_jwt(user_token_session, datetime_util.utcnow(), user.email)
+    return generate_jwt(user_token_session, user, datetime_util.utcnow(), user.email)
 
 
 def _get_user_api_key(user: User) -> str | None:

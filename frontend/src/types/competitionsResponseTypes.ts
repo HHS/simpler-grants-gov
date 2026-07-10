@@ -1,3 +1,4 @@
+import { APIResponse } from "./apiResponseTypes";
 import { FormDetail } from "./formResponseTypes";
 import {
   BaseOpportunity,
@@ -10,9 +11,21 @@ export interface CompetitionInstructions {
   file_name: string;
   updated_at: string;
 }
-export type CompetitionForms = [{ form: FormDetail; is_required: boolean }];
+export type CompetitionForms = { form: FormDetail; is_required: boolean }[];
 
 export type ApplicantTypes = "individual" | "organization";
+
+export type CompetitionCreateRequest = {
+  competition_title: string;
+  opening_date: string | null;
+  closing_date: string | null;
+  contact_info: string | null;
+  open_to_applicants: ApplicantTypes[];
+};
+
+export interface CompetitionCreateApiResponse extends APIResponse {
+  data: Competition;
+}
 
 export type Competition = {
   closing_date: string;
@@ -21,7 +34,7 @@ export type Competition = {
   competition_info: string;
   competition_instructions: CompetitionInstructions[];
   competition_title: string;
-  contact_info: null;
+  contact_info: string | null;
   is_open: boolean;
   open_to_applicants: ApplicantTypes[];
   opening_date: string;

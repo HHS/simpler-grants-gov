@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import SubscriptionForm from "src/app/[locale]/(base)/newsletter/_components/SubscriptionForm";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { useTranslations } from "next-intl";
@@ -7,8 +8,7 @@ import Image from "next/image";
 import { use } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";
-import SubscriptionForm from "src/components/newsletter/SubscriptionForm";
+import NewsletterDisclaimer from "src/components/newsletter/NewsletterDisclaimer";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -67,7 +67,7 @@ export default function Subscribe({ params }: LocalizedPageProps) {
             </Grid>
           </Grid>
         </GridContainer>
-        <SendyDisclaimer />
+        <NewsletterDisclaimer />
       </div>
     </>
   );

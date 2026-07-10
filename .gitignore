@@ -156,5 +156,5 @@ dmypy.json
 # Artilery
 frontend/tests/artillery/params.json
 
-# XSD cache for XML validation
-xsd_cache/
+# XML validation results
+api/src/services/xml_generation/xsds/validation_results.json

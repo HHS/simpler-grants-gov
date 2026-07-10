@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 # setup-env-override-file.sh
 #
 # Generate an override.env file
@@ -9,7 +9,7 @@
 #   ./setup-env-override-file.sh --recreate
 #
 
-set -o errexit -o pipefail
+set -o errexit
 
 PROGRAM_NAME=$(basename "$0")
 

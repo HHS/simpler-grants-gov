@@ -1,9 +1,9 @@
 from datetime import date
 
+import grants_shared.util.file_util as file_util
 import pytest
 from marshmallow import ValidationError
 
-import src.util.file_util as file_util
 from src.api.extracts_v1.extract_schema import (
     ExtractMetadataListResponseSchema,
     ExtractMetadataRequestSchema,
@@ -60,7 +60,7 @@ def test_response_schema_single(sample_extract_metadata, monkeypatch):
     extract_metadata = schema.dump(sample_extract_metadata)
 
     assert extract_metadata["download_path"].startswith(
-        "http://localhost:4566/local-mock-public-bucket/test/path/test_extract.csv"
+        "http://localhost:9090/local-mock-public-bucket/test/path/test_extract.csv"
     )
     assert extract_metadata["extract_metadata_id"] == sample_extract_metadata.extract_metadata_id
     assert extract_metadata["extract_type"] == "opportunities_csv"
@@ -88,12 +88,12 @@ def test_response_schema_list(sample_extract_metadata, monkeypatch):
     assert result["data"][0]["extract_metadata_id"] == sample_extract_metadata.extract_metadata_id
     assert result["data"][0]["extract_type"] == "opportunities_csv"
     assert result["data"][0]["download_path"].startswith(
-        "http://localhost:4566/local-mock-public-bucket/test/path/test_extract.csv"
+        "http://localhost:9090/local-mock-public-bucket/test/path/test_extract.csv"
     )
     assert result["data"][1]["extract_metadata_id"] == other_extract_metadata.extract_metadata_id
     assert result["data"][1]["extract_type"] == "opportunities_json"
     assert result["data"][1]["download_path"].startswith(
-        "http://localhost:4566/local-mock-public-bucket/test/path/test_extract2.xml"
+        "http://localhost:9090/local-mock-public-bucket/test/path/test_extract2.xml"
     )
 
 

@@ -37,11 +37,11 @@ The goal of this ADR is to evaluate a series of potential wiki platforms and det
 
 ## Options Considered
 
-* [Confluence](../../../decisions/adr/confluence/) - _NOT chosen_ because of limits around data access and content review
-* [Notion](../../../decisions/adr/notion/) - _NOT chosen_ because of limits on version history and content review
-* [GitHub Wiki](../../../decisions/adr/gh-wiki/) - _NOT chosen_ because of limited feature set and issues with usability
-* [GitBook](../../../decisions/adr/gitbook/) - _Chosen_ because of support for content review and GitHub syncing
-* [WikiJS](../../../decisions/adr/wiki-js/) - _NOT chosen_ because of issues with usability and requirements for ongoing maintenance
+* [Confluence](https://www.atlassian.com/software/confluence) - _NOT chosen_ because of limits around data access and content review
+* [Notion](https://www.notion.so/) - _NOT chosen_ because of limits on version history and content review
+* [GitHub Wiki](https://docs.github.com/en/communities/documenting-your-project-with-wikis) - _NOT chosen_ because of limited feature set and issues with usability
+* [GitBook](https://www.gitbook.com/) - _Chosen_ because of support for content review and GitHub syncing
+* [WikiJS](https://js.wiki/) - _NOT chosen_ because of issues with usability and requirements for ongoing maintenance
 
 ## Decision Outcome
 
@@ -96,12 +96,12 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 
 ### Confluence
 
-[Confluence](../../../decisions/adr/confluence/) is a Software as a Service (SaaS) documentation and collaboration tool offered by Atlassian that organizes content into "spaces" and offers a series of templates and components that can be used to create custom documentation for internal and external stakeholders.
+[Confluence](https://www.atlassian.com/software/confluence) is a Software as a Service (SaaS) documentation and collaboration tool offered by Atlassian that organizes content into "spaces" and offers a series of templates and components that can be used to create custom documentation for internal and external stakeholders.
 
 #### Details
 
 * **Hosting:** SaaS
-* **Pricing:** [$5.75 (standard) or $11 (premium) per user per month](../../../decisions/adr/confluence-pricing/)
+* **Pricing:** [$5.75 (standard) or $11 (premium) per user per month](https://www.atlassian.com/software/confluence/pricing)
 * **Public Access:** Supported, but limited to individual pages or entire spaces
 * **Content Review:** Partial support, limited to drafts and not enforceable
 * **Version History:** Supported by default
@@ -112,7 +112,7 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
   * Video embedding
   * Diagrams
 * **I18n:** Limited third party plugins for automating translation
-* **Web Analytics:** [Google Analytics plugin](../../../decisions/adr/confluence-ga/) available, also native analytics with premium tier
+* **Web Analytics:** [Google Analytics plugin](https://marketplace.atlassian.com/apps/1216936/google-analytics-in-confluence) available, also native analytics with premium tier
 * **Open Source Status:** Propietary
 * **External Contributions:** Only supported in public spaces (without review)
 * **Data Access:** Limited access via API
@@ -139,12 +139,12 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 
 ### Notion
 
-[Notion](../../../decisions/adr/notion/) is a Software as a Service (SaaS) documentation and collaboration tool that also allows users to add structured and semi-structured content to pages. Because Notion offers a fully-featured API for reading and managing content, it also has a robust set of community integrations that extend Notion's core functionality.
+[Notion](https://www.notion.so/) is a Software as a Service (SaaS) documentation and collaboration tool that also allows users to add structured and semi-structured content to pages. Because Notion offers a fully-featured API for reading and managing content, it also has a robust set of community integrations that extend Notion's core functionality.
 
 #### Details
 
 * **Hosting:** SaaS
-* **Pricing:** [$8 (pro) or $15(business) per user per month](../../../decisions/adr/notion-pricing/)
+* **Pricing:** [$8 (pro) or $15(business) per user per month](https://www.notion.so/pricing)
 * **Public Access:** Supported, but limited to individual pages
 * **Content Review:** Not supported
 * **Version History:** Limited support, past 30-90 days
@@ -182,7 +182,7 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 
 ### GitHub Wiki
 
-[GitHub Wiki](../../../decisions/adr/gh-wiki/) is a free feature for public repositories that allows maintainers of the repository to host documents and other content that isn't stored directly within the repository itself.
+[GitHub Wiki](https://docs.github.com/en/communities/documenting-your-project-with-wikis/about-wikis) is a free feature for public repositories that allows maintainers of the repository to host documents and other content that isn't stored directly within the repository itself.
 
 #### Details
 
@@ -218,12 +218,12 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 
 ### GitBook
 
-[GitBook](../../../decisions/adr/gitbook/) is a Software as a Service (SaaS) platform for creating and managing public documentation for a project. GitBook prioritizes version control and collaboration by offering first class support for reviewing and merging content changes. It has become a common documentation and wiki tool for many open source projects.
+[GitBook](https://www.gitbook.com/) is a Software as a Service (SaaS) platform for creating and managing public documentation for a project. GitBook prioritizes version control and collaboration by offering first class support for reviewing and merging content changes. It has become a common documentation and wiki tool for many open source projects.
 
 #### Details
 
 * **Hosting:** SaaS
-* **Pricing:** [$6.70 (plus) or $12.50 (pro) per user per month](../../../decisions/adr/gitbook-pricing/)
+* **Pricing:** [$6.70 (plus) or $12.50 (pro) per user per month](https://www.gitbook.com/pricing)
 * **Public Access:** Supported by default
 * **Content Review:** Supported by default
 * **Version History:** Supported by default
@@ -233,8 +233,8 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
   * Image embedding
   * Video embedding
   * Diagrams
-* **I18n:** Native support with [page collections and variants](../../../decisions/adr/gitbook-i18n/)
-* **Web Analytics:** [Google Analytics integration](../../../decisions/adr/gitbook-ga/) available
+* **I18n:** Native support with [page collections and variants](https://gitbook.com/docs/guides/content-organization-and-localization/localize-your-docs-with-variants-in-gitbook)
+* **Web Analytics:** [Google Analytics integration](https://www.gitbook.com/integrations/googleanalytics) available
 * **Open Source Status:** Propietary
 * **External Contributions:** Limited support, only through GitHub PRs
 * **Data Access:** Full access with GitHub sync, limited access with API
@@ -265,7 +265,7 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 
 ### Wiki.js
 
-[Wiki.js](../../../decisions/adr/wiki-js/) is an open source wiki platform that seeks to replicate many of the basic features found in SaaS offerings like Confluence or GitBook.
+[Wiki.js](https://js.wiki/) is an open source wiki platform that seeks to replicate many of the basic features found in SaaS offerings like Confluence or GitBook.
 
 #### Details
 
@@ -306,21 +306,19 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 
 ## Links
 
-* [Comms Tooling Deliverable](../../../decisions/adr/deliverable/)
-* [Confluence](../../../decisions/adr/confluence/)
-  * [Confluence Pricing](../../../decisions/adr/confluence-pricing/)
-  * [Confluence Permissions](../../../decisions/adr/confluence-permissions/)
-  * [Confluence Google Analytics](../../../decisions/adr/confluence-ga/)
-  * [Confluence Public Spaces](../../../decisions/adr/confluence-public-spaces/)
-  * [Confluence Public Pages](../../../decisions/adr/confluence-public-pages/)
-* [Notion](../../../decisions/adr/notion/)
-  * [Notion Pricing](../../../decisions/adr/notion-pricing/)
-  * [Notion Internationalization](../../../decisions/adr/notion-i18n/)
-  * [Notion Pricing](../../../decisions/adr/notion-pricing/)
-  * [Notion Internationalization](../../../decisions/adr/notion-i18n/)
-* [GitHub Wiki](../../../decisions/adr/gh-wiki/)
-* [GitBook](../../../decisions/adr/gitbook/)
-  * [GitBook Pricing](../../../decisions/adr/gitbook-pricing/)
-  * [GitBook Open Source Pricing](../../../decisions/adr/gitbook-oss/)
-  * [GitBook Internationalization](../../../decisions/adr/gitbook-i18n/)
-  * [GitBook Google Analytics](../../../decisions/adr/gitbook-ga/)
+* [Confluence](https://www.atlassian.com/software/confluence)
+  * [Confluence Pricing](https://www.atlassian.com/software/confluence/pricing)
+  * [Confluence Permissions](https://www.atlassian.com/software/confluence/resources/guides/get-started/manage-permissions#manage-global-permissions)
+  * [Confluence Google Analytics](https://marketplace.atlassian.com/apps/1216936/google-analytics-in-confluence)
+  * [Confluence Public Spaces](https://support.atlassian.com/confluence-cloud/docs/what-are-space-permissions/)
+  * [Confluence Public Pages](https://support.atlassian.com/confluence-cloud/docs/share-content-externally-with-public-links/)
+* [Notion](https://www.notion.so/)
+  * [Notion Pricing](https://www.notion.so/pricing)
+  * [Notion Internationalization](https://www.notion.com/templates/product-localization-w-notion-ai)
+  * [Notion Permissions](https://www.notion.com/help/sharing-and-permissions)
+* [GitHub Wiki](https://docs.github.com/en/communities/documenting-your-project-with-wikis/about-wikis)
+* [GitBook](https://www.gitbook.com/)
+  * [GitBook Pricing](https://www.gitbook.com/pricing)
+  * [GitBook Open Source Pricing](https://www.gitbook.com/pricing#faq-open-source)
+  * [GitBook Internationalization](https://gitbook.com/docs/guides/content-organization-and-localization/localize-your-docs-with-variants-in-gitbook)
+  * [GitBook Google Analytics](https://www.gitbook.com/integrations/googleanalytics)

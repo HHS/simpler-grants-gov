@@ -43,7 +43,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.13.5
+          terraform_version: 1.14.3
           terraform_wrapper: false
       - name: Run infra-lint-terraform
         run: |
@@ -56,10 +56,21 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.13.5
+          terraform_version: 1.14.3
           terraform_wrapper: false
       - name: Validate
         run: make infra-validate-modules
+  unit-test-terraform-modules:
+    name: Unit test Terraform modules
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.3
+          terraform_wrapper: false
+      - name: Run module unit tests
+        run: make infra-test-modules
   check-compliance-with-checkov:
     name: Check compliance with checkov
     runs-on: ubuntu-22.04
@@ -74,22 +85,38 @@ jobs:
         # There is currently no way to specify the checkov version to pin to (See https://github.com/bridgecrewio/checkov-action/issues/41)
         # so we need to pin the version of the checkov-action, which indirectly pins the checkov version.
         # In this case, checkov-action v12.2875.0 is mapped to checkov v3.2.257.
-        uses: bridgecrewio/checkov-action@v12.3034.0
+        uses: bridgecrewio/checkov-action@v12.3112.0
         with:
           directory: infra
           framework: terraform
           quiet: true # only displays failed checks
-  check-compliance-with-tfsec:
-    name: Check compliance with tfsec
+  check-compliance-with-trivy:
+    name: Check IaC compliance with Trivy
     runs-on: ubuntu-22.04
 
     permissions:
       contents: read
-      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
-      - name: Run tfsec check
-        uses: aquasecurity/tfsec-pr-commenter-action@v1.3.1
+      - name: Run Trivy IaC scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          github_token: ${{ github.token }}
+          scan-type: config
+          scan-ref: infra
+          format: json
+          output: trivy-results.json
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          trivyignores: infra/.trivyignore.yaml
+      - name: Make step summary
+        if: always()
+        run: |
+          OUTPUT=$(python3 scripts/utilities/trivy_to_markdown.py \
+            --results trivy-results.json \
+            --directory infra \
+            --env iac \
+            --scan-ref infra)
+          if [ -n "$OUTPUT" ]; then
+            echo "$OUTPUT" >> "$GITHUB_STEP_SUMMARY"
+          fi

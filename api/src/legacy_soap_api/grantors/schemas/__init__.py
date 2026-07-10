@@ -1,3 +1,7 @@
+from src.legacy_soap_api.grantors.schemas.confirm_application_delivery_schemas import (
+    ConfirmApplicationDeliveryRequest,
+    ConfirmApplicationDeliveryResponseSOAPEnvelope,
+)
 from src.legacy_soap_api.grantors.schemas.get_application_zip_schemas import (
     FileDataHandler,
     GetApplicationZipRequest,
@@ -6,13 +10,19 @@ from src.legacy_soap_api.grantors.schemas.get_application_zip_schemas import (
     GetApplicationZipResponseSOAPEnvelope,
     XOPIncludeData,
 )
-from src.legacy_soap_api.grantors.schemas.get_submission_list_expanded_schemas import (
+from src.legacy_soap_api.grantors.schemas.get_submission_list_schemas import (
     ExpandedApplicationFilter,
-    GetSubmissionListExpandedRequest,
-    GetSubmissionListExpandedResponse,
-    GetSubmissionListExpandedResponseSOAPBody,
-    GetSubmissionListExpandedResponseSOAPEnvelope,
+    GetSubmissionListRequest,
+    GetSubmissionListResponse,
     SubmissionInfo,
+    SubmissionInfoExpanded,
+)
+from src.legacy_soap_api.grantors.schemas.update_application_info_schemas import (
+    AssignAgencyTrackingNumberResult,
+    SaveAgencyNotesResult,
+    UpdateApplicationInfoRequest,
+    UpdateApplicationInfoResponse,
+    UpdateApplicationInfoResponseSOAPEnvelope,
 )
 
 __all__ = [
@@ -22,10 +32,16 @@ __all__ = [
     "FileDataHandler",
     "XOPIncludeData",
     "GetApplicationZipRequest",
-    "GetSubmissionListExpandedRequest",
-    "GetSubmissionListExpandedResponse",
-    "GetSubmissionListExpandedResponseSOAPEnvelope",
     "ExpandedApplicationFilter",
-    "GetSubmissionListExpandedResponseSOAPBody",
     "SubmissionInfo",
+    "UpdateApplicationInfoResponse",
+    "UpdateApplicationInfoResponseSOAPEnvelope",
+    "UpdateApplicationInfoRequest",
+    "AssignAgencyTrackingNumberResult",
+    "SaveAgencyNotesResult",
+    "ConfirmApplicationDeliveryResponseSOAPEnvelope",
+    "ConfirmApplicationDeliveryRequest",
+    "SubmissionInfoExpanded",
+    "GetSubmissionListResponse",
+    "GetSubmissionListRequest",
 ]

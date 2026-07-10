@@ -1,7 +1,9 @@
 import logging
 from uuid import UUID
 
-from src.adapters import db, search
+from grants_shared.adapters import db
+
+from src.adapters import search
 from src.db.models.user_models import UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 

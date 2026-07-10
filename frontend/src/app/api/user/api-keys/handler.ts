@@ -22,7 +22,6 @@ export const createApiKeyHandler = async (request: Request) => {
     }
 
     const response = await handleCreateApiKey(
-      session.token,
       session.user_id,
       apiKeyBody.key_name,
     );

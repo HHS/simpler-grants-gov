@@ -1,26 +1,32 @@
 module "staging_config" {
-  source                          = "./env-config"
-  project_name                    = local.project_name
-  app_name                        = local.app_name
-  default_region                  = module.project_config.default_region
-  environment                     = "staging"
-  network_name                    = "staging"
-  domain_name                     = "api.staging.simpler.grants.gov"
-  secondary_domain_names          = ["alb.staging.simpler.grants.gov"]
-  s3_cdn_domain_name              = "files.staging.simpler.grants.gov"
-  mtls_domain_name                = "soap.staging.simpler.grants.gov"
-  enable_https                    = true
-  has_database                    = local.has_database
-  database_enable_http_endpoint   = true
-  has_incident_management_service = local.has_incident_management_service
-  enable_identity_provider        = local.enable_identity_provider
-  enable_notifications            = local.enable_notifications
+  source                            = "./env-config"
+  project_name                      = local.project_name
+  app_name                          = local.app_name
+  default_region                    = module.project_config.default_region
+  environment                       = "staging"
+  network_name                      = "staging"
+  domain_name                       = "api.staging.simpler.grants.gov"
+  secondary_domain_names            = ["alb.staging.simpler.grants.gov"]
+  s3_cdn_domain_name                = "files.staging.simpler.grants.gov"
+  mtls_domain_name                  = "soap.staging.simpler.grants.gov"
+  enable_https                      = true
+  has_database                      = local.has_database
+  database_enable_http_endpoint     = true
+  database_engine_version           = "17.7"
+  database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwtMjA3MTAxMDcwODY2NTUyNTU"
+  has_incident_management_service   = local.has_incident_management_service
+  enable_identity_provider          = local.enable_identity_provider
+  enable_notifications              = local.enable_notifications
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwzMDI2MDE0OTk3ODY3NDMwMjA3"
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMzgzNjIwODA5MTQ5MzcxNTc5OA"
+  api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058OTc2Mzk2OTQ1"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1
   # instance_desired_instance_count and instance_scaling_min_capacity are scaled for the average CPU and Memory
   # seen over 12 months, as of November 2024 exlucing an outlier range around February 2024.
   # With a minimum of 2, as a general best pratice.
+  instance_memory                 = 4096
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
   # instance_scaling_max_capacity is 2x the instance_scaling_min_capacity
@@ -43,24 +49,30 @@ module "staging_config" {
   search_engine_version = "OpenSearch_2.15"
 
   service_override_extra_environment_variables = {
-    # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT   = 1
-    ENABLE_APPLY_ENDPOINTS = 1
-    ENABLE_SOAP_API        = 1
-
-    # CommonGrants Protocol
-    ENABLE_COMMON_GRANTS_ENDPOINTS = 1
+    ENABLE_WORKFLOW_ENDPOINTS             = 1
+    ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
+    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
+    ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
 
     # Email notification
-    RESET_EMAILS_WITHOUT_SENDING = "false"
+    RESET_EMAILS_WITHOUT_SENDING               = "false"
+    ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation - Staging overrides
     FRONTEND_URL             = "https://staging.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
+
+    # Workflow
+    WORKFLOW_SERVICE_INTERNAL_USER_ID = "903bf2e6-b213-4744-9f95-66ccfd98a819"
+
+    # Job lock — only enabled in dev/staging while we validate it
+    ENABLE_JOB_LOCK = "true"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
-  # enable_command_execution = true
+  enable_command_execution = true
+
+  enable_workflow_service = true
 }

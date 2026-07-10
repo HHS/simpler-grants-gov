@@ -6,6 +6,8 @@ from uuid import uuid4
 
 from common_grants_sdk.schemas.pydantic import (
     ArrayOperator,
+    CustomFieldType,
+    DefaultFilter,
     Money,
     MoneyRange,
     MoneyRangeFilter,
@@ -19,16 +21,28 @@ from common_grants_sdk.schemas.pydantic import (
 )
 from freezegun import freeze_time
 
-from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
+from src.api.common_grants.schemas.marshmallow.schemas import OpportunityCustomFields
+from src.api.common_grants.schemas.pydantic.custom_fields import (
+    AgencyField,
+    AttachmentsField,
+    CostSharingField,
+    FiscalYearField,
+    LegacySerialIdField,
+)
+from src.constants.lookup_constants import ApplicantType, CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
+    APPLICANT_TYPE_FROM_CG,
+    build_custom_filters,
     build_filter_info,
     build_money_range_filter,
+    populate_custom_fields,
     transform_opportunity_to_cg,
     transform_search_request_from_cg,
     transform_search_result_to_cg,
     transform_sorting_from_cg,
     transform_status_from_cg,
     transform_status_to_cg,
+    validate_custom_field,
     validate_url,
 )
 
@@ -57,6 +71,27 @@ def _legacy_validate_url(value: str | None) -> str | None:
     return None
 
 
+DEFAULT_MOCK_OPP_FIELDS = {
+    "legacy_opportunity_id": 67890,
+    "opportunity_number": "2024-010",
+    "category": "Mandatory",
+    "agency_code": "A2345",
+    "agency_name": "Testing Agency",
+    "top_level_agency_name": "Testing top level agency",
+    "top_level_agency_code": "A",
+    "opportunity_assistance_listings": [
+        type(
+            "MockAssistanceListing",
+            (),
+            {
+                "assistance_listing_number": "10.557",
+                "program_title": "Special Supplemental Nutrition Program",
+            },
+        )()
+    ],
+}
+
+
 class TestTransformation:
     """Test the transformation functions."""
 
@@ -71,6 +106,7 @@ class TestTransformation:
                 self.opportunity_status = OpportunityStatus.POSTED
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
                 self.updated_at = datetime(2024, 1, 2, 12, 0, 0)  # Changed from date to datetime
+                vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -86,6 +122,12 @@ class TestTransformation:
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
                                 "additional_info_url": "https://example.com/opportunity",
+                                "additional_info_url_description": "Additional opportunity information",
+                                "agency_contact_description": "Contact the grants office for questions",
+                                "agency_email_address": "grants@test-agency.gov",
+                                "agency_email_address_description": "Grants Office Email",
+                                "fiscal_year": 2024,
+                                "is_cost_sharing": False,
                                 "created_at": datetime(2024, 1, 3, 12, 0, 0),
                                 "updated_at": datetime(2024, 1, 4, 12, 0, 0),
                             },
@@ -93,11 +135,27 @@ class TestTransformation:
                     },
                 )()
                 self.summary = self.current_opportunity_summary.opportunity_summary
+                self.opportunity_attachments = [
+                    type(
+                        "MockAttachment",
+                        (),
+                        {
+                            "download_path": "https://example.com/opportunity",
+                            "file_name": "nofo.pdf",
+                            "file_description": "Notice of Funding Opportunity",
+                            "file_size_bytes": 204800,
+                            "mime_type": "application/pdf",
+                            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+                        },
+                    )()
+                ]
 
         opportunity = MockOpportunity()
 
         result = transform_opportunity_to_cg(opportunity)
 
+        assert result is not None
         assert result.id == opportunity.opportunity_id
         assert result.title == "Test Opportunity"
         assert result.description == "Test description"
@@ -125,6 +183,63 @@ class TestTransformation:
 
         # Check source URL
         assert str(result.source) == "https://example.com/opportunity"
+
+        # Check custom fields
+        assert result.custom_fields is not None
+
+        assert "legacySerialId" in result.custom_fields
+        assert result.custom_fields["legacySerialId"].value == opportunity.legacy_opportunity_id
+
+        assert "federalOpportunityNumber" in result.custom_fields
+        assert result.custom_fields["federalOpportunityNumber"].value == "2024-010"
+
+        assert "federalFundingSource" in result.custom_fields
+        assert result.custom_fields["federalFundingSource"].value == "Mandatory"
+
+        assert "agency" in result.custom_fields
+        assert result.custom_fields["agency"].value.code == "A2345"
+        assert result.custom_fields["agency"].value.name == "Testing Agency"
+        assert result.custom_fields["agency"].value.parentName == "Testing top level agency"
+        assert result.custom_fields["agency"].value.parentCode == "A"
+
+        assert "assistanceListings" in result.custom_fields
+        assert len(result.custom_fields["assistanceListings"].value) == 1
+        assert result.custom_fields["assistanceListings"].value[0].identifier == "10.557"
+        assert (
+            result.custom_fields["assistanceListings"].value[0].programTitle
+            == "Special Supplemental Nutrition Program"
+        )
+
+        assert "contactInfo" in result.custom_fields
+        assert (
+            result.custom_fields["contactInfo"].value.description
+            == "Contact the grants office for questions"
+        )
+        assert result.custom_fields["contactInfo"].value.email == "grants@test-agency.gov"
+        assert result.custom_fields["contactInfo"].value.name is None
+        assert result.custom_fields["contactInfo"].value.phone is None
+
+        assert "additionalInfo" in result.custom_fields
+        assert result.custom_fields["additionalInfo"].value.url == "https://example.com/opportunity"
+        assert (
+            result.custom_fields["additionalInfo"].value.description
+            == "Additional opportunity information"
+        )
+
+        assert "fiscalYear" in result.custom_fields
+        assert result.custom_fields["fiscalYear"].value == 2024
+
+        assert "costSharing" in result.custom_fields
+        assert result.custom_fields["costSharing"].value.isRequired is False
+
+        assert "attachments" in result.custom_fields
+        assert len(result.custom_fields["attachments"].value) == 1
+        attachment = result.custom_fields["attachments"].value[0]
+        assert attachment.downloadUrl == "https://example.com/opportunity"
+        assert attachment.name == "nofo.pdf"
+        assert attachment.description == "Notice of Funding Opportunity"
+        assert attachment.sizeInBytes == 204800
+        assert attachment.mimeType == "application/pdf"
 
     def test_url_validation_and_fixing(self):
         """Test that URLs are properly validated and fixed."""
@@ -166,6 +281,22 @@ class TestTransformation:
                     self.updated_at = datetime(
                         2024, 1, 1, 12, 0, 0
                     )  # Changed from date to datetime
+                    vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
+                    self.opportunity_attachments = [
+                        type(
+                            "MockAttachment",
+                            (),
+                            {
+                                "download_path": "https://example.com/opportunity",
+                                "file_name": "nofo.pdf",
+                                "file_description": "Notice of Funding Opportunity",
+                                "file_size_bytes": 102400,
+                                "mime_type": "application/pdf",
+                                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),
+                            },
+                        )()
+                    ]
                     self.current_opportunity_summary = type(
                         "MockSummary",
                         (),
@@ -174,13 +305,19 @@ class TestTransformation:
                                 "MockOppSummary",
                                 (),
                                 {
-                                    "summary_description": "Test",
-                                    "post_date": None,
-                                    "close_date": None,
-                                    "estimated_total_program_funding": None,
-                                    "award_ceiling": None,
-                                    "award_floor": None,
-                                    "additional_info_url": None,
+                                    "summary_description": "Test summary description",
+                                    "post_date": date(2024, 1, 1),
+                                    "close_date": date(2024, 12, 31),
+                                    "estimated_total_program_funding": 500000,
+                                    "award_ceiling": 100000,
+                                    "award_floor": 5000,
+                                    "additional_info_url": "https://example.com/opportunity",
+                                    "additional_info_url_description": "Grant program details",
+                                    "agency_contact_description": "Contact the program office",
+                                    "agency_email_address": "example@test.gov",
+                                    "agency_email_address_description": "Program Office Email",
+                                    "fiscal_year": 2024,
+                                    "is_cost_sharing": False,
                                     "created_at": datetime(2024, 1, 1, 12, 0, 0),
                                     "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                                 },
@@ -191,6 +328,7 @@ class TestTransformation:
 
             opportunity = MockOpportunity(db_status)
             result = transform_opportunity_to_cg(opportunity)
+            assert result is not None
             assert result.status.value == expected_status
 
     @freeze_time("2024-01-03 12:00:00")
@@ -208,6 +346,22 @@ class TestTransformation:
                 self.updated_at = datetime(
                     2024, 1, 1, 12, 0, 0
                 )  # Provide a default datetime instead of None
+                vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
+                self.opportunity_attachments = [
+                    type(
+                        "MockAttachment",
+                        (),
+                        {
+                            "download_path": "https://example.com/opportunity",
+                            "file_name": "synopsis.pdf",
+                            "file_description": "Opportunity Synopsis",
+                            "file_size_bytes": 51200,
+                            "mime_type": "application/pdf",
+                            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                            "updated_at": datetime(2024, 1, 1, 12, 0, 0),
+                        },
+                    )()
+                ]
                 self.current_opportunity_summary = None
                 self.summary = None
 
@@ -215,6 +369,7 @@ class TestTransformation:
         result = transform_opportunity_to_cg(opportunity)
 
         # The transformation should now succeed even with None summary
+        assert result is not None
         assert result.id == opportunity.opportunity_id
         assert result.title == "Untitled Opportunity"
         assert result.description == "No description available"
@@ -242,6 +397,22 @@ class TestTransformation:
                 self.opportunity_status = type("MockStatus", (), {"value": "posted"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
                 self.updated_at = datetime(2024, 1, 2, 12, 0, 0)  # Changed from date to datetime
+                vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
+                self.opportunity_attachments = [
+                    type(
+                        "MockAttachment",
+                        (),
+                        {
+                            "download_path": "https://example.com/opportunity",
+                            "file_name": "solicitation.pdf",
+                            "file_description": "Grant Solicitation",
+                            "file_size_bytes": 307200,
+                            "mime_type": "application/pdf",
+                            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+                        },
+                    )()
+                ]
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -257,6 +428,12 @@ class TestTransformation:
                                 "award_ceiling": None,
                                 "award_floor": 10000,
                                 "additional_info_url": None,
+                                "additional_info_url_description": None,
+                                "agency_contact_description": "Contact the NSF program office",
+                                "agency_email_address": "example@test.gov",
+                                "agency_email_address_description": "NSF Program Office",
+                                "fiscal_year": 2024,
+                                "is_cost_sharing": True,
                                 "created_at": datetime(2024, 1, 3, 12, 0, 0),
                                 "updated_at": datetime(2024, 1, 4, 12, 0, 0),
                             },
@@ -268,6 +445,7 @@ class TestTransformation:
         opportunity = MockOpportunity()
         result = transform_opportunity_to_cg(opportunity)
 
+        assert result is not None
         assert result.description == "No description available"
         assert result.key_dates is not None
         assert result.key_dates.close_date is not None
@@ -285,6 +463,22 @@ class TestTransformation:
                 self.opportunity_status = type("MockStatus", (), {"value": "unknown_status"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
                 self.updated_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
+                vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
+                self.opportunity_attachments = [
+                    type(
+                        "MockAttachment",
+                        (),
+                        {
+                            "download_path": "https://example.com/opportunity",
+                            "file_name": "announcement.pdf",
+                            "file_description": "Grant Announcement",
+                            "file_size_bytes": 153600,
+                            "mime_type": "application/pdf",
+                            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                            "updated_at": datetime(2024, 1, 1, 12, 0, 0),
+                        },
+                    )()
+                ]
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -293,13 +487,19 @@ class TestTransformation:
                             "MockOppSummary",
                             (),
                             {
-                                "summary_description": "Test",
-                                "post_date": None,
-                                "close_date": None,
-                                "estimated_total_program_funding": None,
-                                "award_ceiling": None,
-                                "award_floor": None,
-                                "additional_info_url": None,
+                                "summary_description": "Test summary for unknown status",
+                                "post_date": date(2024, 3, 1),
+                                "close_date": date(2024, 9, 30),
+                                "estimated_total_program_funding": 750000,
+                                "award_ceiling": 250000,
+                                "award_floor": 25000,
+                                "additional_info_url": "https://example.com/opportunity",
+                                "additional_info_url_description": "Example",
+                                "agency_contact_description": "Example Program Office",
+                                "agency_email_address": "test@example.gov",
+                                "agency_email_address_description": "Example Test Email",
+                                "fiscal_year": 2024,
+                                "is_cost_sharing": False,
                                 "created_at": datetime(2024, 1, 1, 12, 0, 0),
                                 "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                             },
@@ -311,6 +511,7 @@ class TestTransformation:
         opportunity = MockOpportunity()
         result = transform_opportunity_to_cg(opportunity)
 
+        assert result is not None
         assert result.status.value == OppStatusOptions.FORECASTED
 
     def test_transformation_with_url_fixing(self):
@@ -323,6 +524,22 @@ class TestTransformation:
                 self.opportunity_status = type("MockStatus", (), {"value": "posted"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)
                 self.updated_at = datetime(2024, 1, 2, 12, 0, 0)
+                vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
+                self.opportunity_attachments = [
+                    type(
+                        "MockAttachment",
+                        (),
+                        {
+                            "download_path": "https://example.com/opportunity",
+                            "file_name": "solicitation.pdf",
+                            "file_description": "Testing Research Solicitation",
+                            "file_size_bytes": 409600,
+                            "mime_type": "application/pdf",
+                            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+                        },
+                    )()
+                ]
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -338,6 +555,12 @@ class TestTransformation:
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
                                 "additional_info_url": "sam.gov",  # URL without protocol
+                                "additional_info_url_description": "SAM.gov Listing",
+                                "agency_contact_description": "Testing contact description",
+                                "agency_email_address": "example@test.gov",
+                                "agency_email_address_description": "Test Example Email",
+                                "fiscal_year": 2024,
+                                "is_cost_sharing": False,
                                 "created_at": datetime(2024, 1, 1, 12, 0, 0),
                                 "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                             },
@@ -350,6 +573,7 @@ class TestTransformation:
         result = transform_opportunity_to_cg(opportunity)
 
         # Check that the URL was not fixed (current implementation returns None for invalid URLs)
+        assert result is not None
         assert result.source is None
 
     def test_transform_status_to_cg(self):
@@ -494,6 +718,184 @@ class TestTransformation:
         assert old_result is not None, "_legacy_validate_url() should accept NASA URL"
         assert new_result is None, "validate_url() should reject NASA URL"
 
+    def test_validate_url_rejects_urls_that_marshmallow_url_field_rejects(self):
+        """validate_url() must also reject URLs that pass Pydantic's HttpUrl but fail
+        marshmallow's URL field. The CG response is loaded through marshmallow on the
+        way out; a URL that pydantic accepts but marshmallow rejects 500s the entire
+        response (one bad record kills the batch).
+
+        Concrete divergence: comma-separated URLs — agencies sometimes paste multiple
+        URLs into one field. Pydantic's HttpUrl mangles 'https://a.gov,https://b.gov'
+        into a string ('https://a.gov,https//b.gov') it considers valid; marshmallow's
+        fields.URL rejects that string with "Not a valid URL." — producing the
+        ValidationError({'items': {N: {'customFields': {'additionalInfo': {'value':
+        {'url': [..., message='Not a valid URL.']}}}}}}) we observed in prod.
+        """
+        comma_url = "https://www.grants.gov,https://other.example"
+        assert validate_url(comma_url) is None, (
+            "validate_url() must reject URLs that fail marshmallow's URL field, "
+            "otherwise they reach the CG response load and 500 the whole batch"
+        )
+
+        no_tld_url = "http://example"
+        assert validate_url(no_tld_url) is None, (
+            "validate_url() must reject scheme-only-host URLs that pydantic accepts "
+            "but marshmallow rejects"
+        )
+
+    def test_search_response_marshmallow_load_does_not_500_on_problematic_url(self):
+        """End-to-end recreation of the prod 500.
+
+        Builds an opportunity whose summary.additional_info_url is the comma-separated
+        form that triggers the prod 500. Runs the same pipeline the route uses:
+            transform_search_result_to_cg -> build OpportunitiesSearchResponse pydantic
+            -> model_dump(by_alias=True, mode='json') -> response marshmallow load.
+        Before the fix this raises marshmallow.ValidationError on
+        items[0].customFields.additionalInfo.value.url. After the fix the record loads
+        cleanly with additionalInfo absent (because validate_url returned None).
+        """
+        from http import HTTPStatus
+
+        from common_grants_sdk.schemas.pydantic import (
+            OpportunitiesSearchResponse,
+            PaginatedResultsInfo,
+            SortedResultsInfo,
+        )
+
+        from src.api.common_grants.schemas.marshmallow.schemas import (
+            OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
+        )
+
+        problematic_url = "https://www.grants.gov,https://other.example"
+        opp_data = {
+            "opportunity_id": uuid4(),
+            "opportunity_title": "Test Opportunity",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "Test description",
+                "post_date": date(2024, 1, 1),
+                "close_date": date(2024, 12, 31),
+                "additional_info_url": problematic_url,
+                "additional_info_url_description": "Multiple links",
+                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            },
+        }
+
+        cg_opportunity = transform_search_result_to_cg(opp_data)
+        assert cg_opportunity is not None, "transform itself must not drop the record"
+
+        response = OpportunitiesSearchResponse(
+            status=HTTPStatus.OK,
+            message="ok",
+            items=[cg_opportunity],
+            pagination_info=PaginatedResultsInfo(page=1, page_size=1, totalItems=1, totalPages=1),
+            sort_info=SortedResultsInfo(
+                sort_by=OppSortBy.LAST_MODIFIED_AT.value,
+                sort_order="desc",
+                errors=[],
+            ),
+            filter_info=build_filter_info(None),
+        )
+        response_json = response.model_dump(by_alias=True, mode="json")
+
+        # This is the line that raises marshmallow.ValidationError in prod.
+        validated = OpportunitiesSearchResponseSchema().load(response_json)
+
+        assert len(validated["items"]) == 1
+        # Once validate_url filters the bad URL, additionalInfo is absent; that's the
+        # contract — invalid URLs are dropped, not propagated.
+        custom_fields = validated["items"][0].get("customFields") or {}
+        assert custom_fields.get("additionalInfo") is None, (
+            "additionalInfo must be omitted when its url fails validation, not "
+            "passed through with an invalid URL"
+        )
+
+    def test_attachment_download_url_dual_validates(self):
+        """Sibling of the additional-info-url path: AttachmentValue.downloadUrl in
+        the CG response is loaded through marshmallow's fields.URL on the way out;
+        the field validator on the pydantic model must reject the same divergent
+        strings (comma-URLs, scheme-only-host) that validate_url rejects, otherwise
+        an attachment with a malformed download_path 500s the whole batch in the same
+        way an additional_info_url did.
+        """
+        from src.api.common_grants.schemas.pydantic.custom_fields import AttachmentValue
+
+        good_attachment = {
+            "downloadUrl": "https://example.com/file.pdf",
+            "name": "ok.pdf",
+            "sizeInBytes": 1,
+            "mimeType": "application/pdf",
+            "createdAt": datetime(2024, 1, 1, 12, 0, 0),
+            "lastModifiedAt": datetime(2024, 1, 2, 12, 0, 0),
+        }
+        validated = AttachmentValue.model_validate(good_attachment)
+        assert validated.downloadUrl == "https://example.com/file.pdf"
+
+        for divergent in ("https://www.grants.gov,https://other.example", "http://example"):
+            bad_attachment = good_attachment | {"downloadUrl": divergent}
+            validated = AttachmentValue.model_validate(bad_attachment)
+            assert validated.downloadUrl is None, (
+                f"AttachmentValue.downloadUrl must drop {divergent!r}; pydantic accepts it "
+                "but marshmallow's fields.URL — which loads the response — rejects it"
+            )
+
+    def test_dropped_url_log_includes_field_path_and_opportunity_id(self, caplog):
+        """When a URL is dropped during transformation, the WARNING log must carry
+        enough context for an operator to answer 'why is this field missing for
+        opportunity X?' That means: which field path was dropped (so the op can
+        tell whether `source`, `customFields.additionalInfo.url`, or an
+        attachment's `downloadUrl` is missing) and which opportunity_id owns it.
+        Both validate_url callsites in transformation.py thread these through.
+        """
+        import logging
+
+        caplog.set_level(logging.WARNING)
+
+        opp_id = uuid4()
+        opp_data = {
+            "opportunity_id": opp_id,
+            "opportunity_title": "Test",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "x",
+                "additional_info_url": "https://www.grants.gov,https://b.gov",  # dual-validate fails
+                "additional_info_url_description": "two links",
+                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            },
+            "opportunity_attachments": [
+                {
+                    "download_path": "http://example",  # dual-validate fails
+                    "file_name": "x.pdf",
+                    "file_size_bytes": 1,
+                    "mime_type": "application/pdf",
+                    "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                    "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+                },
+            ],
+        }
+
+        result = transform_search_result_to_cg(opp_data)
+        assert result is not None
+
+        drop_records = [r for r in caplog.records if "Dropping URL field" in r.message]
+        # Three drops: source, customFields.additionalInfo.url, attachments[].downloadUrl
+        # (additional_info_url is consumed by both `source` and the additionalInfo custom field).
+        fields_dropped = {getattr(r, "field", None) for r in drop_records}
+        assert "source" in fields_dropped
+        assert "customFields.additionalInfo.url" in fields_dropped
+        assert "customFields.attachments[].downloadUrl" in fields_dropped
+
+        # opportunity_id is on every drop record so an operator can correlate.
+        for r in drop_records:
+            assert getattr(r, "opportunity_id", None) == opp_id
+            assert r.levelname == "WARNING"
+
     def test_transform_search_result_to_cg_with_nasa_url_bug(self):
         """Test that transformation works correctly with NASA URL that Pydantic rejects.
 
@@ -634,8 +1036,9 @@ class TestTransformation:
 
         search_query = "test query"
 
-        result = transform_search_request_from_cg(filters, sorting, pagination, search_query)
+        result, _ = transform_search_request_from_cg(filters, sorting, pagination, search_query)
 
+        assert result is not None
         # Check pagination
         assert result["pagination"]["page_offset"] == 1
         assert result["pagination"]["page_size"] == 20
@@ -662,8 +1065,9 @@ class TestTransformation:
         sorting = OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT, sort_order="desc")
         pagination = PaginatedBodyParams(page=1, page_size=10)
 
-        result = transform_search_request_from_cg(filters, sorting, pagination, None)
+        result, _ = transform_search_request_from_cg(filters, sorting, pagination, None)
 
+        assert result is not None
         # Check pagination
         assert result["pagination"]["page_offset"] == 1
         assert result["pagination"]["page_size"] == 10
@@ -691,17 +1095,17 @@ class TestTransformation:
         # Verify the URL was rejected
         assert result is None
 
-        # Verify the log was captured
+        # Verify the log was captured. The URL is in extra["url"] and the log
+        # message itself is a fixed string.
         assert any(
-            record.levelname == "INFO"
-            and "URL validation failed for:" in record.message
-            and invalid_url in record.message
+            record.levelname == "WARNING"
+            and "Dropping URL field" in record.message
+            and getattr(record, "url", None) == invalid_url
             for record in caplog.records
         )
 
-        # Verify the extra data is present in the log record
         log_record = next(
-            (record for record in caplog.records if "URL validation failed for:" in record.message),
+            (record for record in caplog.records if "Dropping URL field" in record.message),
             None,
         )
         assert log_record is not None
@@ -754,8 +1158,9 @@ class TestTransformation:
         """Test that transformation with invalid URL logs error but still succeeds."""
         import logging
 
-        # Set up logging to capture info level logs
-        caplog.set_level(logging.INFO)
+        # WARNING because dropping a field from the consumer-facing response is
+        # a data-suppression event, not a routine validation observation.
+        caplog.set_level(logging.WARNING)
 
         # Create opportunity data with an invalid URL
         invalid_url = "https://example.com/path/{invalid}"
@@ -784,10 +1189,453 @@ class TestTransformation:
         assert result.title == "Test Opportunity"
         assert result.source is None  # URL should be None due to validation failure
 
-        # Verify URL validation error was logged
-        assert any(
-            record.levelname == "INFO"
-            and "URL validation failed for:" in record.message
-            and invalid_url in record.message
-            for record in caplog.records
+        # Verify URL drop was logged with field + opportunity_id context so an
+        # operator can answer "why is `source` missing for opportunity X?"
+        log_record = next(
+            (r for r in caplog.records if "Dropping URL field" in r.message),
+            None,
         )
+        assert log_record is not None
+        assert log_record.levelname == "WARNING"
+        assert getattr(log_record, "url", None) == invalid_url
+        assert getattr(log_record, "field", None) == "source"
+        assert getattr(log_record, "opportunity_id", None) == opp_data["opportunity_id"]
+
+
+class TestPopulateCustomFields:
+    """Tests for the populate_custom_fields function."""
+
+    BASE_OPP_DATA = {
+        "legacy_opportunity_id": 99001,
+        "opportunity_number": "HHS-2024-001",
+        "category": "Discretionary",
+        "agency_code": "HHS",
+        "agency_name": "Dept of Health and Human Services",
+        "top_level_agency_name": "Health and Human Services",
+        "top_level_agency_code": "HHS",
+        "opportunity_assistance_listings": [
+            {"assistance_listing_number": "93.001", "program_title": "Health Research"},
+        ],
+        "opportunity_attachments": [
+            {
+                "download_path": "https://example.com/nofo.pdf",
+                "file_name": "nofo.pdf",
+                "file_description": "Notice of Funding Opportunity",
+                "file_size_bytes": 102400,
+                "mime_type": "application/pdf",
+                "created_at": "2024-01-01T12:00:00",
+                "updated_at": "2024-01-02T12:00:00",
+            }
+        ],
+        "summary": {
+            "agency_contact_description": "Contact the grants office",
+            "agency_email_address": "grants@hhs.gov",
+            "agency_email_address_description": "Grants Office Email",
+            "additional_info_url": "https://hhs.gov/grants",
+            "additional_info_url_description": "More info",
+            "fiscal_year": 2024,
+            "is_cost_sharing": False,
+        },
+    }
+
+    def test_all_fields_populated(self):
+        """Test that populate_custom_fields correctly maps all fields when fully populated."""
+        result = populate_custom_fields(self.BASE_OPP_DATA)
+
+        assert result is not None
+
+        assert result["legacySerialId"].field_type == CustomFieldType.INTEGER
+        assert result["legacySerialId"].value == 99001
+
+        assert result["federalOpportunityNumber"].field_type == CustomFieldType.STRING
+        assert result["federalOpportunityNumber"].value == "HHS-2024-001"
+
+        assert result["federalFundingSource"].field_type == CustomFieldType.STRING
+        assert result["federalFundingSource"].value == "Discretionary"
+
+        assert result["agency"].field_type == CustomFieldType.OBJECT
+        assert result["agency"].value.code == "HHS"
+        assert result["agency"].value.name == "Dept of Health and Human Services"
+        assert result["agency"].value.parentName == "Health and Human Services"
+        assert result["agency"].value.parentCode == "HHS"
+
+        assert result["assistanceListings"].field_type == CustomFieldType.ARRAY
+        assert len(result["assistanceListings"].value) == 1
+        assert result["assistanceListings"].value[0].identifier == "93.001"
+        assert result["assistanceListings"].value[0].programTitle == "Health Research"
+
+        assert result["contactInfo"].field_type == CustomFieldType.OBJECT
+        assert result["contactInfo"].value.description == "Contact the grants office"
+        assert result["contactInfo"].value.email == "grants@hhs.gov"
+        assert result["contactInfo"].value.name is None
+        assert result["contactInfo"].value.phone is None
+
+        assert result["additionalInfo"].field_type == CustomFieldType.OBJECT
+        assert result["additionalInfo"].value.url == "https://hhs.gov/grants"
+        assert result["additionalInfo"].value.description == "More info"
+
+        assert result["fiscalYear"].field_type == CustomFieldType.INTEGER
+        assert result["fiscalYear"].value == 2024
+
+        assert result["costSharing"].field_type == CustomFieldType.OBJECT
+        assert result["costSharing"].value.isRequired is False
+
+        assert result["attachments"].field_type == CustomFieldType.ARRAY
+        assert len(result["attachments"].value) == 1
+        attachment = result["attachments"].value[0]
+        assert attachment.downloadUrl == "https://example.com/nofo.pdf"
+        assert attachment.name == "nofo.pdf"
+        assert attachment.description == "Notice of Funding Opportunity"
+        assert attachment.sizeInBytes == 102400
+        assert attachment.mimeType == "application/pdf"
+
+    def test_missing_optional_fields(self):
+        """Test that None and missing values are handled gracefully and produce valid schema output."""
+        opp_data = {
+            "legacy_opportunity_id": None,
+            "opportunity_number": None,
+            "category": None,
+            "agency_code": None,
+            "opportunity_assistance_listings": [],
+            "opportunity_attachments": [],
+            "summary": None,
+        }
+
+        result = populate_custom_fields(opp_data)
+
+        # All fields are absent/None so populate_custom_fields should return None
+        assert result is None
+
+        # An empty custom fields dict should pass Marshmallow schema validation without errors
+        schema = OpportunityCustomFields()
+        errors = schema.validate({})
+        assert errors == {}
+
+    def test_malformed_data_types_are_omitted(self):
+        """Test that fields with invalid types are omitted from the result by Pydantic validation."""
+        opp_data = {
+            **self.BASE_OPP_DATA,
+            "legacy_opportunity_id": "not-an-integer",
+            "summary": {
+                **self.BASE_OPP_DATA["summary"],
+                "fiscal_year": "not-a-year",
+            },
+        }
+
+        result = populate_custom_fields(opp_data)
+
+        # Pydantic rejects invalid types, so the invalid fields are absent from the result
+        assert result is not None
+        assert "legacySerialId" not in result
+        assert "fiscalYear" not in result
+
+    def test_attachment_missing_required_fields_is_omitted(self):
+        """Test that an attachment missing required fields is excluded from the result.
+
+        When all attachments are invalid, the entire attachments field is omitted.
+        """
+        opp_data = {
+            **self.BASE_OPP_DATA,
+            "opportunity_attachments": [
+                {
+                    "download_path": "https://example.com/nofo.pdf",
+                    # file_name (name) is intentionally missing
+                    "file_size_bytes": 102400,
+                    "mime_type": "application/pdf",
+                    "created_at": "2024-01-01T12:00:00",
+                    "updated_at": "2024-01-02T12:00:00",
+                }
+            ],
+        }
+
+        result = populate_custom_fields(opp_data)
+
+        # Other valid fields are still present; the attachments field is omitted since no valid attachments remain
+        assert result is not None
+        assert "attachments" not in result
+
+    def test_mixed_valid_and_invalid_attachments_only_valid_included(self):
+        """Test that only valid attachments are included when some attachments fail validation."""
+        opp_data = {
+            **self.BASE_OPP_DATA,
+            "opportunity_attachments": [
+                {
+                    "download_path": "https://example.com/nofo.pdf",
+                    "file_name": "nofo.pdf",
+                    "file_description": "Notice of Funding Opportunity",
+                    "file_size_bytes": 102400,
+                    "mime_type": "application/pdf",
+                    "created_at": "2024-01-01T12:00:00",
+                    "updated_at": "2024-01-02T12:00:00",
+                },
+                {
+                    "download_path": "https://example.com/invalid.pdf",
+                    # file_name (name) is intentionally missing
+                    "file_size_bytes": 5000,
+                    "mime_type": "application/pdf",
+                    "created_at": "2024-01-01T12:00:00",
+                    "updated_at": "2024-01-02T12:00:00",
+                },
+            ],
+        }
+
+        result = populate_custom_fields(opp_data)
+
+        # The valid attachment is included; the invalid one is skipped
+        assert result is not None
+        assert "attachments" in result
+        assert len(result["attachments"].value) == 1
+        assert result["attachments"].value[0].name == "nofo.pdf"
+
+    def test_attachment_with_malformed_download_url_sets_url_to_none(self):
+        """Test that an invalid downloadUrl is coerced to None rather than failing validation."""
+        opp_data = {
+            **self.BASE_OPP_DATA,
+            "opportunity_attachments": [
+                {
+                    "download_path": "not-a-valid-url",
+                    "file_name": "nofo.pdf",
+                    "file_description": "Notice of Funding Opportunity",
+                    "file_size_bytes": 102400,
+                    "mime_type": "application/pdf",
+                    "created_at": "2024-01-01T12:00:00",
+                    "updated_at": "2024-01-02T12:00:00",
+                }
+            ],
+        }
+
+        result = populate_custom_fields(opp_data)
+
+        # The attachment is still included, but downloadUrl is None
+        assert result is not None
+        assert "attachments" in result
+        assert result["attachments"].value[0].downloadUrl is None
+
+
+class TestValidateCustomField:
+    """Tests for the validate_custom_field helper."""
+
+    def test_returns_field_on_valid_input(self):
+        result = validate_custom_field(LegacySerialIdField, value=12345)
+        assert result is not None
+        assert result.value == 12345
+        assert result.name == "legacySerialId"
+
+    def test_returns_none_on_invalid_type(self):
+        # LegacySerialIdField expects an int, not a string
+        result = validate_custom_field(LegacySerialIdField, value="not-an-integer")
+        assert result is None
+
+    def test_returns_none_on_missing_required_value(self):
+        # value is required on all CustomField subclasses
+        result = validate_custom_field(LegacySerialIdField)
+        assert result is None
+
+    def test_returns_field_with_correct_field_type(self):
+        result = validate_custom_field(CostSharingField, value={"isRequired": True})
+        assert result is not None
+        assert result.field_type == CustomFieldType.OBJECT
+
+    def test_returns_field_for_object_value(self):
+        result = validate_custom_field(
+            AgencyField,
+            value={"code": "HHS", "name": "Dept of Health", "parentName": None, "parentCode": None},
+        )
+        assert result is not None
+        assert result.value.code == "HHS"
+
+    def test_returns_none_for_object_missing_required_subfield(self):
+        # AgencyValue requires `code`
+        result = validate_custom_field(
+            AgencyField,
+            value={"name": "Dept of Health"},
+        )
+        assert result is None
+
+    def test_returns_field_for_numeric_value(self):
+        result = validate_custom_field(FiscalYearField, value=2026)
+        assert result is not None
+        assert result.value == 2026
+
+    def test_returns_none_for_invalid_numeric_type(self):
+        result = validate_custom_field(FiscalYearField, value="two-thousand-twenty-six")
+        assert result is None
+
+    def test_returns_none_when_unexpected_exception_is_raised(self):
+        """Test that non-ValidationError exceptions are also caught and return None."""
+
+        class BrokenField:
+            def __init__(self, **kwargs: object) -> None:
+                raise TypeError("unexpected argument type")
+
+        result = validate_custom_field(BrokenField)  # type: ignore[arg-type]
+        assert result is None
+
+    def test_attachment_with_invalid_download_url_sets_url_to_none(self):
+        """Test that an invalid downloadUrl within AttachmentsField is coerced to None."""
+        result = validate_custom_field(
+            AttachmentsField,
+            value=[
+                {
+                    "downloadUrl": "not-a-valid-url",
+                    "name": "test.pdf",
+                    "sizeInBytes": 1000,
+                    "mimeType": "application/pdf",
+                    "createdAt": "2024-01-01T12:00:00",
+                    "lastModifiedAt": "2024-01-02T12:00:00",
+                }
+            ],
+        )
+        assert result is not None
+        assert result.value[0].downloadUrl is None
+
+
+def _cf(operator, value):
+    return DefaultFilter(operator=operator, value=value)
+
+
+def test_build_custom_filters_agency_passthrough():
+    applied, errors = build_custom_filters({"agency": _cf("in", ["USAID", "DOC"])})
+    assert applied == {"agency": {"one_of": ["USAID", "DOC"]}}
+    assert errors == []
+
+
+def test_build_custom_filters_applicant_type_maps_cg_to_native():
+    applied, errors = build_custom_filters(
+        {"applicantType": _cf("in", ["government_state", "individual"])}
+    )
+    assert applied == {"applicant_type": {"one_of": ["state_governments", "individuals"]}}
+    assert errors == []
+
+
+def test_build_custom_filters_funding_instrument_passthrough():
+    applied, errors = build_custom_filters(
+        {"fundingInstrument": _cf("in", ["grant", "cooperative_agreement"])}
+    )
+    assert applied == {"funding_instrument": {"one_of": ["grant", "cooperative_agreement"]}}
+    assert errors == []
+
+
+def test_build_custom_filters_cost_sharing_boolean():
+    applied, errors = build_custom_filters({"costSharing": _cf("eq", True)})
+    assert applied == {"is_cost_sharing": {"one_of": [True]}}
+    assert errors == []
+
+
+def test_build_custom_filters_cost_sharing_invalid_value_reported():
+    applied, errors = build_custom_filters({"costSharing": _cf("eq", "maybe")})
+    assert applied == {}
+    assert errors == ["customFilters.costSharing: invalid boolean value maybe"]
+
+
+def test_build_custom_filters_unsupported_key_reported():
+    applied, errors = build_custom_filters({"bogus": _cf("in", ["x"])})
+    assert applied == {}
+    assert errors == ["customFilters.bogus: unsupported filter"]
+
+
+def test_build_custom_filters_unmappable_applicant_type_reported():
+    applied, errors = build_custom_filters({"applicantType": _cf("in", ["not_a_real_type"])})
+    assert applied == {}
+    assert errors == ["customFilters.applicantType: unmappable value not_a_real_type"]
+
+
+def test_build_custom_filters_applicant_type_partial_map():
+    applied, errors = build_custom_filters(
+        {"applicantType": _cf("in", ["government_state", "not_a_real_type"])}
+    )
+    assert applied == {"applicant_type": {"one_of": ["state_governments"]}}
+    assert errors == ["customFilters.applicantType: unmappable value not_a_real_type"]
+
+
+def test_build_custom_filters_none_is_noop():
+    assert build_custom_filters(None) == ({}, [])
+
+
+def test_applicant_type_mapping_targets_are_valid_native_values():
+    valid = {e.value for e in ApplicantType}
+    unknown = set(APPLICANT_TYPE_FROM_CG.values()) - valid
+    assert unknown == set(), f"mapping targets not in ApplicantType enum: {unknown}"
+
+
+def test_transform_applies_custom_filters_into_v1():
+    filters = OppFilters.model_validate(
+        {"customFilters": {"agency": {"operator": "in", "value": ["USAID"]}}}
+    )
+    params, _ = transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+    assert params["filters"]["agency"] == {"one_of": ["USAID"]}
+
+
+def test_build_filter_info_reports_unsupported_custom_filter():
+    filters = OppFilters.model_validate(
+        {"customFilters": {"bogus": {"operator": "in", "value": ["x"]}}}
+    )
+    _, errors = transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+    info = build_filter_info(filters, errors)
+    assert "customFilters.bogus: unsupported filter" in info.errors
+
+
+def test_build_custom_filters_cost_sharing_unsupported_operator():
+    applied, errors = build_custom_filters({"costSharing": _cf("in", True)})
+    assert applied == {}
+    assert errors == ["customFilters.costSharing: unsupported operator in"]
+
+
+def test_build_custom_filters_array_key_unsupported_operator():
+    applied, errors = build_custom_filters({"agency": _cf("eq", ["USAID"])})
+    assert applied == {}
+    assert errors == ["customFilters.agency: unsupported operator eq"]
+
+
+def test_build_custom_filters_array_key_non_list_value():
+    applied, errors = build_custom_filters({"agency": _cf("in", "USAID")})
+    assert applied == {}
+    assert errors == ["customFilters.agency: expected an array value"]
+
+
+def test_build_custom_filters_cost_sharing_string_booleans():
+    assert build_custom_filters({"costSharing": _cf("eq", "true")})[0] == {
+        "is_cost_sharing": {"one_of": [True]}
+    }
+    assert build_custom_filters({"costSharing": _cf("eq", "false")})[0] == {
+        "is_cost_sharing": {"one_of": [False]}
+    }
+
+
+def test_build_filter_info_reports_invalid_cost_sharing_via_request_path():
+    filters = OppFilters.model_validate(
+        {"customFilters": {"costSharing": {"operator": "eq", "value": "maybe"}}}
+    )
+    _, errors = transform_search_request_from_cg(
+        filters, OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT), PaginatedBodyParams(), None
+    )
+    info = build_filter_info(filters, errors)
+    assert "customFilters.costSharing: invalid boolean value maybe" in info.errors
+
+
+def test_build_custom_filters_non_string_applicant_type_element_reported():
+    # DefaultFilter.value permits list-of-dict; a non-string element must be
+    # reported, not raise (the fail-soft contract).
+    applied, errors = build_custom_filters({"applicantType": _cf("in", [{}])})
+    assert applied == {}
+    assert errors == ["customFilters.applicantType: invalid value {}"]
+
+
+def test_build_custom_filters_non_string_array_element_reported():
+    applied, errors = build_custom_filters({"agency": _cf("in", ["USAID", 123])})
+    assert applied == {"agency": {"one_of": ["USAID"]}}
+    assert errors == ["customFilters.agency: invalid value 123"]
+
+
+def test_build_custom_filters_applies_valid_filter_when_other_key_invalid():
+    # Headline behavior: an unsupported key is reported but valid filters still apply.
+    # Invalid key first so a stray break (instead of continue) would drop the valid one.
+    applied, errors = build_custom_filters(
+        {"bogus": _cf("in", ["x"]), "agency": _cf("in", ["USAID"])}
+    )
+    assert applied == {"agency": {"one_of": ["USAID"]}}
+    assert errors == ["customFilters.bogus: unsupported filter"]

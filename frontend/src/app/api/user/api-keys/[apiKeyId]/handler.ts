@@ -34,7 +34,6 @@ export const renameApiKeyHandler = async (
     }
 
     const response = await handleRenameApiKey(
-      session.token,
       session.user_id,
       apiKeyId,
       apiKeyBody.key_name,
@@ -79,11 +78,7 @@ export const deleteApiKeyHandler = async (
       throw new BadRequestError("No API key ID provided");
     }
 
-    const response = await handleDeleteApiKey(
-      session.token,
-      session.user_id,
-      apiKeyId,
-    );
+    const response = await handleDeleteApiKey(session.user_id, apiKeyId);
 
     if (!response || response.status_code !== 200) {
       throw new ApiRequestError(

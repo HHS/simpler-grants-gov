@@ -1,5 +1,5 @@
 name: Deploy API
-run-name: Deploy ${{ inputs.version || 'main' }} to API ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
+run-name: Deploy ${{ inputs.version || 'main' }} to API ${{ inputs.environment || 'nonprod' }}
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
       - "api/**"
       - "infra/api/**"
       - "infra/modules/**"
-  release:
-    types: [published]
+  # Release deployments are handled by cd-release.yml to enforce deployment order
+  # (API -> Frontend -> NOFOs -> Analytics)
   workflow_dispatch:
     inputs:
       environment:
@@ -22,22 +22,47 @@ on:
           - dev
           - staging
           - training
+          - grantee1
+          - grantee2
+          - grantor1
           - prod
       version:
         required: true
         default: "main"
         description: Tag or branch or SHA to deploy
+      skip_checks:
+        type: boolean
+        default: false
+        description: Skip unit tests, lint, etc
+      skip_vuln_scans:
+        type: boolean
+        default: false
+        description: Skip vulnerability scans
+  workflow_call:
+    inputs:
+      skip_checks:
+        type: boolean
+        default: false
+        description: Skip unit tests, lint, etc while deploying
+      skip_vuln_scans:
+        type: boolean
+        default: false
+        description: Skip vulnerability scans while deploying
 
 jobs:
   api-checks:
     name: Run API Checks
     uses: ./.github/workflows/ci-api.yml
+    with:
+      skip_checks: ${{ inputs.skip_checks != null && inputs.skip_checks != false }}
 
   vulnerability-scans:
     name: Vulnerability Scans
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: api
+      fail_on_vulns: ${{ ! (contains(fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]'), 'staging') || contains(fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]'), 'dev')) }}
+      skip_vuln_scans: ${{ inputs.skip_vuln_scans != null && inputs.skip_vuln_scans != false }}
 
   deploy:
     name: Deploy
@@ -47,14 +72,14 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod", "training"]' || github.ref_name == 'main' && '["staging"]' || '["dev"]')  }}
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]')  }}
     with:
       app_name: "api"
       environment: ${{ matrix.envs }}
       version: ${{ inputs.version || github.ref }}
 
   send-slack-notification:
-    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'release')
+    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     needs: [api-checks, vulnerability-scans, deploy]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit

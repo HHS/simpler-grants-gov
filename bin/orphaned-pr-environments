@@ -17,7 +17,7 @@ echo "::endgroup::"
 echo "::group::List PRs with PR environments"
 echo terraform -chdir="infra/${app_name}/service" workspace list
 workspaces="$(terraform -chdir="infra/${app_name}/service" workspace list)"
-pr_nums="$(echo "${workspaces}" | grep -o 'p-[0-9]\+' | sed 's/p-//')"
+pr_nums="$(echo "${workspaces}" | grep -o 'p-[0-9]\+$' | sed 's/p-//')"
 echo "PRs"
 echo "${pr_nums}"
 echo "::endgroup::"

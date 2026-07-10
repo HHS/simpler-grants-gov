@@ -2,8 +2,8 @@ import logging
 
 import freezegun
 import pytest
+from grants_shared.api.response import ValidationErrorDetail
 
-from src.api.response import ValidationErrorDetail
 from src.form_schema.rule_processing.json_rule_processor import process_rule_schema_for_context
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.form_schema.rule_processing.conftest import setup_context

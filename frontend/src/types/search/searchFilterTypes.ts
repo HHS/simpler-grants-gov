@@ -1,10 +1,14 @@
+import { LabelValueOption } from "src/types/generalTypes";
+
 export const backendFilterNames = [
   "opportunity_status",
   "funding_instrument",
   "applicant_type",
   "agency",
+  "assistance_listing_number",
   "funding_category",
   "close_date",
+  "post_date",
   "is_cost_sharing",
 ] as const;
 
@@ -15,23 +19,23 @@ export const searchFilterNames = [
   "agency",
   "category",
   "closeDate",
+  "postedDate",
   "costSharing",
   "topLevelAgency",
+  "assistanceListingNumber",
 ] as const;
 
 export type FrontendFilterNames = (typeof searchFilterNames)[number];
 export type BackendFilterNames = (typeof backendFilterNames)[number];
 export type HardcodedFrontendFilterNames = Exclude<
   FrontendFilterNames,
-  "agency" | "topLevelAgency"
+  "agency" | "topLevelAgency" | "assistanceListingNumber"
 >;
 
-export interface FilterOption {
+export interface FilterOption extends LabelValueOption {
   children?: FilterOption[];
   id: string;
   isChecked?: boolean;
-  label: string;
-  value: string;
   tooltip?: string;
 }
 

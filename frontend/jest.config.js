@@ -11,6 +11,7 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   setupFilesAfterEnv: ["<rootDir>/tests/jest.setup.js"],
   testEnvironment: "jsdom",
+  coverageReporters: ["text", "json"],
   // if using TypeScript with a baseUrl set to the root directory then you need the below for alias' to work
   moduleDirectories: ["node_modules", "<rootDir>/"],
   testPathIgnorePatterns: ["<rootDir>/tests/e2e"],

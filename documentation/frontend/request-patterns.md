@@ -37,7 +37,7 @@ Once you have your fetcher function created, you can call it with any supported 
 
 - subPath - any dynamic path segments following the namespace path defined in the endpoint config
 - body - json body used either for POST / PUT payloads, or stringified into a query string for a GET request
-- additionalHeaders - any headers to add or overwrite on top of the default "X-AUTH" and "content-type"
+- additionalHeaders - any headers to add or overwrite on top of the default "X-API-KEY" and "content-type"
 - nextOptions - see https://nextjs.org/docs/app/api-reference/functions/fetch#fetchurl-options
 
 Fetchers will return a raw response object on success.

@@ -1,11 +1,11 @@
 import logging
 from uuid import UUID
 
+import grants_shared.adapters.db as db
+from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
-from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,
@@ -119,7 +119,7 @@ def add_organization_to_application(
     )
 
     # Update application with organization
-    application.organization_id = organization_id
+    application.organization = organization
 
     # Re-run pre-population logic on all application forms
     for application_form in application.application_forms:

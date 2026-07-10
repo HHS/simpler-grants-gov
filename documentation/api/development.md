@@ -16,7 +16,23 @@ This section covers development using Docker. There are a number of Docker comma
 
 ### Setup
 
-These scripts depend on having `postgresql` installed in your environment as a pre-requisite. Install instructions for your particular operating system can be found on the [Postgres website](https://www.postgresql.org/download/)
+The following must be installed in order to run the API locally, these instructions
+focus on setting up on a Mac, but most of this would be applicable regardless of system
+although the installation method will vary. The exact approach detailed here may not
+match exactly what you do, it's one way of getting the tools, some have multiple installation methods.
+
+* Install [xcode-select](https://developer.apple.com/documentation/xcode/installing-the-command-line-tools/) - these are the developer tools needed for most command line tools.
+* Install [Homebrew](https://brew.sh/) - for installing several packages
+* Install [postgres](https://www.postgresql.org/download/macosx/) - Can use brew, make sure to specify the version in our [docker-compose](../../api/docker-compose.yml) (eg. `brew install postgresql@17`)
+* Install [libpq](https://formulae.brew.sh/formula/libpq) - Postgres utils, including one used by a script to verify the DB is ready
+* Install [docker](https://docs.docker.com/engine/install/)
+* Install [uv](https://docs.astral.sh/uv/getting-started/installation/) - For managing packages
+
+These aren't required, but relevant:
+* Install [git](https://git-scm.com/install/mac)
+* Install [pyenv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation) - for managing multiple python versions / makes upgrading python much easier
+
+---
 
 Run `make init && make run-logs` to start the local containers and watch logs. The application will be available at `http://localhost:8080` and API documentation at `http://localhost:8080/docs`.
 
@@ -28,20 +44,26 @@ This stands up the following services:
 * Postgres database
 * OpenSearch node
 * OpenSearch Dashboard (http://localhost:5601)
-* [localstack](https://www.localstack.cloud) for mocking s3 actions locally
+* [s3Mock](https://github.com/adobe/S3Mock)
+* [elasticMq](https://github.com/softwaremill/elasticmq) - for mocking SQS locally
 * [mock oauth2 server](https://github.com/navikt/mock-oauth2-server) (http://localhost:5001)
+
+
+> [!NOTE]
+> `make init` runs through and sets up every service.
+> If one isn't running, run `make init`, you usually don't need to run
+> many of the direct setup commands unless you are reworking our local setup.
+
 
 ### Seed data
 
 Run `make setup-api-data` to create local data in the database, search index  and make it available in the API. This basically creates everything; if you want to be selective about what data you're seeding, see the Makefile for ways you can populate selective data.
 
-### API Authentication
-
-This API uses a very simple [ApiKey authentication approach](https://apiflask.com/authentication/#use-external-authentication-library) which requires the caller to provide a static key. This is specified with the `API_AUTH_TOKEN` environment variable.
-
 ### User Authentication
 
 Run `make setup-env-override-file` to create the `override.env` file which will include the necessary JWT keys for running user authentication within the app.
+
+Note that this runs as part of `make init` so generally does not need to be done separately.
 
 ### Accessing the API through swagger docs
 
@@ -59,7 +81,7 @@ A mock Oauth2 server is defined and managed in the API's [docker-compose.yml](..
 
 Most configuration options are managed by environment variables.
 
-Environment variables for local development are stored in the [local.env](../../api/local.env) file. This file is automatically loaded when running. If running within Docker, this file is specified as an `env_file` in the [docker-compose](../../docker-compose.yml) file, and loaded [by a script](../../api/src/util/local.py) automatically when running most other components outside the container.
+Environment variables for local development are stored in the [local.env](../../api/local.env) file. This file is automatically loaded when running. If running within Docker, this file is specified as an `env_file` in the [docker-compose](../../docker-compose.yml) file, and loaded [by a script](../../backend/grants_shared/src/grants_shared/util/local.py) automatically when running most other components outside the container.
 
 Any environment variables specified directly in the [docker-compose](../../docker-compose.yml) file will take precedent over those specified in the [local.env](../../api/local.env) file.
 
@@ -70,7 +92,8 @@ Errors in standing up the API can originate from an out of date container, datab
 * **db-check-migrations** - check if migrations are out of sync
 * **volume-recreate** - delete all existing volumes and data
 * **remake-backend** - delete all data (`volume-recreate`) and load data (`db-seed-local` and `populate-search-opportunities`)
-   - This may be needed if you are experiencing errors from the API indicating data not found.
+   - Note this drops all data in the DB and fully remakes it. If you are missing data, try just running `make db-seed-local` first.
+   - This script should be seen as a last resort for getting the API into a healthy state.
 
 ### VSCode Remote Attach Container Debugging
 
@@ -79,7 +102,7 @@ The API can be run in debug mode that allows for remote attach debugging (curren
 - Requirements:
 
   - VSCode Python extension
-  - Updated Poetry with the `debugpy` dev package in `pyproject.toml`
+  - Updated UV with the `debugpy` dev package in `pyproject.toml`
 
 - See `./vscode/launch.json` which has the debug config. (Named `API Remote Attach`)
 
@@ -110,13 +133,45 @@ Running in the native/local approach may require additional packages to be insta
 2. Ensure that `python -V` and `python3 -V` are picking up that version.
    - If not, run `pyenv init -` and/or restart your shell to ensure it was run automatically
 3. After installing and activating the right version of Python, install
-   [poetry](https://python-poetry.org/docs/#installation) and follow the instructions to add poetry to your path if necessary.
+   [uv](https://docs.astral.sh/uv/getting-started/installation/) and follow the instructions to add uv to your path if necessary.
+4. This still requires Docker as the database and services all still run within Docker.
+5. Certain environment variables require different paths when running outside of Docker.
+   You can handle this by setting these environment variables yourself via you `.bashrc`
+   or `.zshrc` file. Another approach is to have an `.envrc` in the api directory and
+   use [direnv](https://direnv.net/) to have a directory-based shell file.
 
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
-   ```
+```shell
+#!/bin/bash
+# This file can be used by direnv to load the local.env file
+# into your current terminal session.
+# Steps:
+# * Install direnv: https://direnv.net/
+# * Configure direnv: https://direnv.net/docs/hook.html
+# * In this folder, run "direnv allow ."
 
-4. You'll also need [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+set -o allexport
+source local.env
+set +o allexport
+
+set -o allexport
+source override.env
+set +o allexport
+
+
+# If you are running outside of the Docker container, the DB can
+# be found on localhost:5432. Inside the container it's referenced via
+# the name of the docker container.
+#
+export DB_HOST=localhost
+export S3_ENDPOINT_URL=http://localhost:9090
+export SQS_ENDPOINT_URL=http://localhost:9324
+export LOGIN_GOV_JWK_ENDPOINT=http://localhost:5001/issuer1/jwks
+
+export SEARCH_ENDPOINT=localhost
+export OPENSEARCH_HOST=localhost
+
+export PY_RUN_APPROACH=local
+```
 
 **Note:** All the following commands should be run from the `/api` directory.
 
@@ -134,10 +189,44 @@ Individual services can be run through Docker, which can be useful in concert wi
 
   If your DB or OpenSearch end up in an odd place, you can reset all the persistent storage using `make volume-recreate`.
 
-* **Localstack (local s3)**
-   * Run `make init-localstack`
+* **s3Mock**
+   * Run `make init-s3mock`
+* **elasticMq (local sqs)**
+   * Run `make init-sqsmock`
 * **Mock OAuth server**
    * Run `make init-mock-oauth2`
+
+#### S3 Mock
+
+For local development, we use [S3Mock](https://github.com/adobe/S3Mock) when running
+the API to mock out s3. The s3Mock is used based on setting the endpoint URL when
+calling AWS from our code or the CLI which is set in the `S3_ENDPOINT_URL` environment variable.
+
+If you want to connect to s3 with the AWS CLI, you can do:
+`aws --endpoint-url http://localhost:9090 s3 ls` which in this case would list the buckets.
+
+Files are stored in the `/api/locals3root` folder, although they may not match what
+you've named the files as they store metadata and other information as well. See [their docs](https://github.com/adobe/S3Mock?tab=readme-ov-file#file-system-structure)
+for more information.
+
+S3 buckets are automatically created based on the `COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS`
+environment variable which we set in the docker-compose file. These won't display in the `locals3root`
+folder until at least one file has been added to s3.
+
+#### SQS Mock
+
+For local development, we use [elasticmq](https://github.com/softwaremill/elasticmq) when running
+the API to mock out SQS.
+
+If you want to connect to SQS with the AWS CLI, you can do:
+`aws --endpoint-url http://localhost:9324 sqs list-queues` which in this case would list the queues.
+
+SQS queues are automatically created based on the configuration that we specify in the
+[custom.conf](../../api/mock-sqs/custom.conf) file which gets passed to the elasticmq docker image during
+startup.
+
+The SQS queues **DO NOT** maintain state if you stop and restart the container. If you stop the SQS
+mock container all messages in the queues will be lost.
 
 ## Next steps
 

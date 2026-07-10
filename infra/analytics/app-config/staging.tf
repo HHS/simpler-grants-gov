@@ -7,9 +7,10 @@ module "staging_config" {
   environment    = "staging"
   network_name   = "staging"
 
-  database_instance_count = 2
-  database_min_capacity   = 2
-  database_max_capacity   = 2
+  database_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXw0MzE3Mzk2OTcxNjk3NTgxMDcy"
+  database_instance_count       = 2
+  database_min_capacity         = 2
+  database_max_capacity         = 2
 
   service_override_extra_environment_variables = {
     # In staging, post results to the #z_bot-analytics-ci-test channel in slack

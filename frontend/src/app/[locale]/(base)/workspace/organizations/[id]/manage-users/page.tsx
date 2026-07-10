@@ -1,0 +1,55 @@
+import { ManageUsersPageContent } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/_components/ManageUsersPageContent";
+import {
+  getOrganizationPendingInvitations,
+  getOrganizationRoles,
+  getOrganizationUsers,
+} from "src/services/fetch/fetchers/organizationsFetcher";
+
+import { getTranslations } from "next-intl/server";
+
+import { AuthorizationGate } from "src/components/core/AuthorizationGate";
+import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
+
+interface ManageUsersPageProps {
+  params: Promise<{ locale: string; id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
+
+  return {
+    title: t("ManageUsers.pageTitle"),
+    description: t("Index.metaDescription"),
+  };
+}
+
+async function ManageUsersPage({ params }: ManageUsersPageProps) {
+  const { id: organizationId } = await params;
+
+  return (
+    <AuthorizationGate
+      resourcePromises={{
+        invitedUsersList: getOrganizationPendingInvitations(organizationId),
+        activeUsersList: getOrganizationUsers(organizationId),
+        organizationRolesList: getOrganizationRoles(organizationId),
+      }}
+      requiredPrivileges={[
+        {
+          resourceId: organizationId,
+          resourceType: "organization",
+          privilege: "manage_org_members",
+        },
+      ]}
+      onUnauthorized={() => <UnauthorizedMessage />}
+    >
+      <ManageUsersPageContent organizationId={organizationId} />
+    </AuthorizationGate>
+  );
+}
+
+export default ManageUsersPage;

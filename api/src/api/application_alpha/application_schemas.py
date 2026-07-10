@@ -1,21 +1,22 @@
-from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
-from src.api.form_alpha.form_schema import FormAlphaSchema
-from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
-from src.api.schemas.extension import Schema, fields
-from src.api.schemas.response_schema import (
+from grants_shared.api.schemas.extension import Schema, fields
+from grants_shared.api.schemas.response_schema import (
     AbstractResponseSchema,
     FileResponseSchema,
     PaginationMixinSchema,
     WarningMixinSchema,
 )
-from src.api.schemas.search_schema import StrSearchSchemaBuilder
+from grants_shared.api.schemas.search_schema import StrSearchSchemaBuilder
+from grants_shared.pagination.pagination_schema import generate_pagination_schema
+
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
+from src.api.form_alpha.form_schema import FormAlphaSchema
+from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,
     ApplicationFormStatus,
     ApplicationStatus,
 )
-from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class ApplicationStartRequestSchema(Schema):
@@ -40,6 +41,14 @@ class ApplicationStartRequestSchema(Schema):
         metadata={
             "description": "Optional organization ID to associate with the application",
             "example": "456e7890-e12c-34f5-b678-901234567890",
+        },
+    )
+    intends_to_add_organization = fields.Boolean(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Whether the user intends to add an organization later when applying as an individual",
+            "example": True,
         },
     )
 
@@ -280,6 +289,13 @@ class ApplicationGetResponseDataSchema(Schema):
         metadata={"description": "Organization associated with this application, if any"},
     )
 
+    intends_to_add_organization = fields.Boolean(
+        allow_none=True,
+        metadata={
+            "description": "Whether the user intends to add an organization later when applying as an individual"
+        },
+    )
+
     form_validation_warnings = fields.Dict(
         metadata={
             "description": "Specific form validation issues",
@@ -461,3 +477,54 @@ class ApplicationAuditDataSchema(Schema):
 
 class ApplicationAuditResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     data = fields.List(fields.Nested(ApplicationAuditDataSchema()))
+
+
+# Application Submissions Schemas
+
+
+class ApplicationSubmissionsRequestSchema(Schema):
+    """Request schema for listing application submissions"""
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "ApplicationSubmissionsRequestPaginationSchema",
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
+
+
+class ApplicationSubmissionDataSchema(Schema):
+    """Schema for a single application submission"""
+
+    application_submission_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the application submission",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    download_path = fields.String(
+        metadata={
+            "description": "The presigned URL path for downloading the submission package",
+            "example": "https://s3.amazonaws.com/bucket/path/to/submission.zip",
+        }
+    )
+    file_size_bytes = fields.Integer(
+        metadata={
+            "description": "The size of the submission file in bytes",
+            "example": 1234567,
+        }
+    )
+    legacy_tracking_number = fields.Integer(
+        metadata={
+            "description": "The legacy tracking number for the submission",
+            "example": 80000001,
+        }
+    )
+
+
+class ApplicationSubmissionsResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Response schema for listing application submissions"""
+
+    data = fields.List(fields.Nested(ApplicationSubmissionDataSchema()))

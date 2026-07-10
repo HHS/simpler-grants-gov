@@ -18,6 +18,8 @@ from src.data_migration.transformation.subtask.transform_agency import (
     transform_agency_notify,
 )
 from src.db.models.agency_models import Agency
+from src.db.models.user_models import AgencyUser
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
     setup_agency,
@@ -383,6 +385,11 @@ class TestTransformAgency(BaseTransformTestClass):
 
 
 class TestValidateAgencyData(BaseTransformTestClass):
+
+    @pytest.fixture(scope="class")
+    def truncate_agencies(self, db_session):
+        cascade_delete_from_db_table(db_session, AgencyUser)
+        cascade_delete_from_db_table(db_session, Agency)
 
     @pytest.fixture
     def validate_agency_data(self, transform_oracle_data_task, truncate_agencies):

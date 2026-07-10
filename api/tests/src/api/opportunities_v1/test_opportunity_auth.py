@@ -1,5 +1,7 @@
+import grants_shared.util.datetime_util as datetime_util
 import pytest
 
+from src.auth.api_jwt_auth import parse_jwt_for_user
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import OpportunityFactory, UserApiKeyFactory
 
@@ -8,25 +10,25 @@ from tests.src.db.models.factories import OpportunityFactory, UserApiKeyFactory
     "method,url,body",
     [
         ("POST", "/v1/opportunities/search", get_search_request()),
+        ("POST", "/v1/opportunities/search/csv", {}),
         ("GET", "/v1/opportunities/1", None),
     ],
 )
-def test_opportunity_unauthorized_401_env_key(client, api_auth_token, method, url, body):
-    """Test opportunity endpoints with invalid environment API key (X-Auth header)"""
-    # open is just the generic method that post/get/etc. call under the hood
-    response = client.open(url, method=method, json=body, headers={"X-Auth": "incorrect token"})
+def test_opportunity_unauthorized_401_jwt(client, method, url, body):
+    """Test opportunity endpoints with invalid JWT token (X-SGG-Token header)"""
+    response = client.open(
+        url, method=method, json=body, headers={"X-SGG-Token": "invalid-jwt-token"}
+    )
 
     assert response.status_code == 401
-    assert (
-        response.get_json()["message"]
-        == "The server could not verify that you are authorized to access the URL requested"
-    )
+    assert response.get_json()["message"] == "Unable to process token"
 
 
 @pytest.mark.parametrize(
     "method,url,body",
     [
         ("POST", "/v1/opportunities/search", get_search_request()),
+        ("POST", "/v1/opportunities/search/csv", {}),
         ("GET", "/v1/opportunities/1", None),
     ],
 )
@@ -42,6 +44,7 @@ def test_opportunity_unauthorized_401_api_user_key(client, method, url, body):
     "method,url,body",
     [
         ("POST", "/v1/opportunities/search", get_search_request()),
+        ("POST", "/v1/opportunities/search/csv", {}),
         ("GET", "/v1/opportunities/1", None),
     ],
 )
@@ -101,11 +104,26 @@ def test_opportunity_get_success_with_api_user_key(
 def test_opportunity_search_with_inactive_api_user_key(client, enable_factory_create, db_session):
     """Test opportunity search endpoint with inactive API user key"""
     inactive_api_key = UserApiKeyFactory.create(is_active=False)
-    db_session.commit()
 
     response = client.post(
         "/v1/opportunities/search",
         json=get_search_request(),
+        headers={"X-API-Key": inactive_api_key.key_id},
+    )
+
+    assert response.status_code == 401
+    assert response.get_json()["message"] == "API key is inactive"
+
+
+def test_opportunity_search_csv_with_inactive_api_user_key(
+    client, enable_factory_create, db_session
+):
+    """Test opportunity search CSV endpoint with inactive API user key"""
+    inactive_api_key = UserApiKeyFactory.create(is_active=False)
+
+    response = client.post(
+        "/v1/opportunities/search/csv",
+        json={},
         headers={"X-API-Key": inactive_api_key.key_id},
     )
 
@@ -118,7 +136,6 @@ def test_opportunity_get_with_inactive_api_user_key(client, enable_factory_creat
     inactive_api_key = UserApiKeyFactory.create(is_active=False)
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
-    db_session.commit()
 
     response = client.get(
         f"/v1/opportunities/{opportunity.opportunity_id}",
@@ -129,23 +146,51 @@ def test_opportunity_get_with_inactive_api_user_key(client, enable_factory_creat
     assert response.get_json()["message"] == "API key is inactive"
 
 
-def test_opportunity_auth_precedence_api_user_key_first(
-    client, enable_factory_create, db_session, api_auth_token, user_api_key, user_api_key_id
-):
-    """Test that API user key takes precedence over environment API key when both are provided"""
+def test_opportunity_get_legacy_success_with_jwt_auth(client, user_auth_token):
+    """Test legacy opportunity get endpoint with valid JWT auth token"""
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
-    db_session.commit()
 
-    # Send both headers - API user key should take precedence
+    response = client.get(
+        f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["message"] == "Success"
+    assert response.get_json()["data"]["opportunity_id"] == str(opportunity.opportunity_id)
+
+
+def test_opportunity_get_success_with_jwt_auth(client, user_auth_token):
+    """Test opportunity get endpoint with valid JWT auth token"""
+    # Create an opportunity to get
+    opportunity = OpportunityFactory.create()
+
     response = client.get(
         f"/v1/opportunities/{opportunity.opportunity_id}",
-        headers={"X-API-Key": user_api_key_id, "X-Auth": api_auth_token},
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["message"] == "Success"
+    assert response.get_json()["data"]["opportunity_id"] == str(opportunity.opportunity_id)
+
+
+def test_opportunity_auth_precedence_jwt_first(
+    client, db_session, user_auth_token, user_api_key_id
+):
+    """Test that JWT auth takes precedence over API key auth when both are provided"""
+    # Create an opportunity to get
+    opportunity = OpportunityFactory.create()
+
+    # Send both headers - JWT should take precedence over API key
+    response = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}",
+        headers={"X-SGG-Token": user_auth_token, "X-API-Key": user_api_key_id},
     )
 
     assert response.status_code == 200
     assert response.get_json()["message"] == "Success"
 
-    # Verify the API user key's last_used was updated (indicating it was used)
-    db_session.refresh(user_api_key)
-    assert user_api_key.last_used is not None
+    # check the JWT usage with expires_at field
+    assert parse_jwt_for_user(user_auth_token, db_session).expires_at > datetime_util.utcnow()

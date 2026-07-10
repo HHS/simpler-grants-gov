@@ -1,7 +1,6 @@
 // @ts-check
 
 const withNextIntl = require("next-intl/plugin")();
-const sassOptions = require("./scripts/sassOptions");
 const nrExternals = require("@newrelic/next/load-externals");
 
 /**
@@ -12,7 +11,6 @@ const nrExternals = require("@newrelic/next/load-externals");
  * @example "/test" results in "localhost:3000/test" as the index page for the app
  */
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
-const appSassOptions = sassOptions(basePath);
 
 const cspHeader = `
     default-src 'self';
@@ -109,7 +107,7 @@ const headers = [
   },
   // don't cache user specific pages: saved-opportunities, saved-search-queries
   {
-    source: "/saved:path*",
+    source: "/saved/:path*",
     headers: [
       {
         key: "Cache-Control",
@@ -148,7 +146,6 @@ if (!isCi)
     headers: securityHeaders,
   });
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
     return headers;
@@ -165,7 +162,13 @@ const nextConfig = {
   // Output only the necessary files for a deployment, excluding irrelevant node_modules
   // https://nextjs.org/docs/app/api-reference/next-config-js/output
   output: "standalone",
-  sassOptions: appSassOptions,
+  sassOptions: {
+    silenceDeprecations: ["if-function", "import", "global-builtin"],
+    loadPaths: [
+      "./node_modules/@uswds",
+      "./node_modules/@uswds/uswds/packages",
+    ],
+  },
   serverExternalPackages: ["newrelic"],
   webpack: (config) => {
     nrExternals(config);
@@ -185,6 +188,7 @@ const nextConfig = {
   },
   experimental: {
     testProxy: true,
+    proxyClientMaxBodySize: "2000mb",
     serverActions: {
       bodySizeLimit: "2000mb",
     },
@@ -209,6 +213,71 @@ const nextConfig = {
       {
         source: "/subscribe/unsubscribe",
         destination: "/newsletter/unsubscribe",
+        permanent: false,
+      },
+      {
+        source: "/organization/:segments*",
+        destination: "/workspace/organizations/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/organizations/:segments*",
+        destination: "/workspace/organizations/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/workspace/applications/application/:segments*",
+        destination: "/workspace/applications/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/applications/application/:segments*",
+        destination: "/workspace/applications/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/applications/:segments*",
+        destination: "/workspace/applications/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/developer",
+        destination: "/developers",
+        permanent: false,
+      },
+      {
+        source: "/api-dashboard",
+        destination: "/developers/api-dashboard",
+        permanent: false,
+      },
+      {
+        source: "/dashboard",
+        destination: "/workspace",
+        permanent: false,
+      },
+      {
+        source: "/saved-opportunities",
+        destination: "/workspace/saved-opportunities",
+        permanent: false,
+      },
+      {
+        source: "/saved-search-queries",
+        destination: "/workspace/saved-search-queries",
+        permanent: false,
+      },
+      {
+        source: "/opportunity/:opportunity_id/edit",
+        destination: "/grantor/opportunity/:opportunity_id/edit",
+        permanent: false,
+      },
+      {
+        source: "/opportunities",
+        destination: "/grantor/opportunities",
+        permanent: false,
+      },
+      {
+        source: "/opportunities/create",
+        destination: "/grantor/opportunities/create",
         permanent: false,
       },
     ];

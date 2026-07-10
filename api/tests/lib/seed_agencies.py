@@ -1,7 +1,8 @@
 # Called by seed_local_db when running `make seed-db-local`
 import logging
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 import tests.src.db.models.factories as factories
 from src.db.models.agency_models import Agency
 
@@ -45,11 +46,6 @@ AGENCIES_TO_CREATE = [
         "agency_code": "NSF",
         "agency_id": "16945d39-1564-479c-b438-ef8d0804f051",
         "agency_name": "National Science Foundation",
-    },
-    {
-        "agency_code": "USAID",
-        "agency_id": "094f7d5c-afe6-4e40-823b-d830076e9144",
-        "agency_name": "Agency for International Development",
     },
     {
         "agency_code": "USDA",
@@ -338,18 +334,6 @@ AGENCIES_TO_CREATE = [
         "top_level_agency_id": "f331d496-e18e-47d5-95d4-f3b1231db153",
     },
     {
-        "agency_code": "USAID-ETH",
-        "agency_id": "9293aa4d-101b-4507-9725-6a180df2facd",
-        "agency_name": "Ethiopia USAID-Addis Ababa ",
-        "top_level_agency_id": "094f7d5c-afe6-4e40-823b-d830076e9144",
-    },
-    {
-        "agency_code": "USAID-SAF",
-        "agency_id": "31d754a4-6e0d-4593-b344-febef892548d",
-        "agency_name": "South Africa USAID-Pretoria",
-        "top_level_agency_id": "094f7d5c-afe6-4e40-823b-d830076e9144",
-    },
-    {
         "agency_code": "USDA-AMS",
         "agency_id": "1b6c6fc7-4594-4af5-be95-81222fb87101",
         "agency_name": "Agricultural Marketing Service",
@@ -454,6 +438,11 @@ AGENCIES_TO_CREATE = [
         "agency_code": "ARCHIVED",
         "agency_id": "add4bfff-e895-4ca9-92f4-38ed34055247",
         "agency_name": "Agency of archived opportunities",
+    },
+    {
+        "agency_code": "SGG",
+        "agency_id": "7f4e3d2c-1b0a-4f9e-8d7c-6b5a4f3e2d1c",
+        "agency_name": "Simpler Grants.gov",
     },
 ]
 

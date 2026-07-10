@@ -1,31 +1,37 @@
 module "prod_config" {
-  source                          = "./env-config"
-  project_name                    = local.project_name
-  app_name                        = local.app_name
-  default_region                  = module.project_config.default_region
-  environment                     = "prod"
-  network_name                    = "prod"
-  domain_name                     = "api.simpler.grants.gov"
-  secondary_domain_names          = ["alb.simpler.grants.gov"]
-  enable_https                    = true
-  s3_cdn_domain_name              = "files.simpler.grants.gov"
-  mtls_domain_name                = "soap.simpler.grants.gov"
-  has_database                    = local.has_database
-  database_enable_http_endpoint   = true
-  has_incident_management_service = local.has_incident_management_service
-  enable_identity_provider        = local.enable_identity_provider
-  enable_notifications            = local.enable_notifications
+  source                            = "./env-config"
+  project_name                      = local.project_name
+  app_name                          = local.app_name
+  default_region                    = module.project_config.default_region
+  environment                       = "prod"
+  network_name                      = "prod"
+  domain_name                       = "api.simpler.grants.gov"
+  secondary_domain_names            = ["alb.simpler.grants.gov"]
+  enable_https                      = true
+  s3_cdn_domain_name                = "files.simpler.grants.gov"
+  mtls_domain_name                  = "soap.simpler.grants.gov"
+  has_database                      = local.has_database
+  database_enable_http_endpoint     = true
+  database_engine_version           = "17.7"
+  database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXw3NTg3MzYwMjg2Njg1MjU2ODYy"
+  has_incident_management_service   = local.has_incident_management_service
+  enable_identity_provider          = local.enable_identity_provider
+  enable_notifications              = local.enable_notifications
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyNjMzMDEwMDY4MDkyNjI0MTY0"
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXw2ODQyNTI2NjUwMjY5NTAzNzM5"
+  api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058MTA5NDc3MTExMg"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-prod/services/api-prod/health?region=us-east-1
   # instance_desired_instance_count and instance_scaling_min_capacity are scaled for 5x the average CPU and Memory
   # seen over 12 months, as of November 2024 exlucing an outlier range around February 2024.
   # The math is: 5 * max(average CPU or average Memory) * 1.3. The 1.3 is for a buffer.
-  instance_desired_instance_count = 2
-  instance_scaling_min_capacity   = 2
-  # instance_scaling_max_capacity is 4x the instance_scaling_min_capacity
-  # the "4x" number is functionally arbibrary.
-  instance_scaling_max_capacity = 8
+  instance_desired_instance_count = 4
+  instance_scaling_min_capacity   = 4
+
+  instance_scaling_max_capacity  = 8
+  instance_scaling_cpu_target    = 40
+  instance_scaling_memory_target = 70
 
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.setting-capacity.html
   # https://us-east-1.console.aws.amazon.com/rds/home?region=us-east-1#database:id=api-prod;is-cluster=true;tab=monitoring
@@ -50,9 +56,10 @@ module "prod_config" {
   # Scale the search_data_instance_count number to meet your compute needs.
   # The search_data_instance_count should be a multiple of the number of availability zones.
   # Use the AWS Console to determine the number of availability zones in your region.
-  search_data_instance_type      = "or1.medium.search"
-  search_data_volume_size        = 20
-  search_data_instance_count     = 3
+  search_data_instance_type = "or1.medium.search"
+  search_data_volume_size   = 20
+  # 2 data nodes per availability zone across 3 AZs (must be a multiple of az zone count).
+  search_data_instance_count     = 6
   search_availability_zone_count = 3
   # Versions: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
   search_engine_version = "OpenSearch_2.15"
@@ -67,37 +74,36 @@ module "prod_config" {
     LOAD_AGENCY_SEARCH_REPLICA_COUNT = 2
 
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT     = 1
     LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"
     LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
     LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
     LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
 
-    ENABLE_APPLY_ENDPOINTS = 1
 
     # CommonGrants Protocol
-    ENABLE_COMMON_GRANTS_ENDPOINTS = 1
 
     TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN,TX,MN,MMC,WWC,SCRC,NRC,JL04022024,JUSFC,JMM,IAF,USIP,GCERC,ARPAH,ORD,DC,SCC800,BBG,ACR,ECP,MC,CCFF,CNCS,FMCS,SGG"
 
     # grants.gov services/applications URI.
     GRANTS_GOV_URI  = "https://ws07.grants.gov"
     GRANTS_GOV_PORT = 443
-    ENABLE_SOAP_API = 1
 
     # Sam.gov
     SAM_GOV_BASE_URL = "https://api.sam.gov"
 
     # Email notification
-    RESET_EMAILS_WITHOUT_SENDING = "false"
+    RESET_EMAILS_WITHOUT_SENDING               = "false"
+    ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation - Production overrides
     FRONTEND_URL             = "https://simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
     PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
   }
-  instance_cpu    = 1024
+  instance_cpu    = 2048
   instance_memory = 4096
+
+  scanner_provisioned_concurrency = 1
 
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import Snackbar from "src/components/Snackbar";
+import Snackbar from "src/components/core/Snackbar";
 
 const SNACKBAR_VISIBLE_TIME = 6000;
 

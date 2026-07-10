@@ -31,6 +31,8 @@ class ValidationErrorType(StrEnum):
     MAX_VALUE = "max_value"
     MIN_OR_MAX_VALUE = "min_or_max_value"
 
+    INVALID_DATE_ORDER = "invalid_date_order"
+
     NOT_IN_PROGRESS = "not_in_progress"
 
     # Competition window validation error types
@@ -46,7 +48,15 @@ class ValidationErrorType(StrEnum):
 
     MISSING_INCLUDED_IN_SUBMISSION = "missing_included_in_submission"
 
+    APPLICATION_SUBMISSION_NOT_FOUND = "application_submission_not_found"
+
+    AGENCY_NOT_FOUND = "agency_not_found"
+
     ORGANIZATION_REQUIRED = "organization_required"
     ORGANIZATION_NO_SAM_GOV_ENTITY = "organization_no_sam_gov_entity"
     ORGANIZATION_INACTIVE_IN_SAM_GOV = "organization_inactive_in_sam_gov"
     ORGANIZATION_SAM_GOV_EXPIRED = "organization_sam_gov_expired"
+
+    # File upload validation error types
+    PENDING_FILE_UPLOAD_LIMIT_EXCEEDED = "pending_file_upload_limit_exceeded"
+    FILE_NOT_FOUND_AT_LOCATION = "file_not_found_at_location"

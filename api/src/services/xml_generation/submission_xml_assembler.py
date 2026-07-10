@@ -6,7 +6,14 @@ from typing import Any
 from lxml import etree as lxml_etree
 
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
+from src.form_schema.forms import init_form_registry
 from src.services.applications.application_validation import is_form_required
+from src.services.xml_generation.config import load_xml_transform_config
+from src.services.xml_generation.constants import (
+    GRANTS_GOV_NAMESPACES,
+    SCHEMA_LOCATION_BASE_URL,
+    Namespace,
+)
 from src.services.xml_generation.header_generator import (
     generate_application_footer_xml,
     generate_application_header_xml,
@@ -30,6 +37,7 @@ class SubmissionXMLAssembler:
         self.application_submission = application_submission
         self.xml_service = XMLGenerationService()
         self.attachment_mapping = attachment_mapping
+        init_form_registry()
 
     def get_supported_forms(self) -> list[ApplicationForm]:
         """Get list of application forms that are supported for XML generation.
@@ -146,7 +154,7 @@ class SubmissionXMLAssembler:
 
         request = XMLGenerationRequest(
             application_data=app_form.application_response,
-            transform_config=app_form.form.json_to_xml_schema,
+            transform_config=load_xml_transform_config(form_name),
             pretty_print=pretty_print,
             attachment_mapping=attachment_mapping,
         )
@@ -179,34 +187,96 @@ class SubmissionXMLAssembler:
         form_elements = [self._parse_xml_string(xml) for xml in form_xmls]
 
         # Create root element with namespaces
-        nsmap = {
-            "header": "http://apply.grants.gov/system/Header-V1.0",
-            "footer": "http://apply.grants.gov/system/Footer-V1.0",
-            "glob": "http://apply.grants.gov/system/Global-V1.0",
-        }
+        # Add all required namespaces per Grants.gov specification
+        grant_ns = Namespace.GRANT
+        nsmap = GRANTS_GOV_NAMESPACES
 
-        root = lxml_etree.Element("GrantApplication", nsmap=nsmap)
+        # Create GrantApplication element with grant: namespace prefix
+        root = lxml_etree.Element(f"{{{grant_ns}}}GrantApplication", nsmap=nsmap)
+
+        # Add xsi:schemaLocation attribute
+        # Construct schema URL from competition's legacy_package_id
+        schema_url = self._get_schema_location_url()
+        if schema_url:
+            schema_location = f"{grant_ns} {schema_url}"
+            root.set(
+                f"{{{nsmap['xsi']}}}schemaLocation",
+                schema_location,
+            )
 
         # Add header (must strip XML declaration and use just the element)
         root.append(header_element)
 
-        # Add Forms wrapper
-        forms_element = lxml_etree.SubElement(root, "Forms")
+        # Add Forms wrapper with grant: namespace prefix for consistency with legacy
+        forms_element = lxml_etree.SubElement(root, f"{{{grant_ns}}}Forms")
         for form_element in form_elements:
             forms_element.append(form_element)
 
         # Add footer
         root.append(footer_element)
 
-        # Generate final XML string
+        # Generate final XML string with UTF-8 encoding (uppercase)
         if pretty_print:
             xml_bytes = lxml_etree.tostring(
-                root, encoding="utf-8", xml_declaration=True, pretty_print=True
+                root, encoding="UTF-8", xml_declaration=True, pretty_print=True
             )
         else:
-            xml_bytes = lxml_etree.tostring(root, encoding="utf-8", xml_declaration=True)
+            xml_bytes = lxml_etree.tostring(root, encoding="UTF-8", xml_declaration=True)
 
         return xml_bytes.decode("utf-8").strip()
+
+    def _get_schema_location_url(self) -> str | None:
+        """Get the schema location URL for xsi:schemaLocation attribute.
+
+        Constructs the URL from competition's opportunity number and CFDA number.
+        Format: https://apply07.grants.gov/apply/opportunities/schemas/agency/oppOPP_NUMBER-cfdaCFDA_NUMBER.xsd
+
+        Example: https://trainingapply.grants.gov/apply/opportunities/schemas/agency/oppSIMP-QUAD4-FORMS-10202025-cfda00.000.xsd
+
+        Returns:
+            Schema location URL or None if opportunity_number is not set
+        """
+        opportunity_number = self.application.competition.opportunity.opportunity_number
+
+        if not opportunity_number:
+            logger.warning(
+                "Competition opportunity_number is not set - cannot generate schema location",
+                extra={
+                    "application_id": self.application.application_id,
+                    "competition_id": self.application.competition.competition_id,
+                },
+            )
+            return None
+
+        # Get assistance listing number from the competition
+        # Note: A competition is associated with a single assistance listing (or none)
+        cfda_suffix = ""
+        opportunity_assistance_listing = self.application.competition.opportunity_assistance_listing
+
+        if opportunity_assistance_listing is not None:
+            assistance_listing_number = opportunity_assistance_listing.assistance_listing_number
+            if assistance_listing_number:
+                cfda_suffix = f"-cfda{assistance_listing_number}"
+            else:
+                logger.info(
+                    "Assistance listing exists but assistance_listing_number is None - XSD filename will not include CFDA",
+                    extra={
+                        "application_id": self.application.application_id,
+                        "competition_id": self.application.competition.competition_id,
+                    },
+                )
+        else:
+            logger.info(
+                "No assistance listing found for competition - XSD filename will not include CFDA",
+                extra={
+                    "application_id": self.application.application_id,
+                    "competition_id": self.application.competition.competition_id,
+                },
+            )
+
+        # Construct XSD filename with 'opp' prefix + opportunity number + optional CFDA suffix
+        xsd_filename = f"opp{opportunity_number}{cfda_suffix}.xsd"
+        return f"{SCHEMA_LOCATION_BASE_URL}/{xsd_filename}"
 
     def _parse_xml_string(self, xml_string: str) -> lxml_etree.Element:
         """Parse XML string into element tree."""

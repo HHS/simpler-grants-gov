@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import defusedxml.ElementTree as ET
 import xmlschema
 from lxml import etree
 
@@ -19,32 +20,50 @@ class XSDValidationError(Exception):
 class XSDValidator:
     """Validates XML against XSD schemas.
 
-    This validator assumes XSD files are already downloaded and cached locally.
+    This validator assumes XSD files are already downloaded and stored locally.
     Run the fetch-xsds CLI command first to download XSD files before validation.
     """
 
-    def __init__(self, xsd_cache_dir: str | Path):
-        """Initialize XSD validator with cache directory.
+    def __init__(self, xsd_dir: str | Path):
+        """Initialize XSD validator.
 
         Args:
-            xsd_cache_dir: Directory containing cached XSD files.
+            xsd_dir: Directory containing stored XSD files.
                           XSD files must be pre-downloaded using the fetch-xsds command.
 
         Raises:
-            XSDValidationError: If cache directory doesn't exist
+            XSDValidationError: If directory doesn't exist
         """
-        self.xsd_cache_dir = Path(xsd_cache_dir)
+        self.xsd_dir = Path(xsd_dir)
 
-        if not self.xsd_cache_dir.exists():
+        if not self.xsd_dir.exists():
             raise XSDValidationError(
-                f"XSD cache directory does not exist: {xsd_cache_dir}. "
+                f"XSD directory does not exist: {xsd_dir}. "
                 "Run 'flask task fetch-xsds' to download XSD files first."
             )
 
         self._schemas: dict[str, xmlschema.XMLSchema] = {}
 
+    def _build_local_locations(self) -> dict[str, str]:
+        """Build a namespace-to-local-path map from XSD files in xsd_dir.
+
+        This lets xmlschema resolve imports from local files instead of fetching
+        remote URLs, making validation faster and offline-capable.
+        """
+        locations: dict[str, str] = {}
+        for xsd_file in self.xsd_dir.glob("*.xsd"):
+            try:
+                tree = ET.parse(str(xsd_file))
+                root = tree.getroot()
+                ns = root.get("targetNamespace")
+                if ns:
+                    locations[ns] = str(xsd_file)
+            except Exception as e:
+                logger.warning("Failed to parse XSD file for locations map: %s (%s)", xsd_file, e)
+        return locations
+
     def get_xsd_path(self, form_name: str) -> Path:
-        """Get the path to a cached XSD file.
+        """Get the path to a stored XSD file.
 
         Args:
             form_name: The form name (e.g., "SF424_4_0")
@@ -56,7 +75,7 @@ class XSDValidator:
             XSDValidationError: If XSD file doesn't exist
         """
         xsd_filename = f"{form_name}.xsd"
-        xsd_path = self.xsd_cache_dir / xsd_filename
+        xsd_path = self.xsd_dir / xsd_filename
 
         if not xsd_path.exists():
             raise XSDValidationError(
@@ -90,7 +109,8 @@ class XSDValidator:
 
         try:
             logger.info(f"Loading XSD schema from: {xsd_path}")
-            schema = xmlschema.XMLSchema(str(xsd_path))
+            locations = self._build_local_locations()
+            schema = xmlschema.XMLSchema(str(xsd_path), locations=locations)
             self._schemas[cache_key] = schema
             return schema
 

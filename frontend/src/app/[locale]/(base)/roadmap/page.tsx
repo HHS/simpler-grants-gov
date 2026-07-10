@@ -3,7 +3,7 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 
-import RoadmapPageSections from "src/components/roadmap/RoadmapSections";
+import RoadmapPageSections from "./_components/RoadmapSections";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;

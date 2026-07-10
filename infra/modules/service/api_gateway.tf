@@ -1,6 +1,10 @@
 locals {
+  alpha_applications_model_name = "alphaApplicationsAttachments"
   # Root level paths, and their method types. If the method is an empty list, this has sub-paths, which will be defined
   # in another variable
+  # Note that by default, API gateway will encode all bodies of requests, which can cause issues for attachments/uploads.
+  # To handle this, you need to create an explicit endpoint that is expecting an upload, and have it use a model. See
+  # /alpha/applications/{app_id}/attachments for an example of how this is done
   root_endpoints = [
     # Terraform does not like conditionally setting an object that has different keys, so we have to force set the values
     # from a list, with the index being what is conditional
@@ -8,6 +12,7 @@ locals {
     {
       ".well-known"        = [],
       "docs"               = [{ "method" : "GET" }],
+      "alpha"              = [],
       "grantsws-agency"    = [],
       "grantsws-applicant" = [],
       "health"             = [{ "method" : "GET" }],
@@ -34,6 +39,8 @@ locals {
     {},
     {
       ".well-known/pki-validation"  = [],
+      "alpha/applications"          = [],
+      "alpha/forms"                 = [],
       "grantsws-agency/services"    = [],
       "grantsws-applicant/services" = [],
       "static/{proxy+}" = [{
@@ -46,6 +53,7 @@ locals {
         }
       }],
       "v1/users" = [],
+      "v1/files" = [],
   }][var.enable_api_gateway ? 1 : 0]
 
   second_level_endpoints = [
@@ -60,15 +68,33 @@ locals {
           "integration.request.path.proxy" : "method.request.path.proxy",
         }
       }],
-      "grantsws-agency/services/v2"    = [],
-      "grantsws-applicant/services/v2" = [],
-      "v1/users/login"                 = [{ "method" : "GET" }],
-      "v1/users/token"                 = [],
+      "alpha/applications/{application_id}" = [],
+      "alpha/forms/{form_id}"               = [],
+      "grantsws-agency/services/v2"         = [],
+      "grantsws-applicant/services/v2"      = [],
+      "v1/users/login"                      = [{ "method" : "GET" }],
+      "v1/users/logout"                     = [{ "method" : "GET" }],
+      "v1/users/token"                      = [],
+      "v1/files/{file_id}"                  = [],
   }][var.enable_api_gateway ? 1 : 0]
 
   third_level_endpoints = [
     {},
     {
+      "alpha/applications/{application_id}/attachments" = [{
+        "method" : "POST",
+        "api_key_required" : true,
+        "method_parameters" : {
+          "method.request.path.application_id" = true
+        },
+        "request_parameters" : {
+          "integration.request.path.application_id" : "method.request.path.application_id",
+        },
+        "request_models" : {
+          "multipart/form-data" : local.alpha_applications_model_name
+        }
+      }],
+      "alpha/forms/{form_id}/form_instructions" = [],
       "grantsws-agency/services/v2/{service_port_name}" = [{
         "method" : "POST",
         "method_parameters" : {
@@ -91,6 +117,52 @@ locals {
       "v1/users/login/result"   = [{ "method" : "GET" }],
       "v1/users/token/logout"   = [{ "method" : "GET" }],
       "v1/users/token/refresh"  = [{ "method" : "GET" }],
+      "v1/files/{file_id}/results" = [{
+        "method" : "GET",
+        "api_key_required" : true,
+        "enable_streaming" : true,
+        "method_parameters" : {
+          "method.request.path.file_id" = true
+        },
+        "request_parameters" : {
+          "integration.request.path.file_id" : "method.request.path.file_id",
+        }
+      }],
+  }][var.enable_api_gateway ? 1 : 0]
+
+  fourth_level_endpoints = [
+    {},
+    {
+      "alpha/forms/{form_id}/form_instructions/{form_instruction_id}" = [{
+        "method" : "PUT",
+        "api_key_required" : true,
+        "method_parameters" : {
+          "method.request.path.form_id"             = true,
+          "method.request.path.form_instruction_id" = true,
+        },
+        "request_parameters" : {
+          "integration.request.path.form_id" : "method.request.path.form_id",
+          "integration.request.path.form_instruction_id" : "method.request.path.form_instruction_id",
+        },
+        "request_models" : {
+          "multipart/form-data" : local.alpha_applications_model_name
+        }
+      }],
+      "alpha/applications/{application_id}/attachments/{application_attachment_id}" = [{
+        "method" : "PUT",
+        "api_key_required" : true,
+        "method_parameters" : {
+          "method.request.path.application_id"            = true,
+          "method.request.path.application_attachment_id" = true,
+        },
+        "request_parameters" : {
+          "integration.request.path.application_id" : "method.request.path.application_id",
+          "integration.request.path.application_attachment_id" : "method.request.path.application_attachment_id",
+        },
+        "request_models" : {
+          "multipart/form-data" : local.alpha_applications_model_name
+        }
+      }],
   }][var.enable_api_gateway ? 1 : 0]
 
   # In order to support multiple request methods, we need to be able to loop on all method types
@@ -103,7 +175,8 @@ locals {
         "method" : config.method,
         "api_key_required" : lookup(config, "api_key_required", false),
         "method_parameters" : lookup(config, "method_parameters", {}),
-        "request_parameters" : lookup(config, "request_parameters", {})
+        "request_parameters" : lookup(config, "request_parameters", {}),
+        "request_models" : lookup(config, "request_models", {}),
       }
     ]
   ]) : []
@@ -115,7 +188,8 @@ locals {
         "method" : config.method,
         "api_key_required" : lookup(config, "api_key_required", false),
         "method_parameters" : lookup(config, "method_parameters", {}),
-        "request_parameters" : lookup(config, "request_parameters", {})
+        "request_parameters" : lookup(config, "request_parameters", {}),
+        "request_models" : lookup(config, "request_models", {}),
       }
     ]
   ]) : []
@@ -127,7 +201,8 @@ locals {
         "method" : config.method,
         "api_key_required" : lookup(config, "api_key_required", false),
         "method_parameters" : lookup(config, "method_parameters", {}),
-        "request_parameters" : lookup(config, "request_parameters", {})
+        "request_parameters" : lookup(config, "request_parameters", {}),
+        "request_models" : lookup(config, "request_models", {}),
       }
     ]
   ]) : []
@@ -138,8 +213,23 @@ locals {
         "endpoint" : endpoint,
         "method" : config.method,
         "api_key_required" : lookup(config, "api_key_required", false),
+        "enable_streaming" : lookup(config, "enable_streaming", false),
         "method_parameters" : lookup(config, "method_parameters", {}),
-        "request_parameters" : lookup(config, "request_parameters", {})
+        "request_parameters" : lookup(config, "request_parameters", {}),
+        "request_models" : lookup(config, "request_models", {}),
+      }
+    ]
+  ]) : []
+  flattened_fourth_level_endpoints = var.enable_api_gateway ? flatten([
+    for endpoint, config_list in local.fourth_level_endpoints : [
+      for config in config_list : {
+        "id" : "${endpoint}-${config.method}",
+        "endpoint" : endpoint,
+        "method" : config.method,
+        "api_key_required" : lookup(config, "api_key_required", false),
+        "method_parameters" : lookup(config, "method_parameters", {}),
+        "request_parameters" : lookup(config, "request_parameters", {}),
+        "request_models" : lookup(config, "request_models", {}),
       }
     ]
   ]) : []
@@ -148,6 +238,7 @@ locals {
   first_level_endpoint_methods  = { for config in local.flattened_first_level_endpoints : config.id => config }
   second_level_endpoint_methods = { for config in local.flattened_second_level_endpoints : config.id => config }
   third_level_endpoint_methods  = { for config in local.flattened_third_level_endpoints : config.id => config }
+  fourth_level_endpoint_methods = { for config in local.flattened_fourth_level_endpoints : config.id => config }
 }
 
 resource "aws_api_gateway_rest_api" "api" {
@@ -158,12 +249,36 @@ resource "aws_api_gateway_rest_api" "api" {
   endpoint_configuration {
     types = ["REGIONAL"]
   }
+
+  binary_media_types = [
+    "multipart/form-data",
+  ]
+}
+
+resource "aws_api_gateway_model" "alpha_applications_model" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  rest_api_id  = aws_api_gateway_rest_api.api[0].id
+  name         = local.alpha_applications_model_name
+  description  = "Schema for allowing uploads to /alpha/applications/{app_id}/attachments"
+  content_type = "application/form-data"
+
+  schema = jsonencode({
+    "$schema" : "http://json-schema.org/draft-04/schema#",
+    "title" : "MediaFileUpload",
+    "type" : "object",
+    "properties" : {
+      "file" : { "type" : "string" }
+    }
+  })
 }
 
 resource "aws_api_gateway_method" "root" {
   # checkov:skip=CKV_AWS_59: Public endpoints or endpoint that is used as part of a flow don't need auth. Auth is enforced on greedy proxy
   # checkov:skip=CKV2_AWS_53: Integration is proxy to downstream ECS, input validation is done at that level to reduce duplicative work
   count = var.enable_api_gateway ? 1 : 0
+
+  depends_on = [aws_api_gateway_model.alpha_applications_model]
 
   rest_api_id   = aws_api_gateway_rest_api.api[0].id
   resource_id   = aws_api_gateway_rest_api.api[0].root_resource_id
@@ -186,7 +301,7 @@ resource "aws_api_gateway_integration" "root" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri = "https://${var.optional_extra_alb_domains[0]}/"
+  uri = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/"
 }
 
 resource "aws_api_gateway_resource" "root_endpoints" {
@@ -207,6 +322,7 @@ resource "aws_api_gateway_method" "root_endpoints" {
   authorization = "NONE"
 
   request_parameters = each.value.method_parameters
+  request_models     = each.value.request_models
   api_key_required   = each.value.api_key_required
 }
 
@@ -225,7 +341,7 @@ resource "aws_api_gateway_integration" "root_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -247,6 +363,7 @@ resource "aws_api_gateway_method" "first_level_endpoints" {
   authorization = "NONE"
 
   request_parameters = each.value.method_parameters
+  request_models     = each.value.request_models
   api_key_required   = each.value.api_key_required
 }
 
@@ -265,7 +382,7 @@ resource "aws_api_gateway_integration" "first_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -287,6 +404,7 @@ resource "aws_api_gateway_method" "second_level_endpoints" {
   authorization = "NONE"
 
   request_parameters = each.value.method_parameters
+  request_models     = each.value.request_models
   api_key_required   = each.value.api_key_required
 }
 
@@ -305,7 +423,7 @@ resource "aws_api_gateway_integration" "second_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -327,6 +445,7 @@ resource "aws_api_gateway_method" "third_level_endpoints" {
   authorization = "NONE"
 
   request_parameters = each.value.method_parameters
+  request_models     = each.value.request_models
   api_key_required   = each.value.api_key_required
 }
 
@@ -343,9 +462,53 @@ resource "aws_api_gateway_integration" "third_level_endpoints" {
   type        = "HTTP_PROXY"
 
   passthrough_behavior = "WHEN_NO_MATCH"
+  # Use extended timeout for streaming endpoints (up to 15 minutes), otherwise use default 29 seconds
+  timeout_milliseconds = each.value.enable_streaming ? 900000 : 29000
+  # Enable streaming mode for endpoints that support it
+  response_transfer_mode = each.value.enable_streaming ? "STREAM" : null
+
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  request_parameters = each.value.request_parameters
+}
+
+resource "aws_api_gateway_resource" "fourth_level_endpoints" {
+  for_each = local.fourth_level_endpoints
+
+  parent_id   = aws_api_gateway_resource.third_level_endpoints[join("/", slice(split("/", each.key), 0, 4))].id
+  path_part   = split("/", each.key)[4]
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+}
+
+resource "aws_api_gateway_method" "fourth_level_endpoints" {
+  # checkov:skip=CKV2_AWS_53: Integration is proxy to downstream ECS, input validation is done at that level to reduce duplicative work
+  for_each = local.fourth_level_endpoint_methods
+
+  rest_api_id   = aws_api_gateway_rest_api.api[0].id
+  resource_id   = aws_api_gateway_resource.fourth_level_endpoints[each.value.endpoint].id
+  http_method   = each.value.method
+  authorization = "NONE"
+
+  request_parameters = each.value.method_parameters
+  request_models     = each.value.request_models
+  api_key_required   = each.value.api_key_required
+}
+
+resource "aws_api_gateway_integration" "fourth_level_endpoints" {
+  for_each = local.fourth_level_endpoint_methods
+
+  depends_on = [aws_api_gateway_method.fourth_level_endpoints]
+
+  http_method             = each.value.method
+  integration_http_method = each.value.method
+
+  resource_id = aws_api_gateway_resource.fourth_level_endpoints[each.value.endpoint].id
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+  type        = "HTTP_PROXY"
+
+  passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -357,6 +520,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
     aws_api_gateway_integration.first_level_endpoints,
     aws_api_gateway_integration.second_level_endpoints,
     aws_api_gateway_integration.third_level_endpoints,
+    aws_api_gateway_integration.fourth_level_endpoints,
   ]
 
   rest_api_id = aws_api_gateway_rest_api.api[0].id
@@ -402,6 +566,7 @@ resource "aws_cloudwatch_log_group" "api_gateway_logs" {
   # checkov:skip=CKV_AWS_158:Encrypt gateway logs with customer key in future work
 }
 
+
 resource "aws_api_gateway_method_settings" "api_v1_stage_settings" {
   count = var.enable_api_gateway ? 1 : 0
 
@@ -417,8 +582,9 @@ resource "aws_api_gateway_method_settings" "api_v1_stage_settings" {
   # checkov:skip=CKV_AWS_225:Cache disabled for now, will be followed up in a future ticket
 }
 
+# trivy:ignore:AVD-AWS-0005
 resource "aws_api_gateway_domain_name" "api" {
-  count = var.enable_api_gateway ? 1 : 0
+  count = var.enable_api_gateway && var.certificate_arn != null ? 1 : 0
   # This will become a different variable since it will be the current API domain and cert
   domain_name              = var.domain_name
   regional_certificate_arn = var.certificate_arn
@@ -431,7 +597,7 @@ resource "aws_api_gateway_domain_name" "api" {
 }
 
 resource "aws_api_gateway_base_path_mapping" "api_domain_name_mapping_v1" {
-  count       = var.enable_api_gateway ? 1 : 0
+  count       = var.enable_api_gateway && var.certificate_arn != null ? 1 : 0
   api_id      = aws_api_gateway_rest_api.api[0].id
   domain_name = aws_api_gateway_domain_name.api[0].domain_name
   stage_name  = aws_api_gateway_stage.api_v1_stage[0].stage_name

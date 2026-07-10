@@ -2,26 +2,30 @@ import logging
 
 from . import (
     agency_models,
-    base,
+    api_schema_table,
+    award_recommendation_models,
     competition_models,
     entity_models,
     extract_models,
+    file_upload_models,
     lookup_models,
     opportunity_models,
     sam_extract_models,
     task_models,
     user_models,
+    workflow_models,
 )
 
 logger = logging.getLogger(__name__)
 
 # Re-export metadata
 # This is used by tests to create the test database.
-metadata = base.metadata
+metadata = api_schema_table.metadata
 
 __all__ = [
     "metadata",
     "opportunity_models",
+    "award_recommendation_models",
     "lookup_models",
     "agency_models",
     "user_models",
@@ -30,4 +34,6 @@ __all__ = [
     "competition_models",
     "sam_extract_models",
     "entity_models",
+    "workflow_models",
+    "file_upload_models",
 ]

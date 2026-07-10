@@ -1,10 +1,8 @@
-import { Meta } from "@storybook/react";
+import HomepageHero from "src/app/[locale]/(base)/_components/sections/HomepageHero";
 
-import Hero from "src/components/homepage/sections/HomepageHero";
-
-const meta: Meta<typeof Hero> = {
-  title: "Components/Hero",
-  component: Hero,
+const meta = {
+  title: "Components/HomepageHero",
+  component: HomepageHero,
 };
 export default meta;
 

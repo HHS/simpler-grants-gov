@@ -2,11 +2,12 @@
 
 from datetime import date
 
+import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
+from src.services.xml_generation.constants import Namespace
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -15,7 +16,6 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
@@ -25,7 +25,7 @@ class TestSubmissionXMLAssembler:
     """Test cases for SubmissionXMLAssembler."""
 
     @pytest.fixture
-    def sample_application(self, enable_factory_create, db_session: db.Session):
+    def sample_application(self, enable_factory_create, db_session: db.Session, create_test_form):
         """Create a sample application with SF424 form for testing."""
         agency = AgencyFactory.create()
 
@@ -45,10 +45,11 @@ class TestSubmissionXMLAssembler:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         # Create SF424 form with XML transform config
-        sf424_form = FormFactory.create(
+        sf424_form = create_test_form(
             form_name="Application for Federal Assistance (SF-424)",
             short_form_name="SF424_4_0",
             form_version="4.0",
@@ -60,8 +61,6 @@ class TestSubmissionXMLAssembler:
         )
 
         # Create competition form linking to SF424
-        from tests.src.db.models.factories import CompetitionFormFactory
-
         competition_form = CompetitionFormFactory.create(competition=competition, form=sf424_form)
 
         # Create application form with sample data
@@ -71,6 +70,19 @@ class TestSubmissionXMLAssembler:
             application_response={
                 "submission_type": "Application",
                 "organization_name": "Test Organization",
+                "applicant": {
+                    "street1": "123 Main St",
+                    "city": "Washington",
+                    "state": "DC: District of Columbia",
+                    "zip_code": "20001",
+                    "country": "USA: UNITED STATES",
+                },
+                "contact_person": {
+                    "first_name": "John",
+                    "last_name": "Doe",
+                },
+                "phone_number": "555-123-4567",
+                "email": "test@example.org",
                 "project_title": "Test Project",
                 "federal_estimated_funding": "50000.00",
                 "certification_agree": True,
@@ -100,11 +112,16 @@ class TestSubmissionXMLAssembler:
         assert app_form.form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_mixed_support(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test getting supported forms when some forms are unsupported."""
         # Add an unsupported form to the application
-        unsupported_form = FormFactory.create(
+        unsupported_form = create_test_form(
             form_name="SF-424A Budget Information",
             short_form_name="SF424A_1_0",
             form_version="1.0",
@@ -128,14 +145,19 @@ class TestSubmissionXMLAssembler:
         assert app_form.form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_none_supported(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test getting supported forms when no forms are supported."""
         # Remove the SF424 form and add only unsupported forms
         sample_application.application_forms = []
         db_session.flush()
 
-        unsupported_form = FormFactory.create(
+        unsupported_form = create_test_form(
             form_name="SF-424A Budget Information",
             short_form_name="SF424A_1_0",
             form_version="1.0",
@@ -172,15 +194,17 @@ class TestSubmissionXMLAssembler:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         # Verify root element
-        assert root.tag == "GrantApplication"
+        grant_ns = f"{{{Namespace.GRANT}}}"
+        assert root.tag == f"{grant_ns}GrantApplication"
 
         # Verify header element
-        header_ns = "{http://apply.grants.gov/system/Header-V1.0}"
+        header_ns = f"{{{Namespace.HEADER}}}"
         header_elements = root.findall(f".//{header_ns}GrantSubmissionHeader")
         assert len(header_elements) == 1
 
-        # Verify Forms element
-        forms_elements = root.findall(".//Forms")
+        # Verify Forms element with grant namespace
+        grant_forms_tag = f"{grant_ns}Forms"
+        forms_elements = root.findall(f".//{grant_forms_tag}")
         assert len(forms_elements) == 1
 
         # Verify SF424 form element inside Forms
@@ -188,10 +212,45 @@ class TestSubmissionXMLAssembler:
         sf424_elements = forms_elements[0].findall(f".//{sf424_ns}SF424_4_0")
         assert len(sf424_elements) == 1
 
+        # Verify schemaLocation is set correctly
+        # Note: The fixture includes an assistance listing with number "12.345"
+        xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
+        schema_location = root.get(f"{xsi_ns}schemaLocation")
+        assert schema_location is not None
+        assert "oppTEST-OPP-001-cfda12.345.xsd" in schema_location
+        assert "None.xsd" not in schema_location
+
         # Verify footer element
-        footer_ns = "{http://apply.grants.gov/system/Footer-V1.0}"
+        footer_ns = f"{{{Namespace.FOOTER}}}"
         footer_elements = root.findall(f".//{footer_ns}GrantSubmissionFooter")
         assert len(footer_elements) == 1
+
+    def test_generate_complete_submission_xml_includes_cfda_when_present(
+        self, sample_application, sample_application_submission
+    ):
+        """Test that schema location includes CFDA number when present on competition."""
+
+        # Verify it's set up correctly
+        assert sample_application.competition.opportunity_assistance_listing is not None
+        assert (
+            sample_application.competition.opportunity_assistance_listing.assistance_listing_number
+            == "12.345"
+        )
+
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        # Parse XML to verify structure
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        # Verify schemaLocation is set correctly (includes CFDA number)
+        xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
+        schema_location = root.get(f"{xsi_ns}schemaLocation")
+        assert schema_location is not None
+        assert "oppTEST-OPP-001-cfda12.345.xsd" in schema_location
+        assert "None.xsd" not in schema_location
 
     def test_generate_complete_submission_xml_contains_header_data(
         self, sample_application, sample_application_submission
@@ -221,6 +280,94 @@ class TestSubmissionXMLAssembler:
         assert "Test Project" in xml_string
         assert "50000.00" in xml_string
 
+    def test_generate_complete_submission_xml_contains_contact_person(
+        self, sample_application, sample_application_submission
+    ):
+        """Test that generated XML contains ContactPerson element with correct structure."""
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        # Verify ContactPerson element exists
+        assert "<SF424_4_0:ContactPerson>" in xml_string, "ContactPerson element not found in XML"
+        assert "</SF424_4_0:ContactPerson>" in xml_string, "ContactPerson closing tag not found"
+
+        # Verify ContactPerson contains FirstName and LastName with globLib namespace
+        assert "globLib:FirstName" in xml_string, "globLib:FirstName not found in ContactPerson"
+        assert "globLib:LastName" in xml_string, "globLib:LastName not found in ContactPerson"
+        assert "John" in xml_string, "ContactPerson FirstName 'John' not found"
+        assert "Doe" in xml_string, "ContactPerson LastName 'Doe' not found"
+
+        # Verify ContactPerson comes after Applicant
+        applicant_pos = xml_string.find("<SF424_4_0:Applicant>")
+        contact_person_pos = xml_string.find("<SF424_4_0:ContactPerson>")
+        assert applicant_pos != -1, "Applicant element not found"
+        assert contact_person_pos != -1, "ContactPerson element not found"
+        assert (
+            applicant_pos < contact_person_pos
+        ), "ContactPerson should come after Applicant in XML"
+
+    def test_generate_complete_submission_xml_contains_applicant_and_contact_person(
+        self, sample_application, sample_application_submission
+    ):
+        """Test that generated XML contains both Applicant and ContactPerson elements."""
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        # Parse XML to verify structure
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        # Find SF424 form element
+        sf424_ns = "{http://apply.grants.gov/forms/SF424_4_0-V4.0}"
+        grant_ns_prefix = f"{{{Namespace.GRANT}}}"
+        forms_element = root.find(f".//{grant_ns_prefix}Forms")
+        sf424_element = forms_element.find(f".//{sf424_ns}SF424_4_0")
+        assert sf424_element is not None, "SF424_4_0 element not found"
+
+        # Verify Applicant element exists
+        applicant_elements = sf424_element.findall(f".//{sf424_ns}Applicant")
+        assert len(applicant_elements) == 1, "Expected exactly one Applicant element"
+        applicant = applicant_elements[0]
+
+        # Verify Applicant has child elements with globLib namespace
+        glob_lib_ns = "{http://apply.grants.gov/system/GlobalLibrary-V2.0}"
+        assert (
+            applicant.find(f".//{glob_lib_ns}Street1") is not None
+        ), "Street1 not found in Applicant"
+        assert applicant.find(f".//{glob_lib_ns}City") is not None, "City not found in Applicant"
+        assert applicant.find(f".//{glob_lib_ns}State") is not None, "State not found in Applicant"
+
+        # Verify ContactPerson element exists
+        contact_person_elements = sf424_element.findall(f".//{sf424_ns}ContactPerson")
+        assert len(contact_person_elements) == 1, "Expected exactly one ContactPerson element"
+        contact_person = contact_person_elements[0]
+
+        # Verify ContactPerson has child elements with globLib namespace
+        first_name = contact_person.find(f".//{glob_lib_ns}FirstName")
+        last_name = contact_person.find(f".//{glob_lib_ns}LastName")
+        assert first_name is not None, "FirstName not found in ContactPerson"
+        assert last_name is not None, "LastName not found in ContactPerson"
+        assert first_name.text == "John", f"Expected FirstName='John', got '{first_name.text}'"
+        assert last_name.text == "Doe", f"Expected LastName='Doe', got '{last_name.text}'"
+
+        # Verify element order: Applicant should come before ContactPerson
+        sf424_children = list(sf424_element)
+        applicant_index = None
+        contact_person_index = None
+        for i, child in enumerate(sf424_children):
+            if child.tag == f"{sf424_ns}Applicant":
+                applicant_index = i
+            elif child.tag == f"{sf424_ns}ContactPerson":
+                contact_person_index = i
+
+        assert applicant_index is not None, "Applicant element not found in SF424 children"
+        assert contact_person_index is not None, "ContactPerson element not found in SF424 children"
+        assert (
+            applicant_index < contact_person_index
+        ), f"ContactPerson (index {contact_person_index}) should come after Applicant (index {applicant_index})"
+
     def test_generate_complete_submission_xml_contains_footer_data(
         self, sample_application, sample_application_submission
     ):
@@ -233,14 +380,19 @@ class TestSubmissionXMLAssembler:
         assert "GRANT12345678" in xml_string  # Tracking number
 
     def test_generate_complete_submission_xml_no_supported_forms(
-        self, sample_application, sample_application_submission, enable_factory_create, db_session
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that XML generation raises error when no supported forms."""
         # Remove the SF424 form and add only unsupported forms
         sample_application.application_forms = []
         db_session.flush()
 
-        unsupported_form = FormFactory.create(
+        unsupported_form = create_test_form(
             form_name="SF-424A Budget Information",
             short_form_name="SF424A_1_0",
             form_version="1.0",
@@ -278,7 +430,7 @@ class TestSubmissionXMLAssembler:
         assert result is None
 
     def test_generate_complete_submission_xml_with_only_unsupported_forms(
-        self, enable_factory_create, db_session
+        self, enable_factory_create, db_session, create_test_form
     ):
         """Test that XML generation returns None when only unsupported forms are present with XML generation enabled."""
         # Create application infrastructure
@@ -297,10 +449,11 @@ class TestSubmissionXMLAssembler:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         # Create an UNSUPPORTED form (SF-424A doesn't have XML transform config)
-        unsupported_form = FormFactory.create(
+        unsupported_form = create_test_form(
             form_name="Budget Information - Non-Construction Programs",
             short_form_name="SF424A_1_1",
             form_version="1.1",
@@ -368,7 +521,8 @@ class TestSubmissionXMLAssembler:
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
-        forms_elements = root.findall(".//Forms")
+        grant_ns_prefix = f"{{{Namespace.GRANT}}}"
+        forms_elements = root.findall(f".//{grant_ns_prefix}Forms")
         assert len(forms_elements) == 1
 
         # Count child elements in Forms (should have at least 1)
@@ -394,9 +548,9 @@ class TestSubmissionXMLAssembler:
         assert "encoding" in xml_string[:50]  # Check encoding is in declaration
 
         # Verify namespaces are properly declared
-        assert "xmlns:header" in xml_string
-        assert "xmlns:footer" in xml_string
-        assert "xmlns:glob" in xml_string
+        assert f'xmlns:header="{Namespace.HEADER}"' in xml_string
+        assert f'xmlns:footer="{Namespace.FOOTER}"' in xml_string
+        assert f'xmlns:glob="{Namespace.GLOB}"' in xml_string
 
     def test_parse_xml_string_valid(self, sample_application, sample_application_submission):
         """Test parsing a valid XML string."""
@@ -465,16 +619,21 @@ class TestSubmissionXMLAssembler:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         # Verify namespace declarations exist
-        assert "http://apply.grants.gov/system/Header-V1.0" in root.nsmap.values()
-        assert "http://apply.grants.gov/system/Footer-V1.0" in root.nsmap.values()
-        assert "http://apply.grants.gov/system/Global-V1.0" in root.nsmap.values()
+        assert Namespace.HEADER in root.nsmap.values()
+        assert Namespace.FOOTER in root.nsmap.values()
+        assert Namespace.GLOB in root.nsmap.values()
 
     def test_get_supported_forms_filters_non_required_not_included(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that non-required forms with is_included_in_submission=False are filtered out."""
         # Create a non-required form with XML support
-        optional_form = FormFactory.create(
+        optional_form = create_test_form(
             form_name="Optional Form",
             short_form_name="OPTIONAL_1_0",
             form_version="1.0",
@@ -504,11 +663,16 @@ class TestSubmissionXMLAssembler:
         assert supported_forms[0].form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_includes_non_required_when_included(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that non-required forms with is_included_in_submission=True are included."""
         # Create a non-required form with XML support
-        optional_form = FormFactory.create(
+        optional_form = create_test_form(
             form_name="Optional Form",
             short_form_name="OPTIONAL_1_0",
             form_version="1.0",
@@ -556,11 +720,16 @@ class TestSubmissionXMLAssembler:
         assert supported_forms[0].form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_filters_non_required_null_is_included(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self,
+        sample_application,
+        sample_application_submission,
+        enable_factory_create,
+        db_session,
+        create_test_form,
     ):
         """Test that non-required forms with is_included_in_submission=None are filtered out."""
         # Create a non-required form with XML support
-        optional_form = FormFactory.create(
+        optional_form = create_test_form(
             form_name="Optional Form",
             short_form_name="OPTIONAL_1_0",
             form_version="1.0",

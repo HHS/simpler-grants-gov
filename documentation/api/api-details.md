@@ -41,8 +41,8 @@ For example, if we wanted to define an endpoint with a request like:
 We would define the Marshmallow schema in-python like so:
 ```py
 from enum import StrEnum
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
 
 class Suffix(StrEnum):
     SENIOR = "SR"
@@ -82,7 +82,7 @@ but it's recommended you try to populate the following:
 You can specify validators that will be run when the request is being serialized by APIFlask
 
 Defining a response works the exact same way however field validation does not occur on response, only formatting.
-To keep our response schema following a consistent pattern, we have a few base schema classes like [AbstractResponseSchema](../../api/src/api/schemas/response_schema.py)
+To keep our response schema following a consistent pattern, we have a few base schema classes like [AbstractResponseSchema](../../backend/grants_shared/src/grants_shared/api/schemas/response_schema.py)
 that you can derive from for shared values like the message.
 
 ### Schema tips
@@ -110,16 +110,17 @@ define it like so:
 
 
 ```py
-from src.auth.api_key_auth import api_key_auth
 from apiflask import APIBlueprint
-import src.api.response as response
+
+import grants_shared.api.response as response
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 
 example_blueprint = APIBlueprint("Example", __name__, tag="Example")
 
 @example_blueprint.post("/example-route/<string:example_id>")
 @example_blueprint.input(ExampleSchema, arg_name="body") # As defined above, arg_name is used to map to the field in the function below
 @example_blueprint.output(ExampleResponseSchema)
-@example_blueprint.auth_required(api_key_auth) # The HTTPTokenAuth object that has a registered authentication function
+@example_blueprint.auth_required(jwt_or_api_user_key_multi_auth) # Supports both JWT (X-SGG-Token) and API User Key (X-API-Key) auth
 def post_example_route(example_id: str, body: dict) -> response.ApiResponse:
     # Implement API logic
 

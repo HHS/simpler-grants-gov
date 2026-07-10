@@ -4,6 +4,8 @@ import logging
 from http import HTTPStatus
 from uuid import UUID
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 from common_grants_sdk.schemas.pydantic import (
     OppFilters,
     OpportunitiesListResponse,
@@ -15,33 +17,31 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SortedResultsInfo,
 )
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.util.dict_util import flatten_dict
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
-from src.api.common_grants.common_grants_schemas import (
+from src.api.common_grants.common_grants_utils import with_cg_error_handler
+from src.api.common_grants.schemas.marshmallow.schemas import (
     OpportunitiesListResponse as OpportunitiesListResponseSchema,
 )
-from src.api.common_grants.common_grants_schemas import (
+from src.api.common_grants.schemas.marshmallow.schemas import (
     OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
 )
-from src.api.common_grants.common_grants_schemas import (
+from src.api.common_grants.schemas.marshmallow.schemas import (
     OpportunityResponse as OpportunityResponseSchema,
 )
-from src.api.common_grants.common_grants_schemas import (
+from src.api.common_grants.schemas.marshmallow.schemas import (
     OpportunitySearchRequest as OpportunitySearchRequestSchema,
 )
-from src.api.common_grants.common_grants_schemas import (
+from src.api.common_grants.schemas.marshmallow.schemas import (
     PaginatedQueryParams as PaginatedQueryParamsSchema,
 )
-from src.api.common_grants.common_grants_utils import with_cg_error_handler
 from src.auth.api_user_key_auth import api_user_key_auth
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
 from src.services.common_grants.transformation import build_filter_info
-from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 
@@ -146,9 +146,11 @@ def search_opportunities(
 
     # Fetch data from service
     search_request = OpportunitySearchRequest.model_validate(json_data)
-    opportunity_data, pagination_data = CommonGrantsOpportunityService.search_opportunities(
-        search_client,
-        search_request,
+    opportunity_data, pagination_data, custom_filter_errors = (
+        CommonGrantsOpportunityService.search_opportunities(
+            search_client,
+            search_request,
+        )
     )
 
     # Define response data
@@ -164,7 +166,7 @@ def search_opportunities(
             sort_order=sorting_data.sort_order,
             errors=[],
         ),
-        filter_info=build_filter_info(filter_data),
+        filter_info=build_filter_info(filter_data, custom_filter_errors),
     )
 
     # Transform response data from CG pydantic to CG marshmallow

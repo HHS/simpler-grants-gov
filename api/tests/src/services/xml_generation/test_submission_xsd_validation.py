@@ -9,10 +9,9 @@ from datetime import date
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
-from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
-from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
-from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
+from src.form_schema.forms.sf424 import SF424_v4_0
+from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from src.services.xml_generation.validation.xsd_validator import XSDValidator
 from tests.src.db.models.factories import (
@@ -22,35 +21,31 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
 
 
-@pytest.mark.xml_validation
 class TestSubmissionXSDValidation:
     """End-to-end XSD validation tests for complete application submissions."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
+        """Create XSD validator with directory."""
         from pathlib import Path
 
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
-        return XSDValidator(xsd_cache_dir)
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def sf424_application(self, enable_factory_create, db_session: db.Session):
+    def sf424_application(self, enable_factory_create, seed_form_registry):
         """Create an application with SF-424 form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -70,15 +65,10 @@ class TestSubmissionXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create SF424 form with XML transform config
-        sf424_form = FormFactory.create(
-            form_name="Application for Federal Assistance (SF-424)",
-            short_form_name="SF424_4_0",
-            form_version="4.0",
-            json_to_xml_schema=SF424_TRANSFORM_RULES,
-        )
+        sf424_form = SF424_v4_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="End-to-End Test Application"
@@ -98,12 +88,16 @@ class TestSubmissionXSDValidation:
                 "organization_name": "Test Research University",
                 "employer_taxpayer_identification_number": "123456789",  # Required per XSD
                 "sam_uei": "TEST12345678",  # Required per XSD (exactly 12 chars)
-                "applicant_address": {  # Required per XSD
+                "applicant": {  # Required per XSD
                     "street1": "123 Main St",
                     "city": "Washington",
                     "state": "DC: District of Columbia",
-                    "zip_postal_code": "20001",
+                    "zip_code": "20001",
                     "country": "USA: UNITED STATES",
+                },
+                "contact_person": {  # Required per XSD
+                    "first_name": "John",
+                    "last_name": "Doe",
                 },
                 "phone_number": "555-123-4567",  # Required per XSD
                 "email": "test@example.org",  # Required per XSD
@@ -139,7 +133,7 @@ class TestSubmissionXSDValidation:
         return application
 
     @pytest.fixture
-    def sf424a_application(self, enable_factory_create, db_session: db.Session):
+    def sf424a_application(self, enable_factory_create, seed_form_registry):
         """Create an application with SF-424A form and realistic budget data."""
         agency = AgencyFactory.create()
 
@@ -159,15 +153,10 @@ class TestSubmissionXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create SF424A form with XML transform config
-        sf424a_form = FormFactory.create(
-            form_name="Budget Information - Non-Construction Programs",
-            short_form_name="SF424A",
-            form_version="1.0",
-            json_to_xml_schema=SF424A_TRANSFORM_RULES,
-        )
+        sf424a_form = SF424a_v1_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="Budget Test Application"
@@ -228,9 +217,7 @@ class TestSubmissionXSDValidation:
 
         return application
 
-    def test_sf424_submission_xml_validates_against_xsd(
-        self, sf424_application, xsd_validator, db_session
-    ):
+    def test_sf424_submission_xml_validates_against_xsd(self, sf424_application, xsd_validator):
         """Test that complete SF-424 submission XML validates against XSD schema."""
         # Create application submission
         application_submission = ApplicationSubmissionFactory.create(
@@ -252,7 +239,8 @@ class TestSubmissionXSDValidation:
 
         # Extract SF424 form element
         sf424_ns = "{http://apply.grants.gov/forms/SF424_4_0-V4.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         sf424_elements = forms_element.findall(f".//{sf424_ns}SF424_4_0")
@@ -274,9 +262,8 @@ class TestSubmissionXSDValidation:
             f"Generated XML:\n{sf424_xml[:1000]}"
         )
 
-    def test_sf424a_submission_xml_validates_against_xsd(
-        self, sf424a_application, xsd_validator, db_session
-    ):
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
+    def test_sf424a_submission_xml_validates_against_xsd(self, sf424a_application, xsd_validator):
         """Test that complete SF-424A submission XML validates against XSD schema."""
         # Create application submission
         application_submission = ApplicationSubmissionFactory.create(
@@ -298,7 +285,9 @@ class TestSubmissionXSDValidation:
 
         # Extract SF424A form element
         sf424a_ns = "{http://apply.grants.gov/forms/SF424A-V1.0}"
-        forms_element = root.find(".//Forms")
+
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         sf424a_elements = forms_element.findall(f".//{sf424a_ns}BudgetInformation")
@@ -320,8 +309,9 @@ class TestSubmissionXSDValidation:
             f"Generated XML:\n{sf424a_xml[:1000]}"
         )
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_multi_form_submission_xml_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that submission with multiple forms validates all forms against XSD schemas."""
         # Create application with both SF-424 and SF-424A
@@ -343,6 +333,7 @@ class TestSubmissionXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         application = ApplicationFactory.create(
@@ -350,12 +341,7 @@ class TestSubmissionXSDValidation:
         )
 
         # Add SF-424 form
-        sf424_form = FormFactory.create(
-            form_name="Application for Federal Assistance (SF-424)",
-            short_form_name="SF424_4_0",
-            form_version="4.0",
-            json_to_xml_schema=SF424_TRANSFORM_RULES,
-        )
+        sf424_form = SF424_v4_0
         comp_form_424 = CompetitionFormFactory.create(competition=competition, form=sf424_form)
         ApplicationFormFactory.create(
             application=application,
@@ -367,12 +353,16 @@ class TestSubmissionXSDValidation:
                 "organization_name": "Multi-Form Test Org",
                 "employer_taxpayer_identification_number": "987654321",  # Required per XSD
                 "sam_uei": "MULTI8765432",  # Required per XSD (exactly 12 chars)
-                "applicant_address": {  # Required per XSD
+                "applicant": {  # Required per XSD
                     "street1": "456 Oak Ave",
                     "city": "Washington",
                     "state": "DC: District of Columbia",
-                    "zip_postal_code": "20002",
+                    "zip_code": "20002",
                     "country": "USA: UNITED STATES",
+                },
+                "contact_person": {  # Required per XSD
+                    "first_name": "Jane",
+                    "last_name": "Smith",
                 },
                 "phone_number": "555-987-6543",  # Required per XSD
                 "email": "multi@example.org",  # Required per XSD
@@ -406,12 +396,7 @@ class TestSubmissionXSDValidation:
         )
 
         # Add SF-424A form
-        sf424a_form = FormFactory.create(
-            form_name="Budget Information - Non-Construction Programs",
-            short_form_name="SF424A",
-            form_version="1.0",
-            json_to_xml_schema=SF424A_TRANSFORM_RULES,
-        )
+        sf424a_form = SF424a_v1_0
         comp_form_424a = CompetitionFormFactory.create(competition=competition, form=sf424a_form)
         ApplicationFormFactory.create(
             application=application,
@@ -471,8 +456,8 @@ class TestSubmissionXSDValidation:
         # Parse complete XML
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
-
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None
 
         # Validate SF-424
@@ -503,7 +488,7 @@ class TestSubmissionXSDValidation:
             "valid"
         ], f"SF-424A validation failed: {sf424a_validation['error_message']}"
 
-    def test_submission_xml_structure_is_well_formed(self, sf424_application, db_session):
+    def test_submission_xml_structure_is_well_formed(self, sf424_application):
         """Test that generated submission XML has proper structure even without XSD validation."""
         application_submission = ApplicationSubmissionFactory.create(
             application=sf424_application,
@@ -517,8 +502,9 @@ class TestSubmissionXSDValidation:
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
-        # Verify root element
-        assert root.tag == "GrantApplication"
+        # Verify root element (with grant: namespace prefix)
+        grant_ns = "http://apply.grants.gov/system/MetaGrantApplication"
+        assert root.tag == f"{{{grant_ns}}}GrantApplication"
 
         # Verify required namespaces exist
         assert "http://apply.grants.gov/system/Header-V1.0" in root.nsmap.values()
@@ -530,7 +516,8 @@ class TestSubmissionXSDValidation:
         footer_ns = "{http://apply.grants.gov/system/Footer-V1.0}"
 
         header = root.find(f".//{header_ns}GrantSubmissionHeader")
-        forms = root.find(".//Forms")
+        ns = {"grant": grant_ns}
+        forms = root.find(".//grant:Forms", namespaces=ns)
         footer = root.find(f".//{footer_ns}GrantSubmissionFooter")
 
         assert header is not None, "Header not found"
@@ -540,13 +527,15 @@ class TestSubmissionXSDValidation:
         # Verify order: Header should come before Forms, Forms before Footer
         children = list(root)
         header_idx = next(i for i, child in enumerate(children) if "Header" in child.tag)
-        forms_idx = next(i for i, child in enumerate(children) if child.tag == "Forms")
+        forms_idx = next(
+            i for i, child in enumerate(children) if child.tag.split("}")[-1] == "Forms"
+        )
         footer_idx = next(i for i, child in enumerate(children) if "Footer" in child.tag)
 
         assert header_idx < forms_idx < footer_idx, "Elements not in correct order"
 
     @pytest.fixture
-    def sflll_application(self, enable_factory_create, db_session: db.Session):
+    def sflll_application(self, enable_factory_create, seed_form_registry):
         """Create an application with SF-LLL form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -566,15 +555,10 @@ class TestSubmissionXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create SF-LLL form with XML transform config
-        sflll_form = FormFactory.create(
-            form_name="Disclosure of Lobbying Activities (SF-LLL)",
-            short_form_name="SFLLL_2_0",
-            form_version="2.0",
-            json_to_xml_schema=SFLLL_TRANSFORM_RULES,
-        )
+        sflll_form = SFLLL_v2_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-LLL Test Application"
@@ -651,7 +635,7 @@ class TestSubmissionXSDValidation:
 
         return application
 
-    def test_sflll_xsd_validation(self, sflll_application, xsd_validator, db_session):
+    def test_sflll_xsd_validation(self, sflll_application, xsd_validator):
         """Test that SF-LLL form XML passes XSD validation."""
         # Create submission
         application_submission = ApplicationSubmissionFactory.create(
@@ -669,7 +653,8 @@ class TestSubmissionXSDValidation:
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None
 
         # Extract SF-LLL element
@@ -688,7 +673,7 @@ class TestSubmissionXSDValidation:
         ], f"SF-LLL validation failed: {sflll_validation['error_message']}"
 
     def test_sflll_with_subawardee_xsd_validation(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that SF-LLL with subawardee data passes XSD validation."""
         agency = AgencyFactory.create()
@@ -709,15 +694,10 @@ class TestSubmissionXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create SF-LLL form with XML transform config
-        sflll_form = FormFactory.create(
-            form_name="Disclosure of Lobbying Activities (SF-LLL)",
-            short_form_name="SFLLL_2_0",
-            form_version="2.0",
-            json_to_xml_schema=SFLLL_TRANSFORM_RULES,
-        )
+        sflll_form = SFLLL_v2_0
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-LLL Subawardee Test Application"
@@ -820,7 +800,8 @@ class TestSubmissionXSDValidation:
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None
 
         # Extract SF-LLL element

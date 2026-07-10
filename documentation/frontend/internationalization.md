@@ -1,11 +1,11 @@
 # Internationalization (i18n)
 
 - [next-intl](https://next-intl-docs.vercel.app) is used for internationalization. Toggling between languages is done by changing the URL's path prefix (e.g. `/about` ➡️ `/es-US/about`).
-- Configuration is located in [`i18n/config.ts`](../frontend/src/i18n/config.ts). For the most part, you shouldn't need to edit this file unless adding a new formatter or new language.
+- Configuration is located in [`i18n/config.ts`](../../frontend/src/i18n/config.ts). For the most part, you shouldn't need to edit this file unless adding a new formatter or new language.
 
 ## Managing translations
 
-- Translations are managed as files in the [`i18n/messages`](../frontend/src/i18n/messages/) directory, where each language has its own directory (e.g. `en-US` and `es-US`).
+- Translations are managed as files in the [`i18n/messages`](../../frontend/src/i18n/messages/) directory, where each language has its own directory (e.g. `en-US` and `es-US`).
 - How you organize translations is up to you, but here are some suggestions:
   - Group your messages. It's recommended to use component/page names as namespaces and embrace them as the primary unit of organization in your app.
   - By default, all messages are in a single file, but you can split them into multiple files if you prefer. Continue to export all messages from `i18n/messages/{locale}/index.ts` so that they can be imported from a single location, and so files that depend on the messages don't need to be updated.
@@ -28,7 +28,7 @@ Locale messages should only ever be loaded on the server-side, to avoid bloating
 
 1. Add a language folder, using the same BCP47 language tag: `mkdir -p src/i18n/messages/<lang>`
 1. Add a language file: `touch src/i18n/messages/<lang>/index.ts` and add the translated content. The JSON structure should be the same across languages. However, non-default languages can omit keys, in which case the default language will be used as a fallback.
-1. Update [`i18n/config.ts`](../../app/src/i18n/config.ts) to include the new language in the `locales` array.
+1. Update [`i18n/config.ts`](../../frontend/src/i18n/config.ts) to include the new language in the `locales` array.
 
 ## Structuring your messages
 

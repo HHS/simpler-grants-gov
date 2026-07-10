@@ -8,10 +8,12 @@ from src.auth.endpoint_access_util import (
     get_roles_for_app,
     get_roles_for_org,
     get_roles_for_resource,
+    get_users_with_privileges_for_agency,
 )
 from src.constants.lookup_constants import Privilege
 from src.services.users.get_roles_and_privileges import get_roles_and_privileges
 from tests.conftest import BaseTestClass
+from tests.lib.agency_test_utils import create_user_in_agency
 from tests.src.db.models.factories import (
     AgencyFactory,
     AgencyUserFactory,
@@ -24,6 +26,7 @@ from tests.src.db.models.factories import (
     OrganizationUserFactory,
     OrganizationUserRoleFactory,
     RoleFactory,
+    SuppressedEmailFactory,
 )
 
 ORG_PRIVILEGES = [
@@ -384,3 +387,65 @@ def test_check_user_access(db_session, user):
 
     # Assert no additional queries made
     assert len(queries) == 0
+
+
+def test_get_users_with_privileges_for_agency_deduplicates_user_with_same_privilege_via_multi_roles(
+    db_session, enable_factory_create
+):
+    """User assigned the same privilege via two different roles should appear only once."""
+    agency = AgencyFactory.create()
+    user, _ = create_user_in_agency(agency=agency, privileges=[Privilege.PROGRAM_OFFICER_APPROVAL])
+
+    # Give them a second role
+    role_b = RoleFactory.create(
+        privileges=[Privilege.PROGRAM_OFFICER_APPROVAL], is_agency_role=True
+    )
+    AgencyUserRoleFactory.create(agency_user=user.agency_users[0], role=role_b)
+
+    # Another user with the same privilege (should be included)
+    user_with_privilege, _ = create_user_in_agency(
+        agency=agency, privileges=[Privilege.PROGRAM_OFFICER_APPROVAL]
+    )
+
+    # Another user in the agency without that privilege (should not be included)
+    user_without_privilege, _ = create_user_in_agency(
+        agency=agency, privileges=[Privilege.BUDGET_OFFICER_APPROVAL]
+    )
+
+    results = get_users_with_privileges_for_agency(
+        db_session, agency, [Privilege.PROGRAM_OFFICER_APPROVAL]
+    )
+
+    assert len(results) == 2
+    result_user_ids = {result.user_id for result in results}
+    assert user.user_id in result_user_ids
+    assert user_with_privilege.user_id in result_user_ids
+    assert user_without_privilege.user_id not in result_user_ids
+
+
+def test_get_users_with_privileges_for_agency_with_suppressed_email_users(
+    db_session, enable_factory_create
+):
+    agency = AgencyFactory.create()
+
+    user, _ = create_user_in_agency(agency=agency, privileges=[Privilege.PROGRAM_OFFICER_APPROVAL])
+
+    suppressed_user, _ = create_user_in_agency(
+        agency=agency, privileges=[Privilege.PROGRAM_OFFICER_APPROVAL]
+    )
+    SuppressedEmailFactory(email=suppressed_user.email)
+
+    # First get all users
+    results = get_users_with_privileges_for_agency(
+        db_session, agency, [Privilege.PROGRAM_OFFICER_APPROVAL], filter_out_suppressed_emails=False
+    )
+    assert len(results) == 2
+    assert results[0].user_id == user.user_id
+    assert results[1].user_id == suppressed_user.user_id
+
+    # Then verify the suppressed email gets filtered
+    results = get_users_with_privileges_for_agency(
+        db_session, agency, [Privilege.PROGRAM_OFFICER_APPROVAL], filter_out_suppressed_emails=True
+    )
+    assert len(results) == 1
+    assert results[0].user_id == user.user_id

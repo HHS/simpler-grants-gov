@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+# -----------------------------------------------------------------------------
+# Migrate .s3.tfbackend files from DynamoDB state locking to S3 native locking.
+#
+# This script:
+#   1. Checks for active DynamoDB locks
+#   2. Finds all .s3.tfbackend files under infra/
+#   3. Removes the dynamodb_table line
+#   4. Adds use_lockfile = true
+#   5. Optionally reinitializes each root module and runs terraform plan
+#
+# Usage:
+#   bin/migrate-terraform-state-locking-to-s3              # Update backend files only
+#   bin/migrate-terraform-state-locking-to-s3 --reinit     # Also run terraform init + plan for each module
+#
+# Run this from the project root before applying the accounts layer.
+# After running, you still need to:
+#   - Apply the accounts layer to remove the DynamoDB table
+#   - Commit and push the updated .s3.tfbackend files
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+reinit=false
+if [[ "${1:-}" == "--reinit" ]]; then
+  reinit=true
+fi
+
+echo "===================================="
+echo "Migrate to S3 native state locking"
+echo "===================================="
+
+# Find all .s3.tfbackend files under infra/
+tfbackend_files=$(find infra -name '*.s3.tfbackend' -not -name 'example.*' | sort)
+
+# Check for active DynamoDB locks before proceeding
+first_file=$(echo "${tfbackend_files}" | head -1)
+if [ -n "${first_file}" ]; then
+  lock_table=$(grep 'dynamodb_table' "${first_file}" | sed 's/.*= *"\(.*\)"/\1/' | tr -d ' ')
+  if [ -n "${lock_table}" ]; then
+    echo "Checking for active locks in DynamoDB table: ${lock_table}"
+    active_count=$(aws dynamodb scan \
+      --table-name "${lock_table}" \
+      --filter-expression "attribute_exists(LockID) AND attribute_exists(Info)" \
+      --select "COUNT" \
+      --query "Count" \
+      --output text 2>/dev/null || echo "")
+    if [ -n "${active_count}" ] && [ "${active_count}" -gt 0 ] 2>/dev/null; then
+      echo "ERROR: Found ${active_count} active lock(s) in ${lock_table}"
+      echo "Someone is running Terraform. Wait for them to finish before proceeding."
+      exit 1
+    elif [ -n "${active_count}" ]; then
+      echo "No active locks found. Proceeding with migration."
+    else
+      echo "WARNING: Could not check for locks (AWS access issue?)."
+      read -r -p "Continue without checking locks? (y/N) " response
+      if [[ ! "${response}" =~ ^[Yy]$ ]]; then
+        echo "Aborting."
+        exit 1
+      fi
+    fi
+    echo
+  fi
+fi
+file_count=$(echo "${tfbackend_files}" | wc -l | tr -d ' ')
+
+echo "Found ${file_count} .s3.tfbackend files to migrate"
+echo
+
+migrated=0
+skipped=0
+
+for file in ${tfbackend_files}; do
+  # Check if file still has dynamodb_table
+  if grep -q 'dynamodb_table' "${file}"; then
+    # Remove the dynamodb_table line
+    sed -i.bak '/dynamodb_table/d' "${file}"
+
+    # Add use_lockfile = true if not already present
+    if ! grep -q 'use_lockfile' "${file}"; then
+      echo "use_lockfile   = true" >> "${file}"
+    fi
+
+    # Remove the backup file created by sed
+    rm -f "${file}.bak"
+
+    echo "  Migrated: ${file}"
+    migrated=$((migrated + 1))
+  else
+    echo "  Skipped (already migrated): ${file}"
+    skipped=$((skipped + 1))
+  fi
+done
+
+# Update example.s3.tfbackend if needed (normally handled by the template update,
+# but included here for completeness)
+example_file="infra/example.s3.tfbackend"
+if [ -f "${example_file}" ] && grep -q 'dynamodb_table' "${example_file}"; then
+  sed -i.bak '/dynamodb_table/d' "${example_file}"
+  if ! grep -q 'use_lockfile' "${example_file}"; then
+    echo "use_lockfile   = true" >> "${example_file}"
+  fi
+  rm -f "${example_file}.bak"
+  echo "  Updated: ${example_file}"
+fi
+
+echo
+echo "===================================="
+echo "Migration complete"
+echo "  Migrated: ${migrated} files"
+echo "  Skipped:  ${skipped} files"
+echo "===================================="
+
+if [[ "${reinit}" == true ]]; then
+  echo
+  echo "===================================="
+  echo "Reinitializing root modules"
+  echo "===================================="
+
+  errors=0
+
+  for file in ${tfbackend_files}; do
+    # Derive module_dir and config_name from the file path
+    # e.g. infra/networks/dev.s3.tfbackend -> module_dir=infra/networks, config_name=dev
+    module_dir=$(dirname "${file}")
+    config_name=$(basename "${file}" .s3.tfbackend)
+
+    echo
+    echo "--- ${module_dir} (${config_name}) ---"
+    echo "Running: terraform init -reconfigure"
+    if ! ./bin/terraform-init "${module_dir}" "${config_name}"; then
+      echo "  ERROR: terraform init failed for ${module_dir} ${config_name}"
+      errors=$((errors + 1))
+      continue
+    fi
+
+    echo "Running: terraform plan"
+    tf_vars_file="${module_dir}/${config_name}.tfvars"
+    tf_vars_args=()
+    if [ -f "${tf_vars_file}" ]; then
+      tf_vars_args+=("-var-file=${config_name}.tfvars")
+    fi
+    if ! terraform -chdir="${module_dir}" plan -input=false ${tf_vars_args[@]+"${tf_vars_args[@]}"}; then
+      echo "  ERROR: terraform plan failed for ${module_dir} ${config_name}"
+      errors=$((errors + 1))
+      continue
+    fi
+
+    echo "  OK: ${module_dir} (${config_name})"
+  done
+
+  echo
+  echo "===================================="
+  echo "Reinit complete"
+  if [[ ${errors} -gt 0 ]]; then
+    echo "  ERRORS: ${errors} module(s) had failures"
+    exit 1
+  else
+    echo "  All modules initialized and verified successfully"
+  fi
+  echo "===================================="
+fi
+
+echo
+echo "Next steps:"
+if [[ "${reinit}" == false ]]; then
+  echo "  1. Run 'terraform init -reconfigure' for each root module"
+  echo "     Or re-run this script with --reinit to automate this"
+  echo "  2. Run 'terraform plan' to verify no unexpected changes"
+  echo "  3. Apply the accounts layer for each account to remove the DynamoDB table"
+  echo "  4. Commit and push the updated .s3.tfbackend files"
+else
+  echo "  1. Apply the accounts layer for each account to remove the DynamoDB table"
+  echo "  2. Commit and push the updated .s3.tfbackend files"
+fi

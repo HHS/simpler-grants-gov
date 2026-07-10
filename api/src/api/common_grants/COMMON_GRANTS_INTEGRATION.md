@@ -57,23 +57,13 @@ This approach ensures search functionality consistency while providing the stand
 
 ## Configuration
 
-### Environment Variables
-
-```bash
-# Enable CommonGrants Protocol endpoints (defaults to false)
-ENABLE_COMMON_GRANTS_ENDPOINTS=true
-```
-
-**Note**: This environment variable is set to `true` in `local.env` by default. To disable CommonGrants endpoints, change the value to `false` in your environment.
-
 ### Route Registration
 
-The CommonGrants routes are conditionally registered in the Flask application based on the `ENABLE_COMMON_GRANTS_ENDPOINTS` environment variable:
+The CommonGrants routes are registered in the Flask application.
 
 ```python
 # In src/app.py
-if endpoint_config.enable_common_grants_endpoints:
-    app.register_blueprint(common_grants_blueprint)
+app.register_blueprint(common_grants_blueprint)
 ```
 
 ### Dependencies
@@ -160,6 +150,33 @@ POST /common-grants/opportunities/search
 - **Uses OpenSearch infrastructure** - same search engine used by `/v1/opportunities/search`
 - **Transforms requests/responses** between CommonGrants and v1 formats
 - Returns `OpportunitiesSearchResponse`
+
+### Custom Filters
+
+The search endpoint accepts a `filters.customFilters` map that extends the standard CommonGrants filter set with Grants.gov-specific fields. Each entry is a `{operator, value}` object.
+
+| key | operator | value | notes |
+|---|---|---|---|
+| `agency` | `in` | array of agency codes (e.g. `["USAID"]`) | native agency codes (passthrough) |
+| `applicantType` | `in` | array of CommonGrants applicant-type values (e.g. `["government_state"]`) | mapped to native applicant types |
+| `fundingInstrument` | `in` | array of funding instrument values (e.g. `["grant"]`) | native values (passthrough) |
+| `costSharing` | `eq` | boolean (or the strings `"true"`/`"false"`) | matches `is_cost_sharing` |
+
+**Error behavior**: unsupported keys and invalid values are skipped — the search still runs with the valid filters applied — and the skipped filters are reported in `filterInfo.errors` in the response. An empty array value applies no filter for that key and is not an error. `agency` and `fundingInstrument` values are forwarded to the native search unchanged (not validated by this adapter); an unrecognized value matches no opportunities rather than producing an error.
+
+**Example request body** (agency + applicant type):
+
+```json
+{
+  "pagination": { "page": 1, "pageSize": 25 },
+  "filters": {
+    "customFilters": {
+      "agency": { "operator": "in", "value": ["USAID"] },
+      "applicantType": { "operator": "in", "value": ["government_state", "non_profit_with_501c3"] }
+    }
+  }
+}
+```
 
 ## OpenAPI Specification Generation & Validation
 
@@ -258,7 +275,7 @@ The integration includes a custom error handler (`@with_cg_error_handler()`) tha
 
 ```bash
 # Install dependencies
-poetry install
+uv sync
 
 # Start API with data
 make init 
@@ -298,3 +315,31 @@ make lint-ruff
 # Type checking
 make lint-mypy
 ```
+
+
+## Adding Custom Fields
+
+To add custom fields to the openAPI sample documentation follow these steps:
+1. Add any new custom fields to the marshmallow schemas in `common_grants_custom_fields.py` this file is the container for all existing custom fields
+2. Inside of `common_grants_schemas.py` update the `CustomFields` class to have an additional field named after the field that has been added and set it's value equal to the newly imported custom field.  Like so
+```python
+class CustomFields(Schema):
+    legacyId = fields.Nested(LegacyId, allow_none=True)
+    federalOpportunityNumber = fields.Nested(FederalOpportunityNumber, allow_none=True)
+    assistanceListing = fields.Nested(AssistanceListing, allow_none=True)
+    agency = fields.Nested(Agency, allow_none=True)
+    attachments = fields.Nested(Attachments, allow_none=True)
+    category = fields.Nested(Category, allow_none=True)
+    fiscalYear = fields.Nested(FiscalYear, allow_none=True)
+    costSharing = fields.Nested(CostSharing, allow_none=True)
+    additionalInfo = fields.Nested(AdditionalInfo, allow_none=True)
+    AgencyContact = fields.Nested(AgencyContact, allow_none=True)
+    yourNewestField = fields.Nexted(YourNewestField, allow_none=True)
+
+```
+
+
+3. To verify the changes run `make openapi-spec-common-grants` at the first `/api` directory in the repository and then run `make init make db-seed-local && make populate-search-opportunities make run-logs` to stand up the openApi endpoints
+
+4. After the Docker containers have started go to `localhost:8080/docs` and enter the user key for the `common grants` endpoints. 
+5. Run the endpoints to validate responses. 

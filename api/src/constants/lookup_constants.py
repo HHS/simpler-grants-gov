@@ -98,6 +98,7 @@ class FundingCategory(StrEnum):
     ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS = (
         "energy_infrastructure_and_critical_mineral_and_materials"  # EIC
     )
+    RECREATION_AND_TOURISM = "recreation_and_tourism"  # RT
 
 
 class FundingInstrument(StrEnum):
@@ -108,6 +109,15 @@ class FundingInstrument(StrEnum):
     GRANT = "grant"  # G
     PROCUREMENT_CONTRACT = "procurement_contract"  # PC
     OTHER = "other"  # O
+
+
+class AwardSelectionMethod(StrEnum):
+    MERIT_REVIEW_RANKING_ONLY = "merit_review_ranking_only"
+    MERIT_REVIEW_RANKING_WITH_OTHER_FACTORS = "merit_review_ranking_with_other_factors"
+    FORMULA = "formula"
+    SINGLE_SOURCE = "single_source"
+    SOLE_SOURCE = "sole_source"
+    OTHER = "other"
 
 
 class AgencyDownloadFileType(StrEnum):
@@ -148,6 +158,7 @@ class FormType(StrEnum):
     SF424 = "SF424"
     SF424A = "SF424A"
     SF424B = "SF424B"
+    SF424C = "SF424C"
     SF424D = "SF424D"
     SFLLL = "SFLLL"
     PROJECT_NARRATIVE_ATTACHMENT = "ProjectNarrativeAttachment"
@@ -163,6 +174,12 @@ class FormType(StrEnum):
 
     EPA_FORM_4700_4 = "EPAForm4700-4"
     EPA_KEY_CONTACTS = "EPAKeyContacts"
+
+    KEY_CONTACTS = "KeyContacts"
+
+    ATTACHMENT_FORM = "AttachmentForm"
+
+    PROJECT_PERFORMANCE_SITE_LOCATION = "ProjectPerformanceSiteLocation"
 
 
 class CompetitionOpenToApplicant(StrEnum):
@@ -190,6 +207,7 @@ class SubmissionIssue(StrEnum):
     APPLICATION_FORM_NOT_FOUND_NO_RESPONSE = "application_form_not_found_no_response"
     INVALID_FILE_NAME = "invalid_file_name"
     ATTACHMENT_NOT_FOUND = "attachment_not_found"
+    ATTACHMENT_LIMIT_EXCEEDED = "attachment_limit_exceeded"
 
 
 class SamGovExtractType(StrEnum):
@@ -221,6 +239,57 @@ class ApplicationFormStatus(StrEnum):
     COMPLETE = "complete"
 
 
+class AwardRecommendationAttachmentType(StrEnum):
+    STANDARD_TERMS = "standard_terms"
+    STANDARD_CONDITIONS = "standard_conditions"
+    PROGRAM_TERMS = "program_terms"
+    PROGRAM_CONDITIONS = "program_conditions"
+    OTHER = "other"
+
+
+class AwardRecommendationStatus(StrEnum):
+    DRAFT = "draft"
+    IN_REVIEW = "in_review"
+    APPROVED = "approved"
+
+
+class AwardRecommendationType(StrEnum):
+    RECOMMENDED_FOR_FUNDING = "recommended_for_funding"
+    RECOMMENDED_WITHOUT_FUNDING = "recommended_without_funding"
+    NOT_RECOMMENDED = "not_recommended"
+
+
+class AwardRecommendationReviewType(StrEnum):
+    MERIT_REVIEW = "merit_review"
+    APPLICATION_BUDGET_REVIEW = "application_budget_review"
+    PROGRAMMATIC_REVIEW = "programmatic_review"
+    BUSINESS_AND_RISK_REVIEW = "business_and_risk_review"
+
+
+class AwardRecommendationRiskType(StrEnum):
+    ADDITIONAL_MONITORING = "additional_monitoring"
+
+
+class AwardRecommendationAuditEvent(StrEnum):
+    AWARD_RECOMMENDATION_CREATED = "award_recommendation_created"
+    AWARD_RECOMMENDATION_UPDATED = "award_recommendation_updated"
+    AWARD_RECOMMENDATION_DELETED = "award_recommendation_deleted"
+    ATTACHMENT_CREATED = "attachment_created"
+    ATTACHMENT_UPDATED = "attachment_updated"
+    ATTACHMENT_DELETED = "attachment_deleted"
+    EXCEPTION_CREATED = "exception_created"
+    EXCEPTION_UPDATED = "exception_updated"
+    EXCEPTION_DELETED = "exception_deleted"
+    RISK_CREATED = "risk_created"
+    RISK_UPDATED = "risk_updated"
+    RISK_DELETED = "risk_deleted"
+    APPLICATION_SUBMISSION_UPDATED = "application_submission_updated"
+    AWARD_RECOMMENDATION_SUBMISSION_UPDATED = "award_recommendation_submission_updated"
+    REVIEW_CREATED = "review_created"
+    REVIEW_UPDATED = "review_updated"
+    REVIEW_DELETED = "review_deleted"
+
+
 class Privilege(StrEnum):
     MANAGE_ORG_MEMBERS = "manage_org_members"
     MANAGE_ORG_ADMIN_MEMBERS = "manage_org_admin_members"
@@ -236,6 +305,29 @@ class Privilege(StrEnum):
     LEGACY_AGENCY_VIEWER = "legacy_agency_viewer"
     LEGACY_AGENCY_GRANT_RETRIEVER = "legacy_agency_grant_retriever"
     LEGACY_AGENCY_ASSIGNER = "legacy_agency_assigner"
+    MANAGE_INTERNAL_ROLES = "manage_internal_roles"
+    MANAGE_COMPETITION = "manage_competition"
+    READ_TEST_USER_TOKEN = "read_test_user_token"
+    VIEW_OPPORTUNITY = "view_opportunity"
+    CREATE_OPPORTUNITY = "create_opportunity"
+    UPDATE_OPPORTUNITY = "update_opportunity"
+    PUBLISH_OPPORTUNITY = "publish_opportunity"
+    INTERNAL_WORKFLOW_ACCESS = "internal_workflow_access"
+    VIEW_ORG_SAVED_OPPORTUNITIES = "view_org_saved_opportunities"
+    MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
+    INTERNAL_WORKFLOW_EVENT_SEND = "internal_workflow_event_send"
+    VIEW_AWARD_RECOMMENDATION = "view_award_recommendation"
+    CREATE_AWARD_RECOMMENDATION = "create_award_recommendation"
+    UPDATE_AWARD_RECOMMENDATION = "update_award_recommendation"
+    SUBMIT_AWARD_RECOMMENDATION = "submit_award_recommendation"
+
+    # These privileges are associated with workflow approvals
+    PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
+    BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
+
+    INTERNAL_S3_SCAN = "internal_s3_scan"
+
+    MANAGE_TEST_USER_TOKEN = "manage_test_user_token"
 
 
 class RoleType(StrEnum):
@@ -290,3 +382,88 @@ class UserType(StrEnum):
     STANDARD = "standard"
     INTERNAL_FRONTEND = "internal_frontend"
     LEGACY_CERTIFICATE = "legacy_certificate"
+    INTERNAL_SYSTEM_USER = "internal_system_user"
+
+
+class OrganizationAuditEvent(StrEnum):
+    USER_ADDED = "user_added"
+    USER_UPDATED = "user_updated"
+    USER_REMOVED = "user_removed"
+
+
+class WorkflowType(StrEnum):
+    OPPORTUNITY_PUBLISH = "opportunity_publish"
+    APPLICATION_SUBMISSION = "application_submission"
+    INITIAL_PROTOTYPE = "initial_prototype"
+
+    # Because of how we use the workflow type to find
+    # the state machine and its configuration, we need
+    # to define any workflows for tests here as well.
+    # These workflow types aren't real, and are instead
+    # reserved for testing.
+    BASIC_TEST_WORKFLOW = "basic_test_workflow"
+    NO_CONCURRENT_TEST_WORKFLOW = "no_concurrent_test_workflow"
+    LIMITED_APPROVAL_TEST_WORKFLOW = "limited_approval_test_workflow"
+
+    def get_human_friendly_text(self) -> str:
+        return self.value.replace("_", " ").title()
+
+
+class ApprovalType(StrEnum):
+    INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
+
+    PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
+    BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
+
+
+class ApprovalResponseType(StrEnum):
+    APPROVED = "approved"
+    DECLINED = "declined"
+    REQUIRES_MODIFICATION = "requires_modification"
+
+
+class WorkflowEntityType(StrEnum):
+    OPPORTUNITY = "opportunity"
+    APPLICATION = "application"
+    AWARD_RECOMMENDATION = "award_recommendation"
+
+
+class WorkflowEventType(StrEnum):
+    START_WORKFLOW = "start_workflow"
+    PROCESS_WORKFLOW = "process_workflow"
+
+
+class WorkflowEventProcessingResult(StrEnum):
+    """Enum representing the result of processing an SQS event."""
+
+    SUCCESS = "success"
+    NON_RETRYABLE_ERROR = "non_retryable_error"
+    RETRYABLE_ERROR = "retryable_error"
+    GENERAL_ERROR = "general_error"
+
+
+class FileScanStatus(StrEnum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETE = "complete"
+    INFECTED = "infected"
+    PROCESSED = "processed"
+
+
+class JobType(StrEnum):
+    MIGRATE_UP = "migrate-up"
+    MIGRATE_DOWN = "migrate-down"
+    MIGRATE_DOWNALL = "migrate-downall"
+    LOAD_TRANSFORM = "load-transform"
+    SETUP_FOREIGN_TABLES = "setup-foreign-tables"
+    LOAD_OPPORTUNITY_DATA_OPENSEARCH = "load-opportunity-data-opensearch"
+    SETUP_LOWER_ENV_AGENCIES = "setup-lower-env-agencies"
+    CREATE_ANALYTICS_DB_CSVS = "create-analytics-db-csvs"
+    CREATE_APPLICATION_SUBMISSION = "create-application-submission"
+    SETUP_CERT_USER = "setup-cert-user"
+    UPDATE_FORM_INSTRUCTION = "update-form-instruction"
+    EMAIL_NOTIFICATIONS = "email-notifications"
+    BUILD_AUTOMATIC_OPPORTUNITIES = "build-automatic-opportunities"
+    SAM_EXTRACTS = "sam-extracts"
+    LOAD_AGENCY_DATA_OPENSEARCH = "load-agency-data-opensearch"
+    EXPORT_OPPORTUNITY_DATA = "export-opportunity-data"

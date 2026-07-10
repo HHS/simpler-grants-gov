@@ -4,10 +4,9 @@ import uuid
 import boto3
 import botocore.client
 from botocore.exceptions import ClientError
+from grants_shared.adapters.aws import get_boto_session
+from grants_shared.adapters.aws.aws_session import is_local_aws
 from pydantic import BaseModel, Field
-
-from src.adapters.aws import get_boto_session
-from src.adapters.aws.aws_session import is_local_aws
 
 logger = logging.getLogger(__name__)
 
@@ -104,8 +103,6 @@ def send_pinpoint_email_raw(
             "Addresses": {to_address: {"ChannelType": "EMAIL"}},
             "MessageConfiguration": {
                 "EmailMessage": {
-                    # TODO - we'll switch this to use templates in the future
-                    #        so keeping this simple with html/text the same
                     "SimpleEmail": {
                         "Subject": {"Charset": "UTF-8", "Data": subject},
                         "HtmlPart": {"Charset": "UTF-8", "Data": message},

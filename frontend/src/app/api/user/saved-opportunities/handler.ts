@@ -23,7 +23,6 @@ export const handleSavedOpportunityRequest = async (request: Request) => {
     }
     const response = await handleSavedOpportunity(
       request.method,
-      session.token,
       session.user_id,
       opportunityId,
     );

@@ -1,0 +1,214 @@
+import clsx from "clsx";
+import {
+  BaseOpportunity,
+  MinimalOpportunity,
+  OpportunityStatus,
+  PossiblySavedBaseOpportunity,
+} from "src/types/opportunity/opportunityResponseTypes";
+import { SearchResponseData } from "src/types/search/searchRequestTypes";
+import { toShortMonthDate } from "src/utils/dateUtil";
+import { formatCurrency } from "src/utils/formatCurrencyUtil";
+import { getOpportunityUrl } from "src/utils/opportunity/opportunityUtils";
+
+import { useTranslations } from "next-intl";
+
+import {
+  TableCellData,
+  TableWithResponsiveHeader,
+} from "src/components/core/TableWithResponsiveHeader";
+import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
+import { FilterSearchNoResults } from "./Filters/FilterSearchNoResults";
+
+const statusColorClasses = {
+  posted: "bg-accent-warm-light",
+  forecasted: "bg-accent-warm-lightest",
+  closed: "bg-base-lightest",
+  archived: "bg-base-lightest",
+};
+
+const indicateWhichSearchResultsAreSaved = (
+  searchResults: SearchResponseData,
+  savedOpportunities: MinimalOpportunity[],
+) => {
+  const savedIds = savedOpportunities.map(
+    ({ opportunity_id }) => opportunity_id,
+  );
+  return searchResults.map((result) =>
+    savedIds.includes(result.opportunity_id)
+      ? { ...result, opportunitySaved: true }
+      : result,
+  );
+};
+
+const SearchTableStatusDisplay = ({
+  status,
+}: {
+  status: OpportunityStatus;
+}) => {
+  const t = useTranslations("Search.table");
+  const backgroundClass = statusColorClasses[status];
+  return (
+    <div
+      className={clsx(
+        "font-sans-xs text-center padding-y-05 minw-5 radius-md",
+        {
+          [backgroundClass]: !!backgroundClass,
+        },
+      )}
+    >
+      {t(`statuses.${status}`)}
+    </div>
+  );
+};
+
+const CloseDateDisplay = ({ closeDate }: { closeDate: string }) => {
+  const t = useTranslations("Search.table");
+  return (
+    <p className={"font-sans-xs"}>
+      {closeDate ? toShortMonthDate(closeDate) : t("tbd")}
+    </p>
+  );
+};
+
+const TitleDisplay = ({
+  opportunity,
+  page,
+  index,
+}: {
+  opportunity: PossiblySavedBaseOpportunity;
+  page: number;
+  index: number;
+}) => {
+  const t = useTranslations("Search.table");
+  return (
+    <>
+      <div className="display-flex">
+        <div className="margin-y-auto grid-col-auto minw-4">
+          <OpportunitySaveUserControl
+            opportunityId={opportunity.opportunity_id}
+            type="icon"
+            opportunitySaved={opportunity.opportunitySaved || false}
+          />
+        </div>
+        <div className="grid-col-fill">
+          <div className="font-sans-md text-bold line-height-sans-3">
+            <a
+              href={getOpportunityUrl(opportunity.opportunity_id)}
+              id={`search-result-link-${page}-${index + 1}`}
+            >
+              {opportunity.opportunity_title}
+            </a>
+          </div>
+          <div className="display-none tablet-lg:display-block font-sans-xs">
+            <span className="text-bold">{t("number")}:</span>{" "}
+            {opportunity.opportunity_number}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+const AgencyDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
+  const t = useTranslations("Search.table");
+  return (
+    <>
+      <div className="tablet-lg:margin-bottom-1">{opportunity.agency_name}</div>
+      <div className="font-sans-xs display-none tablet-lg:display-block">
+        <span className="text-bold">{t("published")}</span>:{" "}
+        {toShortMonthDate(opportunity.summary.post_date || "")}
+      </div>
+      <div className="font-sans-xs display-none tablet-lg:display-block">
+        {t("expectedAwards")}:{" "}
+        {opportunity.summary.expected_number_of_awards === undefined ||
+        opportunity.summary.expected_number_of_awards === null
+          ? "--"
+          : opportunity.summary.expected_number_of_awards}
+      </div>
+    </>
+  );
+};
+
+const toSearchResultsTableRow = (
+  result: PossiblySavedBaseOpportunity,
+  page: number,
+  index: number,
+): TableCellData[] => {
+  return [
+    {
+      cellData: (
+        <CloseDateDisplay closeDate={result.summary.close_date || ""} />
+      ),
+      stackOrder: 2,
+    },
+    {
+      cellData: <SearchTableStatusDisplay status={result.opportunity_status} />,
+      stackOrder: 1,
+    },
+    {
+      cellData: <TitleDisplay opportunity={result} page={page} index={index} />,
+      stackOrder: 0,
+    },
+    {
+      cellData: <AgencyDisplay opportunity={result} />,
+      stackOrder: 3,
+    },
+    {
+      cellData: <AwardValue awardValue={result.summary.award_floor} />,
+      stackOrder: 4,
+    },
+    {
+      cellData: <AwardValue awardValue={result.summary.award_ceiling} />,
+      stackOrder: 5,
+    },
+  ];
+};
+
+export const AwardValue = ({
+  awardValue,
+}: {
+  awardValue: undefined | null | number;
+}) => (
+  <p className={"font-sans-xs text-no-wrap"}>
+    {awardValue === undefined || awardValue === null
+      ? "$--"
+      : formatCurrency(awardValue)}
+  </p>
+);
+
+export const SearchResultsTable = ({
+  searchResults,
+  page,
+  savedOpportunities,
+}: {
+  searchResults: SearchResponseData;
+  page: number;
+  savedOpportunities: MinimalOpportunity[];
+}) => {
+  const t = useTranslations("Search.table");
+
+  if (!searchResults.length) {
+    return <FilterSearchNoResults useHeading={true} />;
+  }
+
+  const searchResultsWithSavedOpportunities =
+    indicateWhichSearchResultsAreSaved(searchResults, savedOpportunities);
+
+  const headerContent: TableCellData[] = [
+    { cellData: t("headings.closeDate") },
+    { cellData: t("headings.status") },
+    { cellData: t("headings.title") },
+    { cellData: t("headings.agency") },
+    { cellData: t("headings.awardMin") },
+    { cellData: t("headings.awardMax") },
+  ];
+  const tableRowData = searchResultsWithSavedOpportunities.map(
+    (result, index) => toSearchResultsTableRow(result, page, index),
+  );
+  return (
+    <TableWithResponsiveHeader
+      headerContent={headerContent}
+      tableRowData={tableRowData}
+    />
+  );
+};

@@ -3,13 +3,19 @@ import "server-only";
 import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
+  fetchAwardRecommendationEndpoint,
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
+  getApplicationForPrintEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
+  toDynamicAwardRecommendationEndpoint,
+  toDynamicFilesEndpoint,
+  toDynamicGrantorOpportunityEndpoint,
+  toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
@@ -20,8 +26,6 @@ import {
   createRequestUrl,
   fetchErrorToNetworkError,
   getDefaultHeaders,
-  HeadersDict,
-  JSONRequestBody,
   throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { APIResponse } from "src/types/apiResponseTypes";
@@ -36,17 +40,26 @@ export function requesterForEndpoint({
   basePath,
   version,
   namespace,
-  allowedErrorStatuses = [],
+  requiresAuth,
 }: EndpointConfig) {
   return async function (
     options: {
       subPath?: string;
-      body?: JSONRequestBody;
-      additionalHeaders?: HeadersDict;
+      body?: Record<string, unknown> | FormData;
+      additionalHeaders?: Record<string, string>;
       nextOptions?: NextFetchRequestConfig;
+      allowedErrorStatuses?: number[];
+      addContentType?: boolean;
     } = {},
   ): Promise<Response> {
-    const { additionalHeaders = {}, body, subPath, nextOptions } = options;
+    const {
+      additionalHeaders = {},
+      body,
+      subPath,
+      nextOptions,
+      allowedErrorStatuses = [],
+      addContentType = true,
+    } = options;
     const url = createRequestUrl(
       method,
       basePath,
@@ -55,8 +68,13 @@ export function requesterForEndpoint({
       subPath,
       body,
     );
-    const headers: HeadersDict = {
-      ...getDefaultHeaders(),
+    const defaultHeaders = await getDefaultHeaders({
+      addContentType,
+      requiresUserAuthToken: requiresAuth,
+      url,
+    });
+    const headers = {
+      ...defaultHeaders,
       ...additionalHeaders,
     };
 
@@ -83,12 +101,13 @@ export function requesterForEndpoint({
       let jsonBody;
       try {
         jsonBody = (await response.json()) as APIResponse;
-      } catch (e) {
+      } catch (_e) {
         throw new Error(
           `bad Json from error response at ${url} with status code ${response.status}`,
         );
       }
-      return throwError(jsonBody, url);
+
+      return throwError(jsonBody, url, response);
     } else if (
       !response.ok &&
       !allowedErrorStatuses.includes(response.status)
@@ -121,6 +140,14 @@ export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,
 );
 
+export const fetchAwardRecommendation = cache(
+  requesterForEndpoint(fetchAwardRecommendationEndpoint),
+);
+
+export const fetchAwardRecommendationWithMethod = (
+  type: "POST" | "PUT" | "DELETE",
+) => requesterForEndpoint(toDynamicAwardRecommendationEndpoint(type));
+
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
 export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT" | "GET") =>
@@ -135,3 +162,17 @@ export const fetchOrganizationWithMethod = (
 ) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
 
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
+
+export const fetchGrantorOpportunityWithMethod = (
+  type: "POST" | "DELETE" | "GET" | "PUT",
+) => requesterForEndpoint(toDynamicGrantorOpportunityEndpoint(type));
+
+export const fetchGrantorWithMethod = (type: "POST") =>
+  requesterForEndpoint(toDynamicGrantorsEndpoint(type));
+
+export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
+  requesterForEndpoint(toDynamicFilesEndpoint(type));
+
+export const getApplicationForPrint = requesterForEndpoint(
+  getApplicationForPrintEndpoint,
+);

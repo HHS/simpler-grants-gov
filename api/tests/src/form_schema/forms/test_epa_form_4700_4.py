@@ -281,10 +281,10 @@ def test_epa_form_v5_0_post_population(
     validation_issues = validate_application_form(application_form, ApplicationAction.SUBMIT)
     assert len(validation_issues) == 0
     assert (
-        application_form.application_response["application_signature"]["aor_signature"]
+        application_form.application_response["applicant_signature"]["aor_signature"]
         == "my-fake-email@mail.com"
     )
     assert (
-        application_form.application_response["application_signature"]["submitted_date"]
+        application_form.application_response["applicant_signature"]["submitted_date"]
         == "2024-04-03"
     )

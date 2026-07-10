@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import datetime, timezone
 
@@ -46,7 +47,6 @@ def saved_searches(user, db_session):
             created_at=datetime(2024, 1, 3, tzinfo=timezone.utc),
         ),
     ]
-    db_session.commit()
     return searches
 
 
@@ -61,7 +61,6 @@ def test_user_get_saved_searches_unauthorized_user(
 ):
     # Try to get searches for a different user ID
     different_user = UserFactory.create()
-    db_session.commit()
 
     response = client.post(
         f"/v1/users/{different_user.user_id}/saved-searches/list",
@@ -91,7 +90,7 @@ def test_user_get_saved_searches_no_auth(client, db_session, user, saved_searche
     )
 
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"
 
 
 def test_user_get_saved_searches_empty(client, user, user_auth_token):
@@ -190,3 +189,17 @@ def test_user_get_saved_searches_deleted(
 
     data = response.json["data"]
     assert len(data) == 0
+
+
+def test_user_get_saved_searches_logging(
+    client, user, user_auth_token, enable_factory_create, db_session, saved_searches, caplog
+):
+    caplog.set_level(logging.INFO)
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-searches/list",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"pagination": {"page_offset": 1, "page_size": 25}},
+    )
+
+    assert response.status_code == 200
+    assert any("Successfully fetched saved searches" in r.message for r in caplog.records)

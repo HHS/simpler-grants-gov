@@ -61,7 +61,6 @@ def test_csv_to_jsonschema_contains_expected_fields(csv_file_content, expected_f
     """Test that the generated schema contains expected fields."""
     schema, _ = csv_to_jsonschema(csv_file_content)
 
-    print(schema)
     # Look for each field in the schema properties
     for field in expected_fields:
         # Fields might be in the main schema or in a section

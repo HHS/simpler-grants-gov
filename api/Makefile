@@ -9,14 +9,6 @@ APP_NAME := grants-api
 RED := \033[0;31m
 NO_COLOR := \033[0m
 
-# Adding this to the end of a script that outputs JSON will convert
-# it to a readable format with timestamps and color-coding.
-#
-# Note that you can also change the LOG_FORMAT env var to switch
-# between JSON & human readable format. This is left in place
-# in the event JSON is output from a process we don't log.
-DECODE_LOG := 2>&1 | python3 -u src/logging/util/decodelog.py
-
 # Required for CI flags below to work properly
 SHELL = /bin/bash -o pipefail
 
@@ -28,17 +20,19 @@ APP_DIR := api
 ifdef CI
  DOCKER_EXEC_ARGS := -T -e CI -e PYTEST_ADDOPTS="--color=yes"
  MYPY_FLAGS := --no-pretty
- MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\4/"
+ # The perl command here modifies the output format to appear as a warning on the github action
+ # See https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#setting-a-warning-message
+ MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\1:\2:\3 :error: \4/ or s/^/::warning ::/"
 endif
 
-# By default, all python/poetry commands will run inside of the docker container
+# By default, all python/uv commands will run inside of the docker container
 # if you wish to run this natively, add PY_RUN_APPROACH=local to your environment vars
 # You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add
 # it to your ~/.zshrc file (and run `source ~/.zshrc`)
 ifeq "$(PY_RUN_APPROACH)" "local"
-PY_RUN_CMD := poetry run
+PY_RUN_CMD := uv run
 else
-PY_RUN_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
+PY_RUN_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME)
 endif
 
 FLASK_CMD := $(PY_RUN_CMD) flask
@@ -78,11 +72,8 @@ release-build:
 ##################################################
 
 setup-local:
-	# Configure poetry to use virtualenvs in the project directory
-	poetry config virtualenvs.in-project true
-
 	# Install dependencies
-	poetry install --no-root --all-extras --with dev
+	uv sync --all-groups --locked
 
 setup-env-override-file:
 	./bin/setup-env-override-file.sh $(args)
@@ -94,7 +85,10 @@ setup-env-override-file:
 build:
 	docker compose build
 
-start: ## Start the API
+start: ## Start the API for CI/CD or local Dev work where we don't need OpenSearch Dashboard
+	docker compose up grants-api --detach
+
+start-full: ## Start the API including OpenSearch Dashboard
 	docker compose up --detach
 
 start-debug:
@@ -103,19 +97,26 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services ## Run all of the init tasks to set up DB, Search, Local Stack, and Mock services. To do this "from scratch" use remake-backend instead
+init-components: init-db init-opensearch init-s3mock init-sqsmock init-dynamodb init-mock-soap-services
+
+init: setup-env-override-file build init-components ## Run all of the init tasks (including build) to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
+
+init-ci-cd: setup-env-override-file init-components ## Do not build, but do run all of the init tasks to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
+	docker compose -f ../backend/docker-compose.db.yml down --volumes
 
 volume-recreate: clean-volumes init ## Destroy current volumes, setup new ones - will remove all existing data
 
-stop:
+stop: ## Stop the docker containers
 	docker compose down
+	docker compose -f ../backend/docker-compose.db.yml down
 
 check: format-check lint db-check-migrations test
 
 remake-backend: volume-recreate setup-api-data ## Completely recreate API services, load data into the DB and search index
+
 ##################################################
 # DB & migrations
 ##################################################
@@ -129,8 +130,8 @@ remake-backend: volume-recreate setup-api-data ## Completely recreate API servic
 init-db: start-db setup-postgres-db db-migrate
 
 start-db:
-	docker compose up --detach grants-db
-	./bin/wait-for-local-db.sh
+	docker compose -f ../backend/docker-compose.db.yml up --detach grants-db
+	../backend/scripts/wait-for-local-db.sh
 
 #########################
 # DB Migrations
@@ -179,7 +180,7 @@ db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
 
 create-erds: # Create ERD diagrams for our DB schema
-	docker compose run --rm openapi-tools poetry run create-erds
+	docker compose run --rm openapi-tools create-erds
 	mv bin/*.png ../documentation/api/database/erds
 
 setup-postgres-db: ## Does any initial setup necessary for our local database to work
@@ -195,17 +196,43 @@ start-opensearch:
 	docker compose up --detach opensearch-node
 	./bin/wait-for-local-opensearch.sh
 
+init-opensearch-dashboards: start-opensearch-dashboards
+
+start-opensearch-dashboards:
+	docker compose up --detach opensearch-dashboards
+
 ##################################################
-# Localstack
+# S3 Mock
 ##################################################
 
-init-localstack: start-localstack setup-localstack ## Start localstack (local s3) and setup buckets
+init-s3mock: start-s3mock
 
-start-localstack:
-	docker compose up --detach localstack
+start-s3mock:
+	docker compose up --detach s3mock
 
-setup-localstack:
-	$(PY_RUN_CMD) setup-localstack
+
+##################################################
+# SQS Mock
+##################################################
+
+init-sqsmock: start-sqsmock
+
+start-sqsmock:
+	docker compose up --detach sqsmock
+
+
+##################################################
+# DynamoDB Local
+##################################################
+
+init-dynamodb: start-dynamodb setup-dynamodb
+
+start-dynamodb:
+	docker compose up --detach dynamodb-local
+	./bin/wait-for-local-dynamodb.sh
+
+setup-dynamodb: ## Create local DynamoDB tables
+	$(PY_RUN_CMD) setup-local-dynamodb
 
 
 ##################################################
@@ -230,16 +257,12 @@ start-mock-oauth2:
 # Testing
 ##################################################
 
-test: ## Run all tests except for audit logging and XML validation tests
-	$(PY_RUN_CMD) pytest -m "not audit and not xml_validation" $(args)
+test: ## Run all tests
+	$(PY_RUN_CMD) pytest $(args)
 
-test-audit: ## Run audit logging tests
-	$(PY_RUN_CMD) pytest -m "audit" $(args)
 
 test-coverage: ## Run tests and generate coverage report
-	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit and not xml_validation" $(args)
-	$(PY_RUN_CMD) coverage run --data-file=.coverage.audit --branch --source=src -m pytest -m "audit" $(args)
-	$(PY_RUN_CMD) coverage combine --data-file=.coverage --append
+	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest $(args)
 	$(PY_RUN_CMD) coverage report
 
 test-coverage-report: ## Open HTML test coverage report
@@ -263,10 +286,10 @@ lint: lint-py ## Lint
 lint-py: lint-ruff lint-mypy
 
 lint-ruff:
-	$(PY_RUN_CMD) ruff check src tests bin
+	$(PY_RUN_CMD) ruff check .
 
 lint-ruff-fix:
-	$(PY_RUN_CMD) ruff check src tests bin --fix
+	$(PY_RUN_CMD) ruff check . --fix
 
 lint-mypy:
 	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
@@ -283,7 +306,7 @@ cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of C
 	$(FLASK_CMD) $(args)
 
 openapi-spec: ## Generate OpenAPI spec
-	docker compose run --rm openapi-tools poetry run flask --app src.app spec --format yaml --output openapi.generated.yml
+	docker compose run --rm -e DB_CHECK_CONNECTION_ON_INIT=false openapi-tools flask --app src.app spec --format yaml --output openapi.generated.yml
 
 openapi-spec-common-grants:
 	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml
@@ -304,6 +327,9 @@ seed-local-legacy-tables:
 generate-internal-token:
 	$(FLASK_CMD) task generate-internal-token $(args)
 
+seed-local-soap-certificate:
+	$(PY_RUN_CMD) seed-local-soap-certificate --dir-path "$(DIR_PATH)" --agency-code "${AGENCY_CODE}"
+
 
 ##################################################
 # Tasks/Jobs
@@ -314,6 +340,15 @@ populate-search-opportunities: ## Load opportunities from the DB into the search
 
 populate-search-agencies: ## Load agencies from the DB into the search index, run "make db-seed-local" first to populate your database
 	$(FLASK_CMD) load-search-data load-agency-data $(args)
+
+run-workflow-service: ## Run the workflow service
+	$(FLASK_CMD) workflow workflow-main
+
+# This doesn't use our usual pre-defined prefix command since this only works
+# when run with docker as we use it to run the code async. Outside docker that
+# isn't something we have a simple way to support that.
+run-workflow-service-async: ## Run the workflow service without blocking
+	docker compose run --detach --rm grants-api flask workflow workflow-main
 
 run-generate-notifications: ## Send email notifications
 	$(FLASK_CMD) generate-notifications $(args)
@@ -344,8 +379,8 @@ help: ## Prints the help documentation and info about each command
 test-xml-validation: ## Run XML validation tests against XSD schemas (usage: make test-xml-validation form=SF424_4_0)
 	$(PY_RUN_CMD) flask task validate-xml-generation $(if $(form),--form $(form)) $(args)
 
-fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds cache_dir=./xsd_cache)
-	$(PY_RUN_CMD) flask task fetch-xsds $(if $(cache_dir),--cache-dir $(cache_dir)) $(if $(form),--form $(form)) $(args)
+fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds xsd_dir=../services/xml_generation/xsds/)
+	$(PY_RUN_CMD) flask task fetch-xsds $(if $(cache_dir),--xsd-dir $(xsd_dir)) $(if $(form),--form $(form)) $(args)
 
 ##################################################
 # Load testing
@@ -354,17 +389,14 @@ fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make
 load-test-local: # Load test the local environment at localhost:3000
 	artillery run artillery-load-test.yml
 
-load-test-dev: # Load test the dev environment in aws
-	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/dev/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
-	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e dev artillery-load-test.yml
+load-test-dev: # Load test the dev environment in aws. Requires API_KEY env var set to a valid API key.
+	env API_KEY=$(API_KEY) artillery run -e dev artillery-load-test.yml
 
-load-test-staging: # Load test the staging environment in aws
-	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/staging/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
-	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e staging artillery-load-test.yml
+load-test-staging: # Load test the staging environment in aws. Requires API_KEY env var set to a valid API key.
+	env API_KEY=$(API_KEY) artillery run -e staging artillery-load-test.yml
 
-load-test-prod: # Load test the production environment in aws. Please test responsibly
-	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/prod/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
-	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e prod artillery-load-test.yml
+load-test-prod: # Load test the production environment in aws. Please test responsibly. Requires API_KEY env var set to a valid API key.
+	env API_KEY=$(API_KEY) artillery run -e prod artillery-load-test.yml
 
 
 
@@ -391,3 +423,10 @@ validate-xml-generation: ## Run XML generation validation tests
 
 run-xml-validator: ## Run XML validator tool directly
 	$(PY_RUN_CMD) python tool/xml_validator.py
+
+#####################
+# Workflow State Machine
+#####################
+
+create-workflow-diagrams: ## Create diagrams of all of our defined workflows
+	$(PY_RUN_CMD) create-workflow-diagrams

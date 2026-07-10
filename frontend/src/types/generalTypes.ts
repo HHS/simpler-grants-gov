@@ -1,5 +1,8 @@
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 
+export const iso8601Date =
+  /^\d{4}(-\d\d(-\d\d(T\d\d:\d\d(:\d\d)?(\.\d+)?(([+-]\d\d:\d\d)|Z)?)?)?)?$/;
+
 export type RegexMatchedString<Pattern extends RegExp> = string & {
   __regexPattern: Pattern;
 };
@@ -11,6 +14,11 @@ type Only<T, U> = {
 };
 
 // exported Types ----
+
+export type LabelValueOption = {
+  label: string;
+  value: string;
+};
 
 export type Either<T, U> = Only<T, U> | Only<U, T>;
 
@@ -278,3 +286,5 @@ export interface ParsedError {
   type?: string;
   details?: FrontendErrorDetails;
 }
+
+export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";

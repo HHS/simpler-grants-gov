@@ -3,14 +3,14 @@
 from datetime import datetime, timezone
 
 import pytest
+from grants_shared.util.datetime_util import utcnow
 from lxml import etree as lxml_etree
 
+from src.services.xml_generation.constants import FOOTER_NAMESPACES
 from src.services.xml_generation.header_generator import (
-    FOOTER_NAMESPACES,
     SubmissionXMLGenerator,
     generate_application_footer_xml,
 )
-from src.util.datetime_util import utcnow
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationSubmissionFactory,
@@ -241,7 +241,7 @@ class TestFooterGeneration:
 
         assert xml_string.startswith("<?xml version=")
         first_line = xml_string.split("\n")[0]
-        assert "encoding='utf-8'" in first_line or 'encoding="utf-8"' in first_line
+        assert "encoding='utf-8'" in first_line.lower() or 'encoding="utf-8"' in first_line.lower()
 
     def test_footer_namespace_prefixes_in_output(self, application_with_submission):
         """Test that namespace prefixes are correctly used in footer XML output."""

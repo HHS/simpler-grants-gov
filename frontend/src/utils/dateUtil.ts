@@ -10,6 +10,11 @@ dayjs.extend(customParseFormat);
 dayjs.extend(localizedFormat);
 dayjs.extend(timezone);
 
+export const getConfiguredDayJs = () => dayjs;
+
+export const formatDateWithNoPreformattedExpectations = (date: Date) =>
+  dayjs(date).format("LL");
+
 // Convert "2024-02-21" to "February 21, 2024"
 export function formatDate(dateStr: string | null): string {
   if (!dateStr || !dayjs(dateStr, "YYYY-MM-DD", true).isValid()) {
@@ -20,6 +25,7 @@ export function formatDate(dateStr: string | null): string {
   return dayjs(dateStr).format("LL");
 }
 
+// "2025-01-15 22:22:22" -> "Jan 15, 2025 10:22 PM"
 export function formatDateTime(dateStr: string | null): string {
   if (!dateStr || !dayjs(dateStr).isValid()) {
     console.warn("invalid date string provided for parse");
@@ -34,8 +40,6 @@ export const toShortMonthDate = (unformattedDate: string): string => {
   const dateInstance = dayjs(unformattedDate);
   return dateInstance.isValid() ? dateInstance.format("MMM D, YYYY") : "";
 };
-
-export const getConfiguredDayJs = () => dayjs;
 
 export const isExpired = (expiration?: number) =>
   !!expiration && expiration < Date.now();

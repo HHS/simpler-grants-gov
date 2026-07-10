@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/react";
+import { SaveSearchModal } from "src/app/[locale]/(base)/search/_components/SaveSearchModal";
 
-import { SaveSearchModal } from "src/components/search/SaveSearchModal";
-
-const meta: Meta<typeof SaveSearchModal> = {
+const meta = {
   title: "Components/Search/SaveSearchModal",
   component: SaveSearchModal,
   args: {},

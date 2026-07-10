@@ -7,22 +7,13 @@ from typing import Any
 
 import click
 
-from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
-from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
-from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
+from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 
 from .xsd_validator import XSDValidator
 
 logger = logging.getLogger(__name__)
-
-# Map form names to their transform rules
-FORM_TRANSFORM_RULES = {
-    "SF424_4_0": SF424_TRANSFORM_RULES,
-    "SF424A": SF424A_TRANSFORM_RULES,
-    "SFLLL_2_0": SFLLL_TRANSFORM_RULES,
-}
 
 
 class ValidationTestRunner:
@@ -31,19 +22,56 @@ class ValidationTestRunner:
     **Prerequisites**: XSD files must be pre-downloaded using the fetch-xsds CLI command.
     """
 
-    def __init__(self, xsd_cache_dir: str | Path):
+    def __init__(
+        self,
+        xsd_dir: str | Path,
+        xml_form_map: dict[str, Any],
+    ):
         """Initialize validation test runner.
 
         Args:
-            xsd_cache_dir: Directory containing cached XSD files.
+            xsd_dir: Directory containing XSD files.
                           XSD files must be pre-downloaded using 'flask task fetch-xsds'.
+            xml_form_map: Pre-built mapping of form names to transform configuration.
+        Must be initialized AFTER form registry setup using
+        'init_form_registry()' and '_build_xml_form_map()'.
 
         Raises:
-            XSDValidationError: If cache directory doesn't exist
+            XSDValidationError: If XSD directory doesn't exist
         """
         self.xml_service = XMLGenerationService()
-        self.xsd_validator = XSDValidator(xsd_cache_dir)
+        self.xsd_validator = XSDValidator(xsd_dir)
         self.results: list[dict[str, Any]] = []
+        self.xml_form_map = xml_form_map
+
+    def _get_transform_config(self, form_name: str) -> dict | None:
+        """Return transform config for a form, matching case-insensitively."""
+        return self.xml_form_map.get(form_name.upper())
+
+    def _convert_attachment_mapping(
+        self, attachment_mapping: dict[str, Any] | None
+    ) -> dict[str, AttachmentInfo] | None:
+        """Convert dictionary attachment mapping to AttachmentInfo objects.
+
+        Args:
+            attachment_mapping: Raw dictionary with attachment data
+
+        Returns:
+            Dictionary mapping UUIDs to AttachmentInfo objects, or None
+        """
+        if not attachment_mapping:
+            return None
+
+        converted = {}
+        for uuid, data in attachment_mapping.items():
+            converted[uuid] = AttachmentInfo(
+                filename=data.get("FileName", ""),
+                mime_type=data.get("MimeType", ""),
+                file_location=data.get("FileLocation", ""),
+                hash_value=data.get("HashValue", ""),
+                hash_algorithm=data.get("HashAlgorithm", "SHA-1"),
+            )
+        return converted
 
     def run_validation_test(
         self,
@@ -52,14 +80,16 @@ class ValidationTestRunner:
         xsd_url_or_path: str,
         form_name: str = "SF424_4_0",
         pretty_print: bool = True,
+        attachment_mapping: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Run a single validation test.
 
         Args:
             test_name: Name of the test case
             json_input: JSON input data
-            xsd_url_or_path: URL to XSD file (will be converted to cached file path)
+            xsd_url_or_path: URL to XSD file (will be converted to XSD file path)
             form_name: Form name for XML generation
+            attachment_mapping: Optional attachment mapping for forms with attachments
             pretty_print: Whether to pretty-print XML
 
         Returns:
@@ -69,7 +99,7 @@ class ValidationTestRunner:
 
         try:
             # Get transform rules for the form
-            transform_config = FORM_TRANSFORM_RULES.get(form_name)
+            transform_config = self._get_transform_config(form_name)
             if not transform_config:
                 return {
                     "test_name": test_name,
@@ -79,12 +109,15 @@ class ValidationTestRunner:
                     "xml_content": None,
                     "validation_result": None,
                 }
-
             # Generate XML
+            # Convert attachment_mapping dictionaries to AttachmentInfo objects
+            converted_attachments = self._convert_attachment_mapping(attachment_mapping)
+
             request = XMLGenerationRequest(
                 transform_config=transform_config,
                 application_data=json_input,
                 pretty_print=pretty_print,
+                attachment_mapping=converted_attachments,
             )
 
             response = self.xml_service.generate_xml(request)
@@ -110,7 +143,7 @@ class ValidationTestRunner:
                     "validation_result": None,
                 }
 
-            # Convert URL to cached file path
+            # Convert URL to XSD file path
             xsd_file_path = self._get_xsd_file_path(xsd_url_or_path)
 
             validation_result = self.xsd_validator.validate_xml(response.xml_data, xsd_file_path)
@@ -141,10 +174,10 @@ class ValidationTestRunner:
             return error_result
 
     def _get_xsd_file_path(self, xsd_url: str) -> Path:
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to XSD file path."""
         # Extract filename from URL
         xsd_filename = xsd_url.split("/")[-1]
-        return self.xsd_validator.xsd_cache_dir / xsd_filename
+        return self.xsd_validator.xsd_dir / xsd_filename
 
     def run_test_suite(self, test_cases: list[dict[str, Any]]) -> dict[str, Any]:
         """Run a suite of validation tests."""
@@ -157,8 +190,9 @@ class ValidationTestRunner:
                 test_name=test_case["name"],
                 json_input=test_case["json_input"],
                 xsd_url_or_path=test_case["xsd_url"],
-                form_name=test_case.get("form_name", "SF424_4_0"),
+                form_name=test_case.get("short_form_name", test_case.get("form_name", "SF424_4_0")),
                 pretty_print=test_case.get("pretty_print", True),
+                attachment_mapping=test_case.get("attachment_mapping"),
             )
 
         # Calculate summary

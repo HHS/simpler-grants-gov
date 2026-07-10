@@ -10,9 +10,6 @@ export const getUserOrganizations = async () => {
     try {
       const organizationsResponse = await fetchUserWithMethod("GET")({
         subPath: `${currentSession.user_id}/organizations`,
-        additionalHeaders: {
-          "X-SGG-TOKEN": currentSession.token,
-        },
       });
       const responseBody = (await organizationsResponse.json()) as { data: [] };
       return NextResponse.json(responseBody.data);

@@ -1,29 +1,214 @@
-name: Frontend E2E Tests
+name: E2E Tests (Local Github Target)
 on:
+  push:
+    branches:
+      - "main"
   workflow_dispatch:
+    inputs:
+      api_logs:
+        description: "print api logs on failure?"
+        default: false
+        type: boolean
+      playwright_tags:
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
+        required: false
+        type: string
   workflow_call:
+    inputs:
+      api_logs:
+        description: "print api logs on failure?"
+        default: false
+        type: boolean
+      playwright_tags:
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
+        required: false
+        type: string
   pull_request:
     paths:
-      - frontend/**
-      - .github/workflows/ci-frontend-e2e.yml
+      - "api/**"
+      - "frontend/**"
+      - ".github/workflows/ci-frontend-e2e.yml"
+      - ".github/workflows/e2e-create-report.yml"
+      - ".github/actions/e2e/action.yml"
 
 defaults:
   run:
     working-directory: ./frontend
 
 env:
-  NODE_VERSION: 22
+  NODE_VERSION: 24
   LOCKFILE_PATH: ./frontend/package-lock.json
   PACKAGE_MANAGER: npm
   NODE_OPTIONS: --dns-result-order=ipv4first
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-local-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  e2e-tests:
-    name: Run E2E Tests
+  get-api-commit-hash:
+    name: Get API commit hash
+    runs-on: ubuntu-22.04
+    outputs:
+      commit_hash: ${{ steps.get-api-commit-hash.outputs.commit_hash }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          repository: ${{ github.event.repository.full_name }}
+          fetch-depth: 1000
+      - name: Get commit hash
+        id: get-api-commit-hash
+        env:
+          CLEAN_REF: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+        run: |
+          cd ..
+          COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 "$CLEAN_REF" -- api)
+          echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
+          echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
+
+  get-frontend-commit-hash:
+    name: Get frontend commit hash
+    runs-on: ubuntu-22.04
+    outputs:
+      commit_hash: ${{ steps.get-frontend-commit-hash.outputs.commit_hash }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          repository: ${{ github.event.repository.full_name }}
+          fetch-depth: 1000
+      - name: Get commit hash
+        id: get-frontend-commit-hash
+        env:
+          CLEAN_REF: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+        run: |
+          cd ..
+          COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 "$CLEAN_REF" -- frontend)
+          echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
+          echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
+
+  # do this in it's own step so that each parallel process in the matrix job below isn't having to download and install stuff
+  # based on this https://justin.poehnelt.com/posts/caching-playwright-in-github-actions/
+  playwright-cache:
+    name: Playwright caching
+    needs: [get-api-commit-hash]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          # if cache is missing randomly so instead of being able to just trust the cache existing, we have to download here and push it to an artifact for the next job, by commenting the lookup-only out
+          # lookup-only: true
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - uses: actions/cache@v5
+        id: npm-cache
+        with:
+          # if cache is missing randomly so instead of being able to just trust the cache existing, we have to download here and push it to an artifact for the next job, by commenting the lookup-only out
+          # lookup-only: true
+          path: |
+            frontend/node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+
+      - id: install-npm-packages
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+
+      # Install Chrome only for caching; other browsers installed per-shard in test job
+      - run: npx playwright install --with-deps chromium-headless-shell
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      # We package ourselves as tar.gz because this preserves permissions that a regular artifact upload/download does not.
+      - name: Package node_modules
+        run: |
+          tar -czf /tmp/node_modules.tar.gz ./node_modules/
+
+      - name: Upload node_modules artifact
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          path: /tmp/node_modules.tar.gz
+
+      # We package ourselves as tar.gz because this preserves permissions that a regular artifact upload/download does not.
+      - name: Package Playwright artifact
+        run: |
+          cd ~/.cache/ms-playwright
+          tar -czf /tmp/playwright.tar.gz .
+
+      - name: Upload Playwright artifact
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          path: /tmp/playwright.tar.gz
+
+  build-api-if-not-cached:
+    name: Build API if not cached
+    needs: [get-api-commit-hash]
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Restore API Docker image cached
+        id: restore-docker-image-cached
+        uses: actions/cache/restore@v5
+        with:
+          path: /tmp/docker-image.tar
+          lookup-only: true
+          key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          # disable this for now as it seems like we can't actually use the live images, flask not found?
+          #restore-keys: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+      - name: Build API Server for e2e tests (if not cached)
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+
+          make build
+
+      - name: Save API Docker image to file
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          docker save api-grants-api > /tmp/docker-image.tar
+
+      - name: Save API Docker image cache
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        id: save-docker-image-cache
+        uses: actions/cache/save@v5
+        with:
+          path: /tmp/docker-image.tar
+          key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+  run-e2e-tests-local:
+    name: Prepare infra and run E2E tests
+    needs:
+      [
+        get-api-commit-hash,
+        get-frontend-commit-hash,
+        playwright-cache,
+        build-api-if-not-cached,
+      ]
     runs-on: ubuntu-22.04
 
     strategy:
@@ -33,19 +218,104 @@ jobs:
         total_shards: [4]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
-      - run: |
-          npm ci
-          npx playwright install --with-deps
-          docker rmi node:22 node:20 node:18
+      - uses: actions/cache@v5
+        id: npm-cache
+        with:
+          # don't fail for now as we're backing this up with an artifact download since the cache hit is sketchy
+          # fail-on-cache-miss: true
+          path: |
+            frontend/node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+
+      # We download because the cache is not reliably hitting even when it exists
+      # We expand the tar.gz manually because this preserves permissions that a regular artifact upload/download does not.
+      - name: Download node_modules artifact
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: node_modules.tar.gz
+          path: /tmp
+
+      - name: Expand node_modules
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          tar -xzf /tmp/node_modules.tar.gz
+
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          # don't fail for now as we're backing this up with an artifact download because the cache hit is sketchy
+          # fail-on-cache-miss: true
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      # We download because the cache is not reliably hitting even when it exists
+      # We expand the tar.gz manually because this preserves permissions that a regular artifact upload/download does not.
+      - name: Download Playwright artifact
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: playwright.tar.gz
+          path: /tmp
+
+      - name: Expand Playwright
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: |
+          cd ~
+          mkdir -p .cache/ms-playwright
+          tar -xzf /tmp/playwright.tar.gz -C ~/.cache/ms-playwright
+
+      - name: Restore Docker image cached
+        id: restore-docker-image-cached
+        uses: actions/cache/restore@v5
+        with:
+          path: /tmp/docker-image.tar
+          key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          # disable this for now as it seems like we can't actually use the live images, flask not found?
+          #restore-keys: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+      # leaving this for troubleshooting why images don't work in the future (you can't download a cache item)
+      # - name: Upload API artifact
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     name: api-docker.tar
+      #     path: /tmp/docker-image.tar
+
+      - name: Fail if cache miss on API
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          echo "Failing because we couldn't load the API image from cache"
+          exit 1
+
+      - name: Load cached Docker image (alias it if needed)
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key != ''
+        run: |
+          docker load < /tmp/docker-image.tar
+          # alias the live docker container name simpler-grants-gov-api to the locally build name api-grants-api so that we don't rebuild it in later steps.
+          IMAGE_ID="$(docker image ls -q simpler-grants-gov-api)"
+          docker tag "$IMAGE_ID" api-grants-api:latest || true
+
+      - name: Init API Server for e2e tests
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+          # Run init first to generate JWT keys in override.env
+
+          make init-ci-cd
 
       - name: Start API Server for e2e tests
         run: |
@@ -54,111 +324,94 @@ jobs:
           ulimit -c unlimited
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-          # Run init first to generate JWT keys in override.env
-          make init
+
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
           make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          make run-workflow-service-async
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
           ../api/bin/wait-for-api.sh
         shell: bash
 
-      - name: Build a prod version of the site
+      # we shouldn't ever need to do this
+      # - name: npm ci
+      #   if: steps.npm-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     npm ci
+
+      # we shouldn't ever need to do this
+      # - name: Install dependencies and Playwright
+      #   if: steps.playwright-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     npx playwright install --with-deps
+
+      - name: Build a prod version of the frontend
         run: |
           {
             cat .env.development
             sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
-            cat ../api/e2e_token.tmp
+            # e2e_token.tmp may not exist once seeding moves to the new test user system; don't fail if it's absent
+            cat ../api/e2e_token.tmp 2>/dev/null || true
           } >> .env.local
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
-          npm run build -- --no-lint
+          npm run build
 
-      - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
-        env:
-          CI: true
-          TOTAL_SHARDS: ${{ matrix.total_shards }}
-          CURRENT_SHARD: ${{ matrix.shard }}
-        run: |
-          npm run test:e2e
-
-      - name: Debug logging on failure
-        if: failure()
-        run: |
-          cd ../api
-          echo "=== API Container Logs ==="
-          docker logs grants-api || echo "Could not retrieve API logs"
-          echo ""
-          echo "=== OpenSearch Container Logs ==="
-          docker logs opensearch-node || echo "Could not retrieve OpenSearch logs"
-          echo ""
-          echo "=== Container Status ==="
-          docker ps -a
-          echo ""
-          echo "=== Disk free ==="
-          df -h
-          echo ""
-        shell: bash
-
-      - name: Verify Blob Report Directory
-        run: |
-          echo "Contents of blob-report directory:"
-          ls -R blob-report || echo "blob-report directory not found"
-
-      - name: Upload Blob Report
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Get list of changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v47.0.6
         with:
-          name: blob-report-shard-${{ matrix.shard }}
-          path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
-          retention-days: 1
+          files: |
+            frontend/tests/e2e/apply/forms/**/*.spec.ts
+            frontend/src/components/applyForm/**
+            frontend/src/app/[locale]/workspace/applications/[applicationId]/**/*.tsx
+            api/src/form_schema/forms/**
+            api/src/form_schema/shared/**
+            api/src/form_schema/rule_processing/**
+
+      - name: Determine test groups to run
+        shell: bash
+        env:
+          ANY_CHANGED_FILES: ${{ steps.changed-files.outputs.any_changed }}
+        run: |
+          echo "Any apply form files changed?"
+          echo "$ANY_CHANGED_FILES"
+          if [[ $GITHUB_EVENT_NAME = "pull_request" ]]; then
+            if [[ $ANY_CHANGED_FILES = "false" ]]; then
+              echo "test_group_tags=@smoke" >> "$GITHUB_ENV"
+            else
+              echo "test_group_tags=@smoke|@apply-forms" >> "$GITHUB_ENV"
+            fi
+          elif [[ $GITHUB_EVENT_NAME = "push" ]]; then
+            echo "test_group_tags=@smoke|@core-regression" >> "$GITHUB_ENV"
+          else
+            echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Run E2E tests
+        uses: ./.github/actions/e2e
+        with:
+          version: ${{ github.ref }}
+          target: "local"
+          needs_node_setup: "false"
+          total_shards: ${{ matrix.total_shards }}
+          current_shard: ${{ matrix.shard }}
+          api_logs: ${{ inputs.api_logs && 'true' || 'false' }}
+          playwright_tags: ${{ env.test_group_tags }}
+          test_user_manager_api_key: ${{ secrets.LOCAL_TEST_USER_MANAGER_API_KEY }}
+          # shard 2 is the firefox shard
+          do-firefox-install: ${{ matrix.shard == 2 && 'true' || 'false' }}
+          # shard 3 is the webkit shard
+          do-webkit-install: ${{ matrix.shard == 3 && 'true' || 'false' }}
 
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
-    needs: [e2e-tests]
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: ${{ env.PACKAGE_MANAGER }}
-          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
-
-      - run: |
-          npm ci
-          npx playwright install --with-deps
-
-      - name: Download All Blob Reports
-        uses: actions/download-artifact@v4
-        with:
-          path: frontend/all-blob-reports
-          pattern: blob-report-shard-*
-          merge-multiple: true
-
-      - name: Verify Downloaded Artifacts
-        run: |
-          echo "Contents of all-blob-reports after download:"
-          ls -R all-blob-reports*
-
-      - name: Merge Blob Reports into HTML
-        run: npx playwright merge-reports --reporter html ./all-blob-reports
-
-      - name: Verify Downloaded Artifacts
-        run: |
-          echo "Contents of all-blob-reports after download:"
-          ls -R playwright*
-
-      - name: Upload Merged HTML Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: merged-html-report
-          path: frontend/playwright-report
-          retention-days: 30
+    needs: run-e2e-tests-local
+    uses: ./.github/workflows/e2e-create-report.yml
+    secrets: inherit
+    with:
+      run_id: ${{ github.run_id }}
+      target: local

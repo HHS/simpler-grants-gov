@@ -1,15 +1,17 @@
-# Overview
+# API Versioning
+
+## Overview
 
 This document will detail how we handle versioning our API right now, as well a long-term idea that we will want to circle back to.
 
-## Why versioning?
+### Why versioning?
 
 While many changes we plan to make to our API should be backwards-compatible, there will be times when we have to make
 changes that would break our clients from calling our API (eg. making a field required that was previously optional).
 
 By having versioned endpoints, we can give our clients time to update their calls until the old version of the endpoint can be fully deprecated.
 
-# Current Implementation
+## Current Implementation
 
 Endpoints are versioned in their routes. For example, if our `GET` opportunity endpoint is `GET /v1/opportunities/:opportunityId` and
 we made a change that was not backwards compatible (let's say we change the authentication approach), then we'd make an entirely
@@ -20,7 +22,7 @@ While we are in the early phases of developing the API, prior to having any sign
 maintaining the backwards compatability. We won't start adding new versions of the API until we would begin impacting production
 systems of our users.
 
-# Long-term idea using headers
+## Long-term idea using headers
 
 An alternative approach we could take in the future is to instead put the versioning in a header parameter (like the `content-type` field) similar to [Stripe](https://stripe.com/blog/api-versioning).
 
@@ -39,7 +41,7 @@ takes in the request and returns a `Schema` object. That request object contains
 
 However, the `input` and `output` methods for APIFlask do not take in multiple Schema or a callable, and would need to be rewritten.
 
-## Rough Ideas
+### Rough Ideas
 Modify the [input](https://apiflask.com/api/blueprint/#apiflask.scaffold.APIScaffold.input) method in APIFlask to be capable of taking in a callable. We could
 either override the method, or look into making the change in APIFlask itself which is open source.
 

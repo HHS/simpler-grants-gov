@@ -1,0 +1,84 @@
+"use client";
+
+import {
+  BasicSearchFilterAccordion,
+  SearchFilterProps,
+} from "src/app/[locale]/(base)/search/_components/SearchFilterAccordion/SearchFilterAccordion";
+import { SearchFilterRadio } from "src/app/[locale]/(base)/search/_components/SearchFilterRadio";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+
+import { useMemo } from "react";
+
+export function RadioButtonFilter({
+  query,
+  queryParamKey,
+  title,
+  includeAnyOption = true,
+  filterOptions,
+  facetCounts,
+  contentClassName,
+}: SearchFilterProps) {
+  const { setQueryParam } = useSearchParamUpdater();
+
+  const toggleRadioSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    if (!query.has(value)) {
+      setQueryParam(queryParamKey, event.target.value);
+    }
+  };
+
+  const handleRadioClickedTwice = (
+    event: React.MouseEvent<HTMLInputElement>,
+  ) => {
+    if ((event.currentTarget as HTMLInputElement).checked) {
+      // focused only on checking the radio button to see if its checked.
+      setQueryParam(queryParamKey, "");
+      event.currentTarget.checked = false;
+    }
+  };
+
+  const isNoneSelected = useMemo(() => query.size === 0, [query]);
+
+  return (
+    <BasicSearchFilterAccordion
+      query={query}
+      queryParamKey={queryParamKey}
+      title={title}
+      expanded={!!query.size}
+      className="width-100"
+      contentClassName={contentClassName}
+    >
+      <div data-testid={`${title}-filter`}>
+        <ul className="usa-list usa-list--unstyled">
+          {includeAnyOption && (
+            <li>
+              <SearchFilterRadio
+                id={`${title}-any-radio`}
+                name={`Any ${title}`}
+                label={`Any ${title.toLowerCase()}`}
+                onChange={toggleRadioSelection}
+                value={undefined}
+                facetCount={undefined}
+                checked={isNoneSelected}
+              />
+            </li>
+          )}
+          {filterOptions.map((option) => (
+            <li key={option.id}>
+              <SearchFilterRadio
+                id={option.id}
+                name={option.label}
+                label={option.label}
+                onChange={toggleRadioSelection}
+                onClick={handleRadioClickedTwice}
+                value={option.value}
+                facetCount={facetCounts && (facetCounts?.[option.value] || 0)}
+                checked={query.has(option.value)}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </BasicSearchFilterAccordion>
+  );
+}

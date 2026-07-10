@@ -1,37 +1,39 @@
 import io
 import logging
+from collections.abc import Sequence
 from uuid import UUID
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
+import grants_shared.api.response as response
+import grants_shared.util.datetime_util as datetime_util
 from flask import Response
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.util.dict_util import flatten_dict
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
-import src.api.response as response
-import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
-from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.services.opportunities_v1.get_opportunity import (
     get_opportunity,
     get_opportunity_by_legacy_id,
 )
 from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
-from src.services.opportunities_v1.search_opportunities import search_opportunities
-from src.util.dict_util import flatten_dict
+from src.services.opportunities_v1.search_opportunities import (
+    search_opportunities,
+    search_opportunities_csv,
+)
 
 logger = logging.getLogger(__name__)
 
 # Descriptions in OpenAPI support markdown https://swagger.io/specification/
 SHARED_ALPHA_DESCRIPTION = """
-__ALPHA VERSION__
+This API is in active development as we build out new functionalities for Simpler.Grants.gov.
+It is currently stable for everyday use, and will be versioned with advance notice for any breaking changes.
 
-This endpoint in its current form is primarily for testing and feedback.
-
-Features in this endpoint are still under heavy development, and subject to change. Not for production use.
-
+Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
 
@@ -172,6 +174,37 @@ examples = {
     },
 }
 
+csv_examples = {
+    "example1": {
+        "summary": "No filters",
+        "value": {},
+    },
+    "example2": {
+        "summary": "Query and filters",
+        "value": {
+            "query": "research",
+            "query_operator": "OR",
+            "filters": {
+                "agency": {"one_of": ["USAID", "DOC"]},
+                "opportunity_status": {"one_of": ["forecasted", "posted"]},
+            },
+        },
+    },
+}
+
+
+def _build_opportunities_csv_response(opportunities: Sequence[dict]) -> Response:
+    output = io.StringIO()
+    opportunities_to_csv(opportunities, output)
+    timestamp = datetime_util.utcnow().strftime("%Y%m%d-%H%M%S")
+    return Response(
+        output.getvalue().encode("utf-8"),
+        content_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=opportunity_search_results_{timestamp}.csv"
+        },
+    )
+
 
 @opportunity_blueprint.post("/opportunities/search")
 @opportunity_blueprint.input(
@@ -180,13 +213,13 @@ examples = {
     examples=examples,
 )
 @opportunity_blueprint.output(opportunity_schemas.OpportunitySearchResponseV1Schema())
-@api_key_multi_auth.login_required
+@opportunity_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @opportunity_blueprint.doc(
     description=SHARED_ALPHA_DESCRIPTION,
-    security=api_key_multi_auth_security_schemes,
+    summary="Search opportunities (JSON or CSV)",
     # This adds a file response schema
     # in addition to the one added by the output decorator
-    responses={200: {"content": {"application/octet-stream": {}}}},  # type: ignore
+    responses={200: {"content": {"text/csv": {}}}},  # type: ignore
 )
 @flask_opensearch.with_search_client()
 def opportunity_search(
@@ -194,6 +227,13 @@ def opportunity_search(
 ) -> response.ApiResponse | Response:
     add_extra_data_to_current_request_logs(flatten_dict(search_params, prefix="request.body"))
     logger.info("POST /v1/opportunities/search")
+
+    if search_params.get("format") == opportunity_schemas.SearchResponseFormat.CSV:
+        opportunities = search_opportunities_csv(
+            search_client, search_params, apply_export_pagination=False
+        )
+        logger.info("Successfully fetched opportunities for CSV response")
+        return _build_opportunities_csv_response(opportunities)
 
     opportunities, aggregations, pagination_info = search_opportunities(
         search_client, search_params
@@ -206,19 +246,6 @@ def opportunity_search(
     )
     logger.info("Successfully fetched opportunities")
 
-    if search_params.get("format") == opportunity_schemas.SearchResponseFormat.CSV:
-        # Convert the response into a CSV and return the contents
-        output = io.StringIO()
-        opportunities_to_csv(opportunities, output)
-        timestamp = datetime_util.utcnow().strftime("%Y%m%d-%H%M%S")
-        return Response(
-            output.getvalue().encode("utf-8"),
-            content_type="text/csv",
-            headers={
-                "Content-Disposition": f"attachment; filename=opportunity_search_results_{timestamp}.csv"
-            },
-        )
-
     return response.ApiResponse(
         message="Success",
         data=opportunities,
@@ -227,12 +254,34 @@ def opportunity_search(
     )
 
 
+@opportunity_blueprint.post("/opportunities/search/csv")
+@opportunity_blueprint.input(
+    opportunity_schemas.OpportunitySearchCSVRequestV1Schema,
+    arg_name="search_params",
+    examples=csv_examples,
+)
+@opportunity_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_blueprint.doc(
+    description=SHARED_ALPHA_DESCRIPTION,
+    responses={200: {"content": {"text/csv": {}}}},  # type: ignore
+)
+@flask_opensearch.with_search_client()
+def opportunity_search_csv(search_client: search.SearchClient, search_params: dict) -> Response:
+    add_extra_data_to_current_request_logs(flatten_dict(search_params, prefix="request.body"))
+    logger.info("POST /v1/opportunities/search/csv")
+
+    opportunities = search_opportunities_csv(
+        search_client, search_params, apply_export_pagination=True
+    )
+    logger.info("Successfully fetched opportunities for CSV response")
+
+    return _build_opportunities_csv_response(opportunities)
+
+
 @opportunity_blueprint.get("/opportunities/<int:legacy_opportunity_id>")
 @opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV1Schema())
-@api_key_multi_auth.login_required
-@opportunity_blueprint.doc(
-    description=SHARED_ALPHA_DESCRIPTION, security=api_key_multi_auth_security_schemes
-)
+@opportunity_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
 def opportunity_get_legacy(
     db_session: db.Session, legacy_opportunity_id: int
@@ -247,10 +296,8 @@ def opportunity_get_legacy(
 
 @opportunity_blueprint.get("/opportunities/<uuid:opportunity_id>")
 @opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV1Schema())
-@api_key_multi_auth.login_required
-@opportunity_blueprint.doc(
-    description=SHARED_ALPHA_DESCRIPTION, security=api_key_multi_auth_security_schemes
-)
+@opportunity_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
 def opportunity_get(db_session: db.Session, opportunity_id: UUID) -> response.ApiResponse:
     add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})

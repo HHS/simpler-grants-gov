@@ -3,7 +3,8 @@ import logging
 import time
 from typing import Any
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
+
 from src.task.task import Task
 
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class SubTask(abc.ABC, metaclass=abc.ABCMeta):
         # Passthrough method to the task set_metrics function
         self.task.set_metrics(metrics)
 
-    def increment(self, name: str, value: int = 1, prefix: str | None = None) -> None:
+    def increment(self, name: str, value: int | float = 1, prefix: str | None = None) -> None:
         # Passthrough method to the task increment function
         self.task.increment(name, value, prefix)
 

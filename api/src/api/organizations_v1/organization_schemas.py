@@ -1,10 +1,11 @@
-from src.api.schemas.extension import Schema, fields
-from src.api.schemas.extension.field_validators import Email, Length, validators
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import StrSearchSchemaBuilder
+from grants_shared.api.schemas.extension import Schema, fields
+from grants_shared.api.schemas.extension.field_validators import Email, Length, validators
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from grants_shared.api.schemas.search_schema import StrSearchSchemaBuilder
+from grants_shared.pagination.pagination_schema import generate_pagination_schema
+
 from src.api.schemas.shared_schema import RoleSchema
 from src.constants.lookup_constants import LegacyUserStatus, OrganizationInvitationStatus
-from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class SamGovEntityResponseSchema(Schema):
@@ -439,3 +440,27 @@ class LegacyUsersListResponseSchema(AbstractResponseSchema, PaginationMixinSchem
         fields.Nested(LegacyUserDataSchema),
         metadata={"description": "List of legacy users"},
     )
+
+
+class OrganizationSaveOpportunityRequestSchema(Schema):
+    """Schema for POST /organizations/:organization_id/saved-opportunities request"""
+
+    opportunity_id = fields.UUID(
+        required=True,
+        metadata={
+            "description": "Opportunity unique identifier to save",
+            "example": "942e4567-e89b-12d3-a456-426614174000",
+        },
+    )
+
+
+class OrganizationSaveOpportunityResponseSchema(AbstractResponseSchema):
+    """Schema for POST /organizations/:organization_id/saved-opportunities response"""
+
+    data = fields.Raw(allow_none=True, metadata={"description": "No data returned", "example": {}})
+
+
+class OrganizationDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
+    """Schema for DELETE /organizations/:organization_id/saved-opportunities/:opportunity_id response"""
+
+    data = fields.Raw(allow_none=True, metadata={"description": "No data returned", "example": {}})

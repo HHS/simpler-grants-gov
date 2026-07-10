@@ -32,15 +32,13 @@ locals {
     description = "Database resources for the ${var.environment_name} environment"
   })
 
-  is_temporary = terraform.workspace != "default"
-
   environment_config = module.app_config.environment_configs[var.environment_name]
   database_config    = local.environment_config.database_config
   network_config     = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
-  required_version = "1.13.5"
+  required_version = "1.14.3"
 
   required_providers {
     aws = {
@@ -96,11 +94,14 @@ module "database" {
   max_capacity                   = local.database_config.max_capacity
   min_capacity                   = local.database_config.min_capacity
   enable_http_endpoint           = local.database_config.enable_http_endpoint
+  engine_version                 = local.database_config.database_engine_version
   vpc_id                         = data.aws_vpc.network.id
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
   database_subnet_group_name     = var.environment_name
   environment_name               = var.environment_name
   grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
-  is_temporary                   = local.is_temporary
+  newrelic_entity_guid           = local.database_config.newrelic_entity_guid
+  deletion_protection            = local.database_config.deletion_protection
+  snapshot_identifier            = var.database_snapshot_id
 }

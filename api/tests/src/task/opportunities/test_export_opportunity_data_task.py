@@ -1,9 +1,9 @@
 import csv
 import json
 
+import grants_shared.util.file_util as file_util
 import pytest
 
-import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
@@ -12,7 +12,7 @@ from src.task.opportunities.export_opportunity_data_task import (
     ExportOpportunityDataTask,
 )
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import ExcludedOpportunityReviewFactory, OpportunityFactory
+from tests.src.db.models.factories import OpportunityFactory
 
 
 class TestExportOpportunityDataTask(BaseTestClass):
@@ -48,8 +48,6 @@ class TestExportOpportunityDataTask(BaseTestClass):
         # Create some opportunities that won't get fetched / exported
         OpportunityFactory.create_batch(size=3, is_draft=True)
         OpportunityFactory.create_batch(size=4, no_current_summary=True)
-        opp = OpportunityFactory.create(is_posted_summary=True)
-        ExcludedOpportunityReviewFactory.create(legacy_opportunity_id=opp.legacy_opportunity_id)
 
         export_opportunity_data_task.run()
 

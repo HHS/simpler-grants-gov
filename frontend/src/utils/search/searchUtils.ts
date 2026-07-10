@@ -1,4 +1,3 @@
-import { uniq } from "lodash";
 import {
   SEARCH_NO_STATUS_VALUE,
   STATUS_FILTER_DEFAULT_VALUES,
@@ -34,10 +33,14 @@ export function convertSearchParamsToProperTypes(
     agency: paramToSet(params.agency),
     category: paramToSet(params.category),
     closeDate: paramToDateRange(params.closeDate),
+    postedDate: paramToDateRange(params.postedDate),
     costSharing: paramToSet(params.costSharing),
     andOr: (params.andOr as QueryOperator) || "",
     topLevelAgency: paramToSet(params.topLevelAgency),
     sortby: (params.sortby as SortOptions) || null, // Convert empty string to null if needed
+    assistanceListingNumber: paramToSet(
+      params.assistanceListingNumber as QuerySetParam,
+    ),
 
     // Ensure page is at least 1 or default to 1 if undefined
     page: getSafePage(params.page),
@@ -118,5 +121,5 @@ export const getStatusValueForAgencySearch = (statuses?: string[]) => {
     return statusOptions.map(({ value }) => value);
   }
   // always include posted and forecasted
-  return uniq(statuses.concat(STATUS_FILTER_DEFAULT_VALUES));
+  return [...new Set(statuses.concat(STATUS_FILTER_DEFAULT_VALUES))];
 };

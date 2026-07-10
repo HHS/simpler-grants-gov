@@ -1,30 +1,46 @@
 import uuid
 from datetime import date, datetime
+from typing import Any
 
+from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from grants_shared.db.models.auth_base_models import (
+    BaseLinkExternalUser,
+    BaseLoginGovState,
+    BaseUser,
+    BaseUserApiKey,
+    BaseUserTokenSession,
+)
+from grants_shared.db.models.base import TimestampMixin
+from grants_shared.util import datetime_util
 from sqlalchemy import ForeignKey, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
 
-from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType, UserType
 from src.db.models.agency_models import Agency
-from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType, LkUserType
 from src.db.models.opportunity_models import Opportunity
-from src.util import datetime_util
 
 
-class User(ApiSchemaTable, TimestampMixin):
+class User(BaseUser, ApiSchemaTable, TimestampMixin):
     __tablename__ = "user"
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
     saved_opportunities: Mapped[list[UserSavedOpportunity]] = relationship(
         "UserSavedOpportunity",
+        back_populates="user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+    saved_opportunity_notifications: Mapped[list[UserSavedOpportunityNotification]] = relationship(
+        "UserSavedOpportunityNotification",
         back_populates="user",
         uselist=True,
         cascade="all, delete-orphan",
@@ -98,12 +114,10 @@ class User(ApiSchemaTable, TimestampMixin):
         return [iur.role for iur in self.internal_user_roles]
 
 
-class LinkExternalUser(ApiSchemaTable, TimestampMixin):
+class LinkExternalUser(BaseLinkExternalUser, ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_external_user"
 
     link_external_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-
-    external_user_id: Mapped[str] = mapped_column(index=True, unique=True)
 
     external_user_type: Mapped[ExternalUserType] = mapped_column(
         "external_user_type_id",
@@ -115,32 +129,29 @@ class LinkExternalUser(ApiSchemaTable, TimestampMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User)
 
-    email: Mapped[str] = mapped_column(index=True)
 
-
-class UserTokenSession(ApiSchemaTable, TimestampMixin):
+class UserTokenSession(BaseUserTokenSession, ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_token_session"
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
-    user: Mapped[User] = relationship(User)
-
     token_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
 
-    expires_at: Mapped[datetime]
+    user: Mapped[User] = relationship(User)
 
-    # When a user logs out, we set this flag to False.
-    is_valid: Mapped[bool] = mapped_column(default=True)
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info"""
+        return {
+            "auth.token_id": self.token_id,
+            "auth.user_id": self.user_id,
+        }
 
 
-class LoginGovState(ApiSchemaTable, TimestampMixin):
+class LoginGovState(BaseLoginGovState, ApiSchemaTable, TimestampMixin):
     """Table used to store temporary state during the OAuth login flow"""
 
     __tablename__ = "login_gov_state"
 
     login_gov_state_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
-
-    # https://openid.net/specs/openid-connect-core-1_0.html#NonceNotes
-    nonce: Mapped[uuid.UUID]
 
 
 class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
@@ -160,6 +171,48 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
         "Opportunity", back_populates="saved_opportunities_by_users"
     )
     is_deleted: Mapped[bool | None]
+
+
+class UserSavedOpportunityNotification(ApiSchemaTable, TimestampMixin):
+    """Notification settings for a user's saved opportunities.
+
+    A row with organization_id=None represents the user's own default settings.
+    A row with an organization_id represents settings scoped to that organization.
+
+    Business logic defaults:
+    - No row for user's own settings -> email_enabled=True
+    - No row for an org -> email_enabled=False
+    """
+
+    __tablename__ = "user_saved_opportunity_notification"
+
+    __table_args__ = (
+        # NULLS_NOT_DISTINCT treats NULL organization_id as equal, enforcing one row per
+        # (user, org) pair and one row per user where organization_id IS NULL.
+        UniqueConstraint(
+            "user_id",
+            "organization_id",
+            postgresql_nulls_not_distinct=True,
+        ),
+        ApiSchemaTable.__table_args__,
+    )
+
+    user_saved_opportunity_notification_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
+    user: Mapped[User] = relationship(User, back_populates="saved_opportunity_notifications")
+
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id), index=True
+    )
+    organization: Mapped[Organization | None] = relationship(Organization)
+
+    # Defaults to True for user's own settings (organization_id IS NULL), False for org-scoped rows.
+    email_enabled: Mapped[bool] = mapped_column(
+        default=lambda ctx: ctx.get_current_parameters().get("organization_id") is None
+    )
 
 
 class UserSavedSearch(ApiSchemaTable, TimestampMixin):
@@ -303,21 +356,23 @@ class SuppressedEmail(ApiSchemaTable, TimestampMixin):
     last_update_time: Mapped[datetime] = mapped_column(index=True)
 
 
-class UserApiKey(ApiSchemaTable, TimestampMixin):
+class UserApiKey(BaseUserApiKey, ApiSchemaTable, TimestampMixin):
     """API Key table for user authentication to the API"""
 
     __tablename__ = "user_api_key"
 
     api_key_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    key_name: Mapped[str]
-    key_id: Mapped[str] = mapped_column(
-        unique=True, index=True, comment="AWS API Gateway key identifier"
-    )
+
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
-    last_used: Mapped[datetime | None]
-    is_active: Mapped[bool] = mapped_column(default=True)
 
     user: Mapped[User] = relationship(User, back_populates="api_keys", uselist=False)
+
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info"""
+        return {
+            "auth.api_key_id": self.api_key_id,
+            "auth.user_id": self.user_id,
+        }
 
 
 class Role(ApiSchemaTable, TimestampMixin):

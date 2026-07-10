@@ -8,7 +8,7 @@ We also recognize capacity building as a key part of involving a diverse open so
 
 ## Principles
 
-Principles and guidelines for participating in our open source community are linked belowhere. Please read them before joining or starting a conversation in this repo or one of the channels listed below. All community members and participants are expected to adhere to the community guidelines and code of conduct when participating in community spaces including: code repositories, communication channels and venues, and events.
+Principles and guidelines for participating in our open source community are linked below here. Please read them before joining or starting a conversation in this repo or one of the channels listed below. All community members and participants are expected to adhere to the community guidelines and code of conduct when participating in community spaces including: code repositories, communication channels and venues, and events.
 
 These principles guide our data, product, and process decisions, architecture, and approach. These guidelines are inspired by the [Justice40 Community Guidelines](https://github.com/usds/justice40-tool/blob/main/COMMUNITY_GUIDELINES.md).
 

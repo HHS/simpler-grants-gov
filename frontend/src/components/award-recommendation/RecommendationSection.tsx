@@ -1,0 +1,134 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { CharacterCount, Radio } from "@trussworks/react-uswds";
+
+import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
+
+type RecommendationSectionProps = {
+  mode: "view" | "edit";
+  recommendationMethod?: string;
+  recommendationMethodDetails?: string;
+  otherKeyInformation?: string;
+};
+
+export const RecommendationSection = ({
+  mode,
+  recommendationMethod,
+  recommendationMethodDetails,
+  otherKeyInformation,
+}: RecommendationSectionProps) => {
+  const t = useTranslations("AwardRecommendation");
+  const [selectedMethod, setSelectedMethod] = useState(
+    recommendationMethod || "",
+  );
+
+  // Edit mode: form inputs without borders
+  if (mode === "edit") {
+    return (
+      <div className="margin-top-3 margin-bottom-3">
+        <div>
+          <div className="margin-bottom-3">
+            <p className="text-bold margin-bottom-2">
+              {t("recommendationMethod.label")}
+            </p>
+            <p className="text-base margin-top-1 margin-bottom-2">
+              {t("recommendationMethod.description")}
+            </p>
+            <Radio
+              id="merit_review_only"
+              name="award_selection_method"
+              label={t("recommendationMethod.meritReviewOnly")}
+              value="merit_review_ranking_only"
+              checked={selectedMethod === "merit_review_ranking_only"}
+              onChange={(e) => setSelectedMethod(e.target.value)}
+            />
+            <Radio
+              id="merit_review_other"
+              name="award_selection_method"
+              label={t("recommendationMethod.meritReviewOther")}
+              value="merit_review_ranking_with_other_factors"
+              checked={
+                selectedMethod === "merit_review_ranking_with_other_factors"
+              }
+              onChange={(e) => setSelectedMethod(e.target.value)}
+            />
+          </div>
+          <div className="margin-bottom-3">
+            <p className="text-bold margin-bottom-2">
+              {t("recommendationMethodDetails.label")}
+            </p>
+            <p className="text-base margin-top-1 margin-bottom-2">
+              {t("recommendationMethodDetails.description")}
+            </p>
+            <CharacterCount
+              id="award_selection_details"
+              name="award_selection_details"
+              maxLength={500}
+              isTextArea
+              defaultValue={recommendationMethodDetails || ""}
+              rows={6}
+              className="maxw-full"
+              data-testid="award-selection-details-textarea"
+            />
+          </div>
+          <div className="border-top border-base-lighter margin-top-4 margin-bottom-4" />
+          <div className="margin-bottom-3">
+            <p className="text-bold margin-bottom-1 font-sans-sm">
+              {t("otherKeyInformation.label")}
+            </p>
+            <p className="text-base margin-top-1 margin-bottom-2">
+              {t("otherKeyInformation.description")}
+            </p>
+            <CharacterCount
+              id="other_key_information"
+              name="other_key_information"
+              maxLength={500}
+              isTextArea
+              defaultValue={otherKeyInformation || ""}
+              rows={6}
+              className="maxw-full"
+              data-testid="other-key-information-textarea"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // View mode: display data with border
+  return (
+    <div className="margin-top-3 margin-bottom-3">
+      <div className="border radius-md border-base-lighter padding-3 bg-white">
+        <div className="margin-bottom-3">
+          <p className="text-bold margin-bottom-2">
+            {t("recommendationMethod.label")}
+          </p>
+          {recommendationMethod || ""}
+        </div>
+        <div className="margin-bottom-3">
+          <p className="text-bold margin-bottom-2">
+            {t("recommendationMethodDetails.label")}
+          </p>
+          <ExpandableTextContent
+            textContent={recommendationMethodDetails || ""}
+            showCallToAction={t("summary.showDescription")}
+            hideCallToAction={t("summary.hideSummaryDescription")}
+          />
+        </div>
+        <div className="border-top border-base-lighter margin-top-2 margin-bottom-2" />
+        <div className="margin-bottom-3">
+          <p className="text-bold margin-bottom-2">
+            {t("otherKeyInformation.label")}
+          </p>
+          <ExpandableTextContent
+            textContent={otherKeyInformation || ""}
+            showCallToAction={t("summary.showDescription")}
+            hideCallToAction={t("summary.hideSummaryDescription")}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};

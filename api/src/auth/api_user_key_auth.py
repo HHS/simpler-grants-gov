@@ -1,21 +1,21 @@
 import logging
 from typing import cast
 
-from apiflask import HTTPTokenAuth
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+import grants_shared.util.datetime_util as datetime_util
+from apiflask import APIKeyHeaderAuth
+from grants_shared.adapters import db
+from grants_shared.adapters.db import flask_db
+from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.db.models.auth_base_models import BaseUserApiKey
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.util.datetime_util as datetime_util
-from src.adapters import db
-from src.adapters.db import flask_db
-from src.api.route_utils import raise_flask_error
+from src.auth.auth_handler import get_auth_handler
 from src.db.models.user_models import User, UserApiKey
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
 
-class ApiUserKeyHttpTokenAuth(HTTPTokenAuth):
+class ApiUserKeyHttpTokenAuth(APIKeyHeaderAuth):
     """Custom HTTPTokenAuth that provides typed access to the current user API key and user."""
 
     def get_user_api_key(self) -> UserApiKey:
@@ -39,7 +39,7 @@ class ApiUserKeyHttpTokenAuth(HTTPTokenAuth):
 # This uses the X-API-Key header which is the standard header that AWS API Gateway
 # forwards when api_key_required is set to true
 api_user_key_auth = ApiUserKeyHttpTokenAuth(
-    "ApiKey", header="X-API-Key", security_scheme_name="ApiUserKeyAuth"
+    "ApiKey", param_name="X-API-Key", security_scheme_name="ApiUserKeyAuth"
 )
 
 
@@ -53,7 +53,7 @@ class ApiKeyValidationError(Exception):
 
 @api_user_key_auth.verify_token
 @flask_db.with_db_session()
-def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
+def verify_api_key(db_session: db.Session, token: str) -> BaseUserApiKey:
     logger.info("Authenticating API Gateway key")
 
     with db_session.begin():
@@ -66,24 +66,15 @@ def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
         api_key.last_used = datetime_util.utcnow()
         db_session.add(api_key)
 
-        add_extra_data_to_current_request_logs(
-            {
-                "auth.user_id": api_key.user_id,
-                "auth.api_key_id": str(api_key.api_key_id),
-            }
-        )
+        add_extra_data_to_current_request_logs(api_key.get_log_extra())
 
         logger.info("API Gateway key authentication successful")
 
         return api_key
 
 
-def validate_api_key_in_db(api_key: str, db_session: db.Session) -> UserApiKey:
-    user_api_key: UserApiKey | None = db_session.execute(
-        select(UserApiKey)
-        .where(UserApiKey.key_id == api_key)
-        .options(selectinload(UserApiKey.user))
-    ).scalar_one_or_none()
+def validate_api_key_in_db(api_key: str, db_session: db.Session) -> BaseUserApiKey:
+    user_api_key = get_auth_handler(db_session).get_api_key_by_key_id(api_key)
 
     if user_api_key is None:
         raise ApiKeyValidationError("Invalid API key")

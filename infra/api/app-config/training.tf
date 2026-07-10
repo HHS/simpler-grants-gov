@@ -1,21 +1,25 @@
 module "training_config" {
-  source                          = "./env-config"
-  project_name                    = local.project_name
-  app_name                        = local.app_name
-  default_region                  = module.project_config.default_region
-  environment                     = "training"
-  network_name                    = "training"
-  domain_name                     = "api.training.simpler.grants.gov"
-  s3_cdn_domain_name              = "files.training.simpler.grants.gov"
-  secondary_domain_names          = ["alb.training.simpler.grants.gov"]
-  mtls_domain_name                = "soap.training.simpler.grants.gov"
-  enable_https                    = true
-  database_engine_version         = "17.5"
-  has_database                    = true
-  database_enable_http_endpoint   = true
-  has_incident_management_service = local.has_incident_management_service
-  enable_identity_provider        = local.enable_identity_provider
-  enable_notifications            = local.enable_notifications
+  source                            = "./env-config"
+  project_name                      = local.project_name
+  app_name                          = local.app_name
+  default_region                    = module.project_config.default_region
+  environment                       = "training"
+  network_name                      = "training"
+  domain_name                       = "api.training.simpler.grants.gov"
+  s3_cdn_domain_name                = "files.training.simpler.grants.gov"
+  secondary_domain_names            = ["alb.training.simpler.grants.gov"]
+  mtls_domain_name                  = "soap.training.simpler.grants.gov"
+  enable_https                      = true
+  database_engine_version           = "17.7"
+  has_database                      = true
+  database_enable_http_endpoint     = true
+  database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwtMjEwNzYwNjQ1MjUwNjc2ODE4OQ"
+  has_incident_management_service   = local.has_incident_management_service
+  enable_identity_provider          = local.enable_identity_provider
+  enable_notifications              = local.enable_notifications
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwtNTMyNjczNTExNjkwODE1NjMyMA"
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwxMTEyMzE1NDM1OTM1OTM5OTYy"
+  api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058OTgyMjgwNTEz"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1
@@ -44,18 +48,23 @@ module "training_config" {
   search_engine_version = "OpenSearch_2.15"
 
   service_override_extra_environment_variables = {
-    # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT   = 1
-    ENABLE_APPLY_ENDPOINTS = 1
-    ENABLE_SOAP_API        = 1
-
     SAM_GOV_BASE_URL = "https://api.sam.gov"
 
     # Email notification
-    RESET_EMAILS_WITHOUT_SENDING = "false"
+    RESET_EMAILS_WITHOUT_SENDING               = "false"
+    ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
+    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS       = 1
+
+    # Workflow
+    WORKFLOW_SERVICE_INTERNAL_USER_ID = "00bcaf8e-dd04-4fd1-9fb3-ea872a93178d"
+    ENABLE_WORKFLOW_ENDPOINTS         = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
+
+  enable_workflow_service = true
+
+  scanner_provisioned_concurrency = 1
 }

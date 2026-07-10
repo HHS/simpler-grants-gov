@@ -1,5 +1,7 @@
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
+import { OptionalStringDict } from "./generalTypes";
+
 export interface PaginationInfo {
   order_by: string;
   page_offset: number;
@@ -25,3 +27,9 @@ export interface FrontendErrorDetails {
   message?: string;
   type?: string;
 }
+
+export type FileUploadDetailsResponse = {
+  url: string;
+  pending_file_id: string;
+  body: OptionalStringDict;
+};

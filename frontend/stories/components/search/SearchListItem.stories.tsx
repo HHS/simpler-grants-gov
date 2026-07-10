@@ -1,10 +1,8 @@
-import { Meta } from "@storybook/react";
+import SearchResultsListItem from "src/app/[locale]/(base)/workspace/saved-opportunities/_components/SearchResultsListItem";
 
-import Item from "src/components/search/SearchResultsListItem";
-
-const meta: Meta<typeof Item> = {
+const meta = {
   title: "Components/Search/SearchListItem",
-  component: Item,
+  component: SearchResultsListItem,
   args: {
     saved: true,
     opportunity: {

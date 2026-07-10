@@ -7,9 +7,10 @@ module "dev_config" {
   environment    = "dev"
   network_name   = "dev"
 
-  database_instance_count = 2
-  database_min_capacity   = 2
-  database_max_capacity   = 2
+  database_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtODc5ODA3MTQ0Njk3NDYyNTM2Mg"
+  database_instance_count       = 2
+  database_min_capacity         = 2
+  database_max_capacity         = 2
 
   service_override_extra_environment_variables = {
     # In dev, only show the results in the AWS console
@@ -30,4 +31,9 @@ module "dev_config" {
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
+
+  # Uncomment to override default feature flag values
+  # feature_flag_overrides = {
+  #   BAR = true
+  # }
 }

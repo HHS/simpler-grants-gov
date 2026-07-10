@@ -3,43 +3,52 @@ import logging
 import os
 from typing import Any
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
+import grants_shared.logs
+import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
 from flask import Response
 from flask_cors import CORS
+from grants_shared.api.response import restructure_error_response
+from grants_shared.api.schemas import response_schema
+from grants_shared.auth.api_jwt_auth import initialize_jwt_auth
+from grants_shared.auth.login_gov_jwt_auth import initialize_login_gov_config
+from grants_shared.util.local import error_if_not_local
 from pydantic import Field
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
-import src.logging
-import src.logging.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
+from src.api.award_recommendations_alpha import award_recommendation_blueprint
 from src.api.common_grants import common_grants_blueprint
 from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
+from src.api.files_v1 import file_blueprint as files_v1_blueprint
 from src.api.form_alpha import form_blueprint
+from src.api.form_v1 import form_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
+from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
+from src.api.opportunities_grantor_v1 import (
+    opportunity_grantor_blueprint as opportunities_grantor_v1_blueprint,
+)
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
-from src.api.response import restructure_error_response
-from src.api.schemas import response_schema
 from src.api.users.user_blueprint import user_blueprint
+from src.api.workflows import workflow_blueprint
 from src.app_config import AppConfig
-from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.auth_utils import get_app_security_scheme
-from src.auth.login_gov_jwt_auth import initialize_login_gov_config
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
+from src.form_schema.forms import init_form_registry
 from src.legacy_soap_api import init_app as init_legacy_soap_api
-from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
+from src.services.files.local_file_scanner import setup_local_file_scanner
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
@@ -48,19 +57,27 @@ API_OVERALL_VERSION = "v0"
 API_DESCRIPTION = """
 Back end API for simpler.grants.gov.
 
-This API is an ALPHA VERSION! Its current form is primarily for testing and feedback. Features are still under heavy development, and subject to change. Not for production use.
+This API is in active development as we build out new functionalities for Simpler.Grants.gov. It is currently stable for everyday use, and will be versioned with advance notice for any breaking changes.
 
+Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
 
 
 class EndpointConfig(PydanticBaseEnvConfig):
-    auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
-
-    enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
-    enable_common_grants_endpoints: bool = Field(False, alias="ENABLE_COMMON_GRANTS_ENDPOINTS")
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
     domain_verification_map: dict = Field(default_factory=dict)
+
+    enable_workflow_endpoints: bool = Field(False, alias="ENABLE_WORKFLOW_ENDPOINTS")
+    enable_award_recommendation_endpoints: bool = Field(
+        False, alias="ENABLE_AWARD_RECOMMENDATION_ENDPOINTS"
+    )
+
+    enable_file_upload_endpoints: bool = Field(False, alias="ENABLE_FILE_UPLOAD_ENDPOINTS")
+
+    enable_grantor_opportunity_endpoints: bool = Field(
+        False, alias="ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS"
+    )
 
     # Do not ever change this to True, this controls endpoints we only
     # want to exist for local development.
@@ -93,21 +110,23 @@ def create_app() -> APIFlask:
     register_search_client(app)
 
     endpoint_config = EndpointConfig()
-    if endpoint_config.auth_endpoint:
-        initialize_login_gov_config()
-        initialize_jwt_auth()
+    initialize_login_gov_config()
+    initialize_jwt_auth()
 
-    if LegacySoapAPIConfig().soap_api_enabled:
-        init_legacy_soap_api(app)
+    init_legacy_soap_api(app)
 
     register_well_known(app, endpoint_config.domain_verification_map)
+
+    init_form_registry()
+
+    setup_local_file_scanner()
 
     return app
 
 
 def setup_logging(app: APIFlask) -> None:
-    src.logging.init(__package__)
-    flask_logger.init_app(logging.root, app)
+    grants_shared.logs.init(__package__)
+    flask_logger.init_app(logging.root, app, "simpler-grants")
 
 
 def register_db_client(app: APIFlask) -> None:
@@ -125,11 +144,6 @@ def configure_app(app: APIFlask) -> None:
 
     # Set maximum file upload size (2 GB)
     app.config["MAX_CONTENT_LENGTH"] = app_config.max_file_upload_size_bytes
-
-    # Modify the response schema to instead use the format of our ApiResponse class
-    # which adds additional details to the object.
-    # https://apiflask.com/schema/#base-response-schema-customization
-    # app.config["BASE_RESPONSE_SCHEMA"] = response_schema.ResponseSchema
     app.config["HTTP_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     app.config["VALIDATION_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     app.config["SWAGGER_UI_CSS"] = "/static/swagger-ui.min.css"
@@ -168,25 +182,37 @@ def configure_app(app: APIFlask) -> None:
 
 
 def register_blueprints(app: APIFlask) -> None:
+
+    endpoint_config = EndpointConfig()
+
     app.register_blueprint(healthcheck_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
+
+    # Endpoint for Create Opportunity
+    if endpoint_config.enable_grantor_opportunity_endpoints:
+        app.register_blueprint(opportunities_grantor_v1_blueprint)
+
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
     app.register_blueprint(organizations_v1_blueprint)
+    app.register_blueprint(internal_blueprint)
 
-    endpoint_config = EndpointConfig()
-    if endpoint_config.auth_endpoint:
-        app.register_blueprint(user_blueprint)
+    if endpoint_config.enable_file_upload_endpoints:
+        app.register_blueprint(files_v1_blueprint)
+
+    app.register_blueprint(user_blueprint)
 
     # Endpoints for apply functionality
-    if endpoint_config.enable_apply_endpoints:
-        app.register_blueprint(application_blueprint)
-        app.register_blueprint(form_blueprint)
-        app.register_blueprint(competition_blueprint)
+    app.register_blueprint(application_blueprint)
+    app.register_blueprint(form_blueprint)
+    app.register_blueprint(form_v1_blueprint)
+    app.register_blueprint(competition_blueprint)
+
+    if endpoint_config.enable_award_recommendation_endpoints:
+        app.register_blueprint(award_recommendation_blueprint)
 
     # CommonGrants Protocol endpoints
-    if endpoint_config.enable_common_grants_endpoints:
-        app.register_blueprint(common_grants_blueprint)
+    app.register_blueprint(common_grants_blueprint)
 
     # Local endpoints for development, will error
     # if this is ever enabled non-locally.
@@ -198,6 +224,9 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
     app.register_blueprint(load_search_data_blueprint)
+
+    if endpoint_config.enable_workflow_endpoints:
+        app.register_blueprint(workflow_blueprint)
 
 
 def get_project_root_dir() -> str:

@@ -1,4 +1,4 @@
-import { UiSchema } from "src/components/applyForm/types";
+import { UiSchema } from "src/types/applyForm/types";
 
 export function formHasAttachmentFields(uiSchema: UiSchema): boolean {
   for (const item of uiSchema) {

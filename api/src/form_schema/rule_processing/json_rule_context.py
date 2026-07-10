@@ -1,7 +1,8 @@
 import copy
 from dataclasses import dataclass
 
-from src.api.response import ValidationErrorDetail
+from grants_shared.api.response import ValidationErrorDetail
+
 from src.db.models.competition_models import ApplicationForm
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.rule_processing.json_rule_util import build_path_str
@@ -45,6 +46,8 @@ class JsonRuleContext:
         self.json_data = copy.deepcopy(self.application_form.application_response)
 
         self.validation_issues: list[ValidationErrorDetail] = []
+
+        self.attachment_ids: set[str] = set()
 
         self.rules: list[JsonRule] = []
 

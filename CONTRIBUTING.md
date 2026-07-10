@@ -1,4 +1,3 @@
-<!--- # NOTE: Modify sections marked with `TODO` and then rename the file.-->
 
 # How to Contribute as an External Contributor
 
@@ -20,7 +19,7 @@ If you think you have found a bug in the code or static site, [search our issues
 
 If you do not find your bug in our issues list, file a bug report. When reporting the bug, please follow these guidelines:
 
-- **Please use the [Bug Report](https://github.com/HHS/simpler-grants-gov/issues/new?assignees=octocat&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+) issue template** This is populated with information and questions that will help grants.gov developers resolve the issuethe right information
+- **Please use the [Bug Report](https://github.com/HHS/simpler-grants-gov/issues/new?assignees=octocat&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+) issue template** This is populated with information and questions that will help grants.gov developers resolve the issue with the right information
 - **Use a clear and descriptive issue title** for the issue to identify the problem.
 - **Describe the exact steps to reproduce the problem** in as much detail as possible. For example, start by explaining how you got to the page where you encountered the bug and what you were attempting to do when the bug occurred.
 - **Describe the behavior you observed after following the steps** and point out what exactly is the problem with that behavior.
@@ -44,7 +43,11 @@ To contribute to documentation you find in this repository, feel free to use the
 
 ### Contribute to community discussions
 
-> 🚧 Tools and expanding avenues for community engagement are coming soon.
+👉 Join or visit our [forum](https://forum.simpler.grants.gov/).
+
+👉 Visit our [wiki](https://wiki.simpler.grants.gov/).
+
+📧 Reach out for support directly using [simpler@grants.gov](mailto:simpler@grants.gov)
 
 ### Sharing your story
 
@@ -52,7 +55,7 @@ Sharing how you or your organization have used the Simpler Grants project is an 
 
 ## Code Contributions
 
-The following guidelines are for code contributions. Please see [DEVELOPMENT.md](./DEVELOPMENT.md) for more information about the software development lifecylce on the project.
+The following guidelines are for code contributions. Please see [DEVELOPMENT.md](./DEVELOPMENT.md) for more information about the software development lifecycle on the project.
 
 ### Getting Started
 
@@ -64,12 +67,11 @@ This project follows [trunk-based development](./DEVELOPMENT.md#branching-model)
 
 1.  Fork the project
 1.  Check out the `main` branch
-1.  Create a feature branch
+1.  Create a feature branch using [the naming convention mentioned here](./DEVELOPMENT.md#branch-naming-convention)
 1.  Write code and tests for your change
-1.  From your branch, make a pull request against `hhs/simpler-grants-gov/main`
+1.  From your branch, make a pull request against `hhs/simpler-grants-gov/main` using [the naming convention mentioned here](./DEVELOPMENT.md#pull-request-title)
 1.  Work with repo maintainers to get your change reviewed
 1.  Wait for your change to be pulled into `hhs/simpler-grants-gov/main`
-1.  Delete your feature branch
 
 ### Testing, Coding Style and Linters
 
@@ -85,6 +87,20 @@ Pull requests should follow the conventions in [DEVELOPMENT.md](./DEVELOPMENT.md
 
 1. Pull requests should be titled with `[Issue N] Description`. However if there is no issue, use `[External] Description` format.
 1. External contributors can't merge their own PRs, so an internal team member will pull in after changes are satisfactory.
+
+### Review Assignment
+
+This repository uses a hybrid review assignment model powered by a GitHub Action rather than the traditional CODEOWNERS file.
+
+**For external contributors (community/fork PRs):**
+When you open a pull request from a fork, we request that you tag one or all of our designated maintainers to review your PR prior to us merging it.
+
+Current designated maintainers:
+
+- @btabaska
+- @mdragon
+- @KevinJBoyer
+
 
 ## Policies
 

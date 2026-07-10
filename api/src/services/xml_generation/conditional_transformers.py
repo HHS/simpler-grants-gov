@@ -7,15 +7,24 @@ including if/then/else rules, field dependencies, and computed fields.
 import logging
 from typing import Any
 
-from src.util.dict_util import get_nested_value
+from grants_shared.util.dict_util import get_nested_value
 
 logger = logging.getLogger(__name__)
 
 
 def _transform_nested_field_names(
-    data: dict[str, Any], transform_config_root: dict[str, Any]
+    data: dict[str, Any],
+    transform_config_root: dict[str, Any],
+    field_overrides: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Transform field names in a nested object based on transform rules."""
+    """Transform field names in a nested object based on transform rules.
+
+    Args:
+        data: Data dictionary to transform
+        transform_config_root: Root transform configuration
+        field_overrides: Optional dict mapping field names to override target names
+                        (e.g., {"other_amount": "BudgetOtherRequestedAmount"})
+    """
     if not isinstance(data, dict) or not transform_config_root:
         return data
 
@@ -38,8 +47,18 @@ def _transform_nested_field_names(
         if isinstance(field_config, dict):
             xml_transform = field_config.get("xml_transform", {})
             target_name = xml_transform.get("target")
-            if target_name and xml_transform.get("type") != "attribute":
-                # Use transformed name
+
+            # Check for field override (takes precedence over config target)
+            if field_overrides and field_name in field_overrides:
+                target_name = field_overrides[field_name]
+
+            # Attribute-type fields are rendered as XML attributes, not data elements
+            if xml_transform.get("type") == "attribute":
+                processed_fields.add(field_name)
+                continue
+
+            if target_name:
+                # Use transformed name (either from override or config)
                 result[target_name] = field_value
                 processed_fields.add(field_name)
                 continue
@@ -209,6 +228,7 @@ def _apply_array_decomposition_transform(
         item_attributes = mapping_config.get("item_attributes", [])
         total_field = mapping_config.get("total_field")
         total_wrapper = mapping_config.get("total_wrapper")
+        field_overrides = mapping_config.get("field_overrides")
 
         if not item_field:
             logger.warning(f"Skipping field mapping '{output_field_name}': missing 'item_field'")
@@ -228,22 +248,34 @@ def _apply_array_decomposition_transform(
                         if item_wrapper:
                             wrapped_value["__wrapper"] = item_wrapper
 
-                        # Extract attributes from source item
+                        # Extract attributes from source item or from nested field value.
+                        # Check parent item first; if not found, check within the nested field.
+                        # This allows fields like grant_program inside non_federal_resources
+                        # to be used as XML attributes on the wrapper element.
                         if item_attributes:
                             attrs = {}
                             for attr_name in item_attributes:
                                 if attr_name in item and item[attr_name] is not None:
-                                    # Transform attribute name if transform config is provided
-                                    transformed_attr_name = attr_name
-                                    if transform_config_root and attr_name in transform_config_root:
-                                        attr_config = transform_config_root[attr_name]
-                                        if isinstance(attr_config, dict):
-                                            xml_transform = attr_config.get("xml_transform", {})
-                                            if xml_transform.get("type") == "attribute":
-                                                target_name = xml_transform.get("target")
-                                                if target_name:
-                                                    transformed_attr_name = target_name
-                                    attrs[transformed_attr_name] = item[attr_name]
+                                    attr_value = item[attr_name]
+                                elif (
+                                    isinstance(value, dict)
+                                    and attr_name in value
+                                    and value[attr_name] is not None
+                                ):
+                                    attr_value = value[attr_name]
+                                else:
+                                    continue
+                                # Transform attribute name if transform config is provided
+                                transformed_attr_name = attr_name
+                                if transform_config_root and attr_name in transform_config_root:
+                                    attr_config = transform_config_root[attr_name]
+                                    if isinstance(attr_config, dict):
+                                        xml_transform = attr_config.get("xml_transform", {})
+                                        if xml_transform.get("type") == "attribute":
+                                            target_name = xml_transform.get("target")
+                                            if target_name:
+                                                transformed_attr_name = target_name
+                                attrs[transformed_attr_name] = attr_value
                             if attrs:
                                 wrapped_value["__attributes"] = attrs
 
@@ -251,7 +283,9 @@ def _apply_array_decomposition_transform(
                         if isinstance(value, dict):
                             # Transform field names if transform config is provided
                             if transform_config_root:
-                                value = _transform_nested_field_names(value, transform_config_root)
+                                value = _transform_nested_field_names(
+                                    value, transform_config_root, field_overrides
+                                )
                             wrapped_value.update(value)
                         else:
                             wrapped_value["value"] = value
@@ -272,7 +306,7 @@ def _apply_array_decomposition_transform(
                         # Transform field names if transform config is provided
                         if transform_config_root:
                             total_value = _transform_nested_field_names(
-                                total_value, transform_config_root
+                                total_value, transform_config_root, field_overrides
                             )
                         wrapped_total.update(total_value)
                     else:
@@ -370,6 +404,60 @@ def evaluate_condition(condition: dict[str, Any], source_data: dict[str, Any]) -
         raise ConditionalTransformationError(f"Unknown condition type: {condition_type}")
 
 
+def _apply_field_grouping_transform(
+    transform_config: dict[str, Any], source_data: dict[str, Any]
+) -> dict[str, Any] | None:
+    """Apply field grouping transformation.
+
+    Groups multiple source fields under a single wrapper element.
+    This is useful when the XSD requires a wrapper element but the JSON
+    has the fields as siblings.
+
+    Example:
+        JSON: {"applicant_name": "Test", "applicant_address": {...}}
+        XSD: <ApplicantInfo><ApplicantName>...</><ApplicantAddress>...</></ApplicantInfo>
+
+    Configuration:
+        {
+            "type": "field_grouping",
+            "source_fields": ["applicant_name", "applicant_address"]
+        }
+
+    The nested field transforms will be processed by the transformer using
+    the nested_fields configuration in the parent rule.
+
+    Args:
+        transform_config: Field grouping configuration
+        source_data: Source data containing the fields to group
+
+    Returns:
+        Dictionary with grouped field values (keyed by original field names),
+        or None if no fields found
+    """
+    source_fields = transform_config.get("source_fields", [])
+
+    if not source_fields:
+        logger.warning(
+            "field_grouping requires 'source_fields' configuration (list of field names)"
+        )
+        return None
+
+    result = {}
+
+    # Extract each source field from the data
+    for source_field_name in source_fields:
+        if isinstance(source_field_name, str):
+            # Get value from source data
+            source_path = source_field_name.split(".")
+            value = get_nested_value(source_data, source_path)
+
+            if value is not None:
+                # Use the original field name as the key - transforms will be applied later
+                result[source_field_name] = value
+
+    return result if result else None
+
+
 def apply_conditional_transform(
     transform_config: dict[str, Any],
     source_data: dict[str, Any],
@@ -383,6 +471,7 @@ def apply_conditional_transform(
     - pivot_object: Restructure nested objects by pivoting dimensions
     - array_decomposition: Transform row-oriented arrays to column-oriented structure
     - conditional_structure: Select different structures based on data conditions
+    - field_grouping: Group multiple source fields under a single wrapper element
 
     Args:
         transform_config: Conditional transformation configuration
@@ -463,6 +552,9 @@ def apply_conditional_transform(
         return _apply_array_decomposition_transform(
             transform_config, source_data, transform_config_root
         )
+
+    elif transform_type == "field_grouping":
+        return _apply_field_grouping_transform(transform_config, source_data)
 
     elif transform_type == "compose_object":
         # Create a nested object from flat root-level fields

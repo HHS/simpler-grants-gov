@@ -8,6 +8,8 @@ import re
 import sqlalchemy
 import sqlalchemy.dialects.postgresql
 
+from src.db.extension.sqlalchemy_column import StripZerosText
+
 
 class ForeignTableDDLCompiler(sqlalchemy.sql.compiler.DDLCompiler):
     """SQLAlchemy compiler for creating foreign tables."""
@@ -32,9 +34,23 @@ class ForeignTableDDLCompiler(sqlalchemy.sql.compiler.DDLCompiler):
     def visit_create_column(self, create, first_pk=False, **kw):
         column = create.element
         sql = super().visit_create_column(create, first_pk, **kw)
-        if sql and column.primary_key:
+
+        if not sql:
+            return sql
+
+        options = []
+        if column.primary_key:
+            options.append("key 'true'")
+
+        if isinstance(column.type, StripZerosText):
+            options.append("strip_zeros 'true'")
+
+        if len(options) > 0:
             # Add "OPTIONS ..." to primary key column.
-            sql = re.sub(r"^(.*?)( NOT NULL)?$", r"\1 OPTIONS (key 'true')\2", sql)
+            option_str = f" OPTIONS ({(", ".join(options))})"
+
+            sql = re.sub(r"^(.*?)( NOT NULL)?$", rf"\1{option_str}\2", sql)
+
         return sql
 
 

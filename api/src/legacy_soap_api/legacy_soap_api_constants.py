@@ -4,12 +4,17 @@ from enum import StrEnum
 class LegacySoapApiEvent(StrEnum):
 
     NO_HEADER_CERT = "no_header_cert"
+    TCERT_NOT_FOUND = "tcert_not_found"
+    CERT_EXPIRED = "cert_expired"
     PARSED_CERT = "parsed_cert"
     UNPARSEABLE_CERT = "unparseable_cert"
     UNKNOWN_INVALID_CLIENT_CERT = "unknown_invalid_client_cert"
     NOT_CONFIGURED_CERT = "not_configured_cert"
     CALLING_WITHOUT_CERT = "calling_without_cert"
     CALLING_WITH_CERT = "calling_with_cert"
+    CALLING_WITH_JWT = "calling_with_jwt"
+    JWT_CREATED = "jwt_created"
+    USE_SIMPLER_OVERRIDE = "use_simpler_override"
 
     NO_SIMPLER_SCHEMA_DEFINED = "no_simpler_schema_defined"
 
@@ -32,3 +37,14 @@ class LegacySoapApiEvent(StrEnum):
 
     RETURNING_SIMPLER_RESPONSE = "returning_simpler_response"
     RETURNING_LEGACY_SOAP_RESPONSE = "returning_legacy_soap_response"
+    SIMPLER_ROUTE_DISABLED = "simpler_route_disabled"
+    ERROR_UPLOADING_DEBUG_DATA = "error_uploading_debug_data"
+    INVALID_FILTER = "invalid_filter"
+
+
+class SimplerRequests(StrEnum):
+    GET_SUBMISSION_LIST_REQUEST = "GetSubmissionListRequest"
+    GET_SUBMISSION_LIST_EXPANDED_REQUEST = "GetSubmissionListExpandedRequest"
+    CONFIRM_APPLICATION_DELIVERY_REQUEST = "ConfirmApplicationDeliveryRequest"
+    UPDATE_APPLICATION_INFO_REQUEST = "UpdateApplicationInfoRequest"
+    GET_APPLICATION_ZIP_REQUEST = "GetApplicationZipRequest"

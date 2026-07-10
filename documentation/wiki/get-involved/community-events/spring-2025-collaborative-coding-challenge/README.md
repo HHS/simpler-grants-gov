@@ -16,7 +16,7 @@ Who Should Participate?
 Whether you have extensive coding experience or simply a passion for problem-solving, your insights will help shape the next generation of federal grants solutions.
 
 \
-If you are interested and have not already, please sign up [here](https://forms.gle/d7u6RzHYboZ1gvJ18) to participate.&#x20;
+If you are interested and have not already, please sign up [here](https://forms.gle/d7u6RzHYboZ1gvJ18) to participate.
 
 ***
 
@@ -26,15 +26,13 @@ Develop simple projects using the Search & Opportunities API that showcase innov
 
 ***
 
-
-
-## Submissions&#x20;
+## Submissions
 
 These must be added to this Google Drive folder by midnight EST on March 31st 2025. All submissions must contain the following critera to be accepted.
 
 [Google Drive Folder](https://drive.google.com/drive/u/0/folders/1A4AlwA3fVsc40m1yjBBBiTd4NmyVL4u8)
 
-**A document or slideshow  in a readable format (.docx, .rtf, .txt, .pdf, etc) which contains:**
+**A document or slideshow in a readable format (.docx, .rtf, .txt, .pdf, etc) which contains:**
 
 1. Team / Project Name
 2. Names of all contributors
@@ -46,13 +44,11 @@ These must be added to this Google Drive folder by midnight EST on March 31st 20
 
 Looking for examples? Check out the [submissions](../fall-2024-coding-challenge/event-submissions-and-winners.md) from our 24 hour Fall 2024 Collaborative Code & Design Challenge
 
-
-
 ***
 
 ## Prize Pool
 
-A prize pool will be awarded to winners at the conclusion of the event. Awards will be decided by **community favorite voting** from all participants. Prize money must be divided up equally among all members of the winning team.&#x20;
+A prize pool will be awarded to winners at the conclusion of the event. Awards will be decided by **community favorite voting** from all participants. Prize money must be divided up equally among all members of the winning team.
 
 ### Over $4,000 total
 
@@ -69,7 +65,7 @@ Submissions open on **March 10, 2025**, and remain open for 3 weeks. We’ll kic
 
 {% stepper %}
 {% step %}
-### **Kickoff Meeting**
+#### **Kickoff Meeting**
 
 * **Monday, March 10th at 3 PM EST**
 * [Zoom Link](https://us02web.zoom.us/j/82924948517)
@@ -77,7 +73,7 @@ Submissions open on **March 10, 2025**, and remain open for 3 weeks. We’ll kic
 {% endstep %}
 
 {% step %}
-### Weekly Zoom Workshops
+#### Weekly Zoom Workshops
 
 * **March 14th @ 2 PM EST**
   * Topics: How to request an API key, setting up your development environment, live Q\&A with mentors
@@ -91,28 +87,28 @@ Submissions open on **March 10, 2025**, and remain open for 3 weeks. We’ll kic
 {% endstep %}
 
 {% step %}
-### Submission Due Date
+#### Submission Due Date
 
 * **March 31st @ 12AM EST**
   * All submissions must be turned in by this time. Late submissions will be accepted, but will not be eligible for awards.
 {% endstep %}
 
 {% step %}
-### **Voting Period Begins**
+#### **Voting Period Begins**
 
 * **April 1st @ 12PM EST**
   * Submissions will be voted on by participants to determine who the "Crowd Favorite" is. The top 10 submissions will be eligible for prize money.
 {% endstep %}
 
 {% step %}
-### **Voting Period Begins**
+#### **Voting Period Begins**
 
 * **April 4th @ 12AM EST**
-  * All votes must be in by this time. The Simpler.Grants.gov team will then tabulate the results and announce them to the community.&#x20;
+  * All votes must be in by this time. The Simpler.Grants.gov team will then tabulate the results and announce them to the community.
 {% endstep %}
 
 {% step %}
-### Awards Ceremony
+#### Awards Ceremony
 
 * **April 4th @ 4PM EST**
   * We will announce winners, celebrate participants and discuss next steps for successful projects.

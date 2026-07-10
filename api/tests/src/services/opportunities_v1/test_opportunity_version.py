@@ -1,22 +1,12 @@
-import pytest
-
 from src.constants.lookup_constants import OpportunityCategory
-from src.db.models.agency_models import Agency
-from src.db.models.opportunity_models import Opportunity, OpportunityVersion
+from src.db.models.opportunity_models import OpportunityVersion
 from src.services.opportunities_v1.opportunity_version import save_opportunity_version
-from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
     OpportunityAssistanceListingFactory,
     OpportunityAttachmentFactory,
     OpportunityFactory,
 )
-
-
-@pytest.fixture(autouse=True)
-def clear_data(db_session):
-    cascade_delete_from_db_table(db_session, Agency)
-    cascade_delete_from_db_table(db_session, Opportunity)
 
 
 def test_save_opportunity_version(db_session, enable_factory_create):
@@ -55,13 +45,18 @@ def test_save_opportunity_version(db_session, enable_factory_create):
             }
         ],
         "opportunity_attachments": [],
+        "top_level_agency_code": agency_top.agency_code,
     }
 
     # Save opportunity into opportunity_version table
     save_opportunity_version(db_session, opp)
 
     # Verify Record created
-    saved_opp_version = db_session.query(OpportunityVersion).all()
+    saved_opp_version = (
+        db_session.query(OpportunityVersion)
+        .where(OpportunityVersion.opportunity_id == opp.opportunity_id)
+        .all()
+    )
 
     assert len(saved_opp_version) == 1
     assert saved_opp_version[0].opportunity_id == opp.opportunity_id
@@ -83,7 +78,11 @@ def test_save_opportunity_version_with_attachments(db_session, enable_factory_cr
     save_opportunity_version(db_session, opp)
 
     # Verify Record created
-    saved_opp_version = db_session.query(OpportunityVersion).all()
+    saved_opp_version = (
+        db_session.query(OpportunityVersion)
+        .where(OpportunityVersion.opportunity_id == opp.opportunity_id)
+        .all()
+    )
 
     assert len(saved_opp_version) == 1
     assert saved_opp_version[0].opportunity_id == opp.opportunity_id
@@ -95,7 +94,11 @@ def test_save_opportunity_version_draft(db_session, enable_factory_create):
     save_opportunity_version(db_session, opp)
 
     # Verify record is not created
-    saved_opp_version = db_session.query(OpportunityVersion).all()
+    saved_opp_version = (
+        db_session.query(OpportunityVersion)
+        .where(OpportunityVersion.opportunity_id == opp.opportunity_id)
+        .all()
+    )
     assert len(saved_opp_version) == 0
 
 

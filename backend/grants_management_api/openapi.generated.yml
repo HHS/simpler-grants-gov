@@ -1,0 +1,126 @@
+info:
+  description: '
+
+    Back end API for Grants Management.
+
+
+    This API is in early development, and is not yet ready for public use.
+
+    '
+  contact:
+    name: Grants Management
+    url: https://simpler.grants.gov/
+    email: simpler@grants.gov
+  title: Grants Management API
+  version: v0
+tags:
+- name: Health
+servers: .
+paths:
+  /health:
+    get:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthcheckResponseSchema'
+          description: Successful response
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Service Unavailable
+      tags:
+      - Health
+      summary: Healthcheck endpoint - verifies database can be connected to and returns
+        deploy metadata.
+openapi: 3.1.0
+components:
+  schemas:
+    HealthcheckMetadataSchema:
+      type: object
+      properties:
+        commit_sha:
+          type: string
+          description: The github commit sha for the latest deployed commit
+          example: ffaca647223e0b6e54344122eefa73401f5ec131
+        commit_link:
+          type: string
+          description: A github link to the latest deployed commit
+          example: https://github.com/HHS/simpler-grants-gov/commit/main
+        release_notes_link:
+          type: string
+          description: A github link to the release notes - direct if the latest deploy
+            was a release
+          example: https://github.com/HHS/simpler-grants-gov/releases
+        last_deploy_time:
+          type: string
+          format: date-time
+          description: Latest deploy time in US/Eastern timezone
+        deploy_whoami:
+          type: string
+          description: The latest user to deploy the application
+          example: runner
+    HealthcheckResponseSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/HealthcheckMetadataSchema'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ValidationIssueSchema:
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of error
+          example: invalid
+        message:
+          type: string
+          description: The message to return
+          example: Not a valid string.
+        field:
+          type: string
+          description: The field that failed
+          example: summary.summary_description
+        value:
+          type: string
+          description: The value that failed
+          example: invalid string
+    ErrorResponseSchema:
+      type: object
+      properties:
+        data:
+          description: Additional data that might be useful in resolving an error
+            (see specific endpoints for details, this is used infrequently)
+          example: {}
+        message:
+          type: string
+          description: General description of the error
+          example: Error
+        status_code:
+          type: integer
+          description: The HTTP status code of the error
+        errors:
+          type: array
+          example: []
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ValidationIssueSchema'
+        internal_request_id:
+          type: string
+          description: An internal tracking ID
+          example: 550e8400-e29b-41d4-a716-446655440000
+

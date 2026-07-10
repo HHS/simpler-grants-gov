@@ -1,6 +1,7 @@
 import logging
 import uuid
 
+from grants_shared.util import file_util
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -102,7 +103,7 @@ class TransformCompetition(AbstractTransformSubTask):
             prefix=transform_constants.COMPETITION,
         )
 
-        extra = {"competition_id": source_competition.comp_id}
+        extra = {"competition_id": source_competition.comp_id, "opportunity_id": opportunity_id}
         logger.info("Processing competition", extra=extra)
 
         if source_competition.is_deleted:
@@ -113,6 +114,17 @@ class TransformCompetition(AbstractTransformSubTask):
                 record_type=transform_constants.COMPETITION,
                 extra=extra,
             )
+
+            # Cleanup competition instructions
+            if target_competition is not None:
+                for competition_instruction in target_competition.competition_instructions:
+                    logger.info(
+                        "Deleting competition instruction as competition is being deleted.",
+                        extra=extra | {"s3_location": competition_instruction.file_location},
+                    )
+
+                    file_util.delete_file(competition_instruction.file_location)
+
         elif opportunity_id is None:
             # Handle orphaned competition when an opportunity_id has been found but
             # the opportunity for that id does not exist.

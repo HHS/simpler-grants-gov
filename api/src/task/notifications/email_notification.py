@@ -1,12 +1,17 @@
-import src.adapters.db.flask_db as flask_db
+import grants_shared.adapters.db.flask_db as flask_db
+from grants_shared.adapters import db
+from grants_shared.adapters.aws.ses_suppressed_email_adapter import BaseSESV2Client
+from grants_shared.task.ecs_background_task import ecs_background_task
+
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
-from src.adapters import db
-from src.adapters.aws.sesv2_adapter import BaseSESV2Client
-from src.task.ecs_background_task import ecs_background_task
+from src.constants.lookup_constants import JobType
 from src.task.notifications.closing_date_notification import ClosingDateNotificationTask
 from src.task.notifications.config import EmailNotificationConfig, get_email_config
 from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
+from src.task.notifications.org_saved_opportunity_notification import (
+    OrgSavedOpportunityNotificationTask,
+)
 from src.task.notifications.search_notification import SearchNotificationTask
 from src.task.notifications.sync_suppressed_emails import SyncSuppressedEmailsTask
 from src.task.task import Task
@@ -16,7 +21,7 @@ from src.task.task_blueprint import task_blueprint
 @task_blueprint.cli.command(
     "email-notifications", help="Send email notifications for opportunity and search changes"
 )
-@ecs_background_task("email-notifications")
+@ecs_background_task(JobType.EMAIL_NOTIFICATIONS)
 @flask_opensearch.with_search_client()
 @flask_db.with_db_session()
 def run_email_notification_task(db_session: db.Session, search_client: search.SearchClient) -> None:
@@ -58,5 +63,9 @@ class EmailNotificationTask(Task):
             ).run()
         if self.notification_config.enable_closing_date_notifications:
             ClosingDateNotificationTask(
+                db_session=self.db_session, notification_config=self.notification_config
+            ).run()
+        if self.notification_config.enable_org_saved_opportunity_notifications:
+            OrgSavedOpportunityNotificationTask(
                 db_session=self.db_session, notification_config=self.notification_config
             ).run()

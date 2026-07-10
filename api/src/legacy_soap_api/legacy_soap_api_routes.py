@@ -1,22 +1,11 @@
 import logging
 
-from flask import request
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
-from src.legacy_soap_api.legacy_soap_api_auth import MTLS_CERT_HEADER_KEY, get_soap_auth
 from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_blueprint
-from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
-from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response
-from src.legacy_soap_api.legacy_soap_api_schemas import SimplerSoapAPI, SOAPRequest
-from src.legacy_soap_api.legacy_soap_api_utils import (
-    get_alternate_proxy_response,
-    get_invalid_path_response,
-    get_soap_error_response,
-)
-from src.legacy_soap_api.simpler_soap_api import get_simpler_soap_response
-from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from src.legacy_soap_api.simpler_soap_api import process_simpler_request
 
 logger = logging.getLogger(__name__)
 
@@ -33,59 +22,5 @@ def simpler_soap_api_route(
         }
     )
     logger.info("POST /<service_name>/services/v2/<service_port_name>")
-
-    api_name = SimplerSoapAPI.get_soap_api(service_name, service_port_name)
-    if not api_name:
-        logger.info(
-            "Could not determine Simpler SOAP API from service_name and service_port_name",
-            extra={"soap_api_event": LegacySoapApiEvent.UNKNOWN_SOAP_API},
-        )
-        return get_invalid_path_response().to_flask_response()
-
-    operation_name = get_soap_operation_name(request.data)
-    add_extra_data_to_current_request_logs(
-        {
-            "soap_api": api_name,
-            "soap_request_operation_name": operation_name if operation_name else "Unknown",
-        }
-    )
-    logger.info("SOAP request received")
-
-    try:
-        soap_request = SOAPRequest(
-            api_name=api_name,
-            method="POST",
-            full_path=request.full_path,
-            headers=dict(request.headers),
-            data=request.data,
-            auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY), db_session=db_session),
-            operation_name=operation_name,
-        )
-        if alternate_proxy_response := get_alternate_proxy_response(soap_request):
-            soap_proxy_response = alternate_proxy_response
-        else:
-            soap_proxy_response = get_proxy_response(soap_request)
-    except Exception:
-        logger.exception(
-            msg="Error getting soap proxy response",
-            extra={
-                "used_simpler_response": False,
-                "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_LEGACY_SOAP,
-            },
-        )
-        return get_soap_error_response().to_flask_response()
-
-    try:
-        return get_simpler_soap_response(
-            soap_request, soap_proxy_response, db_session
-        ).to_flask_response()
-    except Exception:
-        msg = "Unable to process Simpler SOAP proxy response"
-        logger.exception(
-            msg=msg,
-            extra={
-                "used_simpler_response": False,
-                "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
-            },
-        )
-        return soap_proxy_response.to_flask_response()
+    with db_session.begin():
+        return process_simpler_request(db_session, service_name, service_port_name)

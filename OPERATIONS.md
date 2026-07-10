@@ -4,7 +4,7 @@
 
 ### Deploying Every Service
 
-This series of commands will deploy non-prod every service for you. Run them from the top level directory (where this file is located). If you want to run them all quickly, then run each block of bash in a new terminal. If you want to be more careful, run them all one at a time, from top to bottom, inspecting the output on every step.
+This series of commands will deploy every non-prod service for you. Run them from the top level directory (where this file is located). If you want to run them all quickly, then run each block of bash in a new terminal. If you want to be more careful, run them all one at a time, from top to bottom, inspecting the output on every step.
 
 ```bash
 terraform -chdir="infra/api/service" init -backend-config="dev.s3.tfbackend" -reconfigure
@@ -127,6 +127,16 @@ We manage several secret values that need to be rotated yearly.
 
 #### Application Certificates: Part 1: Generate A Cert
 
+##### NEW more scripted process
+```bash
+bin/create-csr <domain prefix> # anything you pass as the prefix will be prepended to .simpler.grants.gov
+bin/create-csr soap.training # would yield a CSR for soap.training.simpler.grants.gov
+
+bin/create-csr # called without any domain will generate a request for the root, simpler.grants.gov domain
+```
+
+##### DEPRECIATED more manual process
+
 The process starts by generating a cert like so. You will need to generate the certs one at a time.
 
 ```bash
@@ -234,7 +244,7 @@ Certificates were last rotated:
 * Dev - December 2025
 * Staging - December 2025
 * Training - August 2025
-* Prod - March 2025
+* Prod - February 2026
 
 We need to manage a public certificate with login.gov for [private_jwt_auth](https://developers.login.gov/oidc/token/#client_assertion) in each of our environments.
 
@@ -294,3 +304,21 @@ export NEW_RELIC_REGION="US" # Always "US".
 ```
 
 You will then be able to interact with New Relic via Terraform. There's some New Relic Terraform configuration inside of the `infra/accounts/` folder for example. From this point you can use normal Terraform CLI commands to interact with New Relic, `terraform init` `terraform apply` etc.
+
+### Metabase Version Upgrade steps are below: 
+
+#### To Note: We do not push any new image into ecr for the metabase upgrade as the images are pulled directly from Metabase's docker hub repository. 
+
+```
+cd infra/analytics/metabase
+
+terraform init --reconfigure --backend-config="dev.s3.tfbackend"
+
+terraform apply -var="image_tag=<target_version_number_here>"
+```
+
+Version numbers are prefixed with the letter "v". For example, if we wanted to upgrade to version 1.55.22 the terraform apply command would be: 
+
+```
+terraform apply -var="image_tag=v1.55.22"
+```

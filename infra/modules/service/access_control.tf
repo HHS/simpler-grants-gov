@@ -19,6 +19,23 @@ resource "aws_iam_role" "migrator_task" {
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
 }
 
+# OpenSearch write role for scheduled jobs that need to write to OpenSearch
+# This role is separate from the migrator role which is now only used for database migrations
+resource "aws_iam_role" "opensearch_write" {
+  count = var.opensearch_ingest_policy_arn != null ? 1 : 0
+
+  name               = "${var.service_name}-opensearch-write"
+  assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
+}
+
+# Dedicated role for the workflow service
+resource "aws_iam_role" "workflow_service" {
+  count = var.opensearch_ingest_policy_arn != null ? 1 : 0
+
+  name               = "${var.service_name}-workflow"
+  assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
+}
+
 data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {
   statement {
     sid = "ECSTasksAssumeRole"
@@ -33,7 +50,7 @@ data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {
 }
 
 data "aws_iam_policy_document" "task_executor" {
-  # Allow ECS to log to Cloudwatch.
+  # Allow ECS to log to CloudWatch.
   statement {
     actions = [
       "logs:CreateLogStream",
@@ -66,17 +83,6 @@ data "aws_iam_policy_document" "task_executor" {
       ]
       resources = [var.image_repository_arn]
     }
-  }
-
-  # Allow ECS to download images for fluentbit
-  statement {
-    sid = "ECRPullAccessFluentbit"
-    actions = [
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:BatchGetImage",
-      "ecr:GetDownloadUrlForLayer",
-    ]
-    resources = [local.fluent_bit_repo_arn]
   }
 
   # Allow ECS to download images for GuardDuty agent
@@ -214,6 +220,13 @@ resource "aws_iam_role_policy_attachment" "email_access" {
   count = length(var.pinpoint_app_id) > 0 ? 1 : 0
 
   role       = aws_iam_role.app_service.name
+  policy_arn = aws_iam_policy.email_access[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "migrator_email_access" {
+  count = length(var.pinpoint_app_id) > 0 && var.db_vars != null ? 1 : 0
+
+  role       = aws_iam_role.migrator_task[0].name
   policy_arn = aws_iam_policy.email_access[0].arn
 }
 

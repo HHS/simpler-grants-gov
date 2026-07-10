@@ -2,11 +2,13 @@ import logging
 from typing import Never
 from uuid import UUID
 
+import grants_shared.adapters.db as db
 from apiflask.exceptions import HTTPError
+from grants_shared.adapters.db import flask_db
+from grants_shared.api import response
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
-from src.api import response
 from src.api.application_alpha.application_blueprint import application_blueprint
 from src.api.application_alpha.application_schemas import (
     ApplicationAddOrganizationResponseSchema,
@@ -26,15 +28,15 @@ from src.api.application_alpha.application_schemas import (
     ApplicationGetResponseSchema,
     ApplicationStartRequestSchema,
     ApplicationStartResponseSchema,
+    ApplicationSubmissionsRequestSchema,
+    ApplicationSubmissionsResponseSchema,
     ApplicationUpdateRequestSchema,
     ApplicationUpdateResponseSchema,
 )
-from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
-from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_key_or_internal_security_schemes
+from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_or_api_user_key_multi_auth
 from src.constants.lookup_constants import ApplicationAuditEvent
 from src.db.models.user_models import UserTokenSession
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.add_organization_to_application import (
     add_organization_to_application,
 )
@@ -48,6 +50,7 @@ from src.services.applications.get_application_attachment import (
 )
 from src.services.applications.get_application_form import get_application_form
 from src.services.applications.list_application_audit import list_application_audit
+from src.services.applications.list_application_submissions import list_application_submissions
 from src.services.applications.submit_application import submit_application
 from src.services.applications.update_application import update_application
 from src.services.applications.update_application_attachment import update_application_attachment
@@ -64,12 +67,7 @@ logger = logging.getLogger(__name__)
 @flask_db.with_db_session()
 def application_start(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new application for a competition"""
-    competition_id = json_data["competition_id"]
-    # application_name is optional, so we use get to avoid a KeyError
-    application_name = json_data.get("application_name", None)
-    # organization_id is optional, so we use get to avoid a KeyError
-    organization_id = json_data.get("organization_id", None)
-    add_extra_data_to_current_request_logs({"competition_id": competition_id})
+    add_extra_data_to_current_request_logs({"competition_id": json_data.get("competition_id")})
     logger.info("POST /alpha/applications/start")
 
     # Get user from token session
@@ -78,9 +76,7 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
 
     with db_session.begin():
         db_session.add(token_session)
-        application = create_application(
-            db_session, competition_id, user, application_name, organization_id
-        )
+        application = create_application(db_session, user, json_data)
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}
@@ -221,8 +217,8 @@ def application_form_inclusion_update(
     "/applications/<uuid:application_id>/application_form/<uuid:app_form_id>"
 )
 @application_blueprint.output(ApplicationFormGetResponseSchema)
-@application_blueprint.doc(responses=[200, 401, 404], security=jwt_key_or_internal_security_schemes)
-@jwt_key_or_internal_multi_auth.login_required
+@application_blueprint.doc(responses=[200, 401, 404])
+@application_blueprint.auth_required(jwt_key_or_internal_multi_auth)
 @flask_db.with_db_session()
 def application_form_get(
     db_session: db.Session, application_id: UUID, app_form_id: UUID
@@ -490,4 +486,38 @@ def application_audit_list(
 
     return response.ApiResponse(
         message="Success", data=audit_events, pagination_info=pagination_info
+    )
+
+
+@application_blueprint.post("/applications/<uuid:application_id>/submissions")
+@application_blueprint.input(ApplicationSubmissionsRequestSchema())
+@application_blueprint.output(ApplicationSubmissionsResponseSchema())
+@application_blueprint.doc(responses=[200, 401, 403, 404])
+@application_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def application_submissions_list(
+    db_session: db.Session, application_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Get all application submissions for an application"""
+    add_extra_data_to_current_request_logs({"application_id": application_id})
+    logger.info("POST /alpha/applications/:application_id/submissions")
+
+    user = jwt_or_api_user_key_multi_auth.get_user()
+
+    with db_session.begin():
+        db_session.add(user)
+        submissions, pagination_info = list_application_submissions(
+            db_session, application_id, user, json_data
+        )
+
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
+    )
+    logger.info("Successfully fetched application submissions")
+
+    return response.ApiResponse(
+        message="Success", data=submissions, pagination_info=pagination_info
     )

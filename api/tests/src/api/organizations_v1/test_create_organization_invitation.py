@@ -648,7 +648,7 @@ class TestCreateOrganizationInvitation:
 <p>Here's how to get started:</p>
 <ol>
 <li>Go to <a href="http://localhost:3000" target="_blank">Simpler.Grants.gov</a> and sign in (top right) using your Login.gov email and password. If you don't have an account yet, you'll be guided to create one.</li>
-<li>After signing in, open your "Activity dashboard" under Workspace in the navigation.</li>
+<li>After signing in, open your "Workspace dashboard" under Workspace in the navigation.</li>
 <li>A message will be waiting for you, select "Accept" to join your organization. Once you accept, you'll have access to your team, organization details, and more.</li>
 </ol>
 

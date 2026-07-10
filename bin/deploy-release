@@ -16,8 +16,18 @@ echo
 
 # Update task definition and update service to use new task definition
 
-echo "::group::Starting ${app_name} deploy of ${image_tag} to ${environment}"
-TF_CLI_ARGS_apply="-input=false -auto-approve -var=image_tag=${image_tag}" make infra-update-app-service APP_NAME="${app_name}" ENVIRONMENT="${environment}"
+# When no image tag is provided, omit the image_tag variable so Terraform falls
+# back to its null default and redeploys the last image tag used
+if [ -n "${image_tag}" ]; then
+  image_tag_var="-var=image_tag=${image_tag}"
+  deploy_target="${image_tag}"
+else
+  image_tag_var=""
+  deploy_target="the last image tag used"
+fi
+
+echo "::group::Starting ${app_name} deploy of ${deploy_target} to ${environment}"
+TF_CLI_ARGS_apply="-input=false -auto-approve ${image_tag_var}" make infra-update-app-service APP_NAME="${app_name}" ENVIRONMENT="${environment}"
 echo "::endgroup::"
 
 # Wait for the service to become stable
@@ -34,7 +44,7 @@ if ! wait_for_service_stability; then
   wait_for_service_stability
 fi
 
-echo "Completed ${app_name} deploy of ${image_tag} to ${environment}"
+echo "Completed ${app_name} deploy of ${deploy_target} to ${environment}"
 
 # Invalidate CloudFront cache for frontend deployments only
 if [ "$app_name" = "frontend" ]; then

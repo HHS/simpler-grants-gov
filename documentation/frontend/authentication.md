@@ -9,12 +9,10 @@ Tokens are created at the end of the login process, which is initiated when a us
 Once the flow takes you into the frontend code, the token:
 
 - is extracted from the query param in the callback route
-
   - After successful authentication, the API redirects the user to the `/api/auth/callback` route with a `token` query parameter.
   - The `GET` handler in `callback/route.ts` processes this request.
 
 - is encrypted into a client cookie
-
   - the token from the query param is encrypted with a new expiration date and stored in a `session` cookie
 
 - sent down to the client on redirect
@@ -28,7 +26,6 @@ Once the flow takes you into the frontend code, the token:
 Tokens are validated during user interactions with the application. Specifically:
 
 - Routine Session Retrieval
-
   - whenever the client makes a call to the Next API's /session route, the token provided from the session cookie will be validated
   - these calls can be traced from the [useUser `getUserSession` function](https://github.com/HHS/simpler-grants-gov/blob/7eab597355d4fc0d1e3e32a1a82d1987cc9a7df8/frontend/src/services/auth/UserProvider.tsx#L21)
   - generally, this is done whenever a user logs in or out
@@ -36,7 +33,7 @@ Tokens are validated during user interactions with the application. Specifically
 - Expiration Checks
   - expiration checks are run on each route change and API request within the client application. See:
     - [useClientFetch](https://github.com/HHS/simpler-grants-gov/blob/7eab597355d4fc0d1e3e32a1a82d1987cc9a7df8/frontend/src/hooks/useClientFetch.ts#L21)
-    - [RouteChangeWatcher](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/src/components/RouteChangeWatcher.tsx)
+    - [RouteChangeWatcher](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/src/components/core/header/RouteChangeWatcher.tsx)
   - checks are also run whenever the session is retrieved from the API as described above
 
 ### What Happens If a Token Check Fails
@@ -54,15 +51,12 @@ The logged out message is controlled by [logic in the Header component](https://
 The application refreshes tokens to extend the user's session without requiring them to log in again. This process involves:
 
 1. **Client Request**
-
    - Whenever the client makes a request to the NextJS api using the `clientFetch` function returned by the `useClientFetch` hook, the client will make a call to the /session endpoint
 
 1. **Expiration Detection**:
-
    - When the session handler is called, it checks if the session is expiring using the `isExpiring` function. Currently `isExpiring` is set to consider any token that is less than 10 minutes from expiring to be eligible for refresh
 
 1. **Token Refresh Process**:
-
    - The `refreshSession` function in `session.ts` is called to refresh the token.
    - This function:
      - Sends a request to the Simpler API's token refresh endpoint (`postTokenRefresh`) to update the expiration on the server side.

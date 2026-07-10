@@ -115,8 +115,7 @@ Fider is the best tool if:
 
 #### FeatureBase
 
-FeatureBase is a Commercial Off-the-Shelf (COTS) feature voting and roadmapping tool. It is a managed solution with various pricing tiers. We would need the Business Pro plan for $250/mo.\
-
+FeatureBase is a Commercial Off-the-Shelf (COTS) feature voting and roadmapping tool. It is a managed solution with various pricing tiers. We would need the Business Pro plan for $250/mo.<br>
 
 {% hint style="info" %}
 **Bottom line**
@@ -147,8 +146,7 @@ FeatureBase is the best tool if:
 
 #### Custom solution
 
-Involves building a [custom solution](https://pb-tools.billy-daly.workers.dev/) that could either be embedded in [Simpler.Grants.gov](http://simpler.grants.gov) or hosted as a standalone application.\
-
+Involves building a [custom solution](https://pb-tools.billy-daly.workers.dev/) that could either be embedded in [Simpler.Grants.gov](http://simpler.grants.gov) or hosted as a standalone application.<br>
 
 {% hint style="info" %}
 **Bottom line**
@@ -168,4 +166,4 @@ A custom-built solution probably doesn’t make sense unless we want to integrat
 * Requires a lot of upfront development to replicate features that are available out-of-the-box with Fider or FeatureBase
 * Requires more overhead to maintain and host the tool
 * May reduce capacity available to build and maintain core [Simpler.Grants.gov](http://simpler.grants.gov) features
-* Usability test participants might find this tool less user friendly if we required authenticating with [Login.gov](http://login.gov) \
+* Usability test participants might find this tool less user friendly if we required authenticating with [Login.gov](http://login.gov) <br>

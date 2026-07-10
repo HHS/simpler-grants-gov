@@ -1,6 +1,6 @@
 import { readError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { getUserSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 
 import { NextResponse } from "next/server";
 
@@ -15,8 +15,7 @@ export async function getSavedOpportunityHandler(
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session to get saved opportunity");
     }
-    const savedOpportunities = await getSavedOpportunity(
-      session.token,
+    const savedOpportunities = await getUserSavedOpportunity(
       session.user_id,
       opportunityId,
     );

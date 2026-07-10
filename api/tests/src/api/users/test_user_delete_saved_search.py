@@ -1,9 +1,9 @@
+import logging
 import uuid
 
 import pytest
 
-from src.db.models.user_models import UserSavedSearch, UserTokenSession
-from tests.lib.db_testing import cascade_delete_from_db_table
+from src.db.models.user_models import UserSavedSearch
 from tests.src.db.models.factories import UserFactory, UserSavedSearchFactory
 
 
@@ -12,14 +12,7 @@ def saved_search(enable_factory_create, user, db_session):
     search = UserSavedSearchFactory.create(
         user=user, name="Test Search", search_query={"keywords": "python"}
     )
-    db_session.commit()
     return search
-
-
-@pytest.fixture(autouse=True)
-def clear_data(db_session):
-    cascade_delete_from_db_table(db_session, UserTokenSession)
-    return
 
 
 def test_user_delete_saved_search_unauthorized_user(
@@ -54,7 +47,7 @@ def test_user_delete_saved_search_no_auth(
     )
 
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"
 
     # Verify search was not deleted
     saved_searches = (
@@ -102,3 +95,16 @@ def test_user_delete_saved_search(
     )
     assert len(saved_searches) == 1
     assert saved_searches[0].is_deleted
+
+
+def test_user_delete_saved_search_logging(
+    client, db_session, user, user_auth_token, enable_factory_create, saved_search, caplog
+):
+    caplog.set_level(logging.INFO)
+    response = client.delete(
+        f"/v1/users/{user.user_id}/saved-searches/{saved_search.saved_search_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert any("Deleted saved search" in r.message for r in caplog.records)

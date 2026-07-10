@@ -5,6 +5,7 @@ import sqlalchemy
 
 import src.db.models.foreign
 from src.data_migration.setup_foreign_tables import build_sql
+from src.db.models.foreign.dialect import StripZerosText
 
 EXPECTED_LOCAL_OPPORTUNITY_SQL = [
     "CREATE TABLE IF NOT EXISTS __[SCHEMA_legacy].topportunity (",
@@ -60,20 +61,45 @@ TEST_TABLE = sqlalchemy.Table(
     TEST_METADATA,
     sqlalchemy.Column("id", sqlalchemy.Integer, nullable=False, primary_key=True),
     sqlalchemy.Column("description", sqlalchemy.Text),
+    sqlalchemy.Column("zero_str", StripZerosText),
     schema="schema1",
 )
 EXPECTED_LOCAL_TEST_SQL = [
     "CREATE TABLE IF NOT EXISTS __[SCHEMA_schema1].test_table (",
     "id SERIAL NOT NULL,",
     "description TEXT,",
+    "zero_str TEXT,",
     "PRIMARY KEY (id)",
     ")",
 ]
 EXPECTED_NONLOCAL_TEST_SQL = [
     "CREATE FOREIGN TABLE IF NOT EXISTS __[SCHEMA_schema1].test_table (",
     "id INTEGER OPTIONS (key 'true') NOT NULL,",
-    "description TEXT",
+    "description TEXT,",
+    "zero_str TEXT OPTIONS (strip_zeros 'true')",
     ") SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TEST_TABLE', readonly 'true', prefetch '1000')",
+]
+
+
+TEST_TABLE_DUAL_PRIMARY_TABLE = sqlalchemy.Table(
+    "test_table_dual_primary",
+    TEST_METADATA,
+    sqlalchemy.Column("id", StripZerosText, nullable=False, primary_key=True),
+    sqlalchemy.Column("description", sqlalchemy.Text),
+    schema="schema1",
+)
+EXPECTED_LOCAL_DUAL_PRIMARY_SQL = [
+    "CREATE TABLE IF NOT EXISTS __[SCHEMA_schema1].test_table_dual_primary (",
+    "id TEXT NOT NULL,",
+    "description TEXT,",
+    "PRIMARY KEY (id)",
+    ")",
+]
+EXPECTED_NONLOCAL_DUAL_PRIMARY_SQL = [
+    "CREATE FOREIGN TABLE IF NOT EXISTS __[SCHEMA_schema1].test_table_dual_primary (",
+    "id TEXT OPTIONS (key 'true', strip_zeros 'true') NOT NULL,",
+    "description TEXT",
+    ") SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TEST_TABLE_DUAL_PRIMARY', readonly 'true', prefetch '1000')",
 ]
 
 
@@ -82,6 +108,8 @@ EXPECTED_NONLOCAL_TEST_SQL = [
     [
         (TEST_TABLE, True, EXPECTED_LOCAL_TEST_SQL),
         (TEST_TABLE, False, EXPECTED_NONLOCAL_TEST_SQL),
+        (TEST_TABLE_DUAL_PRIMARY_TABLE, True, EXPECTED_LOCAL_DUAL_PRIMARY_SQL),
+        (TEST_TABLE_DUAL_PRIMARY_TABLE, False, EXPECTED_NONLOCAL_DUAL_PRIMARY_SQL),
         (
             src.db.models.foreign.metadata.tables["legacy.topportunity"],
             True,
@@ -96,5 +124,4 @@ EXPECTED_NONLOCAL_TEST_SQL = [
 )
 def test_build_sql(table, is_local, expected_sql, test_foreign_schema):
     sql = build_sql(table, is_local, test_foreign_schema)
-
     assert re.split(r"\s*\n\s*", sql) == expected_sql

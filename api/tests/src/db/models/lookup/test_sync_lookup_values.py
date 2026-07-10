@@ -2,14 +2,14 @@ import logging
 import uuid
 from enum import StrEnum
 
+import grants_shared.adapters.db as db
 import pytest
+from grants_shared.db.models.lookup import LookupConfig, LookupRegistry, LookupStr, LookupTable
 from sqlalchemy import inspect
 
-import src.adapters.db as db
 import src.db.models as db_models
 from src.constants.lookup_constants import Privilege, RoleType
 from src.constants.static_role_values import APPLICATION_CONTRIBUTOR, CORE_ROLES, ORG_MEMBER
-from src.db.models.lookup import LookupConfig, LookupRegistry, LookupStr, LookupTable
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.lookup_models import LkOpportunityCategory
 from src.db.models.user_models import Role

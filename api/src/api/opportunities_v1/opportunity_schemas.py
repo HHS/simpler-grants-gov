@@ -1,18 +1,21 @@
 from enum import StrEnum
 
-from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import (
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.response_schema import (
     AbstractResponseSchema,
     FileResponseSchema,
     PaginationMixinSchema,
 )
-from src.api.schemas.search_schema import (
+from grants_shared.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     DateSearchSchemaBuilder,
     IntegerSearchSchemaBuilder,
     StrSearchSchemaBuilder,
 )
+from grants_shared.pagination.pagination_schema import generate_pagination_schema
+from marshmallow import RAISE
+
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -21,7 +24,6 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityStatus,
 )
-from src.pagination.pagination_schema import generate_pagination_schema
 from src.services.opportunities_v1.experimental_constant import ScoringRule
 
 
@@ -225,6 +227,7 @@ class OpportunityV1Schema(Schema):
     )
 
     legacy_opportunity_id = fields.Integer(
+        allow_none=True,
         metadata={"description": "The internal legacy ID of the opportunity", "example": 12345},
     )
 
@@ -295,11 +298,20 @@ class OpportunityV1Schema(Schema):
         },
     )
 
+    top_level_agency_code = fields.String(
+        allow_none=True,
+        metadata={"description": "The top-level (parent) agency", "example": "HHS"},
+    )
+
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
 
 class OpportunityAttachmentV1Schema(FileResponseSchema):
+    opportunity_attachment_id = fields.UUID(
+        attribute="attachment_id",
+        metadata={"description": "The unique ID of the attachment"},
+    )
     mime_type = fields.String(
         metadata={"description": "The MIME type of the attachment", "example": "application/pdf"}
     )
@@ -355,9 +367,7 @@ class OpportunitySearchFilterV1Schema(Schema):
     )
     assistance_listing_number = fields.Nested(
         StrSearchSchemaBuilder("AssistanceListingNumberFilterV1Schema")
-        .with_one_of(
-            example="45.149", pattern=r"^\d{2}\.\d{2,3}$"
-        )  # Always of the format ##.## or ##.###
+        .with_one_of(example="45.149", pattern=r"^\d{2}\.[A-Za-z0-9]{2,3}$")
         .build()
     )
     is_cost_sharing = fields.Nested(
@@ -464,6 +474,14 @@ class OpportunityFacetV1Schema(Schema):
         },
     )
 
+    post_date = fields.Dict(
+        keys=fields.String(),
+        values=fields.Integer(),
+        metadata={
+            "description": "The counts of post_date values in the full response",
+        },
+    )
+
 
 class ExperimentalV1Schema(Schema):
     scoring_rule = fields.Enum(
@@ -521,10 +539,37 @@ class OpportunitySearchRequestV1Schema(Schema):
         SearchResponseFormat,
         load_default=SearchResponseFormat.JSON,
         metadata={
-            "description": "The format of the response",
+            "description": (
+                "Response serialization. `json` returns the standard envelope with facet counts. "
+                "`csv` returns a CSV file; pagination and sort_order match the JSON response for the same request. "
+                "For a bulk export (up to 5000 rows, fixed sort by post_date descending), use "
+                "`POST /v1/opportunities/search/csv` instead."
+            ),
             "default": SearchResponseFormat.JSON,
         },
     )
+
+
+class OpportunitySearchCSVRequestV1Schema(Schema):
+    query = fields.String(
+        metadata={
+            "description": "Query string which searches against several text fields",
+            "example": "research",
+        },
+        validate=[validators.Length(min=1, max=100)],
+    )
+    query_operator = fields.Enum(
+        SearchQueryOperator,
+        load_default=SearchQueryOperator.AND,
+        metadata={
+            "description": "Query operator for combining search conditions",
+            "example": "OR",
+        },
+    )
+    filters = fields.Nested(OpportunitySearchFilterV1Schema())
+
+    class Meta:
+        unknown = RAISE
 
 
 class OpportunityGetResponseV1Schema(AbstractResponseSchema):
@@ -558,6 +603,16 @@ class SavedOpportunitySummaryV1Schema(Schema):
     )
 
 
+class SavedOpportunityOrganizationSchema(Schema):
+    organization_id = fields.UUID(
+        metadata={"description": "The ID of the organization"}, allow_none=False
+    )
+    organization_name = fields.String(
+        metadata={"description": "The name of the organization", "example": "Department of Health"},
+        allow_none=True,
+    )
+
+
 class SavedOpportunityResponseV1Schema(Schema):
     opportunity_id = fields.UUID(metadata={"description": "The ID of the saved opportunity"})
     opportunity_title = fields.String(
@@ -573,6 +628,9 @@ class SavedOpportunityResponseV1Schema(Schema):
     )
 
     summary = fields.Nested(SavedOpportunitySummaryV1Schema())
+    saved_to_organizations = fields.List(
+        fields.Nested(SavedOpportunityOrganizationSchema, allow_none=True)
+    )
 
 
 class OpportunityVersionAttachmentSchema(Schema):

@@ -1,0 +1,183 @@
+"use client";
+
+import { useUser } from "src/services/auth/useUser";
+import { submitApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
+import {
+  ApplicationDetail,
+  ApplicationHistory,
+  ApplicationStatus,
+} from "src/types/applicationResponseTypes";
+import { FormValidationWarning } from "src/types/applyForm/types";
+import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
+import {
+  Alert,
+  SummaryBox,
+  SummaryBoxContent,
+  SummaryBoxHeading,
+} from "@trussworks/react-uswds";
+
+import { ApplicationFormsTable } from "./ApplicationFormsTable";
+import { ApplicationHistoryTable } from "./ApplicationHistoryTable";
+import ApplicationValidationAlert from "./ApplicationValidationAlert";
+import { InformationCard } from "./InformationCard";
+import { OpportunityCard } from "./OpportunityCard";
+
+const MY_APPLICATIONS_LINK = "/workspace/applications";
+
+const ApplicationContainer = ({
+  applicationDetails,
+  opportunity,
+  applicationHistory,
+  latestApplicationSubmission,
+}: {
+  applicationDetails: ApplicationDetail;
+  opportunity: OpportunityDetail;
+  applicationHistory: ApplicationHistory[];
+  latestApplicationSubmission: ApplicationSubmission | null;
+}) => {
+  const forms = applicationDetails.competition.competition_forms;
+  const applicationForms = applicationDetails.application_forms;
+  const applicationId = applicationDetails.application_id;
+  const applicationStatus = applicationDetails.application_status;
+  const applicationDetailsObject = applicationDetails;
+
+  const { user } = useUser();
+  const token = user?.token || null;
+  const t = useTranslations("Application");
+  const router = useRouter();
+
+  const [validationErrors, setValidationErrors] = useState<
+    FormValidationWarning[]
+  >([]);
+
+  const [error, setError] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
+
+  // TODO: check this after mvp
+  // instructions were to use the first available path
+  // this may change
+  const instructionsDownloadPath = applicationDetails.competition
+    .competition_instructions.length
+    ? applicationDetails.competition.competition_instructions[0].download_path
+    : "";
+
+  const handleSubmit = useCallback(() => {
+    if (!token) {
+      return;
+    }
+
+    setLoading(true);
+    submitApplication(applicationId)
+      .then((data) => {
+        if (!data) {
+          setError(true);
+        } else if (data?.errors) {
+          setValidationErrors(data.errors);
+          router.refresh();
+        } else {
+          setSuccess(true);
+          // Refresh server-side data to get updated application status from API
+          router.refresh();
+        }
+      })
+      .catch((error) => {
+        setError(true);
+        console.error(error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [applicationId, token, router]);
+
+  return (
+    <>
+      {(success ||
+        applicationDetails.application_status === ApplicationStatus.SUBMITTED ||
+        applicationDetails.application_status ===
+          ApplicationStatus.ACCEPTED) && (
+        <SummaryBox>
+          <SummaryBoxHeading headingLevel="h3">
+            {t("submissionSuccess.title")}
+          </SummaryBoxHeading>
+          <SummaryBoxContent
+            style={{ fontWeight: "bold", paddingBottom: "20px" }}
+          >
+            Application ID #: {applicationId}
+          </SummaryBoxContent>
+          <SummaryBoxContent style={{ paddingBottom: "20px" }}>
+            {t.rich("submissionSuccess.description", {
+              linkMyApplications: (chunks) => (
+                <Link href={MY_APPLICATIONS_LINK}>{chunks}</Link>
+              ),
+              p: (content) => (
+                <p style={{ width: "100%", maxWidth: "100%" }}>{content}</p>
+              ),
+            })}
+          </SummaryBoxContent>
+          <SummaryBoxContent>
+            {t.rich("submissionSuccess.contact", {
+              "email-link": (content) => (
+                <a href="mailto:simpler@grants.gov">{content}</a>
+              ),
+            })}
+          </SummaryBoxContent>
+        </SummaryBox>
+      )}
+      {error && (
+        <Alert
+          heading={t("submissionError.title")}
+          headingLevel="h3"
+          type="error"
+          validation
+        >
+          {t.rich("submissionError.description", {
+            "email-link": (content) => (
+              <a href="mailto:simpler@grants.gov">{content}</a>
+            ),
+            p: (content) => <p>{content}</p>,
+          })}
+        </Alert>
+      )}
+      {validationErrors.length > 0 &&
+        applicationDetails.application_status ===
+          ApplicationStatus.IN_PROGRESS &&
+        !success && (
+          <ApplicationValidationAlert
+            applicationForms={applicationForms}
+            forms={forms}
+            validationErrors={validationErrors}
+          />
+        )}
+      <InformationCard
+        applicationDetails={applicationDetails}
+        applicationSubmitHandler={handleSubmit}
+        applicationSubmitted={
+          applicationStatus === ApplicationStatus.SUBMITTED ||
+          applicationStatus === ApplicationStatus.ACCEPTED ||
+          success
+        }
+        submissionLoading={loading}
+        opportunityName={opportunity.opportunity_title}
+        instructionsDownloadPath={instructionsDownloadPath}
+        latestApplicationSubmission={latestApplicationSubmission}
+      />
+      <OpportunityCard opportunityOverview={opportunity} />
+      <ApplicationFormsTable
+        applicationForms={applicationForms}
+        competitionInstructionsDownloadPath={instructionsDownloadPath}
+        errors={validationErrors}
+        applicationDetailsObject={applicationDetailsObject}
+      />
+      <ApplicationHistoryTable applicationHistory={applicationHistory} />
+    </>
+  );
+};
+
+export default ApplicationContainer;

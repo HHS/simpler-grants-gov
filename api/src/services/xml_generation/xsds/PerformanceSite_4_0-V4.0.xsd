@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:PerformanceSite_4_0="http://apply.grants.gov/forms/PerformanceSite_4_0-V4.0" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://apply.grants.gov/forms/PerformanceSite_4_0-V4.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="4.0">
+	<xs:import namespace="http://apply.grants.gov/system/Attachments-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:element name="PerformanceSite_4_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PrimarySite" type="PerformanceSite_4_0:SiteLocationDataType"/>
+				<xs:element name="OtherSite" type="PerformanceSite_4_0:SiteLocationDataType" minOccurs="0" maxOccurs="299"/>
+				<xs:element name="AttachedFile" type="att:AttachedFileDataType" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="4.0"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="SiteLocationDataType">
+		<xs:sequence>
+			<xs:element name="Individual" type="globLib:YesNoDataType" minOccurs="0"/>
+			<xs:element name="OrganizationName" type="globLib:OrganizationNameDataType" minOccurs="0"/>
+			<xs:element name="SAMUEI" type="globLib:SAMUEIDataType" minOccurs="0"/>
+			<xs:element name="Address" type="globLib:AddressDataTypeV3"/>
+			<xs:element name="CongressionalDistrictProgramProject" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="globLib:CongressionalDistrictDataType">
+						<xs:minLength value="6"/>
+						<xs:maxLength value="6"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

@@ -2,12 +2,12 @@ import logging
 import uuid
 
 import alembic.command as command
+import grants_shared.adapters.db as db
 import pytest
 from alembic.script import ScriptDirectory
 from alembic.script.revision import MultipleHeads
 from alembic.util.exc import CommandError
 
-import src.adapters.db as db
 from src.db.migrations.run import alembic_cfg
 from tests.lib import db_testing
 

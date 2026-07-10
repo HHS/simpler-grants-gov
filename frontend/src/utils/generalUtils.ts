@@ -5,7 +5,7 @@
 // * the character count is zero indexed
 // * the split will happen on the first whitespace AFTER the supplied split point
 
-import { difference } from "lodash";
+import { difference, isNumber } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 
 // Refer to tests to see how this works in practice
@@ -128,4 +128,53 @@ export function isExternalLink(href: string): boolean {
 
 export const isSubset = <T>(subset: T[], superset: T[]) => {
   return !difference(subset, superset).length;
+};
+
+export const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
+  if (typeof mightBeAnObject === "boolean") {
+    return false;
+  }
+  return (
+    !!mightBeAnObject &&
+    !Array.isArray(mightBeAnObject) &&
+    typeof mightBeAnObject.valueOf() !== "string" &&
+    !isNumber(mightBeAnObject)
+  );
+};
+
+export const formatTimestamp = (time: string) => {
+  const date = new Date(time);
+  return `${date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })} ${date.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "numeric",
+    timeZoneName: "short",
+  })}`;
+};
+
+export const getModifiedTimeDisplay = (
+  updated_at: string,
+  created_at: string,
+  returnStr: string,
+) => {
+  const updatedTime = new Date(updated_at).getTime();
+  const createdTime = new Date(created_at).getTime();
+  const timeDiff = Math.abs(updatedTime - createdTime);
+
+  if (timeDiff <= 5000) {
+    return returnStr;
+  }
+
+  return formatTimestamp(updated_at);
+};
+
+export const printAwsHeaders = (headers: Headers): string => {
+  return `requestid: ${headers.get("x-amzn-requestid") || "not set"}, apigw-id: ${headers.get("x-amz-apigw-id") || "not set"}, amzn-errortype: ${headers.get("x-amzn-errortype") || "not set"}, content-type: ${headers.get("Content-Type") || "not set"}`;
+};
+
+export const printResponseInfo = (response: Response): string => {
+  return `Ok?: ${response.ok ? "ok" : "no"}, status: ${response.status}`;
 };

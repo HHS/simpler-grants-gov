@@ -1,7 +1,25 @@
+import { Metadata } from "next";
 import { LayoutProps } from "src/types/generalTypes";
+import { LocalizedPageProps } from "src/types/intl";
 
-import { NavigationGuardProvider } from "next-navigation-guard";
+import { getTranslations } from "next-intl/server";
 
-export default function ApplicaitonsLayout({ children }: LayoutProps) {
-  return <NavigationGuardProvider>{children}</NavigationGuardProvider>;
+import { AuthenticationGate } from "src/components/core/AuthenticationGate";
+
+export async function generateMetadata({ params }: LocalizedPageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
+  const meta: Metadata = {
+    title: t("Applications.pageTitle"),
+    description: t("Applications.metaDescription"),
+  };
+  return meta;
+}
+
+export default function ApplicationsLayout({ children }: LayoutProps) {
+  return (
+    <>
+      <AuthenticationGate>{children}</AuthenticationGate>
+    </>
+  );
 }

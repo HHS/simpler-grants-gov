@@ -33,30 +33,25 @@ locals {
   #   }
   # }
   secrets = {
-    # Sendy API key to pass with requests for sendy subscriber endpoints.
-    SENDY_API_KEY = {
+    # Mailchimp API key to pass with requests for newsletter subscriber endpoints.
+    MAILCHIMP_API_KEY = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/sendy-api-key"
+      secret_store_name = "/${var.app_name}/${var.environment}/mailchimp-api-key"
     },
-    # Sendy API base url for requests to manage subscribers.
-    SENDY_API_URL = {
+    # Mailchimp data center prefix (e.g. "us4") used to build the API base url.
+    MAILCHIMP_API_URL_PREFIX = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/sendy-api-url"
+      secret_store_name = "/${var.app_name}/${var.environment}/mailchimp-api-url-prefix"
     },
-    # Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list.
-    SENDY_LIST_ID = {
+    # Mailchimp list ID for requests to manage subscribers to the Simpler Grants distribution list.
+    MAILCHIMP_LIST_ID = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/sendy-list-id"
+      secret_store_name = "/${var.app_name}/${var.environment}/mailchimp-list-id"
     },
     # URL that the frontend uses to make fetch requests to the Grants API.
     API_URL = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/api-url"
-    },
-    # Token that the frontend uses to authenticate when making Grants API fetch requests.
-    API_AUTH_TOKEN = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/api-auth-token"
     },
     # URL for the API login route.
     AUTH_LOGIN_URL = {
@@ -71,53 +66,29 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/new-relic-license-key"
     },
-    FEATURE_SEARCH_OFF = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-search-off"
-    },
-    FEATURE_OPPORTUNITY_OFF = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-opportunity-off"
-    },
     SESSION_SECRET = {
       manage_method     = "generated"
       secret_store_name = "/${var.app_name}/${var.environment}/session-secret"
-    },
-    FEATURE_AUTH_ON = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-auth-on"
-    },
-    FEATURE_SAVED_OPPORTUNITIES_ON = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-saved-opportunities-on"
-    },
-    FEATURE_SAVED_SEARCHES_ON = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-saved-searches-on"
     },
     FEATURE_APPLY_FORM_PROTOTYPE_OFF = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-apply-form-prototype-off"
     },
-    FEATURE_SEARCH_DRAWER_ON = {
+    FEATURE_AWARD_RECOMMENDATION_OFF = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-search-drawer-on"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-award-recommendation-off"
     },
-    FEATURE_SEARCH_TABLE_ON = {
+    FEATURE_MAINTENANCE_MODE = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-search-table-on"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-maintenance-mode"
     },
-    FEATURE_DEVELOPER_PAGE_OFF = {
+    FEATURE_OPPORTUNITIES_LIST_OFF = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-developer-page-off"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-opportunities-list-off"
     },
-    FEATURE_USER_ADMIN_OFF = {
+    FEATURE_FEATURE_FLAG_ADMIN_OFF = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-user-admin-off"
-    },
-    FEATURE_MANAGE_USERS_OFF = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-manage-users-off"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-feature-flag-admin-off"
     },
     API_JWT_PUBLIC_KEY = {
       manage_method     = "manual"

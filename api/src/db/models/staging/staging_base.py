@@ -3,10 +3,10 @@ from collections.abc import Iterable
 from typing import Any
 
 import sqlalchemy
+from grants_shared.util import datetime_util
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 from src.constants.schema import Schemas
-from src.util import datetime_util
 
 metadata = sqlalchemy.MetaData(
     naming_convention={

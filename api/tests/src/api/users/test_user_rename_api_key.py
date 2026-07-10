@@ -150,7 +150,7 @@ def test_rename_api_key_no_authentication(enable_factory_create, db_session, cli
     )
 
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"
 
     db_session.refresh(api_key)
     assert api_key.key_name == "Original Key Name"

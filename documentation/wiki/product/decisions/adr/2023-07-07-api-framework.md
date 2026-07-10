@@ -7,7 +7,7 @@
 
 ## Context and Problem Statement
 
-This ADR is to decide what python framework to use for the back-end API of grants.gov. Python was chosen as the language for the back-end API in [ADR #3](../../../../decisions/adr/0003-api-language.md).
+This ADR is to decide what python framework to use for the back-end API of grants.gov. Python was chosen as the language for the back-end API in [ADR #3](./2023-06-30-api-language.md).
 
 ## Decision Drivers
 

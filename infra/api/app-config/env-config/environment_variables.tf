@@ -9,11 +9,9 @@ locals {
     # LOG_LEVEL               = "info"
     # DB_CONNECTION_POOL_SIZE = 5
 
-
     # Login.gov OAuth
     # Default values point to the IDP integration environment
     # which all non-prod environments should use
-    ENABLE_AUTH_ENDPOINT             = 0
     LOGIN_GOV_CLIENT_ID              = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-${var.environment}-simpler-grants-gov"
     LOGIN_GOV_ENDPOINT               = "https://idp.int.identitysandbox.gov/"
     LOGIN_GOV_JWK_ENDPOINT           = "https://idp.int.identitysandbox.gov/api/openid_connect/certs"
@@ -30,7 +28,6 @@ locals {
     # Both staging and dev environments both point to trainingws subdomain.
     GRANTS_GOV_URI  = "https://trainingws.grants.gov"
     GRANTS_GOV_PORT = 443
-    ENABLE_SOAP_API = 0
 
     # Sam.gov
     SAM_GOV_BASE_URL = "https://api-alpha.sam.gov"
@@ -41,6 +38,12 @@ locals {
     DOCRAPTOR_API_URL                    = "https://docraptor.com/docs"
     SHORT_LIVED_TOKEN_EXPIRATION_MINUTES = "60"
     PDF_GENERATION_USE_MOCKS             = "false"
+
+    # OpenSearch explanation logging (kill switch if explain queries cause latency issues)
+    OPENSEARCH_EXPLAIN_ENABLED = "true"
+
+    # DB Schemas
+    ALL_DB_SCHEMAS = "api,legacy,staging"
   }
 
   # Configuration for secrets
@@ -53,11 +56,6 @@ locals {
   #   }
   # }
   secrets = {
-    API_AUTH_TOKEN = {
-      manage_method     = "manual"
-      secret_store_name = "/api/${var.environment}/api-auth-token"
-    }
-
     NEW_RELIC_LICENSE_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/new-relic-license-key"
@@ -96,6 +94,46 @@ locals {
     SOAP_PRIVATE_KEYS = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/soap-private-keys"
+    }
+
+    SOAP_PARTNER_GATEWAY_URI = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-partner-gateway-uri"
+    }
+
+    SOAP_GRANTORS_PATH = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-grantors-path"
+    }
+
+    SOAP_APPLICANTS_PATH = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-applicants-path"
+    }
+
+    SOAP_PARTNER_GATEWAY_AUTH_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-partner-gateway-auth-key"
+    }
+
+    USE_SIMPLER = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/use-simpler"
+    }
+
+    ENABLE_SIMPLER_ROUTE = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/enable-simpler-route"
+    }
+
+    ENABLE_MAINTENANCE_MODE = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/enable-maintenance-mode"
+    }
+
+    SAVE_SOAP_MESSAGES_TO_S3 = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/save-soap-messages-to-s3"
     }
 
     SAM_GOV_API_KEY = {

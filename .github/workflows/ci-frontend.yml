@@ -2,6 +2,11 @@ name: Frontend Checks
 
 on:
   workflow_call:
+    inputs:
+      skip_checks:
+        type: boolean
+        default: false
+        description: Skip the guts of this workflow, but we have to run the workflow for dependency reasons when calling from CD workflows
   pull_request:
     paths:
       - frontend/**
@@ -12,7 +17,7 @@ defaults:
     working-directory: ./frontend
 
 env:
-  NODE_VERSION: 22
+  NODE_VERSION: 24
   LOCKFILE_PATH: ./frontend/package-lock.json # or yarn.lock
   PACKAGE_MANAGER: npm # or yarn
 
@@ -22,6 +27,7 @@ concurrency:
 
 jobs:
   tests:
+    if: ${{ inputs.skip_checks == null || inputs.skip_checks == false }}
     name: FE Lint, Type Check, Format & Tests
     runs-on: ubuntu-22.04
 
@@ -43,20 +49,21 @@ jobs:
       - name: Run format
         run: npm run format-check
 
-      - run: npm run test -- --testLocationInResults --json --outputFile=coverage/report.json
-      - uses: ArtiomTr/jest-coverage-report-action@v2
-        with:
-          coverage-file: coverage/report.json
-          test-script: npm test
-          working-directory: ./frontend
-          annotations: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'failed-tests' || 'none' }}
-          package-manager: npm
-          icons: emoji
-          skip-step: none
-          output: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'comment' || 'report-markdown' }}
+      - name: Run unit tests
+        run: npm run test -- --testLocationInResults --coverage
+
+      # disabled while we determine next steps for coverage, see https://github.com/HHS/simpler-grants-gov/issues/10650
+      # - name: Run coverage report
+      #   uses: ArtiomTr/jest-coverage-report-action@v2
+      #   with:
+      #     skip-step: all
+      #     working-directory: ./frontend
+      #     coverage-file: ./coverage-final.json
+      #     output: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'comment' || 'report-markdown' }}
 
   # Confirms the front end still builds successfully
   check-frontend-builds:
+    if: ${{ inputs.skip_checks == null || inputs.skip_checks == false }}
     name: FE Build Check
     runs-on: ubuntu-22.04
 
@@ -81,10 +88,11 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
       - run: npm ci
-      - run: npm run build -- --no-lint
+      - run: npm run build
 
   # Confirms Storybook still builds successfully
   check-storybook-builds:
+    if: ${{ inputs.skip_checks == null || inputs.skip_checks == false }}
     name: FE Storybook Build Check
     runs-on: ubuntu-22.04
 
@@ -97,3 +105,12 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
       - run: npm ci
       - run: npm run storybook-build
+
+  skip-checks:
+    if: ${{ inputs.skip_checks != null && inputs.skip_checks == true }}
+    name: Skip Checks
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checks skipped
+        working-directory: ./
+        run: exit 0

@@ -7,7 +7,7 @@ RUN dnf -y install cpio && \
     for rpm in /tmp/rpms/*.rpm; do rpm2cpio "$rpm" | cpio -idmv; done && \
     rm -rf /tmp/rpms
 
-FROM ghcr.io/hhs/python-base-image:b8b6289@sha256:fadc641c704cc98386246e531be93c35162ea6a56f1f92489d4ea71e016c65f0
+FROM ghcr.io/hhs/python-base-image:3d63eb7@sha256:2f10c624ac0d59a6541b411e09f03fd8aa68c88c4fdb94624ad90a5c72135b0b
 
 ARG RUN_USER
 ARG RUN_UID
@@ -18,8 +18,8 @@ RUN /usr/bin/dot -c
 
 RUN groupadd -g ${RUN_UID} ${RUN_USER} && \
     useradd -l -M -s /bin/bash -u ${RUN_UID} -g ${RUN_USER} ${RUN_USER} && \
-    mkdir -p /home/${RUN_USER} /api && \
-    chown -R ${RUN_UID}:${RUN_UID} /home/${RUN_USER} /api
+    mkdir -p /home/${RUN_USER} /api /opt/venv && \
+    chown -R ${RUN_UID}:${RUN_UID} /home/${RUN_USER} /api /opt/venv
 
 # Ensure /usr/bin is in the PATH for graphviz executables
 ENV PATH="/usr/bin:${PATH}"
@@ -27,6 +27,15 @@ ENV PATH="/usr/bin:${PATH}"
 WORKDIR /api
 USER ${RUN_USER}
 
-COPY pyproject.toml poetry.lock ./
-RUN poetry install --no-root --with dev
+# Setup the uv venv separately
+ENV VIRTUAL_ENV=/opt/venv
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+
+COPY pyproject.toml uv.lock ./
 COPY . /api
+
+# Install packages
+RUN uv venv /opt/venv && uv sync --locked --all-groups
+
+# Make it so we can access commands in /opt/venv/bin
+ENV PATH="/opt/venv/bin:$PATH"

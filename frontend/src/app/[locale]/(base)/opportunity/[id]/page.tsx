@@ -1,29 +1,25 @@
 import { Metadata } from "next";
-import NotFound from "src/app/[locale]/(base)/not-found";
-import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
+import { OpportunityCompetitionStart } from "src/app/[locale]/(base)/opportunity/[id]/_components/OpportunityCompetitionStart";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { getUserSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect, RedirectType } from "next/navigation";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
-import ContentLayout from "src/components/ContentLayout";
-import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
-import OpportunityCTA from "src/components/opportunity/OpportunityCTA";
-import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
-import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
-import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
-import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
-import OpportunityLink from "src/components/opportunity/OpportunityLink";
-import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
-import { OpportunityCompetitionStart } from "src/components/user/OpportunityCompetitionStart";
-import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
+import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
+import OpportunityAwardInfo from "./_components/OpportunityAwardInfo";
+import OpportunityCTA from "./_components/OpportunityCTA";
+import OpportunityDescription from "./_components/OpportunityDescription";
+import OpportunityDocuments from "./_components/OpportunityDocuments";
+import OpportunityHistory from "./_components/OpportunityHistory";
+import OpportunityIntro from "./_components/OpportunityIntro";
+import OpportunityLink from "./_components/OpportunityLink";
+import OpportunityStatusWidget from "./_components/OpportunityStatusWidget";
 
 type OpportunityListingProps = {
   params: Promise<{ id: string }>;
@@ -92,13 +88,13 @@ function emptySummary() {
     is_forecast: false,
     post_date: null,
     summary_description: null,
+    updated_at: "",
     version_number: null,
   };
 }
 
 async function OpportunityListing({ params }: OpportunityListingProps) {
   const { id } = await params;
-  const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
 
   let opportunityData = {} as OpportunityDetail;
   let opportunitySaved = false;
@@ -107,7 +103,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     opportunityData = response.data;
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {
-      return <NotFound />;
+      notFound();
     }
     throw error;
   }
@@ -121,8 +117,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
   try {
     const session = await getSession();
     if (session?.user_id && session.token) {
-      const savedOpportunity = await getSavedOpportunity(
-        session.token,
+      const savedOpportunity = await getUserSavedOpportunity(
         session.user_id,
         id,
       );
@@ -138,66 +133,62 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     ? opportunityData.summary
     : emptySummary();
 
-  breadcrumbs.push({
-    title: `${opportunityData.opportunity_title || ""}: ${opportunityData.opportunity_number}`,
-    path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
-  });
-
   return (
     <div>
-      <div className="grid-container">
-        <Breadcrumbs breadcrumbList={breadcrumbs} />
-      </div>
-      <ContentLayout
-        title={opportunityData.opportunity_title}
+      <GridContainer
         data-testid="opportunity-intro-content"
-        paddingTop={false}
+        className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6"
       >
-        <div className="display-flex desktop:padding-y-1 padding-y-3">
-          <OpportunitySaveUserControl
-            opportunityId={opportunityData.opportunity_id}
-            type="button"
-            opportunitySaved={opportunitySaved}
-          />
-          {opportunityData.competitions &&
-            opportunityData.opportunity_title && (
-              <OpportunityCompetitionStart
-                opportunityTitle={opportunityData.opportunity_title}
-                competitions={opportunityData.competitions}
-              />
-            )}
-        </div>
-        <div className="grid-row grid-gap" id="opportunity-detail-content">
-          <div className="desktop:grid-col-8 grid-col-12 order-1 desktop:order-first">
-            <OpportunityIntro opportunityData={opportunityData} />
-            <OpportunityDescription
-              summary={opportunityData.summary}
-              attachments={opportunityData.attachments}
-            />
-            <OpportunityDocuments
-              documents={opportunityData.attachments}
+        {opportunityData.opportunity_title ? (
+          <h2 className="margin-bottom-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
+            {opportunityData.opportunity_title}
+          </h2>
+        ) : null}
+        <Grid row gap={true}>
+          <div className="display-flex desktop:padding-y-1 padding-y-3">
+            <OpportunitySaveUserControl
               opportunityId={opportunityData.opportunity_id}
+              type="button"
+              opportunitySaved={opportunitySaved}
             />
-            <OpportunityLink opportunityData={opportunityData} />
+            {opportunityData.competitions &&
+              opportunityData.opportunity_title && (
+                <OpportunityCompetitionStart
+                  opportunityTitle={opportunityData.opportunity_title}
+                  competitions={opportunityData.competitions}
+                />
+              )}
           </div>
+          <div className="grid-row grid-gap" id="opportunity-detail-content">
+            <div className="desktop:grid-col-8 grid-col-12 order-1 desktop:order-first">
+              <OpportunityIntro opportunityData={opportunityData} />
+              <OpportunityDescription
+                summary={opportunityData.summary}
+                attachments={opportunityData.attachments}
+              />
+              <OpportunityDocuments
+                documents={opportunityData.attachments}
+                opportunityId={opportunityData.opportunity_id}
+              />
+              <OpportunityLink opportunityData={opportunityData} />
+            </div>
 
-          <div className="desktop:grid-col-4 grid-col-12 order-0">
-            <OpportunityStatusWidget opportunityData={opportunityData} />
-            <OpportunityCTA legacyId={opportunityData.legacy_opportunity_id} />
-            <OpportunityAwardInfo opportunityData={opportunityData} />
-            <OpportunityHistory
-              summary={opportunityData.summary}
-              status={opportunityData.opportunity_status}
-            />
+            <div className="desktop:grid-col-4 grid-col-12 order-0">
+              <OpportunityStatusWidget opportunityData={opportunityData} />
+              <OpportunityCTA
+                legacyId={opportunityData.legacy_opportunity_id}
+              />
+              <OpportunityAwardInfo opportunityData={opportunityData} />
+              <OpportunityHistory
+                summary={opportunityData.summary}
+                status={opportunityData.opportunity_status}
+              />
+            </div>
           </div>
-        </div>
-      </ContentLayout>
+        </Grid>
+      </GridContainer>
     </div>
   );
 }
 
-export default withFeatureFlag<OpportunityListingProps, never>(
-  OpportunityListing,
-  "opportunityOff",
-  () => redirect("/maintenance"),
-);
+export default OpportunityListing;

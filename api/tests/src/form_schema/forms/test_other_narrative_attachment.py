@@ -56,9 +56,6 @@ def test_other_narrative_v1_2_attachment_type(other_narrative_attachment_v1_2):
     assert validation_issues[0].field == "$.attachments[1]"
 
 
-# TODO - add form validation
-
-
 def test_other_narrative_attachment_v1_2_with_valid_attachment(
     enable_factory_create, other_narrative_attachment_v1_2, verify_no_warning_error_logs
 ):

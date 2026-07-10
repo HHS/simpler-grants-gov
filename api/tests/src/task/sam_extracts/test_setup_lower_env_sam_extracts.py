@@ -3,12 +3,12 @@ import zipfile
 from datetime import date
 
 import pytest
+from grants_shared.util import file_util
 
 from src.db.models.sam_extract_models import SamExtractFile
 from src.db.models.user_models import LinkExternalUser
 from src.task.sam_extracts.process_sam_extracts import ExtractIndex
 from src.task.sam_extracts.setup_lower_env_sam_extracts import SetupLowerEnvSamExtractsTask
-from src.util import file_util
 from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (

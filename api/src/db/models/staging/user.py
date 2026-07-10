@@ -5,33 +5,8 @@
 # match by oracle_fdw, but we are matching them for maintainability.
 from sqlalchemy import Index
 
-from src.db.models.legacy_mixin import user_mixin
 from src.db.models.legacy_mixin.user_mixin import TuserProfileMixin, VuserAccountMixin
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
-
-
-# TODO(#7340): Evaluate removing TuserAccount/TuserAccountMapper - no longer synced from Oracle
-class TuserAccountMapper(StagingBase, user_mixin.TuserAccountMapperMixin, StagingParamMixin):
-    __tablename__ = "tuser_account_mapper"
-
-
-# TODO(#7340): Evaluate removing TuserAccount/TuserAccountMapper - no longer synced from Oracle
-class TuserAccount(StagingBase, user_mixin.TuserAccountMixin, StagingParamMixin):
-    __tablename__ = "tuser_account"
-
-
-class TsubscriptionMixin(StagingBase, user_mixin.TsubscriptionMixin, StagingParamMixin):
-    __tablename__ = "tsubscription"
-
-
-class TsubscriptionSearchMixin(StagingBase, user_mixin.TsubscriptionSearchMixin, StagingParamMixin):
-    __tablename__ = "tsubscription_search"
-
-
-class TsubscriptionOpportunityMixin(
-    StagingBase, user_mixin.TsubscriptionOpportunityMixin, StagingParamMixin
-):
-    __tablename__ = "tsubscription_opportunity"
 
 
 class VuserAccount(StagingBase, VuserAccountMixin, StagingParamMixin):

@@ -1,0 +1,33 @@
+services:
+
+  grants-management-api:
+    build:
+      context: .
+      target: dev
+      args:
+        - RUN_UID=${RUN_UID:-4000}
+        - RUN_USER=${RUN_USER:-api}
+    command:
+      [
+        "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8089", "--reload"
+      ]
+    container_name: grants-management-api
+    env_file:
+      - path: ./local.env
+        required: true
+      - path: ./override.env
+        required: false
+    ports:
+      - 8089:8089
+    volumes:
+      - .:/grants_management_api
+    networks:
+      - local_db
+      - default
+
+networks:
+  local_db:
+    # NOTE: This network is created by starting the shared DB
+    # defined in /backend/docker-compose.db.yml
+    external: true
+    name: local_db

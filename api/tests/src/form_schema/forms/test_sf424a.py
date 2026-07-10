@@ -18,6 +18,7 @@ def activity_line_item1():
             "non_federal_estimated_unobligated_amount": "2.00",
             "federal_new_or_revised_amount": "3.00",
             "non_federal_new_or_revised_amount": "4.00",
+            "total_amount": "10.00",
         },
         "budget_categories": {
             "personnel_amount": "1.00",
@@ -55,6 +56,7 @@ def activity_line_item2():
             "non_federal_estimated_unobligated_amount": "-12.00",
             "federal_new_or_revised_amount": "35.00",
             "non_federal_new_or_revised_amount": "43.00",
+            "total_amount": "76.00",
         },
         "budget_categories": {
             "personnel_amount": "100.00",
@@ -91,6 +93,7 @@ def activity_line_item3():
             "non_federal_estimated_unobligated_amount": "0.02",
             "federal_new_or_revised_amount": "0.03",
             "non_federal_new_or_revised_amount": "0.04",
+            "total_amount": "0.10",
         },
         "budget_categories": {
             "personnel_amount": "0.01",
@@ -184,12 +187,14 @@ def full_valid_activity_line_item_v1_0():
             "program_income_amount": "0.00",
         },
         "non_federal_resources": {
+            "grant_program": "My full activity",
             "applicant_amount": "0.00",
             "state_amount": "0.00",
             "other_amount": "0.00",
             "total_amount": "0.00",
         },
         "federal_fund_estimates": {
+            "grant_program": "My full activity",
             "first_year_amount": "0.00",
             "second_year_amount": "0.00",
             "third_year_amount": "0.00",
@@ -302,6 +307,90 @@ def test_sf424a_v1_0_empty_line_item(full_valid_json_v1_0, sf424a_v1_0):
         assert validation_issue.field in EXPECTED_REQUIRED_FIELDS
 
 
+def test_sf424a_v1_0_row_1_always_required(sf424a_v1_0):
+    """Row 1 activity_title is required even when only later rows hold data."""
+    data = {
+        "activity_line_items": [
+            {},
+            {"activity_title": "Line2", "budget_summary": {"total_amount": "5.00"}},
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "required"
+    assert validation_issues[0].field == "$.activity_line_items[0].activity_title"
+
+
+def test_sf424a_v1_0_empty_rows_2_4_not_required(sf424a_v1_0):
+    """Rows 2-4 without any data do not require activity_title."""
+    data = {
+        "activity_line_items": [{"activity_title": "Line1"}, {}, {}, {}],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+    assert len(validation_issues) == 0
+
+
+def test_sf424a_v1_0_row_required_when_section_a_data_entered(sf424a_v1_0):
+    """Row 3 Section A data with an empty Column A errors as required (ticket example)."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {},
+            {"budget_summary": {"federal_new_or_revised_amount": "10.00"}},
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "required"
+    assert validation_issues[0].field == "$.activity_line_items[2].activity_title"
+
+    # Providing the title clears the error
+    data["activity_line_items"][2]["activity_title"] = "Line3"
+    assert len(validate_json_schema_for_form(data, sf424a_v1_0)) == 0
+
+
+def test_sf424a_v1_0_row_required_when_section_b_data_entered(sf424a_v1_0):
+    """Row 3 Section B user-entered data with an empty Column A errors as required."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {},
+            {
+                "budget_categories": {
+                    "personnel_amount": "5.00",
+                    "total_direct_charge_amount": "5.00",
+                    "total_amount": "5.00",
+                }
+            },
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "required"
+    assert validation_issues[0].field == "$.activity_line_items[2].activity_title"
+
+
+def test_sf424a_v1_0_row_not_required_with_only_autopopulated_totals(sf424a_v1_0):
+    """Auto-populated Section B totals alone do not make activity_title required."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {"budget_categories": {"total_direct_charge_amount": "0.00", "total_amount": "0.00"}},
+            {"budget_categories": {"total_direct_charge_amount": "0.00", "total_amount": "0.00"}},
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+    assert len(validation_issues) == 0
+
+
 def test_sf424a_v1_0_no_line_items(full_valid_json_v1_0, sf424a_v1_0):
     data = full_valid_json_v1_0
     data["activity_line_items"] = []
@@ -396,7 +485,6 @@ def test_sf424a_v_1_0_auto_summation_empty_state(
 
     validate_application_form(application_form, ApplicationAction.MODIFY)
     app_json = application_form.application_response
-
     # Nearly every monetary field outside of the activity line items
     # gets pre-populated as 0.00
     assert app_json == {
@@ -494,25 +582,21 @@ def test_sf424a_v_1_0_auto_summation_full_data(
 
     # Add the expected calculated values to the activity line items
     expected_activity_line_item1 = activity_line_item1
-    expected_activity_line_item1["budget_summary"]["total_amount"] = "10.00"
     expected_activity_line_item1["budget_categories"]["total_direct_charge_amount"] = "36.00"
     expected_activity_line_item1["budget_categories"]["total_amount"] = "45.00"
     expected_activity_line_item1["non_federal_resources"]["total_amount"] = "6.00"
 
     expected_activity_line_item2 = activity_line_item2
-    expected_activity_line_item2["budget_summary"]["total_amount"] = "76.00"
     expected_activity_line_item2["budget_categories"]["total_direct_charge_amount"] = "11323.00"
     expected_activity_line_item2["budget_categories"]["total_amount"] = "11352.00"
     expected_activity_line_item2["non_federal_resources"]["total_amount"] = "1156.00"
 
     expected_activity_line_item3 = activity_line_item3
-    expected_activity_line_item3["budget_summary"]["total_amount"] = "0.10"
     expected_activity_line_item3["budget_categories"]["total_direct_charge_amount"] = "0.36"
     expected_activity_line_item3["budget_categories"]["total_amount"] = "0.45"
     expected_activity_line_item3["non_federal_resources"]["total_amount"] = "0.06"
 
     expected_activity_line_item4 = activity_line_item4
-    expected_activity_line_item4["budget_summary"]["total_amount"] = "27.03"
     expected_activity_line_item4["budget_categories"]["total_direct_charge_amount"] = "33.12"
     expected_activity_line_item4["budget_categories"]["total_amount"] = "33.12"
     expected_activity_line_item4["non_federal_resources"]["total_amount"] = "9.06"
@@ -529,7 +613,7 @@ def test_sf424a_v_1_0_auto_summation_full_data(
             "non_federal_estimated_unobligated_amount": "-9.98",
             "federal_new_or_revised_amount": "51.05",
             "non_federal_new_or_revised_amount": "47.04",
-            "total_amount": "113.13",
+            "total_amount": "86.10",
         },
         "total_budget_categories": {
             "personnel_amount": "113.04",
@@ -582,3 +666,104 @@ def test_sf424a_v_1_0_auto_summation_full_data(
         },
         "confirmation": True,
     }
+
+
+def test_sf424a_v_1_0_conditional_required_end_to_end(enable_factory_create, sf424a_v1_0):
+    """Through pre-population, empty rows stay optional and Section A data forces Column A."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {},
+            {"budget_summary": {"federal_new_or_revised_amount": "10.00"}},
+            {},
+        ],
+        "confirmation": True,
+    }
+    app = setup_application_for_form_validation(
+        data,
+        json_schema=sf424a_v1_0.form_json_schema,
+        rule_schema=sf424a_v1_0.form_rule_schema,
+    )
+
+    validation_issues = validate_application_form(app, ApplicationAction.MODIFY)
+
+    # Pre-population injects budget_categories totals into every row, but only row 3
+    # (which has Section A data and no Column A value) is flagged as required.
+    required_issues = [i for i in validation_issues if i.type == "required"]
+    assert len(required_issues) == 1
+    assert required_issues[0].field == "$.activity_line_items[2].activity_title"
+
+
+def test_sf424a_v_1_0_total_budget_summary_sums_column_g(enable_factory_create, sf424a_v1_0):
+    """Row 5 Column G should sum Column G (rows 1-4), not Row 5 Columns C-F."""
+    data = {
+        "activity_line_items": [
+            {
+                "budget_summary": {
+                    "federal_estimated_unobligated_amount": "1.00",
+                    "non_federal_estimated_unobligated_amount": "2.00",
+                    "federal_new_or_revised_amount": "3.00",
+                    "non_federal_new_or_revised_amount": "4.00",
+                    "total_amount": "10.00",
+                }
+            },
+            {
+                "budget_summary": {
+                    "federal_estimated_unobligated_amount": "10.00",
+                    "non_federal_estimated_unobligated_amount": "20.00",
+                    "federal_new_or_revised_amount": "30.00",
+                    "non_federal_new_or_revised_amount": "40.00",
+                    "total_amount": "40.00",
+                }
+            },
+        ],
+        "confirmation": True,
+    }
+
+    app = setup_application_for_form_validation(
+        data,
+        json_schema=sf424a_v1_0.form_json_schema,
+        rule_schema=sf424a_v1_0.form_rule_schema,
+    )
+
+    validate_application_form(app, ApplicationAction.MODIFY)
+    app_json = app.application_response
+
+    # Individual row G values are preserved unchanged
+    assert app_json["activity_line_items"][0]["budget_summary"]["total_amount"] == "10.00"
+    assert app_json["activity_line_items"][1]["budget_summary"]["total_amount"] == "40.00"
+
+    # Row 5 G = sum of Column G rows 1-4 (10 + 40 = 50), NOT sum of C-F (1+2+3+4 + 10+20+30+40 = 110)
+    assert app_json["total_budget_summary"]["total_amount"] == "50.00"
+
+
+def test_sf424a_v_1_0_total_budget_summary_column_g_differs_from_cf_sum(
+    enable_factory_create, sf424a_v1_0
+):
+    """For supplemental grants Column G per row is NOT the sum of C-F; Row 5 G must still sum Column G."""
+    data = {
+        "activity_line_items": [
+            {
+                "budget_summary": {
+                    "federal_estimated_unobligated_amount": "0.00",
+                    "non_federal_estimated_unobligated_amount": "0.00",
+                    "federal_new_or_revised_amount": "0.00",
+                    "non_federal_new_or_revised_amount": "0.00",
+                    "total_amount": "999999.00",  # user-entered value unrelated to C-F
+                }
+            }
+        ],
+        "confirmation": True,
+    }
+
+    app = setup_application_for_form_validation(
+        data,
+        json_schema=sf424a_v1_0.form_json_schema,
+        rule_schema=sf424a_v1_0.form_rule_schema,
+    )
+
+    validate_application_form(app, ApplicationAction.MODIFY)
+    app_json = app.application_response
+
+    # Row 5 G = sum of Column G rows 1-4, which is 999999.00 (not 0.00 from C-F)
+    assert app_json["total_budget_summary"]["total_amount"] == "999999.00"

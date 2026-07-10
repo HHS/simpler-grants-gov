@@ -1,21 +1,21 @@
 import uuid
 from collections.abc import Sequence
 
+import grants_shared.adapters.db as db
+from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams
+from grants_shared.pagination.paginator import Paginator
+from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select
 
-import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
-from src.db.models.competition_models import ApplicationAudit, ApplicationForm, CompetitionForm
+from src.db.models.competition_models import ApplicationAudit, ApplicationForm
 from src.db.models.user_models import User
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
-from src.pagination.paginator import Paginator
 from src.search.search_models import StrSearchFilter
 from src.services.applications.get_application import get_application
-from src.services.service_utils import apply_sorting
 
 
 class ApplicationAuditFilters(BaseModel):
@@ -68,16 +68,16 @@ def list_application_audit(
             selectinload(ApplicationAudit.target_user).options(
                 selectinload(User.profile), selectinload(User.linked_login_gov_external_user)
             ),
-            # Preload the application form + competition form + form
-            selectinload(ApplicationAudit.target_application_form)
-            .selectinload(ApplicationForm.competition_form)
-            .selectinload(CompetitionForm.form),
+            # Preload the application form + competition form
+            selectinload(ApplicationAudit.target_application_form).selectinload(
+                ApplicationForm.competition_form
+            ),
             # Preload the attachment
             selectinload(ApplicationAudit.target_attachment),
         )
     )
     stmt = apply_filters(stmt, params.filters)
-    stmt = apply_sorting(stmt, ApplicationAudit, params.pagination.sort_order)
+    stmt = apply_sorting(stmt, params.pagination.sort_order, ApplicationAudit)
 
     # Paginate the results
     paginator: Paginator[ApplicationAudit] = Paginator(

@@ -9,18 +9,20 @@ class NotificationReason(StrEnum):
     OPPORTUNITY_UPDATES = "opportunity_updates"
     SEARCH_UPDATES = "search_updates"
     CLOSING_DATE_REMINDER = "closing_date_reminder"
+    ORG_SAVED_OPPORTUNITY = "org_saved_opportunity"
 
 
-# TODO: Confirm with team if we want to use these metrics
 class Metrics(StrEnum):
     OPPORTUNITIES_TRACKED = "opportunities_tracked"
     VERSIONLESS_OPPORTUNITY_COUNT = "versionless_opportunity_count"
     SEARCHES_TRACKED = "searches_tracked"
     CLOSING_SOON_OPPORTUNITIES_TRACKED = "closing_soon_opportunities_tracked"
+    ORG_SAVED_OPPORTUNITIES_TRACKED = "org_saved_opportunities_tracked"
     USERS_NOTIFIED = "users_notified"
     FAILED_TO_SEND = "failed_to_send"
     NOTIFICATIONS_RESET = "notifications_reset"
     SUPPRESSED_DESTINATION_COUNT = "suppressed_destination_count"
+    NOTIFICATIONS_SKIPPED_EMAIL_DISABLED = "notifications_skipped_email_disabled"
 
 
 @dataclass

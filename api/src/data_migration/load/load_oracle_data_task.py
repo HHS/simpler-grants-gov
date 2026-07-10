@@ -4,19 +4,33 @@
 import itertools
 import logging
 import time
+from dataclasses import dataclass
 
 import sqlalchemy
+from grants_shared.adapters import db
+from grants_shared.util import datetime_util
 
-import src.db.models.foreign
-import src.db.models.staging
-import src.logging
 import src.task.task
-from src.adapters import db
-from src.util import datetime_util
 
 from . import sql
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class LoadResult:
+    """Row count and timing breakdown for a single load operation (insert/update/delete) on one table."""
+
+    count: int = 0
+    # Time spent executing the SELECT that determines which rows to act on.
+    fetch_time: float = 0.0
+    # Time spent copying the rows (inserts/updates) or marking them deleted.
+    copy_time: float = 0.0
+
+    @property
+    def total_time(self) -> float:
+        return round(self.fetch_time + self.copy_time, 3)
+
 
 TABLES_TO_LOAD = [
     "topportunity",
@@ -31,10 +45,6 @@ TABLES_TO_LOAD = [
     "tfundinstr_synopsis",
     "tgroups",
     "tsynopsisattachment",
-    "tuser_account_mapper",
-    "tsubscription",
-    "tsubscription_search",
-    "tsubscription_opportunity",
     "tcompetition",
     "tinstructions",
     "tcertificates",
@@ -59,6 +69,8 @@ class LoadOracleDataTask(src.task.task.Task):
             tables_to_load = TABLES_TO_LOAD
 
         # Initialize columns_to_exclude if None
+        # Note: This does not work on UPDATES and can cause errors because the fields won't be excluded
+        # if the column has invalid data
         self.columns_to_exclude: dict[str, list[str]] = {"tcertificates": ["is_selfsigned"]}
 
         foreign_tables = {k: v for (k, v) in foreign_tables.items() if k in tables_to_load}
@@ -71,9 +83,17 @@ class LoadOracleDataTask(src.task.task.Task):
         self.foreign_tables = foreign_tables
         self.staging_tables = staging_tables
         self.insert_chunk_size = insert_chunk_size
+        # Strip tzinfo so the cutoff is a naive datetime with EST wall-clock values.
+        # The Oracle foreign data stores EST timestamps but Postgres treats them as UTC, so a
+        # tz-aware cutoff is converted to UTC for comparison and ends up 4-5h ahead of the source.
+        self.batch_cutoff = datetime_util.get_now_us_eastern_datetime().replace(tzinfo=None)
 
     def run_task(self) -> None:
         """Main task process, called by run()."""
+        logger.info(
+            "batch cutoff timestamp captured",
+            extra={"batch_cutoff": self.batch_cutoff},
+        )
         with self.db_session.begin():
             self.log_database_settings()
         self.load_data()
@@ -119,13 +139,26 @@ class LoadOracleDataTask(src.task.task.Task):
 
         self.log_row_count("before", foreign_table, staging_table)
 
-        self.do_update(foreign_table, staging_table)
-        self.do_insert(foreign_table, staging_table)
-        self.do_mark_deleted(foreign_table, staging_table)
+        update_result = self.do_update(foreign_table, staging_table)
+        insert_result = self.do_insert(foreign_table, staging_table)
+        delete_result = self.do_mark_deleted(foreign_table, staging_table)
+
+        processing_time = round(
+            update_result.total_time + insert_result.total_time + delete_result.total_time, 3
+        )
+        logger.info(
+            "Processed table",
+            extra={
+                "table": table_name,
+                f"time.processing.{staging_table.name}": processing_time,
+            },
+        )
 
         self.log_row_count("after", staging_table)
 
-    def do_insert(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
+    def do_insert(
+        self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table
+    ) -> LoadResult:
         """Determine new rows by primary key, and copy them into the staging table."""
         log_extra: dict = {"table": foreign_table.name}
 
@@ -137,9 +170,11 @@ class LoadOracleDataTask(src.task.task.Task):
             )
 
         logger.info("Fetching records to be inserted", extra=log_extra)
-        select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table)
+        select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table, self.batch_cutoff)
+        fetch_t0 = time.monotonic()
         with self.db_session.begin():
             new_ids = self.db_session.execute(select_sql).all()
+        fetch_time = round(time.monotonic() - fetch_t0, 3)
 
         t0 = time.monotonic()
         insert_chunk_count = []
@@ -164,19 +199,25 @@ class LoadOracleDataTask(src.task.task.Task):
             )
 
         t1 = time.monotonic()
+        copy_time = round(t1 - t0, 3)
         total_insert_count = sum(insert_chunk_count)
         self.increment("count.insert.total", total_insert_count)
+        self.increment("time.insert.total", copy_time)
+        self.increment("time.insert_fetch.total", fetch_time)
 
         log_extra |= {
             f"count.insert.{staging_table.name}": total_insert_count,
             f"count.insert.chunk.{staging_table.name}": ",".join(map(str, insert_chunk_count)),
-            f"time.insert.{staging_table.name}": round(t1 - t0, 3),
+            f"time.insert.{staging_table.name}": copy_time,
+            f"time.insert_fetch.{staging_table.name}": fetch_time,
         }
         logger.info("Processed records to be inserted", extra=log_extra)
 
-        return total_insert_count
+        return LoadResult(count=total_insert_count, fetch_time=fetch_time, copy_time=copy_time)
 
-    def do_update(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
+    def do_update(
+        self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table
+    ) -> LoadResult:
         """Find updated rows using last_upd_date, copy them, and reset transformed_at to NULL."""
         log_extra: dict = {"table": foreign_table.name}
 
@@ -188,9 +229,13 @@ class LoadOracleDataTask(src.task.task.Task):
             )
 
         logger.info("Fetching records to be updated", extra=log_extra)
-        select_sql = sql.build_select_updated_rows_sql(foreign_table, staging_table)
+        select_sql = sql.build_select_updated_rows_sql(
+            foreign_table, staging_table, self.batch_cutoff
+        )
+        fetch_t0 = time.monotonic()
         with self.db_session.begin():
             update_ids = self.db_session.execute(select_sql).all()
+        fetch_time = round(time.monotonic() - fetch_t0, 3)
 
         t0 = time.monotonic()
         update_chunk_count = []
@@ -219,21 +264,25 @@ class LoadOracleDataTask(src.task.task.Task):
             )
 
         t1 = time.monotonic()
+        copy_time = round(t1 - t0, 3)
         total_update_count = sum(update_chunk_count)
         self.increment("count.update.total", total_update_count)
+        self.increment("time.update.total", copy_time)
+        self.increment("time.update_fetch.total", fetch_time)
 
         log_extra |= {
             f"count.update.{staging_table.name}": total_update_count,
             f"count.update.chunk.{staging_table.name}": ",".join(map(str, update_chunk_count)),
-            f"time.update.{staging_table.name}": round(t1 - t0, 3),
+            f"time.update.{staging_table.name}": copy_time,
+            f"time.update_fetch.{staging_table.name}": fetch_time,
         }
         logger.info("Processed records to be updated", extra=log_extra)
 
-        return total_update_count
+        return LoadResult(count=total_update_count, fetch_time=fetch_time, copy_time=copy_time)
 
     def do_mark_deleted(
         self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table
-    ) -> int:
+    ) -> LoadResult:
         """Find deleted rows, set is_deleted=TRUE, and reset transformed_at to NULL."""
         log_extra: dict = {"table": foreign_table.name}
 
@@ -248,18 +297,20 @@ class LoadOracleDataTask(src.task.task.Task):
         with self.db_session.begin():
             result = self.db_session.execute(update_sql)
         t1 = time.monotonic()
+        delete_time = round(t1 - t0, 3)
         delete_count = result.rowcount  # type: ignore[attr-defined]
 
         self.increment("count.delete.total", delete_count)
+        self.increment("time.delete.total", delete_time)
 
         log_extra |= {
             f"count.delete.{staging_table.name}": delete_count,
-            f"time.delete.{staging_table.name}": round(t1 - t0, 3),
+            f"time.delete.{staging_table.name}": delete_time,
         }
 
         logger.info("Processed records to be deleted", extra=log_extra)
 
-        return delete_count
+        return LoadResult(count=delete_count, copy_time=delete_time)
 
     def log_row_count(self, message: str, *tables: sqlalchemy.Table) -> None:
         """Log the number of rows in each of the tables using SQL COUNT()."""
@@ -270,22 +321,3 @@ class LoadOracleDataTask(src.task.task.Task):
                 extra["table"] = table.name
                 extra[f"count.{table.schema}.{table.name}"] = count
         logger.info(f"row count {message}", extra=extra, stacklevel=2)
-
-
-def main() -> None:
-    with src.logging.init(__package__):
-        db_client = db.PostgresDBClient()
-
-        foreign_tables = {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
-        staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
-
-        with db_client.get_session() as db_session:
-            LoadOracleDataTask(
-                db_session,
-                foreign_tables,
-                staging_tables,
-            ).run()
-
-
-if __name__ == "__main__":
-    main()

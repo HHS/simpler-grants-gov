@@ -13,7 +13,7 @@ export const postAttachmentHandler = async (
   const session = await getSession();
 
   if (!session || !session.token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
   }
 
   const { applicationId } = await params;
@@ -33,12 +33,7 @@ export const postAttachmentHandler = async (
   const fileFormData = createFormData(file.name, buffer, file.type);
 
   try {
-    const res = await uploadAttachment(
-      applicationId,
-      session.token,
-      fileFormData,
-    );
-    if (res.status_code !== 200) throw new Error("Upload failed");
+    const res = await uploadAttachment(applicationId, fileFormData);
 
     return NextResponse.json({
       application_attachment_id: res.data?.application_attachment_id,
@@ -48,7 +43,7 @@ export const postAttachmentHandler = async (
 
     return Response.json(
       {
-        message: `Error fauled to upload attachment: ${message}`,
+        message: `Error failed to upload attachment: ${message}`,
       },
       { status },
     );

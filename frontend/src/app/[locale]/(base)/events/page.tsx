@@ -4,9 +4,9 @@ import { LocalizedPageProps } from "src/types/intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
 
-import EventsCoding from "./EventsCoding";
-import EventsDemo from "./EventsDemo";
-import EventsHero from "./EventsHero";
+import EventsCoding from "./_components/EventsCoding";
+import EventsDemo from "./_components/EventsDemo";
+import EventsHero from "./_components/EventsHero";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;

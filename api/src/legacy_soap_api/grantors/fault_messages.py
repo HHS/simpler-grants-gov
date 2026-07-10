@@ -1,0 +1,21 @@
+from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage
+
+InvalidGrantsGovTrackingNumber = FaultMessage(
+    faultstring="Failed to validate request. cvc-pattern-valid: Value is not facet-valid with respect to pattern 'GRANT[0-9]{8}' for type 'GrantsGovTrackingNumberType'.",
+    faultcode="soap:Server",
+)
+
+MissingGrantsGovTrackingNumber = FaultMessage(
+    faultstring="Failed to validate request.\ncvc-complex-type.2.4.b: The content of element UpdateApplicationInfoRequest is not complete. One of {https://apply.grants.gov/system/GrantsCommonElements-V1.0:GrantsGovTrackingNumber} is expected.",
+    faultcode="soap:Server",
+)
+
+ConfirmDeliverySubmissionNotFound = FaultMessage(
+    faultstring="Failed to confirm application delivery.(Authorization Failure)",
+    faultcode="soap:Server",
+)
+
+ConfirmDeliveryAlreadyRetrieved = FaultMessage(
+    faultstring="This application submission has already been retrieved. Failed to confirm application delivery.",
+    faultcode="soap:Server",
+)

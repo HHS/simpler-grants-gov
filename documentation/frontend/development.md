@@ -8,10 +8,12 @@ This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
 ### 🏗️ Development version
 
-For version 0.1.0, please install and use node <= v22.13.0.
+Running a local server requires the version of Node specified in [the .nvmrc file](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/.nvmrc) to be installed.
+
+This project supports the use of NVM for node version management, so it is suggested you install and use NVM. More information can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
 
 * **For Mac** - Run `npm install && npm run local` to install and start the application.
-* **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx run dev` afterwards to start the application.
+* **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx next dev` afterwards to start the application.
 
 Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
 
@@ -21,11 +23,15 @@ npx next telemetry disable
 
 ### Configuration
 
-Create a local enviornment file in the frontend directory to hold your frontend application overrides.  To allows you to make specializations to your local setup outside of GitHub.
+Create a local environment file in the frontend directory to hold your frontend application overrides. This allows you to make specializations to your local setup without the danger of committing any secrets to GitHub.
 
-On Mac, run `touch .env.local`
+`.env.local.example` is provided in the frontend directory for a comprehensive list of all environment variables used in frontend as well as where they are referenced. It contains all default values for a quick setup as well as a starting point to configure the development environment. 
 
-On Windows, run `ni .env.local` in PowerShell.
+On Mac, run `cp frontend/.env.local.example frontend/.env.local`
+
+On Windows, run `cp .env.local.example .env.local` in PowerShell.
+
+`.env.local.example` is tracked and sensitive information **SHOULD NOT** be enteredin the file itself. 
 
 For more information about environments, take a look at [environments.md](./environments.md).
 
@@ -65,7 +71,7 @@ From the `/frontend` directory:
 
 ### 🚀 Production version
 
-The `make dev` command runs the `docker-compose.yml` which runs the `dev` target in the [Dockerfile](./Dockerfile). To run a production version in docker, run `docker compose up -d -f docker-compose-realease.yml` which targest the `release` stage in the docker build. This runs the production version, while still creating a network connection to the local API.
+The `make dev` command runs the `docker-compose.yml` which runs the `dev` target in the [Dockerfile](../../frontend/Dockerfile). To run a production version in docker, run `docker compose up -d -f docker-compose-realease.yml` which targest the `release` stage in the docker build. This runs the production version, while still creating a network connection to the local API.
 
 ### Testing Release Target Locally
 
@@ -87,7 +93,6 @@ Tests are manged as `.test.ts` (or `.tsx`) files in the the `tests/` directory.
 To run tests:
 
 - `npm test` - Runs all tests and outputs test coverage report
-- `npm run test-update` - Updates test snapshots
 - `npm run test-watch` - Runs tests in [watch](https://jestjs.io/docs/cli#--watch) mode. Tests will re-run when files are changed, and an interactive prompt will allow you to run specific tests or update snapshots.
 
 A subset of tests can be run by passing a pattern to the script. For example, to only run tests in `tests/pages/`:
@@ -206,7 +211,7 @@ From the `frontend/` directory:
 - Place breakpoints in VSCode
 - Visit the relevant routes in the browser and confirm you can hit these breakpoints
 
-**Note** that debugging the server-side or full-stack here doesn't debug the API. [See the API readme for more information](../documentation/api/development.md)
+**Note** that debugging the server-side or full-stack here doesn't debug the API. [See the API readme for more information](../api/development.md)
 
 ## Feature setup and development
 
@@ -216,7 +221,7 @@ The following features require additional local setup to use.
 
 The `/search` and opportunity pages rely on the application API. The API endpoint and authentication token are defined in `.env.development` and can be overwritten in an `.env.local` file.
 
-The `API_URL` environment variable can be set to connect to prod (`https://api.simpler.grants.gov`) or lower environment URLs to quickly develop using production or development data. To successfully connect to a deployed API, the `API_AUTH_TOKEN` variable must be set correctly for the environment.
+The `API_URL` environment variable can be set to connect to prod (`https://api.simpler.grants.gov`) or lower environment URLs to quickly develop using production or development data. To successfully connect to a deployed API, the `API_GW_AUTH` variable must be set to a valid API gateway key for the environment.
 
 To start a local development version of the API, run `make remake-backend` in the `/api` folder.
 
@@ -230,24 +235,24 @@ The `/api/auth/callback` route handler receives a JSON web token as query parame
 
 #### Mock Oauth2 Server
 
-When clicking "Sign in" or other buttons that simulate the login flow locally, shoule be redirected to the mock Oauth2 server at `http://localhost:5001`. Enter any text string in the screen provided to continue the login flow.
+When clicking "Sign in" or other buttons that simulate the login flow locally, you should be redirected to the mock Oauth2 server at `http://localhost:5001`. Enter any text string in the screen provided to continue the login flow.
 
-### New Relic and Sendy (email)
+### New Relic and Mailchimp (email)
 
 Some functionality will not work locally without supplying the application environment variables containing secrets.
 
 - New Relic
   - `NEW_RELIC_APP_NAME`
   - `NEW_RELIC_LICENSE_KEY`
-- Email subscription form (Sendy)
-  - `SENDY_API_KEY`
-  - `SENDY_API_URL`
-  - `SENDY_LIST_ID`
+- Email subscription form (Mailchimp)
+  - `MAILCHIMP_API_KEY`
+  - `MAILCHIMP_API_URL_PREFIX`
+  - `MAILCHIMP_LIST_ID`
 
 If you need to access this functionality locally, contact an engineer on the team to get access to the necessary secrets.
 
 ## Other topics
 
-- [Internationalization](../documentation/frontend/internationalization.md)
-- [Feature Flags](../documentation/frontend/featureFlags.md)
-- Refer to the [architecture decision records](../documentation/decisions) for more context on technical decisions.
+- [Internationalization](./internationalization.md)
+- [Feature Flags](./featureFlags.md)
+- Refer to the [architecture decision records](../wiki/product/decisions) for more context on technical decisions.

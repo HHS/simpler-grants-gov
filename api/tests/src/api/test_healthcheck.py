@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import src.adapters.db as db
+import grants_shared.adapters.db as db
 
 
 def test_get_healthcheck_200(client, monkeypatch):

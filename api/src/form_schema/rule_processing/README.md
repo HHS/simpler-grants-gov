@@ -95,6 +95,8 @@ rules currently implemented:
 * `public_competition_id` - from the competition
 * `competition_title` - from the competition
 * `sum_monetary` - calculated based on other fields in the JSON, see Monetary Summation section below for further details
+* `multiply_by_percentage` - a monetary amount multiplied by a whole-number percentage, see Multiply by Percentage section below for further details
+* `subtract_monetary` - calculated based on other fields in the JSON, see Monetary Subtraction section below for further details
 
 For post-population, this rule group is `gg_post_population` with the following
 rules currently implemented:
@@ -147,6 +149,53 @@ A few important details about our summation logic:
 NOTE: Only monetary summation is supported right now. All math done by this summing
 logic assumes the input values are strings of the format "0.00". If we need to support
 summing integers or other numeric types, we'll need to add a separate rule for those.
+
+## Multiply by Percentage
+We support multiplying a monetary amount by a whole-number percentage. This is
+used for cells like SF424C line 17 (federal share). The rule takes two paths:
+```json
+{
+  "my_field": {
+    "gg_pre_population": {
+      "rule": "multiply_by_percentage",
+      "amount": "@THIS.total_allowable_costs",
+      "percentage": "@THIS.federal_share_percentage"
+    }
+  }
+}
+```
+
+The `amount` path points at a monetary string (the same "0.00" format used by
+`sum_monetary`). The `percentage` path points at an integer 0-100 (the
+`percentage` shared type), where `N` means `N%`. The rule bakes in the
+divide-by-100, so `1000 * 5` produces `"50.00"`, NOT `"5000.00"`.
+
+For details on how the `amount`/`percentage` paths work, see the Fields section
+below (single paths are resolved the same way as `sum_monetary`'s fields).
+
+A few important details:
+* A missing `amount` or `percentage` is treated as zero, producing `"0.00"`.
+* Invalid data (a non-string amount, a non-integer percentage, or an unparseable
+  value) raises a validation error rather than populating a bogus value.
+
+## Monetary Subtraction
+We support the ability to subtract monetary amounts from each other. This rule
+requires that you specify which fields to subtract like so:
+```json
+{
+  "my_field": {
+    "gg_pre_population": {
+      "rule": "subtract_monetary",
+      "fields": ["@THIS.a", "@THIS.b"]
+    }
+  }
+}
+```
+
+This mirrors `sum_monetary`, but every subsequent field is subtracted from the first. 
+The example above produces `a - b`, and fields of `["a", "b", "c"]` would produce `a - b - c`.
+
+For details on how the fields parameter works, see the Fields section below.
 
 ## Fields
 Some rules like our `sum_monetary` rule allow you to specify fields that

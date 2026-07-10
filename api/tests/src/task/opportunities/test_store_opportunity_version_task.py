@@ -1,11 +1,11 @@
 import pytest
+from grants_shared.util import datetime_util
 
 from src.db.models.opportunity_models import Opportunity, OpportunityVersion
 from src.task.opportunities.store_opportunity_version_task import (
     StoreOpportunityVersionConfig,
     StoreOpportunityVersionTask,
 )
-from src.util import datetime_util
 from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import OpportunityChangeAuditFactory, OpportunityVersionFactory

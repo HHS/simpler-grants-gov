@@ -3,7 +3,10 @@
 import logging
 from datetime import date, datetime
 
+import grants_shared.util.datetime_util as datetime_util
 from common_grants_sdk.schemas.pydantic import (
+    CustomField,
+    DefaultFilter,
     FilterInfo,
     Money,
     MoneyRangeFilter,
@@ -18,25 +21,29 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SingleDateEvent,
 )
-from pydantic import BaseModel, Field, HttpUrl, ValidationError
+from grants_shared.api.response import ValidationErrorDetail
+from pydantic import ValidationError
 
-import src.util.datetime_util as datetime_util
-from src.api.response import ValidationErrorDetail
+from src.api.common_grants.schemas.pydantic.custom_fields import (
+    AdditionalInfoField,
+    AgencyField,
+    AssistanceListingsField,
+    AssistanceListingValue,
+    AttachmentsField,
+    AttachmentValue,
+    ContactInfoField,
+    CostSharingField,
+    FederalFundingSourceField,
+    FederalOpportunityNumberField,
+    FiscalYearField,
+    LegacySerialIdField,
+)
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
+from src.services.common_grants.url_utils import validate_url_compatible
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
-
-
-class UrlValidator(BaseModel):
-    """Validator for a URL string using Pydantic's HttpUrl with strict mode enabled.
-
-    Mirrors the HttpUrl field in OpportunityBase and other CommonGrants models.
-    TODO(@widal001): Replace this with a new field from SDK or relax strictness in SDK
-    """
-
-    url: HttpUrl = Field(strict=True)
 
 
 def transform_status_to_cg(v1_status: OpportunityStatus) -> OppStatusOptions:
@@ -95,6 +102,116 @@ def transform_status_from_cg(cg_status: OppStatusOptions) -> str:
     return v1_status
 
 
+# CommonGrants applicant-type values -> native ApplicantType values.
+APPLICANT_TYPE_FROM_CG = {
+    "individual": "individuals",
+    "organization": "other",
+    "government_state": "state_governments",
+    "government_county": "county_governments",
+    "government_municipal": "city_or_township_governments",
+    "government_special_district": "special_district_governments",
+    "government_tribal": "federally_recognized_native_american_tribal_governments",
+    "organization_tribal_other": "other_native_american_tribal_organizations",
+    "school_district_independent": "independent_school_districts",
+    "higher_education_public": "public_and_state_institutions_of_higher_education",
+    "higher_education_private": "private_institutions_of_higher_education",
+    "non_profit_with_501c3": "nonprofits_non_higher_education_with_501c3",
+    "nonprofit_without_501c3": "nonprofits_non_higher_education_without_501c3",
+    "for_profit_small_business": "small_businesses",
+    "for_profit_not_small_business": "for_profit_organizations_other_than_small_businesses",
+    "unrestricted": "unrestricted",
+    "custom": "other",
+}
+
+# Recognized customFilters key -> native v1 search field.
+_CUSTOM_FILTER_NATIVE_FIELD = {
+    "agency": "agency",
+    "applicantType": "applicant_type",
+    "fundingInstrument": "funding_instrument",
+    "costSharing": "is_cost_sharing",
+}
+
+_TRUE_STRINGS = frozenset({"true", "t", "yes", "1"})
+_FALSE_STRINGS = frozenset({"false", "f", "no", "0"})
+
+
+def _coerce_cg_bool(value: object) -> bool | None:
+    """Coerce a costSharing value to bool, or None if unrecognized.
+
+    JSON booleans arrive as int 0/1 (the SDK value union has no bool member).
+    None lets the caller report the bad value instead of silently defaulting.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int) and value in (0, 1):
+        return bool(value)
+    if isinstance(value, str):
+        s = value.strip().lower()
+        if s in _TRUE_STRINGS:
+            return True
+        if s in _FALSE_STRINGS:
+            return False
+    return None
+
+
+def build_custom_filters(
+    custom_filters: dict[str, DefaultFilter] | None,
+) -> tuple[dict, list[str]]:
+    """Translate CommonGrants customFilters into native v1 filter entries.
+
+    Returns (applied, errors). `applied` maps native field -> {"one_of": [...]}.
+    `errors` describe unsupported keys / invalid values; never raises.
+    """
+    applied: dict = {}
+    errors: list[str] = []
+    if not custom_filters:
+        return applied, errors
+
+    for key, filt in custom_filters.items():
+        native_field = _CUSTOM_FILTER_NATIVE_FIELD.get(key)
+        if native_field is None:
+            errors.append(f"customFilters.{key}: unsupported filter")
+            continue
+
+        if key == "costSharing":
+            if filt.operator != "eq":
+                errors.append(f"customFilters.{key}: unsupported operator {filt.operator}")
+                continue
+            parsed = _coerce_cg_bool(filt.value)
+            if parsed is None:
+                errors.append(f"customFilters.{key}: invalid boolean value {filt.value}")
+                continue
+            applied[native_field] = {"one_of": [parsed]}
+            continue
+
+        # string-array filters: agency, applicantType, fundingInstrument
+        if filt.operator != "in":
+            errors.append(f"customFilters.{key}: unsupported operator {filt.operator}")
+            continue
+        if not isinstance(filt.value, list):
+            errors.append(f"customFilters.{key}: expected an array value")
+            continue
+
+        values = []
+        for v in filt.value:
+            if not isinstance(v, str):
+                errors.append(f"customFilters.{key}: invalid value {v}")
+                continue
+            if key == "applicantType":
+                native = APPLICANT_TYPE_FROM_CG.get(v)
+                if native is None:
+                    errors.append(f"customFilters.{key}: unmappable value {v}")
+                    continue
+                values.append(native)
+            else:
+                values.append(v)
+
+        if values:
+            applied[native_field] = {"one_of": values}
+
+    return applied, errors
+
+
 def transform_sorting_from_cg(cg_sort_by: OppSortBy) -> str:
     """
     Transform CG enum value to v1 enum value.
@@ -147,36 +264,35 @@ def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
     return date_value
 
 
-def validate_url(value: str | None) -> str | None:
+def validate_url(
+    value: str | None,
+    *,
+    field: str | None = None,
+    opportunity_id: object = None,
+) -> str | None:
+    """Return ``value`` normalized only if both pydantic and marshmallow accept it.
+
+    Delegates the dual-validation to ``validate_url_compatible``. When the URL
+    fails validation the function returns ``None`` and emits a WARNING — the
+    field will be omitted from the CG response, so callers passing ``field``
+    and ``opportunity_id`` give operators enough context to answer "why is
+    this field missing for opportunity X?" without paging the original record.
     """
-    Validate a URL string using Pydantic's HttpUrl validation.
-
-    This ensures URLs are validated with the same strict rules that Pydantic
-    uses, preventing validation errors when creating OpportunityBase objects.
-
-    We use a minimal model with the same field definition as OpportunityBase
-    to ensure we use the exact same validation rules.
-
-    Args:
-        value: The string to validate
-
-    Returns:
-        A valid URL string or None if validation fails
-    """
-    if value is None or value == "":
-        return None
-    try:
-        valid = UrlValidator.model_validate({"url": value})
-        return str(valid.url)
-    except ValidationError:
-        logger.info(
-            f"URL validation failed for: {value}",
-            extra={
-                "cg_event": CommonGrantsEvent.URL_VALIDATION_ERROR,
-                "url": value,
-            },
+    result = validate_url_compatible(value)
+    if result is None and value not in (None, ""):
+        log_extra: dict[str, object] = {
+            "cg_event": CommonGrantsEvent.URL_VALIDATION_ERROR,
+            "url": value,
+        }
+        if field is not None:
+            log_extra["field"] = field
+        if opportunity_id is not None:
+            log_extra["opportunity_id"] = opportunity_id
+        logger.warning(
+            "Dropping URL field from CG response: failed dual validation",
+            extra=log_extra,
         )
-        return None
+    return result
 
 
 def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase | None:
@@ -194,6 +310,20 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
         "opportunity_id": v1_opportunity.opportunity_id,
         "opportunity_title": v1_opportunity.opportunity_title or "Untitled Opportunity",
         "opportunity_status": v1_opportunity.opportunity_status,
+        "legacy_opportunity_id": v1_opportunity.legacy_opportunity_id,
+        "opportunity_number": v1_opportunity.opportunity_number,
+        "category": v1_opportunity.category,
+        "agency_code": v1_opportunity.agency_code,
+        "agency_name": v1_opportunity.agency_name,
+        "top_level_agency_name": v1_opportunity.top_level_agency_name,
+        "top_level_agency_code": v1_opportunity.top_level_agency_code,
+        "opportunity_assistance_listings": [
+            {
+                "assistance_listing_number": listing.assistance_listing_number,
+                "program_title": listing.program_title,
+            }
+            for listing in v1_opportunity.opportunity_assistance_listings
+        ],
         "created_at": v1_opportunity.created_at,
         "updated_at": v1_opportunity.updated_at,
         "summmary": {},
@@ -209,9 +339,28 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
             "award_ceiling": v1_opportunity.summary.award_ceiling,
             "award_floor": v1_opportunity.summary.award_floor,
             "additional_info_url": v1_opportunity.summary.additional_info_url,
+            "additional_info_url_description": v1_opportunity.summary.additional_info_url_description,
+            "agency_contact_description": v1_opportunity.summary.agency_contact_description,
+            "agency_email_address": v1_opportunity.summary.agency_email_address,
+            "agency_email_address_description": v1_opportunity.summary.agency_email_address_description,
+            "fiscal_year": v1_opportunity.summary.fiscal_year,
+            "is_cost_sharing": v1_opportunity.summary.is_cost_sharing,
             "created_at": v1_opportunity.summary.created_at,
             "updated_at": v1_opportunity.summary.updated_at,
         }
+
+    opp_data["opportunity_attachments"] = [
+        {
+            "download_path": attachment.download_path,
+            "file_name": attachment.file_name,
+            "file_description": attachment.file_description,
+            "file_size_bytes": attachment.file_size_bytes,
+            "mime_type": attachment.mime_type,
+            "created_at": attachment.created_at,
+            "updated_at": attachment.updated_at,
+        }
+        for attachment in v1_opportunity.opportunity_attachments
+    ]
 
     return transform_search_result_to_cg(opp_data)
 
@@ -294,8 +443,12 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
                 maxAwardAmount=max_award_money,
                 minAwardAmount=min_award_money,
             ),
-            source=validate_url(summary.get("additional_info_url")),
-            custom_fields={},
+            source=validate_url(
+                summary.get("additional_info_url"),
+                field="source",
+                opportunity_id=opportunity_id,
+            ),
+            customFields=populate_custom_fields(opp_data),
             createdAt=summary.get("created_at") or datetime_util.utcnow(),
             lastModifiedAt=summary.get("updated_at") or datetime_util.utcnow(),
         )
@@ -307,6 +460,209 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
                 "opportunity_id": opportunity_id,
             },
         )
+        return None
+
+
+def validate_custom_field(
+    field_class: type[CustomField],
+    opportunity_id: object = None,
+    **kwargs: object,
+) -> CustomField | None:
+    """
+    Validate a custom field value against its typed Pydantic schema.
+
+    Args:
+        field_class: The typed CustomField subclass to validate against
+        opportunity_id: The opportunity id, included in warning messages on failure
+        **kwargs: Field constructor arguments (typically just `value`)
+
+    Returns:
+        A validated CustomField instance, or None if validation fails
+    """
+    try:
+        return field_class(**kwargs)
+    except Exception as e:
+        logger.warning(
+            f"Custom field validation failed for {field_class.__name__} on opportunity {opportunity_id}: {e}",
+            extra={
+                "cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR,
+                "opportunity_id": opportunity_id,
+            },
+        )
+        return None
+
+
+def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
+    """
+    Helper function to assemble custom fields from the data and pass them back as part of the response.
+
+    Args:
+        opp_data: Opportunity data from the SGG database
+
+    Returns:
+        custom_fields: A dict with the values recovered from the input and stored in the appropriate field
+    """
+
+    custom_fields: dict[str, CustomField] = {}
+    opportunity_id = opp_data.get("opportunity_id")
+    summary = opp_data.get("summary")
+
+    attachments = opp_data.get("opportunity_attachments")
+    if attachments:
+        valid_attachment_values = []
+        for attachment in attachments:
+            # Pre-validate the download URL with field/opportunity context so a
+            # drop is observable in logs. The pydantic field validator on
+            # AttachmentValue.downloadUrl is still a defensive backstop for
+            # direct model construction; passing the already-validated value
+            # here means it runs the dual-check on a string we already cleared.
+            download_url = validate_url(
+                attachment.get("download_path"),
+                field="customFields.attachments[].downloadUrl",
+                opportunity_id=opportunity_id,
+            )
+            attachment_data = {
+                "downloadUrl": download_url,
+                "name": attachment.get("file_name"),
+                "description": attachment.get("file_description"),
+                "sizeInBytes": attachment.get("file_size_bytes"),
+                "mimeType": attachment.get("mime_type"),
+                "createdAt": attachment.get("created_at"),
+                "lastModifiedAt": attachment.get("updated_at"),
+            }
+            try:
+                valid_attachment_values.append(AttachmentValue.model_validate(attachment_data))
+            except Exception as e:
+                logger.warning(
+                    f"Attachment validation failed, skipping: {e}",
+                    extra={"cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR},
+                )
+        if valid_attachment_values:
+            field = validate_custom_field(
+                AttachmentsField, opportunity_id=opportunity_id, value=valid_attachment_values
+            )
+            if field:
+                custom_fields["attachments"] = field
+
+    legacy_opportunity_id = opp_data.get("legacy_opportunity_id")
+    if legacy_opportunity_id is not None:
+        field = validate_custom_field(
+            LegacySerialIdField, opportunity_id=opportunity_id, value=legacy_opportunity_id
+        )
+        if field:
+            custom_fields["legacySerialId"] = field
+
+    federal_opportunity_number = opp_data.get("opportunity_number")
+    if federal_opportunity_number is not None:
+        field = validate_custom_field(
+            FederalOpportunityNumberField,
+            opportunity_id=opportunity_id,
+            value=federal_opportunity_number,
+        )
+        if field:
+            custom_fields["federalOpportunityNumber"] = field
+
+    listings = opp_data.get("opportunity_assistance_listings")
+    if listings:
+        valid_listing_values = []
+        for listing in listings:
+            listing_data = {
+                "identifier": listing.get("assistance_listing_number"),
+                "programTitle": listing.get("program_title"),
+            }
+            try:
+                valid_listing_values.append(AssistanceListingValue.model_validate(listing_data))
+            except Exception as e:
+                logger.warning(
+                    f"Assistance listing validation failed, skipping: {e}",
+                    extra={"cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR},
+                )
+        if valid_listing_values:
+            field = validate_custom_field(
+                AssistanceListingsField, opportunity_id=opportunity_id, value=valid_listing_values
+            )
+            if field:
+                custom_fields["assistanceListings"] = field
+
+    category = opp_data.get("category")
+    if category is not None:
+        field = validate_custom_field(
+            FederalFundingSourceField, opportunity_id=opportunity_id, value=str(category)
+        )
+        if field:
+            custom_fields["federalFundingSource"] = field
+
+    agency = opp_data.get("agency_code")
+    if agency is not None:
+        field = validate_custom_field(
+            AgencyField,
+            opportunity_id=opportunity_id,
+            value={
+                "code": agency,
+                "name": opp_data.get("agency_name"),
+                "parentName": opp_data.get("top_level_agency_name"),
+                "parentCode": opp_data.get("top_level_agency_code"),
+            },
+        )
+        if field:
+            custom_fields["agency"] = field
+
+    if summary:
+        agency_contact_description = summary.get("agency_contact_description")
+        agency_email_address = summary.get("agency_email_address")
+        if any([agency_contact_description, agency_email_address]):
+            field = validate_custom_field(
+                ContactInfoField,
+                opportunity_id=opportunity_id,
+                value={
+                    "name": None,
+                    "email": agency_email_address,
+                    "phone": None,
+                    "description": agency_contact_description,
+                },
+            )
+            if field:
+                custom_fields["contactInfo"] = field
+
+        additional_info_url = validate_url(
+            summary.get("additional_info_url"),
+            field="customFields.additionalInfo.url",
+            opportunity_id=opportunity_id,
+        )
+        additional_info_url_description = summary.get("additional_info_url_description")
+        if additional_info_url is not None:
+            field = validate_custom_field(
+                AdditionalInfoField,
+                opportunity_id=opportunity_id,
+                value={
+                    "url": additional_info_url,
+                    "description": additional_info_url_description,
+                },
+            )
+            if field:
+                custom_fields["additionalInfo"] = field
+
+        fiscal_year = summary.get("fiscal_year")
+        if fiscal_year is not None:
+            field = validate_custom_field(
+                FiscalYearField, opportunity_id=opportunity_id, value=fiscal_year
+            )
+            if field:
+                custom_fields["fiscalYear"] = field
+
+        is_cost_sharing = summary.get("is_cost_sharing")
+        if is_cost_sharing is not None:
+            field = validate_custom_field(
+                CostSharingField,
+                opportunity_id=opportunity_id,
+                value={"isRequired": is_cost_sharing},
+            )
+            if field:
+                custom_fields["costSharing"] = field
+
+    if custom_fields:
+        return custom_fields
+    else:
         return None
 
 
@@ -332,12 +688,17 @@ def build_money_range_filter(
         v1_filters[v1_field_name]["max"] = int(float(money_range_filter.value.max.amount))
 
 
-def build_filter_info(filters: OppFilters | None) -> FilterInfo:
+def build_filter_info(
+    filters: OppFilters | None,
+    custom_filter_errors: list[str] | None = None,
+) -> FilterInfo:
     """
     Helper function to build FilterInfo from CommonGrants filters.
 
     Args:
         filters: The CommonGrants filters to transform
+        custom_filter_errors: customFilters errors already derived by
+            transform_search_request_from_cg; surfaced here instead of re-parsing
 
     Returns:
         FilterInfo: The filter info for the response
@@ -361,7 +722,7 @@ def build_filter_info(filters: OppFilters | None) -> FilterInfo:
 
     return FilterInfo(
         filters=applied_filters,
-        errors=[],
+        errors=custom_filter_errors or [],
     )
 
 
@@ -370,7 +731,7 @@ def transform_search_request_from_cg(
     sorting: OppSorting,
     pagination: PaginatedBodyParams,
     search_term: str | None,
-) -> dict:
+) -> tuple[dict, list[str]]:
     """
     Transform CG search request to v1 search format.
 
@@ -381,7 +742,7 @@ def transform_search_request_from_cg(
         search_query: Optional search query string
 
     Returns:
-        dict: search parameters in v1 format
+        tuple: (v1 search parameters, customFilters errors for the response)
     """
     # Convert pagination
     v1_pagination = {
@@ -420,6 +781,10 @@ def transform_search_request_from_cg(
     build_money_range_filter(filters.min_award_amount_range, "award_floor", v1_filters)
     build_money_range_filter(filters.max_award_amount_range, "award_ceiling", v1_filters)
 
+    # Apply recognized customFilters; surface errors for the response's filterInfo
+    applied_custom, custom_filter_errors = build_custom_filters(filters.custom_filters)
+    v1_filters.update(applied_custom)
+
     # Build the complete v1 search parameters
     v1_params: dict[str, object] = {
         "pagination": v1_pagination,
@@ -433,7 +798,7 @@ def transform_search_request_from_cg(
     if v1_filters:
         v1_params["filters"] = v1_filters
 
-    return v1_params
+    return v1_params, custom_filter_errors
 
 
 def transform_validation_error_from_cg(

@@ -1,10 +1,9 @@
-import { Meta } from "@storybook/react";
+import { OpportunityCard } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/_components/OpportunityCard";
 import { OpportunityOverview } from "src/types/opportunity/opportunityResponseTypes";
 
-import { OpportunityCard } from "src/components/application/OpportunityCard";
 import opportunityMock from "./opportunity.mock.json";
 
-const meta: Meta<typeof OpportunityCard> = {
+const meta = {
   title: "Components/Application/OpportunityCard",
   component: OpportunityCard,
   args: {

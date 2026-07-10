@@ -93,7 +93,7 @@ def test_delete_api_key_no_authentication(enable_factory_create, db_session, cli
     )
 
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"
 
     db_api_key = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key.api_key_id)

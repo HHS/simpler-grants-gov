@@ -61,19 +61,21 @@ class TestCurrencyTransformations:
         assert result == "50000.00"
 
     def test_transform_currency_string_no_decimal(self):
-        """Test currency transformation with integer string."""
+        """Test currency transformation with integer string - now formats with .00."""
         result = transform_currency_format("50000")
-        assert result == "50000"
+        assert result == "50000.00"
 
     def test_transform_currency_string_decimal_only(self):
-        """Test currency transformation with decimal starting with dot."""
+        """Test currency transformation with decimal starting with dot - adds leading zero."""
         result = transform_currency_format(".50")
-        assert result == ".50"
+        assert result == "0.50"
 
     def test_transform_currency_empty_string(self):
-        """Test currency transformation with empty string."""
-        result = transform_currency_format("")
-        assert result == ""
+        """Test currency transformation with empty string - should raise error."""
+        with pytest.raises(
+            ValueTransformationError, match="Cannot convert currency value to decimal"
+        ):
+            transform_currency_format("")
 
     def test_transform_currency_non_string_error(self):
         """Test error handling for non-string input."""

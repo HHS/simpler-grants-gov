@@ -6,10 +6,10 @@ import datetime
 import logging
 
 import factory
+import grants_shared.adapters.db
+import grants_shared.logs
 import sqlalchemy
 
-import src.adapters.db
-import src.logging
 import tests.src.db.models.factories as factories
 from src.db.models import foreign
 
@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 def seed_local_source_tables() -> None:
-    with src.logging.init("seed_local_source_tables"):
+    with grants_shared.logs.init("seed_local_source_tables"):
         logger.info("populating source tables with mock data")
 
-        db_client = src.adapters.db.PostgresDBClient()
+        db_client = grants_shared.adapters.db.PostgresDBClient()
 
         with db_client.get_session() as db_session:
             factories._db_session = db_session

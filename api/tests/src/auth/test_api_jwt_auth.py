@@ -1,18 +1,14 @@
 from calendar import timegm
 from datetime import datetime
 
+import grants_shared.logs
 import jwt
 import pytest
 from freezegun import freeze_time
+from grants_shared.auth.api_jwt_auth import ApiJwtConfig
 
 import src.app as app_entry
-import src.logging
-from src.auth.api_jwt_auth import (
-    ApiJwtConfig,
-    api_jwt_auth,
-    create_jwt_for_user,
-    parse_jwt_for_user,
-)
+from src.auth.api_jwt_auth import api_jwt_auth, create_jwt_for_user, parse_jwt_for_user
 from src.db.models.user_models import UserTokenSession
 from tests.src.db.models.factories import LinkExternalUserFactory, UserFactory
 
@@ -50,7 +46,7 @@ def mini_app(monkeypatch_module):
     # To avoid re-initializing logging everytime we
     # setup the app, we disabled it above and do it here
     # in case you want it while running your tests
-    with src.logging.init(__package__):
+    with grants_shared.logs.init(__package__):
         yield mini_app
 
 
@@ -206,4 +202,4 @@ def test_api_jwt_auth_token_unknown_audience(mini_app, enable_factory_create, db
 def test_api_jwt_auth_no_token(mini_app, enable_factory_create, db_session):
     resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={})
     assert resp.status_code == 401
-    assert resp.get_json()["message"] == "Unable to process token"
+    assert resp.get_json()["message"] == "Unauthorized"

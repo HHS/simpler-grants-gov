@@ -3,6 +3,7 @@
 import uuid
 from datetime import datetime
 
+import marshmallow
 from flask.testing import FlaskClient
 
 from tests.src.db.models.factories import OpportunityFactory
@@ -394,3 +395,57 @@ class TestResponseSchemaValidation:
             assert "paginationInfo" in data
             assert "filterInfo" in data
             assert "sortInfo" in data
+
+
+class TestSchemaValidation:
+    """Test Marshmallow schema validation for request and response paths."""
+
+    def test_invalid_sort_by_returns_422(
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
+    ):
+        """Invalid sortBy value is rejected by APIFlask input validation → 422."""
+        response = client.post(
+            "/common-grants/opportunities/search",
+            headers={"X-API-Key": user_api_key_id},
+            json={"sorting": {"sortBy": "not_a_valid_field", "sortOrder": "asc"}},
+        )
+        assert response.status_code == 422
+
+    def test_invalid_filter_operator_returns_422(
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
+    ):
+        """Invalid filter operator is rejected by APIFlask input validation → 422."""
+        response = client.post(
+            "/common-grants/opportunities/search",
+            headers={"X-API-Key": user_api_key_id},
+            json={"filters": {"status": {"operator": "invalid_op", "value": ["open"]}}},
+        )
+        assert response.status_code == 422
+
+    def test_response_schema_error_returns_500(
+        self,
+        client: FlaskClient,
+        enable_factory_create,
+        db_session,
+        user_api_key_id,
+        monkeypatch,
+    ):
+        """Marshmallow ValidationError raised during response loading → 500 with runtime message."""
+        opportunity = OpportunityFactory.create(is_draft=False)
+
+        def raise_validation_error(*args, **kwargs):
+            raise marshmallow.ValidationError("simulated response schema failure")
+
+        monkeypatch.setattr(
+            "src.api.common_grants.common_grants_routes.OpportunityResponseSchema.load",
+            raise_validation_error,
+        )
+
+        response = client.get(
+            f"/common-grants/opportunities/{opportunity.opportunity_id}",
+            headers={"X-API-Key": user_api_key_id},
+        )
+        assert response.status_code == 500
+        data = response.get_json()
+        assert "message" in data
+        assert "CommonGrants runtime exception" in data["message"]

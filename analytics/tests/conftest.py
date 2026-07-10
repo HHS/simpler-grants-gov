@@ -5,6 +5,7 @@ Configure pytest settings and create reusable fixtures and functions.
 Visit pytest docs for more info:
 https://docs.pytest.org/en/7.1.x/reference/fixtures.html
 """
+
 import json
 import logging
 import uuid
@@ -362,7 +363,7 @@ def create_test_db(test_schema: str) -> EtlDb:
 
 def _create_schema(conn: EtlDb.connection, schema: str) -> None:
     """Create a database schema."""
-    db_test_user = "app"
+    db_test_user = "analytics"
 
     with conn.begin():
         conn.execute(

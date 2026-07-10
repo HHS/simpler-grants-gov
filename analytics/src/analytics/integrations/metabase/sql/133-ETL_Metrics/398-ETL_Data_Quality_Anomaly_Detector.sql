@@ -4,8 +4,8 @@ constants AS
  20 AS min_deliverable_count, -- Minimum deliverable count for the latest day
  3500 AS min_point_sum, -- Minimum total point sum for the latest day
  40 AS min_sprint_count, -- Minimum number of distinct sprints
- 60.0 AS min_pointed_issue_pct, -- Minimum % of pointed issues
- 50.0 AS min_task_issue_pct, -- Minimum % of task-type issues
+ 50.0 AS min_pointed_issue_pct, -- Minimum % of pointed issues
+ 70.0 AS min_task_issue_pct, -- Minimum % of task-type issues
  INTERVAL '24 hours' AS max_data_age -- Max allowed age for the latest data
 ), -- Get max available dates from both tables
 max_dates AS

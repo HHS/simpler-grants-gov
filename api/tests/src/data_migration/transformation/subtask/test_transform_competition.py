@@ -1,4 +1,5 @@
 import pytest
+from grants_shared.util import file_util
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import tests.src.db.models.factories as f
@@ -8,9 +9,6 @@ from src.data_migration.transformation.subtask.transform_competition import (
     transform_form_family,
     transform_open_to_applicants,
 )
-from src.db.models.competition_models import Competition
-from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
-from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
     setup_competition,
@@ -19,17 +17,12 @@ from tests.src.data_migration.transformation.conftest import (
 
 
 class TestTransformCompetition(BaseTransformTestClass):
-    @pytest.fixture(autouse=True)
-    def cleanup_competitions(self, db_session, test_staging_schema):
-        """Clean up competition data before each test."""
-        # Use cascade delete to properly handle foreign key constraints
-        cascade_delete_from_db_table(db_session, Competition)
 
-        # Clean opportunity tables
-        cascade_delete_from_db_table(db_session, OpportunityAssistanceListing)
-        cascade_delete_from_db_table(db_session, Opportunity)
-
-        db_session.commit()
+    @pytest.fixture(scope="class", autouse=True)
+    def setup(self):
+        # To avoid conflicting with any assistance listings or cfdas in other tests
+        # we set the sequence (ie. the ID) to a much higher number past any that would have been created.
+        f.OpportunityAssistanceListingFactory.reset_sequence(1_000_000)
 
     @pytest.fixture
     def transform_competition(self, transform_oracle_data_task):
@@ -92,7 +85,7 @@ class TestTransformCompetition(BaseTransformTestClass):
         )
 
         # Test case where cfda listing exists in staging but not api schema
-        # and we are still able to associate competition to oppportunity.
+        # and we are still able to associate competition to opportunity.
         cfda_opp_id_in_staging_only = 10111
         cfda_opp_listing_only_in_staging = setup_competition(
             db_session,
@@ -245,3 +238,35 @@ class TestTransformCompetition(BaseTransformTestClass):
                 opportunity.opportunity_id,
                 opportunity_assistance_listing.opportunity_assistance_listing_id,
             )
+
+    def test_process_competition_delete_with_competition_instructions(
+        self, db_session, transform_competition, s3_config
+    ):
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
+
+        tcompetition = setup_competition(
+            db_session,
+            create_existing=False,  # will make below
+            is_delete=True,
+            opportunity=opportunity,
+        )
+        competition = f.CompetitionFactory.create(
+            opportunity=opportunity, legacy_competition_id=tcompetition.comp_id
+        )
+
+        # create some instructions records
+        competition_instructions = []
+
+        for _ in range(3):
+            competition_instructions.append(
+                f.CompetitionInstructionFactory.create(competition=competition)
+            )
+
+        transform_competition.process_competition(
+            tcompetition, competition, opportunity.opportunity_id, None
+        )
+
+        validate_competition(db_session, tcompetition, expect_in_db=False)
+
+        for competition_instruction in competition_instructions:
+            assert file_util.file_exists(competition_instruction.file_location) is False

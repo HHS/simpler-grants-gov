@@ -2,11 +2,14 @@ import logging
 from collections.abc import Sequence
 from uuid import UUID
 
+import grants_shared.adapters.db as db
+from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams
+from grants_shared.pagination.paginator import Paginator
+from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import Application, Competition
 from src.db.models.entity_models import Organization
@@ -18,10 +21,7 @@ from src.db.models.user_models import (
     OrganizationUser,
     OrganizationUserRole,
 )
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
-from src.pagination.paginator import Paginator
 from src.search.search_models import StrSearchFilter, UuidSearchFilter
-from src.services.service_utils import apply_sorting
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ def get_user_applications(
     if filter_clauses:
         stmt = stmt.where(and_(*filter_clauses))
     # Sort
-    stmt = apply_sorting(stmt, Application, list_params.pagination.sort_order)
+    stmt = apply_sorting(stmt, list_params.pagination.sort_order, Application)
     # Paginate
     paginator: Paginator[Application] = Paginator(
         Application, stmt, db_session, page_size=list_params.pagination.page_size

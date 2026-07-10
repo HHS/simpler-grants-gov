@@ -1,5 +1,4 @@
-import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import { ApiRequestError, readError } from "src/errors";
 import { handleUpdateApplicationFormIncludeInSubmission } from "src/services/fetch/fetchers/applicationFetcher";
 
 export const updateApplicationIncludeFormInSubmissionHandler = async (
@@ -7,12 +6,6 @@ export const updateApplicationIncludeFormInSubmissionHandler = async (
   { params }: { params: Promise<{ applicationId: string; formId: string }> },
 ) => {
   try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      throw new UnauthorizedError(
-        "No active session to update including form in application submission",
-      );
-    }
     const applicationId = (await params).applicationId;
     const formId = (await params).formId;
     const { is_included_in_submission } = (await request.json()) as {
@@ -23,7 +16,6 @@ export const updateApplicationIncludeFormInSubmissionHandler = async (
       applicationId,
       formId,
       is_included_in_submission,
-      session.token,
     );
     const status = response.status_code;
     if (!response || status !== 200) {

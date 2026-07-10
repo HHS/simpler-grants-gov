@@ -42,7 +42,7 @@ This command will create the S3 tfstate bucket and the GitHub OIDC provider. It 
 
 ### 3. Update the account names map in app-config
 
-In [app-config/main.tf](/infra/frontend/app-config/main.tf), update the `account_names_by_environment` config to reflect the account name you chose.
+In [app-config/main.tf](../../infra/frontend/app-config/main.tf), update the `account_names_by_environment` config to reflect the account name you chose.
 
 ## Making changes to the account
 

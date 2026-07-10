@@ -47,13 +47,17 @@ __check_defined = \
 	infra-configure-app-service \
 	infra-configure-monitoring-secrets \
 	infra-configure-network \
+	infra-create-csr \
 	infra-format \
+	infra-import-certificate \
 	infra-lint \
+	infra-lint-markdown \
 	infra-lint-scripts \
 	infra-lint-terraform \
 	infra-lint-workflows \
 	infra-module-database-role-manager \
 	infra-set-up-account \
+	infra-test-modules \
 	infra-test-service \
 	infra-update-app-build-repository \
 	infra-update-app-database-roles \
@@ -172,7 +176,8 @@ infra-update-app-database: ## Create or update $APP_NAME's database module for $
 
 infra-module-database-role-manager-archive: ## Build/rebuild role manager code package for Lambda deploys
 	pip3 install -r infra/modules/database/role_manager/requirements.txt -t infra/modules/database/role_manager/vendor --upgrade
-	zip -r infra/modules/database/role_manager.zip infra/modules/database/role_manager
+	rm -f infra/modules/database/role_manager.zip
+	cd infra/modules/database/role_manager && zip -r ../role_manager.zip . -x '*.DS_Store' -x '*__pycache__*'
 
 infra-update-app-database-roles: ## Create or update database roles and schemas for $APP_NAME's database in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -185,13 +190,6 @@ infra-update-app-service: ## Create or update $APP_NAME's web service module
 	terraform -chdir="infra/$(APP_NAME)/service" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
 	terraform -chdir="infra/$(APP_NAME)/service" apply -var="environment_name=$(ENVIRONMENT)"
 
-infra-update-metabase-service: ## Create or update $APP_NAME's web service module
-	# APP_NAME has a default value defined above, but check anyways in case the default is ever removed
-	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
-	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
-	terraform -chdir="infra/analytics/metabase" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
-	terraform -chdir="infra/analytics/metabase" apply -var="environment_name=$(ENVIRONMENT)"
-
 # The prerequisite for this rule is obtained by
 # prefixing each module with the string "infra-validate-module-"
 infra-validate-modules: ## Run terraform validate on reusable child modules
@@ -202,10 +200,33 @@ infra-validate-module-%:
 	terraform -chdir=infra/modules/$* init -backend=false
 	terraform -chdir=infra/modules/$* validate
 
+infra-test-modules: ## Run native Terraform unit tests for reusable child modules
+infra-test-modules: $(patsubst %, infra-test-module-%, $(MODULES))
+
+infra-test-module-%:
+	@echo "Test module: $*"
+	terraform -chdir=infra/modules/$* init -backend=false
+	terraform -chdir=infra/modules/$* test
+
 infra-check-app-database-roles: ## Check that app database roles have been configured properly
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
 	./bin/check-database-roles $(APP_NAME) $(ENVIRONMENT)
+
+# Support domain arg: make infra-create-csr my-domain
+ifeq ($(firstword $(MAKECMDGOALS)),infra-create-csr)
+DOMAIN := $(or $(DOMAIN),$(word 2,$(MAKECMDGOALS)))
+$(DOMAIN):
+	@:
+endif
+
+infra-create-csr: ## Generate a private key and CSR. Optionally pass $DOMAIN (e.g. "api"); defaults to simpler.grants.gov. Output written to certs/
+	./bin/create-csr $(DOMAIN)
+
+infra-import-certificate: ## Import a signed certificate into AWS ACM for $DOMAIN using $CERTIFICATE_FILE
+	@:$(call check_defined, DOMAIN, the domain name e.g. "api" or "api.simpler.grants.gov")
+	@:$(call check_defined, CERTIFICATE_FILE, path to the signed certificate file)
+	./bin/import-certificate $(DOMAIN) $(CERTIFICATE_FILE)
 
 infra-check-compliance: ## Run compliance checks
 infra-check-compliance: infra-check-compliance-checkov infra-check-compliance-tfsec
@@ -221,7 +242,10 @@ infra-check-compliance-checkov: ## Run checkov compliance checks
 infra-check-compliance-tfsec: ## Run tfsec compliance checks
 	tfsec infra
 
-infra-lint: lint-markdown infra-lint-scripts infra-lint-terraform infra-lint-workflows
+infra-lint: infra-lint-markdown infra-lint-scripts infra-lint-terraform infra-lint-workflows ## Lint infra code
+
+infra-lint-markdown: ## Lint Markdown docs for broken links
+	./bin/lint-markdown.sh
 
 infra-lint-scripts: ## Lint shell scripts
 	shellcheck bin/**
@@ -268,8 +292,7 @@ else
 	APP_NAME_ARG := "."
 endif
 
-ifdef IMAGE_TAG
-else
+ifeq ($(origin IMAGE_TAG),undefined)
 	ifdef GIT_REPO_AVAILABLE
 		IMAGE_TAG := $(shell git log --pretty=format:'%H' -n 1 "${ROOT_REV}" -- "${APP_NAME_ARG}")
 	else
@@ -294,17 +317,17 @@ release-publish: ## Publish release to $APP_NAME's build repository
 release-run-database-migrations: ## Run $APP_NAME's database migrations in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/run-database-migrations $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
+	./bin/run-database-migrations "$(APP_NAME)" "$(IMAGE_TAG)" "$(ENVIRONMENT)"
+
+release-run-setup-foreign-tables: ## Run setup-foreign-tables for $APP_NAME in $ENVIRONMENT
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
+	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
+	./bin/run-setup-foreign-tables $(APP_NAME) $(ENVIRONMENT)
 
 release-deploy: ## Deploy release to $APP_NAME's web service in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/deploy-release $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
-
-metabase-deploy: ## Deploy metabase to $APP_NAME's web service in $ENVIRONMENT
-	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
-	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/deploy-metabase $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
+	./bin/deploy-release "$(APP_NAME)" "$(IMAGE_TAG)" "$(ENVIRONMENT)"
 
 invalidate-cloudfront-cache: ## Invalidate CloudFront cache for $ENVIRONMENT
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")

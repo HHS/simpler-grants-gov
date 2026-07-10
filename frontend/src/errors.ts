@@ -22,6 +22,18 @@ export const parseErrorStatus = (error: ApiRequestError): number => {
   }
 };
 
+export class MissingAuthError extends Error {
+  constructor(message?: string) {
+    const errorMessage =
+      message || "Request requires authentication and is missing user token";
+    const cause = {
+      type: "MissingAuthError",
+      message: errorMessage,
+    };
+    super(errorMessage, { cause });
+  }
+}
+
 /**
  * A fetch request failed due to a network error. The error wasn't the fault of the user,
  * and an issue was encountered while setting up or sending a request, or parsing the response.
@@ -188,8 +200,14 @@ function convertSearchInputSetsToArrays(
       ? Array.from(searchInputs.eligibility)
       : [],
     agency: searchInputs.agency ? Array.from(searchInputs.agency) : [],
+    assistanceListingNumber: searchInputs.assistanceListingNumber
+      ? Array.from(searchInputs.assistanceListingNumber)
+      : [],
     category: searchInputs.category ? Array.from(searchInputs.category) : [],
     closeDate: searchInputs.closeDate ? Array.from(searchInputs.closeDate) : [],
+    postedDate: searchInputs.postedDate
+      ? Array.from(searchInputs.postedDate)
+      : [],
     costSharing: searchInputs.costSharing
       ? Array.from(searchInputs.costSharing)
       : [],

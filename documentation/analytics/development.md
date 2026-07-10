@@ -10,8 +10,8 @@ This package runs in Docker by default.
 **Prerequisites**
 
 - **Docker** [Installation options](https://docs.docker.com/desktop/setup/install/mac-install/) 
-- **Python version 3.12:** [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python, or [asdf](https://asdf-vm.com/)
-- **Poetry:** [Install poetry with the official installer](https://python-poetry.org/docs/#installing-with-the-official-installer) or alternatively use [pipx to install](https://python-poetry.org/docs/#installing-with-pipx)
+- **Python version 3.14:** [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python, or [asdf](https://asdf-vm.com/)
+- **UV:** [Install UV](https://docs.astral.sh/uv/getting-started/installation/)
 - **GitHub CLI:** [Install the GitHub CLI](https://github.com/cli/cli#installation)
 - **Postgres:** [Installation options for macOS](https://www.postgresql.org/download/macosx/)
 - **Psycopg:** [Installation options](https://www.psycopg.org/psycopg3/docs/basic/install.html)
@@ -58,7 +58,7 @@ Several `make` commands are defined in the project [`Makefile`](../../analytics/
 
 ### Using the CLI 
 
-The package includes a CLI that can be used to discover the available commands. To run the CLI, type `poetry run analytics --help` at the command line, and the CLI should respond with a list of available commands.
+The package includes a CLI that can be used to discover the available commands. To run the CLI, type `uv run analytics --help` at the command line, and the CLI should respond with a list of available commands.
 
 ![Screenshot of passing the --help flag to CLI entry point](../../analytics/static/screenshot-cli-help.png)
 

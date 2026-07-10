@@ -23,10 +23,10 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             no_current_summary=True, opportunity_assistance_listings=[]
         )
         forecast_insert1 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=None, create_existing=False, opportunity=opportunity1
+            is_forecast=True, create_existing=False, opportunity=opportunity1
         )
         synopsis_insert1 = setup_synopsis_forecast(
-            is_forecast=False, revision_number=None, create_existing=False, opportunity=opportunity1
+            is_forecast=False, create_existing=False, opportunity=opportunity1
         )
 
         # Mix of updates and inserts
@@ -34,10 +34,13 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             no_current_summary=True, opportunity_assistance_listings=[]
         )
         forecast_update1 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=None, create_existing=True, opportunity=opportunity2
+            is_forecast=True,
+            create_existing=True,
+            opportunity=opportunity2,
+            source_values={"ac_phone": "123-456-7890", "ac_name": "Bob Smith"},
         )
         synopsis_update1 = setup_synopsis_forecast(
-            is_forecast=False, revision_number=None, create_existing=True, opportunity=opportunity2
+            is_forecast=False, create_existing=True, opportunity=opportunity2
         )
 
         # Mix of inserts, updates, and deletes
@@ -46,7 +49,6 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
         forecast_delete1 = setup_synopsis_forecast(
             is_forecast=True,
-            revision_number=None,
             create_existing=True,
             is_delete=True,
             opportunity=opportunity3,
@@ -54,7 +56,6 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
         synopsis_delete1 = setup_synopsis_forecast(
             is_forecast=False,
-            revision_number=None,
             create_existing=True,
             is_delete=True,
             opportunity=opportunity3,
@@ -66,7 +67,6 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
         forecast_delete_but_current_missing = setup_synopsis_forecast(
             is_forecast=True,
-            revision_number=None,
             create_existing=False,
             is_delete=True,
             opportunity=opportunity4,
@@ -74,7 +74,6 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
         synopsis_update_invalid_yn_field = setup_synopsis_forecast(
             is_forecast=False,
-            revision_number=None,
             create_existing=True,
             source_values={"sendmail": "E"},
             opportunity=opportunity4,
@@ -125,7 +124,6 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
         delete_but_current_missing = setup_synopsis_forecast(
             is_forecast=is_forecast,
-            revision_number=revision_number,
             create_existing=False,
             is_delete=True,
             opportunity=opportunity,
@@ -160,7 +158,6 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
         source_summary = setup_synopsis_forecast(
             is_forecast=is_forecast,
-            revision_number=revision_number,
             create_existing=False,
             opportunity=opportunity,
             source_values=source_values,
@@ -180,7 +177,6 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
     ):
         source_record = setup_synopsis_forecast(
             is_forecast=is_forecast,
-            revision_number=None,
             create_existing=False,
             opportunity=None,
             source_values={"opportunity_id": 12121212},

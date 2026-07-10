@@ -5,9 +5,8 @@ from typing import Any, ParamSpec
 
 import flask
 from apiflask.exceptions import HTTPError
-
-from src.api import response
-from src.auth.login_gov_jwt_auth import get_final_redirect_uri
+from grants_shared.api import response
+from grants_shared.auth.login_gov_jwt_auth import get_final_redirect_uri
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +16,6 @@ INTERNAL_ERROR = "internal error"
 
 def get_app_security_scheme() -> dict[str, Any]:
     return {
-        "ApiKeyAuth": {"type": "apiKey", "in": "header", "name": "X-Auth"},
         "ApiJwtAuth": {"type": "apiKey", "in": "header", "name": "X-SGG-Token"},
         "InternalApiJwtAuth": {"type": "apiKey", "in": "header", "name": "X-SGG-Internal-Token"},
         "ApiUserKeyAuth": {"type": "apiKey", "in": "header", "name": "X-API-Key"},
@@ -65,7 +63,11 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
                     )
 
                 return response.redirect_response(
-                    get_final_redirect_uri("error", error_description=message)
+                    get_final_redirect_uri(
+                        "error",
+                        error_description=message,
+                        login_piv_required_error=e.extra_data.get("login_piv_required_error", None),
+                    )
                 )
             except Exception:
                 # Any other exception, we'll just use a generic error message to be safe

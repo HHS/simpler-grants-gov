@@ -128,12 +128,20 @@ class TestLoadOracleData(BaseTestClass):
         # this prevents some weirdness with the value comparison we'll do
         db_session.expire_all()
 
-        assert db_session.query(source_table).count() == 5
-        assert db_session.query(destination_table).count() == 6
-
-        destination_records = (
-            db_session.query(destination_table).order_by(destination_table.c.opportunity_id).all()
+        assert (
+            db_session.scalar(sqlalchemy.select(sqlalchemy.func.count()).select_from(source_table))
+            == 5
         )
+        assert (
+            db_session.scalar(
+                sqlalchemy.select(sqlalchemy.func.count()).select_from(destination_table)
+            )
+            == 6
+        )
+
+        destination_records = db_session.execute(
+            sqlalchemy.select(destination_table).order_by(destination_table.c.opportunity_id)
+        ).all()
 
         validate_copied_value(source_table, source_record1, destination_records[0])
         validate_copied_value(source_table, source_record2, destination_records[1])
@@ -147,6 +155,56 @@ class TestLoadOracleData(BaseTestClass):
         assert task.metrics["count.delete.total"] == 1
         assert task.metrics["count.insert.total"] == 2
         assert task.metrics["count.update.total"] == 2
+
+        # Timing total metrics are recorded for each part of the run. Timing is
+        # non-deterministic, so just assert the keys exist and hold sane values.
+        for timing_metric in (
+            "time.insert.total",
+            "time.insert_fetch.total",
+            "time.update.total",
+            "time.update_fetch.total",
+            "time.delete.total",
+        ):
+            assert timing_metric in task.metrics
+            assert task.metrics[timing_metric] >= 0
+
+    def test_per_table_timing_metrics_logged(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create, caplog
+    ):
+        caplog.set_level(logging.INFO)
+
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        ForeignTopportunityFactory.create(opportunity_id=101, oppnumber="B-1", cfdas=[])
+
+        task = load_oracle_data_task.LoadOracleDataTask(
+            db_session, foreign_tables, staging_tables, ["topportunity"]
+        )
+        task.run()
+
+        # The fetch timing for the SELECT that determines records appears alongside
+        # the existing copy timing in the per-operation "Processed records" log lines.
+        insert_log = next(
+            r for r in caplog.records if r.message == "Processed records to be inserted"
+        )
+        assert hasattr(insert_log, "time.insert.topportunity")
+        assert hasattr(insert_log, "time.insert_fetch.topportunity")
+        assert getattr(insert_log, "time.insert_fetch.topportunity") >= 0
+
+        update_log = next(
+            r for r in caplog.records if r.message == "Processed records to be updated"
+        )
+        assert hasattr(update_log, "time.update.topportunity")
+        assert hasattr(update_log, "time.update_fetch.topportunity")
+
+        # The per-table processing time (sum of the five parts) is logged once per table.
+        processing_log = next(r for r in caplog.records if r.message == "Processed table")
+        assert hasattr(processing_log, "time.processing.topportunity")
+        assert getattr(processing_log, "time.processing.topportunity") >= 0
 
     def test_raises_if_table_dicts_different(self, db_session, foreign_tables, staging_tables):
         with pytest.raises(
@@ -179,8 +237,16 @@ class TestLoadOracleData(BaseTestClass):
         )
         task.run()
 
-        assert db_session.query(source_table).count() == 100
-        assert db_session.query(destination_table).count() == 100
+        assert (
+            db_session.scalar(sqlalchemy.select(sqlalchemy.func.count()).select_from(source_table))
+            == 100
+        )
+        assert (
+            db_session.scalar(
+                sqlalchemy.select(sqlalchemy.func.count()).select_from(destination_table)
+            )
+            == 100
+        )
 
         assert set(
             db_session.scalars(sqlalchemy.select(destination_table.c.opportunity_id))
@@ -249,11 +315,9 @@ class TestLoadOracleData(BaseTestClass):
         db_session.expire_all()
 
         # Retrieve the inserted staging record
-        inserted_record = (
-            db_session.query(destination_table)
-            .filter(destination_table.c.opportunity_id == 10)
-            .first()
-        )
+        inserted_record = db_session.execute(
+            sqlalchemy.select(destination_table).where(destination_table.c.opportunity_id == 10)
+        ).first()
 
         # Verify regular columns were inserted
         assert inserted_record.oppnumber == source_record.oppnumber
@@ -279,17 +343,186 @@ class TestLoadOracleData(BaseTestClass):
         db_session.expire_all()
 
         # Retrieve the updated record
-        updated_record = (
-            db_session.query(destination_table)
-            .filter(destination_table.c.opportunity_id == 10)
-            .first()
-        )
+        updated_record = db_session.execute(
+            sqlalchemy.select(destination_table).where(destination_table.c.opportunity_id == 10)
+        ).first()
 
         # Verify regular columns were updated
         assert updated_record.oppnumber == "TEST-001-UPDATED"
         assert updated_record.last_upd_date == time4
         # Verify excluded column was still not copied (should still be None)
         assert updated_record.oppcategory is None
+
+    @freezegun.freeze_time("2024-06-15 14:30:00")
+    def test_cutoff_is_naive_eastern_wall_clock(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create, caplog
+    ):
+        caplog.set_level(logging.INFO)
+
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        task = load_oracle_data_task.LoadOracleDataTask(
+            db_session, foreign_tables, staging_tables, ["topportunity"]
+        )
+        task.run()
+
+        # The cutoff must be naive: the Oracle foreign data stores EST timestamps as UTC, so a
+        # tz-aware cutoff would get converted to UTC for comparison and end up 4-5h ahead of the
+        # source data, letting post-cutoff records sneak through the filter.
+        assert task.batch_cutoff.tzinfo is None
+        # Frozen UTC time is 14:30; Eastern wall-clock (EDT in June) is 10:30.
+        assert task.batch_cutoff.hour == 10
+        assert task.batch_cutoff.minute == 30
+
+        cutoff_log = next(
+            record
+            for record in caplog.records
+            if record.message == "batch cutoff timestamp captured"
+        )
+        assert cutoff_log.batch_cutoff == task.batch_cutoff
+
+    def test_record_after_cutoff_excluded_at_or_before_included(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create
+    ):
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        # Use a fixed cutoff time in Eastern
+        cutoff_time = datetime.datetime(2024, 6, 15, 10, 0, 0)
+
+        # Record AT cutoff -- should be included
+        ForeignTopportunityFactory.create(
+            opportunity_id=1,
+            oppnumber="AT-CUTOFF",
+            cfdas=[],
+            created_date=cutoff_time,
+            last_upd_date=cutoff_time,
+        )
+        # Record BEFORE cutoff -- should be included
+        ForeignTopportunityFactory.create(
+            opportunity_id=2,
+            oppnumber="BEFORE-CUTOFF",
+            cfdas=[],
+            created_date=cutoff_time - datetime.timedelta(hours=1),
+            last_upd_date=cutoff_time - datetime.timedelta(hours=1),
+        )
+        # Record AFTER cutoff -- should be EXCLUDED
+        ForeignTopportunityFactory.create(
+            opportunity_id=3,
+            oppnumber="AFTER-CUTOFF",
+            cfdas=[],
+            created_date=cutoff_time + datetime.timedelta(seconds=1),
+            last_upd_date=cutoff_time + datetime.timedelta(seconds=1),
+        )
+
+        # Freeze UTC at 14:00 so the Eastern wall-clock cutoff lands at 10:00, matching
+        # cutoff_time above. (June = EDT = UTC-4.)
+        with freezegun.freeze_time("2024-06-15 14:00:00"):
+            task = load_oracle_data_task.LoadOracleDataTask(
+                db_session, foreign_tables, staging_tables, ["topportunity"]
+            )
+            task.run()
+
+        db_session.expire_all()
+        destination_records = db_session.execute(
+            sqlalchemy.select(destination_table).order_by(destination_table.c.opportunity_id)
+        ).all()
+
+        assert len(destination_records) == 2
+        assert destination_records[0].opportunity_id == 1
+        assert destination_records[1].opportunity_id == 2
+        assert task.metrics["count.insert.total"] == 2
+
+    def test_deferred_record_picked_up_on_next_run(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create
+    ):
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        cutoff_time = datetime.datetime(2024, 6, 15, 10, 0, 0)
+
+        # Record created 5 minutes AFTER cutoff -- will be deferred on run 1
+        ForeignTopportunityFactory.create(
+            opportunity_id=1,
+            oppnumber="FUTURE",
+            cfdas=[],
+            created_date=cutoff_time + datetime.timedelta(minutes=5),
+            last_upd_date=cutoff_time + datetime.timedelta(minutes=5),
+        )
+
+        # Freeze UTC at 14:00 so the Eastern wall-clock cutoff is 10:00 (June = EDT = UTC-4).
+        # Record is at 10:05 -- should be excluded.
+        with freezegun.freeze_time("2024-06-15 14:00:00"):
+            task1 = load_oracle_data_task.LoadOracleDataTask(
+                db_session, foreign_tables, staging_tables, ["topportunity"]
+            )
+            task1.run()
+
+        db_session.expire_all()
+        assert (
+            db_session.scalar(
+                sqlalchemy.select(sqlalchemy.func.count()).select_from(destination_table)
+            )
+            == 0
+        )
+        assert task1.metrics["count.insert.total"] == 0
+
+        # Run 2: cutoff is at 10:10 Eastern, record is at 10:05 -- should be included.
+        with freezegun.freeze_time("2024-06-15 14:10:00"):
+            task2 = load_oracle_data_task.LoadOracleDataTask(
+                db_session, foreign_tables, staging_tables, ["topportunity"]
+            )
+            task2.run()
+
+        db_session.expire_all()
+        assert (
+            db_session.scalar(
+                sqlalchemy.select(sqlalchemy.func.count()).select_from(destination_table)
+            )
+            == 1
+        )
+        assert task2.metrics["count.insert.total"] == 1
+
+        record = db_session.execute(sqlalchemy.select(destination_table)).first()
+        assert record.opportunity_id == 1
+
+    def test_record_with_null_created_date_included(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create
+    ):
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        ForeignTopportunityFactory.create(
+            opportunity_id=1,
+            oppnumber="NULL-CREATED",
+            cfdas=[],
+            created_date=None,
+            last_upd_date=None,
+        )
+
+        with freezegun.freeze_time("2024-06-15 10:00:00"):
+            task = load_oracle_data_task.LoadOracleDataTask(
+                db_session, foreign_tables, staging_tables, ["topportunity"]
+            )
+            task.run()
+
+        db_session.expire_all()
+        assert (
+            db_session.scalar(
+                sqlalchemy.select(sqlalchemy.func.count()).select_from(destination_table)
+            )
+            == 1
+        )
+        assert task.metrics["count.insert.total"] == 1
 
     def test_load_data_excludes_tcertificates_column_is_selfsigned_by_default(
         self, db_session, foreign_tables, staging_tables, enable_factory_create
@@ -318,18 +551,18 @@ class TestLoadOracleData(BaseTestClass):
         db_session.expire_all()
 
         # Retrieve the inserted staging record
-        inserted_record = (
-            db_session.query(destination_table)
-            .filter(destination_table.c.currentcertid == source_record.currentcertid)
-            .first()
-        )
+        inserted_record = db_session.execute(
+            sqlalchemy.select(destination_table).where(
+                destination_table.c.currentcertid == source_record.currentcertid
+            )
+        ).first()
 
         # Verify regular columns were inserted
-        assert inserted_record.certemail == source_record.certemail
         assert inserted_record.creator_id == source_record.creator_id
         assert inserted_record.created_date == source_record.created_date
-        assert inserted_record.serial_num == source_record.serial_num
         assert inserted_record.agencyid == source_record.agencyid
+        assert inserted_record.certemail == source_record.certemail
+        assert inserted_record.serial_num == source_record.serial_num
 
         # Verify excluded column was not copied (should be None)
         assert inserted_record.is_selfsigned is None

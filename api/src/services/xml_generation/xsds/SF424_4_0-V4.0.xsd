@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:SF424_4_0="http://apply.grants.gov/forms/SF424_4_0-V4.0" targetNamespace="http://apply.grants.gov/forms/SF424_4_0-V4.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="4.0">
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/Attachments-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd"/>
+	<xs:element name="SF424_4_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="SubmissionType">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="Preapplication"/>
+							<xs:enumeration value="Application"/>
+							<xs:enumeration value="Changed/Corrected Application"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="ApplicationType">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="New"/>
+							<xs:enumeration value="Continuation"/>
+							<xs:enumeration value="Revision"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="RevisionType" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="A: Increase Award"/>
+							<xs:enumeration value="B: Decrease Award"/>
+							<xs:enumeration value="C: Increase Duration"/>
+							<xs:enumeration value="D: Decrease Duration"/>
+							<xs:enumeration value="E: Other (specify)"/>
+							<xs:enumeration value="AC: Increase Award, Increase Duration"/>
+							<xs:enumeration value="AD: Increase Award, Decrease Duration"/>
+							<xs:enumeration value="BC: Decrease Award, Increase Duration"/>
+							<xs:enumeration value="BD: Decrease Award, Decrease Duration"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="RevisionOtherSpecify" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="21"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="DateReceived" type="xs:date"/>
+				<xs:element name="ApplicantID" type="globLib:ApplicantIDDataType" minOccurs="0"/>
+				<xs:element name="FederalEntityIdentifier" type="globLib:FederalIDDataType" minOccurs="0"/>
+				<xs:element name="FederalAwardIdentifier" type="globLib:ProjectAwardNumberDataType" minOccurs="0"/>
+				<xs:element name="StateReceiveDate" type="xs:date" minOccurs="0"/>
+				<xs:element name="StateApplicationID" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="30"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="OrganizationName" type="globLib:OrganizationNameDataType"/>
+				<xs:element name="EmployerTaxpayerIdentificationNumber" type="globLib:EmployerIDDataType"/>
+				<xs:element name="SAMUEI" type="globLib:SAMUEIDataType"/>
+				<xs:element name="Applicant" type="globLib:AddressDataTypeV3"/>
+				<xs:element name="DepartmentName" type="globLib:DepartmentNameDataType" minOccurs="0"/>
+				<xs:element name="DivisionName" type="globLib:DivisionNameDataType" minOccurs="0"/>
+				<xs:element name="ContactPerson" type="globLib:HumanNameDataType" minOccurs="0"/>
+				<xs:element name="Title" type="globLib:HumanTitleDataType" minOccurs="0"/>
+				<xs:element name="OrganizationAffiliation" type="globLib:OrganizationNameDataType" minOccurs="0"/>
+				<xs:element name="PhoneNumber" type="globLib:TelephoneNumberDataType"/>
+				<xs:element name="Fax" type="globLib:TelephoneNumberDataType" minOccurs="0"/>
+				<xs:element name="Email" type="globLib:EmailDataType"/>
+				<xs:element name="ApplicantTypeCode1" type="globLib:ApplicantTypeCodeDataType"/>
+				<xs:element name="ApplicantTypeCode2" type="globLib:ApplicantTypeCodeDataType" minOccurs="0"/>
+				<xs:element name="ApplicantTypeCode3" type="globLib:ApplicantTypeCodeDataType" minOccurs="0"/>
+				<xs:element name="ApplicantTypeOtherSpecify" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="30"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="AgencyName" type="globLib:AgencyNameDataType"/>
+				<xs:element name="CFDANumber" type="globLib:CFDANumberDataType" minOccurs="0"/>
+				<xs:element name="CFDAProgramTitle" type="globLib:CFDATitleDataType" minOccurs="0"/>
+				<xs:element name="FundingOpportunityNumber" type="globLib:OpportunityIDDataType"/>
+				<xs:element name="FundingOpportunityTitle" type="globLib:OpportunityTitleDataType"/>
+				<xs:element name="CompetitionIdentificationNumber" type="globLib:CompetitionIDDataType" minOccurs="0"/>
+				<xs:element name="CompetitionIdentificationTitle" type="globLib:CompetitionTitleDataType" minOccurs="0"/>
+				<xs:element name="AreasAffected" type="att:AttachedFileDataType" minOccurs="0"/>
+				<xs:element name="ProjectTitle" type="globLib:ProjectTitleDataType"/>
+				<xs:element name="AdditionalProjectTitle" type="att:AttachmentGroupMin0Max100DataType" minOccurs="0"/>
+				<xs:element name="CongressionalDistrictApplicant" type="globLib:CongressionalDistrictDataType"/>
+				<xs:element name="CongressionalDistrictProgramProject" type="globLib:CongressionalDistrictDataType"/>
+				<xs:element name="AdditionalCongressionalDistricts" type="att:AttachedFileDataType" minOccurs="0"/>
+				<xs:element name="ProjectStartDate" type="xs:date"/>
+				<xs:element name="ProjectEndDate" type="xs:date"/>
+				<xs:element name="FederalEstimatedFunding" type="globLib:BudgetAmountDataType"/>
+				<xs:element name="ApplicantEstimatedFunding" type="globLib:BudgetAmountDataType"/>
+				<xs:element name="StateEstimatedFunding" type="globLib:BudgetAmountDataType"/>
+				<xs:element name="LocalEstimatedFunding" type="globLib:BudgetAmountDataType"/>
+				<xs:element name="OtherEstimatedFunding" type="globLib:BudgetAmountDataType"/>
+				<xs:element name="ProgramIncomeEstimatedFunding" type="globLib:BudgetAmountDataType"/>
+				<xs:element name="TotalEstimatedFunding" type="globLib:BudgetTotalAmountDataType"/>
+				<xs:element name="StateReview">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="a. This application was made available to the State under the Executive Order 12372 Process for review on"/>
+							<xs:enumeration value="b. Program is subject to E.O. 12372 but has not been selected by the State for review."/>
+							<xs:enumeration value="c. Program is not covered by E.O. 12372."/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="StateReviewAvailableDate" type="xs:date" minOccurs="0"/>
+				<xs:element name="DelinquentFederalDebt" type="globLib:YesNoDataType"/>
+				<xs:element name="DebtExplanation" type="att:AttachedFileDataType" minOccurs="0"/>
+				<xs:element name="CertificationAgree" type="globLib:YesNoDataType"/>
+				<xs:element name="AuthorizedRepresentative" type="globLib:HumanNameDataType"/>
+				<xs:element name="AuthorizedRepresentativeTitle" type="globLib:HumanTitleDataType"/>
+				<xs:element name="AuthorizedRepresentativePhoneNumber" type="globLib:TelephoneNumberDataType"/>
+				<xs:element name="AuthorizedRepresentativeEmail" type="globLib:EmailDataType"/>
+				<xs:element name="AuthorizedRepresentativeFax" type="globLib:TelephoneNumberDataType" minOccurs="0"/>
+				<xs:element name="AORSignature" type="globLib:SignatureDataType"/>
+				<xs:element name="DateSigned" type="xs:date"/>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="4.0"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

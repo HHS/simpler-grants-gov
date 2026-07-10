@@ -1,10 +1,11 @@
 import logging
 from datetime import datetime
 
+from grants_shared.adapters import db
+from grants_shared.util import datetime_util
 from pydantic_settings import SettingsConfigDict
 
 import src.data_migration.transformation.transform_constants as transform_constants
-from src.adapters import db
 from src.data_migration.transformation.subtask.transform_agency import (
     TransformAgency,
     TransformAgencyHierarchy,
@@ -17,13 +18,19 @@ from src.data_migration.transformation.subtask.transform_assistance_listing impo
     TransformAssistanceListing,
 )
 from src.data_migration.transformation.subtask.transform_competition import TransformCompetition
+from src.data_migration.transformation.subtask.transform_competition_instruction import (
+    TransformCompetitionInstruction,
+)
 from src.data_migration.transformation.subtask.transform_funding_category import (
     TransformFundingCategory,
 )
 from src.data_migration.transformation.subtask.transform_funding_instrument import (
     TransformFundingInstrument,
 )
-from src.data_migration.transformation.subtask.transform_opportunity import TransformOpportunity
+from src.data_migration.transformation.subtask.transform_opportunity import (
+    TransformOpportunity,
+    TransformOpportunityAgencyConnection,
+)
 from src.data_migration.transformation.subtask.transform_opportunity_attachment import (
     TransformOpportunityAttachment,
 )
@@ -31,7 +38,6 @@ from src.data_migration.transformation.subtask.transform_opportunity_summary imp
     TransformOpportunitySummary,
 )
 from src.task.task import Task
-from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -51,6 +57,9 @@ class TransformOracleDataTaskConfig(PydanticBaseEnvConfig):
         True  # TRANSFORM_ORACLE_DATA_ENABLE_OPPORTUNITY_ATTACHMENT
     )
     enable_competition: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_COMPETITION
+    enable_competition_instruction: bool = (
+        True  # TRANSFORM_ORACLE_DATA_ENABLE_COMPETITION_INSTRUCTION
+    )
 
 
 class TransformOracleDataTask(Task):
@@ -73,8 +82,15 @@ class TransformOracleDataTask(Task):
         self.transform_config = transform_config
 
     def run_task(self) -> None:
+
+        if self.transform_config.enable_agency:
+            TransformAgency(self).run()
+            TransformAgencyHierarchy(self).run()
+            ValidateAgencyData(self).run()
+
         if self.transform_config.enable_opportunity:
             TransformOpportunity(self).run()
+            TransformOpportunityAgencyConnection(self).run()
 
         if self.transform_config.enable_assistance_listing:
             TransformAssistanceListing(self).run()
@@ -91,13 +107,11 @@ class TransformOracleDataTask(Task):
         if self.transform_config.enable_funding_instrument:
             TransformFundingInstrument(self).run()
 
-        if self.transform_config.enable_agency:
-            TransformAgency(self).run()
-            TransformAgencyHierarchy(self).run()
-            ValidateAgencyData(self).run()
-
         if self.transform_config.enable_opportunity_attachment:
             TransformOpportunityAttachment(self).run()
 
         if self.transform_config.enable_competition:
             TransformCompetition(self).run()
+
+        if self.transform_config.enable_competition_instruction:
+            TransformCompetitionInstruction(self).run()

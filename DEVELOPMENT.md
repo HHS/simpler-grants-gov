@@ -1,6 +1,6 @@
 # Development and Software Delivery Lifecycle
 
-The following guide is for members of the project team who have access to the repository as well as code contributors. The main difference between internal and external contributions is that externabl contributors will need to fork the project and will not be able to merge their own pull requests. For more information on contribributing, see: [CONTRIBUTING.md](./CONTRIBUTING.md).
+The following guide is for members of the project team who have access to the repository as well as code contributors. The main difference between internal and external contributions is that external contributors will need to fork the project and will not be able to merge their own pull requests. For more information on contributing, see: [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Local Development
 
@@ -8,7 +8,7 @@ This project is monorepo with several apps. Please see the [api](./api/README.md
 
 ### Linting and Testing
 
-Each application has its own linting and testing guidelines. Lint and code tests are run on each commit, so linters and tests should be run locally before commiting.
+Each application has its own linting and testing guidelines. Lint and code tests are run on each commit, so linters and tests should be run locally before committing.
 
 ## Branching Model
 
@@ -24,15 +24,27 @@ This project uses **continuous deployment** using [Github Actions](https://githu
 
 Pull-requests are merged to `main` and the changes are immediately deployed to the development environment. Releases are created to push changes to production.
 
-## Writing Pull Requests
+### Branch Naming Convention
 
-Prefix the branch name with your name, and include the ticket number in the branch name e.g. `cooldev/issue-1234-new-feature`.
+In order to allow branches to be easily found based on ticket, contributor, or the purpose of the branch, branch names should contain the following information:
+
+- Contributor handle: this can be either your github username, or any other handle by which project maintainers can easily identify you as a contributor. Most importantly, this should be consistent across all of the branches opened by any individual contributor
+- Issue number: the number of the Github issue the change pertains to
+- Change description: a few words describing the purpose of the branch
+
+With this in mind, branch names should follow this general convention:
+
+```
+[contributor-handle]/[issue-number]-[change-description]
+```
+
+## Writing Pull Requests
 
 Commit messages should, but are not required, to follow [git best practice conventions](https://cbea.ms/git-commit/#seven-rules) for consistency and legibility. Commit messages will be squashed, so individual commit messages will only be visible in the commit history of the pull request.
 
-### Title
+### Pull Request Title
 
-Pull request should have the following format: `[Issue N] Description`. The description should follow the imperative voice and lack of period from the [git best practice conventions](https://cbea.ms/git-commit/#seven-rules).
+Pull request titles should have the following format: `[Issue N] Description`. The description should follow the imperative voice and lack of period from the [git best practice conventions](https://cbea.ms/git-commit/#seven-rules).
 
 ### Recommendations
 
@@ -51,7 +63,7 @@ If any manual testing was performed, document it in enough detail in the PR desc
 
 ### Reviewers
 
-Assign reviewers applicable to the domain of your pull request. See [CODEOWNERS](.github/CODEOWNERS) for more details.
+Assign reviewers applicable to the domain of your pull request. See [Review Assignment](CONTRIBUTING.md#review-assignment) for more details.
 
 ### Pull in Own Requests
 
@@ -90,12 +102,10 @@ Releases are [created in Github](https://github.com/HHS/simpler-grants-gov/relea
 
 Step by step instructions for creating a release:
 
-
-
 - On Github.com, open the Releases page: https://github.com/HHS/simpler-grants-gov/releases
 - Click "Draft a new release"
 - Create the new tag via the UI
-- Start with `N=1` for a release, incrementing if there is another release on the same day. So the first release on `2000.10.10` would be `2000.10.10-1`, ths second release on that day would be `2000.10.10-2`, etc.
+- Start with `N=1` for a release, incrementing if there is another release on the same day. So the first release on `2000.10.10` would be `2000.10.10-1`, the second release on that day would be `2000.10.10-2`, etc.
   - Alternatively, create the tag in your terminal
   - `git switch main` and `git pull` to sync your local code with the latest main commit
   - `git tag YYYY.MM.DD-N` (FILLED IN!) and `git push --tags` to tag and push your CalVer tag

@@ -1,0 +1,47 @@
+name: Fork - Disable Unneeded Actions
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  workflow_dispatch: # for manual runs
+  schedule:
+    # Runs "at 06:00 UTC, every week on Monday" (see https://crontab.guru)
+    # Sprints are 2 weeks long, but crons don't easily support biweekly schedules
+    # and this GitHub action won't move tickets out of the current sprint
+    - cron: "0 6 * * 1"
+
+jobs:
+  disable-scheduled:
+    name: Disable scheduled jobs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
+          clean: false
+
+      - id: disable-scheduled-step
+        name: Disable jobs not needed in the fork
+        # only run this on forks
+        if: ${{ github.repository != 'hhs/simpler-grants-gov' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # NOTE: Add to this list in alphabetical order, if more jobs shouldn't run on forks
+          gh workflow disable "Check Infra deploy status" || true
+          gh workflow disable "CI Cron Vulnerability Scans" || true
+          gh workflow disable "CI Documentation Linker Checks" || true
+          gh workflow disable "CI Weekly Vulnerability Report" || true
+          gh workflow disable "Co-planning: Sync Fider to GitHub" || true
+          gh workflow disable "Co-planning: Sync GitHub to Fider" || true
+          gh workflow disable "Deliverable mapping: Issue level" || true
+          gh workflow disable "E2E Test Daily" || true
+          gh workflow disable "E2E Tests Weekly" || true
+          gh workflow disable "ECR Cleanup" || true
+          gh workflow disable "Lint - Bulk inherit parent metadata" || true
+          gh workflow disable "Lint - Deliverable Acceptance Criteria and Metrics" || true
+          gh workflow disable "Lint - Propagate milestone to sub-issues" || true
+          gh workflow disable "Lint - Set point and sprint on close" || true
+          gh workflow disable "Lint - Sprint rollover" || true
+          gh workflow disable "Scheduled Dev Deploy" || true

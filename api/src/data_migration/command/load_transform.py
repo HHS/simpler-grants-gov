@@ -5,16 +5,17 @@
 import logging
 
 import click
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
+from grants_shared.task.ecs_background_task import ecs_background_task
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
 import src.db.models.foreign
 import src.db.models.staging
-from src.task.ecs_background_task import ecs_background_task
+from src.constants.lookup_constants import JobType
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
+from src.task.task_job_lock import TaskJobLock
 
 from ...task.opportunities.store_opportunity_version_task import StoreOpportunityVersionTask
-from ...task.opportunities.sync_opportunity_review_status_task import SyncOpportunityReviewStatus
 from ..data_migration_blueprint import data_migration_blueprint
 from ..load.load_oracle_data_task import LoadOracleDataTask
 from ..transformation.transform_oracle_data_task import TransformOracleDataTask
@@ -37,18 +38,14 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--store-version/--no-store-version", default=False, help="run StoreOpportunityVersionTask"
 )
-@click.option(
-    "--sync-status/--no-sync-status", default=False, help="run SyncOpportunityReviewStatus"
-)
 @flask_db.with_db_session()
-@ecs_background_task(task_name="load-transform")
+@ecs_background_task(task_name=JobType.LOAD_TRANSFORM)
 def load_transform(
     db_session: db.Session,
     load: bool,
     transform: bool,
     set_current: bool,
     store_version: bool,
-    sync_status: bool,
     insert_chunk_size: int,
     tables_to_load: list[str],
 ) -> None:
@@ -57,17 +54,16 @@ def load_transform(
     foreign_tables = {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
     staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
 
-    if load:
-        LoadOracleDataTask(
-            db_session, foreign_tables, staging_tables, tables_to_load, insert_chunk_size
-        ).run()
-    if transform:
-        TransformOracleDataTask(db_session).run()
-    if set_current:
-        SetCurrentOpportunitiesTask(db_session).run()
-    if store_version:
-        StoreOpportunityVersionTask(db_session).run()
-    if sync_status:
-        SyncOpportunityReviewStatus(db_session).run()
+    with TaskJobLock(db_session, job_type=JobType.LOAD_TRANSFORM, lock_duration_minutes=90):
+        if load:
+            LoadOracleDataTask(
+                db_session, foreign_tables, staging_tables, tables_to_load, insert_chunk_size
+            ).run()
+        if transform:
+            TransformOracleDataTask(db_session).run()
+        if set_current:
+            SetCurrentOpportunitiesTask(db_session).run()
+        if store_version:
+            StoreOpportunityVersionTask(db_session).run()
 
     logger.info("load and transform complete")

@@ -5,6 +5,7 @@ import logging
 from urllib.parse import urljoin
 
 import requests
+from grants_shared.util.file_util import open_stream
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -15,7 +16,6 @@ from tenacity import (
 
 from src.adapters.sam_gov.config import SamGovConfig
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
-from src.util.file_util import open_stream
 
 logger = logging.getLogger(__name__)
 

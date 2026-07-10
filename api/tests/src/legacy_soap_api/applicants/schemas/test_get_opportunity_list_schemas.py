@@ -1,9 +1,9 @@
 from datetime import date
 
 import pytest
+from grants_shared.util.datetime_util import parse_grants_gov_date
 
 from src.legacy_soap_api.applicants.schemas.get_opportunity_list_schemas import OpportunityDetails
-from src.util.datetime_util import parse_grants_gov_date
 
 
 class TestParseGrantsGovDate:

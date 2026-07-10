@@ -41,6 +41,15 @@ Thank you for considering contributing to an Open Source project of the US
 Government! For more information about our contribution guidelines, see
 [CONTRIBUTING.md](CONTRIBUTING.md) to learn more and join our community see our [wiki](https://wiki.simpler.hhs.gov).
 
+## Community
+
+To better understand how this project is governed and how to participate beyond code contributions, please review the following community resources:
+
+- [Community Guidelines](./COMMUNITY_GUIDELINES.md)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+- [Architecture Decision Records](./documentation/architecture/)
+- [Project Wiki](https://wiki.simpler.hhs.gov)
+
 ## Security
 
 For more information about our Security, Vulnerability, and Responsible

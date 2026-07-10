@@ -1,6 +1,10 @@
 from enum import StrEnum
 from typing import Any
 
+from grants_shared.api.schemas.extension import Schema, fields, validators
+from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+from grants_shared.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
+from grants_shared.pagination.pagination_schema import generate_pagination_schema
 from marshmallow import pre_dump
 
 from src.api.opportunities_v1.opportunity_schemas import (
@@ -8,9 +12,6 @@ from src.api.opportunities_v1.opportunity_schemas import (
     SavedOpportunityResponseV1Schema,
 )
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
-from src.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicationStatus,
     ExternalUserType,
@@ -25,7 +26,6 @@ from src.db.models.user_models import (
     LinkExternalUser,
     OrganizationUserRole,
 )
-from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class ResourceSchema(StrEnum):
@@ -120,6 +120,16 @@ class UserLoginGovCallbackSchema(Schema):
     )
 
 
+class UserLoginSchema(Schema):
+    # This is defining the inputs we receive on the callback from login.gov's
+    # authorization endpoint and must match:
+    # https://developers.login.gov/oidc/authorization/#authorization-response
+    piv_required = fields.Boolean(
+        allow_none=True,
+        metadata={"description": "Whether the user is required to use a PIV to login"},
+    )
+
+
 class UserTokenRefreshResponseSchema(AbstractResponseSchema):
     # No data returned
     data = fields.MixinField(metadata={"example": None})
@@ -152,15 +162,19 @@ class UserSavedOpportunitiesFilterSchema(Schema):
         .with_one_of(allowed_values=OpportunityStatus, example=OpportunityStatus.POSTED)
         .build()
     )
+    organization_ids = fields.Nested(
+        UuidSearchSchemaBuilder("UserSavedOpportunitiesOrganizationIDSFilterSchema")
+        .with_one_of(minimum_length=None)
+        .build()
+    )
 
 
 class UserSavedOpportunitiesRequestSchema(Schema):
     filters = fields.Nested(UserSavedOpportunitiesFilterSchema(), required=False, allow_none=True)
-
     pagination = fields.Nested(
         generate_pagination_schema(
             "UserGetSavedOpportunityPaginationV1Schema",
-            ["created_at", "updated_at", "opportunity_title", "close_date"],
+            ["created_at", "opportunity_title", "close_date"],
             default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
         ),
         required=True,
@@ -258,6 +272,34 @@ class UserOrganizationsResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(UserOrganizationSchema),
         metadata={"description": "List of organizations the user is associated with"},
+    )
+
+
+class UserAgencySchema(Schema):
+    agency_id = fields.String(
+        metadata={
+            "description": "The internal ID of the agency",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    agency_name = fields.String(
+        metadata={
+            "description": "The name of the agency",
+            "example": "Department of Commerce",
+        }
+    )
+    agency_code = fields.String(
+        metadata={
+            "description": "The unique code for the agency",
+            "example": "DOC",
+        }
+    )
+
+
+class UserAgenciesResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(UserAgencySchema),
+        metadata={"description": "List of agencies the user is associated with"},
     )
 
 
@@ -773,3 +815,59 @@ class OrganizationInvitationSchema(Schema):
 
 class UserResponseOrgInvitationResponseSchema(AbstractResponseSchema):
     data = fields.Nested(OrganizationInvitationSchema)
+
+
+class SavedOpportunityNotificationsSelfSchema(Schema):
+    email_enabled = fields.Boolean(
+        metadata={
+            "description": "Whether email notifications are enabled for personal saved opportunities",
+            "example": True,
+        }
+    )
+
+
+class SavedOpportunityNotificationsOrgSchema(Schema):
+    organization_id = fields.UUID(
+        metadata={
+            "description": "The organization ID",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    email_enabled = fields.Boolean(
+        metadata={
+            "description": "Whether email notifications are enabled for this organization's saved opportunities",
+            "example": False,
+        }
+    )
+
+
+class SavedOpportunityNotificationsSchema(Schema):
+    self = fields.Nested(
+        SavedOpportunityNotificationsSelfSchema,
+        metadata={"description": "Personal notification settings for saved opportunities"},
+    )
+    organizations = fields.List(
+        fields.Nested(SavedOpportunityNotificationsOrgSchema),
+        metadata={"description": "Notification settings per organization"},
+    )
+
+
+class UserSavedOpportunityNotificationsResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(SavedOpportunityNotificationsSchema)
+
+
+class SetUserSavedOpportunityNotificationRequestSchema(Schema):
+    organization_id = fields.UUID(
+        required=True,
+        allow_none=True,
+        metadata={
+            "description": "The ID of the organization for which to set notification. If not provided, the setting applies to the user's own saved opportunities."
+        },
+    )
+    email_enabled = fields.Boolean(
+        required=True, metadata={"description": "Whether the email notifications is enabled"}
+    )
+
+
+class SetUserSavedOpportunityNotificationResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})

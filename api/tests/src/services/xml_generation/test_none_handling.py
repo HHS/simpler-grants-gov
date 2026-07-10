@@ -159,7 +159,7 @@ class TestNoneHandling:
         """Test None handling with nested object structures."""
         application_data = {
             "submission_type": "Application",
-            "applicant_address": {
+            "applicant": {
                 "street1": "123 Main St",
                 "street2": None,  # Should be excluded from nested structure
                 "city": "Washington",

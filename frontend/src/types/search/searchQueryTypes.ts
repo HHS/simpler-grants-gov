@@ -7,8 +7,10 @@ export interface FilterQueryParamData {
   fundingInstrument: Set<string>;
   eligibility: Set<string>;
   agency: Set<string>;
+  assistanceListingNumber: Set<string>;
   category: Set<string>;
   closeDate: Set<string>;
+  postedDate: Set<string>;
   costSharing: Set<string>;
   topLevelAgency: Set<string>;
 }

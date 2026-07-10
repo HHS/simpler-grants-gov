@@ -198,3 +198,33 @@ jobs:
             echo "Failed to create PR"
             exit 1
           fi
+
+          # Add reviewers to the newly created PR
+          NEW_PR_NUM=$(echo "$CREATE_RESPONSE" | jq -r '.number // empty')
+          if [ -n "$NEW_PR_NUM" ]; then
+            echo "Adding reviewers to PR #$NEW_PR_NUM..."
+            REVIEWER_RESPONSE=$(curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+                 -H "Accept: application/vnd.github+json" \
+                 "https://api.github.com/repos/${{ github.repository }}/pulls/$NEW_PR_NUM/requested_reviewers" \
+                 -d '{
+                   "reviewers": [
+                     "chouinar",
+                     "mdragon",
+                     "joshtonava",
+                     "jakobpederson",
+                     "chay-REIsys",
+                     "hao10282025-sudo",
+                     "kkrug",
+                     "dghazvini"
+                   ]
+                 }')
+
+            echo "Reviewer assignment response:"
+            echo "$REVIEWER_RESPONSE" | jq '.requested_reviewers[].login // "No reviewers in response"'
+
+            if echo "$REVIEWER_RESPONSE" | jq -e '.url' > /dev/null 2>&1; then
+              echo "Successfully requested reviewers"
+            else
+              echo "Warning: Could not add reviewers, but PR was created successfully"
+            fi
+          fi

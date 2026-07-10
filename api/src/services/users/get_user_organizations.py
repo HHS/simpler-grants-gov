@@ -1,10 +1,10 @@
 from typing import Any
 from uuid import UUID
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.adapters import db
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import OrganizationUser
 

@@ -4,26 +4,27 @@ import os
 from collections.abc import Iterator, Sequence
 from enum import StrEnum
 
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
+import grants_shared.util.file_util as file_util
+from grants_shared.task.ecs_background_task import ecs_background_task
+from grants_shared.util.datetime_util import get_now_us_eastern_datetime
 from pydantic import Field
-from sqlalchemy import exists, select
-from sqlalchemy.orm import noload, selectinload
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
-import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
-from src.constants.lookup_constants import ExtractType
+from src.constants.lookup_constants import ExtractType, JobType
+from src.db.models.agency_models import Agency
 from src.db.models.extract_models import ExtractMetadata
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
-    ExcludedOpportunityReview,
     Opportunity,
+    OpportunitySummary,
 )
 from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
-from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
-from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ logger = logging.getLogger(__name__)
     help="Generate JSON and CSV files containing an export of all opportunity data",
 )
 @flask_db.with_db_session()
-@ecs_background_task(task_name="export-opportunity-data")
+@ecs_background_task(task_name=JobType.EXPORT_OPPORTUNITY_DATA)
 def export_opportunity_data(db_session: db.Session) -> None:
     ExportOpportunityDataTask(db_session).run()
 
@@ -128,14 +129,21 @@ class ExportOpportunityDataTask(Task):
                 .where(
                     Opportunity.is_draft.is_(False),
                     CurrentOpportunitySummary.opportunity_status.isnot(None),
-                    ~exists(
-                        select(ExcludedOpportunityReview.legacy_opportunity_id).where(
-                            ExcludedOpportunityReview.legacy_opportunity_id
-                            == Opportunity.legacy_opportunity_id
-                        )
-                    ),
                 )
-                .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
+                .options(
+                    # Opportunity summary
+                    selectinload(Opportunity.current_opportunity_summary)
+                    .selectinload(CurrentOpportunitySummary.opportunity_summary)
+                    .options(
+                        selectinload(OpportunitySummary.link_funding_instruments),
+                        selectinload(OpportunitySummary.link_funding_categories),
+                        selectinload(OpportunitySummary.link_applicant_types),
+                    ),
+                    # Assistance listing number
+                    selectinload(Opportunity.opportunity_assistance_listings),
+                    # Agency
+                    selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency),
+                )
                 .execution_options(yield_per=5000)
             )
             .scalars()

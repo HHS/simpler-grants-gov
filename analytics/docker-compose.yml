@@ -1,15 +1,4 @@
 services:
-
-  grants-analytics-db:
-    image: postgres:15-alpine
-    container_name: grants-analytics-db
-    command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
-    env_file: ./local.env
-    ports:
-      - "5432:5432"
-    volumes:
-      - grantsanalyticsdbdata:/var/lib/postgresql/data
-
   grants-analytics:
     build:
       context: .
@@ -22,8 +11,9 @@ services:
     volumes:
       - .:/analytics
       - ~/.ssh:/home/${RUN_USER:-analytics}/.ssh
-    depends_on:
-      - grants-analytics-db
+    networks:
+      - default
+      - local_db
 
   grants-metabase:
     image: metabase/metabase:latest
@@ -34,5 +24,10 @@ services:
       - 3100:3000
     env_file: ./local.env
 
-volumes:
-  grantsanalyticsdbdata:
+
+networks:
+  local_db:
+    # NOTE: This network is created by starting the shared DB
+    # defined in /backend/docker-compose.db.yml
+    external: true
+    name: local_db

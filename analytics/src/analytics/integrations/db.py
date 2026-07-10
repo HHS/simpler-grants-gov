@@ -7,7 +7,7 @@ import boto3
 import psycopg
 from sqlalchemy import Connection, Engine, create_engine, pool
 
-from config import DBSettings, get_db_settings
+from analytics.config import DBSettings, get_db_settings
 
 # The variables used in the connection url are pulled from local.env
 # and configured in the DBSettings class found in config.py

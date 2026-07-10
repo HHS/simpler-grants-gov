@@ -31,7 +31,7 @@ class GetApplicationZipResponseSOAPEnvelope(BaseModel):
     _mtom_file_stream: Any | None = PrivateAttr(default=None)
 
     def to_soap_envelope_dict(self, operation_name: str) -> dict:
-        envelope_dict = {"Body": self.Body.model_dump(by_alias=True)}
+        envelope_dict = {"Envelope": {"Body": self.Body.model_dump(by_alias=True)}}
         if self._mtom_file_stream:
             envelope_dict["_mtom_file_stream"] = self._mtom_file_stream
         return envelope_dict

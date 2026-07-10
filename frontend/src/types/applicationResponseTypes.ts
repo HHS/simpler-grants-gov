@@ -1,15 +1,17 @@
-import { APIResponse } from "src/types/apiResponseTypes";
+import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
+import { FormValidationWarning } from "src/types/applyForm/types";
 
-import { FormValidationWarning } from "src/components/applyForm/types";
+import { ApplicationSubmission } from "./application/applicationSubmissionTypes";
 import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";
 import { FormDetail } from "./formResponseTypes";
+import { iso8601Date, RegexMatchedString } from "./generalTypes";
 
 export interface ApplicationResponseDetail {
   [key: string]: string;
 }
 
-export enum Status {
+export enum ApplicationStatus {
   IN_PROGRESS = "in_progress",
   SUBMITTED = "submitted",
   ACCEPTED = "accepted",
@@ -48,6 +50,8 @@ export interface ApplicationFormDetail {
   application_name: string;
   is_required: boolean;
   is_included_in_submission?: boolean | null;
+  updated_at: RegexMatchedString<typeof iso8601Date>;
+  created_at: RegexMatchedString<typeof iso8601Date>;
 }
 
 export interface ApplicationDetail {
@@ -55,14 +59,52 @@ export interface ApplicationDetail {
   application_forms: Array<ApplicationFormDetail>;
   application_id: string;
   application_name: string;
-  application_status: string;
+  application_status: ApplicationStatus;
   competition: Competition;
   form_validation_warnings?: FormValidationWarnings;
-  organization: Organization;
+  organization?: Organization | null;
   users: {
     email: string;
     user_id: string;
   };
+}
+export interface ApplicationHistoryUserData {
+  user_id: string;
+  first_name?: string;
+  last_name?: string;
+  email: string;
+}
+
+export type ApplicationActivityEvent =
+  | "application_created"
+  | "application_name_changed"
+  | "attachment_added"
+  | "attachment_deleted"
+  | "attachment_updated"
+  | "application_submitted"
+  | "form_updated"
+  | "user_added"
+  | "user_updated"
+  | "user_removed"
+  | "organization_added"
+  | "application_submit_rejected"
+  | "submission_created";
+
+export interface ApplicationHistory {
+  application_audit_event: ApplicationActivityEvent;
+  user: ApplicationHistoryUserData;
+  target_user?: ApplicationHistoryUserData;
+  target_application_form?: {
+    application_form_id: string;
+    competition_form_id: string;
+    form_id: string;
+    form_name: string;
+  };
+  target_attachment?: {
+    application_attachment_id: string;
+    file_name: string;
+  };
+  created_at: string;
 }
 
 export interface ApplicationAttachmentUploadResponse extends APIResponse {
@@ -96,4 +138,13 @@ export interface ApplicationFormDetailApiResponse
 
 export interface ApplicationDetailApiResponse extends APIResponse {
   data: ApplicationDetail;
+}
+
+export interface ApplicationHistoryApiResponse extends APIResponse {
+  data: ApplicationHistory[];
+}
+
+export interface ApplicationSubmissionsApiResponse extends APIResponse {
+  data: ApplicationSubmission[];
+  pagination_info: PaginationInfo;
 }

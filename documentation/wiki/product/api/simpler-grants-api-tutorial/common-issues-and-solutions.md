@@ -41,7 +41,7 @@ Every search request must include:
 **Solution**: Check your API key
 
 * Make sure you copied it correctly (all 25 characters)
-* Verify you're using the header `X-API-Key` (not `X-Auth` or anything else)
+* Verify you're using the header `X-API-Key`
 * Ensure there are no extra spaces
 
 #### Problem: "400 Bad Request" Error

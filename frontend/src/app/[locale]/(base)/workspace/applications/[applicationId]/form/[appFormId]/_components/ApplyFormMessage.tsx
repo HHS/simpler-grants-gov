@@ -1,0 +1,141 @@
+import { FormattedFormValidationWarning } from "src/types/applyForm/types";
+
+import { useTranslations } from "next-intl";
+import { Alert } from "@trussworks/react-uswds";
+
+const getWarningKey = (warning: FormattedFormValidationWarning): string => {
+  return `${warning.htmlField ?? warning.field ?? warning.definition}-${warning.message}`;
+};
+
+/**
+ * Builds summary link text for validation warnings.
+ *
+ * For repeatable FieldList inputs, multiple rows can contain the same child
+ * field name (for example, multiple `first_name` fields). In those cases,
+ * the base formatted message alone is not specific enough in the summary.
+ *
+ * When the warning points to a row-specific FieldList input, we append:
+ * - the FieldList label
+ * - the 1-based entry number derived from the rendered html field id
+ *
+ * Example:
+ *   "First Name is required"
+ *
+ * becomes:
+ *   "First Name is required (Contact People, Entry 2)"
+ */
+export const getWarningLinkText = (
+  warning: FormattedFormValidationWarning,
+): string => {
+  const baseText = warning.formatted ?? warning.message;
+  const entryMatch = warning.htmlField?.match(/\[(\d+)\]--/);
+  const fieldListLabel = warning.fieldListLabel ?? "";
+
+  if (!entryMatch) {
+    return baseText;
+  }
+
+  const entryIndex = Number(entryMatch[1]);
+
+  if (Number.isNaN(entryIndex)) {
+    return baseText;
+  }
+
+  const entryNumber = entryIndex + 1;
+  const requiredMatch = baseText.match(/^(.*)\s+is required$/i);
+
+  if (fieldListLabel && requiredMatch) {
+    const fieldName = requiredMatch[1];
+
+    return `${fieldName} in ${fieldListLabel}, Entry ${entryNumber} is required`;
+  }
+
+  if (fieldListLabel) {
+    return `${baseText} (${fieldListLabel}, Entry ${entryNumber})`;
+  }
+
+  return `${baseText} (Entry ${entryNumber})`;
+};
+
+export const ApplyFormMessage = ({
+  error,
+  validationWarnings,
+  saved,
+  isBudgetForm = false,
+}: {
+  error: boolean;
+  validationWarnings: FormattedFormValidationWarning[] | null;
+  saved: boolean;
+  isBudgetForm?: boolean;
+}) => {
+  const t = useTranslations("Application.applyForm");
+  const errorMessage = t.rich("errorMessage", {
+    "email-link": (content) => (
+      <a href="mailto:simpler@grants.gov">{content}</a>
+    ),
+    p: (content) => <p>{content}</p>,
+  });
+
+  const uniqueValidationWarnings = validationWarnings
+    ? Array.from(
+        new Map(
+          validationWarnings.map((warning) => [
+            getWarningKey(warning),
+            warning,
+          ]),
+        ).values(),
+      )
+    : null;
+
+  if (!saved) {
+    return <></>;
+  } else if (error) {
+    return (
+      <Alert
+        heading={t("errorTitle")}
+        headingLevel="h2"
+        type="error"
+        validation
+      >
+        {errorMessage}
+      </Alert>
+    );
+  } else if (uniqueValidationWarnings && uniqueValidationWarnings.length > 0) {
+    return (
+      <Alert
+        // Added data-testid to ensure success and warning alerts are detectable in tests
+        data-testid="alert"
+        heading={t("savedTitle")}
+        headingLevel="h2"
+        type="warning"
+        validation
+      >
+        {t("validationMessage")}
+        <ul>
+          {uniqueValidationWarnings.map((warning) => {
+            const link = isBudgetForm ? (
+              <a href={`#${warning.field}`}>{warning.message}</a>
+            ) : (
+              <a href={`#${warning.htmlField || ""}`}>
+                {getWarningLinkText(warning)}
+              </a>
+            );
+            return <li key={getWarningKey(warning)}>{link}</li>;
+          })}
+        </ul>
+      </Alert>
+    );
+  } else {
+    return (
+      // Added data-testid to ensure success and warning alerts are detectable in tests
+      <Alert
+        data-testid="alert"
+        heading={t("savedTitle")}
+        headingLevel="h3"
+        type="success"
+      >
+        {t("savedMessage")}
+      </Alert>
+    );
+  }
+};

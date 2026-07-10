@@ -4,11 +4,30 @@ To help simplify setup when we need many factories repeatedly
 with only a few alterations.
 """
 
+import io
+import uuid
+from datetime import timedelta
+from urllib import parse
+
+import grants_shared.util.datetime_util as datetime_util
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import NameOID
+
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import ApplicationForm
+from src.db.models.competition_models import ApplicationForm, Form
 from src.db.models.user_models import Role, User
-from src.legacy_soap_api.legacy_soap_api_auth import SOAPClientCertificate
+from src.form_schema.forms import init_form_registry
+from src.form_schema.registry.form_template_registry import form_template_registry
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    LOG_LOCAL_RESPONSE_HEADER_KEY,
+    SOAPAuth,
+    SOAPClientCertificate,
+)
+from src.legacy_soap_api.legacy_soap_api_config import GRANTOR_SOAP_ACTION_PATH, SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from tests.src.db.models.factories import (
     AgencyFactory,
     AgencyUserFactory,
@@ -19,13 +38,13 @@ from tests.src.db.models.factories import (
     ApplicationUserFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     LegacyAgencyCertificateFactory,
     LinkExternalUserFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
     OrganizationFactory,
     RoleFactory,
+    StagingTcertificatesFactory,
 )
 
 DEFAULT_VALUE = object()
@@ -88,7 +107,20 @@ def setup_application_for_form_validation(
     }
 
     competition = CompetitionFactory.create(**competition_params)
-    form = FormFactory.create(form_json_schema=json_schema, form_rule_schema=rule_schema)
+
+    init_form_registry()
+    form = Form(
+        form_id=uuid.uuid4(),
+        form_name="Test Form",
+        short_form_name="TestForm",
+        form_version="1.0",
+        agency_code="SGG",
+        form_json_schema=json_schema,
+        form_ui_schema={},
+        form_rule_schema=rule_schema,
+        json_to_xml_schema=None,
+    )
+    form_template_registry.register(form, major_version=1)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     organization = None
@@ -119,14 +151,52 @@ def setup_application_for_form_validation(
     if user_email is not None:
         app_user = ApplicationUserFactory.create(application=application)
         LinkExternalUserFactory.create(email=user_email, user=app_user.user)
+        application.submitted_by_user = app_user.user
 
     return application_form
 
 
+def get_mtls_urlencoded_str_and_serial_number():
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    subject = issuer = x509.Name(
+        [
+            x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
+            x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "Oregon"),
+            x509.NameAttribute(NameOID.LOCALITY_NAME, "Portland"),
+            x509.NameAttribute(NameOID.ORGANIZATION_NAME, "My Company"),
+            x509.NameAttribute(NameOID.COMMON_NAME, "example.com"),
+        ]
+    )
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(subject)
+        .issuer_name(issuer)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(datetime_util.utcnow())
+        .not_valid_after(datetime_util.utcnow() + timedelta(days=365))
+        .add_extension(
+            x509.SubjectAlternativeName([x509.DNSName("example.com")]),
+            critical=False,
+        )
+        .sign(key, algorithm=hashes.SHA256())
+    )
+    serial_number = hex(cert.serial_number).lower().lstrip("0x")
+    pem_bytes = cert.public_bytes(serialization.Encoding.PEM)
+    return parse.quote(pem_bytes), serial_number
+
+
 def setup_cert_user(
-    agency: Agency, privileges: list[Privilege]
-) -> tuple[User, Role, SOAPClientCertificate]:
-    legacy_certificate = LegacyAgencyCertificateFactory.create(agency=agency)
+    agency: Agency, privileges: list | set
+) -> tuple[User, Role, SOAPClientCertificate, str]:
+    mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
+    tcertificate = StagingTcertificatesFactory.create(serial_num=serial_number)
+    legacy_certificate = LegacyAgencyCertificateFactory.create(
+        agency=agency,
+        serial_number=serial_number,
+        cert_id=tcertificate.currentcertid,
+        expiration_date=tcertificate.expirationdate,
+    )
     agency_user = AgencyUserFactory.create(agency=agency, user=legacy_certificate.user)
     role = RoleFactory.create(privileges=privileges, is_agency_role=True)
     AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
@@ -135,5 +205,33 @@ def setup_cert_user(
         cert="123",
         fingerprint="456",
         legacy_certificate=legacy_certificate,
+        cert_id=legacy_certificate.cert_id,
     )
-    return legacy_certificate.user, role, soap_client_certificate
+    return legacy_certificate.user, role, soap_client_certificate, mtls_cert
+
+
+def create_soap_request(
+    soap_payload: bytes,
+    log_local: bool = False,
+    operation_name: str = "GetApplicationZipRequest",
+    full_path: str = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
+    api_name: str = SimplerSoapAPI.GRANTORS,
+) -> SOAPRequest:
+    _, _, soap_certificate, _ = setup_cert_user(
+        AgencyFactory.create(), [Privilege.LEGACY_AGENCY_VIEWER]
+    )
+    headers = {
+        "X-Gg-S2S-Uri": "https://google.com/xyz",
+        "Soapaction": f"{GRANTOR_SOAP_ACTION_PATH}/{operation_name.removesuffix('Request')}",
+    }
+    if log_local:
+        headers.update({f"{LOG_LOCAL_RESPONSE_HEADER_KEY}": "1"})
+    return SOAPRequest(
+        api_name=api_name,
+        headers=headers,
+        data=SoapRequestStreamer(stream=io.BytesIO(soap_payload)),
+        full_path=full_path,
+        method="POST",
+        auth=SOAPAuth(certificate=soap_certificate),
+        operation_name=operation_name,
+    )

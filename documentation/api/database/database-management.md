@@ -1,6 +1,7 @@
 # Database Management
 
 - [Database Management](#database-management)
+  - [Shared Setup](#shared-setup)
   - [Basic operations](#basic-operations)
     - [Initialize](#initialize)
     - [Start](#start)
@@ -8,6 +9,58 @@
   - [Running migrations](#running-migrations)
   - [Creating new migrations](#creating-new-migrations)
   - [Multi-head situations](#multi-head-situations)
+
+## Shared Setup
+As we have multiple backend applications that require a database, rather
+than create a separate database instance for each of them, we instead create
+one database instance with separate logical databases inside it. Each database
+is isolated from the others and has their own users.
+
+As part of the setup defined in [docker-compose.db.yml](../../../backend/docker-compose.db.yml) we setup:
+* A Postgres DB
+* Separate logical databases with their own separate super users - this way the services are still isolated
+
+### Adding a new service that depends on this DB
+If you wish to add a new service that depends on the database, you'll need to do the following.
+
+In your docker-compose file, add the `local_db` network as an external network
+```yml
+networks:
+  local_db:
+    external: true
+    name: local_db
+```
+
+Any services in the docker-compose that need to reach that DB like an API service
+needs to include that network:
+
+```yml
+services:
+  grants-api:
+    # include whatever you need here for the service itself
+    networks:
+      - local_db
+      - default
+```
+
+In [docker-compose.db.yml](../../../backend/docker-compose.db.yml) update the
+`POSTGRES_MULTIPLE_DATABASES: "app,app:analytics,analytics"` env variable to include
+the name of the database + user you want the service to connect as. We generally name
+these the same. When the DB service starts up, we'll create a logical database owned
+by a user with that name. All users will have a password of `secret123`.
+
+You'll need to completely remake the database for the user to be created, some of our services
+have utilities for that already, but you can also run:
+
+```shell
+# Drop the volume, this will delete all DB data
+docker compose -f docker-compose.db.yml down --volumes grants-db
+
+# Start the DB
+docker compose -f docker-compose.db.yml up grants-db
+```
+
+You must specify the docker compose file, otherwise docker won't know where to look for `grants-db`.
 
 ## Basic operations
 ### Initialize
@@ -61,7 +114,7 @@ $ make db-migrate
 <details>
     <summary>Example: Adding a new column to an existing table:</summary>
 
-1. Manually update the database models with the changes ([example_models.py](/api/src/db/models/example_models.py) in this example)
+1. Manually update the database models with the changes ([example_models.py](../../../api/src/db/models/base.py) in this example)
 ```python
 class ExampleTable(Base):
     ...
@@ -141,7 +194,18 @@ it will be caught when you send a pull request.
 
 In order to remove a column, we'll first need to remove all usage of the column in the API code base.
 
+One usage case is in transformation module (e.g. \simpler-grants-gov\api\src\data_migration\transformation\transform_util.py).
+
+```diff
+def transform_example():
+    example.first_column = example_source.first_column
+-   example.my_column = example_source.my_column    # column to be removed
+    return example
+```
+
 However, since the column will still be in the database model, SQLAlchemy will still include it in `SELECT`s and `INSERT`s for the table. We'll need to set this column to `deferred`, in order to exclude it from queries, and to `evaluates_none`, to stop inserting null for it. This does require that the column be nullable to work, if it isn't you'll first need to make it nullable in an earlier migration.
+
+Note: `evaulates_none` is required if the column has a server_default as it will make it so if a field isn't set, rather than excluding it from the insert into the DB, it sets it to `null` so the server_default isn't used. If the column has no `server_default`, it isn't technically required to use it, but we recommend adding it because it's simpler to have a single pattern to follow rather than multiple.
 
 ```python
 class Example(ApiSchemaTable, TimestampMixin):
@@ -153,7 +217,7 @@ class Example(ApiSchemaTable, TimestampMixin):
 
     # The column we want to deprecate, needs both
     # the call to evaluates_none() and deferred=True
-    my_column: Mapped[str | None] = mapped_column(Text.evaluates_none(), deferred=True)
+    my_column: Mapped[str | None] = mapped_column(Text().evaluates_none(), deferred=True)
 ```
 
 **Second Deploy**

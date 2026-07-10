@@ -1,13 +1,19 @@
+import dataclasses
 import uuid
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
+from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from grants_shared.db.models.base import TimestampMixin
+from grants_shared.util.datetime_util import get_now_us_eastern_date
+from grants_shared.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+import src.form_schema.registry.form_template_registry as form_template_registry_module
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,
     ApplicationStatus,
@@ -15,22 +21,20 @@ from src.constants.lookup_constants import (
     FormFamily,
     FormType,
 )
-from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import (
     LkApplicationAuditEvent,
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
     LkFormFamily,
-    LkFormType,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
-from src.util.datetime_util import get_now_us_eastern_date
-from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
     from src.db.models.user_models import ApplicationUser, User
+    from src.db.models.workflow_models import Workflow
 
 
 class Competition(ApiSchemaTable, TimestampMixin):
@@ -158,6 +162,11 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     file_location: Mapped[str]
     file_name: Mapped[str]
 
+    # In grants.gov, a competition could only have one instruction record
+    # and it reused the competition ID as its primary key. We copy that over
+    # when transforming as it makes joining the data much simpler.
+    legacy_competition_id: Mapped[int | None] = mapped_column(index=True)
+
     @property
     def download_path(self) -> str:
         return presign_or_s3_cdnify_url(self.file_location)
@@ -177,38 +186,29 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
         return presign_or_s3_cdnify_url(self.file_location)
 
 
-class Form(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "form"
+@dataclasses.dataclass
+class Form:
+    """In-memory form definition. The form DB table has been dropped; forms live in the registry."""
 
-    form_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    form_name: Mapped[str]
+    form_id: uuid.UUID
+    form_name: str
     # This is used for making files and should not contain spaces
-    short_form_name: Mapped[str]
-    form_version: Mapped[str]
-    agency_code: Mapped[str]
-    omb_number: Mapped[str | None]
-    legacy_form_id: Mapped[int | None] = mapped_column(index=True, unique=True)
-    active_at: Mapped[datetime | None]
-    inactive_at: Mapped[datetime | None]
-    form_json_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
-    form_ui_schema: Mapped[dict] = mapped_column(JSONB, nullable=False)
-    form_instruction_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID, ForeignKey(FormInstruction.form_instruction_id), nullable=True
-    )
-    form_instruction: Mapped[FormInstruction | None] = relationship(
-        FormInstruction, cascade="all, delete-orphan", single_parent=True
-    )
-
-    form_rule_schema: Mapped[dict | None] = mapped_column(JSONB)
-    json_to_xml_schema: Mapped[dict | None] = mapped_column(JSONB)
-
-    form_type: Mapped[FormType | None] = mapped_column(
-        "form_type_id",
-        LookupColumn(LkFormType),
-        ForeignKey(LkFormType.form_type_id),
-    )
-    sgg_version: Mapped[str | None]
-    is_deprecated: Mapped[bool | None]
+    short_form_name: str
+    form_version: str
+    agency_code: str
+    form_json_schema: dict
+    form_ui_schema: dict
+    omb_number: str | None = None
+    legacy_form_id: int | None = None
+    active_at: datetime | None = None
+    inactive_at: datetime | None = None
+    form_instruction_id: uuid.UUID | None = None
+    form_instruction: FormInstruction | None = None  # populated at runtime by get_form service
+    form_rule_schema: dict | None = None
+    json_to_xml_schema: dict | None = None
+    form_type: FormType | None = None
+    sgg_version: str | None = None
+    is_deprecated: bool | None = None
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
@@ -229,10 +229,16 @@ class CompetitionForm(ApiSchemaTable, TimestampMixin):
     )
     competition: Mapped[Competition] = relationship(Competition)
 
-    form_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Form.form_id))
-    form: Mapped[Form] = relationship(Form)
+    form_id: Mapped[uuid.UUID] = mapped_column(UUID)
 
     is_required: Mapped[bool]
+
+    @property
+    def form(self) -> Form:
+        """Return the Form from the in-memory registry."""
+        return form_template_registry_module.form_template_registry.get_by_id_and_major_version(
+            form_template_registry_module.FormTemplateKey(self.form_id, 1)
+        )
 
 
 class Application(ApiSchemaTable, TimestampMixin):
@@ -264,6 +270,8 @@ class Application(ApiSchemaTable, TimestampMixin):
     organization: Mapped[Organization | None] = relationship(
         Organization, uselist=False, back_populates="applications"
     )
+
+    intends_to_add_organization: Mapped[bool | None]
 
     application_forms: Mapped[list[ApplicationForm]] = relationship(
         "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
@@ -307,6 +315,15 @@ class Application(ApiSchemaTable, TimestampMixin):
         "ApplicationAudit",
         uselist=True,
         back_populates="application",
+        cascade="all, delete-orphan",
+    )
+
+    # We mostly add this so if we delete an application, any corresponding
+    # workflows are deleted as well.
+    workflows: Mapped[list[Workflow]] = relationship(
+        "Workflow",
+        back_populates="application",
+        uselist=True,
         cascade="all, delete-orphan",
     )
 
@@ -418,12 +435,65 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
         server_default=legacy_tracking_number_seq.next_value(),
     )
 
+    application_submission_number: Mapped[str | None]
+    project_title: Mapped[str | None]
+    total_requested_amount: Mapped[Decimal | None]
+
+    # We mostly add this so if we delete a submission, any corresponding
+    # workflows are deleted as well.
+    workflows: Mapped[list[Workflow]] = relationship(
+        "Workflow",
+        back_populates="application_submission",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+    application_submission_notes: Mapped[list[ApplicationSubmissionNote]] = relationship(
+        back_populates="application_submission",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+    application_submission_tracking_numbers: Mapped[list[ApplicationSubmissionTrackingNumber]] = (
+        relationship(
+            back_populates="application_submission",
+            uselist=True,
+            cascade="all, delete-orphan",
+        )
+    )
+
+    application_submission_retrievals: Mapped[list[ApplicationSubmissionRetrieved]] = relationship(
+        "ApplicationSubmissionRetrieved",
+        back_populates="application_submission",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
     @property
     def download_path(self) -> str:
         """Get the presigned s3 url path for downloading the submission file"""
         # NOTE: These submission files will only ever be in a non-public
         # bucket so we only can presign their URL, we can't use the CDN path.
         return pre_sign_file_location(self.file_location)
+
+
+class ApplicationSubmissionRetrieved(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_submission_retrieved"
+
+    application_submission_retrieved_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(ApplicationSubmission.application_submission_id)
+    )
+    created_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+    modified_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+
+    application_submission: Mapped[ApplicationSubmission] = relationship(
+        ApplicationSubmission, back_populates="application_submission_retrievals"
+    )
+    created_by_user: Mapped[User] = relationship("User", foreign_keys=[created_by_user_id])
+    modified_by_user: Mapped[User] = relationship("User", foreign_keys=[modified_by_user_id])
 
 
 class ShortLivedInternalToken(ApiSchemaTable, TimestampMixin):
@@ -450,6 +520,54 @@ class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkCompetitionOpenToApplicant.competition_open_to_applicant_id),
         primary_key=True,
     )
+
+
+class ApplicationSubmissionNote(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_submission_note"
+
+    application_submission_note_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(ApplicationSubmission.application_submission_id)
+    )
+
+    application_submission: Mapped[ApplicationSubmission] = relationship(
+        ApplicationSubmission, back_populates="application_submission_notes"
+    )
+
+    note: Mapped[str]
+
+    created_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+    modified_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+
+    created_by_user: Mapped[User] = relationship("User", foreign_keys=[created_by_user_id])
+    modified_by_user: Mapped[User] = relationship("User", foreign_keys=[modified_by_user_id])
+
+
+class ApplicationSubmissionTrackingNumber(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_submission_tracking_number"
+
+    application_submission_tracking_number_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(ApplicationSubmission.application_submission_id)
+    )
+
+    application_submission: Mapped[ApplicationSubmission] = relationship(
+        ApplicationSubmission, back_populates="application_submission_tracking_numbers"
+    )
+
+    tracking_number: Mapped[str]
+
+    created_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+    modified_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+
+    created_by_user: Mapped[User] = relationship("User", foreign_keys=[created_by_user_id])
+    modified_by_user: Mapped[User] = relationship("User", foreign_keys=[modified_by_user_id])
 
 
 class ApplicationAudit(ApiSchemaTable, TimestampMixin):

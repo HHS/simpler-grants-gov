@@ -1,8 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import React, { ElementType } from "react";
 
-import React from "react";
-
-import InfoTooltip from "src/components/InfoTooltip";
+import InfoTooltip from "src/components/core/tooltip/InfoTooltip";
 
 const meta = {
   title: "Components/InfoTooltip",
@@ -16,18 +14,17 @@ const meta = {
     },
   },
   decorators: [
-    (Story) => (
+    (Story: ElementType) => (
       <div style={{ padding: "50px" }}>
         <Story />
       </div>
     ),
   ],
-} satisfies Meta<typeof InfoTooltip>;
+};
 
 export default meta;
-type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default = {
   args: {
     text: "This is an informational tooltip",
     position: "top",

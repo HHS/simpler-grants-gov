@@ -6,7 +6,7 @@ The logo is used most often as it captures more of our brand characters. The sym
 
 The symbol and wordmark have been carefully scaled, spaced, and aligned to create the logo. Do not alter its construction.
 
-<figure><img src="../../.gitbook/assets/Simpler Grants Logo Overview (1).jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Simpler Grants Logo Overview.jpg" alt=""><figcaption></figcaption></figure>
 
 ## Star Symbol
 
@@ -43,4 +43,3 @@ Do not diminish the value of our identity. Avoid the following treatments.
 Major updates to the content of this page will be added here.
 
 <table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>01/2025</td><td>Initial Content</td><td>Updated with initial content</td></tr><tr><td>02/25/2025</td><td>Format change</td><td>Reformatted so that "Don'ts" are cards</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
-

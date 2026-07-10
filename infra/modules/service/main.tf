@@ -22,10 +22,6 @@ data "external" "deploy_github_sha" {
   program = ["sh", "-c", "git rev-parse HEAD | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
 
-data "aws_ssm_parameter" "fluent_bit_commit" {
-  name = "/fluent-bit-commit"
-}
-
 locals {
   alb_name                = var.service_name
   cluster_name            = var.service_name
@@ -33,9 +29,6 @@ locals {
   log_group_name          = "service/${var.service_name}"
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
-  fluent_bit_repo_arn     = "arn:aws:ecr:us-east-1:${data.aws_caller_identity.current.account_id}:repository/simpler-grants-gov-fluentbit"
-  fluent_bit_repo_url     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/simpler-grants-gov-fluentbit"
-  fluent_bit_image_url    = "${local.fluent_bit_repo_url}:${data.aws_ssm_parameter.fluent_bit_commit.value}"
   image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 
@@ -45,7 +38,6 @@ locals {
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "GENERAL_S3_BUCKET_URL", value : aws_s3_bucket.general_purpose.bucket_regional_domain_name },
     { name : "ENVIRONMENT", value : var.environment_name },
-    { name : "DEPLOY_TIMESTAMP", value : timestamp() },
     { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
     # TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
     # { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
@@ -64,6 +56,7 @@ locals {
     { name : "DB_NAME", value : var.db_vars.connection_info.db_name },
     { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
+
   cdn_environment_variables = local.enable_cdn ? [
     { name : "CDN_URL", value : "https://${local.cdn_domain_name_env_var}" },
   ] : []
@@ -89,6 +82,7 @@ locals {
       ]
     ])
   )
+
 }
 
 #-------------------
@@ -111,7 +105,7 @@ resource "aws_ecs_service" "app" {
 
   network_configuration {
     assign_public_ip = false
-    subnets          = var.private_subnet_ids
+    subnets          = module.network.private_subnet_ids
     security_groups  = [aws_security_group.app.id]
   }
 
@@ -144,8 +138,8 @@ resource "aws_ecs_task_definition" "app" {
     {
       name                   = local.container_name,
       image                  = local.image_url,
-      memory                 = var.fargate_memory - var.fluent_bit_memory,
-      cpu                    = var.fargate_cpu - var.fluent_bit_cpu,
+      memory                 = var.fargate_memory,
+      cpu                    = var.fargate_cpu,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = var.readonly_root_filesystem,
@@ -159,8 +153,13 @@ resource "aws_ecs_task_definition" "app" {
         timeout  = 5,
         command  = var.healthcheck_command
       } : null,
-      environment = local.environment_variables,
-      secrets     = var.secrets,
+      environment = concat(local.environment_variables, [
+        {
+          name  = "TMPDIR"
+          value = "/tmp"
+        }
+      ]),
+      secrets = var.secrets,
       portMappings = [
         {
           containerPort = var.container_port,
@@ -168,61 +167,31 @@ resource "aws_ecs_task_definition" "app" {
           protocol      = "tcp"
         }
       ],
-      linuxParameters = var.drop_linux_capabilities ? {
-        capabilities = {
+      linuxParameters = {
+        capabilities = var.drop_linux_capabilities ? {
           add  = []
           drop = ["ALL"]
-        },
-        initProcessEnabled = true
-      } : null,
-      logConfiguration = {
-        logDriver = "awsfirelens",
-      }
-      mountPoints    = []
-      systemControls = []
-      volumesFrom    = []
-    },
-    {
-      name                   = "${local.container_name}-fluentbit"
-      image                  = local.fluent_bit_image_url,
-      memory                 = var.fluent_bit_memory,
-      cpu                    = var.fluent_bit_cpu,
-      networkMode            = "awsvpc",
-      essential              = true,
-      readonlyRootFilesystem = false,
-      healthCheck = {
-        timeout     = 5,
-        interval    = 10,
-        startPeriod = 30,
-        command     = ["CMD-SHELL", "curl http://localhost:80/api/v1/health"]
-      },
-      firelensConfiguration = {
-        type = "fluentbit",
-        options = {
-          enable-ecs-log-metadata = "true"
-          config-file-type        = "file"
-          config-file-value       = "/fluent-bit/etc/fluent-bit-custom.yml"
+          } : {
+          add  = []
+          drop = []
         }
-      }
+        initProcessEnabled = true
+        tmpfs = [{
+          containerPath = "/tmp"
+          size          = 1024
+          mountOptions  = ["rw", "nosuid"]
+        }]
+      },
       logConfiguration = {
         logDriver = "awslogs",
         options = {
-          "awslogs-group"         = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit",
+          "awslogs-group"         = aws_cloudwatch_log_group.service_logs.name,
           "awslogs-region"        = data.aws_region.current.name,
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
       }
-      secrets = [
-        {
-          name      = "licenseKey",
-          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
-        }
-      ]
-      environment = [
-        { name : "aws_region", value : data.aws_region.current.name },
-        { name : "container_name", value : local.container_name },
-        { name : "log_group_name", value : local.log_group_name },
-      ],
+      systemControls = []
+      volumesFrom    = []
     },
   ])
 
@@ -246,7 +215,6 @@ resource "aws_ecs_task_definition" "app" {
 
   depends_on = [
     aws_cloudwatch_log_group.service_logs,
-    aws_cloudwatch_log_group.fluentbit,
     aws_iam_role_policy.task_executor,
     aws_iam_role_policy_attachment.extra_policies,
   ]

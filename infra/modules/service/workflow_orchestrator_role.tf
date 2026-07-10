@@ -4,9 +4,13 @@
 # This role and policy are used by the Step Functions state machine that manages the scheduled jobs workflow.
 
 resource "aws_iam_role" "workflow_orchestrator" {
-  name                = "${var.service_name}-workflow-orchestrator"
-  managed_policy_arns = [aws_iam_policy.workflow_orchestrator.arn]
-  assume_role_policy  = data.aws_iam_policy_document.workflow_orchestrator_assume_role.json
+  name               = "${var.service_name}-workflow-orchestrator"
+  assume_role_policy = data.aws_iam_policy_document.workflow_orchestrator_assume_role.json
+}
+
+resource "aws_iam_role_policy_attachment" "workflow_orchestrator" {
+  role       = aws_iam_role.workflow_orchestrator.name
+  policy_arn = aws_iam_policy.workflow_orchestrator.arn
 }
 
 data "aws_iam_policy_document" "workflow_orchestrator_assume_role" {
@@ -72,9 +76,27 @@ data "aws_iam_policy_document" "workflow_orchestrator" {
   }
 
   statement {
-    effect    = "Allow"
-    actions   = ["ecs:RunTask"]
-    resources = ["${aws_ecs_task_definition.app.arn_without_revision}:*"]
+    sid = "StepFunctionsManagedRules"
+    actions = [
+      "events:CreateManagedRule",
+      "events:DeleteManagedRule",
+      "events:DescribeManagedRule",
+      "events:DisableManagedRule",
+      "events:EnableManagedRule",
+      "events:PutManagedRule",
+      "events:PutTargets",
+    ]
+    resources = [
+      "arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:managed-rule/*",
+    ]
+  }
+
+  statement {
+    effect  = "Allow"
+    actions = ["ecs:RunTask"]
+    resources = [
+      "${aws_ecs_task_definition.app.arn_without_revision}:*"
+    ]
     condition {
       test     = "ArnLike"
       variable = "ecs:cluster"
@@ -102,9 +124,15 @@ data "aws_iam_policy_document" "workflow_orchestrator" {
     actions = [
       "iam:PassRole",
     ]
-    resources = [
-      aws_iam_role.task_executor.arn,
-      aws_iam_role.app_service.arn,
-    ]
+    # Allow passing app_service, migrator_task, opensearch_write, and workflow_service roles
+    resources = concat(
+      [
+        aws_iam_role.task_executor.arn,
+        aws_iam_role.app_service.arn,
+      ],
+      length(aws_iam_role.migrator_task) > 0 ? [aws_iam_role.migrator_task[0].arn] : [],
+      length(aws_iam_role.opensearch_write) > 0 ? [aws_iam_role.opensearch_write[0].arn] : [],
+      length(aws_iam_role.workflow_service) > 0 ? [aws_iam_role.workflow_service[0].arn] : []
+    )
   }
 }

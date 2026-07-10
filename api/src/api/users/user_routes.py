@@ -2,15 +2,23 @@ import logging
 from uuid import UUID
 
 import flask
+from grants_shared.adapters import db
+from grants_shared.adapters.db import flask_db
+from grants_shared.api import response
+from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.auth.api_jwt_auth import refresh_token_expiration
+from grants_shared.auth.login_gov_jwt_auth import get_final_redirect_uri
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.util.dict_util import flatten_dict
 
 import src.adapters.search.flask_opensearch as flask_opensearch
-from src.adapters import db, search
-from src.adapters.db import flask_db
-from src.api import response
-from src.api.route_utils import raise_flask_error
+from src.adapters import search
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
+    SetUserSavedOpportunityNotificationRequestSchema,
+    SetUserSavedOpportunityNotificationResponseSchema,
+    UserAgenciesResponseSchema,
     UserApiKeyCreateRequestSchema,
     UserApiKeyCreateResponseSchema,
     UserApiKeyDeleteResponseSchema,
@@ -33,6 +41,7 @@ from src.api.users.user_schemas import (
     UserResponseOrgInvitationResponseSchema,
     UserSavedOpportunitiesRequestSchema,
     UserSavedOpportunitiesResponseSchema,
+    UserSavedOpportunityNotificationsResponseSchema,
     UserSavedSearchesRequestSchema,
     UserSavedSearchesResponseSchema,
     UserSaveOpportunityRequestSchema,
@@ -46,11 +55,11 @@ from src.api.users.user_schemas import (
     UserUpdateSavedSearchRequestSchema,
     UserUpdateSavedSearchResponseSchema,
 )
-from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
+from src.auth.api_jwt_auth import api_jwt_auth
 from src.auth.auth_utils import with_login_redirect_error_handler
-from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
+from src.auth.login_gov_jwt_auth import get_login_gov_redirect_uri
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.db.models.user_models import UserTokenSession
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.users.create_api_key import create_api_key
 from src.services.users.create_saved_opportunity import create_saved_opportunity
 from src.services.users.create_saved_search import create_saved_search
@@ -59,8 +68,12 @@ from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.delete_saved_search import delete_saved_search
 from src.services.users.get_roles_and_privileges import get_roles_and_privileges
 from src.services.users.get_saved_opportunities import get_saved_opportunities
+from src.services.users.get_saved_opportunity_notification_preferences import (
+    get_saved_opportunity_notification_preferences,
+)
 from src.services.users.get_saved_searches import get_saved_searches
 from src.services.users.get_user import get_user
+from src.services.users.get_user_agencies import get_user_agencies
 from src.services.users.get_user_api_keys import get_user_api_keys
 from src.services.users.get_user_applications import get_user_applications
 from src.services.users.get_user_organizations import get_user_organizations
@@ -71,6 +84,9 @@ from src.services.users.login_gov_callback_handler import (
 )
 from src.services.users.org_invitation_response import org_invitation_response
 from src.services.users.rename_api_key import rename_api_key
+from src.services.users.set_saved_opportunity_notification_settings import (
+    set_saved_opportunity_notification_settings,
+)
 from src.services.users.update_saved_searches import update_saved_search
 from src.services.users.update_user_profile import update_user_profile
 from src.services.users.user_can_access import check_user_can_access
@@ -89,12 +105,13 @@ The token you receive can then be set to the X-SGG-Token header for authenticati
 
 @user_blueprint.get("/login")
 @user_blueprint.doc(responses=[302], description=LOGIN_DESCRIPTION)
+@user_blueprint.input(user_schemas.UserLoginSchema, location="query")
 @with_login_redirect_error_handler()
 @flask_db.with_db_session()
-def user_login(db_session: db.Session) -> flask.Response:
+def user_login(db_session: db.Session, query_data: dict) -> flask.Response:
     logger.info("GET /v1/users/login")
     with db_session.begin():
-        redirect_uri = get_login_gov_redirect_uri(db_session)
+        redirect_uri = get_login_gov_redirect_uri(query_data, db_session)
 
     return response.redirect_response(redirect_uri)
 
@@ -147,8 +164,8 @@ def user_token_logout(db_session: db.Session) -> response.ApiResponse:
     logger.info(
         "Logged out a user",
         extra={
-            "user_token_session.token_id": str(user_token_session.token_id),
-            "user_token_session.user_id": str(user_token_session.user_id),
+            "user_token_session.token_id": user_token_session.token_id,
+            "user_token_session.user_id": user_token_session.user_id,
         },
     )
 
@@ -227,6 +244,36 @@ def user_get_organizations(db_session: db.Session, user_id: UUID) -> response.Ap
     return response.ApiResponse(message="Success", data=organizations)
 
 
+@user_blueprint.post("/<uuid:user_id>/agencies")
+@user_blueprint.output(UserAgenciesResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def user_get_agencies(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
+    logger.info("POST /v1/users/:user_id/agencies")
+
+    # Get user from multi-auth (supports both JWT and User API Key)
+    user = jwt_or_api_user_key_multi_auth.get_user()
+
+    # Verify the authenticated user matches the requested user_id
+    if user.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        db_session.add(user)
+        agencies = get_user_agencies(user)
+
+    logger.info(
+        "Retrieved agencies for user",
+        extra={
+            "user_id": user_id,
+            "agency_count": len(agencies),
+        },
+    )
+
+    return response.ApiResponse(message="Success", data=agencies)
+
+
 @user_blueprint.post("/<uuid:user_id>/applications")
 @user_blueprint.input(UserApplicationListRequestSchema, location="json")
 @user_blueprint.output(UserApplicationListResponseSchema)
@@ -268,6 +315,7 @@ def user_get_applications(
 def user_save_opportunity(
     db_session: db.Session, user_id: UUID, json_data: dict
 ) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"opportunity_id": json_data["opportunity_id"]})
     logger.info("POST /v1/users/:user_id/saved-opportunities")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
@@ -298,6 +346,7 @@ def user_save_opportunity(
 def user_delete_saved_opportunity(
     db_session: db.Session, user_id: UUID, opportunity_id: UUID
 ) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
     logger.info("DELETE /v1/users/:user_id/saved-opportunities/:opportunity_id")
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
@@ -309,6 +358,9 @@ def user_delete_saved_opportunity(
         # Delete the saved opportunity
         delete_saved_opportunity(db_session, user_id, opportunity_id)
 
+    logger.info(
+        "Deleted saved opportunity", extra={"user_id": user_id, "opportunity_id": opportunity_id}
+    )
     return response.ApiResponse(message="Success")
 
 
@@ -320,6 +372,7 @@ def user_delete_saved_opportunity(
 def user_delete_saved_opportunity_legacy(
     db_session: db.Session, user_id: UUID, legacy_opportunity_id: int
 ) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"legacy_opportunity_id": legacy_opportunity_id})
     logger.info("DELETE /v1/users/:user_id/saved-opportunities/:opportunity_id")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
@@ -332,28 +385,44 @@ def user_delete_saved_opportunity_legacy(
         # Delete the saved opportunity
         delete_saved_opportunity(db_session, user_id, legacy_opportunity_id)
 
+    logger.info(
+        "Deleted saved opportunity",
+        extra={"user_id": user_id, "legacy_opportunity_id": legacy_opportunity_id},
+    )
     return response.ApiResponse(message="Success")
 
 
 @user_blueprint.post("/<uuid:user_id>/saved-opportunities/list")
 @user_blueprint.input(UserSavedOpportunitiesRequestSchema, location="json")
 @user_blueprint.output(UserSavedOpportunitiesResponseSchema)
-@user_blueprint.doc(responses=[200, 403])
+@user_blueprint.doc(responses=[200, 403, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_get_saved_opportunities(
     db_session: db.Session, user_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     logger.info("POST /v1/users/:user_id/saved-opportunities/list")
-
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
-
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
         raise_flask_error(403, "Forbidden")
 
-    # Get all saved opportunities for the user with their related opportunity data
-    saved_opportunities, pagination_info = get_saved_opportunities(db_session, user_id, json_data)
+    with db_session.begin():
+        # Add the user from the token session to our current session
+        db_session.add(user_token_session)
+
+        # Get all saved opportunities for the user with their related opportunity data
+        saved_opportunities, pagination_info = get_saved_opportunities(
+            db_session, user_token_session.user, json_data
+        )
+
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
+    )
+    logger.info("Successfully fetched saved opportunities")
 
     return response.ApiResponse(
         message="Success",
@@ -372,6 +441,9 @@ def user_get_saved_opportunities(
 def user_save_search(
     search_client: search.SearchClient, db_session: db.Session, user_id: UUID, json_data: dict
 ) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        flatten_dict(json_data.get("search_query", {}), prefix="search_query")
+    )
     logger.info("POST /v1/users/:user_id/saved-searches")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
@@ -383,6 +455,11 @@ def user_save_search(
     with db_session.begin():
         saved_search = create_saved_search(search_client, db_session, user_id, json_data)
 
+    add_extra_data_to_current_request_logs(
+        {
+            "response.matched_opportunity_count": len(saved_search.searched_opportunity_ids),
+        }
+    )
     logger.info(
         "Saved search for user",
         extra={
@@ -402,6 +479,7 @@ def user_save_search(
 def user_delete_saved_search(
     db_session: db.Session, user_id: UUID, saved_search_id: UUID
 ) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"saved_search_id": saved_search_id})
     logger.info("DELETE /v1/users/:user_id/saved-searches/:saved_search_id")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
@@ -442,6 +520,14 @@ def user_get_saved_searches(
 
     saved_searches, pagination_info = get_saved_searches(db_session, user_id, json_data)
 
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
+    )
+    logger.info("Successfully fetched saved searches")
+
     return response.ApiResponse(
         message="Success",
         data=saved_searches,
@@ -458,6 +544,7 @@ def user_get_saved_searches(
 def user_update_saved_search(
     db_session: db.Session, user_id: UUID, saved_search_id: UUID, json_data: dict
 ) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"saved_search_id": saved_search_id})
     logger.info("PUT /v1/users/:user_id/saved-searches/:saved_search_id")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
@@ -504,11 +591,7 @@ def user_create_api_key(
 
     logger.info(
         "Created API key for user",
-        extra={
-            "user_id": user_id,
-            "api_key_id": api_key.api_key_id,
-            "key_name": api_key.key_name,
-        },
+        extra=api_key.get_log_extra(),
     )
 
     return response.ApiResponse(message="Success", data=api_key)
@@ -744,3 +827,55 @@ def user_response_org_invitation(
         )
 
     return response.ApiResponse(message="Success", data=invitation_response)
+
+
+@user_blueprint.get("/<uuid:user_id>/saved-opportunities/notifications")
+@user_blueprint.output(UserSavedOpportunityNotificationsResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def user_get_saved_opportunity_notifications(
+    db_session: db.Session, user_id: UUID
+) -> response.ApiResponse:
+    logger.info("GET /v1/users/:user_id/saved-opportunities/notifications")
+    user = jwt_or_api_user_key_multi_auth.get_user()
+
+    # Verify the authenticated user matches the requested user_id
+    if user.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        db_session.add(user)
+        result = get_saved_opportunity_notification_preferences(db_session, user)
+
+    logger.info("Successfully fetched saved opportunity notification preferences")
+    return response.ApiResponse(message="Success", data=result)
+
+
+@user_blueprint.post("/<uuid:user_id>/saved-opportunities/notifications")
+@user_blueprint.input(SetUserSavedOpportunityNotificationRequestSchema)
+@user_blueprint.output(SetUserSavedOpportunityNotificationResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403, 404, 422])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def user_saved_opportunities_notifications(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "user_id": user_id,
+        }
+    )
+    logger.info("POST /v1/users/:user_id/saved-opportunities/notifications")
+
+    user = jwt_or_api_user_key_multi_auth.get_user()
+
+    # Verify the authenticated user matches the requested user_id
+    if user.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        db_session.add(user)
+        set_saved_opportunity_notification_settings(db_session, user, json_data)
+
+    return response.ApiResponse(message="Success")

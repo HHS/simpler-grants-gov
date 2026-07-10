@@ -1,9 +1,9 @@
 from collections.abc import Sequence
 from uuid import UUID
 
+from grants_shared.adapters import db
 from sqlalchemy import select
 
-from src.adapters import db
 from src.constants.lookup_constants import RoleType
 from src.db.models.user_models import LinkRoleRoleType, Role, User
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access

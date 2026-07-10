@@ -778,6 +778,93 @@ class TestArrayDecompositionTransform:
         # No __attributes key when all are None
         assert "__attributes" not in result["Data"][0]
 
+    def test_array_decomposition_item_attributes_from_nested_field(self):
+        """Test that item_attributes can be sourced from inside the nested item_field value.
+
+        This covers the Section C/E grant_program use case: grant_program lives inside
+        non_federal_resources (the item_field), not at the parent activity_line_items level.
+        """
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "activity_line_items",
+            "field_mappings": {
+                "NonFederalResources": {
+                    "item_field": "non_federal_resources",
+                    "item_wrapper": "ResourceLineItem",
+                    "item_attributes": ["grant_program"],
+                },
+            },
+        }
+        source_data = {
+            "activity_line_items": [
+                {
+                    "activity_title": "Activity 1",
+                    "non_federal_resources": {
+                        "grant_program": "Grant Program A",
+                        "applicant_amount": "500.00",
+                    },
+                },
+                {
+                    "activity_title": "Activity 2",
+                    "non_federal_resources": {
+                        # No grant_program provided - attribute should be absent
+                        "applicant_amount": "1000.00",
+                    },
+                },
+            ],
+        }
+        field_path = ["budget_sections"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        assert "NonFederalResources" in result
+        assert len(result["NonFederalResources"]) == 2
+
+        # First item has grant_program inside non_federal_resources - should appear as attribute
+        assert result["NonFederalResources"][0]["__wrapper"] == "ResourceLineItem"
+        assert result["NonFederalResources"][0]["__attributes"] == {
+            "grant_program": "Grant Program A"
+        }
+        assert result["NonFederalResources"][0]["applicant_amount"] == "500.00"
+
+        # Second item has no grant_program - no __attributes key
+        assert result["NonFederalResources"][1]["__wrapper"] == "ResourceLineItem"
+        assert "__attributes" not in result["NonFederalResources"][1]
+        assert result["NonFederalResources"][1]["applicant_amount"] == "1000.00"
+
+    def test_array_decomposition_parent_item_attributes_take_priority(self):
+        """Test that parent-level item_attributes take priority over nested field values."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Data": {
+                    "item_field": "data",
+                    "item_wrapper": "DataItem",
+                    "item_attributes": ["title"],
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {
+                    "title": "Parent Title",  # at parent level
+                    "data": {
+                        "title": "Nested Title",  # also in nested field
+                        "value": "100",
+                    },
+                },
+            ],
+        }
+        field_path = ["data"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        # Parent-level value should win
+        assert result["Data"][0]["__attributes"] == {"title": "Parent Title"}
+
 
 class TestConditionalStructure:
     """Test conditional structure selection logic."""

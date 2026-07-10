@@ -1,12 +1,11 @@
-import { Meta } from "@storybook/react";
 import {
   fakeResponsiveTableHeaders,
   fakeResponsiveTableRows,
 } from "src/utils/testing/fixtures";
 
-import { TableWithResponsiveHeader } from "src/components/TableWithResponsiveHeader";
+import { TableWithResponsiveHeader } from "src/components/core/TableWithResponsiveHeader";
 
-const meta: Meta<typeof TableWithResponsiveHeader> = {
+const meta = {
   title: "Components/TableWithResponsiveHeader",
   component: TableWithResponsiveHeader,
   args: {

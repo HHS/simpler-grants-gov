@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 
 import flask
 import jwt
+from grants_shared.adapters.oauth.oauth_client_models import OauthTokenResponse
 
-from src.adapters.oauth.oauth_client_models import OauthTokenResponse
 from src.auth.login_gov_jwt_auth import get_config
 
 
@@ -23,6 +23,7 @@ def create_jwt(
     # in conftest.py::setup_login_gov_auth
     issuer: str | None = None,
     audience: str | None = None,
+    x509_presented: bool | None = None,
 ):
     """Create a JWT in roughly the format login.gov will give us"""
 
@@ -56,6 +57,10 @@ def create_jwt(
         "c_hash": "abc123",
         "acr": "urn:acr.login.gov:auth-only",
     }
+
+    # Only include x509_presented if explicitly set (login.gov only includes it when requested)
+    if x509_presented is not None:
+        payload["x509_presented"] = x509_presented
 
     return jwt.encode(payload, private_key, algorithm="RS256", headers={"kid": "test-key-id"})
 
@@ -114,5 +119,6 @@ def mock_oauth_endpoint(app, monkeypatch, private_key, mock_oauth_client):
         return mock_oauth_client
 
     monkeypatch.setattr(
-        "src.services.users.login_gov_callback_handler.get_login_gov_client", override_get_client
+        "grants_shared.services.users.login_gov_callback_handler.get_login_gov_client",
+        override_get_client,
     )

@@ -1,0 +1,47 @@
+import { render, screen } from "@testing-library/react";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
+
+import AwardRecommendationStatusTag from "src/components/award-recommendation/AwardRecommendationStatusTag";
+
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  use: jest.fn(() => ({
+    locale: "en",
+  })),
+}));
+
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+}));
+
+describe("AwardRecommendationStatusTag", () => {
+  it("renders the correct wrapper with data-testid", () => {
+    render(<AwardRecommendationStatusTag status="draft" />);
+
+    const wrapper = screen.getByTestId("award-recommendation-status-tag");
+    expect(wrapper).toBeInTheDocument();
+  });
+  it("renders draft status tag", () => {
+    render(<AwardRecommendationStatusTag status="draft" />);
+
+    const tag = screen.getByTestId("award-recommendation-status-in-progress");
+    expect(tag).toBeInTheDocument();
+  });
+
+  it("renders in review status tag without wrapping text", () => {
+    render(<AwardRecommendationStatusTag status="in_review" />);
+
+    const tag = screen.getByTestId(
+      "award-recommendation-status-pending-review",
+    );
+    expect(tag).toBeInTheDocument();
+    expect(tag).toHaveStyle({ whiteSpace: "nowrap" });
+  });
+
+  it("renders approved status tag", () => {
+    render(<AwardRecommendationStatusTag status="approved" />);
+
+    const tag = screen.getByTestId("award-recommendation-status-approved");
+    expect(tag).toBeInTheDocument();
+  });
+});

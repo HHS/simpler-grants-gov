@@ -3,16 +3,17 @@ import time
 from enum import StrEnum
 
 import click
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 import sqlalchemy
+from grants_shared.task.ecs_background_task import ecs_background_task
+from grants_shared.util import file_util
 from pydantic import Field
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
+from src.constants.lookup_constants import JobType
 from src.db.models import metadata as api_metadata
-from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
-from src.util import file_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -59,14 +60,11 @@ TABLES_TO_EXTRACT = {
         "modification_comments",
         "funding_category_description",
         "applicant_eligibility_description",
-        "agency_phone_number",
         "agency_contact_description",
         "agency_email_address",
         "agency_email_address_description",
         "version_number",
         "can_send_mail",
-        "agency_code",
-        "agency_name",
         "created_at",
         "updated_at",
     ],
@@ -113,7 +111,7 @@ TABLES_TO_EXTRACT = {
 )
 @click.option("--tables-to-extract", "-t", help="Tables to extract to a CSV file", multiple=True)
 @flask_db.with_db_session()
-@ecs_background_task(task_name="create-analytics-db-csvs")
+@ecs_background_task(task_name=JobType.CREATE_ANALYTICS_DB_CSVS)
 def create_analytics_db_csvs(db_session: db.Session, tables_to_extract: list[str]) -> None:
     logger.info("Create extract CSV file start")
 

@@ -11,7 +11,7 @@ import {
 } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
-import { LoginModal } from "src/components/LoginModal";
+import { LoginModal } from "src/components/core/loginModal/LoginModal";
 
 type LoginModalContextValue = {
   loginModalRef: RefObject<ModalRef | null>;

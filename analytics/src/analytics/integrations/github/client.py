@@ -5,7 +5,7 @@ from typing import Any
 
 import requests
 
-from config import get_db_settings
+from analytics.config import get_db_settings
 
 logger = logging.getLogger(__name__)
 

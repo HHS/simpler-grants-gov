@@ -1,10 +1,13 @@
 import { Metadata } from "next";
+import FeatureFlagsTable from "src/app/[locale]/(base)/dev/feature-flags/_components/FeatureFlagsTable";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import Head from "next/head";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import React from "react";
 import { Button } from "@trussworks/react-uswds";
-
-import FeatureFlagsTable from "src/components/dev/FeatureFlagsTable";
 
 export function generateMetadata() {
   const meta: Metadata = {
@@ -17,7 +20,7 @@ export function generateMetadata() {
 /**
  * View for managing feature flags
  */
-export default function FeatureFlags() {
+function FeatureFlags() {
   return (
     <>
       <Head>
@@ -28,18 +31,24 @@ export default function FeatureFlags() {
 
         <FeatureFlagsTable />
 
-        <a href="/">
+        <Link href="/">
           <Button type="button" data-testid="apply-changes">
             Apply changes and return to the App
           </Button>
-        </a>
+        </Link>
 
-        <a href="?_ff=reset">
+        <Link href="?_ff=reset">
           <Button type="button" data-testid="reset-defaults" secondary>
             Reset all flags to defaults
           </Button>
-        </a>
+        </Link>
       </div>
     </>
   );
 }
+
+export default withFeatureFlag<WithFeatureFlagProps, never>(
+  FeatureFlags,
+  "featureFlagAdminOff",
+  () => notFound(),
+);

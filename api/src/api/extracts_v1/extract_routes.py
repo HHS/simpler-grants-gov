@@ -1,12 +1,13 @@
 import logging
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
+import grants_shared.api.response as response
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+
 import src.api.extracts_v1.extract_schema as extract_schema
-import src.api.response as response
 from src.api.extracts_v1.extract_blueprint import extract_blueprint
-from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.services.extracts_v1.get_extracts import ExtractListParams, get_extracts
 
 logger = logging.getLogger(__name__)
@@ -37,8 +38,7 @@ examples = {
     examples=examples,
 )
 @extract_blueprint.output(extract_schema.ExtractMetadataListResponseSchema)
-@extract_blueprint.doc(security=api_key_multi_auth_security_schemes)
-@api_key_multi_auth.login_required
+@extract_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def extract_metadata_get(db_session: db.Session, raw_list_params: dict) -> response.ApiResponse:
     list_params: ExtractListParams = ExtractListParams.model_validate(raw_list_params)

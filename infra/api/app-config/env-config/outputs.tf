@@ -23,6 +23,8 @@ output "service_config" {
     instance_desired_instance_count = var.instance_desired_instance_count
     instance_scaling_max_capacity   = var.instance_scaling_max_capacity
     instance_scaling_min_capacity   = var.instance_scaling_min_capacity
+    instance_scaling_cpu_target     = var.instance_scaling_cpu_target
+    instance_scaling_memory_target  = var.instance_scaling_memory_target
     database_engine_version         = var.database_engine_version
     instance_cpu                    = var.instance_cpu
     instance_memory                 = var.instance_memory
@@ -37,6 +39,10 @@ output "service_config" {
     memory                          = var.instance_memory
     desired_instance_count          = var.instance_desired_instance_count
     enable_command_execution        = var.enable_command_execution
+    newrelic_entity_guid            = var.service_newrelic_entity_guid
+    newrelic_mtls_entity_guid       = var.service_newrelic_mtls_entity_guid
+    newrelic_host_entity_guid       = var.api_host_newrelic_entity_guid
+    scanner_provisioned_concurrency = var.scanner_provisioned_concurrency
 
     extra_environment_variables = merge(
       local.default_extra_environment_variables,
@@ -80,4 +86,21 @@ output "incident_management_service_integration" {
   value = var.has_incident_management_service ? {
     integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
   } : null
+}
+
+output "sqs_config" {
+  value = local.sqs_config
+}
+
+output "workflow_service_config" {
+  value = {
+    enable        = var.enable_workflow_service
+    cpu           = var.workflow_service_cpu
+    memory        = var.workflow_service_memory
+    desired_count = var.workflow_service_desired_count
+  }
+}
+
+output "file_scan_cache_config" {
+  value = local.file_scan_cache_config
 }

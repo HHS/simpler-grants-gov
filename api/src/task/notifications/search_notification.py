@@ -2,10 +2,11 @@ import logging
 from collections.abc import Sequence
 from uuid import UUID
 
+import grants_shared.adapters.db as db
+from grants_shared.util import datetime_util
 from sqlalchemy import and_, exists, select, update
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
 import src.adapters.search as search
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
@@ -17,7 +18,6 @@ from src.services.opportunities_v1.search_opportunities import search_opportunit
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason, UserEmailNotification
-from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 

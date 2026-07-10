@@ -1,38 +1,60 @@
 import logging
+import os
 import uuid
 from os import path
+from types import SimpleNamespace
 
 import _pytest.monkeypatch
 import boto3
 import flask.testing
+import grants_shared.adapters.db as db
+import grants_shared.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import moto
 import pytest
 from apiflask import APIFlask
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from sqlalchemy import text
+from grants_shared.adapters.aws import S3Config
+from grants_shared.adapters.oauth.login_gov.mock_login_gov_oauth_client import (
+    MockLoginGovOauthClient,
+)
+from grants_shared.util.local import load_local_env_vars
+from moto.core import DEFAULT_ACCOUNT_ID
+from moto.ses.models import ses_backends
+from sqlalchemy import select, text
 
-import src.adapters.db as db
 import src.app as app_entry
-import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
 from src.adapters import search
-from src.adapters.aws import S3Config
-from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
+from src.adapters.search import SearchClient
 from src.auth.api_jwt_auth import create_jwt_for_user
+from src.constants.lookup_constants import Privilege, RoleType
 from src.constants.schema import Schemas
 from src.constants.static_role_values import NAVA_INTERNAL_ROLE
 from src.db import models
-from src.db.models.agency_models import Agency
+from src.db.models.competition_models import Form as FormModel
+from src.db.models.competition_models import FormInstruction
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
-from src.db.models.user_models import AgencyUser, UserApiKey
-from src.util.local import load_local_env_vars
+from src.db.models.user_models import User, UserApiKey
+from src.form_schema.forms import get_active_forms, init_form_registry
+from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
+from src.workflow.registry.workflow_client_registry import (
+    WorkflowClientRegistry,
+    init_workflow_client_registry,
+)
+from src.workflow.workflow_background_task import _init_newrelic_app
 from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint
 from tests.lib.db_testing import cascade_delete_from_db_table
+from tests.src.db.models.factories import (
+    InternalUserRoleFactory,
+    RoleFactory,
+    UserFactory,
+    UserProfileFactory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +138,17 @@ def set_env_var_defaults(monkeypatch_session):
 
     # We will set this to false so we skip logs during unit tests and keep enabled during dev.
     monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
+
+    # Stops the local file-scan watcher from spawning a thread per app fixture.
+    monkeypatch_session.setenv("ENABLE_LOCAL_FILE_SCANNER", "FALSE")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def init_new_relic_app():
+    """Setup the new relic app to be initialized so the transaction logic
+    won't error when running tests. This won't actually connect to New Relic.
+    """
+    _init_newrelic_app()
 
 
 @pytest.fixture
@@ -266,33 +299,6 @@ def search_client() -> search.SearchClient:
 
 
 @pytest.fixture(scope="session")
-def search_attachment_pipeline(search_client) -> str:
-    pipeline_name = "test-multi-attachment"
-    search_client.put_pipeline(
-        {
-            "description": "Extract attachment information",
-            "processors": [
-                {
-                    "foreach": {
-                        "field": "attachments",
-                        "processor": {
-                            "attachment": {
-                                "target_field": "_ingest._value.attachment",
-                                "field": "_ingest._value.data",
-                            }
-                        },
-                        "ignore_missing": True,
-                    }
-                }
-            ],
-        },
-        pipeline_name=pipeline_name,
-    )
-
-    return pipeline_name
-
-
-@pytest.fixture(scope="session")
 def opportunity_index(search_client):
     # create a random index name just to make sure it won't ever conflict
     # with an actual one, similar to how we create schemas for database tests
@@ -418,7 +424,6 @@ def app(
     monkeypatch_session.setenv(
         "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
     )
-    # TODO: Discussion shouldnt the env variable cover this?
     monkeypatch_session.setenv(
         "LOGIN_FINAL_DESTINATION", "http://localhost:8080/v1/users/login/result"
     )
@@ -440,19 +445,6 @@ def cli_runner(app: flask.Flask) -> flask.testing.CliRunner:
     return app.test_cli_runner()
 
 
-@pytest.fixture
-def all_api_auth_tokens(monkeypatch):
-    all_auth_tokens = ["abcd1234", "wxyz7890", "lmno56"]
-    monkeypatch.setenv("API_AUTH_TOKEN", ",".join(all_auth_tokens))
-    return all_auth_tokens
-
-
-@pytest.fixture
-def api_auth_token(monkeypatch, all_api_auth_tokens):
-    auth_token = all_api_auth_tokens[0]
-    return auth_token
-
-
 ####################
 # AWS Mock Fixtures
 ####################
@@ -467,8 +459,11 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
     monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
-    monkeypatch.delenv("S3_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_S3_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_SQS_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_DYNAMODB_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("CDN_URL", raising=False)
+    monkeypatch.setattr("grants_shared.adapters.aws.aws_session._aws_config", None)
 
 
 @pytest.fixture
@@ -505,11 +500,115 @@ def other_mock_s3_bucket(other_mock_s3_bucket_resource):
 
 
 @pytest.fixture
-def s3_config(mock_s3_bucket, other_mock_s3_bucket):
+def mock_file_scan_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("local-mock-file-scan-bucket")
+    bucket.create()
+    return bucket
+
+
+@pytest.fixture
+def mock_file_scan_s3_bucket(mock_file_scan_s3_bucket_resource):
+    return mock_file_scan_s3_bucket_resource.name
+
+
+@pytest.fixture
+def s3_config(mock_s3_bucket, other_mock_s3_bucket, mock_file_scan_s3_bucket):
     return S3Config(
         PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
         DRAFT_FILES_BUCKET=f"s3://{other_mock_s3_bucket}",
+        FILE_SCAN_BUCKET=f"s3://{mock_file_scan_s3_bucket}",
     )
+
+
+@pytest.fixture
+def mock_sqs(reset_aws_env_vars):
+    with moto.mock_aws(config={"core": {"service_whitelist": ["sqs"]}}):
+        yield
+
+
+@pytest.fixture
+def workflow_sqs_queue(mock_sqs, monkeypatch):
+    sqs = boto3.client("sqs", region_name="us-east-1")
+    # Create a default queue for tests
+    queue = sqs.create_queue(QueueName="test-workflow-queue")
+    # Set the env var of this queue so the SQSConfig picks it up
+    monkeypatch.setenv("WORKFLOW_QUEUE_URL", queue["QueueUrl"])
+    return queue["QueueUrl"]
+
+
+@pytest.fixture
+def mock_dynamodb(reset_aws_env_vars):
+    with moto.mock_aws(config={"core": {"service_whitelist": ["dynamodb"]}}):
+        yield
+
+
+@pytest.fixture
+def file_scan_dynamodb_table(mock_dynamodb, monkeypatch):
+    dynamodb = boto3.client("dynamodb", region_name="us-east-1")
+    table_name = "test-local-virus-scan"
+    dynamodb.create_table(
+        TableName=table_name,
+        KeySchema=[
+            {"AttributeName": "file_id", "KeyType": "HASH"},
+        ],
+        AttributeDefinitions=[
+            {"AttributeName": "file_id", "AttributeType": "S"},
+        ],
+        BillingMode="PAY_PER_REQUEST",
+    )
+    monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
+    return table_name
+
+
+@pytest.fixture
+def mock_dynamodb_and_s3(reset_aws_env_vars, monkeypatch):
+    """A single moto context whitelisting both dynamodb and s3.
+
+    The single-service ``mock_dynamodb`` / ``mock_s3`` fixtures each enter their
+    own ``moto.mock_aws`` context with a one-service whitelist, and the
+    innermost-entered context wins -- so they can't both be active at once.
+    Flows that touch both services (e.g. the file-scan-complete path: read the
+    dynamodb scan record, then presign/size the s3 object) need this combined
+    context instead.
+
+    Yields a namespace with ``table_name``, ``bucket``, and a ``dynamodb_client``
+    for seeding scan records.
+    """
+    table_name = "test-local-virus-scan"
+    bucket = "local-mock-public-bucket"
+    with moto.mock_aws(config={"core": {"service_whitelist": ["dynamodb", "s3"]}}):
+        dynamodb_client = boto3.client("dynamodb", region_name="us-east-1")
+        dynamodb_client.create_table(
+            TableName=table_name,
+            KeySchema=[{"AttributeName": "file_id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "file_id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+        monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
+        boto3.client("s3").create_bucket(Bucket=bucket)
+
+        yield SimpleNamespace(table_name=table_name, bucket=bucket, dynamodb_client=dynamodb_client)
+
+
+@pytest.fixture
+def ses_client(monkeypatch):
+    """Create a mocked SESv2 client using moto3."""
+    monkeypatch.setenv("IS_LOCAL_AWS", "0")
+
+    # to access ses_backends, need to add ses to the whitelist
+    with moto.mock_aws(config={"core": {"service_whitelist": ["ses", "sesv2"]}}):
+        ses_client = boto3.client("sesv2", region_name="us-east-1")
+        ses_client.create_email_identity(EmailIdentity=os.getenv("AWS_SES_FROM_EMAIL"))
+        yield ses_client
+
+
+@pytest.fixture
+def get_sent_emails():
+    def func():
+        ses_backend = ses_backends[DEFAULT_ACCOUNT_ID]["us-east-1"]
+        return ses_backend.sent_messages
+
+    return func
 
 
 ####################
@@ -570,11 +669,6 @@ class BaseTestClass:
         cascade_delete_from_db_table(db_session, Opportunity)
 
     @pytest.fixture(scope="class")
-    def truncate_agencies(self, db_session):
-        cascade_delete_from_db_table(db_session, AgencyUser)
-        cascade_delete_from_db_table(db_session, Agency)
-
-    @pytest.fixture(scope="class")
     def truncate_staging_tables(self, db_session, test_staging_schema):
         for table in staging_metadata.tables.values():
             db_session.execute(text(f"TRUNCATE TABLE {test_staging_schema}.{table.name}"))
@@ -621,3 +715,133 @@ def fixture_file_path():
         return path.join(FILE_FIXTURE_DIR, fixture_path_relative_to_fixture_dir.lstrip("/"))
 
     return _get_fixture_file_path
+
+
+########################
+# Forms
+########################
+
+
+@pytest.fixture
+def load_active_forms(db_session, enable_factory_create) -> None:
+    """
+    Initialize the form registry and seed any required FormInstruction DB records.
+
+    Forms now live entirely in the in-memory registry (the form table has been dropped).
+    Use the registry directly to access forms in tests:
+
+        def test_example(load_active_forms):
+            from src.form_schema.forms import SF424_v4_0
+            CompetitionFormFactory.create(form_id=SF424_v4_0.form_id)
+    """
+    init_form_registry()
+
+    existing_form_instruction_ids = set(
+        db_session.execute(select(FormInstruction.form_instruction_id)).scalars()
+    )
+
+    for form in get_active_forms():
+        form_instruction_id = form.form_instruction_id
+        if (
+            form_instruction_id is not None
+            and form_instruction_id not in existing_form_instruction_ids
+        ):
+            # Note that we make these text files as generating valid PDFs is surprisingly complex.
+            factories.FormInstructionFactory.create(
+                form_instruction_id=form.form_instruction_id,
+                file_name=f"{form.short_form_name}.txt",
+            )
+
+
+@pytest.fixture
+def seed_form_registry(load_active_forms) -> None:
+    """Populate the in-memory form registry for tests.
+
+    After this fixture runs, all registered forms are accessible via the registry.
+    Use form objects directly (e.g. SF424_v4_0) rather than db_session.get().
+    """
+    factories._seed_form_registry_active = True
+    yield
+    factories._seed_form_registry_active = False
+
+
+@pytest.fixture
+def create_test_form(db_session):
+    """Factory fixture for custom-schema test forms with automatic registry cleanup."""
+    init_form_registry()
+    registered_keys = []
+
+    def _make(
+        form_name: str = "Test Form",
+        form_json_schema: dict | None = None,
+        form_rule_schema: dict | None = None,
+        **kwargs,
+    ) -> FormModel:
+        form = FormModel(
+            form_id=uuid.uuid4(),
+            form_name=form_name,
+            short_form_name=kwargs.get("short_form_name", "TestForm"),
+            form_version=kwargs.get("form_version", "1.0"),
+            agency_code="SGG",
+            form_json_schema=form_json_schema or {"type": "object", "properties": {}},
+            form_ui_schema={},
+            form_rule_schema=form_rule_schema,
+            json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
+        )
+        form_template_registry.register(form, major_version=1)
+        registered_keys.append(FormTemplateKey(form.form_id, 1))
+        return form
+
+    yield _make
+
+    for key in registered_keys:
+        form_template_registry._registry.pop(key, None)
+
+
+@pytest.fixture
+def s3_scanner_user(db_session, monkeypatch) -> User:
+    """Create the local file-scanner user with the INTERNAL_S3_SCAN privilege
+    and point LOCAL_FILE_SCANNER_USER_ID at them.
+
+    Mirrors the workflow_user fixture pattern but skips enable_factory_create
+    so it can compose with a test-local moto context. enable_factory_create
+    pulls in mock_s3_bucket -> mock_s3, whose s3-only whitelist would block
+    the DynamoDB calls these tests also need.
+    """
+    monkeypatch.setattr(factories, "_db_session", db_session)
+    user = UserFactory.create()
+    role = RoleFactory.create(
+        privileges=[Privilege.INTERNAL_S3_SCAN], role_types=[RoleType.INTERNAL]
+    )
+    InternalUserRoleFactory.create(user=user, role=role)
+
+    monkeypatch.setenv("LOCAL_FILE_SCANNER_USER_ID", str(user.user_id))
+
+    return user
+
+
+@pytest.fixture
+def workflow_user(enable_factory_create, monkeypatch) -> User:
+    """Get the workflow user, setting them up with expected params
+
+    Also sets the workflow user ID env var to the user created here.
+
+    This fixture has autouse=True so it's automatically available for all
+    workflow tests without needing to explicitly request it.
+    """
+    user = UserFactory.create()
+    UserProfileFactory.create(user=user, first_name="System", last_name="User")
+
+    role = RoleFactory.create(
+        privileges=[Privilege.INTERNAL_WORKFLOW_ACCESS], role_types=[RoleType.INTERNAL]
+    )
+    InternalUserRoleFactory.create(user=user, role=role)
+
+    monkeypatch.setenv("WORKFLOW_SERVICE_INTERNAL_USER_ID", str(user.user_id))
+
+    return user
+
+
+@pytest.fixture(scope="session")
+def workflow_client_registry(search_client: SearchClient) -> WorkflowClientRegistry:
+    return init_workflow_client_registry(search_client=search_client)

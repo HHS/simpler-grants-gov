@@ -1,9 +1,14 @@
 import base64
 import csv
+import re
 from datetime import date
+from unittest.mock import patch
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from grants_shared.pagination.pagination_models import SortDirection
+from grants_shared.util import datetime_util
+from grants_shared.util.dict_util import flatten_dict
 
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
@@ -13,13 +18,9 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models.opportunity_models import Opportunity
-from src.pagination.pagination_models import SortDirection
-from src.util import datetime_util
-from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
-    AgencyFactory,
     CurrentOpportunitySummaryFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
@@ -38,7 +39,6 @@ def validate_search_response(
     assert search_response.status_code == expected_status_code
 
     expected_ids = [str(exp.opportunity_id) for exp in expected_results]
-
     if is_csv_response:
         reader = csv.DictReader(search_response.text.split("\n"))
         opportunities = [record for record in reader]
@@ -56,14 +56,14 @@ def validate_search_response(
     ), f"Actual opportunities:\n {'\n'.join([opp['opportunity_title'] for opp in opportunities])}"
 
 
-def call_search_and_validate(client, api_auth_token, search_request, expected_results):
+def call_search_and_validate(client, user_api_key_id, search_request, expected_results):
     resp = client.post(
-        "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
     )
     validate_search_response(resp, expected_results)
     search_request["format"] = "csv"
     resp = client.post(
-        "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
     )
     validate_search_response(resp, expected_results, is_csv_response=True)
 
@@ -120,7 +120,6 @@ def build_opp(
         award_floor=award_floor,
         award_ceiling=award_ceiling,
         estimated_total_program_funding=estimated_total_program_funding,
-        agency_phone_number=agency_phone_number,
     )
 
     opportunity.current_opportunity_summary = CurrentOpportunitySummaryFactory.build(
@@ -140,7 +139,7 @@ def build_opp(
 
 EDUCATION_AL = ("43.008", "Office of Stem Engagement (OSTEM)")
 SPACE_AL = ("43.012", "Space Technology")
-AERONAUTICS_AL = ("43.002", "Aeronautics")
+AERONAUTICS_AL = ("43.T02", "Aeronautics")
 LOC_AL = ("42.011", "Library of Congress Grants")
 AMERICAN_AL = ("19.441", "ECA - American Spaces")
 ECONOMIC_AL = ("11.307", "Economic Adjustment Assistance")
@@ -391,7 +390,10 @@ def search_scenario_id_fnc(val):
 class TestOpportunityRouteSearch(BaseTestClass):
     @pytest.fixture(scope="class", autouse=True)
     def setup_search_data(
-        self, opportunity_index, opportunity_index_alias, search_client, search_attachment_pipeline
+        self,
+        opportunity_index,
+        opportunity_index_alias,
+        search_client,
     ):
         # Load into the search index
         schema = OpportunityV1Schema()
@@ -410,13 +412,22 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 }
             ]
 
+            if opportunity.opportunity_id in [
+                DOC_SPACE_COAST.opportunity_id,
+                DOC_MANUFACTURING.opportunity_id,
+            ]:
+                json_record["top_level_agency_name"] = "Department of Commerce"
+                json_record["top_level_agency_code"] = DOC_TOP_LEVEL.agency_code
+            if opportunity.opportunity_id == DOC_TOP_LEVEL.opportunity_id:
+                json_record["agency_name"] = "Department of Commerce"
+                json_record["top_level_agency_code"] = None
+
             json_records.append(json_record)
 
         search_client.bulk_upsert(
             opportunity_index,
             json_records,
             "opportunity_id",
-            pipeline=search_attachment_pipeline,
             refresh=True,
         )
 
@@ -670,9 +681,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ids=search_scenario_id_fnc,
     )
     def test_sorting_and_pagination_200(
-        self, client, api_auth_token, search_request, expected_results
+        self, client, user_api_key_id, search_request, expected_results
     ):
-        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+        call_search_and_validate(client, user_api_key_id, search_request, expected_results)
 
     @pytest.mark.parametrize(
         "search_request",
@@ -683,9 +694,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
         ids=search_scenario_id_fnc,
     )
-    def test_page_size_422(self, client, api_auth_token, search_request):
+    def test_page_size_422(self, client, user_api_key_id, search_request):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 422
 
@@ -918,11 +929,37 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ),
                 [NASA_SPACE_FELLOWSHIP, DOC_MANUFACTURING, DOC_TOP_LEVEL],
             ),
+            # Assistance Listing Number
+            (
+                get_search_request(assistance_listing_one_of=["43.008"]),
+                [NASA_SPACE_FELLOWSHIP, NASA_K12_DIVERSITY, LOC_TEACHING],
+            ),
+            (get_search_request(assistance_listing_one_of=["43.012"]), [NASA_INNOVATIONS]),
+            (get_search_request(assistance_listing_one_of=["43.t02"]), [NASA_SUPERSONIC]),
+            (
+                get_search_request(assistance_listing_one_of=["43.008", "43.012"]),
+                [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_K12_DIVERSITY, LOC_TEACHING],
+            ),
+            (
+                get_search_request(assistance_listing_one_of=["43.008", "43.012", "43.T02"]),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_INNOVATIONS,
+                    NASA_SUPERSONIC,
+                    NASA_K12_DIVERSITY,
+                    LOC_TEACHING,
+                ],
+            ),
+            (get_search_request(assistance_listing_one_of=["99.999"]), []),
+            (
+                get_search_request(assistance_listing_one_of=["43.008"], agency_one_of=["NASA"]),
+                [NASA_SPACE_FELLOWSHIP, NASA_K12_DIVERSITY],
+            ),
         ],
         ids=search_scenario_id_fnc,
     )
-    def test_search_filters_200(self, client, api_auth_token, search_request, expected_results):
-        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+    def test_search_filters_200(self, client, user_api_key_id, search_request, expected_results):
+        call_search_and_validate(client, user_api_key_id, search_request, expected_results)
 
     @pytest.mark.parametrize(
         "search_request, expected_results",
@@ -1069,9 +1106,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_filters_date_200(
-        self, client, api_auth_token, search_request, expected_results
+        self, client, user_api_key_id, search_request, expected_results
     ):
-        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+        call_search_and_validate(client, user_api_key_id, search_request, expected_results)
 
     @pytest.mark.parametrize(
         "search_request, expected_results",
@@ -1122,9 +1159,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_bool_filters_200(
-        self, client, api_auth_token, search_request, expected_results
+        self, client, user_api_key_id, search_request, expected_results
     ):
-        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+        call_search_and_validate(client, user_api_key_id, search_request, expected_results)
 
     @pytest.mark.parametrize(
         "search_request, expected_results",
@@ -1264,8 +1301,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
             ),
         ],
     )
-    def test_search_int_filters_200(self, client, api_auth_token, search_request, expected_results):
-        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+    def test_search_int_filters_200(
+        self, client, user_api_key_id, search_request, expected_results
+    ):
+        call_search_and_validate(client, user_api_key_id, search_request, expected_results)
 
     @pytest.mark.parametrize(
         "search_request",
@@ -1290,9 +1329,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (get_search_request(close_date={"end_date": 5})),
         ],
     )
-    def test_search_validate_date_filters_format_422(self, client, api_auth_token, search_request):
+    def test_search_validate_date_filters_format_422(self, client, user_api_key_id, search_request):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 422
 
@@ -1331,10 +1370,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_date_filters_nullability_422(
-        self, client, api_auth_token, search_request
+        self, client, user_api_key_id, search_request
     ):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 422
 
@@ -1362,10 +1401,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_date_relative_filters_format_422(
-        self, client, api_auth_token, search_request
+        self, client, user_api_key_id, search_request
     ):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 422
 
@@ -1386,10 +1425,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_date_relative_range_values_422(
-        self, client, api_auth_token, search_request
+        self, client, user_api_key_id, search_request
     ):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
 
         json = resp.get_json()
@@ -1410,10 +1449,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_date_filters_mix_format_422(
-        self, client, api_auth_token, search_request
+        self, client, user_api_key_id, search_request
     ):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 422
 
@@ -1428,13 +1467,17 @@ class TestOpportunityRouteSearch(BaseTestClass):
             get_search_request(assistance_listing_one_of=["12.345", "67.89"]),
             get_search_request(assistance_listing_one_of=["98.765"]),
             get_search_request(assistance_listing_one_of=["67.89", "54.24", "12.345", "86.753"]),
+            get_search_request(assistance_listing_one_of=["12.AB"]),
+            get_search_request(assistance_listing_one_of=["45.A19"]),
+            get_search_request(assistance_listing_one_of=["67.9C", "54.AB3", "12.Z9"]),
+            get_search_request(assistance_listing_one_of=["11.cC1"]),
         ],
     )
     def test_search_validate_assistance_listing_filters_200(
-        self, client, api_auth_token, search_request
+        self, client, user_api_key_id, search_request
     ):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 200
 
@@ -1448,13 +1491,14 @@ class TestOpportunityRouteSearch(BaseTestClass):
             get_search_request(assistance_listing_one_of=["12.hello"]),
             get_search_request(assistance_listing_one_of=["fourfive.sixseveneight"]),
             get_search_request(assistance_listing_one_of=["11..11"]),
+            get_search_request(assistance_listing_one_of=["A1..11"]),
         ],
     )
     def test_search_validate_assistance_listing_filters_422(
-        self, client, api_auth_token, search_request
+        self, client, user_api_key_id, search_request
     ):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 422
 
@@ -1474,10 +1518,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_is_cost_sharing_filters_422(
-        self, client, api_auth_token, search_request
+        self, client, user_api_key_id, search_request
     ):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 422
 
@@ -1494,9 +1538,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
             get_search_request(award_ceiling={"min": {}, "max": "123e4f5"}),
         ],
     )
-    def test_search_validate_award_values_422(self, client, api_auth_token, search_request):
+    def test_search_validate_award_values_422(self, client, user_api_key_id, search_request):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 422
 
@@ -1521,10 +1565,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_award_values_negative_422(
-        self, client, api_auth_token, search_request
+        self, client, user_api_key_id, search_request
     ):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
 
         json = resp.get_json()
@@ -1559,10 +1603,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_award_values_nullability_422(
-        self, client, api_auth_token, search_request
+        self, client, user_api_key_id, search_request
     ):
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
 
         json = resp.get_json()
@@ -1638,16 +1682,16 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
         ids=search_scenario_id_fnc,
     )
-    def test_search_query_200(self, client, api_auth_token, search_request, expected_results):
+    def test_search_query_200(self, client, user_api_key_id, search_request, expected_results):
         # This test isn't looking to validate opensearch behavior, just that we've connected fields properly and
         # results being returned are as expected.
-        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+        call_search_and_validate(client, user_api_key_id, search_request, expected_results)
 
-    def test_search_query_facets_200(self, client, api_auth_token):
+    def test_search_query_facets_200(self, client, user_api_key_id):
         search_response = client.post(
             "/v1/opportunities/search",
             json=get_search_request(),
-            headers={"X-Auth": api_auth_token},
+            headers={"X-API-Key": user_api_key_id},
         )
 
         assert search_response.status_code == 200
@@ -1660,6 +1704,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "opportunity_status",
             "is_cost_sharing",
             "close_date",
+            "post_date",
         }
 
     @pytest.mark.parametrize(
@@ -1681,56 +1726,29 @@ class TestOpportunityRouteSearch(BaseTestClass):
             ),
         ],
     )
-    def test_search_experimental_200(self, client, api_auth_token, search_request):
+    def test_search_experimental_200(self, client, user_api_key_id, search_request):
         # We are only testing for 200 responses when adding the experimental field into the request body.
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 200
 
         search_request["format"] = "csv"
         resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         assert resp.status_code == 200
-
-    def test_search_experimental_attachment_200(
-        self, client, api_auth_token, search_client, opportunity_index_alias
-    ):
-        # Prepare the search request
-        search_request = get_search_request(
-            query="Space",
-            experimental={"scoring_rule": "attachment_only"},
-        )
-
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        data = resp.json["data"]
-
-        # Assert only NASA opportunities are returned
-        assert resp.status_code == 200
-        assert len(data) == 1
-
-        assert data[0]["opportunity_id"] == NASA_SPACE_FELLOWSHIP.opportunity_id
 
     def test_search_top_level_agency_200(
         self,
         client,
         db_session,
-        enable_factory_create,
-        api_auth_token,
+        user_api_key_id,
     ):
-        # setup-data
-        doc = AgencyFactory.create(agency_code="DOC")
-        AgencyFactory.create(
-            agency_code=DOC_SPACE_COAST.agency_code, top_level_agency_id=doc.agency_id
-        )
-
         resp = client.post(
             "/v1/opportunities/search",
             json=get_search_request(top_level_agency_one_of=["DOC", "DOS"]),
-            headers={"X-Auth": api_auth_token},
+            headers={"X-API-Key": user_api_key_id},
         )
         assert resp.status_code == 200
         data = resp.json["data"]
@@ -1742,18 +1760,13 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ]
 
     def test_search_top_level_agency_and_sub_agencies_200(
-        self, client, db_session, enable_factory_create, api_auth_token
+        self, client, db_session, user_api_key_id
     ):
-        # setup-data
-        dos = AgencyFactory.create(agency_code="DOS")
-        AgencyFactory.create(
-            agency_code=DOS_DIGITAL_LITERACY.agency_code, top_level_agency_id=dos.agency_id
-        )
 
         resp = client.post(
             "/v1/opportunities/search",
             json=get_search_request(top_level_agency_one_of=["DOS"], agency_one_of=["DOC-EDA"]),
-            headers={"X-Auth": api_auth_token},
+            headers={"X-API-Key": user_api_key_id},
         )
         assert resp.status_code == 200
         data = resp.json["data"]
@@ -1762,3 +1775,199 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert [opp["opportunity_id"] for opp in data] == [
             opp.opportunity_id for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING]
         ]
+
+    @pytest.mark.parametrize(
+        "search_request, expected_results",
+        [
+            (
+                get_search_request(
+                    sort_order=[
+                        {"order_by": "opportunity_id", "sort_direction": SortDirection.ASCENDING}
+                    ],
+                    query="DOC",  # search by top-level agency code
+                ),
+                [
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
+                ],
+            ),
+        ],
+        ids=["top_level_agency_doc"],
+    )
+    def test_search_by_top_level_agency(
+        self, client, user_api_key_id, search_request, expected_results
+    ):
+        """
+        Test that searching by a top-level agency code (DOC) returns all opportunities
+        for its sub-agencies and itself.
+        """
+        call_search_and_validate(client, user_api_key_id, search_request, expected_results)
+
+    @pytest.mark.parametrize(
+        "search_request, expected",
+        [
+            (
+                get_search_request(
+                    sort_order=[
+                        {"order_by": "relevancy", "sort_direction": SortDirection.DESCENDING}
+                    ],
+                    query="DOC",
+                ),
+                DOC_TOP_LEVEL,
+            ),
+        ],
+        ids=["top_level_doc_first"],
+    )
+    def test_top_level_agency_returns_first(
+        self, client, user_api_key_id, search_request, expected
+    ):
+        """
+        Test that when searching by a top-level agency (DOC), the top-level agency's
+        own opportunities are returned before its sub-agencies.
+        """
+        resp = client.post(
+            "/v1/opportunities/search",
+            json=search_request,
+            headers={"X-API-Key": user_api_key_id},
+        )
+        response_json = resp.get_json()
+        opportunities = response_json["data"]
+        first_opportunity = opportunities[0]
+        assert first_opportunity["opportunity_id"] == str(expected.opportunity_id)
+
+    @pytest.mark.parametrize(
+        "search_request, expected_results",
+        [
+            (
+                get_search_request(
+                    sort_order=[
+                        {"order_by": "opportunity_id", "sort_direction": SortDirection.ASCENDING}
+                    ],
+                    query="Department of Commerce",
+                ),
+                [
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
+                ],
+            ),
+        ],
+        ids=["agency_name_doc"],
+    )
+    def test_search_by_agency_name(self, client, user_api_key_id, search_request, expected_results):
+        """
+        Test that searching by an agency name returns matching opportunities.
+
+        This test validates that opportunities are returned when their agency_name
+        or top_level_agency_name matches the query.
+        """
+        call_search_and_validate(client, user_api_key_id, search_request, expected_results)
+
+    def test_opportunities_to_csv(self, client, user_api_key_id, monkeypatch):
+        monkeypatch.setenv("FRONTEND_BASE_URL", "https://example.com")
+        search_request = get_search_request(is_cost_sharing_one_of=[True, False])
+        search_request["format"] = "csv"
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
+        )
+
+        assert resp.status_code == 200
+        assert "text/csv" in resp.headers["Content-Type"]
+
+        reader = csv.DictReader(resp.text.split("\n"))
+        rows = list(reader)
+
+        assert "url" in reader.fieldnames
+
+        for row in rows:
+            # assert correct url is configured
+            assert row["url"].startswith("https://example.com/opportunity/")
+            # assert date fields are ISO format
+            iso_date_pattern = r"^\d{4}-\d{2}-\d{2}$"
+            if row["close_date"]:
+                assert re.match(iso_date_pattern, row["close_date"])
+            # assert currency fields are raw numbers
+            if row["award_floor"]:
+                assert row["award_floor"].isdigit()
+            if row["award_ceiling"]:
+                assert row["award_ceiling"].isdigit()
+            # Null handling (empty string instead of None)
+            if row["opportunity_id"] == LOC_HIGHER_EDUCATION.opportunity_id:
+                assert row["close_date"] is not None
+                assert row["award_floor"] is not None
+                assert row["award_ceiling"] is not None
+                assert row["post_date"] is not None
+
+    def test_opportunity_search_csv_endpoint_returns_csv(
+        self, client, user_api_key_id, monkeypatch
+    ):
+        monkeypatch.setenv("FRONTEND_BASE_URL", "https://example.com")
+        search_request = {"filters": {"is_cost_sharing": {"one_of": [True, False]}}}
+        resp = client.post(
+            "/v1/opportunities/search/csv",
+            json=search_request,
+            headers={"X-API-Key": user_api_key_id},
+        )
+
+        assert resp.status_code == 200
+        assert "text/csv" in resp.headers["Content-Type"]
+        assert "attachment; filename=opportunity_search_results_" in resp.headers.get(
+            "Content-Disposition", ""
+        )
+
+        reader = csv.DictReader(resp.text.split("\n"))
+        rows = list(reader)
+        assert "opportunity_id" in reader.fieldnames
+        assert len(rows) > 0
+
+    def test_opportunity_search_csv_endpoint_rejects_format_field_422(
+        self, client, user_api_key_id
+    ):
+        search_request = get_search_request(is_cost_sharing_one_of=[True, False])
+        search_request["format"] = "json"
+        resp = client.post(
+            "/v1/opportunities/search/csv",
+            json=search_request,
+            headers={"X-API-Key": user_api_key_id},
+        )
+
+        assert resp.status_code == 422
+
+    def test_opportunity_search_csv_endpoint_rejects_pagination_422(self, client, user_api_key_id):
+        search_request = get_search_request(is_cost_sharing_one_of=[True, False])
+        resp = client.post(
+            "/v1/opportunities/search/csv",
+            json=search_request,
+            headers={"X-API-Key": user_api_key_id},
+        )
+
+        assert resp.status_code == 422
+
+    def test_opportunity_search_csv_endpoint_invalid_request_422(self, client, user_api_key_id):
+        resp = client.post(
+            "/v1/opportunities/search/csv",
+            json={"invalid": "data"},
+            headers={"X-API-Key": user_api_key_id},
+        )
+
+        assert resp.status_code == 422
+
+    @patch("src.api.opportunities_v1.opportunity_routes.search_opportunities")
+    @patch("src.api.opportunities_v1.opportunity_routes.search_opportunities_csv")
+    def test_opportunity_search_format_csv_uses_optimized_service_path(
+        self, mock_search_csv, mock_search_json, client, user_api_key_id
+    ):
+        mock_search_csv.return_value = []
+        search_request = get_search_request(format="csv")
+
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
+        )
+
+        assert resp.status_code == 200
+        assert "text/csv" in resp.headers["Content-Type"]
+        mock_search_csv.assert_called_once()
+        _, kwargs = mock_search_csv.call_args
+        assert kwargs.get("apply_export_pagination") is False
+        mock_search_json.assert_not_called()

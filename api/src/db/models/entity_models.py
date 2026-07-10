@@ -2,15 +2,21 @@ import uuid
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
+from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from grants_shared.db.models.base import TimestampMixin
+from grants_shared.util.datetime_util import utcnow
 from sqlalchemy import ForeignKey, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.constants.lookup_constants import OrganizationInvitationStatus, SamGovImportType
-from src.db.models.base import ApiSchemaTable, TimestampMixin
-from src.db.models.lookup_models import LkSamGovImportType
-from src.util.datetime_util import utcnow
+from src.constants.lookup_constants import (
+    OrganizationAuditEvent,
+    OrganizationInvitationStatus,
+    SamGovImportType,
+)
+from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.lookup_models import LkOrganizationAuditEvent, LkSamGovImportType
+from src.db.models.opportunity_models import Opportunity
 
 # Add conditional import for type checking to avoid circular imports
 if TYPE_CHECKING:
@@ -92,9 +98,26 @@ class Organization(ApiSchemaTable, TimestampMixin):
         "Application", uselist=True, back_populates="organization", cascade="all, delete-orphan"
     )
 
+    organization_audits: Mapped[list[OrganizationAudit]] = relationship(
+        "OrganizationAudit",
+        uselist=True,
+        back_populates="organization",
+        cascade="all, delete-orphan",
+    )
+    saved_opportunities: Mapped[list[OrganizationSavedOpportunity]] = relationship(
+        "OrganizationSavedOpportunity",
+        back_populates="organization",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
     @property
     def organization_name(self) -> str | None:
         return self.sam_gov_entity.legal_business_name if self.sam_gov_entity else None
+
+    @property
+    def uei(self) -> str | None:
+        return self.sam_gov_entity.uei if self.sam_gov_entity else None
 
 
 class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
@@ -194,3 +217,53 @@ class IgnoredLegacyOrganizationUser(ApiSchemaTable, TimestampMixin):
         ForeignKey("api.user.user_id"), index=True
     )
     user: Mapped[User] = relationship("User")
+
+
+class OrganizationAudit(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "organization_audit"
+
+    organization_audit_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), nullable=False, index=True
+    )
+    user: Mapped[User] = relationship("User", foreign_keys=[user_id])
+
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id), nullable=False, index=True
+    )
+    organization: Mapped[Organization] = relationship(Organization)
+
+    organization_audit_event: Mapped[OrganizationAuditEvent] = mapped_column(
+        "organization_audit_event_id",
+        LookupColumn(LkOrganizationAuditEvent),
+        ForeignKey(LkOrganizationAuditEvent.organization_audit_event_id),
+        nullable=False,
+    )
+    target_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), index=True
+    )
+    target_user: Mapped[User | None] = relationship("User", foreign_keys=[target_user_id])
+    audit_metadata: Mapped[dict | None] = mapped_column(JSONB)
+
+
+class OrganizationSavedOpportunity(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "organization_saved_opportunity"
+
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(Organization.organization_id), primary_key=True
+    )
+    organization: Mapped[Organization] = relationship(
+        Organization, back_populates="saved_opportunities"
+    )
+
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(Opportunity.opportunity_id), primary_key=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(
+        "Opportunity", back_populates="saved_opportunities_by_organizations"
+    )
+
+    notification_processed_at: Mapped[datetime | None] = mapped_column(nullable=True, default=None)

@@ -1,12 +1,11 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
-import NotFound from "src/app/[locale]/(base)/not-found";
+import PrintForm from "src/app/[locale]/(print)/print/application/[applicationId]/form/_components/PrintForm";
+import { addPrintWidgetToFields } from "src/utils/applyForm/applyFormUtils";
 import getFormData from "src/utils/getFormData";
 
 import { headers } from "next/headers";
-
-import PrintForm from "src/components/applyForm/PrintForm";
-import { addPrintWidgetToFields } from "src/components/applyForm/utils";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -48,15 +47,17 @@ interface FormPageProps {
   }>;
 }
 
+/*
+  The use case for this page is to allow generating PDF versions of completed application forms
+  by Docraptor. Docraptor will not be able to log in as a user to access application information.
+  Instead, requests from Docraptor will contain an "internal token" header ("X-SGG-Internal-Token")
+  containing an alternate authorization token that can be used to fetch the form data without logging in.
+*/
+
 export default async function FormPage({ params }: FormPageProps) {
   const { applicationId, appFormId, setAttachmentsChanged } = await params;
   const headersList = await headers();
   const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
-
-  if (internalToken === undefined) {
-    console.error("Internal token not supplied");
-    return <TopLevelError />;
-  }
 
   const { data, error } = await getFormData({
     applicationId,
@@ -65,7 +66,7 @@ export default async function FormPage({ params }: FormPageProps) {
   });
 
   if (error || !data) {
-    if (error === "NotFound") return <NotFound />;
+    if (error === "NotFound") notFound();
     return <TopLevelError />;
   }
 

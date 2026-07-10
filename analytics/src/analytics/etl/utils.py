@@ -2,15 +2,11 @@
 
 import json
 from pathlib import Path
-from typing import TypeVar
 
 from pydantic import BaseModel
 
-# Define a generic type variable for the schema
-T = TypeVar("T", bound=BaseModel)
 
-
-def load_config(config_path: Path, schema: type[T]) -> T:
+def load_config[T: BaseModel](config_path: Path, schema: type[T]) -> T:
     """
     Load a JSON config file and validate it against a Pydantic schema.
 

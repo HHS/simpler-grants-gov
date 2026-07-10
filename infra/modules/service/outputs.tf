@@ -30,6 +30,16 @@ output "migrator_role_arn" {
   value       = length(aws_iam_role.migrator_task) > 0 ? aws_iam_role.migrator_task[0].arn : null
 }
 
+output "opensearch_write_role_arn" {
+  description = "ARN for role to use for OpenSearch write operations"
+  value       = length(aws_iam_role.opensearch_write) > 0 ? aws_iam_role.opensearch_write[0].arn : null
+}
+
+output "workflow_service_role_arn" {
+  description = "ARN for role to use for the workflow service"
+  value       = length(aws_iam_role.workflow_service) > 0 ? aws_iam_role.workflow_service[0].arn : null
+}
+
 output "cluster_arn" {
   value = aws_ecs_cluster.cluster.arn
 }
@@ -52,4 +62,34 @@ output "app_security_group_id" {
 
 output "service_logs_arn" {
   value = aws_cloudwatch_log_group.service_logs.arn
+}
+
+output "image_url" {
+  description = "image url for the app container"
+  value       = local.image_url
+}
+
+output "environment_variables" {
+  description = "environment variable for the app container"
+  value       = local.environment_variables
+}
+
+output "nr_host_log_forwarder_arn" {
+  description = "ARN of the New Relic host log forwarder Lambda"
+  value       = aws_lambda_function.nr_host_log_forwarder.arn
+}
+
+output "nr_host_log_forwarder_name" {
+  description = "Name of the New Relic host log forwarder Lambda"
+  value       = aws_lambda_function.nr_host_log_forwarder.function_name
+}
+
+output "s3_bucket_ids" {
+  description = "Map of s3_buckets keys to their generated bucket IDs."
+  value       = { for k, v in aws_s3_bucket.s3_buckets : k => v.id }
+}
+
+output "s3_bucket_arns" {
+  description = "Map of s3_buckets keys to their generated bucket ARNs."
+  value       = { for k, v in aws_s3_bucket.s3_buckets : k => v.arn }
 }

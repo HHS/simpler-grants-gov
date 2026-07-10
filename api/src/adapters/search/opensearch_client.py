@@ -2,12 +2,28 @@ import logging
 from collections.abc import Generator, Iterable
 from typing import Any
 
+import boto3
 import opensearchpy
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_fixed
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
 from src.adapters.search.opensearch_response import SearchResponse
 
 logger = logging.getLogger(__name__)
+
+# OpenSearch automatically snapshots our indexes hourly. An index that is
+# actively being snapshotted cannot be deleted and OpenSearch returns a 400
+# RequestError with this error type.
+SNAPSHOT_IN_PROGRESS_ERROR = "snapshot_in_progress_exception"
+
+
+def _is_snapshot_in_progress_error(exception: BaseException) -> bool:
+    return (
+        isinstance(exception, opensearchpy.exceptions.RequestError)
+        and exception.error == SNAPSHOT_IN_PROGRESS_ERROR
+    )
+
 
 # By default, we'll override the default analyzer+tokenization
 # for a search index. You can provide your own when calling create_index
@@ -21,11 +37,11 @@ DEFAULT_INDEX_ANALYSIS = {
     },
     # Change the default stemming to use snowball which handles plural
     # queries better than the default
-    # TODO - there are a lot of stemmers, we should take some time to figure out
-    #        which one works best with our particular dataset. Snowball is really
+    # NOTE - there are a lot of stemmers, Snowball is really
     #        basic and naive (literally just adjusting suffixes on words in common patterns)
     #        which might be fine generally, but we work with a lot of acronyms
-    #        and should verify that doesn't cause any issues.
+    #        and should verify that doesn't cause any issues. Although we can use
+    #        keyword fields to work around that particular issue.
     # see: https://opensearch.org/docs/latest/analyzers/token-filters/index/
     "filter": {"custom_stemmer": {"type": "snowball", "name": "english"}},
 }
@@ -75,24 +91,31 @@ class SearchClient:
     def delete_index(self, index_name: str) -> None:
         """
         Delete an index. Can also delete all indexes via a prefix.
+
+        If the index is being snapshotted, OpenSearch refuses the delete. We retry
+        a few times to wait out a short snapshot, and if it is still in progress we
+        skip the delete rather than fail the job -- the next run of the load job
+        deletes all stale indexes, so the leftover index gets cleaned up then.
         """
         logger.info("Deleting search index %s", index_name, extra={"index_name": index_name})
-        self._client.indices.delete(index=index_name)
-
-    def put_pipeline(self, pipeline: dict, pipeline_name: str) -> None:
-        """
-        Create a pipeline
-        """
-        resp = self._client.ingest.put_pipeline(id=pipeline_name, body=pipeline)
-        if resp["acknowledged"]:
-            logger.info(f"Pipeline '{pipeline_name}' created successfully!")
-        else:
-            status_code = resp["status"] or 500
-            error_message = resp["error"]["reason"] or "Internal Server Error"
-
-            raise Exception(
-                f"Failed to create pipeline {pipeline_name}: {error_message}. Status code: {status_code}"
+        try:
+            self._delete_index_with_retry(index_name)
+        except opensearchpy.exceptions.RequestError as e:
+            if not _is_snapshot_in_progress_error(e):
+                raise
+            logger.info(
+                "Skipping search index delete, snapshot in progress",
+                extra={"index_name": index_name},
             )
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(2),
+        retry=retry_if_exception(_is_snapshot_in_progress_error),
+        reraise=True,
+    )
+    def _delete_index_with_retry(self, index_name: str) -> None:
+        self._client.indices.delete(index=index_name)
 
     def bulk_upsert(
         self,
@@ -101,7 +124,6 @@ class SearchClient:
         primary_key_field: str,
         *,
         refresh: bool = True,
-        pipeline: str | None = None,
     ) -> None:
         """
         Bulk upsert records to an index
@@ -133,8 +155,6 @@ class SearchClient:
             },
         )
         bulk_args = {"index": index_name, "body": bulk_operations, "refresh": refresh}
-        if pipeline:
-            bulk_args["pipeline"] = pipeline
 
         self._client.bulk(**bulk_args)
 
@@ -188,14 +208,6 @@ class SearchClient:
         for index in old_indexes:
             self.delete_index(index)
 
-    def refresh_index(self, index_name: str) -> None:
-        """
-        Refresh index
-        """
-        logger.info("Refreshing index %s", index_name, extra={"index_name": index_name})
-
-        self._client.indices.refresh(index_name)
-
     def swap_alias_index(self, index_name: str | None, alias_name: str) -> None:
         """
         For a given index, set it to the given alias. If any existing index(es) are
@@ -232,18 +244,40 @@ class SearchClient:
         params: dict | None = None,
         includes: list[str] | None = None,
         excludes: list[str] | None = None,
+        explain: bool = False,
     ) -> SearchResponse:
         if params is None:
             params = {}
 
-        response = self._client.search(
+        if explain:
+            search_query = search_query | {"explain": True}
+
+        raw_response = self._client.search(
             index=index_name,
             body=search_query,
             params=params,
             _source_includes=includes,
             _source_excludes=excludes,
         )
-        return SearchResponse.from_opensearch_response(response, include_scores)
+
+        response = SearchResponse.from_opensearch_response(raw_response, include_scores)
+        # Structured logging enrichment
+        add_extra_data_to_current_request_logs(
+            {
+                "search.index": index_name,
+                "search.took_ms": response.took_ms,
+                "search.timed_out": response.timed_out,
+                "search.shards_failed": response.shards_failed,
+                "search.total_records": response.total_records,
+                "search.is_zero_result": response.total_records == 0,
+                "search.max_score": response.max_score,
+                "search.total_relation": response.total_relation,
+                **{f"search.agg_overflow.{k}": v for k, v in response.agg_overflow.items()},
+                **response.score_stats,
+            }
+        )
+
+        return response
 
     def scroll(
         self,
@@ -298,6 +332,18 @@ class SearchClient:
         # close scroll
         self._client.clear_scroll(scroll_id=scroll_id)
 
+    def get(self, index_name: str, id: Any) -> dict | None:
+        """Get a record directly from an OpenSearch index. Returns None if not found."""
+        try:
+            raw_result = self._client.get(index=index_name, id=id)
+        except opensearchpy.exceptions.NotFoundError:
+            return None
+
+        # The raw result looks like:
+        # {"_index": "...", '_id': '1', '_version': 1, '_seq_no': 0, '_primary_term': 1, 'found': True, '_source': {'id': 1, 'title': 'Green Eggs & Ham'}}
+        # We only really care about the result itself, so grab that
+        return raw_result.get("_source", None)
+
 
 def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str, Any]:
     # See: https://opensearch.org/docs/latest/clients/python-low-level/#connecting-to-opensearch
@@ -311,14 +357,13 @@ def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str,
         pool_maxsize=opensearch_config.search_connection_pool_size,
     )
 
-    # We'll assume if the aws_region is set, we're running in AWS
-    # and should connect using the session credentials
+    # When aws_region is set, use AWS IAM credentials (SigV4) for authentication
     if opensearch_config.aws_region:
-        # Get credentials and authorize with AWS Opensearch Serverless (es)
-        # TODO - once we have the user setup in Opensearch, we want to change to this approach
-        # credentials = boto3.Session().get_credentials()
-        # auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
-        auth = (opensearch_config.search_username, opensearch_config.search_password)
+        credentials = boto3.Session().get_credentials()
+        if credentials is None:
+            raise RuntimeError("AWS credentials not found. Ensure AWS credentials are configured ")
+        auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
         params["http_auth"] = auth
+        logger.info("Using AWS IAM (SigV4) authentication for OpenSearch")
 
     return params

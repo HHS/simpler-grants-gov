@@ -5,8 +5,8 @@ from datetime import date
 import pytest
 from lxml import etree as lxml_etree
 
+from src.services.xml_generation.constants import HEADER_NAMESPACES
 from src.services.xml_generation.header_generator import (
-    HEADER_NAMESPACES,
     SubmissionXMLGenerator,
     generate_application_header_xml,
 )
@@ -49,6 +49,7 @@ def application(enable_factory_create, db_session):
         opening_date=date(2025, 9, 2),
         closing_date=date(2025, 9, 30),
         opportunity_assistance_listing=opportunity_assistance_listing,
+        competition_forms=[],
     )
 
     application = ApplicationFactory.create(
@@ -122,7 +123,7 @@ class TestSubmissionXMLGenerator:
             opportunity_title="Test Opportunity Title",
             agency_code="XYZ",  # Use a different code that won't have an Agency record
         )
-        competition = CompetitionFactory.create(opportunity=opportunity)
+        competition = CompetitionFactory.create(opportunity=opportunity, competition_forms=[])
         application = ApplicationFactory.create(competition=competition)
 
         generator = SubmissionXMLGenerator(application)
@@ -142,6 +143,7 @@ class TestSubmissionXMLGenerator:
             opening_date=None,
             closing_date=None,
             opportunity_assistance_listing=None,
+            competition_forms=[],
         )
         application = ApplicationFactory.create(
             competition=competition,
@@ -182,6 +184,7 @@ class TestSubmissionXMLGenerator:
         competition = CompetitionFactory.create(
             opportunity=opportunity,
             opportunity_assistance_listing=None,
+            competition_forms=[],
         )
         application = ApplicationFactory.create(competition=competition)
 
@@ -199,6 +202,7 @@ class TestSubmissionXMLGenerator:
             opportunity=opportunity,
             opening_date=date(2025, 1, 5),
             closing_date=date(2025, 12, 31),
+            competition_forms=[],
         )
         application = ApplicationFactory.create(competition=competition)
 
@@ -232,7 +236,7 @@ class TestSubmissionXMLGenerator:
     def test_hash_value_changes_with_different_application(self, enable_factory_create):
         """Test that hash value changes for different applications."""
         opportunity = OpportunityFactory.create()
-        competition = CompetitionFactory.create(opportunity=opportunity)
+        competition = CompetitionFactory.create(opportunity=opportunity, competition_forms=[])
 
         application1 = ApplicationFactory.create(
             competition=competition,
@@ -286,7 +290,7 @@ class TestSubmissionXMLGenerator:
         assert xml_string.startswith("<?xml version=")
         # Accept either single or double quotes in encoding declaration
         first_line = xml_string.split("\n")[0]
-        assert "encoding='utf-8'" in first_line or 'encoding="utf-8"' in first_line
+        assert "encoding='utf-8'" in first_line.lower() or 'encoding="utf-8"' in first_line.lower()
 
     def test_namespace_prefixes_in_output(self, application):
         """Test that namespace prefixes are correctly used in XML output."""
@@ -310,7 +314,7 @@ class TestSubmissionXMLGenerator:
         opportunity = OpportunityFactory.create(
             agency_code=None,
         )
-        competition = CompetitionFactory.create(opportunity=opportunity)
+        competition = CompetitionFactory.create(opportunity=opportunity, competition_forms=[])
         application = ApplicationFactory.create(competition=competition)
 
         generator = SubmissionXMLGenerator(application)

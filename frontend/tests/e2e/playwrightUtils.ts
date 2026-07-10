@@ -1,9 +1,7 @@
-import {
-  BrowserContextOptions,
-  expect,
-  FullProject,
-  Page,
-} from "@playwright/test";
+import { BrowserContextOptions, expect, Page } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
+
+const { targetEnv } = playwrightEnv;
 
 export interface PageProps {
   page: Page;
@@ -14,7 +12,7 @@ export interface PageProps {
 export async function waitForURLChange(
   page: Page,
   changeCheck: (url: string) => boolean,
-  timeout = 30000, // query params get set after a debounce period)
+  timeout = 60000, // query params get set after a debounce period)
 ) {
   const endTime = Date.now() + timeout;
 
@@ -30,12 +28,28 @@ export async function waitForURLChange(
   throw new Error(`URL did not update as expected within ${timeout}ms`);
 }
 
+/* ---- Single Value Query Param Utils ---- */
+
+export const expectURLQueryParamValue = (
+  page: Page,
+  queryParamName: string,
+  queryParamValue: string,
+): void => {
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName);
+  expect(actualValue).toBe(queryParamValue);
+};
+
 export async function waitForURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
   queryParamValue: string,
-  timeout = 30000, // query params get set after a debounce period
+  timeoutOverride?: number,
 ) {
+  // Use longer timeout for staging environment due to slower response times
+  const timeout = timeoutOverride ?? (targetEnv === "staging" ? 300000 : 60000);
+
   const changeCheck = (pageUrl: string): boolean => {
     const url = new URL(pageUrl);
     const params = new URLSearchParams(url.search);
@@ -50,7 +64,61 @@ export async function waitForURLContainsQueryParamValue(
       `Url did not change to contain ${queryParamName}:${queryParamValue} as expected`,
     );
   }
+
+  // Verify using URLSearchParams to handle URL encoding correctly
+  expectURLQueryParamValue(page, queryParamName, queryParamValue);
 }
+
+/* ---- Multiple Value Query Param Utils ---- */
+
+export const expectURLQueryParamValues = (
+  page: Page,
+  queryParamName: string,
+  queryParamValues: string[],
+): void => {
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName) || "";
+
+  const actualSorted = actualValue.split(",").filter(Boolean).sort();
+  const expectedSorted = [...queryParamValues].sort();
+  expect(actualSorted).toEqual(expectedSorted);
+};
+
+export async function waitForURLContainsQueryParamValues(
+  page: Page,
+  queryParamName: string,
+  queryParamValues: string[],
+  timeoutOverride?: number,
+) {
+  const timeout = timeoutOverride ?? (targetEnv === "staging" ? 300000 : 60000);
+
+  const expectedSorted = [...queryParamValues].sort();
+
+  const changeCheck = (pageUrl: string): boolean => {
+    const url = new URL(pageUrl);
+    const params = new URLSearchParams(url.search);
+    const actualValue = params.get(queryParamName);
+    if (!actualValue) {
+      return false;
+    }
+
+    const actualSorted = actualValue.split(",").filter(Boolean).sort();
+    return JSON.stringify(actualSorted) === JSON.stringify(expectedSorted);
+  };
+
+  try {
+    await waitForURLChange(page, changeCheck, timeout);
+  } catch (_e) {
+    throw new Error(
+      `Url did not change to contain ${queryParamName}:${queryParamValues.join(",")} as expected`,
+    );
+  }
+
+  expectURLQueryParamValues(page, queryParamName, queryParamValues);
+}
+
+/* ---- URL Helpers ---- */
 
 export async function waitForUrl(
   page: Page,
@@ -66,7 +134,7 @@ export async function waitForUrl(
 export async function waitForURLContainsQueryParam(
   page: Page,
   queryParamName: string,
-  timeout = 30000, // query params get set after a debounce period
+  timeout = 60000, // query params get set after a debounce period
 ) {
   const changeCheck = (pageUrl: string): boolean => {
     const url = new URL(pageUrl);
@@ -81,13 +149,15 @@ export async function waitForURLContainsQueryParam(
 export async function waitForAnyURLChange(
   page: Page,
   initialUrl: string,
-  timeout = 30000, // query params get set after a debounce period
+  timeout = 60000, // query params get set after a debounce period
 ) {
   const changeCheck = (pageUrl: string): boolean => {
     return pageUrl !== initialUrl;
   };
   await waitForURLChange(page, changeCheck, timeout);
 }
+
+/* ---- Random String Generator ---- */
 
 const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -109,52 +179,46 @@ export const generateRandomString = (desiredPattern: number[]) => {
   }, "");
 };
 
-// signs in using mock 0auth server
-// note that this does not currently work in CI, but does work locally
-// an unknown error prevents sending the token back successfully from the API in CI
-// this will be remedied by https://github.com/HHS/simpler-grants-gov/issues/3791
-// after which we can reenable sign in related tests
-export const performSignIn = async (page: Page, project: FullProject) => {
-  const signInButton = page.locator('button[data-testid="sign-in-button"]');
-  await expect(signInButton).toHaveText("Sign in");
-  await signInButton.click();
-  const secondSignInButton = page.locator(".usa-modal__footer a");
-  await secondSignInButton.click();
-
-  await waitForAnyURLChange(page, "/");
-
-  const requiredInput = page.locator('input[type="text"]');
-  const submitButton = page.locator('input[type="submit"]');
-  const randomUserName = generateRandomString([12]);
-
-  await requiredInput.fill(randomUserName);
-  await submitButton.click();
-
-  await waitForUrl(page, "http://localhost:3000/");
-
-  if (project.name.match(/[Mm]obile/)) {
-    const userDropdown = page.locator(
-      'button[data-testid="navDropDownButton"]',
-    );
-    await userDropdown.click();
-    await expect(
-      page.locator("#user-control > li:first-child a div"),
-    ).toHaveText("fake_mail@mail.com");
-  } else {
-    await expect(
-      page.locator('button[data-testid="navDropDownButton"] a div'),
-    ).toHaveText("fake_mail@mail.com");
-  }
-};
+/* ---- Mobile Navigation ---- */
 
 export const openMobileNav = async (page: Page) => {
   const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
-  await menuOpener.click();
+  const nav = page.locator(".usa-nav");
+  const overlay = page.locator(".usa-overlay");
+  const timeout = targetEnv === "staging" ? 120000 : 10000;
+
+  // If the nav is already open (e.g. left open by authenticateE2eUser), skip
+  // clicking the hamburger button — clicking it again would close the nav and
+  // the open nav overlay would intercept the click causing a timeout.
+  const alreadyOpen = await nav
+    .evaluate((el) => el.classList.contains("is-visible"))
+    .catch(() => false);
+
+  if (!alreadyOpen) {
+    await menuOpener.click();
+
+    // Wait for animation to complete on slow staging environment
+    if (targetEnv === "staging") {
+      await page.waitForTimeout(5000);
+    }
+
+    await expect(nav).toHaveClass(/is-visible/, { timeout });
+    await expect(overlay).toBeVisible({ timeout });
+  }
+
   return menuOpener;
 };
 
+/* ---- Page Refresh ---- */
+
 export async function refreshPageWithCurrentURL(page: Page) {
   const currentURL = page.url();
-  await page.goto(currentURL); // go to new url in same tab
+  // Use "domcontentloaded" instead of "networkidle" to avoid timeouts on staging,
+  // All callers follow this with waitForSearchResultsInitialLoad() which handles
+  // waiting for meaningful app state.
+  await page.goto(currentURL, {
+    waitUntil: "domcontentloaded",
+    timeout: 60000,
+  }); // go to new url in same tab
   return page;
 }

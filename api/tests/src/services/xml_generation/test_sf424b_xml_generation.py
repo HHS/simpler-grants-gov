@@ -12,8 +12,8 @@ from pathlib import Path
 import pytest
 from lxml import etree as lxml_etree
 
-import src.adapters.db as db
 from src.form_schema.forms.sf424b import FORM_XML_TRANSFORM_RULES as SF424B_TRANSFORM_RULES
+from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -25,13 +25,11 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
 
 
-@pytest.mark.xml_validation
 class TestSF424BXMLGeneration:
     """Test cases for SF-424B XML generation service."""
 
@@ -176,6 +174,155 @@ class TestSF424BXMLGeneration:
         # All elements should exist and be in order
         assert auth_rep_pos < org_pos < date_pos
 
+    def test_generate_sf424b_xml_matches_legacy_format(self):
+        """Test that generated XML matches legacy Grants.gov XML format exactly."""
+
+        # Input data matching the legacy XML sample
+        application_data = {
+            "signature": "MH",
+            "title": "M",
+            "applicant_organization": "Org",
+            "date_signed": "2026-02-06",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=SF424B_TRANSFORM_RULES
+        )
+
+        response = service.generate_xml(request)
+
+        assert response.success is True
+        xml_data = response.xml_data
+
+        # Parse the generated XML
+        root = lxml_etree.fromstring(xml_data.encode("utf-8"))
+
+        # Define namespaces for XPath queries
+        namespaces = {
+            "SF424B": "http://apply.grants.gov/forms/SF424B-V1.1",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+        }
+
+        # Verify root element and attributes
+        assert root.tag == "{http://apply.grants.gov/forms/SF424B-V1.1}Assurances"
+        assert (
+            root.get("{http://apply.grants.gov/forms/SF424B-V1.1}programType") == "Non-Construction"
+        )
+        assert root.get("{http://apply.grants.gov/system/Global-V1.0}coreSchemaVersion") == "1.1"
+
+        # Verify FormVersionIdentifier is present and is the first child element
+        form_version = root.find("glob:FormVersionIdentifier", namespaces)
+        assert form_version is not None, "FormVersionIdentifier element is missing"
+        assert form_version.text == "1.1", "FormVersionIdentifier should be '1.1'"
+
+        # Verify FormVersionIdentifier is the FIRST child element
+        first_child = next(iter(root))
+        assert (
+            first_child.tag == "{http://apply.grants.gov/system/Global-V1.0}FormVersionIdentifier"
+        ), "FormVersionIdentifier must be the first child element per XSD"
+
+        # Verify AuthorizedRepresentative structure
+        auth_rep = root.find("SF424B:AuthorizedRepresentative", namespaces)
+        assert auth_rep is not None, "AuthorizedRepresentative element should exist"
+
+        rep_name = auth_rep.find("SF424B:RepresentativeName", namespaces)
+        assert rep_name is not None, "RepresentativeName should exist"
+        assert rep_name.text == "MH", "RepresentativeName should match input exactly"
+
+        rep_title = auth_rep.find("SF424B:RepresentativeTitle", namespaces)
+        assert rep_title is not None, "RepresentativeTitle should exist"
+        assert rep_title.text == "M", "RepresentativeTitle should match input"
+
+        # Verify ApplicantOrganizationName
+        org_name = root.find("SF424B:ApplicantOrganizationName", namespaces)
+        assert org_name is not None, "ApplicantOrganizationName should exist"
+        assert org_name.text == "Org", "ApplicantOrganizationName should match input"
+
+        # Verify SubmittedDate
+        submitted_date = root.find("SF424B:SubmittedDate", namespaces)
+        assert submitted_date is not None, "SubmittedDate should exist"
+        assert submitted_date.text == "2026-02-06", "SubmittedDate should match input"
+
+        # Verify element order (critical for XSD compliance)
+        children = list(root)
+        child_tags = [child.tag for child in children]
+
+        # Expected order per XSD schema
+        expected_order = [
+            "{http://apply.grants.gov/system/Global-V1.0}FormVersionIdentifier",
+            "{http://apply.grants.gov/forms/SF424B-V1.1}AuthorizedRepresentative",
+            "{http://apply.grants.gov/forms/SF424B-V1.1}ApplicantOrganizationName",
+            "{http://apply.grants.gov/forms/SF424B-V1.1}SubmittedDate",
+        ]
+
+        assert child_tags == expected_order, (
+            f"Element order should match XSD schema. "
+            f"Expected: {expected_order}, Got: {child_tags}"
+        )
+
+        # Verify the generated XML contains the expected structure (string comparison)
+        assert "<glob:FormVersionIdentifier>1.1</glob:FormVersionIdentifier>" in xml_data
+        assert "<SF424B:AuthorizedRepresentative>" in xml_data
+        assert "<SF424B:RepresentativeName>MH</SF424B:RepresentativeName>" in xml_data
+        assert "<SF424B:RepresentativeTitle>M</SF424B:RepresentativeTitle>" in xml_data
+        assert "</SF424B:AuthorizedRepresentative>" in xml_data
+        assert (
+            "<SF424B:ApplicantOrganizationName>Org</SF424B:ApplicantOrganizationName>" in xml_data
+        )
+        assert "<SF424B:SubmittedDate>2026-02-06</SF424B:SubmittedDate>" in xml_data
+
+    def test_generate_sf424b_xml_namespaces_match_legacy(self):
+        """Test that generated XML includes all namespace declarations matching legacy format.
+
+        Legacy Grants.gov XML includes specific namespace declarations that must be present
+        for proper XSD validation and submission compatibility.
+        """
+        application_data = {
+            "signature": "MH",
+            "title": "M",
+            "applicant_organization": "Org",
+            "date_signed": "2026-02-06",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=SF424B_TRANSFORM_RULES
+        )
+
+        response = service.generate_xml(request)
+
+        assert response.success is True
+        xml_data = response.xml_data
+
+        # Verify all required namespace declarations are present
+        required_namespaces = {
+            'xmlns:SF424B="http://apply.grants.gov/forms/SF424B-V1.1"',
+            'xmlns:att="http://apply.grants.gov/system/Attachments-V1.0"',
+            'xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0"',
+            'xmlns:glob="http://apply.grants.gov/system/Global-V1.0"',
+        }
+
+        for namespace_decl in required_namespaces:
+            assert namespace_decl in xml_data, (
+                f"Missing namespace declaration: {namespace_decl}\n"
+                f"Generated XML root element:\n{xml_data[:500]}"
+            )
+
+        # Verify namespace prefixes are used correctly in attributes
+        assert 'SF424B:programType="Non-Construction"' in xml_data
+        assert 'glob:coreSchemaVersion="1.1"' in xml_data
+
+        # Parse XML to verify namespace declarations are valid
+        root = lxml_etree.fromstring(xml_data.encode("utf-8"))
+
+        # Verify namespace map includes all expected namespaces
+        nsmap = root.nsmap
+        assert nsmap.get("SF424B") == "http://apply.grants.gov/forms/SF424B-V1.1"
+        assert nsmap.get("att") == "http://apply.grants.gov/system/Attachments-V1.0"
+        assert nsmap.get("globLib") == "http://apply.grants.gov/system/GlobalLibrary-V2.0"
+        assert nsmap.get("glob") == "http://apply.grants.gov/system/Global-V1.0"
+
     def test_generate_sf424b_xml_with_only_title(self):
         """Test SF-424B XML generation with only title field (no signature)."""
         application_data = {
@@ -227,33 +374,31 @@ class TestSF424BXMLGeneration:
         assert "<SF424B:SubmittedDate>2025-04-15</SF424B:SubmittedDate>" in xml_data
 
 
-@pytest.mark.xml_validation
+@pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
 class TestSF424BXSDValidation:
     """XSD validation tests for SF-424B form XML."""
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+        """Create XSD validator with directory."""
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
         # Check if SF424B XSD exists
-        sf424b_xsd_path = xsd_cache_dir / "SF424B-V1.1.xsd"
+        sf424b_xsd_path = xsd_dir / "SF424B-V1.1.xsd"
         if not sf424b_xsd_path.exists():
             pytest.skip(
-                "SF424B-V1.1.xsd not found in cache. Run 'flask task fetch-xsds' to download schemas."
+                "SF424B-V1.1.xsd not found. Run 'flask task fetch-xsds' to download schemas."
             )
-        return XSDValidator(xsd_cache_dir)
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def sf424b_application(self, enable_factory_create, db_session: db.Session):
+    def sf424b_application(self, enable_factory_create, seed_form_registry):
         """Create an application with SF-424B form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -273,15 +418,10 @@ class TestSF424BXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        # Create SF-424B form with XML transform config
-        sf424b_form = FormFactory.create(
-            form_name="SF424B",
-            short_form_name="SF424B",
-            form_version="1.1",
-            json_to_xml_schema=SF424B_TRANSFORM_RULES,
-        )
+        sf424b_form = SF424b_v1_1
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-424B Test Application"
@@ -304,9 +444,7 @@ class TestSF424BXSDValidation:
 
         return application
 
-    def test_sf424b_submission_xml_validates_against_xsd(
-        self, sf424b_application, xsd_validator, db_session
-    ):
+    def test_sf424b_submission_xml_validates_against_xsd(self, sf424b_application, xsd_validator):
         """Test that complete SF-424B submission XML validates against XSD schema."""
         # Create application submission
         application_submission = ApplicationSubmissionFactory.create(
@@ -328,7 +466,8 @@ class TestSF424BXSDValidation:
 
         # Extract SF-424B form element
         sf424b_ns = "{http://apply.grants.gov/forms/SF424B-V1.1}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         sf424b_elements = forms_element.findall(f".//{sf424b_ns}Assurances")
@@ -350,8 +489,9 @@ class TestSF424BXSDValidation:
             f"Generated XML:\n{sf424b_xml[:2000]}"
         )
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sf424b_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that SF-424B with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -372,14 +512,10 @@ class TestSF424BXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
-        sf424b_form = FormFactory.create(
-            form_name="SF424B",
-            short_form_name="SF424B",
-            form_version="1.1",
-            json_to_xml_schema=SF424B_TRANSFORM_RULES,
-        )
+        sf424b_form = SF424b_v1_1
 
         application = ApplicationFactory.create(
             competition=competition, application_name="SF-424B Minimal Test Application"
@@ -411,7 +547,8 @@ class TestSF424BXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         sf424b_ns = "{http://apply.grants.gov/forms/SF424B-V1.1}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         sf424b_elements = forms_element.findall(f".//{sf424b_ns}Assurances")
         assert len(sf424b_elements) == 1
 

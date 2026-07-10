@@ -1,6 +1,6 @@
 # Background
 
-Simpler Grants maintains a feature flag system within its NextJS app that currently allows for custom behavior for top level pages. Each feature flag is a simple boolean, and when turned on (or turned to `true`), the page that is set up to respond to this flag can opt out of the standard render. For example, when a "searchOff" feature flag is set to "true", the search page is configured to redirect to a maintenance page.
+Simpler Grants maintains a feature flag system within its NextJS app that currently allows for custom behavior on pages and features. Each feature flag is a simple boolean, and when turned on (or turned to `true`), a page or feature that is set up to respond to this flag can opt out of the standard render or behavior. For example, when an "applyFormPrototypeOff" feature flag is set to "true", the application form page is configured to disable or hide the prototype feature.
 
 Our feature flags implementation can read feature flag values from environment variables, but can also read them from the frontend, and stores user settings on client side cookies. The intent is for these feature flags to be user configurable, so that
 
@@ -11,7 +11,7 @@ This means that any codebase/deployment level behavior that isn't meant for user
 
 # Current Feature Flags
 
-You can find and update the feature flags currently in use by the application in the [feature flags typescript file](/frontend/src/constants/featureFlags.ts).
+You can find and update the feature flags currently in use by the application in the [feature flags typescript file](../../frontend/src/constants/defaultFeatureFlags.ts).
 
 # Usage
 
@@ -19,8 +19,8 @@ You can find and update the feature flags currently in use by the application in
 
 Feature flags will follow these conventions!
 
-- feature flags should be named and conceived such that their default value is `false` or `off`. This allows us to easily implement custom behavior across the board when flags are turned on. For example, a feature flag to toggle the opportunity page should be something like `opportunityOff` or `disableOpportunity` and with a default value of `false`.
-- feature flag names will use simple camel case naming, for example `searchOff`, `disableApplicationForm`
+- feature flags should be named and conceived such that their default value is `false` or `off`. This allows us to easily implement custom behavior across the board when flags are turned on. For example, a feature flag to toggle the form prototype should be something like `applyFormPrototypeOff` or `disableApplyFormPrototype` and with a default value of `false`.
+- feature flag names will use simple camel case naming, for example `applyFormPrototypeOff`
 - names of environment variables for controlling feature flag values should match the name of the flags within the code, except
   - using snake case
   - all caps
@@ -184,3 +184,28 @@ The `FeatureFlagsManager` and middleware integration intelligently and gracefull
 - Invalid query param formats, invalid feature flag names, and invalid feature flag values are ignored
 - If the cookie value is corrupted, a new cookie value set to the default feature flag values will be set
 - The cookie is read every time we check if a feature flag is enabled, so it also handles changes to the cookie made by another page or request
+
+# Updating default feature flags in deployed apps
+
+When the default value of a flag should be updated for all users of a deployed application, for examople when turning on a new feature:
+
+First, gather the name for the SSM parameter from terraform. You may need to trace through from frontend variable name -> env var name (found in environments.ts) -> SSM param name (found in frontend/app-config/env-config/environment_variables.tf). The name will look something like `/<application>/<environment>/<name-of-flag>`
+
+For PROD and Training:
+
+1. log in to AWS. Note that this can only be done by a user with write access to AWS
+2. go to Systems Manager
+3. scroll down to the Parameter Store link on the left nav
+4. find the right entry for the feature flag, found in step one
+5. click edit
+6. set value and save
+7. you will need to manually redeploy or restart the frontend ECS service to pick up the new value of the feature flag
+
+For DEV and Staging:
+
+1. go to https://github.com/HHS/simpler-grants-gov/actions/workflows/update-frontend-feature-flag.yml
+2. click run workflow
+3. choose the feature flag in the drop down that you found in step one
+4. set value and environment
+5. click run workflow
+6. this will automatically restart the service after setting the feature flag

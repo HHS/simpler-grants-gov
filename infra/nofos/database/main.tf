@@ -1,26 +1,21 @@
-data "aws_caller_identity" "current" {}
-
 data "aws_vpc" "network" {
-  filter {
-    name   = "tag:Name"
-    values = [module.project_config.network_configs[var.environment_name].vpc_name]
+  tags = {
+    project      = module.project_config.project_name
+    network_name = local.environment_config.network_name
   }
 }
 
 data "aws_subnets" "database" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
-  }
-  filter {
-    name   = "tag:subnet_type"
-    values = ["database"]
+  tags = {
+    project      = module.project_config.project_name
+    network_name = local.environment_config.network_name
+    subnet_type  = "database"
   }
 }
 
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
-  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
+  # By default, Terraform creates a workspace named "default." If a non-default workspace is not created this prefix will equal "default",
   # if you choose not to use workspaces set this value to "dev"
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
@@ -32,15 +27,13 @@ locals {
     description = "Database resources for the ${var.environment_name} environment"
   })
 
-  is_temporary = terraform.workspace != "default"
-
   environment_config = module.app_config.environment_configs[var.environment_name]
   database_config    = local.environment_config.database_config
   network_config     = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
-  required_version = "1.13.5"
+  required_version = "1.14.3"
 
   required_providers {
     aws = {
@@ -103,5 +96,5 @@ module "database" {
   database_subnet_group_name     = var.environment_name
   environment_name               = var.environment_name
   grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
-  is_temporary                   = local.is_temporary
+  newrelic_entity_guid           = local.database_config.newrelic_entity_guid
 }

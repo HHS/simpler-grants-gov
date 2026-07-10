@@ -1,17 +1,29 @@
 import io
 import json
 import logging
+import re
 import uuid
 from collections.abc import Callable, Iterator
 from enum import StrEnum
 from typing import Any
 
+import grants_shared.adapters.db as db
 import requests
 from defusedxml import minidom
+from grants_shared.adapters.aws import S3Config
+from grants_shared.util import file_util
 from lxml import etree
+from sqlalchemy import exists, select
 
+from src.db.models.competition_models import (
+    ApplicationSubmission,
+    ApplicationSubmissionRetrieved,
+    ApplicationSubmissionTrackingNumber,
+)
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
-from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
+from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.soap_payload_handler import extract_soap_xml
 
 logger = logging.getLogger(__name__)
@@ -25,30 +37,8 @@ HIDDEN_VALUE = "hidden"
 class AlternateSoapOperation(StrEnum):
     GET_APPLICATION_ZIP = "GetApplicationZipRequest"
     GET_APPLICATION = "GetApplicationRequest"
-
-
-def format_local_soap_response(response_data: bytes, boundary_id: str | None = None) -> bytes:
-    # This is a format string for formatting local responses from the mock
-    # soap server since it does not support manipulating the response.
-    # The grants.gov SOAP API currently includes this data.
-    # Note: /r/n is how Windows encodes a newline
-    # /r symbolizes a Carriage Return which returns to the start of the current line (holdover from typewriters)
-    # Mac just uses /n
-    # This is used to ensure the correct Content-Length
-    # see: https://en.wikipedia.org/wiki/Newline
-    response_id = boundary_id if boundary_id else str(uuid.uuid4())
-    return (
-        (
-            f"--uuid:{response_id}\r\n"
-            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
-            "Content-Transfer-Encoding: binary\r\n"
-            f"Content-ID: <root.message@cxf.apache.org>{response_data.decode()}\r\n"
-            f"--uuid:{response_id}--\r\n"
-        )
-        .replace('<?xml version="1.0" encoding="UTF-8"?>', "")
-        .strip()
-        .encode("utf-8")
-    )
+    CONFIRM_APPLICATION_DELIVERY = "ConfirmApplicationDeliveryRequest"
+    UPDATE_APPLICATION_INFO = "UpdateApplicationInfoRequest"
 
 
 def get_soap_proxy_grant_application_not_found_response(
@@ -79,6 +69,114 @@ def get_soap_proxy_grant_application_not_found_response(
     return get_soap_response(response_data, 500, headers=response_headers)
 
 
+def get_soap_proxy_failed_to_confirm_delivery_response(
+    *args: str, headers: dict, **kwargs: dict | bool
+) -> SOAPResponse:
+    data = (
+        '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        "<faultstring>Failed to confirm application delivery.(Authorization Failure)</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    ).encode("utf-8")
+    boundary_id = str(uuid.uuid4())
+    response_data = format_local_soap_response(data, boundary_id=boundary_id)
+    response_headers = {
+        "Content-Type": (
+            "multipart/related;"
+            ' type="application/xop+xml";'
+            f' boundary="uuid:{boundary_id}";'
+            ' start="<root.message@cxf.apache.org>";'
+            ' start-info="text/xml"'
+        ),
+        "Set-Cookie": (f"{headers.get('Cookie')}; Path=/grantsws-agency; Secure; HttpOnly"),
+    }
+    return get_soap_response(response_data, 500, headers=response_headers)
+
+
+def get_soap_proxy_failed_to_update_application_info(
+    grants_gov_tracking_number: str, headers: dict, **kwargs: dict | bool
+) -> SOAPResponse:
+    data = (
+        '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<ns2:UpdateApplicationInfoResponse "
+        'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+        'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+        'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+        'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+        'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" '
+        'xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+        'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+        'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+        'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+        'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+        'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        f"<GrantsGovTrackingNumber>{grants_gov_tracking_number}</GrantsGovTrackingNumber>"
+        "<ns2:Success>true</ns2:Success>"
+        "<ns9:AssignAgencyTrackingNumberResult>"
+        "<ns9:Success>false</ns9:Success>"
+        "<ns9:ErrorMessage>Exception caught assigning agency tracking number.(Authorization Failure)</ns9:ErrorMessage>"
+        "</ns9:AssignAgencyTrackingNumberResult>"
+        "<ns9:SaveAgencyNotesResult>"
+        "<ns9:Success>false</ns9:Success>"
+        "<ns9:ErrorMessage>Exception caught saving agency notes.(Authorization Failure)</ns9:ErrorMessage>"
+        "</ns9:SaveAgencyNotesResult>"
+        "</ns2:UpdateApplicationInfoResponse>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    ).encode("utf-8")
+    boundary_id = str(uuid.uuid4())
+    response_data = format_local_soap_response(data, boundary_id=boundary_id)
+    response_headers = {
+        "Content-Type": (
+            "multipart/related;"
+            ' type="application/xop+xml";'
+            f' boundary="uuid:{boundary_id}";'
+            ' start="<root.message@cxf.apache.org>";'
+            ' start-info="text/xml"'
+        ),
+        "Set-Cookie": (f"{headers.get('Cookie')}; Path=/grantsws-agency; Secure; HttpOnly"),
+    }
+    return get_soap_response(response_data, 500, headers=response_headers)
+
+
+DEFAULT_NOT_FOUND_RESPONSES: dict[AlternateSoapOperation, Callable] = {
+    AlternateSoapOperation.GET_APPLICATION_ZIP: get_soap_proxy_grant_application_not_found_response,
+    AlternateSoapOperation.GET_APPLICATION: get_soap_proxy_grant_application_not_found_response,
+    AlternateSoapOperation.CONFIRM_APPLICATION_DELIVERY: get_soap_proxy_failed_to_confirm_delivery_response,
+    AlternateSoapOperation.UPDATE_APPLICATION_INFO: get_soap_proxy_failed_to_update_application_info,
+}
+
+
+def format_local_soap_response(response_data: bytes, boundary_id: str | None = None) -> bytes:
+    # This is a format string for formatting local responses from the mock
+    # soap server since it does not support manipulating the response.
+    # The grants.gov SOAP API currently includes this data.
+    # Note: /r/n is how Windows encodes a newline
+    # /r symbolizes a Carriage Return which returns to the start of the current line (holdover from typewriters)
+    # Mac just uses /n
+    # This is used to ensure the correct Content-Length
+    # see: https://en.wikipedia.org/wiki/Newline
+    response_id = boundary_id if boundary_id else str(uuid.uuid4())
+    return (
+        (
+            f"--uuid:{response_id}\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+            "Content-Transfer-Encoding: binary\r\n"
+            f"Content-ID: <root.message@cxf.apache.org>{response_data.decode()}\r\n"
+            f"--uuid:{response_id}--\r\n"
+        )
+        .replace('<?xml version="1.0" encoding="UTF-8"?>', "")
+        .strip()
+        .encode("utf-8")
+    )
+
+
 def get_soap_response(
     data: bytes | Iterator[bytes] | list[bytes], status_code: int = 200, headers: dict | None = None
 ) -> SOAPResponse:
@@ -104,6 +202,10 @@ class SOAPFaultException(Exception):
         super().__init__(message, fault, *args)
 
 
+class SOAPInvalidFilter(SOAPFaultException):
+    pass
+
+
 def wrap_envelope_dict(soap_xml_dict: dict, operation_name: str | None = None) -> dict:
     body = {operation_name: {**soap_xml_dict}} if operation_name else soap_xml_dict
     return {"Envelope": {"Body": {**body}}}
@@ -125,6 +227,44 @@ def get_soap_error_response(
 </soap:Envelope>
 """.encode()
     return get_soap_response(data=err, status_code=500, headers=headers)
+
+
+def get_soap_fault_error_response(
+    faultcode: str = "soap:Server",
+    faultstring: str = "Server error has occurred",
+    headers: dict | None = None,
+) -> SOAPResponse:
+    err = f"""
+    <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        <soap:Body>
+            <soap:Fault>
+                <faultcode>{faultcode}</faultcode>
+                <faultstring>{faultstring}</faultstring>
+            </soap:Fault>
+        </soap:Body>
+    </soap:Envelope>
+    """.strip()
+    boundary_id = str(uuid.uuid4())
+    mtom_response = (
+        f"--uuid:{boundary_id}\r\n"
+        f'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        f"Content-Transfer-Encoding: binary\r\n"
+        f"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        f"{err}\r\n"
+        f"--uuid:{boundary_id}--\r\n"
+    ).encode()
+    response_headers = {
+        "Content-Type": (
+            "multipart/related;"
+            ' type="application/xop+xml";'
+            f' boundary="uuid:{boundary_id}";'
+            ' start="<root.message@cxf.apache.org>";'
+            ' start-info="text/xml"'
+        )
+    }
+    if headers:
+        response_headers.update(headers)
+    return get_soap_response(data=mtom_response, status_code=500, headers=response_headers)
 
 
 def get_auth_error_response() -> SOAPResponse:
@@ -321,7 +461,7 @@ def get_gov_grants_tracking_number(xml_bytes: bytes) -> str | None:
 
 
 def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | None:
-    xml_bytes = extract_soap_xml(soap_request.data)
+    xml_bytes = extract_soap_xml(soap_request.data.head())
     if not xml_bytes:
         return None
     if soap_request.operation_name in AlternateSoapOperation:
@@ -330,11 +470,129 @@ def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | No
         if tracking_number and (
             tracking_number.startswith("GRANT8") or tracking_number.startswith("GRANT9")
         ):
-            return get_soap_proxy_grant_application_not_found_response(
+            return DEFAULT_NOT_FOUND_RESPONSES[AlternateSoapOperation(soap_request.operation_name)](
                 tracking_number, headers=soap_request.headers, is_get_application_zip=is_zip
             )
     return None
 
 
+def get_application_submission_by_legacy_tracking_number(
+    db_session: db.Session, legacy_tracking_number: str
+) -> ApplicationSubmission | None:
+    if legacy_tracking_number.startswith("GRANT"):
+        legacy_tracking_number = legacy_tracking_number.split("GRANT")[1]
+    return db_session.execute(
+        select(ApplicationSubmission).where(
+            ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number),
+        )
+    ).scalar_one_or_none()
+
+
+def get_application_submission_by_legacy_tracking_number_extended(
+    db_session: db.Session, legacy_tracking_number: str, user_id: str
+) -> dict | None:
+    if legacy_tracking_number.startswith("GRANT"):
+        legacy_tracking_number = legacy_tracking_number.split("GRANT")[1]
+    combined_stmt = select(
+        ApplicationSubmission,
+        exists()
+        .where(
+            ApplicationSubmissionTrackingNumber.created_by_user_id == user_id,
+            ApplicationSubmissionTrackingNumber.application_submission_id
+            == ApplicationSubmission.application_submission_id,
+        )
+        .label("has_tracking"),
+        exists()
+        .where(
+            ApplicationSubmissionRetrieved.created_by_user_id == user_id,
+            ApplicationSubmissionRetrieved.application_submission_id
+            == ApplicationSubmission.application_submission_id,
+        )
+        .label("has_retrieval"),
+    ).where(ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number))
+    result = db_session.execute(combined_stmt).tuples().first()
+    if result:
+        return dict(submission=result[0], has_tracking=result[1], has_retrieval=result[2])
+    return None
+
+
 def convert_bool_to_yes_no(value: bool | None) -> str:
     return "Yes" if value else "No"
+
+
+def to_snake_case(name: str) -> str:
+    """
+    Converts camel case to snake case
+    GetApplicationZipRequest -> get_application_zip_request
+    SF424ABC -> sf424_abc
+    OperationID -> operation_id
+    """
+    sub = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", sub).lower()
+
+
+def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAPResponse) -> None:
+    if get_soap_config().save_soap_messages_to_s3:
+        try:
+            s3_config = S3Config()
+            debug_identifier = uuid.uuid4()
+            base_path = file_util.join(
+                s3_config.draft_files_bucket_path,
+                # Not "soap": in virtual-hosted S3 URLs the object key becomes the URL path,
+                # and a WAF rule blocks paths starting with /soap -- which breaks both the
+                # upload here and downloading these files from the S3 console.
+                "soap-debug",
+                str(debug_identifier),
+            )
+            # Store as plain text so the debug files preview in the browser / S3 console
+            # instead of downloading as binary/octet-stream.
+            text_content_type = "text/plain; charset=utf-8"
+            if soap_request is not None:
+                request_s3_path = file_util.join(
+                    base_path,
+                    "request.txt",
+                )
+                file_util.write_to_file(
+                    request_s3_path,
+                    # The request body stream is consumed when forwarding to the legacy proxy, so
+                    # re-reading soap_request.data here yields nothing (the empty-request.txt bug).
+                    # Use the cached head, which holds the SOAP envelope captured during parsing.
+                    soap_request.data.head().decode("utf-8"),
+                    content_type=text_content_type,
+                )
+                request_headers_s3_path = file_util.join(
+                    base_path,
+                    "request_headers.txt",
+                )
+                file_util.write_to_file(
+                    request_headers_s3_path,
+                    json.dumps(soap_request.headers),
+                    content_type=text_content_type,
+                )
+            response_s3_path = file_util.join(
+                base_path,
+                "response.txt",
+            )
+            file_util.write_to_file(
+                response_s3_path,
+                soap_response.to_bytes().decode("utf-8"),
+                content_type=text_content_type,
+            )
+            response_headers_s3_path = file_util.join(
+                base_path,
+                "response_headers.txt",
+            )
+            file_util.write_to_file(
+                response_headers_s3_path,
+                json.dumps(soap_response.headers),
+                content_type=text_content_type,
+            )
+            logger.info(
+                "soap_client: debug info uploaded to s3",
+                extra={"debug_identifier": debug_identifier},
+            )
+        except Exception:
+            logger.exception(
+                "soap_client: failed to upload debug info to s3",
+                extra={"soap_api_event": LegacySoapApiEvent.ERROR_UPLOADING_DEBUG_DATA},
+            )

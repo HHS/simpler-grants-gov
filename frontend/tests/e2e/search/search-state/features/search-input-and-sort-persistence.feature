@@ -1,0 +1,33 @@
+/**
+* @featureArea Search
+* @feature Search State Persistence
+* @specFile e2e/search/search-state/specs/search-state-persistence.spec.ts
+* @description Validates persistence of search query and sort selection after page refresh
+*/
+
+Feature: Search page - state persistence after refresh
+  As a grantee searching for opportunities
+  I want my search filters and inputs to be preserved in the URL
+  So that I can refresh the page and return to the same search state
+ 
+Background:
+  Given I am on the search page
+  And the search results have loaded
+
+/* @tags GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION */
+Scenario: Retain search input and sort after refresh
+  When I enter "<search-term>" in the search input and submit in "<viewport>"
+  And I "<sort access action>"
+  And I select sort order "<sort label>"
+  Then the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
+  When I refresh the page
+  Then the search results load
+  And the search input should contain "<search-term>"
+  And the sort order should be "<sort label>"
+  And the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
+
+Examples:
+  | viewport | sort access action      | search-term | sort label                 | sort type        |
+  | mobile   | open the filter drawer  | education   | Award maximum (Highest)    | awardCeilingDesc |
+  | desktop  | view the sort options   | education   | Award maximum (Highest)    | awardCeilingDesc |
+  

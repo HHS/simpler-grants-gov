@@ -1,8 +1,11 @@
 "server only";
 
-import { ApiRequestError } from "src/errors";
-import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
-import { searchAgencies } from "src/services/fetch/fetchers/fetchers";
+import { ApiRequestError, MissingAuthError } from "src/errors";
+import { getSession } from "src/services/auth/session";
+import {
+  fetchUserWithMethod,
+  searchAgencies,
+} from "src/services/fetch/fetchers/fetchers";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
 import { getStatusValueForAgencySearch } from "src/utils/search/searchUtils";
@@ -14,7 +17,7 @@ export const performAgencySearch = async ({
   keyword?: string;
   selectedStatuses?: string[];
 } = {}): Promise<RelevantAgencyRecord[]> => {
-  const requestBody: JSONRequestBody = {
+  const requestBody: Record<string, unknown> = {
     pagination: {
       page_offset: 1,
       page_size: 1500, // 969 agencies in prod as of 3/7/25
@@ -71,6 +74,37 @@ export const searchAndFlattenAgencies = async (
     return flattenAgencies(agencies);
   } catch (e) {
     console.error("Error flattening agency search results");
+    throw e;
+  }
+};
+
+// ------------------------------------------------------
+// Fetch user's agencies
+// ------------------------------------------------------
+export const getUserAgencies = async (
+  userId: string,
+): Promise<RelevantAgencyRecord[]> => {
+  const subPath = `${userId}/agencies`;
+  const resp = await fetchUserWithMethod("POST")({
+    subPath,
+  });
+  const json = (await resp.json()) as { data: [] };
+  return json.data;
+};
+
+export const fetchUserAgencies = async (): Promise<RelevantAgencyRecord[]> => {
+  try {
+    const session = await getSession();
+    if (!session || !session.token) {
+      // we shouldn't get there because the page should be checking authentication
+      throw new MissingAuthError(
+        "Error fetching user agencies - not logged in",
+      );
+    }
+    const agencies = await getUserAgencies(session.user_id);
+    return agencies;
+  } catch (e) {
+    console.error("Error fetching user agencies");
     throw e;
   }
 };

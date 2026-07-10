@@ -9,7 +9,7 @@ This module provides functionality to backup Metabase queries by:
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -397,7 +397,7 @@ class MetabaseBackup:
         logger.info("Files renamed: %d", self.stats["files_renamed"])
 
         # Write changelog
-        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
         log_entry = (
             f"\n=== Backup completed at {timestamp} ===\n"
             f"Collections processed: {self.stats['total_collections']}\n"
