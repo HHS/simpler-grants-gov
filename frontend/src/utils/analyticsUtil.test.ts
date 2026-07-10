@@ -7,6 +7,11 @@ import {
   type NewRelicBrowser,
 } from "src/utils/analyticsUtil";
 
+jest.mock("src/constants/environments", () => ({
+  environment: {
+    NEW_RELIC_ENABLED: "true",
+  },
+}));
 declare global {
   interface Window {
     newrelic?: NewRelicBrowser;
