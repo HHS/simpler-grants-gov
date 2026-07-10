@@ -119,15 +119,25 @@ body:
       value: |
         ## Supporting Documentation
 
-        | Document Type | Link | POC | Status |
-        |--------------|------|------|--------|
-        | Product Ticket |  | Product Owner | Draft / In Review / Approved |
-        | Design Documents |  | Designer | Draft / In Review / Approved |
-        | Mockup Page |  | Designer | Draft / In Review / Approved |
-        | Business Logic |  | Product Owner | Draft / In Review / Approved |
-        | Technical Design |  | Developer / Tech Lead | Draft / In Review / Approved |
-        | Related Tickets |  | Product Owner | Draft / In Review / Approved |
-        | Additional Documentation |  |  | Draft / In Review / Approved |
+        <table>
+          <thead>
+            <tr>
+              <th>Document Type</th>
+              <th>Link</th>
+              <th>POC</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Product Ticket</td><td></td><td>Product Owner</td><td>Draft / In Review / Approved</td></tr>
+            <tr><td>Design Documents</td><td></td><td>Designer</td><td>Draft / In Review / Approved</td></tr>
+            <tr><td>Mockup Page</td><td></td><td>Designer</td><td>Draft / In Review / Approved</td></tr>
+            <tr><td>Business Logic</td><td></td><td>Product Owner</td><td>Draft / In Review / Approved</td></tr>
+            <tr><td>Technical Design</td><td></td><td>Developer / Tech Lead</td><td>Draft / In Review / Approved</td></tr>
+            <tr><td>Related Tickets</td><td></td><td>Product Owner</td><td>Draft / In Review / Approved</td></tr>
+            <tr><td>Additional Documentation</td><td></td><td></td><td>Draft / In Review / Approved</td></tr>
+          </tbody>
+        </table>
 
   - type: textarea
     id: supporting_documentation_notes
