@@ -74,13 +74,17 @@ const mockGetAwardRecommendationDetails = jest
   .mockResolvedValue(mockAwardRecommendationDetails);
 
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
-  getAwardRecommendationDetails: (awardRecommendationId: string): ReturnType<typeof mockGetAwardRecommendationDetails> =>
+  getAwardRecommendationDetails: (
+    awardRecommendationId: string,
+  ): ReturnType<typeof mockGetAwardRecommendationDetails> =>
     mockGetAwardRecommendationDetails(awardRecommendationId),
 }));
 
 const mockUseSelectedSubmissions = jest.fn();
 jest.mock("src/hooks/useSelectedSubmissions", () => ({
-  useSelectedSubmissions: (awardRecommendationId: string): ReturnType<typeof mockUseSelectedSubmissions> =>
+  useSelectedSubmissions: (
+    awardRecommendationId: string,
+  ): ReturnType<typeof mockUseSelectedSubmissions> =>
     mockUseSelectedSubmissions(awardRecommendationId),
 }));
 
@@ -142,7 +146,6 @@ describe("BulkEditRecommendationsPage", () => {
         await screen.findByTestId("award-recommendation-hero-fallback"),
       ).toBeInTheDocument();
     });
-
 
     it("renders the EditRecommendationsForm component", async () => {
       const component = await BulkEditRecommendationsPage({

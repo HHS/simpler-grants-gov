@@ -1,5 +1,6 @@
 "use client";
 
+import { RecommendationDetailForm } from "src/app/[locale]/(base)/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
 import { useSelectedSubmissions } from "src/hooks/useSelectedSubmissions";
 
 import { useTranslations } from "next-intl";
@@ -7,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, ButtonGroup } from "@trussworks/react-uswds";
 
-import { RecommendationDetailForm } from "src/app/[locale]/(base)/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
 import SelectedApplicationsTable from "src/components/award-recommendation/SelectedApplicationsTable";
 import SimplerAlert from "src/components/core/SimplerAlert";
 
@@ -99,11 +99,7 @@ export default function EditRecommendationsForm({
         />
 
         <ButtonGroup className="margin-top-4">
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={isSubmitting}
-          >
+          <Button type="button" onClick={handleSave} disabled={isSubmitting}>
             {isSubmitting ? t("saving") : t("saveButton")}
           </Button>
           <Button

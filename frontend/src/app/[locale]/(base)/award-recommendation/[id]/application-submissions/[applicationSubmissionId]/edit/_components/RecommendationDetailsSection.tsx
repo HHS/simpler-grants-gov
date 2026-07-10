@@ -4,7 +4,11 @@ import {
   AwardRecommendationSubmission,
   AwardRecommendationType,
 } from "src/types/awardRecommendationTypes";
-import { formatCurrency, formatCurrencyString, getNumericAmountFromString } from "src/utils/formatCurrencyUtil";
+import {
+  formatCurrency,
+  formatCurrencyString,
+  getNumericAmountFromString,
+} from "src/utils/formatCurrencyUtil";
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -208,9 +212,22 @@ const FundingSectionMultiple = ({
         <table className="usa-table usa-table--borderless width-full">
           <thead>
             <tr>
-              <th scope="col" className="bg-base-lightest padding-y-205 minw-15">{t("applicationIdLabel")}</th>
-              <th scope="col" className="bg-base-lightest padding-y-205 minw-15">{t("amountRequestedLabel")}</th>
-              <th scope="col" className="bg-base-lightest padding-y-205 minw-15">
+              <th
+                scope="col"
+                className="bg-base-lightest padding-y-205 minw-15"
+              >
+                {t("applicationIdLabel")}
+              </th>
+              <th
+                scope="col"
+                className="bg-base-lightest padding-y-205 minw-15"
+              >
+                {t("amountRequestedLabel")}
+              </th>
+              <th
+                scope="col"
+                className="bg-base-lightest padding-y-205 minw-15"
+              >
                 <span>{t("amountRecommendedLabel")}</span>
                 <RequiredFieldIndicator> *</RequiredFieldIndicator>
               </th>
@@ -316,7 +333,8 @@ export const RecommendationDetailForm = ({
 }: RecommendationDetailFormProps) => {
   const isMultipleSubmissions = submissions && submissions.length > 1;
   const singleSubmission =
-    submission || (submissions && submissions.length === 1 ? submissions[0] : null);
+    submission ||
+    (submissions && submissions.length === 1 ? submissions[0] : null);
 
   if (!singleSubmission && !isMultipleSubmissions) {
     return null;
@@ -325,10 +343,7 @@ export const RecommendationDetailForm = ({
   if (isMultipleSubmissions) {
     return (
       <div className="margin-bottom-4" data-testid="recommendation-detail-form">
-        <RecommendationFields
-          submissionId="bulk"
-          namePrefix="bulk_edit["
-        />
+        <RecommendationFields submissionId="bulk" namePrefix="bulk_edit[" />
         <FundingSectionMultiple submissions={submissions} />
       </div>
     );

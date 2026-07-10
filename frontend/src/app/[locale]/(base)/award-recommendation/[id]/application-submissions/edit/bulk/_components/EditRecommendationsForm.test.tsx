@@ -17,15 +17,20 @@ jest.mock("next/navigation", () => ({
 
 const mockUseSelectedSubmissions = jest.fn();
 jest.mock("src/hooks/useSelectedSubmissions", () => ({
-  useSelectedSubmissions: (awardRecommendationId: string): ReturnType<typeof mockUseSelectedSubmissions> =>
+  useSelectedSubmissions: (
+    awardRecommendationId: string,
+  ): ReturnType<typeof mockUseSelectedSubmissions> =>
     mockUseSelectedSubmissions(awardRecommendationId),
 }));
 
-jest.mock("src/components/award-recommendation/SelectedApplicationsTable", () => {
-  return function MockSelectedApplicationsTable() {
-    return <div data-testid="selected-applications-table">Mock Table</div>;
-  };
-});
+jest.mock(
+  "src/components/award-recommendation/SelectedApplicationsTable",
+  () => {
+    return function MockSelectedApplicationsTable() {
+      return <div data-testid="selected-applications-table">Mock Table</div>;
+    };
+  },
+);
 
 jest.mock("src/components/core/SimplerAlert", () => {
   return function MockSimplerAlert({
@@ -112,7 +117,9 @@ describe("EditRecommendationsForm", () => {
 
     it("displays error alert when no submissions are selected", () => {
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       expect(screen.getByTestId("no-selections-alert")).toBeInTheDocument();
@@ -121,7 +128,9 @@ describe("EditRecommendationsForm", () => {
 
     it("does not render the form content", () => {
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       expect(
@@ -147,7 +156,9 @@ describe("EditRecommendationsForm", () => {
 
     it("renders the form with selected applications table", () => {
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       expect(screen.getByText("selectedApplications")).toBeInTheDocument();
@@ -158,7 +169,9 @@ describe("EditRecommendationsForm", () => {
 
     it("renders single submission form with funding section", () => {
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       expect(screen.getByText("fundingHeading")).toBeInTheDocument();
@@ -166,7 +179,9 @@ describe("EditRecommendationsForm", () => {
 
     it("renders save and cancel buttons", () => {
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       expect(screen.getByText("saveButton")).toBeInTheDocument();
@@ -176,7 +191,9 @@ describe("EditRecommendationsForm", () => {
     it("navigates back when cancel is clicked", async () => {
       const user = userEvent.setup();
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       const cancelButton = screen.getByText("cancelButton");
@@ -191,7 +208,9 @@ describe("EditRecommendationsForm", () => {
       jest.useFakeTimers();
       const user = userEvent.setup({ delay: null });
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       const saveButton = screen.getByText("saveButton");
@@ -213,7 +232,9 @@ describe("EditRecommendationsForm", () => {
     it("disables buttons while submitting", async () => {
       const user = userEvent.setup();
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       const saveButton = screen.getByText("saveButton");
@@ -240,7 +261,9 @@ describe("EditRecommendationsForm", () => {
 
     it("renders the form with multiple submissions", () => {
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       expect(screen.getByText("selectedApplications")).toBeInTheDocument();
@@ -251,7 +274,9 @@ describe("EditRecommendationsForm", () => {
 
     it("displays recommendation fields for multiple submissions", () => {
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       expect(screen.getByText("recommendationLabel")).toBeInTheDocument();
@@ -261,7 +286,9 @@ describe("EditRecommendationsForm", () => {
 
     it("renders table view with totals for multiple submissions", () => {
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       expect(screen.getByText("applicationIdLabel")).toBeInTheDocument();
@@ -270,7 +297,9 @@ describe("EditRecommendationsForm", () => {
 
     it("calculates correct totals for multiple submissions", () => {
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       // Total requested: $100,000 + $50,000 = $150,000
@@ -298,7 +327,9 @@ describe("EditRecommendationsForm", () => {
 
     it("does not display error alert initially", () => {
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       expect(screen.queryByTestId("error-alert")).not.toBeInTheDocument();
@@ -319,7 +350,9 @@ describe("EditRecommendationsForm", () => {
       });
 
       render(
-        <EditRecommendationsForm awardRecommendationId={awardRecommendationId} />,
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
       );
 
       expect(mockUseSelectedSubmissions).toHaveBeenCalledWith(
