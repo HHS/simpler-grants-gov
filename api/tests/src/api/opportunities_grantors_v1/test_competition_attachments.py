@@ -24,7 +24,9 @@ def grantor_auth_data(db_session, enable_factory_create):
 def existing_opportunity(grantor_auth_data, enable_factory_create):
     """Create an opportunity belonging to the grantor's agency"""
     user, agency, _, _ = grantor_auth_data
-    return OpportunityFactory.create(agency_code=agency.agency_code, is_draft=True)
+    return OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=True, is_simpler_grants_opportunity=True
+    )
 
 
 @pytest.fixture
@@ -198,7 +200,9 @@ def test_upload_instructions_competition_wrong_opportunity(
     _, agency, token, _ = grantor_auth_data
 
     # Create a different opportunity
-    other_opportunity = OpportunityFactory.create(agency_code=agency.agency_code, is_draft=True)
+    other_opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=True, is_simpler_grants_opportunity=True
+    )
 
     competition = existing_competition
     file_content = b"This is instruction content"
@@ -249,3 +253,32 @@ def test_upload_instructions_empty_file_list(
     assert resp.status_code == 422
     response_json = resp.get_json()
     assert response_json["message"] == "Validation error"
+
+
+def test_upload_instructions_non_sgm_opportunity(
+    client, db_session, grantor_auth_data, enable_factory_create
+):
+    """Test upload to a non-SGM opportunity"""
+    _, agency, token, _ = grantor_auth_data
+
+    # Create a non-SGM opportunity
+    non_sgm_opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=True, is_simpler_grants_opportunity=False
+    )
+
+    # Create a competition for this opportunity
+    competition = CompetitionFactory.create(
+        opportunity=non_sgm_opportunity, opportunity_id=non_sgm_opportunity.opportunity_id
+    )
+
+    file_content = b"This is instruction content"
+
+    resp = client.post(
+        f"/v1/grantors/opportunities/{non_sgm_opportunity.opportunity_id}/competitions/{competition.competition_id}/instructions",
+        headers={"X-SGG-Token": token},
+        data={"file_attachment": [(BytesIO(file_content), "instructions.pdf", "application/pdf")]},
+    )
+
+    assert resp.status_code == 422
+    response_json = resp.get_json()
+    assert response_json["message"] == "Only opportunities created in Simpler Grants can be updated"

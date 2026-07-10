@@ -13,6 +13,9 @@ from src.db.models.competition_models import CompetitionInstruction
 from src.db.models.user_models import User
 from src.services.competition_alpha.get_competition import get_competition
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
+from src.services.opportunities_grantor_v1.opportunity_utils import (
+    validate_opportunity_created_in_simpler_grants,
+)
 from src.services.opportunity_attachments.attachment_util import (
     adjust_legacy_file_name,
     get_s3_competition_instruction_path,
@@ -28,12 +31,15 @@ def upload_competition_instructions(
     competition_id: uuid.UUID,
     file_data_list: list[FileStorage],
 ) -> list[str]:
-    """Upload instruction attachments to a competition"""
+    """Upload instruction files to a competition"""
     # Get the opportunity and verify it exists
     opportunity = get_opportunity_for_grantors(db_session, user, opportunity_id)
 
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
+
+    # Verify opportunity was created in Simpler Grants
+    validate_opportunity_created_in_simpler_grants(opportunity)
 
     # Get the competition and verify it exists
     competition = get_competition(db_session, competition_id)
