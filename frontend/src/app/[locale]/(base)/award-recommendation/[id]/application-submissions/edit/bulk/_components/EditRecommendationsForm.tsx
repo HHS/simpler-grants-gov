@@ -36,7 +36,7 @@ export default function EditRecommendationsForm({
     );
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     setIsSubmitting(true);
     setError(null);
 
@@ -101,7 +101,7 @@ export default function EditRecommendationsForm({
         <ButtonGroup className="margin-top-4">
           <Button
             type="button"
-            onClick={() => void handleSave()}
+            onClick={handleSave}
             disabled={isSubmitting}
           >
             {isSubmitting ? t("saving") : t("saveButton")}

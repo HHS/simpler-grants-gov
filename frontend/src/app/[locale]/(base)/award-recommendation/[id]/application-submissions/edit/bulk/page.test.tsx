@@ -74,13 +74,13 @@ const mockGetAwardRecommendationDetails = jest
   .mockResolvedValue(mockAwardRecommendationDetails);
 
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
-  getAwardRecommendationDetails: (awardRecommendationId: string) =>
+  getAwardRecommendationDetails: (awardRecommendationId: string): ReturnType<typeof mockGetAwardRecommendationDetails> =>
     mockGetAwardRecommendationDetails(awardRecommendationId),
 }));
 
 const mockUseSelectedSubmissions = jest.fn();
 jest.mock("src/hooks/useSelectedSubmissions", () => ({
-  useSelectedSubmissions: (awardRecommendationId: string) =>
+  useSelectedSubmissions: (awardRecommendationId: string): ReturnType<typeof mockUseSelectedSubmissions> =>
     mockUseSelectedSubmissions(awardRecommendationId),
 }));
 

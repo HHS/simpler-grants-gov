@@ -142,7 +142,7 @@ describe("RecommendationDetailForm", () => {
   describe("edge cases", () => {
     it("returns null when no submission or submissions provided", () => {
       const { container } = render(<RecommendationDetailForm />);
-      expect(container.firstChild).toBeNull();
+      expect(container).toBeEmptyDOMElement();
     });
 
     it("treats single item in submissions array as single submission", () => {

@@ -329,7 +329,7 @@ export const RecommendationDetailForm = ({
           submissionId="bulk"
           namePrefix="bulk_edit["
         />
-        <FundingSectionMultiple submissions={submissions!} />
+        <FundingSectionMultiple submissions={submissions} />
       </div>
     );
   }

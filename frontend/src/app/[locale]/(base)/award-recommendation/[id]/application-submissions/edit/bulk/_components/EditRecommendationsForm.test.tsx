@@ -17,7 +17,7 @@ jest.mock("next/navigation", () => ({
 
 const mockUseSelectedSubmissions = jest.fn();
 jest.mock("src/hooks/useSelectedSubmissions", () => ({
-  useSelectedSubmissions: (awardRecommendationId: string) =>
+  useSelectedSubmissions: (awardRecommendationId: string): ReturnType<typeof mockUseSelectedSubmissions> =>
     mockUseSelectedSubmissions(awardRecommendationId),
 }));
 
