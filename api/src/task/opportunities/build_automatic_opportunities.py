@@ -189,6 +189,7 @@ class BuildAutomaticOpportunitiesTask(Task):
         if os.getenv("ENVIRONMENT", None) not in [
             "grantee1",
             "grantee2",
+            "grantor1",
             "local",
             "dev",
             "staging",
