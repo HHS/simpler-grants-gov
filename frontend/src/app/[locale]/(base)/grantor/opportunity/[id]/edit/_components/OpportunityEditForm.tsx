@@ -120,9 +120,6 @@ export default function OpportunityEditForm({
   const [selectedEligibility, setSelectedEligibility] = useState<string[]>(
     initialValues.eligibleApplicants,
   );
-  const [fundingType, setFundingType] = useState(initialValues.fundingType);
-  const [publishDate, setPublishDate] = useState(initialValues.publishDate);
-
   const [formState, formAction] = useActionState(opportunityEditFormAction, {
     validationErrors: {},
   });
@@ -336,9 +333,6 @@ export default function OpportunityEditForm({
                   id="funding-type-values"
                   name="funding-type-values"
                   defaultValue={initialValues.fundingType}
-                  onChange={(event) => {
-                    setFundingType(event.target.value);
-                  }}
                   className="width-full"
                   disabled={!isDraft}
                 >
@@ -549,9 +543,6 @@ export default function OpportunityEditForm({
                   name="publishDate"
                   defaultValue={initialValues.publishDate}
                   placeholder="mm/dd/yyyy"
-                  onChange={(value) => {
-                    setPublishDate(value ?? "");
-                  }}
                   className="width-full"
                   disabled={!isDraft}
                 />

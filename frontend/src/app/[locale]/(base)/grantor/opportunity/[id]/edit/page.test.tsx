@@ -73,11 +73,9 @@ jest.mock(
   }),
 );
 
-export const pageParams = new Promise<{ id: string; locale: string }>(
-  (resolve) => {
-    resolve({ id: "opportunity-123", locale: "en" });
-  },
-);
+const pageParams = new Promise<{ id: string; locale: string }>((resolve) => {
+  resolve({ id: "opportunity-123", locale: "en" });
+});
 
 describe("OpportunityEditForm — action buttons", () => {
   beforeEach(() => {

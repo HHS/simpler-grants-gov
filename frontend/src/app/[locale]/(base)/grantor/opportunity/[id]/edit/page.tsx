@@ -6,7 +6,6 @@ import {
 } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
-import { TFn } from "src/types/intl";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { buildOpportunityEditInitialValues } from "src/utils/opportunityEditFormConfig";
 

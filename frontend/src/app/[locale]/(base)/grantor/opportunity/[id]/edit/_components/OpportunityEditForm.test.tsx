@@ -63,14 +63,6 @@ const initialValues: OpportunityEditFormValues = {
   contactEmailText: "Email the grants team",
 };
 
-const emptyInitialValues: OpportunityEditFormValues = {
-  ...initialValues,
-  publishDate: "",
-  fundingType: "",
-  fundingCategories: "",
-  eligibleApplicants: [],
-};
-
 const renderOpportunityEditForm = (
   props: Partial<React.ComponentProps<typeof OpportunityEditForm>> = {},
 ) =>
@@ -80,9 +72,6 @@ const renderOpportunityEditForm = (
       opportunitySummaryId="summary-456"
       initialValues={initialValues}
       isDraft
-      saveLabel="Save"
-      previewLabel="Preview"
-      publishLabel="Publish"
       {...props}
     />,
   );

@@ -2,7 +2,6 @@ import { identity } from "lodash";
 import { ApiRequestError } from "src/errors";
 import {
   createOpportunitySummaryForGrantor,
-  publishOpportunityForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { buildOpportunitySummaryUpdateRequest } from "src/utils/opportunityEditFormConfig";
@@ -22,7 +21,6 @@ jest.mock(
   () => ({
     createOpportunitySummaryForGrantor: jest.fn(),
     updateOpportunitySummaryForGrantor: jest.fn(),
-    publishOpportunityForGrantor: jest.fn(),
   }),
 );
 
@@ -42,9 +40,6 @@ const mockCreateOpportunitySummaryForGrantor = jest.mocked(
 );
 const mockUpdateOpportunitySummaryForGrantor = jest.mocked(
   updateOpportunitySummaryForGrantor,
-);
-const mockPublishOpportunityForGrantor = jest.mocked(
-  publishOpportunityForGrantor,
 );
 
 const successfulSummaryUpdateResponse: Awaited<
@@ -438,7 +433,55 @@ describe("opportunityEditFormAction", () => {
     jest.resetAllMocks();
   });
 
-  it("delegates to saveOpportunityEditAction when submitType is 'save'", async () => {
+  it("delegates to saveOpportunityEditAction and redirects to the overview page when submitType = saveAndExit", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunityId", "opp-123");
+    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("submitType", "saveAndExit");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
+    expect(mockRedirect).toHaveBeenCalledWith("../overview");
+  });
+
+  it("delegates to saveOpportunityEditAction and redirects to the overview page when submitType = saveAndGoBack", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunityId", "opp-123");
+    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("submitType", "saveAndGoBack");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
+    expect(mockRedirect).toHaveBeenCalledWith("../overview");
+  });
+
+  it("delegates to saveOpportunityEditAction and redirects to the competition page when submitType = saveAndContinue", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunityId", "opp-123");
+    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("submitType", "saveAndContinue");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
+    expect(mockRedirect).toHaveBeenCalledWith("../competition");
+  });
+
+  it("delegates to saveOpportunityEditAction and returns success when submitType none of three expected", async () => {
     const formData = buildValidFormData();
     formData.set("opportunityId", "opp-123");
     formData.set("opportunitySummaryId", "sum-456");
@@ -451,7 +494,26 @@ describe("opportunityEditFormAction", () => {
     const result = await opportunityEditFormAction(initialState, formData);
 
     expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
-    expect(mockPublishOpportunityForGrantor).not.toHaveBeenCalled();
     expect(result).toEqual({ successMessage: "success" });
+  });
+
+  it("delegates to saveOpportunityEditAction and returns errors and does not redirect", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunityId", "opp-123");
+    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("submitType", "saveAndContinue");
+    formData.set("contactEmail", "not-an-email");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    const result = await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).not.toHaveBeenCalledTimes(1);
+    expect(mockRedirect).not.toHaveBeenCalledWith("../competition");
+    expect(result.validationErrors).toEqual({
+      contactEmail: ["contactEmailInvalid"],
+    });
   });
 });
