@@ -24,7 +24,7 @@ drives most of these; escalations are noted per snippet. Replace every placehold
 Thanks @handle — your claim is confirmed and you've been added to the tracking table. 🎉
 
 A few reminders:
-- Please email me, nicamellifera@navapbc.com, with your github handle and a link to the issue, so I can contact you privately during the claim process. (if you can beleive it, none of the messages you get here are automatic, and right now bounties run off a single person processing them with copy/paste 😅)
+- Please email <opensource@grants.gov>, with your github handle and a link to the issue, so I can contact you privately during the claim process. (if you can beleive it, none of the messages you get here are automatic, and right now bounties run off a single person processing them with copy/paste 😅)
 - This claim stays active for **14 days**. Keep it alive with a commit, comment, or push; otherwise it goes stale and reopens to others.
 - Need more time? Comment a substantive progress update before the 14-day mark and you can request **one 7-day extension**.
 - When you open your PR, include `Closes #NNN` in the description so it links back here.
@@ -57,7 +57,7 @@ Once you close one out — by submitting a PR or withdrawing with `/withdraw`, c
 ```markdown
 Thanks @handle. I'm not able to accept new claims from you at this time — your account is in a temporary cooldown on new claims, ending **<date>**.
 
-Any claim you already have in progress continues to its normal resolution. After the cooldown ends you're welcome to claim again. If you'd like to understand the reason or discuss it, email me at nicamellifera@navapbc.com and we'll follow up privately.
+Any claim you already have in progress continues to its normal resolution. After the cooldown ends you're welcome to claim again. If you'd like to understand the reason or discuss it, email <opensource@grants.gov> and we'll follow up one-on-one.
 ```
 
 ---
@@ -216,7 +216,7 @@ One more step: with this payment, your total bounty payments from the program th
 
 Please complete and return a W-9 by <date — 14 days out>:
 - Blank form and instructions: https://www.irs.gov/forms-pubs/about-form-w-9
-- Return it securely via a google drive or drop-box link sent to nicamellifera@navapbc.com
+- Return it securely via a google drive or drop-box link sent to <opensource@grants.gov>
 Your payment is on hold until we receive the completed form. If it isn't returned within 14 days from the sending of this email, the payment is forfeited to the program reserve under the Terms of Service — though your contribution remains merged either way, and you can reach out anytime to sort it out.
 
 Questions are welcome. Thanks for your work on Simpler Grants.
