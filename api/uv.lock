@@ -606,7 +606,7 @@ wheels = [
 
 [[package]]
 name = "grants-shared"
-version = "0.2.9"
+version = "0.2.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apiflask" },
@@ -629,9 +629,9 @@ dependencies = [
     { name = "smart-open" },
     { name = "sqlalchemy", extra = ["mypy"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/eb/4d/428f661359588a0b993af884fce1b8057abac33990f25fdfab766b31747e/grants_shared-0.2.9.tar.gz", hash = "sha256:b51615632eead1c3f5bcc05f52d7c26680abdcdf73dd77de9de266db88272813", size = 57872, upload-time = "2026-06-25T17:42:36.87Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/bb/4c62e4513325c224ce417fa557776767a0bf4e938bd9f24ecfad57076a6b/grants_shared-0.2.15.tar.gz", hash = "sha256:48e362d6fac924572660cef59ea733f57f8d1791f810e3b45660aa100cd52159", size = 70335, upload-time = "2026-07-08T16:44:05.939Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/21/9d/90d61adf46ab65c7a0ef1f2b489a7fb2af3719df864e4e12c4b0a7615d04/grants_shared-0.2.9-py3-none-any.whl", hash = "sha256:d8e578e2a29d6ad593692e347946960c6309dd799b69a7709082c522130c2d89", size = 73424, upload-time = "2026-06-25T17:42:35.631Z" },
+    { url = "https://files.pythonhosted.org/packages/96/31/ba34b74e614018d8c49881b9cb4bc99fdb5ed8d991adcd75c9572cce4867/grants_shared-0.2.15-py3-none-any.whl", hash = "sha256:760188ef6a293599441c5b1be68a4bf4d24195fb6e89948fe8492973609f4ee3", size = 91269, upload-time = "2026-07-08T16:44:04.744Z" },
 ]
 
 [[package]]
@@ -1773,7 +1773,7 @@ requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1,<0.8" },
     { name = "docraptor", specifier = ">=3.0.0,<4" },
     { name = "flask-cors", specifier = ">=6.0.0,<7" },
-    { name = "grants-shared", specifier = "==0.2.9" },
+    { name = "grants-shared", specifier = "==0.2.15" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
     { name = "jinja2", specifier = ">=3.1.5" },
     { name = "jsonpath-ng", specifier = ">=1.7.0,<2" },
@@ -1853,11 +1853,11 @@ wheels = [
 
 [[package]]
 name = "soupsieve"
-version = "2.8.3"
+version = "2.8.4"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/7b/ae/2d9c981590ed9999a0d91755b47fc74f74de286b0f5cee14c9269041e6c4/soupsieve-2.8.3.tar.gz", hash = "sha256:3267f1eeea4251fb42728b6dfb746edc9acaffc4a45b27e19450b676586e8349", size = 118627, upload-time = "2026-01-20T04:27:02.457Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/47/2c/0a5f6f8ee0d5589e48c7640213ed5175d52cf540a06725b628cc1a45d6ce/soupsieve-2.8.4.tar.gz", hash = "sha256:e121fd02e975c695e4e9e8774a5ee35d74714b59307868dcc5319ad2d9e3328e", size = 121110, upload-time = "2026-05-24T13:55:57.154Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/46/2c/1462b1d0a634697ae9e55b3cecdcb64788e8b7d63f54d923fcd0bb140aed/soupsieve-2.8.3-py3-none-any.whl", hash = "sha256:ed64f2ba4eebeab06cc4962affce381647455978ffc1e36bb79a545b91f45a95", size = 37016, upload-time = "2026-01-20T04:27:01.012Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/f5/0c41cb68dcae6b7de4fac4188a3a9589e21fb31df21ea3a2e888db95e6c9/soupsieve-2.8.4-py3-none-any.whl", hash = "sha256:e7e6b0769c8f51ed59acab6e994b00621096cfb1c640a7509295987388fbaf65", size = 37304, upload-time = "2026-05-24T13:55:55.406Z" },
 ]
 
 [[package]]

@@ -68,7 +68,10 @@ def test_get_all_returns_all_registered_forms():
     registry.register(form_a, major_version=1)
     registry.register(form_b, major_version=1)
 
-    assert set(registry.get_all()) == {form_a, form_b}
+    result = registry.get_all()
+    assert len(result) == 2
+    assert form_a in result
+    assert form_b in result
 
 
 def test_get_all_empty_registry():

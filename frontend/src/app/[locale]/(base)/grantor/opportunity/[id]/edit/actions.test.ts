@@ -154,7 +154,7 @@ describe("saveOpportunityEditAction", () => {
 
     expect(result.validationErrors).toEqual({
       awardMinimum: ["awardMinLessThanMax"],
-      awardMaximum: ["awardMinLessThanMax"],
+      awardMaximum: ["awardMaxGreaterThanMin"],
     });
   });
 

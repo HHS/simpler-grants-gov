@@ -9,11 +9,9 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1
 from datetime import date
 from pathlib import Path
 
-import grants_shared.adapters.db as db
 import pytest
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Form
 from src.form_schema.forms.gg_lobbying_form import (
     FORM_XML_TRANSFORM_RULES as GG_LOBBYING_FORM_TRANSFORM_RULES,
 )
@@ -217,9 +215,7 @@ class TestGGLobbyingFormXSDValidation:
         return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
-    def gg_lobbying_form_application(
-        self, enable_factory_create, db_session: db.Session, seed_form_registry
-    ):
+    def gg_lobbying_form_application(self, enable_factory_create, seed_form_registry):
         """Create an application with GG_LobbyingForm form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -242,7 +238,7 @@ class TestGGLobbyingFormXSDValidation:
             competition_forms=[],
         )
 
-        gg_lobbying_form = db_session.get(Form, GG_LobbyingForm_v1_1.form_id)
+        gg_lobbying_form = GG_LobbyingForm_v1_1
 
         application = ApplicationFactory.create(
             competition=competition, application_name="GG_LobbyingForm Test Application"
@@ -275,7 +271,7 @@ class TestGGLobbyingFormXSDValidation:
         return application
 
     def test_gg_lobbying_form_submission_xml_validates_against_xsd(
-        self, gg_lobbying_form_application, xsd_validator, db_session
+        self, gg_lobbying_form_application, xsd_validator
     ):
         """Test that complete GG_LobbyingForm submission XML validates against XSD schema."""
         # Create application submission
@@ -322,7 +318,7 @@ class TestGGLobbyingFormXSDValidation:
         )
 
     def test_gg_lobbying_form_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
+        self, enable_factory_create, xsd_validator, seed_form_registry
     ):
         """Test that GG_LobbyingForm with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -346,7 +342,7 @@ class TestGGLobbyingFormXSDValidation:
             competition_forms=[],
         )
 
-        gg_lobbying_form = db_session.get(Form, GG_LobbyingForm_v1_1.form_id)
+        gg_lobbying_form = GG_LobbyingForm_v1_1
 
         application = ApplicationFactory.create(
             competition=competition, application_name="GG_LobbyingForm Minimal Test Application"

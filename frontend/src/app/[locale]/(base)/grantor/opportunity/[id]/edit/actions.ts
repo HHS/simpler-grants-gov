@@ -157,7 +157,7 @@ async function validateOpportunityEditForm(formData: FormData) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["awardMaximum"],
-            message: validationErrors("awardMinLessThanMax"),
+            message: validationErrors("awardMaxGreaterThanMin"),
           });
         }
       },

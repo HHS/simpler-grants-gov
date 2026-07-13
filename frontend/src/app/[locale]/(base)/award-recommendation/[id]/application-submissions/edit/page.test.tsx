@@ -109,6 +109,28 @@ jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
 
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: jest.fn(() => ({
+    clientFetch: jest.fn().mockResolvedValue({
+      data: [],
+      pagination_info: { total_pages: 1, total_records: 0 },
+    }),
+  })),
+}));
+
+jest.mock("src/hooks/useSelectedSubmissions", () => ({
+  useSelectedSubmissions: jest.fn(() => ({
+    selectedSubmissionIds: new Set(),
+    selectedSubmissions: [],
+    hasSelections: false,
+    addSubmission: jest.fn(),
+    addMultipleSubmissions: jest.fn(),
+    removeSubmission: jest.fn(),
+    setSelectedSubmissionIds: jest.fn(),
+    clearSelections: jest.fn(),
+  })),
+}));
+
 const editRecommendationsParams = Promise.resolve({
   locale: "en",
   id: "AR-26-0001",
@@ -193,6 +215,25 @@ describe("EditRecommendationsPage", () => {
       expect(mockGetAwardRecommendationDetails).toHaveBeenCalledWith(
         "AR-26-0001",
       );
+    });
+
+    it("renders the page heading and description", async () => {
+      const component = await EditRecommendationsPage({
+        params: editRecommendationsParams,
+      });
+      render(component);
+
+      expect(screen.getByText("pageHeading")).toBeInTheDocument();
+      expect(screen.getByText("pageDescription")).toBeInTheDocument();
+    });
+
+    it("renders the page with table container", async () => {
+      const component = await EditRecommendationsPage({
+        params: editRecommendationsParams,
+      });
+      render(component);
+
+      expect(screen.getByText("loading")).toBeInTheDocument();
     });
 
     it("handles 404 error gracefully when award recommendation not found", async () => {

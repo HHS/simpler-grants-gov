@@ -10,8 +10,11 @@ import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
 from flask import Response
 from flask_cors import CORS
+from grants_shared.api.maintenance_mode import register_maintenance_mode_handler
 from grants_shared.api.response import restructure_error_response
 from grants_shared.api.schemas import response_schema
+from grants_shared.auth.api_jwt_auth import initialize_jwt_auth
+from grants_shared.auth.login_gov_jwt_auth import initialize_login_gov_config
 from grants_shared.util.local import error_if_not_local
 from pydantic import Field
 
@@ -39,9 +42,7 @@ from src.api.organizations_v1 import organization_blueprint as organizations_v1_
 from src.api.users.user_blueprint import user_blueprint
 from src.api.workflows import workflow_blueprint
 from src.app_config import AppConfig
-from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.auth_utils import get_app_security_scheme
-from src.auth.login_gov_jwt_auth import initialize_login_gov_config
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.form_schema.forms import init_form_registry
 from src.legacy_soap_api import init_app as init_legacy_soap_api
@@ -62,6 +63,11 @@ This API is in active development as we build out new functionalities for Simple
 Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
+
+# Paths that continue to serve normally while maintenance mode is on. /health must
+# stay reachable so ALB target-group and Docker healthchecks do not recycle tasks
+# during a planned-maintenance window.
+MAINTENANCE_MODE_ALLOWLIST = frozenset({"/health"})
 
 
 class EndpointConfig(PydanticBaseEnvConfig):
@@ -97,6 +103,10 @@ def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
 
     setup_logging(app)
+    # Registered after setup_logging so the logging before_request handlers run
+    # first (rejections still produce start/end request logs), and before auth so
+    # unauthenticated clients see a 503 rather than a 401 during maintenance.
+    register_maintenance_mode_handler(app, MAINTENANCE_MODE_ALLOWLIST)
     init_newrelic()
     register_db_client(app)
 

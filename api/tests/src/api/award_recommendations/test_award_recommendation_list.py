@@ -11,6 +11,7 @@ from tests.lib.agency_test_utils import (
 )
 from tests.src.db.models.factories import (
     AgencyFactory,
+    AwardRecommendationApplicationSubmissionFactory,
     AwardRecommendationFactory,
     OpportunityFactory,
 )
@@ -247,6 +248,46 @@ class TestListAwardRecommendations200:
         assert resp.json["data"] == []
         assert resp.json["pagination_info"]["total_records"] == 0
         assert resp.json["pagination_info"]["total_pages"] == 0
+
+    def test_list_award_recommendations_200_includes_total_received_count(
+        self, client, db_session, agency, opportunity
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        ar_with_submissions = AwardRecommendationFactory.create(
+            opportunity=opportunity,
+            review_workflow=None,
+            review_workflow_id=None,
+        )
+        ar_without_submissions = AwardRecommendationFactory.create(
+            opportunity=opportunity,
+            review_workflow=None,
+            review_workflow_id=None,
+        )
+        AwardRecommendationApplicationSubmissionFactory.create(
+            award_recommendation=ar_with_submissions
+        )
+        AwardRecommendationApplicationSubmissionFactory.create(
+            award_recommendation=ar_with_submissions
+        )
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json=_build_request([agency.agency_id]),
+        )
+
+        assert resp.status_code == 200
+        counts_by_id = {
+            row["award_recommendation_id"]: row["award_recommendation_summary"][
+                "total_received_count"
+            ]
+            for row in resp.json["data"]
+        }
+        assert counts_by_id[str(ar_with_submissions.award_recommendation_id)] == 2
+        assert counts_by_id[str(ar_without_submissions.award_recommendation_id)] == 0
 
 
 ####################################

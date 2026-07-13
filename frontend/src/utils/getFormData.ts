@@ -30,6 +30,8 @@ type FormDataResult =
         formUiSchema: UiSchema;
         formValidationWarnings: FormValidationWarning[] | null;
         applicationAttachments: Attachment[];
+        createdAt?: string;
+        updatedAt?: string;
       };
     };
 
@@ -136,6 +138,8 @@ export default async function getFormData({
         formSchema: result.formSchema,
         formUiSchema,
         formValidationWarnings,
+        createdAt: applicationFormData.created_at,
+        updatedAt: applicationFormData.updated_at,
       },
     };
   } catch (e) {

@@ -363,9 +363,6 @@ export const messages = {
       alerts: {
         success: "Saved successfully",
         successBody: "Your changes have been saved.",
-        newOpportunityHeading: "Opportunity draft started",
-        newOpportunityBody:
-          "Your initial information has been saved. Complete the sections below to finish your opportunity details",
         genericError: "Unable to save draft opportunity details.",
         missingSummaryContext: "Missing opportunity summary context for save.",
         unauthenticated: "You must be signed in to update this opportunity.",
@@ -409,6 +406,8 @@ export const messages = {
       awardMaxLessThanTotal:
         "Award maximum cannot exceed the Estimated Total Program Funding.",
       awardMinLessThanMax: "Award minimum cannot exceed Award maximum.",
+      awardMaxGreaterThanMin:
+        "Award maximum cannot be less than Award minimum.",
     },
     attachments: {
       removeButton: "Remove",
@@ -579,6 +578,11 @@ export const messages = {
         deleteEntry: "Delete this entry",
         addEntry: "Add another entry",
       },
+      returnToApplication: "Return to application",
+      saving: "Saving...",
+      savingAndRefreshing: "Save and refresh",
+      lastUpdatedMessage: "This form was last updated on",
+      createdMessage: "This form was created on",
     },
     transferOwnershipModal: {
       title: "Transfer application ownership",
@@ -2033,6 +2037,20 @@ export const messages = {
       agencyNotAuthorized:
         "You do not have access to this agency's award recommendations.",
       noAgencies: "You are not associated with any agencies.",
+      empty: "No award recommendations found.",
+      fetchError:
+        "We have encountered an error loading award recommendations. Please try again.",
+      columns: {
+        awardRecId: "Award Rec ID",
+        opportunityName: "Opportunity name",
+        opportunityId: "Opportunity ID",
+        applicationsReceived: "Applications received",
+        status: "Status",
+        action: "Action",
+      },
+      actions: {
+        delete: "Delete",
+      },
     },
     summary: {
       showDescription: "Show full description",
@@ -2074,8 +2092,27 @@ export const messages = {
       pageTitle: "Edit recommendations",
       metaDescription: "Edit award recommendations for multiple applications",
       heading: "Edit recommendations",
-      description:
+      pageHeading: "Recommend awards",
+      pageDescription:
         "Select one or more applications to edit recommendations. Search by App #, program title, org name of UEI",
+      selectAll: "Select all",
+      selectRow: "Select row for {appNumber}",
+      selectedCount:
+        "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      showingRange: "Showing {start}-{end} of {total}",
+      loading: "Loading...",
+      errorLoading: "Error loading submissions. Please try again.",
+      editButton: "Edit",
+      columns: {
+        appNumber: "App #",
+        projectTitle: "Project Title",
+        orgName: "Org Name",
+        uei: "UEI",
+        score: "Score",
+        recommendation: "Recommendation",
+        requested: "Requested",
+        recommended: "Recommended",
+      },
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -2379,6 +2416,8 @@ export const messages = {
     labels: {
       editOpportunityLink: "Opportunity Summary",
       competitionLink: "Application Package",
+      previewButton: "Preview",
+      publishButton: "Publish",
     },
   },
   CreateOpportunity: {
@@ -2441,12 +2480,18 @@ export const messages = {
   OpportunityCompetition: {
     pageTitle: "Competition",
     metaDescription: "Set up competition details for this opportunity.",
-    sections: {
-      applicationRequirements: "Application requirements",
-      applicationRequirementsSubheader:
-        "What applicants must submit, how they'll be scored, and the format rules.",
-      submissionSetUp: "Submission set-up",
-      submissionSetUpSubheader:
+    leftNavTitle: "On this page",
+    applicationRequirements: "Application requirements",
+    applicationRequirementsSubheader:
+      "What applicants must submit, how they'll be scored, and the format rules.",
+    button: {
+      back: "Back",
+      saveAndExit: "Save and exit",
+      saveAndContinue: "Save and continue",
+    },
+    sectionSubmissionSetUp: {
+      header: "Submission set-up",
+      subHeader:
         "A competition is one apply-window inside an opportunity. Most opportunities have only one.",
       competitionId: "Competition ID",
       competitionIdHint: "An ID if this opportunity has multiple competitions.",
@@ -2463,26 +2508,46 @@ export const messages = {
       expectedApplicationSize: "Expected application size",
       expectedApplicationSizeHint:
         "Approximate file size of a typical submission",
+    },
+    sectionOpenAndCloseDates: {
+      header: "Open and close dates",
+      howDoesThisClose: "How does this opportunity close?",
+      howDoesThisCloseHint:
+        "Most federal opportunities have a single hard deadline. Choose another option only when the program runs differently.",
       openDate: "Open date",
       openDateHint: "First day to start applying.",
       closeDate: "Close date",
       closeDateHint: "Final deadline for all applications",
-      back: "Back",
-      saveAndFinishLater: "Save and finish later",
-      saveAndContinue: "Save and continue",
-      howDoesThisClose: "How does this opportunity close?",
-      howDoesThisCloseHint:
-        "Most federal opportunities have a single hard deadline. Choose another option only when the program runs differently.",
       hardDeadline: "Hard deadline",
       hardDeadlineHint: "All applications must be in by the close date.",
       rollingDeadline: "Rolling deadline",
       rollingDeadlineHint: "Applications are reviewed in cycles.",
       continuousReview: "Continuous review",
       continuousReviewHint: "No close date, open until further notice",
-      openAndCloseDates: "Open and close dates",
-      applicationChecklist: "Application checklist",
-      narrativeFormatInstructions: "Narrative format instructions",
-      navTitle: "On this page",
+    },
+    sectionApplicationChecklist: {
+      header: "Application checklist",
+    },
+    sectionNarrativeFormatInstructions: {
+      header: "Narrative format instructions",
+    },
+    sectionAgencyContact: {
+      header: "Agency contact",
+      subHeader:
+        "Grantor contact details. Provide the name, email, and phone number for the agency contact.",
+      fullName: "Full name",
+      personTitle: "Title",
+      emailAddress: "Email address",
+      emailAddressHint: "For example: example@mail.com",
+      phoneNumber: "Phone number",
+      phoneNumberHint: "10-digit, for example: (999) 999-9999",
+      error: {
+        requiredFullName: "Full name is required.",
+        requiredPhoneNumber: "Phone number is required.",
+        requiredEmail: "Email address is required.",
+        invalidEmail:
+          "Incorrect text format. Please ensure there are no spaces or missing characters.",
+      },
     },
   },
   FeatureFlagsAdmin: {
@@ -2497,6 +2562,11 @@ export const messages = {
     subAgency: "Sub-agency:",
     draft: "Draft",
     lastUpdated: "Last updated:",
+    alerts: {
+      newOpportunityHeading: "Opportunity draft started",
+      newOpportunityBody:
+        "Your initial information has been saved. Complete the sections below to finish your opportunity details",
+    },
   },
   AwardRecommendationSelectFundingOpportunity: {
     pageTitle: "Select funding opportunity | Simpler.Grants.gov",
@@ -2534,7 +2604,7 @@ export const messages = {
       postUploadError: "Error processing file",
       missingFileId: "Error: missing file id",
       preUploadError: "Pre upload error",
-      infected: "Security scan failed. File infected",
+      infected: "Security scan failed. File removed",
     },
     deleteModal: {
       titleText: "Delete",

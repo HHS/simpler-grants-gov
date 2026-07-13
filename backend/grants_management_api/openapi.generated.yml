@@ -15,6 +15,7 @@ info:
   version: v0
 tags:
 - name: Health
+- name: User v1 - Internal Only
 servers: .
 paths:
   /health:
@@ -37,6 +38,88 @@ paths:
       - Health
       summary: Healthcheck endpoint - verifies database can be connected to and returns
         deploy metadata.
+  /v1/users/login:
+    get:
+      parameters:
+      - in: query
+        name: piv_required
+        description: Whether the user is required to use a PIV to login
+        schema:
+          type: boolean
+          nullable: true
+        required: false
+      responses:
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Validation error
+        '302':
+          content:
+            application/json:
+              schema: {}
+          description: Found
+      tags:
+      - User v1 - Internal Only
+      summary: User Login
+      description: '
+
+        To use this endpoint, click [this link](/v1/users/login) which will redirect
+
+        you to an OAuth provider where you can sign into an account.
+
+
+        Do not try to use the execute option below as OpenAPI will not redirect your
+        browser for you.
+
+
+        The token you receive can then be set to the X-MGMT-Token header for authenticating
+        with endpoints.
+
+        '
+  /v1/users/token/logout:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTokenLogoutResponseSchema'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Authentication error
+      tags:
+      - User v1 - Internal Only
+      summary: User Token Logout
+      security:
+      - ApiJwtAuth: []
+  /v1/users/token/refresh:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTokenRefreshResponseSchema'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Authentication error
+      tags:
+      - User v1 - Internal Only
+      summary: User Token Refresh
+      security:
+      - ApiJwtAuth: []
 openapi: 3.1.0
 components:
   schemas:
@@ -123,4 +206,35 @@ components:
           type: string
           description: An internal tracking ID
           example: 550e8400-e29b-41d4-a716-446655440000
+    UserTokenLogoutResponseSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserTokenRefreshResponseSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+  securitySchemes:
+    ApiJwtAuth:
+      type: apiKey
+      name: X-MGMT-Token
+      in: header
 
