@@ -13,11 +13,18 @@ type NestedObject = {
 };
 
 type FormDataToJsonOptions = {
+  // seems to be unused, but an optional path prefix to add when referencing schema location
   parentKey?: string;
+  // will default to `--` downstream if not provided. Used to convert representation of nested fields
+  // from FormData / DOM level implementation to implementation used in schema
   delimiter?: string;
 };
 
 /*
+  parses form data values (which based on FormData defs are either string or blob)
+  into proper data types based on specified type from schema definition
+
+  note:
   - string representations of booleans are cast to booleans
   - for number type fields, cast to number as long as a value is present
   - for string type fields that represent a number, ensure they remain strings (or undefined)
@@ -44,10 +51,11 @@ const parseValue = (value: unknown, type: string) => {
   }
 };
 
+// determines the proper type of a form field's value based on the form's schema
 const getFieldType = (
-  currentKey: string,
+  currentKey: string, // FormData key
   formSchema: RJSFSchema,
-  parentKey?: string,
+  options: FormDataToJsonOptions = {},
 ): string => {
   // for fields that represent array items in the form schema, we need to reference
   // the "items" property of the field's schema definition. The form data key will
@@ -58,8 +66,11 @@ const getFieldType = (
     /\[\d+\]/g,
     "--items",
   );
-  const path = getFieldPathFromHtml(keyWithArrayNotationStripped);
-  const fullPath = parentKey ? `${parentKey}/${path}` : path;
+  const path = getFieldPathFromHtml(
+    keyWithArrayNotationStripped,
+    options.delimiter,
+  );
+  const fullPath = options.parentKey ? `${options.parentKey}/${path}` : path;
   const formFieldDefinition = getByPointer(formSchema, fullPath) as {
     type?: string;
   };
@@ -70,12 +81,14 @@ const getFieldType = (
   return formFieldDefinition?.type;
 };
 
+// basic functionality here was borrowed from https://github.com/ArturKot95/FormData2Json
+// handles conversion of FormData into a POJO, accounting for nested structures and arrays
 export function formDataToObject(
   formData = new FormData(),
-  formSchema: RJSFSchema,
+  formSchema: RJSFSchema, // expects that any "/properties" path segments have already been removed
   options?: FormDataToJsonOptions,
 ): NestedObject {
-  const delimiter = options?.delimiter || ".";
+  const delimiter = options?.delimiter || "--";
   const { parentKey } = options ?? { parentKey: "" };
   const result: NestedObject = {};
   const entries = formData.entries();
@@ -83,7 +96,7 @@ export function formDataToObject(
   for (const [key, value] of entries) {
     const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
     const chunks = currentKey.split(delimiter);
-    const fieldType = getFieldType(currentKey, formSchema, parentKey);
+    const fieldType = getFieldType(currentKey, formSchema, options);
     const parsedValue = parseValue(value, fieldType);
 
     let current = result;
@@ -109,7 +122,7 @@ export function formDataToObject(
 
         const actualChunkName = chunkName.substring(0, indexStart);
         current[actualChunkName] =
-          (current[actualChunkName] as unknown[]) ?? ([] as unknown[]);
+          current[actualChunkName] ?? ([] as unknown[]);
 
         const currentChunk = current[actualChunkName] as unknown[];
         if (chunkIdx === chunks.length - 1) {

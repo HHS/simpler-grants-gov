@@ -16,6 +16,15 @@ import { isBasicallyAnObject } from "src/utils/generalUtils";
 
 import { formDataToObject } from "./formDataToJson";
 
+// when constructing field identifiers within the dom we will use hyphens rather than slashes
+// since that will cause less confusion for html attributes and will have less conflict with other characters
+const FORM_DATA_NESTING_DELIMITER = "--";
+
+// API side validation library delimits nesting with a dot rather than a slash
+const VALIDATION_ERROR_NESTING_DELIMITER = ".";
+
+const JSON_SCHEMA_NESTING_DELIMITER = "/";
+
 const nestedWarningsForField = ({
   definition,
   errors,
@@ -119,7 +128,9 @@ export const findValidationErrors = (
   }) as SchemaField;
   const path = definition ? jsonSchemaPointerToPath(definition) : "";
   const fieldName = definition
-    ? definition.split("/")[definition.split("/").length - 1]
+    ? definition.split(JSON_SCHEMA_NESTING_DELIMITER)[
+        definition.split(JSON_SCHEMA_NESTING_DELIMITER).length - 1
+      ]
     : "";
   const directWarnings = errors.filter((error) => {
     if (error.field === path) {
@@ -133,7 +144,10 @@ export const findValidationErrors = (
       return false;
     }
     const [, fieldListName, childDefinitionPath] = fieldListMatch;
-    const childFieldPath = childDefinitionPath.replace(/\/properties\//g, ".");
+    const childFieldPath = childDefinitionPath.replace(
+      /\/properties\//g,
+      VALIDATION_ERROR_NESTING_DELIMITER,
+    );
     return new RegExp(
       `^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldPath}$`,
     ).test(error.field);
@@ -298,7 +312,7 @@ export const getFieldSchema = ({
     return {
       ...(getByPointer(formSchema, definition) as object),
       ...schema,
-    } as RJSFSchema;
+    };
   } else if (definition) {
     return getByPointer(formSchema, definition) as RJSFSchema;
   }
@@ -314,10 +328,10 @@ export const getFieldNameForHtml = ({
   schema?: SchemaField;
 }): string => {
   if (definition) {
-    const definitionParts = definition.split("/");
+    const definitionParts = definition.split(JSON_SCHEMA_NESTING_DELIMITER);
     return definitionParts
       .filter((part) => part && part !== "properties")
-      .join("--"); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
+      .join(FORM_DATA_NESTING_DELIMITER);
   }
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
@@ -342,8 +356,14 @@ export function getHtmlFieldForWarning({
   }
 
   const [, fieldListName, childDefinitionPath] = match;
-  const childFieldPath = childDefinitionPath.replace(/\/properties\//g, ".");
-  const childHtmlPath = childFieldPath.replace(/\./g, "--");
+  const childFieldPath = childDefinitionPath.replace(
+    /\/properties\//g,
+    VALIDATION_ERROR_NESTING_DELIMITER,
+  );
+  const childHtmlPath = childFieldPath.replace(
+    /\./g,
+    FORM_DATA_NESTING_DELIMITER,
+  );
 
   const entryMatch = field?.match(
     new RegExp(`^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldPath}$`),
@@ -404,8 +424,12 @@ export function getFieldListLabelFromDefinition({
 }
 
 // transform a form data field name / id into a json path that can be used to reference the form schema
-export const getFieldPathFromHtml = (fieldName: string) =>
-  `/${fieldName.replace(/--/g, "/")}`;
+// (assumes that any `/properties` path segments have been removed from schema)
+export const getFieldPathFromHtml = (
+  inputPath: string,
+  inputDelimiter = FORM_DATA_NESTING_DELIMITER,
+) =>
+  `/${inputPath.replace(new RegExp(`${inputDelimiter}`, "g"), JSON_SCHEMA_NESTING_DELIMITER)}`;
 
 export const getByPointer = (target: object, path: string): unknown => {
   if (!Object.keys(target).length) {
@@ -484,9 +508,7 @@ export function getFieldsForNav(
       if (Array.isArray(item.children)) {
         results.push(
           ...getFieldsForNav(
-            item.children.filter(
-              (child) => child.type === "section",
-            ) as unknown as UiSchema,
+            item.children.filter((child) => child.type === "section"),
           ),
         );
       }
@@ -514,7 +536,7 @@ const getObjectItemSchema = (schema?: RJSFSchema): RJSFSchema | undefined => {
     !Array.isArray(schema.items) &&
     typeof schema.items === "object"
   ) {
-    return schema.items as RJSFSchema;
+    return schema.items;
   }
 
   return undefined;
@@ -545,10 +567,7 @@ const getChildSchema = ({
   schema?: RJSFSchema;
   key: string;
 }): RJSFSchema | undefined => {
-  return (schema?.properties?.[key] ??
-    (schema as Record<string, unknown> | undefined)?.[key]) as
-    | RJSFSchema
-    | undefined;
+  return (schema?.properties?.[key] ?? schema?.[key]) as RJSFSchema | undefined;
 };
 
 /**
@@ -665,12 +684,12 @@ export const shapeFormData = <T extends object>(
     formData,
     condenseFormSchemaProperties(formSchema),
     {
-      delimiter: "--",
+      delimiter: FORM_DATA_NESTING_DELIMITER,
     },
   );
   return pruneEmptyNestedFields(
     structuredFormData,
-    condenseFormSchemaProperties(formSchema) as RJSFSchema,
+    condenseFormSchemaProperties(formSchema),
   ) as T;
 };
 
@@ -761,9 +780,7 @@ export const processFormSchema = (
 } => {
   try {
     const { propertiesWithoutComplexConditionals, conditionalValidationRules } =
-      extricateConditionalValidationRules(
-        (formSchema.properties ?? {}) as JSONSchema7,
-      );
+      extricateConditionalValidationRules(formSchema.properties ?? {});
     const condensedProperties = mergeAllOf({
       properties: propertiesWithoutComplexConditionals,
     } as JSONSchema7);
@@ -779,6 +796,7 @@ export const processFormSchema = (
     throw e;
   }
 };
+
 /*
   this will flatten any properties objects so that we can directly reference field paths
   within a json schema without traversing nested "properties". Any other object attributes
@@ -809,7 +827,7 @@ export const condenseFormSchemaProperties = (schema: object): object => {
 };
 
 export const pointerToFieldName = (pointer: string): string => {
-  return pointer.replace("$.", "").replace(/\./g, "--");
+  return pointer.replace("$.", "").replace(/\./g, FORM_DATA_NESTING_DELIMITER);
 };
 
 export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
