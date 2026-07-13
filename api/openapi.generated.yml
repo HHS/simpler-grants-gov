@@ -9571,9 +9571,13 @@ components:
             \ `for_profit_small_business`, `for_profit_not_small_business`, `unrestricted`,\
             \ `custom`\n- `fundingInstrument` \u2014 operator `\"in\"`, value: array\
             \ of funding instrument values (e.g. `[\"grant\"]`)\n- `costSharing` \u2014\
-            \ operator `\"eq\"`, value: boolean\n\nUnsupported keys and invalid values\
-            \ are skipped and reported in `filterInfo.errors`; the search still runs\
-            \ with the valid filters applied."
+            \ operator `\"eq\"`, value: boolean (also accepts the strings `\"true\"\
+            `/`\"false\"`)\n\nUnsupported keys and invalid values are skipped and\
+            \ reported in `filterInfo.errors`; the search still runs with the valid\
+            \ filters applied. `agency` and `fundingInstrument` values are forwarded\
+            \ to the search unvalidated \u2014 an unrecognized value matches no opportunities\
+            \ rather than producing an error \u2014 and an empty array applies no\
+            \ filter for that key."
           example:
             agency:
               operator: in

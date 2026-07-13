@@ -748,10 +748,14 @@ class OppFilters(Schema):
                 "`for_profit_not_small_business`, `unrestricted`, `custom`\n"
                 '- `fundingInstrument` — operator `"in"`, value: array of '
                 'funding instrument values (e.g. `["grant"]`)\n'
-                '- `costSharing` — operator `"eq"`, value: boolean\n\n'
+                '- `costSharing` — operator `"eq"`, value: boolean (also '
+                'accepts the strings `"true"`/`"false"`)\n\n'
                 "Unsupported keys and invalid values are skipped and reported "
                 "in `filterInfo.errors`; the search still runs with the valid "
-                "filters applied."
+                "filters applied. `agency` and `fundingInstrument` values are "
+                "forwarded to the search unvalidated — an unrecognized value "
+                "matches no opportunities rather than producing an error — and "
+                "an empty array applies no filter for that key."
             ),
             "example": {
                 "agency": {"operator": "in", "value": ["USAID"]},
