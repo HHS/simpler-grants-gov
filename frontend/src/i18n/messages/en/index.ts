@@ -2542,7 +2542,7 @@ export const messages = {
     subAgency: "Sub-agency:",
     draft: "Draft",
     lastUpdated: "Last updated:",
-    backToOverview: "Back to overivew page",
+    backToOverview: "Back to overview page",
     alerts: {
       newOpportunityHeading: "Opportunity draft started",
       newOpportunityBody:
