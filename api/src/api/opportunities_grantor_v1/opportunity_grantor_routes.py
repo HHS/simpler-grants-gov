@@ -368,7 +368,7 @@ def competition_instructions_upload(
         {"opportunity_id": opportunity_id, "competition_id": competition_id}
     )
     logger.info(
-        f"POST /v1/grantors/opportunities/{opportunity_id}/competitions/{competition_id}/instructions"
+        "POST /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id/instructions"
     )
 
     with db_session.begin():
