@@ -114,10 +114,6 @@ test.describe("Opportunity failure path - edit opportunity", () => {
           },
         },
       );
-
-      // Out of scope in this file: character limits, date relationships, special characters,
-      // and email display behavior are covered in dedicated failure-path specs.
-
       //----------Test steps end-----------------
     },
   );
