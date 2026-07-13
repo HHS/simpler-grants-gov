@@ -3,10 +3,16 @@ import uuid
 import _pytest.monkeypatch
 import boto3
 import flask
+import grants_shared.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import moto
 import pytest
 from apiflask import APIFlask
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from grants_shared.adapters import db
+from grants_shared.adapters.oauth.login_gov.mock_login_gov_oauth_client import (
+    MockLoginGovOauthClient,
+)
 from grants_shared.util.local import load_local_env_vars
 
 import src.app as app_entry
@@ -14,6 +20,7 @@ import tests.db.models.factories as factories
 from src.db import models
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from tests.test_utils import db_testing
+from tests.test_utils.auth_test_utils import mock_oauth_endpoint
 
 ####################
 # General test setup/utils
@@ -153,6 +160,63 @@ def enable_factory_create(monkeypatch, db_session, mock_s3_bucket) -> db.Session
 
 
 ####################
+# Auth/Login
+####################
+
+
+def _generate_rsa_key_pair():
+    # Rather than define a private/public key, generate one for the tests
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    private_key = key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+
+    public_key = key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    return private_key, public_key
+
+
+@pytest.fixture(scope="session")
+def rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
+@pytest.fixture(scope="session")
+def private_rsa_key(rsa_key_pair):
+    return rsa_key_pair[0]
+
+
+@pytest.fixture(scope="session")
+def public_rsa_key(rsa_key_pair):
+    return rsa_key_pair[1]
+
+
+@pytest.fixture(scope="session")
+def other_rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
+@pytest.fixture(scope="session")
+def mock_oauth_client():
+    return MockLoginGovOauthClient()
+
+
+@pytest.fixture(scope="session")
+def setup_login_gov_auth(monkeypatch_session, public_rsa_key):
+    """Setup login.gov JWK endpoint to be stubbed out"""
+
+    def override_method(config):
+        config.public_key_map = {"test-key-id": public_rsa_key}
+
+    monkeypatch_session.setattr(login_gov_jwt_auth, "_refresh_keys", override_method)
+
+
+####################
 # Test App & Client
 ####################
 
@@ -163,10 +227,21 @@ def enable_factory_create(monkeypatch, db_session, mock_s3_bucket) -> db.Session
 def app(
     db_client,
     monkeypatch_session,
+    private_rsa_key,
+    mock_oauth_client,
+    setup_login_gov_auth,
 ) -> APIFlask:
-    # TODO - when we add auth, need to add connections here and mock out oauth
-    # https://github.com/HHS/simpler-grants-gov/issues/11022
+    # Override the OAuth endpoint path before creating the app which loads the config at startup
+    monkeypatch_session.setenv(
+        "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8089/test-endpoint/oauth-authorize"
+    )
+    monkeypatch_session.setenv(
+        "LOGIN_FINAL_DESTINATION", "http://localhost:8089/v1/users/login/result"
+    )
     app = app_entry.create_app()
+
+    # Add endpoints and mocks for handling the external OAuth logic
+    mock_oauth_endpoint(app, monkeypatch_session, private_rsa_key, mock_oauth_client)
 
     return app
 

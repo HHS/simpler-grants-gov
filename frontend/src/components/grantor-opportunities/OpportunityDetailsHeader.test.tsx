@@ -138,4 +138,31 @@ describe("OpportunityDetailsHeader", () => {
     );
     expect(screen.queryByText("Sub-agency:")).not.toBeInTheDocument();
   });
+
+  it("renders the back to overview link when hasBackToOverview is true", () => {
+    render(
+      <OpportunityDetailsHeader
+        opportunityData={{ ...mockOpportunityData, agency_name: null }}
+        locale="en"
+        hasBackToOverview={true}
+      />,
+    );
+
+    const link = screen.getByRole("link", { name: "backToOverview" });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("href", "../abc-123/overview");
+  });
+
+  it("does not render the back to overview link when hasBackToOverview is false", () => {
+    render(
+      <OpportunityDetailsHeader
+        opportunityData={{ ...mockOpportunityData, agency_name: null }}
+        locale="en"
+        hasBackToOverview={false}
+      />,
+    );
+
+    const link = screen.queryByRole("link", { name: "backToOverview" });
+    expect(link).not.toBeInTheDocument();
+  });
 });

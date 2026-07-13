@@ -203,13 +203,7 @@ class AbstractLoginGovCallbackHandler[
             user, email=external_user.email
         )
 
-        logger.info(
-            "Generated token for user",
-            extra={
-                "user_token_session.token_id": user_token_session.token_id,
-                "user_token_session.user_id": user_token_session.user_id,
-            },
-        )
+        logger.info("Generated token for user", extra=user_token_session.get_log_extra())
 
         return LoginGovCallbackResponse(token=token, is_user_new=is_user_new)
 

@@ -1,0 +1,6 @@
+bucket         = "simpler-grants-gov-staging-${ACCOUNT_ID}-us-east-1-tf"
+key            = "infra/account.tfstate"
+region         = "us-east-1"
+encrypt        = true
+dynamodb_table = "simpler-grants-gov-staging-tf-state-lock"
+use_lockfile   = true

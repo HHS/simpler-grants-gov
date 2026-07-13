@@ -30,7 +30,7 @@ dependencies = [
     "prettytable>=3.16.0,<4",
     "PyYAML>=6.0.3,<7",
     "python-statemachine>=3.0.0,<4",
-    "grants-shared==0.2.8",
+    "grants-shared==0.2.16",
 ]
 
 [dependency-groups]

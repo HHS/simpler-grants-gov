@@ -11,17 +11,31 @@ import { buildOpportunityEditInitialValues } from "src/utils/opportunityEditForm
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
-import { Alert, GridContainer } from "@trussworks/react-uswds";
+import { Alert, Button, GridContainer } from "@trussworks/react-uswds";
 
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
 
+export const dynamic = "force-dynamic";
+
+const HeaderButtons = ({ saveAndExitLabel }: { saveAndExitLabel: string }) => {
+  return (
+    <>
+      <Button
+        type="submit"
+        form="opportunity-edit-form"
+        className="margin-left-1"
+      >
+        {saveAndExitLabel}
+      </Button>
+    </>
+  );
+};
+
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
 };
-
-export const dynamic = "force-dynamic";
 
 async function OpportunityEditPage({ params }: PageProps) {
   const { id, locale } = await params;
@@ -94,14 +108,14 @@ async function OpportunityEditPage({ params }: PageProps) {
       <OpportunityDetailsHeader
         opportunityData={opportunityData}
         locale={locale}
-      />
+        hasBackToOverview={true}
+      >
+        <HeaderButtons saveAndExitLabel={tEdit("button.saveAndExit")} />
+      </OpportunityDetailsHeader>
 
       <div className="grid-container padding-bottom-4">
         <div className="usa-in-page-nav-container">
-          <LeftHandFormNav
-            title={tEdit("header.navTitle")}
-            fields={navigationItems}
-          />
+          <LeftHandFormNav title={tEdit("navTitle")} fields={navigationItems} />
 
           <section className="order-2 width-full maxw-tablet-xl padding-top-4">
             <OpportunityEditForm
@@ -111,9 +125,6 @@ async function OpportunityEditPage({ params }: PageProps) {
               initialValues={initialValues}
               isDraft={!!opportunityData.is_draft}
               initialAttachments={opportunityData.attachments ?? []}
-              saveLabel={tEdit("header.saveButton")}
-              previewLabel={tEdit("header.previewButton")}
-              publishLabel={tEdit("header.publishButton")}
             />
           </section>
         </div>

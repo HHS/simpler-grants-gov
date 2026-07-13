@@ -63,14 +63,6 @@ const initialValues: OpportunityEditFormValues = {
   contactEmailText: "Email the grants team",
 };
 
-const emptyInitialValues: OpportunityEditFormValues = {
-  ...initialValues,
-  publishDate: "",
-  fundingType: "",
-  fundingCategories: "",
-  eligibleApplicants: [],
-};
-
 const renderOpportunityEditForm = (
   props: Partial<React.ComponentProps<typeof OpportunityEditForm>> = {},
 ) =>
@@ -80,9 +72,6 @@ const renderOpportunityEditForm = (
       opportunitySummaryId="summary-456"
       initialValues={initialValues}
       isDraft
-      saveLabel="Save"
-      previewLabel="Preview"
-      publishLabel="Publish"
       {...props}
     />,
   );
@@ -850,46 +839,18 @@ describe("OpportunityEditForm — action buttons", () => {
     jest.resetAllMocks();
   });
 
-  it("renders Save, Preview, and Publish buttons", () => {
+  it("renders two Save buttons", () => {
     renderOpportunityEditForm();
-
-    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Preview" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Publish" })).toBeInTheDocument();
+    // NOTE: the third save button is in the header
+    expect(
+      screen.getByRole("button", { name: "button.saveAndGoBack" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "button.saveAndContinue" }),
+    ).toBeInTheDocument();
   });
 
-  it("enables the Publish button when all required fields are populated", () => {
-    renderOpportunityEditForm();
-
-    expect(screen.getByRole("button", { name: "Publish" })).toBeEnabled();
-  });
-
-  it("disables the Publish button when required fields are missing", () => {
-    renderOpportunityEditForm({ initialValues: emptyInitialValues });
-
-    expect(screen.getByRole("button", { name: "Publish" })).toBeDisabled();
-  });
-
-  it("disables Save and Publish while isPending is true", () => {
-    mockUseActionState.mockReturnValue([
-      { validationErrors: {} },
-      jest.fn(),
-      true,
-    ]);
-
-    renderOpportunityEditForm();
-
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Publish" })).toBeDisabled();
-  });
-
-  it("Preview button is always disabled", () => {
-    renderOpportunityEditForm();
-
-    expect(screen.getByRole("button", { name: "Preview" })).toBeDisabled();
-  });
-
-  it("calls the form action when Save is clicked", () => {
+  it("calls the form action when saveAndGoBack is clicked", () => {
     const mockFormAction = jest.fn();
     mockUseActionState.mockReturnValue([
       { validationErrors: {} },
@@ -899,12 +860,14 @@ describe("OpportunityEditForm — action buttons", () => {
 
     renderOpportunityEditForm();
 
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "button.saveAndGoBack" }),
+    );
 
     expect(mockFormAction).toHaveBeenCalledTimes(1);
   });
 
-  it("calls the form action when Publish is clicked", () => {
+  it("calls the form action when saveAndContinue is clicked", () => {
     const mockFormAction = jest.fn();
     mockUseActionState.mockReturnValue([
       { validationErrors: {} },
@@ -914,7 +877,9 @@ describe("OpportunityEditForm — action buttons", () => {
 
     renderOpportunityEditForm();
 
-    fireEvent.click(screen.getByRole("button", { name: "Publish" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "button.saveAndContinue" }),
+    );
 
     expect(mockFormAction).toHaveBeenCalledTimes(1);
   });

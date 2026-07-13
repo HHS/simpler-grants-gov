@@ -1,4 +1,5 @@
 import {
+  deleteAwardRecommendation,
   deleteAwardRecommendationRisk,
   getAwardRecommendationDetails,
   getAwardRecommendationRisk,
@@ -167,6 +168,36 @@ describe("listAwardRecommendationsPaginated", () => {
       mockAwardRecommendationListItem,
     ]);
     expect(result.paginationInfo).toEqual({ total_pages: 1, total_records: 1 });
+  });
+});
+
+describe("deleteAwardRecommendation", () => {
+  beforeEach(() => {
+    mockInnerFetch.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        message: "Deleted",
+      } as APIResponse),
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls fetchAwardRecommendationWithMethod with the award recommendation id", async () => {
+    await deleteAwardRecommendation("award-rec-id");
+
+    expect(mockInnerFetch).toHaveBeenCalledWith({
+      subPath: "award-rec-id",
+    });
+  });
+
+  it("returns success when delete succeeds", async () => {
+    const result = await deleteAwardRecommendation("award-rec-id");
+
+    expect(result.success).toBe(true);
+    expect(result.message).toBe("Deleted");
   });
 });
 

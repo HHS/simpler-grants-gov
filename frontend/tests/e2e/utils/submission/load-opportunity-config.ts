@@ -6,6 +6,8 @@ import { SF424A_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424a-data";
 import { SF424A_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424a-field-definitions";
 import { SFLLL_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sfLLL-data";
 import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
+import { SUPP_COVER_SHEET_NEH_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/supp-cover-sheet-neh-grantsprogram-data";
+import { SUPP_COVER_SHEET_NEH_FORM_CONFIG } from "tests/e2e/apply/fixtures/supp-cover-sheet-neh-grantsprogram-field-definitions";
 import type { FillFormConfig } from "tests/e2e/utils/common/types";
 
 import type {
@@ -23,6 +25,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   SF424_OPPORTUNITY_DATA,
   SF424A_OPPORTUNITY_DATA,
   SFLLL_OPPORTUNITY_DATA,
+  SUPP_COVER_SHEET_NEH_OPPORTUNITY_DATA,
 ];
 
 /**
@@ -34,6 +37,7 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   sf424: SF424_FORM_CONFIG,
   sf424a: SF424A_FORM_CONFIG,
   sfLLL: SFLLL_FORM_CONFIG,
+  suppCoverSheetNEH: SUPP_COVER_SHEET_NEH_FORM_CONFIG,
 };
 
 /**
