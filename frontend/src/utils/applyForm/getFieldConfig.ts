@@ -139,6 +139,7 @@ export const getFieldListRequiredFields = ({
 
       // Check if this field is an object with nested required fields
       const fieldSchema = properties?.[fieldName] as RJSFSchema | undefined;
+      // Note: This only expands nested required fields for objects defined directly in the schema.
       if (
         fieldSchema &&
         fieldSchema.type === "object" &&

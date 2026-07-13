@@ -651,7 +651,7 @@ describe("getFieldConfig", () => {
       expect(result).toEqual(["contacts/name"]);
     });
 
-    it("ignores non-object required properties", () => {
+    it("includes required primitive fields and expands nested required object fields ", () => {
       const formSchema: RJSFSchema = {
         type: "object",
         properties: {
