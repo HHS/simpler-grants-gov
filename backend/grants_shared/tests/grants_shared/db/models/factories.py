@@ -109,3 +109,20 @@ class SharedLoginGovStateFactory(BaseFactory):
 
     shared_login_gov_state_id = Generators.UuidObj
     nonce = Generators.UuidObj
+
+
+class SharedUserApiKeyFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.SharedUserApiKey
+
+    shared_api_key_id = Generators.UuidObj
+
+    shared_user = factory.SubFactory(SharedUserFactory)
+    shared_user_id = factory.LazyAttribute(lambda k: k.shared_user.shared_user_id)
+
+    key_name = factory.Faker("sentence", nb_words=3)
+    key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+
+    last_used = factory.Faker("date_time_between", start_date="-30d", end_date="now")
+
+    is_active = True
