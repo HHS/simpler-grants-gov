@@ -229,6 +229,15 @@ db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
 
 ##################################################
+# Mock Oauth Server
+##################################################
+
+init-mock-oauth2: start-mock-oauth2
+
+start-mock-oauth2:
+	docker compose up --detach mock-oauth2-server
+
+##################################################
 # CLI Commands
 ##################################################
 

@@ -18,6 +18,19 @@ on:
         options:
           - grantee1
           - grantee2
+          - grantor1
+      app:
+        description: Which app's parameters to copy
+        required: true
+        type: choice
+        default: api
+        options:
+          - api
+      no_overwrite:
+        description: "Create-if-missing: only create target params that don't already exist (never overwrite)"
+        required: false
+        type: boolean
+        default: false
       dry_run:
         description: "Dry run: preview what would be copied without making changes"
         required: false
@@ -50,6 +63,8 @@ jobs:
           .github/scripts/copy-ssm-params.sh \
             "${{ inputs.source_environment }}" \
             "${{ inputs.target_environment }}" \
+            ${{ inputs.app != 'all' && format('--app={0}', inputs.app) || '' }} \
+            ${{ inputs.no_overwrite && '--no-overwrite' || '' }} \
             ${{ inputs.dry_run && '--dry-run' || '' }}
 
   send-slack-notification:

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { identity } from "lodash";
 import AwardRecommendationsListTable from "src/app/[locale]/(base)/award-recommendation/_components/AwardRecommendationsListTable";
 import {
@@ -47,6 +47,12 @@ jest.mock(
   }),
 );
 
+jest.mock("src/components/core/PopoverMenu", () => ({
+  PopoverMenu: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="popover-menu">{children}</div>
+  ),
+}));
+
 jest.mock("src/components/core/SimplerAlert", () => ({
   __esModule: true,
   default: ({ messageText }: { messageText: string }) => (
@@ -65,7 +71,7 @@ jest.mock("@trussworks/react-uswds", () => ({
 
 describe("AwardRecommendationsListTable", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockClientFetch.mockReset();
     mockClientFetch.mockResolvedValue({
       data: [mockAwardRecommendationListItem],
       pagination_info: { total_pages: 1, total_records: 1 },
@@ -105,6 +111,7 @@ describe("AwardRecommendationsListTable", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("200")).toBeInTheDocument();
+    expect(screen.queryByText("actions.delete")).not.toBeInTheDocument();
   });
 
   it("renders zero applications received when summary count is zero", async () => {
@@ -126,7 +133,7 @@ describe("AwardRecommendationsListTable", () => {
     expect(screen.getByText("0")).toBeInTheDocument();
   });
 
-  it("renders edit link for draft award recommendations", async () => {
+  it("renders edit link and delete action for draft award recommendations", async () => {
     mockClientFetch.mockResolvedValue({
       data: [mockDraftAwardRecommendationListItem],
       pagination_info: { total_pages: 1, total_records: 1 },
@@ -142,6 +149,47 @@ describe("AwardRecommendationsListTable", () => {
       ).toHaveAttribute(
         "href",
         `/award-recommendation/${mockDraftAwardRecommendationListItem.award_recommendation_id}/edit`,
+      );
+    });
+
+    expect(screen.getByText("actions.delete")).toBeInTheDocument();
+  });
+
+  it("calls delete endpoint when delete is clicked", async () => {
+    let deleted = false;
+    mockClientFetch.mockImplementation(
+      (_url: string, options?: RequestInit): unknown => {
+        if (options?.method === "DELETE") {
+          deleted = true;
+          return {};
+        }
+
+        if (deleted) {
+          return {
+            data: [],
+            pagination_info: { total_pages: 1, total_records: 0 },
+          };
+        }
+
+        return {
+          data: [mockDraftAwardRecommendationListItem],
+          pagination_info: { total_pages: 1, total_records: 1 },
+        };
+      },
+    );
+
+    render(<AwardRecommendationsListTable currentAgencyId="1" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("actions.delete")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("actions.delete"));
+
+    await waitFor(() => {
+      expect(mockClientFetch).toHaveBeenCalledWith(
+        `/api/award-recommendations/${mockDraftAwardRecommendationListItem.award_recommendation_id}`,
+        expect.objectContaining({ method: "DELETE" }),
       );
     });
   });

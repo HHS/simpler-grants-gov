@@ -3,7 +3,6 @@
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import {
   createOpportunitySummaryForGrantor,
-  publishOpportunityForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
@@ -282,40 +281,11 @@ export async function saveOpportunityEditAction(
   }
 }
 
-async function publishOpportunityAction(
-  opportunityId: string,
-): Promise<OpportunityEditActionState> {
-  const alerts = await getTranslations("OpportunityEdit.content.alerts");
-
-  try {
-    await publishOpportunityForGrantor(opportunityId);
-  } catch (error) {
-    const status =
-      error instanceof ApiRequestError ? parseErrorStatus(error) : null;
-
-    if (status === 401) {
-      return { errorMessage: alerts("unauthenticated") };
-    }
-
-    if (status === 403) {
-      return { errorMessage: alerts("forbidden") };
-    }
-
-    if (status === 404) {
-      return { errorMessage: alerts("notFound") };
-    }
-
-    return { errorMessage: alerts("genericError") };
-  }
-
-  return {};
-}
-
-export async function submitOpportunityAction(
+export async function opportunityEditFormAction(
   prevState: OpportunityEditActionState,
   formData: FormData,
 ): Promise<OpportunityEditActionState> {
-  // Save the form first - if there are validation or API errors, surface them without publishing.
+  // Save the form first - if there are validation or API errors, display them.
   const saveResult = await saveOpportunityEditAction(prevState, formData);
   const hasValidationErrors =
     saveResult.validationErrors &&
@@ -324,21 +294,15 @@ export async function submitOpportunityAction(
     return saveResult;
   }
 
-  const opportunityId = readStringValue(formData.get("opportunityId")).trim();
-  const publishResult = await publishOpportunityAction(opportunityId);
-  if (publishResult.errorMessage) {
-    return publishResult;
+  if (readStringValue(formData.get("submitType")) === "saveAndExit") {
+    redirect("../overview");
+  } else if (readStringValue(formData.get("submitType")) === "saveAndGoBack") {
+    redirect("../overview");
+  } else if (
+    readStringValue(formData.get("submitType")) === "saveAndContinue"
+  ) {
+    redirect("../competition");
+  } else {
+    return saveResult;
   }
-
-  redirect("/grantor/opportunities");
-}
-
-export async function opportunityEditFormAction(
-  prevState: OpportunityEditActionState,
-  formData: FormData,
-): Promise<OpportunityEditActionState> {
-  if (readStringValue(formData.get("submitType")) === "publish") {
-    return submitOpportunityAction(prevState, formData);
-  }
-  return saveOpportunityEditAction(prevState, formData);
 }

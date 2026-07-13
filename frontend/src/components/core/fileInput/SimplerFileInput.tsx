@@ -68,7 +68,7 @@ export const SimplerFileInput = ({
   );
   // upload id is only used for tracking internal to this component
   const [activeUploads, setActiveUploads] = useState<
-    { uploadId: string; file: File; complete?: boolean }[]
+    { uploadId: string; file: File }[]
   >([]);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
 
@@ -118,7 +118,6 @@ export const SimplerFileInput = ({
         return;
       })
       .catch((e) => {
-        // do we want to do anything else here to surface the error?
         console.error("Error deleting file", e);
         setDeletePending(false);
         setFilePendingDeletion(undefined);
@@ -139,24 +138,19 @@ export const SimplerFileInput = ({
     if (existingFiles?.length) {
       return true;
     }
-    // if there is any active upload that has not yet completed
-    if (activeUploads.some((activeUpload) => !activeUpload.complete)) {
+    if (activeUploads.length) {
       return true;
     }
-  }, [multiFile, activeUploads, existingFiles]);
+  }, [multiFile, existingFiles?.length, activeUploads.length]);
 
   // note the usage of functional state setters in these functions
   // it's necessary to avoid referencing stale closed over state values up the call stack
-  const trackUploadSuccess = (uploadId: string) => {
-    setActiveUploads((previousActiveUploads) => {
-      const completedIndex = previousActiveUploads.findIndex(
-        (item) => item.uploadId === uploadId,
-      );
-      if (completedIndex > -1) {
-        previousActiveUploads[completedIndex].complete = true;
-      }
-      return previousActiveUploads;
-    });
+  const trackUploadComplete = (uploadId: string) => {
+    setActiveUploads((previousActiveUploads) =>
+      previousActiveUploads.filter(
+        (activeUpload) => activeUpload.uploadId !== uploadId,
+      ),
+    );
   };
   const trackUploadError = (uploadId: string) => {
     setUploadErrors((previousUploadErrors) => [
@@ -166,26 +160,16 @@ export const SimplerFileInput = ({
   };
 
   const dismissError = (uploadId: string) => {
-    setUploadErrors((previousUploadErrors) => {
-      const errorIndex = previousUploadErrors.indexOf(uploadId);
-      if (errorIndex > -1) {
-        previousUploadErrors.splice(errorIndex, 1);
-      }
-      return previousUploadErrors;
-    });
+    setUploadErrors((previousUploadErrors) =>
+      previousUploadErrors.filter((uploadError) => uploadError !== uploadId),
+    );
+    // we want to show the upload input again after dismissing a single error
+    trackUploadComplete(uploadId);
+    if (!multiFile) {
+      fileInputRef?.current?.clearFiles();
+    }
   };
 
-  const trackUploadCancel = (uploadId: string) => {
-    setActiveUploads((previousActiveUploads) => {
-      const canceledIndex = previousActiveUploads.findIndex(
-        (item) => item.uploadId === uploadId,
-      );
-      if (canceledIndex > -1) {
-        previousActiveUploads.splice(canceledIndex, 1);
-      }
-      return previousActiveUploads;
-    });
-  };
   return (
     <>
       <FileInput
@@ -209,24 +193,29 @@ export const SimplerFileInput = ({
           key={uploadId}
           fileToUpload={file}
           onCancel={() => {
-            trackUploadCancel(uploadId);
+            trackUploadComplete(uploadId);
             if (!multiFile) {
               fileInputRef?.current?.clearFiles();
             }
           }}
-          onDismiss={() => dismissError(uploadId)}
+          onDismiss={() => {
+            dismissError(uploadId);
+          }}
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
           onStart={onStart}
           onUploadSuccess={(postUploadResult: unknown) => {
-            trackUploadSuccess(uploadId);
+            trackUploadComplete(uploadId);
             onSuccess(postUploadResult);
+            if (!multiFile) {
+              fileInputRef?.current?.clearFiles();
+            }
           }}
           onComplete={onComplete}
           onUploadError={(e: Error) => {
-            trackUploadError(uploadId);
             onError(e);
+            trackUploadError(uploadId);
           }}
           postUploadAction={postUploadAction}
         />

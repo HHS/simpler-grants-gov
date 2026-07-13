@@ -54,3 +54,9 @@ ignore:
   # https://github.com/HHS/simpler-grants-gov/issues/8109
   # Last checked: 07/01/2026
   - vulnerability: CVE-2026-12003
+
+  # html.parser.HTMLParser
+  # Fix only in pre-release Python 3.15 (3.15.0b3); no fix in any GA 3.14.x yet.
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 07/13/2026
+  - vulnerability: CVE-2026-15308
