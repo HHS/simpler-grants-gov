@@ -13,7 +13,7 @@ from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.services.opportunities_grantor_v1.competition_creation import create_competition
 from src.services.opportunities_grantor_v1.competition_instruction_upload import (
-    upload_competition_instructions,
+    upload_competition_instruction,
 )
 from src.services.opportunities_grantor_v1.competition_update import update_competition
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
@@ -360,10 +360,10 @@ def competition_update(
 @opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
 @flask_db.with_db_session()
-def competition_instructions_upload(
+def competition_instruction_upload(
     db_session: db.Session, opportunity_id: UUID, competition_id: UUID, files_data: dict
 ) -> response.ApiResponse:
-    """Upload instruction files to a competition"""
+    """Upload an instruction file to a competition"""
     add_extra_data_to_current_request_logs(
         {"opportunity_id": opportunity_id, "competition_id": competition_id}
     )
@@ -375,11 +375,11 @@ def competition_instructions_upload(
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
-        instruction_ids = upload_competition_instructions(
+        instruction_id = upload_competition_instruction(
             db_session, user, opportunity_id, competition_id, files_data["file_attachment"]
         )
 
     return response.ApiResponse(
-        message="Instructions uploaded successfully",
-        data={"competition_instruction_id": instruction_ids},
+        message="Instruction uploaded successfully",
+        data={"competition_instruction_id": instruction_id},
     )

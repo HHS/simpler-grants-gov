@@ -716,25 +716,19 @@ class CompetitionUpdateResponseSchema(AbstractResponseSchema):
 class CompetitionInstructionUploadRequestV1Schema(Schema):
     """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id/instructions request"""
 
-    file_attachment = fields.List(
-        fields.File(
-            required=True,
-            allow_none=False,
-            metadata={"description": "The file attachments to upload"},
-        ),
+    file_attachment = fields.File(
         required=True,
-        validate=validators.Length(min=1),
-        metadata={"description": "List of instruction files to upload"},
+        allow_none=False,
+        metadata={"description": "The instruction file to upload"},
     )
 
 
 class CompetitionInstructionUploadResponseDataV1Schema(Schema):
     """Data schema for competition instruction upload response"""
 
-    competition_instruction_id = fields.List(
-        fields.String(),
+    competition_instruction_id = fields.String(
         required=True,
-        metadata={"description": "List of created competition instruction IDs"},
+        metadata={"description": "The created competition instruction ID"},
     )
 
 

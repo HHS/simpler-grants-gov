@@ -54,19 +54,18 @@ def test_upload_instructions_success_single_file(
     resp = client.post(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": [(BytesIO(file_content), "instructions.pdf", "application/pdf")]},
+        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
     )
 
     assert resp.status_code == 200
     response_json = resp.get_json()
-    assert response_json["message"] == "Instructions uploaded successfully"
+    assert response_json["message"] == "Instruction uploaded successfully"
     assert "data" in response_json
     assert "competition_instruction_id" in response_json["data"]
-    assert isinstance(response_json["data"]["competition_instruction_id"], list)
-    assert len(response_json["data"]["competition_instruction_id"]) == 1
+    assert isinstance(response_json["data"]["competition_instruction_id"], str)
 
     # Verify database record
-    instruction_id = response_json["data"]["competition_instruction_id"][0]
+    instruction_id = response_json["data"]["competition_instruction_id"]
     instruction = (
         db_session.query(competition_models.CompetitionInstruction)
         .filter_by(competition_instruction_id=instruction_id)
@@ -76,52 +75,6 @@ def test_upload_instructions_success_single_file(
     assert instruction is not None
     assert instruction.file_name == "instructions.pdf"
     assert file_util.file_exists(instruction.file_location) is True
-
-
-def test_upload_instructions_success_multiple_files(
-    client,
-    grantor_auth_data,
-    existing_opportunity,
-    existing_competition,
-    mock_s3_bucket,
-    other_mock_s3_bucket,
-    db_session,
-):
-    """Test successful upload of multiple instruction files"""
-    _, _, token, _ = grantor_auth_data
-
-    file_content_1 = b"First instruction content"
-    file_content_2 = b"Second instruction content"
-
-    resp = client.post(
-        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
-        headers={"X-SGG-Token": token},
-        data={
-            "file_attachment": [
-                (BytesIO(file_content_1), "instructions1.pdf", "application/pdf"),
-                (
-                    BytesIO(file_content_2),
-                    "instructions2.docx",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                ),
-            ]
-        },
-    )
-
-    assert resp.status_code == 200
-    response_json = resp.get_json()
-    assert response_json["message"] == "Instructions uploaded successfully"
-    assert len(response_json["data"]["competition_instruction_id"]) == 2
-
-    # Verify both files in database
-    for instruction_id in response_json["data"]["competition_instruction_id"]:
-        instruction = (
-            db_session.query(competition_models.CompetitionInstruction)
-            .filter_by(competition_instruction_id=instruction_id)
-            .first()
-        )
-        assert instruction is not None
-        assert file_util.file_exists(instruction.file_location) is True
 
 
 def test_upload_instructions_unauthorized(
@@ -139,7 +92,7 @@ def test_upload_instructions_unauthorized(
     resp = client.post(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": [(BytesIO(file_content), "instructions.pdf", "application/pdf")]},
+        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
     )
 
     assert resp.status_code == 403
@@ -159,7 +112,7 @@ def test_upload_instructions_nonexistent_opportunity(
     resp = client.post(
         f"/v1/grantors/opportunities/{non_existent_opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": [(BytesIO(file_content), "instructions.pdf", "application/pdf")]},
+        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
     )
 
     assert resp.status_code == 404
@@ -182,7 +135,7 @@ def test_upload_instructions_nonexistent_competition(
     resp = client.post(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{non_existent_competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": [(BytesIO(file_content), "instructions.pdf", "application/pdf")]},
+        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
     )
 
     assert resp.status_code == 404
@@ -210,7 +163,7 @@ def test_upload_instructions_competition_wrong_opportunity(
     resp = client.post(
         f"/v1/grantors/opportunities/{other_opportunity.opportunity_id}/competitions/{competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": [(BytesIO(file_content), "instructions.pdf", "application/pdf")]},
+        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
     )
 
     assert resp.status_code == 404
@@ -231,23 +184,6 @@ def test_upload_instructions_invalid_file(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
         data={"file_attachment": invalid_file},
-    )
-
-    assert resp.status_code == 422
-    response_json = resp.get_json()
-    assert response_json["message"] == "Validation error"
-
-
-def test_upload_instructions_empty_file_list(
-    client, grantor_auth_data, existing_opportunity, existing_competition
-):
-    """Test upload with empty file list"""
-    _, _, token, _ = grantor_auth_data
-
-    resp = client.post(
-        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
-        headers={"X-SGG-Token": token},
-        data={"file_attachment": []},
     )
 
     assert resp.status_code == 422
@@ -276,7 +212,7 @@ def test_upload_instructions_non_sgm_opportunity(
     resp = client.post(
         f"/v1/grantors/opportunities/{non_sgm_opportunity.opportunity_id}/competitions/{competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": [(BytesIO(file_content), "instructions.pdf", "application/pdf")]},
+        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
     )
 
     assert resp.status_code == 422

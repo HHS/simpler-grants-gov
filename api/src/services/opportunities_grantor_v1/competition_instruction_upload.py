@@ -24,14 +24,14 @@ from src.services.opportunity_attachments.attachment_util import adjust_legacy_f
 logger = logging.getLogger(__name__)
 
 
-def upload_competition_instructions(
+def upload_competition_instruction(
     db_session: db.Session,
     user: User,
     opportunity_id: uuid.UUID,
     competition_id: uuid.UUID,
-    file_data_list: list[FileStorage],
-) -> list[str]:
-    """Upload instruction files to a competition"""
+    file_data: FileStorage,
+) -> str:
+    """Upload an instruction file to a competition"""
     # Get the opportunity and verify it exists
     opportunity = get_opportunity_for_grantors(db_session, user, opportunity_id)
 
@@ -50,52 +50,48 @@ def upload_competition_instructions(
             404, message=f"Competition {competition_id} not found for opportunity {opportunity_id}"
         )
 
-    # Process each file
-    instruction_ids = []
+    # Process the file
     s3_config = S3Config()
+    instruction_id = uuid.uuid4()
 
-    for file_data in file_data_list:
-        instruction_id = uuid.uuid4()
+    # Extract file metadata
+    if not file_data.filename:
+        raise_flask_error(422, "File must have a filename")
 
-        # Extract file metadata
-        if not file_data.filename:
-            raise_flask_error(422, "File must have a filename")
+    file_name = adjust_legacy_file_name(file_data.filename)
 
-        file_name = adjust_legacy_file_name(file_data.filename)
+    # Create S3 path for the file
+    file_path = get_s3_competition_instruction_path(
+        file_name=file_name,
+        competition_instruction_id=instruction_id,
+        competition=competition,
+        s3_config=s3_config,
+    )
 
-        # Create S3 path for the file
-        file_path = get_s3_competition_instruction_path(
-            file_name=file_name,
-            competition_instruction_id=instruction_id,
-            competition=competition,
-            s3_config=s3_config,
-        )
+    # Write the file to S3
+    mime_type = file_data.mimetype or "application/octet-stream"
+    with file_util.open_stream(file_path, "wb", content_type=mime_type) as f:
+        file_data.save(f)
 
-        # Write the file to S3
-        mime_type = file_data.mimetype or "application/octet-stream"
-        with file_util.open_stream(file_path, "wb", content_type=mime_type) as f:
-            file_data.save(f)
+    # Create the instruction record
+    instruction = CompetitionInstruction(
+        competition_instruction_id=instruction_id,
+        competition_id=competition_id,
+        file_location=file_path,
+        file_name=file_name,
+        legacy_competition_id=None,
+    )
 
-        # Create the instruction record
-        instruction = CompetitionInstruction(
-            competition_instruction_id=instruction_id,
-            competition_id=competition_id,
-            file_location=file_path,
-            file_name=file_name,
-            legacy_competition_id=None,
-        )
+    db_session.add(instruction)
 
-        db_session.add(instruction)
-        instruction_ids.append(str(instruction_id))
+    logger.info(
+        "Added instruction to competition",
+        extra={
+            "competition_id": competition_id,
+            "opportunity_id": opportunity_id,
+            "instruction_id": instruction_id,
+            "file_name": file_name,
+        },
+    )
 
-        logger.info(
-            "Added instruction to competition",
-            extra={
-                "competition_id": competition_id,
-                "opportunity_id": opportunity_id,
-                "instruction_id": instruction_id,
-                "file_name": file_name,
-            },
-        )
-
-    return instruction_ids
+    return str(instruction_id)
