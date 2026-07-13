@@ -11,15 +11,15 @@ from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import CompetitionInstruction
 from src.db.models.user_models import User
+from src.services.competition_alpha.competition_instruction_util import (
+    get_s3_competition_instruction_path,
+)
 from src.services.competition_alpha.get_competition import get_competition
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
 )
-from src.services.opportunity_attachments.attachment_util import (
-    adjust_legacy_file_name,
-    get_s3_competition_instruction_path,
-)
+from src.services.opportunity_attachments.attachment_util import adjust_legacy_file_name
 
 logger = logging.getLogger(__name__)
 
