@@ -456,7 +456,7 @@ def application_attachment_delete(
     return response.ApiResponse(message="Success")
 
 
-@application_blueprint.post("/applications/<uuid:application_id>/audit-history")
+@application_blueprint.post("/applications/<uuid:application_id>/audit_history")
 @application_blueprint.input(ApplicationAuditRequestSchema())
 @application_blueprint.output(ApplicationAuditResponseSchema())
 @application_blueprint.auth_required(api_jwt_auth)
@@ -464,7 +464,7 @@ def application_attachment_delete(
 def application_audit_list(
     db_session: db.Session, application_id: UUID, json_data: dict
 ) -> response.ApiResponse:
-    logger.info("POST /alpha/applications/:application_id/audit-history")
+    logger.info("POST /alpha/applications/:application_id/audit_history")
 
     # Get user from token session
     token_session = api_jwt_auth.get_user_token_session()
