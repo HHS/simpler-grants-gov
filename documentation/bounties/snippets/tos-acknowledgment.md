@@ -14,7 +14,7 @@ and the `/claim` instructions in the
 ## Drop-in (contributor posts this verbatim)
 
 ```markdown
-I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former Nava or HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.
+I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.
 ```
 
 ## What the operator verifies before accepting the claim
@@ -24,7 +24,7 @@ All of the following statements must be present and unaltered:
 - [ ] Read and agree to the Terms of Service.
 - [ ] 18 or older.
 - [ ] US citizen.
-- [ ] Not a current or former Nava or HHS employee or contractor.
+- [ ] Not a current or former HHS employee or contractor.
 - [ ] Not on the OFAC SDN list.
 - [ ] Understands payment requires a merged PR, verification, and W-9 at the $600 threshold.
 

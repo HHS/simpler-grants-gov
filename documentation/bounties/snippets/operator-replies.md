@@ -70,7 +70,7 @@ Any claim you already have in progress continues to its normal resolution. After
 ```markdown
 Thanks @handle! Before I can record your claim, I need your **Terms of Service acknowledgment**. Please post the text below as a comment, *then* comment `/claim` again:
 
-> I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former Nava or HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.
+> I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.
 
 Heads up: for tiebreaker purposes your claim timestamp is set to the time of a **complete** acknowledgment, not the `/claim` comment.
 ```
@@ -148,9 +148,9 @@ Thank you again for contributing to Simpler Grants.
 
 ---
 
-## Eligibility decline — Nava / HHS relationship
+## Eligibility decline — HHS relationship
 
-> Contributor is or was a Nava employee/contractor/subcontractor or an HHS
+> Contributor is or was an employee/contractor/subcontractor or an HHS
 > employee/contractor — a conflict of interest (SOP Rule 11). **Private email.**
 > The contribution, if merged, stays; the claimed bounty is released to the pool.
 > Governance: OS Associate identifies; OS Lead confirms.
@@ -162,7 +162,7 @@ Hi <name>,
 
 Thank you for contributing to #NNN. I'm following up about the bounty payment.
 
-The program's Terms of Service exclude current and former Nava employees, contractors, and subcontractors, as well as current HHS employees and contractors, from receiving bounty payments. This is a conflict-of-interest safeguard for a federally funded program, not a judgment of your work. Based on our records, that exclusion applies here, so we're unable to issue the bounty payment for this contribution.
+The program's Terms of Service exclude current and former HHS employees and contractors and subcontractors, from receiving bounty payments. This is a conflict-of-interest safeguard for a federally funded program, not a judgment of your work. Based on our records, that exclusion applies here, so we're unable to issue the bounty payment for this contribution.
 
 Your contribution, if merged, remains in the project with full credit to you. If you think this is a mistake, reply within 14 days and we'll review.
 
@@ -243,7 +243,7 @@ Internal ref ID:     <tracker reference ID>
 
 Verification (complete before submitting):
 - [ ] PR merged; two maintainer approvals + acceptance-criteria PASS comment on file
-- [ ] Identity / eligibility verified (citizenship, no Nava/HHS relationship, 18+)
+- [ ] Identity / eligibility verified (citizenship, no HHS relationship, 18+)
 - [ ] OFAC SDN screen clear (date + initials in tracker)
 - [ ] W-9 on file if YTD cumulative ≥ $600, otherwise N/A
 - [ ] Budget tracker reservation status = posted; sufficient envelope remaining
