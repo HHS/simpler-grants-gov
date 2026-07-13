@@ -732,8 +732,33 @@ class OppFilters(Schema):
     customFilters = fields.Dict(
         allow_none=True,
         metadata={
-            "description": "Additional custom filters to apply to the search",
-            "example": {},
+            "description": (
+                "Grants.gov-specific filters. Each entry is a `{operator, value}` "
+                "object. Supported keys:\n\n"
+                '- `agency` — operator `"in"`, value: array of agency codes '
+                '(e.g. `["USAID"]`)\n'
+                '- `applicantType` — operator `"in"`, value: array of '
+                "CommonGrants applicant-type values: `individual`, "
+                "`organization`, `government_state`, `government_county`, "
+                "`government_municipal`, `government_special_district`, "
+                "`government_tribal`, `organization_tribal_other`, "
+                "`school_district_independent`, `higher_education_public`, "
+                "`higher_education_private`, `non_profit_with_501c3`, "
+                "`nonprofit_without_501c3`, `for_profit_small_business`, "
+                "`for_profit_not_small_business`, `unrestricted`, `custom`\n"
+                '- `fundingInstrument` — operator `"in"`, value: array of '
+                'funding instrument values (e.g. `["grant"]`)\n'
+                '- `costSharing` — operator `"eq"`, value: boolean\n\n'
+                "Unsupported keys and invalid values are skipped and reported "
+                "in `filterInfo.errors`; the search still runs with the valid "
+                "filters applied."
+            ),
+            "example": {
+                "agency": {"operator": "in", "value": ["USAID"]},
+                "applicantType": {"operator": "in", "value": ["government_state"]},
+                "fundingInstrument": {"operator": "in", "value": ["grant"]},
+                "costSharing": {"operator": "eq", "value": True},
+            },
         },
     )
 
