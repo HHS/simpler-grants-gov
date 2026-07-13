@@ -109,15 +109,14 @@ describe("listAwardRecommendationSubmissions", () => {
 
 describe("listAwardRecommendationsPaginated", () => {
   beforeEach(() => {
-    mockInnerFetch.mockImplementation(
-      ({ subPath }: { subPath: string }) =>
-        Promise.resolve({
-          ok: true,
-          json: jest.fn().mockResolvedValue({
-            data: subPath === "list" ? [mockAwardRecommendationListItem] : null,
-            pagination_info: { total_pages: 1, total_records: 1 },
-          } as APIResponse),
-        }) as unknown as Promise<Response>,
+    mockInnerFetch.mockImplementation(({ subPath }: { subPath: string }) =>
+      Promise.resolve({
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          data: subPath === "list" ? [mockAwardRecommendationListItem] : null,
+          pagination_info: { total_pages: 1, total_records: 1 },
+        }),
+      }),
     );
   });
 
@@ -175,7 +174,7 @@ describe("deleteAwardRecommendation", () => {
       ok: true,
       json: jest.fn().mockResolvedValue({
         message: "Deleted",
-      } as APIResponse),
+      }),
     });
   });
 
