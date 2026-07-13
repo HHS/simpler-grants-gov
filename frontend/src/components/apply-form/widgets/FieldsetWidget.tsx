@@ -21,12 +21,12 @@ export const FieldsetWidget = ({
   return (
     <Fieldset key={`${fieldName}-row`} id={`form-section-${fieldName}`}>
       <FormGroup key={`${fieldName}-group`} className="simpler-formgroup">
-        <h2
+        <h4
           key={`${fieldName}-legend`}
-          className="usa-legend font-sans-xl margin-bottom-05 margin-top-5"
+          className="usa-legend font-sans-lg margin-bottom-05 margin-top-5"
         >
           {label}
-        </h2>
+        </h4>
         {descriptionGraphs}
         {children}
       </FormGroup>

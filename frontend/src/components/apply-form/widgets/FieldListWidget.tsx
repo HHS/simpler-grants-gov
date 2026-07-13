@@ -462,7 +462,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
     minItemsHeading ?? "Would you like to delete this field?";
 
   const resolvedMinItemsHelperText =
-    minItemsHelperText ?? `At least one contact person is required.`;
+    minItemsHelperText ?? `There is a minimum count of ${minimumEntryCount}.`;
 
   const resolvedEntryLabel = label ?? "entry";
 
