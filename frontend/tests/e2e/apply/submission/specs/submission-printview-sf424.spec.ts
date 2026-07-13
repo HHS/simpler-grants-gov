@@ -173,9 +173,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
         // SF-424 attachments - filenames are in the section, not testId elements, so use the section locator
         if (formKey === "sf424") {
-          const attachmentFileName = (filePath: string) =>
-            filePath.split(/[/\\]/).pop() ?? filePath;
-
           const sf424AttachmentSections = [
             {
               fieldKey: "areas_affected_attachment",
