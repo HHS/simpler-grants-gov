@@ -7,7 +7,9 @@ import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
 
 // Mock the main fetchGrantorOpportunitiesWithMethod and the sub-method it calls, fetch
 const mockFetcher = jest.fn();
-const mockFetchGrantorOpportunitiesWithMethod = jest.fn((_args: unknown) => mockFetcher);
+const mockFetchGrantorOpportunitiesWithMethod = jest.fn(
+  (_args: unknown) => mockFetcher,
+);
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchGrantorOpportunitiesWithMethod: (arg: unknown): unknown =>
     mockFetchGrantorOpportunitiesWithMethod(arg),
@@ -53,7 +55,9 @@ describe("searchOpportunitiesByAgency", () => {
       pagination_info: { total_pages: 1, total_records: 4 },
     });
     expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith(
+      "POST",
+    );
     expect(mockFetcher).toHaveBeenCalledWith({
       subPath: "agencies/123-ABC-456-DEF/opportunities",
       body: pageBody,
@@ -132,7 +136,9 @@ describe("searchOpportunitiesByAgency", () => {
       pagination_info: undefined,
     });
     expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith(
+      "POST",
+    );
   });
 
   it("propagates network errors", async () => {
@@ -169,7 +175,9 @@ describe("createOpportunity", () => {
 
     expect(result).toEqual(createOppSchema);
     expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith(
+      "POST",
+    );
     expect(mockFetcher).toHaveBeenCalledWith({
       subPath: "opportunities",
       body: createOppSchema,
@@ -189,7 +197,9 @@ describe("createOpportunity", () => {
 
     expect(result).toEqual(errMsg);
     expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith(
+      "POST",
+    );
   });
 
   it("propagates network errors", async () => {
