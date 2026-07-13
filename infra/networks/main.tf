@@ -63,6 +63,18 @@ provider "aws" {
   }
 }
 
+# The domain module's DNS query logging (Route53 query logs + their CloudWatch log
+# group and resource policy) must live in us-east-1, so it requires an aws.us-east-1
+# provider in addition to the default one. This alias satisfies that requirement even
+# when manage_dns = false and no us-east-1 resources are actually created.
+provider "aws" {
+  alias  = "us-east-1"
+  region = "us-east-1"
+  default_tags {
+    tags = local.tags
+  }
+}
+
 module "project_config" {
   source = "../project-config"
 }
@@ -99,4 +111,9 @@ module "domain" {
   name                = local.domain_config.hosted_zone
   manage_dns          = local.domain_config.manage_dns
   certificate_configs = local.domain_config.certificate_configs
+
+  providers = {
+    aws           = aws
+    aws.us-east-1 = aws.us-east-1
+  }
 }

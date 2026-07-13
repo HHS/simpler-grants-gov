@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
 import AwardRecommendationStatusTag from "src/components/award-recommendation/AwardRecommendationStatusTag";
+import { PopoverMenu } from "src/components/core/PopoverMenu";
 import SimplerAlert from "src/components/core/SimplerAlert";
 import Spinner from "src/components/core/Spinner";
 import {
@@ -101,6 +102,21 @@ export default function AwardRecommendationsListTable({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAgencyId, page, clientFetch]);
 
+  const handleDelete = async (awardRecommendationId: string) => {
+    try {
+      setLoading(true);
+      await clientFetch(`/api/award-recommendations/${awardRecommendationId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      await fetchAwardRecommendations();
+    } catch (error) {
+      setApiError(true);
+      console.error(error);
+      setLoading(false);
+    }
+  };
+
   const headers: TableCellData[] = [
     { cellData: t("columns.awardRecId") },
     { cellData: t("columns.opportunityName") },
@@ -157,7 +173,20 @@ export default function AwardRecommendationsListTable({
           ),
         },
         {
-          cellData: null,
+          cellData:
+            award_recommendation_status === "draft" ? (
+              <PopoverMenu>
+                <button
+                  className="usa-button usa-button--unstyled width-full text-left padding-y-1 padding-x-2 hover:bg-base-lighter"
+                  onClick={() => {
+                    void handleDelete(award_recommendation_id);
+                  }}
+                  type="button"
+                >
+                  {t("actions.delete")}
+                </button>
+              </PopoverMenu>
+            ) : null,
         },
       ];
     },

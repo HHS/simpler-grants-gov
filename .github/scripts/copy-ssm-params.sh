@@ -1,29 +1,41 @@
 #!/usr/bin/env bash
-# Copy all SSM parameters from one environment path to another.
-# Usage: copy-ssm-params.sh <source_env> <target_env> [--dry-run]
+# Copy SSM parameters from one environment path to another.
+# Usage: copy-ssm-params.sh <source_env> <target_env> [--dry-run] [--no-overwrite] [--app=<name>]
 #
 # Copies parameters matching /{app}/{source_env}/* to /{app}/{target_env}/*
-# for all apps: api, frontend, nofos, analytics
+# for all apps (api, frontend, nofos, analytics) unless narrowed with --app.
 #
-# Example:
+# Flags:
+#   --dry-run       Preview what would happen without making changes.
+#   --no-overwrite  Create-if-missing: only create target params that do NOT already
+#                   exist; leave existing target values untouched. (Default overwrites.)
+#   --app=<name>    Restrict to a single app: api, frontend, nofos, or analytics.
+#
+# Examples:
 #   copy-ssm-params.sh staging grantee1
 #   copy-ssm-params.sh dev grantee2 --dry-run
+#   # Seed grantor1 api secrets from staging, creating only the ones that don't exist:
+#   copy-ssm-params.sh staging grantor1 --app=api --no-overwrite
 
 set -euo pipefail
 
 SOURCE_ENV="${1:?source_env argument is required}"
 TARGET_ENV="${2:?target_env argument is required}"
 DRY_RUN="false"
+OVERWRITE="true"
+APP_FILTER=""
 
 for arg in "${@:3}"; do
   case "${arg}" in
     --dry-run) DRY_RUN="true" ;;
+    --no-overwrite) OVERWRITE="false" ;;
+    --app=*) APP_FILTER="${arg#*=}" ;;
     *) echo "Unknown argument: ${arg}"; exit 1 ;;
   esac
 done
 
 VALID_SOURCES=("dev" "staging")
-VALID_TARGETS=("grantee1" "grantee2")
+VALID_TARGETS=("grantee1" "grantee2" "grantor1")
 
 if [[ ! " ${VALID_SOURCES[*]} " =~ " ${SOURCE_ENV} " ]]; then
   echo "ERROR: source_env must be one of: ${VALID_SOURCES[*]}"
@@ -42,6 +54,15 @@ fi
 
 APP_PREFIXES=("api" "frontend" "nofos" "analytics")
 
+# Narrow to a single app when --app is provided (e.g. --app=api).
+if [[ -n "${APP_FILTER}" ]]; then
+  if [[ ! " ${APP_PREFIXES[*]} " =~ " ${APP_FILTER} " ]]; then
+    echo "ERROR: --app must be one of: ${APP_PREFIXES[*]}"
+    exit 1
+  fi
+  APP_PREFIXES=("${APP_FILTER}")
+fi
+
 # These params contain environment-specific URLs that must not be overwritten
 # in grantee environments — they are managed manually per environment.
 SKIP_PARAMS=(
@@ -52,13 +73,23 @@ SKIP_PARAMS=(
 
 TOTAL_COPIED=0
 TOTAL_SKIPPED=0
+TOTAL_EXISTS=0
 FAILED_PARAMS=()
+
+# When not overwriting, create new params without the --overwrite flag; existing ones
+# are detected and skipped below. When overwriting, keep the original behavior.
+OVERWRITE_FLAG=""
+if [[ "${OVERWRITE}" == "true" ]]; then
+  OVERWRITE_FLAG="--overwrite"
+fi
 
 echo "============================================================"
 echo " Copy SSM Parameters"
-echo "  Source: ${SOURCE_ENV}"
-echo "  Target: ${TARGET_ENV}"
-echo "  Dry run: ${DRY_RUN}"
+echo "  Source:    ${SOURCE_ENV}"
+echo "  Target:    ${TARGET_ENV}"
+echo "  Apps:      ${APP_PREFIXES[*]}"
+echo "  Mode:      $([[ "${OVERWRITE}" == "true" ]] && echo "overwrite existing" || echo "create-if-missing (no overwrite)")"
+echo "  Dry run:   ${DRY_RUN}"
 echo "============================================================"
 echo ""
 
@@ -143,6 +174,14 @@ for APP in "${APP_PREFIXES[@]}"; do
       continue
     fi
 
+    # Create-if-missing: leave any parameter that already exists in the target alone.
+    if [[ "${OVERWRITE}" == "false" ]] && \
+      aws ssm get-parameter --name "${TARGET_NAME}" --no-cli-pager >/dev/null 2>&1; then
+      echo "  Exists, keeping target value: ${TARGET_NAME}"
+      TOTAL_EXISTS=$((TOTAL_EXISTS + 1))
+      continue
+    fi
+
     VALUE_LEN=${#VALUE}
     TIER="Standard"
     if [[ "${VALUE_LEN}" -gt 4096 ]]; then
@@ -161,7 +200,7 @@ for APP in "${APP_PREFIXES[@]}"; do
         --value "${VALUE}" \
         --type "${TYPE}" \
         --tier "${TIER}" \
-        --overwrite \
+        ${OVERWRITE_FLAG} \
         --no-cli-pager > /dev/null; then
         echo "  ERROR: Failed to copy ${TARGET_NAME}"
         FAILED_PARAMS+=("${TARGET_NAME}")
@@ -181,9 +220,9 @@ FAILED_COUNT=${#FAILED_PARAMS[@]}
 
 echo "============================================================"
 if [[ "${DRY_RUN}" == "true" ]]; then
-  echo " DRY RUN complete — ${TOTAL_COPIED} parameter(s) would be copied, ${TOTAL_SKIPPED} skipped"
+  echo " DRY RUN complete — ${TOTAL_COPIED} parameter(s) would be copied, ${TOTAL_SKIPPED} skipped, ${TOTAL_EXISTS} already exist (kept)"
 else
-  echo " Copy complete — ${TOTAL_COPIED} parameter(s) copied, ${TOTAL_SKIPPED} skipped"
+  echo " Copy complete — ${TOTAL_COPIED} parameter(s) copied, ${TOTAL_SKIPPED} skipped, ${TOTAL_EXISTS} already existed (kept)"
   if [[ ${FAILED_COUNT} -gt 0 ]]; then
     echo " FAILED: ${FAILED_COUNT} parameter(s) could not be copied:"
     for P in "${FAILED_PARAMS[@]}"; do echo "   - ${P}"; done
@@ -199,9 +238,12 @@ echo "============================================================"
   echo "|---|---|"
   echo "| **Source** | \`${SOURCE_ENV}\` |"
   echo "| **Target** | \`${TARGET_ENV}\` |"
+  echo "| **Apps** | \`${APP_PREFIXES[*]}\` |"
+  echo "| **Mode** | $([[ "${OVERWRITE}" == "true" ]] && echo "overwrite existing" || echo "create-if-missing") |"
   echo "| **Dry run** | ${DRY_RUN} |"
   echo "| **Parameters copied** | ${TOTAL_COPIED} |"
-  echo "| **Parameters skipped** | ${TOTAL_SKIPPED} |"
+  echo "| **Parameters skipped (env-specific)** | ${TOTAL_SKIPPED} |"
+  echo "| **Parameters already existed (kept)** | ${TOTAL_EXISTS} |"
   if [[ ${FAILED_COUNT} -gt 0 ]]; then
     echo "| **Parameters failed** | ${FAILED_COUNT} |"
   fi

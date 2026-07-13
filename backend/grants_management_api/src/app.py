@@ -9,9 +9,12 @@ from apiflask import APIFlask, exceptions
 from flask_cors import CORS
 from grants_shared.api.response import restructure_error_response
 from grants_shared.api.schemas import response_schema
+from grants_shared.auth.api_jwt_auth import initialize_jwt_auth
+from grants_shared.auth.login_gov_jwt_auth import initialize_login_gov_config
 
 from src.adapters.newrelic import init_newrelic
 from src.api.healthcheck.healthcheck_blueprint import healthcheck_blueprint
+from src.api.users.user_blueprint import user_blueprint
 from src.app_config import AppConfig
 from src.task.task_blueprint import task_blueprint
 
@@ -36,6 +39,11 @@ def create_app() -> APIFlask:
     CORS(app)
     configure_app(app)
     register_blueprints(app)
+
+    # Initialize auth
+    initialize_login_gov_config()
+    initialize_jwt_auth()
+
     register_index(app)
     register_robots_txt(app)
 
@@ -58,6 +66,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
 
     app.register_blueprint(task_blueprint)
+    app.register_blueprint(user_blueprint)
 
 
 def configure_app(app: APIFlask) -> None:
