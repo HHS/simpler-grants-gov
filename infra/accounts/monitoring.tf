@@ -11,7 +11,7 @@ data "aws_ssm_parameter" "newrelic_account_id" {
 locals {
   # New Relic linked-account names must be unique within the New Relic account.
   newrelic_link_name_full = (
-    data.aws_caller_identity.current.account_id == "315341936575"
+    local.is_admin_account
     ? "simpler-grants-gov"
     : "simpler-grants-gov-${coalesce(var.account_name, data.aws_caller_identity.current.account_id)}"
   )

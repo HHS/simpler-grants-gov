@@ -158,7 +158,7 @@ infra-configure-app-service: ## Configure infra/$APP_NAME/service module's tfbac
 
 infra-update-current-account: ## Update infra resources for current AWS profile
 	TF_VAR_account_name="$$(./bin/current-account-config-name | cut -d. -f1)" \
-	./bin/terraform-init-and-apply infra/accounts `./bin/current-account-config-name`
+	./bin/terraform-init-and-apply infra/accounts "$$(./bin/current-account-config-name)"
 
 infra-update-network: ## Update network
 	@:$(call check_defined, NETWORK_NAME, the name of the network in /infra/networks)

@@ -4,8 +4,9 @@
 
 locals {
   # Security Hub standards subscriptions are governed by the organization's
-  # Security Hub *central configuration*.
-  manage_security_hub_standards = data.aws_caller_identity.current.account_id == "315341936575"
+  # Security Hub *central configuration*, which is only managed from the
+  # delegated administrator account (local.admin_account_id).
+  manage_security_hub_standards = local.is_admin_account
 }
 
 # Enable Security Hub

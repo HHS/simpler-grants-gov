@@ -2,6 +2,15 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
+  # AWS account that acts as the Security Hub delegated administrator and the
+  # central CloudTrail logging account for the organization. Only this account
+  # manages the org-wide CloudTrail trails and Security Hub standards
+  # subscriptions; every other account is a member that forwards to it. Kept in
+  # one place so the account ID isn't hardcoded across cloudtrail.tf,
+  # security_hub.tf, and monitoring.tf.
+  admin_account_id = "315341936575"
+  is_admin_account = data.aws_caller_identity.current.account_id == local.admin_account_id
+
   # This must match the name of the bucket created while bootstrapping the account in set-up-current-account
   tf_state_bucket_name = "${module.project_config.project_name}-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}-tf"
 
