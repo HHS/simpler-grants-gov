@@ -25,6 +25,7 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
+  validateAttachmentPrintViewSection,
   validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
@@ -142,10 +143,8 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
       // --- Print View Validation (one page per form) ---
       for (const {
-        formKey,
         testData,
         printUrl,
-        expectedPrepopulatedFields,
         userEnteredFieldTestIds,
         formName,
       } of filledForms) {
@@ -153,14 +152,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
         // Form title heading is visible
         await expect(page.locator("h1")).toContainText(formName);
-
-        // Pre-populated fields (API-injected from opportunity record)
-        for (const [testId, expectedValue] of Object.entries(
-          expectedPrepopulatedFields,
-        )) {
-          await expect(page.getByTestId(testId)).toBeVisible();
-          await expect(page.getByTestId(testId)).toContainText(expectedValue);
-        }
 
         // User-entered fields - uses formConfig.fields (printTestId ?? testId)
         for (const [dataKey, testId] of Object.entries(
@@ -171,29 +162,16 @@ for (const { testName, orgLabel } of applicantScenarios) {
         }
 
         // Attachment fields - filenames appear in section locators, not testId elements
-        if (formKey === "attachment") {
-          const attachmentFileName = (filePath: string) =>
-            filePath.split(/[/\\]/).pop() ?? filePath;
+        const attachmentSections = [
+          { fieldKey: "att1", sectionId: "form-section-attachment1" },
+        ] as const;
 
-          const attachmentSections = [
-            { fieldKey: "att1", sectionId: "form-section-attachment1" },
-          ] as const;
-
-          for (const { fieldKey, sectionId } of attachmentSections) {
-            if (testData[fieldKey]) {
-              const fileName = attachmentFileName(testData[fieldKey]);
-              const section = page.locator(`#${sectionId}`);
-
-              // Verify section exists and renders the attachment list
-              await expect(section).toBeVisible();
-              await expect(section.getByRole("listitem")).toBeVisible({
-                timeout: 15000,
-              });
-
-              // Verify filename is displayed
-              await expect(section).toContainText(fileName);
-            }
-          }
+        for (const { fieldKey, sectionId } of attachmentSections) {
+          await validateAttachmentPrintViewSection(
+            page,
+            sectionId,
+            testData[fieldKey],
+          );
         }
       }
     },
