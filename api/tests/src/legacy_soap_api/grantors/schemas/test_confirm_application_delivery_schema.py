@@ -279,5 +279,4 @@ class TestLegacySoapGrantorConfirmApplicationResponseSchema:
         mtom_response = build_mtom_response_from_dict(
             result, raw_uuid=BOUNDARY_UUID, root="", namespaces=ns
         )
-        # cleaned_mtom_response = mtom_response.decode().replace("\n", "").encode("utf-8")
         assert mtom_response == response_xml_bytes
