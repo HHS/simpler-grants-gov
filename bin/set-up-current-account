@@ -26,6 +26,8 @@ account_name="$1"
 
 account_id=$(./bin/current-account-id)
 
+security_hub_admin_account_id="315341936575"
+
 # Get project name and region from project config
 # This ensures consistency with how terraform computes the bucket name
 terraform -chdir="infra/project-config" apply -auto-approve > /dev/null
@@ -82,6 +84,109 @@ if [[ -z "${github_arn}" ]]; then
     --thumbprint-list "0000000000000000000000000000000000000000"
 fi
 
+# -----------------------------------------------------------------------------
+# Create supporting SSM parameters / secrets if they are missing
+#
+# The infra/accounts module reads a New Relic account id SSM parameter and two
+# Secrets Manager secrets (used for Security Hub alerting) via data sources. A
+# fresh account won't have these yet, which makes terraform fail with
+# "couldn't find resource" errors. Create them here (idempotently) with
+# placeholder values so the account can be bootstrapped from scratch. Replace
+# the placeholders with real values afterwards.
+# -----------------------------------------------------------------------------
+create_ssm_param_if_missing() {
+  local name="$1"
+  local value="$2"
+  if ! aws ssm get-parameter --name "${name}" --region "${region}" > /dev/null 2>&1; then
+    echo "Creating placeholder SSM parameter ${name}"
+    aws ssm put-parameter --name "${name}" --type "String" --value "${value}" --region "${region}" > /dev/null
+  else
+    echo "SSM parameter ${name} already exists, skipping"
+  fi
+}
+
+create_secret_if_missing() {
+  local name="$1"
+  local value="$2"
+  if ! aws secretsmanager describe-secret --secret-id "${name}" --region "${region}" > /dev/null 2>&1; then
+    echo "Creating placeholder secret ${name}"
+    aws secretsmanager create-secret --name "${name}" --secret-string "${value}" --region "${region}" > /dev/null
+  else
+    echo "Secret ${name} already exists, skipping"
+  fi
+}
+
+placeholder_value="placeholder"
+
+create_ssm_param_if_missing "/new-relic-account-id" "${placeholder_value}"
+create_secret_if_missing "grants-alerts-email" "${placeholder_value}"
+create_secret_if_missing "security-hub-slack-webhook" "${placeholder_value}"
+
+export NEW_RELIC_ACCOUNT_ID="${NEW_RELIC_ACCOUNT_ID:-0000000}"
+export NEW_RELIC_API_KEY="${NEW_RELIC_API_KEY:-PLACEHOLDER}"
+
+export TF_VAR_account_name="${account_name}"
+
+# -----------------------------------------------------------------------------
+# Warn about any parameters/secrets that still hold placeholder values.
+# -----------------------------------------------------------------------------
+warn_about_placeholder_secrets() {
+  local placeholders=()
+
+  local nr_account_id
+  nr_account_id=$(aws ssm get-parameter --name "/new-relic-account-id" --query "Parameter.Value" --output text --region "${region}" 2>/dev/null || true)
+  if [[ "${nr_account_id}" == "${placeholder_value}" ]]; then
+    placeholders+=("SSM parameter /new-relic-account-id")
+  fi
+
+  local alerts_email
+  alerts_email=$(aws secretsmanager get-secret-value --secret-id "grants-alerts-email" --query "SecretString" --output text --region "${region}" 2>/dev/null || true)
+  if [[ "${alerts_email}" == "${placeholder_value}" ]]; then
+    placeholders+=("secret grants-alerts-email")
+  fi
+
+  local slack_webhook
+  slack_webhook=$(aws secretsmanager get-secret-value --secret-id "security-hub-slack-webhook" --query "SecretString" --output text --region "${region}" 2>/dev/null || true)
+  if [[ "${slack_webhook}" == "${placeholder_value}" ]]; then
+    placeholders+=("secret security-hub-slack-webhook")
+  fi
+
+  if [[ "${NEW_RELIC_API_KEY}" == "PLACEHOLDER" ]]; then
+    placeholders+=("env var NEW_RELIC_API_KEY")
+  fi
+
+  if [[ "${#placeholders[@]}" -eq 0 ]]; then
+    return 0
+  fi
+
+  echo
+  echo "=============================================================================="
+  echo "ACTION REQUIRED: the following still hold placeholder values and MUST be"
+  echo "updated before this account is used for monitoring / alerting:"
+  echo
+  local item
+  for item in "${placeholders[@]}"; do
+    echo "  - ${item}"
+  done
+  echo
+  echo "Update them (then re-run this script) with:"
+  echo "  aws ssm put-parameter --name '/new-relic-account-id' --value '<real-value>' --overwrite --region ${region}"
+  echo "  aws secretsmanager put-secret-value --secret-id 'grants-alerts-email' --secret-string '<email>' --region ${region}"
+  echo "  aws secretsmanager put-secret-value --secret-id 'security-hub-slack-webhook' --secret-string '<webhook-url>' --region ${region}"
+  echo "  export NEW_RELIC_ACCOUNT_ID='<real-id>' NEW_RELIC_API_KEY='<real-key>'"
+  echo "=============================================================================="
+  echo
+
+  case "${account_name}" in
+    prod | production | staging)
+      echo "FATAL: refusing to bootstrap '${account_name}' with placeholder monitoring/alerting values."
+      exit 1
+      ;;
+  esac
+}
+
+warn_about_placeholder_secrets
+
 # Create the infrastructure for the terraform backend such as the S3 bucket
 # for storing tfstate files (state locking is handled natively by S3).
 # -reconfigure is used in case this isn't the first account being set up
@@ -100,12 +205,87 @@ if ! terraform state list module.backend.aws_s3_bucket.tf_state; then
   terraform import module.backend.aws_s3_bucket.tf_state "${tf_state_bucket_name}"
 fi
 
+# Security Hub config
+import_if_exists() {
+  local tf_resource="$1"
+  local import_id="$2"
+  # Already tracked by terraform - nothing to do.
+  if terraform state list "${tf_resource}" > /dev/null 2>&1; then
+    echo "${tf_resource} already in terraform state, skipping import"
+    return 0
+  fi
+  # Adopt the existing AWS resource, or leave it for terraform apply to create
+  # if it doesn't exist yet.
+  if terraform import "${tf_resource}" "${import_id}" > /dev/null 2>&1; then
+    echo "Adopted already-existing ${tf_resource} into terraform state"
+  else
+    echo "${tf_resource} does not exist yet, will be created by terraform apply"
+  fi
+}
+
+if aws securityhub describe-hub --region "${region}" > /dev/null 2>&1; then
+  echo "Security Hub already enabled on this account; adopting existing resources into state"
+
+  import_if_exists aws_securityhub_account.main "${account_id}"
+
+  # NOTE: standards subscriptions are intentionally NOT imported here. They are
+  # governed by Security Hub central configuration and are only managed from the
+  # delegated administrator account
+  for product in guardduty inspector access-analyzer firewall-manager ssm-patch-manager health macie; do
+    case "${product}" in
+      access-analyzer)   tf_name="access_analyzer" ;;
+      firewall-manager)  tf_name="firewall_manager" ;;
+      ssm-patch-manager) tf_name="systems_manager" ;;
+      *)                 tf_name="${product}" ;;
+    esac
+    import_if_exists "aws_securityhub_product_subscription.${tf_name}" \
+      "arn:aws:securityhub:${region}::product/aws/${product},arn:aws:securityhub:${region}:${account_id}:product-subscription/aws/${product}"
+  done
+fi
+
+if [[ "${account_id}" != "${security_hub_admin_account_id}" ]]; then
+  for standard in cis_1_2 aws_foundational cis_1_4 nist_800_53; do
+    # state list returns the exact instance address(es), which may be bare or
+    # count-indexed (e.g. "...cis_1_2[0]"). Remove exactly what's there so
+    # state rm doesn't reject a bare address for a counted resource.
+    instances=$(terraform state list "aws_securityhub_standards_subscription.${standard}" 2>/dev/null || true)
+    if [[ -n "${instances}" ]]; then
+      while IFS= read -r instance; do
+        [[ -z "${instance}" ]] && continue
+        echo "Dropping centrally-managed standards subscription ${instance} from state"
+        terraform state rm "${instance}" > /dev/null
+      done <<< "${instances}"
+    fi
+  done
+fi
+
+# First apply only the terraform backend and GitHub auth resources. These have
+# no New Relic dependency.
 terraform apply \
   -input=false \
-  -auto-approve
+  -auto-approve \
+  -target=module.backend \
+  -target=module.auth_github_actions
+
+
+apply_exit_code=0
+terraform apply \
+  -input=false \
+  -auto-approve || apply_exit_code=$?
 
 cd -
 
 module_dir="infra/accounts"
 backend_config_name="${account_name}.${account_id}"
 ./bin/create-tfbackend "${module_dir}" "${backend_config_name}" "${tf_state_key}"
+
+if [[ "${apply_exit_code}" -ne 0 ]]; then
+  echo
+  echo "ERROR: terraform apply failed (exit code ${apply_exit_code})."
+  echo "This is most likely due to missing or placeholder New Relic configuration."
+  echo "Ensure the following contain real values, then re-run this command:"
+  echo "  - SSM parameter /new-relic-account-id"
+  echo "  - NEW_RELIC_ACCOUNT_ID and NEW_RELIC_API_KEY environment variables"
+  echo "  - secrets grants-alerts-email and security-hub-slack-webhook"
+  exit "${apply_exit_code}"
+fi
