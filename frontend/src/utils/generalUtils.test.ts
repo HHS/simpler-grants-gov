@@ -1,4 +1,5 @@
 import {
+  escapeRegExpString,
   findFirstWhitespace,
   formatTimestamp,
   getModifiedTimeDisplay,
@@ -251,5 +252,17 @@ describe("isBasicallyAnObject", () => {
     expect(isBasicallyAnObject(new Set())).toEqual(true);
     expect(isBasicallyAnObject({ a: "value" })).toEqual(true);
     expect(isBasicallyAnObject(new Date())).toEqual(true);
+  });
+});
+
+describe("escapeRegExpString", () => {
+  it("escapes all relevant characters in a string for use in a regexp", () => {
+    expect(
+      escapeRegExpString(
+        `All of these should be escaped: \\ ^ $ * + ? . ( ) | { } [ ]`,
+      ),
+    ).toEqual(
+      "\\x41ll\\x20of\\x20these\\x20should\\x20be\\x20escaped\\x3a\\x20\\\\\\x20\\^\\x20\\$\\x20\\*\\x20\\+\\x20\\?\\x20\\.\\x20\\(\\x20\\)\\x20\\|\\x20\\{\\x20\\}\\x20\\[\\x20\\]",
+    );
   });
 });

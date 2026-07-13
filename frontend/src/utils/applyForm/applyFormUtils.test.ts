@@ -446,6 +446,9 @@ describe("getFieldPathFromHtml", () => {
   it("converts field name to JSON pointer path", () => {
     expect(getFieldPathFromHtml("foo--bar")).toBe("/foo/bar");
   });
+  it("honors alternate html side delimiters", () => {
+    expect(getFieldPathFromHtml("foo.bar", ".")).toBe("/foo/bar");
+  });
 });
 
 describe("jsonPointerToPath", () => {

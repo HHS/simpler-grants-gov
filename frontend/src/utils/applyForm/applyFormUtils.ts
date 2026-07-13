@@ -12,7 +12,10 @@ import {
   UiSchemaNode,
 } from "src/types/applyForm/types";
 import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
-import { isBasicallyAnObject } from "src/utils/generalUtils";
+import {
+  escapeRegExpString,
+  isBasicallyAnObject,
+} from "src/utils/generalUtils";
 
 import { formDataToObject } from "./formDataToJson";
 
@@ -429,7 +432,7 @@ export const getFieldPathFromHtml = (
   inputPath: string,
   inputDelimiter = FORM_DATA_NESTING_DELIMITER,
 ) =>
-  `/${inputPath.replace(new RegExp(`${inputDelimiter}`, "g"), JSON_SCHEMA_NESTING_DELIMITER)}`;
+  `/${inputPath.replace(new RegExp(`${escapeRegExpString(inputDelimiter)}`, "g"), JSON_SCHEMA_NESTING_DELIMITER)}`;
 
 export const getByPointer = (target: object, path: string): unknown => {
   if (!Object.keys(target).length) {
