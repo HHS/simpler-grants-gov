@@ -583,7 +583,9 @@ class OpportunityAudit(ApiSchemaTable, TimestampMixin):
     opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Opportunity.opportunity_id), nullable=False, index=True
     )
-    opportunity: Mapped[Opportunity] = relationship(Opportunity, back_populates="opportunity_audits")
+    opportunity: Mapped[Opportunity] = relationship(
+        Opportunity, back_populates="opportunity_audits"
+    )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey("api.user.user_id"), nullable=False, index=True
