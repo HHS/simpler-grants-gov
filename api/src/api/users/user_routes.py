@@ -738,7 +738,7 @@ def user_get_roles_and_privileges(db_session: db.Session, user_id: UUID) -> resp
     return response.ApiResponse(message="Success", data=roles_and_privileges)
 
 
-@user_blueprint.post("/<uuid:user_id>/can_access")
+@user_blueprint.post("/<uuid:user_id>/can-access")
 @user_blueprint.input(UserCanAccessRequestSchema, location="json")
 @user_blueprint.output(UserCanAccessResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 403, 404])
@@ -751,7 +751,7 @@ def user_can_access(db_session: db.Session, user_id: UUID, json_data: dict) -> r
             "user_id": user_id,
         }
     )
-    logger.info("POST /v1/users/:user_id/can_access")
+    logger.info("POST /v1/users/:user_id/can-access")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
     # Verify the authenticated user matches the requested user_id

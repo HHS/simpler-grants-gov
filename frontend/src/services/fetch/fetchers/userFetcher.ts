@@ -53,7 +53,7 @@ export const checkUserPrivilege = async (
 ): Promise<undefined> => {
   const { privilege, resourceId, resourceType } = privilegeDefinition;
   await fetchUserWithMethod("POST")({
-    subPath: `${userId}/can_access`,
+    subPath: `${userId}/can-access`,
     body: {
       resource_type: resourceType,
       resource_id: resourceId,
@@ -69,6 +69,20 @@ export const getUserInvitations = async (
     subPath: `${userId}/invitations/list`,
   });
   const json = (await resp.json()) as { data: OrganizationInvitation[] };
+
+  return json.data;
+};
+
+export const updateUserInvitation = async (
+  userId: string,
+  invitationId: string,
+  status: "accepted" | "rejected",
+): Promise<OrganizationInvitation> => {
+  const resp = await fetchUserWithMethod("POST")({
+    subPath: `${userId}/invitations/${invitationId}/organizations`,
+    body: { status },
+  });
+  const json = (await resp.json()) as { data: OrganizationInvitation };
 
   return json.data;
 };

@@ -93,18 +93,9 @@ export const getUserAgencies = async (
 };
 
 export const fetchUserAgencies = async (): Promise<RelevantAgencyRecord[]> => {
-  try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      // we shouldn't get there because the page should be checking authentication
-      throw new MissingAuthError(
-        "Error fetching user agencies - not logged in",
-      );
-    }
-    const agencies = await getUserAgencies(session.user_id);
-    return agencies;
-  } catch (e) {
-    console.error("Error fetching user agencies");
-    throw e;
+  const session = await getSession();
+  if (!session?.token) {
+    throw new MissingAuthError("No user token present to fetch user agencies");
   }
+  return getUserAgencies(session.user_id);
 };

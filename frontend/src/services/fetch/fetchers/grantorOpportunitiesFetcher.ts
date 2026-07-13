@@ -1,6 +1,6 @@
 "server-only";
 
-import { fetchGrantorWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { fetchGrantorOpportunitiesWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { CreateOpportunityRecord } from "src/types/grantor/createOpportunityTypes";
 import {
@@ -20,7 +20,7 @@ export const searchOpportunitiesByAgency = async (
   const pagination = pageInputs;
   const pageBody: PaginationBody = { pagination };
 
-  const response = await fetchGrantorWithMethod("POST")({
+  const response = await fetchGrantorOpportunitiesWithMethod("POST")({
     subPath: `agencies/` + agencyId + `/opportunities`,
     body: pageBody,
   });
@@ -30,7 +30,7 @@ export const searchOpportunitiesByAgency = async (
 export const createOpportunity = async (
   createOppSchema: Record<string, string>,
 ): Promise<CreateOpportunityRecord> => {
-  const response = await fetchGrantorWithMethod("POST")({
+  const response = await fetchGrantorOpportunitiesWithMethod("POST")({
     subPath: "opportunities",
     body: createOppSchema,
   });
@@ -41,7 +41,7 @@ export const createOpportunity = async (
 export const searchAccessibleOpportunities = async (
   pageInputs: PaginationRequestBody,
 ): Promise<{ data: SearchResponseData; pagination_info: PaginationInfo }> => {
-  const response = await fetchGrantorWithMethod("POST")({
+  const response = await fetchGrantorOpportunitiesWithMethod("POST")({
     subPath: "opportunities/list",
     body: { pagination: pageInputs },
   });

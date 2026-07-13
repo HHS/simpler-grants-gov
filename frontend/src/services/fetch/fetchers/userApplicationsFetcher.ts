@@ -1,6 +1,6 @@
 "server-only";
 
-import { UnauthorizedError } from "src/errors";
+import { MissingAuthError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { ApplicationDetail } from "src/types/applicationResponseTypes";
@@ -31,10 +31,8 @@ export const getApplications = async (
 
 export const fetchApplications = async (): Promise<ApplicationDetail[]> => {
   const session = await getSession();
-  if (!session || !session.token) {
-    // we shouldn't get there because the page should be checking authentication
-    throw new UnauthorizedError("No active session");
+  if (!session?.token) {
+    throw new MissingAuthError("No user token present to fetch applications");
   }
-  const applications = await getApplications(session.user_id);
-  return applications;
+  return getApplications(session.user_id);
 };

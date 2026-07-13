@@ -18,7 +18,7 @@ def test_user_can_access_organization(
         "privileges": ["view_application"],
     }
     response = client.post(
-        f"/v1/users/{user.user_id}/can_access",
+        f"/v1/users/{user.user_id}/can-access",
         headers={"X-SGG-Token": token},
         json=request,
     )
@@ -38,7 +38,7 @@ def test_user_can_access_application(
         "privileges": ["view_application"],
     }
     response = client.post(
-        f"/v1/users/{user.user_id}/can_access",
+        f"/v1/users/{user.user_id}/can-access",
         headers={"X-SGG-Token": token},
         json=request,
     )
@@ -58,7 +58,7 @@ def test_user_can_access_agency(client, db_session, enable_factory_create, user,
         "privileges": ["manage_agency_members"],
     }
     response = client.post(
-        f"/v1/users/{user.user_id}/can_access",
+        f"/v1/users/{user.user_id}/can-access",
         headers={"X-SGG-Token": user_auth_token},
         json=request,
     )
@@ -78,7 +78,7 @@ def test_user_can_access_404(
         "privileges": ["modify_application"],
     }
     response = client.post(
-        f"/v1/users/{user.user_id}/can_access",
+        f"/v1/users/{user.user_id}/can-access",
         headers={"X-SGG-Token": token},
         json=request,
     )
@@ -98,7 +98,7 @@ def test_user_can_access_403(
         "privileges": ["modify_application"],
     }
     response = client.post(
-        f"/v1/users/{user.user_id}/can_access",
+        f"/v1/users/{user.user_id}/can-access",
         headers={"X-SGG-Token": token},
         json=request,
     )

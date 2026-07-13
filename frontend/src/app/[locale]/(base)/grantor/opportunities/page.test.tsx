@@ -3,7 +3,6 @@ import { axe } from "jest-axe";
 import { identity } from "lodash";
 import OpportunitiesListPage from "src/app/[locale]/(base)/grantor/opportunities/page";
 import { UnauthorizedError } from "src/errors";
-import { UserAgency } from "src/services/fetch/fetchers/userAgenciesFetcher";
 import { UserSession } from "src/types/authTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
@@ -63,6 +62,16 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
         onEnabled,
       )(props) as FunctionComponent<LocalizedPageProps>,
 }));
+
+// Minimal, test-only agency shape for this page's fixtures/mocks. Intentionally not
+// RelevantAgencyRecord (the real return type of getUserAgencies): these fixtures use
+// string agency_ids so they can flow through the `?agency=<id>` search-param assertions
+// below, whereas RelevantAgencyRecord.agency_id is numeric.
+interface UserAgency {
+  agency_id: string;
+  agency_name: string;
+  agency_code: string;
+}
 
 const redirectMock = jest.fn();
 

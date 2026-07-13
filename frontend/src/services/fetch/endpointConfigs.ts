@@ -116,7 +116,9 @@ export const toDynamicOrganizationsEndpoint = (
   };
 };
 
-export const toDynamicGrantorsEndpoint = (type: "POST") => {
+export const toDynamicGrantorOpportunitiesEndpoint = (
+  type: "POST" | "GET" | "PUT" | "DELETE",
+) => {
   return {
     basePath: environment.API_URL,
     version: "v1",

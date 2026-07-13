@@ -159,7 +159,7 @@ def test_list_application_audit_200(client, enable_factory_create, db_session, h
     ]
 
     response = client.post(
-        f"/alpha/applications/{application.application_id}/audit_history",
+        f"/alpha/applications/{application.application_id}/audit-history",
         json={"pagination": {"page_offset": 1, "page_size": 25}},
         headers={"X-SGG-Token": token},
     )
@@ -259,7 +259,7 @@ def test_list_application_audit_filter_event_200(client, enable_factory_create, 
 
     for event_group in event_groups:
         response = client.post(
-            f"/alpha/applications/{application.application_id}/audit_history",
+            f"/alpha/applications/{application.application_id}/audit-history",
             json={
                 "pagination": {"page_offset": 1, "page_size": 250},
                 "filters": {"application_audit_event": {"one_of": event_group}},
@@ -329,7 +329,7 @@ def test_list_application_audit_pagination_200(client, enable_factory_create, db
     for pagination, expected_audit_events in scenarios:
 
         response = client.post(
-            f"/alpha/applications/{application.application_id}/audit_history",
+            f"/alpha/applications/{application.application_id}/audit-history",
             json={"pagination": pagination},
             headers={"X-SGG-Token": token},
         )
@@ -368,7 +368,7 @@ def test_list_application_audit_empty_result_200(
         )
 
     response = client.post(
-        f"/alpha/applications/{application.application_id}/audit_history",
+        f"/alpha/applications/{application.application_id}/audit-history",
         json={"pagination": {"page_offset": 1, "page_size": 25}},
         headers={"X-SGG-Token": token},
     )
@@ -385,7 +385,7 @@ def test_list_application_audit_not_in_app_403(client, enable_factory_create, db
     )
 
     response = client.post(
-        f"/alpha/applications/{application.application_id}/audit_history",
+        f"/alpha/applications/{application.application_id}/audit-history",
         json={"pagination": {"page_offset": 1, "page_size": 25}},
         headers={"X-SGG-Token": token},
     )
@@ -403,7 +403,7 @@ def test_list_application_audit_in_app_missing_right_privilege_403(
     )
 
     response = client.post(
-        f"/alpha/applications/{application.application_id}/audit_history",
+        f"/alpha/applications/{application.application_id}/audit-history",
         json={"pagination": {"page_offset": 1, "page_size": 25}},
         headers={"X-SGG-Token": token},
     )
@@ -420,7 +420,7 @@ def test_list_application_audit_not_in_org_403(client, enable_factory_create, db
     )
 
     response = client.post(
-        f"/alpha/applications/{application.application_id}/audit_history",
+        f"/alpha/applications/{application.application_id}/audit-history",
         json={"pagination": {"page_offset": 1, "page_size": 25}},
         headers={"X-SGG-Token": token},
     )
@@ -441,7 +441,7 @@ def test_list_application_audit_in_org_missing_right_privilege_403(
     )
 
     response = client.post(
-        f"/alpha/applications/{application.application_id}/audit_history",
+        f"/alpha/applications/{application.application_id}/audit-history",
         json={"pagination": {"page_offset": 1, "page_size": 25}},
         headers={"X-SGG-Token": token},
     )
@@ -452,7 +452,7 @@ def test_list_application_audit_in_org_missing_right_privilege_403(
 
 def test_list_application_audit_no_auth_401(client):
     response = client.post(
-        f"/alpha/applications/{uuid.uuid4()}/audit_history",
+        f"/alpha/applications/{uuid.uuid4()}/audit-history",
         json={"pagination": {"page_offset": 1, "page_size": 25}},
     )
     assert response.status_code == 401
@@ -465,7 +465,7 @@ def test_list_application_audit_missing_required_422(client, db_session, enable_
     )
 
     response = client.post(
-        f"/alpha/applications/{uuid.uuid4()}/audit_history",
+        f"/alpha/applications/{uuid.uuid4()}/audit-history",
         json={},
         headers={"X-SGG-Token": token},
     )
