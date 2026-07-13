@@ -9,7 +9,7 @@ from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.db.models.auth_base_models import BaseUserApiKey
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
-from src.auth.auth_handler import get_auth_handler
+from src.auth.auth_handler import AuthHandler
 from src.db.models.user_models import User, UserApiKey
 
 logger = logging.getLogger(__name__)
@@ -73,8 +73,8 @@ def verify_api_key(db_session: db.Session, token: str) -> BaseUserApiKey:
         return api_key
 
 
-def validate_api_key_in_db(api_key: str, db_session: db.Session) -> BaseUserApiKey:
-    user_api_key = get_auth_handler(db_session).get_api_key_by_key_id(api_key)
+def validate_api_key_in_db(api_key: str, db_session: db.Session) -> UserApiKey:
+    user_api_key = AuthHandler(db_session).get_api_key_by_key_id(api_key)
 
     if user_api_key is None:
         raise ApiKeyValidationError("Invalid API key")
