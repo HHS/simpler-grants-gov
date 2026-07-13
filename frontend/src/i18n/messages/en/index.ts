@@ -272,11 +272,12 @@ export const messages = {
     pageTitle: "Edit opportunity",
     metaDescription:
       "Edit draft opportunity information and non-forecast summary fields.",
-    header: {
-      saveButton: "Save",
-      previewButton: "Preview",
-      publishButton: "Publish",
-      navTitle: "On this page",
+    navTitle: "On this page",
+    button: {
+      backToOverview: "Back to overview page",
+      saveAndExit: "Save and exit",
+      saveAndGoBack: "Save and go back",
+      saveAndContinue: "Save and continue",
     },
     sections: {
       fundingDetails: "Funding details",
@@ -2562,6 +2563,7 @@ export const messages = {
     subAgency: "Sub-agency:",
     draft: "Draft",
     lastUpdated: "Last updated:",
+    backToOverview: "Back to overview page",
     alerts: {
       newOpportunityHeading: "Opportunity draft started",
       newOpportunityBody:
