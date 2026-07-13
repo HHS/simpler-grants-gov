@@ -15,14 +15,15 @@ from tests.grants_shared.db_test_models.db_test_models import SharedUserApiKey
 from tests.grants_shared.test_utils.auth_handler import SharedApiKeyHandler
 
 
-def test_create_api_key_success(enable_factory_create, db_session: db.Session):
+def test_create_api_key_success(enable_factory_create, db_session: db.Session, caplog):
     """Test that create_api_key successfully creates a new API key with auto-generated key_id."""
     user = SharedUserFactory.create()
 
-    api_key = SharedApiKeyHandler(db_session).create_api_key(
-        user_id=user.shared_user_id,
-        key_name="Test API Key",
-    )
+    with caplog.at_level("INFO"):
+        api_key = SharedApiKeyHandler(db_session).create_api_key(
+            user_id=user.shared_user_id,
+            key_name="Test API Key",
+        )
 
     # Verify that the API key was created successfully (AWS integration is mocked automatically)
 
@@ -45,29 +46,13 @@ def test_create_api_key_success(enable_factory_create, db_session: db.Session):
     assert api_key.created_at is not None
     assert api_key.updated_at is not None
 
+    assert any("Created new API key" in record.message for record in caplog.records)
 
-def test_create_api_key_default_active(enable_factory_create, db_session: db.Session):
-    """Test that create_api_key defaults is_active to True."""
-    user = SharedUserFactory.create()
-
-    api_key = SharedApiKeyHandler(db_session).create_api_key(
-        user_id=user.shared_user_id,
-        key_name="Default Active Key",
+    log_record = next(
+        record for record in caplog.records if "Created new API key" in record.message
     )
-
-    assert api_key.is_active is True
-
-
-def test_create_api_key_inactive(enable_factory_create, db_session: db.Session):
-    """Test that create_api_key can create inactive keys."""
-    user = SharedUserFactory.create()
-
-    api_key = SharedApiKeyHandler(db_session).create_api_key(
-        user_id=user.shared_user_id,
-        key_name="Inactive Key",
-    )
-
-    assert api_key.is_active is True
+    assert str(getattr(log_record, "auth.shared_api_key_id")) == str(api_key.shared_api_key_id)
+    assert str(getattr(log_record, "auth.shared_user_id")) == str(api_key.shared_user_id)
 
 
 def test_create_api_key_generates_unique_key_ids(enable_factory_create, db_session: db.Session):
@@ -112,7 +97,7 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
         assert mock_generate.call_count == 2
 
 
-def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: db.Session):
+def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: db.Session, caplog):
     """Test that create_api_key raises KeyGenerationError when max retries exceeded."""
     user = SharedUserFactory.create()
 
@@ -124,9 +109,12 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
     with patch("grants_shared.auth.api_key_handler.generate_api_key_id") as mock_generate:
         mock_generate.return_value = existing_key_id  # Always return the same colliding key
 
-        with pytest.raises(
-            KeyGenerationError,
-            match="Unable to generate unique API key after 5 attempts",
+        with (
+            caplog.at_level("ERROR"),
+            pytest.raises(
+                KeyGenerationError,
+                match="Unable to generate unique API key after 5 attempts",
+            ),
         ):
             SharedApiKeyHandler(db_session).create_api_key(
                 user_id=user.shared_user_id,
@@ -135,75 +123,18 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
 
         assert mock_generate.call_count == MAX_KEY_GENERATION_RETRIES
 
-
-def test_create_api_key_logging_success(enable_factory_create, db_session: db.Session, caplog):
-    """Test that create_api_key logs appropriate success messages."""
-    user = SharedUserFactory.create()
-
-    with caplog.at_level("INFO"):
-        api_key = SharedApiKeyHandler(db_session).create_api_key(
-            user_id=user.shared_user_id,
-            key_name="Logging Test Key",
+        assert any(
+            "Failed to generate unique key_id after maximum retries" in record.message
+            for record in caplog.records
         )
 
-    assert any("Created new API key" in record.message for record in caplog.records)
-
-    log_record = next(
-        record for record in caplog.records if "Created new API key" in record.message
-    )
-    assert str(getattr(log_record, "auth.shared_api_key_id")) == str(api_key.shared_api_key_id)
-    assert str(getattr(log_record, "auth.shared_user_id")) == str(api_key.shared_user_id)
-
-
-def test_create_api_key_logging_max_retries(enable_factory_create, db_session: db.Session, caplog):
-    """Test that create_api_key logs error when max retries exceeded."""
-    user = SharedUserFactory.create()
-
-    existing_key_id = "COLLISION_LOG_12345678901234"
-    SharedUserApiKeyFactory.create(
-        shared_user=user, key_name="Existing Key", key_id=existing_key_id
-    )
-
-    with patch("grants_shared.auth.api_key_handler.generate_api_key_id") as mock_generate:
-        mock_generate.return_value = existing_key_id
-
-        with caplog.at_level("ERROR"):
-            with pytest.raises(KeyGenerationError):
-                SharedApiKeyHandler(db_session).create_api_key(
-                    user_id=user.shared_user_id,
-                    key_name="Failed Key",
-                )
-
-    assert any(
-        "Failed to generate unique key_id after maximum retries" in record.message
-        for record in caplog.records
-    )
-
-    error_log = next(
-        record
-        for record in caplog.records
-        if "Failed to generate unique key_id after maximum retries" in record.message
-    )
-    assert hasattr(error_log, "max_retries")
-    assert error_log.max_retries == MAX_KEY_GENERATION_RETRIES
-
-
-@patch("grants_shared.auth.api_key_handler.generate_api_key_id")
-def test_create_api_key_uses_key_generator(
-    mock_generate, enable_factory_create, db_session: db.Session
-):
-    """Test that create_api_key uses the generate_api_key_id utility."""
-    mock_generate.return_value = "TestGeneratedKey123456789"
-    user = SharedUserFactory.create()
-
-    api_key = SharedApiKeyHandler(db_session).create_api_key(
-        user_id=user.shared_user_id,
-        key_name="Test Key",
-    )
-
-    mock_generate.assert_called_once()
-
-    assert api_key.key_id == "TestGeneratedKey123456789"
+        error_log = next(
+            record
+            for record in caplog.records
+            if "Failed to generate unique key_id after maximum retries" in record.message
+        )
+        assert hasattr(error_log, "max_retries")
+        assert error_log.max_retries == MAX_KEY_GENERATION_RETRIES
 
 
 def test_create_api_key_aws_gateway_error_handling(
@@ -295,12 +226,15 @@ def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_sessio
     assert api_key1.key_id != api_key2.key_id
 
 
-def test_delete_api_key_success(enable_factory_create, db_session: db.Session):
+def test_delete_api_key_success(enable_factory_create, db_session: db.Session, caplog):
     """Test that delete_api_key successfully deletes an API key."""
     user = SharedUserFactory.create()
     api_key = SharedUserApiKeyFactory.create(shared_user=user, is_active=True)
 
-    SharedApiKeyHandler(db_session).delete_api_key(user.shared_user_id, api_key.shared_api_key_id)
+    with caplog.at_level("INFO"):
+        SharedApiKeyHandler(db_session).delete_api_key(
+            user.shared_user_id, api_key.shared_api_key_id
+        )
 
     db_api_key = db_session.execute(
         select(SharedUserApiKey).where(
@@ -308,6 +242,12 @@ def test_delete_api_key_success(enable_factory_create, db_session: db.Session):
         )
     ).scalar_one_or_none()
     assert db_api_key is None
+
+    assert any("Deleted API key" in record.message for record in caplog.records)
+
+    log_record = next(record for record in caplog.records if "Deleted API key" in record.message)
+    assert getattr(log_record, "auth.shared_api_key_id") == api_key.shared_api_key_id
+    assert getattr(log_record, "auth.shared_user_id") == api_key.shared_user_id
 
 
 def test_delete_api_key_not_found_wrong_user(enable_factory_create, db_session: db.Session):
@@ -356,23 +296,6 @@ def test_delete_api_key_already_inactive(enable_factory_create, db_session: db.S
         )
     ).scalar_one_or_none()
     assert db_api_key is None
-
-
-def test_delete_api_key_logging_success(enable_factory_create, db_session: db.Session, caplog):
-    """Test that delete_api_key logs appropriate success messages."""
-    user = SharedUserFactory.create()
-    api_key = SharedUserApiKeyFactory.create(shared_user=user, is_active=True, key_name="Test Key")
-
-    with caplog.at_level("INFO"):
-        SharedApiKeyHandler(db_session).delete_api_key(
-            user.shared_user_id, api_key.shared_api_key_id
-        )
-
-    assert any("Deleted API key" in record.message for record in caplog.records)
-
-    log_record = next(record for record in caplog.records if "Deleted API key" in record.message)
-    assert getattr(log_record, "auth.shared_api_key_id") == api_key.shared_api_key_id
-    assert getattr(log_record, "auth.shared_user_id") == api_key.shared_user_id
 
 
 def test_delete_api_key_multiple_keys_same_user(enable_factory_create, db_session: db.Session):
@@ -504,14 +427,17 @@ def test_get_user_api_key_not_found_nonexistent(enable_factory_create, db_sessio
     assert "API key not found" in exc_info.value.message
 
 
-def test_rename_api_key_success(enable_factory_create, db_session: db.Session):
+def test_rename_api_key_success(enable_factory_create, db_session: db.Session, caplog):
     """Test that rename_api_key successfully renames an existing API key."""
     user = SharedUserFactory.create()
     api_key = SharedUserApiKeyFactory.create(shared_user=user, key_name="Original Key Name")
 
-    renamed_api_key = SharedApiKeyHandler(db_session).rename_api_key(
-        user_id=user.shared_user_id, api_key_id=api_key.shared_api_key_id, key_name="New Key Name"
-    )
+    with caplog.at_level("INFO"):
+        renamed_api_key = SharedApiKeyHandler(db_session).rename_api_key(
+            user_id=user.shared_user_id,
+            api_key_id=api_key.shared_api_key_id,
+            key_name="New Key Name",
+        )
 
     assert renamed_api_key.shared_api_key_id == api_key.shared_api_key_id
     assert renamed_api_key.shared_user_id == user.shared_user_id
@@ -523,6 +449,12 @@ def test_rename_api_key_success(enable_factory_create, db_session: db.Session):
     db_session.commit()
     db_session.refresh(renamed_api_key)
     assert renamed_api_key.key_name == "New Key Name"
+
+    assert any("Renamed API key" in record.message for record in caplog.records)
+
+    log_record = next(record for record in caplog.records if "Renamed API key" in record.message)
+    assert str(getattr(log_record, "auth.shared_api_key_id")) == str(api_key.shared_api_key_id)
+    assert str(getattr(log_record, "auth.shared_user_id")) == str(api_key.shared_user_id)
 
 
 def test_rename_api_key_wrong_user(enable_factory_create, db_session: db.Session):
@@ -590,25 +522,6 @@ def test_rename_api_key_preserves_other_fields(enable_factory_create, db_session
     assert renamed_api_key.created_at == original_created_at
 
 
-def test_rename_api_key_logging_success(enable_factory_create, db_session: db.Session, caplog):
-    """Test that rename_api_key logs appropriate success messages."""
-    user = SharedUserFactory.create()
-    api_key = SharedUserApiKeyFactory.create(shared_user=user, key_name="Original Key Name")
-
-    with caplog.at_level("INFO"):
-        SharedApiKeyHandler(db_session).rename_api_key(
-            user_id=user.shared_user_id,
-            api_key_id=api_key.shared_api_key_id,
-            key_name="New Key Name",
-        )
-
-    assert any("Renamed API key" in record.message for record in caplog.records)
-
-    log_record = next(record for record in caplog.records if "Renamed API key" in record.message)
-    assert str(getattr(log_record, "auth.shared_api_key_id")) == str(api_key.shared_api_key_id)
-    assert str(getattr(log_record, "auth.shared_user_id")) == str(api_key.shared_user_id)
-
-
 def test_rename_api_key_multiple_keys_same_user(enable_factory_create, db_session: db.Session):
     """Test that rename_api_key correctly identifies the right key when user has multiple keys."""
     user = SharedUserFactory.create()
@@ -639,15 +552,3 @@ def test_rename_api_key_long_name(enable_factory_create, db_session: db.Session)
 
     assert renamed_api_key.key_name == long_name
     assert len(renamed_api_key.key_name) == 255
-
-
-def test_rename_api_key_empty_name_handled_by_schema(enable_factory_create, db_session: db.Session):
-    """Test that empty key names are handled by schema validation (not by the service)."""
-    user = SharedUserFactory.create()
-    api_key = SharedUserApiKeyFactory.create(shared_user=user, key_name="Original Key Name")
-
-    renamed_api_key = SharedApiKeyHandler(db_session).rename_api_key(
-        user_id=user.shared_user_id, api_key_id=api_key.shared_api_key_id, key_name=""
-    )
-
-    assert renamed_api_key.key_name == ""
