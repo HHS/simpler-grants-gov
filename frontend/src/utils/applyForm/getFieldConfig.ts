@@ -14,13 +14,9 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/types/applyForm/types";
+import { getByPointer, getFieldPathFromHtml } from "src/utils/formDataUtils";
 
-import {
-  getByPointer,
-  getFieldNameForHtml,
-  getFieldPathFromHtml,
-  getFieldSchema,
-} from "./applyFormUtils";
+import { getFieldNameForHtml, getFieldSchema } from "./applyFormUtils";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
@@ -106,7 +102,8 @@ const getFieldListRequiredFields = ({
   fieldListName: string;
 }): string[] => {
   const fieldListSchema = formSchema.properties?.[fieldListName] as
-    RJSFSchema | undefined;
+    | RJSFSchema
+    | undefined;
 
   if (!fieldListSchema || fieldListSchema.type !== "array") {
     return [];
@@ -547,7 +544,8 @@ const getFieldListConfig = ({
   });
 
   const fieldListSchema = formSchema.properties?.[uiFieldObject.name] as
-    RJSFSchema | undefined;
+    | RJSFSchema
+    | undefined;
 
   return {
     type: "FieldList",

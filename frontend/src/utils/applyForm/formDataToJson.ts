@@ -1,8 +1,7 @@
 // based on https://github.com/ArturKot95/FormData2Json/blob/main/src/formDataToObject.ts
 
 import { RJSFSchema } from "@rjsf/utils";
-
-import { getByPointer, getFieldPathFromHtml } from "./applyFormUtils";
+import { getByPointer, getFieldPathFromHtml } from "src/utils/formDataUtils";
 
 // like, this is basically anything lol - DWS
 type NestedObject = {

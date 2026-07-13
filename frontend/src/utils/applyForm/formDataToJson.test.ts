@@ -1,5 +1,3 @@
-import { RJSFSchema } from "@rjsf/utils";
-
 import { formDataToObject } from "./formDataToJson";
 
 const mockMergeAllOf = jest.fn();
