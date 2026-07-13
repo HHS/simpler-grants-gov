@@ -1,5 +1,7 @@
 # Dead Letter Queue Redrive in Workflow Management
 
+It is estimated this process can be run to completition within 30 minutes, less if someone is familiar with the AWS Console for SQS
+
 ## Overview
 This guide explains how to manage messages in the Simpler Grants workflow management Dead Letter Queue (DLQ), including understanding why messages end up in the DLQ, when to redrive vs delete, and step-by-step procedures for both operations.
 
