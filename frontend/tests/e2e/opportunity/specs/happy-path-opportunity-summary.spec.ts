@@ -39,13 +39,9 @@ import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixture
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import {
-  assertButtonEnabledDisabledStates,
-} from "tests/e2e/utils/common/index";
-import {
-  waitForOpportunityRowByStatus,
-} from "tests/e2e/utils/opportunities/table-row-utils";
+import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index";
 import { assertOverviewSectionStatus } from "tests/e2e/utils/opportunities/overview-status-utils";
+import { waitForOpportunityRowByStatus } from "tests/e2e/utils/opportunities/table-row-utils";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 
@@ -140,7 +136,9 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
       await page.getByRole("button", { name: "Save and exit" }).click();
 
       // Then I should return to the "Opportunity Overview" page.
-      await expect(page).toHaveURL(/\/grantor\/opportunity\/([a-z0-9-]+?)\/overview/);
+      await expect(page).toHaveURL(
+        /\/grantor\/opportunity\/([a-z0-9-]+?)\/overview/,
+      );
 
       // And I should see overview statuses for key sections.
       await assertOverviewSectionStatus(page, {
