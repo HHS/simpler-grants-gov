@@ -88,9 +88,6 @@ def create_application_attachment_from_pending_file(
     # Retrieve file size from S3 after the move
     file_size_bytes = file_util.get_file_length_bytes(s3_file_location)
 
-    # Avoid "Can't attach instance of 'User' to session" errors
-    user = db_session.merge(user)
-
     # Persist attachment record
     application_attachment = ApplicationAttachment(
         application_attachment_id=application_attachment_id
