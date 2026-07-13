@@ -14,7 +14,7 @@ import {
   toDynamicApplicationsEndpoint,
   toDynamicAwardRecommendationEndpoint,
   toDynamicFilesEndpoint,
-  toDynamicGrantorOpportunitiesEndpoint,
+  toDynamicGrantorAgenciesEndpoint,
   toDynamicGrantorOpportunityEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
@@ -167,9 +167,9 @@ export const fetchGrantorOpportunityWithMethod = (
   type: "POST" | "DELETE" | "GET" | "PUT",
 ) => requesterForEndpoint(toDynamicGrantorOpportunityEndpoint(type));
 
-export const fetchGrantorOpportunitiesWithMethod = (
+export const fetchGrantorAgenciesWithMethod = (
   type: "POST" | "GET" | "PUT" | "DELETE",
-) => requesterForEndpoint(toDynamicGrantorOpportunitiesEndpoint(type));
+) => requesterForEndpoint(toDynamicGrantorAgenciesEndpoint(type));
 
 export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
   requesterForEndpoint(toDynamicFilesEndpoint(type));

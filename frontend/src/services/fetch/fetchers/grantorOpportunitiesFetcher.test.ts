@@ -5,14 +5,19 @@ import {
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
 
-// Mock the main fetchGrantorOpportunitiesWithMethod and the sub-method it calls, fetch
+// Mock the grantor agencies/opportunities requesters and the sub-method they call, fetch
 const mockFetcher = jest.fn();
-const mockFetchGrantorOpportunitiesWithMethod = jest.fn(
+const mockFetchGrantorAgenciesWithMethod = jest.fn(
+  (_args: unknown) => mockFetcher,
+);
+const mockFetchGrantorOpportunityWithMethod = jest.fn(
   (_args: unknown) => mockFetcher,
 );
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
-  fetchGrantorOpportunitiesWithMethod: (arg: unknown): unknown =>
-    mockFetchGrantorOpportunitiesWithMethod(arg),
+  fetchGrantorAgenciesWithMethod: (arg: unknown): unknown =>
+    mockFetchGrantorAgenciesWithMethod(arg),
+  fetchGrantorOpportunityWithMethod: (arg: unknown): unknown =>
+    mockFetchGrantorOpportunityWithMethod(arg),
 }));
 
 // ---------------------------------------------
@@ -54,12 +59,10 @@ describe("searchOpportunitiesByAgency", () => {
       data: fakeAgencyResponseData,
       pagination_info: { total_pages: 1, total_records: 4 },
     });
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith(
-      "POST",
-    );
+    expect(mockFetchGrantorAgenciesWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorAgenciesWithMethod).toHaveBeenCalledWith("POST");
     expect(mockFetcher).toHaveBeenCalledWith({
-      subPath: "agencies/123-ABC-456-DEF/opportunities",
+      subPath: "123-ABC-456-DEF/opportunities",
       body: pageBody,
     });
   });
@@ -135,10 +138,8 @@ describe("searchOpportunitiesByAgency", () => {
       data: errMsg,
       pagination_info: undefined,
     });
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith(
-      "POST",
-    );
+    expect(mockFetchGrantorAgenciesWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorAgenciesWithMethod).toHaveBeenCalledWith("POST");
   });
 
   it("propagates network errors", async () => {
@@ -174,12 +175,9 @@ describe("createOpportunity", () => {
     const result = await createOpportunity(createOppSchema);
 
     expect(result).toEqual(createOppSchema);
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith(
-      "POST",
-    );
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledWith("POST");
     expect(mockFetcher).toHaveBeenCalledWith({
-      subPath: "opportunities",
       body: createOppSchema,
     });
   });
@@ -196,10 +194,8 @@ describe("createOpportunity", () => {
     const result = await createOpportunity(createOppSchema);
 
     expect(result).toEqual(errMsg);
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledTimes(1);
-    expect(mockFetchGrantorOpportunitiesWithMethod).toHaveBeenCalledWith(
-      "POST",
-    );
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledWith("POST");
   });
 
   it("propagates network errors", async () => {

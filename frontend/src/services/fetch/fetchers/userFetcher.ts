@@ -53,7 +53,7 @@ export const checkUserPrivilege = async (
 ): Promise<undefined> => {
   const { privilege, resourceId, resourceType } = privilegeDefinition;
   await fetchUserWithMethod("POST")({
-    subPath: `${userId}/can-access`,
+    subPath: `${userId}/can_access`,
     body: {
       resource_type: resourceType,
       resource_id: resourceId,

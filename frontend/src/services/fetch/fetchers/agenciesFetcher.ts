@@ -1,7 +1,6 @@
 "server only";
 
-import { ApiRequestError, MissingAuthError } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import { ApiRequestError } from "src/errors";
 import {
   fetchUserWithMethod,
   searchAgencies,
@@ -90,12 +89,4 @@ export const getUserAgencies = async (
   });
   const json = (await resp.json()) as { data: [] };
   return json.data;
-};
-
-export const fetchUserAgencies = async (): Promise<RelevantAgencyRecord[]> => {
-  const session = await getSession();
-  if (!session?.token) {
-    throw new MissingAuthError("No user token present to fetch user agencies");
-  }
-  return getUserAgencies(session.user_id);
 };

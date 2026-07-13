@@ -119,7 +119,7 @@ export const getApplicationHistory = async (
   applicationId: string,
 ): Promise<ApplicationHistoryApiResponse> => {
   const response = await fetchApplicationWithMethod("POST")({
-    subPath: `${applicationId}/audit-history`,
+    subPath: `${applicationId}/audit_history`,
     body: {
       pagination: {
         page_offset: 1,
