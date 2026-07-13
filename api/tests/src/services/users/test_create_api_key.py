@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from grants_shared.adapters import db
 
-from src.auth.api_key_handler import KeyGenerationError
+from src.auth.api_key_handler import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.services.users.create_api_key import create_api_key
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
@@ -135,7 +135,7 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
                 json_data=json_data,
             )
 
-        assert mock_generate.call_count == 5
+        assert mock_generate.call_count == MAX_KEY_GENERATION_RETRIES
 
 
 def test_create_api_key_logging_success(enable_factory_create, db_session: db.Session, caplog):
@@ -190,7 +190,7 @@ def test_create_api_key_logging_max_retries(enable_factory_create, db_session: d
         if "Failed to generate unique key_id after maximum retries" in record.message
     )
     assert hasattr(error_log, "max_retries")
-    assert error_log.max_retries == 5
+    assert error_log.max_retries == MAX_KEY_GENERATION_RETRIES
 
 
 @patch("src.auth.api_key_handler.generate_api_key_id")
