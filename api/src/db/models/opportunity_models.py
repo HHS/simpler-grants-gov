@@ -127,6 +127,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    opportunity_audits: Mapped[list[OpportunityAudit]] = relationship(
+        "OpportunityAudit",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
     derived_opportunities: Mapped[list[ReferencedOpportunity]] = relationship(
         uselist=True,
         cascade="all, delete-orphan",
@@ -576,7 +583,7 @@ class OpportunityAudit(ApiSchemaTable, TimestampMixin):
     opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Opportunity.opportunity_id), nullable=False, index=True
     )
-    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+    opportunity: Mapped[Opportunity] = relationship(Opportunity, back_populates="opportunity_audits")
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey("api.user.user_id"), nullable=False, index=True
