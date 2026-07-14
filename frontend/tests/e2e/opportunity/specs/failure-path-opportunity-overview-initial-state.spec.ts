@@ -65,13 +65,17 @@ test.describe("Grantor opportunity overview failure path - initial state gating"
       const overviewUrl = page.url();
 
       // When I attempt to click Preview, navigation should not occur.
-      await page.getByRole("button", { name: "Preview" }).click({ force: true });
+      await page
+        .getByRole("button", { name: "Preview" })
+        .click({ force: true });
 
       // Then I should still be on the same overview URL.
       await expect(page).toHaveURL(overviewUrl);
 
       // When I attempt to click Publish, navigation should not occur.
-      await page.getByRole("button", { name: "Publish" }).click({ force: true });
+      await page
+        .getByRole("button", { name: "Publish" })
+        .click({ force: true });
 
       // Then I should still be on the same overview URL.
       await expect(page).toHaveURL(overviewUrl);
