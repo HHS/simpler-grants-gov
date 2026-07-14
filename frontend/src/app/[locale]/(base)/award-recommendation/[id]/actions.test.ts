@@ -28,7 +28,8 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("next/cache", () => ({
-  revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
+  revalidatePath: (...args: unknown[]): unknown =>
+    mockRevalidatePath(...args) as unknown,
 }));
 
 jest.mock("next-intl/server", () => ({
