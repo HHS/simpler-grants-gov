@@ -352,8 +352,6 @@ jobs:
           {
             cat .env.development
             sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
-            # e2e_token.tmp may not exist once seeding moves to the new test user system; don't fail if it's absent
-            cat ../api/e2e_token.tmp 2>/dev/null || true
           } >> .env.local
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local

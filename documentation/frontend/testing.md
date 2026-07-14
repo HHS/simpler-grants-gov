@@ -8,21 +8,19 @@ E2E tests are run using Playwright. See [development.md](/DEVELOPMENT.md) for mo
 
 There are situations where we want to be able to test a "logged in" experience without having to script the test through the full login flow. In order to support this we have built a system to spoof the user login by placing a session cookie into the browser context. This system works by creating a client side cookie on the browser context within Playwright that will function the same as the session cookie produced as the output of the real login process.
 
-The system is defined in [Login Utils](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/utils/auth/login-utils.ts)
+Both local and staging use the same mechanism: Playwright fetches a session token for a seeded test user from the staging-only internal endpoint `POST /v1/internal/e2e-token`, then encodes it into a spoofed client session cookie. The request is authorized by a "test user manager" API key, and the target test user is chosen per test via a readable key (see [test-users.ts](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/utils/auth/test-users.ts)). Seeded test users have no login credentials, so if spoofing fails the test fails — there is no fallback to a real Login.gov login.
+
+The system is defined in [Login Utils](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/utils/auth/login-utils.ts) and [Authenticate E2E User Utils](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/utils/auth/authenticate-e2e-user-utils.ts).
 
 #### Local setup
 
-Local spoofed logins depend on an auth token for a test user that is generated each time the local database is seeded. During seed a file is created containing the key, which you can then reference in the Playwright process. Steps to implement:
-
-- run `make db-seed-local` in the /api directory. This will create the necessary DB records for the spoofed user and spit out an API auth token in a file at /api/e2e_token.tmp.
-- copy the token variable declaration from the e2e_token.tmp file into the `E2E_USER_AUTH_TOKEN` env var declaration in your frontend .env.local file
-- that's it! Running e2e tests using spoofing should now work. [This process is encapsulated in our CI process here](https://github.com/HHS/simpler-grants-gov/blob/c5f29978c45d658329f2466d652da743d83d6a73/.github/workflows/ci-frontend-e2e.yml#L97).
+- run `make db-seed-local` in the /api directory. This creates the seeded test users (flagged so their tokens can be fetched via the e2e-token endpoint) and the test-user-manager account.
+- set `SESSION_SECRET` and `TEST_USER_MANAGER_API_KEY` in your frontend `.env.local`. `TEST_USER_MANAGER_API_KEY` must match `LOCAL_TEST_USER_MANAGER_API_KEY` in `api/local.env` (default: `local-manager-key`).
+- that's it! Running e2e tests using spoofing should now work.
 
 #### Staging setup
 
-Since staging tests run on a deployed server that does not expose a testing token directly, to spoof a login is a bit more involved, but only requires proper env vars to be set in order to work. A test user is set up in staging that can be spoofed. In order to obtain a session token for this user, Playwright needs to request it from a staging-only internal endpoint.
-
-To run spoofed logins (locally or in CI), SESSION_SECRET and STAGING_TEST_USER_API_KEY env vars must be correctly set in .env.local. Values for these env vars can be found 1password, AWS SSM, or ask a team member.
+Staging runs on a deployed server, so Playwright requests the session token from the same staging-only internal endpoint. To run spoofed logins against staging, `SESSION_SECRET` and `STAGING_TEST_USER_MANAGER_API_KEY` env vars must be set in `.env.local`. Values for these env vars can be found in 1Password, AWS SSM, or ask a team member.
 
 ### Test groups
 
@@ -103,13 +101,12 @@ The easiest thing to do in these cases is to:
 - [example usage](https://github.com/HHS/simpler-grants-gov/blob/f92baefc1b8409f12057240d98fa68d20946593b/frontend/tests/components/organization/manage-users/ActiveUsersSection.test.tsx#L44)
 
 ```tsx
-    const component = await ActiveUsersSection({
-      organizationId: "org-123",
-      activeUsers,
-      roles,
-    });
-    render(component);
-
+const component = await ActiveUsersSection({
+  organizationId: "org-123",
+  activeUsers,
+  roles,
+});
+render(component);
 ```
 
 #### Route tests
