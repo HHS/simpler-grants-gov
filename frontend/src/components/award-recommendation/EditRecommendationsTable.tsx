@@ -316,7 +316,7 @@ export default function EditRecommendationsTable({
               className="usa-button"
               onClick={() => {
                 router.push(
-                  `/award-recommendation/${awardRecommendationId}/application-submissions/edit`,
+                  `/award-recommendation/${awardRecommendationId}/application-submissions/edit/bulk`,
                 );
               }}
             >

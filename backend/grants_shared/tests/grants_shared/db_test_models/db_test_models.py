@@ -11,6 +11,7 @@ from grants_shared.db.models.auth_base_models import (
     BaseLinkExternalUser,
     BaseLoginGovState,
     BaseUser,
+    BaseUserApiKey,
     BaseUserTokenSession,
 )
 from grants_shared.db.models.base import Base, TimestampMixin
@@ -193,6 +194,10 @@ class SharedUser(BaseUser, OtherSchemaTable, TimestampMixin):
         viewonly=True,
     )
 
+    api_keys: Mapped[list[SharedUserApiKey]] = relationship(
+        "SharedUserApiKey", back_populates="shared_user", uselist=True, cascade="all, delete-orphan"
+    )
+
     @property
     def email(self) -> str | None:
         if self.linked_login_gov_external_user is not None:
@@ -225,3 +230,26 @@ class SharedLoginGovState(BaseLoginGovState, OtherSchemaTable, TimestampMixin):
     __tablename__ = "shared_login_gov_state"
 
     shared_login_gov_state_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+
+
+class SharedUserApiKey(BaseUserApiKey, OtherSchemaTable, TimestampMixin):
+    """API Key table for user authentication to the API"""
+
+    __tablename__ = "shared_user_api_key"
+
+    shared_api_key_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+
+    shared_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(SharedUser.shared_user_id), index=True
+    )
+
+    shared_user: Mapped[SharedUser] = relationship(
+        SharedUser, back_populates="api_keys", uselist=False
+    )
+
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info"""
+        return {
+            "auth.shared_api_key_id": self.shared_api_key_id,
+            "auth.shared_user_id": self.shared_user_id,
+        }
