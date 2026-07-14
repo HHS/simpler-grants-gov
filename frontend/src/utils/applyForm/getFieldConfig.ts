@@ -98,6 +98,21 @@ export function buildFieldListStoragePath({
 }
 
 // FieldList currently supports root-level array fields only.
+/**
+ * Compute the list of required field paths for a root-level FieldList.
+ *
+ * This inspects the `items` schema of the named array property and
+ * expands any nested `required` entries into full slash-separated paths
+ * prefixed with the `fieldListName`.
+ *
+ * Example returned value:
+ *   ["additional_sites/address/street1", "additional_sites/organization_name"]
+ *
+ * @param formSchema - full RJSF form schema
+ * @param fieldListName - top-level property name of the array field
+ * @returns array of required field paths for items of the field list
+ */
+
 export const getFieldListRequiredFields = ({
   formSchema,
   fieldListName,
@@ -124,22 +139,32 @@ export const getFieldListRequiredFields = ({
     return [];
   }
 
+  /**
+   * Recursively expand required field names into full storage paths for
+   * FieldList items. Given a list of required field names at the current
+   * level and the schema `properties` for that level, this returns an array
+   * of full paths prefixed with the `fieldListName`.
+   *
+   * Example returned path: "additional_sites/address/street1"
+   */
+
   const expandRequiredFields = (
     requiredFieldNames: string[],
     properties: RJSFSchema["properties"],
     pathPrefix: string = "",
   ): string[] => {
-    const result: string[] = [];
-
+    const expandedRequiredFieldPaths: string[] = [];
     for (const fieldName of requiredFieldNames) {
       const fieldPath = pathPrefix ? `${pathPrefix}/${fieldName}` : fieldName;
       const fullPath = `${fieldListName}/${fieldPath}`;
 
-      result.push(fullPath);
+      expandedRequiredFieldPaths.push(fullPath);
 
+      // Note: only expands nested `required` for objects defined inline; it
+      // does NOT resolve `$ref`/shared schemas, so required fields inside
+      // referenced schemas won't be expanded.
       // Check if this field is an object with nested required fields
       const fieldSchema = properties?.[fieldName] as RJSFSchema | undefined;
-      // Note: This only expands nested required fields for objects defined directly in the schema.
       if (
         fieldSchema &&
         fieldSchema.type === "object" &&
@@ -153,11 +178,11 @@ export const getFieldListRequiredFields = ({
           fieldSchema.properties,
           fieldPath,
         );
-        result.push(...nestedRequired);
+        expandedRequiredFieldPaths.push(...nestedRequired);
       }
     }
 
-    return result;
+    return expandedRequiredFieldPaths;
   };
 
   return expandRequiredFields(itemSchema.required, itemSchema.properties);
