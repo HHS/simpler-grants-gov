@@ -158,6 +158,7 @@ def test_parse_jwt_for_user_fails_when_token_not_yet_valid(
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
+    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token not yet valid"
 
 
@@ -179,6 +180,7 @@ def test_parse_jwt_for_user_fails_when_token_has_unknown_issuer(
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
+    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unknown Issuer"
 
 
@@ -200,6 +202,7 @@ def test_parse_jwt_for_user_fails_when_token_has_unknown_audience(
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
+    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unknown Audience"
 
 
@@ -222,6 +225,7 @@ def test_parse_jwt_for_user_fails_when_unable_to_process_token(
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
+    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unable to process token"
 
 
@@ -242,6 +246,7 @@ def test_parse_jwt_for_user_fails_when_token_missing_sub_field(
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
+    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token missing sub field"
 
 
@@ -262,6 +267,7 @@ def test_parse_jwt_for_user_fails_when_token_session_is_none(
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
+    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token session does not exist"
 
 
@@ -277,6 +283,7 @@ def test_parse_jwt_for_user_fails_when_token_is_expired(
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
+    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token expired"
 
 
@@ -292,6 +299,7 @@ def test_parse_jwt_for_user_fails_when_token_is_no_longer_valid(
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
+    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token is no longer valid"
 
 
