@@ -14,6 +14,7 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
+    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -23,6 +24,7 @@ from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
     LkFundingInstrument,
+    LkOpportunityAuditEvent,
     LkOpportunityCategory,
     LkOpportunityStatus,
 )
@@ -31,7 +33,7 @@ if TYPE_CHECKING:
     from src.db.models.award_recommendation_models import AwardRecommendation
     from src.db.models.competition_models import Competition
     from src.db.models.entity_models import OrganizationSavedOpportunity
-    from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
+    from src.db.models.user_models import User, UserOpportunityNotificationLog, UserSavedOpportunity
     from src.db.models.workflow_models import Workflow
 
 
@@ -120,6 +122,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     versions: Mapped[list[OpportunityVersion]] = relationship(
         "OpportunityVersion",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+    opportunity_audits: Mapped[list[OpportunityAudit]] = relationship(
+        "OpportunityAudit",
         back_populates="opportunity",
         uselist=True,
         cascade="all, delete-orphan",
@@ -562,3 +571,36 @@ class OpportunityVersion(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(Opportunity, back_populates="versions")
 
     opportunity_data: Mapped[dict] = mapped_column(JSONB)
+
+
+class OpportunityAudit(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_audit"
+
+    opportunity_audit_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), nullable=False, index=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(
+        Opportunity, back_populates="opportunity_audits"
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), nullable=False, index=True
+    )
+    user: Mapped[User] = relationship("User")
+
+    opportunity_audit_event: Mapped[OpportunityAuditEvent] = mapped_column(
+        "opportunity_audit_event_id",
+        LookupColumn(LkOpportunityAuditEvent),
+        ForeignKey(LkOpportunityAuditEvent.opportunity_audit_event_id),
+        nullable=False,
+    )
+
+    # Only one of the following JSONB columns will be populated per row,
+    # depending on which entity was created or updated.
+    opportunity_data: Mapped[dict | None] = mapped_column("opportunity", JSONB)
+    nonforecast_opportunity_summary: Mapped[dict | None] = mapped_column(JSONB)
+    competition: Mapped[dict | None] = mapped_column(JSONB)

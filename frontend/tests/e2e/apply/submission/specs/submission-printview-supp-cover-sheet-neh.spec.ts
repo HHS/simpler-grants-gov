@@ -1,6 +1,6 @@
 /**
- * @feature Apply - Happy Path - SF-424 Application Submission and Print View Workflow
- * @scenario Complete the SF-424 Application Submission and Print View workflow for an <user type> user
+ * @feature Apply - Happy Path - Supplementary Cover Sheet for NEH Grant Programs and Print View Workflow
+ * @scenario Complete the Supplementary Cover Sheet for NEH Grant Programs and Print View workflow for an <user type> user
  */
 
 import {
@@ -25,7 +25,6 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
-  validateAttachmentPrintViewSection,
   validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
@@ -37,16 +36,16 @@ const { testOrgLabel, targetEnv } = playwrightEnv;
 // Only the opportunity number is declared here.
 // All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
 // Unified opportunity for both local and staging environments.
-const OPPORTUNITY_NUMBER = "E2E-SF424-ORG-IND-01";
+const OPPORTUNITY_NUMBER = "E2E-NEHCS-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
 const applicantScenarios = [
   {
-    testName: `Complete the SF-424 Application Submission and Print View workflow for an Organization user`,
+    testName: `Complete the Supplementary Cover Sheet for NEH Grant Programs and Print View workflow for an Organization user`,
     orgLabel: testOrgLabel,
   },
   {
-    testName: `Complete the SF-424 Application Submission and Print View workflow for an Individual user`,
+    testName: `Complete the Supplementary Cover Sheet for NEH Grant Programs and Print View workflow for an Individual user`,
     orgLabel: undefined,
   },
 ] as const;
@@ -79,7 +78,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await authenticateE2eUser(page, context, !!isMobile);
 
       // --- Navigate to Opportunity page and start a new application ---
-      // And the user launches the URL for an opportunity with an open SF-424 competition
+      // And the user launches the URL for an opportunity with an open NEH Supplementary Cover Sheet competition
       // When the user clicks "Start Application", selects applicant type and creates the application
       await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
       const applicationUrl = page.url();
@@ -143,7 +142,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
       // --- Print View Validation (one page per form) ---
       for (const {
-        formKey,
         testData,
         printUrl,
         expectedPrepopulatedFields,
@@ -169,34 +167,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
         )) {
           if (testData[dataKey] === undefined) continue;
           await validatePrintViewField(page, testId, testData[dataKey]);
-        }
-
-        // SF-424 attachments - filenames are in the section, not testId elements, so use the section locator
-        if (formKey === "sf424") {
-          const sf424AttachmentSections = [
-            {
-              fieldKey: "areas_affected_attachment",
-              sectionId: "form-section-areas_affected",
-            },
-            {
-              fieldKey: "additional_project_title_attachment",
-              sectionId: "form-section-project_title",
-            },
-            {
-              fieldKey: "additional_congressional_attachment",
-              sectionId: "form-section-congressional_districts",
-            },
-          ] as const;
-
-          for (const { fieldKey, sectionId } of sf424AttachmentSections) {
-            if (testData[fieldKey]) {
-              await validateAttachmentPrintViewSection(
-                page,
-                sectionId,
-                testData[fieldKey],
-              );
-            }
-          }
         }
       }
     },

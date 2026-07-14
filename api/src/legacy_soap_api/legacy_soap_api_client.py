@@ -324,19 +324,20 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
                     break
         finally:
             mtom_file_stream.close()
-        yield b"\n" + boundary.encode("utf-8") + b"--"
+        yield b"\r\n" + boundary.encode("utf-8") + b"--"
 
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
         # MTOM message is assembled here
-        # 1. --uuid: {boundary_uuid}\n
+        # The expected newlines are \r\n instead of \n
+        # 1. --uuid: {boundary_uuid}\r\n
         # 2. headers:
-        #    'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-        #    "Content-Transfer-Encoding: binary\n"
-        #    "Content-ID: <root.message@cxf.apache.org>\n\n"
+        #    'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        #    "Content-Transfer-Encoding: binary\r\n"
+        #    "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
         # 3. MTOM xml body
-        # 4. --uuid: {boundary_uuid}
+        # 4. \r\n--uuid: {boundary_uuid}\r\n
         # 5. the file bytes from the file being attached
-        # 6. --uuid: {boundary_uuid}--
+        # 6. \r\n--uuid: {boundary_uuid}--
         simpler_response_soap_dict = self.get_soap_response_dict(proxy_response)
         mtom_file_stream = simpler_response_soap_dict.pop("_mtom_file_stream", None)
         log_local(
@@ -357,13 +358,13 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             root=self.operation_config.response_operation_name,
         )
         if self.operation_config.response_operation_name != "GetApplicationZipResponse":
-            mime_message += f"\n--uuid:{boundary_uuid}--".encode("utf-8")
+            mime_message += f"\r\n--uuid:{boundary_uuid}--".encode("utf-8")
             return get_soap_response(
                 data=mime_message,
                 headers=update_headers,
             )
         if mtom_file_stream:
-            mime_message += ("\n" + boundary + "\n").encode("utf8")
+            mime_message += ("\r\n" + boundary + "\r\n").encode("utf8")
             return get_soap_response(
                 data=self._gen_response_data(mime_message, boundary, mtom_file_stream),
                 headers=update_headers,

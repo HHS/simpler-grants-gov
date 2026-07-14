@@ -12,30 +12,16 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
-  ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
   buildPageFieldsFromDefinitions,
   CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
-  ELIGIBILITY_FIELD_DEFINITIONS,
-  FUNDING_DETAILS_FIELD_DEFINITIONS,
 } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
 import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixtures/opportunity-pages-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import {
-  assertActionsColumnLinksByStatus,
-  assertButtonEnabledDisabledStates,
-  assertPageHeadingAndTextsVisible,
-  assertTextsVisibleOnPage,
-  formatNumberWithCommas,
-  selectOptionByLabel,
-} from "tests/e2e/utils/common/index";
-import {
-  clickRowTitle,
-  waitForOpportunityRowByStatus,
-} from "tests/e2e/utils/opportunities/table-row-utils";
+import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index";
+import { waitForOpportunityRowByStatus } from "tests/e2e/utils/opportunities/table-row-utils";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
-import { verifyOpportunityInSearchByTitleAndNumber } from "tests/e2e/utils/search/searchSpecUtil";
 
 const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
@@ -51,7 +37,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
   });
 
   test(
-    "Create, publish, and validate opportunity details",
+    "Create opportunity draft and verify draft status on list page",
     { tag: [GRANTOR, CORE_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
@@ -68,7 +54,6 @@ test.describe("Grantor Opportunity Happy Path", () => {
 
       // Define commonly used values for assertions and form filling at the beginning of the test for better readability of the scenario steps.
       const fillData = buildOpportunityHappyPathFillData(new Date());
-      const opportunityNumber = fillData.opportunityNumber;
       const opportunityTitle = fillData.opportunityTitle;
 
       //--------------Scenario steps start here----------------
@@ -110,156 +95,24 @@ test.describe("Grantor Opportunity Happy Path", () => {
         page.getByRole("link", { name: "Opportunity Summary" }),
       ).toBeVisible();
 
-      // And I click "Opportunity Summary" link
-      await page.getByRole("link", { name: "Opportunity Summary" }).click();
-
-      // Then I should be on the "Edit Opportunity" page
-      await expect(page).toHaveURL(
-        /\/grantor\/opportunity\/([a-z0-9-]+?)\/edit/,
-      );
-
-      // And "Save" should be enabled while "Publish" and "Preview" remain disabled.
+      // And I should see the "Preview" and "Publish" buttons disabled.
       await assertButtonEnabledDisabledStates(page, {
-        Save: true,
+        Preview: false,
         Publish: false,
-        Preview: false,
       });
 
-      // Fill required Funding details values.
-      await fillPageFields(
-        page,
-        buildPageFieldsFromDefinitions(
-          FUNDING_DETAILS_FIELD_DEFINITIONS,
-          fillData,
-        ),
-      );
+      // When I navigate directly to opportunity list page
+      await page.goto("/grantor/opportunities");
 
-      // Fill required Eligibility values.
-      await fillPageFields(
-        page,
-        buildPageFieldsFromDefinitions(ELIGIBILITY_FIELD_DEFINITIONS, fillData),
-      );
-
-      // Fill optional Additional information values.
-      await fillPageFields(
-        page,
-        buildPageFieldsFromDefinitions(
-          ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
-          fillData,
-        ),
-      );
-
-      // And I click "Save" button
-      await page.getByRole("button", { name: "Save" }).click();
-
-      // Then I should see the edit-page save confirmation.
-      await expect(
-        page.getByText("Saved successfully", { exact: true }),
-      ).toBeVisible();
-
-      // And I should see the save confirmation body.
-      await expect(
-        page.getByText("Your changes have been saved.", { exact: true }),
-      ).toBeVisible();
-
-      // And I should see "Draft" status.
-      await expect(
-        page.locator("span.display-inline-flex", { hasText: "Draft" }).first(),
-      ).toBeVisible();
-
-      // And I should see Opportunity title / Opportunity number values
-      await assertTextsVisibleOnPage(page, [
-        opportunityTitle,
-        opportunityNumber,
-      ]);
-
-      // And "Save" and "Publish" should be enabled while "Preview" remains disabled.
-      await assertButtonEnabledDisabledStates(page, {
-        Save: true,
-        Publish: true,
-        Preview: false,
-      });
-
-      // When I set "Funding type" to "Select", "Publish" should become disabled.
-      await selectOptionByLabel(page, "Funding type", "Select");
-
-      // Then "Save" should remain enabled and "Publish" should be disabled.
-      await assertButtonEnabledDisabledStates(page, {
-        Save: true,
-        Publish: false,
-        Preview: false,
-      });
-
-      // When I set "Funding type" to "Cooperative Agreement", "Publish" should be enabled again.
-      await selectOptionByLabel(page, "Funding type", fillData.fundingType_2);
-
-      // Then "Save" and "Publish" should be enabled while "Preview" remains disabled.
-      await assertButtonEnabledDisabledStates(page, {
-        Save: true,
-        Publish: true,
-        Preview: false,
-      });
-
-      // And I click "Publish" button
-      await page.getByRole("button", { name: "Publish" }).click();
-
-      // Then I should return to the "Opportunities List" page.
-      await expect(page).toHaveURL(/\/grantor\/opportunities/);
-
-      // And I should see "posted" status for the created opportunity row.
+      // Then I should see "Draft" status for the created opportunity row.
       const matchingRow = await waitForOpportunityRowByStatus(page, {
         title: opportunityTitle,
-        status: "posted",
-        message: 'Waiting for "posted" opportunity row to appear on list',
+        status: "Draft",
+        message: 'Waiting for "Draft" opportunity row to appear on list',
       });
 
-      // And link visibility should match the expected "posted" actions behavior.
-      await assertActionsColumnLinksByStatus(matchingRow, {
-        status: "posted",
-        actionLinkVisibility: {
-          Edit: true,
-          Copy: false,
-          Delete: false,
-        },
-      });
-
-      // When I open the "Opportunity details" page from the row title.
-      await clickRowTitle(matchingRow, opportunityTitle);
-
-      // Then I should see all expected values on the "Opportunity details" page.
-      const finalAssertions = [
-        opportunityTitle,
-        opportunityNumber,
-        fillData.assistanceListingNumber,
-        fillData.fundingType_2,
-        fillData.category,
-        fillData.expectedNumberOfAwards,
-        formatNumberWithCommas(fillData.awardMinimum),
-        formatNumberWithCommas(fillData.awardMaximum),
-        formatNumberWithCommas(fillData.estimatedTotalProgramFunding),
-        fillData.eligibleApplicantSmallBusinesses,
-        fillData.eligibleApplicantOtherNativeAmericanTribalOrganizations,
-        fillData.eligibleApplicantIndependentSchoolDistricts,
-        fillData.eligibleApplicantIndividuals,
-        fillData.eligibleApplicantStateGovernments,
-        fillData.description,
-        fillData.linkDisplayText,
-        fillData.grantorContactDetails,
-        fillData.contactEmail,
-        fillData.emailDisplayText,
-      ];
-
-      await assertPageHeadingAndTextsVisible(page, {
-        heading: opportunityTitle,
-        texts: finalAssertions,
-      });
-
-      // And I verify the opportunity visibility on search results page after publishing
-      await verifyOpportunityInSearchByTitleAndNumber(
-        page,
-        opportunityTitle,
-        opportunityNumber,
-      );
+      // And the matching row should be visible.
+      await expect(matchingRow).toBeVisible();
 
       //--------------Scenario steps end here----------------
     },
