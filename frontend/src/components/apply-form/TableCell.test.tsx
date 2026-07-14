@@ -53,6 +53,7 @@ describe("TableCell", () => {
     expect(input).toHaveAttribute("type", "text");
     expect(input).toHaveAttribute("inputmode", "decimal");
     expect(input).toHaveValue("1250.5");
+    expect(input).toHaveClass("overflow-x-auto");
   });
 
   it("passes valid numeric input changes to onChange", () => {
@@ -114,9 +115,44 @@ describe("TableCell", () => {
 
     expect(screen.getByTestId("input-cell-input")).toBeDisabled();
     expect(screen.getByTestId("input-cell-input")).toHaveClass("width-full");
+  });
+
+  it("supports keyboard focus for editable values", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+        }}
+        id="input-cell"
+        value=""
+      />,
+    );
+
+    const input = screen.getByTestId("input-cell-input");
+    input.focus();
+
+    expect(input).toHaveFocus();
+  });
+
+  it("renders read-only values with a distinct visual treatment", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "readOnly",
+          definition: "/properties/total",
+          format: "dollar",
+        }}
+        id="read-only-cell"
+        value={1234.5}
+      />,
+    );
 
     expect(screen.getByTestId("read-only-cell-read-only")).toHaveClass(
-      "bg-base-lightest",
+      "border-base-light",
+    );
+    expect(screen.getByTestId("read-only-cell-read-only")).toHaveClass(
+      "text-wrap",
     );
   });
 });

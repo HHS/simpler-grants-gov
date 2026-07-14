@@ -188,99 +188,99 @@ describe("buildFormTreeRecursive", () => {
     expect(screen.getByTestId("section--field2")).toBeInTheDocument();
   });
 
-it("should render a Table multiField widget inside a section", () => {
-  const schema: RJSFSchema = {
-    type: "object",
-    properties: {
-      first_value: {
-        type: "number",
-        title: "First Value",
-      },
-      second_value: {
-        type: "number",
-        title: "Second Value",
-        readOnly: true,
-      },
-    },
-  };
-
-  const uiSchema: UiSchema = [
-    {
-      type: "section",
-      name: "table_demo",
-      label: "Table Demo",
-      children: [
-        {
-          type: "multiField",
-          name: "summary_table_test",
-          widget: "Table",
-          definition: ["/properties/first_value", "/properties/second_value"],
-          children: {
-            columns: [
-              {
-                columnHeader: "Item",
-                width: 40,
-              },
-              {
-                columnHeader: "First Value",
-                width: 30,
-              },
-              {
-                columnHeader: "Second Value",
-                width: 30,
-              },
-            ],
-            rows: [
-              {
-                cells: [
-                  {
-                    type: "input",
-                    definition: "/properties/first_value",
-                  },
-                  {
-                    type: "readOnly",
-                    definition: "/properties/second_value",
-                  },
-                ],
-              },
-            ],
-          },
+  it("should render a Table multiField widget inside a section", () => {
+    const schema: RJSFSchema = {
+      type: "object",
+      properties: {
+        first_value: {
+          type: "number",
+          title: "First Value",
         },
-      ],
-    },
-  ];
+        second_value: {
+          type: "number",
+          title: "Second Value",
+          readOnly: true,
+        },
+      },
+    };
 
-  render(
-    <FormFields
-      errors={null}
-      formData={{
-        first_value: 2500,
-        second_value: 1000,
-      }}
-      schema={schema}
-      uiSchema={uiSchema}
-    />,
-  );
+    const uiSchema: UiSchema = [
+      {
+        type: "section",
+        name: "table_demo",
+        label: "Table Demo",
+        children: [
+          {
+            type: "multiField",
+            name: "summary_table_test",
+            widget: "Table",
+            definition: ["/properties/first_value", "/properties/second_value"],
+            children: {
+              columns: [
+                {
+                  columnHeader: "Item",
+                  width: 40,
+                },
+                {
+                  columnHeader: "First Value",
+                  width: 30,
+                },
+                {
+                  columnHeader: "Second Value",
+                  width: 30,
+                },
+              ],
+              rows: [
+                {
+                  cells: [
+                    {
+                      type: "input",
+                      definition: "/properties/first_value",
+                    },
+                    {
+                      type: "readOnly",
+                      definition: "/properties/second_value",
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
 
-  expect(
-    screen.getByRole("heading", { name: "Table Demo" }),
-  ).toBeInTheDocument();
+    render(
+      <FormFields
+        errors={null}
+        formData={{
+          first_value: 2500,
+          second_value: 1000,
+        }}
+        schema={schema}
+        uiSchema={uiSchema}
+      />,
+    );
 
-  const table = screen.getByTestId("table");
+    expect(
+      screen.getByRole("heading", { name: "Table Demo" }),
+    ).toBeInTheDocument();
 
-  expect(table).toBeInTheDocument();
-  expect(screen.getAllByRole("columnheader")).toHaveLength(3);
-  expect(screen.getAllByRole("row")).toHaveLength(2);
-  expect(screen.getAllByRole("cell")).toHaveLength(3);
+    const table = screen.getByTestId("table");
 
-  expect(
-    screen.getByRole("columnheader", { name: "Item" }),
-  ).toBeInTheDocument();
+    expect(table).toBeInTheDocument();
+    expect(screen.getAllByRole("columnheader")).toHaveLength(3);
+    expect(screen.getAllByRole("row")).toHaveLength(2);
+    expect(screen.getAllByRole("cell")).toHaveLength(3);
 
-  expect(
-    screen.getByRole("rowheader", { name: "First Row" }),
-  ).toBeInTheDocument();
-});
+    expect(
+      screen.getByRole("columnheader", { name: "Item" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("rowheader", { name: "First Row" }),
+    ).toBeInTheDocument();
+  });
 
   describe("FormFields formContext forwarding", () => {
     it("forwards formContext to rendered widgets", () => {
