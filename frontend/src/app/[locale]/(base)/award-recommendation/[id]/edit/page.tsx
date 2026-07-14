@@ -1,8 +1,6 @@
 import { Metadata } from "next";
-import {
-  saveAwardRecommendation,
-  submitAwardRecommendationForReview,
-} from "src/app/[locale]/(base)/award-recommendation/[id]/actions";
+import { submitAwardRecommendationForReview } from "src/app/[locale]/(base)/award-recommendation/[id]/actions";
+import AwardRecommendationSaveButton from "src/app/[locale]/(base)/award-recommendation/[id]/edit/_components/AwardRecommendationSaveButton";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
@@ -139,10 +137,8 @@ async function AwardRecommendationEditPageContent({
   // Define button configuration for edit page
   const heroButtons: HeroButtonConfig[] = [
     {
-      type: "action",
-      label: t("heroButtons.save"),
-      formAction: saveAwardRecommendation,
-      outline: true,
+      type: "custom",
+      node: <AwardRecommendationSaveButton label={t("heroButtons.save")} />,
     },
     {
       type: "navigation",
@@ -204,6 +200,11 @@ async function AwardRecommendationEditPageContent({
 
   return (
     <form>
+      <input
+        type="hidden"
+        name="award_recommendation_id"
+        value={awardRecommendationId}
+      />
       {awardRecommendationDetails && (
         <Suspense
           fallback={
