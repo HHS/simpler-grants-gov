@@ -17,6 +17,7 @@ type FormDataToJsonOptions = {
   // will default to `--` downstream if not provided. Used to convert representation of nested fields
   // from FormData / DOM level implementation to implementation used in schema
   delimiter?: string;
+  useUndefinedDefaultValue?: boolean;
 };
 
 /*
@@ -26,12 +27,19 @@ type FormDataToJsonOptions = {
   note:
   - string representations of booleans are cast to booleans
   - for number type fields, cast to number as long as a value is present
-  - for string type fields that represent a number, ensure they remain strings (or undefined)
+  - for string type fields that represent a number, ensure they remain strings (or null)
   - otherwise it may be an object or array, so try to cast to parse json
     - note that this will cast a number string ("1") to a number, thus the necessity of the previous case
-  - if the json parse fails, just return the string (or undefined)
+  - if the json parse fails, just return the string (or null)
+
+  Note that
 */
-const parseValue = (value: unknown, type: string) => {
+const parseValue = (
+  value: unknown,
+  type: string,
+  useUndefinedDefaultValue = false,
+) => {
+  const defaultValue = useUndefinedDefaultValue ? undefined : null;
   if (value === "false") return false;
   if (value === "true") return true;
   if (
@@ -41,12 +49,12 @@ const parseValue = (value: unknown, type: string) => {
   )
     return Number(value);
   if (type === "string" && !isNaN(Number(value))) {
-    return value || undefined;
+    return value || defaultValue;
   }
   try {
     return JSON.parse(value as string) as unknown;
   } catch (_e) {
-    return value || undefined;
+    return value || defaultValue;
   }
 };
 
@@ -87,8 +95,9 @@ export function formDataToObject<T extends NestedObject>(
   formSchema: RJSFSchema, // expects that any "/properties" path segments have already been removed
   options?: FormDataToJsonOptions,
 ): T {
-  const delimiter = options?.delimiter || "--";
-  const { parentKey } = options ?? { parentKey: "" };
+  const delimiter = options?.delimiter || ".";
+  const parentKey = options?.parentKey || "";
+  const useUndefinedDefaultValue = options?.useUndefinedDefaultValue || false;
   const result: NestedObject = {};
   const entries = formData.entries();
 
@@ -96,7 +105,7 @@ export function formDataToObject<T extends NestedObject>(
     const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
     const chunks = currentKey.split(delimiter);
     const fieldType = getFieldType(currentKey, formSchema, options);
-    const parsedValue = parseValue(value, fieldType);
+    const parsedValue = parseValue(value, fieldType, useUndefinedDefaultValue);
 
     let current = result;
 

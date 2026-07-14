@@ -60,15 +60,15 @@ describe("formDataToObject", () => {
       user: {
         age: "30",
         name: "Alice",
-        emptyString: undefined,
-        emptyNumber: undefined,
+        emptyString: null,
+        emptyNumber: null,
         skills: ["JavaScript", "TypeScript", { surprise: "more stuff" }],
         deeper: {
           value: "hello",
         },
       },
       nonUser: false,
-      empty: undefined,
+      empty: null,
       numeral: 100,
     };
 
@@ -150,5 +150,37 @@ describe("formDataToObject", () => {
     // eslint-disable-next-line
     // @ts-ignore
     expect(result.something[0]).toEqual({ whatever: "a value" });
+  });
+  it("defaults to null for empty values", () => {
+    const formData = new FormData();
+    formData.append("whatever", "");
+    const formSchema = {
+      something: {
+        items: { type: "object", properties: { whatever: { type: "string" } } },
+      },
+    };
+
+    const result = formDataToObject(formData, formSchema);
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    expect(result).toEqual({ whatever: null });
+  });
+  it("defaults to undefined for empty values if option provided", () => {
+    const formData = new FormData();
+    formData.append("whatever", "");
+    const formSchema = {
+      something: {
+        items: { type: "object", properties: { whatever: { type: "string" } } },
+      },
+    };
+
+    const result = formDataToObject(formData, formSchema, {
+      useUndefinedDefaultValue: true,
+    });
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    expect(result).toEqual({ whatever: undefined });
   });
 });

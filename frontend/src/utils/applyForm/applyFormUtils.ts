@@ -658,6 +658,7 @@ export const shapeFormData = <T extends object>(
     condenseFormSchemaProperties(formSchema),
     {
       delimiter: FORM_DATA_NESTING_DELIMITER,
+      useUndefinedDefaultValue: true, // apply form handlers will expect empty fields to be `undefined` rather than `null`
     },
   );
   return pruneEmptyNestedFields(
