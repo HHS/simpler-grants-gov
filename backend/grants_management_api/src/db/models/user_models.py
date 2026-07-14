@@ -131,3 +131,4 @@ class MgmtUserApiKey(BaseUserApiKey, GrantorSchemaTable, TimestampMixin):
             "auth.api_key_id": self.mgmt_api_key_id,
             "auth.user_id": self.mgmt_user_id,
         }
+
