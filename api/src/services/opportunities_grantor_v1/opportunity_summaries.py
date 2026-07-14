@@ -4,11 +4,15 @@ from uuid import UUID
 from grants_shared.adapters import db
 from grants_shared.api.route_utils import raise_flask_error
 
+from src.api.opportunities_grantor_v1.opportunity_grantor_schemas import (
+    OpportunitySummaryDetailSchema,
+)
 from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
+from src.services.opportunities_grantor_v1.opportunity_audit import add_opportunity_audit_event
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
     validate_opportunity_is_draft,
@@ -66,6 +70,14 @@ def create_opportunity_summary(
 
     db_session.add(opportunity_summary)
 
+    add_opportunity_audit_event(
+        db_session,
+        opportunity,
+        user,
+        OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED,
+        nonforecast_opportunity_summary=OpportunitySummaryDetailSchema().dump(opportunity_summary),
+    )
+
     logger.info(
         "Created opportunity summary",
         extra={
@@ -100,6 +112,14 @@ def update_opportunity_summary(
     # Update all fields from the request body
     for field, value in summary_data.items():
         setattr(summary, field, value)
+
+    add_opportunity_audit_event(
+        db_session,
+        opportunity,
+        user,
+        OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED,
+        nonforecast_opportunity_summary=OpportunitySummaryDetailSchema().dump(summary),
+    )
 
     logger.info(
         "Updated opportunity summary",

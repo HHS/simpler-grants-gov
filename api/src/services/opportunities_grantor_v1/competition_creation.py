@@ -3,11 +3,15 @@ import uuid
 
 import grants_shared.adapters.db as db
 
+from src.api.opportunities_grantor_v1.opportunity_grantor_schemas import (
+    CompetitionRequestBaseSchema,
+)
 from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
 from src.db.models.competition_models import Competition
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
+from src.services.opportunities_grantor_v1.opportunity_audit import add_opportunity_audit_event
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +48,14 @@ def create_competition(
 
     db_session.add(competition)
     db_session.flush()
+
+    add_opportunity_audit_event(
+        db_session,
+        opportunity,
+        user,
+        OpportunityAuditEvent.COMPETITION_CREATED,
+        competition=CompetitionRequestBaseSchema().dump(competition),
+    )
 
     logger.info(
         "Created competition",

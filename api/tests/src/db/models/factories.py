@@ -61,6 +61,7 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     JobStatus,
     JobType,
+    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
@@ -3412,6 +3413,44 @@ class OrganizationAuditFactory(BaseFactory):
             organization_audit_event=OrganizationAuditEvent.USER_REMOVED,
             target_user=factory.SubFactory(UserFactory, with_profile=True),
             target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
+        )
+
+
+class OpportunityAuditFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityAudit
+
+    opportunity_audit_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    user = factory.SubFactory(UserFactory, with_profile=True)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    opportunity_audit_event = OpportunityAuditEvent.OPPORTUNITY_CREATED
+    opportunity_data = None
+    nonforecast_opportunity_summary = None
+    competition = None
+
+    class Params:
+        is_opportunity_created = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_CREATED,
+        )
+        is_opportunity_updated = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_UPDATED,
+        )
+        is_summary_created = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED,
+        )
+        is_summary_updated = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED,
+        )
+        is_competition_created = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.COMPETITION_CREATED,
+        )
+        is_competition_updated = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.COMPETITION_UPDATED,
         )
 
 

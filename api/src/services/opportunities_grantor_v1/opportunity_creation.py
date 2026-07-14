@@ -6,13 +6,15 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from src.api.opportunities_grantor_v1.opportunity_grantor_schemas import OpportunityGrantorSchema
 from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import OpportunityCategory, Privilege
+from src.constants.lookup_constants import OpportunityAuditEvent, OpportunityCategory, Privilege
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.db.models.user_models import Agency, User
 from src.services.opportunities_grantor_v1.get_agency import get_agency
 from src.services.opportunities_grantor_v1.get_assistance_listing import get_assistance_listing
 from src.services.opportunities_grantor_v1.get_opportunity import check_opportunity_number_exists
+from src.services.opportunities_grantor_v1.opportunity_audit import add_opportunity_audit_event
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +70,14 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
     db_session.add(opportunity)
     db_session.add(opportunity_assistance_listing)
     db_session.flush()
+
+    add_opportunity_audit_event(
+        db_session,
+        opportunity,
+        user,
+        OpportunityAuditEvent.OPPORTUNITY_CREATED,
+        opportunity_data=OpportunityGrantorSchema().dump(opportunity),
+    )
 
     # Reload the opportunity with all necessary relationships
     stmt = (
