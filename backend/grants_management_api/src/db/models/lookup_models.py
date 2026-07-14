@@ -38,7 +38,7 @@ MGMT_PRIVILEGE_CONFIG: LookupConfig[MgmtPrivilege] = LookupConfig(
     [
         LookupStr(MgmtPrivilege.VIEW_DEPARTMENT, 1),
         LookupStr(MgmtPrivilege.UPDATE_DEPARTMENT, 2),
-        LookupStr(MgmtPrivilege.MAMAGE_DEPARTMENT_MEMBERS, 3),
+        LookupStr(MgmtPrivilege.MANAGE_DEPARTMENT_MEMBERS, 3),
         LookupStr(MgmtPrivilege.VIEW_SUBAGENCY, 4),
         LookupStr(MgmtPrivilege.UPDATE_SUBAGENCY, 5),
         LookupStr(MgmtPrivilege.MANAGE_SUBAGENCY_MEMBERS, 6),

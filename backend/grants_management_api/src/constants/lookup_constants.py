@@ -19,7 +19,7 @@ class ExternalUserType(StrEnum):
 class MgmtPrivilege(StrEnum):
     VIEW_DEPARTMENT = "view_department"
     UPDATE_DEPARTMENT = "update_department"
-    MAMAGE_DEPARTMENT_MEMBERS = "mamage_department_members"
+    MANAGE_DEPARTMENT_MEMBERS = "manage_department_members"
 
     VIEW_SUBAGENCY = "view_subagency"
     UPDATE_SUBAGENCY = "update_subagency"
