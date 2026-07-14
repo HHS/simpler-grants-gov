@@ -17,3 +17,24 @@ output "tf_log_bucket_name" {
 output "tf_state_bucket_name" {
   value = module.backend.tf_state_bucket_name
 }
+
+output "sbom_buckets" {
+  description = "Map of environment names to SBOM S3 bucket IDs"
+  value = {
+    for env in local.sbom_environments :
+    env => aws_s3_bucket.sbom[env].id
+  }
+}
+
+output "sbom_bucket_arns" {
+  description = "Map of environment names to SBOM S3 bucket ARNs"
+  value = {
+    for env in local.sbom_environments :
+    env => aws_s3_bucket.sbom[env].arn
+  }
+}
+
+output "sbom_access_logs_bucket" {
+  description = "S3 bucket for SBOM access logs"
+  value       = aws_s3_bucket.sbom_access_logs.id
+}
