@@ -52,9 +52,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md#paid-contributions) to learn more.
 
 | Size | Amount | Name | Status | Age |
 | ---- | ------ | ---- | ------ | --- |
-| M | $200 | Fix focus order in the search filters sidebar | open, unclaimed! | 2 weeks |
-| L | $400 | Add keyboard navigation to the application status stepper | open, unclaimed! | 3 weeks |
-| XL | $750 | Migrate legacy opportunity cards to the USWDS card component | open, unclaimed! | 2 weeks |
+| L | $400 | [Support sending emails locally](https://github.com/HHS/simpler-grants-gov/issues/10897) | open, unclaimed! | New |
 
 [See a list of all open bounties.](https://github.com/HHS/simpler-grants-gov/issues?q=state%3Aopen%20label%3A%22status%3A%20open%20bounty%22)
 

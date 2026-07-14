@@ -68,7 +68,7 @@ Any claim you already have in progress continues to its normal resolution. After
 > Governance: OS Associate.
 
 ```markdown
-Thanks @handle! Before I can record your claim, I need your **Terms of Service acknowledgment**. Please post the text below as a comment, *then* comment `/claim` again:
+Thanks @handle! Before I can record your claim, I need your [**Terms of Service acknowledgment**](https://github.com/HHS/simpler-grants-gov/blob/main/documentation/bounties/paid-contributor-TOS.md). Please post the text below as a comment, *then* comment `/claim` again:
 
 > I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.
 
@@ -85,7 +85,7 @@ Heads up: for tiebreaker purposes your claim timestamp is set to the time of a *
 ```markdown
 Hi @handle — this claim has had no activity for 14 days, so I've marked it **stale** and reopened the bounty for other contributors.
 
-You can still submit a PR. Just note that if another contributor now claims and submits a valid PR first, the [tiebreaker rules](/documentation/bounties/paid-contributor-TOS.md) apply. If you're actively working and just went quiet, reply here with a progress update and we'll sort it out.
+You can still submit a PR. Just note that if another contributor now claims and submits a valid PR first, the [tiebreaker rules](https://github.com/HHS/simpler-grants-gov/blob/main/documentation/bounties/paid-contributor-TOS.md) apply. If you're actively working and just went quiet, reply here with a progress update and we'll sort it out.
 ```
 
 ---

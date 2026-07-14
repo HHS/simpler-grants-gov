@@ -6,7 +6,11 @@ row; every later state change updates that same row.
 
 ## Drop-in (empty) — for a freshly posted issue
 
+
+
 ```markdown
+This issue has been selected for our paid contributor program. If you wish to claim the bounty offered, add a comment with `/claim` and acknowledge the bounty program's [terms of service](https://github.com/HHS/simpler-grants-gov/blob/main/documentation/bounties/paid-contributor-TOS.md).
+
 | Contributor | ToS Ack | Status | Last Updated | PR | Notes |
 | ----------- | ------- | ------ | ------------ | -- | ----- |
 | _no claims yet_ | | | | | |
