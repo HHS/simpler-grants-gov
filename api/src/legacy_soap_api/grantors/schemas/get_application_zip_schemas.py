@@ -29,9 +29,14 @@ class GetApplicationZipResponseSOAPBody(BaseModel):
 class GetApplicationZipResponseSOAPEnvelope(BaseModel):
     Body: GetApplicationZipResponseSOAPBody
     _mtom_file_stream: Any | None = PrivateAttr(default=None)
+    _content_id: str
 
     def to_soap_envelope_dict(self, operation_name: str) -> dict:
-        envelope_dict = {"Envelope": {"Body": self.Body.model_dump(by_alias=True)}}
+        # We need the _content_id for the header
+        envelope_dict = {
+            "Envelope": {"Body": self.Body.model_dump(by_alias=True)},
+            "_content_id": self._content_id,
+        }
         if self._mtom_file_stream:
             envelope_dict["_mtom_file_stream"] = self._mtom_file_stream
         return envelope_dict

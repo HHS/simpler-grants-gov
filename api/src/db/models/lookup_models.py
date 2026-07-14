@@ -33,6 +33,7 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     JobStatus,
     JobType,
+    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityStatus,
     OrganizationAuditEvent,
@@ -418,6 +419,17 @@ ORGANIZATION_AUDIT_EVENT_CONFIG: LookupConfig[OrganizationAuditEvent] = LookupCo
         LookupStr(OrganizationAuditEvent.USER_ADDED, 1),
         LookupStr(OrganizationAuditEvent.USER_UPDATED, 2),
         LookupStr(OrganizationAuditEvent.USER_REMOVED, 3),
+    ]
+)
+
+OPPORTUNITY_AUDIT_EVENT_CONFIG: LookupConfig[OpportunityAuditEvent] = LookupConfig(
+    [
+        LookupStr(OpportunityAuditEvent.OPPORTUNITY_CREATED, 1),
+        LookupStr(OpportunityAuditEvent.OPPORTUNITY_UPDATED, 2),
+        LookupStr(OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED, 3),
+        LookupStr(OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED, 4),
+        LookupStr(OpportunityAuditEvent.COMPETITION_CREATED, 5),
+        LookupStr(OpportunityAuditEvent.COMPETITION_UPDATED, 6),
     ]
 )
 
@@ -929,3 +941,17 @@ class LkJobType(ApiLookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> LkJobType:
         return LkJobType(job_type_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(OPPORTUNITY_AUDIT_EVENT_CONFIG)
+class LkOpportunityAuditEvent(ApiLookupTable, TimestampMixin):
+    __tablename__ = "lk_opportunity_audit_event"
+
+    opportunity_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkOpportunityAuditEvent:
+        return LkOpportunityAuditEvent(
+            opportunity_audit_event_id=lookup.lookup_val, description=lookup.get_description()
+        )

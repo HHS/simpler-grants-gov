@@ -324,19 +324,20 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
                     break
         finally:
             mtom_file_stream.close()
-        yield b"\n" + boundary.encode("utf-8") + b"--"
+        yield b"\r\n" + boundary.encode("utf-8") + b"--"
 
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
         # MTOM message is assembled here
-        # 1. --uuid: {boundary_uuid}\n
+        # The expected newlines are \r\n instead of \n
+        # 1. --uuid: {boundary_uuid}\r\n
         # 2. headers:
-        #    'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-        #    "Content-Transfer-Encoding: binary\n"
-        #    "Content-ID: <root.message@cxf.apache.org>\n\n"
+        #    'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        #    "Content-Transfer-Encoding: binary\r\n"
+        #    "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
         # 3. MTOM xml body
-        # 4. --uuid: {boundary_uuid}
+        # 4. \r\n--uuid: {boundary_uuid}\r\n
         # 5. the file bytes from the file being attached
-        # 6. --uuid: {boundary_uuid}--
+        # 6. \r\n--uuid: {boundary_uuid}--
         simpler_response_soap_dict = self.get_soap_response_dict(proxy_response)
         mtom_file_stream = simpler_response_soap_dict.pop("_mtom_file_stream", None)
         log_local(
@@ -345,8 +346,6 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         boundary_uuid = str(uuid.uuid4())
         update_headers = {
             "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{boundary_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
-            # TODO: removing till we can confirm GS needs this
-            # "Soapaction": self.operation_config.soap_action,
         }
         boundary = "--uuid:" + boundary_uuid
         mime_message: Iterator[bytes] | bytes = b""
@@ -357,15 +356,30 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             root=self.operation_config.response_operation_name,
         )
         if self.operation_config.response_operation_name != "GetApplicationZipResponse":
-            mime_message += f"\n--uuid:{boundary_uuid}--".encode("utf-8")
+            mime_message += f"\r\n--uuid:{boundary_uuid}--".encode("utf-8")
             return get_soap_response(
                 data=mime_message,
                 headers=update_headers,
             )
         if mtom_file_stream:
-            mime_message += ("\n" + boundary + "\n").encode("utf8")
+            content_id = simpler_response_soap_dict.pop("_content_id", None)
+            mime_message += self.get_mtom_file_stream_header(content_id, boundary)
             return get_soap_response(
                 data=self._gen_response_data(mime_message, boundary, mtom_file_stream),
                 headers=update_headers,
             )
         return proxy_response
+
+    def get_mtom_file_stream_header(self, content_id: str, boundary: str) -> bytes:
+        # The mtom file stream header is formatted like this
+        # Content-Type: application/octet-stream\r\n
+        # Content-Transfer-Encoding: binary\r\n
+        # Content-ID: <{content_id}>\r\n
+        # Content-Disposition: attachment;name="AgencyApplicationDownload.zip"\r\n\r\n
+        return (
+            "\r\n" + boundary + "\r\n"
+            "Content-Type: application/octet-stream\r\n"
+            "Content-Transfer-Encoding: binary\r\n"
+            f"Content-ID: <{content_id}>\r\n"
+            'Content-Disposition: attachment;name="AgencyApplicationDownload.zip"\r\n\r\n'
+        ).encode("utf-8")

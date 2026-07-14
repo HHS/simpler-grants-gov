@@ -2,7 +2,7 @@ import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityRespo
 
 import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
-import { Alert } from "@trussworks/react-uswds";
+import { Alert, Link } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
@@ -11,6 +11,7 @@ type OpportunityDetailsHeaderProps = {
   locale: string;
   children?: ReactNode;
   isNewlyCreated?: boolean;
+  hasBackToOverview?: boolean;
 };
 
 export function OpportunityDetailsHeader({
@@ -18,9 +19,11 @@ export function OpportunityDetailsHeader({
   locale,
   children,
   isNewlyCreated = false,
+  hasBackToOverview = false,
 }: OpportunityDetailsHeaderProps) {
   const t = useTranslations("OpportunityDetailsHeader");
 
+  const opportunityId = opportunityData.opportunity_id;
   const opportunityNumber = opportunityData.opportunity_number ?? "";
   const title = opportunityData.opportunity_title ?? "";
   const agency = opportunityData.top_level_agency_name ?? "";
@@ -48,6 +51,11 @@ export function OpportunityDetailsHeader({
       <div className="grid-container">
         <div className="display-flex flex-justify">
           <div className="flex-1">
+            {hasBackToOverview && (
+              <Link href={"../" + opportunityId + "/overview"}>
+                {t("backToOverview")}
+              </Link>
+            )}
             <h1 className="margin-0 font-heading-2xl margin-bottom-2">
               {t("opportunityNumber", { number: opportunityNumber })}
             </h1>

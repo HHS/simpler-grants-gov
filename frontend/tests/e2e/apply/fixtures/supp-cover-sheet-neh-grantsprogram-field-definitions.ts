@@ -32,6 +32,9 @@ export const SUPP_COVER_SHEET_NEH_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
 ];
 
+// maxLength values sourced from:
+// api/src/form_schema/forms/supplementary_neh_cover_sheet/1/0/form_json.py
+// api/src/form_schema/shared/common_shared.py
 export const fieldDefinitionsSuppCoverSheetNEH: FormFillFieldDefinitions = {
   // ********* Section 1 - Project Director *********
   major_field: {
@@ -53,18 +56,21 @@ export const fieldDefinitionsSuppCoverSheetNEH: FormFillFieldDefinitions = {
   "funding_group--outright_funds": {
     testId: "funding_group--outright_funds",
     type: "text",
+    maxLength: 14, // common_shared.py.budget_monetary_amount
     section: "Project Funding",
     field: "Outright Funds",
   },
   "funding_group--federal_match": {
     testId: "funding_group--federal_match",
     type: "text",
+    maxLength: 14, // common_shared.py.budget_monetary_amount
     section: "Project Funding",
     field: "Federal Match",
   },
   "funding_group--cost_sharing": {
     testId: "funding_group--cost_sharing",
     type: "text",
+    maxLength: 14, // common_shared.py.budget_monetary_amount
     section: "Project Funding",
     field: "Cost Sharing",
   },
@@ -88,6 +94,7 @@ export const fieldDefinitionsSuppCoverSheetNEH: FormFillFieldDefinitions = {
   supplemental_grant_numbers: {
     testId: "application_info--supplemental_grant_numbers",
     type: "text",
+    maxLength: 50, // FORM_JSON_SCHEMA.properties.application_info.properties.supplemental_grant_numbers
     section: "Application Information",
     field: "Supplemental Grant Numbers",
   },

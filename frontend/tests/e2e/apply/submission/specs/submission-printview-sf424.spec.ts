@@ -25,6 +25,7 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
+  validateAttachmentPrintViewSection,
   validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
@@ -172,9 +173,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
         // SF-424 attachments - filenames are in the section, not testId elements, so use the section locator
         if (formKey === "sf424") {
-          const attachmentFileName = (filePath: string) =>
-            filePath.split(/[/\\]/).pop() ?? filePath;
-
           const sf424AttachmentSections = [
             {
               fieldKey: "areas_affected_attachment",
@@ -192,12 +190,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
           for (const { fieldKey, sectionId } of sf424AttachmentSections) {
             if (testData[fieldKey]) {
-              const fileName = attachmentFileName(testData[fieldKey]);
-              await expect(
-                page.locator(`#${sectionId}`).getByRole("listitem"),
-              ).toBeVisible();
-              await expect(page.locator(`#${sectionId}`)).toContainText(
-                fileName,
+              await validateAttachmentPrintViewSection(
+                page,
+                sectionId,
+                testData[fieldKey],
               );
             }
           }

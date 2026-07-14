@@ -272,11 +272,12 @@ export const messages = {
     pageTitle: "Edit opportunity",
     metaDescription:
       "Edit draft opportunity information and non-forecast summary fields.",
-    header: {
-      saveButton: "Save",
-      previewButton: "Preview",
-      publishButton: "Publish",
-      navTitle: "On this page",
+    navTitle: "On this page",
+    button: {
+      backToOverview: "Back to overview page",
+      saveAndExit: "Save and exit",
+      saveAndGoBack: "Save and go back",
+      saveAndContinue: "Save and continue",
     },
     sections: {
       fundingDetails: "Funding details",
@@ -2103,6 +2104,21 @@ export const messages = {
       loading: "Loading...",
       errorLoading: "Error loading submissions. Please try again.",
       editButton: "Edit",
+      bulkEditPageTitle: "Bulk Edit Recommendations",
+      bulkEditMetaDescription:
+        "Bulk edit award recommendations for selected applications",
+      bulkEditTitle: "Bulk Edit Recommendations",
+      selectedApplications: "Selected Applications",
+      submissionsSelected: "submissions selected",
+      bulkEditHeading: "Update Recommendation",
+      bulkEditDescription:
+        "Select a recommendation type to apply to all selected applications.",
+      recommendationType: "Recommendation Type",
+      noSelectionsMessage:
+        "No submissions selected. Please select submissions to edit.",
+      saveButton: "Save",
+      saving: "Saving...",
+      cancelButton: "Cancel",
       columns: {
         appNumber: "App #",
         projectTitle: "Project Title",
@@ -2193,8 +2209,12 @@ export const messages = {
       exceptionDetailDescription:
         "Select one or more applications and explain any exceptions to the general selection method. For example, the reasons for any applications skipped on the merit review ranking or other similar exceptions.",
       fundingHeading: "Funding recommendations",
+      fundingDescription:
+        "Review and provide the updates to recommended funding as needed.",
+      applicationIdLabel: "Application ID",
       amountRequestedLabel: "Amount Requested",
       amountRecommendedLabel: "Amount Recommended",
+      totalLabel: "Total",
     },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
@@ -2562,6 +2582,7 @@ export const messages = {
     subAgency: "Sub-agency:",
     draft: "Draft",
     lastUpdated: "Last updated:",
+    backToOverview: "Back to overview page",
     alerts: {
       newOpportunityHeading: "Opportunity draft started",
       newOpportunityBody:
