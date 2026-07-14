@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 import pytest
 from grants_shared.adapters import db
+from grants_shared.auth.api_key_handler import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 
-from src.auth.api_key_handler import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.services.users.create_api_key import create_api_key
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
