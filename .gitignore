@@ -24,6 +24,7 @@ eggs/
 .eggs/
 lib/
 !api/tests/lib
+!backend/grants_management_api/tests/lib
 lib64/
 parts/
 sdist/
