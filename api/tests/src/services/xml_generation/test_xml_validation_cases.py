@@ -1,6 +1,6 @@
 """XSD validation coverage for the shared XML-generation test cases.
 
-Ported from the ``test-xml-validation`` CLI runner (#10426) so the 45 sample
+Ported from the ``test-xml-validation`` CLI runner (#10426) so the sample
 cases in ``src/services/xml_generation/validation/test_cases.py`` are validated
 against their XSD schemas in CI on every commit. Each case is generated through
 ``XMLGenerationService`` and validated with ``XSDValidator``, mirroring
@@ -50,8 +50,6 @@ def _test_case_params() -> list:
 @pytest.fixture(scope="module")
 def validation_runner() -> ValidationTestRunner:
     """Runner wired to the local XSD directory and the form transform map."""
-    if not XSD_DIR.exists():
-        pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
     init_form_registry()
     return ValidationTestRunner(xsd_dir=XSD_DIR, xml_form_map=_build_xml_form_map())
 
