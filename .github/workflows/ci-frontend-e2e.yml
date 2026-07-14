@@ -398,7 +398,10 @@ jobs:
           current_shard: ${{ matrix.shard }}
           api_logs: ${{ inputs.api_logs && 'true' || 'false' }}
           playwright_tags: ${{ env.test_group_tags }}
-          test_user_manager_api_key: ${{ secrets.LOCAL_TEST_USER_MANAGER_API_KEY }}
+          # Not a secret: the local API seeds the test-user manager with the
+          # committed LOCAL_TEST_USER_MANAGER_API_KEY default from api/local.env,
+          # so the frontend must send that same literal value.
+          test_user_manager_api_key: "local-manager-key"
           # shard 2 is the firefox shard
           do-firefox-install: ${{ matrix.shard == 2 && 'true' || 'false' }}
           # shard 3 is the webkit shard
