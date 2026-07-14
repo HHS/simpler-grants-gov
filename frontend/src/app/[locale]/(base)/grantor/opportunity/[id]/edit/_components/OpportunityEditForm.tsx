@@ -75,7 +75,7 @@ function EligibilityCheckboxGroup({
           <div key={option.value} className="padding-top-05">
             <Checkbox
               id={`${baseId}-${index}`}
-              name="eligibleApplicants"
+              name="applicant_types"
               value={option.value}
               label={eligibilityDisplayLabels[option.value] ?? option.label}
               defaultChecked={initialSelectedValues.includes(option.value)}
@@ -120,14 +120,16 @@ export default function OpportunityEditForm({
   // State for fields that drive conditional show/hide rendering and
   // the publish button enabled state.
   const [fundingCategory, setFundingCategory] = useState(
-    initialValues.fundingCategories,
+    initialValues.funding_categories,
   );
-  const [closeDate, setCloseDate] = useState(initialValues.closeDate);
+  const [closeDate, setCloseDate] = useState(initialValues.close_date);
   const [selectedEligibility, setSelectedEligibility] = useState<string[]>(
-    initialValues.eligibleApplicants,
+    initialValues.applicant_types,
   );
-  const [fundingType, setFundingType] = useState(initialValues.fundingType);
-  const [publishDate, setPublishDate] = useState(initialValues.publishDate);
+  const [fundingType, setFundingType] = useState(
+    initialValues.funding_instruments,
+  );
+  const [publishDate, setPublishDate] = useState(initialValues.post_date);
 
   const [formState, formAction, isPending] = useActionState(
     opportunityEditFormAction,
@@ -170,32 +172,32 @@ export default function OpportunityEditForm({
     if (!form) return;
     const formData = new FormData(form);
     const estTotalFunding = getNumericAmountFromString(
-      formData.get("estimatedTotalProgramFunding") as string | null,
+      formData.get("estimated_total_program_funding") as string | null,
     );
     const awardMin = getNumericAmountFromString(
-      formData.get("awardMinimum") as string | null,
+      formData.get("award_floor") as string | null,
     );
     const awardMax = getNumericAmountFromString(
-      formData.get("awardMaximum") as string | null,
+      formData.get("award_ceiling") as string | null,
     );
     // clear old error messages
-    setSingleFrontendError("awardMinimum", null);
-    setSingleFrontendError("awardMaximum", null);
-    setSingleFrontendError("estimatedTotalProgramFunding", null);
+    setSingleFrontendError("award_floor", null);
+    setSingleFrontendError("award_ceiling", null);
+    setSingleFrontendError("estimated_total_program_funding", null);
     const maxLimit = 1000000000000000;
 
     //--- min & max values for Award Minimum, Award Minimum and Total Program Funding ---
     if (awardMin < 0 || awardMin >= maxLimit) {
       const errMsg = t("validationErrors.awardMinCurrencyInput");
-      setSingleFrontendError("awardMinimum", errMsg);
+      setSingleFrontendError("award_floor", errMsg);
     }
     if (awardMax < 0 || awardMax >= maxLimit) {
       const errMsg = t("validationErrors.awardMaxCurrencyInput");
-      setSingleFrontendError("awardMaximum", errMsg);
+      setSingleFrontendError("award_ceiling", errMsg);
     }
     if (estTotalFunding < 0 || estTotalFunding >= maxLimit) {
       const errMsg = t("validationErrors.totalFundingCurrencyInput");
-      setSingleFrontendError("estimatedTotalProgramFunding", errMsg);
+      setSingleFrontendError("estimated_total_program_funding", errMsg);
     }
   };
 
@@ -237,6 +239,7 @@ export default function OpportunityEditForm({
 
   // CommonCharacterCount fields use onTextChange={() => {}} because they are uncontrolled:
   // values are read from FormData on submit, not tracked in React state.
+
   return (
     <form
       ref={formRef}
@@ -249,24 +252,24 @@ export default function OpportunityEditForm({
       }}
       noValidate
     >
-      <input type="hidden" name="opportunityId" value={opportunityId} />
+      <input type="hidden" name="opportunity_id" value={opportunityId} />
       <input
         type="hidden"
-        name="opportunitySummaryId"
+        name="opportunity_summary_id"
         value={currentSummaryId}
       />
       <input
         type="hidden"
-        name="isForecast"
+        name="is_forecast"
         data-testid="isForecast-input"
         value={isForecast ? "true" : "false"}
       />
-      <input type="hidden" name="title" value={initialValues.title} />
       <input
         type="hidden"
-        name="awardSelectionMethod"
-        value={initialValues.awardSelectionMethod}
+        name="opportunity_title"
+        value={initialValues.opportunity_title}
       />
+      <input type="hidden" name="category" value={initialValues.category} />
 
       {!isDraft ? (
         <div className="margin-top-2">
@@ -370,7 +373,7 @@ export default function OpportunityEditForm({
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("fundingType")}>
                 <DynamicFieldLabel
-                  idFor="funding-type-values"
+                  idFor="funding_instruments"
                   title={t("labels.fundingType")}
                   required
                   description={t("content.fundingTypeHint")}
@@ -379,9 +382,9 @@ export default function OpportunityEditForm({
                   <ErrorMessage>{getFieldError("fundingType")}</ErrorMessage>
                 ) : null}
                 <Select
-                  id="funding-type-values"
-                  name="funding-type-values"
-                  defaultValue={initialValues.fundingType}
+                  id="funding_instruments"
+                  name="funding_instruments"
+                  defaultValue={initialValues.funding_instruments}
                   onChange={(event) => {
                     setFundingType(event.target.value);
                   }}
@@ -408,20 +411,20 @@ export default function OpportunityEditForm({
                   <div className="grid-col-6">
                     <Radio
                       id="cost-sharing-yes"
-                      name="costSharing"
+                      name="is_cost_sharing"
                       label={t("labels.yes")}
                       value="true"
-                      defaultChecked={initialValues.costSharing === true}
+                      defaultChecked={initialValues.is_cost_sharing === true}
                       disabled={!isDraft}
                     />
                   </div>
                   <div className="grid-col-6">
                     <Radio
                       id="cost-sharing-no"
-                      name="costSharing"
+                      name="is_cost_sharing"
                       label={t("labels.no")}
                       value="false"
-                      defaultChecked={initialValues.costSharing === false}
+                      defaultChecked={initialValues.is_cost_sharing === false}
                       disabled={!isDraft}
                     />
                   </div>
@@ -434,7 +437,7 @@ export default function OpportunityEditForm({
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("fundingCategory")}>
                 <DynamicFieldLabel
-                  idFor="funding-category-values"
+                  idFor="funding_categories"
                   title={t("labels.category")}
                   required
                   description={t("content.categoryHint")}
@@ -445,8 +448,8 @@ export default function OpportunityEditForm({
                   </ErrorMessage>
                 ) : null}
                 <Select
-                  id="funding-category-values"
-                  name="funding-category-values"
+                  id="funding_categories"
+                  name="funding_categories"
                   value={fundingCategory}
                   onChange={(event) => {
                     setFundingCategory(event.target.value);
@@ -471,10 +474,10 @@ export default function OpportunityEditForm({
                 isTextArea={true}
                 labelText={t("labels.fundingCategoryExplanation")}
                 description={t("content.fundingCategoryExplanationHint")}
-                fieldId="fundingCategoryExplanation"
+                fieldId="funding_category_description"
                 fieldMaxLength={2500}
                 isRequired={false}
-                defaultValue={initialValues.fundingCategoryExplanation}
+                defaultValue={initialValues.funding_category_description}
                 onTextChange={() => {}}
                 disabled={!isDraft}
               />
@@ -485,7 +488,7 @@ export default function OpportunityEditForm({
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("expectedNumberOfAwards")}>
                 <DynamicFieldLabel
-                  idFor="expected-number-of-awards"
+                  idFor="expected_number_of_awards"
                   title={t("labels.expectedNumberOfAwards")}
                   description={t("content.expectedNumberOfAwardsHint")}
                 />
@@ -495,21 +498,19 @@ export default function OpportunityEditForm({
                   </ErrorMessage>
                 ) : null}
                 <TextInput
-                  id="expected-number-of-awards"
-                  name="expectedNumberOfAwards"
+                  id="expected_number_of_awards"
+                  name="expected_number_of_awards"
                   type="text"
-                  defaultValue={initialValues.expectedNumberOfAwards}
+                  defaultValue={initialValues.expected_number_of_awards}
                   className="width-full"
                   disabled={!isDraft}
                 />
               </FormGroup>
             </div>
             <div className="tablet:grid-col-6">
-              <FormGroup
-                error={!!getFieldError("estimatedTotalProgramFunding")}
-              >
+              <FormGroup error={!!getFieldError("est")}>
                 <DynamicFieldLabel
-                  idFor="estimated-total-program-funding"
+                  idFor="estimated_total_program_funding"
                   title={t("labels.estimatedTotalProgramFunding")}
                   description={t("content.estimatedTotalProgramFundingHint")}
                 />
@@ -519,11 +520,11 @@ export default function OpportunityEditForm({
                   </ErrorMessage>
                 ) : null}
                 <TextInput
-                  id="estimated-total-program-funding"
-                  name="estimatedTotalProgramFunding"
+                  id="estimated_total_program_funding"
+                  name="estimated_total_program_funding"
                   type="text"
                   defaultValue={formatNumber(
-                    initialValues.estimatedTotalProgramFunding,
+                    initialValues.estimated_total_program_funding,
                   )}
                   onBlur={singleFieldValidation}
                   className="width-full"
@@ -537,7 +538,7 @@ export default function OpportunityEditForm({
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("awardMinimum")}>
                 <DynamicFieldLabel
-                  idFor="award-minimum"
+                  idFor="award_floor"
                   title={t("labels.awardMinimum")}
                   description={t("content.awardMinimumHint")}
                 />
@@ -545,10 +546,10 @@ export default function OpportunityEditForm({
                   <ErrorMessage>{getFieldError("awardMinimum")}</ErrorMessage>
                 ) : null}
                 <TextInput
-                  id="award-minimum"
-                  name="awardMinimum"
+                  id="award_floor"
+                  name="award_floor"
                   type="text"
-                  defaultValue={formatNumber(initialValues.awardMinimum)}
+                  defaultValue={formatNumber(initialValues.award_floor)}
                   onBlur={singleFieldValidation}
                   className="width-full"
                   disabled={!isDraft}
@@ -558,7 +559,7 @@ export default function OpportunityEditForm({
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("awardMaximum")}>
                 <DynamicFieldLabel
-                  idFor="award-maximum"
+                  idFor="award_ceiling"
                   title={t("labels.awardMaximum")}
                   description={t("content.awardMaximumHint")}
                 />
@@ -566,10 +567,10 @@ export default function OpportunityEditForm({
                   <ErrorMessage>{getFieldError("awardMaximum")}</ErrorMessage>
                 ) : null}
                 <TextInput
-                  id="award-maximum"
-                  name="awardMaximum"
+                  id="award_ceiling"
+                  name="award_ceiling"
                   type="text"
-                  defaultValue={formatNumber(initialValues.awardMaximum)}
+                  defaultValue={formatNumber(initialValues.award_ceiling)}
                   onBlur={singleFieldValidation}
                   className="width-full"
                   disabled={!isDraft}
@@ -582,7 +583,7 @@ export default function OpportunityEditForm({
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("publishDate")}>
                 <DynamicFieldLabel
-                  idFor="publish-date"
+                  idFor="post_date"
                   title={t("labels.publishDate")}
                   required
                   description={t("content.publishDateHint")}
@@ -591,9 +592,9 @@ export default function OpportunityEditForm({
                   <ErrorMessage>{getFieldError("publishDate")}</ErrorMessage>
                 ) : null}
                 <DatePicker
-                  id="publish-date"
-                  name="publishDate"
-                  defaultValue={initialValues.publishDate}
+                  id="post_date"
+                  name="post_date"
+                  defaultValue={initialValues.post_date}
                   placeholder="mm/dd/yyyy"
                   onChange={(value) => {
                     setPublishDate(value ?? "");
@@ -606,7 +607,7 @@ export default function OpportunityEditForm({
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("closeDate")}>
                 <DynamicFieldLabel
-                  idFor="close-date"
+                  idFor="close_date"
                   title={t("labels.closeDate")}
                   description={t("content.closeDateHint")}
                 />
@@ -614,9 +615,9 @@ export default function OpportunityEditForm({
                   <ErrorMessage>{getFieldError("closeDate")}</ErrorMessage>
                 ) : null}
                 <DatePicker
-                  id="close-date"
-                  name="closeDate"
-                  defaultValue={initialValues.closeDate}
+                  id="close_date"
+                  name="close_date"
+                  defaultValue={initialValues.close_date}
                   placeholder="mm/dd/yyyy"
                   onChange={(value) => setCloseDate(value ?? "")}
                   className="width-full"
@@ -630,14 +631,14 @@ export default function OpportunityEditForm({
             <div className="width-full">
               <FormGroup>
                 <DynamicFieldLabel
-                  idFor="close-date-explanation"
+                  idFor="close_date_description"
                   title={t("labels.closeDateExplanation")}
                   description={t("content.closeDateExplanationHint")}
                 />
                 <Textarea
-                  id="close-date-explanation"
-                  name="closeDateExplanation"
-                  defaultValue={initialValues.closeDateExplanation}
+                  id="close_date_description"
+                  name="close_date_description"
+                  defaultValue={initialValues.close_date_description}
                   rows={5}
                   className="width-full"
                   disabled={!isDraft}
@@ -664,7 +665,7 @@ export default function OpportunityEditForm({
         <div className="display-flex flex-column gap-3">
           <FormGroup error={!!getFieldError("eligibleApplicants")}>
             <DynamicFieldLabel
-              idFor="eligible-applicants-values"
+              idFor="applicant_types"
               title={t("labels.eligibleApplicants")}
               required
               description={t("content.eligibleApplicantsHint")}
@@ -681,7 +682,7 @@ export default function OpportunityEditForm({
                   title={t("labels.eligibilityBusiness")}
                   options={eligibilityGroups.business}
                   baseId="eligible-business"
-                  initialSelectedValues={initialValues.eligibleApplicants}
+                  initialSelectedValues={initialValues.applicant_types}
                   onToggle={handleEligibilityToggle}
                   disabled={!isDraft}
                 />
@@ -689,7 +690,7 @@ export default function OpportunityEditForm({
                   title={t("labels.eligibilityEducation")}
                   options={eligibilityGroups.education}
                   baseId="eligible-education"
-                  initialSelectedValues={initialValues.eligibleApplicants}
+                  initialSelectedValues={initialValues.applicant_types}
                   onToggle={handleEligibilityToggle}
                   disabled={!isDraft}
                 />
@@ -697,7 +698,7 @@ export default function OpportunityEditForm({
                   title={t("labels.eligibilityGovernment")}
                   options={eligibilityGroups.government}
                   baseId="eligible-government"
-                  initialSelectedValues={initialValues.eligibleApplicants}
+                  initialSelectedValues={initialValues.applicant_types}
                   onToggle={handleEligibilityToggle}
                   disabled={!isDraft}
                 />
@@ -709,7 +710,7 @@ export default function OpportunityEditForm({
                   title={t("labels.eligibilityNonprofit")}
                   options={eligibilityGroups.nonprofit}
                   baseId="eligible-nonprofit"
-                  initialSelectedValues={initialValues.eligibleApplicants}
+                  initialSelectedValues={initialValues.applicant_types}
                   onToggle={handleEligibilityToggle}
                   disabled={!isDraft}
                 />
@@ -717,7 +718,7 @@ export default function OpportunityEditForm({
                   title={t("labels.eligibilityMiscellaneous")}
                   options={eligibilityGroups.miscellaneous}
                   baseId="eligible-misc"
-                  initialSelectedValues={initialValues.eligibleApplicants}
+                  initialSelectedValues={initialValues.applicant_types}
                   onToggle={handleEligibilityToggle}
                   disabled={!isDraft}
                 />
@@ -732,10 +733,10 @@ export default function OpportunityEditForm({
                 isTextArea={true}
                 labelText={t("labels.additionalEligibilityInfo")}
                 description={t("content.additionalEligibilityInfoHint")}
-                fieldId="additionalEligibilityInfo"
+                fieldId="applicant_eligibility_description"
                 fieldMaxLength={4000}
                 isRequired={false}
-                defaultValue={initialValues.additionalEligibilityInfo}
+                defaultValue={initialValues.applicant_eligibility_description}
                 onTextChange={() => {}}
                 rawErrors={
                   getFieldError("additionalEligibilityInfo")
@@ -768,10 +769,10 @@ export default function OpportunityEditForm({
               isTextArea={true}
               labelText={t("labels.description")}
               description={t("content.descriptionHint")}
-              fieldId="description"
+              fieldId="summary_description"
               fieldMaxLength={1800}
               isRequired={false}
-              defaultValue={initialValues.description}
+              defaultValue={initialValues.summary_description}
               onTextChange={() => {}}
               rawErrors={
                 getFieldError("description")
@@ -788,10 +789,10 @@ export default function OpportunityEditForm({
                 inputType="url"
                 labelText={t("labels.additionalInfoUrl")}
                 description={t("content.additionalInfoUrlHint")}
-                fieldId="additionalInfoUrl"
+                fieldId="additional_info_url"
                 fieldMaxLength={250}
                 isRequired={false}
-                defaultValue={initialValues.additionalInfoUrl}
+                defaultValue={initialValues.additional_info_url}
                 onTextChange={() => {}}
                 rawErrors={
                   getFieldError("additionalInfoUrl")
@@ -805,10 +806,10 @@ export default function OpportunityEditForm({
               <CommonCharacterCount
                 labelText={t("labels.additionalInfoUrlText")}
                 description={t("content.additionalInfoUrlTextHint")}
-                fieldId="additionalInfoUrlText"
+                fieldId="additional_info_url_description"
                 fieldMaxLength={250}
                 isRequired={false}
-                defaultValue={initialValues.additionalInfoUrlText}
+                defaultValue={initialValues.additional_info_url_description}
                 onTextChange={() => {}}
                 rawErrors={
                   getFieldError("additionalInfoUrlText")
@@ -825,10 +826,10 @@ export default function OpportunityEditForm({
               isTextArea={true}
               labelText={t("labels.grantorContactDetails")}
               description={t("content.grantorContactDetailsHint")}
-              fieldId="grantorContactDetails"
+              fieldId="agency_contact_description"
               fieldMaxLength={1000}
               isRequired={false}
-              defaultValue={initialValues.grantorContactDetails}
+              defaultValue={initialValues.agency_contact_description}
               onTextChange={() => {}}
               rawErrors={
                 getFieldError("grantorContactDetails")
@@ -845,10 +846,10 @@ export default function OpportunityEditForm({
                 inputType="email"
                 labelText={t("labels.contactEmail")}
                 description={t("content.contactEmailHint")}
-                fieldId="contactEmail"
+                fieldId="agency_email_address"
                 fieldMaxLength={130}
                 isRequired={false}
-                defaultValue={initialValues.contactEmail}
+                defaultValue={initialValues.agency_email_address}
                 onTextChange={() => {}}
                 rawErrors={
                   getFieldError("contactEmail")
@@ -862,10 +863,10 @@ export default function OpportunityEditForm({
               <CommonCharacterCount
                 labelText={t("labels.contactEmailText")}
                 description={t("content.contactEmailTextHint")}
-                fieldId="contactEmailText"
+                fieldId="agency_email_address_description"
                 fieldMaxLength={108}
                 isRequired={false}
-                defaultValue={initialValues.contactEmailText}
+                defaultValue={initialValues.agency_email_address_description}
                 onTextChange={() => {}}
                 rawErrors={
                   getFieldError("contactEmailText")
