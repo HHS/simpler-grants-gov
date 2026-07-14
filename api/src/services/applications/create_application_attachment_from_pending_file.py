@@ -82,13 +82,11 @@ def create_application_attachment_from_pending_file(
         secure_file_name, application_id, application_attachment_id
     )
 
-    # Move (not copy) — pending file is consumed; its status is set to PROCESSED
-    move_pending_file_to_destination(pending_file, s3_file_location)
+    # Get file size
+    file_size_bytes = file_util.get_file_length_bytes(pending_file.file_location)
 
-    # Retrieve file size from S3 after the move
-    file_size_bytes = file_util.get_file_length_bytes(s3_file_location)
-
-    # Persist attachment record
+    # Persist attachment record before moving the file so that if any DB
+    # operation fails the pending file remains in its original location.
     application_attachment = ApplicationAttachment(
         application_attachment_id=application_attachment_id
     )
@@ -107,5 +105,9 @@ def create_application_attachment_from_pending_file(
         audit_event=ApplicationAuditEvent.ATTACHMENT_ADDED,
         target_attachment=application_attachment,
     )
+
+    # Move (not copy) after all DB operations — pending file is consumed and
+    # its status is set to PROCESSED.
+    move_pending_file_to_destination(pending_file, s3_file_location)
 
     return application_attachment
