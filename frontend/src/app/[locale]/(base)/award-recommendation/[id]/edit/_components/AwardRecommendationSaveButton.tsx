@@ -4,13 +4,7 @@ import { saveAwardRecommendation } from "src/app/[locale]/(base)/award-recommend
 import { useSnackbar } from "src/hooks/useSnackbar";
 
 import { useTranslations } from "next-intl";
-import {
-  MouseEvent,
-  startTransition,
-  useActionState,
-  useEffect,
-  useState,
-} from "react";
+import { MouseEvent, startTransition, useActionState, useEffect } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 interface AwardRecommendationSaveButtonProps {
@@ -27,17 +21,18 @@ export default function AwardRecommendationSaveButton({
   );
   const { hideSnackbar, snackbarIsVisible, showSnackbar, Snackbar } =
     useSnackbar();
-  const [message, setMessage] = useState("");
+
+  const feedbackMessage = state.success
+    ? t("save.success")
+    : state.errorMessage
+      ? t("save.error")
+      : "";
 
   useEffect(() => {
-    if (state.success) {
-      setMessage(t("save.success"));
-      showSnackbar();
-    } else if (state.errorMessage) {
-      setMessage(t("save.error"));
+    if (state.success || state.errorMessage) {
       showSnackbar();
     }
-  }, [state, showSnackbar, t]);
+  }, [state.success, state.errorMessage, showSnackbar]);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     const form = event.currentTarget.closest("form");
@@ -60,7 +55,7 @@ export default function AwardRecommendationSaveButton({
         {label}
       </Button>
       <Snackbar isVisible={snackbarIsVisible} close={hideSnackbar}>
-        {message}
+        {feedbackMessage}
       </Snackbar>
     </>
   );
