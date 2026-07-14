@@ -65,7 +65,6 @@ test.describe("Grantor opportunity overview happy path - initial state", () => {
 
       // Define commonly used values for assertions and form filling at the beginning of the test for better readability of the scenario steps.
       const fillData = buildOpportunityHappyPathFillData(new Date());
-      // const opportunityTitle = fillData.opportunityTitle;
 
       //--------------Scenario steps start here----------------
 
