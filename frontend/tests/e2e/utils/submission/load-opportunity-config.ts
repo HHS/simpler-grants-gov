@@ -1,3 +1,5 @@
+import { ATTACHMENT_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/attachment-data";
+import { ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/attachment-field-definitions";
 import { PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-abstract-summary-data";
 import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import { SF424_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424-data";
@@ -21,6 +23,7 @@ import type {
  * Add a new entry here when a new form type is introduced.
  */
 const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
+  ATTACHMENT_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
   SF424_OPPORTUNITY_DATA,
   SF424A_OPPORTUNITY_DATA,
@@ -33,6 +36,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
  * Add a new entry here when a new form type is introduced.
  */
 const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
+  attachment: ATTACHMENT_FORM_CONFIG,
   projectAbstractSummary: PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,
   sf424: SF424_FORM_CONFIG,
   sf424a: SF424A_FORM_CONFIG,
