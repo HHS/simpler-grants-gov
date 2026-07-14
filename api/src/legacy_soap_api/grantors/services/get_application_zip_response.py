@@ -23,9 +23,8 @@ def get_application_zip_response(
     get_application_zip_request: grantor_schemas.GetApplicationZipRequest,
     soap_config: SOAPOperationConfig,
 ) -> grantor_schemas.GetApplicationZipResponseSOAPEnvelope:
-    xop_data_instance = grantor_schemas.XOPIncludeData(
-        **{"@href": f"cid:{uuid.uuid4()}-0001@apply.grants.gov"}
-    )
+    content_id = f"{uuid.uuid4()}-1@apply.grants.gov"
+    xop_data_instance = grantor_schemas.XOPIncludeData(**{"@href": f"cid:{content_id}"})
     file_handler_instance = grantor_schemas.FileDataHandler(**{"xop:Include": xop_data_instance})
     get_response_instance = grantor_schemas.GetApplicationZipResponse(
         **{"ns2:FileDataHandler": file_handler_instance}
@@ -35,6 +34,7 @@ def get_application_zip_response(
             **{"ns2:GetApplicationZipResponse": get_response_instance}
         )
     )
+    schema._content_id = content_id
     legacy_tracking_number = get_application_zip_request.grants_gov_tracking_number
     if not legacy_tracking_number:
         return schema

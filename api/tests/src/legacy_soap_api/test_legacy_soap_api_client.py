@@ -466,14 +466,37 @@ class TestSimplerSOAPGetApplicationZip:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                '--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\nContent-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org'
-                '>\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><ns2:GetApplicationZipResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns11="htt'
-                'p://schemas.xmlsoap.org/wsdl/" xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" xmlns'
-                ':ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" xmlns:ns6="http://apply.grants.gov/system/GrantsP'
-                'ackage-V1.0" xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" xmlns:ns3="http://apply.grants.gov'
-                '/system/GrantsTemplate-V1.0" xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0"><ns2:FileDataHandler>'
-                '<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb-0001@apply.grants.gov"/></ns2:FileDataHandler></ns2:GetApplicationZipResp'
-                f"onse></soap:Body></soap:Envelope>\r\n--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\n{submission_text}\r\n--uuid:cccccccc-1111-2222-3333-dddddddddddd--"
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+                '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+                "<soap:Body>"
+                "<ns2:GetApplicationZipResponse "
+                'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+                'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+                'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+                'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+                'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+                'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+                'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+                'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+                'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+                'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+                'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+                "<ns2:FileDataHandler>"
+                '<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb-1@apply.grants.gov"/>'
+                "</ns2:FileDataHandler>"
+                "</ns2:GetApplicationZipResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>\r\n"
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\n"
+                "Content-Type: application/octet-stream\r\n"
+                "Content-Transfer-Encoding: binary\r\n"
+                f"Content-ID: <{CID_UUID}-1@apply.grants.gov>\r\n"
+                'Content-Disposition: attachment;name="AgencyApplicationDownload.zip"\r\n\r\n'
+                f"{submission_text}\r\n"
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd--"
             ).encode("utf-8")
             assert isinstance(result.data, Iterator)
             assert b"".join(list(result.data)) == expected
