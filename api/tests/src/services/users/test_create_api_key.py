@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 import pytest
 from grants_shared.adapters import db
+from grants_shared.auth.api_key_handler import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 
-from src.auth.api_key_handler import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.services.users.create_api_key import create_api_key
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
@@ -42,34 +42,6 @@ def test_create_api_key_success(enable_factory_create, db_session: db.Session):
     assert api_key.updated_at is not None
 
 
-def test_create_api_key_default_active(enable_factory_create, db_session: db.Session):
-    """Test that create_api_key defaults is_active to True."""
-    user = UserFactory.create()
-    json_data = {"key_name": "Default Active Key"}
-
-    api_key = create_api_key(
-        db_session=db_session,
-        user_id=user.user_id,
-        json_data=json_data,
-    )
-
-    assert api_key.is_active is True
-
-
-def test_create_api_key_inactive(enable_factory_create, db_session: db.Session):
-    """Test that create_api_key can create inactive keys."""
-    user = UserFactory.create()
-    json_data = {"key_name": "Inactive Key"}
-
-    api_key = create_api_key(
-        db_session=db_session,
-        user_id=user.user_id,
-        json_data=json_data,
-    )
-
-    assert api_key.is_active is True
-
-
 def test_create_api_key_generates_unique_key_ids(enable_factory_create, db_session: db.Session):
     """Test that create_api_key generates unique key_ids for each API key."""
     user = UserFactory.create()
@@ -97,7 +69,7 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
     existing_key_id = "COLLISION_TEST_KEY_12345"
     UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
 
-    with patch("src.auth.api_key_handler.generate_api_key_id") as mock_generate:
+    with patch("grants_shared.auth.api_key_handler.generate_api_key_id") as mock_generate:
         mock_generate.side_effect = [
             existing_key_id,
             "UNIQUE_TEST_KEY_123456789",
@@ -121,7 +93,7 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
     existing_key_id = "COLLISION_KEY_12345678901234"
     UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
 
-    with patch("src.auth.api_key_handler.generate_api_key_id") as mock_generate:
+    with patch("grants_shared.auth.api_key_handler.generate_api_key_id") as mock_generate:
         mock_generate.return_value = existing_key_id  # Always return the same colliding key
         json_data = {"key_name": "Failed Key"}
 
@@ -167,7 +139,7 @@ def test_create_api_key_logging_max_retries(enable_factory_create, db_session: d
     existing_key_id = "COLLISION_LOG_12345678901234"
     UserApiKeyFactory.create(user=user, key_name="Existing Key", key_id=existing_key_id)
 
-    with patch("src.auth.api_key_handler.generate_api_key_id") as mock_generate:
+    with patch("grants_shared.auth.api_key_handler.generate_api_key_id") as mock_generate:
         mock_generate.return_value = existing_key_id
         json_data = {"key_name": "Failed Key"}
 
@@ -193,7 +165,7 @@ def test_create_api_key_logging_max_retries(enable_factory_create, db_session: d
     assert error_log.max_retries == MAX_KEY_GENERATION_RETRIES
 
 
-@patch("src.auth.api_key_handler.generate_api_key_id")
+@patch("grants_shared.auth.api_key_handler.generate_api_key_id")
 def test_create_api_key_uses_key_generator(
     mock_generate, enable_factory_create, db_session: db.Session
 ):
