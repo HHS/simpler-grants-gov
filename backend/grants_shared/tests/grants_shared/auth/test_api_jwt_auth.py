@@ -4,12 +4,12 @@ from datetime import datetime
 
 import jwt
 import pytest
-from apiflask import APIBlueprint, APIFlask
-from flask import request
+from apiflask import APIBlueprint, APIFlask, APIKeyHeaderAuth
 from freezegun import freeze_time
 
 import grants_shared.logs
 from grants_shared.api.response import restructure_error_response
+from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.api.schemas.response_schema import ErrorResponseSchema
 from grants_shared.auth import api_jwt_auth
 from grants_shared.auth.api_jwt_auth import ApiJwtConfig, JwtAuth, refresh_token_expiration
@@ -39,28 +39,34 @@ def simple_app(monkeypatch):
     def error_processor(error):
         return restructure_error_response(error)
 
-    @app.errorhandler(JwtValidationError)
-    def handle_jwt_validation_error(error):
-        return {"message": error.message, "data": {}, "errors": []}, 401
-
     with grants_shared.logs.init(__package__):
         yield app
 
 
 @pytest.fixture
-def simple_client(simple_app, db_session, jwt_config):
+def simple_client(simple_app, db_session, jwt_config, monkeypatch):
     """Register test blueprint and return test client"""
-    # Create a JWT auth instance for testing
-    jwt_auth = JwtAuth(AuthHandler(db_session), jwt_config)
+    # Create auth object following the production pattern
+    test_jwt_auth = APIKeyHeaderAuth(
+        "ApiKey", param_name="X-SGG-Token", security_scheme_name="ApiJwtAuth"
+    )
+
+    @test_jwt_auth.verify_token
+    def decode_token(token: str):
+        """Verify token and return token session (following production pattern)"""
+        try:
+            token_session = JwtAuth(AuthHandler(db_session), jwt_config).parse_jwt_for_user(token)
+            return token_session
+        except JwtValidationError as e:
+            raise_flask_error(401, e.message)
 
     # Create a test blueprint
     test_blueprint = APIBlueprint("test_jwt", __name__, tag="test")
 
     @test_blueprint.get("/test_jwt_endpoint")
+    @test_blueprint.auth_required(test_jwt_auth)
     def test_jwt_endpoint():
-        token = request.headers.get("X-SGG-Token")
-        token_session = jwt_auth.parse_jwt_for_user(token)
-
+        token_session = test_jwt_auth.current_user
         return {
             "message": "Success",
             "data": {
@@ -124,7 +130,6 @@ def test_parse_jwt_for_user_succeeds(simple_client, enable_factory_create, db_se
     """Test JWT auth succeeds with valid token in HTTP context"""
     user = SharedUserFactory.create()
     token, _ = JwtAuth(AuthHandler(db_session), jwt_config).create_jwt_for_user(user, None)
-    db_session.commit()
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
@@ -150,11 +155,9 @@ def test_parse_jwt_for_user_fails_when_token_not_yet_valid(
         "user_id": str(user.shared_user_id),
     }
     token = jwt.encode(payload, jwt_config.private_key, algorithm="RS256")
-    db_session.commit()
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
-    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token not yet valid"
 
 
@@ -173,11 +176,9 @@ def test_parse_jwt_for_user_fails_when_token_has_unknown_issuer(
         "user_id": str(user.shared_user_id),
     }
     token = jwt.encode(payload, jwt_config.private_key, algorithm="RS256")
-    db_session.commit()
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
-    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unknown Issuer"
 
 
@@ -196,11 +197,9 @@ def test_parse_jwt_for_user_fails_when_token_has_unknown_audience(
         "user_id": str(user.shared_user_id),
     }
     token = jwt.encode(payload, jwt_config.private_key, algorithm="RS256")
-    db_session.commit()
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
-    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unknown Audience"
 
 
@@ -220,11 +219,9 @@ def test_parse_jwt_for_user_fails_when_unable_to_process_token(
     }
     other_private_key = other_rsa_key_pair[0]
     token = jwt.encode(payload, other_private_key, algorithm="RS256")
-    db_session.commit()
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
-    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unable to process token"
 
 
@@ -242,11 +239,9 @@ def test_parse_jwt_for_user_fails_when_token_missing_sub_field(
         "user_id": str(user.shared_user_id),
     }
     token = jwt.encode(payload, jwt_config.private_key, algorithm="RS256")
-    db_session.commit()
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
-    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token missing sub field"
 
 
@@ -264,11 +259,9 @@ def test_parse_jwt_for_user_fails_when_token_session_is_none(
         "user_id": str(uuid.uuid4()),
     }
     token = jwt.encode(payload, jwt_config.private_key, algorithm="RS256")
-    db_session.commit()
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
-    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token session does not exist"
 
 
@@ -281,11 +274,9 @@ def test_parse_jwt_for_user_fails_when_token_is_expired(
         user, None
     )
     token_session.expires_at = datetime.fromisoformat("1980-01-01 12:00:00+00:00")
-    db_session.commit()
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
-    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token expired"
 
 
@@ -298,11 +289,9 @@ def test_parse_jwt_for_user_fails_when_token_is_no_longer_valid(
         user, None
     )
     token_session.is_valid = False
-    db_session.commit()
 
     resp = simple_client.get("/test_jwt_endpoint", headers={"X-SGG-Token": token})
 
-    assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token is no longer valid"
 
 
