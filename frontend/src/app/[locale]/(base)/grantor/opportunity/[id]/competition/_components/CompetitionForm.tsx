@@ -1,5 +1,6 @@
 "use client";
 
+import { AgencyContact } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/AgencyContact";
 import { OpenAndCloseDates } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/OpenAndCloseDates";
 import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
 
@@ -29,6 +30,10 @@ export function CompetitionForm({
     {
       text: t("sectionSubmissionSetUp.header"),
       href: "submission-set-up",
+    },
+    {
+      text: t("sectionAgencyContact.header"),
+      href: "agency-contact",
     },
     {
       text: t("sectionOpenAndCloseDates.header"),
@@ -62,6 +67,7 @@ export function CompetitionForm({
                 {t("applicationRequirementsSubheader")}
               </p>
               <SubmissionSetUp />
+              <AgencyContact />
               <OpenAndCloseDates />
             </div>
             <div className="display-flex flex-justify margin-top-4">

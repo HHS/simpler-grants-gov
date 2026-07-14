@@ -49,14 +49,16 @@ def setup_application_submission(
     application_status=ApplicationStatus.ACCEPTED,
     opportunity_assistance_listing=True,
     has_organization=True,
-    legacy_competition_id=1,
+    legacy_competition_id=1001,
     submitted_at=DT_EST_AWARE,
+    public_competition_id="ABC-134-56789",
 ):
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
     competition = CompetitionFactory(
         opportunity=opportunity,
         legacy_package_id=legacy_package_id,
         legacy_competition_id=legacy_competition_id,
+        public_competition_id=public_competition_id,
         opportunity_assistance_listing=(
             OpportunityAssistanceListingFactory.create(opportunity=opportunity)
             if opportunity_assistance_listing
@@ -148,6 +150,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Validated",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": application.competition.legacy_package_id,
+                                "CompetitionID": f"{application.competition.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
@@ -407,6 +410,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Validated",
             "SubmissionTitle": submission_1.application.application_name,
             "PackageID": submission_1.application.competition.legacy_package_id,
+            "CompetitionID": f"{submission_1.application.competition.public_competition_id}",
             "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
@@ -420,6 +424,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Received",
             "SubmissionTitle": submission_2.application.application_name,
             "PackageID": submission_2.application.competition.legacy_package_id,
+            "CompetitionID": f"{submission_2.application.competition.public_competition_id}",
             "ns2:ReceivedDateTime": "2025-08-01T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
@@ -515,6 +520,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Validated",
             "SubmissionTitle": submission_1.application.application_name,
             "PackageID": submission_1.application.competition.legacy_package_id,
+            "CompetitionID": f"{submission_1.application.competition.public_competition_id}",
             "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
@@ -528,6 +534,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Received",
             "SubmissionTitle": submission_2.application.application_name,
             "PackageID": submission_2.application.competition.legacy_package_id,
+            "CompetitionID": f"{submission_2.application.competition.public_competition_id}",
             "ns2:ReceivedDateTime": "2025-08-01T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
@@ -643,6 +650,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
+                                "CompetitionID": f"{competition.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
@@ -733,6 +741,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
+                                "CompetitionID": f"{competition.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": f"{'Yes' if application.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
@@ -825,6 +834,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application_1.application_name,
                                 "PackageID": competition_1.legacy_package_id,
+                                "CompetitionID": f"{competition_1.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": f"{'Yes' if application_1.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
@@ -916,6 +926,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application_1.application_name,
                                 "PackageID": competition_1.legacy_package_id,
+                                "CompetitionID": f"{competition_1.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": f"{'Yes' if application_1.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
@@ -1010,6 +1021,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
+                                "CompetitionID": f"{competition.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": f"{'Yes' if sam_gov_entity.has_debt_subject_to_offset else 'No'}",
@@ -1104,6 +1116,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
+                                "CompetitionID": f"{competition.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
@@ -1198,6 +1211,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
+                                "CompetitionID": f"{competition.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
@@ -1300,6 +1314,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
+                                "CompetitionID": f"{competition.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
@@ -1318,12 +1333,14 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
     ):
         agency = AgencyFactory.create()
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
-        competition = CompetitionFactory(
+        competition = CompetitionFactory.create(
             opportunity=opportunity,
             legacy_package_id="PKG00118065",
+            legacy_competition_id=1001,
             opportunity_assistance_listing=OpportunityAssistanceListingFactory.create(
                 opportunity=opportunity
             ),
+            public_competition_id="ABC-012",
         )
         application = ApplicationFactory.create(
             competition=competition,
@@ -1345,11 +1362,13 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         db_session.refresh(competition)
         db_session.refresh(application)
         opportunity_1 = OpportunityFactory.create(agency_code=agency.agency_code)
-        competition_1 = CompetitionFactory(
+        competition_1 = CompetitionFactory.create(
             opportunity=opportunity_1,
             opportunity_assistance_listing=OpportunityAssistanceListingFactory.create(
                 opportunity=opportunity_1
             ),
+            legacy_competition_id=1002,
+            public_competition_id="ABC-123",
         )
         application_1 = ApplicationFactory.create(
             competition=competition_1,
@@ -1359,11 +1378,13 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         ApplicationSubmissionFactory.create(application=application_1)
         opportunity_2 = OpportunityFactory.create(agency_code=agency.agency_code)
-        competition_2 = CompetitionFactory(
+        competition_2 = CompetitionFactory.create(
             opportunity=opportunity_2,
             opportunity_assistance_listing=OpportunityAssistanceListingFactory.create(
                 opportunity=opportunity_2
             ),
+            legacy_competition_id=1003,
+            public_competition_id="ABC-456",
         )
         application_2 = ApplicationFactory.create(
             competition=competition_2,
@@ -1422,6 +1443,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
+                                "CompetitionID": f"{competition.public_competition_id}",
                                 "SubmissionMethod": "web",
                             }
                         ],
@@ -1597,6 +1619,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
+                                "CompetitionID": f"{competition.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                             }
@@ -1758,6 +1781,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
+                                "CompetitionID": f"{competition.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
@@ -1852,6 +1876,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
+                                "CompetitionID": f"{competition.public_competition_id}",
                                 "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
@@ -1872,7 +1897,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         agency = AgencyFactory.create()
         submission = setup_application_submission(
             agency,
-            legacy_competition_id=1,
+            legacy_competition_id=1234,
             application_status=ApplicationStatus.SUBMITTED,
         )
         user, role, soap_client_certificate, _ = setup_cert_user(
@@ -1884,8 +1909,8 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             soap_action=f"{GRANTOR_SOAP_ACTION_PATH}/GetSubmissionListExpanded",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
-        setup_application_submission(agency, legacy_competition_id=2)
-        setup_application_submission(agency, legacy_competition_id=3)
+        setup_application_submission(agency, legacy_competition_id=2345)
+        setup_application_submission(agency, legacy_competition_id=3456)
         application = submission.application
         competition = application.competition
         request_xml = (
@@ -1895,7 +1920,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "<agen:GetSubmissionListExpandedRequest>"
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>CompetitionID</gran:FilterType>"
-            f"<gran:FilterValue>{competition.legacy_competition_id}</gran:FilterValue>"
+            f"<gran:FilterValue>{competition.public_competition_id}</gran:FilterValue>"
             "</gran:ExpandedApplicationFilter>"
             "</agen:GetSubmissionListExpandedRequest>"
             "</soapenv:Body>"
@@ -1928,7 +1953,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             None,
         )
         assert record
-        assert record.competition_ids == f"['{competition.legacy_competition_id}']"
+        assert record.competition_ids == f"['{competition.public_competition_id}']"
 
     def test_get_submission_list_response_logs_filters_by_package_id(
         self, db_session, enable_factory_create, caplog

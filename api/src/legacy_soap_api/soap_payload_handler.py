@@ -376,10 +376,10 @@ def build_mtom_response_from_dict(
     xml_bytes = etree.tostring(soap_env, encoding="UTF-8", xml_declaration=False)
     boundary = f"uuid:{raw_uuid}"
     mime_header = (
-        f"--{boundary}\n"
-        f'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-        f"Content-Transfer-Encoding: binary\n"
-        f"Content-ID: <root.message@cxf.apache.org>\n\n"
+        f"--{boundary}\r\n"
+        f'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        f"Content-Transfer-Encoding: binary\r\n"
+        f"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
     )
     return mime_header.encode("utf-8") + xml_bytes
 

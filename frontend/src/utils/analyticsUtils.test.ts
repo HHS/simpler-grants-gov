@@ -5,6 +5,11 @@ import {
   waitForNewRelic,
 } from "src/utils/analyticsUtil";
 
+jest.mock("src/constants/environments", () => ({
+  environment: {
+    NEW_RELIC_ENABLED: "true",
+  },
+}));
 jest.useFakeTimers();
 const mockSetCustomAttribute = jest.fn();
 

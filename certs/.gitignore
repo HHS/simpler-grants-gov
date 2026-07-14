@@ -1,0 +1,5 @@
+# Never commit certificate material.
+# Private keys (*.key) are secret; CSRs (*.csr) and signed certs (*.crt) are
+# submitted to / received from HHS and imported into ACM — they do not belong in git.
+*
+!.gitignore

@@ -272,11 +272,12 @@ export const messages = {
     pageTitle: "Edit opportunity",
     metaDescription:
       "Edit draft opportunity information and non-forecast summary fields.",
-    header: {
-      saveButton: "Save",
-      previewButton: "Preview",
-      publishButton: "Publish",
-      navTitle: "On this page",
+    navTitle: "On this page",
+    button: {
+      backToOverview: "Back to overview page",
+      saveAndExit: "Save and exit",
+      saveAndGoBack: "Save and go back",
+      saveAndContinue: "Save and continue",
     },
     sections: {
       fundingDetails: "Funding details",
@@ -2037,6 +2038,20 @@ export const messages = {
       agencyNotAuthorized:
         "You do not have access to this agency's award recommendations.",
       noAgencies: "You are not associated with any agencies.",
+      empty: "No award recommendations found.",
+      fetchError:
+        "We have encountered an error loading award recommendations. Please try again.",
+      columns: {
+        awardRecId: "Award Rec ID",
+        opportunityName: "Opportunity name",
+        opportunityId: "Opportunity ID",
+        applicationsReceived: "Applications received",
+        status: "Status",
+        action: "Action",
+      },
+      actions: {
+        delete: "Delete",
+      },
     },
     summary: {
       showDescription: "Show full description",
@@ -2517,6 +2532,24 @@ export const messages = {
     sectionNarrativeFormatInstructions: {
       header: "Narrative format instructions",
     },
+    sectionAgencyContact: {
+      header: "Agency contact",
+      subHeader:
+        "Grantor contact details. Provide the name, email, and phone number for the agency contact.",
+      fullName: "Full name",
+      personTitle: "Title",
+      emailAddress: "Email address",
+      emailAddressHint: "For example: example@mail.com",
+      phoneNumber: "Phone number",
+      phoneNumberHint: "10-digit, for example: (999) 999-9999",
+      error: {
+        requiredFullName: "Full name is required.",
+        requiredPhoneNumber: "Phone number is required.",
+        requiredEmail: "Email address is required.",
+        invalidEmail:
+          "Incorrect text format. Please ensure there are no spaces or missing characters.",
+      },
+    },
   },
   FeatureFlagsAdmin: {
     heading: "Refresh your page",
@@ -2530,6 +2563,7 @@ export const messages = {
     subAgency: "Sub-agency:",
     draft: "Draft",
     lastUpdated: "Last updated:",
+    backToOverview: "Back to overview page",
     alerts: {
       newOpportunityHeading: "Opportunity draft started",
       newOpportunityBody:
@@ -2572,7 +2606,7 @@ export const messages = {
       postUploadError: "Error processing file",
       missingFileId: "Error: missing file id",
       preUploadError: "Pre upload error",
-      infected: "Security scan failed. File infected",
+      infected: "Security scan failed. File removed",
     },
     deleteModal: {
       titleText: "Delete",

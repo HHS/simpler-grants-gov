@@ -24,6 +24,7 @@ class SubmissionInfo(BaseSOAPSchema):
     submission_method: str | None = Field(default=None, alias="SubmissionMethod")
     submission_title: str | None = Field(default=None, alias="SubmissionTitle")
     package_id: str | None = Field(default=None, alias="PackageID")
+    competition_id: str | None = Field(default=None, alias="CompetitionID")
     delinquent_federal_debt: str | None = Field(default=None, alias="DelinquentFederalDebt")
     active_exclusions: str | None = Field(default=None, alias="ActiveExclusions")
 

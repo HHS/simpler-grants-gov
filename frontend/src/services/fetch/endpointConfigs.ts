@@ -147,7 +147,7 @@ export const getLocalUsersEndpoint = {
 
 // opting out of traditional X-SGG based auth since these requests will use the
 // internal auth token instead
-export const getApplicationForPrint = {
+export const getApplicationForPrintEndpoint = {
   basePath: environment.API_URL,
   version: "alpha",
   namespace: "applications",

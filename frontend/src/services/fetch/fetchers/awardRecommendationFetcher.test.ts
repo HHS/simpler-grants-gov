@@ -1,10 +1,12 @@
 import {
+  deleteAwardRecommendation,
   deleteAwardRecommendationRisk,
   getAwardRecommendationDetails,
   getAwardRecommendationRisk,
   getAwardRecommendationRisks,
   getAwardRecommendationSubmission,
   getAwardRecommendationSubmissionsForRisk,
+  listAwardRecommendationsPaginated,
   listAwardRecommendationSubmissions,
   listAwardRecommendationSubmissionsPaginated,
   updateAwardRecommendationRisk,
@@ -13,6 +15,7 @@ import {
 import { APIResponse } from "src/types/apiResponseTypes";
 import {
   mockAwardRecommendationDetails,
+  mockAwardRecommendationListItem,
   mockAwardRecommendationSubmissions,
 } from "src/utils/testing/fixtures";
 
@@ -103,6 +106,98 @@ describe("listAwardRecommendationSubmissions", () => {
     const result = await listAwardRecommendationSubmissions("an id");
 
     expect(result).toEqual(mockAwardRecommendationSubmissions);
+  });
+});
+
+describe("listAwardRecommendationsPaginated", () => {
+  beforeEach(() => {
+    mockInnerFetch.mockImplementation(
+      ({ subPath }: { subPath: string }) =>
+        Promise.resolve({
+          ok: true,
+          json: jest.fn().mockResolvedValue({
+            data: subPath === "list" ? [mockAwardRecommendationListItem] : null,
+            pagination_info: { total_pages: 1, total_records: 1 },
+          } as APIResponse),
+        }) as unknown as Promise<Response>,
+    );
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls fetchAwardRecommendationWithMethod with agency filter and pagination", async () => {
+    await listAwardRecommendationsPaginated("agency-id", {
+      page_offset: 1,
+      page_size: 10,
+      sort_order: [
+        {
+          order_by: "created_at",
+          sort_direction: "descending",
+        },
+      ],
+    });
+
+    expect(mockInnerFetch).toHaveBeenCalledWith({
+      subPath: "list",
+      body: {
+        filters: { agency_id: { one_of: ["agency-id"] } },
+        pagination: {
+          page_offset: 1,
+          page_size: 10,
+          sort_order: [
+            {
+              order_by: "created_at",
+              sort_direction: "descending",
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it("returns award recommendations and pagination info", async () => {
+    const result = await listAwardRecommendationsPaginated("agency-id", {
+      page_offset: 1,
+      page_size: 10,
+      sort_order: [],
+    });
+
+    expect(result.awardRecommendations).toEqual([
+      mockAwardRecommendationListItem,
+    ]);
+    expect(result.paginationInfo).toEqual({ total_pages: 1, total_records: 1 });
+  });
+});
+
+describe("deleteAwardRecommendation", () => {
+  beforeEach(() => {
+    mockInnerFetch.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        message: "Deleted",
+      } as APIResponse),
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls fetchAwardRecommendationWithMethod with the award recommendation id", async () => {
+    await deleteAwardRecommendation("award-rec-id");
+
+    expect(mockInnerFetch).toHaveBeenCalledWith({
+      subPath: "award-rec-id",
+    });
+  });
+
+  it("returns success when delete succeeds", async () => {
+    const result = await deleteAwardRecommendation("award-rec-id");
+
+    expect(result.success).toBe(true);
+    expect(result.message).toBe("Deleted");
   });
 });
 
