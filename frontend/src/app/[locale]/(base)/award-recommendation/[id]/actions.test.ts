@@ -9,7 +9,6 @@ import {
 const mockUpdateAwardRecommendationSubmissionDetails = jest.fn();
 const mockUpdateAwardRecommendation = jest.fn();
 const mockRedirect = jest.fn();
-const mockRevalidatePath = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
   updateAwardRecommendationSubmissionDetails: (
@@ -25,11 +24,6 @@ jest.mock("next/navigation", () => ({
     mockRedirect(...args);
     throw new Error("NEXT_REDIRECT");
   },
-}));
-
-jest.mock("next/cache", () => ({
-  revalidatePath: (...args: unknown[]): unknown =>
-    mockRevalidatePath(...args) as unknown,
 }));
 
 jest.mock("next-intl/server", () => ({
@@ -66,9 +60,6 @@ describe("Award Recommendation Actions", () => {
         selection_method_detail: "Panel review",
         other_key_information: null,
       });
-      expect(mockRevalidatePath).toHaveBeenCalledWith(
-        "/award-recommendation/ar-id-123/edit",
-      );
       expect(result.success).toBe(true);
       expect(result.errorMessage).toBeUndefined();
     });

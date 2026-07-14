@@ -15,10 +15,6 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
 
-jest.mock("next/cache", () => ({
-  revalidatePath: jest.fn(),
-}));
-
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   use: jest.fn(() => ({

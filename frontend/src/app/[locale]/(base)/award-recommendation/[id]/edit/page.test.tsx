@@ -34,10 +34,6 @@ jest.mock("next/navigation", () => ({
   })),
 }));
 
-jest.mock("next/cache", () => ({
-  revalidatePath: jest.fn(),
-}));
-
 const withFeatureFlagMock = jest.fn();
 
 jest.mock("src/services/featureFlags/withFeatureFlag", () => ({

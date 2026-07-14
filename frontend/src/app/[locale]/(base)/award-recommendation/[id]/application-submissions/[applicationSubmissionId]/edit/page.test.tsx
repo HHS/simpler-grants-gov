@@ -20,10 +20,6 @@ jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
 
-jest.mock("next/cache", () => ({
-  revalidatePath: jest.fn(),
-}));
-
 const mockRedirect = jest.fn();
 jest.mock("next/navigation", () => ({
   redirect: (...args: unknown[]) => {

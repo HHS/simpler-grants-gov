@@ -10,7 +10,6 @@ import {
   AwardRecommendationType,
 } from "src/types/awardRecommendationTypes";
 
-import { revalidatePath } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 
@@ -110,8 +109,6 @@ export async function saveAwardRecommendation(
         formData.get("other_key_information"),
       ),
     });
-
-    revalidatePath(`/award-recommendation/${awardRecommendationId}/edit`);
 
     return {
       success: true,
