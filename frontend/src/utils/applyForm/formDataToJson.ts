@@ -90,7 +90,7 @@ const getFieldType = (
 
 // basic functionality here was borrowed from https://github.com/ArturKot95/FormData2Json
 // handles conversion of FormData into a POJO, accounting for nested structures and arrays
-export function formDataToObject<T extends NestedObject>(
+export function formDataToObject<T = NestedObject>(
   formData = new FormData(),
   formSchema: RJSFSchema, // expects that any "/properties" path segments have already been removed
   options?: FormDataToJsonOptions,

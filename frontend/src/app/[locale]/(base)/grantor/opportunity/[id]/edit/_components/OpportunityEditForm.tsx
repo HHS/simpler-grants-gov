@@ -75,7 +75,9 @@ function EligibilityCheckboxGroup({
           <div key={option.value} className="padding-top-05">
             <Checkbox
               id={`${baseId}-${index}`}
-              name="applicant_types"
+              // selected these values will be collected in hidden inputs populated by state
+              // so we don't want these inputs showing up in the form data
+              name={""}
               value={option.value}
               label={eligibilityDisplayLabels[option.value] ?? option.label}
               defaultChecked={initialSelectedValues.includes(option.value)}
@@ -239,7 +241,6 @@ export default function OpportunityEditForm({
 
   // CommonCharacterCount fields use onTextChange={() => {}} because they are uncontrolled:
   // values are read from FormData on submit, not tracked in React state.
-
   return (
     <form
       ref={formRef}
@@ -724,6 +725,14 @@ export default function OpportunityEditForm({
                 />
               </div>
             </div>
+            {selectedEligibility.map((eligibility, index) => (
+              <input
+                key={`eligibility-${index}`}
+                type="hidden"
+                name={`applicant_types[${index}]`}
+                value={eligibility}
+              />
+            ))}
           </div>
 
           {(selectedEligibility.includes("other") ||

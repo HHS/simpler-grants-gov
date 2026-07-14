@@ -6,10 +6,12 @@ import {
   publishOpportunityForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
-import { OpportunitySummaryUpdateRequest } from "src/types/opportunity/opportunityResponseTypes";
+import {
+  OpportunitySummaryUpdateRawData,
+  OpportunitySummaryUpdateRequest,
+} from "src/types/opportunity/opportunityResponseTypes";
 import { formDataToObject } from "src/utils/applyForm/formDataToJson";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
-import { buildOpportunitySummaryUpdateRequest } from "src/utils/opportunityEditFormConfig";
 import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
@@ -49,9 +51,7 @@ const editOpportunityFormSchema = {
   is_forecast: { type: "boolean" },
   opportunity_title: { type: "string" },
   category: { type: "string" },
-  funding_instruments: { items: { type: "string" } }, // array
   is_cost_sharing: { type: "boolean" },
-  funding_categories: { items: { type: "string" } }, // array
   expected_number_of_awards: { type: "number" },
   estimated_total_program_funding: { type: "number" },
   award_floor: { type: "number" },
@@ -59,6 +59,8 @@ const editOpportunityFormSchema = {
   post_date: { type: "string" },
   close_date: { type: "string" },
   close_date_description: { type: "string" },
+  funding_instruments: { items: { type: "string" } }, // array
+  funding_categories: { items: { type: "string" } }, // array
   applicant_types: { items: { type: "string" } }, // array
   summary_description: { type: "string" },
   additional_info_url: { type: "string" },
@@ -192,7 +194,9 @@ async function validateOpportunityEditForm(formData: FormData) {
         }
       },
     );
-
+  const applicantTypeKeys = Array.from(
+    formData.keys().filter((key) => key.includes("applicant_types[")),
+  );
   return reviewOpportunityEditSchema.safeParse({
     opportunity_title: readStringValue(formData.get("opportunity_title")),
     category: readStringValue(formData.get("category")),
@@ -213,7 +217,9 @@ async function validateOpportunityEditForm(formData: FormData) {
     estimated_total_program_funding: readStringValue(
       formData.get("estimated_total_program_funding"),
     ),
-    applicant_types: formData.getAll("applicant_types") as string[],
+    applicant_types: applicantTypeKeys.map(
+      (key) => formData.get(key) as string,
+    ),
     applicant_eligibility_description: readStringValue(
       formData.get("applicant_eligibility_description"),
     ),
@@ -274,10 +280,23 @@ export async function saveOpportunityEditAction(
       };
     }
 
-    const body = formDataToObject<OpportunitySummaryUpdateRequest>(
+    const rawBody = formDataToObject<OpportunitySummaryUpdateRawData>(
       formData,
       editOpportunityFormSchema,
     );
+    /*
+      funding_instruments, funding_categories, applicant_types all need to be arrays of strings
+
+      * funding_instruments, funding_categories are not implemented as multiselects, so they just need to be reformatted
+      * applicant_types is handled via hidden inputs for collecting values
+    */
+
+    const body = {
+      ...rawBody,
+      funding_categories: [rawBody.funding_categories],
+      funding_instruments: [rawBody.funding_instruments],
+    };
+
     const response = await updateOpportunitySummaryForGrantor({
       opportunityId,
       opportunitySummaryId,

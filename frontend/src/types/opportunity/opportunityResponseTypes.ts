@@ -58,7 +58,7 @@ export interface OpportunitySummaryDetail extends Summary {
   opportunity_summary_id: string;
 }
 
-export type OpportunitySummaryUpdateRequest = {
+interface OpportunitySummaryUpdateBase {
   is_cost_sharing: boolean | null;
   summary_description: string | null;
   post_date: string | null;
@@ -70,15 +70,25 @@ export type OpportunitySummaryUpdateRequest = {
   award_ceiling: number | null;
   additional_info_url: string | null;
   additional_info_url_description: string | null;
-  funding_categories: string[];
   funding_category_description: string | null;
-  funding_instruments: string[];
-  applicant_types: string[];
-  applicant_eligibility_description: string | null;
   agency_contact_description: string | null;
   agency_email_address: string | null;
+  applicant_eligibility_description: string | null;
   agency_email_address_description: string | null;
-};
+  applicant_types: string[];
+}
+
+export interface OpportunitySummaryUpdateRequest
+  extends OpportunitySummaryUpdateBase {
+  funding_categories: string[];
+  funding_instruments: string[];
+}
+
+export interface OpportunitySummaryUpdateRawData
+  extends OpportunitySummaryUpdateBase {
+  funding_categories: string;
+  funding_instruments: string;
+}
 
 export type OpportunitySummaryCreateRequest =
   OpportunitySummaryUpdateRequest & {
