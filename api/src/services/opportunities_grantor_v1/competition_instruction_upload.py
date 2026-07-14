@@ -89,7 +89,7 @@ def upload_competition_instruction(
         extra={
             "competition_id": competition_id,
             "opportunity_id": opportunity_id,
-            "instruction_id": instruction_id,
+            "competition_instruction_id": instruction_id,
             "file_name": file_name,
         },
     )
