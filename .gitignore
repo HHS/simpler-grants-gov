@@ -158,3 +158,6 @@ frontend/tests/artillery/params.json
 
 # XML validation results
 api/src/services/xml_generation/xsds/validation_results.json
+
+# Compound Engineering local config (machine-specific)
+.compound-engineering/*.local.yaml
