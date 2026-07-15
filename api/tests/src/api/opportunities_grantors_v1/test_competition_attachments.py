@@ -37,6 +37,19 @@ def existing_competition(existing_opportunity, enable_factory_create):
     )
 
 
+@pytest.fixture
+def existing_instruction(
+    existing_competition, mock_s3_bucket, other_mock_s3_bucket, enable_factory_create
+):
+    """Create a competition instruction for the competition"""
+    from tests.src.db.models.factories import CompetitionInstructionFactory
+
+    return CompetitionInstructionFactory.create(
+        competition=existing_competition,
+        competition_id=existing_competition.competition_id,
+    )
+
+
 def test_upload_instructions_success_single_file(
     client,
     grantor_auth_data,
@@ -213,6 +226,185 @@ def test_upload_instructions_non_sgm_opportunity(
         f"/v1/grantors/opportunities/{non_sgm_opportunity.opportunity_id}/competitions/{competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
         data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
+    )
+
+    assert resp.status_code == 422
+    response_json = resp.get_json()
+    assert response_json["message"] == "Only opportunities created in Simpler Grants can be updated"
+
+
+def test_delete_instruction_success(
+    client,
+    grantor_auth_data,
+    existing_opportunity,
+    existing_competition,
+    existing_instruction,
+    db_session,
+):
+    """Test successful deletion of a competition instruction"""
+    _, _, token, _ = grantor_auth_data
+
+    # Verify instruction exists before deletion
+    assert (
+        db_session.query(competition_models.CompetitionInstruction)
+        .filter_by(competition_instruction_id=existing_instruction.competition_instruction_id)
+        .first()
+        is not None
+    )
+
+    resp = client.delete(
+        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions/{existing_instruction.competition_instruction_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert resp.status_code == 200
+    response_json = resp.get_json()
+    assert response_json["message"] == "Instruction deleted successfully"
+
+    # Verify instruction is deleted from database
+    assert (
+        db_session.query(competition_models.CompetitionInstruction)
+        .filter_by(competition_instruction_id=existing_instruction.competition_instruction_id)
+        .first()
+        is None
+    )
+
+    # Verify file is deleted from S3
+    assert file_util.file_exists(existing_instruction.file_location) is False
+
+
+def test_delete_instruction_unauthorized(
+    client, db_session, existing_opportunity, existing_competition, existing_instruction
+):
+    """Test deletion without proper authorization"""
+    # Create a user without UPDATE_OPPORTUNITY privilege
+    user, agency, token, _ = create_user_in_agency_with_jwt_and_api_key(
+        db_session=db_session,
+        privileges=[Privilege.VIEW_OPPORTUNITY],
+    )
+
+    resp = client.delete(
+        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions/{existing_instruction.competition_instruction_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert resp.status_code == 403
+    response_json = resp.get_json()
+    assert response_json["message"] == "Forbidden"
+
+
+def test_delete_instruction_nonexistent_opportunity(
+    client, grantor_auth_data, existing_competition, existing_instruction
+):
+    """Test deletion with non-existent opportunity ID"""
+    _, _, token, _ = grantor_auth_data
+
+    non_existent_opportunity_id = uuid.uuid4()
+
+    resp = client.delete(
+        f"/v1/grantors/opportunities/{non_existent_opportunity_id}/competitions/{existing_competition.competition_id}/instructions/{existing_instruction.competition_instruction_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert resp.status_code == 404
+    response_json = resp.get_json()
+    assert (
+        response_json["message"]
+        == f"Could not find Opportunity with ID {non_existent_opportunity_id}"
+    )
+
+
+def test_delete_instruction_nonexistent_competition(
+    client, grantor_auth_data, existing_opportunity, existing_instruction
+):
+    """Test deletion with non-existent competition ID"""
+    _, _, token, _ = grantor_auth_data
+
+    non_existent_competition_id = uuid.uuid4()
+
+    resp = client.delete(
+        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{non_existent_competition_id}/instructions/{existing_instruction.competition_instruction_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert resp.status_code == 404
+    response_json = resp.get_json()
+    assert (
+        response_json["message"]
+        == f"Could not find Competition with ID {non_existent_competition_id}"
+    )
+
+
+def test_delete_instruction_competition_wrong_opportunity(
+    client, grantor_auth_data, existing_competition, existing_instruction, enable_factory_create
+):
+    """Test deletion when competition doesn't belong to the specified opportunity"""
+    _, agency, token, _ = grantor_auth_data
+
+    # Create a different opportunity
+    other_opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=True, is_simpler_grants_opportunity=True
+    )
+
+    resp = client.delete(
+        f"/v1/grantors/opportunities/{other_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions/{existing_instruction.competition_instruction_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert resp.status_code == 404
+    response_json = resp.get_json()
+    assert "not found for opportunity" in response_json["message"]
+
+
+def test_delete_instruction_nonexistent_instruction(
+    client, grantor_auth_data, existing_opportunity, existing_competition
+):
+    """Test deletion with non-existent instruction ID"""
+    _, _, token, _ = grantor_auth_data
+
+    non_existent_instruction_id = uuid.uuid4()
+
+    resp = client.delete(
+        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions/{non_existent_instruction_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert resp.status_code == 404
+    response_json = resp.get_json()
+    assert response_json["message"] == "Instruction not found"
+
+
+def test_delete_instruction_non_sgm_opportunity(
+    client,
+    db_session,
+    grantor_auth_data,
+    enable_factory_create,
+    mock_s3_bucket,
+    other_mock_s3_bucket,
+):
+    """Test deletion from a non-SGM opportunity"""
+    from tests.src.db.models.factories import CompetitionInstructionFactory
+
+    _, agency, token, _ = grantor_auth_data
+
+    # Create a non-SGM opportunity
+    non_sgm_opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=True, is_simpler_grants_opportunity=False
+    )
+
+    # Create a competition and instruction for this opportunity
+    competition = CompetitionFactory.create(
+        opportunity=non_sgm_opportunity, opportunity_id=non_sgm_opportunity.opportunity_id
+    )
+
+    instruction = CompetitionInstructionFactory.create(
+        competition=competition,
+        competition_id=competition.competition_id,
+    )
+
+    resp = client.delete(
+        f"/v1/grantors/opportunities/{non_sgm_opportunity.opportunity_id}/competitions/{competition.competition_id}/instructions/{instruction.competition_instruction_id}",
+        headers={"X-SGG-Token": token},
     )
 
     assert resp.status_code == 422

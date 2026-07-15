@@ -5,6 +5,7 @@ import grants_shared.adapters.db as db
 from grants_shared.adapters.aws import S3Config
 from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util import file_util
+from sqlalchemy import select
 from werkzeug.datastructures import FileStorage
 
 from src.auth.endpoint_access_util import verify_access
@@ -95,3 +96,56 @@ def upload_competition_instruction(
     )
 
     return str(instruction_id)
+
+
+def delete_competition_instruction(
+    db_session: db.Session,
+    user: User,
+    opportunity_id: uuid.UUID,
+    competition_id: uuid.UUID,
+    competition_instruction_id: str,
+) -> None:
+    """Delete an instruction file from a competition"""
+    # Get the opportunity and verify it exists
+    opportunity = get_opportunity_for_grantors(db_session, user, opportunity_id)
+
+    # Check if user has permission to update opportunities for this agency
+    verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
+
+    # Verify opportunity was created in Simpler Grants
+    validate_opportunity_created_in_simpler_grants(opportunity)
+
+    # Get the competition and verify it exists
+    competition = get_competition(db_session, competition_id)
+
+    # Verify competition belongs to the opportunity
+    if competition.opportunity_id != opportunity_id:
+        raise_flask_error(
+            404, message=f"Competition {competition_id} not found for opportunity {opportunity_id}"
+        )
+
+    # Find the instruction
+    instruction = db_session.execute(
+        select(CompetitionInstruction).where(
+            CompetitionInstruction.competition_id == competition_id,
+            CompetitionInstruction.competition_instruction_id == competition_instruction_id,
+        )
+    ).scalar_one_or_none()
+
+    if not instruction:
+        raise_flask_error(404, "Instruction not found")
+
+    # Delete from database
+    db_session.delete(instruction)
+
+    # Delete from S3
+    file_util.delete_file(instruction.file_location)
+
+    logger.info(
+        "Deleted competition instruction",
+        extra={
+            "opportunity_id": opportunity_id,
+            "competition_id": competition_id,
+            "competition_instruction_id": competition_instruction_id,
+        },
+    )

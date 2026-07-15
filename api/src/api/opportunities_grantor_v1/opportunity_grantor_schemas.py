@@ -736,3 +736,9 @@ class CompetitionInstructionUploadResponseV1Schema(ResponseWithErrorsSchema):
     """Response Schema for Upload Competition Instructions Endpoint"""
 
     data = fields.Nested(CompetitionInstructionUploadResponseDataV1Schema())
+
+
+class DeleteCompetitionInstructionResponseV1Schema(ResponseWithErrorsSchema):
+    """Response Schema for Delete Competition Instruction Endpoint"""
+
+    pass
