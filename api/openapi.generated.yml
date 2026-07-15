@@ -9572,12 +9572,14 @@ components:
             \ `custom`\n- `fundingInstrument` \u2014 operator `\"in\"`, value: array\
             \ of funding instrument values (e.g. `[\"grant\"]`)\n- `costSharing` \u2014\
             \ operator `\"eq\"`, value: boolean (also accepts the strings `\"true\"\
-            `/`\"false\"`)\n\nUnsupported keys and invalid values are skipped and\
-            \ reported in `filterInfo.errors`; the search still runs with the valid\
-            \ filters applied. `agency` and `fundingInstrument` values are forwarded\
-            \ to the search unvalidated \u2014 an unrecognized value matches no opportunities\
-            \ rather than producing an error \u2014 and an empty array applies no\
-            \ filter for that key."
+            `/`\"false\"`)\n\nEach entry must parse as an `{operator, value}` object;\
+            \ an entry that does not (a non-object value, or a missing `operator`/`value`\
+            \ key) is rejected with a 422 validation error. Well-formed entries with\
+            \ an unsupported key, operator, or value are skipped and reported in `filterInfo.errors`,\
+            \ and the search still runs with the valid filters applied. `agency` and\
+            \ `fundingInstrument` values are forwarded to the search unvalidated \u2014\
+            \ an unrecognized value matches no opportunities rather than producing\
+            \ an error \u2014 and an empty array applies no filter for that key."
           example:
             agency:
               operator: in
@@ -14420,6 +14422,10 @@ components:
           description: The HTTP status code
           example: 200
   securitySchemes:
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
     ApiJwtAuth:
       type: apiKey
       in: header
@@ -14428,8 +14434,4 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
 

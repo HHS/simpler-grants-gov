@@ -750,9 +750,13 @@ class OppFilters(Schema):
                 'funding instrument values (e.g. `["grant"]`)\n'
                 '- `costSharing` — operator `"eq"`, value: boolean (also '
                 'accepts the strings `"true"`/`"false"`)\n\n'
-                "Unsupported keys and invalid values are skipped and reported "
-                "in `filterInfo.errors`; the search still runs with the valid "
-                "filters applied. `agency` and `fundingInstrument` values are "
+                "Each entry must parse as an `{operator, value}` object; an "
+                "entry that does not (a non-object value, or a missing "
+                "`operator`/`value` key) is rejected with a 422 validation "
+                "error. Well-formed entries with an unsupported key, operator, "
+                "or value are skipped and reported in `filterInfo.errors`, and "
+                "the search still runs with the valid filters applied. "
+                "`agency` and `fundingInstrument` values are "
                 "forwarded to the search unvalidated — an unrecognized value "
                 "matches no opportunities rather than producing an error — and "
                 "an empty array applies no filter for that key."
