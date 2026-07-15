@@ -300,14 +300,8 @@ export async function saveOpportunityEditAction(
     const response = await updateOpportunitySummaryForGrantor({
       opportunityId,
       opportunitySummaryId,
-      // body: buildOpportunitySummaryUpdateRequest(formData),
       body,
     });
-    if (response.status_code === 200) {
-      return {
-        successMessage: alerts("success"),
-      };
-    }
     if (response.status_code === 422) {
       console.error("API side validation errors:", response.errors);
       throw new ApiRequestError(
@@ -316,6 +310,9 @@ export async function saveOpportunityEditAction(
         422,
       );
     }
+    return {
+      successMessage: alerts("success"),
+    };
   } catch (error) {
     const status =
       error instanceof ApiRequestError ? parseErrorStatus(error) : null;

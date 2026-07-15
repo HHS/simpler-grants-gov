@@ -372,15 +372,17 @@ export default function OpportunityEditForm({
         <div className="display-flex flex-column gap-3">
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("fundingType")}>
+              <FormGroup error={!!getFieldError("funding_instruments")}>
                 <DynamicFieldLabel
                   idFor="funding_instruments"
                   title={t("labels.fundingType")}
                   required
                   description={t("content.fundingTypeHint")}
                 />
-                {getFieldError("fundingType") ? (
-                  <ErrorMessage>{getFieldError("fundingType")}</ErrorMessage>
+                {getFieldError("funding_instruments") ? (
+                  <ErrorMessage>
+                    {getFieldError("funding_instruments")}
+                  </ErrorMessage>
                 ) : null}
                 <Select
                   id="funding_instruments"
@@ -436,16 +438,16 @@ export default function OpportunityEditForm({
 
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("fundingCategory")}>
+              <FormGroup error={!!getFieldError("funding_categories")}>
                 <DynamicFieldLabel
                   idFor="funding_categories"
                   title={t("labels.category")}
                   required
                   description={t("content.categoryHint")}
                 />
-                {getFieldError("fundingCategory") ? (
+                {getFieldError("funding_categories") ? (
                   <ErrorMessage>
-                    {getFieldError("fundingCategory")}
+                    {getFieldError("funding_categories")}
                   </ErrorMessage>
                 ) : null}
                 <Select
@@ -487,15 +489,15 @@ export default function OpportunityEditForm({
 
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("expectedNumberOfAwards")}>
+              <FormGroup error={!!getFieldError("expected_number_of_awards")}>
                 <DynamicFieldLabel
                   idFor="expected_number_of_awards"
                   title={t("labels.expectedNumberOfAwards")}
                   description={t("content.expectedNumberOfAwardsHint")}
                 />
-                {getFieldError("expectedNumberOfAwards") ? (
+                {getFieldError("expected_number_of_awards") ? (
                   <ErrorMessage>
-                    {getFieldError("expectedNumberOfAwards")}
+                    {getFieldError("expected_number_of_awards")}
                   </ErrorMessage>
                 ) : null}
                 <TextInput
@@ -509,15 +511,17 @@ export default function OpportunityEditForm({
               </FormGroup>
             </div>
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("est")}>
+              <FormGroup
+                error={!!getFieldError("estimated_total_program_funding")}
+              >
                 <DynamicFieldLabel
                   idFor="estimated_total_program_funding"
                   title={t("labels.estimatedTotalProgramFunding")}
                   description={t("content.estimatedTotalProgramFundingHint")}
                 />
-                {getFieldError("estimatedTotalProgramFunding") ? (
+                {getFieldError("estimated_total_program_funding") ? (
                   <ErrorMessage>
-                    {getFieldError("estimatedTotalProgramFunding")}
+                    {getFieldError("estimated_total_program_funding")}
                   </ErrorMessage>
                 ) : null}
                 <TextInput
@@ -537,14 +541,14 @@ export default function OpportunityEditForm({
 
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("awardMinimum")}>
+              <FormGroup error={!!getFieldError("award_floor")}>
                 <DynamicFieldLabel
                   idFor="award_floor"
                   title={t("labels.awardMinimum")}
                   description={t("content.awardMinimumHint")}
                 />
-                {getFieldError("awardMinimum") ? (
-                  <ErrorMessage>{getFieldError("awardMinimum")}</ErrorMessage>
+                {getFieldError("award_floor") ? (
+                  <ErrorMessage>{getFieldError("award_floor")}</ErrorMessage>
                 ) : null}
                 <TextInput
                   id="award_floor"
@@ -558,14 +562,14 @@ export default function OpportunityEditForm({
               </FormGroup>
             </div>
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("awardMaximum")}>
+              <FormGroup error={!!getFieldError("award_ceiling")}>
                 <DynamicFieldLabel
                   idFor="award_ceiling"
                   title={t("labels.awardMaximum")}
                   description={t("content.awardMaximumHint")}
                 />
-                {getFieldError("awardMaximum") ? (
-                  <ErrorMessage>{getFieldError("awardMaximum")}</ErrorMessage>
+                {getFieldError("award_ceiling") ? (
+                  <ErrorMessage>{getFieldError("award_ceiling")}</ErrorMessage>
                 ) : null}
                 <TextInput
                   id="award_ceiling"
@@ -582,15 +586,15 @@ export default function OpportunityEditForm({
 
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("publishDate")}>
+              <FormGroup error={!!getFieldError("post_date")}>
                 <DynamicFieldLabel
                   idFor="post_date"
                   title={t("labels.publishDate")}
                   required
                   description={t("content.publishDateHint")}
                 />
-                {getFieldError("publishDate") ? (
-                  <ErrorMessage>{getFieldError("publishDate")}</ErrorMessage>
+                {getFieldError("post_date") ? (
+                  <ErrorMessage>{getFieldError("post_date")}</ErrorMessage>
                 ) : null}
                 <DatePicker
                   id="post_date"
@@ -606,14 +610,14 @@ export default function OpportunityEditForm({
               </FormGroup>
             </div>
             <div className="tablet:grid-col-6">
-              <FormGroup error={!!getFieldError("closeDate")}>
+              <FormGroup error={!!getFieldError("close_date")}>
                 <DynamicFieldLabel
                   idFor="close_date"
                   title={t("labels.closeDate")}
                   description={t("content.closeDateHint")}
                 />
-                {getFieldError("closeDate") ? (
-                  <ErrorMessage>{getFieldError("closeDate")}</ErrorMessage>
+                {getFieldError("close_date") ? (
+                  <ErrorMessage>{getFieldError("close_date")}</ErrorMessage>
                 ) : null}
                 <DatePicker
                   id="close_date"
@@ -664,15 +668,15 @@ export default function OpportunityEditForm({
         </div>
 
         <div className="display-flex flex-column gap-3">
-          <FormGroup error={!!getFieldError("eligibleApplicants")}>
+          <FormGroup error={!!getFieldError("applicant_types")}>
             <DynamicFieldLabel
               idFor="applicant_types"
               title={t("labels.eligibleApplicants")}
               required
               description={t("content.eligibleApplicantsHint")}
             />
-            {getFieldError("eligibleApplicants") ? (
-              <ErrorMessage>{getFieldError("eligibleApplicants")}</ErrorMessage>
+            {getFieldError("applicant_types") ? (
+              <ErrorMessage>{getFieldError("applicant_types")}</ErrorMessage>
             ) : null}
           </FormGroup>
 
@@ -748,8 +752,12 @@ export default function OpportunityEditForm({
                 defaultValue={initialValues.applicant_eligibility_description}
                 onTextChange={() => {}}
                 rawErrors={
-                  getFieldError("additionalEligibilityInfo")
-                    ? [getFieldError("additionalEligibilityInfo") as string]
+                  getFieldError("applicant_eligibility_description")
+                    ? [
+                        getFieldError(
+                          "applicant_eligibility_description",
+                        ) as string,
+                      ]
                     : []
                 }
                 disabled={!isDraft}
@@ -784,8 +792,8 @@ export default function OpportunityEditForm({
               defaultValue={initialValues.summary_description}
               onTextChange={() => {}}
               rawErrors={
-                getFieldError("description")
-                  ? [getFieldError("description") as string]
+                getFieldError("summary_description")
+                  ? [getFieldError("summary_description") as string]
                   : []
               }
               disabled={!isDraft}
@@ -804,8 +812,8 @@ export default function OpportunityEditForm({
                 defaultValue={initialValues.additional_info_url}
                 onTextChange={() => {}}
                 rawErrors={
-                  getFieldError("additionalInfoUrl")
-                    ? [getFieldError("additionalInfoUrl") as string]
+                  getFieldError("additional_info_url")
+                    ? [getFieldError("additional_info_url") as string]
                     : []
                 }
                 disabled={!isDraft}
@@ -821,8 +829,12 @@ export default function OpportunityEditForm({
                 defaultValue={initialValues.additional_info_url_description}
                 onTextChange={() => {}}
                 rawErrors={
-                  getFieldError("additionalInfoUrlText")
-                    ? [getFieldError("additionalInfoUrlText") as string]
+                  getFieldError("additional_info_url_description")
+                    ? [
+                        getFieldError(
+                          "additional_info_url_description",
+                        ) as string,
+                      ]
                     : []
                 }
                 disabled={!isDraft}
@@ -841,8 +853,8 @@ export default function OpportunityEditForm({
               defaultValue={initialValues.agency_contact_description}
               onTextChange={() => {}}
               rawErrors={
-                getFieldError("grantorContactDetails")
-                  ? [getFieldError("grantorContactDetails") as string]
+                getFieldError("agency_contact_description")
+                  ? [getFieldError("agency_contact_description") as string]
                   : []
               }
               disabled={!isDraft}
@@ -861,8 +873,8 @@ export default function OpportunityEditForm({
                 defaultValue={initialValues.agency_email_address}
                 onTextChange={() => {}}
                 rawErrors={
-                  getFieldError("contactEmail")
-                    ? [getFieldError("contactEmail") as string]
+                  getFieldError("agency_email_address")
+                    ? [getFieldError("agency_email_address") as string]
                     : []
                 }
                 disabled={!isDraft}
@@ -878,8 +890,12 @@ export default function OpportunityEditForm({
                 defaultValue={initialValues.agency_email_address_description}
                 onTextChange={() => {}}
                 rawErrors={
-                  getFieldError("contactEmailText")
-                    ? [getFieldError("contactEmailText") as string]
+                  getFieldError("agency_email_address_description")
+                    ? [
+                        getFieldError(
+                          "agency_email_address_description",
+                        ) as string,
+                      ]
                     : []
                 }
                 disabled={!isDraft}

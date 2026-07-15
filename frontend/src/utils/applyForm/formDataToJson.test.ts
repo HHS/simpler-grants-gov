@@ -120,7 +120,7 @@ describe("formDataToObject", () => {
   it("handles array paths", () => {
     const formData = new FormData();
 
-    formData.append("something[0]--whatever", "a value");
+    formData.append("something[0].whatever", "a value");
 
     const formSchema = {
       something: {

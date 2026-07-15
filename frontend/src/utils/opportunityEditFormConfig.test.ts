@@ -1,21 +1,6 @@
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
-import {
-  buildOpportunityEditInitialValues,
-  buildOpportunitySummaryUpdateRequest,
-} from "./opportunityEditFormConfig";
-
-function makeFormData(fields: Record<string, string | string[]>): FormData {
-  const formData = new FormData();
-  for (const [key, value] of Object.entries(fields)) {
-    if (Array.isArray(value)) {
-      value.forEach((v) => formData.append(key, v));
-    } else {
-      formData.append(key, value);
-    }
-  }
-  return formData;
-}
+import { buildOpportunityEditInitialValues } from "./opportunityEditFormConfig";
 
 function makeOpportunity(
   summaryOverrides: Partial<OpportunityDetail["summary"]> = {},
@@ -84,20 +69,20 @@ describe("buildOpportunityEditInitialValues", () => {
   it("maps opportunity and summary fields to form values", () => {
     const result = buildOpportunityEditInitialValues(makeOpportunity());
 
-    expect(result.title).toBe("Test Opportunity");
-    expect(result.awardSelectionMethod).toBe("discretionary");
-    expect(result.description).toBe("A test description");
-    expect(result.fundingType).toBe("grant");
-    expect(result.fundingCategories).toBe("education");
-    expect(result.awardMinimum).toBe("1000");
-    expect(result.awardMaximum).toBe("100000");
-    expect(result.estimatedTotalProgramFunding).toBe("500000");
-    expect(result.expectedNumberOfAwards).toBe("5");
-    expect(result.eligibleApplicants).toEqual(["individuals"]);
-    expect(result.costSharing).toBe(true);
-    expect(result.publishDate).toBe("2026-05-01");
-    expect(result.closeDate).toBe("2026-06-01");
-    expect(result.contactEmail).toBe("test@example.com");
+    expect(result.opportunity_title).toBe("Test Opportunity");
+    expect(result.category).toBe("discretionary");
+    expect(result.summary_description).toBe("A test description");
+    expect(result.funding_instruments).toBe("grant");
+    expect(result.funding_categories).toBe("education");
+    expect(result.award_floor).toBe("1000");
+    expect(result.award_ceiling).toBe("100000");
+    expect(result.estimated_total_program_funding).toBe("500000");
+    expect(result.expected_number_of_awards).toBe("5");
+    expect(result.applicant_types).toEqual(["individuals"]);
+    expect(result.is_cost_sharing).toBe(true);
+    expect(result.post_date).toBe("2026-05-01");
+    expect(result.close_date).toBe("2026-06-01");
+    expect(result.agency_email_address).toBe("test@example.com");
   });
 
   it("returns empty string for null numeric summary fields (numberToString null branch)", () => {
@@ -110,10 +95,10 @@ describe("buildOpportunityEditInitialValues", () => {
       }),
     );
 
-    expect(result.awardMinimum).toBe("");
-    expect(result.awardMaximum).toBe("");
-    expect(result.estimatedTotalProgramFunding).toBe("");
-    expect(result.expectedNumberOfAwards).toBe("");
+    expect(result.award_floor).toBe("");
+    expect(result.award_ceiling).toBe("");
+    expect(result.estimated_total_program_funding).toBe("");
+    expect(result.expected_number_of_awards).toBe("");
   });
 
   it("falls back to empty string when opportunity_title is null", () => {
@@ -121,7 +106,7 @@ describe("buildOpportunityEditInitialValues", () => {
       makeOpportunity({}, { opportunity_title: null }),
     );
 
-    expect(result.title).toBe("");
+    expect(result.opportunity_title).toBe("");
   });
 
   it("returns empty string when funding_instruments array is empty", () => {
@@ -129,7 +114,7 @@ describe("buildOpportunityEditInitialValues", () => {
       makeOpportunity({ funding_instruments: [] }),
     );
 
-    expect(result.fundingType).toBe("");
+    expect(result.funding_instruments).toBe("");
   });
 
   it("returns empty string when funding_instruments is null", () => {
@@ -137,7 +122,7 @@ describe("buildOpportunityEditInitialValues", () => {
       makeOpportunity({ funding_instruments: null }),
     );
 
-    expect(result.fundingType).toBe("");
+    expect(result.funding_instruments).toBe("");
   });
 
   it("returns empty array when applicant_types is null", () => {
@@ -145,7 +130,7 @@ describe("buildOpportunityEditInitialValues", () => {
       makeOpportunity({ applicant_types: null }),
     );
 
-    expect(result.eligibleApplicants).toEqual([]);
+    expect(result.applicant_types).toEqual([]);
   });
 
   it("returns empty string when funding_categories is empty", () => {
@@ -153,153 +138,6 @@ describe("buildOpportunityEditInitialValues", () => {
       makeOpportunity({ funding_categories: [] }),
     );
 
-    expect(result.fundingCategories).toBe("");
-  });
-});
-
-describe("buildOpportunitySummaryUpdateRequest", () => {
-  describe("stringToNullableNumber fields", () => {
-    it("parses a valid integer", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ expectedNumberOfAwards: "5" }),
-      );
-      expect(result.expected_number_of_awards).toBe(5);
-    });
-
-    it("parses a number with commas", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ estimatedTotalProgramFunding: "1,000,000" }),
-      );
-      expect(result.estimated_total_program_funding).toBe(1000000);
-    });
-
-    it("returns null for an empty string", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ awardMinimum: "" }),
-      );
-      expect(result.award_floor).toBeNull();
-    });
-
-    it("returns null for a whitespace-only string", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ awardMaximum: "   " }),
-      );
-      expect(result.award_ceiling).toBeNull();
-    });
-
-    it("returns null for a non-numeric string", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ expectedNumberOfAwards: "abc" }),
-      );
-      expect(result.expected_number_of_awards).toBeNull();
-    });
-
-    it("returns null when field is absent", () => {
-      const result = buildOpportunitySummaryUpdateRequest(new FormData());
-      expect(result.expected_number_of_awards).toBeNull();
-    });
-  });
-
-  describe("getMultiValueField fields", () => {
-    it("returns values from the funding-category-values field", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ "funding-category-values": ["education", "health"] }),
-      );
-      expect(result.funding_categories).toEqual(["education", "health"]);
-    });
-
-    it("returns values from the funding-type-values field", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({
-          "funding-type-values": ["grant", "cooperative_agreement"],
-        }),
-      );
-      expect(result.funding_instruments).toEqual([
-        "grant",
-        "cooperative_agreement",
-      ]);
-    });
-
-    it("filters out blank values", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({
-          "funding-type-values": ["grant", "  ", "cooperative_agreement"],
-        }),
-      );
-      expect(result.funding_instruments).toEqual([
-        "grant",
-        "cooperative_agreement",
-      ]);
-    });
-
-    it("returns an empty array when field is absent", () => {
-      const result = buildOpportunitySummaryUpdateRequest(new FormData());
-      expect(result.funding_categories).toEqual([]);
-    });
-
-    it("supports multiple eligible applicants via eligibleApplicants field", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({
-          eligibleApplicants: ["individuals", "state_governments"],
-        }),
-      );
-      expect(result.applicant_types).toEqual([
-        "individuals",
-        "state_governments",
-      ]);
-    });
-
-    it("falls back to eligible-applicants-values when eligibleApplicants is empty", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({
-          "eligible-applicants-values": ["state_governments"],
-        }),
-      );
-      expect(result.applicant_types).toEqual(["state_governments"]);
-    });
-  });
-
-  describe("is_cost_sharing", () => {
-    it("returns true when value is 'true'", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ costSharing: "true" }),
-      );
-      expect(result.is_cost_sharing).toBe(true);
-    });
-
-    it("returns false when value is 'false'", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ costSharing: "false" }),
-      );
-      expect(result.is_cost_sharing).toBe(false);
-    });
-
-    it("returns null when field is absent", () => {
-      const result = buildOpportunitySummaryUpdateRequest(new FormData());
-      expect(result.is_cost_sharing).toBeNull();
-    });
-  });
-
-  describe("emptyToNull string fields", () => {
-    it("returns the value for a non-empty string", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ description: "Some description" }),
-      );
-      expect(result.summary_description).toBe("Some description");
-    });
-
-    it("returns null for an empty string", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ description: "" }),
-      );
-      expect(result.summary_description).toBeNull();
-    });
-
-    it("returns null for a whitespace-only string", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ description: "   " }),
-      );
-      expect(result.summary_description).toBeNull();
-    });
+    expect(result.funding_categories).toBe("");
   });
 });

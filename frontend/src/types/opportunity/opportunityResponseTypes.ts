@@ -58,7 +58,9 @@ export interface OpportunitySummaryDetail extends Summary {
   opportunity_summary_id: string;
 }
 
-interface OpportunitySummaryUpdateBase {
+// note that we're using a type with a union here because of awkwardness inferring index signatures
+// from interfaces in this case. See https://github.com/microsoft/TypeScript/issues/15300 for more info
+type OpportunitySummaryUpdateBase = {
   is_cost_sharing: boolean | null;
   summary_description: string | null;
   post_date: string | null;
@@ -76,19 +78,17 @@ interface OpportunitySummaryUpdateBase {
   applicant_eligibility_description: string | null;
   agency_email_address_description: string | null;
   applicant_types: string[];
-}
+};
 
-export interface OpportunitySummaryUpdateRequest
-  extends OpportunitySummaryUpdateBase {
+export type OpportunitySummaryUpdateRequest = {
   funding_categories: string[];
   funding_instruments: string[];
-}
+} & OpportunitySummaryUpdateBase;
 
-export interface OpportunitySummaryUpdateRawData
-  extends OpportunitySummaryUpdateBase {
+export type OpportunitySummaryUpdateRawData = {
   funding_categories: string;
   funding_instruments: string;
-}
+} & OpportunitySummaryUpdateBase;
 
 export type OpportunitySummaryCreateRequest =
   OpportunitySummaryUpdateRequest & {
