@@ -23,13 +23,6 @@ export const fieldDefinitionsPPSL: FormFillFieldDefinitions = {
     section: "Project/Performance Site Primary Location",
     field: "Organization Name",
   },
-  "primary_site--uei": {
-    testId: "primary_site--uei",
-    type: "text",
-    maxLength: 12, // common_shared.py.sam_uei (SAM UEI is exactly 12 alphanumeric chars)
-    section: "Project/Performance Site Primary Location",
-    field: "UEI",
-  },
   "primary_site--address--street1": {
     testId: "primary_site--address--street1",
     type: "text",
@@ -64,13 +57,8 @@ export const fieldDefinitionsPPSL: FormFillFieldDefinitions = {
     section: "Project/Performance Site Primary Location",
     field: "State",
   },
-  "primary_site--address--province": {
-    testId: "primary_site--address--province",
-    type: "text",
-    maxLength: 35, // address_shared.py.province
-    section: "Project/Performance Site Primary Location",
-    field: "Province",
-  },
+  // primary_site--address--province is omitted: only applicable for non-US addresses.
+  // The happy path uses USA as the country, so province is never shown or required.
   "primary_site--address--country": {
     selector: "#primary_site--address--country",
     type: "dropdown",
