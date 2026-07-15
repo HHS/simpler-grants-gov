@@ -22,6 +22,7 @@ import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixture
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
 
 const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
@@ -61,7 +62,11 @@ test.describe("Grantor opportunity overview failure path - initial state gating"
       await expect(page).toHaveURL(
         /\/grantor\/opportunity\/([a-z0-9-]+?)\/overview/,
       );
-
+// And I should see the "Preview", and "Publish" buttons disabled.
+await assertButtonEnabledDisabledStates(page, {
+  Preview: false,
+  Publish: false,
+});
       const overviewUrl = page.url();
 
       // When I attempt to click Preview, navigation should not occur.
