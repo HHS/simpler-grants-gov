@@ -81,7 +81,9 @@ export async function assertEmailValidationsFromDefinitions(
     });
 
     if (useContainsText) {
-      await expect(locator).toContainText(fieldDefinition.emailValidationMessage);
+      await expect(locator).toContainText(
+        fieldDefinition.emailValidationMessage,
+      );
     } else {
       await expect(locator).toHaveText(fieldDefinition.emailValidationMessage);
     }

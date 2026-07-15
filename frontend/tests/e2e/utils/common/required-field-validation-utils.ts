@@ -1,6 +1,9 @@
 import { expect, type Page } from "@playwright/test";
 
-import { type MetadataPageFieldDefinition, type ValidationMetadata } from "./types";
+import {
+  type MetadataPageFieldDefinition,
+  type ValidationMetadata,
+} from "./types";
 
 /**
  * Shared helpers for metadata-driven required-field validation assertions.
@@ -39,9 +42,7 @@ export const getRequiredValidationFields = <
   definitions: TDefinition[],
 ): Array<TDefinition & { requiredFieldMessage: string }> => {
   return definitions.filter(
-    (
-      field,
-    ): field is TDefinition & { requiredFieldMessage: string } =>
+    (field): field is TDefinition & { requiredFieldMessage: string } =>
       Boolean(field.required && field.requiredFieldMessage),
   );
 };
@@ -55,7 +56,9 @@ export const buildRequiredFieldErrorsFromDefinitions = <
   TDefinition extends RequiredValidationField<TValueKey>,
 >(
   definitions: TDefinition[],
-  fieldIdResolver?: (field: TDefinition & { requiredFieldMessage: string }) => string,
+  fieldIdResolver?: (
+    field: TDefinition & { requiredFieldMessage: string },
+  ) => string,
 ): RequiredFieldError[] => {
   return getRequiredValidationFields(definitions).map((field) => ({
     fieldId: fieldIdResolver ? fieldIdResolver(field) : field.valueKey,
@@ -75,9 +78,8 @@ export async function assertRequiredFieldValidationsFromDefinitions(
   const triggerButtonNames = options?.triggerButtonNames ?? [
     options?.saveButtonName ?? "Save",
   ];
-  const requiredFieldErrors = buildRequiredFieldErrorsFromDefinitions(
-    definitions,
-  );
+  const requiredFieldErrors =
+    buildRequiredFieldErrorsFromDefinitions(definitions);
 
   const hasNoTriggerSentinel = triggerButtonNames.some(
     (buttonName) => buttonName.toLowerCase() === "no",
@@ -109,7 +111,9 @@ export async function assertRequiredFieldValidationsFromDefinitions(
               .locator('xpath=ancestor::*[@data-testid="formGroup"][1]')
           : page.locator("body");
 
-      await expect(inlineErrorScope).toContainText(definition.requiredFieldMessage);
+      await expect(inlineErrorScope).toContainText(
+        definition.requiredFieldMessage,
+      );
     }
 
     if (options?.verifyAlertLinkMappings) {
@@ -132,4 +136,3 @@ export async function assertRequiredFieldValidationsFromDefinitions(
     }
   }
 }
-

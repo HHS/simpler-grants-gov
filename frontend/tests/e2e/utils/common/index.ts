@@ -48,9 +48,7 @@ export {
 } from "./duplicate-data-validation-utils";
 
 // Metadata-driven validation helpers and required-field gating helpers.
-export {
-  assertCharacterLimitValidationsFromDefinitions,
-} from "./character-limit-validation-utils";
+export { assertCharacterLimitValidationsFromDefinitions } from "./character-limit-validation-utils";
 export {
   assertCharacterLimitMessageCount,
   buildOverLimitFillData,

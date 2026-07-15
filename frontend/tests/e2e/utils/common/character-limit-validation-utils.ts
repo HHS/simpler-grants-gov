@@ -4,8 +4,11 @@ import {
   buildOverLimitFillData,
   getCharacterLimitedFields,
 } from "tests/e2e/utils/common/character-limit-fill-data-utils";
-import { type PageFillField, fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 import { type ValidationMetadata } from "tests/e2e/utils/common/types";
+import {
+  fillPageFields,
+  type PageFillField,
+} from "tests/e2e/utils/pages/general-pages-filling";
 
 type CharacterLimitValidationDefinition<TValueKey extends string> = {
   valueKey: TValueKey;

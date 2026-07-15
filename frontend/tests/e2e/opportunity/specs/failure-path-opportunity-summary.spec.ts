@@ -41,18 +41,14 @@ import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixture
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import { assertCrossFieldValidationsFromDefinitions } from "tests/e2e/utils/common/cross-field-validation-utils";
-import {
-  assertButtonEnabledDisabledStates,
-} from "tests/e2e/utils/common/index";
 import { assertCharacterLimitValidationsFromDefinitions } from "tests/e2e/utils/common/character-limit-validation-utils";
+import { assertCrossFieldValidationsFromDefinitions } from "tests/e2e/utils/common/cross-field-validation-utils";
 import { assertEmailValidationsFromDefinitions } from "tests/e2e/utils/common/email-validation-utils";
+import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index";
 import { assertNegativeNumberValidationsFromDefinitions } from "tests/e2e/utils/common/negative-number-validation-utils";
 import { assertRequiredFieldValidationsFromDefinitions } from "tests/e2e/utils/common/required-field-validation-utils";
-import {
-  EDIT_OPPORTUNITY_URL_PATTERN,
-} from "tests/e2e/utils/opportunity/edit-opportunity-setup-utils";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
+import { EDIT_OPPORTUNITY_URL_PATTERN } from "tests/e2e/utils/opportunity/edit-opportunity-setup-utils";
 
 const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
@@ -118,11 +114,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
     { tag: [GRANTOR, CORE_REGRESSION] },
     async ({ page, context }, testInfo) => {
       //--------------Test setup start here----------------
-      await setupAndNavigateToOpportunitySummary(
-        page,
-        context,
-        testInfo,
-      );
+      await setupAndNavigateToOpportunitySummary(page, context, testInfo);
 
       //--------------Scenario steps start here----------------
       // When I click the configured trigger button
