@@ -60,15 +60,15 @@ describe("formDataToObject", () => {
       user: {
         age: "30",
         name: "Alice",
-        emptyString: undefined,
-        emptyNumber: undefined,
+        emptyString: null,
+        emptyNumber: null,
         skills: ["JavaScript", "TypeScript", { surprise: "more stuff" }],
         deeper: {
           value: "hello",
         },
       },
       nonUser: false,
-      empty: undefined,
+      empty: null,
       numeral: 100,
     };
 
@@ -120,7 +120,7 @@ describe("formDataToObject", () => {
   it("handles array paths", () => {
     const formData = new FormData();
 
-    formData.append("something[0]--whatever", "a value");
+    formData.append("something[0].whatever", "a value");
 
     const formSchema = {
       something: {
@@ -128,10 +128,59 @@ describe("formDataToObject", () => {
       },
     };
 
-    const result = formDataToObject(formData, formSchema, { delimiter: "--" });
+    const result = formDataToObject(formData, formSchema);
 
     // eslint-disable-next-line
     // @ts-ignore
     expect(result.something[0]).toEqual({ whatever: "a value" });
+  });
+  it("respects alternate nested path delimiters", () => {
+    const formData = new FormData();
+
+    formData.append("something[0].whatever", "a value");
+
+    const formSchema = {
+      something: {
+        items: { type: "object", properties: { whatever: { type: "string" } } },
+      },
+    };
+
+    const result = formDataToObject(formData, formSchema, { delimiter: "." });
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    expect(result.something[0]).toEqual({ whatever: "a value" });
+  });
+  it("defaults to null for empty values", () => {
+    const formData = new FormData();
+    formData.append("whatever", "");
+    const formSchema = {
+      something: {
+        items: { type: "object", properties: { whatever: { type: "string" } } },
+      },
+    };
+
+    const result = formDataToObject(formData, formSchema);
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    expect(result).toEqual({ whatever: null });
+  });
+  it("defaults to undefined for empty values if option provided", () => {
+    const formData = new FormData();
+    formData.append("whatever", "");
+    const formSchema = {
+      something: {
+        items: { type: "object", properties: { whatever: { type: "string" } } },
+      },
+    };
+
+    const result = formDataToObject(formData, formSchema, {
+      useUndefinedDefaultValue: true,
+    });
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    expect(result).toEqual({ whatever: undefined });
   });
 });
