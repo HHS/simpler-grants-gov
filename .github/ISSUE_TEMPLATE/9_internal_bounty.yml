@@ -10,7 +10,7 @@ body:
         > 💰 **Bounty — $AMOUNT (TIER)**
         >
         > This issue is part of the Simpler Grants Funded Open Source Contributor Program.
-        > Payment is contingent on a merged PR meeting all acceptance criteria, two maintainer approvals, and the verification steps in the [Contributor Terms of Service](../blob/main/CONTRIBUTING.md#funded-bounty-program).
+        > Payment is contingent on a merged PR meeting all acceptance criteria, two maintainer approvals, and the verification steps in the [Contributor Terms of Service](/documentation/bounties/paid-contributor-TOS.md).
         >
         > **Eligibility:** US citizens 18+, not current or former Nava/HHS employees or contractors, not on the OFAC SDN list. Full terms in the ToS.
 
@@ -107,7 +107,7 @@ body:
       value: |
         ## How to claim
 
-        1. Read the [Contributor Terms of Service](../blob/main/CONTRIBUTING.md#funded-bounty-program).
+        1. Read the [Contributor Terms of Service](/documentation/bounties/paid-contributor-TOS.md).
         2. **Post the ToS acknowledgment as a comment on this issue.** Copy the text below verbatim:
 
            > I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former Nava or HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.

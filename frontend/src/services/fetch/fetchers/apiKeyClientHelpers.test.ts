@@ -3,34 +3,11 @@ import {
   createApiKeyRequestConfig,
   deleteApiKeyEndpoint,
   deleteApiKeyRequestConfig,
-  getApiKeysEndpoint,
-  getApiKeysRequestConfig,
   renameApiKeyEndpoint,
   renameApiKeyRequestConfig,
 } from "src/services/fetch/fetchers/apiKeyClientHelpers";
 
 describe("apiKeyClientHelpers", () => {
-  describe("getApiKeysEndpoint", () => {
-    it("returns the correct endpoint for listing API keys", () => {
-      const endpoint = getApiKeysEndpoint();
-      expect(endpoint).toBe("/api/user/api-keys/list");
-    });
-  });
-
-  describe("getApiKeysRequestConfig", () => {
-    it("returns the correct request configuration for listing API keys", () => {
-      const config = getApiKeysRequestConfig();
-
-      expect(config).toEqual({
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      });
-    });
-  });
-
   describe("createApiKeyEndpoint", () => {
     it("returns the correct endpoint for creating API keys", () => {
       const endpoint = createApiKeyEndpoint();

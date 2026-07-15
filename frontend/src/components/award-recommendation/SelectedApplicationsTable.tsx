@@ -25,7 +25,7 @@ const tableCell = (
 });
 
 const recommendationTypeTagBaseClass =
-  "usa-tag font-sans-sm text-no-uppercase text-ink radius-2";
+  "usa-tag font-sans-sm text-no-uppercase text-ink radius-2 text-no-wrap";
 
 const RecommendationTypeTag = ({
   recommendationType,
