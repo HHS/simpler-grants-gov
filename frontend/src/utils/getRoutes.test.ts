@@ -9,6 +9,11 @@ describe("getNextRoutes", () => {
 
     expect(result).toEqual([
       "/(base)/[...not-found]",
+      "/(base)/dev/feature-flags",
+      "/(base)/developers/api-dashboard",
+      "/(base)/developers",
+      "/(base)/error",
+      "/(base)/events",
       "/(base)/grantor/award-recommendation/1/application-submissions/[applicationSubmissionId]/edit",
       "/(base)/grantor/award-recommendation/1/application-submissions/edit/bulk",
       "/(base)/grantor/award-recommendation/1/application-submissions/edit",
@@ -20,11 +25,6 @@ describe("getNextRoutes", () => {
       "/(base)/grantor/award-recommendation/create",
       "/(base)/grantor/award-recommendation",
       "/(base)/grantor/award-recommendation/select-opportunity",
-      "/(base)/dev/feature-flags",
-      "/(base)/developers/api-dashboard",
-      "/(base)/developers",
-      "/(base)/error",
-      "/(base)/events",
       "/(base)/grantor/opportunities/create",
       "/(base)/grantor/opportunities",
       "/(base)/grantor/opportunity/1/competition",
