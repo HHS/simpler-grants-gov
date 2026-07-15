@@ -49,10 +49,18 @@ export {
 
 // Metadata-driven validation helpers and required-field gating helpers.
 export {
+  assertCharacterLimitValidationsFromDefinitions,
+} from "./character-limit-validation-utils";
+export {
   assertCharacterLimitMessageCount,
   buildOverLimitFillData,
   getCharacterLimitValidationMessage,
   getCharacterLimitedFields,
 } from "./character-limit-fill-data-utils";
+export {
+  assertRequiredFieldValidationsFromDefinitions,
+  buildRequiredFieldErrorsFromDefinitions,
+  getRequiredValidationFields,
+} from "./required-field-validation-utils";
 export { getRequiredFields } from "./required-fields-button-state-utils";
 export { fillRequiredFieldsAndAssertButtonState } from "./required-fields-button-state-utils";

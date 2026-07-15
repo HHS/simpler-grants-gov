@@ -4,7 +4,7 @@
  * Reviewer guide (what logic):
  * 1. Open edit opportunity flow from create.
  * 2. Fill required fields for the scenario.
- * 3. Assert Save/Preview/Publish button baseline states.
+ * 3. Assert Save-and-* button baseline states.
  *
  * Tester parameter guide (what to update):
  * - fillData controls seeded values used for create + edit setup.
@@ -47,8 +47,8 @@ export async function primeEditOpportunityForPublishChecks(
     buildPageFieldsFromDefinitions(requiredFieldDefinitions, fillData),
   );
   await assertButtonEnabledDisabledStates(page, {
-    Save: true,
-    Preview: false,
-    Publish: true,
+    "Save and exit": true,
+    "Save and go back": true,
+    "Save and continue": true,
   });
 }
