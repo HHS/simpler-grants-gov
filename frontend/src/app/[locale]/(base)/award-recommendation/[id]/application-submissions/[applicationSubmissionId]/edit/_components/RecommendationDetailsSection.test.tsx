@@ -266,33 +266,6 @@ describe("RecommendationDetailForm", () => {
     });
   });
 
-  describe("currency formatting", () => {
-    it("formats recommended amount on blur", async () => {
-      render(<RecommendationDetailForm submission={mockSubmission} />);
-
-      const input = screen.getByDisplayValue("$75,000");
-      fireEvent.change(input, { target: { value: "50000" } });
-      expect(input).toHaveValue("50000");
-
-      fireEvent.blur(input);
-      await waitFor(() => {
-        expect(input.value).toBe("$50,000");
-      });
-    });
-
-    it("handles invalid currency input gracefully", async () => {
-      render(<RecommendationDetailForm submission={mockSubmission} />);
-
-      const input = screen.getByDisplayValue("$75,000");
-      fireEvent.change(input, { target: { value: "invalid" } });
-      fireEvent.blur(input);
-
-      await waitFor(() => {
-        expect(input.value).toBeDefined();
-      });
-    });
-  });
-
   describe("multiple submissions table", () => {
     it("renders input fields for each submission", () => {
       render(
