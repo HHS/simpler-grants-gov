@@ -1,8 +1,9 @@
 import TopLevelError from "src/app/[locale]/(base)/error/page";
 import { CreateOpportunityForm } from "src/app/[locale]/(base)/grantor/opportunities/create/_components/CreateOpportunityForm";
 import { MissingAuthError, UnauthorizedError } from "src/errors";
+import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { fetchUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
+import { getUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 
 import { useTranslations } from "next-intl";
@@ -73,9 +74,13 @@ async function CreateOpportunityPage({ searchParams }: CreateOpportunityProps) {
     : selectedAgencyParam;
 
   // Get agencies
+  const session = await getSession();
+  if (!session?.token) {
+    return <TopLevelError />;
+  }
   let userAgencies: RelevantAgencyRecord[];
   try {
-    userAgencies = await fetchUserAgencies();
+    userAgencies = await getUserAgencies(session.user_id);
   } catch (error) {
     if (error instanceof MissingAuthError) {
       return <TopLevelError />;

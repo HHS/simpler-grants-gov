@@ -52,7 +52,10 @@ export const handleDeleteSavedSearch = async (
 
 export const fetchSavedSearches = async (): Promise<SavedSearchRecord[]> => {
   const session = await getSession();
-  if (!session || !session.token) {
+  // Supplementary data: this renders on pages available to logged-out users, so a
+  // missing token degrades to an empty list rather than throwing (unlike required-data
+  // fetchers such as fetchApplications, which throw MissingAuthError).
+  if (!session?.token) {
     return [];
   }
   const body = {

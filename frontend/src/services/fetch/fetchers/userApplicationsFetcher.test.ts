@@ -1,7 +1,8 @@
+import { MissingAuthError } from "src/errors";
 import {
   fetchApplications,
   getApplications,
-} from "src/services/fetch/fetchers/applicationsFetcher";
+} from "src/services/fetch/fetchers/userApplicationsFetcher";
 
 const fetchUserMock = jest.fn();
 const fetchUserWithMethodMock = jest.fn();
@@ -76,9 +77,9 @@ describe("fetchApplications", () => {
     });
   });
 
-  it("returns an error if user session is not present", async () => {
+  it("throws MissingAuthError if user token is not present", async () => {
     mockGetSession.mockResolvedValue({});
 
-    await expect(fetchApplications()).rejects.toThrow();
+    await expect(fetchApplications()).rejects.toThrow(MissingAuthError);
   });
 });

@@ -68,11 +68,12 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
                     "Body": {
                         "ns2:GetApplicationZipResponse": {
                             "ns2:FileDataHandler": {
-                                "xop:Include": {"@href": f"cid:{CID_UUID}-0001@apply.grants.gov"}
+                                "xop:Include": {"@href": f"cid:{CID_UUID}-1@apply.grants.gov"}
                             }
                         }
                     }
-                }
+                },
+                "_content_id": f"{CID_UUID}-1@apply.grants.gov",
             }
             assert result == expected
 

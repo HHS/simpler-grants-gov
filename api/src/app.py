@@ -24,6 +24,7 @@ import src.api.feature_flags.feature_flag_config as feature_flag_config
 from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
+from src.api.application_v1 import application_v1_blueprint
 from src.api.award_recommendations_alpha import award_recommendation_blueprint
 from src.api.common_grants import common_grants_blueprint
 from src.api.competition_alpha import competition_blueprint
@@ -214,6 +215,7 @@ def register_blueprints(app: APIFlask) -> None:
 
     # Endpoints for apply functionality
     app.register_blueprint(application_blueprint)
+    app.register_blueprint(application_v1_blueprint)
     app.register_blueprint(form_blueprint)
     app.register_blueprint(form_v1_blueprint)
     app.register_blueprint(competition_blueprint)
