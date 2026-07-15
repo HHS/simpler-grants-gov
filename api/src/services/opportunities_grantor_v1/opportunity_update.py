@@ -9,7 +9,7 @@ from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
-from src.services.opportunities_grantor_v1.opportunity_audit import add_opportunity_audit_event
+from src.services.opportunities_grantor_v1.opportunity_audit import build_opportunity_audit_event
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
 )
@@ -31,12 +31,13 @@ def update_opportunity(
     for field, value in opportunity_data.items():
         setattr(opportunity, field, value)
 
-    add_opportunity_audit_event(
-        db_session,
-        opportunity,
-        user,
-        OpportunityAuditEvent.OPPORTUNITY_UPDATED,
-        opportunity_data=OpportunityGrantorSchema().dump(opportunity),
+    opportunity.opportunity_audits.append(
+        build_opportunity_audit_event(
+            opportunity,
+            user,
+            OpportunityAuditEvent.OPPORTUNITY_UPDATED,
+            opportunity_data=OpportunityGrantorSchema().dump(opportunity),
+        )
     )
 
     logger.info(

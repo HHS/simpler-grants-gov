@@ -14,7 +14,7 @@ from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
 from src.db.models.competition_models import Competition
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
-from src.services.opportunities_grantor_v1.opportunity_audit import add_opportunity_audit_event
+from src.services.opportunities_grantor_v1.opportunity_audit import build_opportunity_audit_event
 
 logger = logging.getLogger(__name__)
 
@@ -59,12 +59,13 @@ def update_competition(
     competition.contact_info = competition_data["contact_info"]
     competition.open_to_applicants = set(competition_data["open_to_applicants"])
 
-    add_opportunity_audit_event(
-        db_session,
-        opportunity,
-        user,
-        OpportunityAuditEvent.COMPETITION_UPDATED,
-        competition=CompetitionRequestBaseSchema().dump(competition),
+    opportunity.opportunity_audits.append(
+        build_opportunity_audit_event(
+            opportunity,
+            user,
+            OpportunityAuditEvent.COMPETITION_UPDATED,
+            competition=CompetitionRequestBaseSchema().dump(competition),
+        )
     )
 
     logger.info(

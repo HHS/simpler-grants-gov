@@ -12,7 +12,7 @@ from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
-from src.services.opportunities_grantor_v1.opportunity_audit import add_opportunity_audit_event
+from src.services.opportunities_grantor_v1.opportunity_audit import build_opportunity_audit_event
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
     validate_opportunity_is_draft,
@@ -69,13 +69,15 @@ def create_opportunity_summary(
     opportunity_summary = OpportunitySummary(opportunity=opportunity, **summary_data)
 
     db_session.add(opportunity_summary)
-
-    add_opportunity_audit_event(
-        db_session,
-        opportunity,
-        user,
-        OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED,
-        nonforecast_opportunity_summary=OpportunitySummaryDetailSchema().dump(opportunity_summary),
+    opportunity.opportunity_audits.append(
+        build_opportunity_audit_event(
+            opportunity,
+            user,
+            OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED,
+            nonforecast_opportunity_summary=OpportunitySummaryDetailSchema().dump(
+                opportunity_summary
+            ),
+        )
     )
 
     logger.info(
@@ -113,12 +115,13 @@ def update_opportunity_summary(
     for field, value in summary_data.items():
         setattr(summary, field, value)
 
-    add_opportunity_audit_event(
-        db_session,
-        opportunity,
-        user,
-        OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED,
-        nonforecast_opportunity_summary=OpportunitySummaryDetailSchema().dump(summary),
+    opportunity.opportunity_audits.append(
+        build_opportunity_audit_event(
+            opportunity,
+            user,
+            OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED,
+            nonforecast_opportunity_summary=OpportunitySummaryDetailSchema().dump(summary),
+        )
     )
 
     logger.info(
