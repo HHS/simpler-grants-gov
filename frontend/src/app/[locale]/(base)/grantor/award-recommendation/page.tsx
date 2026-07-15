@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import AwardRecommendationsListContent from "src/app/[locale]/(base)/grantor/award-recommendation/_components/AwardRecommendationsListContent";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
+import AwardRecommendationsListContent from "src/app/[locale]/(base)/grantor/award-recommendation/_components/AwardRecommendationsListContent";
 import Unauthenticated from "src/app/[locale]/(base)/unauthenticated/page";
 import { MissingAuthError } from "src/errors";
 import { getSession } from "src/services/auth/session";

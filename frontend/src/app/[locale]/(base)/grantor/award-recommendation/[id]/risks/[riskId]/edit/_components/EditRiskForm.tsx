@@ -72,7 +72,9 @@ export default function EditRiskForm({
     );
 
     if (result.success) {
-      router.push(`/grantor/award-recommendation/${awardRecommendationId}/edit`);
+      router.push(
+        `/grantor/award-recommendation/${awardRecommendationId}/edit`,
+      );
     } else {
       setError(result.errorMessage || t("saveError"));
       setIsSubmitting(false);

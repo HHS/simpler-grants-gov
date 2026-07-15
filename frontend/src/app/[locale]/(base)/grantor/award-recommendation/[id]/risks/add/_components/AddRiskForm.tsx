@@ -64,7 +64,9 @@ export default function AddRiskForm({
     });
 
     if (result.success) {
-      router.push(`/grantor/award-recommendation/${awardRecommendationId}/edit`);
+      router.push(
+        `/grantor/award-recommendation/${awardRecommendationId}/edit`,
+      );
     } else {
       setError(result.errorMessage || t("saveError"));
       setIsSubmitting(false);
@@ -75,7 +77,9 @@ export default function AddRiskForm({
     return (
       <SimplerAlert
         alertClick={() =>
-          router.push(`/grantor/award-recommendation/${awardRecommendationId}/risks`)
+          router.push(
+            `/grantor/award-recommendation/${awardRecommendationId}/risks`,
+          )
         }
         buttonId="no-selections-alert"
         messageText={t("noSelectionsMessage")}
