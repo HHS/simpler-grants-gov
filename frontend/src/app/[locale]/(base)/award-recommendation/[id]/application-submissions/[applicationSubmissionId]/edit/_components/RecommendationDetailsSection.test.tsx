@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import { RecommendationDetailForm } from "src/app/[locale]/(base)/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
 import { AwardRecommendationSubmission } from "src/types/awardRecommendationTypes";
@@ -223,9 +223,7 @@ describe("RecommendationDetailForm", () => {
     it("pre-populates general comment from submission_detail", () => {
       render(<RecommendationDetailForm submission={mockSubmission} />);
 
-      const textarea = screen.getByTestId(
-        "recommendation-comments-textarea",
-      );
+      const textarea = screen.getByTestId("recommendation-comments-textarea");
       expect(textarea).toHaveValue("Test comment");
     });
 
@@ -242,9 +240,7 @@ describe("RecommendationDetailForm", () => {
 
       render(<RecommendationDetailForm submission={submissionWithException} />);
 
-      const textarea = screen.getByTestId(
-        "exception-detail-textarea",
-      );
+      const textarea = screen.getByTestId("exception-detail-textarea");
       expect(textarea).toHaveValue("Exception reason here");
     });
 
@@ -257,7 +253,9 @@ describe("RecommendationDetailForm", () => {
         },
       };
 
-      render(<RecommendationDetailForm submission={submissionNotRecommended} />);
+      render(
+        <RecommendationDetailForm submission={submissionNotRecommended} />,
+      );
 
       const select = screen.getByRole("combobox", {
         name: /recommendationLabel/i,
@@ -275,12 +273,8 @@ describe("RecommendationDetailForm", () => {
       );
 
       // Check that both recommended amount inputs are rendered
-      expect(
-        screen.getByDisplayValue("$75,000"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByDisplayValue("$25,000"),
-      ).toBeInTheDocument();
+      expect(screen.getByDisplayValue("$75,000")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("$25,000")).toBeInTheDocument();
     });
 
     it("displays application IDs in table rows", () => {
