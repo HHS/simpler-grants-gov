@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { identity } from "lodash";
 import { RecommendationDetailForm } from "src/app/[locale]/(base)/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
 import { AwardRecommendationSubmission } from "src/types/awardRecommendationTypes";
@@ -215,8 +214,8 @@ describe("RecommendationDetailForm", () => {
 
       const checkbox = screen.getByRole("checkbox", {
         name: /hasExceptionLabel/i,
-      }) as HTMLInputElement;
-      expect(checkbox.checked).toBe(true);
+      });
+      expect(checkbox).toBeChecked();
     });
   });
 
@@ -226,8 +225,8 @@ describe("RecommendationDetailForm", () => {
 
       const textarea = screen.getByTestId(
         "recommendation-comments-textarea",
-      ) as HTMLTextAreaElement;
-      expect(textarea.value).toBe("Test comment");
+      );
+      expect(textarea).toHaveValue("Test comment");
     });
 
     it("pre-populates exception detail when provided", () => {
@@ -245,8 +244,8 @@ describe("RecommendationDetailForm", () => {
 
       const textarea = screen.getByTestId(
         "exception-detail-textarea",
-      ) as HTMLTextAreaElement;
-      expect(textarea.value).toBe("Exception reason here");
+      );
+      expect(textarea).toHaveValue("Exception reason here");
     });
 
     it("pre-selects correct recommendation type", () => {
@@ -262,8 +261,8 @@ describe("RecommendationDetailForm", () => {
 
       const select = screen.getByRole("combobox", {
         name: /recommendationLabel/i,
-      }) as HTMLSelectElement;
-      expect(select.value).toBe("not_recommended");
+      });
+      expect(select).toHaveValue("not_recommended");
     });
   });
 
@@ -271,9 +270,9 @@ describe("RecommendationDetailForm", () => {
     it("formats recommended amount on blur", async () => {
       render(<RecommendationDetailForm submission={mockSubmission} />);
 
-      const input = screen.getByDisplayValue("$75,000") as HTMLInputElement;
+      const input = screen.getByDisplayValue("$75,000");
       fireEvent.change(input, { target: { value: "50000" } });
-      expect(input.value).toBe("50000");
+      expect(input).toHaveValue("50000");
 
       fireEvent.blur(input);
       await waitFor(() => {
@@ -284,7 +283,7 @@ describe("RecommendationDetailForm", () => {
     it("handles invalid currency input gracefully", async () => {
       render(<RecommendationDetailForm submission={mockSubmission} />);
 
-      const input = screen.getByDisplayValue("$75,000") as HTMLInputElement;
+      const input = screen.getByDisplayValue("$75,000");
       fireEvent.change(input, { target: { value: "invalid" } });
       fireEvent.blur(input);
 
