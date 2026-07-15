@@ -1,8 +1,10 @@
 // based on https://github.com/ArturKot95/FormData2Json/blob/main/src/formDataToObject.ts
 
 import { RJSFSchema } from "@rjsf/utils";
-
-import { getByPointer, getFieldPathFromHtml } from "./applyFormUtils";
+import {
+  getByPointer,
+  getFieldPathFromHtml,
+} from "src/utils/formData/formDataUtils";
 
 // like, this is basically anything lol - DWS
 type NestedObject = {
@@ -13,19 +15,34 @@ type NestedObject = {
 };
 
 type FormDataToJsonOptions = {
+  // seems to be unused, but an optional path prefix to add when referencing schema location
   parentKey?: string;
+  // will default to `--` downstream if not provided. Used to convert representation of nested fields
+  // from FormData / DOM level implementation to implementation used in schema
   delimiter?: string;
+  useUndefinedDefaultValue?: boolean;
 };
 
 /*
+  parses form data values (which based on FormData defs are either string or blob)
+  into proper data types based on specified type from schema definition
+
+  note:
   - string representations of booleans are cast to booleans
   - for number type fields, cast to number as long as a value is present
-  - for string type fields that represent a number, ensure they remain strings (or undefined)
+  - for string type fields that represent a number, ensure they remain strings (or null)
   - otherwise it may be an object or array, so try to cast to parse json
     - note that this will cast a number string ("1") to a number, thus the necessity of the previous case
-  - if the json parse fails, just return the string (or undefined)
+  - if the json parse fails, just return the string (or null)
+
+  Note that
 */
-const parseValue = (value: unknown, type: string) => {
+const parseValue = (
+  value: unknown,
+  type: string,
+  useUndefinedDefaultValue = false,
+) => {
+  const defaultValue = useUndefinedDefaultValue ? undefined : null;
   if (value === "false") return false;
   if (value === "true") return true;
   if (
@@ -35,19 +52,20 @@ const parseValue = (value: unknown, type: string) => {
   )
     return Number(value);
   if (type === "string" && !isNaN(Number(value))) {
-    return value || undefined;
+    return value || defaultValue;
   }
   try {
     return JSON.parse(value as string) as unknown;
   } catch (_e) {
-    return value || undefined;
+    return value || defaultValue;
   }
 };
 
+// determines the proper type of a form field's value based on the form's schema
 const getFieldType = (
-  currentKey: string,
+  currentKey: string, // FormData key
   formSchema: RJSFSchema,
-  parentKey?: string,
+  options: FormDataToJsonOptions = {},
 ): string => {
   // for fields that represent array items in the form schema, we need to reference
   // the "items" property of the field's schema definition. The form data key will
@@ -58,8 +76,11 @@ const getFieldType = (
     /\[\d+\]/g,
     "--items",
   );
-  const path = getFieldPathFromHtml(keyWithArrayNotationStripped);
-  const fullPath = parentKey ? `${parentKey}/${path}` : path;
+  const path = getFieldPathFromHtml(
+    keyWithArrayNotationStripped,
+    options.delimiter,
+  );
+  const fullPath = options.parentKey ? `${options.parentKey}/${path}` : path;
   const formFieldDefinition = getByPointer(formSchema, fullPath) as {
     type?: string;
   };
@@ -70,21 +91,24 @@ const getFieldType = (
   return formFieldDefinition?.type;
 };
 
-export function formDataToObject(
+// basic functionality here was borrowed from https://github.com/ArturKot95/FormData2Json
+// handles conversion of FormData into a POJO, accounting for nested structures and arrays
+export function formDataToObject<T = NestedObject>(
   formData = new FormData(),
-  formSchema: RJSFSchema,
+  formSchema: RJSFSchema, // expects that any "/properties" path segments have already been removed
   options?: FormDataToJsonOptions,
-): NestedObject {
+): T {
   const delimiter = options?.delimiter || ".";
-  const { parentKey } = options ?? { parentKey: "" };
+  const parentKey = options?.parentKey || "";
+  const useUndefinedDefaultValue = options?.useUndefinedDefaultValue || false;
   const result: NestedObject = {};
   const entries = formData.entries();
 
   for (const [key, value] of entries) {
     const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
     const chunks = currentKey.split(delimiter);
-    const fieldType = getFieldType(currentKey, formSchema, parentKey);
-    const parsedValue = parseValue(value, fieldType);
+    const fieldType = getFieldType(currentKey, formSchema, options);
+    const parsedValue = parseValue(value, fieldType, useUndefinedDefaultValue);
 
     let current = result;
 
@@ -109,7 +133,7 @@ export function formDataToObject(
 
         const actualChunkName = chunkName.substring(0, indexStart);
         current[actualChunkName] =
-          (current[actualChunkName] as unknown[]) ?? ([] as unknown[]);
+          current[actualChunkName] ?? ([] as unknown[]);
 
         const currentChunk = current[actualChunkName] as unknown[];
         if (chunkIdx === chunks.length - 1) {
@@ -133,5 +157,5 @@ export function formDataToObject(
     }
   }
 
-  return result;
+  return result as T;
 }

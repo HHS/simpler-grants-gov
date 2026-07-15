@@ -14,13 +14,12 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/types/applyForm/types";
-
 import {
   getByPointer,
-  getFieldNameForHtml,
   getFieldPathFromHtml,
-  getFieldSchema,
-} from "./applyFormUtils";
+} from "src/utils/formData/formDataUtils";
+
+import { getFieldNameForHtml, getFieldSchema } from "./applyFormUtils";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
@@ -226,6 +225,9 @@ export const getWarningsForField = ({
   });
 };
 
+// returns either the final slash delimited path segment from definition
+// or the "title" attribute from the field schema (with dashes for whitespace)
+// or "untitled"
 export const getNameFromDef = ({
   definition,
   schema,
@@ -252,7 +254,7 @@ const getBasicFieldInfo = ({
 }: {
   uiFieldObject: UiSchemaField;
   formSchema: RJSFSchema;
-  formData: object;
+  formData: object; // this will be either the saved form JSON, or an empty FormData object (?s)
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<string> => {
   const { schema } = uiFieldObject;
@@ -267,6 +269,19 @@ const getBasicFieldInfo = ({
     schema,
     formSchema,
   }) as RJSFSchema;
+
+  /*
+    this section of code formats the field's name and path for various use cases
+    by way of example, where `definition` = `/properties/applicant/properties/state`
+      * `fieldName` = `state`
+        * used as a fallback ID in case htmlFieldName can't be computed
+        * seems like it'd be used for something else, like a label, but it's not
+      * `htmlFieldName` = `applicant--state`
+        * used for referencing data values within HTML form's FormData
+        * used for defining ID on each widget
+      * `formDataPath` =  `/applicant/state`
+        * used for retrieving data from saved form data JSON
+  */
   const fieldName = getNameFromDef({ definition, schema });
   const htmlFieldName = getFieldNameForHtml({ definition, schema });
   const formDataPath = getFieldPathFromHtml(htmlFieldName);
@@ -412,8 +427,8 @@ export const getEnumOptions = ({
   );
 
   return widgetType === "Select"
-    ? ({ enumOptions, emptyValue: "- Select -" } as WidgetOptions)
-    : ({ enumOptions } as WidgetOptions);
+    ? { enumOptions, emptyValue: "- Select -" }
+    : { enumOptions };
 };
 
 // handle complexity of branching for basic vs. multifield config logic
