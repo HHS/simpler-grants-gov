@@ -265,16 +265,16 @@ class MgmtRoleFactory(BaseFactory):
 
     class Params:
         is_department_role = factory.Trait(
-            resource_type=[MgmtResourceType.DEPARTMENT],
+            resource_types=[MgmtResourceType.DEPARTMENT],
             privileges=[MgmtPrivilege.VIEW_DEPARTMENT],
         )
 
         is_subagency_role = factory.Trait(
-            resource_type=[MgmtResourceType.SUBAGENCY],
+            resource_types=[MgmtResourceType.SUBAGENCY],
             privileges=[MgmtPrivilege.VIEW_SUBAGENCY],
         )
 
         is_team_role = factory.Trait(
-            resource_type=[MgmtResourceType.TEAM],
+            resource_types=[MgmtResourceType.TEAM],
             privileges=[MgmtPrivilege.VIEW_TEAM],
         )

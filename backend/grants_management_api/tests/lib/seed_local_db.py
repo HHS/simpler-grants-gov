@@ -9,7 +9,6 @@ from grants_shared.util.local import error_if_not_local
 
 import tests.db.models.factories as f
 from src.db.resource_automation.resource_automation import setup_resource_automation
-from tests.db.models import factories
 from tests.lib.seed_data_utils import UserBuilder
 
 logger = logging.getLogger(__name__)
@@ -26,7 +25,7 @@ def seed_local_db() -> None:
         setup_resource_automation()
 
         with db_client.get_session() as db_session:
-            factories._db_session = db_session
+            f._db_session = db_session
             run_seed_logic(db_session)
 
 
@@ -56,7 +55,7 @@ def create_users(db_session: db.Session) -> None:
     ).with_oauth_login("another_jwt_user").with_jwt_auth().build()
 
 
-def create_teams():
+def create_teams() -> None:
     teams = f.TeamFactory.create_batch(size=10)
 
     for team in teams:

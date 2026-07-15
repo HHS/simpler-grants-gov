@@ -31,7 +31,6 @@ def test_resource_automation_with_defaults(db_session):
 
     internal_resource = MgmtInternalResource(internal_resource_name="My example internal resource")
     db_session.add(internal_resource)
-    db_session.add(internal_resource)
 
     db_session.commit()
 
@@ -117,6 +116,22 @@ def test_resource_automation_does_not_change_resource_on_change(db_session, enab
     db_session.refresh(department)
     assert department.department_id == department_id
     assert department.resource.mgmt_resource_id == department_id
+    assert department.department_name == "New department name"
+
+    db_session.refresh(subagency)
+    assert subagency.subagency_id == subagency_id
+    assert subagency.resource.mgmt_resource_id == subagency_id
+    assert subagency.subagency_name == "New subagency name"
+
+    db_session.refresh(team)
+    assert team.team_id == team_id
+    assert team.resource.mgmt_resource_id == team_id
+    assert team.team_id == team_id
+
+    db_session.refresh(internal_resource)
+    assert internal_resource.mgmt_internal_resource_id == internal_resource_id
+    assert internal_resource.resource.mgmt_resource_id == internal_resource_id
+    assert internal_resource.internal_resource_name == "New internal resource name"
 
 
 def test_resource_automation_when_deleting_resource(db_session, enable_factory_create):
