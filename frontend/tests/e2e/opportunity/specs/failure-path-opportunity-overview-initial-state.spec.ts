@@ -62,11 +62,13 @@ test.describe("Grantor opportunity overview failure path - initial state gating"
       await expect(page).toHaveURL(
         /\/grantor\/opportunity\/([a-z0-9-]+?)\/overview/,
       );
-// And I should see the "Preview", and "Publish" buttons disabled.
-await assertButtonEnabledDisabledStates(page, {
-  Preview: false,
-  Publish: false,
-});
+
+      // And I should see the "Preview" and "Publish" buttons disabled.
+      await assertButtonEnabledDisabledStates(page, {
+        Preview: false,
+        Publish: false,
+      });
+
       const overviewUrl = page.url();
 
       // When I attempt to click Preview, navigation should not occur.
