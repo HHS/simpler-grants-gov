@@ -1,5 +1,6 @@
 import json
 import logging
+import signal
 import threading
 import uuid
 from unittest.mock import patch
@@ -7,6 +8,7 @@ from unittest.mock import patch
 import boto3
 import pytest
 from grants_shared.adapters.aws.sqs_adapter import SQSClient, SQSMessage
+from grants_shared.api.maintenance_mode import get_maintenance_mode_config
 
 from src.constants.lookup_constants import (
     WorkflowEntityType,
@@ -19,6 +21,7 @@ from src.workflow.event.workflow_event import ProcessWorkflowEventContext, Workf
 from src.workflow.manager.workflow_manager import (
     WorkflowManager,
     WorkflowManagerConfig,
+    WorkflowManagerLogEvent,
     handle_event,
 )
 from tests.src.db.models.factories import OpportunityFactory, UserFactory, WorkflowFactory
@@ -47,6 +50,60 @@ def test_workflow_manager(workflow_sqs_queue, app, valid_sqs_message):
     metrics = workflow_manager.metrics
     assert metrics["batches_processed"] == 3
     assert metrics["events_processed"] >= 3
+
+
+@pytest.fixture
+def enable_maintenance_mode(monkeypatch):
+    """Turn maintenance mode on for the duration of a test.
+
+    The maintenance-mode config is @cached, so clear it around the env change.
+    """
+    monkeypatch.setenv("ENABLE_MAINTENANCE_MODE", "true")
+    get_maintenance_mode_config.cache_clear()
+    yield
+    get_maintenance_mode_config.cache_clear()
+
+
+def test_process_events_skips_when_maintenance_mode_enabled(
+    app, workflow_sqs_queue, valid_sqs_message, enable_maintenance_mode, caplog
+):
+    """With maintenance mode on, process_events idles without fetching from SQS or
+    processing a batch, and exits cleanly once a SIGTERM has been received."""
+    caplog.set_level(logging.INFO)
+
+    boto_client = boto3.client("sqs", region_name="us-east-1")
+    sqs_client = SQSClient(queue_url=workflow_sqs_queue, sqs_client=boto_client)
+    sqs_client.send_message(json.loads(valid_sqs_message.body))
+
+    config = WorkflowManagerConfig(workflow_cycle_duration=0)
+    workflow_manager = WorkflowManager(config=config)
+    # Simulate the SIGTERM the force-new-deployment sends, so the idle loop wakes
+    # and exits instead of blocking. Exercise the real handler rather than poking
+    # internal state so we cover the shutdown path end to end.
+    workflow_manager.handle_exit(signal.SIGTERM, None)
+
+    with app.app_context():
+        workflow_manager.process_events()
+
+    assert workflow_manager.sigterm_received is True
+
+    # No batch was processed - the manager never touched SQS or the DB.
+    assert workflow_manager.metrics["batches_processed"] == 0
+    assert workflow_manager.metrics["events_processed"] == 0
+
+    # The message we enqueued is still on the queue - fetch_messages was never called.
+    remaining = sqs_client.receive_messages(max_messages=1, wait_time=0)
+    assert len(remaining) == 1
+
+    # A distinct, queryable skip event was logged.
+    skip_records = [
+        record
+        for record in caplog.records
+        if getattr(record, "maintenance_mode_event", None)
+        == WorkflowManagerLogEvent.MAINTENANCE_MODE_SKIP
+    ]
+    assert len(skip_records) == 1
+    assert skip_records[0].message == "Skipping workflow processing due to maintenance mode"
 
 
 @pytest.fixture
