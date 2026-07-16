@@ -154,7 +154,7 @@ describe("RecommendationDetailForm", () => {
     });
   });
 
-    describe("recommendation type interactions", () => {
+  describe("recommendation type interactions", () => {
     it("shows exception checkbox for 'recommended_without_funding'", () => {
       render(<RecommendationDetailForm submission={mockSubmission} />);
 

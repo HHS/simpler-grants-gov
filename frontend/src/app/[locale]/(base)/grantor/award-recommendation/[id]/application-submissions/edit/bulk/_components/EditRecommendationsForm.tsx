@@ -82,7 +82,7 @@ export default function EditRecommendationsForm({
       </h2>
 
       {isMultipleSubmissions && (
-       <div className="bg-base-lightest padding-2 margin-bottom-2">
+        <div className="bg-base-lightest padding-2 margin-bottom-2">
           <p className="margin-0 text-bold">
             {selectedSubmissions.length} {t("submissionsSelected")}
           </p>
