@@ -30,6 +30,12 @@ export {
 
 // Generic shared helpers used across page flows and fixtures.
 export { formatNumberWithCommas };
+export {
+  createAuthenticatedPageLifecycle,
+  createAuthenticatedStorageState,
+  createPageWithStorageState,
+  type AuthenticatedStorageState,
+} from "./auth-storage-state-utils";
 export { runSharedFieldFill } from "./shared-field-filling";
 export { runFieldFillBatch } from "./field-batch-filling";
 export { buildPageFieldsFromDefinitions } from "./build-page-fields-from-definitions";

@@ -11,6 +11,10 @@
  * - Required-field gating: FUNDING_DETAILS_FIELD_DEFINITIONS + ELIGIBILITY_FIELD_DEFINITIONS.
  * - Character limits/email/contact checks: ADDITIONAL_INFORMATION_FIELD_DEFINITIONS.
  * - Numeric and cross-field rules: FUNDING_DETAILS_FIELD_DEFINITIONS + CROSS_FIELD_VALIDATION_DEFINITIONS.
+ * - Shared failure-path exports:
+ *   - REQUIRED_FIELD_DEFINITIONS
+ *   - EDIT_FAILURE_PATH_FIELD_DEFINITIONS
+ *   - EDIT_OPPORTUNITY_URL_PATTERN
  */
 
 import { buildPageFieldsFromDefinitions as buildSharedPageFieldsFromDefinitions } from "tests/e2e/utils/common/build-page-fields-from-definitions";
@@ -52,6 +56,7 @@ export type OpportunityFieldValueKey =
 export type OpportunityPageFieldDefinition =
   MetadataPageFieldDefinition<OpportunityFieldValueKey> &
     ValidationMetadata &
+    // Included for create-opportunity duplicate checks; optional in edit-only flows.
     DuplicateValidationMetadata;
 
 /** Cross-field validation scenarios used by funding relationship checks. */
@@ -232,6 +237,10 @@ export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[
     },
   ];
 
+/** Opportunity Summary edit page URL pattern (with optional query params). */
+export const EDIT_OPPORTUNITY_URL_PATTERN =
+  /\/grantor\/opportunity\/[0-9a-f-]{36}\/edit(?:\?.*)?$/i;
+
 /** Shard 6: eligibility checkbox definitions for applicant categories. */
 export const ELIGIBILITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
   {
@@ -330,3 +339,14 @@ export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefin
       characterLimitValidationMessage: "1 character over limit",
     },
   ];
+
+/** Required field definitions used by Opportunity Summary gating checks. */
+export const REQUIRED_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
+  // Save/Publish gating fields come from funding + eligibility sections.
+  ...FUNDING_DETAILS_FIELD_DEFINITIONS,
+  ...ELIGIBILITY_FIELD_DEFINITIONS,
+];
+
+/** Combined field definitions for Opportunity Summary edit failure-path checks. */
+export const EDIT_FAILURE_PATH_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
+  [...REQUIRED_FIELD_DEFINITIONS, ...ADDITIONAL_INFORMATION_FIELD_DEFINITIONS];

@@ -2,7 +2,7 @@
  * @feature Opportunity Summary - Failure Path
  *
  * Notes for reviewer (what happens in this spec):
- * 1) Authenticates a grantor user and creates a draft opportunity per test.
+ * 1) Uses shared authenticated lifecycle hooks (one login per spec) and creates a draft opportunity per test.
  * 2) Opens the Opportunity Summary edit page from the create flow.
  * 3) Runs focused failure-path validation scenarios for:
  *    - required-field gating
@@ -14,33 +14,28 @@
  *
  * Tester parameter guide:
  * - Dynamic values are generated in buildOpportunityHappyPathFillData(new Date()).
- * - To adjust required-field priming, update fixture inputs/definitions used by:
- *   - FUNDING_DETAILS_FIELD_DEFINITIONS
- *   - ELIGIBILITY_FIELD_DEFINITIONS
+ * - To adjust required-field priming, update REQUIRED_FIELD_DEFINITIONS in
+ *   opportunity-pages-field-definitions.
  * - To adjust validation coverage, update the relevant metadata/inputs used by:
  *   - ADDITIONAL_INFORMATION_FIELD_DEFINITIONS
  *   - CROSS_FIELD_VALIDATION_DEFINITIONS
- * - Scenario-specific invalid inputs are controlled by constants in this spec.
+ * - EDIT_OPPORTUNITY_URL_PATTERN is imported from opportunity-pages-field-definitions.
  */
 
-import {
-  expect,
-  test,
-  type BrowserContext,
-  type Page,
-  type TestInfo,
-} from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import {
   ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
   buildPageFieldsFromDefinitions,
   CROSS_FIELD_VALIDATION_DEFINITIONS,
-  ELIGIBILITY_FIELD_DEFINITIONS,
+  EDIT_FAILURE_PATH_FIELD_DEFINITIONS,
+  EDIT_OPPORTUNITY_URL_PATTERN,
   FUNDING_DETAILS_FIELD_DEFINITIONS,
+  REQUIRED_FIELD_DEFINITIONS,
 } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
 import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixtures/opportunity-pages-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { createAuthenticatedPageLifecycle } from "tests/e2e/utils/common/auth-storage-state-utils";
 import { assertCharacterLimitValidationsFromDefinitions } from "tests/e2e/utils/common/character-limit-validation-utils";
 import { assertCrossFieldValidationsFromDefinitions } from "tests/e2e/utils/common/cross-field-validation-utils";
 import { assertEmailValidationsFromDefinitions } from "tests/e2e/utils/common/email-validation-utils";
@@ -51,36 +46,9 @@ import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunit
 
 const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
-const REQUIRED_FIELD_DEFINITIONS = [
-  ...FUNDING_DETAILS_FIELD_DEFINITIONS,
-  ...ELIGIBILITY_FIELD_DEFINITIONS,
-];
-const NEGATIVE_TEST_VALUE = "-10";
-const EDIT_OPPORTUNITY_URL_PATTERN =
-  /\/grantor\/opportunity\/[0-9a-f-]{36}\/edit(?:\?.*)?$/i;
 
-async function authenticateAndBuildFillData(
-  page: Page,
-  context: BrowserContext,
-  testInfo: TestInfo,
-) {
-  testInfo.setTimeout(300_000);
-
-  await authenticateE2eUser(
-    page,
-    context,
-    !!testInfo.project.name.match(/[Mm]obile/),
-  );
-
-  return buildOpportunityHappyPathFillData(new Date());
-}
-
-async function setupAndNavigateToOpportunitySummary(
-  page: Page,
-  context: BrowserContext,
-  testInfo: TestInfo,
-) {
-  const fillData = await authenticateAndBuildFillData(page, context, testInfo);
+async function setupAndNavigateToOpportunitySummary(page: Page) {
+  const fillData = buildOpportunityHappyPathFillData(new Date());
 
   // Given I create a new opportunity with all required fields filled in
   await createOpportunity(page, fillData);
@@ -88,7 +56,7 @@ async function setupAndNavigateToOpportunitySummary(
   // And I click "Opportunity Summary" link
   await page.getByRole("link", { name: "Opportunity Summary" }).click();
 
-  // Then I should be on the "Opportunity Summary" page.
+  // And I should be on the edit opportunity summary page
   await expect(page).toHaveURL(EDIT_OPPORTUNITY_URL_PATTERN);
 
   // And I should see the "Save and exit", "Save and go back", and "Save and continue" buttons enabled.
@@ -102,28 +70,30 @@ async function setupAndNavigateToOpportunitySummary(
 }
 
 test.describe("Grantor Opportunity Summary Failure Path", () => {
-  test.beforeEach(({ page: _ }, testInfo) => {
-    if (targetEnv === "staging") {
-      test.skip(
-        testInfo.project.name !== "Chrome",
-        "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-      );
-    }
+  // One-login-per-spec lifecycle shared across failure-path specs.
+  const authenticatedLifecycle = createAuthenticatedPageLifecycle({
+    targetEnv,
+    skipTest: (condition, description) => test.skip(condition, description),
   });
+
+  test.beforeAll(authenticatedLifecycle.beforeAll);
+  test.beforeEach(authenticatedLifecycle.beforeEach);
+  test.afterEach(authenticatedLifecycle.afterEach);
 
   test(
     "Required-field validation",
     { tag: [GRANTOR, CORE_REGRESSION] },
-    async ({ page, context }, testInfo) => {
+    async () => {
       //--------------Test setup start here----------------
-      await setupAndNavigateToOpportunitySummary(page, context, testInfo);
+      const testPage = authenticatedLifecycle.getPage();
+      await setupAndNavigateToOpportunitySummary(testPage);
 
       //--------------Scenario steps start here----------------
       // When I click the configured trigger button
       // Then required-field validation errors are shown on the page.
       // Note: The required-field validation helper asserts the page URL pattern after each trigger button click.
       await assertRequiredFieldValidationsFromDefinitions(
-        page,
+        testPage,
         REQUIRED_FIELD_DEFINITIONS,
         {
           triggerButtonNames: ["Save and exit"],
@@ -138,24 +108,21 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
   test(
     "Negative number validation",
     { tag: [GRANTOR, CORE_REGRESSION] },
-    async ({ page, context }, testInfo) => {
+    async () => {
       //--------------Test setup start here----------------
-      const fillData = await setupAndNavigateToOpportunitySummary(
-        page,
-        context,
-        testInfo,
-      );
+      const testPage = authenticatedLifecycle.getPage();
+      const fillData = await setupAndNavigateToOpportunitySummary(testPage);
 
       //--------------Scenario steps start here----------------
       // When I click the configured trigger button
       // Then negative number validation errors are shown on the page.
       // Note: The negative-number validation helper asserts the page URL pattern after each trigger button click.
       await assertNegativeNumberValidationsFromDefinitions(
-        page,
+        testPage,
         FUNDING_DETAILS_FIELD_DEFINITIONS,
         fillData,
         {
-          negativeValue: NEGATIVE_TEST_VALUE,
+          negativeValue: "-10",
           triggerButtonNames: ["Save and exit"],
           pageUrlPattern: EDIT_OPPORTUNITY_URL_PATTERN,
         },
@@ -168,20 +135,17 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
   test(
     "Email format validation",
     { tag: [GRANTOR, CORE_REGRESSION] },
-    async ({ page, context }, testInfo) => {
+    async () => {
       //--------------Test setup start here----------------
-      const fillData = await setupAndNavigateToOpportunitySummary(
-        page,
-        context,
-        testInfo,
-      );
+      const testPage = authenticatedLifecycle.getPage();
+      const fillData = await setupAndNavigateToOpportunitySummary(testPage);
 
       //--------------Scenario steps start here----------------
       // When I click the configured trigger button
       // Then email format validation errors are shown on the page.
       // Note: The email-validation helper asserts the page URL pattern after each trigger button click.
       await assertEmailValidationsFromDefinitions(
-        page,
+        testPage,
         ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
         fillData,
         {
@@ -198,20 +162,17 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
   test(
     "Cross-field validation",
     { tag: [GRANTOR, CORE_REGRESSION] },
-    async ({ page, context }, testInfo) => {
+    async () => {
       //--------------Test setup start here----------------
-      const fillData = await setupAndNavigateToOpportunitySummary(
-        page,
-        context,
-        testInfo,
-      );
+      const testPage = authenticatedLifecycle.getPage();
+      const fillData = await setupAndNavigateToOpportunitySummary(testPage);
 
       //--------------Scenario steps start here----------------
       // When I click the configured trigger button
       // Then cross-field validation errors are shown on the page.
       // Note: The cross-field validation helper asserts the page URL pattern after each trigger button click.
       await assertCrossFieldValidationsFromDefinitions(
-        page,
+        testPage,
         CROSS_FIELD_VALIDATION_DEFINITIONS,
         fillData,
         {
@@ -227,26 +188,18 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
   test(
     "Character limits validation",
     { tag: [GRANTOR, CORE_REGRESSION] },
-    async ({ page, context }, testInfo) => {
+    async () => {
       //--------------Test setup start here----------------
-      const fillData = await setupAndNavigateToOpportunitySummary(
-        page,
-        context,
-        testInfo,
-      );
+      const testPage = authenticatedLifecycle.getPage();
+      const fillData = await setupAndNavigateToOpportunitySummary(testPage);
 
       //--------------Scenario steps start here----------------
       // When I click the configured trigger button
       // Then character limits validation errors are shown on the page.
       // Note: The character limits validation helper asserts the page URL pattern after each trigger button click.
-      const editFailurePathFieldDefinitions = [
-        ...REQUIRED_FIELD_DEFINITIONS,
-        ...ADDITIONAL_INFORMATION_FIELD_DEFINITIONS,
-      ];
-
       await assertCharacterLimitValidationsFromDefinitions(
-        page,
-        editFailurePathFieldDefinitions,
+        testPage,
+        EDIT_FAILURE_PATH_FIELD_DEFINITIONS,
         fillData,
         {
           buildPageFields: buildPageFieldsFromDefinitions,
