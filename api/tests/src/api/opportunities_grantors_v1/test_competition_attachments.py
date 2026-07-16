@@ -7,7 +7,11 @@ from grants_shared.util import file_util
 from src.constants.lookup_constants import Privilege
 from src.db.models import competition_models
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
-from tests.src.db.models.factories import CompetitionFactory, OpportunityFactory
+from tests.src.db.models.factories import (
+    CompetitionFactory,
+    CompetitionInstructionFactory,
+    OpportunityFactory,
+)
 
 
 @pytest.fixture
@@ -42,8 +46,6 @@ def existing_instruction(
     existing_competition, mock_s3_bucket, other_mock_s3_bucket, enable_factory_create
 ):
     """Create a competition instruction for the competition"""
-    from tests.src.db.models.factories import CompetitionInstructionFactory
-
     return CompetitionInstructionFactory.create(
         competition=existing_competition,
         competition_id=existing_competition.competition_id,
@@ -383,8 +385,6 @@ def test_delete_instruction_non_sgm_opportunity(
     other_mock_s3_bucket,
 ):
     """Test deletion from a non-SGM opportunity"""
-    from tests.src.db.models.factories import CompetitionInstructionFactory
-
     _, agency, token, _ = grantor_auth_data
 
     # Create a non-SGM opportunity
