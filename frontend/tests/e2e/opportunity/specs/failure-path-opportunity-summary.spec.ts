@@ -48,7 +48,6 @@ import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index"
 import { assertNegativeNumberValidationsFromDefinitions } from "tests/e2e/utils/common/negative-number-validation-utils";
 import { assertRequiredFieldValidationsFromDefinitions } from "tests/e2e/utils/common/required-field-validation-utils";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
-import { EDIT_OPPORTUNITY_URL_PATTERN } from "tests/e2e/utils/opportunity/edit-opportunity-setup-utils";
 
 const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
@@ -57,6 +56,9 @@ const REQUIRED_FIELD_DEFINITIONS = [
   ...ELIGIBILITY_FIELD_DEFINITIONS,
 ];
 const NEGATIVE_TEST_VALUE = "-10";
+const EDIT_OPPORTUNITY_URL_PATTERN =
+  /\/grantor\/opportunity\/[0-9a-f-]{36}\/edit(?:\?.*)?$/i;
+
 async function authenticateAndBuildFillData(
   page: Page,
   context: BrowserContext,
