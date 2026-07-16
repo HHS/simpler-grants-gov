@@ -298,7 +298,7 @@ export const getFieldSchema = ({
     return {
       ...(getByPointer(formSchema, definition) as object),
       ...schema,
-    } as RJSFSchema;
+    };
   } else if (definition) {
     return getByPointer(formSchema, definition) as RJSFSchema;
   }
@@ -484,9 +484,7 @@ export function getFieldsForNav(
       if (Array.isArray(item.children)) {
         results.push(
           ...getFieldsForNav(
-            item.children.filter(
-              (child) => child.type === "section",
-            ) as unknown as UiSchema,
+            item.children.filter((child) => child.type === "section"),
           ),
         );
       }
@@ -514,7 +512,7 @@ const getObjectItemSchema = (schema?: RJSFSchema): RJSFSchema | undefined => {
     !Array.isArray(schema.items) &&
     typeof schema.items === "object"
   ) {
-    return schema.items as RJSFSchema;
+    return schema.items;
   }
 
   return undefined;
@@ -545,10 +543,7 @@ const getChildSchema = ({
   schema?: RJSFSchema;
   key: string;
 }): RJSFSchema | undefined => {
-  return (schema?.properties?.[key] ??
-    (schema as Record<string, unknown> | undefined)?.[key]) as
-    | RJSFSchema
-    | undefined;
+  return (schema?.properties?.[key] ?? schema?.[key]) as RJSFSchema | undefined;
 };
 
 /**
@@ -670,7 +665,7 @@ export const shapeFormData = <T extends object>(
   );
   return pruneEmptyNestedFields(
     structuredFormData,
-    condenseFormSchemaProperties(formSchema) as RJSFSchema,
+    condenseFormSchemaProperties(formSchema),
   ) as T;
 };
 
@@ -761,9 +756,7 @@ export const processFormSchema = (
 } => {
   try {
     const { propertiesWithoutComplexConditionals, conditionalValidationRules } =
-      extricateConditionalValidationRules(
-        (formSchema.properties ?? {}) as JSONSchema7,
-      );
+      extricateConditionalValidationRules(formSchema.properties ?? {});
     const condensedProperties = mergeAllOf({
       properties: propertiesWithoutComplexConditionals,
     } as JSONSchema7);

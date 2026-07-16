@@ -94,10 +94,14 @@ export default function AwardRecommendationsListTable({
   };
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
   }, [currentAgencyId]);
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchAwardRecommendations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAgencyId, page, clientFetch]);

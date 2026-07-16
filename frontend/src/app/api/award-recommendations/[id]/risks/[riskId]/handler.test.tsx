@@ -29,7 +29,7 @@ global.Response = class Response {
       json: jest.fn().mockResolvedValue(data),
       status: init?.status || 200,
       ...init,
-    } as MockResponse;
+    };
   }
 } as unknown as typeof globalThis.Response;
 
