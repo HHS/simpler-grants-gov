@@ -2,10 +2,12 @@ import unittest
 
 import pytest
 
+from src.legacy_soap_api.legacy_soap_api_utils import get_gov_grants_tracking_number
 from src.legacy_soap_api.soap_payload_handler import (
     SOAPEnvelopeData,
     SOAPPayload,
     build_xml_from_dict,
+    extract_soap_xml,
     get_envelope_dict,
     get_soap_envelope_from_payload,
     get_soap_operation_name,
@@ -51,7 +53,7 @@ MOCK_SOAP_REQUEST_ENVELOPE = f"""
     "utf-8"
 )
 MOCK_SOAP_REQUEST_ALT_ENVELOPE = f"""
-    <soap:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">
     \n   <soapenv:Header/>\n   <soapenv:Body>\n      <app:{MOCK_SOAP_OPERATION_NAME}>\n         <app:OperationName2>
     </app:OperationName2>\n<!--Zero or more repetitions:-->\n          <gran:Attachment>\n
                  <gran:FileContentId>Dummy.pdf</gran:FileContentId>\n\t        <gran:FileDataHandler>
@@ -325,3 +327,59 @@ class TestGetSoapOperationName(unittest.TestCase):
             (FIVE_CHUNKS + MOCK_SOAP_REQUEST_ENVELOPE.decode()).encode("utf-8")
         )
         assert result == ""
+
+
+class TestExtractSoapXML(unittest.TestCase):
+    def test_extract_soap_xml_can_handle_incoming_soap_xml_with_header_and_footer(self):
+        soap_bytes = (
+            "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
+            "Content-Transfer-Encoding: binary"
+            "Content-ID: <0.urn:uuid:9467EB4D41266EA2C91784229922208@apache.org>"
+            "<?xml version='1.0' encoding='UTF-8'?>"
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">'
+            '<soapenv:Body><agen:GetApplicationZipRequest xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0">'
+            '<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT80000038</gran:GrantsGovTrackingNumber></agen:GetApplicationZipRequest></soapenv:Body></soapenv:Envelope>'
+            "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207--"
+        ).encode("utf-8")
+        xml_bytes = extract_soap_xml(soap_bytes)
+        expected = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">'
+            "<soapenv:Body>"
+            '<agen:GetApplicationZipRequest xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0">'
+            '<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT80000038</gran:GrantsGovTrackingNumber>'
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        assert xml_bytes == expected
+
+    def test_extract_soap_xml_can_handle_incoming_soap_xml_without_header_and_footer(self):
+        soap_bytes = (
+            "<?xml version='1.0' encoding='UTF-8'?>"
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">'
+            '<soapenv:Body><agen:GetApplicationZipRequest xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0">'
+            '<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT80000038</gran:GrantsGovTrackingNumber></agen:GetApplicationZipRequest></soapenv:Body></soapenv:Envelope>'
+        ).encode("utf-8")
+        xml_bytes = extract_soap_xml(soap_bytes)
+        expected = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">'
+            "<soapenv:Body>"
+            '<agen:GetApplicationZipRequest xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0">'
+            '<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT80000038</gran:GrantsGovTrackingNumber>'
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        assert xml_bytes == expected
+
+    def test_can_get_grants_gov_tracking_number_from_incoming_soap_xml_without_headers(self):
+        soap_bytes = (
+            "<?xml version='1.0' encoding='UTF-8'?>"
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">'
+            '<soapenv:Body><agen:GetApplicationZipRequest xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0">'
+            '<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT80000038</gran:GrantsGovTrackingNumber></agen:GetApplicationZipRequest></soapenv:Body></soapenv:Envelope>'
+        ).encode("utf-8")
+        xml_bytes = extract_soap_xml(soap_bytes)
+        result = get_gov_grants_tracking_number(xml_bytes)
+        assert result == "GRANT80000038"
