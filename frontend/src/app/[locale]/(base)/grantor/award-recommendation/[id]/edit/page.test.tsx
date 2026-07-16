@@ -1,0 +1,388 @@
+import { render, screen } from "@testing-library/react";
+import { identity } from "lodash";
+import AwardRecommendationEditPage from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/edit/page";
+import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
+import { LocalizedPageProps } from "src/types/intl";
+import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
+import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
+import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
+
+import { FunctionComponent, ReactNode } from "react";
+
+type onEnabled = (props: LocalizedPageProps) => ReactNode;
+
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => identity,
+}));
+
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  use: jest.fn(() => ({
+    locale: "en",
+  })),
+}));
+
+const mockRedirect = jest.fn();
+jest.mock("next/navigation", () => ({
+  redirect: (...args: unknown[]) => {
+    mockRedirect(...args);
+    throw new Error("NEXT_REDIRECT");
+  },
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    refresh: jest.fn(),
+  })),
+}));
+
+const withFeatureFlagMock = jest.fn();
+
+jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
+  __esModule: true,
+  default:
+    (
+      WrappedComponent: FunctionComponent<LocalizedPageProps>,
+      _featureFlagName: string,
+      onEnabled: onEnabled,
+    ) =>
+    (props: LocalizedPageProps) =>
+      (
+        withFeatureFlagMock as FeatureFlaggedPageWrapper<
+          LocalizedPageProps,
+          ReactNode
+        >
+      )(
+        WrappedComponent,
+        _featureFlagName,
+        onEnabled,
+      )(props) as FunctionComponent<LocalizedPageProps>,
+}));
+
+const mockGetAwardRecommendationDetails = jest
+  .fn()
+  .mockResolvedValue(mockAwardRecommendationDetails);
+
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
+  getAwardRecommendationDetails: (
+    id: string,
+  ): Promise<AwardRecommendationDetails> =>
+    mockGetAwardRecommendationDetails(
+      id,
+    ) as Promise<AwardRecommendationDetails>,
+}));
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: jest.fn().mockResolvedValue(null),
+}));
+
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
+}));
+
+jest.mock("next-intl", () => ({
+  useTranslations: () => identity,
+}));
+
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: jest.fn(() => ({
+    clientFetch: jest.fn().mockResolvedValue({
+      data: [],
+      pagination_info: { total_pages: 1 },
+    }),
+  })),
+}));
+
+const awardRecommendationParams = Promise.resolve({
+  locale: "en",
+  id: "AR-26-0001",
+});
+
+describe("AwardRecommendationEditPage", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe("when feature flag is enabled", () => {
+    beforeEach(() => {
+      withFeatureFlagMock.mockImplementation(
+        (
+          WrappedComponent: FunctionComponent<LocalizedPageProps>,
+          _featureFlagName: string,
+          _onEnabled: onEnabled,
+        ) =>
+          (props: { params: Promise<{ locale: string }> }) =>
+            WrappedComponent(props) as unknown,
+      );
+
+      mockGetAwardRecommendationDetails.mockResolvedValue(
+        mockAwardRecommendationDetails,
+      );
+    });
+
+    it("includes the AwardRecommendationHero component in the page", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+      expect(
+        screen.getByTestId("award-recommendation-hero-fallback"),
+      ).toBeInTheDocument();
+    });
+
+    it("renders page for edit Award Recommendation", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+      const opportunityElements = await screen.findAllByText("opportunity");
+      expect(opportunityElements.length).toBeGreaterThan(0);
+      expect(opportunityElements[0]).toBeVisible();
+    });
+
+    it("renders the navigation component with correct title", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+      expect(await screen.findByText("onThisPage")).toBeVisible();
+      expect(screen.getByTestId("InPageNavigation")).toBeInTheDocument();
+    });
+
+    it("renders navigation links for sections", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      const navLinks = screen.getAllByRole("link");
+      const opportunityLink = navLinks.find(
+        (link) => link.getAttribute("href") === "#opportunity",
+      );
+      const recommendationsLink = navLinks.find(
+        (link) => link.getAttribute("href") === "#recommendations",
+      );
+
+      expect(opportunityLink).toBeInTheDocument();
+      expect(recommendationsLink).toBeInTheDocument();
+    });
+
+    it("renders opportunity details on the page", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText(
+          mockAwardRecommendationDetails.opportunity.opportunity_title,
+        ),
+      ).toBeVisible();
+      expect(
+        await screen.findByText(
+          mockAwardRecommendationDetails.opportunity.opportunity_number,
+        ),
+      ).toBeVisible();
+    });
+
+    it("renders other opportunity information textarea field", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("otherOpportunityInfo.label"),
+      ).toBeInTheDocument();
+      expect(
+        await screen.findByText("otherOpportunityInfo.description"),
+      ).toBeVisible();
+    });
+
+    it("renders textarea with correct attributes", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      const textarea = await screen.findByTestId("additional-info-textarea");
+      expect(textarea).toHaveAttribute("id", "additional_info");
+      expect(textarea).toHaveAttribute("name", "additional_info");
+    });
+
+    it("renders 'No summary available' when opportunity has no summary description", async () => {
+      mockGetAwardRecommendationDetails.mockResolvedValue({
+        ...mockAwardRecommendationDetails,
+        opportunity: {
+          ...mockAwardRecommendationDetails.opportunity,
+          summary: {
+            ...mockAwardRecommendationDetails.opportunity.summary,
+            summary_description: "",
+          },
+        },
+      });
+
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(await screen.findByText("noSummaryAvailable")).toBeVisible();
+    });
+
+    it("calls getAwardRecommendationDetails with expected id", async () => {
+      mockGetAwardRecommendationDetails.mockResolvedValue(
+        mockAwardRecommendationDetails,
+      );
+
+      await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+        searchParams: Promise.resolve({}),
+      });
+
+      expect(mockGetAwardRecommendationDetails).toHaveBeenCalledWith(
+        "AR-26-0001",
+      );
+    });
+
+    it("handles 404 error gracefully when award recommendation not found", async () => {
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+      mockGetAwardRecommendationDetails.mockRejectedValue({
+        response: { status: 404 },
+      });
+
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+        searchParams: Promise.resolve({}),
+      });
+      render(component);
+
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
+    });
+
+    it("handles generic error when fetching award recommendation fails", async () => {
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+      mockGetAwardRecommendationDetails.mockRejectedValue(
+        new Error("Network error"),
+      );
+
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+        searchParams: Promise.resolve({}),
+      });
+
+      render(component);
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Failed to fetch award recommendation details",
+        expect.any(Error),
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it("does not render selection method field on edit page", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(screen.queryByText("selectionMethod")).not.toBeInTheDocument();
+      expect(screen.queryByText("Merit Review")).not.toBeInTheDocument();
+    });
+
+    it("renders the recommendation section on edit page", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethod.label"),
+      ).toBeVisible();
+    });
+
+    it("displays recommendation method radio buttons", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethod.label"),
+      ).toBeVisible();
+      expect(
+        screen.getByLabelText("recommendationMethod.meritReviewOnly"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText("recommendationMethod.meritReviewOther"),
+      ).toBeInTheDocument();
+    });
+
+    it("displays recommendation method details textarea", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethodDetails.label"),
+      ).toBeVisible();
+      const textarea = screen.getByTestId("award-selection-details-textarea");
+      expect(textarea).toHaveAttribute("id", "award_selection_details");
+      expect(textarea).toHaveAttribute("name", "selection_method_detail");
+    });
+
+    it("displays other key information textarea in recommendation section", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("otherKeyInformation.label"),
+      ).toBeVisible();
+      const textarea = screen.getByTestId("other-key-information-textarea");
+      expect(textarea).toHaveAttribute("id", "other_key_information");
+      expect(textarea).toHaveAttribute("name", "other_key_information");
+    });
+
+    it("renders attachments section with navigation link", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      const navLinks = screen.getAllByRole("link");
+      const attachmentsLink = navLinks.find(
+        (link) => link.getAttribute("href") === "#attachments",
+      );
+
+      expect(attachmentsLink).toBeInTheDocument();
+    });
+  });
+
+  describe("when feature flag is disabled", () => {
+    beforeEach(() => {
+      withFeatureFlagMock.mockImplementation(
+        (
+          _WrappedComponent: FunctionComponent<LocalizedPageProps>,
+          _featureFlagName: string,
+          onEnabled: onEnabled,
+        ) =>
+          (props: { params: Promise<{ locale: string }> }) =>
+            onEnabled(props) as unknown,
+      );
+    });
+
+    it("redirects to /maintenance", async () => {
+      await wrapForExpectedError(() => {
+        return AwardRecommendationEditPage({
+          params: awardRecommendationParams,
+        });
+      });
+
+      expect(mockRedirect).toHaveBeenCalledWith("/maintenance");
+    });
+  });
+});

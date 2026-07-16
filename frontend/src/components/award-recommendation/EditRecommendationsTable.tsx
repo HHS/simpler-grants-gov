@@ -257,7 +257,7 @@ export default function EditRecommendationsTable({
       tableCell(
         appSubmission.application_submission_number ? (
           <Link
-            href={`/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
+            href={`/grantor/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
             className="usa-link"
           >
             {appSubmission.application_submission_number}
@@ -316,7 +316,7 @@ export default function EditRecommendationsTable({
               className="usa-button"
               onClick={() => {
                 router.push(
-                  `/award-recommendation/${awardRecommendationId}/application-submissions/edit`,
+                  `/grantor/award-recommendation/${awardRecommendationId}/application-submissions/edit/bulk`,
                 );
               }}
             >
