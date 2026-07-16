@@ -1,3 +1,5 @@
+import { FormSelectModal } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/FormSelectModal";
+
 export const messages = {
   Homepage: {
     pageTitle: "Let's build a simpler Grants.gov together",
@@ -898,6 +900,21 @@ export const messages = {
     description:
       "You must sign in with your government employee ID. Make sure you've set up your Personal Identity Verification (PIV) or Common Access Card (CAC) as a two-factor authentication method.",
     button: "Sign in using PIV/CAC",
+  },
+  FormSelectModal: {
+    title: "Form Library",
+    heading: "Select Forms",
+    selectAll: "Select all",
+    buttons: {
+      cancel: "Cancel",
+      save: "Save",
+    },
+    requiredStates: {
+      required: "Required",
+      conditional: "Conditionally Required",
+      auto: "Auto added",
+      always: "Always required",
+    },
   },
   Footer: {
     agencyName: "Grants.gov",
