@@ -350,8 +350,10 @@ run-workflow-service: ## Run the workflow service
 run-workflow-service-async: ## Run the workflow service without blocking
 	docker compose run --detach --rm grants-api flask workflow workflow-main
 
-run-generate-notifications: ## Send email notifications
-	$(FLASK_CMD) generate-notifications $(args)
+run-email-notifications: ## Send email notifications
+	$(FLASK_CMD) task email-notifications $(args)
+
+run-generate-notifications: run-email-notifications ## Backwards-compatible alias
 
 setup-api-data: db-seed-local populate-search-opportunities populate-search-agencies  ## Load all the data, especially useful for inital setup
 

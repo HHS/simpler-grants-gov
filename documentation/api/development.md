@@ -195,6 +195,22 @@ Individual services can be run through Docker, which can be useful in concert wi
    * Run `make init-sqsmock`
 * **Mock OAuth server**
    * Run `make init-mock-oauth2`
+* **Mailpit (local email)**
+   * Run `docker compose up --detach mailpit`
+   * Open [http://localhost:8025](http://localhost:8025) to inspect captured messages
+
+#### Local Email
+
+Local development captures email in [Mailpit](https://mailpit.axllent.org/) instead of
+sending it to real recipients. This includes organization invitations, workflow approval
+messages, and scheduled notifications. Run `make run-email-notifications` after seeding
+suitable local data to generate scheduled messages.
+
+Host-run API commands use `localhost:1025` for SMTP, while Docker Compose routes the API
+to the `mailpit` service. No SMTP relay or forwarding is configured, and the application
+only permits this SMTP path when `ENVIRONMENT=local` and local AWS mode are active. To
+temporarily use the in-memory email mock instead, set `ENABLE_LOCAL_EMAIL_CAPTURE=FALSE`
+in `override.env`.
 
 #### S3 Mock
 

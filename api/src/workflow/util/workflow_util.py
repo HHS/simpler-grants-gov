@@ -8,6 +8,7 @@ import uuid
 
 from grants_shared.adapters.aws.ses_adapter import send_email
 
+from src.adapters.aws.local_email_adapter import send_local_email_if_enabled
 from src.db.models.user_models import User
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_metric_context import WorkflowMetricContext
@@ -43,11 +44,18 @@ def send_workflow_email(
 
     try:
         logger.info("Sending email for workflow", extra=log_extra)
-        send_email(
+        message_id = send_local_email_if_enabled(
             to_address=user.email,
             subject=subject,
             message=message,
+            trace_id=trace_id,
         )
+        if message_id is None:
+            send_email(
+                to_address=user.email,
+                subject=subject,
+                message=message,
+            )
 
     except Exception:
         logger.exception("Failed to send email for workflow", extra=log_extra)

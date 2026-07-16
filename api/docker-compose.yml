@@ -99,6 +99,9 @@ services:
         required: false
       - path: ./soap-api.env
         required: false
+    environment:
+      # local.env uses localhost for host-run commands; containers reach Mailpit by service name.
+      LOCAL_EMAIL_SMTP_HOST: mailpit
     ports:
       - 8080:8080
     volumes:
@@ -110,6 +113,7 @@ services:
       - dynamodb-local
       - mock-oauth2-server
       - mock-applicants-soap-api
+      - mailpit
     networks:
       - grants_backend
       - local_db
@@ -137,6 +141,24 @@ services:
       - "8082:8080"
     volumes:
       - ./mock-soap-services/applicants:/opt/imposter/config:ro
+    networks:
+      - default
+
+  mailpit:
+    image: axllent/mailpit:v1.30.4
+    container_name: mailpit
+    environment:
+      # Keep the local inbox self-contained and avoid background version-check traffic.
+      MP_DISABLE_VERSION_CHECK: "true"
+      MP_MAX_MESSAGES: "500"
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - default
 
