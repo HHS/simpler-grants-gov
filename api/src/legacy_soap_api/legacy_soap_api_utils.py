@@ -482,6 +482,10 @@ def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | No
         if tracking_number and (
             tracking_number.startswith("GRANT8") or tracking_number.startswith("GRANT9")
         ):
+            logger.info(
+                "simpler_soap_api: using default response",
+                extra={"defaulting_response_operation_name": soap_request.operation_name},
+            )
             return DEFAULT_NOT_FOUND_RESPONSES[AlternateSoapOperation(soap_request.operation_name)](
                 tracking_number, headers=soap_request.headers, is_get_application_zip=is_zip
             )
