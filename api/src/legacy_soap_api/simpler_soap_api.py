@@ -247,6 +247,9 @@ def process_simpler_request(
         return error_response.to_flask_response()
     if auth and auth.certificate.legacy_certificate:
         try:
+            logger.info(
+                msg="simpler_soap_api: getting simpler response",
+            )
             simpler_soap_response = get_simpler_soap_response(
                 soap_request, soap_legacy_response, db_session
             )

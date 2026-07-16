@@ -473,8 +473,10 @@ def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | No
             "simpler_soap_api: tracking number check",
             extra={
                 "tracking_number_length": len(tracking_number) if tracking_number else None,
-                "is_simpler_tracking_number": tracking_number.startswith("GRANT8") if tracking_number else False
-            }
+                "is_simpler_tracking_number": (
+                    tracking_number.startswith("GRANT8") if tracking_number else False
+                ),
+            },
         )
         is_zip = soap_request.operation_name == AlternateSoapOperation.GET_APPLICATION_ZIP
         if tracking_number and (
