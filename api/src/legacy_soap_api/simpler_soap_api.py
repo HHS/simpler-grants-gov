@@ -201,6 +201,9 @@ def process_simpler_request(
         # call legacy and don't call simpler
         is_alternate_response: bool = False
         if is_get_opportunity_list or is_legacy_only_certificate:
+            logger.info(
+                "simpler_soap_api: no legacy certificate or is an opportunity list call",
+            )
             soap_legacy_response = get_legacy_response(soap_request)
             write_debug_data_to_s3(soap_request, soap_legacy_response)
             return soap_legacy_response.to_flask_response()
@@ -224,6 +227,9 @@ def process_simpler_request(
             soap_legacy_response = get_legacy_response(soap_request)
         # Fallback: return legacy response and don't call simpler
         else:
+            logger.info(
+                "simpler_soap_api: defaulting to legacy response",
+            )
             soap_legacy_response = get_legacy_response(soap_request)
             write_debug_data_to_s3(soap_request, soap_legacy_response)
             return soap_legacy_response.to_flask_response()
