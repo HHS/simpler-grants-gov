@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2"]
+  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2", "grantor1"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -57,6 +57,7 @@ locals {
     training = module.training_config
     grantee1 = module.grantee1_config
     grantee2 = module.grantee2_config
+    grantor1 = module.grantor1_config
   }
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
@@ -94,6 +95,7 @@ locals {
     prod     = "simpler-grants-gov"
     grantee1 = "simpler-grants-gov"
     grantee2 = "simpler-grants-gov"
+    grantor1 = "simpler-grants-gov"
   }
 
   # The name of the network that contains the resources shared across all

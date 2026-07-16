@@ -47,7 +47,7 @@ describe("AwardRecommendationHero", () => {
       {
         type: "navigation" as const,
         label: "Edit",
-        href: "/award-recommendation/AR-26-0001/edit",
+        href: "/grantor/award-recommendation/AR-26-0001/edit",
         outline: true,
       },
       {

@@ -43,7 +43,7 @@ describe("SubscriptionForm", () => {
       Promise.resolve({
         json: () => Promise.resolve({ success: true }),
       } as unknown as Response),
-    ) as unknown as typeof global.fetch;
+    );
 
     render(<SubscriptionForm />);
 
@@ -70,7 +70,7 @@ describe("SubscriptionForm", () => {
       Promise.resolve({
         json: () => Promise.resolve({ success: true }),
       } as unknown as Response),
-    ) as unknown as typeof global.fetch;
+    );
 
     render(<SubscriptionForm />);
 
@@ -94,7 +94,7 @@ describe("SubscriptionForm", () => {
       Promise.resolve({
         json: () => Promise.resolve({ success: false, errorCode: "server" }),
       } as unknown as Response),
-    ) as unknown as typeof global.fetch;
+    );
 
     render(<SubscriptionForm />);
 
@@ -120,7 +120,7 @@ describe("SubscriptionForm", () => {
         json: () =>
           Promise.resolve({ success: false, errorCode: "invalidEmail" }),
       } as unknown as Response),
-    ) as unknown as typeof global.fetch;
+    );
 
     render(<SubscriptionForm />);
 
@@ -145,7 +145,7 @@ describe("SubscriptionForm", () => {
         json: () =>
           Promise.resolve({ success: false, errorCode: "tooManyRequests" }),
       } as unknown as Response),
-    ) as unknown as typeof global.fetch;
+    );
 
     render(<SubscriptionForm />);
 

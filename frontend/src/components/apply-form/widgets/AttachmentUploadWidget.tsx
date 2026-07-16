@@ -138,7 +138,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
         idFor={id}
         title={title}
         required={required}
-        description={description as string}
+        description={description}
         labelType={labelType}
       />
       <input type="hidden" name={id} value={attachmentId ?? ""} />

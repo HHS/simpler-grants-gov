@@ -96,9 +96,6 @@ type OpportunityEditFormProps = {
   initialValues: OpportunityEditFormValues;
   isDraft?: boolean;
   initialAttachments?: OpportunityAttachment[];
-  saveLabel: string;
-  previewLabel: string;
-  publishLabel: string;
 };
 
 export default function OpportunityEditForm({
@@ -108,9 +105,6 @@ export default function OpportunityEditForm({
   initialValues,
   isDraft = false,
   initialAttachments = [],
-  saveLabel,
-  previewLabel,
-  publishLabel,
 }: OpportunityEditFormProps) {
   const t = useTranslations("OpportunityEdit");
   const formRef = useRef<HTMLFormElement>(null);
@@ -126,21 +120,10 @@ export default function OpportunityEditForm({
   const [selectedEligibility, setSelectedEligibility] = useState<string[]>(
     initialValues.eligibleApplicants,
   );
-  const [fundingType, setFundingType] = useState(initialValues.fundingType);
-  const [publishDate, setPublishDate] = useState(initialValues.publishDate);
+  const [formState, formAction] = useActionState(opportunityEditFormAction, {
+    validationErrors: {},
+  });
 
-  const [formState, formAction, isPending] = useActionState(
-    opportunityEditFormAction,
-    {
-      validationErrors: {},
-    },
-  );
-
-  const publishEnabled =
-    publishDate.trim() !== "" &&
-    fundingType.trim() !== "" &&
-    fundingCategory.trim() !== "" &&
-    selectedEligibility.length > 0;
   const validationErrors: OpportunityEditValidationErrors | undefined =
     formState.validationErrors;
 
@@ -244,7 +227,7 @@ export default function OpportunityEditForm({
       onSubmit={(e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        formData.set("submitType", "save");
+        formData.set("submitType", "saveAndExit");
         startTransition(() => formAction(formData));
       }}
       noValidate
@@ -275,38 +258,6 @@ export default function OpportunityEditForm({
           </Alert>
         </div>
       ) : null}
-
-      <div className="display-flex flex-wrap flex-align-center margin-bottom-4">
-        <Button
-          type="submit"
-          outline
-          disabled={isPending}
-          className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
-        >
-          {saveLabel}
-        </Button>
-        <Button
-          type="button"
-          outline
-          disabled
-          className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
-        >
-          {previewLabel}
-        </Button>
-        <Button
-          type="button"
-          onClick={() => {
-            if (!formRef.current) return;
-            const formData = new FormData(formRef.current);
-            formData.set("submitType", "publish");
-            startTransition(() => formAction(formData));
-          }}
-          disabled={!publishEnabled || isPending}
-          className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
-        >
-          {publishLabel}
-        </Button>
-      </div>
 
       {formState.errorMessage ? (
         <div className="margin-top-2">
@@ -382,9 +333,6 @@ export default function OpportunityEditForm({
                   id="funding-type-values"
                   name="funding-type-values"
                   defaultValue={initialValues.fundingType}
-                  onChange={(event) => {
-                    setFundingType(event.target.value);
-                  }}
                   className="width-full"
                   disabled={!isDraft}
                 >
@@ -595,9 +543,6 @@ export default function OpportunityEditForm({
                   name="publishDate"
                   defaultValue={initialValues.publishDate}
                   placeholder="mm/dd/yyyy"
-                  onChange={(value) => {
-                    setPublishDate(value ?? "");
-                  }}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -897,6 +842,36 @@ export default function OpportunityEditForm({
           isDraft={isDraft}
         />
       </section>
+
+      <div className="display-flex flex-justify margin-top-4">
+        <div className="display-flex gap-2">
+          <Button
+            outline
+            type="button"
+            onClick={() => {
+              if (!formRef.current) return;
+              const formData = new FormData(formRef.current);
+              formData.set("submitType", "saveAndGoBack");
+              startTransition(() => formAction(formData));
+            }}
+            className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
+          >
+            {t("button.saveAndGoBack")}
+          </Button>
+        </div>
+        <Button
+          type="button"
+          onClick={() => {
+            if (!formRef.current) return;
+            const formData = new FormData(formRef.current);
+            formData.set("submitType", "saveAndContinue");
+            startTransition(() => formAction(formData));
+          }}
+          className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
+        >
+          {t("button.saveAndContinue")}
+        </Button>
+      </div>
     </form>
   );
 }

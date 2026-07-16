@@ -10,6 +10,7 @@ import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
 from flask import Response
 from flask_cors import CORS
+from grants_shared.api.maintenance_mode import register_maintenance_mode_handler
 from grants_shared.api.response import restructure_error_response
 from grants_shared.api.schemas import response_schema
 from grants_shared.auth.api_jwt_auth import initialize_jwt_auth
@@ -23,6 +24,7 @@ import src.api.feature_flags.feature_flag_config as feature_flag_config
 from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
+from src.api.application_v1 import application_v1_blueprint
 from src.api.award_recommendations_alpha import award_recommendation_blueprint
 from src.api.common_grants import common_grants_blueprint
 from src.api.competition_alpha import competition_blueprint
@@ -63,6 +65,11 @@ Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/ap
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
 
+# Paths that continue to serve normally while maintenance mode is on. /health must
+# stay reachable so ALB target-group and Docker healthchecks do not recycle tasks
+# during a planned-maintenance window.
+MAINTENANCE_MODE_ALLOWLIST = frozenset({"/health"})
+
 
 class EndpointConfig(PydanticBaseEnvConfig):
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
@@ -97,6 +104,10 @@ def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
 
     setup_logging(app)
+    # Registered after setup_logging so the logging before_request handlers run
+    # first (rejections still produce start/end request logs), and before auth so
+    # unauthenticated clients see a 503 rather than a 401 during maintenance.
+    register_maintenance_mode_handler(app, MAINTENANCE_MODE_ALLOWLIST)
     init_newrelic()
     register_db_client(app)
 
@@ -204,6 +215,7 @@ def register_blueprints(app: APIFlask) -> None:
 
     # Endpoints for apply functionality
     app.register_blueprint(application_blueprint)
+    app.register_blueprint(application_v1_blueprint)
     app.register_blueprint(form_blueprint)
     app.register_blueprint(form_v1_blueprint)
     app.register_blueprint(competition_blueprint)

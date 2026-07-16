@@ -1,5 +1,3 @@
-import { RJSFSchema } from "@rjsf/utils";
-
 import { formDataToObject } from "./formDataToJson";
 
 const mockMergeAllOf = jest.fn();
@@ -74,7 +72,7 @@ describe("formDataToObject", () => {
       numeral: 100,
     };
 
-    const result = formDataToObject(formData, formSchema as RJSFSchema, {
+    const result = formDataToObject(formData, formSchema, {
       delimiter: "--",
     });
 

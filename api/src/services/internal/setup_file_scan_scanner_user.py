@@ -26,7 +26,7 @@ import grants_shared.adapters.db as db
 from grants_shared.util.api_key_gen import generate_api_key_id
 from sqlalchemy import select
 
-from src.auth.auth_handler import get_auth_handler
+from src.auth.auth_handler import AuthHandler
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege, UserType
 from src.constants.static_role_values import INTERNAL_S3_SCANNER_ROLE_ID
@@ -96,7 +96,7 @@ def _create_api_key(db_session: db.Session, user: User) -> UserApiKey:
     # Mint the key through the shared auth handler (no AWS API Gateway import):
     # this key is validated only against the user_api_key table by the
     # X-API-Key auth, same as the locally-seeded scanner key.
-    api_key = get_auth_handler(db_session).create_api_key(
+    api_key = AuthHandler(db_session).create_api_key(
         user.user_id, SCANNER_API_KEY_NAME, _generate_unique_key_id(db_session)
     )
     logger.info(

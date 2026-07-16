@@ -124,3 +124,27 @@ export async function validatePrintViewField(
     await expect(locator).toContainText(expectedValue);
   }
 }
+
+/**
+ * Validates that an uploaded attachment filename appears in a print view section.
+ * Used for file upload fields where filenames render inside a section locator
+ * rather than a testId element.
+ *
+ * Shared across specs that include file attachment fields (e.g. Attachment Form, SF-424).
+ *
+ * @param page - Playwright page
+ * @param sectionId - The HTML id of the section element (e.g. "form-section-attachment1")
+ * @param filePath - The full file path from testData; the filename is extracted and asserted
+ */
+export async function validateAttachmentPrintViewSection(
+  page: Page,
+  sectionId: string,
+  filePath: string,
+): Promise<void> {
+  const fileName = filePath.split(/[/\\]/).pop() ?? filePath;
+  const section = page.locator(`#${sectionId}`);
+
+  await expect(section).toBeVisible();
+  await expect(section.getByRole("listitem")).toBeVisible({ timeout: 15000 });
+  await expect(section).toContainText(fileName);
+}

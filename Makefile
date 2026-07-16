@@ -128,9 +128,9 @@ e2e-test-native: ## Run end-to-end tests
 ## Infra ##
 ###########
 
-infra-set-up-account: ## Configure and create resources for current AWS profile and save tfbackend file to infra/accounts/$ACCOUNT_NAME.ACCOUNT_ID.s3.tfbackend
+infra-set-up-account: ## Configure and create resources for current AWS profile and save tfbackend file to infra/accounts/$ACCOUNT_NAME.ACCOUNT_ID.s3.tfbackend. Optionally pass AWS_PROFILE=<profile> to target a specific AWS SSO profile.
 	@:$(call check_defined, ACCOUNT_NAME, human readable name for account e.g. "prod" or the AWS account alias)
-	./bin/set-up-current-account $(ACCOUNT_NAME)
+	$(if $(AWS_PROFILE),AWS_PROFILE=$(AWS_PROFILE)) ./bin/set-up-current-account $(ACCOUNT_NAME)
 
 infra-configure-network: ## Configure network $NETWORK_NAME
 	@:$(call check_defined, NETWORK_NAME, the name of the network in /infra/networks)
@@ -157,7 +157,8 @@ infra-configure-app-service: ## Configure infra/$APP_NAME/service module's tfbac
 	./bin/create-tfbackend "infra/$(APP_NAME)/service" "$(ENVIRONMENT)"
 
 infra-update-current-account: ## Update infra resources for current AWS profile
-	./bin/terraform-init-and-apply infra/accounts `./bin/current-account-config-name`
+	TF_VAR_account_name="$$(./bin/current-account-config-name | cut -d. -f1)" \
+	./bin/terraform-init-and-apply infra/accounts "$$(./bin/current-account-config-name)"
 
 infra-update-network: ## Update network
 	@:$(call check_defined, NETWORK_NAME, the name of the network in /infra/networks)

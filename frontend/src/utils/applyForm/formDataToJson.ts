@@ -109,7 +109,7 @@ export function formDataToObject(
 
         const actualChunkName = chunkName.substring(0, indexStart);
         current[actualChunkName] =
-          (current[actualChunkName] as unknown[]) ?? ([] as unknown[]);
+          current[actualChunkName] ?? ([] as unknown[]);
 
         const currentChunk = current[actualChunkName] as unknown[];
         if (chunkIdx === chunks.length - 1) {

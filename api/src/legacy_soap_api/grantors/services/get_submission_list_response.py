@@ -80,6 +80,7 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
         "GrantsGovApplicationStatus": None,
         "SubmissionTitle": application.application_name,
         "PackageID": competition.legacy_package_id,
+        "CompetitionID": competition.public_competition_id,
         "ns2:ReceivedDateTime": (
             adjust_timezone(application.submitted_at, "America/New_York")
             if application.submitted_at

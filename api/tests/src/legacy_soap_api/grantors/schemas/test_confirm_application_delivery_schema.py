@@ -225,10 +225,10 @@ class TestLegacySoapGrantorConfirmApplicationResponseSchema:
 
     def test_can_convert_confirm_application_delivery_response_dict_to_mtom_message(self):
         response_xml_bytes = (
-            f"--uuid:{BOUNDARY_UUID}"
-            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
-            "Content-Transfer-Encoding: binary"
-            "Content-ID: <root.message@cxf.apache.org>"
+            f"--uuid:{BOUNDARY_UUID}\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+            "Content-Transfer-Encoding: binary\r\n"
+            "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
             '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
             "<soap:Body>"
             "<ns2:ConfirmApplicationDeliveryResponse "
@@ -279,5 +279,4 @@ class TestLegacySoapGrantorConfirmApplicationResponseSchema:
         mtom_response = build_mtom_response_from_dict(
             result, raw_uuid=BOUNDARY_UUID, root="", namespaces=ns
         )
-        cleaned_mtom_response = mtom_response.decode().replace("\n", "").encode("utf-8")
-        assert cleaned_mtom_response == response_xml_bytes
+        assert mtom_response == response_xml_bytes
