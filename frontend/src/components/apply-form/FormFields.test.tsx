@@ -276,10 +276,6 @@ describe("buildFormTreeRecursive", () => {
     expect(
       screen.getByRole("columnheader", { name: "Item" }),
     ).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("rowheader", { name: "First Row" }),
-    ).toBeInTheDocument();
   });
 
   describe("FormFields formContext forwarding", () => {

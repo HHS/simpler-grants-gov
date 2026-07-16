@@ -257,7 +257,6 @@ export type UiSchemaTableRow = {
    *
    * Each row must contain one cell for every configured column.
    */
-  rowHeader?: string;
   cells: UiSchemaTableCell[];
 };
 

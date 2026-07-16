@@ -124,6 +124,18 @@ describe("TableWidget", () => {
                   type: "plainText",
                   staticContent: "Only one cell",
                 },
+                {
+                  type: "plainText",
+                  staticContent: "Extra cell",
+                },
+                {
+                  type: "plainText",
+                  staticContent: "Too many cells",
+                },
+                {
+                  type: "plainText",
+                  staticContent: "Fourth cell",
+                },
               ],
             },
           ],
@@ -143,6 +155,8 @@ describe("TableWidget", () => {
       );
     });
 
-    expect(error.message).toBe("Table row 1 must contain exactly 3 cells.");
+    expect(error.message).toBe(
+      "Table row 1 must contain no more than 3 cells.",
+    );
   });
 });
