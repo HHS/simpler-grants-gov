@@ -118,11 +118,11 @@ describe("formDataToObject", () => {
   it("handles array paths", () => {
     const formData = new FormData();
 
-    formData.append("something[0]--whatever", "a value");
+    formData.append("something[0]--whatever", "1");
 
     const formSchema = {
       something: {
-        items: { type: "object", properties: { whatever: { type: "string" } } },
+        items: { whatever: { type: "number" } },
       },
     };
 
@@ -130,7 +130,7 @@ describe("formDataToObject", () => {
 
     // eslint-disable-next-line
     // @ts-ignore
-    expect(result.something[0]).toEqual({ whatever: "a value" });
+    expect(result.something[0]).toEqual({ whatever: 1 });
   });
   it("respects alternate nested path delimiters", () => {
     const formData = new FormData();
@@ -139,7 +139,7 @@ describe("formDataToObject", () => {
 
     const formSchema = {
       something: {
-        items: { type: "object", properties: { whatever: { type: "number" } } },
+        items: { whatever: { type: "number" } },
       },
     };
 
@@ -156,7 +156,7 @@ describe("formDataToObject", () => {
     formData.append("whatever", "");
     const formSchema = {
       something: {
-        items: { type: "object", properties: { whatever: { type: "string" } } },
+        items: { whatever: { type: "string" } },
       },
     };
 
@@ -171,7 +171,7 @@ describe("formDataToObject", () => {
     formData.append("whatever", "");
     const formSchema = {
       something: {
-        items: { type: "object", properties: { whatever: { type: "string" } } },
+        items: { whatever: { type: "string" } },
       },
     };
 
