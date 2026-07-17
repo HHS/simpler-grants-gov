@@ -309,6 +309,40 @@ describe("EditRecommendationsForm", () => {
       const hundredThousandElements = screen.getAllByText("$100,000");
       expect(hundredThousandElements.length).toBeGreaterThanOrEqual(1);
     });
+
+    it("updates total recommended amount when user changes individual amounts", async () => {
+      const user = userEvent.setup();
+      render(
+        <EditRecommendationsForm
+          awardRecommendationId={awardRecommendationId}
+        />,
+      );
+
+      // Verify initial state - total requested and total recommended
+      const initialTotalRequested = screen.getByText("$150,000");
+      expect(initialTotalRequested).toBeInTheDocument();
+      
+      // Initial total recommended: $75,000 + $25,000 = $100,000
+      // Note: $100,000 appears twice (as requested amount and total recommended)
+      const hundredThousandElements = screen.getAllByText("$100,000");
+      expect(hundredThousandElements.length).toBeGreaterThanOrEqual(2);
+
+      // Find the first recommended amount input by its display value
+      const firstInput = screen.getByDisplayValue("$75,000");
+
+      // Clear and update the first submission's recommended amount to $80,000
+      await user.clear(firstInput);
+      await user.type(firstInput, "80000");
+      await user.tab();
+
+      // New total should be: $80,000 + $25,000 = $105,000
+      await waitFor(() => {
+        expect(screen.getByText("$105,000")).toBeInTheDocument();
+      });
+      
+      // Verify total requested hasn't changed
+      expect(screen.getByText("$150,000")).toBeInTheDocument();
+    });
   });
 
   describe("error handling", () => {

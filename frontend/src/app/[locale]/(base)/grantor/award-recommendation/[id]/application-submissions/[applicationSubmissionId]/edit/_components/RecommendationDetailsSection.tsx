@@ -162,14 +162,15 @@ const RecommendationFields = ({
 
 const FundingRecommendationRow = ({
   submission,
+  recommendedAmount,
+  onRecommendedAmountChange,
 }: {
   submission: AwardRecommendationSubmission;
+  recommendedAmount: string;
+  onRecommendedAmountChange: (value: string) => void;
 }) => {
   const submissionId =
     submission.award_recommendation_application_submission_id;
-  const [recommendedAmount, setRecommendedAmount] = useState(
-    formatCurrencyString(submission.submission_detail?.recommended_amount),
-  );
 
   return (
     <tr>
@@ -185,9 +186,9 @@ const FundingRecommendationRow = ({
           name={`award_recommendation_submissions[${submissionId}][recommended_amount]`}
           type="text"
           value={recommendedAmount}
-          onChange={(event) => setRecommendedAmount(event.target.value)}
+          onChange={(event) => onRecommendedAmountChange(event.target.value)}
           onBlur={(event) =>
-            setRecommendedAmount(formatCurrencyString(event.target.value))
+            onRecommendedAmountChange(formatCurrencyString(event.target.value))
           }
           required
         />
@@ -202,6 +203,36 @@ const FundingSectionMultiple = ({
   submissions: AwardRecommendationSubmission[];
 }) => {
   const t = useTranslations("AwardRecommendation.recommendationDetails");
+
+  const [recommendedAmounts, setRecommendedAmounts] = useState<
+    Record<string, string>
+  >(() => {
+    const initial: Record<string, string> = {};
+    submissions.forEach((sub) => {
+      initial[sub.award_recommendation_application_submission_id] =
+        formatCurrencyString(sub.submission_detail?.recommended_amount);
+    });
+    return initial;
+  });
+
+  const handleAmountChange = (submissionId: string, value: string) => {
+    setRecommendedAmounts((prev) => ({
+      ...prev,
+      [submissionId]: value,
+    }));
+  };
+
+  const totalRequested = submissions.reduce(
+    (sum, s) =>
+      sum +
+      getNumericAmountFromString(s.application_submission.total_requested_amount),
+    0,
+  );
+
+  const totalRecommended = submissions.reduce((sum, s) => {
+    const submissionId = s.award_recommendation_application_submission_id;
+    return sum + getNumericAmountFromString(recommendedAmounts[submissionId]);
+  }, 0);
 
   return (
     <div className="margin-top-4">
@@ -238,34 +269,23 @@ const FundingSectionMultiple = ({
               <FundingRecommendationRow
                 key={sub.award_recommendation_application_submission_id}
                 submission={sub}
+                recommendedAmount={
+                  recommendedAmounts[
+                    sub.award_recommendation_application_submission_id
+                  ]
+                }
+                onRecommendedAmountChange={(value) =>
+                  handleAmountChange(
+                    sub.award_recommendation_application_submission_id,
+                    value,
+                  )
+                }
               />
             ))}
             <tr>
               <td>{t("totalLabel")}</td>
-              <td>
-                {formatCurrency(
-                  submissions.reduce(
-                    (sum, s) =>
-                      sum +
-                      getNumericAmountFromString(
-                        s.application_submission.total_requested_amount,
-                      ),
-                    0,
-                  ),
-                )}
-              </td>
-              <td>
-                {formatCurrency(
-                  submissions.reduce(
-                    (sum, s) =>
-                      sum +
-                      getNumericAmountFromString(
-                        s.submission_detail?.recommended_amount,
-                      ),
-                    0,
-                  ),
-                )}
-              </td>
+              <td>{formatCurrency(totalRequested)}</td>
+              <td>{formatCurrency(totalRecommended)}</td>
             </tr>
           </tbody>
         </table>
