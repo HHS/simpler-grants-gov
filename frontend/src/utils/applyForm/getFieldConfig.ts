@@ -106,8 +106,7 @@ const getFieldListRequiredFields = ({
   fieldListName: string;
 }): string[] => {
   const fieldListSchema = formSchema.properties?.[fieldListName] as
-    | RJSFSchema
-    | undefined;
+    RJSFSchema | undefined;
 
   if (!fieldListSchema || fieldListSchema.type !== "array") {
     return [];
@@ -412,8 +411,8 @@ export const getEnumOptions = ({
   );
 
   return widgetType === "Select"
-    ? ({ enumOptions, emptyValue: "- Select -" } as WidgetOptions)
-    : ({ enumOptions } as WidgetOptions);
+    ? { enumOptions, emptyValue: "- Select -" }
+    : { enumOptions };
 };
 
 // handle complexity of branching for basic vs. multifield config logic
@@ -532,8 +531,7 @@ const getFieldListConfig = ({
   });
 
   const fieldListSchema = formSchema.properties?.[uiFieldObject.name] as
-    | RJSFSchema
-    | undefined;
+    RJSFSchema | undefined;
 
   return {
     type: "FieldList",

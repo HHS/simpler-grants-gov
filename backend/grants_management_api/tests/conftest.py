@@ -19,6 +19,7 @@ import src.app as app_entry
 import tests.db.models.factories as factories
 from src.db import models
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
+from src.db.resource_automation.resource_automation import setup_resource_automation
 from tests.test_utils import db_testing
 from tests.test_utils.auth_test_utils import mock_oauth_endpoint
 
@@ -134,6 +135,7 @@ def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
             models.metadata.create_all(bind=conn)
 
         sync_lookup_values(db_client)
+        setup_resource_automation()
         yield db_client
 
 

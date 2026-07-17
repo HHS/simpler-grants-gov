@@ -217,8 +217,7 @@ export async function saveOpportunityEditAction(
 
   if (!validatedFields.success) {
     return {
-      validationErrors: validatedFields.error.flatten()
-        .fieldErrors as OpportunityEditValidationErrors,
+      validationErrors: validatedFields.error.flatten().fieldErrors,
     };
   }
 

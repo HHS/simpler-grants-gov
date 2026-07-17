@@ -2,10 +2,12 @@ import json
 import logging
 import signal
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
 from datetime import datetime
+from enum import StrEnum
 from types import FrameType
 
 from flask import Flask, current_app
@@ -13,6 +15,7 @@ from grants_shared.adapters import db
 from grants_shared.adapters.aws import SQSConfig
 from grants_shared.adapters.aws.sqs_adapter import SQSClient, SQSMessage
 from grants_shared.adapters.db import flask_db
+from grants_shared.api.maintenance_mode import is_maintenance_mode_enabled
 from grants_shared.util import datetime_util
 from grants_shared.util.json_util import json_encoder
 from pydantic import ValidationError
@@ -29,6 +32,12 @@ from src.workflow.workflow_background_task import workflow_transaction
 from src.workflow.workflow_errors import NonRetryableWorkflowError, RetryableWorkflowError
 
 logger = logging.getLogger(__name__)
+
+
+class WorkflowManagerLogEvent(StrEnum):
+    """Distinct, queryable event types for workflow manager log records."""
+
+    MAINTENANCE_MODE_SKIP = "maintenance_mode_workflow_processing_skipped"
 
 
 class WorkflowManagerConfig(PydanticBaseEnvConfig):
@@ -55,6 +64,9 @@ class WorkflowManager:
 
     def __init__(self, config: WorkflowManagerConfig | None = None):
         self.sigterm_received = False
+        # Set when a shutdown signal is received so the maintenance-mode idle loop
+        # can wake immediately rather than waiting out a full sleep interval.
+        self._shutdown_event = threading.Event()
         self._register_signal_handlers()
 
         if config is None:
@@ -102,9 +114,11 @@ class WorkflowManager:
             "Received interrupt signal, will allow current processing to complete before exiting."
         )
         self.sigterm_received = True
+        self._shutdown_event.set()
 
     def handle_interrupt(self, signum: int, frame: FrameType | None) -> None:
         logger.info("Received keyboard interrupt, exiting immediately.")
+        self._shutdown_event.set()
         sys.exit(0)
 
     def parse_event(self, message: SQSMessage) -> WorkflowEvent:
@@ -147,6 +161,10 @@ class WorkflowManager:
 
         The 'main' loop of the workflow manager.
         """
+        if is_maintenance_mode_enabled():
+            self._idle_during_maintenance()
+            return
+
         logger.info("Processing workflow events")
         initialize_workflow_client_registry()
 
@@ -180,6 +198,22 @@ class WorkflowManager:
                 break
 
         logger.info("Finished processing workflow events - exiting process", extra=self.metrics)
+
+    def _idle_during_maintenance(self) -> None:
+        """Idle without touching SQS or the DB while maintenance mode is enabled.
+
+        The flag is resolved at task launch and flipped via force-new-deployment,
+        so a single check at loop entry is sufficient. We wait for the SIGTERM that
+        the redeploy sends, checking periodically so shutdown stays responsive.
+        """
+        logger.info(
+            "Skipping workflow processing due to maintenance mode",
+            extra={"maintenance_mode_event": WorkflowManagerLogEvent.MAINTENANCE_MODE_SKIP},
+        )
+        # Block until a shutdown signal wakes us. handle_exit/handle_interrupt set the
+        # event, so this returns promptly on SIGTERM instead of waiting out a sleep.
+        self._shutdown_event.wait()
+        logger.info("Exiting after receiving SIGTERM.")
 
     def process_batch(self) -> tuple[list[str], list[str]]:
         """Fetch and process a batch of events from SQS."""

@@ -98,7 +98,7 @@ export default function RadioWidget<
             value: enumValue,
           }))
         : [];
-    return fromSchema as EnumOptionsType<S>[];
+    return fromSchema;
   }, [uiEnumOptions, enumFromSchema]);
 
   const error = rawErrors.length ? true : undefined;
@@ -138,7 +138,7 @@ export default function RadioWidget<
         idFor={id}
         title={title}
         required={required}
-        description={description as string}
+        description={description}
         labelType={labelType}
       />
       {error && (
