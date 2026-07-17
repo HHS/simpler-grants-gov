@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { getUserOrganizations } from "src/app/api/user/organizations/handler";
+import { getUserOrganizationsHandler } from "src/app/api/user/organizations/handler";
 import { UserOrganization } from "src/types/userTypes";
 import { fakeUserOrganization } from "src/utils/testing/fixtures";
 
@@ -26,15 +26,15 @@ describe("user/organizations GET requests", () => {
     getSessionMock.mockReturnValue({ token: "a token", user_id: "1" });
   });
   afterEach(() => jest.resetAllMocks());
-  it("calls opportunityDetails with expected arguments", async () => {
-    await getUserOrganizations();
+  it("calls the user organizations fetcher with expected arguments", async () => {
+    await getUserOrganizationsHandler();
     expect(mockFetchOrganizations).toHaveBeenCalledWith({
       subPath: `1/organizations`,
     });
   });
 
-  it("returns a new response with competition data", async () => {
-    const response = await getUserOrganizations();
+  it("returns a new response with user organization data", async () => {
+    const response = await getUserOrganizationsHandler();
     expect(response.status).toEqual(200);
     const body = (await response.json()) as UserOrganization[];
     expect(body).toEqual([fakeUserOrganization]);
@@ -42,7 +42,7 @@ describe("user/organizations GET requests", () => {
 
   it("returns a new response with with error if error on data fetch", async () => {
     mockFetchOrganizations.mockRejectedValue(new Error());
-    const response = await getUserOrganizations();
+    const response = await getUserOrganizationsHandler();
     expect(response.status).toEqual(500);
   });
 });

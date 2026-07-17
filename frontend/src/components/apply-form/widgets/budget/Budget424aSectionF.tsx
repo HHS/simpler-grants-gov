@@ -6,7 +6,7 @@ import {
   UswdsWidgetProps,
 } from "src/types/applyForm/types";
 
-import React, { JSX } from "react";
+import { JSX } from "react";
 
 import CheckboxWidget from "src/components/apply-form/widgets/CheckboxWidget";
 import TextAreaWidget from "src/components/apply-form/widgets/TextAreaWidget";
@@ -14,22 +14,16 @@ import TextWidget from "src/components/apply-form/widgets/TextWidget";
 import { getBudgetErrors } from "./budgetErrorLabels";
 import { getStringOrUndefined, isRecord } from "./budgetValueGuards";
 
-type RootSchemaContext = FormContextType & { rootSchema?: RJSFSchema };
-
 function getRootSchemaFromContext(context: unknown): RJSFSchema | undefined {
   if (context && typeof context === "object" && "rootSchema" in context) {
     const candidate = (context as { rootSchema?: unknown }).rootSchema;
-    return candidate && typeof candidate === "object"
-      ? (candidate as RJSFSchema)
-      : undefined;
+    return candidate && typeof candidate === "object" ? candidate : undefined;
   }
   return undefined;
 }
 
 type WarningsFromContext =
-  | FormValidationWarning[]
-  | FormattedFormValidationWarning[]
-  | [];
+  FormValidationWarning[] | FormattedFormValidationWarning[] | [];
 
 function coerceFormValidationWarnings(
   input: WarningsFromContext,
@@ -74,12 +68,10 @@ function Budget424aSectionF<
   disabled,
   readOnly,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
-  const rootFormDataFromContext = (
-    formContext as { rootFormData?: unknown } | undefined
-  )?.rootFormData;
+  const rootFormDataFromContext = formContext?.rootFormData;
   const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
   const rootValue = isRecord(rawValue) ? rawValue : {};
-  const rootSchema = getRootSchemaFromContext(formContext as RootSchemaContext);
+  const rootSchema = getRootSchemaFromContext(formContext);
   const properties = rootSchema?.properties as
     | Record<
         string,
@@ -95,11 +87,9 @@ function Budget424aSectionF<
     | undefined;
 
   const directChargesSchema = properties?.direct_charges_explanation as
-    | RJSFSchema
-    | undefined;
+    RJSFSchema | undefined;
   const indirectChargesSchema = properties?.indirect_charges_explanation as
-    | RJSFSchema
-    | undefined;
+    RJSFSchema | undefined;
   const remarksSchema = properties?.remarks as RJSFSchema | undefined;
   const confirmationSchema = properties?.confirmation as RJSFSchema | undefined;
 
@@ -138,13 +128,12 @@ function Budget424aSectionF<
   );
   const remarksValue = getStringOrUndefined(rootValue, "remarks");
   const confirmationValue = get(rootValue, "confirmation") as
-    | boolean
-    | undefined;
+    boolean | undefined;
 
   const updateField = (path: string, next: unknown) => {
     const updated = { ...rootValue };
     set(updated, path, next);
-    onChange?.(updated as T);
+    onChange?.(updated);
   };
 
   return (

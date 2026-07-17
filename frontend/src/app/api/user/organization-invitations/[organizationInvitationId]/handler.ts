@@ -1,7 +1,6 @@
 import { readError } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
-import { OrganizationInvitation } from "src/types/userTypes";
+import { updateUserInvitation } from "src/services/fetch/fetchers/userFetcher";
 
 import { NextResponse } from "next/server";
 
@@ -11,33 +10,29 @@ export const updateOrganizationInvitation = async (
 ) => {
   const { organizationInvitationId } = await params;
   const currentSession = await getSession();
-  if (currentSession) {
-    try {
-      const requestBody = (await request.json()) as { accepted: boolean };
-      const invitationResponse = await fetchUserWithMethod("POST")({
-        subPath: `${currentSession.user_id}/invitations/${organizationInvitationId}/organizations`,
-        body: {
-          status: requestBody.accepted ? "accepted" : "rejected",
-        },
-      });
-      const responseBody = (await invitationResponse.json()) as {
-        data: OrganizationInvitation;
-      };
-      return NextResponse.json(responseBody.data);
-    } catch (e) {
-      const { status, message } = readError(e as Error, 500);
-      return Response.json(
-        {
-          message: `Error attempting to fetch user organizations: ${message}`,
-        },
-        { status },
-      );
-    }
+  if (!currentSession) {
+    return NextResponse.json(
+      {
+        message: "Not logged in, cannot update organization invitation",
+      },
+      { status: 401 },
+    );
   }
-  return NextResponse.json(
-    {
-      message: "Not logged in, cannot retrieve user organizations",
-    },
-    { status: 401 },
-  );
+  try {
+    const requestBody = (await request.json()) as { accepted: boolean };
+    const invitation = await updateUserInvitation(
+      currentSession.user_id,
+      organizationInvitationId,
+      requestBody.accepted ? "accepted" : "rejected",
+    );
+    return NextResponse.json(invitation);
+  } catch (e) {
+    const { status, message } = readError(e as Error, 500);
+    return Response.json(
+      {
+        message: `Error attempting to update organization invitation: ${message}`,
+      },
+      { status },
+    );
+  }
 };

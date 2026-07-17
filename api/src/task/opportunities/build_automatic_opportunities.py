@@ -41,6 +41,7 @@ from src.form_schema.forms import (
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
+    ProjectPerformanceSiteLocation_v4_0,
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
@@ -616,6 +617,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Project Narrative Attachment Form",
                 ProjectNarrativeAttachment_v1_2.form_id,
                 "6bdc2df3-6e51-4aea-89af-bade326feba1",
+            ),
+            (
+                "E2E-PPSL",
+                "Project Performance Site Location(s)",
+                ProjectPerformanceSiteLocation_v4_0.form_id,
+                "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
             ),
             (
                 "E2E-SF424",

@@ -39,9 +39,7 @@ function Budget424aSectionD<
   formContext,
   disabled,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
-  const rootFormDataFromContext = (
-    formContext as { rootFormData?: unknown } | undefined
-  )?.rootFormData;
+  const rootFormDataFromContext = formContext?.rootFormData;
   const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
   const errors = (rawErrors as FormValidationWarning[]) || [];
 
@@ -49,9 +47,7 @@ function Budget424aSectionD<
     get(rawValue as object, "forecasted_cash_needs") ?? rawValue;
 
   const root: ForecastedCashNeeds =
-    typeof candidate === "object" && candidate !== null
-      ? (candidate as ForecastedCashNeeds)
-      : {};
+    typeof candidate === "object" && candidate !== null ? candidate : {};
 
   const quarters = [
     { key: "first_quarter_amount", quarter: "1st Quarter", label: "A" },
@@ -214,7 +210,7 @@ function Budget424aSectionD<
                 <React.Fragment key={quarter.key}>
                   <td className="padding-05 border-top-0 border-bottom-0 sf424a__cell verticle-align-bottom">
                     {cellInput({
-                      rowKey: row.key as RowKey,
+                      rowKey: row.key,
                       colKey: quarter.key,
                     })}
                   </td>
