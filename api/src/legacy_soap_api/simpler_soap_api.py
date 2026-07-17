@@ -71,7 +71,7 @@ def get_simpler_soap_response(
                 "soap_response_operation": simpler_soap_client.operation_config.response_operation_name,
             }
         )
-    except (SOAPInvalidEnvelope, SOAPOperationNotSupported):
+    except SOAPInvalidEnvelope, SOAPOperationNotSupported:
         logger.info(
             "simpler_soap_api: Initialization failed due to invalid request",
             exc_info=True,
