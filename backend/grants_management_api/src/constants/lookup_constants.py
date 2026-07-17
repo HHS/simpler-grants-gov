@@ -42,8 +42,8 @@ class MgmtResourceType(StrEnum):
 
 # The resource types each privilege is allowed to be assigned at. A privilege may only be
 # included in a role when the role's resource types are a subset of the privilege's allowed
-# resource types (validated in src/constants/static_role_values.py::build_role). This prevents
-# assigning, for example, a department-only privilege on a team-level role.
+# resource types (validated in src/util/role_util.py::build_role). This prevents assigning,
+# for example, a department-only privilege on a team-level role.
 ALLOWED_RESOURCES_FOR_PRIVILEGE: dict[MgmtPrivilege, set[MgmtResourceType]] = {
     MgmtPrivilege.VIEW_DEPARTMENT: {MgmtResourceType.DEPARTMENT},
     MgmtPrivilege.UPDATE_DEPARTMENT: {MgmtResourceType.DEPARTMENT},

@@ -5,6 +5,8 @@ import grants_shared.db.models.lookup as grants_shared_lookup
 from grants_shared.adapters.db import PostgresDBClient
 from grants_shared.adapters.db.clients.postgres_config import get_db_config
 
+from src.constants.static_role_values import CORE_ROLES
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,9 +30,6 @@ def sync_lookup_values(db_client: PostgresDBClient | None = None) -> None:
 
 
 def _sync_roles(db_session: db.Session) -> None:
-    # Import placed here to avoid circular dependencies
-    from src.constants.static_role_values import CORE_ROLES
-
     logger.info("Syncing static core roles")
     updated_role_count = 0
     for role in CORE_ROLES:

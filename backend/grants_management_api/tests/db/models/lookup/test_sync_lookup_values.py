@@ -7,9 +7,10 @@ from sqlalchemy import func, select
 
 import src.db.models as db_models
 from src.constants.lookup_constants import MgmtPrivilege, MgmtResourceType
-from src.constants.static_role_values import CORE_ROLES, TEAM_VIEWER, build_role
+from src.constants.static_role_values import CORE_ROLES, TEAM_VIEWER
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.resource_models import MgmtRole
+from src.util.role_util import build_role
 from tests.test_utils import db_testing
 
 
@@ -66,15 +67,14 @@ def test_sync_roles_applies_updates(
     caplog.set_level(logging.INFO)
 
     # Sync a throwaway role rather than mutating a shared static role, so other tests
-    # aren't affected. _sync_roles imports CORE_ROLES at call time, so patching the module
-    # attribute swaps in our role.
+    # aren't affected. Patch CORE_ROLES where _sync_roles reads it to swap in our role.
     role = build_role(
         role_id=uuid.uuid4(),
         role_name="Test Sync Role",
         privileges={MgmtPrivilege.VIEW_TEAM},
         resource_types={MgmtResourceType.TEAM},
     )
-    monkeypatch.setattr("src.constants.static_role_values.CORE_ROLES", [role])
+    monkeypatch.setattr("src.db.models.lookup.sync_lookup_values.CORE_ROLES", [role])
     sync_lookup_values(schema_no_lookup)
 
     # Change the role and confirm the update is detected and persisted.
