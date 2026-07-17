@@ -19,20 +19,28 @@ data "aws_vpc" "network" {
   }
 }
 
-# The infra-dev-grants-management VPC is a bare VPC (no app-config environment maps to it), so it has no
-# NAT gateways. The stub therefore runs in the public subnets with a public IP so
-# it can reach the ECR API/S3 endpoints (to pull the nginx image from our ECR
-# repo) via the internet gateway. Inbound is still restricted to within the VPC
-# by the security group below.
-data "aws_subnets" "public" {
+# The infra-dev-grants-management VPC is a bare VPC (no app-config environment maps to it), so it
+# has no NAT gateways. The stub still runs entirely privately: the networks layer creates
+# interface/gateway VPC endpoints for ECR (ecr.api, ecr.dkr), S3, and CloudWatch Logs in every
+# VPC (see infra/modules/network/vpc_endpoints.tf), so Fargate tasks in the private subnets pull
+# the image from our ECR repo and ship logs without any public IP or internet gateway. Inbound is
+# restricted to within the VPC by the security group below.
+data "aws_subnets" "private" {
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.network.id]
   }
   filter {
     name   = "tag:subnet_type"
-    values = ["public"]
+    values = ["private"]
   }
+}
+
+# Managed prefix list for the S3 gateway VPC endpoint. The task's security group allows egress
+# to it so ECR image layers (stored in S3) can be pulled without opening egress to the public
+# internet.
+data "aws_ec2_managed_prefix_list" "s3" {
+  name = "com.amazonaws.${var.region}.s3"
 }
 
 locals {
@@ -101,23 +109,52 @@ module "account_guard" {
 # The nginx image must be pushed here (e.g. mirrored from a public registry)
 # before the ECS service can start its tasks. Kept in-account so the pull is not
 # cross-account and never touches the public registry.
+#
+# Mirrors the shared container-image-repository module's conventions: immutable
+# tags, scan-on-push, and encryption at rest with a customer-managed KMS key.
+# Because tags are immutable, push each image under a unique tag (var.image_tag)
+# instead of overwriting one.
 resource "aws_ecr_repository" "stub" {
   name                 = local.image_repository_name
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = "IMMUTABLE"
   force_delete         = true # stub / experimental environment
 
   image_scanning_configuration {
     scan_on_push = true
   }
+
+  encryption_configuration {
+    encryption_type = "KMS"
+    kms_key         = aws_kms_key.stub_ecr.arn
+  }
+}
+
+# Customer-managed key used to encrypt the stub's ECR repository at rest. ECR
+# creates a grant on this key automatically, so the task execution role needs no
+# extra KMS permissions to pull images.
+resource "aws_kms_key" "stub_ecr" {
+  enable_key_rotation = true
+  description         = "KMS key for the ${local.service_name} stub ECR repository"
+  # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
 
 resource "aws_ecs_cluster" "stub" {
   name = local.service_name
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
 }
 
 resource "aws_cloudwatch_log_group" "stub" {
-  name              = "service/${local.service_name}"
-  retention_in_days = 30
+  name = "service/${local.service_name}"
+
+  # Conservatively retain logs for 5 years, matching the other service log groups.
+  retention_in_days = 1827
+
+  # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
+  # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
 }
 
 # --- IAM ---------------------------------------------------------------------
@@ -131,7 +168,7 @@ data "aws_iam_policy_document" "ecs_assume_role" {
   }
 }
 
-# Pulls the image from (public) ECR and writes container logs to CloudWatch.
+# Pulls the image from our private ECR repo and writes container logs to CloudWatch.
 resource "aws_iam_role" "task_executor" {
   name               = "${local.service_name}-task-executor"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume_role.json
@@ -163,12 +200,24 @@ resource "aws_security_group" "stub" {
     cidr_blocks = [data.aws_vpc.network.cidr_block]
   }
 
+  # HTTPS egress is all the task needs, and only to AWS endpoints — never the public internet.
+  # The ECR (ecr.api/ecr.dkr) and CloudWatch Logs interface endpoints live inside the VPC CIDR;
+  # the S3 gateway endpoint (where ECR image layers are stored) is reached via its managed prefix
+  # list. Scoping egress this tightly keeps it off 0.0.0.0/0 with no all-protocol egress.
   egress {
-    description = "Allow all outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS to ECR & CloudWatch Logs interface VPC endpoints"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [data.aws_vpc.network.cidr_block]
+  }
+
+  egress {
+    description     = "HTTPS to S3 gateway VPC endpoint (ECR image layers)"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    prefix_list_ids = [data.aws_ec2_managed_prefix_list.s3.id]
   }
 
   lifecycle {
@@ -216,12 +265,12 @@ resource "aws_ecs_service" "stub" {
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
 
-  # Tasks run in the infra-dev-grants-management VPC's public subnets with a public IP so they can pull
-  # the nginx image from our ECR repo via the internet gateway (the bare infra-dev-grants-management VPC
-  # has no NAT). The security group still only allows inbound from within the VPC.
+  # Tasks run in the infra-dev-grants-management VPC's private subnets with no public IP. They pull
+  # the nginx image from our ECR repo and ship logs entirely over the VPC endpoints the networks
+  # layer provisions (ECR, S3, CloudWatch Logs), so no NAT or internet gateway is required.
   network_configuration {
-    subnets          = data.aws_subnets.public.ids
+    subnets          = data.aws_subnets.private.ids
     security_groups  = [aws_security_group.stub.id]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 }

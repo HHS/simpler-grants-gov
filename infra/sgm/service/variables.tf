@@ -24,7 +24,7 @@ variable "region" {
 
 variable "image_tag" {
   type        = string
-  description = "Tag of the image to run from the stub's ECR repo. Push an nginx image to that repo under this tag before applying."
+  description = "Tag of the image to run from the stub's ECR repo. Push an nginx image to that repo under this tag before applying. The repo uses immutable tags, so use a unique tag per image (do not overwrite an existing one)."
   default     = "latest"
 }
 
