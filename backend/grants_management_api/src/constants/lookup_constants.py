@@ -38,3 +38,37 @@ class MgmtResourceType(StrEnum):
     SUBAGENCY = "subagency"
     TEAM = "team"
     OPPORTUNITY = "opportunity"
+
+
+# The resource types each privilege is allowed to be assigned at. A privilege may only be
+# included in a role when the role's resource types are a subset of the privilege's allowed
+# resource types (validated in src/constants/static_role_values.py::build_role). This prevents
+# assigning, for example, a department-only privilege on a team-level role.
+ALLOWED_RESOURCES_FOR_PRIVILEGE: dict[MgmtPrivilege, set[MgmtResourceType]] = {
+    MgmtPrivilege.VIEW_DEPARTMENT: {MgmtResourceType.DEPARTMENT},
+    MgmtPrivilege.UPDATE_DEPARTMENT: {MgmtResourceType.DEPARTMENT},
+    MgmtPrivilege.MANAGE_DEPARTMENT_MEMBERS: {MgmtResourceType.DEPARTMENT},
+    MgmtPrivilege.VIEW_SUBAGENCY: {MgmtResourceType.DEPARTMENT, MgmtResourceType.SUBAGENCY},
+    MgmtPrivilege.UPDATE_SUBAGENCY: {MgmtResourceType.DEPARTMENT, MgmtResourceType.SUBAGENCY},
+    MgmtPrivilege.MANAGE_SUBAGENCY_MEMBERS: {
+        MgmtResourceType.DEPARTMENT,
+        MgmtResourceType.SUBAGENCY,
+    },
+    MgmtPrivilege.VIEW_TEAM: {
+        MgmtResourceType.DEPARTMENT,
+        MgmtResourceType.SUBAGENCY,
+        MgmtResourceType.TEAM,
+    },
+    MgmtPrivilege.MANAGE_TEAM_MEMBERS: {
+        MgmtResourceType.DEPARTMENT,
+        MgmtResourceType.SUBAGENCY,
+        MgmtResourceType.TEAM,
+    },
+    MgmtPrivilege.UPDATE_TEAM: {
+        MgmtResourceType.DEPARTMENT,
+        MgmtResourceType.SUBAGENCY,
+        MgmtResourceType.TEAM,
+    },
+    MgmtPrivilege.CREATE_TEAM: {MgmtResourceType.DEPARTMENT, MgmtResourceType.SUBAGENCY},
+    MgmtPrivilege.DELETE_TEAM: {MgmtResourceType.DEPARTMENT, MgmtResourceType.SUBAGENCY},
+}
