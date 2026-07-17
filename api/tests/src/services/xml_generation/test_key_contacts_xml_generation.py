@@ -10,8 +10,7 @@ from typing import Any
 import pytest
 from lxml import etree as lxml_etree
 
-from src.form_schema.forms.key_contacts import FORM_XML_TRANSFORM_RULES
-from src.form_schema.forms.key_contacts import KeyContacts_v2_0
+from src.form_schema.forms.key_contacts import FORM_XML_TRANSFORM_RULES, KeyContacts_v2_0
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
