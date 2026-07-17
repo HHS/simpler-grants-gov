@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 
 import factory
@@ -16,6 +17,14 @@ from src.constants.lookup_constants import (
     MgmtResourceType,
     MgmtUserType,
 )
+
+
+def sometimes_none(factory_value, none_chance: float = 0.5):
+    return factory.Maybe(
+        decider=factory.LazyAttribute(lambda s: random.random() > none_chance),
+        yes_declaration=factory_value,
+        no_declaration=None,
+    )
 
 
 class CustomProvider(BaseProvider):
@@ -278,3 +287,32 @@ class MgmtRoleFactory(BaseFactory):
             resource_types=[MgmtResourceType.TEAM],
             privileges=[MgmtPrivilege.VIEW_TEAM],
         )
+
+
+class MgmtUserApiKeyFactory(BaseFactory):
+    class Meta:
+        model = user_models.MgmtUserApiKey
+
+    mgmt_api_key_id = Generators.UuidObj
+    mgmt_user = factory.SubFactory(MgmtUserFactory)
+    mgmt_user_id = factory.LazyAttribute(lambda s: s.mgmt_user.mgmt_user_id)
+
+    key_name = factory.Faker("sentence", nb_words=3)
+    key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+
+    last_used = sometimes_none(
+        factory.Faker("date_time_between", start_date="-30d", end_date="now"), none_chance=0.3
+    )
+    is_active = True
+
+    class Params:
+        # Trait for inactive keys
+        inactive = factory.Trait(is_active=False)
+
+        # Trait for recently used keys
+        recently_used = factory.Trait(
+            last_used=factory.Faker("date_time_between", start_date="-7d", end_date="now")
+        )
+
+        # Trait for unused keys
+        never_used = factory.Trait(last_used=None)

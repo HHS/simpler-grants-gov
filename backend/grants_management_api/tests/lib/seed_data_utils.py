@@ -52,11 +52,26 @@ class UserBuilder:
         self.jwt_token = token
         return self
 
+    def with_api_key(self, key_id: str, key_name: str = "Local Development Key") -> Self:
+        """Add an API key to the user for X-API-Key authentication.
+        
+        For example, if you passed in "my_test_key", you could authenticate
+        by passing X-API-Key: my_test_key in your request headers.
+        """
+        api_key = factories.MgmtUserApiKeyFactory.build(
+            mgmt_user=self.user, key_id=key_id, key_name=key_name, is_active=True
+        )
+        self.db_session.add(api_key)
+        self.api_key_id = key_id
+        return self
+
     def build(self) -> MgmtUser:
         log_msg = f"Updating {self.scenario_name}:"
         if self.link_external_id:
             log_msg += f" '{self.link_external_id}'"
         if self.jwt_token:
             log_msg += f" with X-MGMT-Token: '{self.jwt_token}'"
+        if self.api_key_id:
+            log_msg += f" with X-API-Key: '{self.api_key_id}'"
         logger.info(log_msg)
         return self.user
