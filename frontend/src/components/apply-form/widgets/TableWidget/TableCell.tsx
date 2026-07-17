@@ -1,4 +1,4 @@
-import { UiSchemaTableCell } from "src/types/applyForm/types";
+import { TableWidgetCellConfig } from "src/types/applyForm/types";
 
 import { ChangeEvent } from "react";
 
@@ -8,8 +8,8 @@ const READ_ONLY_OUTPUT_CLASS =
   "border border-base-light bg-base-lightest display-block padding-1 text-right text-wrap";
 
 type TableCellProps = {
-  /** The cell configuration from the UI schema */
-  cell: UiSchemaTableCell;
+  /** The cell configuration from the table widget schema */
+  cell: TableWidgetCellConfig;
   /** Unique identifier for the cell */
   id: string;
   /** The value to display or edit in the cell */

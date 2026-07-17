@@ -220,7 +220,7 @@ export type UiSchemaTableColumn = {
   width?: number;
 };
 
-export type UiSchemaTableCell =
+export type TableWidgetCellConfig =
   | {
       type: "input" | "readOnly";
       definition: PropertyPath;
@@ -244,10 +244,8 @@ export type UiSchemaTableCell =
 export type UiSchemaTableRow = {
   /**
    * Cells rendered in the same order as the configured table columns.
-   *
-   * Each row must contain one cell for every configured column.
    */
-  cells: UiSchemaTableCell[];
+  cells: TableWidgetCellConfig[];
 };
 
 export type UiSchemaTableChildren = {

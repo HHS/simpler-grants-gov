@@ -1,6 +1,11 @@
-import { UswdsWidgetProps } from "src/types/applyForm/types";
+import {
+  UswdsWidgetProps,
+  type UiSchemaTableColumn,
+  type UiSchemaTableMultiField,
+  type UiSchemaTableRow,
+} from "src/types/applyForm/types";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { Table } from "@trussworks/react-uswds";
 
 import TableCell from "./TableCell";
@@ -130,14 +135,38 @@ function TableWidget({
     },
     [onChange, value],
   );
+  // ensure hooks are called unconditionally; default to empty arrays
+  const columns: UiSchemaTableColumn[] =
+    (uiSchemaField as UiSchemaTableMultiField | undefined)?.children?.columns ??
+    [];
+  const rows: UiSchemaTableRow[] =
+    (uiSchemaField as UiSchemaTableMultiField | undefined)?.children?.rows ??
+    [];
+
+  const cellChangeHandlers = useMemo(
+    () =>
+      rows.reduce(
+        (handlers, row) => {
+          row.cells.forEach((cell) => {
+            if (cell.type === "input" && cell.definition) {
+              handlers[cell.definition] = (nextValue: string) =>
+                handleCellChange(cell.definition, nextValue);
+            }
+          });
+
+          return handlers;
+        },
+        {} as Record<string, (nextValue: string) => void>,
+      ),
+    [handleCellChange, rows],
+  );
+
   if (
     uiSchemaField?.type !== "multiField" ||
     uiSchemaField.widget !== "Table"
   ) {
     return null;
   }
-
-  const { columns, rows } = uiSchemaField.children;
   const expectedCellCount = columns.length;
   const isInteractionDisabled = disabled || isFormLocked;
   // Validate that each row has the correct number of cells.
@@ -183,11 +212,35 @@ function TableWidget({
       </thead>
       <tbody>
         {rows.map((row, rowIndex) => {
-          const emptyCellCount = expectedCellCount - row.cells.length;
+          const shouldRenderRowHeader = row.cells.length < expectedCellCount;
+          const rowHeaderCell = shouldRenderRowHeader
+            ? row.cells[0]
+            : undefined;
+          const bodyCells = shouldRenderRowHeader
+            ? row.cells.slice(1)
+            : row.cells;
+          const emptyCellCount =
+            expectedCellCount -
+            row.cells.length -
+            (shouldRenderRowHeader ? 1 : 0);
 
           return (
             <tr key={`table-row-${rowIndex}`}>
-              {row.cells.map((cell, cellIndex) => {
+              {rowHeaderCell && (
+                <th scope="row">
+                  <TableCell
+                    cell={rowHeaderCell}
+                    disabled={false}
+                    id={`${uiSchemaField.name}-${rowIndex}-row-header`}
+                    value={
+                      rowHeaderCell.type === "plainText"
+                        ? undefined
+                        : getRenderValue(rowHeaderCell.definition, value)
+                    }
+                  />
+                </th>
+              )}
+              {bodyCells.map((cell, cellIndex) => {
                 const cellId = `${uiSchemaField.name}-${rowIndex}-${cellIndex}`;
 
                 return (
@@ -203,8 +256,7 @@ function TableWidget({
                       id={cellId}
                       onChange={
                         cell.type === "input" && cell.definition
-                          ? (nextValue) =>
-                              handleCellChange(cell.definition, nextValue)
+                          ? cellChangeHandlers[cell.definition]
                           : undefined
                       }
                       value={
