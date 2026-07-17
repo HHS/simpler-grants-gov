@@ -399,7 +399,7 @@ def competition_instruction_delete(
     db_session: db.Session,
     opportunity_id: UUID,
     competition_id: UUID,
-    competition_instruction_id: str,
+    competition_instruction_id: UUID,
 ) -> response.ApiResponse:
     """Delete an instruction file from a competition"""
     add_extra_data_to_current_request_logs(
