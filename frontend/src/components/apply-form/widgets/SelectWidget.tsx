@@ -9,12 +9,7 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import {
-  ComboBox,
-  ComboBoxOption,
-  FormGroup,
-  Select,
-} from "@trussworks/react-uswds";
+import { ComboBox, FormGroup, Select } from "@trussworks/react-uswds";
 
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
@@ -116,7 +111,7 @@ function SelectWidget<
         idFor={idFor}
         title={title}
         required={required}
-        description={description as string}
+        description={description}
         labelType={labelType}
       />
       {error && (
@@ -136,7 +131,7 @@ function SelectWidget<
         autoFocus={autofocus}
         onChange={updateOnInput ? handleChange : noop}
         onBlur={updateOnInput ? handleBlur : undefined}
-        options={useCombo ? (enumOptions as ComboBoxOption[]) : []}
+        options={useCombo ? enumOptions : []}
         onFocus={updateOnInput ? handleFocus : undefined}
         aria-describedby={describedby}
       >

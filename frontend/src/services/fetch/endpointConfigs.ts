@@ -116,11 +116,13 @@ export const toDynamicOrganizationsEndpoint = (
   };
 };
 
-export const toDynamicGrantorsEndpoint = (type: "POST") => {
+export const toDynamicGrantorAgenciesEndpoint = (
+  type: "POST" | "GET" | "PUT" | "DELETE",
+) => {
   return {
     basePath: environment.API_URL,
     version: "v1",
-    namespace: "grantors",
+    namespace: "grantors/agencies",
     method: type as ApiMethod,
     requiresAuth: true,
   };

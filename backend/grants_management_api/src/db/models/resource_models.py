@@ -175,6 +175,7 @@ class MgmtResourceUser(GrantorSchemaTable, TimestampMixin):
     def roles(self) -> list[MgmtRole]:
         return [resource_user_role.mgmt_role for resource_user_role in self.resource_user_roles]
 
+
 class MgmtRole(GrantorSchemaTable, TimestampMixin):
     __tablename__ = "mgmt_role"
 

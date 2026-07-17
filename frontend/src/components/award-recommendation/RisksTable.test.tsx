@@ -292,7 +292,7 @@ describe("RisksTable", () => {
     const link = screen.getByRole("link", { name: "APP-001" });
     expect(link).toHaveAttribute(
       "href",
-      "/award-recommendation/test-award-id/application-submissions/sub-1/edit",
+      "/grantor/award-recommendation/test-award-id/application-submissions/sub-1/edit",
     );
   });
 

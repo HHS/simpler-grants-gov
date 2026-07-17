@@ -128,8 +128,7 @@ def get_db_session() -> db.Session:
     # _db_session is only set in the pytest fixture `enable_factory_create`
     # so that tests do not unintentionally write to the database.
     if _db_session is None:
-        raise Exception(
-            """Factory db_session is not initialized.
+        raise Exception("""Factory db_session is not initialized.
 
             If your tests don't need to cover database behavior, consider
             calling the `build()` method instead of `create()` on the factory to
@@ -137,8 +136,7 @@ def get_db_session() -> db.Session:
 
             If running tests that actually need data in the DB, pull in the
             `enable_factory_create` fixture to initialize the db_session.
-            """
-        )
+            """)
 
     return _db_session
 
@@ -279,6 +277,7 @@ class MgmtRoleFactory(BaseFactory):
             privileges=[MgmtPrivilege.VIEW_TEAM],
         )
 
+
 class MgmtResourceFactory(BaseFactory):
     class Meta:
         model = resource_models.MgmtResource
@@ -286,6 +285,7 @@ class MgmtResourceFactory(BaseFactory):
     mgmt_resource_id = Generators.UuidObj
 
     mgmt_resource_type = factory.fuzzy.FuzzyChoice(MgmtResourceType)
+
 
 class MgmtResourceUserFactory(BaseFactory):
     class Meta:
@@ -299,12 +299,15 @@ class MgmtResourceUserFactory(BaseFactory):
     mgmt_user = factory.SubFactory(MgmtUserFactory)
     mgmt_user_id = factory.LazyAttribute(lambda r: r.mgmt_user.mgmt_user_id)
 
+
 class MgmtResourceUserRoleFactory(BaseFactory):
     class Meta:
         model = resource_models.MgmtResourceUserRole
 
     mgmt_resource_user = factory.SubFactory(MgmtResourceUserFactory)
-    mgmt_resource_user_id = factory.LazyAttribute(lambda r: r.mgmt_resource_user.mgmt_resource_user_id)
+    mgmt_resource_user_id = factory.LazyAttribute(
+        lambda r: r.mgmt_resource_user.mgmt_resource_user_id
+    )
 
     mgmt_role = factory.SubFactory(MgmtRoleFactory)
     mgmt_role_id = factory.LazyAttribute(lambda r: r.mgmt_role.mgmt_role_id)

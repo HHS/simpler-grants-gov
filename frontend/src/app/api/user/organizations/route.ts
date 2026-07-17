@@ -1,5 +1,5 @@
 import { respondWithTraceAndLogs } from "src/utils/apiUtils";
 
-import { getUserOrganizations } from "./handler";
+import { getUserOrganizationsHandler } from "./handler";
 
-export const GET = respondWithTraceAndLogs(getUserOrganizations);
+export const GET = respondWithTraceAndLogs(getUserOrganizationsHandler);

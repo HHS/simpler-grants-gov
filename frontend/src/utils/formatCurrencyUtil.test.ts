@@ -76,4 +76,16 @@ describe("getNumericAmountFromString", () => {
   it("returns 0 for non-numeric strings", () => {
     expect(getNumericAmountFromString("abc")).toBe(0);
   });
+
+  it("parses a formatted currency string with dollar sign and commas", () => {
+    expect(getNumericAmountFromString("$1,234")).toBe(1234);
+  });
+
+  it("parses a formatted currency string with dollar sign", () => {
+    expect(getNumericAmountFromString("$75000")).toBe(75000);
+  });
+
+  it("parses large formatted amounts", () => {
+    expect(getNumericAmountFromString("$1,234,567.89")).toBe(1234567.89);
+  });
 });

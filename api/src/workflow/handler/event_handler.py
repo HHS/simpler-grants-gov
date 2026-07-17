@@ -177,7 +177,7 @@ class EventHandler:
             # otherwise won't realize the StrEnum is also a string and error.
             current_workflow_state=state_machine_cls.initial_state.value,
             is_active=True,
-            **workflow_entity
+            **workflow_entity,
         )
         self.db_session.add(workflow)
 
