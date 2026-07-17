@@ -22,6 +22,7 @@ Feature: Opportunity summary failure path validation
   Background:
     Given I am authenticated as a grantor user
     And I create a new opportunity with happy-path data
+    And I should be on the "Opportunity Overview" page
     And I click "Opportunity Summary"
     And I should be on the "Opportunity Summary" page
     And the "Save and exit" button should be enabled
