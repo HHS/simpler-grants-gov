@@ -196,7 +196,8 @@ Individual services can be run through Docker, which can be useful in concert wi
 * **Mock OAuth server**
    * Run `make init-mock-oauth2`
 * **Mailpit (local email)**
-   * Run `docker compose up --detach mailpit`
+   * `make init` starts Mailpit with the other API dependencies
+   * To start it separately from `api/`, run `make init-mailpit`
    * Open [http://localhost:8025](http://localhost:8025) to inspect captured messages
 
 #### Local Email

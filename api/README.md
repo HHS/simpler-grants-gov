@@ -42,11 +42,14 @@ See [development.md](../documentation/api/development.md) for installation and d
 ### Inspecting local email
 
 Local development captures email in [Mailpit](https://mailpit.axllent.org/) instead of
-sending it to real recipients. Start Mailpit on its own with:
+sending it to real recipients. `make init` starts Mailpit with the other local
+dependencies. To start it on its own, run the following from `api/`:
 
 ```bash
-docker compose up --detach mailpit
+make init-mailpit
 ```
+
+The equivalent Compose command is `docker compose up --detach mailpit`.
 
 Open [http://localhost:8025](http://localhost:8025) to inspect message content,
 recipients, sender, headers, timestamps, and raw MIME source. The local API and
