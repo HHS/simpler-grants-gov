@@ -10,12 +10,16 @@ export const PPSL_FORM_MATCHER = /Project\/Performance\s+Site\s+Location/i;
 // api/src/form_schema/shared/address_shared.py
 export const fieldDefinitionsPPSL: FormFillFieldDefinitions = {
   // ********* Primary Site *********
-  "primary_site--submitting_as_individual": {
-    testId: "primary_site--submitting_as_individual",
-    type: "checkbox",
-    section: "Project/Performance Site Primary Location",
-    field: "Submitting as Individual",
-  },
+  // primary_site--submitting_as_individual is omitted: it defaults to false (unchecked)
+  // which is the correct state for the happy path. Actively setting it to false is
+  // unnecessary and the checkboxHandler cannot locate the element by testId.
+  //
+  // primary_site--uei is omitted: unlike SF-424 where UEI is prepopulated from the
+  // user's SAM.gov account, PPSL requires manual entry. Since UEI differs across
+  // local and deployed environments and is not a required field, it is excluded here.
+  //
+  // primary_site--address--province is omitted: only applicable for non-US addresses.
+  // The happy path uses USA as the country, so province is never shown or required.
   "primary_site--organization_name": {
     testId: "primary_site--organization_name",
     type: "text",
@@ -57,8 +61,6 @@ export const fieldDefinitionsPPSL: FormFillFieldDefinitions = {
     section: "Project/Performance Site Primary Location",
     field: "State",
   },
-  // primary_site--address--province is omitted: only applicable for non-US addresses.
-  // The happy path uses USA as the country, so province is never shown or required.
   "primary_site--address--country": {
     selector: "#primary_site--address--country",
     type: "dropdown",

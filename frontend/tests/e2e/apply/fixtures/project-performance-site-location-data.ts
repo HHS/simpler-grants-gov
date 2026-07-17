@@ -13,6 +13,10 @@ const PPSL_TEST_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
  * submitting_as_individual is set to "false" so organization_name is required and filled.
  * congressional_district is required when country is USA and is exactly 6 characters.
  * additional_locations_attachment is optional and included to exercise the file upload path.
+ *
+ * primary_site--uei is intentionally omitted: unlike SF-424 where UEI is prepopulated
+ * from the user's SAM.gov account, PPSL requires manual entry. Since UEI differs
+ * across local and deployed environments and is not a required field, it is skipped here.
  */
 export const buildPPSLHappyPathTestData = (
   suffix: number,
@@ -20,8 +24,6 @@ export const buildPPSLHappyPathTestData = (
   const shortSuffix = toHappyPathSuffix(suffix);
 
   return {
-    // Primary Site – Submission type
-    "primary_site--submitting_as_individual": "false",
     // Primary Site – Organization
     "primary_site--organization_name": `Org ${shortSuffix}`,
     // Primary Site – Address
