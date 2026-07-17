@@ -60,21 +60,19 @@ describe("formDataToObject", () => {
       user: {
         age: "30",
         name: "Alice",
-        emptyString: null,
-        emptyNumber: null,
+        emptyString: undefined,
+        emptyNumber: undefined,
         skills: ["JavaScript", "TypeScript", { surprise: "more stuff" }],
         deeper: {
           value: "hello",
         },
       },
       nonUser: false,
-      empty: null,
+      empty: undefined,
       numeral: 100,
     };
 
-    const result = formDataToObject(formData, formSchema, {
-      delimiter: "--",
-    });
+    const result = formDataToObject(formData, formSchema, undefined);
 
     expect(result).toEqual(expected);
   });
@@ -95,7 +93,7 @@ describe("formDataToObject", () => {
       complicated: { key: "value" },
     };
 
-    const result = formDataToObject(formData, formSchema);
+    const result = formDataToObject(formData, formSchema, undefined);
 
     expect(result).toEqual(expected);
   });
@@ -110,7 +108,7 @@ describe("formDataToObject", () => {
       },
     };
 
-    const result = formDataToObject(formData, formSchema, { delimiter: "--" });
+    const result = formDataToObject(formData, formSchema, undefined);
 
     expect(result.any).toEqual(undefined);
     // eslint-disable-next-line
@@ -120,7 +118,7 @@ describe("formDataToObject", () => {
   it("handles array paths", () => {
     const formData = new FormData();
 
-    formData.append("something[0].whatever", "a value");
+    formData.append("something[0]--whatever", "a value");
 
     const formSchema = {
       something: {
@@ -128,7 +126,7 @@ describe("formDataToObject", () => {
       },
     };
 
-    const result = formDataToObject(formData, formSchema);
+    const result = formDataToObject(formData, formSchema, undefined);
 
     // eslint-disable-next-line
     // @ts-ignore
@@ -137,21 +135,23 @@ describe("formDataToObject", () => {
   it("respects alternate nested path delimiters", () => {
     const formData = new FormData();
 
-    formData.append("something[0].whatever", "a value");
+    formData.append("something[0].whatever", "1");
 
     const formSchema = {
       something: {
-        items: { type: "object", properties: { whatever: { type: "string" } } },
+        items: { type: "object", properties: { whatever: { type: "number" } } },
       },
     };
 
-    const result = formDataToObject(formData, formSchema, { delimiter: "." });
+    const result = formDataToObject(formData, formSchema, undefined, {
+      delimiter: ".",
+    });
 
     // eslint-disable-next-line
     // @ts-ignore
-    expect(result.something[0]).toEqual({ whatever: "a value" });
+    expect(result.something[0]).toEqual({ whatever: 1 });
   });
-  it("defaults to null for empty values", () => {
+  it("defaults to null for empty values when specified", () => {
     const formData = new FormData();
     formData.append("whatever", "");
     const formSchema = {
@@ -160,13 +160,13 @@ describe("formDataToObject", () => {
       },
     };
 
-    const result = formDataToObject(formData, formSchema);
+    const result = formDataToObject(formData, formSchema, null);
 
     // eslint-disable-next-line
     // @ts-ignore
     expect(result).toEqual({ whatever: null });
   });
-  it("defaults to undefined for empty values if option provided", () => {
+  it("defaults to undefined for empty values when specified", () => {
     const formData = new FormData();
     formData.append("whatever", "");
     const formSchema = {
@@ -175,9 +175,7 @@ describe("formDataToObject", () => {
       },
     };
 
-    const result = formDataToObject(formData, formSchema, {
-      useUndefinedDefaultValue: true,
-    });
+    const result = formDataToObject(formData, formSchema, undefined);
 
     // eslint-disable-next-line
     // @ts-ignore

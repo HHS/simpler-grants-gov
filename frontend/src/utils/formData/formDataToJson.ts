@@ -2,6 +2,7 @@
 
 import { RJSFSchema } from "@rjsf/utils";
 import {
+  FORM_DATA_NESTING_DELIMITER,
   getByPointer,
   getFieldPathFromHtml,
 } from "src/utils/formData/formDataUtils";
@@ -17,10 +18,9 @@ type NestedObject = {
 type FormDataToJsonOptions = {
   // seems to be unused, but an optional path prefix to add when referencing schema location
   parentKey?: string;
-  // will default to `--` downstream if not provided. Used to convert representation of nested fields
+  // will default to the FORM_DATA_NESTING_DELIMITER (`--`) downstream if not provided. Used to convert representation of nested fields
   // from FormData / DOM level implementation to implementation used in schema
   delimiter?: string;
-  useUndefinedDefaultValue?: boolean;
 };
 
 /*
@@ -30,19 +30,19 @@ type FormDataToJsonOptions = {
   note:
   - string representations of booleans are cast to booleans
   - for number type fields, cast to number as long as a value is present
-  - for string type fields that represent a number, ensure they remain strings (or null)
+  - for string type fields that represent a number, ensure they remain strings (or undefined/null)
   - otherwise it may be an object or array, so try to cast to parse json
     - note that this will cast a number string ("1") to a number, thus the necessity of the previous case
-  - if the json parse fails, just return the string (or null)
-
-  Note that
+  - if the json parse fails, just return the string (or undefined/null)
+  - default undefined/null values are determined by the default value passed in the original formDataToObject call
+    - apply form validations require `undefined` values for empty fields
+    - all other forms should use `null`
 */
 const parseValue = (
   value: unknown,
   type: string,
-  useUndefinedDefaultValue = false,
+  defaultValue: null | undefined,
 ) => {
-  const defaultValue = useUndefinedDefaultValue ? undefined : null;
   if (value === "false") return false;
   if (value === "true") return true;
   if (
@@ -65,7 +65,8 @@ const parseValue = (
 const getFieldType = (
   currentKey: string, // FormData key
   formSchema: RJSFSchema,
-  options: FormDataToJsonOptions = {},
+  delimiter: string,
+  parentKey: string,
 ): string => {
   // for fields that represent array items in the form schema, we need to reference
   // the "items" property of the field's schema definition. The form data key will
@@ -74,13 +75,10 @@ const getFieldType = (
   // needed to handle activity line items in the budget form
   const keyWithArrayNotationStripped = currentKey.replace(
     /\[\d+\]/g,
-    "--items",
+    `${delimiter}items`,
   );
-  const path = getFieldPathFromHtml(
-    keyWithArrayNotationStripped,
-    options.delimiter,
-  );
-  const fullPath = options.parentKey ? `${options.parentKey}/${path}` : path;
+  const path = getFieldPathFromHtml(keyWithArrayNotationStripped, delimiter);
+  const fullPath = parentKey ? `${parentKey}/${path}` : path;
   const formFieldDefinition = getByPointer(formSchema, fullPath) as {
     type?: string;
   };
@@ -96,19 +94,26 @@ const getFieldType = (
 export function formDataToObject<T = NestedObject>(
   formData = new FormData(),
   formSchema: RJSFSchema, // expects that any "/properties" path segments have already been removed
+  // apply form validations require `undefined` values for empty fields
+  // all other forms should use `null`
+  defaultValue: null | undefined,
   options?: FormDataToJsonOptions,
 ): T {
-  const delimiter = options?.delimiter || ".";
+  const delimiter = options?.delimiter || FORM_DATA_NESTING_DELIMITER;
   const parentKey = options?.parentKey || "";
-  const useUndefinedDefaultValue = options?.useUndefinedDefaultValue || false;
   const result: NestedObject = {};
   const entries = formData.entries();
 
   for (const [key, value] of entries) {
     const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
     const chunks = currentKey.split(delimiter);
-    const fieldType = getFieldType(currentKey, formSchema, options);
-    const parsedValue = parseValue(value, fieldType, useUndefinedDefaultValue);
+    const fieldType = getFieldType(
+      currentKey,
+      formSchema,
+      delimiter,
+      parentKey,
+    );
+    const parsedValue = parseValue(value, fieldType, defaultValue);
 
     let current = result;
 

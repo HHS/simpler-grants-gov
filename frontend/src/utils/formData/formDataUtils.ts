@@ -7,6 +7,9 @@ export const FORM_DATA_NESTING_DELIMITER = "--";
 
 export const JSON_SCHEMA_NESTING_DELIMITER = "/";
 
+// API side validation library delimits nesting with a dot rather than a slash
+export const VALIDATION_ERROR_NESTING_DELIMITER = ".";
+
 // transform a form data field name / id into a json path that can be used to reference the form schema
 // (assumes that any `/properties` path segments have been removed from schema)
 export const getFieldPathFromHtml = (

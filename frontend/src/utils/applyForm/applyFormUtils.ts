@@ -16,11 +16,9 @@ import {
   FORM_DATA_NESTING_DELIMITER,
   getByPointer,
   JSON_SCHEMA_NESTING_DELIMITER,
+  VALIDATION_ERROR_NESTING_DELIMITER,
 } from "src/utils/formData/formDataUtils";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
-
-// API side validation library delimits nesting with a dot rather than a slash
-const VALIDATION_ERROR_NESTING_DELIMITER = ".";
 
 const nestedWarningsForField = ({
   definition,
@@ -655,10 +653,7 @@ export const shapeFormData = <T extends object>(
   const structuredFormData = formDataToObject(
     formData,
     condenseFormSchemaProperties(formSchema),
-    {
-      delimiter: FORM_DATA_NESTING_DELIMITER,
-      useUndefinedDefaultValue: true, // apply form handlers will expect empty fields to be `undefined` rather than `null`
-    },
+    undefined,
   );
   return pruneEmptyNestedFields(
     structuredFormData,
