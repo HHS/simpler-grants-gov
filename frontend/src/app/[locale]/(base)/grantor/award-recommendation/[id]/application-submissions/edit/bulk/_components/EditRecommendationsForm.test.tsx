@@ -321,7 +321,7 @@ describe("EditRecommendationsForm", () => {
       // Verify initial state - total requested and total recommended
       const initialTotalRequested = screen.getByText("$150,000");
       expect(initialTotalRequested).toBeInTheDocument();
-      
+
       // Initial total recommended: $75,000 + $25,000 = $100,000
       // Note: $100,000 appears twice (as requested amount and total recommended)
       const hundredThousandElements = screen.getAllByText("$100,000");
@@ -339,7 +339,7 @@ describe("EditRecommendationsForm", () => {
       await waitFor(() => {
         expect(screen.getByText("$105,000")).toBeInTheDocument();
       });
-      
+
       // Verify total requested hasn't changed
       expect(screen.getByText("$150,000")).toBeInTheDocument();
     });

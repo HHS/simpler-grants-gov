@@ -225,7 +225,9 @@ const FundingSectionMultiple = ({
   const totalRequested = submissions.reduce(
     (sum, s) =>
       sum +
-      getNumericAmountFromString(s.application_submission.total_requested_amount),
+      getNumericAmountFromString(
+        s.application_submission.total_requested_amount,
+      ),
     0,
   );
 
