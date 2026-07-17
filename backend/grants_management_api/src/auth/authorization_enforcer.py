@@ -8,8 +8,8 @@ from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 
 from src.constants.lookup_constants import MgmtPrivilege, MgmtResourceType
-from src.db.models.resource_models import MgmtRole, MgmtResource, MgmtInternalResource, AbstractResourceTableMixin, \
-    Department, Subagency, Team, MgmtResourceUserRole, MgmtResourceUser
+from src.db.models.resource_models import MgmtRole, MgmtInternalResource, AbstractResourceTableMixin, \
+    Department, Subagency, Team, MgmtResourceUser
 from src.db.models.user_models import MgmtUser
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,19 @@ class AuthorizationEnforcer:
 
 
     def can_access(self, user: MgmtUser, required_privileges: MgmtPrivilege | set[MgmtPrivilege], resource: AbstractResourceTableMixin) -> bool:
-        """TODO"""
+        """
+        Check whether a user has the required privilege against the resource.
+
+        This check has 3 core pieces:
+        * Determine which resources are relevant to the resource passed in. If a resource
+          has inheritance, then we'll grab all the resources that a user could be able to access
+          the passed in resource through. Exact inheritance is defined per resource.
+        * Determine which roles the user has against the resources determine in step 1.
+        * Check whether a user has the required privileges within the roles from step 2.
+          If multiple required privileges are passed in, the user does not need every
+          privilege to come from the same role.
+
+        """
         # In the event there are any unexpected, we want to get as much context as possible for what errored
         # so attach the log context we've been building up to the error message and re-raise
         try:
@@ -32,7 +44,7 @@ class AuthorizationEnforcer:
             raise
 
     def _can_access(self, user: MgmtUser, required_privileges: MgmtPrivilege | set[MgmtPrivilege], resource: AbstractResourceTableMixin) -> bool:
-        """TODO"""
+        """Internal implementation of can_access, call that function directly instead."""
         if isinstance(required_privileges, MgmtPrivilege):
             required_privileges = {required_privileges}
 
@@ -59,9 +71,18 @@ class AuthorizationEnforcer:
             access_granted = False
         else:
             access_granted = True
-            # TODO - add the roles that granted them access here
+
+            # For logging, grab all role IDs/names that were involved in authorizing
+            authorizing_role_ids = set()
+            authorizing_role_names = set()
             for privilege in required_privileges:
-                pass
+                authorizing_roles =  privilege_to_role.get(privilege, [])
+                for authorizing_role in authorizing_roles:
+                    authorizing_role_ids.add(str(authorizing_role.mgmt_role_id))
+                    authorizing_role_names.add(authorizing_role.role_name)
+
+            self.log_context["authorizing_role_ids"] = "|".join(authorizing_role_ids)
+            self.log_context["authorizing_role_names"] = "|".join(authorizing_role_names)
 
 
         self.log_context |= {"access_granted": access_granted}
@@ -71,14 +92,24 @@ class AuthorizationEnforcer:
 
 
     def verify_access(self, user: MgmtUser, required_privileges: MgmtPrivilege | set[MgmtPrivilege], resource) -> None:
+        """Wrapper function around can_access that handles raising a 403 if the user does not have access."""
         if not self.can_access(user=user, required_privileges=required_privileges, resource=resource):
             raise_flask_error(403, "Forbidden")
 
 
     def get_user_roles_for_resource(self, user: MgmtUser, resource: AbstractResourceTableMixin) -> list[MgmtRole]:
-        """TODO"""
+        """
+        Get all roles of the given user that are relevant to the resource.
 
-        # Fetch the resources
+        Depending on what resources are relevant to the passed in resource, this may
+        be roles against several resources.
+
+        For example, if having a role against a parent resource should allow access
+        to the passed in resource, both resources will be relevant, and all user roles against
+        both would be returned.
+        """
+
+        # Fetch the relevant resources
         resources = self._get_relevant_resources(resource)
 
         resource_ids = []
@@ -94,6 +125,8 @@ class AuthorizationEnforcer:
         for k, v in relevant_resource_map.items():
             self.log_context[f"relevant_{k}_ids"] = "|".join(v)
 
+        # Grab all resource user connections where either one of the above resources
+        # is present AND the user is the one with that role.
         stmt = select(MgmtResourceUser).where(MgmtResourceUser.mgmt_resource_id.in_(resource_ids), MgmtResourceUser.mgmt_user_id == user.mgmt_user_id)
 
         resource_users = self.db_session.execute(stmt).scalars()
@@ -120,8 +153,6 @@ class AuthorizationEnforcer:
 
         * Internal resource -> The internal resource itself - no inheritance exists for this type
         """
-
-        # TODO - probably some sort of way to preload the resource hierarchy for efficiency here?
 
         if isinstance(resource, Department):
             return self._get_resources_for_department(resource)

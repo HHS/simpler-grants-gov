@@ -1,3 +1,4 @@
+from apiflask import HTTPError
 from grants_shared.adapters import db
 
 from src.auth.authorization_enforcer import AuthorizationEnforcer
@@ -98,7 +99,6 @@ def setup_user_with_roles(db_session: db.Session, resources: list[AbstractResour
             MgmtResourceUserRoleFactory.create(mgmt_resource_user=resource_user, mgmt_role=role)
 
     # Make any subsequent calls with these objects go back to the DB.
-    # TODO - see if I can fix it with some back_pops
     db_session.expire_all()
 
     return user
@@ -245,15 +245,69 @@ def test_user_with_privileges_across_roles(db_session, internal_resource1, inter
     assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.UPDATE_TEAM}, internal_resource2) is False
     assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.VIEW_TEAM, MgmtPrivilege.UPDATE_TEAM}, internal_resource2) is False
 
-def test_user_with_multiple_roles_at_different_levels(db_session):
-    pass
+def test_user_with_multiple_roles_at_different_levels(db_session, department_a, subagency_x, team1, team2, team3, team4):
 
-def test_verify_access(db_session):
-    pass
+    # Has 3 different team related privileges at department/subagency/team levels
+    department_role = MgmtRoleFactory.create(privileges=[MgmtPrivilege.VIEW_TEAM], resource_types=[MgmtResourceType.DEPARTMENT])
+    subagency_role = MgmtRoleFactory.create(privileges=[MgmtPrivilege.UPDATE_TEAM], resource_types=[MgmtResourceType.SUBAGENCY])
+    team_role = MgmtRoleFactory.create(privileges=[MgmtPrivilege.MANAGE_TEAM_MEMBERS], resource_types=[MgmtResourceType.TEAM])
+    user = setup_user_with_roles(db_session, resources=[department_a], roles=[department_role])
+    setup_user_with_roles(db_session, user=user, resources=[subagency_x], roles=[subagency_role])
+    setup_user_with_roles(db_session, user=user, resources=[team1], roles=[team_role])
 
-# TODO tests
-# User in a resource with a different privilege can't access it
-# User with privilege can access - also via hierarchy
-# User with privilege in different resource can't access
-# Multiple privileges
-# Multiple privileges granted at different levels
+    # Can do various things at the team level through inheritance
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.VIEW_TEAM}, team1) is True
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.UPDATE_TEAM}, team1) is True
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.MANAGE_TEAM_MEMBERS}, team1) is True
+
+    # Can do all of them across roles
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.VIEW_TEAM, MgmtPrivilege.UPDATE_TEAM, MgmtPrivilege.MANAGE_TEAM_MEMBERS}, team1) is True
+
+    # Cannot do other actions against the team
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.DELETE_TEAM}, team1) is False
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.CREATE_TEAM}, team1) is False
+
+    # Can do the actions from the department/subagency against a sibling team
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.VIEW_TEAM}, team2) is True
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.UPDATE_TEAM}, team2) is True
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.MANAGE_TEAM_MEMBERS}, team2) is False
+
+    # Can do only actions from the department against a team in another subagency
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.VIEW_TEAM}, team3) is True
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.UPDATE_TEAM}, team3) is False
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.MANAGE_TEAM_MEMBERS}, team3) is False
+
+    # Cannot access other teams
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.VIEW_TEAM}, team4) is False
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.UPDATE_TEAM}, team4) is False
+    assert AuthorizationEnforcer(db_session).can_access(user, {MgmtPrivilege.MANAGE_TEAM_MEMBERS}, team4) is False
+
+def test_verify_access(db_session, department_a):
+    user = MgmtUserFactory.create()
+    with pytest.raises(HTTPError, match="Forbidden"):
+        AuthorizationEnforcer(db_session).verify_access(user, {MgmtPrivilege.VIEW_DEPARTMENT}, department_a)
+
+
+def test_logging(db_session, department_a, team1, subagency_x):
+    """Test that logging values get populated as expected"""
+    department_role = MgmtRoleFactory.create(privileges=[MgmtPrivilege.VIEW_TEAM], resource_types=[MgmtResourceType.DEPARTMENT])
+    subagency_role = MgmtRoleFactory.create(privileges=[MgmtPrivilege.UPDATE_TEAM], resource_types=[MgmtResourceType.SUBAGENCY])
+    team_role = MgmtRoleFactory.create(privileges=[MgmtPrivilege.MANAGE_TEAM_MEMBERS], resource_types=[MgmtResourceType.TEAM])
+    user = setup_user_with_roles(db_session, resources=[department_a], roles=[department_role])
+    setup_user_with_roles(db_session, user=user, resources=[subagency_x], roles=[subagency_role])
+    setup_user_with_roles(db_session, user=user, resources=[team1], roles=[team_role])
+
+    enforcer = AuthorizationEnforcer(db_session)
+    enforcer.can_access(user, {MgmtPrivilege.VIEW_TEAM, MgmtPrivilege.UPDATE_TEAM, MgmtPrivilege.MANAGE_TEAM_MEMBERS}, team1)
+
+    log_context = enforcer.log_context
+    assert log_context["user_id"] == user.mgmt_user_id
+    assert log_context["resource_type"] == MgmtResourceType.TEAM
+    assert set(log_context["required_privileges"].split("|")) == {MgmtPrivilege.VIEW_TEAM, MgmtPrivilege.UPDATE_TEAM, MgmtPrivilege.MANAGE_TEAM_MEMBERS}
+    assert log_context["relevant_team_ids"] == str(team1.team_id)
+    assert log_context["relevant_subagency_ids"] == str(subagency_x.subagency_id)
+    assert log_context["relevant_department_ids"] == str(department_a.department_id)
+    assert log_context["relevant_role_count"] == 3
+    assert set(log_context["authorizing_role_ids"].split("|")) == {str(department_role.mgmt_role_id), str(subagency_role.mgmt_role_id), str(team_role.mgmt_role_id)}
+    assert set(log_context["authorizing_role_names"].split("|")) == {department_role.role_name, subagency_role.role_name, team_role.role_name}
+    assert log_context["access_granted"] is True
