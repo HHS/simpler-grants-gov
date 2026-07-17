@@ -14,10 +14,11 @@ from tests.db.models.factories import MgmtUserApiKeyFactory, MgmtUserFactory
 
 @pytest.fixture(scope="module")
 def mini_app(monkeypatch_module):
+    """Create a separate app that we can modify separate from the base one used by other tests"""
+
     def stub(app):
         pass
 
-    """Create a separate app that we can modify separate from the base one used by other tests"""
     monkeypatch_module.setattr(app_entry, "register_blueprints", stub)
     monkeypatch_module.setattr(app_entry, "setup_logging", stub)
     mini_app = app_entry.create_app()
