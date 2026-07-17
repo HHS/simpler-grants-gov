@@ -70,12 +70,7 @@ def verify_api_key(db_session: db.Session, token: str) -> MgmtUserApiKey:
         api_key.last_used = datetime_util.utcnow()
         db_session.add(api_key)
 
-        add_extra_data_to_current_request_logs(
-            {
-                "auth.user_id": api_key.mgmt_user_id,
-                "auth.api_key_id": str(api_key.mgmt_api_key_id),
-            }
-        )
+        add_extra_data_to_current_request_logs(api_key.get_log_extra())
 
         logger.info("API Gateway key authentication successful")
 
