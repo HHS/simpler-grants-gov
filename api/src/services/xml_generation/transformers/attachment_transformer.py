@@ -29,11 +29,56 @@ class AttachmentTransformer:
         self.attachment_namespace = attachment_namespace
         self.attachment_mapping = attachment_mapping or {}
         self.attachment_field_config = attachment_field_config or {}
+        # Fields already placed in sequence order, so the end-of-form flush skips them.
+        self._emitted_fields: set[str] = set()
+
+    def add_attachment_field(
+        self,
+        parent: lxml_etree._Element,
+        field_name: str,
+        data: dict[str, Any],
+        nsmap: dict[str, str],
+    ) -> bool:
+        """Add the attachment element for a single configured field.
+
+        Lets the caller place an attachment element at its correct position in the
+        XSD sequence rather than appending all attachments at the end.
+
+        Args:
+            parent: Parent XML element
+            field_name: Name of the attachment field to emit
+            data: Data dictionary containing attachment UUIDs
+            nsmap: Namespace map for XML generation
+
+        Returns:
+            True if an element was emitted, False if the field is not a configured
+            attachment or has no value in ``data``.
+        """
+        field_config = self.attachment_field_config.get(field_name)
+        if field_config is None or data.get(field_name) is None:
+            return False
+
+        xml_element = field_config["xml_element"]
+        field_type = field_config["type"]
+        field_value = data[field_name]
+
+        if field_type == "single" or field_type == "single_with_wrapper":
+            attachment_dict = self._resolve_attachment_uuid(field_value, field_name)
+            self._add_single_attachment_element(
+                parent, xml_element, attachment_dict, nsmap, field_config
+            )
+        elif field_type == "multiple":
+            self._add_multiple_attachment_from_uuids(
+                parent, xml_element, field_value, field_name, nsmap
+            )
+
+        self._emitted_fields.add(field_name)
+        return True
 
     def add_attachment_elements(
         self, parent: lxml_etree._Element, data: dict[str, Any], nsmap: dict[str, str]
     ) -> None:
-        """Add attachment elements to the parent XML element.
+        """Add all attachment elements not already emitted to the parent XML element.
 
         Args:
             parent: Parent XML element
@@ -43,26 +88,10 @@ class AttachmentTransformer:
         Raises:
             ValueError: If a UUID is found in data but not in the attachment mapping
         """
-        # Process each configured attachment field
-        for field_name, field_config in self.attachment_field_config.items():
-            if field_name not in data or data[field_name] is None:
+        for field_name in self.attachment_field_config:
+            if field_name in self._emitted_fields:
                 continue
-
-            xml_element = field_config["xml_element"]
-            field_type = field_config["type"]
-            field_value = data[field_name]
-
-            if field_type == "single" or field_type == "single_with_wrapper":
-                # Single attachment field - expect UUID string
-                attachment_dict = self._resolve_attachment_uuid(field_value, field_name)
-                self._add_single_attachment_element(
-                    parent, xml_element, attachment_dict, nsmap, field_config
-                )
-            elif field_type == "multiple":
-                # Multiple attachment field - expect list of UUIDs
-                self._add_multiple_attachment_from_uuids(
-                    parent, xml_element, field_value, field_name, nsmap
-                )
+            self.add_attachment_field(parent, field_name, data, nsmap)
 
     def _resolve_attachment_uuid(self, uuid_value: str, field_name: str) -> dict[str, Any]:
         """Resolve a UUID to attachment data.
@@ -136,10 +165,18 @@ class AttachmentTransformer:
     ) -> None:
         """Add a single attachment element.
 
-        For forms that use the 'single_with_wrapper' type, each attachment slot is
-        wrapped in a nested structure with a File element.
+        Both 'single' and 'single_with_wrapper' place the attachment content inside a
+        wrapper element named ``element_name`` in the form's default namespace. They
+        differ only in whether an inner file element is nested inside that wrapper.
 
-        Example structure with wrapper (type='single_with_wrapper'):
+        Example structure (type='single', element of type att:AttachedFileDataType):
+        <SF424_4_0:DebtExplanation>
+            <att:FileName>...</att:FileName>
+            <att:MimeType>...</att:MimeType>
+            ...
+        </SF424_4_0:DebtExplanation>
+
+        Example structure with inner file element (type='single_with_wrapper'):
         <AttachmentForm_1_2:ATT1>
             <AttachmentForm_1_2:ATT1File>
                 <att:FileName>...</att:FileName>
@@ -155,11 +192,6 @@ class AttachmentTransformer:
             </Project_Abstract_1_2:AttachedFile>
         </Project_Abstract_1_2:ProjectAbstractAddAttachment>
 
-        Example structure without wrapper (type='single'):
-        <att:FileName>...</att:FileName>
-        <att:MimeType>...</att:MimeType>
-        ...
-
         Args:
             parent: Parent XML element
             element_name: Name of the attachment element (e.g., "ATT1")
@@ -167,41 +199,35 @@ class AttachmentTransformer:
             nsmap: Namespace map
             field_config: Field configuration containing type and optional file_element
         """
-        # Check if this field requires wrapper elements based on configuration
-        uses_wrapper = field_config and field_config.get("type") == "single_with_wrapper"
+        field_type = field_config.get("type") if field_config else None
 
-        if uses_wrapper:
-            # Determine inner element name: config override or default to '{element_name}File'.
-            # Empty string means no inner wrapper — content goes directly in the outer element.
+        # 'single' has no inner file element; content goes directly inside the wrapper.
+        if field_type == "single":
+            file_element_name: str = ""
+        else:
             file_element_name = (
                 field_config.get("file_element", f"{element_name}File")
                 if field_config
                 else f"{element_name}File"
             )
 
-            default_ns = next(iter(nsmap.values()), None) if nsmap else None
+        default_ns = next(iter(nsmap.values()), None) if nsmap else None
 
-            # Create the outer wrapper element (e.g., <ATT1>) in the default namespace
-            if default_ns:
-                attachment_elem = lxml_etree.SubElement(parent, f"{{{default_ns}}}{element_name}")
-            else:
-                attachment_elem = lxml_etree.SubElement(parent, element_name)
-
-            if file_element_name:
-                # Create inner file element (e.g., <ATT1File>) and populate it
-                if default_ns:
-                    file_elem = lxml_etree.SubElement(
-                        attachment_elem, f"{{{default_ns}}}{file_element_name}"
-                    )
-                else:
-                    file_elem = lxml_etree.SubElement(attachment_elem, file_element_name)
-                self._populate_attachment_content(file_elem, attachment_data, nsmap)
-            else:
-                # No inner wrapper — populate content directly in the outer element
-                self._populate_attachment_content(attachment_elem, attachment_data, nsmap)
+        if default_ns:
+            attachment_elem = lxml_etree.SubElement(parent, f"{{{default_ns}}}{element_name}")
         else:
-            # No wrapper needed - populate content directly on parent
-            self._populate_attachment_content(parent, attachment_data, nsmap)
+            attachment_elem = lxml_etree.SubElement(parent, element_name)
+
+        if file_element_name:
+            if default_ns:
+                file_elem = lxml_etree.SubElement(
+                    attachment_elem, f"{{{default_ns}}}{file_element_name}"
+                )
+            else:
+                file_elem = lxml_etree.SubElement(attachment_elem, file_element_name)
+            self._populate_attachment_content(file_elem, attachment_data, nsmap)
+        else:
+            self._populate_attachment_content(attachment_elem, attachment_data, nsmap)
 
     def _get_namespace(self, tag: str) -> str | None:
         if tag.startswith("{"):
