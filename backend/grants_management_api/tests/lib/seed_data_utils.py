@@ -54,7 +54,7 @@ class UserBuilder:
 
     def with_api_key(self, key_id: str, key_name: str = "Local Development Key") -> Self:
         """Add an API key to the user for X-API-Key authentication.
-        
+
         For example, if you passed in "my_test_key", you could authenticate
         by passing X-API-Key: my_test_key in your request headers.
         """
