@@ -103,7 +103,7 @@ def delete_competition_instruction(
     user: User,
     opportunity_id: uuid.UUID,
     competition_id: uuid.UUID,
-    competition_instruction_id: str,
+    competition_instruction_id: uuid.UUID,
 ) -> None:
     """Delete an instruction file from a competition"""
     # Get the opportunity and verify it exists
