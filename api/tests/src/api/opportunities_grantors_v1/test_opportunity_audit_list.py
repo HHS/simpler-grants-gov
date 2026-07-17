@@ -251,14 +251,14 @@ class TestListOpportunityAudit200:
 
 class TestListOpportunityAudit401:
 
-    def test_audit_list_no_token_401(self, client, enable_factory_create):
+    def test_audit_list_no_token_401(self, client):
         resp = client.post(
             f"{API_URL}/{uuid.uuid4()}/audit_history",
             json=DEFAULT_PAGINATION,
         )
         assert resp.status_code == 401
 
-    def test_audit_list_invalid_token_401(self, client, enable_factory_create):
+    def test_audit_list_invalid_token_401(self, client):
         resp = client.post(
             f"{API_URL}/{uuid.uuid4()}/audit_history",
             headers={"X-SGG-Token": "invalid-token"},
@@ -274,9 +274,7 @@ class TestListOpportunityAudit401:
 
 class TestListOpportunityAudit403:
 
-    def test_audit_list_wrong_agency_403(
-        self, client, db_session, enable_factory_create, opportunity
-    ):
+    def test_audit_list_wrong_agency_403(self, client, db_session, opportunity):
         """User from a different agency cannot view the audit history"""
         other_agency = AgencyFactory.create()
         _, _, token, _ = create_user_in_agency_with_jwt_and_api_key(

@@ -1,3 +1,4 @@
+import logging
 import uuid
 from collections.abc import Sequence
 
@@ -14,6 +15,8 @@ from src.db.models.opportunity_models import OpportunityAudit
 from src.db.models.user_models import User
 from src.search.search_models import StrSearchFilter
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
+
+logger = logging.getLogger(__name__)
 
 
 class OpportunityAuditFilters(BaseModel):

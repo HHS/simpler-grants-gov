@@ -737,6 +737,8 @@ class CompetitionInstructionUploadResponseDataV1Schema(Schema):
 class CompetitionInstructionUploadResponseV1Schema(ResponseWithErrorsSchema):
     """Response Schema for Upload Competition Instructions Endpoint"""
 
+    data = fields.Nested(CompetitionInstructionUploadResponseDataV1Schema())
+
 
 ####################################
 # Opportunity Audit History
@@ -783,6 +785,9 @@ class OpportunityAuditDataSchema(Schema):
         SimpleUserSchema(),
         metadata={"description": "The user who performed the audited action"},
     )
+    # These three columns are raw JSONB snapshots of the entity at audit time, not FK-linked
+    # objects, so fields.Dict is correct rather than fields.Nested typed schemas.
+    # Exactly one of the three will be non-None per row depending on the event type.
     opportunity = fields.Dict(
         allow_none=True,
         metadata={"description": "Opportunity data snapshot (populated for opportunity events)"},
