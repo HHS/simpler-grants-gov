@@ -14,6 +14,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   verifyFormStatusAfterSave,
@@ -28,15 +29,15 @@ import {
   validateAttachmentPrintViewSection,
   validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
-import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
+import {
+  submitApplicationAndVerify,
+  verifySubmissionConfirmation,
+} from "tests/e2e/utils/submission/submit-application-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 
-// Only the opportunity number is declared here.
-// All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
-// Unified opportunity for both local and staging environments.
 const OPPORTUNITY_NUMBER = "E2E-PPSL-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
@@ -53,12 +54,7 @@ const applicantScenarios = [
 
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
-  if (targetEnv === "staging") {
-    test.skip(
-      testInfo.project.name !== "Chrome",
-      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-    );
-  }
+  skipNonChromeOnStaging(testInfo);
 });
 
 for (const { testName, orgLabel } of applicantScenarios) {
@@ -132,15 +128,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await submitApplicationAndVerify(page, "success");
 
       // --- Confirmation Page Validation ---
-      await expect(
-        page.getByRole("heading", {
-          name: /your application has been submitted/i,
-        }),
-      ).toBeVisible();
-
-      await expect(page.getByTestId("summary-box")).toContainText(
-        "Your application has been submitted",
-      );
+      await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one page per form) ---
       for (const {
@@ -154,10 +142,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
         // Form title heading is visible
         await expect(page.locator("h1")).toContainText(formName);
 
-        // User-entered fields - uses formConfig.fields (printTestId ?? testId)
-        // Some fields are conditional and are only rendered based on earlier selections.
-        // submitting_as_individual is left unchecked so primary_site--organization_name is required.
-        // county and province are optional and not in testData; they are skipped via the undefined check.
         for (const [dataKey, testId] of Object.entries(
           userEnteredFieldTestIds,
         )) {
