@@ -4,7 +4,6 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaFieldList,
-  UswdsWidgetProps,
 } from "src/types/applyForm/types";
 import {
   getRequiredProperties,
@@ -133,7 +132,7 @@ export const FormFields = ({
           node.type === "fieldList"
             ? false
             : isFieldRequired(
-                (node.definition || node.schema?.title || "") as string,
+                node.definition || node.schema?.title || "",
                 requiredFieldPaths,
               );
 
@@ -160,7 +159,7 @@ export const FormFields = ({
             ...widgetConfig.props,
             formContext,
             isFormLocked,
-          } as unknown as UswdsWidgetProps,
+          },
           definition: "definition" in node ? node.definition : undefined,
         });
 
@@ -207,7 +206,7 @@ export const FormFields = ({
           node.type === "fieldList"
             ? false
             : isFieldRequired(
-                (node.definition || node.schema?.title || "") as string,
+                node.definition || node.schema?.title || "",
                 requiredFieldPaths,
               );
 
@@ -225,7 +224,7 @@ export const FormFields = ({
             ...widgetConfig.props,
             formContext,
             isFormLocked,
-          } as unknown as UswdsWidgetProps,
+          },
           definition: "definition" in node ? node.definition : undefined,
         });
       });

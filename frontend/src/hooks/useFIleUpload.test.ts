@@ -26,7 +26,7 @@ jest.mock("src/hooks/useClientFetch", () => ({
     clientFetch: (
       url: string,
       options: { method: string; body: unknown; signal: unknown },
-    ) => clientFetchMock(url, options) as unknown,
+    ) => clientFetchMock(url, options),
   }),
 }));
 
