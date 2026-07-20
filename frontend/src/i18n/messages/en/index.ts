@@ -76,6 +76,10 @@ export const messages = {
       watch: "Watch recordings of past Big Demos",
       watchLinks: [
         {
+          text: "June 30, 2026",
+          link: "https://youtu.be/AeHXvMamcnc?si=3dikqd4MU7zNZ5-q",
+        },
+        {
           text: "January 29, 2026",
           link: "https://youtu.be/LBIqOTKOFf0?si=O0Ec4PaNuAByeHA9",
         },
