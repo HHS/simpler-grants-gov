@@ -82,11 +82,11 @@ def test_upload_instructions_success_single_file(
 
     # Verify database record
     instruction_id = response_json["data"]["competition_instruction_id"]
-    instruction = (
-        db_session.query(competition_models.CompetitionInstruction)
-        .filter_by(competition_instruction_id=instruction_id)
-        .first()
-    )
+    instruction = db_session.execute(
+        select(competition_models.CompetitionInstruction).where(
+            competition_models.CompetitionInstruction.competition_instruction_id == instruction_id
+        )
+    ).scalar_one_or_none()
 
     assert instruction is not None
     assert instruction.file_name == "instructions.pdf"
