@@ -505,7 +505,7 @@ class TestSimplerSOAPGetApplicationZip:
                 "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
             }
 
-    def test_get_simpler_soap_response_returns_mtom_xml_handles_alternate_reqest_body(
+    def test_get_simpler_soap_response_returns_mtom_xml_handles_alternate_request_body(
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
@@ -535,7 +535,7 @@ class TestSimplerSOAPGetApplicationZip:
             f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>'
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
-            "</soapenv:Envelope>/r/n"
+            "</soapenv:Envelope>\r\n"
             "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207--"
         ).encode("utf-8")
         soap_request = SOAPRequest(
