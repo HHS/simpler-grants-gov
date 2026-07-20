@@ -155,7 +155,8 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
         )
 
     def test_get_application_zip_request_schema_handles_a_dict_for_the_grants_gov_tracking_number(
-        self, db_session,
+        self,
+        db_session,
     ):
         request_xml_bytes = (
             "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207\r\n"
