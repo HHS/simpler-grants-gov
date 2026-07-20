@@ -177,9 +177,7 @@ export default async function AwardRecommendationHero({
                   </Grid>
                   <div
                     className={`display-flex flex-column tablet:flex-row ${
-                      buttons && buttons.length > 0
-                        ? "tablet:flex-justify"
-                        : ""
+                      buttons && buttons.length > 0 ? "tablet:flex-justify" : ""
                     } flex-align-end gap-2`}
                   >
                     <Link
