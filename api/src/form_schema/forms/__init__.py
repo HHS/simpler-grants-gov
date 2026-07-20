@@ -21,6 +21,7 @@ from .sf424b import SF424b_v1_1
 from .sf424c import SF424c_v2_0
 from .sf424d import SF424d_v1_1
 from .sflll import SFLLL_v2_0
+from .sandbox import SANDBOX_TABLE
 from .supplementary_neh_cover_sheet import SupplementaryNEHCoverSheet_v3_0
 
 logger = logging.getLogger(__name__)
@@ -45,6 +46,7 @@ _ALL_FORMS: list[Form] = [
     EPA_KEY_CONTACT_v2_0,
     KeyContacts_v2_0,
     ProjectPerformanceSiteLocation_v4_0,
+    SANDBOX_TABLE,
 ]
 
 
