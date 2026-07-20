@@ -45,14 +45,10 @@ const TEST_ORG_LABELS: Record<string, string> = {
 const testOrgLabel = TEST_ORG_LABELS[targetEnv];
 
 // API key for the "test user manager" whose credentials authorize
-// POST /v1/internal/e2e-token. Local and staging use separate keys, both
-// injected by the e2e composite action.
-const TEST_USER_MANAGER_API_KEYS: Record<string, string> = {
-  local: process.env.TEST_USER_MANAGER_API_KEY || "",
-  staging: process.env.STAGING_TEST_USER_MANAGER_API_KEY || "",
-};
-
-const testUserManagerApiKey = TEST_USER_MANAGER_API_KEYS[targetEnv];
+// POST /v1/internal/e2e-token. A single variable set per environment by the
+// e2e composite action (local uses the committed local-manager-key; staging
+// injects its own secret value).
+const testUserManagerApiKey = process.env.TEST_USER_MANAGER_API_KEY || "";
 
 // Environment for web server
 const webServerEnv: Record<string, string> = Object.fromEntries(

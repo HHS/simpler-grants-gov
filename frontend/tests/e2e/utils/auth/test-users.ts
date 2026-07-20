@@ -37,9 +37,9 @@ const STAGING_TEST_USER_IDS: Record<TestUserKey, string> = {
 };
 
 // Organization ids used to build org-scoped URLs (e.g. the org detail page).
-type TestOrgIds = Record<"e2eTestOrg", string>;
+export type TestOrgKey = "e2eTestOrg";
 
-const LOCAL_TEST_ORG_IDS: TestOrgIds = {
+const LOCAL_TEST_ORG_IDS: Record<TestOrgKey, string> = {
   // "E2E Test Organization" — orgMember above is a member of this org.
   e2eTestOrg: "e5f6a7b8-c9d0-4e5f-8a0b-1c2d3e4f5061",
 };
@@ -47,7 +47,7 @@ const LOCAL_TEST_ORG_IDS: TestOrgIds = {
 // "E2E Test Organization" — the staging orgMember is a member (not admin) here.
 // The POC navigates to this org's detail page to confirm the org-member user
 // can view it.
-const STAGING_TEST_ORG_IDS: TestOrgIds = {
+const STAGING_TEST_ORG_IDS: Record<TestOrgKey, string> = {
   e2eTestOrg: "9c6fcfb9-029d-4b69-af43-3b41257639f5",
 };
 

@@ -59,7 +59,14 @@ export async function authenticateE2eUser(
   const userId = getTestUserId(testUserKey);
   const token = await fetchE2eSessionToken(userId);
   await createSpoofedSessionCookie(context, token);
+
+  // Give the spoofed session cookie a moment to settle before navigating, then
+  // let the page hydrate the authenticated state after load. These waits are
+  // carried over from the previous local flow to avoid a race where the nav
+  // renders before the client resolves the session.
+  await page.waitForTimeout(1000);
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
 
   if (isMobile) {
     await openMobileNav(page);
