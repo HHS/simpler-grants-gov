@@ -15,6 +15,10 @@ XML_DICT_KEY_ATTRIBUTE_PREFIX = "@"
 XML_DICT_KEY_TEXT_VALUE_KEY = "#text"
 CHUNK_SIZE = 1000
 NUMBER_OF_CHUNKS = 5
+SOAP_ENV_SHORT_PATTERNS = (b"<soap:Envelope", b"</soap:Envelope>")
+SOAP_ENV_LONG_PATTERNS = (b"<soapenv:Envelope", b"</soapenv:Envelope>")
+SOAP_PATTERNS = [SOAP_ENV_SHORT_PATTERNS, SOAP_ENV_LONG_PATTERNS]
+MAX_TAG_SIZE = len(SOAP_ENV_LONG_PATTERNS[1])
 
 
 class SOAPPayload:
@@ -207,11 +211,6 @@ def get_soap_envelope_from_payload(soap_message: str) -> SOAPEnvelopeData:
 
 
 def extract_soap_xml(soap_bytes: bytes) -> bytes:
-    soap_patterns = [
-        (b"<soap:Envelope", b"</soap:Envelope>"),
-        (b"<soapenv:Envelope", b"</soapenv:Envelope>"),
-    ]
-    max_tag_size = max(len(p[0]) for p in soap_patterns)
     bytes_stream = io.BytesIO(soap_bytes)
     buffer = b""
     total_bytes_read = 0
@@ -226,7 +225,7 @@ def extract_soap_xml(soap_bytes: bytes) -> bytes:
         if not chunk:
             break
         current_data = buffer + chunk
-        for start_pattern, end_pattern in soap_patterns:
+        for start_pattern, end_pattern in SOAP_PATTERNS:
             match_index = current_data.find(start_pattern)
             if match_index != -1:
                 start_position = (total_bytes_read - len(buffer)) + match_index
@@ -234,7 +233,7 @@ def extract_soap_xml(soap_bytes: bytes) -> bytes:
                 break
         if start_position != -1:
             break
-        buffer = current_data[-max_tag_size:]
+        buffer = current_data[-MAX_TAG_SIZE:]
         total_bytes_read += len(chunk)
         count -= 1
 
