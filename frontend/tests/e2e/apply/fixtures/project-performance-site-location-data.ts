@@ -41,10 +41,6 @@ export const buildPPSLHappyPathTestData = (
   } satisfies Partial<Record<keyof typeof PPSL_FORM_CONFIG.fields, string>>;
 };
 
-/**
- * Contains opportunity metadata, expected prepopulated field values, and the form-specific test data builder.
- * Imported by load-opportunity-config.ts to build the opportunity registry.
- */
 export const PPSL_OPPORTUNITY_DATA: PrintViewFormData = {
   opportunityId: "8a30cbe2-f297-49b7-b996-fc22982a3eb5",
   opportunityNumber: "E2E-PPSL-ORG-IND-01",
