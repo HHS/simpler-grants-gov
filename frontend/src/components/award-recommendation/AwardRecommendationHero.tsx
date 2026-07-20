@@ -2,6 +2,7 @@ import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { ReactNode } from "react";
 import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/core/Breadcrumbs";
@@ -26,7 +27,14 @@ export type NavigationButtonConfig = {
   outline?: boolean;
 };
 
-export type HeroButtonConfig = ActionButtonConfig | NavigationButtonConfig;
+// Custom button - renders a caller-provided node (e.g. a client component)
+export type CustomButtonConfig = {
+  type: "custom";
+  node: ReactNode;
+};
+
+export type HeroButtonConfig =
+  ActionButtonConfig | NavigationButtonConfig | CustomButtonConfig;
 
 export type ExternalLinkConfig = {
   label: string;
@@ -135,6 +143,8 @@ export default async function AwardRecommendationHero({
                             {button.label}
                           </Link>
                         );
+                      } else if (button.type === "custom") {
+                        return <span key={index}>{button.node}</span>;
                       } else {
                         return (
                           <Button
@@ -194,6 +204,8 @@ export default async function AwardRecommendationHero({
                               {button.label}
                             </Link>
                           );
+                        } else if (button.type === "custom") {
+                          return <span key={index}>{button.node}</span>;
                         } else {
                           return (
                             <Button

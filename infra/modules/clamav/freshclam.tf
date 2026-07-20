@@ -1,7 +1,16 @@
 data "archive_file" "freshclam" {
   type        = "zip"
   output_path = "${path.module}/freshclam.zip"
-  source_file = "${path.module}/src/update_definitions.py"
+
+  source {
+    content  = file("${path.module}/src/update_definitions.py")
+    filename = "update_definitions.py"
+  }
+
+  source {
+    content  = file("${path.module}/testdata/simpler-test.hdb")
+    filename = "simpler-test.hdb"
+  }
 }
 
 resource "aws_iam_role" "freshclam" {

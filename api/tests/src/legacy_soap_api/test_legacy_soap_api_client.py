@@ -503,6 +503,93 @@ class TestSimplerSOAPGetApplicationZip:
                 "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
             }
 
+    def test_get_simpler_soap_response_returns_mtom_xml_handles_alternate_request_body(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        agency = AgencyFactory.create()
+        user, role, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        )
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory.create(
+            opportunity=opportunity, public_competition_id="CDE-123"
+        )
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
+        response = requests.get(submission.download_path, timeout=10)
+        submission_text = response.content.decode()
+        request_xml_bytes = (
+            "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+            "Content-Transfer-Encoding: binary\r\n"
+            "Content-ID: <0.urn:uuid:9467EB4D41266EA2C91784229922208@apache.org>\r\n\r\n"
+            "<?xml version='1.0' encoding='UTF-8'?>"
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationZipRequest>"
+            f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>'
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>\r\n"
+            "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207--"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [ADDITIONAL_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            expected = (
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+                "Content-Transfer-Encoding: binary\r\n"
+                "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+                '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+                "<soap:Body>"
+                "<ns2:GetApplicationZipResponse "
+                'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+                'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+                'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+                'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+                'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+                'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+                'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+                'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+                'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+                'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+                'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+                "<ns2:FileDataHandler>"
+                f'<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:{submission.application_submission_id}-1@apply.grants.gov"/>'
+                "</ns2:FileDataHandler>"
+                "</ns2:GetApplicationZipResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>\r\n"
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\n"
+                "Content-Type: application/octet-stream\r\n"
+                "Content-Transfer-Encoding: binary\r\n"
+                f"Content-ID: <{submission.application_submission_id}-1@apply.grants.gov>\r\n"
+                'Content-Disposition: attachment;name="AgencyApplicationDownload.zip"\r\n\r\n'
+                f"{submission_text}\r\n"
+                "--uuid:cccccccc-1111-2222-3333-dddddddddddd--"
+            ).encode("utf-8")
+            assert isinstance(result.data, Iterator)
+            assert b"".join(list(result.data)) == expected
+            assert result.status_code == 200
+            assert result.headers == {
+                "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
+            }
+
     def test_get_simpler_soap_response_returns_soap_action_in_header(
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
