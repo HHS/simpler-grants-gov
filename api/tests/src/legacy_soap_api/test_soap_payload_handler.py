@@ -47,9 +47,7 @@ MOCK_SOAP_REQUEST_ENVELOPE = f"""
     <inc:Include href="cid:0000" xmlns:inc="http://www.w3.org/2004/08/xop/include"/>
     </gran:FileDataHandler>\n         </gran:Attachment>\n\n       </app:{MOCK_SOAP_OPERATION_NAME}>\n   </soapenv:Body>\n
     </soapenv:Envelope>
-""".encode(
-    "utf-8"
-)
+""".encode("utf-8")
 MOCK_SOAP_REQUEST_ALT_ENVELOPE = f"""
     <soap:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">
     \n   <soapenv:Header/>\n   <soapenv:Body>\n      <app:{MOCK_SOAP_OPERATION_NAME}>\n         <app:OperationName2>
@@ -58,9 +56,7 @@ MOCK_SOAP_REQUEST_ALT_ENVELOPE = f"""
     <inc:Include href="cid:0000" xmlns:inc="http://www.w3.org/2004/08/xop/include"/>
     </gran:FileDataHandler>\n         </gran:Attachment>\n\n       </app:{MOCK_SOAP_OPERATION_NAME}>\n
     </soapenv:Body>\n</soapenv:Envelope>
-""".encode(
-    "utf-8"
-)
+""".encode("utf-8")
 MOCK_SOAP_REQUEST_NO_TAG_ENVELOPE = """
     '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">'
     "\n   <soapenv:Header/>\n   <soapenv:Body>\n      "
@@ -230,10 +226,7 @@ class TestBuildXMLFromDict(unittest.TestCase):
         result = build_xml_from_dict(
             self.operation_name, xml_dict, self.namespace_keymap, self.namespaces
         )
-        assert (
-            result
-            == minify_xml(
-                """
+        assert result == minify_xml("""
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
 	<soap:Body>
 		<ns1:Operation1 xmlns:ns0="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:ns1="http://nsuri.gov/app" xmlns="http://default_ns_uri.gov/">
@@ -243,19 +236,14 @@ class TestBuildXMLFromDict(unittest.TestCase):
 		</ns1:Operation1>
 	</soap:Body>
 </soap:Envelope>
-        """
-            ).encode()
-        )
+        """).encode()
 
     def test_lists_xml_to_dict_with_ns(self):
         xml_dict = {self.operation_name: {"DataWithNS": ["10", "10"]}}
         result = build_xml_from_dict(
             self.operation_name, xml_dict, self.namespace_keymap, self.namespaces
         )
-        assert (
-            result
-            == minify_xml(
-                """
+        assert result == minify_xml("""
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
 	<soap:Body>
 		<ns1:Operation1 xmlns:ns0="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:ns1="http://nsuri.gov/app" xmlns="http://default_ns_uri.gov/">
@@ -266,9 +254,7 @@ class TestBuildXMLFromDict(unittest.TestCase):
 		</ns1:Operation1>
 	</soap:Body>
 </soap:Envelope>
-        """
-            ).encode()
-        )
+        """).encode()
 
 
 class TestGetSoapOperationName(unittest.TestCase):

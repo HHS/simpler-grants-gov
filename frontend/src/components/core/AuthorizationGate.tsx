@@ -7,7 +7,6 @@ import { getSession } from "src/services/auth/session";
 import { checkUserPrivilege } from "src/services/fetch/fetchers/userFetcher";
 import {
   AuthorizedData,
-  FetchedResource,
   FetchedResourceMap,
   ResourcePromiseDefinitions,
 } from "src/types/authTypes";
@@ -79,7 +78,7 @@ const resolveAndFormatResources = (
             [resourceName]: {
               data: resourceData,
               statusCode: 200,
-            } as FetchedResource,
+            },
           };
         })
         .catch((e: Error) => {
@@ -87,7 +86,7 @@ const resolveAndFormatResources = (
             [resourceName]: {
               error: e.message,
               statusCode: parseErrorStatus(e),
-            } as FetchedResource,
+            },
           };
         });
     },

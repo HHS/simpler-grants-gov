@@ -463,13 +463,29 @@ def get_gov_grants_tracking_number(xml_bytes: bytes) -> str | None:
 def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | None:
     xml_bytes = extract_soap_xml(soap_request.data.head())
     if not xml_bytes:
+        logger.info(
+            "simpler_soap_api: no xml_bytes",
+        )
         return None
     if soap_request.operation_name in AlternateSoapOperation:
         tracking_number = get_gov_grants_tracking_number(xml_bytes)
+        logger.info(
+            "simpler_soap_api: tracking number check",
+            extra={
+                "tracking_number_length": len(tracking_number) if tracking_number else None,
+                "is_simpler_tracking_number": (
+                    tracking_number.startswith("GRANT8") if tracking_number else False
+                ),
+            },
+        )
         is_zip = soap_request.operation_name == AlternateSoapOperation.GET_APPLICATION_ZIP
         if tracking_number and (
             tracking_number.startswith("GRANT8") or tracking_number.startswith("GRANT9")
         ):
+            logger.info(
+                "simpler_soap_api: using default response",
+                extra={"defaulting_response_operation_name": soap_request.operation_name},
+            )
             return DEFAULT_NOT_FOUND_RESPONSES[AlternateSoapOperation(soap_request.operation_name)](
                 tracking_number, headers=soap_request.headers, is_get_application_zip=is_zip
             )

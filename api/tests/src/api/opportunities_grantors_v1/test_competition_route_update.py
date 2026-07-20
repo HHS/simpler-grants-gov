@@ -2,8 +2,14 @@ import uuid
 from datetime import date, timedelta
 
 import pytest
+from sqlalchemy import select
 
-from src.constants.lookup_constants import CompetitionOpenToApplicant, Privilege
+from src.constants.lookup_constants import (
+    CompetitionOpenToApplicant,
+    OpportunityAuditEvent,
+    Privilege,
+)
+from src.db.models.opportunity_models import OpportunityAudit
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import CompetitionFactory, OpportunityFactory
 
@@ -67,7 +73,7 @@ def existing_competition(grantor_auth_data, enable_factory_create):
     return opportunity, competition
 
 
-def test_competition_update_successful(client, grantor_auth_data, existing_competition):
+def test_competition_update_successful(client, db_session, grantor_auth_data, existing_competition):
     """Test successful competition update"""
     _, _, token, _ = grantor_auth_data
     opportunity, competition = existing_competition
@@ -96,6 +102,19 @@ def test_competition_update_successful(client, grantor_auth_data, existing_compe
     assert competition_data["opportunity_id"] == str(opportunity.opportunity_id)
     assert competition_data["opening_date"] is not None
     assert competition_data["opportunity_assistance_listing"] is not None
+
+    audit_rows = (
+        db_session.execute(
+            select(OpportunityAudit).where(
+                OpportunityAudit.opportunity_id == opportunity.opportunity_id
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(audit_rows) == 1
+    assert audit_rows[0].opportunity_audit_event == OpportunityAuditEvent.COMPETITION_UPDATED
+    assert audit_rows[0].competition is not None
 
 
 def test_competition_update_with_invalid_jwt_token(client, existing_competition):
