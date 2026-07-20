@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import grants_shared.logs
 import pytest
 from freezegun import freeze_time
@@ -65,6 +67,7 @@ def test_validate_api_key_in_db_key_inactive(enable_factory_create, db_session):
 @freeze_time("2024-11-14 12:00:00", tz_offset=0)
 def test_api_user_key_auth_happy_path(mini_app, enable_factory_create, db_session):
     """Test successful API Gateway key authentication"""
+
     user = MgmtUserFactory.create()
     api_key = MgmtUserApiKeyFactory.create(
         mgmt_user=user, key_id="valid-gateway-key", is_active=True, last_used=None
@@ -78,7 +81,7 @@ def test_api_user_key_auth_happy_path(mini_app, enable_factory_create, db_sessio
     assert resp.get_json()["message"] == "ok"
 
     db_session.refresh(api_key)
-    assert api_key.last_used is not None
+    assert api_key.last_used == datetime(2024, 11, 14, 12, 0, 0, tzinfo=timezone.utc)
 
 
 def test_api_user_key_auth_invalid_key(mini_app, enable_factory_create, db_session):
