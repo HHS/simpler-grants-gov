@@ -118,9 +118,4 @@ module "domain" {
   name                = local.domain_config.hosted_zone
   manage_dns          = local.domain_config.manage_dns
   certificate_configs = local.domain_config.certificate_configs
-
-  providers = {
-    aws           = aws
-    aws.us-east-1 = aws.us-east-1
-  }
 }
