@@ -66,12 +66,12 @@ for (const { testName, orgLabel } of applicantScenarios) {
     ) => {
       test.setTimeout(300_000); // 5-min timeout
 
-      const isMobile = testInfo.project.name.match(/[Mm]obile/);
+      const isMobile = testInfo.project.use.isMobile ?? false;
       const baseSuffix = Date.now();
 
       // --- Login ---
       // Given the user is logged in
-      await authenticateE2eUser(page, context, !!isMobile);
+      await authenticateE2eUser(page, context, isMobile);
 
       // --- Navigate to Opportunity page and start a new application ---
       // And the user launches the URL for an opportunity with an open PPSL competition
