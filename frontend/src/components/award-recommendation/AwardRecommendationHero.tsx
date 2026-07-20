@@ -33,9 +33,7 @@ export type CustomButtonConfig = {
 };
 
 export type HeroButtonConfig =
-  | ActionButtonConfig
-  | NavigationButtonConfig
-  | CustomButtonConfig;
+  ActionButtonConfig | NavigationButtonConfig | CustomButtonConfig;
 
 interface AwardRecommendationHeroProps {
   awardRecommendationDetails?: AwardRecommendationDetails | null;
