@@ -176,9 +176,11 @@ export default async function AwardRecommendationHero({
                     </h1>
                   </Grid>
                   <div
-                    className={`display-flex flex-column tablet:flex-row ${
-                      buttons && buttons.length > 0 ? "tablet:flex-justify" : ""
-                    } flex-align-end gap-2`}
+                    className={
+                      buttons && buttons.length > 0
+                        ? "display-flex flex-column tablet:flex-row tablet:flex-justify flex-align-end gap-2"
+                        : "display-flex flex-column tablet:flex-row flex-align-end gap-2"
+                    }
                   >
                     <Link
                       href={externalLink.href}
