@@ -252,8 +252,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         )
 
         # Expected XML is formatted for visual aid and minified for equality.
-        expected_simpler_soap_response_xml = minify_xml(
-            f"""
+        expected_simpler_soap_response_xml = minify_xml(f"""
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <ns2:GetOpportunityListResponse xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:ns3="http://schemas.xmlsoap.org/wsdl/" xmlns:ns4="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns5="http://apply.grants.gov/system/ApplicantCommonElements-V1.0" xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
@@ -275,8 +274,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
             </ns5:OpportunityDetails>
         </ns2:GetOpportunityListResponse>
     </soap:Body>
-</soap:Envelope>"""
-        )
+</soap:Envelope>""")
 
         # This is only testing the simpler soap response so we can leave proxy response empty.
         mock_proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
@@ -462,7 +460,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
-            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
+            mock_uuid4.side_effect = [ADDITIONAL_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
@@ -485,7 +483,7 @@ class TestSimplerSOAPGetApplicationZip:
                 'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
                 'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
                 "<ns2:FileDataHandler>"
-                '<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb-1@apply.grants.gov"/>'
+                f'<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:{submission.application_submission_id}-1@apply.grants.gov"/>'
                 "</ns2:FileDataHandler>"
                 "</ns2:GetApplicationZipResponse>"
                 "</soap:Body>"
@@ -493,7 +491,7 @@ class TestSimplerSOAPGetApplicationZip:
                 "--uuid:cccccccc-1111-2222-3333-dddddddddddd\r\n"
                 "Content-Type: application/octet-stream\r\n"
                 "Content-Transfer-Encoding: binary\r\n"
-                f"Content-ID: <{CID_UUID}-1@apply.grants.gov>\r\n"
+                f"Content-ID: <{submission.application_submission_id}-1@apply.grants.gov>\r\n"
                 'Content-Disposition: attachment;name="AgencyApplicationDownload.zip"\r\n\r\n'
                 f"{submission_text}\r\n"
                 "--uuid:cccccccc-1111-2222-3333-dddddddddddd--"
@@ -541,7 +539,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
-            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
+            mock_uuid4.side_effect = [ADDITIONAL_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             assert result.headers == {

@@ -16,6 +16,7 @@ from src.adapters.newrelic import init_newrelic
 from src.api.healthcheck.healthcheck_blueprint import healthcheck_blueprint
 from src.api.users.user_blueprint import user_blueprint
 from src.app_config import AppConfig
+from src.db.resource_automation.resource_automation import setup_resource_automation
 from src.task.task_blueprint import task_blueprint
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,9 @@ def setup_logging(app: APIFlask) -> None:
 def register_db_client(app: APIFlask) -> None:
     db_client = db.PostgresDBClient()
     flask_db.register_db_client(db_client, app)
+
+    # Setup automation for the DB to create resource rows.
+    setup_resource_automation()
 
 
 def register_blueprints(app: APIFlask) -> None:

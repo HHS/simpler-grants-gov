@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 import grants_shared.adapters.db as db
 from botocore.exceptions import ClientError
@@ -17,13 +16,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
 logger = logging.getLogger(__name__)
 
 
-def get_application_zip_response(
-    db_session: db.Session,
-    soap_request: SOAPRequest,
-    get_application_zip_request: grantor_schemas.GetApplicationZipRequest,
-    soap_config: SOAPOperationConfig,
-) -> grantor_schemas.GetApplicationZipResponseSOAPEnvelope:
-    content_id = f"{uuid.uuid4()}-1@apply.grants.gov"
+def build_schema(content_id: str = "") -> grantor_schemas.GetApplicationZipResponseSOAPEnvelope:
     xop_data_instance = grantor_schemas.XOPIncludeData(**{"@href": f"cid:{content_id}"})
     file_handler_instance = grantor_schemas.FileDataHandler(**{"xop:Include": xop_data_instance})
     get_response_instance = grantor_schemas.GetApplicationZipResponse(
@@ -35,6 +28,17 @@ def get_application_zip_response(
         )
     )
     schema._content_id = content_id
+    schema._mtom_file_stream = None
+    return schema
+
+
+def get_application_zip_response(
+    db_session: db.Session,
+    soap_request: SOAPRequest,
+    get_application_zip_request: grantor_schemas.GetApplicationZipRequest,
+    soap_config: SOAPOperationConfig,
+) -> grantor_schemas.GetApplicationZipResponseSOAPEnvelope:
+    schema = build_schema()
     legacy_tracking_number = get_application_zip_request.grants_gov_tracking_number
     if not legacy_tracking_number:
         return schema
@@ -42,6 +46,8 @@ def get_application_zip_response(
         db_session, legacy_tracking_number
     )
     if application_submission:
+        content_id = f"{application_submission.application_submission_id}-1@apply.grants.gov"
+        schema = build_schema(content_id)
         certificate = validate_certificate(
             db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name
         )

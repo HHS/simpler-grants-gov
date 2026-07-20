@@ -203,7 +203,7 @@ def _read_metadata(metadata_file_path: str) -> dict[str, Any] | None:
     try:
         with open(metadata_file_path, encoding="utf-8") as f:
             return json.load(f)
-    except (OSError, json.JSONDecodeError):
+    except OSError, json.JSONDecodeError:
         # s3mock may rewrite this file in place; if we caught it mid-write,
         # the next change event will trigger us again with the final contents.
         logger.warning(

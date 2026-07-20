@@ -10,7 +10,6 @@ import {
   formatValidationWarning,
   getFieldListLabelFromDefinition,
   getFieldNameForHtml,
-  getFieldPathFromHtml,
   getFieldSchema,
   getFieldsForNav,
   getHtmlFieldForWarning,
@@ -439,12 +438,6 @@ describe("getRequiredProperties", () => {
       "signature_block/name/first_name",
       "signature_block/name/last_name",
     ]);
-  });
-});
-
-describe("getFieldPathFromHtml", () => {
-  it("converts field name to JSON pointer path", () => {
-    expect(getFieldPathFromHtml("foo--bar")).toBe("/foo/bar");
   });
 });
 

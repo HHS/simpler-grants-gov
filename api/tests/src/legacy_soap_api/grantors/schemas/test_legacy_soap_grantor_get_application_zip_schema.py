@@ -1,6 +1,4 @@
 import io
-import uuid
-from unittest.mock import patch
 
 import pytest
 
@@ -20,7 +18,6 @@ from tests.src.db.models.factories import (
 )
 
 GRANTS_GOV_TRACKING_NUMBER = "GRANT80000000"
-CID_UUID = "aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
 BOUNDARY_UUID = "cccccccc-1111-2222-3333-dddddddddddd"
 
 
@@ -57,25 +54,26 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
             operation_name="GetApplicationZipRequest",
             auth=auth,
         )
-        with patch.object(uuid, "uuid4", return_value=CID_UUID):
-            client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_application_zip_request().to_soap_envelope_dict(
-                operation_name="GetApplicationZipResponse"
-            )
-            result.pop("_mtom_file_stream")
-            expected = {
-                "Envelope": {
-                    "Body": {
-                        "ns2:GetApplicationZipResponse": {
-                            "ns2:FileDataHandler": {
-                                "xop:Include": {"@href": f"cid:{CID_UUID}-1@apply.grants.gov"}
+        client = SimplerGrantorsS2SClient(soap_request, db_session)
+        result = client.get_application_zip_request().to_soap_envelope_dict(
+            operation_name="GetApplicationZipResponse"
+        )
+        result.pop("_mtom_file_stream")
+        expected = {
+            "Envelope": {
+                "Body": {
+                    "ns2:GetApplicationZipResponse": {
+                        "ns2:FileDataHandler": {
+                            "xop:Include": {
+                                "@href": f"cid:{submission.application_submission_id}-1@apply.grants.gov"
                             }
                         }
                     }
-                },
-                "_content_id": f"{CID_UUID}-1@apply.grants.gov",
-            }
-            assert result == expected
+                }
+            },
+            "_content_id": f"{submission.application_submission_id}-1@apply.grants.gov",
+        }
+        assert result == expected
 
     def test_get_soap_request_dict_turns_request_xml_to_dict(self, db_session):
         request_xml_bytes = (

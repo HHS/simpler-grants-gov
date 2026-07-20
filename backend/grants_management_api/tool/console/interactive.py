@@ -21,6 +21,8 @@ import tests.db.models.factories
 from grants_shared.adapters.db.clients.postgres_client import PostgresDBClient
 from grants_shared.adapters.db.clients.postgres_config import get_db_config
 
+from src.db.resource_automation.resource_automation import setup_resource_automation
+
 INTRO = """
 Simpler Grants Gov Python console
 
@@ -99,6 +101,8 @@ def connect_to_database() -> db.Session | Exception:
         db_session = PostgresDBClient(db_config).get_session()
     except Exception as err:
         db_session = err
+
+    setup_resource_automation()
 
     return db_session
 

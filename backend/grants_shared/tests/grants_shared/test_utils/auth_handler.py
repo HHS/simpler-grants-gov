@@ -87,12 +87,22 @@ class AuthHandler(
             )
         ).scalar_one_or_none()
 
-    def get_link_external_user(self, external_user_id): ...
+    def get_link_external_user(self, external_user_id):
+        return self.db_session.execute(
+            select(SharedLinkExternalUser).where(
+                SharedLinkExternalUser.external_user_id == external_user_id
+            )
+        ).scalar_one_or_none()
 
-    def create_user_with_external_link(self, external_user_id: str): ...
+    def create_user_with_external_link(self, external_user_id: str):
+        user = SharedUser()
+        external_user = SharedLinkExternalUser(shared_user=user, external_user_id=external_user_id)
+        self.db_session.add(user)
+        self.db_session.add(external_user)
+        return external_user
 
     def get_user_for_external_link(self, external_user):
-        return external_user.user
+        return external_user.shared_user
 
 
 class SharedApiKeyHandler(AbstractApiKeyHandler[SharedUserApiKey]):
