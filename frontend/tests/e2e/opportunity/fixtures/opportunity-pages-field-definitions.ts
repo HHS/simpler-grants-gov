@@ -1,10 +1,28 @@
 /**
- * Opportunity field definitions and page-field mapping for happy-path filling.
+ * Opportunity metadata definitions and page-field mapping helpers.
  * Usage: import { buildPageFieldsFromDefinitions } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
+ *
+ * Reviewer guide:
+ * - This fixture is the source of truth for field selectors, value keys,
+ *   and validation messages used by failure-path and happy-path tests.
+ * - Prefer metadata changes here over hardcoded values in spec files.
+ *
+ * Tester parameter guide:
+ * - Required-field gating: FUNDING_DETAILS_FIELD_DEFINITIONS + ELIGIBILITY_FIELD_DEFINITIONS.
+ * - Character limits/email/contact checks: ADDITIONAL_INFORMATION_FIELD_DEFINITIONS.
+ * - Numeric and cross-field rules: FUNDING_DETAILS_FIELD_DEFINITIONS + CROSS_FIELD_VALIDATION_DEFINITIONS.
+ * - Shared failure-path exports:
+ *   - REQUIRED_FIELD_DEFINITIONS
+ *   - EDIT_FAILURE_PATH_FIELD_DEFINITIONS
+ *   - EDIT_OPPORTUNITY_URL_PATTERN
  */
 
-import { type FieldType } from "tests/e2e/utils/common/types";
-import { type PageFillField } from "tests/e2e/utils/pages/general-pages-filling";
+import { buildPageFieldsFromDefinitions as buildSharedPageFieldsFromDefinitions } from "tests/e2e/utils/common/build-page-fields-from-definitions";
+import {
+  type DuplicateValidationMetadata,
+  type MetadataPageFieldDefinition,
+  type ValidationMetadata,
+} from "tests/e2e/utils/common/types";
 
 /** Keys supported by the create-opportunity fill-data object. */
 export type OpportunityFieldValueKey =
@@ -35,35 +53,22 @@ export type OpportunityFieldValueKey =
   | "emailDisplayText";
 
 /** Metadata describing how a single UI field should be filled and validated. */
-export type OpportunityPageFieldDefinition = {
-  label: string;
-  type: FieldType;
-  valueKey: OpportunityFieldValueKey;
-  selector?: string;
-  selectFirstInGroup?: boolean;
-  testId?: string;
-  getByText?: string;
-  textExact?: boolean;
-  useDataAsText?: boolean;
-  hasTextRegex?: string;
-  required?: boolean;
-  requiredFieldMessage?: string;
-  emailValidationMessage?: string;
-  negativeNumberValidationMessage?: string;
-  maxLength?: number;
-  characterLimitValidationMessage?: string;
-  duplicateValidationPattern?: string;
-  exact?: boolean;
-};
+export type OpportunityPageFieldDefinition =
+  MetadataPageFieldDefinition<OpportunityFieldValueKey> &
+    ValidationMetadata &
+    // Included for create-opportunity duplicate checks; optional in edit-only flows.
+    DuplicateValidationMetadata;
 
+/** Cross-field validation scenarios used by funding relationship checks. */
 export type CrossFieldValidationDefinition = {
   name: string;
   fieldsToSet: Array<{
     selector: string;
     valueKey: OpportunityFieldValueKey;
     invalidValue: string;
+    expectedErrorMessage?: string;
   }>;
-  expectedErrors: Array<{
+  expectedErrors?: Array<{
     valueKey: OpportunityFieldValueKey;
     message: string;
   }>;
@@ -73,24 +78,10 @@ export type CrossFieldValidationDefinition = {
 export const buildPageFieldsFromDefinitions = (
   definitions: OpportunityPageFieldDefinition[],
   fillData: Record<OpportunityFieldValueKey, string>,
-): PageFillField[] => {
-  return definitions.map((definition) => ({
-    field: definition.label,
-    type: definition.type,
-    value: fillData[definition.valueKey],
-    label: definition.label,
-    labelExact: definition.exact,
-    selector: definition.selector,
-    selectFirstInGroup: definition.selectFirstInGroup,
-    testId: definition.testId,
-    getByText: definition.getByText,
-    textExact: definition.textExact,
-    useDataAsText: definition.useDataAsText,
-    hasTextRegex: definition.hasTextRegex,
-  }));
-};
+  // Preserve legacy import path while delegating to the global builder.
+) => buildSharedPageFieldsFromDefinitions(definitions, fillData);
 
-/** Core required fields for create-opportunity validation and duplicate checks. */
+/** Shard 3: required create-opportunity fields with duplicate and max-length metadata. */
 export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
   [
     {
@@ -127,13 +118,14 @@ export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinitio
     },
   ];
 
-/** Funding details section fields used by opportunity create/edit flows. */
+/** Shard 4: funding details fields used by create/edit flows. */
 export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
   [
     {
       label: "Funding type",
       type: "select",
       valueKey: "fundingType",
+      selector: "#funding-type-values",
       required: true,
       requiredFieldMessage: "Select a funding type.",
     },
@@ -141,6 +133,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
       label: "Category",
       type: "select",
       valueKey: "category",
+      selector: "#funding-category-values",
       required: true,
       requiredFieldMessage: "Select a funding category.",
     },
@@ -185,6 +178,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
       label: "Publish date",
       type: "date",
       valueKey: "publishDate",
+      selector: "#publish-date",
       required: true,
       requiredFieldMessage: "Enter a publish date.",
     },
@@ -196,7 +190,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
     },
   ];
 
-/** Metadata scenarios for cross-field funding validations. */
+/** Shard 5: cross-field funding validation scenarios. */
 export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[] =
   [
     {
@@ -206,22 +200,14 @@ export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[
           selector: "#award-minimum",
           valueKey: "awardMinimum",
           invalidValue: "100",
+          expectedErrorMessage: "Award minimum cannot exceed Award maximum.",
         },
         {
           selector: "#award-maximum",
           valueKey: "awardMaximum",
           invalidValue: "50",
-        },
-      ],
-      expectedErrors: [
-        {
-          valueKey: "awardMinimum",
-          message: "Award minimum cannot exceed Award maximum.",
-        },
-        {
-          valueKey: "awardMaximum",
-          message: "Award minimum cannot exceed Award maximum.",
-          // message: "Award maximum cannot be less than Award minimum.", un-comment after bug fixed
+          expectedErrorMessage:
+            "Award maximum cannot be less than Award minimum.",
         },
       ],
     },
@@ -237,35 +223,32 @@ export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[
           selector: "#award-minimum",
           valueKey: "awardMinimum",
           invalidValue: "200",
+          expectedErrorMessage:
+            "Award minimum cannot exceed the Estimated Total Program Funding.",
         },
         {
           selector: "#award-maximum",
           valueKey: "awardMaximum",
           invalidValue: "300",
-        },
-      ],
-      expectedErrors: [
-        {
-          valueKey: "awardMinimum",
-          message:
-            "Award minimum cannot exceed the Estimated Total Program Funding.",
-        },
-        {
-          valueKey: "awardMaximum",
-          message:
+          expectedErrorMessage:
             "Award maximum cannot exceed the Estimated Total Program Funding.",
         },
       ],
     },
   ];
 
-/** Eligibility section checkbox definitions for supported applicant categories. */
+/** Opportunity Summary edit page URL pattern (with optional query params). */
+export const EDIT_OPPORTUNITY_URL_PATTERN =
+  /\/grantor\/opportunity\/[0-9a-f-]{36}\/edit(?:\?.*)?$/i;
+
+/** Shard 6: eligibility checkbox definitions for applicant categories. */
 export const ELIGIBILITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
   {
     label: "Eligible applicants",
     type: "checkbox",
     valueKey: "eligibleApplicantsGroupRequired",
     selector: 'input[name="eligibleApplicants"]',
+    inlineErrorSelector: '#eligibility [role="alert"]',
     selectFirstInGroup: true,
     required: true,
     requiredFieldMessage: "Select at least one eligible applicant type.",
@@ -302,7 +285,7 @@ export const ELIGIBILITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
   },
 ];
 
-/** Additional information section fields, including contact and link metadata. */
+/** Shard 7: optional additional-info/contact fields with length/email metadata. */
 export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
   [
     {
@@ -356,3 +339,14 @@ export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefin
       characterLimitValidationMessage: "1 character over limit",
     },
   ];
+
+/** Required field definitions used by Opportunity Summary gating checks. */
+export const REQUIRED_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
+  // Save/Publish gating fields come from funding + eligibility sections.
+  ...FUNDING_DETAILS_FIELD_DEFINITIONS,
+  ...ELIGIBILITY_FIELD_DEFINITIONS,
+];
+
+/** Combined field definitions for Opportunity Summary edit failure-path checks. */
+export const EDIT_FAILURE_PATH_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] =
+  [...REQUIRED_FIELD_DEFINITIONS, ...ADDITIONAL_INFORMATION_FIELD_DEFINITIONS];

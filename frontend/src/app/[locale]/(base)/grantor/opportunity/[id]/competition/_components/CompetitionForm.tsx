@@ -1,5 +1,6 @@
 "use client";
 
+import { AgencyContact } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/AgencyContact";
 import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
 import { SubmissionWindow } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionWindow";
 
@@ -35,6 +36,10 @@ export function CompetitionForm({
       href: "submission-window",
     },
     {
+      text: t("sectionAgencyContact.header"),
+      href: "agency-contact",
+    },
+    {
       text: t("sectionApplicationChecklist.header"),
       href: "application-checklist",
     },
@@ -63,6 +68,7 @@ export function CompetitionForm({
               </p>
               <SubmissionSetUp />
               <SubmissionWindow />
+              <AgencyContact />
             </div>
             <div className="display-flex flex-justify margin-top-4">
               <div className="display-flex gap-2">

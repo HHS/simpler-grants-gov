@@ -24,6 +24,7 @@ on:
           - training
           - grantee1
           - grantee2
+          - grantor1
           - prod
       version:
         required: true

@@ -8,22 +8,24 @@ import _pytest.monkeypatch
 import boto3
 import flask.testing
 import grants_shared.adapters.db as db
+import grants_shared.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import moto
 import pytest
 from apiflask import APIFlask
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from grants_shared.adapters.aws import S3Config
+from grants_shared.adapters.oauth.login_gov.mock_login_gov_oauth_client import (
+    MockLoginGovOauthClient,
+)
 from grants_shared.util.local import load_local_env_vars
 from moto.core import DEFAULT_ACCOUNT_ID
 from moto.ses.models import ses_backends
 from sqlalchemy import select, text
 
 import src.app as app_entry
-import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
 from src.adapters import search
-from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.adapters.search import SearchClient
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege, RoleType
@@ -773,6 +775,7 @@ def create_test_form(db_session):
         form_name: str = "Test Form",
         form_json_schema: dict | None = None,
         form_rule_schema: dict | None = None,
+        form_ui_schema: dict | list | None = None,
         **kwargs,
     ) -> FormModel:
         form = FormModel(
@@ -782,7 +785,7 @@ def create_test_form(db_session):
             form_version=kwargs.get("form_version", "1.0"),
             agency_code="SGG",
             form_json_schema=form_json_schema or {"type": "object", "properties": {}},
-            form_ui_schema={},
+            form_ui_schema=form_ui_schema if form_ui_schema is not None else {},
             form_rule_schema=form_rule_schema,
             json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
         )

@@ -8,7 +8,12 @@ from grants_shared.db.models.lookup import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.constants.lookup_constants import UserType
+from src.constants.lookup_constants import (
+    ExternalUserType,
+    MgmtPrivilege,
+    MgmtResourceType,
+    MgmtUserType,
+)
 from src.db.models.grantor_schema_table import GrantorSchemaTable
 
 #######################################################
@@ -18,10 +23,40 @@ from src.db.models.grantor_schema_table import GrantorSchemaTable
 # representations in this section
 #######################################################
 
-USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
+MGMT_USER_TYPE_CONFIG: LookupConfig[MgmtUserType] = LookupConfig(
     [
-        LookupStr(UserType.STANDARD, 1),
-        LookupStr(UserType.INTERNAL_FRONTEND, 2),
+        LookupStr(MgmtUserType.STANDARD, 1),
+        LookupStr(MgmtUserType.INTERNAL_FRONTEND, 2),
+    ]
+)
+
+EXTERNAL_USER_TYPE_CONFIG: LookupConfig[ExternalUserType] = LookupConfig(
+    [LookupStr(ExternalUserType.LOGIN_GOV, 1)]
+)
+
+MGMT_PRIVILEGE_CONFIG: LookupConfig[MgmtPrivilege] = LookupConfig(
+    [
+        LookupStr(MgmtPrivilege.VIEW_DEPARTMENT, 1),
+        LookupStr(MgmtPrivilege.UPDATE_DEPARTMENT, 2),
+        LookupStr(MgmtPrivilege.MANAGE_DEPARTMENT_MEMBERS, 3),
+        LookupStr(MgmtPrivilege.VIEW_SUBAGENCY, 4),
+        LookupStr(MgmtPrivilege.UPDATE_SUBAGENCY, 5),
+        LookupStr(MgmtPrivilege.MANAGE_SUBAGENCY_MEMBERS, 6),
+        LookupStr(MgmtPrivilege.VIEW_TEAM, 7),
+        LookupStr(MgmtPrivilege.UPDATE_TEAM, 8),
+        LookupStr(MgmtPrivilege.MANAGE_TEAM_MEMBERS, 9),
+        LookupStr(MgmtPrivilege.CREATE_TEAM, 10),
+        LookupStr(MgmtPrivilege.DELETE_TEAM, 11),
+    ]
+)
+
+MGMT_RESOURCE_TYPE_CONFIG: LookupConfig[MgmtResourceType] = LookupConfig(
+    [
+        LookupStr(MgmtResourceType.INTERNAL, 1),
+        LookupStr(MgmtResourceType.DEPARTMENT, 2),
+        LookupStr(MgmtResourceType.SUBAGENCY, 3),
+        LookupStr(MgmtResourceType.TEAM, 4),
+        LookupStr(MgmtResourceType.OPPORTUNITY, 5),
     ]
 )
 
@@ -49,13 +84,57 @@ class GrantorLookupTable(LookupTable, GrantorSchemaTable):
 #######################################################
 
 
-@LookupRegistry.register_lookup(USER_TYPE_CONFIG)
-class LkUserType(GrantorLookupTable, TimestampMixin):
-    __tablename__ = "lk_user_type"
+@LookupRegistry.register_lookup(MGMT_USER_TYPE_CONFIG)
+class LkMgmtUserType(GrantorLookupTable, TimestampMixin):
+    __tablename__ = "lk_mgmt_user_type"
 
-    user_type_id: Mapped[int] = mapped_column(primary_key=True)
+    mgmt_user_type_id: Mapped[int] = mapped_column(primary_key=True)
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> LkUserType:
-        return LkUserType(user_type_id=lookup.lookup_val, description=lookup.get_description())
+    def from_lookup(cls, lookup: Lookup) -> LkMgmtUserType:
+        return LkMgmtUserType(
+            mgmt_user_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(EXTERNAL_USER_TYPE_CONFIG)
+class LkExternalUserType(GrantorLookupTable, TimestampMixin):
+    __tablename__ = "lk_external_user_type"
+
+    external_user_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkExternalUserType:
+        return LkExternalUserType(
+            external_user_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(MGMT_PRIVILEGE_CONFIG)
+class LkMgmtPrivilege(GrantorLookupTable, TimestampMixin):
+    __tablename__ = "lk_mgmt_privilege"
+
+    mgmt_privilege_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkMgmtPrivilege:
+        return LkMgmtPrivilege(
+            mgmt_privilege_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(MGMT_RESOURCE_TYPE_CONFIG)
+class LkMgmtResourceType(GrantorLookupTable, TimestampMixin):
+    __tablename__ = "lk_mgmt_resource_type"
+
+    mgmt_resource_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkMgmtResourceType:
+        return LkMgmtResourceType(
+            mgmt_resource_type_id=lookup.lookup_val, description=lookup.get_description()
+        )

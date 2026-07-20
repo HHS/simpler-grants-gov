@@ -12,12 +12,7 @@ import { HTMLAttributes } from "react";
 export type GeneralRecord = Record<string, unknown>;
 
 export type BroadlyDefinedWidgetValue =
-  | string
-  | GeneralRecord
-  | GeneralRecord[]
-  | string[]
-  | number
-  | boolean;
+  string | GeneralRecord | GeneralRecord[] | string[] | number | boolean;
 
 export type SchemaField = {
   type?: string;
@@ -170,8 +165,7 @@ export type FieldListWidgetProps = {
     rootFormData?: unknown;
     widgetSupport?: {
       validationWarnings?:
-        | FormattedFormValidationWarning[]
-        | FormValidationWarning[];
+        FormattedFormValidationWarning[] | FormValidationWarning[];
       deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
       onFieldListEntryDelete?: (
         fieldListPath: string,
@@ -237,13 +231,9 @@ export type UiSchemaTableCell =
 
 export type UiSchemaTableRow = {
   /**
-   * Human-readable row heading displayed by the table renderer.
-   */
-  rowHeader: string;
-
-  /**
-   * Cell position determines its column. Every row must contain the same
-   * number of cells as the table has columns.
+   * Cells rendered in the same order as the configured table columns.
+   *
+   * Each row must contain one cell for every configured column.
    */
   cells: UiSchemaTableCell[];
 };
@@ -309,9 +299,7 @@ export type UiSchemaTableMultiField = {
 };
 
 export type UiSchemaField =
-  | UiSchemaBasicField
-  | UiSchemaMultiField
-  | UiSchemaTableMultiField;
+  UiSchemaBasicField | UiSchemaMultiField | UiSchemaTableMultiField;
 
 export interface UiSchemaSection {
   type: "section";
@@ -344,13 +332,7 @@ export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;
 export type UiSchema = UiSchemaNode[];
 
 export type TextTypes =
-  | "text"
-  | "email"
-  | "number"
-  | "password"
-  | "search"
-  | "tel"
-  | "url";
+  "text" | "email" | "number" | "password" | "search" | "tel" | "url";
 
 // extends the WidgetProps type from rjsf for USWDS and this project implementation
 // see https://github.com/rjsf-team/react-jsonschema-form/blob/7395afcdee6aaea128d943dd17e126c4ed301e58/packages/utils/src/types.ts#L898
@@ -358,7 +340,9 @@ export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = never,
-> extends GenericObjectType,
+>
+  extends
+    GenericObjectType,
     Pick<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
@@ -403,8 +387,7 @@ export interface UswdsWidgetProps<
     rootFormData?: unknown;
     widgetSupport?: {
       validationWarnings?:
-        | FormattedFormValidationWarning[]
-        | FormValidationWarning[];
+        FormattedFormValidationWarning[] | FormValidationWarning[];
       deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
       onFieldListEntryDelete?: (
         fieldListPath: string,

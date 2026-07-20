@@ -17,6 +17,9 @@ from src.services.applications.application_validation import (
     validate_application_in_progress,
 )
 from src.services.applications.get_application import get_application
+from src.services.applications.process_application_attachment_changes import (
+    process_application_attachment_changes,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -99,9 +102,13 @@ def update_application_form(
         )
     ).scalar_one_or_none()
 
+    # Capture the previous response before overwriting so we can diff attachments
+    old_application_response: dict = {}
+
     if application_form:
         # Update existing application form
         if application_response is not None:
+            old_application_response = application_form.application_response or {}
             application_form.application_response = application_response
         if is_included_in_submission is not None:
             application_form.is_included_in_submission = is_included_in_submission
@@ -150,5 +157,17 @@ def update_application_form(
         audit_event=ApplicationAuditEvent.FORM_UPDATED,
         target_application_form=application_form,
     )
+
+    # When the form response changes, diff the attachment fields to audit
+    # attachments that were added or deleted as part of this save.
+    if application_response is not None:
+        process_application_attachment_changes(
+            db_session=db_session,
+            application=application,
+            form=competition_form.form,
+            user=user,
+            old_application_response=old_application_response,
+            new_application_response=application_response,
+        )
 
     return application_form, warnings

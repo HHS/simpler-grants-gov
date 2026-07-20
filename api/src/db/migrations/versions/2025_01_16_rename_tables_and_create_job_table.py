@@ -111,9 +111,7 @@ def upgrade():
     op.execute(create_trigger_function)
 
     # Insert all existing opportunities into the audit table
-    op.execute(
-        text(
-            """
+    op.execute(text("""
             INSERT INTO api.opportunity_change_audit (opportunity_id, created_at, updated_at)
             SELECT
                 opportunity_id,
@@ -121,9 +119,7 @@ def upgrade():
                 CURRENT_TIMESTAMP as updated_at
             FROM api.opportunity
             ON CONFLICT (opportunity_id) DO NOTHING
-            """
-        )
-    )
+            """))
 
     op.drop_index(
         "opportunity_search_index_queue_opportunity_id_idx",

@@ -2,11 +2,18 @@ import uuid
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import UUID, ForeignKey
+from sqlalchemy import UUID, ForeignKey, and_
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from grants_shared.db.models.auth_base_models import (
+    BaseLinkExternalUser,
+    BaseLoginGovState,
+    BaseUser,
+    BaseUserApiKey,
+    BaseUserTokenSession,
+)
 from grants_shared.db.models.base import Base, TimestampMixin
 from grants_shared.db.models.lookup import (
     Lookup,
@@ -171,3 +178,78 @@ class LinkFriendType(OtherSchemaTable, TimestampMixin):
         ForeignKey(LkFriendType.friend_type_id),
         primary_key=True,
     )
+
+
+class SharedUser(BaseUser, OtherSchemaTable, TimestampMixin):
+    __tablename__ = "shared_user"
+
+    shared_user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+
+    linked_login_gov_external_user: Mapped[SharedLinkExternalUser | None] = relationship(
+        "SharedLinkExternalUser",
+        primaryjoin=lambda: and_(
+            SharedLinkExternalUser.shared_user_id == SharedUser.shared_user_id,
+        ),
+        uselist=False,
+        viewonly=True,
+    )
+
+    api_keys: Mapped[list[SharedUserApiKey]] = relationship(
+        "SharedUserApiKey", back_populates="shared_user", uselist=True, cascade="all, delete-orphan"
+    )
+
+    @property
+    def email(self) -> str | None:
+        if self.linked_login_gov_external_user is not None:
+            return self.linked_login_gov_external_user.email
+        return None
+
+
+class SharedLinkExternalUser(BaseLinkExternalUser, OtherSchemaTable, TimestampMixin):
+    __tablename__ = "shared_link_external_user"
+
+    link_external_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    shared_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(SharedUser.shared_user_id), index=True
+    )
+    shared_user: Mapped[SharedUser] = relationship(SharedUser)
+
+
+class SharedUserTokenSession(BaseUserTokenSession, OtherSchemaTable, TimestampMixin):
+    __tablename__ = "shared_user_token_session"
+
+    shared_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(SharedUser.shared_user_id), primary_key=True
+    )
+    shared_user: Mapped[SharedUser] = relationship(SharedUser)
+
+
+class SharedLoginGovState(BaseLoginGovState, OtherSchemaTable, TimestampMixin):
+    """Table used to store temporary state during the OAuth login flow"""
+
+    __tablename__ = "shared_login_gov_state"
+
+    shared_login_gov_state_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+
+
+class SharedUserApiKey(BaseUserApiKey, OtherSchemaTable, TimestampMixin):
+    """API Key table for user authentication to the API"""
+
+    __tablename__ = "shared_user_api_key"
+
+    shared_api_key_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+
+    shared_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(SharedUser.shared_user_id), index=True
+    )
+
+    shared_user: Mapped[SharedUser] = relationship(
+        SharedUser, back_populates="api_keys", uselist=False
+    )
+
+    def get_log_extra(self) -> dict[str, Any]:
+        """Get logging info"""
+        return {
+            "auth.shared_api_key_id": self.shared_api_key_id,
+            "auth.shared_user_id": self.shared_user_id,
+        }

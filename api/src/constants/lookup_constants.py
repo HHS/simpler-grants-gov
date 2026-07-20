@@ -391,6 +391,15 @@ class OrganizationAuditEvent(StrEnum):
     USER_REMOVED = "user_removed"
 
 
+class OpportunityAuditEvent(StrEnum):
+    OPPORTUNITY_CREATED = "opportunity_created"
+    OPPORTUNITY_UPDATED = "opportunity_updated"
+    OPPORTUNITY_SUMMARY_CREATED = "opportunity_summary_created"
+    OPPORTUNITY_SUMMARY_UPDATED = "opportunity_summary_updated"
+    COMPETITION_CREATED = "competition_created"
+    COMPETITION_UPDATED = "competition_updated"
+
+
 class WorkflowType(StrEnum):
     OPPORTUNITY_PUBLISH = "opportunity_publish"
     APPLICATION_SUBMISSION = "application_submission"

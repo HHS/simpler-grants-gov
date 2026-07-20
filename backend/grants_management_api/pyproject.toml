@@ -30,7 +30,7 @@ dependencies = [
     "prettytable>=3.16.0,<4",
     "PyYAML>=6.0.3,<7",
     "python-statemachine>=3.0.0,<4",
-    "grants-shared==0.2.8",
+    "grants-shared==0.2.16",
 ]
 
 [dependency-groups]
@@ -38,7 +38,7 @@ dependencies = [
 #
 # Any dependencies here are not available when we run our services or scripts non-locally
 dev = [
-    "black>=24.0.0,<25",
+    "black>=26.3.1,<27",
     "isort>=5.12.0,<6",
     "mypy>=2.1.0,<3.0.0",
     "moto[s3]>=5.0.0,<6",

@@ -6,6 +6,8 @@ from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
 from grants_shared.api import response
 from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.auth.api_jwt_auth import refresh_token_expiration
+from grants_shared.auth.login_gov_jwt_auth import get_final_redirect_uri
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from grants_shared.util.dict_util import flatten_dict
 
@@ -53,9 +55,9 @@ from src.api.users.user_schemas import (
     UserUpdateSavedSearchRequestSchema,
     UserUpdateSavedSearchResponseSchema,
 )
-from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
+from src.auth.api_jwt_auth import api_jwt_auth
 from src.auth.auth_utils import with_login_redirect_error_handler
-from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
+from src.auth.login_gov_jwt_auth import get_login_gov_redirect_uri
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.db.models.user_models import UserTokenSession
 from src.services.users.create_api_key import create_api_key
@@ -589,11 +591,7 @@ def user_create_api_key(
 
     logger.info(
         "Created API key for user",
-        extra={
-            "user_id": user_id,
-            "api_key_id": api_key.api_key_id,
-            "key_name": api_key.key_name,
-        },
+        extra=api_key.get_log_extra(),
     )
 
     return response.ApiResponse(message="Success", data=api_key)

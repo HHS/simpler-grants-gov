@@ -187,6 +187,8 @@ const NavLinks = ({
     useState<IndexType>(null);
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentNavItemIndex(getCurrentNavItemIndex(path));
   }, [path, getCurrentNavItemIndex]);
 
@@ -254,7 +256,7 @@ const NavLinks = ({
           key="sign-in"
           href={LOGIN_URL}
           onClick={() => {
-            storeCurrentPage();
+            storeCurrentPage(location.pathname, location.search);
             closeDropdownAndMobileNav();
           }}
           text={t("login")}

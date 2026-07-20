@@ -15,13 +15,11 @@ def setup_opportunity_search_index_queue_trigger_function(
 
     # Create triggers for each table
     for table in tables:
-        op.execute(
-            f"""
+        op.execute(f"""
             CREATE OR REPLACE TRIGGER {table}_queue_trigger
             AFTER INSERT OR UPDATE ON api.{table}
             FOR EACH ROW EXECUTE FUNCTION api.update_opportunity_search_queue();
-        """
-        )
+        """)
 
 
 def remove_opportunity_search_index_queue_trigger_function(

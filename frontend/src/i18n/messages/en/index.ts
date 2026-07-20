@@ -272,11 +272,12 @@ export const messages = {
     pageTitle: "Edit opportunity",
     metaDescription:
       "Edit draft opportunity information and non-forecast summary fields.",
-    header: {
-      saveButton: "Save",
-      previewButton: "Preview",
-      publishButton: "Publish",
-      navTitle: "On this page",
+    navTitle: "On this page",
+    button: {
+      backToOverview: "Back to overview page",
+      saveAndExit: "Save and exit",
+      saveAndGoBack: "Save and go back",
+      saveAndContinue: "Save and continue",
     },
     sections: {
       fundingDetails: "Funding details",
@@ -2037,6 +2038,20 @@ export const messages = {
       agencyNotAuthorized:
         "You do not have access to this agency's award recommendations.",
       noAgencies: "You are not associated with any agencies.",
+      empty: "No award recommendations found.",
+      fetchError:
+        "We have encountered an error loading award recommendations. Please try again.",
+      columns: {
+        awardRecId: "Award Rec ID",
+        opportunityName: "Opportunity name",
+        opportunityId: "Opportunity ID",
+        applicationsReceived: "Applications received",
+        status: "Status",
+        action: "Action",
+      },
+      actions: {
+        delete: "Delete",
+      },
     },
     summary: {
       showDescription: "Show full description",
@@ -2078,8 +2093,42 @@ export const messages = {
       pageTitle: "Edit recommendations",
       metaDescription: "Edit award recommendations for multiple applications",
       heading: "Edit recommendations",
-      description:
+      pageHeading: "Recommend awards",
+      pageDescription:
         "Select one or more applications to edit recommendations. Search by App #, program title, org name of UEI",
+      selectAll: "Select all",
+      selectRow: "Select row for {appNumber}",
+      selectedCount:
+        "{count, plural, =1 {1 submission selected} other {# submissions selected}}",
+      showingRange: "Showing {start}-{end} of {total}",
+      loading: "Loading...",
+      errorLoading: "Error loading submissions. Please try again.",
+      editButton: "Edit",
+      bulkEditPageTitle: "Bulk Edit Recommendations",
+      bulkEditMetaDescription:
+        "Bulk edit award recommendations for selected applications",
+      bulkEditTitle: "Bulk Edit Recommendations",
+      selectedApplications: "Selected Applications",
+      submissionsSelected: "submissions selected",
+      bulkEditHeading: "Update Recommendation",
+      bulkEditDescription:
+        "Select a recommendation type to apply to all selected applications.",
+      recommendationType: "Recommendation Type",
+      noSelectionsMessage:
+        "No submissions selected. Please select submissions to edit.",
+      saveButton: "Save",
+      saving: "Saving...",
+      cancelButton: "Cancel",
+      columns: {
+        appNumber: "App #",
+        projectTitle: "Project Title",
+        orgName: "Org Name",
+        uei: "UEI",
+        score: "Score",
+        recommendation: "Recommendation",
+        requested: "Requested",
+        recommended: "Recommended",
+      },
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -2160,8 +2209,12 @@ export const messages = {
       exceptionDetailDescription:
         "Select one or more applications and explain any exceptions to the general selection method. For example, the reasons for any applications skipped on the merit review ranking or other similar exceptions.",
       fundingHeading: "Funding recommendations",
+      fundingDescription:
+        "Review and provide the updates to recommended funding as needed.",
+      applicationIdLabel: "Application ID",
       amountRequestedLabel: "Amount Requested",
       amountRecommendedLabel: "Amount Recommended",
+      totalLabel: "Total",
     },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
@@ -2383,6 +2436,8 @@ export const messages = {
     labels: {
       editOpportunityLink: "Opportunity Summary",
       competitionLink: "Application Package",
+      previewButton: "Preview",
+      publishButton: "Publish",
     },
   },
   CreateOpportunity: {
@@ -2490,6 +2545,24 @@ export const messages = {
     sectionNarrativeFormatInstructions: {
       header: "Narrative format instructions",
     },
+    sectionAgencyContact: {
+      header: "Agency contact",
+      subHeader:
+        "Grantor contact details. Provide the name, email, and phone number for the agency contact.",
+      fullName: "Full name",
+      personTitle: "Title",
+      emailAddress: "Email address",
+      emailAddressHint: "For example: example@mail.com",
+      phoneNumber: "Phone number",
+      phoneNumberHint: "10-digit, for example: (999) 999-9999",
+      error: {
+        requiredFullName: "Full name is required.",
+        requiredPhoneNumber: "Phone number is required.",
+        requiredEmail: "Email address is required.",
+        invalidEmail:
+          "Incorrect text format. Please ensure there are no spaces or missing characters.",
+      },
+    },
   },
   FeatureFlagsAdmin: {
     heading: "Refresh your page",
@@ -2503,6 +2576,7 @@ export const messages = {
     subAgency: "Sub-agency:",
     draft: "Draft",
     lastUpdated: "Last updated:",
+    backToOverview: "Back to overview page",
     alerts: {
       newOpportunityHeading: "Opportunity draft started",
       newOpportunityBody:
@@ -2545,7 +2619,7 @@ export const messages = {
       postUploadError: "Error processing file",
       missingFileId: "Error: missing file id",
       preUploadError: "Pre upload error",
-      infected: "Security scan failed. File infected",
+      infected: "Security scan failed. File removed",
     },
     deleteModal: {
       titleText: "Delete",
