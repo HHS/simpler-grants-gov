@@ -96,7 +96,6 @@ export const PPSL_FORM_CONFIG = {
   fields: fieldDefinitionsPPSL,
 } as const;
 
-// Required field validation errors for PROJECT/PERFORMANCE SITE LOCATION(S)
 // Sourced from FORM_JSON_SCHEMA required arrays in form_json.py
 export const PPSL_REQUIRED_FIELD_ERRORS: FieldError[] = [
   {
