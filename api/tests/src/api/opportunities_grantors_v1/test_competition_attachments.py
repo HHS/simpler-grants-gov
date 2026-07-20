@@ -3,6 +3,7 @@ from io import BytesIO
 
 import pytest
 from grants_shared.util import file_util
+from sqlalchemy import select
 
 from src.constants.lookup_constants import Privilege
 from src.db.models import competition_models
@@ -248,9 +249,12 @@ def test_delete_instruction_success(
 
     # Verify instruction exists before deletion
     assert (
-        db_session.query(competition_models.CompetitionInstruction)
-        .filter_by(competition_instruction_id=existing_instruction.competition_instruction_id)
-        .first()
+        db_session.execute(
+            select(competition_models.CompetitionInstruction).where(
+                competition_models.CompetitionInstruction.competition_instruction_id
+                == existing_instruction.competition_instruction_id
+            )
+        ).scalar_one_or_none()
         is not None
     )
 
@@ -265,9 +269,12 @@ def test_delete_instruction_success(
 
     # Verify instruction is deleted from database
     assert (
-        db_session.query(competition_models.CompetitionInstruction)
-        .filter_by(competition_instruction_id=existing_instruction.competition_instruction_id)
-        .first()
+        db_session.execute(
+            select(competition_models.CompetitionInstruction).where(
+                competition_models.CompetitionInstruction.competition_instruction_id
+                == existing_instruction.competition_instruction_id
+            )
+        ).scalar_one_or_none()
         is None
     )
 
