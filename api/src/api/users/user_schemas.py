@@ -523,7 +523,7 @@ class RoleSchema(Schema):
         resource_role: (
             ApplicationUserRole | OrganizationUserRole | InternalUserRole | AgencyUserRole
         ),
-        **kwargs: Any
+        **kwargs: Any,
     ) -> dict:
         role = resource_role.role
         return {

@@ -252,8 +252,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         )
 
         # Expected XML is formatted for visual aid and minified for equality.
-        expected_simpler_soap_response_xml = minify_xml(
-            f"""
+        expected_simpler_soap_response_xml = minify_xml(f"""
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <ns2:GetOpportunityListResponse xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:ns3="http://schemas.xmlsoap.org/wsdl/" xmlns:ns4="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns5="http://apply.grants.gov/system/ApplicantCommonElements-V1.0" xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
@@ -275,8 +274,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
             </ns5:OpportunityDetails>
         </ns2:GetOpportunityListResponse>
     </soap:Body>
-</soap:Envelope>"""
-        )
+</soap:Envelope>""")
 
         # This is only testing the simpler soap response so we can leave proxy response empty.
         mock_proxy_response = SOAPResponse(data=b"", status_code=200, headers={})

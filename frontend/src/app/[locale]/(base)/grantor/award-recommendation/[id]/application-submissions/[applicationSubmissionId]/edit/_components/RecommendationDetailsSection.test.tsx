@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import { RecommendationDetailForm } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
 import { AwardRecommendationSubmission } from "src/types/awardRecommendationTypes";
@@ -151,6 +151,194 @@ describe("RecommendationDetailForm", () => {
       // Should render single submission view, not table
       expect(screen.queryByText("applicationIdLabel")).not.toBeInTheDocument();
       expect(screen.getByText("recommendationLabel")).toBeInTheDocument();
+    });
+  });
+
+  describe("recommendation type interactions", () => {
+    it("shows exception checkbox for 'recommended_without_funding'", () => {
+      render(<RecommendationDetailForm submission={mockSubmission} />);
+
+      const select = screen.getByRole("combobox", {
+        name: /recommendationLabel/i,
+      });
+      fireEvent.change(select, {
+        target: { value: "recommended_without_funding" },
+      });
+
+      expect(screen.getByText("hasExceptionLabel")).toBeInTheDocument();
+    });
+
+    it("shows exception checkbox for 'not_recommended'", () => {
+      render(<RecommendationDetailForm submission={mockSubmission} />);
+
+      const select = screen.getByRole("combobox", {
+        name: /recommendationLabel/i,
+      });
+      fireEvent.change(select, { target: { value: "not_recommended" } });
+
+      expect(screen.getByText("hasExceptionLabel")).toBeInTheDocument();
+    });
+
+    it("does not show exception checkbox for 'recommended_for_funding'", () => {
+      render(<RecommendationDetailForm submission={mockSubmission} />);
+
+      expect(screen.queryByText("hasExceptionLabel")).not.toBeInTheDocument();
+    });
+
+    it("shows exception detail textarea when exception is checked", () => {
+      render(<RecommendationDetailForm submission={mockSubmission} />);
+
+      const select = screen.getByRole("combobox", {
+        name: /recommendationLabel/i,
+      });
+      fireEvent.change(select, {
+        target: { value: "recommended_without_funding" },
+      });
+
+      // Exception is auto-checked, so it should already be visible
+      expect(screen.getByText(/exceptionDetailLabel/i)).toBeInTheDocument();
+      expect(
+        screen.getByTestId("exception-detail-textarea"),
+      ).toBeInTheDocument();
+    });
+
+    it("automatically checks exception for 'recommended_without_funding'", () => {
+      render(<RecommendationDetailForm submission={mockSubmission} />);
+
+      const select = screen.getByRole("combobox", {
+        name: /recommendationLabel/i,
+      });
+      fireEvent.change(select, {
+        target: { value: "recommended_without_funding" },
+      });
+
+      const checkbox = screen.getByRole("checkbox", {
+        name: /hasExceptionLabel/i,
+      });
+      expect(checkbox).toBeChecked();
+    });
+  });
+
+  describe("form field pre-population", () => {
+    it("pre-populates general comment from submission_detail", () => {
+      render(<RecommendationDetailForm submission={mockSubmission} />);
+
+      const textarea = screen.getByTestId("recommendation-comments-textarea");
+      expect(textarea).toHaveValue("Test comment");
+    });
+
+    it("pre-populates exception detail when provided", () => {
+      const submissionWithException: AwardRecommendationSubmission = {
+        ...mockSubmission,
+        submission_detail: {
+          award_recommendation_type: "recommended_without_funding",
+          recommended_amount: "75000.00",
+          has_exception: true,
+          exception_detail: "Exception reason here",
+        },
+      };
+
+      render(<RecommendationDetailForm submission={submissionWithException} />);
+
+      const textarea = screen.getByTestId("exception-detail-textarea");
+      expect(textarea).toHaveValue("Exception reason here");
+    });
+
+    it("pre-selects correct recommendation type", () => {
+      const submissionNotRecommended: AwardRecommendationSubmission = {
+        ...mockSubmission,
+        submission_detail: {
+          award_recommendation_type: "not_recommended",
+          recommended_amount: "0.00",
+        },
+      };
+
+      render(
+        <RecommendationDetailForm submission={submissionNotRecommended} />,
+      );
+
+      const select = screen.getByRole("combobox", {
+        name: /recommendationLabel/i,
+      });
+      expect(select).toHaveValue("not_recommended");
+    });
+  });
+
+  describe("multiple submissions table", () => {
+    it("renders input fields for each submission", () => {
+      render(
+        <RecommendationDetailForm
+          submissions={[mockSubmission, mockSubmission2]}
+        />,
+      );
+
+      // Check that both recommended amount inputs are rendered
+      expect(screen.getByDisplayValue("$75,000")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("$25,000")).toBeInTheDocument();
+    });
+
+    it("displays application IDs in table rows", () => {
+      render(
+        <RecommendationDetailForm
+          submissions={[mockSubmission, mockSubmission2]}
+        />,
+      );
+
+      expect(screen.getByText("app-1")).toBeInTheDocument();
+      expect(screen.getByText("app-2")).toBeInTheDocument();
+    });
+
+    it("handles missing application data gracefully", () => {
+      const submissionNoApp: AwardRecommendationSubmission = {
+        award_recommendation_application_submission_id: "test-id-3",
+        application_submission: {
+          application_submission_id: "app-sub-3",
+          total_requested_amount: "30000.00",
+        },
+      };
+
+      render(
+        <RecommendationDetailForm
+          submissions={[mockSubmission, submissionNoApp]}
+        />,
+      );
+
+      expect(screen.getByText("totalLabel")).toBeInTheDocument();
+    });
+  });
+
+  describe("required fields", () => {
+    it("marks recommendation type as required", () => {
+      render(<RecommendationDetailForm submission={mockSubmission} />);
+
+      const select = screen.getByRole("combobox", {
+        name: /recommendationLabel/i,
+      });
+      expect(select).toBeRequired();
+    });
+
+    it("marks recommended amount as required", () => {
+      render(<RecommendationDetailForm submission={mockSubmission} />);
+
+      const input = screen.getByDisplayValue("$75,000");
+      expect(input).toBeRequired();
+    });
+
+    it("marks exception detail as required when shown", () => {
+      const submissionWithException: AwardRecommendationSubmission = {
+        ...mockSubmission,
+        submission_detail: {
+          award_recommendation_type: "recommended_without_funding",
+          recommended_amount: "75000.00",
+          has_exception: true,
+          exception_detail: "Test exception",
+        },
+      };
+
+      render(<RecommendationDetailForm submission={submissionWithException} />);
+
+      const textarea = screen.getByTestId("exception-detail-textarea");
+      expect(textarea).toBeRequired();
     });
   });
 });
