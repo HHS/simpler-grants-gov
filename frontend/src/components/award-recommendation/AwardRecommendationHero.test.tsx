@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { identity } from "lodash";
 import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
 
@@ -197,9 +197,9 @@ describe("AwardRecommendationHero", () => {
 
     const link = screen.getByRole("link", { name: /View application/i });
     expect(link).toBeInTheDocument();
-    
+
     // Icon should not be present
-    const icon = link.querySelector(".usa-icon--size-2");
+    const icon = within(link).queryByRole("img", { hidden: true });
     expect(icon).not.toBeInTheDocument();
   });
 
