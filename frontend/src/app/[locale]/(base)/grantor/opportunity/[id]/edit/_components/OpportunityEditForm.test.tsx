@@ -246,15 +246,15 @@ describe("OpportunityEditForm — rendering", () => {
     ).toBeDisabled();
   });
 
-  // it("pre-checks eligibility checkboxes from initialValues", () => {
-  //   renderOpportunityEditForm();
+  it("pre-checks eligibility checkboxes from initialValues", () => {
+    renderOpportunityEditForm();
 
-  //   // initialValues.eligibleApplicants includes "individuals" - verify it renders checked
-  //   const individualsCheckbox = screen.getByRole("checkbox", {
-  //     name: /individuals/i,
-  //   });
-  //   expect(individualsCheckbox).toBeChecked();
-  // });
+    // initialValues.eligibleApplicants includes "individuals" - verify it renders checked
+    const individualsCheckbox = screen.getByRole("checkbox", {
+      name: /individuals/i,
+    });
+    expect(individualsCheckbox).toBeChecked();
+  });
 
   it("has no accessibility violations", async () => {
     const { container } = renderOpportunityEditForm();
@@ -485,44 +485,44 @@ describe("OpportunityEditForm — eligibility checkboxes", () => {
     expect(checkbox).not.toBeChecked();
   });
 
-  // it("clicking one checkbox from each eligibility group updates state independently", () => {
-  //   // Exercises the onToggle lambda in all five EligibilityCheckboxGroup instances
-  //   renderOpportunityEditForm({
-  //     initialValues: { ...initialValues, applicant_types: [] },
-  //   });
+  it("clicking one checkbox from each eligibility group updates state independently", () => {
+    // Exercises the onToggle lambda in all five EligibilityCheckboxGroup instances
+    renderOpportunityEditForm({
+      initialValues: { ...initialValues, applicant_types: [] },
+    });
 
-  //   // education group
-  //   fireEvent.click(
-  //     screen.getByRole("checkbox", { name: /independent school districts/i }),
-  //   );
-  //   // government group
-  //   fireEvent.click(
-  //     screen.getByRole("checkbox", { name: /state governments/i }),
-  //   );
-  //   // nonprofit group
-  //   fireEvent.click(
-  //     screen.getByRole("checkbox", {
-  //       name: /other native american tribal organizations/i,
-  //     }),
-  //   );
-  //   // misc group
-  //   fireEvent.click(screen.getByRole("checkbox", { name: /^individuals$/i }));
+    // education group
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: /independent school districts/i }),
+    );
+    // government group
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: /state governments/i }),
+    );
+    // nonprofit group
+    fireEvent.click(
+      screen.getByRole("checkbox", {
+        name: /other native american tribal organizations/i,
+      }),
+    );
+    // misc group
+    fireEvent.click(screen.getByRole("checkbox", { name: /^individuals$/i }));
 
-  //   expect(
-  //     screen.getByRole("checkbox", { name: /independent school districts/i }),
-  //   ).toBeChecked();
-  //   expect(
-  //     screen.getByRole("checkbox", { name: /state governments/i }),
-  //   ).toBeChecked();
-  //   expect(
-  //     screen.getByRole("checkbox", {
-  //       name: /other native american tribal organizations/i,
-  //     }),
-  //   ).toBeChecked();
-  //   expect(
-  //     screen.getByRole("checkbox", { name: /^individuals$/i }),
-  //   ).toBeChecked();
-  // });
+    expect(
+      screen.getByRole("checkbox", { name: /independent school districts/i }),
+    ).toBeChecked();
+    expect(
+      screen.getByRole("checkbox", { name: /state governments/i }),
+    ).toBeChecked();
+    expect(
+      screen.getByRole("checkbox", {
+        name: /other native american tribal organizations/i,
+      }),
+    ).toBeChecked();
+    expect(
+      screen.getByRole("checkbox", { name: /^individuals$/i }),
+    ).toBeChecked();
+  });
 });
 
 // ─── Save state ───────────────────────────────────────────────────────────────

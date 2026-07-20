@@ -264,7 +264,6 @@ export async function saveOpportunityEditAction(
       const createResponse = await createOpportunitySummaryForGrantor({
         opportunityId,
         body: {
-          // ...buildOpportunitySummaryUpdateRequest(formData),
           ...formDataToObject<OpportunitySummaryUpdateRequest>(
             formData,
             editOpportunityFormSchema,
