@@ -14,13 +14,12 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/types/applyForm/types";
-
 import {
   getByPointer,
-  getFieldNameForHtml,
   getFieldPathFromHtml,
-  getFieldSchema,
-} from "./applyFormUtils";
+} from "src/utils/formData/formDataUtils";
+
+import { getFieldNameForHtml, getFieldSchema } from "./applyFormUtils";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
@@ -98,7 +97,22 @@ export function buildFieldListStoragePath({
 }
 
 // FieldList currently supports root-level array fields only.
-const getFieldListRequiredFields = ({
+/**
+ * Compute the list of required field paths for a root-level FieldList.
+ *
+ * This inspects the `items` schema of the named array property and
+ * expands any nested `required` entries into full slash-separated paths
+ * prefixed with the `fieldListName`.
+ *
+ * Example returned value:
+ *   ["additional_sites/address/street1", "additional_sites/organization_name"]
+ *
+ * @param formSchema - full RJSF form schema
+ * @param fieldListName - top-level property name of the array field
+ * @returns array of required field paths for items of the field list
+ */
+
+export const getFieldListRequiredFields = ({
   formSchema,
   fieldListName,
 }: {
@@ -123,9 +137,53 @@ const getFieldListRequiredFields = ({
     return [];
   }
 
-  return itemSchema.required.map(
-    (requiredFieldName) => `${fieldListName}/${requiredFieldName}`,
-  );
+  /**
+   * Recursively expand required field names into full storage paths for
+   * FieldList items. Given a list of required field names at the current
+   * level and the schema `properties` for that level, this returns an array
+   * of full paths prefixed with the `fieldListName`.
+   *
+   * Example returned path: "additional_sites/address/street1"
+   */
+
+  const expandRequiredFields = (
+    requiredFieldNames: string[],
+    properties: RJSFSchema["properties"],
+    pathPrefix: string = "",
+  ): string[] => {
+    const expandedRequiredFieldPaths: string[] = [];
+    for (const fieldName of requiredFieldNames) {
+      const fieldPath = pathPrefix ? `${pathPrefix}/${fieldName}` : fieldName;
+      const fullPath = `${fieldListName}/${fieldPath}`;
+
+      expandedRequiredFieldPaths.push(fullPath);
+
+      // Note: only expands nested `required` for objects defined inline; it
+      // does NOT resolve `$ref`/shared schemas, so required fields inside
+      // referenced schemas won't be expanded.
+      // Check if this field is an object with nested required fields
+      const fieldSchema = properties?.[fieldName] as RJSFSchema | undefined;
+      if (
+        fieldSchema &&
+        fieldSchema.type === "object" &&
+        fieldSchema.properties &&
+        fieldSchema.required &&
+        Array.isArray(fieldSchema.required)
+      ) {
+        // Recursively expand nested required fields
+        const nestedRequired = expandRequiredFields(
+          fieldSchema.required,
+          fieldSchema.properties,
+          fieldPath,
+        );
+        expandedRequiredFieldPaths.push(...nestedRequired);
+      }
+    }
+
+    return expandedRequiredFieldPaths;
+  };
+
+  return expandRequiredFields(itemSchema.required, itemSchema.properties);
 };
 
 type FieldWidgetConfig = {
@@ -225,6 +283,9 @@ export const getWarningsForField = ({
   });
 };
 
+// returns either the final slash delimited path segment from definition
+// or the "title" attribute from the field schema (with dashes for whitespace)
+// or "untitled"
 export const getNameFromDef = ({
   definition,
   schema,
@@ -251,7 +312,7 @@ const getBasicFieldInfo = ({
 }: {
   uiFieldObject: UiSchemaField;
   formSchema: RJSFSchema;
-  formData: object;
+  formData: object; // this will be either the saved form JSON, or an empty FormData object (?s)
   errors: FormattedFormValidationWarning[] | null;
 }): FieldInfo<string> => {
   const { schema } = uiFieldObject;
@@ -266,6 +327,19 @@ const getBasicFieldInfo = ({
     schema,
     formSchema,
   }) as RJSFSchema;
+
+  /*
+    this section of code formats the field's name and path for various use cases
+    by way of example, where `definition` = `/properties/applicant/properties/state`
+      * `fieldName` = `state`
+        * used as a fallback ID in case htmlFieldName can't be computed
+        * seems like it'd be used for something else, like a label, but it's not
+      * `htmlFieldName` = `applicant--state`
+        * used for referencing data values within HTML form's FormData
+        * used for defining ID on each widget
+      * `formDataPath` =  `/applicant/state`
+        * used for retrieving data from saved form data JSON
+  */
   const fieldName = getNameFromDef({ definition, schema });
   const htmlFieldName = getFieldNameForHtml({ definition, schema });
   const formDataPath = getFieldPathFromHtml(htmlFieldName);
