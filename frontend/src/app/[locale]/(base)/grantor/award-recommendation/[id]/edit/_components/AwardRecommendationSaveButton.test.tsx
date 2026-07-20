@@ -36,7 +36,7 @@ describe("AwardRecommendationSaveButton", () => {
     expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
   });
 
-  it("submits the enclosing form when clicked", async () => {
+  it("submits the enclosing form when clicked", () => {
     mockSave.mockResolvedValue({ success: true });
 
     render(
@@ -52,7 +52,10 @@ describe("AwardRecommendationSaveButton", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(mockSave).toHaveBeenCalled();
-    const formData = mockSave.mock.calls[0][1] as FormData;
+    const [, formData] = mockSave.mock.calls[0] as unknown as [
+      unknown,
+      FormData,
+    ];
     expect(formData.get("additional_info")).toBe("Updated info");
     expect(formData.get("award_recommendation_id")).toBe("ar-id-123");
   });
