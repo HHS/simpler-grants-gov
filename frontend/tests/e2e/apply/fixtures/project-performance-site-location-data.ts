@@ -36,7 +36,7 @@ export const buildPPSLHappyPathTestData = (
     "primary_site--address--zip_code": "12345",
     // Congressional district required when country is USA; exactly 6 chars
     "primary_site--congressional_district": "MD-000",
-    // Optional attachment — included to exercise the file upload path
+    // Optional attachment - included to exercise the file upload path
     additional_locations_attachment: PPSL_TEST_UPLOAD_FILE,
   } satisfies Partial<Record<keyof typeof PPSL_FORM_CONFIG.fields, string>>;
 };
