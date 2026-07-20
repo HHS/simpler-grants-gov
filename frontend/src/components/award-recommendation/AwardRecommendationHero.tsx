@@ -34,7 +34,9 @@ export type CustomButtonConfig = {
 };
 
 export type HeroButtonConfig =
-  ActionButtonConfig | NavigationButtonConfig | CustomButtonConfig;
+  | ActionButtonConfig
+  | NavigationButtonConfig
+  | CustomButtonConfig;
 
 export type ExternalLinkConfig = {
   label: string;
@@ -173,7 +175,9 @@ export default async function AwardRecommendationHero({
                       {heading || defaultHeading}
                     </h1>
                   </Grid>
-                  <div className={`display-flex flex-column tablet:flex-row ${buttons && buttons.length > 0 ? "tablet:flex-justify" : ""} flex-align-end gap-2`}>
+                  <div
+                    className={`display-flex flex-column tablet:flex-row ${buttons && buttons.length > 0 ? "tablet:flex-justify" : ""} flex-align-end gap-2`}
+                  >
                     <Link
                       href={externalLink.href}
                       target="_blank"
