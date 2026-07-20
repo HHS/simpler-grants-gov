@@ -15,13 +15,13 @@ from .project_abstract import ProjectAbstract_v1_2
 from .project_abstract_summary import ProjectAbstractSummary_v2_0
 from .project_narrative_attachment import ProjectNarrativeAttachment_v1_2
 from .project_performance_site_location import ProjectPerformanceSiteLocation_v4_0
+from .sandbox import SANDBOX_TABLE
 from .sf424 import SF424_v4_0
 from .sf424a import SF424a_v1_0
 from .sf424b import SF424b_v1_1
 from .sf424c import SF424c_v2_0
 from .sf424d import SF424d_v1_1
 from .sflll import SFLLL_v2_0
-from .sandbox import SANDBOX_TABLE
 from .supplementary_neh_cover_sheet import SupplementaryNEHCoverSheet_v3_0
 
 logger = logging.getLogger(__name__)
