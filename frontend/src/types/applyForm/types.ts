@@ -250,7 +250,7 @@ export type UiSchemaTableRow = {
 
 export type UiSchemaTableChildren = {
   /**
-   * Includes the first column represented by each row's `rowHeader`.
+   * Includes each configured column for the table rows.
    */
   columns: UiSchemaTableColumn[];
   rows: UiSchemaTableRow[];

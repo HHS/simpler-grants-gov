@@ -173,13 +173,13 @@ function TableWidget({
   rows.forEach((row, rowIndex) => {
     if (!Array.isArray(row.cells)) {
       throw new Error(
-        `Table row ${rowIndex + 1} must contain no more than ${expectedCellCount} cells.`,
+        `Table row ${rowIndex + 1} must contain exactly ${expectedCellCount} cells.`,
       );
     }
 
-    if (row.cells.length > expectedCellCount) {
+    if (row.cells.length !== expectedCellCount) {
       throw new Error(
-        `Table row ${rowIndex + 1} must contain no more than ${expectedCellCount} cells.`,
+        `Table row ${rowIndex + 1} must contain exactly ${expectedCellCount} cells.`,
       );
     }
   });
@@ -189,7 +189,7 @@ function TableWidget({
       bordered
       fullWidth
       scrollable
-      data-testid="table-widget"
+      data-testid="table"
       data-table-name={uiSchemaField.name}
       data-table-column-count={columns.length}
       data-table-row-count={rows.length}
@@ -211,74 +211,38 @@ function TableWidget({
         </tr>
       </thead>
       <tbody>
-        {rows.map((row, rowIndex) => {
-          const shouldRenderRowHeader = row.cells.length < expectedCellCount;
-          const rowHeaderCell = shouldRenderRowHeader
-            ? row.cells[0]
-            : undefined;
-          const bodyCells = shouldRenderRowHeader
-            ? row.cells.slice(1)
-            : row.cells;
-          const emptyCellCount =
-            expectedCellCount -
-            row.cells.length -
-            (shouldRenderRowHeader ? 1 : 0);
+        {rows.map((row, rowIndex) => (
+          <tr key={`table-row-${rowIndex}`}>
+            {row.cells.map((cell, cellIndex) => {
+              const cellId = `${uiSchemaField.name}-${rowIndex}-${cellIndex}`;
 
-          return (
-            <tr key={`table-row-${rowIndex}`}>
-              {rowHeaderCell && (
-                <th scope="row">
+              return (
+                <td
+                  key={`table-row-${rowIndex}-cell-${cellIndex}`}
+                  data-table-cell-type={cell.type}
+                >
                   <TableCell
-                    cell={rowHeaderCell}
-                    disabled={false}
-                    id={`${uiSchemaField.name}-${rowIndex}-row-header`}
+                    cell={cell}
+                    disabled={
+                      cell.type === "input" ? isInteractionDisabled : false
+                    }
+                    id={cellId}
+                    onChange={
+                      cell.type === "input" && cell.definition
+                        ? cellChangeHandlers[cell.definition]
+                        : undefined
+                    }
                     value={
-                      rowHeaderCell.type === "plainText"
+                      cell.type === "plainText"
                         ? undefined
-                        : getRenderValue(rowHeaderCell.definition, value)
+                        : getRenderValue(cell.definition, value)
                     }
                   />
-                </th>
-              )}
-              {bodyCells.map((cell, cellIndex) => {
-                const cellId = `${uiSchemaField.name}-${rowIndex}-${cellIndex}`;
-
-                return (
-                  <td
-                    key={`table-row-${rowIndex}-cell-${cellIndex}`}
-                    data-table-cell-type={cell.type}
-                  >
-                    <TableCell
-                      cell={cell}
-                      disabled={
-                        cell.type === "input" ? isInteractionDisabled : false
-                      }
-                      id={cellId}
-                      onChange={
-                        cell.type === "input" && cell.definition
-                          ? cellChangeHandlers[cell.definition]
-                          : undefined
-                      }
-                      value={
-                        cell.type === "plainText"
-                          ? undefined
-                          : getRenderValue(cell.definition, value)
-                      }
-                    />
-                  </td>
-                );
-              })}
-              {emptyCellCount > 0 &&
-                Array.from({ length: emptyCellCount }).map(
-                  (_, placeholderIndex) => (
-                    <td
-                      key={`table-row-${rowIndex}-empty-${placeholderIndex}`}
-                    />
-                  ),
-                )}
-            </tr>
-          );
-        })}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
       </tbody>
     </Table>
   );

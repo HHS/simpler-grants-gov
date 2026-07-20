@@ -234,6 +234,10 @@ describe("buildFormTreeRecursive", () => {
                 {
                   cells: [
                     {
+                      type: "plainText",
+                      staticContent: "Item 1",
+                    },
+                    {
                       type: "input",
                       definition: "/properties/first_value",
                     },
@@ -271,7 +275,7 @@ describe("buildFormTreeRecursive", () => {
     expect(table).toBeInTheDocument();
     expect(screen.getAllByRole("columnheader")).toHaveLength(3);
     expect(screen.getAllByRole("row")).toHaveLength(2);
-    expect(screen.getAllByRole("cell")).toHaveLength(1);
+    expect(screen.getAllByRole("cell")).toHaveLength(3);
 
     expect(
       screen.getByRole("columnheader", { name: "Item" }),

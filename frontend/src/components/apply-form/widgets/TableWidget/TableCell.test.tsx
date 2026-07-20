@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import TableCell from "./TableCell";
 
@@ -100,12 +101,13 @@ describe("TableCell", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it("disables an editable cell when disabled", () => {
+  it("renders disabled input cells as read-only output", () => {
     render(
       <TableCell
         cell={{
           type: "input",
           definition: "/properties/federal_share",
+          format: "decimal",
         }}
         disabled
         id="input-cell"
@@ -113,11 +115,13 @@ describe("TableCell", () => {
       />,
     );
 
-    expect(screen.getByTestId("input-cell-input")).toBeDisabled();
-    expect(screen.getByTestId("input-cell-input")).toHaveClass("width-full");
+    expect(screen.queryByTestId("input-cell-input")).not.toBeInTheDocument();
+    expect(screen.getByTestId("input-cell-read-only")).toHaveTextContent(
+      "100.00",
+    );
   });
 
-  it("supports keyboard focus for editable values", () => {
+  it("supports keyboard focus for editable values", async () => {
     render(
       <TableCell
         cell={{
@@ -130,7 +134,9 @@ describe("TableCell", () => {
     );
 
     const input = screen.getByTestId("input-cell-input");
-    input.focus();
+    const user = userEvent.setup();
+
+    await user.tab();
 
     expect(input).toHaveFocus();
   });

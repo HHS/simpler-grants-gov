@@ -1,4 +1,4 @@
-import { formatTableCellValue } from "./formatTableCellValue";
+import { formatTableCellValue } from "src/utils/applyForm/formatTableCellValue";
 
 describe("formatTableCellValue", () => {
   it("returns an empty string for missing values", () => {

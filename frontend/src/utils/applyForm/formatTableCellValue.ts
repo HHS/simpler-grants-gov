@@ -54,10 +54,11 @@ export const formatTableCellValue = (
     }
 
     case "percentage":
-      return `${new Intl.NumberFormat("en-US", {
+      return new Intl.NumberFormat("en-US", {
+        style: "percent",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-      }).format(numericValue)}%`;
+      }).format(numericValue / 100);
 
     default:
       return String(numericValue);

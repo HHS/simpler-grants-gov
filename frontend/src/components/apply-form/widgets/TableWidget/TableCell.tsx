@@ -1,11 +1,10 @@
 import { TableWidgetCellConfig } from "src/types/applyForm/types";
+import { formatTableCellValue } from "src/utils/applyForm/formatTableCellValue";
 
 import { ChangeEvent } from "react";
 
-import { formatTableCellValue } from "./formatTableCellValue";
-
 const READ_ONLY_OUTPUT_CLASS =
-  "border border-base-light bg-base-lightest display-block padding-1 text-right text-wrap";
+  "usa-input margin-0 width-full overflow-x-auto display-block border border-base-light bg-base-lightest text-right text-wrap";
 
 type TableCellProps = {
   /** The cell configuration from the table widget schema */
@@ -83,10 +82,11 @@ function TableCell({
     );
   }
 
-  if (cell.type === "readOnly") {
+  if (cell.type === "readOnly" || (cell.type === "input" && disabled)) {
+    const renderedValue = formatTableCellValue(value, cell.format);
     return (
       <span className={READ_ONLY_OUTPUT_CLASS} data-testid={`${id}-read-only`}>
-        {formatTableCellValue(value, cell.format)}
+        {renderedValue === "" ? "\u00A0" : renderedValue}
       </span>
     );
   }
@@ -110,7 +110,7 @@ function TableCell({
       onChange={handleChange}
       pattern="-?[0-9]*[.]?[0-9]*"
       type="text"
-      value={value ?? ""}
+      value={value === null ? undefined : value}
       disabled={disabled}
     />
   );
