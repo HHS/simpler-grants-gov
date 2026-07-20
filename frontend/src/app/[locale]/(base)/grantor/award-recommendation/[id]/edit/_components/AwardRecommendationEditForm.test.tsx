@@ -18,25 +18,12 @@ jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
 
-describe("AwardRecommendationSaveButton", () => {
+describe("AwardRecommendationEditForm", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("renders the save button with the provided label", () => {
-    render(
-      <AwardRecommendationEditForm
-        awardRecommendationId="ar-id-123"
-        hero={null}
-      >
-        <AwardRecommendationSaveButton label="Save" />
-      </AwardRecommendationEditForm>,
-    );
-
-    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
-  });
-
-  it("submits the enclosing form when clicked", async () => {
+  it("shows a success alert after a successful save", async () => {
     mockSave.mockResolvedValue({ success: true });
 
     render(
@@ -44,16 +31,30 @@ describe("AwardRecommendationSaveButton", () => {
         awardRecommendationId="ar-id-123"
         hero={null}
       >
-        <input name="additional_info" defaultValue="Updated info" />
         <AwardRecommendationSaveButton label="Save" />
       </AwardRecommendationEditForm>,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
+    expect(await screen.findByText("save.success")).toBeInTheDocument();
     expect(mockSave).toHaveBeenCalled();
-    const formData = mockSave.mock.calls[0][1] as FormData;
-    expect(formData.get("additional_info")).toBe("Updated info");
-    expect(formData.get("award_recommendation_id")).toBe("ar-id-123");
+  });
+
+  it("shows an error alert when the save fails", async () => {
+    mockSave.mockResolvedValue({ errorMessage: "Boom" });
+
+    render(
+      <AwardRecommendationEditForm
+        awardRecommendationId="ar-id-123"
+        hero={null}
+      >
+        <AwardRecommendationSaveButton label="Save" />
+      </AwardRecommendationEditForm>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(await screen.findByText("Boom")).toBeInTheDocument();
   });
 });

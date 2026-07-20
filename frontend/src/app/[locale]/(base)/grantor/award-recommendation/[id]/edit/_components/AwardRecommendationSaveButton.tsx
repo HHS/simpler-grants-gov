@@ -1,11 +1,9 @@
 "use client";
 
-import { saveAwardRecommendation } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/actions";
-import { useSnackbar } from "src/hooks/useSnackbar";
-
-import { useTranslations } from "next-intl";
-import { MouseEvent, startTransition, useActionState, useEffect } from "react";
+import { MouseEvent, startTransition } from "react";
 import { Button } from "@trussworks/react-uswds";
+
+import { useAwardRecommendationEditForm } from "./AwardRecommendationEditForm";
 
 interface AwardRecommendationSaveButtonProps {
   label: string;
@@ -14,25 +12,7 @@ interface AwardRecommendationSaveButtonProps {
 export default function AwardRecommendationSaveButton({
   label,
 }: AwardRecommendationSaveButtonProps) {
-  const t = useTranslations("AwardRecommendation");
-  const [state, formAction, isPending] = useActionState(
-    saveAwardRecommendation,
-    {},
-  );
-  const { hideSnackbar, snackbarIsVisible, showSnackbar, Snackbar } =
-    useSnackbar();
-
-  const feedbackMessage = state.success
-    ? t("save.success")
-    : state.errorMessage
-      ? t("save.error")
-      : "";
-
-  useEffect(() => {
-    if (state.success || state.errorMessage) {
-      showSnackbar();
-    }
-  }, [state.success, state.errorMessage, showSnackbar]);
+  const { formAction, isPending } = useAwardRecommendationEditForm();
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     const form = event.currentTarget.closest("form");
@@ -44,19 +24,14 @@ export default function AwardRecommendationSaveButton({
   };
 
   return (
-    <>
-      <Button
-        type="button"
-        onClick={handleClick}
-        outline
-        disabled={isPending}
-        className="width-auto"
-      >
-        {label}
-      </Button>
-      <Snackbar isVisible={snackbarIsVisible} close={hideSnackbar}>
-        {feedbackMessage}
-      </Snackbar>
-    </>
+    <Button
+      type="button"
+      onClick={handleClick}
+      outline
+      disabled={isPending}
+      className="width-auto"
+    >
+      {label}
+    </Button>
   );
 }
