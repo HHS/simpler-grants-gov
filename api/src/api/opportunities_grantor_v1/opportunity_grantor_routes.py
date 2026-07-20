@@ -413,6 +413,18 @@ def competition_instruction_delete(
     logger.info(
         "DELETE /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id/instructions/:competition_instruction_id"
     )
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        delete_competition_instruction(
+            db_session, user, opportunity_id, competition_id, competition_instruction_id
+        )
+
+    return response.ApiResponse(message="Instruction deleted successfully")
+
+
 @opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/audit_history")
 @opportunity_grantor_blueprint.input(
     opportunity_grantor_schemas.OpportunityAuditRequestSchema(), location="json"
@@ -435,11 +447,6 @@ def opportunity_audit_list(
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
-        delete_competition_instruction(
-            db_session, user, opportunity_id, competition_id, competition_instruction_id
-        )
-
-    return response.ApiResponse(message="Instruction deleted successfully")
         audit_events, pagination_info = list_opportunity_audit(
             db_session, user, opportunity_id, json_data
         )
