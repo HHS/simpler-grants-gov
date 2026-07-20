@@ -152,9 +152,6 @@ describe("OpportunityEditForm — rendering", () => {
         opportunitySummaryId="summary-456"
         initialValues={{ ...initialValues, applicant_types: [] }}
         isDraft
-        saveLabel="Save"
-        previewLabel="Preview"
-        publishLabel="Publish"
       />,
     );
 
@@ -171,7 +168,9 @@ describe("OpportunityEditForm — rendering", () => {
 
     fireEvent.click(checkboxOne);
     expect(checkboxOne).toBeChecked();
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "button.saveAndContinue" }),
+    );
 
     expect(mockFormAction).toHaveBeenCalledTimes(1);
     expect(mockFormAction).toHaveBeenCalledWith(expect.any(FormData));
@@ -181,7 +180,9 @@ describe("OpportunityEditForm — rendering", () => {
 
     fireEvent.click(checkboxTwo);
     expect(checkboxTwo).toBeChecked();
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "button.saveAndContinue" }),
+    );
 
     expect(mockFormAction).toHaveBeenCalledTimes(2);
     expect(mockFormAction).toHaveBeenCalledWith(expect.any(FormData));

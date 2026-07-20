@@ -268,6 +268,7 @@ export async function saveOpportunityEditAction(
           ...formDataToObject<OpportunitySummaryUpdateRequest>(
             formData,
             editOpportunityFormSchema,
+            null,
           ),
           is_forecast: isForecast,
         },
@@ -282,6 +283,7 @@ export async function saveOpportunityEditAction(
     const rawBody = formDataToObject<OpportunitySummaryUpdateRawData>(
       formData,
       editOpportunityFormSchema,
+      null,
     );
     /*
       funding_instruments, funding_categories, applicant_types all need to be arrays of strings
@@ -359,13 +361,12 @@ export async function opportunityEditFormAction(
     return saveResult;
   }
 
-  if (readStringValue(formData.get("submitType")) === "saveAndExit") {
+  const submitType = formData.get("submitType");
+  if (submitType === "saveAndExit") {
     redirect("../overview");
-  } else if (readStringValue(formData.get("submitType")) === "saveAndGoBack") {
+  } else if (submitType === "saveAndGoBack") {
     redirect("../overview");
-  } else if (
-    readStringValue(formData.get("submitType")) === "saveAndContinue"
-  ) {
+  } else if (submitType === "saveAndContinue") {
     redirect("../competition");
   } else {
     return saveResult;
