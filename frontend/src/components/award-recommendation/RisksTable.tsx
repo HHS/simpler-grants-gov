@@ -88,6 +88,8 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
   };
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchSubmissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [awardRecommendationId, currentPage, pageSize, clientFetch]);
@@ -177,7 +179,7 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
               className="usa-button"
               onClick={() => {
                 router.push(
-                  `/award-recommendation/${awardRecommendationId}/risks/add`,
+                  `/grantor/award-recommendation/${awardRecommendationId}/risks/add`,
                 );
               }}
             >
@@ -240,7 +242,7 @@ export default function RisksTable({ awardRecommendationId }: RisksTableProps) {
                 <td>
                   {appSubmission.application_submission_number ? (
                     <Link
-                      href={`/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
+                      href={`/grantor/award-recommendation/${awardRecommendationId}/application-submissions/${id}/edit`}
                       className="usa-link"
                     >
                       {appSubmission.application_submission_number}

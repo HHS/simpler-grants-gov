@@ -59,7 +59,7 @@ jest.mock("src/services/auth/useUser", () => ({
 }));
 
 jest.mock("src/hooks/useSnackbar", () => ({
-  useSnackbar: () => mockUseSnackBar() as unknown,
+  useSnackbar: () => mockUseSnackBar(),
 }));
 
 jest.mock("src/utils/userUtils", () => ({

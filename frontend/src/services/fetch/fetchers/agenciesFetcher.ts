@@ -1,7 +1,6 @@
 "server only";
 
-import { ApiRequestError, MissingAuthError } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import { ApiRequestError } from "src/errors";
 import {
   fetchUserWithMethod,
   searchAgencies,
@@ -90,21 +89,4 @@ export const getUserAgencies = async (
   });
   const json = (await resp.json()) as { data: [] };
   return json.data;
-};
-
-export const fetchUserAgencies = async (): Promise<RelevantAgencyRecord[]> => {
-  try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      // we shouldn't get there because the page should be checking authentication
-      throw new MissingAuthError(
-        "Error fetching user agencies - not logged in",
-      );
-    }
-    const agencies = await getUserAgencies(session.user_id);
-    return agencies;
-  } catch (e) {
-    console.error("Error fetching user agencies");
-    throw e;
-  }
 };

@@ -1,8 +1,10 @@
 import uuid
 
 import pytest
+from sqlalchemy import select
 
-from src.constants.lookup_constants import OpportunityCategory, Privilege
+from src.constants.lookup_constants import OpportunityAuditEvent, OpportunityCategory, Privilege
+from src.db.models.opportunity_models import OpportunityAudit
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.lib.opportunity_test_utils import create_opportunity_request
 from tests.src.db.models.factories import AssistanceListingFactory
@@ -48,7 +50,9 @@ def opportunity_request_no_explanation(grantor_auth_data, assistance_listing):
     )
 
 
-def test_opportunity_create_successful_creation(client, grantor_auth_data, opportunity_request):
+def test_opportunity_create_successful_creation(
+    client, db_session, grantor_auth_data, opportunity_request
+):
     _, _, token, _ = grantor_auth_data
 
     # Create an opportunity
@@ -81,6 +85,20 @@ def test_opportunity_create_successful_creation(client, grantor_auth_data, oppor
         opportunity_assistance_listings["assistance_listing_number"]
         == opportunity_request["assistance_listing_number"]
     )
+
+    created_opportunity_id = opportunity_data["opportunity_id"]
+    audit_rows = (
+        db_session.execute(
+            select(OpportunityAudit).where(
+                OpportunityAudit.opportunity_id == created_opportunity_id
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(audit_rows) == 1
+    assert audit_rows[0].opportunity_audit_event == OpportunityAuditEvent.OPPORTUNITY_CREATED
+    assert audit_rows[0].opportunity_data is not None
 
 
 def test_opportunity_create_with_invalid_jwt_token(client, grantor_auth_data, opportunity_request):

@@ -204,7 +204,7 @@ class OpportunityPublishStateMachine(BaseStateMachine):
             )
             state_machine_event.increment(self.Metrics.OPP_PUBLISH_WRITTEN_TO_SEARCH_INDEX)
 
-        except (TransportError, ConnectionTimeout):
+        except TransportError, ConnectionTimeout:
             # These are pretty generic network blips that
             # we have retries for when loading elsewhere.
             logger.warning(

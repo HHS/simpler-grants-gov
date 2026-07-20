@@ -775,6 +775,7 @@ def create_test_form(db_session):
         form_name: str = "Test Form",
         form_json_schema: dict | None = None,
         form_rule_schema: dict | None = None,
+        form_ui_schema: dict | list | None = None,
         **kwargs,
     ) -> FormModel:
         form = FormModel(
@@ -784,7 +785,7 @@ def create_test_form(db_session):
             form_version=kwargs.get("form_version", "1.0"),
             agency_code="SGG",
             form_json_schema=form_json_schema or {"type": "object", "properties": {}},
-            form_ui_schema={},
+            form_ui_schema=form_ui_schema if form_ui_schema is not None else {},
             form_rule_schema=form_rule_schema,
             json_to_xml_schema=kwargs.get("json_to_xml_schema", None),
         )

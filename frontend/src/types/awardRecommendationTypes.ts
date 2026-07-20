@@ -5,9 +5,7 @@ export type AwardRecommendationStatus = "draft" | "in_review" | "approved";
 export type AwardSelectionMethod = "merit-review-only" | "merit-review-other";
 
 export type AwardRecommendationType =
-  | "recommended_for_funding"
-  | "recommended_without_funding"
-  | "not_recommended";
+  "recommended_for_funding" | "recommended_without_funding" | "not_recommended";
 
 export type AwardRecommendationSummary = {
   total_received_count: number;

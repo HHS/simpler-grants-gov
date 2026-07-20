@@ -3,11 +3,15 @@ import uuid
 
 import grants_shared.adapters.db as db
 
+from src.api.opportunities_grantor_v1.opportunity_grantor_schemas import (
+    CompetitionRequestBaseSchema,
+)
 from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
 from src.db.models.competition_models import Competition
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
+from src.services.opportunities_grantor_v1.opportunity_audit import build_opportunity_audit_event
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +31,7 @@ def create_competition(
         competition_id=uuid.uuid4(),
         opportunity_id=opportunity_id,
         is_simpler_grants_enabled=True,
-        **competition_data
+        **competition_data,
     )
 
     # Explicitly initialize all relationships that will be serialized
@@ -44,6 +48,14 @@ def create_competition(
 
     db_session.add(competition)
     db_session.flush()
+    opportunity.opportunity_audits.append(
+        build_opportunity_audit_event(
+            opportunity,
+            user,
+            OpportunityAuditEvent.COMPETITION_CREATED,
+            competition=CompetitionRequestBaseSchema().dump(competition),
+        )
+    )
 
     logger.info(
         "Created competition",

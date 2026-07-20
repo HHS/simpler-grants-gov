@@ -130,7 +130,7 @@ class EventType(fields.String):
             metadata={
                 "description": "Type of event (e.g., a single date, a date range, or a custom event)"
             },
-            **kwargs
+            **kwargs,
         )
 
 
@@ -251,7 +251,7 @@ class OppStatusOptions(fields.String):
         super().__init__(
             validate=validate.OneOf(["forecasted", "open", "custom", "closed"]),
             metadata={"description": "The status of the opportunity"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -431,7 +431,7 @@ class EquivalenceOperator(fields.String):
         super().__init__(
             validate=validate.OneOf(["eq", "neq"]),
             metadata={"description": "The operator to apply to the filter"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -444,7 +444,7 @@ class ComparisonOperator(fields.String):
             metadata={
                 "description": "Operators that filter a field based on a comparison to a value"
             },
-            **kwargs
+            **kwargs,
         )
 
 
@@ -455,7 +455,7 @@ class ArrayOperator(fields.String):
         super().__init__(
             validate=validate.OneOf(["in", "notIn"]),
             metadata={"description": "Operators that filter a field based on an array of values"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -466,7 +466,7 @@ class StringOperator(fields.String):
         super().__init__(
             validate=validate.OneOf(["like", "notLike"]),
             metadata={"description": "Operators that filter a field based on a string value"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -477,7 +477,7 @@ class RangeOperator(fields.String):
         super().__init__(
             validate=validate.OneOf(["between", "outside"]),
             metadata={"description": "Operators that filter a field based on a range of values"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -802,7 +802,7 @@ class SortOrder(fields.String):
         super().__init__(
             validate=validate.OneOf(["asc", "desc"]),
             metadata={"description": "Sort order enumeration"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -858,7 +858,7 @@ class OppSortBy(fields.String):
                 ]
             ),
             metadata={"description": "The field to sort by"},
-            **kwargs
+            **kwargs,
         )
 
 
