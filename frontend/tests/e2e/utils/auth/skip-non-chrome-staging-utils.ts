@@ -1,4 +1,4 @@
-import { Page, test, TestInfo } from "@playwright/test";
+import { test, TestInfo } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 
 /**

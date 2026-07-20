@@ -36,7 +36,7 @@ import {
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 
-const { testOrgLabel, targetEnv } = playwrightEnv;
+const { testOrgLabel } = playwrightEnv;
 
 const OPPORTUNITY_NUMBER = "E2E-PPSL-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
@@ -52,7 +52,6 @@ const applicantScenarios = [
   },
 ] as const;
 
-// Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
@@ -139,7 +138,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
       } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
-        // Form title heading is visible
         await expect(page.locator("h1")).toContainText(formName);
 
         for (const [dataKey, testId] of Object.entries(
