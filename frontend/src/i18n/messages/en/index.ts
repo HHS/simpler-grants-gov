@@ -2085,6 +2085,10 @@ export const messages = {
       backToEdit: "Back to Edit",
       backToSubmissions: "Back to submissions",
     },
+    save: {
+      success: "Your changes have been saved.",
+      error: "We encountered an error saving your changes. Please try again.",
+    },
     submissionEdit: {
       editTitle: "Edit {applicationSubmissionNumber}",
       viewOriginalApplication: "View original application",
