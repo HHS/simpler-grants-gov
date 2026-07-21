@@ -362,7 +362,6 @@ run-workflow-service-async: ## Run the workflow service without blocking
 run-email-notifications: ## Send email notifications
 	$(FLASK_CMD) task email-notifications $(args)
 
-run-generate-notifications: run-email-notifications ## Backwards-compatible alias
 
 setup-api-data: db-seed-local populate-search-opportunities populate-search-agencies  ## Load all the data, especially useful for inital setup
 
