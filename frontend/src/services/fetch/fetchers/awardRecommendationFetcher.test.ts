@@ -9,6 +9,7 @@ import {
   listAwardRecommendationsPaginated,
   listAwardRecommendationSubmissions,
   listAwardRecommendationSubmissionsPaginated,
+  updateAwardRecommendation,
   updateAwardRecommendationRisk,
   updateAwardRecommendationSubmissionDetails,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
@@ -287,6 +288,53 @@ describe("updateAwardRecommendationSubmissionDetails", () => {
         },
       },
     });
+  });
+});
+
+describe("updateAwardRecommendation", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const update = {
+    award_selection_method: "merit_review_ranking_only" as const,
+    additional_info: "info",
+    funding_strategy: null,
+    selection_method_detail: "details",
+    other_key_information: null,
+  };
+
+  it("calls fetchAwardRecommendationWithMethod with the id and body", async () => {
+    await updateAwardRecommendation("an id", update);
+
+    expect(mockInnerFetch).toHaveBeenCalledWith({
+      subPath: "an id",
+      body: update,
+    });
+  });
+
+  it("returns the updated award recommendation details", async () => {
+    mockInnerFetch.mockResolvedValueOnce({
+      ok: true,
+      json: jest
+        .fn()
+        .mockResolvedValue({ data: mockAwardRecommendationDetails }),
+    });
+
+    const result = await updateAwardRecommendation("an id", update);
+
+    expect(result).toEqual(mockAwardRecommendationDetails);
+  });
+
+  it("throws when the response is not ok", async () => {
+    mockInnerFetch.mockResolvedValueOnce({
+      ok: false,
+      json: jest.fn().mockResolvedValue({ message: "Boom" }),
+    });
+
+    await expect(updateAwardRecommendation("an id", update)).rejects.toThrow(
+      "Boom",
+    );
   });
 });
 

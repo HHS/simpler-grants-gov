@@ -542,6 +542,46 @@ The following forms currently have XML generation support:
 - **Project Abstract (v1.2)**: Project abstract file attachment
 - **Supplementary Cover Sheet for NEH Grant Programs (v3.0)**: NEH-specific supplementary cover sheet
 - **Project/Performance Site Location(s) (v4.0)**: Primary and additional project performance site locations with optional attachment
+- **Key Contacts (v2.0)**: Key contact persons form
+
+### Example: Key Contacts (v2.0)
+
+The Key Contacts form maps a list of 1–4 project contacts (`RoleOnProject[]`), each containing name, address, and contact details split across two namespaces:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for Key Contacts form",
+        "form_name": "Key_Contacts_2_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0",
+            "Key_Contacts_2_0": "http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Key_Contacts_2_0-V2.0.xsd",
+        "xml_structure": {
+            "root_element": "Key_Contacts_2_0",
+            "root_namespace_prefix": "Key_Contacts_2_0",
+            "root_attributes": {"FormVersion": "2.0"},
+        },
+    },
+    "applicant_organization_name": {"xml_transform": {"target": "ApplicantOrganizationName"}},
+    "key_contacts": {
+        "xml_transform": {"target": "RoleOnProject", "type": "array"},
+        "items": _key_contact_xml_fields(),
+    },
+}
+```
+
+**Key Contacts Field Mapping Notes:**
+
+- **Array transform**: `key_contacts` emits one `<RoleOnProject>` element per contact. The XSD requires at least 1 and allows at most 4 (`minOccurs=1, maxOccurs=4`).
+- **Dual namespace**: Outer contact elements (`ContactProjectRole`, `ContactName`, `ContactAddress`, `ContactPhone`, etc.) use the default form namespace. Name sub-fields (`PrefixName`, `FirstName`, `MiddleName`, `LastName`, `SuffixName`) and address sub-fields (`Street1`, `Street2`, `City`, `County`, `State`, `Province`, `ZipPostalCode`, `Country`) are typed via `globLib` (`HumanNameDataType` and `AddressDataTypeV3`) and use the `globLib` namespace.
+- **Province field**: Always included in the address mapping (shown unconditionally on this form, unlike other forms where it is conditional on non-US country selection).
+- **`codes` namespace**: Declared in the config because the XSD references `UniversalCodes-V2.0` for enum validation (e.g., state/country codes), even though no field mapping explicitly sets `"namespace": "codes"`.
+- **Helper function**: `_key_contact_xml_fields()` returns the per-contact field mapping dict, shared between all array items.
+- XSD reference: https://apply07.grants.gov/apply/forms/schemas/Key_Contacts_2_0-V2.0.xsd
 
 ### Example: Project/Performance Site Location(s) (v4.0)
 

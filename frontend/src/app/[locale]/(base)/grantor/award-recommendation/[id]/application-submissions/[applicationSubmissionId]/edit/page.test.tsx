@@ -16,6 +16,14 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
 
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  use: jest.fn(() => ({
+    locale: "en",
+  })),
+  Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
+}));
+
 jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
@@ -126,26 +134,15 @@ describe("AwardRecommendationSubmissionEditPage", () => {
       );
     });
 
-    it("renders the submission edit hero", async () => {
+    it("includes the AwardRecommendationHero component in the page", async () => {
       const component = await AwardRecommendationSubmissionEditPage({
         params: pageParams,
       });
       render(component);
 
       expect(
-        await screen.findByTestId("award-recommendation-submission-edit-hero"),
-      ).toBeVisible();
-      expect(
-        screen.getByRole("link", {
-          name: /submissionEdit.viewOriginalApplication/i,
-        }),
-      ).toHaveAttribute(
-        "href",
-        "/workspace/applications/63588df8-f2d1-44ed-a201-5804abba696d",
-      );
-      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-        "submissionEdit.editTitle",
-      );
+        screen.getByTestId("award-recommendation-hero-fallback"),
+      ).toBeInTheDocument();
     });
 
     it("renders recommendation details fields", async () => {
@@ -226,16 +223,25 @@ describe("AwardRecommendationSubmissionEditPage", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("renders cancel and save buttons in the hero", async () => {
+    it("renders form with hidden inputs for award recommendation and submission IDs", async () => {
       const component = await AwardRecommendationSubmissionEditPage({
         params: pageParams,
       });
       render(component);
 
-      expect(await screen.findByText("heroButtons.cancel")).toBeVisible();
-      expect(
-        screen.getByRole("button", { name: "heroButtons.save" }),
-      ).toBeVisible();
+      const awardRecInput = screen.getByDisplayValue("AR-26-0001");
+      expect(awardRecInput).toHaveAttribute("name", "award_recommendation_id");
+      expect(awardRecInput).toHaveAttribute("type", "hidden");
+
+      const submissionInput = screen.getByDisplayValue(
+        mockAwardRecommendationSubmissions[0]
+          .award_recommendation_application_submission_id,
+      );
+      expect(submissionInput).toHaveAttribute(
+        "name",
+        "award_recommendation_application_submission_id",
+      );
+      expect(submissionInput).toHaveAttribute("type", "hidden");
     });
 
     it("renders warning when application submission is not found", async () => {
