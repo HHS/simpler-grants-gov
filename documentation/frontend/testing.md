@@ -20,7 +20,11 @@ The system is defined in [Login Utils](https://github.com/HHS/simpler-grants-gov
 
 #### Staging setup
 
-Staging runs on a deployed server, so Playwright requests the session token from the same staging-only internal endpoint. To run spoofed logins against staging, `SESSION_SECRET` and `STAGING_TEST_USER_MANAGER_API_KEY` env vars must be set in `.env.local`. Values for these env vars can be found in 1Password, AWS SSM, or ask a team member.
+Staging runs on a deployed server, so Playwright requests the session token from the same staging-only internal endpoint. To run spoofed logins against staging, set `PLAYWRIGHT_TARGET_ENV=staging`, `SESSION_SECRET`, and `TEST_USER_MANAGER_API_KEY` in `.env.local`. The staging values for `SESSION_SECRET` and `TEST_USER_MANAGER_API_KEY` (the staging test-user-manager's API key) can be found in 1Password, AWS SSM, or ask a team member.
+
+#### Switching between local and staging
+
+Both targets read the **same** env var, `TEST_USER_MANAGER_API_KEY` — only its value differs (the local `make db-seed-local` default `local-manager-key` vs. the staging manager key). So to switch targets on your machine, change `PLAYWRIGHT_TARGET_ENV` and swap the `TEST_USER_MANAGER_API_KEY` (and `SESSION_SECRET`) value to match. In CI this is handled automatically: the local workflow passes `local-manager-key` and the staging workflow injects the staging key, both into `TEST_USER_MANAGER_API_KEY`.
 
 ### Test groups
 
