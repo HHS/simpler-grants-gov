@@ -16,14 +16,9 @@ module "infra_dev_config" {
   environment    = "infra-dev"
   network_name   = "infra-dev-simpler-grants"
 
-  # Enable once DNS + ACM certs exist in the new account:
-  # domain_name            = "api.infra-dev.simpler.grants.gov"
-  # secondary_domain_names = ["alb.infra-dev.simpler.grants.gov"]
-  # s3_cdn_domain_name     = "files.infra-dev.simpler.grants.gov"
-  # mtls_domain_name       = "soap.infra-dev.simpler.grants.gov"
-  # enable_https           = true
-  domain_name  = null
-  enable_https = false
+  domain_name            = "api.dev.simpler.grants.gov"
+  secondary_domain_names = ["alb.dev.simpler.grants.gov"]
+  enable_https           = false
 
   has_database                  = local.has_database
   database_enable_http_endpoint = true
@@ -50,6 +45,9 @@ module "infra_dev_config" {
 
   has_search            = true
   search_engine_version = "OpenSearch_2.15"
+  # infra-dev's AWS account has its own IAM Identity Center reserved-SSO suffix,
+  # different from the shared account default in env-config.
+  search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_73856a8074e1d297"
 
   service_override_extra_environment_variables = {
     ENABLE_WORKFLOW_ENDPOINTS             = 1
