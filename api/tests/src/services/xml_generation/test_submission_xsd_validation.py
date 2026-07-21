@@ -182,7 +182,7 @@ class TestSubmissionXSDValidation:
                             # Fields in correct XSD order per BudgetAmountGroup
                             "federal_new_or_revised_amount": "50000.00",
                             "non_federal_new_or_revised_amount": "10000.00",
-                            "total_new_or_revised_amount": "60000.00",
+                            "total_amount": "60000.00",
                         },
                         "budget_categories": {
                             "personnel_amount": "30000.00",
@@ -200,7 +200,7 @@ class TestSubmissionXSDValidation:
                 "total_budget_summary": {
                     "federal_new_or_revised_amount": "50000.00",
                     "non_federal_new_or_revised_amount": "10000.00",
-                    "total_new_or_revised_amount": "60000.00",
+                    "total_amount": "60000.00",
                 },
                 "total_budget_categories": {
                     "personnel_amount": "30000.00",
@@ -262,7 +262,6 @@ class TestSubmissionXSDValidation:
             f"Generated XML:\n{sf424_xml[:1000]}"
         )
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sf424a_submission_xml_validates_against_xsd(self, sf424a_application, xsd_validator):
         """Test that complete SF-424A submission XML validates against XSD schema."""
         # Create application submission
@@ -309,7 +308,6 @@ class TestSubmissionXSDValidation:
             f"Generated XML:\n{sf424a_xml[:1000]}"
         )
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_multi_form_submission_xml_validates_against_xsd(
         self, enable_factory_create, xsd_validator, seed_form_registry
     ):
@@ -409,7 +407,7 @@ class TestSubmissionXSDValidation:
                         "activity_title": "Main Project",
                         "budget_summary": {
                             "assistance_listing_number": "93.999",
-                            "total_new_or_revised_amount": "50000.00",
+                            "total_amount": "50000.00",
                         },
                         "budget_categories": {
                             "personnel_amount": "30000.00",
@@ -426,7 +424,7 @@ class TestSubmissionXSDValidation:
                         },
                     },
                 ],
-                "total_budget_summary": {"total_new_or_revised_amount": "50000.00"},
+                "total_budget_summary": {"total_amount": "50000.00"},
                 "total_budget_categories": {
                     "personnel_amount": "30000.00",
                     "fringe_benefits_amount": "10000.00",

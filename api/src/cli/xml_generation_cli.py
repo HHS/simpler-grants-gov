@@ -93,7 +93,7 @@ def generate_xml_command(
         if transform_config is None:
             valid_forms = ", ".join(sorted(form_transform_rules_map.keys()))
             click.echo(
-                f"Error: Invalid form '{form}'. " f"Valid options are: {valid_forms}",
+                f"Error: Invalid form '{form}'. Valid options are: {valid_forms}",
                 err=True,
             )
             sys.exit(1)
@@ -231,14 +231,6 @@ def validate_xml_generation_command(
             if not test_cases:
                 click.echo("Error: No test cases found", err=True)
                 sys.exit(1)
-
-        # APPLY SKIP FILTER
-        test_cases, skipped = filter_skipped(test_cases)
-        if skipped:
-            click.echo("Skipped tests (Fix existing skipped XSD validation tests #10424):")
-            for name in skipped:
-                click.echo(f"  - {name}")
-            click.echo("")
 
         click.echo(f"Found {len(test_cases)} test cases")
         click.echo(f"XSD directory: {xsd_dir}")
@@ -430,20 +422,3 @@ def fetch_xsds_command(
         logger.error(f"Fetch failed: {e}", exc_info=verbose)
         click.echo(f"Error: Fetch failed: {e}", err=True)
         sys.exit(1)
-
-
-def filter_skipped(test_cases: list) -> tuple[list, list]:
-    SKIPPED = {
-        "sf424_with_single_attachment",
-        "sf424_with_multiple_attachments",
-        "sf424_with_all_attachment_types",
-        "sf424a_minimal_non_federal_resources_only",
-        "sf424a_budget_sections_with_array_decomposition",
-        "sf424a_with_forecasted_cash_needs",
-        "sf424a_complete_all_sections",
-    }
-
-    return (
-        [tc for tc in test_cases if tc["name"] not in SKIPPED],
-        [tc["name"] for tc in test_cases if tc["name"] in SKIPPED],
-    )
