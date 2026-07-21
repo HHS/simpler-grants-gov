@@ -167,63 +167,63 @@ export default async function AwardRecommendationHero({
           ) : (
             <div className="padding-bottom-4 mobile-lg:padding-y-4 tablet:padding-y-3">
               {externalLink && (
-                <Grid className="padding-bottom-4 mobile-lg:padding-y-4 tablet:padding-y-3">
-                  <h1 className="font-sans-xl tablet:font-sans-2xl margin-0">
-                    {heading || defaultHeading}
-                  </h1>
-                </Grid>
-              )}
-              {externalLink && (
-                <div className="display-flex flex-column tablet:flex-row tablet:flex-justify flex-align-end gap-2">
-                  <Link
-                    href={externalLink.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="usa-link display-inline-flex flex-align-center flex-wrap"
-                  >
-                    {externalLink.label}
-                    {externalLink.sublabel && <> {externalLink.sublabel}</>}
-                    {(externalLink.showIcon ?? true) && (
-                      <USWDSIcon
-                        name="launch"
-                        className="usa-icon--size-2 text-middle margin-left-05"
-                      />
+                <>
+                  <Grid className="padding-bottom-4 mobile-lg:padding-y-4 tablet:padding-y-3">
+                    <h1 className="font-sans-xl tablet:font-sans-2xl margin-0">
+                      {heading || defaultHeading}
+                    </h1>
+                  </Grid>
+                  <div className="display-flex flex-column tablet:flex-row tablet:flex-justify flex-align-end gap-2">
+                    <Link
+                      href={externalLink.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="usa-link display-inline-flex flex-align-center flex-wrap"
+                    >
+                      {externalLink.label}
+                      {externalLink.sublabel && <> {externalLink.sublabel}</>}
+                      {(externalLink.showIcon ?? true) && (
+                        <USWDSIcon
+                          name="launch"
+                          className="usa-icon--size-2 text-middle margin-left-05"
+                        />
+                      )}
+                    </Link>
+                    {buttons && buttons.length > 0 && (
+                      <div className="display-flex flex-justify-start gap-1 margin-top-4 tablet:margin-top-0 flex-shrink-0">
+                        {buttons.map((button, index) => {
+                          if (button.type === "navigation") {
+                            return (
+                              <Link
+                                key={index}
+                                href={button.href}
+                                className={`usa-button ${button.outline ? "usa-button--outline" : ""} width-auto`}
+                                prefetch={false}
+                              >
+                                {button.label}
+                              </Link>
+                            );
+                          } else if (button.type === "custom") {
+                            return <span key={index}>{button.node}</span>;
+                          } else {
+                            return (
+                              <Button
+                                key={index}
+                                type="submit"
+                                formAction={button.formAction}
+                                outline={button.outline}
+                                disabled={button.disabled}
+                                className="width-auto"
+                              >
+                                {button.label}
+                              </Button>
+                            );
+                          }
+                        })}
+                      </div>
                     )}
-                  </Link>
-                  {buttons && buttons.length > 0 && (
-                    <div className="display-flex flex-justify-start gap-1 margin-top-4 tablet:margin-top-0 flex-shrink-0">
-                      {buttons.map((button, index) => {
-                        if (button.type === "navigation") {
-                          return (
-                            <Link
-                              key={index}
-                              href={button.href}
-                              className={`usa-button ${button.outline ? "usa-button--outline" : ""} width-auto`}
-                              prefetch={false}
-                            >
-                              {button.label}
-                            </Link>
-                          );
-                        } else if (button.type === "custom") {
-                          return <span key={index}>{button.node}</span>;
-                        } else {
-                          return (
-                            <Button
-                              key={index}
-                              type="submit"
-                              formAction={button.formAction}
-                              outline={button.outline}
-                              disabled={button.disabled}
-                              className="width-auto"
-                            >
-                              {button.label}
-                            </Button>
-                          );
-                        }
-                      })}
-                    </div>
-                  )}
-                </div>
+                  </div>
+                </>
               )}
               {!externalLink && (
                 <div className="display-flex flex-column tablet:flex-row tablet:flex-justify tablet:flex-align-center gap-2">
