@@ -1,5 +1,4 @@
 import { expect, type Page } from "@playwright/test";
-import type { FillFormConfig } from "tests/e2e/utils/common/types";
 
 import type { ResolvedPrintViewForm } from "./opportunity-print-view.types";
 
