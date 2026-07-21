@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { TableWidgetProps } from "src/types/applyForm/types";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
@@ -31,11 +31,12 @@ describe("TableWidget", () => {
             cells: [
               {
                 type: "plainText",
-                staticContent: "First Row",
+                staticContent: "First value text",
               },
               {
-                type: "plainText",
-                staticContent: "First value text",
+                type: "input",
+                definition: "/properties/first_value",
+                format: "decimal",
               },
               {
                 type: "readOnly",
@@ -76,8 +77,35 @@ describe("TableWidget", () => {
       screen.getByRole("columnheader", { name: "Second Value" }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText("First Row")).toBeInTheDocument();
     expect(screen.getByText("First value text")).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("summary_table_test-0-2-read-only"),
+    ).toHaveTextContent("");
+  });
+
+  it("updates the table widget value when an editable cell changes", () => {
+    const onChange = jest.fn();
+
+    render(
+      <TableWidget
+        {...props}
+        onChange={onChange}
+        schema={{}}
+        rawErrors={[]}
+        value={{ first_value: 100, second_value: 200 }}
+        options={{}}
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("summary_table_test-0-1-input"), {
+      target: { value: "250" },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      first_value: "250",
+      second_value: 200,
+    });
   });
 
   it("throws when a row does not contain one cell for each configured column", async () => {
@@ -95,6 +123,18 @@ describe("TableWidget", () => {
                 {
                   type: "plainText",
                   staticContent: "Only one cell",
+                },
+                {
+                  type: "plainText",
+                  staticContent: "Extra cell",
+                },
+                {
+                  type: "plainText",
+                  staticContent: "Too many cells",
+                },
+                {
+                  type: "plainText",
+                  staticContent: "Fourth cell",
                 },
               ],
             },
