@@ -350,7 +350,7 @@ def test_sf424_short_v3_0_pre_population_with_all_non_null_values(
         agency_name="Example Agency XYZ",
         agency_code="ABC-XYZ-123-456-789",
         has_organization=True,
-        uei="TESTUEI98765",
+        uei="SHORTUEI9876",
         has_assistance_listing_number=True,
         assistance_listing_number="12.345",
         assistance_listing_program_title="Example Program Title",
@@ -360,7 +360,7 @@ def test_sf424_short_v3_0_pre_population_with_all_non_null_values(
 
     assert len(issues) == 0
     app_json = application_form.application_response
-    assert app_json["sam_uei"] == "TESTUEI98765"
+    assert app_json["sam_uei"] == "SHORTUEI9876"
     assert app_json["agency_name"] == "Example Agency XYZ"
     assert app_json["assistance_listing_number"] == "12.345"
     assert app_json["assistance_listing_program_title"] == "Example Program Title"
