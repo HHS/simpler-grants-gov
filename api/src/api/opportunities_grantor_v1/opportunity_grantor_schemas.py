@@ -740,6 +740,12 @@ class CompetitionInstructionUploadResponseV1Schema(ResponseWithErrorsSchema):
     data = fields.Nested(CompetitionInstructionUploadResponseDataV1Schema())
 
 
+class DeleteCompetitionInstructionResponseV1Schema(ResponseWithErrorsSchema):
+    """Response Schema for Delete Competition Instruction Endpoint"""
+
+    pass
+
+
 ####################################
 # Opportunity Audit History
 ####################################
