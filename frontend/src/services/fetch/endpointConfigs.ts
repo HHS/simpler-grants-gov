@@ -62,6 +62,20 @@ export const fetchFormEndpoint = {
   method: "GET" as ApiMethod,
 };
 
+export const fetchFormsEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "forms",
+  method: "GET" as ApiMethod,
+};
+
+export const fetchCompetitionFormsEndpoint = {
+  basePath: environment.API_URL,
+  version: "alpha",
+  namespace: "competitions",
+  method: "PUT" as ApiMethod,
+};
+
 export const fetchOpportunityEndpoint = {
   basePath: environment.API_URL,
   version: "v1",

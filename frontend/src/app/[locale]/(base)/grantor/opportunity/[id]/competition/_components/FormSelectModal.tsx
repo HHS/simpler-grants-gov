@@ -1,6 +1,9 @@
 "use client";
 
+import { getForms } from "src/services/fetch/fetchers/allFormsFetcher";
+import { getCompetitionFormDetails } from "src/services/fetch/fetchers/competitionFormsFetcher";
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
+import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
@@ -13,7 +16,11 @@ import {
 
 import { SimplerModal } from "src/components/core/SimplerModal";
 
-export const FormSelectModal = () => {
+export const FormSelectModal = async (competitionId: string) => {
+  const competitionFormsResponse =
+    await getCompetitionFormDetails(competitionId);
+  const allFormsResponse = await getForms();
+  const selectedForms: Record<string, boolean> = {};
   const t = useTranslations("FormSelectModal");
   const formModalRef = useRef<ModalRef | null>(null);
   const handleSubmit = () => {
@@ -22,6 +29,9 @@ export const FormSelectModal = () => {
   const onClose = () => {
     formModalRef.current?.toggleModal();
   };
+  competitionFormsResponse.data.forEach((form) => {
+    selectedForms[form.form_id] = form.is_required;
+  });
   return (
     <SimplerModal
       modalId={"piv-required-modal"}
