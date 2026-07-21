@@ -1,3 +1,4 @@
+import { AwardSelectionMethod as AwardSelectionMethodValue } from "src/constants/awardRecommendation";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 
 export type AwardRecommendationStatus = "draft" | "in_review" | "approved";
@@ -5,9 +6,7 @@ export type AwardRecommendationStatus = "draft" | "in_review" | "approved";
 export type AwardSelectionMethod = "merit-review-only" | "merit-review-other";
 
 export type AwardRecommendationType =
-  | "recommended_for_funding"
-  | "recommended_without_funding"
-  | "not_recommended";
+  "recommended_for_funding" | "recommended_without_funding" | "not_recommended";
 
 export type AwardRecommendationSummary = {
   total_received_count: number;
@@ -153,6 +152,14 @@ export type AwardRecommendationSubmissionDetail = {
   award_recommendation_type?: AwardRecommendationType;
   has_exception?: boolean;
   exception_detail?: string;
+};
+
+export type AwardRecommendationUpdate = {
+  award_selection_method: AwardSelectionMethodValue;
+  additional_info?: string | null;
+  funding_strategy?: string | null;
+  selection_method_detail?: string | null;
+  other_key_information?: string | null;
 };
 
 export type AwardRecommendationSubmissionDetailUpdate = {

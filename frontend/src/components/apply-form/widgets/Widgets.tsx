@@ -21,7 +21,7 @@ import PrintAttachmentWidget from "./PrintAttachmentWidget";
 import PrintWidget from "./PrintWidget";
 import RadioWidget from "./RadioWidget";
 import SelectWidget from "./SelectWidget";
-import TableWidget from "./TableWidget";
+import TableWidget from "./TableWidget/TableWidget";
 import TextAreaWidget from "./TextAreaWidget";
 import TextWidget from "./TextWidget";
 

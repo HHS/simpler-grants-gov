@@ -11,10 +11,9 @@ from werkzeug.datastructures import FileStorage
 
 from src.app_config import AppConfig
 from src.auth.endpoint_access_util import check_user_access
-from src.constants.lookup_constants import ApplicationAuditEvent, Privilege, SubmissionIssue
+from src.constants.lookup_constants import Privilege, SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.db.models.user_models import User
-from src.services.applications.application_audit import add_audit_event
 from src.services.applications.get_application import get_application
 
 logger = logging.getLogger(__name__)
@@ -64,13 +63,8 @@ def create_application_attachment(
         application_attachment=None,
     )
 
-    add_audit_event(
-        db_session=db_session,
-        application=application,
-        user=user,
-        audit_event=ApplicationAuditEvent.ATTACHMENT_ADDED,
-        target_attachment=application_attachment,
-    )
+    # The ATTACHMENT_ADDED audit event is intentionally not emitted here. It is
+    # emitted on form save when the attachment is diffed into the form response.
     return application_attachment
 
 

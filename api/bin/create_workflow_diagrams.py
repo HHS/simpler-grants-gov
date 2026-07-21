@@ -11,7 +11,6 @@ from src.workflow.registry.workflow_registry import WorkflowRegistry
 # and the workflows are populated into the WorkflowRegistry
 import src.workflow.state_machine  # noqa: F401 isort:skip
 
-
 logger = logging.getLogger(__name__)
 
 

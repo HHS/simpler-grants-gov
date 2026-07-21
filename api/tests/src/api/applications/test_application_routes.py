@@ -2,6 +2,7 @@
 import uuid
 from datetime import date, timedelta
 
+import grants_shared.util.file_util as file_util
 import pytest
 from grants_shared.util import datetime_util
 from grants_shared.util.datetime_util import get_now_us_eastern_date
@@ -55,6 +56,10 @@ SIMPLE_ATTACHMENT_JSON_SCHEMA = {
 }
 
 SIMPLE_ATTACHMENT_RULE_SCHEMA = {"attachment_field": {"gg_validation": {"rule": "attachment"}}}
+
+SIMPLE_ATTACHMENT_UI_SCHEMA = [
+    {"type": "field", "definition": "/properties/attachment_field", "widget": "Attachment"},
+]
 
 
 def test_application_start_success(
@@ -680,6 +685,91 @@ def test_application_form_update_with_rule_validation_issues(
         application.application_audits[0].target_application_form_id
         == existing_application_form.application_form_id
     )
+
+
+def test_application_form_update_audits_added_attachment(
+    client, enable_factory_create, db_session, create_test_form
+):
+    """Adding an attachment to a form response emits an ATTACHMENT_ADDED audit on save"""
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
+    form = create_test_form(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+        form_ui_schema=SIMPLE_ATTACHMENT_UI_SCHEMA,
+    )
+    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
+    ApplicationFormFactory.create(
+        application=application, competition_form=competition_form, application_response={}
+    )
+    attachment = ApplicationAttachmentFactory.create(application=application)
+
+    request_data = {
+        "application_response": {"attachment_field": str(attachment.application_attachment_id)}
+    }
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+
+    audit_events = {
+        (a.application_audit_event, a.target_attachment_id) for a in application.application_audits
+    }
+    assert (ApplicationAuditEvent.FORM_UPDATED, None) in audit_events
+    assert (
+        ApplicationAuditEvent.ATTACHMENT_ADDED,
+        attachment.application_attachment_id,
+    ) in audit_events
+
+
+def test_application_form_update_audits_deleted_attachment(
+    client, enable_factory_create, db_session, s3_config, create_test_form
+):
+    """Removing an attachment from a form response deletes it and emits ATTACHMENT_DELETED"""
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
+    form = create_test_form(
+        form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
+        form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
+        form_ui_schema=SIMPLE_ATTACHMENT_UI_SCHEMA,
+    )
+    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
+    attachment = ApplicationAttachmentFactory.create(application=application)
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"attachment_field": str(attachment.application_attachment_id)},
+    )
+
+    assert file_util.file_exists(attachment.file_location) is True
+
+    request_data = {"application_response": {}}
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+
+    db_session.refresh(attachment)
+    assert attachment.is_deleted is True
+    assert attachment.file_location == "DELETED"
+    assert file_util.file_exists(attachment.file_location) is False
+
+    audit_events = {
+        (a.application_audit_event, a.target_attachment_id) for a in application.application_audits
+    }
+    assert (ApplicationAuditEvent.FORM_UPDATED, None) in audit_events
+    assert (
+        ApplicationAuditEvent.ATTACHMENT_DELETED,
+        attachment.application_attachment_id,
+    ) in audit_events
 
 
 def test_application_form_update_with_invalid_schema_500(

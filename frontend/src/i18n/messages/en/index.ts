@@ -78,6 +78,10 @@ export const messages = {
       watch: "Watch recordings of past Big Demos",
       watchLinks: [
         {
+          text: "June 30, 2026",
+          link: "https://youtu.be/AeHXvMamcnc?si=3dikqd4MU7zNZ5-q",
+        },
+        {
           text: "January 29, 2026",
           link: "https://youtu.be/LBIqOTKOFf0?si=O0Ec4PaNuAByeHA9",
         },
@@ -2101,6 +2105,10 @@ export const messages = {
       submitForReview: "Submit for review",
       backToEdit: "Back to Edit",
       backToSubmissions: "Back to submissions",
+    },
+    save: {
+      success: "Your changes have been saved.",
+      error: "We encountered an error saving your changes. Please try again.",
     },
     submissionEdit: {
       editTitle: "Edit {applicationSubmissionNumber}",

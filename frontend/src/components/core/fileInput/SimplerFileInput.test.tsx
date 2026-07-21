@@ -1069,7 +1069,7 @@ describe("SimplerFileInput", () => {
 
       await userEvent.click(cancelButton);
       expect(controllerAbortMock).toHaveBeenCalledTimes(1);
-      expect(input).toHaveValue();
+      expect(input).not.toHaveValue();
     });
     it("[non-multifile] disallows uploading additional files if input already has a file", async () => {
       render(

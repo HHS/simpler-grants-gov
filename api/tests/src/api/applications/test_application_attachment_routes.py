@@ -66,14 +66,9 @@ def test_application_attachment_create_200(
     assert application_attachment.file_size_bytes > 0
     assert file_util.file_exists(application_attachment.file_location) is True
 
-    # Verify audit event added
-    assert len(application.application_audits) == 1
-    assert (
-        application.application_audits[0].application_audit_event
-        == ApplicationAuditEvent.ATTACHMENT_ADDED
-    )
-    assert application.application_audits[0].user_id == user.user_id
-    assert str(application.application_audits[0].target_attachment_id) == application_attachment_id
+    # No audit event is emitted on attachment create; it is emitted on form save
+    # when the attachment is diffed into the form response.
+    assert len(application.application_audits) == 0
 
 
 def test_application_attachment_create_404_not_found(
@@ -699,17 +694,9 @@ def test_application_attachment_delete_200(db_session, enable_factory_create, cl
         == second_attachment.application_attachment_id
     )
 
-    # Verify audit event added
-    assert len(application.application_audits) == 1
-    assert (
-        application.application_audits[0].application_audit_event
-        == ApplicationAuditEvent.ATTACHMENT_DELETED
-    )
-    assert application.application_audits[0].user_id == user.user_id
-    assert (
-        application.application_audits[0].target_attachment_id
-        == application_attachment.application_attachment_id
-    )
+    # No audit event is emitted on attachment delete; it is emitted on form save
+    # when the attachment is diffed out of the form response.
+    assert len(application.application_audits) == 0
 
 
 def test_application_attachment_delete_404_application_not_found(
