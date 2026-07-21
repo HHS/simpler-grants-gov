@@ -253,14 +253,13 @@ class TestEPAKeyContactsXMLGeneration:
         assert "LastName>Person<" in xml_data
         assert "Phone>555-123-4567<" in xml_data
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_generate_epa_key_contacts_xml_empty_form(self):
-        """Test EPA Key Contacts XML generation with no contacts (empty form).
+        """EPA Key Contacts XML generation with no contacts (empty form).
 
-        Note: The XML service returns an error for empty data, which is expected behavior.
-        In practice, empty forms would be handled at the submission assembly level.
+        All contact elements are optional in the XSD, so an empty form generates just
+        the root element with its required FormVersion attribute.
         """
-        application_data = {}
+        application_data: dict = {}
 
         service = XMLGenerationService()
         request = XMLGenerationRequest(
@@ -270,9 +269,10 @@ class TestEPAKeyContactsXMLGeneration:
 
         response = service.generate_xml(request)
 
-        # Empty data returns an error from the service
-        assert response.success is False
-        assert response.error_message == "No application data provided"
+        assert response.success is True
+        assert response.xml_data is not None
+        assert "KeyContactPersons_2_0" in response.xml_data
+        assert 'FormVersion="2.0"' in response.xml_data
 
     def test_epa_key_contacts_matches_legacy_xml_structure(self):
         """Verify generated XML structure matches legacy grants.gov format (GRANT00848297).
@@ -490,9 +490,9 @@ class TestEPAKeyContactsXSDValidation:
                         "street1": "123 Main Street",
                         "street2": "Suite 100",
                         "city": "Washington",
-                        "state": "DC",
+                        "state": "DC: District of Columbia",
                         "zip_code": "20001",
-                        "country": "USA",
+                        "country": "USA: UNITED STATES",
                     },
                     "phone": "202-555-1234",
                     "fax": "202-555-5678",
@@ -507,9 +507,9 @@ class TestEPAKeyContactsXSDValidation:
                     "address": {
                         "street1": "456 Finance Drive",
                         "city": "Boston",
-                        "state": "MA",
+                        "state": "MA: Massachusetts",
                         "zip_code": "02101",
-                        "country": "USA",
+                        "country": "USA: UNITED STATES",
                     },
                     "phone": "617-555-9999",
                     "email": "jane.doe@example.org",
@@ -519,7 +519,6 @@ class TestEPAKeyContactsXSDValidation:
 
         return application
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_submission_xml_validates_against_xsd(
         self, epa_key_contacts_application, xsd_validator
     ):
@@ -562,7 +561,6 @@ class TestEPAKeyContactsXSDValidation:
             f"Generated XML:\n{epa_xml[:2000]}"
         )
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_empty_form_validates_against_xsd(
         self, enable_factory_create, xsd_validator, seed_form_registry
     ):

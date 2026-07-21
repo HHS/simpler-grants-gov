@@ -155,8 +155,6 @@ describe("TableWidget", () => {
       );
     });
 
-    expect(error.message).toBe(
-      "Table row 1 must contain no more than 3 cells.",
-    );
+    expect(error.message).toBe("Table row 1 must contain exactly 3 cells.");
   });
 });

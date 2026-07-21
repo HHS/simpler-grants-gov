@@ -22,6 +22,6 @@ export const formatCurrencyString = (value?: string) => {
 export const getNumericAmountFromString = (
   value: string | null | undefined,
 ): number => {
-  const raw = (value ?? "").replace(/,/g, "");
+  const raw = (value ?? "").replace(/[$,\s]/g, "");
   return Number(raw) || 0;
 };

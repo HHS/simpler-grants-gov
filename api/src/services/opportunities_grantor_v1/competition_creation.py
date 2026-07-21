@@ -31,7 +31,7 @@ def create_competition(
         competition_id=uuid.uuid4(),
         opportunity_id=opportunity_id,
         is_simpler_grants_enabled=True,
-        **competition_data
+        **competition_data,
     )
 
     # Explicitly initialize all relationships that will be serialized

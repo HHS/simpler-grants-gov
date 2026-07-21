@@ -6,8 +6,19 @@ from datetime import datetime, timedelta
 
 import flask
 import jwt
+from grants_shared.adapters import db
 from grants_shared.adapters.oauth.oauth_client_models import OauthTokenResponse
 from grants_shared.auth.login_gov_jwt_auth import get_config
+
+from src.constants.lookup_constants import MgmtPrivilege
+from src.db.models.resource_models import AbstractResourceTableMixin, MgmtRole
+from src.db.models.user_models import MgmtUser
+from tests.db.models.factories import (
+    MgmtResourceUserFactory,
+    MgmtResourceUserRoleFactory,
+    MgmtRoleFactory,
+    MgmtUserFactory,
+)
 
 
 def create_jwt(
@@ -121,3 +132,40 @@ def mock_oauth_endpoint(app, monkeypatch, private_key, mock_oauth_client):
         "grants_shared.services.users.login_gov_callback_handler.get_login_gov_client",
         override_get_client,
     )
+
+
+def setup_user_with_roles(
+    db_session: db.Session,
+    resources: list[AbstractResourceTableMixin],
+    user: MgmtUser | None = None,
+    *,
+    roles: list[MgmtRole] | None = None,
+    privileges: list[MgmtPrivilege] | None = None,
+):
+    if user is None:
+        user = MgmtUserFactory.create()
+
+    if roles is None and privileges is None:
+        raise Exception("One of roles or privileges is required for setup_user_with_roles")
+    if roles is not None and privileges is not None:
+        raise Exception("Exactly one of roles or privileges is required for setup_user_with_roles")
+
+    resource_types = {r.get_resource_type() for r in resources}
+
+    # If privileges were passed in, use those to make a role
+    if privileges is not None:
+        roles = [MgmtRoleFactory.create(privileges=privileges, resource_types=resource_types)]
+
+    # Create a connection to every resource passed in
+    for resource in resources:
+
+        resource_user = MgmtResourceUserFactory.create(
+            mgmt_resource=resource.resource, mgmt_user=user, resource_user_roles=[]
+        )
+        for role in roles:
+            MgmtResourceUserRoleFactory.create(mgmt_resource_user=resource_user, mgmt_role=role)
+
+    # Make any subsequent calls with these objects go back to the DB.
+    db_session.expire_all()
+
+    return user

@@ -1,8 +1,7 @@
 import { Metadata } from "next";
-import {
-  saveAwardRecommendation,
-  submitAwardRecommendationForReview,
-} from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/actions";
+import { submitAwardRecommendationForReview } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/actions";
+import AwardRecommendationEditForm from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/edit/_components/AwardRecommendationEditForm";
+import AwardRecommendationSaveButton from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/edit/_components/AwardRecommendationSaveButton";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
@@ -14,12 +13,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import {
-  Alert,
-  CharacterCount,
-  Grid,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { Alert, CharacterCount, Grid } from "@trussworks/react-uswds";
 
 import AwardRecommendationAttachments from "src/components/award-recommendation/AwardRecommendationAttachments";
 import AwardRecommendationHero, {
@@ -139,10 +133,8 @@ async function AwardRecommendationEditPageContent({
   // Define button configuration for edit page
   const heroButtons: HeroButtonConfig[] = [
     {
-      type: "action",
-      label: t("heroButtons.save"),
-      formAction: saveAwardRecommendation,
-      outline: true,
+      type: "custom",
+      node: <AwardRecommendationSaveButton label={t("heroButtons.save")} />,
     },
     {
       type: "navigation",
@@ -203,77 +195,74 @@ async function AwardRecommendationEditPageContent({
   ];
 
   return (
-    <form>
+    <AwardRecommendationEditForm
+      awardRecommendationId={awardRecommendationId}
+      hero={
+        awardRecommendationDetails ? (
+          <Suspense
+            fallback={
+              <span data-testid="award-recommendation-hero-fallback"></span>
+            }
+          >
+            <AwardRecommendationHero
+              awardRecommendationDetails={awardRecommendationDetails}
+              buttons={heroButtons}
+            />
+          </Suspense>
+        ) : null
+      }
+    >
       {awardRecommendationDetails && (
-        <Suspense
-          fallback={
-            <span data-testid="award-recommendation-hero-fallback"></span>
-          }
-        >
-          <AwardRecommendationHero
-            awardRecommendationDetails={awardRecommendationDetails}
-            buttons={heroButtons}
-          />
-        </Suspense>
-      )}
-      <GridContainer>
-        {awardRecommendationDetails && (
-          <Grid row className="grid-gap">
-            <Grid
-              col={3}
-              tablet={{ col: 3 }}
-              className="display-none desktop:display-block"
-            >
-              <LeftHandFormNav
-                title={t("onThisPage")}
-                fields={navigationItems}
-              />
-            </Grid>
-            <Grid col={12} desktop={{ col: 9 }}>
-              <div id="opportunity" className="seg-scroll-margin-top--header">
-                <OpportunitySection
-                  awardRecommendationDetails={awardRecommendationDetails}
-                />
-              </div>
-              <div>
-                <RecommendationSection
-                  mode="edit"
-                  recommendationMethod={
-                    awardRecommendationDetails.award_selection_method
-                  }
-                  recommendationMethodDetails={
-                    awardRecommendationDetails.selection_method_detail
-                  }
-                  otherKeyInformation={
-                    awardRecommendationDetails.other_key_information
-                  }
-                />
-                <div
-                  id="recommendations"
-                  className="seg-scroll-margin-top--header"
-                >
-                  <RecommendationSummarySection
-                    awardRecommendationId={awardRecommendationId}
-                    summary={
-                      awardRecommendationDetails.award_recommendation_summary
-                    }
-                    fundingStrategy={
-                      awardRecommendationDetails.funding_strategy
-                    }
-                  />
-                </div>
-                <div id="attachments" className="seg-scroll-margin-top--header">
-                  <AwardRecommendationAttachments
-                    awardRecommendationId={awardRecommendationId}
-                    mode="edit"
-                  />
-                </div>
-              </div>
-            </Grid>
+        <Grid row className="grid-gap">
+          <Grid
+            col={3}
+            tablet={{ col: 3 }}
+            className="display-none desktop:display-block"
+          >
+            <LeftHandFormNav title={t("onThisPage")} fields={navigationItems} />
           </Grid>
-        )}
-      </GridContainer>
-    </form>
+          <Grid col={12} desktop={{ col: 9 }}>
+            <div id="opportunity" className="seg-scroll-margin-top--header">
+              <OpportunitySection
+                awardRecommendationDetails={awardRecommendationDetails}
+              />
+            </div>
+            <div>
+              <RecommendationSection
+                mode="edit"
+                recommendationMethod={
+                  awardRecommendationDetails.award_selection_method
+                }
+                recommendationMethodDetails={
+                  awardRecommendationDetails.selection_method_detail
+                }
+                otherKeyInformation={
+                  awardRecommendationDetails.other_key_information
+                }
+              />
+              <div
+                id="recommendations"
+                className="seg-scroll-margin-top--header"
+              >
+                <RecommendationSummarySection
+                  awardRecommendationId={awardRecommendationId}
+                  summary={
+                    awardRecommendationDetails.award_recommendation_summary
+                  }
+                  fundingStrategy={awardRecommendationDetails.funding_strategy}
+                />
+              </div>
+              <div id="attachments" className="seg-scroll-margin-top--header">
+                <AwardRecommendationAttachments
+                  awardRecommendationId={awardRecommendationId}
+                  mode="edit"
+                />
+              </div>
+            </div>
+          </Grid>
+        </Grid>
+      )}
+    </AwardRecommendationEditForm>
   );
 }
 

@@ -234,6 +234,10 @@ describe("buildFormTreeRecursive", () => {
                 {
                   cells: [
                     {
+                      type: "plainText",
+                      staticContent: "Item 1",
+                    },
+                    {
                       type: "input",
                       definition: "/properties/first_value",
                     },

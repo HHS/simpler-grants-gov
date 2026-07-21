@@ -79,6 +79,7 @@ export type MetadataPageFieldDefinition<TValueKey extends string = string> =
 /** Validation messages commonly reused across feature metadata definitions. */
 export type ValidationMetadata = {
   requiredFieldMessage?: string;
+  inlineErrorSelector?: string;
   emailValidationMessage?: string;
   negativeNumberValidationMessage?: string;
   characterLimitValidationMessage?: string;

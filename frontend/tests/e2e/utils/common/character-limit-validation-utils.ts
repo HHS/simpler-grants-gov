@@ -1,18 +1,11 @@
 import { expect, type Page } from "@playwright/test";
 import { type ValidationMetadata } from "tests/e2e/utils/common/types";
+import {
+  fillPageFields,
+  type PageFillField,
+} from "tests/e2e/utils/pages/general-pages-filling";
 
-/**
- * Shared helpers for metadata-driven character-limit validation.
- *
- * How this file works:
- * - Select fields that define maxLength in metadata.
- * - Resolve the shared character-limit validation message.
- * - Build deterministic over-limit fill data for those fields.
- * - Assert expected counts of visible character-limit messages.
- */
-
-/** Minimum metadata needed to generate and assert character-limit failures. */
-type CharacterLimitedField<TValueKey extends string = string> = {
+type CharacterLimitValidationDefinition<TValueKey extends string> = {
   valueKey: TValueKey;
   maxLength?: number;
 } & ValidationMetadata;
@@ -20,7 +13,7 @@ type CharacterLimitedField<TValueKey extends string = string> = {
 /** Returns fields that define a maxLength constraint in metadata. */
 export const getCharacterLimitedFields = <
   TValueKey extends string,
-  TDefinition extends CharacterLimitedField<TValueKey>,
+  TDefinition extends CharacterLimitValidationDefinition<TValueKey>,
 >(
   definitions: TDefinition[],
 ): TDefinition[] => {
@@ -31,7 +24,7 @@ export const getCharacterLimitedFields = <
 /** Resolves the shared character-limit validation message from field metadata. */
 export const getCharacterLimitValidationMessage = <
   TValueKey extends string,
-  TDefinition extends CharacterLimitedField<TValueKey>,
+  TDefinition extends CharacterLimitValidationDefinition<TValueKey>,
 >(
   definitions: TDefinition[],
 ): string => {
@@ -54,7 +47,7 @@ export const getCharacterLimitValidationMessage = <
  */
 export const buildOverLimitFillData = <
   TValueKey extends string,
-  TDefinition extends CharacterLimitedField<TValueKey>,
+  TDefinition extends CharacterLimitValidationDefinition<TValueKey>,
 >(
   definitions: TDefinition[],
   fillData: Record<TValueKey, string>,
@@ -78,14 +71,65 @@ export const buildOverLimitFillData = <
 };
 
 /** Asserts the exact count of visible character-limit validation messages. */
-export const assertCharacterLimitMessageCount = async (
+export const assertCharacterLimitMessageCount = async <
+  TValueKey extends string,
+  TDefinition extends CharacterLimitValidationDefinition<TValueKey>,
+>(
   page: Page,
-  definitions: CharacterLimitedField[],
+  definitions: TDefinition[],
   expectedCount: number,
 ): Promise<void> => {
-  // Assert total visible occurrences of the shared character-limit message.
+  // Assert occurrences in the field status element only, excluding SR/live-region duplicates.
   const message = getCharacterLimitValidationMessage(definitions);
-  await expect(page.getByText(message, { exact: true })).toHaveCount(
-    expectedCount,
-  );
+  await expect(
+    page.getByTestId("characterCountMessage").filter({ hasText: message }),
+  ).toHaveCount(expectedCount);
 };
+
+export type AssertCharacterLimitValidationsOptions<
+  TValueKey extends string,
+  TDefinition extends CharacterLimitValidationDefinition<TValueKey>,
+> = {
+  triggerButtonNames?: string[];
+  pageUrlPattern?: RegExp;
+  buildPageFields: (
+    definitions: TDefinition[],
+    fillData: Record<TValueKey, string>,
+  ) => PageFillField[];
+};
+
+/**
+ * Fills over-limit values from metadata, triggers validation, and asserts
+ * character-limit message count for all character-limited fields.
+ */
+export async function assertCharacterLimitValidationsFromDefinitions<
+  TValueKey extends string,
+  TDefinition extends CharacterLimitValidationDefinition<TValueKey>,
+>(
+  page: Page,
+  definitions: TDefinition[],
+  fillData: Record<TValueKey, string>,
+  options: AssertCharacterLimitValidationsOptions<TValueKey, TDefinition>,
+): Promise<void> {
+  await fillPageFields(
+    page,
+    options.buildPageFields(
+      definitions,
+      buildOverLimitFillData(definitions, fillData),
+    ),
+  );
+
+  const triggerButtonNames = options.triggerButtonNames ?? ["Save"];
+  for (const triggerButtonName of triggerButtonNames) {
+    await page.getByRole("button", { name: triggerButtonName }).click();
+    if (options.pageUrlPattern) {
+      await expect(page).toHaveURL(options.pageUrlPattern);
+    }
+  }
+
+  await assertCharacterLimitMessageCount(
+    page,
+    definitions,
+    getCharacterLimitedFields(definitions).length,
+  );
+}
