@@ -350,6 +350,10 @@ export const UiJsonSchema: RJSFSchema = {
         staticContent: {
           type: "string",
         },
+        format: {
+          type: "string",
+          enum: ["integer", "decimal", "currency", "dollar", "percentage"],
+        },
       },
       required: ["type"],
       allOf: [
@@ -379,7 +383,14 @@ export const UiJsonSchema: RJSFSchema = {
           then: {
             required: ["staticContent"],
             not: {
-              required: ["definition"],
+              anyOf: [
+                {
+                  required: ["definition"],
+                },
+                {
+                  required: ["format"],
+                },
+              ],
             },
           },
         },

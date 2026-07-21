@@ -1,6 +1,10 @@
 "use server";
 
-import { updateAwardRecommendationSubmissionDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { AwardSelectionMethod } from "src/constants/awardRecommendation";
+import {
+  updateAwardRecommendation,
+  updateAwardRecommendationSubmissionDetails,
+} from "src/services/fetch/fetchers/awardRecommendationFetcher";
 import {
   AwardRecommendationSubmissionDetailUpdate,
   AwardRecommendationType,
@@ -79,12 +83,33 @@ function buildSubmissionUpdate(
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
+function nullableStringValue(value: FormDataEntryValue | null): string | null {
+  return readStringValue(value) || null;
+}
+
 export async function saveAwardRecommendation(
-  _formData: FormData,
+  _previousState: AwardRecommendationActionResponse,
+  formData: FormData,
 ): Promise<AwardRecommendationActionResponse> {
+  const awardRecommendationId = readStringValue(
+    formData.get("award_recommendation_id"),
+  );
+
   try {
-    // TODO: Implement save functionality when endpoint is available
+    await updateAwardRecommendation(awardRecommendationId, {
+      award_selection_method: readStringValue(
+        formData.get("award_selection_method"),
+      ) as AwardSelectionMethod,
+      additional_info: nullableStringValue(formData.get("additional_info")),
+      funding_strategy: nullableStringValue(formData.get("funding_strategy")),
+      selection_method_detail: nullableStringValue(
+        formData.get("selection_method_detail"),
+      ),
+      other_key_information: nullableStringValue(
+        formData.get("other_key_information"),
+      ),
+    });
+
     return {
       success: true,
     };
