@@ -34,7 +34,9 @@ export type CustomButtonConfig = {
 };
 
 export type HeroButtonConfig =
-  ActionButtonConfig | NavigationButtonConfig | CustomButtonConfig;
+  | ActionButtonConfig
+  | NavigationButtonConfig
+  | CustomButtonConfig;
 
 export type ExternalLinkConfig = {
   label: string;
@@ -166,14 +168,14 @@ export default async function AwardRecommendationHero({
             </>
           ) : (
             <div className="padding-bottom-4 mobile-lg:padding-y-4 tablet:padding-y-3">
-              <Grid className="padding-bottom-4 mobile-lg:padding-y-4 tablet:padding-y-3">
-                <h1 className="font-sans-xl tablet:font-sans-2xl margin-0">
-                  {heading || defaultHeading}
-                </h1>
-              </Grid>
-              {(externalLink || (buttons && buttons.length > 0)) && (
-                <div className="display-flex flex-column tablet:flex-row tablet:flex-justify flex-align-end gap-2">
-                  {externalLink && (
+              {externalLink ? (
+                <>
+                  <Grid className="padding-bottom-4 mobile-lg:padding-y-4 tablet:padding-y-3">
+                    <h1 className="font-sans-xl tablet:font-sans-2xl margin-0">
+                      {heading || defaultHeading}
+                    </h1>
+                  </Grid>
+                  <div className="display-flex flex-column tablet:flex-row tablet:flex-justify flex-align-end gap-2">
                     <Link
                       href={externalLink.href}
                       target="_blank"
@@ -189,9 +191,48 @@ export default async function AwardRecommendationHero({
                         />
                       )}
                     </Link>
-                  )}
+                    {buttons && buttons.length > 0 && (
+                      <div className="display-flex flex-justify-start gap-1 margin-top-4 tablet:margin-top-0 flex-shrink-0">
+                        {buttons.map((button, index) => {
+                          if (button.type === "navigation") {
+                            return (
+                              <Link
+                                key={index}
+                                href={button.href}
+                                className={`usa-button ${button.outline ? "usa-button--outline" : ""} width-auto`}
+                                prefetch={false}
+                              >
+                                {button.label}
+                              </Link>
+                            );
+                          } else if (button.type === "custom") {
+                            return <span key={index}>{button.node}</span>;
+                          } else {
+                            return (
+                              <Button
+                                key={index}
+                                type="submit"
+                                formAction={button.formAction}
+                                outline={button.outline}
+                                disabled={button.disabled}
+                                className="width-auto"
+                              >
+                                {button.label}
+                              </Button>
+                            );
+                          }
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="display-flex flex-column tablet:flex-row tablet:flex-justify tablet:flex-align-center gap-2">
+                  <h1 className="font-sans-xl tablet:font-sans-2xl margin-0">
+                    {heading || defaultHeading}
+                  </h1>
                   {buttons && buttons.length > 0 && (
-                    <div className="display-flex flex-justify-start gap-1 margin-top-4 tablet:margin-top-0 flex-shrink-0">
+                    <div className="display-flex flex-justify-start gap-1 flex-shrink-0">
                       {buttons.map((button, index) => {
                         if (button.type === "navigation") {
                           return (
