@@ -108,6 +108,74 @@ describe("TableWidget", () => {
     });
   });
 
+  it("renders read-only table values from form data", () => {
+    render(
+      <TableWidget
+        {...props}
+        schema={{}}
+        rawErrors={[]}
+        value={{ first_value: 50, second_value: 125 }}
+        options={{}}
+      />,
+    );
+
+    expect(
+      screen.getByTestId("summary_table_test-0-2-read-only"),
+    ).toHaveTextContent("125");
+  });
+
+  it("uses JSON schema definition paths for nested form values", () => {
+    const nestedProps: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        type: "multiField",
+        name: "nested_table_test",
+        widget: "Table",
+        definition: ["/properties/parent/properties/child"],
+        children: {
+          columns: [{ columnHeader: "Item" }, { columnHeader: "Child Value" }],
+          rows: [
+            {
+              cells: [
+                {
+                  type: "plainText",
+                  staticContent: "Nested item",
+                },
+                {
+                  type: "input",
+                  definition: "/properties/parent/properties/child",
+                  format: "integer",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+    const onChange = jest.fn();
+
+    render(
+      <TableWidget
+        {...nestedProps}
+        onChange={onChange}
+        schema={{}}
+        rawErrors={[]}
+        value={{ parent: { child: 10 } }}
+        options={{}}
+      />,
+    );
+
+    expect(screen.getByTestId("nested_table_test-0-1-input")).toHaveValue("10");
+
+    fireEvent.change(screen.getByTestId("nested_table_test-0-1-input"), {
+      target: { value: "25" },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      parent: { child: "25" },
+    });
+  });
+
   it("throws when a row does not contain one cell for each configured column", async () => {
     const { children: tableChildren, ...tableUiSchema } = props.uiSchemaField;
 
