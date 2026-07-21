@@ -1,4 +1,4 @@
-FROM docker pull ghcr.io/hhs/python-base-image:64ba00d@sha256:084381646234074fa58d963269cc49d7042941ecebab1cd8878c600becfac22c AS base
+FROM ghcr.io/hhs/python-base-image:64ba00d@sha256:084381646234074fa58d963269cc49d7042941ecebab1cd8878c600becfac22c AS base
 
 ARG RUN_UID
 ARG RUN_USER
