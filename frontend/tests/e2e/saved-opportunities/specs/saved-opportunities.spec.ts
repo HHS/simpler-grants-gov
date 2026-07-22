@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav, waitForURLChange } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
