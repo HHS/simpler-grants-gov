@@ -18,8 +18,8 @@ from src.constants.static_role_values import (
     CONTENT_CREATOR,
     FINAL_AWARD_REC_REVIEWER,
     FMO_REVIEWER,
-    GMS_REVIEWER,
     GMO_REVIEWER,
+    GMS_REVIEWER,
     GRANTOR_BUDGET_OFFICER,
     GRANTOR_PROGRAM_OFFICER,
     PQC_REVIEWER,
@@ -192,11 +192,9 @@ def _setup_agency_and_users(db_session: db.Session) -> Agency:
             user_id = uuid.UUID(f"660e8400-e29b-41d4-a716-4466554400{user_counter:02d}")
             username = f"{role_slug}_{i}"
             display_name = f"AR User - {role_name} {i}"
-            UserBuilder(user_id, db_session, display_name).with_oauth_login(
-                username
-            ).with_api_key(f"{username}_key").with_jwt_auth().with_agency(
-                agency, roles=[role]
-            ).build()
+            UserBuilder(user_id, db_session, display_name).with_oauth_login(username).with_api_key(
+                f"{username}_key"
+            ).with_jwt_auth().with_agency(agency, roles=[role]).build()
             logger.info(f"Created user: {username} ({role_name})")
 
     logger.info(f"✓ Created 1 agency and {user_counter} users with different AR roles")

@@ -221,9 +221,7 @@ CONTENT_CREATOR = Role(
         CONTENT_CREATOR_ID,
         [Privilege.CONTENT_CREATOR],
     ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=CONTENT_CREATOR_ID, role_type=RoleType.AGENCY)
-    ],
+    link_role_types=[LinkRoleRoleType(role_id=CONTENT_CREATOR_ID, role_type=RoleType.AGENCY)],
 )
 
 PQC_REVIEWER_ID = uuid.UUID("8b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e")
@@ -235,9 +233,7 @@ PQC_REVIEWER = Role(
         PQC_REVIEWER_ID,
         [Privilege.PQC_REVIEWER],
     ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=PQC_REVIEWER_ID, role_type=RoleType.AGENCY)
-    ],
+    link_role_types=[LinkRoleRoleType(role_id=PQC_REVIEWER_ID, role_type=RoleType.AGENCY)],
 )
 
 GMS_REVIEWER_ID = uuid.UUID("9c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f")
@@ -249,9 +245,7 @@ GMS_REVIEWER = Role(
         GMS_REVIEWER_ID,
         [Privilege.GMS_REVIEWER],
     ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=GMS_REVIEWER_ID, role_type=RoleType.AGENCY)
-    ],
+    link_role_types=[LinkRoleRoleType(role_id=GMS_REVIEWER_ID, role_type=RoleType.AGENCY)],
 )
 
 FMO_REVIEWER_ID = uuid.UUID("0d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a")
@@ -263,9 +257,7 @@ FMO_REVIEWER = Role(
         FMO_REVIEWER_ID,
         [Privilege.FMO_REVIEWER],
     ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=FMO_REVIEWER_ID, role_type=RoleType.AGENCY)
-    ],
+    link_role_types=[LinkRoleRoleType(role_id=FMO_REVIEWER_ID, role_type=RoleType.AGENCY)],
 )
 
 GMO_REVIEWER_ID = uuid.UUID("1e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b")
@@ -277,9 +269,7 @@ GMO_REVIEWER = Role(
         GMO_REVIEWER_ID,
         [Privilege.GMO_REVIEWER],
     ),
-    link_role_types=[
-        LinkRoleRoleType(role_id=GMO_REVIEWER_ID, role_type=RoleType.AGENCY)
-    ],
+    link_role_types=[LinkRoleRoleType(role_id=GMO_REVIEWER_ID, role_type=RoleType.AGENCY)],
 )
 
 FINAL_AWARD_REC_REVIEWER_ID = uuid.UUID("2f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c")
