@@ -7,6 +7,7 @@ from src.constants.lookup_constants import MgmtPrivilege, MgmtResourceType
 from tests.db.models.factories import (
     DepartmentFactory,
     MgmtInternalResourceFactory,
+    MgmtUserApiKeyFactory,
     MgmtUserFactory,
     SubagencyFactory,
     TeamFactory,
@@ -245,6 +246,48 @@ def test_can_access_empty_privileges_422(user_and_token, client, db_session):
     resp = _post(client, user.mgmt_user_id, token, MgmtResourceType.TEAM, team.team_id, [])
 
     assert resp.status_code == 422
+
+
+def test_can_access_via_api_key_200(enable_factory_create, client, db_session):
+    """The endpoint also authenticates via an API key (X-API-Key)."""
+    user = MgmtUserFactory.create()
+    api_key = MgmtUserApiKeyFactory.create(mgmt_user=user, key_id="can-access-key", is_active=True)
+    team = TeamFactory.create()
+    setup_user_with_roles(db_session, [team], user=user, privileges=[MgmtPrivilege.VIEW_TEAM])
+
+    resp = client.post(
+        f"v1/users/{user.mgmt_user_id}/can_access",
+        headers={"X-API-Key": api_key.key_id},
+        json={
+            "mgmt_resource_type": MgmtResourceType.TEAM,
+            "mgmt_resource_id": str(team.team_id),
+            "mgmt_privileges": ["view_team"],
+        },
+    )
+
+    assert resp.status_code == 200
+
+
+def test_can_access_via_api_key_other_user_403(enable_factory_create, client, db_session):
+    """An API-key-authenticated user may only check access for their own user ID."""
+    user = MgmtUserFactory.create()
+    api_key = MgmtUserApiKeyFactory.create(
+        mgmt_user=user, key_id="can-access-key-2", is_active=True
+    )
+    team = TeamFactory.create()
+    setup_user_with_roles(db_session, [team], user=user, privileges=[MgmtPrivilege.VIEW_TEAM])
+
+    resp = client.post(
+        f"v1/users/{uuid.uuid4()}/can_access",
+        headers={"X-API-Key": api_key.key_id},
+        json={
+            "mgmt_resource_type": MgmtResourceType.TEAM,
+            "mgmt_resource_id": str(team.team_id),
+            "mgmt_privileges": ["view_team"],
+        },
+    )
+
+    assert resp.status_code == 403
 
 
 def test_can_access_no_token_401(client, enable_factory_create, db_session):
