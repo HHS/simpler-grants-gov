@@ -1,6 +1,0 @@
-# Docker compose file for testing the release version of the frontend.
-services:
-
-networks:
-  api_grants_backend:
-    external: true

@@ -11,7 +11,6 @@ COPY scripts ./scripts
 RUN npm ci --no-audit \
   # Remove dev packages not removed by `npm prune` maybe from older storybook?
   && rm -rf /frontend/node_modules/@esbuild
-RUN ls node_modules/meriyah/dist
 
 # =============================================================================
 # Development stage
@@ -79,7 +78,6 @@ VOLUME ["/frontend/.next/cache/images/"]
 
 # Remove dev dependencies after build
 RUN npm prune --production
-RUN ls node_modules/meriyah/dist
 # Release stage doesn't have a need for `npm`, so remove it to avoid
 # any vulnerabilities specific to NPM
 RUN npm uninstall -g npm

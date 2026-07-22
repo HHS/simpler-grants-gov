@@ -43,7 +43,7 @@ build-dev: # Build the Next.js local dev server in Docker
 build-storybook: # Build Storybook in Docker
 	docker compose build --no-cache storybook
 
-build-prod: # Build the Next.js local dev server in Docker
+build-prod: # Build the Next.js local prod server in Docker
 	docker compose build --no-cache --progress plain nextjs-prod
 
 reinstall-deps:
@@ -54,7 +54,7 @@ dev: # Run the Next.js local dev server in Docker
 	docker compose up --detach nextjs
 	docker compose logs --follow nextjs
 
-run-prod: # Run the Next.js local dev server in Docker
+run-prod: # Run the Next.js local prod server in Docker
 	docker compose up --detach nextjs-prod
 	docker compose logs --follow nextjs-prod
 
