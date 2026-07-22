@@ -444,7 +444,7 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -530,7 +530,7 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>'
+            f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>'
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>\r\n"
@@ -610,7 +610,7 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -653,7 +653,7 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -694,7 +694,7 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -734,7 +734,7 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -756,7 +756,7 @@ class TestSimplerSOAPGetApplicationZip:
                 "GetObject",
             )
             response = client.get_simpler_soap_response(mock_proxy_response)
-            msg = f"Unable to retrieve file legacy_tracking_number {submission.legacy_tracking_number} from s3 file location."
+            msg = f"Unable to retrieve file legacy_tracking_number GRANT{submission.legacy_tracking_number} from s3 file location."
             assert msg in caplog.messages
             assert response.data == mock_proxy_response.data
             assert response.status_code == mock_proxy_response.status_code

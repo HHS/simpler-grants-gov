@@ -5,6 +5,7 @@ from unittest import mock
 
 from grants_shared.util import file_util
 from lxml import etree
+from sqlalchemy import func, select
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import ApplicationSubmissionRetrieved
@@ -104,6 +105,63 @@ def test_successful_confirm_application_delivery_request(
         "<soapenv:Header/>"
         "<soapenv:Body>"
         "<agen:ConfirmApplicationDeliveryRequest>"
+        f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>'
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+        cert_id=soap_client_certificate.legacy_certificate.cert_id,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        response = client.post(
+            full_path,
+            data=mock_data,
+            headers={
+                "Use-Simpler-Override": "1",
+                MTLS_CERT_HEADER_KEY: mtls_cert,
+            },
+        )
+    assert response.status_code == 200
+    count_query = (
+        select(func.count())
+        .select_from(ApplicationSubmissionRetrieved)
+        .where(
+            ApplicationSubmissionRetrieved.application_submission_id
+            == submission.application_submission_id
+        )
+    )
+    assert db_session.execute(count_query).scalar() == 1
+
+
+def test_successful_confirm_application_delivery_request_if_grants_gov_tracking_number_is_parsed_as_a_string(
+    db_session, client, enable_factory_create
+) -> None:
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
         f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
         "</agen:ConfirmApplicationDeliveryRequest>"
         "</soapenv:Body>"
@@ -127,12 +185,15 @@ def test_successful_confirm_application_delivery_request(
             },
         )
     assert response.status_code == 200
-    retrieved = (
-        db_session.query(ApplicationSubmissionRetrieved)
-        .filter_by(application_submission_id=submission.application_submission_id)
-        .all()
+    count_query = (
+        select(func.count())
+        .select_from(ApplicationSubmissionRetrieved)
+        .where(
+            ApplicationSubmissionRetrieved.application_submission_id
+            == submission.application_submission_id
+        )
     )
-    assert len(retrieved) == 1
+    assert db_session.execute(count_query).scalar() == 1
 
 
 @mock.patch("uuid.uuid4")
@@ -173,7 +234,7 @@ def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_
         "<soapenv:Header/>"
         "<soapenv:Body>"
         "<agen:ConfirmApplicationDeliveryRequest>"
-        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>'
         "</agen:ConfirmApplicationDeliveryRequest>"
         "</soapenv:Body>"
         "</soapenv:Envelope>"
