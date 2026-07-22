@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SF424C_2_0:SF424C_2_0 xmlns:SF424C_2_0="http://apply.grants.gov/forms/SF424C_2_0-V2.0" SF424C_2_0:programType="Construction" SF424C_2_0:FormVersion="2.0">
+  <SF424C_2_0:ProjectCosts>
+    <SF424C_2_0:AdministrationCost>
+      <SF424C_2_0:BudgetEstimatedCostAmount>10000.00</SF424C_2_0:BudgetEstimatedCostAmount>
+      <SF424C_2_0:BudgetNonAllowableCostAmount>1000.00</SF424C_2_0:BudgetNonAllowableCostAmount>
+      <SF424C_2_0:BudgetTotalAllowableCostAmount>9000.00</SF424C_2_0:BudgetTotalAllowableCostAmount>
+    </SF424C_2_0:AdministrationCost>
+    <SF424C_2_0:ConstructionCost>
+      <SF424C_2_0:BudgetEstimatedCostAmount>500000.00</SF424C_2_0:BudgetEstimatedCostAmount>
+      <SF424C_2_0:BudgetNonAllowableCostAmount>50000.00</SF424C_2_0:BudgetNonAllowableCostAmount>
+      <SF424C_2_0:BudgetTotalAllowableCostAmount>450000.00</SF424C_2_0:BudgetTotalAllowableCostAmount>
+    </SF424C_2_0:ConstructionCost>
+    <SF424C_2_0:CostSubtotalBeforeContingencies>
+      <SF424C_2_0:BudgetEstimatedCostAmount>510000.00</SF424C_2_0:BudgetEstimatedCostAmount>
+      <SF424C_2_0:BudgetNonAllowableCostAmount>51000.00</SF424C_2_0:BudgetNonAllowableCostAmount>
+      <SF424C_2_0:BudgetTotalAllowableCostAmount>459000.00</SF424C_2_0:BudgetTotalAllowableCostAmount>
+    </SF424C_2_0:CostSubtotalBeforeContingencies>
+    <SF424C_2_0:Contingencies>
+      <SF424C_2_0:BudgetEstimatedCostAmount>25000.00</SF424C_2_0:BudgetEstimatedCostAmount>
+      <SF424C_2_0:BudgetNonAllowableCostAmount>0.00</SF424C_2_0:BudgetNonAllowableCostAmount>
+      <SF424C_2_0:BudgetTotalAllowableCostAmount>25000.00</SF424C_2_0:BudgetTotalAllowableCostAmount>
+    </SF424C_2_0:Contingencies>
+    <SF424C_2_0:CostSubtotalAfterContingencies>
+      <SF424C_2_0:BudgetEstimatedCostAmount>535000.00</SF424C_2_0:BudgetEstimatedCostAmount>
+      <SF424C_2_0:BudgetNonAllowableCostAmount>51000.00</SF424C_2_0:BudgetNonAllowableCostAmount>
+      <SF424C_2_0:BudgetTotalAllowableCostAmount>484000.00</SF424C_2_0:BudgetTotalAllowableCostAmount>
+    </SF424C_2_0:CostSubtotalAfterContingencies>
+    <SF424C_2_0:TotalProjectCosts>
+      <SF424C_2_0:BudgetEstimatedCostAmount>535000.00</SF424C_2_0:BudgetEstimatedCostAmount>
+      <SF424C_2_0:BudgetNonAllowableCostAmount>51000.00</SF424C_2_0:BudgetNonAllowableCostAmount>
+      <SF424C_2_0:BudgetTotalAllowableCostAmount>484000.00</SF424C_2_0:BudgetTotalAllowableCostAmount>
+    </SF424C_2_0:TotalProjectCosts>
+  </SF424C_2_0:ProjectCosts>
+  <SF424C_2_0:FederalFundingPercentageShareValue>80</SF424C_2_0:FederalFundingPercentageShareValue>
+  <SF424C_2_0:FederalFundingShareValue>387200.00</SF424C_2_0:FederalFundingShareValue>
+</SF424C_2_0:SF424C_2_0>
