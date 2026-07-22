@@ -77,9 +77,8 @@ RUN apt-get update \
 RUN mkdir -p /frontend/.next/cache/images/
 VOLUME ["/frontend/.next/cache/images/"]
 
-RUN ls node_modules/meriyah/dist
 # Remove dev dependencies after build
-# RUN npm prune --production
+RUN npm prune --production
 RUN ls node_modules/meriyah/dist
 # Release stage doesn't have a need for `npm`, so remove it to avoid
 # any vulnerabilities specific to NPM

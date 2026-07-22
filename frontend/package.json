@@ -37,6 +37,7 @@
     "@zip.js/zip.js": "^2.7.60",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "autoprefixer": "^10.4.23",
     "clsx": "^2.1.1",
     "cookies-next": "^6.1.1",
     "dayjs": "^1.11.13",
@@ -108,7 +109,7 @@
     "sass": "^1.78.0",
     "storybook": "^10.4.6",
     "style-loader": "^3.3.2",
-    "typescript": "^5.9.2",
+    "typescript": "5.9.3",
     "vite": "^7.0.0"
   },
   "overrides": {
