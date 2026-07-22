@@ -252,3 +252,17 @@ def test_validate_token_invalid_nonce(login_gov_config, private_rsa_key):
 
     with pytest.raises(JwtValidationError, match="Nonce does not match expected"):
         validate_token(token, nonce=DEFAULT_NONCE, config=login_gov_config)
+
+
+def test_get_final_logout_redirect_uri(login_gov_config):
+
+    assert (
+        login_gov_jwt_auth.get_final_logout_redirect_uri("example message", config=login_gov_config)
+        == "http://localhost:3000/final-logout?message=example+message"
+    )
+    assert (
+        login_gov_jwt_auth.get_final_logout_redirect_uri(
+            "bad message", error_description="it errored", config=login_gov_config
+        )
+        == "http://localhost:3000/final-logout?message=bad+message&error_description=it+errored"
+    )
