@@ -1,5 +1,7 @@
-from grants_shared.api.schemas.extension import Schema, fields
+from grants_shared.api.schemas.extension import Schema, fields, validators
 from grants_shared.api.schemas.response_schema import AbstractResponseSchema
+
+from src.constants.lookup_constants import MgmtPrivilege, MgmtResourceType
 
 
 class UserLoginGovCallbackSchema(Schema):
@@ -40,4 +42,28 @@ class UserTokenRefreshResponseSchema(AbstractResponseSchema):
 
 class UserTokenLogoutResponseSchema(AbstractResponseSchema):
     # No data returned
+    data = fields.MixinField(metadata={"example": None})
+
+
+class MgmtUserCanAccessRequestSchema(Schema):
+    mgmt_resource_id = fields.UUID(
+        required=True, metadata={"description": "The ID of the resource to check access against"}
+    )
+    mgmt_resource_type = fields.Enum(
+        MgmtResourceType,
+        required=True,
+        metadata={"description": "The type of the resource to check access against"},
+    )
+    mgmt_privileges = fields.List(
+        fields.Enum(MgmtPrivilege),
+        required=True,
+        validate=[validators.Length(min=1)],
+        metadata={
+            "description": "The privileges the user must have against the resource. The user must have all of them."
+        },
+    )
+
+
+class MgmtUserCanAccessResponseSchema(AbstractResponseSchema):
+    # No data returned - a 200 indicates the user has access
     data = fields.MixinField(metadata={"example": None})
