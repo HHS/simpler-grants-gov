@@ -28,7 +28,7 @@ import {
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
-const { testOrgLabel, targetEnv } = playwrightEnv;
+const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
 
 // Skip non-Chrome browsers in staging

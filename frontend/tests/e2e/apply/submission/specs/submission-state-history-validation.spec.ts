@@ -35,7 +35,7 @@ import {
   type SubmitOutcome,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { testOrgLabel, targetEnv } = playwrightEnv;
+const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 

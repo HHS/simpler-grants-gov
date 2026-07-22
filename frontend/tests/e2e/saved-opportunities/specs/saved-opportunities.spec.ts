@@ -8,8 +8,6 @@ import { ensureOpportunityIsSaved } from "tests/e2e/utils/saved-opportunities/sa
 
 const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
 
-const { targetEnv } = playwrightEnv;
-
 const SAVED_OPPORTUNITY = {
   title: "TEST-APPLY-ORG-IND-OT01",
   opportunityNumber: "TEST-APPLY-ORG-IND-ON01",
@@ -34,12 +32,7 @@ const CARD_FIELD_LABELS = [
 test.describe("Saved Opportunities", () => {
   // Skip non-Chrome browsers in staging
   test.beforeEach(({ page: _ }, testInfo) => {
-    if (targetEnv === "staging") {
-      test.skip(
-        testInfo.project.name !== "Chrome",
-        "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-      );
-    }
+    skipNonChromeOnStaging(testInfo);
   });
 
   /**
