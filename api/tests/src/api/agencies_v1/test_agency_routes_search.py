@@ -4,6 +4,7 @@ from grants_shared.pagination.pagination_models import SortDirection
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.constants.lookup_constants import OpportunityStatus
 from tests.conftest import BaseTestClass
+from tests.lib.search_index_testing import create_isolated_search_index
 from tests.src.db.models.factories import AgencyFactory
 
 # parent agencies
@@ -22,6 +23,12 @@ AGENCIES = [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH, HHS_OMHA]
 
 
 class TestAgencyRoutesSearch(BaseTestClass):
+
+    @pytest.fixture(scope="class")
+    def agency_index(self, search_client):
+        with create_isolated_search_index(search_client, "test-agency-route", mappings={"properties": {"opportunity_statuses": {"type": "keyword"}}}) as index:
+            yield index
+
     @pytest.fixture(scope="class", autouse=True)
     def setup_search_data(self, agency_index, agency_index_alias, search_client):
         # load agencies into search index

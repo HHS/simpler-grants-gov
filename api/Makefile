@@ -23,6 +23,7 @@ ifdef CI
  # The perl command here modifies the output format to appear as a warning on the github action
  # See https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#setting-a-warning-message
  MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\1:\2:\3 :error: \4/ or s/^/::warning ::/"
+ XDIST := -n auto --dist=loadfile --max-worker-restart=0
 endif
 
 # By default, all python/uv commands will run inside of the docker container

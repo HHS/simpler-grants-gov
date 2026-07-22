@@ -287,68 +287,22 @@ def test_foreign_schema(db_schema_prefix):
 
 @pytest.fixture(scope="session")
 def search_client() -> search.SearchClient:
-    client = search.SearchClient()
-
-    try:
-        yield client
-    finally:
-        # Just in case a test setup an index
-        # in a way that didn't clean it up, delete
-        # all indexes at the end of a run that start with test
-        client.delete_index("test-*")
+    return search.SearchClient()
 
 
-@pytest.fixture(scope="session")
-def opportunity_index(search_client):
-    # create a random index name just to make sure it won't ever conflict
-    # with an actual one, similar to how we create schemas for database tests
-    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
-
-    search_client.create_index(index_name)
-
-    try:
-        yield index_name
-    finally:
-        # Try to clean up the index at the end
-        # Use a prefix which will delete the above (if it exists)
-        # and any that might not have been cleaned up due to issues
-        # in prior runs
-        search_client.delete_index("test-opportunity-index-*")
-
-
-@pytest.fixture(scope="session")
-def opportunity_index_alias(search_client, monkeypatch_session):
+@pytest.fixture(scope="module")
+def opportunity_index_alias(search_client, monkeypatch_module):
     # Note we don't actually create anything, this is just a random name
     alias = f"test-opportunity-index-alias-{uuid.uuid4().int}"
-    monkeypatch_session.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
+    monkeypatch_module.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
     return alias
 
 
-@pytest.fixture(scope="session")
-def agency_index(search_client, monkeypatch_session):
-    # create a random index name just to make sure it won't ever conflict
-    # with an actual one, similar to how we create schemas for database tests
-    index_name = f"test-agency-index-{uuid.uuid4().int}"
-
-    search_client.create_index(
-        index_name, mappings={"properties": {"opportunity_statuses": {"type": "keyword"}}}
-    )
-
-    try:
-        yield index_name
-    finally:
-        # Try to clean up the index at the end
-        # Use a prefix which will delete the above (if it exists)
-        # and any that might not have been cleaned up due to issues
-        # in prior runs
-        search_client.delete_index("test-agency-index-*")
-
-
-@pytest.fixture(scope="session")
-def agency_index_alias(search_client, monkeypatch_session):
+@pytest.fixture(scope="module")
+def agency_index_alias(search_client, monkeypatch_module):
     # Note we don't actually create anything, this is just a random name
     alias = f"test-agency-index-alias-{uuid.uuid4().int}"
-    monkeypatch_session.setenv("AGENCY_SEARCH_INDEX_ALIAS", alias)
+    monkeypatch_module.setenv("AGENCY_SEARCH_INDEX_ALIAS", alias)
     return alias
 
 
@@ -414,7 +368,6 @@ def setup_login_gov_auth(monkeypatch_session, public_rsa_key):
 @pytest.fixture(scope="session")
 def app(
     db_client,
-    opportunity_index_alias,
     monkeypatch_session,
     private_rsa_key,
     mock_oauth_client,

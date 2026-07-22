@@ -7,25 +7,14 @@ from src.constants.lookup_constants import Privilege, WorkflowType
 from src.db.models.workflow_models import Workflow
 from src.workflow.manager.workflow_manager import WorkflowManager
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
+from tests.lib.search_index_testing import create_isolated_search_index
 from tests.src.db.models.factories import OpportunityFactory
 
 
 @pytest.fixture(scope="module")
 def publish_index(search_client):
-    # create a random index name just to make sure it won't ever conflict
-    # with an actual one, similar to how we create schemas for database tests
-    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
-
-    search_client.create_index(index_name)
-
-    try:
-        yield index_name
-    finally:
-        # Try to clean up the index at the end
-        # Use a prefix which will delete the above (if it exists)
-        # and any that might not have been cleaned up due to issues
-        # in prior runs
-        search_client.delete_index("test-opportunity-index-*")
+    with create_isolated_search_index(search_client, "test-opportunity-publish") as index:
+        yield index
 
 
 @pytest.fixture(scope="module", autouse=True)

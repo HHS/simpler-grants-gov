@@ -7,6 +7,7 @@ from src.constants.lookup_constants import OpportunityStatus, WorkflowType
 from src.workflow.handler.event_handler import EventHandler
 from src.workflow.state_machine.opportunity_publish_state_machine import OpportunityPublishState
 from src.workflow.workflow_errors import InvalidEventError
+from tests.lib.search_index_testing import create_isolated_search_index
 from tests.src.db.models.factories import (
     OpportunityFactory,
     OpportunitySummaryFactory,
@@ -17,11 +18,9 @@ from tests.src.workflow.workflow_test_util import build_start_workflow_event, se
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_index(
-    search_client, opportunity_index, opportunity_index_alias, workflow_client_registry
-):
-    """Setup the index - making sure the alias is set"""
-    search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+def search_index(search_client, workflow_client_registry):
+    with create_isolated_search_index(search_client, "test-publish-state-machine") as index:
+        yield index
 
 
 @pytest.mark.parametrize("is_draft", [True, False])

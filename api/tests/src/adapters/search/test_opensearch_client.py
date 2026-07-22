@@ -7,6 +7,7 @@ import pytest
 
 from src.adapters.search import get_opensearch_config
 from src.adapters.search.opensearch_client import SearchClient, _get_connection_parameters
+from tests.lib.search_index_testing import create_isolated_search_index
 from tests.src.adapters.search.test_opensearch_query_builder import (
     CALL_OF_WINTER,
     WINTER,
@@ -24,17 +25,8 @@ from tests.src.adapters.search.test_opensearch_query_builder import (
 
 @pytest.fixture
 def generic_index(search_client):
-    # This is very similar to the opportunity_index fixture, but
-    # is reused per unit test rather than a global value
-    index_name = f"test-index-{uuid.uuid4().int}"
-
-    search_client.create_index(index_name)
-
-    try:
-        yield index_name
-    finally:
-        # Try to clean up the index at the end
-        search_client.delete_index(index_name)
+    with create_isolated_search_index(search_client, "test-index") as index:
+        yield index
 
 
 def test_create_and_delete_index_duplicate(search_client):

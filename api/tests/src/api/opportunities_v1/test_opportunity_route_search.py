@@ -19,6 +19,7 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.opportunity_models import Opportunity
 from tests.conftest import BaseTestClass
+from tests.lib.search_index_testing import create_isolated_search_index
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
@@ -388,6 +389,12 @@ def search_scenario_id_fnc(val):
 
 
 class TestOpportunityRouteSearch(BaseTestClass):
+
+    @pytest.fixture(scope="class")
+    def opportunity_index(self, search_client):
+        with create_isolated_search_index(search_client, "test-opportunity-route") as index:
+            yield index
+
     @pytest.fixture(scope="class", autouse=True)
     def setup_search_data(
         self,

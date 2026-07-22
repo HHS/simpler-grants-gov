@@ -3,6 +3,8 @@ import uuid
 from datetime import date
 from unittest.mock import patch
 
+import pytest
+
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -11,9 +13,16 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models.user_models import UserSavedSearch
+from tests.lib.search_index_testing import create_isolated_search_index
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.api.opportunities_v1.test_opportunity_route_search import build_opp
 from tests.src.db.models.factories import UserFactory
+
+# Scoped to function instead of module as the tests here conflict otherwise
+@pytest.fixture(scope="function")
+def search_index(search_client):
+    with create_isolated_search_index(search_client, "test-save-search-post") as index:
+        yield index
 
 SPORTS = build_opp(
     opportunity_title="Research into Sports administrator industry",
@@ -131,7 +140,7 @@ def test_user_save_search_post_invalid_request(client, user, user_auth_token, db
 
 def test_user_save_search_post(
     client,
-    opportunity_index,
+    search_index,
     search_client,
     user,
     user_auth_token,
@@ -147,16 +156,12 @@ def test_user_save_search_post(
         agency_one_of=["USAID"],
     )
 
-    # Create search index
-    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
-    search_client.create_index(index_name)
-
     # Load into the search index
     schema = OpportunityV1Schema()
     json_records = [schema.dump(opp) for opp in [SPORTS, MEDICAL_LABORATORY]]
-    search_client.bulk_upsert(index_name, json_records, "opportunity_id")
+    search_client.bulk_upsert(search_index, json_records, "opportunity_id")
 
-    search_client.swap_alias_index(index_name, opportunity_index_alias)
+    search_client.swap_alias_index(search_index, opportunity_index_alias)
 
     # Make the request to save a search
     response = client.post(
@@ -227,7 +232,7 @@ def test_user_save_search_post(
 
 def test_user_save_search_post_logging(
     client,
-    opportunity_index,
+    search_index,
     search_client,
     user,
     user_auth_token,
@@ -243,12 +248,10 @@ def test_user_save_search_post_logging(
         agency_one_of=["USAID"],
     )
 
-    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
-    search_client.create_index(index_name)
     schema = OpportunityV1Schema()
     json_records = [schema.dump(opp) for opp in [SPORTS]]
-    search_client.bulk_upsert(index_name, json_records, "opportunity_id")
-    search_client.swap_alias_index(index_name, opportunity_index_alias)
+    search_client.bulk_upsert(search_index, json_records, "opportunity_id")
+    search_client.swap_alias_index(search_index, opportunity_index_alias)
 
     with patch(
         "src.api.users.user_routes.add_extra_data_to_current_request_logs"

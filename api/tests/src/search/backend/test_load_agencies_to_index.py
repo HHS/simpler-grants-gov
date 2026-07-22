@@ -12,6 +12,7 @@ from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
 
 
 class TestLoadAgenciesToIndex(BaseTestClass):
+
     @pytest.fixture(autouse=True)
     def cleanup_agencies(self, db_session):
         db_session.execute(update(LegacyCertificate).values(agency_id=None))
