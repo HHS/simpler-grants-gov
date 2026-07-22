@@ -79,6 +79,54 @@ describe("TableCell", () => {
     expect(onChange).toHaveBeenCalledWith("1250.50");
   });
 
+  it("calls onChange for multi-digit typing and deletion", async () => {
+    const onChange = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+        }}
+        id="input-cell"
+        onChange={onChange}
+        value=""
+      />,
+    );
+
+    const input = screen.getByTestId("input-cell-input");
+
+    await user.type(input, "12");
+    expect(input).toHaveValue("12");
+
+    await user.clear(input);
+    expect(input).toHaveValue("");
+
+    expect(onChange).toHaveBeenNthCalledWith(1, "1");
+    expect(onChange).toHaveBeenNthCalledWith(2, "12");
+    expect(onChange).toHaveBeenLastCalledWith("");
+  });
+
+  it("renders an input name for form submission", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+        }}
+        id="input-cell"
+        name="federal_share"
+        value=""
+      />,
+    );
+
+    expect(screen.getByTestId("input-cell-input")).toHaveAttribute(
+      "name",
+      "federal_share",
+    );
+  });
+
   it("does not pass invalid numeric input changes to onChange", () => {
     const onChange = jest.fn();
 

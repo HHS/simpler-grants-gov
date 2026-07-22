@@ -108,6 +108,55 @@ describe("TableWidget", () => {
     });
   });
 
+  it("prefixes nested table input names with the multiField root when configured under one parent object", () => {
+    const tableProps: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        type: "multiField",
+        name: "budget_424c_table_1",
+        widget: "Table",
+        definition: ["/properties/budget_information"],
+        children: {
+          columns: [
+            { columnHeader: "Category" },
+            { columnHeader: "Total Cost" },
+          ],
+          rows: [
+            {
+              cells: [
+                { type: "plainText", staticContent: "Admin" },
+                {
+                  type: "input",
+                  definition:
+                    "/properties/administrative_and_legal_expenses/properties/total_cost",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    render(
+      <TableWidget
+        {...tableProps}
+        schema={{}}
+        rawErrors={[]}
+        value={{
+          administrative_and_legal_expenses: {
+            total_cost: 100,
+          },
+        }}
+        options={{}}
+      />,
+    );
+
+    expect(screen.getByTestId("budget_424c_table_1-0-1-input")).toHaveAttribute(
+      "name",
+      "budget_information--administrative_and_legal_expenses--total_cost",
+    );
+  });
+
   it("renders read-only table values from form data", () => {
     render(
       <TableWidget
