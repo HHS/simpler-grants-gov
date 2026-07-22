@@ -1,4 +1,4 @@
-import { getCompetitionFormDetails } from "src/services/fetch/fetchers/competitionFormsFetcher";
+import { updateCompetitionForms } from "src/services/fetch/fetchers/competitionFormsFetcher";
 
 const fakeResponseBody = { some: "response body" };
 const mockJson = jest.fn(() => fakeResponseBody);
@@ -16,15 +16,10 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 describe("getFormDetails", () => {
   afterEach(() => jest.clearAllMocks());
   it("calls fetchForm with the correct arguments", async () => {
-    await getCompetitionFormDetails("an id");
+    await updateCompetitionForms({ competitionId: "an id", body: "a body" });
     expect(mockFetchCompetitionForm).toHaveBeenCalledWith({
       subPath: "an id/forms",
+      body: "a body",
     });
-  });
-
-  it("returns json from response", async () => {
-    const result = await getCompetitionFormDetails("an id/forms");
-    expect(mockJson).toHaveBeenCalledTimes(1);
-    expect(result).toEqual(fakeResponseBody);
   });
 });

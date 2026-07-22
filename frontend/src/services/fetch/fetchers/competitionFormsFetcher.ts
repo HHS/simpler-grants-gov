@@ -1,12 +1,15 @@
-import { CompetitionFormsDetailApiResponse } from "src/types/competitionFormsResponseTypes";
+import { CompetitionFormsApiResponse } from "src/types/competitionFormsResponseTypes";
 
 import { fetchCompetitionForms } from "./fetchers";
 
-export const getCompetitionFormDetails = async (
-  id: string,
-): Promise<CompetitionFormsDetailApiResponse> => {
-  const response = await fetchCompetitionForms({ subPath: `${id}/forms` });
-  const responseBody =
-    (await response.json()) as CompetitionFormsDetailApiResponse;
-  return responseBody;
-};
+export async function updateCompetitionForms({
+  competitionId,
+  body,
+}: any): Promise<CompetitionFormsApiResponse> {
+  const response = await fetchCompetitionForms({
+    subPath: `${competitionId}/forms`,
+    body,
+  });
+
+  return (await response.json()) as CompetitionFormsApiResponse;
+}

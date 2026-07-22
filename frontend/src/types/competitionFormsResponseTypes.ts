@@ -1,10 +1,7 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
-export interface CompetitionFormDetail {
-  form_id: string;
-  is_required: boolean;
-}
+import { Competition } from "./competitionsResponseTypes";
 
-export interface CompetitionFormsDetailApiResponse extends APIResponse {
-  data: CompetitionFormDetail[];
+export interface CompetitionFormsApiResponse extends APIResponse {
+  data: Competition;
 }

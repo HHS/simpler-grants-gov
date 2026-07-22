@@ -8,7 +8,7 @@ const mockFetchForms = jest.fn().mockResolvedValue({
 });
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
-  fetchForm: (params: unknown): unknown => {
+  fetchForms: (params: unknown): unknown => {
     return mockFetchForms(params);
   },
 }));
