@@ -6,8 +6,6 @@ from src.legacy_soap_api.grantors.schemas.grants_gov_tracking_number_schema impo
     GrantsGovTrackingNumberRequiredSchema,
 )
 
-GET_APPLICATION_ZIP_REQUEST_ERR = "No grants_gov_tracking_number provided."
-
 
 class XOPIncludeData(BaseModel):
     href: str = Field(alias="@href")

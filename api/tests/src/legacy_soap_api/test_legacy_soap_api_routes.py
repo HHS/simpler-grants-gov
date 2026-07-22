@@ -5,6 +5,7 @@ from unittest import mock
 
 from grants_shared.util import file_util
 from lxml import etree
+from sqlalchemy import func, select
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import ApplicationSubmissionRetrieved
@@ -127,12 +128,15 @@ def test_successful_confirm_application_delivery_request(
             },
         )
     assert response.status_code == 200
-    retrieved = (
-        db_session.query(ApplicationSubmissionRetrieved)
-        .filter_by(application_submission_id=submission.application_submission_id)
-        .all()
+    count_query = (
+        select(func.count())
+        .select_from(ApplicationSubmissionRetrieved)
+        .where(
+            ApplicationSubmissionRetrieved.application_submission_id
+            == submission.application_submission_id
+        )
     )
-    assert len(retrieved) == 1
+    assert db_session.execute(count_query).scalar() == 1
 
 
 def test_successful_confirm_application_delivery_request_if_grants_gov_tracking_number_is_parsed_as_a_string(
@@ -181,12 +185,15 @@ def test_successful_confirm_application_delivery_request_if_grants_gov_tracking_
             },
         )
     assert response.status_code == 200
-    retrieved = (
-        db_session.query(ApplicationSubmissionRetrieved)
-        .filter_by(application_submission_id=submission.application_submission_id)
-        .all()
+    count_query = (
+        select(func.count())
+        .select_from(ApplicationSubmissionRetrieved)
+        .where(
+            ApplicationSubmissionRetrieved.application_submission_id
+            == submission.application_submission_id
+        )
     )
-    assert len(retrieved) == 1
+    assert db_session.execute(count_query).scalar() == 1
 
 
 @mock.patch("uuid.uuid4")
