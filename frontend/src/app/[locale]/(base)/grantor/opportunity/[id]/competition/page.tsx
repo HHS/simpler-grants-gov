@@ -23,12 +23,18 @@ type PageProps = {
 
 export const dynamic = "force-dynamic";
 
-const ButtonSaveAndExit = ({ url }: { url: string }) => {
+const ButtonSaveAndExit = () => {
   const t = useTranslations("OpportunityCompetition.button");
   return (
-    <Link href={url}>
-      <Button type="button">{t("saveAndExit")}</Button>
-    </Link>
+    <>
+      <Button
+        type="submit"
+        form="opportunity-edit-form"
+        className="margin-left-1"
+      >
+        {t("saveAndExit")}
+      </Button>
+    </>
   );
 };
 
@@ -81,8 +87,9 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
       <OpportunityDetailsHeader
         opportunityData={opportunityData}
         locale={locale}
+        hasBackToOverview={true}
       >
-        <ButtonSaveAndExit url={overviewUrl} />
+        <ButtonSaveAndExit />
       </OpportunityDetailsHeader>
       <CompetitionForm opportunityId={id} competitionId={competitionId} />
     </>

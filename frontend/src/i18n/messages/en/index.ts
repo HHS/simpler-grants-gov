@@ -2513,9 +2513,17 @@ export const messages = {
     applicationRequirementsSubheader:
       "What applicants must submit, how they'll be scored, and the format rules.",
     button: {
-      back: "Back",
+      back: "Save and go back",
       saveAndExit: "Save and exit",
       saveAndContinue: "Save and continue",
+    },
+    alerts: {
+      success: "Saved successfully",
+      successBody: "Your changes have been saved.",
+      genericError: "Unable to save competition updates.",
+      unauthenticated: "You must be signed in to update this competition.",
+      forbidden: "You do not have permission to update this competition.",
+      notFound: "This competition could not be found.",
     },
     sectionSubmissionSetUp: {
       header: "Submission set-up",
