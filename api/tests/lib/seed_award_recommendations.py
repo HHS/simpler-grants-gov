@@ -15,8 +15,7 @@ from src.constants.lookup_constants import (
 )
 from src.constants.static_role_values import (
     AWARD_RECOMMENDATION_USER,
-    CONTENT_CREATOR,
-    FINAL_AWARD_REC_REVIEWER,
+    FINAL_AWARD_REC_APPROVER,
     FMO_REVIEWER,
     GMO_REVIEWER,
     GMS_REVIEWER,
@@ -177,12 +176,11 @@ def _setup_agency_and_users(db_session: db.Session) -> Agency:
 
     # Create 5 users for each new role
     roles_config = [
-        (CONTENT_CREATOR, "content_creator", "Content Creator"),
         (PQC_REVIEWER, "pqc_reviewer", "PQC Reviewer"),
         (GMS_REVIEWER, "gms_reviewer", "GMS Reviewer"),
         (FMO_REVIEWER, "fmo_reviewer", "FMO Reviewer"),
         (GMO_REVIEWER, "gmo_reviewer", "GMO Reviewer"),
-        (FINAL_AWARD_REC_REVIEWER, "final_award_rec_reviewer", "Final Award Rec Reviewer"),
+        (FINAL_AWARD_REC_APPROVER, "final_award_rec_approver", "Final Award Rec Approver"),
     ]
 
     user_counter = 4
