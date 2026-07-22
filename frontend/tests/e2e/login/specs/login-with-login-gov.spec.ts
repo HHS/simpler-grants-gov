@@ -11,6 +11,7 @@ import {
   findSignOutButton,
   performStagingLogin,
 } from "tests/e2e/utils/auth/perform-login-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 
 const { SMOKE, AUTH } = VALID_TAGS;
 
@@ -22,12 +23,7 @@ const TIMEOUT_REDIRECT = 90000;
 test.describe("Login.gov based authentication tests", () => {
   // Skip non-Chrome browsers in staging
   test.beforeEach(({ page: _ }, testInfo) => {
-    if (targetEnv === "staging") {
-      test.skip(
-        testInfo.project.name !== "Chrome",
-        "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-      );
-    }
+    skipNonChromeOnStaging(testInfo);
   });
 
   // Skip test if env missing
