@@ -44,7 +44,7 @@ build-storybook: # Build Storybook in Docker
 	docker compose build --no-cache storybook
 
 build-prod: # Build the Next.js local dev server in Docker
-	docker compose build --no-cache nextjs-prod
+	docker compose build --no-cache --progress plain nextjs-prod
 
 reinstall-deps:
 	rm -rf node_modules

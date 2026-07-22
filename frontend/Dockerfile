@@ -11,6 +11,7 @@ COPY scripts ./scripts
 RUN npm ci --no-audit \
   # Remove dev packages not removed by `npm prune` maybe from older storybook?
   && rm -rf /frontend/node_modules/@esbuild
+RUN ls node_modules/meriyah/dist
 
 # =============================================================================
 # Development stage
@@ -54,7 +55,7 @@ RUN npm run build
 # Run the Next.js server
 # =====================================
 # Use clean image for release, excluding any unnecessary files or dependencies
-FROM node:24-bookworm-slim AS release
+FROM builder AS release
 WORKDIR /frontend
 
 # Update system and install security updates
@@ -76,9 +77,10 @@ RUN apt-get update \
 RUN mkdir -p /frontend/.next/cache/images/
 VOLUME ["/frontend/.next/cache/images/"]
 
+RUN ls node_modules/meriyah/dist
 # Remove dev dependencies after build
-RUN npm prune --production
-
+# RUN npm prune --production
+RUN ls node_modules/meriyah/dist
 # Release stage doesn't have a need for `npm`, so remove it to avoid
 # any vulnerabilities specific to NPM
 RUN npm uninstall -g npm
