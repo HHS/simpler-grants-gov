@@ -58,6 +58,8 @@ terraform {
 
 provider "aws" {
   region = local.region
+  # Refuse to operate against the wrong account (covers plan/apply/destroy).
+  allowed_account_ids = [module.expected_account.account_id]
   default_tags {
     tags = local.tags
   }
@@ -68,8 +70,9 @@ provider "aws" {
 # provider in addition to the default one. This alias satisfies that requirement even
 # when manage_dns = false and no us-east-1 resources are actually created.
 provider "aws" {
-  alias  = "us-east-1"
-  region = "us-east-1"
+  alias               = "us-east-1"
+  region              = "us-east-1"
+  allowed_account_ids = [module.expected_account.account_id]
   default_tags {
     tags = local.tags
   }
@@ -77,6 +80,21 @@ provider "aws" {
 
 module "project_config" {
   source = "../project-config"
+}
+
+# Resolve the account this network must deploy to (used by the provider's
+# allowed_account_ids below and by the guard), then short-circuit plan/apply if
+# the active AWS credentials are for a different account.
+module "expected_account" {
+  source       = "../modules/account-id-by-name"
+  account_name = local.network_config.account_name
+  accounts_dir = "${path.module}/../accounts"
+}
+
+module "account_guard" {
+  source              = "../modules/aws-account-guard"
+  expected_account_id = module.expected_account.account_id
+  context             = "the \"${var.network_name}\" network"
 }
 
 module "analytics_config" {

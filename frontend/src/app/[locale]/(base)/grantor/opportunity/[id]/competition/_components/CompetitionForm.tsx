@@ -1,8 +1,8 @@
 "use client";
 
 import { AgencyContact } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/AgencyContact";
-import { OpenAndCloseDates } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/OpenAndCloseDates";
 import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
+import { SubmissionWindow } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionWindow";
 
 import { useTranslations } from "next-intl";
 import { startTransition, useActionState, useEffect, useState } from "react";
@@ -34,12 +34,12 @@ export function CompetitionForm({
       href: "submission-set-up",
     },
     {
-      text: t("sectionAgencyContact.header"),
-      href: "agency-contact",
+      text: t("sectionSubmissionWindow.header"),
+      href: "submission-window",
     },
     {
-      text: t("sectionOpenAndCloseDates.header"),
-      href: "open-and-close-dates",
+      text: t("sectionAgencyContact.header"),
+      href: "agency-contact",
     },
     {
       text: t("sectionApplicationChecklist.header"),

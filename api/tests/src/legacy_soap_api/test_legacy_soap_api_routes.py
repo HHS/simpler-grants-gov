@@ -5,6 +5,7 @@ from unittest import mock
 
 from grants_shared.util import file_util
 from lxml import etree
+from sqlalchemy import func, select
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import ApplicationSubmissionRetrieved
@@ -104,6 +105,63 @@ def test_successful_confirm_application_delivery_request(
         "<soapenv:Header/>"
         "<soapenv:Body>"
         "<agen:ConfirmApplicationDeliveryRequest>"
+        f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>'
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+        cert_id=soap_client_certificate.legacy_certificate.cert_id,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        response = client.post(
+            full_path,
+            data=mock_data,
+            headers={
+                "Use-Simpler-Override": "1",
+                MTLS_CERT_HEADER_KEY: mtls_cert,
+            },
+        )
+    assert response.status_code == 200
+    count_query = (
+        select(func.count())
+        .select_from(ApplicationSubmissionRetrieved)
+        .where(
+            ApplicationSubmissionRetrieved.application_submission_id
+            == submission.application_submission_id
+        )
+    )
+    assert db_session.execute(count_query).scalar() == 1
+
+
+def test_successful_confirm_application_delivery_request_if_grants_gov_tracking_number_is_parsed_as_a_string(
+    db_session, client, enable_factory_create
+) -> None:
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
         f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
         "</agen:ConfirmApplicationDeliveryRequest>"
         "</soapenv:Body>"
@@ -127,12 +185,15 @@ def test_successful_confirm_application_delivery_request(
             },
         )
     assert response.status_code == 200
-    retrieved = (
-        db_session.query(ApplicationSubmissionRetrieved)
-        .filter_by(application_submission_id=submission.application_submission_id)
-        .all()
+    count_query = (
+        select(func.count())
+        .select_from(ApplicationSubmissionRetrieved)
+        .where(
+            ApplicationSubmissionRetrieved.application_submission_id
+            == submission.application_submission_id
+        )
     )
-    assert len(retrieved) == 1
+    assert db_session.execute(count_query).scalar() == 1
 
 
 @mock.patch("uuid.uuid4")
@@ -173,7 +234,7 @@ def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_
         "<soapenv:Header/>"
         "<soapenv:Body>"
         "<agen:ConfirmApplicationDeliveryRequest>"
-        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>'
         "</agen:ConfirmApplicationDeliveryRequest>"
         "</soapenv:Body>"
         "</soapenv:Envelope>"
@@ -805,23 +866,36 @@ def test_invalid_xml_server_error_500(client) -> None:
 
 @mock.patch("uuid.uuid4")
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
-def test_getapplication_operation_returns_not_found_response_if_simpler_id_is_used(
+def test_getapplication_operation_returns_not_found_response_if_simpler_id_is_used_with_mime_boundaries(
     mock_get_soap_response, mock_uuid, client, fixture_from_file, enable_factory_create
 ) -> None:
     test_uuid = "00000000-aaaa-0000-bbbb-000000000000"
     mock_uuid.return_value = test_uuid
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
-    fixture_path = "/legacy_soap_api/grantors/get_application_request.xml"
-    mock_data = fixture_from_file(fixture_path)
-    envelope = etree.fromstring(mock_data)
-    tracking_number = envelope.find(GET_APPLICATION_PATH)
-    tracking_number.text = SIMPLER_TRACKING_NUMBER
+    mock_data = (
+        "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207\r\n"
+        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        "Content-Transfer-Encoding: binary\r\n"
+        "Content-ID: <0.urn:uuid:9467EB4D41266EA2C91784229922208@apache.org>\r\n\r\n"
+        "<?xml version='1.0' encoding='UTF-8'?>"
+        '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:GetApplicationRequest>"
+        f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">{SIMPLER_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>'
+        "</agen:GetApplicationRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>/r/n"
+        "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207--"
+    )
     agency = AgencyFactory.create()
     privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
     user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
     response = client.post(
         full_path,
-        data=etree.tostring(envelope),
+        data=mock_data,
         headers={"Connection": "close", MTLS_CERT_HEADER_KEY: mtls_cert},
     )
     expected = (
@@ -832,14 +906,69 @@ def test_getapplication_operation_returns_not_found_response_if_simpler_id_is_us
         '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
         "<soap:Body><soap:Fault>"
         "<faultcode>soap:Server</faultcode>"
-        f"<faultstring>Failed to get application.(Grant Application not found for tracking number:{tracking_number.text})"
+        f"<faultstring>Failed to get application.(Grant Application not found for tracking number:{SIMPLER_TRACKING_NUMBER})"
         "</faultstring></soap:Fault></soap:Body></soap:Envelope>\r\n"
         f"--uuid:{test_uuid}--"
     ).encode("utf-8")
     mock_get_soap_response.assert_not_called()
     assert response.status_code == 500
     assert expected == response.data
-    assert response.headers["Content-Length"] == "523"
+    assert (
+        response.headers["Content-Type"]
+        == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
+    )
+    assert response.headers["Set-Cookie"] == "None; Path=/grantsws-agency; Secure; HttpOnly"
+
+
+@mock.patch("uuid.uuid4")
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is_used_with_mime_boundaries(
+    mock_get_soap_response, mock_uuid, client, fixture_from_file, enable_factory_create
+) -> None:
+    test_uuid = "00000000-aaaa-0000-bbbb-000000000000"
+    mock_uuid.return_value = test_uuid
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207\r\n"
+        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        "Content-Transfer-Encoding: binary\r\n"
+        "Content-ID: <0.urn:uuid:9467EB4D41266EA2C91784229922208@apache.org>\r\n\r\n"
+        "<?xml version='1.0' encoding='UTF-8'?>"
+        '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:GetApplicationZipRequest>"
+        f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">{SIMPLER_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>'
+        "</agen:GetApplicationZipRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>/r/n"
+        "--MIMEBoundaryurn_uuid_9467EB4D41266EA2C91784229922207--"
+    )
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path,
+        data=mock_data,
+        headers={"Connection": "close", MTLS_CERT_HEADER_KEY: mtls_cert},
+    )
+    expected = (
+        f"--uuid:{test_uuid}\r\n"
+        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        "Content-Transfer-Encoding: binary\r\n"
+        "Content-ID: <root.message@cxf.apache.org>"
+        '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body><soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        f"<faultstring>Failed to get application zip.(Grant Application not found for tracking number:{SIMPLER_TRACKING_NUMBER})"
+        "</faultstring></soap:Fault></soap:Body></soap:Envelope>\r\n"
+        f"--uuid:{test_uuid}--"
+    ).encode("utf-8")
+    mock_get_soap_response.assert_not_called()
+    assert response.status_code == 500
+    assert expected == response.data
     assert (
         response.headers["Content-Type"]
         == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'

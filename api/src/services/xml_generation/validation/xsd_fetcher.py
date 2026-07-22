@@ -79,6 +79,10 @@ KNOWN_XSD_DEPENDENCIES = {
         "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
     ],
+    "Key_Contacts_2_0-V2.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
+    ],
     "EPA_KeyContacts_2_0-V2.0.xsd": [
         "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd",
