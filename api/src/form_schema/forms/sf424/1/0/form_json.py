@@ -82,7 +82,7 @@ FORM_JSON_SCHEMA = {
             "if": {
                 "properties": {
                     "state_review": {
-                        "const": "a. This application was made available to the state under the Executive Order 12372 Process for review on"
+                        "const": "a. This application was made available to the State under the Executive Order 12372 Process for review on"
                     },
                 },
                 "required": ["state_review"],  # Only run rule if state_review is set
@@ -436,8 +436,8 @@ FORM_JSON_SCHEMA = {
             "title": "Is Application Subject to Review By State Under Executive Order 12372 Process?",
             "description": "One selection is required.",
             "enum": [
-                "a. This application was made available to the state under the Executive Order 12372 Process for review on",
-                "b. Program is subject to E.O. 12372 but has not been selected by the state for review.",
+                "a. This application was made available to the State under the Executive Order 12372 Process for review on",
+                "b. Program is subject to E.O. 12372 but has not been selected by the State for review.",
                 "c. Program is not covered by E.O. 12372.",
             ],
         },
