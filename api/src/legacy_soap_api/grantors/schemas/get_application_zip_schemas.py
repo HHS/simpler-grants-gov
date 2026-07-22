@@ -1,9 +1,10 @@
-from typing import Any, Self
+from typing import Any
 
-from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
+from pydantic import BaseModel, Field, PrivateAttr
 
-from src.legacy_soap_api.grantors.fault_messages import InvalidGrantsGovTrackingNumber
-from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
+from src.legacy_soap_api.grantors.schemas.grants_gov_tracking_number_schema import (
+    GrantsGovTrackingNumberRequiredSchema,
+)
 
 GET_APPLICATION_ZIP_REQUEST_ERR = "No grants_gov_tracking_number provided."
 
@@ -42,22 +43,5 @@ class GetApplicationZipResponseSOAPEnvelope(BaseModel):
         return envelope_dict
 
 
-class GetApplicationZipRequest(BaseModel):
-    grants_gov_tracking_number: str | None = Field(default=None, alias="GrantsGovTrackingNumber")
-
-    @model_validator(mode="after")
-    def validate_required_properties(self) -> Self:
-        if not self.grants_gov_tracking_number:
-            raise SOAPFaultException(
-                GET_APPLICATION_ZIP_REQUEST_ERR,
-                fault=InvalidGrantsGovTrackingNumber,
-            )
-        return self
-
-    @field_validator("grants_gov_tracking_number", mode="before")
-    @classmethod
-    def get_value_from_dict(cls, value: str | dict) -> str | None:
-        if isinstance(value, dict):
-            return value.get("#text")
-        else:
-            return value
+class GetApplicationZipRequest(GrantsGovTrackingNumberRequiredSchema):
+    pass
