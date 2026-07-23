@@ -12,8 +12,8 @@ Running a local server requires the version of Node specified in [the .nvmrc fil
 
 This project supports the use of NVM for node version management, so it is suggested you install and use NVM. More information can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
 
-* **For Mac** - Run `npm install && npm run local` to install and start the application.
-* **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx next dev` afterwards to start the application.
+- **For Mac** - Run `npm install && npm run local` to install and start the application.
+- **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx next dev` afterwards to start the application.
 
 Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
 
@@ -25,13 +25,13 @@ npx next telemetry disable
 
 Create a local environment file in the frontend directory to hold your frontend application overrides. This allows you to make specializations to your local setup without the danger of committing any secrets to GitHub.
 
-`.env.local.example` is provided in the frontend directory for a comprehensive list of all environment variables used in frontend as well as where they are referenced. It contains all default values for a quick setup as well as a starting point to configure the development environment. 
+`.env.local.example` is provided in the frontend directory for a comprehensive list of all environment variables used in frontend as well as where they are referenced. It contains all default values for a quick setup as well as a starting point to configure the development environment.
 
 On Mac, run `cp frontend/.env.local.example frontend/.env.local`
 
 On Windows, run `cp .env.local.example .env.local` in PowerShell.
 
-`.env.local.example` is tracked and sensitive information **SHOULD NOT** be enteredin the file itself. 
+`.env.local.example` is tracked and sensitive information **SHOULD NOT** be enteredin the file itself.
 
 For more information about environments, take a look at [environments.md](./environments.md).
 
@@ -53,34 +53,30 @@ The Next.js frontend application is exported for production using [next build](h
 
 ## Docker
 
+**Note**: If you are running Docker locally for the first time, you need to run the API locally through Docker as well, in order to create the required `api_grants_backend` network.
+
+**Note**: In order for a dockerized frontend to communicate properly with a dockerized API, you'll need to set API host url(s) to use `host.docker.internal` rather than `localhost`. Ex. set `API_URL=http://host.docker.internal:8080` in your .env.local
+
 ### 🏗️ Development version
 
-Alternatively, you can run the application in a Docker container.
-
-**Note**: If you are running docker locally for the first time, you need to run the API locally through Docker as well, in order to create the required `api_grants_backend` network.
+Using the steps below you can run the `dev` target in the [Dockerfile](../../frontend/Dockerfile), which spins up a NextJS dev server within Docker. This is suitable for most local development work, though in almost all cases it will be easier to run the application outside of Docker.
 
 From the `/frontend` directory:
 
 1. Run the local development server
    ```bash
-   make dev
+   make build-dev dev
    ```
 1. Navigate to [localhost:3000](http://localhost:3000) to view the application
 
-- If installing new packages locally with npm and using `make dev` with docker to run locally, you may need to run `make build` first to bring the new packages into the container
-
 ### 🚀 Production version
 
-The `make dev` command runs the `docker-compose.yml` which runs the `dev` target in the [Dockerfile](../../frontend/Dockerfile). To run a production version in docker, run `docker compose up -d -f docker-compose-realease.yml` which targest the `release` stage in the docker build. This runs the production version, while still creating a network connection to the local API.
+Since the deployed grants application runs a production NextJS build within a Docker container, it will periodically be necessary to simulate this situation locally in order to test as closely as possible to a deployed version of the app, or debug issues found only in the deployed application.
 
-### Testing Release Target Locally
+To run a production version in Docker, from the `/frontend` directory:
 
-To test the release target locally, run:
-
-- `make release-build OPTS="--tag [IMAGE_NAME]"` or
-- `docker buildx build --target release --tag [IMAGE_NAME]` for a faster build on OSX
-
-to build a local image. To view the site at `localhost:3000`, run: `docker run -e "HOSTNAME=0.0.0.0" -p 3000:3000 [IMAGE_NAME]`.
+1. run `make build-prod run-prod`
+1. Navigate to [localhost:3000](http://localhost:3000) to view the application
 
 ## 🎯 Testing
 
