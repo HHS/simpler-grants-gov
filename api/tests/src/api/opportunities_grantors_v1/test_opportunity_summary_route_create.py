@@ -2,13 +2,16 @@ import uuid
 from datetime import date
 
 import pytest
+from sqlalchemy import select
 
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
+    OpportunityAuditEvent,
     Privilege,
 )
+from src.db.models.opportunity_models import OpportunityAudit
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.lib.opportunity_test_utils import create_opportunity_summary_request
 from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
@@ -179,7 +182,7 @@ def test_opportunity_summary_create_invalid_award_amount(
 
 
 def test_opportunity_summary_create_successful(
-    client, opportunity, opportunity_summary_auth_data, opportunity_summary_request
+    client, db_session, opportunity, opportunity_summary_auth_data, opportunity_summary_request
 ):
     """Test successful creation of an opportunity summary"""
     _, _, token, _ = opportunity_summary_auth_data
@@ -227,6 +230,21 @@ def test_opportunity_summary_create_successful(
 
     assert len(summary_data["applicant_types"]) == 1
     assert ApplicantType.CITY_OR_TOWNSHIP_GOVERNMENTS in summary_data["applicant_types"]
+
+    audit_rows = (
+        db_session.execute(
+            select(OpportunityAudit).where(
+                OpportunityAudit.opportunity_id == opportunity.opportunity_id
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(audit_rows) == 1
+    assert (
+        audit_rows[0].opportunity_audit_event == OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED
+    )
+    assert audit_rows[0].nonforecast_opportunity_summary is not None
 
 
 def test_opportunity_summary_create_duplicate_summary(

@@ -801,7 +801,9 @@ FORM_XML_TRANSFORM_RULES = {
             },
         },
     },
-    # Individuals performing services (array of up to 10)
+    # KNOWN LIMITATION (follow-up to #10424): this expects individual.name + nested
+    # individual.address, but the JSON schema defines a flat individual + sibling address,
+    # so schema-shaped responses drop this section. Needs a restructuring transform to fix.
     "individual_performing_service": {
         "xml_transform": {
             "target": "IndividualsPerformingServices",

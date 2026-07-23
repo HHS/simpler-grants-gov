@@ -725,7 +725,7 @@ FORM_XML_TRANSFORM_RULES = {
             },
             "application_info.additional_funding_explanation": {
                 "xml_transform": {
-                    "target": "AdditionalFundingExplanation",
+                    "target": "AddFundingExplanation",
                 }
             },
             "application_info.application_type": {
@@ -735,7 +735,7 @@ FORM_XML_TRANSFORM_RULES = {
             },
             "application_info.supplemental_grant_numbers": {
                 "xml_transform": {
-                    "target": "SupplementalGrantNumber",
+                    "target": "SupGrantNumber",
                 }
             },
             "primary_project_discipline": {
@@ -749,7 +749,7 @@ FORM_XML_TRANSFORM_RULES = {
             },
             "secondary_project_discipline": {
                 "xml_transform": {
-                    "target": "SecondaryProjFieldCode",
+                    "target": "ProjFieldCode2",
                     "value_transform": {
                         "type": "map_values",
                         "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},
@@ -758,7 +758,7 @@ FORM_XML_TRANSFORM_RULES = {
             },
             "tertiary_project_discipline": {
                 "xml_transform": {
-                    "target": "TertiaryProjFieldCode",
+                    "target": "ProjFieldCode3",
                     "value_transform": {
                         "type": "map_values",
                         "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},

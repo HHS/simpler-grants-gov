@@ -58,7 +58,7 @@ describe("RecommendationSection", () => {
       expect(detailsTextarea).toHaveAttribute("id", "award_selection_details");
       expect(detailsTextarea).toHaveAttribute(
         "name",
-        "award_selection_details",
+        "selection_method_detail",
       );
     });
 

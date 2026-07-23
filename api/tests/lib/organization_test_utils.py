@@ -23,7 +23,7 @@ def create_user_in_org(
     email=None,
     first_name=None,
     last_name=None,
-    **kwargs
+    **kwargs,
 ) -> tuple:
     """Create a user in an organization with specified privileges.
 

@@ -13,7 +13,7 @@ FORM_JSON_SCHEMA = {
         "applicant_organization_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Applicant Organization Name",
-            "description": "Enter the name of the applicant organization.",
+            "description": "Enter the legal name of the applicant that will undertake the assistance activity. This field is required.",
         },
         "key_contacts": {
             "type": "array",
@@ -33,7 +33,7 @@ FORM_JSON_SCHEMA = {
                 "project_role": {
                     "type": "string",
                     "title": "Project Role",
-                    "description": "Enter the contact's role on the project.",
+                    "description": "Enter the individual's role on the project (e.g., project manager, fiscal contact).",
                     "minLength": 1,
                     "maxLength": 45,
                 },
@@ -57,7 +57,7 @@ FORM_JSON_SCHEMA = {
                 },
                 "phone": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
-                    "title": "Phone Number",
+                    "title": "Telephone Number",
                 },
                 "fax": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
@@ -65,7 +65,7 @@ FORM_JSON_SCHEMA = {
                 },
                 "email": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
-                    "title": "E-mail Address",
+                    "title": "Email",
                 },
             },
         }
@@ -88,7 +88,7 @@ FORM_UI_SCHEMA = [
                 "type": "fieldList",
                 "name": "key_contacts",
                 "label": "Key Contact",
-                "description": "Enter between 1 and 4 key contacts and their role on the project.",
+                "description": "You may enter up to four (4) Key Contacts. At least 1 (one) contact person is required. Additional contacts are optional.",
                 "children": [
                     {
                         "type": "field",
@@ -148,11 +148,11 @@ FORM_UI_SCHEMA = [
                     },
                     {
                         "type": "field",
-                        "definition": "/properties/key_contacts/items/properties/address/properties/zip_code",
+                        "definition": "/properties/key_contacts/items/properties/address/properties/country",
                     },
                     {
                         "type": "field",
-                        "definition": "/properties/key_contacts/items/properties/address/properties/country",
+                        "definition": "/properties/key_contacts/items/properties/address/properties/zip_code",
                     },
                     {
                         "type": "field",

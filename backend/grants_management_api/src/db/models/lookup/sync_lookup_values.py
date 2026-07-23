@@ -1,6 +1,13 @@
+import logging
+
+import grants_shared.adapters.db as db
 import grants_shared.db.models.lookup as grants_shared_lookup
 from grants_shared.adapters.db import PostgresDBClient
 from grants_shared.adapters.db.clients.postgres_config import get_db_config
+
+from src.constants.static_role_values import CORE_ROLES
+
+logger = logging.getLogger(__name__)
 
 
 def sync_lookup_values(db_client: PostgresDBClient | None = None) -> None:
@@ -17,3 +24,22 @@ def sync_lookup_values(db_client: PostgresDBClient | None = None) -> None:
         db_client = PostgresDBClient(get_db_config())
 
     grants_shared_lookup.sync_lookup_values(db_client)
+
+    with db_client.get_session() as db_session, db_session.begin():
+        _sync_roles(db_session)
+
+
+def _sync_roles(db_session: db.Session) -> None:
+    logger.info("Syncing static core roles")
+    updated_role_count = 0
+    for role in CORE_ROLES:
+        instance = db_session.merge(role)
+        if db_session.is_modified(instance):
+            logger.info("Updated static core role", extra={"role_name": role.role_name})
+            updated_role_count += 1
+        else:
+            logger.info(
+                "No modified values for static core role", extra={"role_name": role.role_name}
+            )
+
+    logger.info("Finished updating roles", extra={"updated_role_count": updated_role_count})

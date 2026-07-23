@@ -207,6 +207,9 @@ export type FieldListGroupItem = {
 
 export type UiSchemaTableCellType = "input" | "readOnly" | "plainText";
 
+export type UiSchemaTableNumberFormat =
+  "integer" | "decimal" | "currency" | "dollar" | "percentage";
+
 export type UiSchemaTableColumn = {
   columnHeader: string;
 
@@ -217,28 +220,38 @@ export type UiSchemaTableColumn = {
   width?: number;
 };
 
-export type UiSchemaTableCell =
+export type TableWidgetCellConfig =
   | {
       type: "input" | "readOnly";
       definition: PropertyPath;
+
+      /**
+       * Optional display format for numeric values.
+       *
+       * Input cells should continue to use an editable numeric representation
+       * while read-only cells use this value for display formatting.
+       */
+      format?: UiSchemaTableNumberFormat;
       staticContent?: undefined;
     }
   | {
       type: "plainText";
       staticContent: string;
       definition?: undefined;
+      format?: undefined;
     };
 
 export type UiSchemaTableRow = {
   /**
    * Cells rendered in the same order as the configured table columns.
-   *
-   * Each row must contain one cell for every configured column.
    */
-  cells: UiSchemaTableCell[];
+  cells: TableWidgetCellConfig[];
 };
 
 export type UiSchemaTableChildren = {
+  /**
+   * Includes each configured column for the table rows.
+   */
   columns: UiSchemaTableColumn[];
   rows: UiSchemaTableRow[];
 };

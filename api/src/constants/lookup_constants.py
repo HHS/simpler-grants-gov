@@ -325,6 +325,13 @@ class Privilege(StrEnum):
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
+    # Award recommendation workflow privileges
+    PQC_REVIEWER = "pqc_reviewer"
+    GMS_REVIEWER = "gms_reviewer"
+    FMO_REVIEWER = "fmo_reviewer"
+    GMO_REVIEWER = "gmo_reviewer"
+    FINAL_AWARD_REC_APPROVER = "final_award_rec_approver"
+
     INTERNAL_S3_SCAN = "internal_s3_scan"
 
     MANAGE_TEST_USER_TOKEN = "manage_test_user_token"

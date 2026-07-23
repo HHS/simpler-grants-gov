@@ -17,12 +17,18 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { getOpportunityId } from "tests/e2e/utils/application/get-opportunityId-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
+
+// Skip non-Chrome browsers in staging
+test.beforeEach(({ page: _ }, testInfo) => {
+  skipNonChromeOnStaging(testInfo);
+});
 
 test(
   "Application form completion happy path - Grants.gov Lobbying",
