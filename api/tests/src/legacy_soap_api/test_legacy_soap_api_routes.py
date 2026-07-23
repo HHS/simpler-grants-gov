@@ -273,10 +273,10 @@ def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_
     )
     assert record
     request_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{TEST_UUID}/request.txt"
     )
     response_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{TEST_UUID}/response.txt"
     )
     assert request_contents.replace("\n", "") == mock_data.decode().replace("\n", "")
     assert response_contents.replace("\r", "") == expected_response.decode().replace("\r", "")
@@ -507,7 +507,9 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
     assert len(records) == 1
 
 
+@mock.patch("uuid.uuid4")
 def test_if_soap_request_errors_on_creation_the_s3_handling_records_just_the_response(
+    mock_uuid,
     db_session,
     client,
     enable_factory_create,
@@ -517,6 +519,8 @@ def test_if_soap_request_errors_on_creation_the_s3_handling_records_just_the_res
     mock_s3,
     s3_config,
 ) -> None:
+    TEST_UUID_1 = "99999999-aaaa-0000-bbbb-000000000000"
+    mock_uuid.return_value = TEST_UUID_1
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     agency = AgencyFactory.create()
@@ -566,16 +570,15 @@ def test_if_soap_request_errors_on_creation_the_s3_handling_records_just_the_res
                 },
             )
         assert response.status_code == 500
-        records = [
+        record = next(
             r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
-        ]
-        assert len(records) == 1
-    record = records[0]
+        )
+    assert getattr(record, "request.internal_id") == TEST_UUID_1
     assert not file_util.file_exists(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{TEST_UUID_1}/request.txt"
     )
     assert file_util.file_exists(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{TEST_UUID_1}/response.txt"
     )
 
 
