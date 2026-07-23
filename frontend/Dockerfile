@@ -25,7 +25,7 @@ COPY src ./src
 COPY stories ./stories
 COPY .storybook ./.storybook
 
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 CMD ["npm", "run", "dev"]
 
@@ -43,10 +43,10 @@ COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
 
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # let the application know that it is being built
-ENV NEXT_BUILD true
+ENV NEXT_BUILD=true
 
 # Skip lint because it should have happened in the CI already
 RUN npm run build
@@ -103,9 +103,9 @@ COPY --from=builder --chown=nextjs:nodejs /frontend/.next/static ./.next/static
 # ARG NEXT_PUBLIC_ENV_VARIABLE
 # ENV NEXT_PUBLIC_ENV_VARIABLE=${NEXT_PUBLIC_ENV_VARIABLE}
 
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV PORT 3000
-ENV NEXT_BUILD false
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV NEXT_BUILD=false
 
 EXPOSE 3000
 
