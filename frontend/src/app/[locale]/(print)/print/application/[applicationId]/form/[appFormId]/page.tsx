@@ -1,11 +1,11 @@
 import { Metadata } from "next";
-import TopLevelError from "src/app/[locale]/(base)/error/page";
 import PrintForm from "src/app/[locale]/(print)/print/application/[applicationId]/form/_components/PrintForm";
+import { logger } from "src/services/logger/simplerLogger";
 import { addPrintWidgetToFields } from "src/utils/applyForm/applyFormUtils";
 import getFormData from "src/utils/getFormData";
 
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import PrintErrorDiagnostics from "src/components/apply-form/PrintErrorDiagnostics";
 
 export const dynamic = "force-dynamic";
 
@@ -66,8 +66,29 @@ export default async function FormPage({ params }: FormPageProps) {
   });
 
   if (error || !data) {
-    if (error === "NotFound") notFound();
-    return <TopLevelError />;
+    const applicationFormId = appFormId;
+    const errorCategory = error ?? "TopLevelError";
+    const hasInternalToken = Boolean(internalToken);
+
+    logger.error(
+      {
+        event: "pdf_rendering_failed",
+        application_id: applicationId,
+        application_form_id: applicationFormId,
+        has_internal_token: hasInternalToken,
+        error_category: errorCategory,
+      },
+      "PDF print page rendering failed",
+    );
+
+    return (
+      <PrintErrorDiagnostics
+        applicationId={applicationId}
+        applicationFormId={applicationFormId}
+        errorCategory={errorCategory}
+        hasInternalToken={hasInternalToken}
+      />
+    );
   }
 
   const {
