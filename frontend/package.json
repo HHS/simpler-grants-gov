@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=24.13.0"
+    "node": ">=24.18.0"
   },
   "scripts": {
     "all-checks": "npm run lint && npm run ts:check && npm run format-check && npm run test && npm run build",
