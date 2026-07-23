@@ -22,7 +22,8 @@ def internal_resource_id(monkeypatch):
 
 def test_create_internal_resource(db_session, internal_resource_id):
     internal_resource = create_internal_resource(db_session)
-    db_session.commit()
+    # Flush so the resource automation (before_flush) populates the backing resource row
+    db_session.flush()
 
     assert internal_resource.mgmt_internal_resource_id == internal_resource_id
     assert internal_resource.internal_resource_name == INTERNAL_RESOURCE_NAME
@@ -46,10 +47,7 @@ def test_create_internal_resource(db_session, internal_resource_id):
 
 def test_create_internal_resource_is_idempotent(db_session, internal_resource_id):
     first = create_internal_resource(db_session)
-    db_session.commit()
-
     second = create_internal_resource(db_session)
-    db_session.commit()
 
     assert (
         first.mgmt_internal_resource_id == second.mgmt_internal_resource_id == internal_resource_id
@@ -79,7 +77,6 @@ def test_create_internal_resource_is_idempotent(db_session, internal_resource_id
 
 def test_get_internal_resource(db_session, internal_resource_id):
     created = create_internal_resource(db_session)
-    db_session.commit()
 
     fetched = get_internal_resource(db_session)
 

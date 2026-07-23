@@ -14,9 +14,8 @@ INTERNAL_RESOURCE_NAME = "Internal"
 
 
 class InternalResourceConfig(PydanticBaseEnvConfig):
-    # The primary key of the statically defined internal resource record.
-    # This is only set up locally for now - there is no terraform/SSM for it yet - so the
-    # field is required and instantiated lazily (only when the internal resource is needed).
+    # The primary key of the statically defined internal resource record. The field is
+    # required and the config is instantiated lazily (only when the internal resource is needed).
     mgmt_internal_resource_id: uuid.UUID = Field(alias="MGMT_INTERNAL_RESOURCE_ID")
 
 
