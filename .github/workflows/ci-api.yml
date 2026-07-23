@@ -40,7 +40,7 @@ jobs:
         run: make lint-security
 
       - name: Start tests
-        run: make test-coverage
+        run: make test
 
   skip-checks:
     if: ${{ inputs.skip_checks != null && inputs.skip_checks == true }}
