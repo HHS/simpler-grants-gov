@@ -7,6 +7,7 @@ from collections.abc import Callable, Iterator
 from enum import StrEnum
 from typing import Any
 
+import flask
 import grants_shared.adapters.db as db
 import requests
 from defusedxml import minidom
@@ -551,14 +552,14 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
     if get_soap_config().save_soap_messages_to_s3:
         try:
             s3_config = S3Config()
-            debug_identifier = uuid.uuid4()
+            internal_request_id = get_internal_request_id()
             base_path = file_util.join(
                 s3_config.draft_files_bucket_path,
                 # Not "soap": in virtual-hosted S3 URLs the object key becomes the URL path,
                 # and a WAF rule blocks paths starting with /soap -- which breaks both the
                 # upload here and downloading these files from the S3 console.
                 "soap-debug",
-                str(debug_identifier),
+                internal_request_id,
             )
             # Store as plain text so the debug files preview in the browser / S3 console
             # instead of downloading as binary/octet-stream.
@@ -605,10 +606,16 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
             )
             logger.info(
                 "soap_client: debug info uploaded to s3",
-                extra={"debug_identifier": debug_identifier},
             )
         except Exception:
             logger.exception(
                 "soap_client: failed to upload debug info to s3",
                 extra={"soap_api_event": LegacySoapApiEvent.ERROR_UPLOADING_DEBUG_DATA},
             )
+
+
+def get_internal_request_id() -> str:
+    if flask.has_request_context():
+        return str(getattr(flask.g, "internal_request_id", uuid.uuid4()))
+    else:
+        return str(uuid.uuid4())
