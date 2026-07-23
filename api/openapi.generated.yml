@@ -8897,6 +8897,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -9400,6 +9405,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -9579,6 +9589,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -10613,6 +10628,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -11124,6 +11144,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
