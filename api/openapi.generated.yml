@@ -8897,6 +8897,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -9400,6 +9405,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -9579,6 +9589,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -9783,8 +9798,42 @@ components:
           type:
           - object
           - 'null'
-          description: Additional custom filters to apply to the search
-          example: {}
+          description: "Grants.gov-specific filters. Each entry is a `{operator, value}`\
+            \ object. Supported keys:\n\n- `agency` \u2014 operator `\"in\"`, value:\
+            \ array of agency codes (e.g. `[\"USAID\"]`)\n- `applicantType` \u2014\
+            \ operator `\"in\"`, value: array of CommonGrants applicant-type values:\
+            \ `individual`, `organization`, `government_state`, `government_county`,\
+            \ `government_municipal`, `government_special_district`, `government_tribal`,\
+            \ `organization_tribal_other`, `school_district_independent`, `higher_education_public`,\
+            \ `higher_education_private`, `non_profit_with_501c3`, `nonprofit_without_501c3`,\
+            \ `for_profit_small_business`, `for_profit_not_small_business`, `unrestricted`,\
+            \ `custom`\n- `fundingInstrument` \u2014 operator `\"in\"`, value: array\
+            \ of funding instrument values (e.g. `[\"grant\"]`)\n- `costSharing` \u2014\
+            \ operator `\"eq\"`, value: boolean (also accepts the strings `\"true\"\
+            `/`\"false\"`)\n\nEach entry must parse as an `{operator, value}` object;\
+            \ an entry that does not (a non-object value, or a missing `operator`/`value`\
+            \ key) is rejected with a 422 validation error. Well-formed entries with\
+            \ an unsupported key, operator, or value are skipped and reported in `filterInfo.errors`,\
+            \ and the search still runs with the valid filters applied. `agency` and\
+            \ `fundingInstrument` values are forwarded to the search unvalidated \u2014\
+            \ an unrecognized value matches no opportunities rather than producing\
+            \ an error \u2014 and an empty array applies no filter for that key."
+          example:
+            agency:
+              operator: in
+              value:
+              - USAID
+            applicantType:
+              operator: in
+              value:
+              - government_state
+            fundingInstrument:
+              operator: in
+              value:
+              - grant
+            costSharing:
+              operator: eq
+              value: true
           additionalProperties: {}
     OppSorting:
       type: object
@@ -10579,6 +10628,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -11090,6 +11144,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:

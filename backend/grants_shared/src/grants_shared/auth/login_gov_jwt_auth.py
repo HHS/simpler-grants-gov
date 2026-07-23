@@ -47,10 +47,14 @@ class LoginGovConfig(PydanticBaseEnvConfig):
     login_gov_jwk_endpoint: str = Field(alias="LOGIN_GOV_JWK_ENDPOINT")
     login_gov_auth_endpoint: str = Field(alias="LOGIN_GOV_AUTH_ENDPOINT")
     login_gov_token_endpoint: str = Field(alias="LOGIN_GOV_TOKEN_ENDPOINT")
+    login_gov_logout_endpoint: str = Field(alias="LOGIN_GOV_LOGOUT_ENDPOINT")
 
     # Where we send a user after they have successfully logged in
     # for now we'll always send them to the same place (a frontend page)
     login_final_destination: str = Field(alias="LOGIN_FINAL_DESTINATION")
+
+    # Where we sent users after they have successfully logged out
+    logout_final_destination: str = Field(alias="LOGOUT_FINAL_DESTINATION")
 
     # The private key we gave login.gov for private_key_jwt validation in the token endpoint
     # See: https://developers.login.gov/oidc/token/#client_assertion
@@ -179,6 +183,29 @@ def get_final_redirect_uri(
     encoded_params = urllib.parse.urlencode(params)
 
     return f"{config.login_final_destination}?{encoded_params}"
+
+
+def get_final_logout_redirect_uri(
+    message: str,
+    error_description: str | None = None,
+    config: LoginGovConfig | None = None,
+) -> str:
+    """
+    Get the destination where we should redirect to after the full logout flow has completed.
+
+    Generally will be a defined page in our frontend website that handles post-logout UX.
+    """
+    if config is None:
+        config = get_config()
+
+    params: dict = {"message": message}
+
+    if error_description is not None:
+        params["error_description"] = error_description
+
+    encoded_params = urllib.parse.urlencode(params)
+
+    return f"{config.logout_final_destination}?{encoded_params}"
 
 
 def validate_token(token: str, nonce: str, config: LoginGovConfig | None = None) -> LoginGovUser:

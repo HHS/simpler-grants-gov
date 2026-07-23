@@ -6,7 +6,7 @@ InvalidGrantsGovTrackingNumber = FaultMessage(
 )
 
 MissingGrantsGovTrackingNumber = FaultMessage(
-    faultstring="Failed to validate request.\ncvc-complex-type.2.4.b: The content of element UpdateApplicationInfoRequest is not complete. One of {https://apply.grants.gov/system/GrantsCommonElements-V1.0:GrantsGovTrackingNumber} is expected.",
+    faultstring="Failed to validate request. cvc-complex-type.2.4.b: The content of element is not complete. One of {https://apply.grants.gov/system/GrantsCommonElements-V1.0:GrantsGovTrackingNumber} is expected.",
     faultcode="soap:Server",
 )
 
