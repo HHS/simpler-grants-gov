@@ -156,3 +156,16 @@ export async function submitApplicationAndVerify(
 
   return appIdMatch[1];
 }
+
+// --- Confirmation Page Validation ---
+export async function verifySubmissionConfirmation(page: Page): Promise<void> {
+  await expect(
+    page.getByRole("heading", {
+      name: /your application has been submitted/i,
+    }),
+  ).toBeVisible();
+
+  await expect(page.getByTestId("summary-box")).toContainText(
+    "Your application has been submitted",
+  );
+}
