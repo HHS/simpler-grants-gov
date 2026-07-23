@@ -1966,6 +1966,84 @@ PERFORMANCE_SITE_TEST_CASES = [
 ]
 
 
+KEY_CONTACTS_TEST_CASES = [
+    {
+        "name": "key_contacts_single_contact",
+        "form_name": "Key_Contacts",
+        "json_input": {
+            "applicant_organization_name": "Acme Corporation",
+            "key_contacts": [
+                {
+                    "project_role": "Principal Investigator",
+                    "name": {
+                        "prefix": "Dr.",
+                        "first_name": "Jane",
+                        "last_name": "Smith",
+                    },
+                    "title": "Senior Researcher",
+                    "organizational_affiliation": "Acme Research Division",
+                    "address": {
+                        "street1": "123 Main Street",
+                        "city": "Washington",
+                        "state": "DC: District of Columbia",
+                        "zip_code": "20001",
+                        "country": "USA: UNITED STATES",
+                    },
+                    "phone": "2025550100",
+                    "email": "jane.smith@acme.org",
+                }
+            ],
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Key_Contacts_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "key_contacts_multiple_contacts",
+        "form_name": "Key_Contacts",
+        "json_input": {
+            "applicant_organization_name": "Acme Corporation",
+            "key_contacts": [
+                {
+                    "project_role": "Principal Investigator",
+                    "name": {
+                        "first_name": "Jane",
+                        "last_name": "Smith",
+                    },
+                    "address": {
+                        "street1": "123 Main Street",
+                        "city": "Washington",
+                        "state": "DC: District of Columbia",
+                        "zip_code": "20001",
+                        "country": "USA: UNITED STATES",
+                    },
+                    "phone": "2025550100",
+                    "email": "jane.smith@acme.org",
+                },
+                {
+                    "project_role": "Project Manager",
+                    "name": {
+                        "first_name": "John",
+                        "last_name": "Doe",
+                    },
+                    "address": {
+                        "street1": "456 Oak Avenue",
+                        "city": "Bethesda",
+                        "state": "MD: Maryland",
+                        "zip_code": "20814",
+                        "country": "USA: UNITED STATES",
+                    },
+                    "phone": "3015550200",
+                    "fax": "3015550201",
+                    "email": "john.doe@acme.org",
+                },
+            ],
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Key_Contacts_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+]
+
+
 SF424C_TEST_CASES = [
     {
         "name": "sf424c_construction_only",
@@ -2139,6 +2217,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + ATTACHMENTFORM_TEST_CASES
         + OTHER_NARRATIVE_ATTACHMENTS_TEST_CASES
         + PERFORMANCE_SITE_TEST_CASES
+        + KEY_CONTACTS_TEST_CASES
     )
 
 

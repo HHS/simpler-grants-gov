@@ -44,5 +44,5 @@ def validate_url_compatible(value: str | None) -> str | None:
         normalized = str(valid.url)
         _marshmallow_url_field.deserialize(normalized)
         return normalized
-    except (ValidationError, MarshmallowValidationError):
+    except ValidationError, MarshmallowValidationError:
         return None

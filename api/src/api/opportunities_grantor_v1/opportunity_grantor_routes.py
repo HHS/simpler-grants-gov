@@ -13,6 +13,7 @@ from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.services.opportunities_grantor_v1.competition_creation import create_competition
 from src.services.opportunities_grantor_v1.competition_instruction_upload import (
+    delete_competition_instruction,
     upload_competition_instruction,
 )
 from src.services.opportunities_grantor_v1.competition_update import update_competition
@@ -21,6 +22,7 @@ from src.services.opportunities_grantor_v1.get_opportunity_list import (
     get_opportunity_list_for_grantors,
     get_opportunity_list_for_user,
 )
+from src.services.opportunities_grantor_v1.list_opportunity_audit import list_opportunity_audit
 from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
 from src.services.opportunities_grantor_v1.opportunity_summaries import (
     create_opportunity_summary,
@@ -382,4 +384,81 @@ def competition_instruction_upload(
     return response.ApiResponse(
         message="Instruction uploaded successfully",
         data={"competition_instruction_id": instruction_id},
+    )
+
+
+@opportunity_grantor_blueprint.delete(
+    "/opportunities/<uuid:opportunity_id>/competitions/<uuid:competition_id>/instructions/<uuid:competition_instruction_id>"
+)
+@opportunity_grantor_blueprint.output(
+    opportunity_grantor_schemas.DeleteCompetitionInstructionResponseV1Schema()
+)
+@opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
+@flask_db.with_db_session()
+def competition_instruction_delete(
+    db_session: db.Session,
+    opportunity_id: UUID,
+    competition_id: UUID,
+    competition_instruction_id: UUID,
+) -> response.ApiResponse:
+    """Delete an instruction file from a competition"""
+    add_extra_data_to_current_request_logs(
+        {
+            "opportunity_id": opportunity_id,
+            "competition_id": competition_id,
+            "competition_instruction_id": competition_instruction_id,
+        }
+    )
+    logger.info(
+        "DELETE /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id/instructions/:competition_instruction_id"
+    )
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        delete_competition_instruction(
+            db_session, user, opportunity_id, competition_id, competition_instruction_id
+        )
+
+    return response.ApiResponse(message="Instruction deleted successfully")
+
+
+@opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/audit_history")
+@opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.OpportunityAuditRequestSchema(), location="json"
+)
+@opportunity_grantor_blueprint.output(opportunity_grantor_schemas.OpportunityAuditResponseSchema())
+@opportunity_grantor_blueprint.doc(
+    summary="List Opportunity Audit History",
+    description="Get paginated audit history for an opportunity.",
+    responses=[200, 401, 403, 404, 422],
+)
+@opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def opportunity_audit_list(
+    db_session: db.Session, opportunity_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
+    logger.info("POST /v1/grantors/opportunities/:opportunity_id/audit_history")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        audit_events, pagination_info = list_opportunity_audit(
+            db_session, user, opportunity_id, json_data
+        )
+
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
+    )
+    logger.info("Successfully fetched opportunity audit history")
+
+    return response.ApiResponse(
+        message="Success", data=audit_events, pagination_info=pagination_info
     )

@@ -81,7 +81,6 @@ class TestAttachmentIntegration:
             "att": "http://apply.grants.gov/system/Attachments-V1.0",
         }
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_add_attachment_elements_with_single_attachment(self):
         """Test add_attachment_elements with single UUID attachment."""
         root = lxml_etree.Element("Application", nsmap=self.nsmap)
@@ -95,13 +94,12 @@ class TestAttachmentIntegration:
 
         # Verify single attachment was added
         assert "<AreasAffected>" in xml_string
-        assert "<FileName>geographic_areas.pdf</FileName>" in xml_string
-        assert "<MimeType>application/pdf</MimeType>" in xml_string
+        assert "<att:FileName>geographic_areas.pdf</att:FileName>" in xml_string
+        assert "<att:MimeType>application/pdf</att:MimeType>" in xml_string
         assert 'href="./attachments/geographic_areas.pdf"' in xml_string
-        assert "<HashValue" in xml_string
+        assert "HashValue" in xml_string
         assert "aGVsbG8gd29ybGQ=" in xml_string
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_add_attachment_elements_with_multiple_attachments(self):
         """Test add_attachment_elements with multiple UUID attachments."""
         root = lxml_etree.Element("Application", nsmap=self.nsmap)
@@ -115,11 +113,10 @@ class TestAttachmentIntegration:
 
         # Verify multiple attachments were added
         assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 2
-        assert "<FileName>project1.pdf</FileName>" in xml_string
-        assert "<FileName>project2.xlsx</FileName>" in xml_string
+        assert xml_string.count("<att:AttachedFile>") == 2
+        assert "<att:FileName>project1.pdf</att:FileName>" in xml_string
+        assert "<att:FileName>project2.xlsx</att:FileName>" in xml_string
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_add_attachment_elements_all_fields(self):
         """Test add_attachment_elements with all four attachment types."""
         root = lxml_etree.Element("Application", nsmap=self.nsmap)
@@ -189,7 +186,6 @@ class TestAttachmentIntegration:
         assert "not found in attachment mapping" in str(exc_info.value)
         assert "not-a-valid-uuid" in str(exc_info.value)
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_mixed_single_and_multiple_uuids(self):
         """Test handling both single and multiple UUID attachments together."""
         root = lxml_etree.Element("Application", nsmap=self.nsmap)
@@ -212,11 +208,10 @@ class TestAttachmentIntegration:
 
         # Verify multiple attachments
         assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 2
+        assert xml_string.count("<att:AttachedFile>") == 2
         assert "project1.pdf" in xml_string
         assert "project2.xlsx" in xml_string
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_uuid_objects_instead_of_strings(self):
         """Test that UUID objects (not just strings) work correctly."""
         root = lxml_etree.Element("Application", nsmap=self.nsmap)

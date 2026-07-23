@@ -1,5 +1,6 @@
 import { expect, type Page } from "@playwright/test";
-import type { FillFormConfig } from "tests/e2e/utils/common/types";
+
+import type { ResolvedPrintViewForm } from "./opportunity-print-view.types";
 
 /**
  * Converts a workspace application form URL to its corresponding print view URL.
@@ -58,21 +59,19 @@ function truncateToMaxLength(value: string, maxLength: number): string {
  * Keys in the returned Record match the fill-data field keys
  * so the spec can resolve print testIds generically.
  *
- * @param builder    - The form's test data builder function.
- * @param suffix     - A numeric suffix appended to each value (e.g. Date.now()).
- * @param formConfig - The form's FillFormConfig, used for completeness + maxLength checks.
+ * @param form   - The ResolvedPrintViewForm containing buildTestData and formConfig.
+ * @param suffix - A numeric suffix appended to each value (e.g. Date.now()).
  */
 export function buildHappyPathTestData(
-  builder: (suffix: number) => Record<string, string>,
+  form: ResolvedPrintViewForm,
   suffix: number,
-  formConfig: FillFormConfig,
 ): Record<string, string> {
-  const rawData = builder(suffix);
+  const rawData = form.buildTestData(suffix);
 
   // Completeness check: every non-attachment, non-conditional field in the form
   // definition must have a value in the test data. This ensures the builder stays
   // in sync with field definition changes automatically — no manual list to maintain.
-  const missingKeys = Object.entries(formConfig.fields)
+  const missingKeys = Object.entries(form.formConfig.fields)
     .filter(
       ([key, def]) =>
         def.type !== "file" && !def.dependsOn && rawData[key] === undefined,
@@ -88,7 +87,7 @@ export function buildHappyPathTestData(
   // Truncate each value to its field's maxLength to prevent validation failures.
   return Object.fromEntries(
     Object.entries(rawData).map(([key, value]) => {
-      const maxLength = formConfig.fields[key]?.maxLength;
+      const maxLength = form.formConfig.fields[key]?.maxLength;
       return [
         key,
         maxLength !== undefined ? truncateToMaxLength(value, maxLength) : value,

@@ -12,12 +12,7 @@ import { HTMLAttributes } from "react";
 export type GeneralRecord = Record<string, unknown>;
 
 export type BroadlyDefinedWidgetValue =
-  | string
-  | GeneralRecord
-  | GeneralRecord[]
-  | string[]
-  | number
-  | boolean;
+  string | GeneralRecord | GeneralRecord[] | string[] | number | boolean;
 
 export type SchemaField = {
   type?: string;
@@ -170,8 +165,7 @@ export type FieldListWidgetProps = {
     rootFormData?: unknown;
     widgetSupport?: {
       validationWarnings?:
-        | FormattedFormValidationWarning[]
-        | FormValidationWarning[];
+        FormattedFormValidationWarning[] | FormValidationWarning[];
       deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
       onFieldListEntryDelete?: (
         fieldListPath: string,
@@ -213,6 +207,9 @@ export type FieldListGroupItem = {
 
 export type UiSchemaTableCellType = "input" | "readOnly" | "plainText";
 
+export type UiSchemaTableNumberFormat =
+  "integer" | "decimal" | "currency" | "dollar" | "percentage";
+
 export type UiSchemaTableColumn = {
   columnHeader: string;
 
@@ -223,28 +220,38 @@ export type UiSchemaTableColumn = {
   width?: number;
 };
 
-export type UiSchemaTableCell =
+export type TableWidgetCellConfig =
   | {
       type: "input" | "readOnly";
       definition: PropertyPath;
+
+      /**
+       * Optional display format for numeric values.
+       *
+       * Input cells should continue to use an editable numeric representation
+       * while read-only cells use this value for display formatting.
+       */
+      format?: UiSchemaTableNumberFormat;
       staticContent?: undefined;
     }
   | {
       type: "plainText";
       staticContent: string;
       definition?: undefined;
+      format?: undefined;
     };
 
 export type UiSchemaTableRow = {
   /**
    * Cells rendered in the same order as the configured table columns.
-   *
-   * Each row must contain one cell for every configured column.
    */
-  cells: UiSchemaTableCell[];
+  cells: TableWidgetCellConfig[];
 };
 
 export type UiSchemaTableChildren = {
+  /**
+   * Includes each configured column for the table rows.
+   */
   columns: UiSchemaTableColumn[];
   rows: UiSchemaTableRow[];
 };
@@ -305,9 +312,7 @@ export type UiSchemaTableMultiField = {
 };
 
 export type UiSchemaField =
-  | UiSchemaBasicField
-  | UiSchemaMultiField
-  | UiSchemaTableMultiField;
+  UiSchemaBasicField | UiSchemaMultiField | UiSchemaTableMultiField;
 
 export interface UiSchemaSection {
   type: "section";
@@ -340,13 +345,7 @@ export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;
 export type UiSchema = UiSchemaNode[];
 
 export type TextTypes =
-  | "text"
-  | "email"
-  | "number"
-  | "password"
-  | "search"
-  | "tel"
-  | "url";
+  "text" | "email" | "number" | "password" | "search" | "tel" | "url";
 
 // extends the WidgetProps type from rjsf for USWDS and this project implementation
 // see https://github.com/rjsf-team/react-jsonschema-form/blob/7395afcdee6aaea128d943dd17e126c4ed301e58/packages/utils/src/types.ts#L898
@@ -354,7 +353,9 @@ export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = never,
-> extends GenericObjectType,
+>
+  extends
+    GenericObjectType,
     Pick<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
@@ -399,8 +400,7 @@ export interface UswdsWidgetProps<
     rootFormData?: unknown;
     widgetSupport?: {
       validationWarnings?:
-        | FormattedFormValidationWarning[]
-        | FormValidationWarning[];
+        FormattedFormValidationWarning[] | FormValidationWarning[];
       deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
       onFieldListEntryDelete?: (
         fieldListPath: string,
