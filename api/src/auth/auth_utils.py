@@ -1,12 +1,13 @@
 import functools
 import logging
+import urllib
 from collections.abc import Callable
 from typing import Any, ParamSpec
 
 import flask
 from apiflask.exceptions import HTTPError
 from grants_shared.api import response
-from grants_shared.auth.login_gov_jwt_auth import get_final_redirect_uri
+from grants_shared.auth.login_gov_jwt_auth import LoginGovConfig, get_config, get_final_redirect_uri
 
 logger = logging.getLogger(__name__)
 
@@ -80,3 +81,69 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
         return wrapper
 
     return decorator
+
+
+def with_logout_redirect_error_handler() -> Callable[..., Callable[P, flask.Response]]:
+    """
+    Wrapper function TODO
+
+    """
+
+    def decorator(f: Callable[P, flask.Response]) -> Callable[P, flask.Response]:
+        @functools.wraps(f)
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> flask.Response:
+            try:
+                return f(*args, **kwargs)
+            except HTTPError as e:
+                # HTTPError is what raise_flask_error raises
+                # and should encompass our "expected" errors
+                # that aren't a concern, as long as it isn't a 5xx
+                message = e.message
+                logger.info("Logout flow failed: %s", message)
+
+                # But we still don't expect 5xx errors
+                if e.status_code >= 500:
+                    message = INTERNAL_ERROR
+                    logger.exception(
+                        "Unexpected error occurred in logout flow via raise_flask_error: %s",
+                        e.message,
+                    )
+
+                return response.redirect_response(
+                    get_final_redirect_uri(
+                        "error",
+                        error_description=message,
+                    )
+                )
+            except Exception:
+                # Any other exception, we'll just use a generic error message to be safe
+                # but this means an unexpected error occurred and we should log an error
+                logger.exception("Unexpected error occurred in logout flow")
+                return response.redirect_response(
+                    get_final_logout_redirect_uri("error", error_description=INTERNAL_ERROR)
+                )
+
+        return wrapper
+
+    return decorator
+
+
+# TODO - move the below function to grants_shared
+
+
+def get_final_logout_redirect_uri(
+    message: str,
+    error_description: str | None = None,
+    config: LoginGovConfig | None = None,
+) -> str:
+    if config is None:
+        config = get_config()
+
+    params: dict = {"message": message}
+
+    if error_description is not None:
+        params["error_description"] = error_description
+
+    encoded_params = urllib.parse.urlencode(params)
+
+    return f"{config.logout_final_destination}?{encoded_params}"

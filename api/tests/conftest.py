@@ -47,7 +47,7 @@ from src.workflow.registry.workflow_client_registry import (
 )
 from src.workflow.workflow_background_task import _init_newrelic_app
 from tests.lib import db_testing
-from tests.lib.auth_test_utils import mock_oauth_endpoint
+from tests.lib.auth_test_utils import mock_oauth_endpoint, mock_oauth_logout_endpoint
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     InternalUserRoleFactory,
@@ -425,12 +425,19 @@ def app(
         "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
     )
     monkeypatch_session.setenv(
+        "LOGIN_GOV_LOGOUT_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-logout"
+    )
+    monkeypatch_session.setenv(
         "LOGIN_FINAL_DESTINATION", "http://localhost:8080/v1/users/login/result"
     )
+    monkeypatch_session.setenv(
+        "LOGOUT_FINAL_DESTINATION", "http://localhost:8080/v1/users/login/result"
+    )  # We reuse the login result endpoint for logout result rather than make another endpoint for the same purpose
     app = app_entry.create_app()
 
     # Add endpoints and mocks for handling the external OAuth logic
     mock_oauth_endpoint(app, monkeypatch_session, private_rsa_key, mock_oauth_client)
+    mock_oauth_logout_endpoint(app)
 
     return app
 
