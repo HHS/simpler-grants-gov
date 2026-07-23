@@ -123,19 +123,6 @@ class SimplerGrantsClient(BaseSimplerGrantsClient):
             raise
 
     def get_opportunity(self, opportunity_id: UUID) -> OpportunityGetResponse:
-        """Get an opportunity by ID.
-
-        Args:
-            opportunity_id: The UUID of the opportunity to retrieve.
-
-        Returns:
-            The opportunity data.
-
-        Raises:
-            requests.HTTPError: If the API returns an error response (4xx, 5xx).
-            requests.RequestException: If there is a network error.
-            pydantic.ValidationError: If there is an error parsing the response.
-        """
         path = f"/v1/opportunities/{opportunity_id}"
 
         logger.info(
