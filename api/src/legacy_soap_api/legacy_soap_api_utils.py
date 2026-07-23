@@ -617,5 +617,4 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
 def get_internal_request_id() -> str:
     if flask.has_request_context():
         return str(getattr(flask.g, "internal_request_id", uuid.uuid4()))
-    else:
-        return str(uuid.uuid4())
+    return str(uuid.uuid4())

@@ -63,20 +63,15 @@ SOAP_LEGACY_RESPONSE_PAYLOAD = (
 ).encode("utf-8")
 
 
-@mock.patch("src.legacy_soap_api.legacy_soap_api_utils.get_internal_request_id")
 def test_write_debug_data_to_s3(
-    mock_internal_id,
-    caplog,
+    app,
     db_session,
     enable_factory_create,
     monkeypatch,
     mock_s3_bucket,
     s3_config,
-    mock_s3,
 ) -> None:
     test_uuid = uuid.uuid4()
-    mock_internal_id.return_value = str(test_uuid)
-    caplog.set_level(logging.INFO)
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     soap_legacy_response = SOAPResponse(
@@ -85,7 +80,9 @@ def test_write_debug_data_to_s3(
     soap_request = create_soap_request(
         SOAP_PAYLOAD, operation_name="GetSubmissionListExpandedRequest"
     )
-    write_debug_data_to_s3(soap_request, soap_legacy_response)
+    with app.test_request_context("/"):
+        flask.g.internal_request_id = test_uuid
+        write_debug_data_to_s3(soap_request, soap_legacy_response)
     request_contents = file_util.read_file(
         f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/request.txt"
     )
