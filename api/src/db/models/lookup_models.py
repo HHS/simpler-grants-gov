@@ -349,6 +349,11 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.SUBMIT_AWARD_RECOMMENDATION, 31),
         LookupStr(Privilege.INTERNAL_S3_SCAN, 32),
         LookupStr(Privilege.MANAGE_TEST_USER_TOKEN, 33),
+        LookupStr(Privilege.PQC_REVIEWER, 34),
+        LookupStr(Privilege.GMS_REVIEWER, 35),
+        LookupStr(Privilege.FMO_REVIEWER, 36),
+        LookupStr(Privilege.GMO_REVIEWER, 37),
+        LookupStr(Privilege.FINAL_AWARD_REC_APPROVER, 38),
     ]
 )
 

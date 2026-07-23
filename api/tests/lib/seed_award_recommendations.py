@@ -15,8 +15,13 @@ from src.constants.lookup_constants import (
 )
 from src.constants.static_role_values import (
     AWARD_RECOMMENDATION_USER,
+    FINAL_AWARD_REC_APPROVER,
+    FMO_REVIEWER,
+    GMO_REVIEWER,
+    GMS_REVIEWER,
     GRANTOR_BUDGET_OFFICER,
     GRANTOR_PROGRAM_OFFICER,
+    PQC_REVIEWER,
 )
 from src.db.models.agency_models import Agency
 from src.db.models.award_recommendation_models import AwardRecommendation
@@ -169,7 +174,28 @@ def _setup_agency_and_users(db_session: db.Session) -> Agency:
     ).build()
     logger.info("Created user: ar_budget_officer (Grantor Budget Officer)")
 
-    logger.info("✓ Created 1 agency and 4 users with different AR roles")
+    # Create 5 users for each new role
+    roles_config = [
+        (PQC_REVIEWER, "pqc_reviewer", "PQC Reviewer"),
+        (GMS_REVIEWER, "gms_reviewer", "GMS Reviewer"),
+        (FMO_REVIEWER, "fmo_reviewer", "FMO Reviewer"),
+        (GMO_REVIEWER, "gmo_reviewer", "GMO Reviewer"),
+        (FINAL_AWARD_REC_APPROVER, "final_award_rec_approver", "Final Award Rec Approver"),
+    ]
+
+    user_counter = 4
+    for role, role_slug, role_name in roles_config:
+        for i in range(1, 6):
+            user_counter += 1
+            user_id = uuid.UUID(f"660e8400-e29b-41d4-a716-4466554400{user_counter:02d}")
+            username = f"{role_slug}_{i}"
+            display_name = f"AR User - {role_name} {i}"
+            UserBuilder(user_id, db_session, display_name).with_oauth_login(username).with_api_key(
+                f"{username}_key"
+            ).with_jwt_auth().with_agency(agency, roles=[role]).build()
+            logger.info(f"Created user: {username} ({role_name})")
+
+    logger.info(f"✓ Created 1 agency and {user_counter} users with different AR roles")
     logger.info("")
 
     return agency
