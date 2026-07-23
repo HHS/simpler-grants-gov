@@ -12,6 +12,7 @@ import {
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
+  toDynamicApplicationsEndpointV1,
   toDynamicAwardRecommendationEndpoint,
   toDynamicFilesEndpoint,
   toDynamicGrantorAgenciesEndpoint,
@@ -135,6 +136,9 @@ export const fetchCompetition = cache(
 export const fetchApplicationWithMethod = (
   type: "POST" | "GET" | "PUT" | "DELETE",
 ) => requesterForEndpoint(toDynamicApplicationsEndpoint(type));
+
+export const fetchApplicationWithMethodV1 = (type: "POST") =>
+  requesterForEndpoint(toDynamicApplicationsEndpointV1(type));
 
 export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,

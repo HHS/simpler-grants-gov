@@ -43,6 +43,16 @@ export const toDynamicAwardRecommendationEndpoint = (
   };
 };
 
+export const toDynamicApplicationsEndpointV1 = (type: "POST") => {
+  return {
+    basePath: environment.API_URL,
+    version: "v1",
+    namespace: "applications",
+    method: type as ApiMethod,
+    requiresAuth: true,
+  };
+};
+
 export const toDynamicApplicationsEndpoint = (
   type: "POST" | "GET" | "PUT" | "DELETE",
 ) => {
