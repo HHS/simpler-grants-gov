@@ -86,11 +86,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
       const filledForms: FilledFormEntry[] = [];
 
       for (const [index, form] of opportunityConfig.forms.entries()) {
-        const testData = buildHappyPathTestData(
-          form.buildTestData,
-          baseSuffix + index,
-          form.formConfig,
-        );
+        const testData = buildHappyPathTestData(form, baseSuffix + index);
 
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
