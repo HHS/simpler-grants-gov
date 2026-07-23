@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { identity } from "lodash";
 import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
 
@@ -155,5 +155,65 @@ describe("AwardRecommendationHero", () => {
     expect(
       screen.getByTestId("award-recommendation-status-pending-review"),
     ).toBeInTheDocument();
+  });
+
+  it("renders external link when externalLink prop is provided", async () => {
+    const externalLink = {
+      label: "View original application",
+      sublabel: "APP-26-00001",
+      href: "/workspace/applications/app-id-456",
+    };
+
+    const component = await AwardRecommendationHero({
+      awardRecommendationDetails: mockAwardRecommendationDetails,
+      showDateAndStatus: false,
+      externalLink,
+    });
+    render(component);
+
+    const link = screen.getByRole("link", {
+      name: /View original application/i,
+    });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("href", "/workspace/applications/app-id-456");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(link).toHaveTextContent("APP-26-00001");
+  });
+
+  it("renders external link without icon when showIcon is false", async () => {
+    const externalLink = {
+      label: "View application",
+      href: "/workspace/applications/app-id-456",
+      showIcon: false,
+    };
+
+    const component = await AwardRecommendationHero({
+      heading: "Custom Heading",
+      showDateAndStatus: false,
+      externalLink,
+    });
+    render(component);
+
+    const link = screen.getByRole("link", { name: /View application/i });
+    expect(link).toBeInTheDocument();
+
+    // Icon should not be present
+    const icon = within(link).queryByRole("img", { hidden: true });
+    expect(icon).not.toBeInTheDocument();
+  });
+
+  it("does not render external link when externalLink prop is not provided", async () => {
+    const component = await AwardRecommendationHero({
+      awardRecommendationDetails: mockAwardRecommendationDetails,
+      showDateAndStatus: false,
+    });
+    render(component);
+
+    const links = screen.getAllByRole("link");
+    // Should only have breadcrumb links, no external link
+    links.forEach((link) => {
+      expect(link).not.toHaveAttribute("target", "_blank");
+    });
   });
 });

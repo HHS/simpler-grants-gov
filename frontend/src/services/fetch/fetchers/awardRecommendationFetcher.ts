@@ -8,6 +8,7 @@ import {
   AwardRecommendationSubmission,
   AwardRecommendationSubmissionDetailUpdate,
   AwardRecommendationSubmissionListFilters,
+  AwardRecommendationUpdate,
 } from "src/types/awardRecommendationTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 
@@ -255,6 +256,25 @@ export const createAwardRecommendation = async (
   if (!response.ok) {
     throw new Error(
       responseBody.message || "Failed to create award recommendation",
+    );
+  }
+
+  return responseBody.data as AwardRecommendationDetails;
+};
+
+export const updateAwardRecommendation = async (
+  awardRecommendationId: string,
+  update: AwardRecommendationUpdate,
+): Promise<AwardRecommendationDetails> => {
+  const response = await fetchAwardRecommendationWithMethod("PUT")({
+    subPath: awardRecommendationId,
+    body: update,
+  });
+  const responseBody = (await response.json()) as APIResponse;
+
+  if (!response.ok) {
+    throw new Error(
+      responseBody.message || "Failed to save award recommendation",
     );
   }
 
