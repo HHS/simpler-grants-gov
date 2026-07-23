@@ -84,8 +84,22 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
 
 
 def with_logout_redirect_error_handler() -> Callable[..., Callable[P, flask.Response]]:
-    """
-    Wrapper function TODO
+    """Wrapper function to handle catching errors and redirecting for our logout redirect endpoints
+
+    Because our logout functions don't have standard 2xx returns
+    and instead redirect the user, we also redirect in the case of errors
+    so that they stay on the frontend, but we pass errors along.
+
+    Usage::
+
+        @with_logout_redirect_error_handler()
+        def foo(...):
+            logger.info("hello")
+
+            if condition:
+                raise_flask_error(...) # this will get caught and a redirect will occur
+
+            return ...
 
     """
 
