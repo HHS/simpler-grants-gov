@@ -56,13 +56,6 @@ class SimplerGrantsClient(BaseSimplerGrantsClient):
         self.api_key = config.api_key
         self.timeout = config.timeout
 
-        # Validate required parameters
-        if not self.base_url:
-            raise ValueError(
-                "Base URL not found in the provided SimplerGrantsConfig. "
-                "Ensure SIMPLER_GRANTS_API_BASE_URL is set."
-            )
-
     def _build_headers(self) -> dict[str, str]:
         """Build headers for API requests.
 

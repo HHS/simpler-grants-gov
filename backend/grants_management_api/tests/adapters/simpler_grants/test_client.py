@@ -36,14 +36,6 @@ def test_client_initialization_success(client_config):
     assert client.timeout == 5
 
 
-def test_client_initialization_without_base_url():
-    """Test client initialization fails without base URL."""
-    config = SimplerGrantsConfig(base_url="", api_key="test-key")
-
-    with pytest.raises(ValueError, match="Base URL not found"):
-        SimplerGrantsClient(config)
-
-
 def test_get_opportunity_success(client):
     """Test successful opportunity retrieval."""
     opportunity_id = uuid.uuid4()
@@ -167,27 +159,33 @@ def test_get_opportunity_minimal_response(client):
         assert result.data.summary is None
 
 
-def test_request_includes_custom_timeout(client):
+def test_request_includes_custom_timeout():
     """Test that requests use the configured timeout."""
+    # Use a different timeout value to prove it's reading from config
+    custom_timeout = 15
+    config = SimplerGrantsConfig(
+        base_url="http://test-api.example.com",
+        api_key="test-api-key-123",
+        timeout=custom_timeout,
+    )
+    client = SimplerGrantsClient(config)
     opportunity_id = uuid.uuid4()
-    mock_response = {
-        "message": "Success",
-        "data": {
-            "opportunity_id": str(opportunity_id),
-            "opportunity_title": "Test",
-            "opportunity_status": "posted",
-            "summary": None,
-        },
-    }
 
-    with requests_mock.Mocker() as m:
-        adapter = m.get(
-            f"http://test-api.example.com/v1/opportunities/{opportunity_id}",
-            json=mock_response,
-            status_code=200,
+    # Mock at the requests.request level to verify timeout is passed
+    with patch("src.adapters.simpler_grants.client.requests.request") as mock_request:
+        # Create a mock response object
+        mock_response_obj = requests.Response()
+        mock_response_obj.status_code = 200
+        mock_response_obj._content = str.encode(
+            '{"message": "Success", "data": {"opportunity_id": "'
+            + str(opportunity_id)
+            + '", "opportunity_title": "Test", "opportunity_status": "posted", "summary": null}}'
         )
+        mock_request.return_value = mock_response_obj
 
         client.get_opportunity(opportunity_id)
 
-        # Verify the request was made with the correct timeout
-        assert adapter.last_request is not None
+        # Verify timeout from config was actually passed to requests.request
+        mock_request.assert_called_once()
+        call_kwargs = mock_request.call_args.kwargs
+        assert call_kwargs["timeout"] == custom_timeout
