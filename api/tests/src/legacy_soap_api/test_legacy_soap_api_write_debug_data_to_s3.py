@@ -1,7 +1,6 @@
 import json
 import logging
 import uuid
-from unittest import mock
 
 import boto3
 import flask
@@ -108,9 +107,8 @@ def test_write_debug_data_to_s3(
     )
 
 
-@mock.patch("uuid.uuid4")
 def test_write_debug_data_to_s3_handles_a_null_soap_request(
-    mock_uuid,
+    app,
     caplog,
     db_session,
     enable_factory_create,
@@ -120,14 +118,15 @@ def test_write_debug_data_to_s3_handles_a_null_soap_request(
     mock_s3,
 ) -> None:
     test_uuid = uuid.uuid4()
-    mock_uuid.return_value = str(test_uuid)
     caplog.set_level(logging.INFO)
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     soap_legacy_response = SOAPResponse(
         data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
     )
-    write_debug_data_to_s3(None, soap_legacy_response)
+    with app.test_request_context("/"):
+        flask.g.internal_request_id = test_uuid
+        write_debug_data_to_s3(None, soap_legacy_response)
     record = next(
         r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
     )
