@@ -113,16 +113,10 @@
     "vite": "^7.0.0"
   },
   "overrides": {
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
     "next-navigation-guard": {
       "next": "^16.0.0"
     },
-    "flatted": "3.4.2",
-    "protobufjs": "^7.6.3",
-    "uuid": "^14.0.0",
     "ws": "^8.21.0",
-    "form-data": "^4.0.6",
     "sharp": "^0.35.0",
     "postcss": "^8.5.1"
   },
