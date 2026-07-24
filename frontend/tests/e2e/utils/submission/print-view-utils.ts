@@ -75,7 +75,9 @@ export function buildHappyPathTestData(
     .filter(
       ([key, def]) =>
         def.testId !== undefined &&
-        def.type !== "file" && !def.dependsOn && rawData[key] === undefined,
+        def.type !== "file" &&
+        !def.dependsOn &&
+        rawData[key] === undefined,
     )
     .map(([key, def]) => `${key} (${def.field})`);
 
