@@ -479,6 +479,56 @@ class TestListAwardRecommendations200:
         statuses = [d["award_recommendation_status"] for d in resp.json["data"]]
         assert statuses == ["draft", "in_review", "approved"]
 
+    def test_list_award_recommendations_sort_by_opportunity_number(
+        self, client, db_session, agency
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        opp1 = OpportunityFactory.create(
+            agency_code=agency.agency_code, opportunity_number="OPP-001"
+        )
+        opp2 = OpportunityFactory.create(
+            agency_code=agency.agency_code, opportunity_number="OPP-999"
+        )
+        opp3 = OpportunityFactory.create(
+            agency_code=agency.agency_code, opportunity_number="OPP-500"
+        )
+
+        ar1 = AwardRecommendationFactory.create(
+            opportunity=opp1, review_workflow=None, review_workflow_id=None
+        )
+        ar2 = AwardRecommendationFactory.create(
+            opportunity=opp2, review_workflow=None, review_workflow_id=None
+        )
+        ar3 = AwardRecommendationFactory.create(
+            opportunity=opp3, review_workflow=None, review_workflow_id=None
+        )
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"agency_id": {"one_of": [str(agency.agency_id)]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                    "sort_order": [
+                        {"order_by": "opportunity_number", "sort_direction": "ascending"}
+                    ],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        returned_ids = [d["award_recommendation_id"] for d in resp.json["data"]]
+        assert returned_ids == [
+            str(ar1.award_recommendation_id),  # OPP-001
+            str(ar3.award_recommendation_id),  # OPP-500
+            str(ar2.award_recommendation_id),  # OPP-999
+        ]
+
 
 ####################################
 # 404 Tests
