@@ -7,11 +7,13 @@ from sqlalchemy import select
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import (
     ApplicationStatus,
+    ApprovalResponseType,
     AwardRecommendationRiskType,
     AwardRecommendationStatus,
     AwardRecommendationType,
     AwardSelectionMethod,
     OpportunityStatus,
+    WorkflowType,
 )
 from src.constants.static_role_values import (
     AWARD_RECOMMENDATION_USER,
@@ -26,9 +28,18 @@ from src.constants.static_role_values import (
 from src.db.models.agency_models import Agency
 from src.db.models.award_recommendation_models import AwardRecommendation
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
+from src.db.models.user_models import User
+from src.workflow.handler.event_handler import EventHandler
+from src.workflow.state_machine.award_recommendation_review_state_machine import (
+    AwardRecommendationReviewState,
+)
 from tests.lib.seed_data_utils import UserBuilder
 from tests.lib.seed_orgs_and_users import _add_application
 from tests.src.db.models.factories import AgencyFactory
+from tests.src.workflow.workflow_test_util import (
+    build_start_workflow_event,
+    send_process_event,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +95,9 @@ def _build_award_recommendations(db_session: db.Session) -> None:
     )
     award_recommendations_created.extend(
         _create_static_scenario(db_session, competition, applications[:10])
+    )
+    award_recommendations_created.extend(
+        _create_workflow_state_scenarios(db_session, competition, applications)
     )
 
     _log_summary(award_recommendations_created)
@@ -199,6 +213,289 @@ def _setup_agency_and_users(db_session: db.Session) -> Agency:
     logger.info("")
 
     return agency
+
+
+
+CONTENT_CREATOR_USER_ID = uuid.UUID("660e8400-e29b-41d4-a716-446655440000")
+PQC_REVIEWER_USER_ID = uuid.UUID("660e8400-e29b-41d4-a716-446655440005")
+GMS_REVIEWER_USER_ID = uuid.UUID("660e8400-e29b-41d4-a716-446655440010")
+FMO_REVIEWER_USER_ID = uuid.UUID("660e8400-e29b-41d4-a716-446655440015")
+GMO_REVIEWER_USER_ID = uuid.UUID("660e8400-e29b-41d4-a716-446655440020")
+FINAL_APPROVER_USER_ID = uuid.UUID("660e8400-e29b-41d4-a716-446655440025")
+
+
+def _get_seeded_user(db_session: db.Session, user_id: uuid.UUID) -> User:
+    user = db_session.get(User, user_id)
+    if user is None:
+        raise RuntimeError(f"Expected seeded workflow user {user_id} was not found")
+    return user
+
+
+def _get_workflow_users(db_session: db.Session) -> dict[str, User]:
+    return {
+        "content_creator": _get_seeded_user(db_session, CONTENT_CREATOR_USER_ID),
+        "pqc_reviewer": _get_seeded_user(db_session, PQC_REVIEWER_USER_ID),
+        "gms_reviewer": _get_seeded_user(db_session, GMS_REVIEWER_USER_ID),
+        "fmo_reviewer": _get_seeded_user(db_session, FMO_REVIEWER_USER_ID),
+        "gmo_reviewer": _get_seeded_user(db_session, GMO_REVIEWER_USER_ID),
+        "final_approver": _get_seeded_user(db_session, FINAL_APPROVER_USER_ID),
+    }
+
+
+def _start_review_workflow(
+    db_session: db.Session,
+    award_recommendation: AwardRecommendation,
+    content_creator: User,
+):
+    start_event = build_start_workflow_event(
+        workflow_type=WorkflowType.AWARD_RECOMMENDATION_REVIEW,
+        user=content_creator,
+        entity=award_recommendation,
+    )
+    return EventHandler(db_session, start_event).process()
+
+
+def _advance_to_happy_path_state(
+    db_session: db.Session,
+    award_recommendation: AwardRecommendation,
+    target_state: AwardRecommendationReviewState,
+    users: dict[str, User],
+):
+    state_machine = _start_review_workflow(
+        db_session,
+        award_recommendation,
+        users["content_creator"],
+    )
+
+    if target_state == AwardRecommendationReviewState.PENDING_PQC_REVIEW:
+        return state_machine
+
+    steps = [
+        (
+            "receive_pqc_approval",
+            users["pqc_reviewer"],
+            ApprovalResponseType.APPROVED,
+            AwardRecommendationReviewState.PENDING_GMS_REVIEW_START,
+            None,
+        ),
+        (
+            "start_gms_review",
+            users["gms_reviewer"],
+            None,
+            AwardRecommendationReviewState.PENDING_GMS_REVIEW,
+            None,
+        ),
+        (
+            "receive_gms_approval",
+            users["gms_reviewer"],
+            ApprovalResponseType.APPROVED,
+            AwardRecommendationReviewState.PENDING_FMO_REVIEW,
+            None,
+        ),
+        (
+            "receive_fmo_approval",
+            users["fmo_reviewer"],
+            ApprovalResponseType.APPROVED,
+            AwardRecommendationReviewState.PENDING_GMO_REVIEW,
+            None,
+        ),
+        (
+            "receive_gmo_approval",
+            users["gmo_reviewer"],
+            ApprovalResponseType.APPROVED,
+            AwardRecommendationReviewState.PENDING_AGENCY_APPROVAL,
+            None,
+        ),
+        (
+            "receive_agency_approval",
+            users["final_approver"],
+            ApprovalResponseType.APPROVED,
+            AwardRecommendationReviewState.PENDING_DEPARTMENTAL_APPROVAL,
+            None,
+        ),
+        (
+            "receive_departmental_approval",
+            users["final_approver"],
+            ApprovalResponseType.APPROVED,
+            AwardRecommendationReviewState.PENDING_INTERAGENCY_APPROVAL,
+            None,
+        ),
+        (
+            "receive_interagency_approval",
+            users["final_approver"],
+            ApprovalResponseType.APPROVED,
+            AwardRecommendationReviewState.PENDING_EXECUTIVE_APPROVAL,
+            None,
+        ),
+        (
+            "receive_executive_approval",
+            users["final_approver"],
+            ApprovalResponseType.APPROVED,
+            AwardRecommendationReviewState.END,
+            False,
+        ),
+    ]
+
+    for event_name, user, response_type, expected_state, expected_is_active in steps:
+        if response_type is None:
+            state_machine = send_process_event(
+                db_session=db_session,
+                event_to_send=event_name,
+                workflow_id=state_machine.workflow.workflow_id,
+                user=user,
+                expected_state=expected_state,
+            )
+        elif expected_is_active is None:
+            state_machine = send_process_event(
+                db_session=db_session,
+                event_to_send=event_name,
+                workflow_id=state_machine.workflow.workflow_id,
+                user=user,
+                approval_response_type=response_type,
+                expected_state=expected_state,
+            )
+        else:
+            state_machine = send_process_event(
+                db_session=db_session,
+                event_to_send=event_name,
+                workflow_id=state_machine.workflow.workflow_id,
+                user=user,
+                approval_response_type=response_type,
+                expected_state=expected_state,
+                expected_is_active=expected_is_active,
+            )
+
+        if target_state == expected_state:
+            return state_machine
+
+    raise ValueError(f"Unsupported happy-path target state: {target_state}")
+
+
+def _advance_to_revision_state(
+    db_session: db.Session,
+    award_recommendation: AwardRecommendation,
+    target_state: AwardRecommendationReviewState,
+    users: dict[str, User],
+):
+    state_machine = _advance_to_happy_path_state(
+        db_session,
+        award_recommendation,
+        AwardRecommendationReviewState.PENDING_GMO_REVIEW,
+        users,
+    )
+
+    state_machine = send_process_event(
+        db_session=db_session,
+        event_to_send="receive_gmo_approval",
+        workflow_id=state_machine.workflow.workflow_id,
+        user=users["gmo_reviewer"],
+        approval_response_type=ApprovalResponseType.REQUIRES_MODIFICATION,
+        comment="Seeded revision request for workflow-state testing.",
+        expected_state=AwardRecommendationReviewState.PENDING_REVISION_START,
+    )
+
+    if target_state == AwardRecommendationReviewState.PENDING_REVISION_START:
+        return state_machine
+
+    state_machine = send_process_event(
+        db_session=db_session,
+        event_to_send="start_revision",
+        workflow_id=state_machine.workflow.workflow_id,
+        user=users["content_creator"],
+        expected_state=AwardRecommendationReviewState.PENDING_REVISION_COMPLETE,
+    )
+
+    if target_state == AwardRecommendationReviewState.PENDING_REVISION_COMPLETE:
+        return state_machine
+
+    raise ValueError(f"Unsupported revision target state: {target_state}")
+
+
+def _create_workflow_state_scenarios(
+    db_session: db.Session,
+    competition: Competition,
+    applications: list[Application],
+) -> list[tuple]:
+    """Create one award recommendation with realistic history in every workflow state."""
+    if not applications:
+        return []
+
+    users = _get_workflow_users(db_session)
+    created = []
+
+    target_states = list(AwardRecommendationReviewState)
+    revision_states = {
+        AwardRecommendationReviewState.PENDING_REVISION_START,
+        AwardRecommendationReviewState.PENDING_REVISION_COMPLETE,
+    }
+
+    for index, target_state in enumerate(target_states):
+        award_recommendation = factories.AwardRecommendationFactory.create(
+            opportunity=competition.opportunity,
+            award_recommendation_status=AwardRecommendationStatus.DRAFT,
+            award_selection_method=AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY,
+            additional_info=f"Seeded workflow scenario for state '{target_state.value}'.",
+            review_workflow=None,
+            review_workflow_id=None,
+        )
+
+        application = applications[index % len(applications)]
+        if application.application_submissions:
+            _add_application_to_award_recommendation(
+                db_session,
+                award_recommendation,
+                application.application_submissions[0],
+                recommended_amount=50000,
+                award_recommendation_type=AwardRecommendationType.RECOMMENDED_FOR_FUNDING,
+                scoring_comment="85",
+                general_comment="Seeded application for workflow-state testing.",
+            )
+
+        if target_state == AwardRecommendationReviewState.START:
+            workflow = factories.WorkflowFactory.create(
+                has_award_recommendation=True,
+                workflow_type=WorkflowType.AWARD_RECOMMENDATION_REVIEW,
+                current_workflow_state=AwardRecommendationReviewState.START,
+                award_recommendation=award_recommendation,
+            )
+            award_recommendation.review_workflow = workflow
+            award_recommendation.review_workflow_id = workflow.workflow_id
+            db_session.add(award_recommendation)
+            db_session.flush()
+        elif target_state in revision_states:
+            state_machine = _advance_to_revision_state(
+                db_session,
+                award_recommendation,
+                target_state,
+                users,
+            )
+            workflow = state_machine.workflow
+        else:
+            state_machine = _advance_to_happy_path_state(
+                db_session,
+                award_recommendation,
+                target_state,
+                users,
+            )
+            workflow = state_machine.workflow
+
+        logger.info(
+            "Created workflow-state AR %s in state %s with status %s and %s approvals",
+            award_recommendation.award_recommendation_number,
+            target_state.value,
+            award_recommendation.award_recommendation_status,
+            len(workflow.workflow_approvals),
+        )
+
+        created.append(
+            (
+                award_recommendation,
+                f"Workflow State - {target_state.value}",
+                competition.opportunity.opportunity_number,
+            )
+        )
+
+    return created
 
 
 def _create_draft_scenario(

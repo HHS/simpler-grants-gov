@@ -60,6 +60,8 @@ const OpportunitySection = ({
   const summaryDescription = opportunityData.summary?.summary_description || "";
   const hasSummary = !!summaryDescription;
 
+  console.log(awardRecommendationDetails, "awardRecommendationDetails");
+
   return (
     <div className="margin-top-3 margin-bottom-3">
       <div className="margin-bottom-3">
