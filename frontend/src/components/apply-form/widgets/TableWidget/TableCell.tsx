@@ -21,6 +21,10 @@ type TableCellProps = {
   onChange?: (value: string) => void;
 };
 
+function getStringValue(value: number | string | null | undefined): string {
+  return value === undefined || value === null ? "" : String(value);
+}
+
 /**
  * TableCell renders a single cell in a table widget.
  *
@@ -79,9 +83,12 @@ function TableCell({
   disabled = false,
   onChange,
 }: TableCellProps) {
-  const initialValue =
-    value === undefined || value === null ? "" : String(value);
-  const [inputValue, setInputValue] = useState(initialValue);
+  const [inputValue, setInputValue] = useState(getStringValue(value));
+  const [lastSyncedValue, setLastSyncedValue] = useState(value);
+  if (lastSyncedValue !== value) {
+    setLastSyncedValue(value);
+    setInputValue(getStringValue(value));
+  }
 
   if (cell.type === "plainText") {
     return (

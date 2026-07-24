@@ -144,9 +144,9 @@ function TableWidget({
         return;
       }
 
-      const currentValue = isObjectRecord(value) ? value : {};
+      const currentValue = isObjectRecord(value) ? { ...value } : {};
 
-      const nextFormValue = set({ ...currentValue }, valuePath, nextValue);
+      const nextFormValue = set(currentValue, valuePath, nextValue);
 
       onChange?.(nextFormValue);
     },

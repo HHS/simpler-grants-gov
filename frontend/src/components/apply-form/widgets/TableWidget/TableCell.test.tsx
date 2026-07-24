@@ -209,4 +209,32 @@ describe("TableCell", () => {
       "text-wrap",
     );
   });
+
+  it("updates the input value when the value prop changes after initial render", () => {
+    const { rerender } = render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+        }}
+        id="input-cell"
+        value={100}
+      />,
+    );
+
+    expect(screen.getByTestId("input-cell-input")).toHaveValue("100");
+
+    rerender(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+        }}
+        id="input-cell"
+        value={250}
+      />,
+    );
+
+    expect(screen.getByTestId("input-cell-input")).toHaveValue("250");
+  });
 });

@@ -274,4 +274,36 @@ describe("TableWidget", () => {
 
     expect(error.message).toBe("Table row 1 must contain exactly 3 cells.");
   });
+
+  it("does not mutate the original value object when updating cells", () => {
+    const onChange = jest.fn();
+    const originalValue: Record<string, number> = {
+      first_value: 100,
+      second_value: 200,
+    };
+    const valueSnapshot = JSON.parse(
+      JSON.stringify(originalValue),
+    ) as unknown as Record<string, number>;
+
+    render(
+      <TableWidget
+        {...props}
+        onChange={onChange}
+        schema={{}}
+        rawErrors={[]}
+        value={originalValue}
+        options={{}}
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("summary_table_test-0-1-input"), {
+      target: { value: "250" },
+    });
+
+    expect(originalValue).toEqual(valueSnapshot);
+    expect(onChange).toHaveBeenCalledWith({
+      first_value: "250",
+      second_value: 200,
+    });
+  });
 });
