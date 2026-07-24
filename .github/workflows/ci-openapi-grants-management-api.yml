@@ -20,12 +20,11 @@ jobs:
         with:
           fetch-depth: 0  # fetch full history so we can create branches properly
 
-      # Generate artifacts on the triggering ref BEFORE switching branches
-      - name: Build Docker images
-        run: make build
-
-      - name: Start database
-        run: make start-db
+      # Generate artifacts on the triggering ref before switching branches.
+      # Only the docs-generation image is needed (it reads SQLAlchemy metadata,
+      # so no DB is required). It's profile-gated, so build it by name.
+      - name: Build the OpenAPI/ERD tooling image
+        run: docker compose build openapi-tools
 
       - name: Create ERD diagram
         run: make create-erds

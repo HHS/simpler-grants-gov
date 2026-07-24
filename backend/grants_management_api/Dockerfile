@@ -58,8 +58,9 @@ RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
 #==============================================
 # Graphviz is needed by `make create-erds` to render the ERD diagrams. The
 # python-base-image doesn't ship it, so we download the rpms in an Amazon Linux
-# stage and copy the resulting rootfs into the dev image below. This keeps the
-# dependency out of the release image, which never generates diagrams.
+# stage and copy the resulting rootfs into the openapi-tools image below. This
+# keeps the dependency out of both the production release image and the
+# standard dev image. Only the docs-generation image carries it.
 FROM --platform=linux/amd64 amazonlinux:2023 AS graphviz-downloader
 
 RUN dnf -y install cpio && \
@@ -74,12 +75,6 @@ RUN dnf -y install cpio && \
 #==============================================
 FROM base AS dev
 ARG RUN_USER
-
-# Add graphviz (for ERD generation via `make create-erds`) from the downloader
-# stage. Done as root before the USER switch below so `dot -c` can register the
-# plugins.
-COPY --from=graphviz-downloader /runtime/rootfs/ /
-RUN /usr/bin/dot -c
 
 # We want dev dependencies in the dev image
 ENV UV_NO_DEV=0
@@ -106,6 +101,23 @@ RUN uv venv /opt/venv && uv sync --locked --all-groups
 
 
 CMD ["flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8089", "--reload"]
+
+#==============================================
+# Stage 2b: OpenAPI / ERD tooling image
+#==============================================
+# Derived from dev, this adds graphviz solely for generating the OpenAPI spec
+# and ERD diagrams (`make openapi-spec` / `make create-erds`). Keeping it in its
+# own stage means neither the release image nor the standard dev image ships
+# graphviz.
+FROM dev AS openapi-tools
+ARG RUN_USER
+
+# Copy graphviz in as root (before dropping back to the run user) so `dot -c`
+# can register the plugins.
+USER root
+COPY --from=graphviz-downloader /runtime/rootfs/ /
+RUN /usr/bin/dot -c
+USER ${RUN_USER}
 
 #==============================================
 # Stage 3: Minimal release runtime
