@@ -5,14 +5,14 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
+  buildSF424BHappyPathTestData,
+  sf424BReadonlyFields,
+} from "tests/e2e/apply/fixtures/sf424b-data";
+import {
   SF424B_FORM_CONFIG,
   SF424B_FORM_MATCHER,
   SF424B_REQUIRED_FIELD_ERRORS,
 } from "tests/e2e/apply/fixtures/sf424b-field-definitions";
-import {
-  sf424BHappyPathTestData,
-  sf424BReadonlyFields,
-} from "tests/e2e/apply/fixtures/sf424b-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -120,7 +120,7 @@ test(
       testInfo,
       page,
       SF424B_FORM_CONFIG,
-      sf424BHappyPathTestData(testOrgLabel),
+      buildSF424BHappyPathTestData(Date.now()),
       false,
     );
 

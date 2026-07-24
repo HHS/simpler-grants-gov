@@ -15,8 +15,8 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { buildSF424BHappyPathTestData } from "tests/e2e/apply/fixtures/sf424b-data";
 import { SF424B_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424b-field-definitions";
-import { sf424BHappyPathTestData } from "tests/e2e/apply/fixtures/sf424b-fill-data";
 import { buildSFLLLHappyPathTestData } from "tests/e2e/apply/fixtures/sfLLL-data";
 import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
@@ -83,7 +83,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         testInfo,
         page,
         SF424B_FORM_CONFIG,
-        sf424BHappyPathTestData(testOrgLabel),
+        buildSF424BHappyPathTestData(Date.now()),
         false,
       );
 
