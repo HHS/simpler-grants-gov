@@ -115,7 +115,7 @@ const ApplyForm = ({
   applicationStatus,
   createdAt,
   updatedAt,
-  useVirusScanning,
+  useVirusScanning = false,
 }: {
   applicationId: string;
   formId: string;
@@ -125,7 +125,7 @@ const ApplyForm = ({
   validationWarnings:
     FormattedFormValidationWarning[] | FormValidationWarning[] | null;
   attachments: Attachment[];
-  useVirusScanning: boolean;
+  useVirusScanning?: boolean;
   isBudgetForm?: boolean;
   applicationStatus?: string;
   createdAt?: string;

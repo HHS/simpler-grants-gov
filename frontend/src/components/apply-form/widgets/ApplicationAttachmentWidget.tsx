@@ -6,7 +6,10 @@ import { ApplicationAttachmentCreateResponse } from "src/types/applicationRespon
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { UploadFileMetadata } from "src/types/fileUploadTypes";
-import { mapAttachmentsToFileMetadata } from "src/utils/applyForm/applicationAttachmentUtils";
+import {
+  ApplicationAttachmentStatus,
+  mapAttachmentsToFileMetadata,
+} from "src/utils/applyForm/applicationAttachmentUtils";
 
 import { useParams } from "next/navigation";
 import React, { useState } from "react";
@@ -17,18 +20,17 @@ import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
-const ApplicationAttachmentWidget = (props: UswdsWidgetProps) => {
-  const {
-    disabled,
-    id,
-    onChange,
-    options,
-    rawErrors = [],
-    readOnly,
-    required,
-    schema: { contentMediaType, title, description },
-    value: applicationAttachmentId,
-  } = props;
+const ApplicationAttachmentWidget = ({
+  disabled,
+  id,
+  onChange,
+  options,
+  rawErrors = [],
+  readOnly,
+  required,
+  schema: { description, title },
+  value,
+}: UswdsWidgetProps) => {
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   const { clientFetch: createApplicationAttachmentFetcher } =
     useClientFetch<ApplicationAttachmentCreateResponse>(
@@ -38,12 +40,11 @@ const ApplicationAttachmentWidget = (props: UswdsWidgetProps) => {
   const { attachments } = useApplicationAttachments();
   const [attachment, setAttachment] = useState<Attachment | null>(
     attachments?.find(
-      (attachmentItem) =>
-        attachmentItem.application_attachment_id === applicationAttachmentId,
+      (attachmentItem) => attachmentItem.application_attachment_id === value,
     ) ?? null,
   );
 
-  const handleFormAttachment = async (
+  const handleUploadApplicationAttachment = async (
     fileId: string,
     abortSignal: AbortSignal,
   ) => {
@@ -61,13 +62,20 @@ const ApplicationAttachmentWidget = (props: UswdsWidgetProps) => {
 
   const handleDeletattachment = (): Promise<undefined> => {
     setAttachment(null);
+    onChange?.(undefined);
     return Promise.resolve(undefined);
   };
+
+  const error = rawErrors.length ? true : undefined;
+  const describedby = error
+    ? `error-for-${id}`
+    : title
+      ? `label-for-${id}`
+      : "app-form-attachment-upload-label";
 
   const existingFiles: UploadFileMetadata[] = attachment
     ? mapAttachmentsToFileMetadata([attachment])
     : [];
-  const error = rawErrors.length ? true : undefined;
 
   return (
     <FormGroup key={`form-group__multi-file-upload--${id}`} error={error}>
@@ -88,15 +96,15 @@ const ApplicationAttachmentWidget = (props: UswdsWidgetProps) => {
       )}
       <SimplerFileInput
         id={id}
-        postUploadAction={handleFormAttachment}
-        postUploadActionProgressMessage={"Uploading"}
-        postUploadActionSuccessMessage={"Success"}
-        postUploadActionErrorMessage={"Something went wrong"}
+        postUploadAction={handleUploadApplicationAttachment}
+        postUploadActionProgressMessage={ApplicationAttachmentStatus.uploading}
+        postUploadActionSuccessMessage={ApplicationAttachmentStatus.success}
+        postUploadActionErrorMessage={ApplicationAttachmentStatus.error}
         onDelete={handleDeletattachment}
         disabled={disabled}
         readOnly={readOnly}
         required={required}
-        labelId={"app-form-attachment-upload-label"}
+        labelId={describedby}
         existingFiles={existingFiles}
       />
     </FormGroup>

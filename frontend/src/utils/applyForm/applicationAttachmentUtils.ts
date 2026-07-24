@@ -1,6 +1,13 @@
 import { Attachment } from "src/types/attachmentTypes";
 import { UploadFileMetadata } from "src/types/fileUploadTypes";
 
+export const ApplicationAttachmentStatus = {
+  uploading: "Uploading...",
+  error:
+    "Processing failed due to a system error. Try uploading your file again.",
+  success: "Success: File scan complete.  “Save” this form to attach the file.",
+};
+
 const toFileMetadata = (attachment: Attachment): UploadFileMetadata => ({
   id: attachment.application_attachment_id,
   fileName: attachment.file_name,
