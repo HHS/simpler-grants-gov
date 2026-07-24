@@ -289,6 +289,8 @@ describe("ApplyFormMessage", () => {
           saved={true}
         />
         <TableWidget
+          id="table-widget-test"
+          schema={{}}
           uiSchemaField={uiSchemaField}
           rawErrors={rawErrors}
           value={{}}
