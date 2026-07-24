@@ -789,7 +789,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
-        with pytest.raises(SOAPFaultException, match="ApplicationSubmission not found."):
+        with pytest.raises(SOAPFaultException, match="ApplicationSubmission not found"):
             client.get_simpler_soap_response(mock_proxy_response)
         assert "Unable to find submission." in caplog.messages
 

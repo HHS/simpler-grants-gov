@@ -41,7 +41,6 @@ def get_application_zip_response(
     get_application_zip_request: grantor_schemas.GetApplicationZipRequest,
     soap_config: SOAPOperationConfig,
 ) -> grantor_schemas.GetApplicationZipResponseSOAPEnvelope:
-    schema = build_schema()
     legacy_tracking_number = get_application_zip_request.grants_gov_tracking_number
     if not legacy_tracking_number:
         raise SOAPFaultException(
