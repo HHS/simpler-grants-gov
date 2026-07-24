@@ -8,16 +8,18 @@ import requests
 import requests_mock
 from pydantic import ValidationError
 
-from src.adapters.simpler_grants.client import SimplerGrantsClient
+from src.adapters.simpler_grants.client import SimplerGrantsClient, SimplerResponseException
 from src.adapters.simpler_grants.config import SimplerGrantsConfig
-from src.adapters.simpler_grants.models import OpportunityStatus
+from src.adapters.simpler_grants.models import SimplerOpportunityStatus
 
 
 @pytest.fixture
 def client_config():
     """Create a test configuration."""
     return SimplerGrantsConfig(
-        base_url="http://test-api.example.com", api_key="test-api-key-123", timeout=5
+        SIMPLER_GRANTS_API_BASE_URL="http://test-api.example.com",
+        SIMPLER_GRANTS_API_KEY="test-api-key-123",
+        SIMPLER_GRANTS_API_TIMEOUT=5,
     )
 
 
@@ -31,9 +33,9 @@ def test_client_initialization_success(client_config):
     """Test successful client initialization."""
     client = SimplerGrantsClient(client_config)
 
-    assert client.base_url == "http://test-api.example.com"
-    assert client.api_key == "test-api-key-123"
-    assert client.timeout == 5
+    assert client.config.base_url == "http://test-api.example.com"
+    assert client.config.api_key == "test-api-key-123"
+    assert client.config.timeout == 5
 
 
 def test_get_opportunity_success(client):
@@ -61,7 +63,7 @@ def test_get_opportunity_success(client):
         assert result.message == "Success"
         assert result.data.opportunity_id == opportunity_id
         assert result.data.opportunity_title == "Test Opportunity"
-        assert result.data.opportunity_status == OpportunityStatus.POSTED
+        assert result.data.opportunity_status == SimplerOpportunityStatus.POSTED
         assert result.data.summary is not None
         assert str(result.data.summary.post_date) == "2024-01-15"
 
@@ -78,11 +80,14 @@ def test_get_opportunity_not_found(client):
             status_code=404,
         )
 
-        with pytest.raises(requests.HTTPError) as exc_info:
+        with pytest.raises(SimplerResponseException) as exc_info:
             client.get_opportunity(opportunity_id)
 
-        # Can check status code directly from the exception
-        assert exc_info.value.response.status_code == 404
+        # Verify the parsed error response
+        error = exc_info.value.simpler_response_error
+        assert error.status_code == 404
+        assert error.message == "Opportunity not found"
+        assert error.errors is None
 
 
 def test_get_opportunity_server_error(client):
@@ -96,12 +101,59 @@ def test_get_opportunity_server_error(client):
             text="Internal Server Error",
         )
 
-        with pytest.raises(requests.HTTPError) as exc_info:
+        with pytest.raises(SimplerResponseException) as exc_info:
             client.get_opportunity(opportunity_id)
 
-        # Can check status code and response text
-        assert exc_info.value.response.status_code == 500
-        assert "Internal Server Error" in exc_info.value.response.text
+        # Verify the parsed error response (non-JSON response)
+        error = exc_info.value.simpler_response_error
+        assert error.status_code == 500
+        assert error.message == "Internal Server Error"
+        assert error.errors is None
+
+
+def test_get_opportunity_with_validation_errors(client):
+    """Test error response with validation errors."""
+    opportunity_id = uuid.uuid4()
+    mock_response = {
+        "message": "Validation failed",
+        "status_code": 422,
+        "errors": [
+            {
+                "type": "invalid_field",
+                "message": "Field is required",
+                "field": "opportunity_title",
+                "value": None,
+            },
+            {
+                "type": "invalid_format",
+                "message": "Invalid date format",
+                "field": "summary.post_date",
+                "value": "not-a-date",
+            },
+        ],
+    }
+
+    with requests_mock.Mocker() as m:
+        m.get(
+            f"http://test-api.example.com/v1/opportunities/{opportunity_id}",
+            json=mock_response,
+            status_code=422,
+        )
+
+        with pytest.raises(SimplerResponseException) as exc_info:
+            client.get_opportunity(opportunity_id)
+
+        # Verify the parsed error response with validation errors
+        error = exc_info.value.simpler_response_error
+        assert error.status_code == 422
+        assert error.message == "Validation failed"
+        assert error.errors is not None
+        assert len(error.errors) == 2
+        assert error.errors[0].type == "invalid_field"
+        assert error.errors[0].message == "Field is required"
+        assert error.errors[0].field == "opportunity_title"
+        assert error.errors[1].type == "invalid_format"
+        assert error.errors[1].field == "summary.post_date"
 
 
 def test_get_opportunity_timeout(client):
@@ -155,7 +207,7 @@ def test_get_opportunity_minimal_response(client):
 
         assert result.data.opportunity_id == opportunity_id
         assert result.data.opportunity_title is None
-        assert result.data.opportunity_status == OpportunityStatus.FORECASTED
+        assert result.data.opportunity_status == SimplerOpportunityStatus.FORECASTED
         assert result.data.summary is None
 
 
@@ -164,9 +216,9 @@ def test_request_includes_custom_timeout():
     # Use a different timeout value to prove it's reading from config
     custom_timeout = 15
     config = SimplerGrantsConfig(
-        base_url="http://test-api.example.com",
-        api_key="test-api-key-123",
-        timeout=custom_timeout,
+        SIMPLER_GRANTS_API_BASE_URL="http://test-api.example.com",
+        SIMPLER_GRANTS_API_KEY="test-api-key-123",
+        SIMPLER_GRANTS_API_TIMEOUT=custom_timeout,
     )
     client = SimplerGrantsClient(config)
     opportunity_id = uuid.uuid4()

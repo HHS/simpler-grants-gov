@@ -7,6 +7,8 @@ from urllib.parse import urljoin
 from uuid import UUID
 
 import requests
+from grants_shared.api.response import ValidationErrorDetail
+from pydantic import BaseModel, ValidationError
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -16,16 +18,37 @@ from tenacity import (
 )
 
 from src.adapters.simpler_grants.config import SimplerGrantsConfig
-from src.adapters.simpler_grants.models import OpportunityGetResponse
+from src.adapters.simpler_grants.models import SimplerOpportunityGetResponse
 
 logger = logging.getLogger(__name__)
+
+
+class SimplerResponseError(BaseModel):
+    """Error response from the Simpler Grants API."""
+
+    message: str
+    status_code: int
+    errors: list[ValidationErrorDetail] | None = None
+
+
+class SimplerResponseException(Exception):
+    """Exception raised when the Simpler Grants API returns an error response."""
+
+    def __init__(self, simpler_response_error: SimplerResponseError):
+        """Initialize the exception with the error response.
+
+        Args:
+            simpler_response_error: The parsed error response from the API.
+        """
+        super().__init__(simpler_response_error.message)
+        self.simpler_response_error = simpler_response_error
 
 
 class BaseSimplerGrantsClient(abc.ABC, metaclass=abc.ABCMeta):
     """Base class for Simpler Grants API clients."""
 
     @abc.abstractmethod
-    def get_opportunity(self, opportunity_id: UUID) -> OpportunityGetResponse:
+    def get_opportunity(self, opportunity_id: UUID) -> SimplerOpportunityGetResponse:
         """Get an opportunity by ID.
 
         Args:
@@ -35,9 +58,9 @@ class BaseSimplerGrantsClient(abc.ABC, metaclass=abc.ABCMeta):
             The opportunity data.
 
         Raises:
-            requests.HTTPError: If the API returns an error response (4xx, 5xx).
+            SimplerResponseException: If the API returns an error response (4xx, 5xx).
             requests.RequestException: If there is a network error.
-            pydantic.ValidationError: If there is an error parsing the response.
+            ValidationError: If there is an error parsing the response.
         """
         pass
 
@@ -52,9 +75,6 @@ class SimplerGrantsClient(BaseSimplerGrantsClient):
             config: Configuration object for the Simpler Grants client.
         """
         self.config = config
-        self.base_url = config.base_url
-        self.api_key = config.api_key
-        self.timeout = config.timeout
 
     def _build_headers(self) -> dict[str, str]:
         """Build headers for API requests.
@@ -67,8 +87,8 @@ class SimplerGrantsClient(BaseSimplerGrantsClient):
             "Accept": "application/json",
         }
 
-        if self.api_key:
-            headers["X-API-Key"] = self.api_key
+        if self.config.api_key:
+            headers["X-API-Key"] = self.config.api_key
 
         return headers
 
@@ -81,7 +101,7 @@ class SimplerGrantsClient(BaseSimplerGrantsClient):
         Returns:
             The full URL.
         """
-        return urljoin(self.base_url, path)
+        return urljoin(self.config.base_url, path)
 
     def _request(self, method: str, path: str, **kwargs: Any) -> requests.Response:
         """Make a request to the API with error handling.
@@ -95,7 +115,7 @@ class SimplerGrantsClient(BaseSimplerGrantsClient):
             The response object.
 
         Raises:
-            requests.HTTPError: If the API returns an error response (4xx, 5xx).
+            SimplerResponseException: If the API returns an error response (4xx, 5xx).
             requests.RequestException: If there is a network error (timeout, connection error, etc.).
         """
         url = self._build_url(path)
@@ -107,31 +127,74 @@ class SimplerGrantsClient(BaseSimplerGrantsClient):
 
         # Set default timeout if not provided
         if "timeout" not in kwargs:
-            kwargs["timeout"] = self.timeout
+            kwargs["timeout"] = self.config.timeout
 
         logger.info(
             "Making request to Simpler Grants API",
             extra={"method": method, "url": url},
         )
 
-        try:
-            response = _do_request_with_retry(method, url, headers=headers, **kwargs)
-            response.raise_for_status()
-            return response
-        except requests.RequestException:
-            logger.exception("Request to Simpler Grants API failed")
-            raise
+        response = _do_request_with_retry(method, url, headers=headers, **kwargs)
 
-    def get_opportunity(self, opportunity_id: UUID) -> OpportunityGetResponse:
+        # If response is not successful, parse error and raise custom exception
+        if not response.ok:
+            self._handle_error_response(response)
+
+        return response
+
+    def _handle_error_response(self, response: requests.Response) -> None:
+        """Parse error response and raise SimplerResponseException.
+
+        Args:
+            response: The error response from the API.
+
+        Raises:
+            SimplerResponseException: Always raised with parsed error details.
+        """
+        try:
+            # Attempt to parse the error response as JSON
+            error_data = response.json()
+            errors = None
+
+            # Extract validation errors if present
+            if "errors" in error_data and isinstance(error_data["errors"], list):
+                errors = [
+                    ValidationErrorDetail(
+                        type=err.get("type", "unknown"),
+                        message=err.get("message", ""),
+                        field=err.get("field"),
+                        value=err.get("value"),
+                    )
+                    for err in error_data["errors"]
+                ]
+
+            simpler_error = SimplerResponseError(
+                message=error_data.get("message", response.reason),
+                status_code=response.status_code,
+                errors=errors,
+            )
+        except ValueError, KeyError, ValidationError:
+            # If we can't parse the error response, use text or reason
+            # priority: text (actual response body) > reason (HTTP status) > "Unknown error" (last fall back message)
+            message = response.text or response.reason or "Unknown error"
+            simpler_error = SimplerResponseError(
+                message=message,
+                status_code=response.status_code,
+                errors=None,
+            )
+
+        raise SimplerResponseException(simpler_error)
+
+    def get_opportunity(self, opportunity_id: UUID) -> SimplerOpportunityGetResponse:
         path = f"/v1/opportunities/{opportunity_id}"
 
         logger.info(
             "Fetching opportunity from Simpler Grants API",
-            extra={"opportunity_id": str(opportunity_id)},
+            extra={"opportunity_id": opportunity_id},
         )
 
         response = self._request("GET", path)
-        return OpportunityGetResponse.model_validate_json(response.text)
+        return SimplerOpportunityGetResponse.model_validate_json(response.text)
 
 
 @retry(
