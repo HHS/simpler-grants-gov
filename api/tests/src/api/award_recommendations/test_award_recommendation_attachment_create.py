@@ -352,9 +352,7 @@ class TestCreateAwardRecommendationAttachment422:
         user, _, token = create_user_in_agency_with_jwt(
             db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
         )
-        pending_file = make_pending_file(
-            user, s3_config, file_scan_status=FileScanStatus.PENDING
-        )
+        pending_file = make_pending_file(user, s3_config, file_scan_status=FileScanStatus.PENDING)
 
         resp = client.post(
             f"{API_URL}/{award_recommendation.award_recommendation_id}/attachments",
@@ -374,9 +372,7 @@ class TestCreateAwardRecommendationAttachment422:
         user, _, token = create_user_in_agency_with_jwt(
             db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
         )
-        pending_file = make_pending_file(
-            user, s3_config, file_scan_status=FileScanStatus.INFECTED
-        )
+        pending_file = make_pending_file(user, s3_config, file_scan_status=FileScanStatus.INFECTED)
 
         resp = client.post(
             f"{API_URL}/{award_recommendation.award_recommendation_id}/attachments",
@@ -409,7 +405,8 @@ class TestCreateAwardRecommendationAttachment422:
         assert resp.status_code == 422
         assert resp.json["message"] == "Validation error"
         assert any(
-            error["field"] == "award_recommendation_attachment_type" for error in resp.json["errors"]
+            error["field"] == "award_recommendation_attachment_type"
+            for error in resp.json["errors"]
         )
 
     def test_create_attachment_invalid_type_422(
@@ -432,7 +429,8 @@ class TestCreateAwardRecommendationAttachment422:
         assert resp.status_code == 422
         assert resp.json["message"] == "Validation error"
         assert any(
-            error["field"] == "award_recommendation_attachment_type" for error in resp.json["errors"]
+            error["field"] == "award_recommendation_attachment_type"
+            for error in resp.json["errors"]
         )
 
     def test_create_attachment_missing_pending_file_id_422(
