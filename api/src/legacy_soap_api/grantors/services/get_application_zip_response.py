@@ -5,11 +5,14 @@ from botocore.exceptions import ClientError
 from grants_shared.util import file_util
 
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
+from src.legacy_soap_api.grantors.fault_messages import MissingGrantsGovTrackingNumber
 from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, verify_certificate_access
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
+from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import (
+    SOAPFaultException,
     get_application_submission_by_legacy_tracking_number,
 )
 
@@ -41,11 +44,14 @@ def get_application_zip_response(
     schema = build_schema()
     legacy_tracking_number = get_application_zip_request.grants_gov_tracking_number
     if not legacy_tracking_number:
-        return schema
+        raise SOAPFaultException(
+            "legacy_tracking_number cannot be None.",
+            fault=MissingGrantsGovTrackingNumber,
+        )
     application_submission = get_application_submission_by_legacy_tracking_number(
         db_session, legacy_tracking_number
     )
-    if application_submission:
+    if application_submission is not None:
         content_id = f"{application_submission.application_submission_id}-1@apply.grants.gov"
         schema = build_schema(content_id)
         certificate = validate_certificate(
@@ -67,12 +73,19 @@ def get_application_zip_response(
                     "response_operation_name": "GetApplicationZipResponse",
                 },
             )
-    else:
-        logger.info(
-            f"Unable to find submission legacy_tracking_number {legacy_tracking_number}.",
-            extra={
-                "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
-                "response_operation_name": "GetApplicationZipResponse",
-            },
-        )
-    return schema
+        return schema
+    logger.info(
+        "Unable to find submission.",
+        extra={
+            "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+            "response_operation_name": "GetApplicationZipResponse",
+        },
+    )
+    fault_message = FaultMessage(
+        faultstring=f"Failed to get application zip.(Grant Application not found for tracking number:{legacy_tracking_number})",
+        faultcode="soap:Server",
+    )
+    raise SOAPFaultException(
+        "ApplicationSubmission not found",
+        fault=fault_message,
+    )

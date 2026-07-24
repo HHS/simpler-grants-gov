@@ -34,6 +34,7 @@ from src.legacy_soap_api.legacy_soap_api_config import (
 )
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
@@ -788,12 +789,9 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
-        response = client.get_simpler_soap_response(mock_proxy_response)
-        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER
-        msg = f"Unable to find submission legacy_tracking_number {grants_gov_tracking_number}."
-        assert msg in caplog.messages
-        assert response.data == mock_proxy_response.data
-        assert response.status_code == mock_proxy_response.status_code
+        with pytest.raises(SOAPFaultException, match="ApplicationSubmission not found."):
+            client.get_simpler_soap_response(mock_proxy_response)
+        assert "Unable to find submission." in caplog.messages
 
 
 class TestSimplerSOAPGetSubmissionListExpanded:
