@@ -79,6 +79,7 @@ def get_application_zip_response(
         extra={
             "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
             "response_operation_name": "GetApplicationZipResponse",
+            "legacy_tracking_number": legacy_tracking_number,
         },
     )
     fault_message = FaultMessage(
