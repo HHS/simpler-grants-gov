@@ -146,7 +146,7 @@ def mock_oauth_logout_endpoint(app):
         return flask.redirect(redirect_uri)
 
     @app.get("/test-endpoint/oauth-logout-result")
-    def login_result() -> flask.Response:
+    def logout_result() -> flask.Response:
         """Dummy endpoint for easily displaying the results of the logout flow"""
 
         # Echo back the query args as JSON

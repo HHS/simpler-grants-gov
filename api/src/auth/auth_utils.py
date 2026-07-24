@@ -61,8 +61,8 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
                 if e.status_code >= 500:
                     message = INTERNAL_ERROR
                     logger.exception(
-                        "Unexpected error occurred in login flow via raise_flask_error: %s",
-                        e.message,
+                        "Unexpected error occurred in login flow via raise_flask_error",
+                        extra={"error.message": e.message},
                     )
 
                 return response.redirect_response(
@@ -121,8 +121,8 @@ def with_logout_redirect_error_handler() -> Callable[..., Callable[P, flask.Resp
                 if e.status_code >= 500:
                     message = INTERNAL_ERROR
                     logger.exception(
-                        "Unexpected error occurred in logout flow via raise_flask_error: %s",
-                        e.message,
+                        "Unexpected error occurred in logout flow via raise_flask_error",
+                        extra={"error.message": e.message},
                     )
 
                 return response.redirect_response(
