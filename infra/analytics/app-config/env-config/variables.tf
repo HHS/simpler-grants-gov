@@ -122,6 +122,12 @@ variable "database_min_capacity" {
   type        = number
 }
 
+variable "database_engine_version" {
+  type        = string
+  description = "Postgres database engine version"
+  default     = "17.5"
+}
+
 variable "project_name" {
   type = string
 }
