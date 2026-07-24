@@ -176,7 +176,7 @@ lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 
 # Docker starts the image for the DB but it's not quite
 # ready to accept connections so we add a brief wait script
-init-db: start-db setup-postgres-db db-migrate
+init-db: start-db setup-postgres-db db-migrate setup-internal-resource
 
 start-db:
 	docker compose -f ../docker-compose.db.yml up --detach grants-db
@@ -184,6 +184,9 @@ start-db:
 
 setup-postgres-db: ## Does any initial setup necessary for our local database to work
 	$(PY_RUN_CMD) setup-postgres-db
+
+setup-internal-resource: ## Create the statically defined internal resource record (runs after migrations)
+	$(PY_RUN_CMD) setup-internal-resource
 
 #########################
 # DB Migrations
