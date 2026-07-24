@@ -135,7 +135,6 @@ def test_get_opportunity_with_attachment_200(
 ):
     # Create an opportunity with an attachment
     opportunity = OpportunityFactory.create(has_attachments=True)
-    print(opportunity.agency_record)
 
     # Make the GET request
     resp = client.get(
@@ -144,6 +143,7 @@ def test_get_opportunity_with_attachment_200(
 
     # Check the response
     assert resp.status_code == 200
+    print(resp.get_json())
     response_data = resp.get_json()["data"]
 
     # Validate the opportunity data

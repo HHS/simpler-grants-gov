@@ -130,7 +130,7 @@ def with_db_session(
             session = get_db(current_app, client_name=client_name).get_session()
             flask.g.request_db_session = session
             try:
-                yield f(session, *args, **kwargs)
+                return f(session, *args, **kwargs)
             finally:
                 pass
                 #session.close()

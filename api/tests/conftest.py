@@ -241,6 +241,14 @@ def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
         yield db_client
 
 
+class OverrideSession(Session):
+
+    def begin(self, **kwargs):
+        if self._transaction is not None and not self._transaction.nested:
+            self.commit()
+
+        return super().begin(**kwargs)
+
 @pytest.fixture
 def db_session(db_client: db.DBClient) -> db.Session:
     """
@@ -250,7 +258,8 @@ def db_session(db_client: db.DBClient) -> db.Session:
 
     connection = db_client.get_connection()
     trans = connection.begin()
-    session = Session(bind=connection, expire_on_commit=False, autocommit=False, join_transaction_mode="create_savepoint")
+    session = OverrideSession(bind=connection, expire_on_commit=False, autocommit=False, join_transaction_mode="create_savepoint")
+
     yield session
 
     session.close()
