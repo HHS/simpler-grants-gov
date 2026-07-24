@@ -1,13 +1,15 @@
 import functools
 import logging
-import urllib
 from collections.abc import Callable
 from typing import Any, ParamSpec
 
 import flask
 from apiflask.exceptions import HTTPError
 from grants_shared.api import response
-from grants_shared.auth.login_gov_jwt_auth import LoginGovConfig, get_config, get_final_redirect_uri
+from grants_shared.auth.login_gov_jwt_auth import (
+    get_final_logout_redirect_uri,
+    get_final_redirect_uri,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +126,7 @@ def with_logout_redirect_error_handler() -> Callable[..., Callable[P, flask.Resp
                     )
 
                 return response.redirect_response(
-                    get_final_redirect_uri(
+                    get_final_logout_redirect_uri(
                         "error",
                         error_description=message,
                     )
@@ -140,24 +142,3 @@ def with_logout_redirect_error_handler() -> Callable[..., Callable[P, flask.Resp
         return wrapper
 
     return decorator
-
-
-# TODO - move the below function to grants_shared
-
-
-def get_final_logout_redirect_uri(
-    message: str,
-    error_description: str | None = None,
-    config: LoginGovConfig | None = None,
-) -> str:
-    if config is None:
-        config = get_config()
-
-    params: dict = {"message": message}
-
-    if error_description is not None:
-        params["error_description"] = error_description
-
-    encoded_params = urllib.parse.urlencode(params)
-
-    return f"{config.logout_final_destination}?{encoded_params}"

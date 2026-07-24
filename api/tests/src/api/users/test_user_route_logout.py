@@ -39,7 +39,7 @@ def validate_redirects_occurred(resp):
     # Redirect to the final destination page
     assert third_redirect.status_code == 302
     third_redirect_url = urllib.parse.urlparse(third_redirect.headers["Location"])
-    assert third_redirect_url.path == "/v1/users/login/result"
+    assert third_redirect_url.path == "/test-endpoint/oauth-logout-result"
 
     third_redirect_params = urllib.parse.parse_qs(third_redirect_url.query)
     assert third_redirect_params["message"][0] == "success"

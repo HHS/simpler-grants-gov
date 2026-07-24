@@ -423,16 +423,16 @@ def app(
     # Override the OAuth endpoint path before creating the app which loads the config at startup
     monkeypatch_session.setenv(
         "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
-    )
+    )  # setup in mock_oauth_endpoint
     monkeypatch_session.setenv(
         "LOGIN_GOV_LOGOUT_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-logout"
-    )
+    )  # setup in mock_oauth_logout_endpoint below
     monkeypatch_session.setenv(
         "LOGIN_FINAL_DESTINATION", "http://localhost:8080/v1/users/login/result"
     )
     monkeypatch_session.setenv(
-        "LOGOUT_FINAL_DESTINATION", "http://localhost:8080/v1/users/login/result"
-    )  # We reuse the login result endpoint for logout result rather than make another endpoint for the same purpose
+        "LOGOUT_FINAL_DESTINATION", "http://localhost:8080/test-endpoint/oauth-logout-result"
+    )  # setup in mock_oauth_logout_endpoint below
     app = app_entry.create_app()
 
     # Add endpoints and mocks for handling the external OAuth logic
