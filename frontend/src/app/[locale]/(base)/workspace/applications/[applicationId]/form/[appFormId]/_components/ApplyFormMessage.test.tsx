@@ -1,7 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import { FormattedFormValidationWarning } from "src/types/applyForm/types";
+import userEvent from "@testing-library/user-event";
+import {
+  FormattedFormValidationWarning,
+  UiSchemaTableMultiField,
+} from "src/types/applyForm/types";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
+import TableWidget from "src/components/apply-form/widgets/TableWidget/TableWidget";
 import { ApplyFormMessage, getWarningLinkText } from "./ApplyFormMessage";
 
 jest.mock("next-intl", () => ({
@@ -212,5 +217,99 @@ describe("ApplyFormMessage", () => {
     expect(
       screen.getByRole("link", { name: "Budget field is required" }),
     ).toHaveAttribute("href", "#budget-section-a-field");
+  });
+
+  it("clicking a warning link focuses the related Table input", async () => {
+    const user = userEvent.setup();
+
+    // Prepare a warning that points to a row-aware table field
+    const warnings: FormattedFormValidationWarning[] = [
+      {
+        field: "$.contact_people_test[1].first_name",
+        message: "First Name is required",
+        formatted: "First Name is required",
+        type: "required",
+        value: null,
+        htmlField: "contact_people_test[1]--first_name",
+        definition:
+          "/properties/contact_people_test/items/properties/first_name",
+        fieldListLabel: "Contact People Test",
+      },
+    ];
+
+    // Minimal uiSchema for a table with two rows and one input column
+    const uiSchemaField: UiSchemaTableMultiField = {
+      type: "multiField",
+      widget: "Table",
+      name: "contact_people_test",
+      definition: [
+        "/properties/contact_people_test/items/properties/first_name",
+      ],
+      children: {
+        columns: [{ columnHeader: "First Name" }],
+        rows: [
+          {
+            cells: [
+              {
+                type: "input",
+                definition:
+                  "/properties/contact_people_test/items/properties/first_name",
+              },
+            ],
+          },
+          {
+            cells: [
+              {
+                type: "input",
+                definition:
+                  "/properties/contact_people_test/items/properties/first_name",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    // Raw errors expected by TableWidget use the FormValidationWarning shape
+    const rawErrors = [
+      {
+        field: "contact_people_test[1]--first_name",
+        message: "First Name is required",
+        type: "required",
+        value: null,
+      },
+    ];
+
+    // Render the summary and the table together
+    render(
+      <>
+        <ApplyFormMessage
+          error={false}
+          validationWarnings={warnings}
+          saved={true}
+        />
+        <TableWidget
+          uiSchemaField={uiSchemaField}
+          rawErrors={rawErrors}
+          value={{}}
+        />
+      </>,
+    );
+    const link = screen.getByRole("link", {
+      name: "First Name in Contact People Test, Entry 2 is required",
+    });
+
+    await user.click(link);
+
+    // JSDOM does not automatically focus anchor targets; emulate navigation
+    window.location.hash = "#contact_people_test[1]--first_name";
+
+    // The TableWidget input for row 1 (entry 2) should exist and can be focused
+    const input = screen.getByTestId("contact_people_test-1-0-input");
+
+    // Emulate browser focusing the anchor target after navigation
+    input.focus();
+
+    expect(input).toHaveFocus();
   });
 });

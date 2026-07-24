@@ -3,12 +3,16 @@ import { formatTableCellValue } from "src/utils/applyForm/formatTableCellValue";
 
 import { ChangeEvent, useState } from "react";
 
+import { FieldErrors } from "src/components/core/forms/FieldErrors";
+
 const READ_ONLY_OUTPUT_CLASS =
   "usa-input margin-0 width-full overflow-x-auto display-block border border-base-light bg-base-lightest text-right text-wrap";
 
 type TableCellProps = {
   /** The cell configuration from the table widget schema */
   cell: TableWidgetCellConfig;
+  /** Validation errors for this Cell */
+  cellErrors?: string[];
   /** Unique identifier for the cell */
   id: string;
   /** HTML form name for the cell input */
@@ -73,6 +77,7 @@ type TableCellProps = {
  */
 function TableCell({
   cell,
+  cellErrors = [],
   id,
   name,
   value,
@@ -106,21 +111,26 @@ function TableCell({
       onChange?.(nextValue);
     }
   };
-
+  const hasError = cellErrors.length > 0;
   return (
-    <input
-      aria-label={`Editable table value for ${cell.definition}`}
-      className="usa-input margin-0 width-full overflow-x-auto"
-      data-testid={`${id}-input`}
-      id={id}
-      name={name}
-      inputMode="decimal"
-      onChange={handleChange}
-      pattern="-?[0-9]*[.]?[0-9]*"
-      type="text"
-      value={inputValue}
-      disabled={disabled}
-    />
+    <>
+      {hasError && <FieldErrors fieldName={id} rawErrors={cellErrors} />}
+      <input
+        aria-label={`Editable table value for ${cell.definition}`}
+        className="usa-input margin-0 width-full overflow-x-auto"
+        data-testid={`${id}-input`}
+        id={id}
+        name={name}
+        inputMode="decimal"
+        onChange={handleChange}
+        pattern="-?[0-9]*[.]?[0-9]*"
+        type="text"
+        value={inputValue}
+        disabled={disabled}
+        aria-invalid={hasError}
+        aria-describedby={hasError ? `error-for-${id}` : undefined}
+      />
+    </>
   );
 }
 

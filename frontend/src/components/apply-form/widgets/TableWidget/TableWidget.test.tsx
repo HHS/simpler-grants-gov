@@ -274,4 +274,88 @@ describe("TableWidget", () => {
 
     expect(error.message).toBe("Table row 1 must contain exactly 3 cells.");
   });
+
+  it("passes validation errors to TableCell components via cellErrors", () => {
+    const rawErrors = [
+      {
+        field: "first_value",
+        message: "First value is required",
+        type: "required",
+        value: null,
+      },
+      {
+        field: "second_value",
+        message: "Second value must be positive",
+        type: "custom",
+        value: null,
+      },
+    ];
+
+    render(
+      <TableWidget
+        {...props}
+        schema={{}}
+        rawErrors={rawErrors}
+        value={{ first_value: 100, second_value: 50 }}
+        options={{}}
+      />,
+    );
+    // Verify that the table renders with error information
+    // (The actual error display is tested in TableCell.test.tsx)
+    expect(screen.getByTestId("table")).toBeInTheDocument();
+  });
+
+  it("handles empty rawErrors array gracefully", () => {
+    render(
+      <TableWidget
+        {...props}
+        schema={{}}
+        rawErrors={[]}
+        value={{ first_value: 100, second_value: 50 }}
+        options={{}}
+      />,
+    );
+
+    expect(screen.getByTestId("table")).toBeInTheDocument();
+  });
+
+  it("filters errors correctly by cell name", () => {
+    const rawErrors = [
+      {
+        field: "first_value",
+        message: "First value error",
+        type: "custom",
+        value: null,
+      },
+      {
+        field: "second_value",
+        message: "Second value error",
+        type: "custom",
+        value: null,
+      },
+      {
+        field: "other_field",
+        message: "Should not appear",
+        type: "custom",
+        value: null,
+      },
+    ];
+
+    render(
+      <TableWidget
+        {...props}
+        schema={{}}
+        rawErrors={rawErrors}
+        value={{ first_value: 100, second_value: 50 }}
+        options={{}}
+      />,
+    );
+
+    expect(screen.getByTestId("table")).toBeInTheDocument();
+
+    // Verify error messages are rendered for input fields
+    // (Note: The second cell is read-only so it won't show errors)
+    expect(screen.getByText("First value error")).toBeInTheDocument();
+    expect(screen.queryByText("Should not appear")).not.toBeInTheDocument();
+  });
 });

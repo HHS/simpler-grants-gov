@@ -1,5 +1,6 @@
 import { get, set } from "lodash";
 import {
+  FormValidationWarning,
   UswdsWidgetProps,
   type UiSchemaTableColumn,
   type UiSchemaTableMultiField,
@@ -128,6 +129,7 @@ function TableWidget({
   isFormLocked,
   label,
   onChange,
+  rawErrors = [],
   uiSchemaField,
   value,
 }: UswdsWidgetProps) {
@@ -192,6 +194,19 @@ function TableWidget({
     return rootFieldName ? `${rootFieldName}--${cellFieldName}` : cellFieldName;
   };
 
+  /**
+   * Get validation errors for a specific cell based on its HTML form name.
+   * Matches the cell's Name against the error field paths.
+   * @param cellName - The HTML form name of the cell input
+   * @returns An array of error messages for the cell, or an empty array if none
+   */
+  const getCellErrors = (cellName: string | undefined): string[] => {
+    if (!cellName) return [];
+    return (rawErrors as FormValidationWarning[])
+      .filter((error) => error.field === cellName)
+      .map((error) => String(error.message));
+  };
+
   if (
     uiSchemaField?.type !== "multiField" ||
     uiSchemaField.widget !== "Table"
@@ -254,6 +269,7 @@ function TableWidget({
                 >
                   <TableCell
                     cell={cell}
+                    cellErrors={getCellErrors(buildCellName(cell.definition))}
                     disabled={
                       cell.type === "input" ? isInteractionDisabled : false
                     }
