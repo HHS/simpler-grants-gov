@@ -54,10 +54,32 @@ RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
     (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /grants_management_api/dist /grants_management_api/src || true)
 
 #==============================================
+# Stage 2a: Graphviz downloader
+#==============================================
+# Graphviz is needed by `make create-erds` to render the ERD diagrams. The
+# python-base-image doesn't ship it, so we download the rpms in an Amazon Linux
+# stage and copy the resulting rootfs into the dev image below. This keeps the
+# dependency out of the release image, which never generates diagrams.
+FROM --platform=linux/amd64 amazonlinux:2023 AS graphviz-downloader
+
+RUN dnf -y install cpio && \
+    dnf -y install --downloadonly --downloaddir=/tmp/rpms \
+    graphviz-2.44.0-25.amzn2023.0.7 graphviz-gd cairo pango librsvg2 && \
+    mkdir -p /runtime/rootfs && cd /runtime/rootfs && \
+    for rpm in /tmp/rpms/*.rpm; do rpm2cpio "$rpm" | cpio -idmv; done && \
+    rm -rf /tmp/rpms
+
+#==============================================
 # Stage 2: Dev image
 #==============================================
 FROM base AS dev
 ARG RUN_USER
+
+# Add graphviz (for ERD generation via `make create-erds`) from the downloader
+# stage. Done as root before the USER switch below so `dot -c` can register the
+# plugins.
+COPY --from=graphviz-downloader /runtime/rootfs/ /
+RUN /usr/bin/dot -c
 
 # We want dev dependencies in the dev image
 ENV UV_NO_DEV=0

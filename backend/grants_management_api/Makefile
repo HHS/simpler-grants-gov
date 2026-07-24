@@ -247,7 +247,13 @@ start-mock-oauth2:
 cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of CLI commands)
 	$(FLASK_CMD) $(args)
 
-# TODO - in the API side, we use the openapi-tools docker image
-# We haven't set that up yet on this side, so changed it to grants-management-api for now
 openapi-spec: ## Generate OpenAPI spec
 	docker compose run --rm -e DB_CHECK_CONNECTION_ON_INIT=false grants-management-api flask --app src.app spec --format yaml --output openapi.generated.yml
+
+##################################################
+# ERD Diagrams
+##################################################
+
+create-erds: ## Create ERD diagrams for our DB schema
+	docker compose run --rm -e DB_CHECK_CONNECTION_ON_INIT=false grants-management-api create-erds
+	mv bin/*.png ../../documentation/api/database/erds
