@@ -1,5 +1,6 @@
 import logging
-from typing import cast
+from contextlib import contextmanager
+from typing import cast, Any, Generator
 
 import grants_shared.util.datetime_util as datetime_util
 from apiflask import APIKeyHeaderAuth
@@ -50,6 +51,13 @@ class ApiKeyValidationError(Exception):
         self.message = message
         super().__init__(message)
 
+@contextmanager
+def transaction(db_session: db.Session) -> Generator[db.Session, Any, None]:
+    if db_session.in_transaction:
+        yield db_session
+    else:
+        with db_session.begin():
+            yield db_session
 
 @api_user_key_auth.verify_token
 @flask_db.with_db_session()

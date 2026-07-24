@@ -135,6 +135,7 @@ def test_get_opportunity_with_attachment_200(
 ):
     # Create an opportunity with an attachment
     opportunity = OpportunityFactory.create(has_attachments=True)
+    print(opportunity.agency_record)
 
     # Make the GET request
     resp = client.get(
@@ -576,3 +577,4 @@ def test_get_opportunity_with_competitions_200_JWT(client, db_session, user_auth
     assert len(response_data["competitions"]) == 1
     assert response_data["competitions"][0]["competition_id"] == str(competition.competition_id)
     assert response_data["competitions"][0]["opportunity_id"] == str(opportunity.opportunity_id)
+

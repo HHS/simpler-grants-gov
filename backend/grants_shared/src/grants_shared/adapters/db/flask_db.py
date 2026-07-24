@@ -43,6 +43,7 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Concatenate, ParamSpec, TypeVar
 
+import flask.ctx
 from flask import Flask, current_app
 
 import grants_shared.adapters.db as db
@@ -118,8 +119,21 @@ def with_db_session(
     def decorator(f: Callable[Concatenate[db.Session, P], T]) -> Callable[P, T]:
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            with get_db(current_app, client_name=client_name).get_session() as session:
-                return f(session, *args, **kwargs)
+
+            if flask.ctx.has_request_context():
+                print("HAS REQUEST CONTEXT\n\n\n\n")
+                print(flask.g.get("request_db_session", None))
+            else:
+                print("NOPE\n\n\n\n")
+
+
+            session = get_db(current_app, client_name=client_name).get_session()
+            flask.g.request_db_session = session
+            try:
+                yield f(session, *args, **kwargs)
+            finally:
+                pass
+                #session.close()
 
         return wrapper
 

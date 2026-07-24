@@ -7,6 +7,9 @@ from types import SimpleNamespace
 import _pytest.monkeypatch
 import boto3
 import flask.testing
+from grants_shared.adapters.db.client import DBClient
+from sqlalchemy.orm import Session
+
 import grants_shared.adapters.db as db
 import grants_shared.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import moto
@@ -243,8 +246,16 @@ def db_session(db_client: db.DBClient) -> db.Session:
     """
     Returns a database session connected to the schema used for the test session.
     """
-    with db_client.get_session() as session:
-        yield session
+    # TODO - would need to do this in grants_shared, this is a hacky workaround
+
+    connection = db_client.get_connection()
+    trans = connection.begin()
+    session = Session(bind=connection, expire_on_commit=False, autocommit=False, join_transaction_mode="create_savepoint")
+    yield session
+
+    session.close()
+    trans.rollback()
+    connection.close()
 
 
 @pytest.fixture
@@ -365,25 +376,27 @@ def setup_login_gov_auth(monkeypatch_session, public_rsa_key):
 
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
-@pytest.fixture(scope="session")
+@pytest.fixture
 def app(
-    db_client,
-    monkeypatch_session,
+    db_session,
+    monkeypatch,
     private_rsa_key,
     mock_oauth_client,
     setup_login_gov_auth,
 ) -> APIFlask:
     # Override the OAuth endpoint path before creating the app which loads the config at startup
-    monkeypatch_session.setenv(
+    monkeypatch.setenv(
         "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
     )
-    monkeypatch_session.setenv(
+    monkeypatch.setenv(
         "LOGIN_FINAL_DESTINATION", "http://localhost:8080/v1/users/login/result"
     )
+    monkeypatch.setattr(DBClient, "get_session", lambda _: db_session)
+
     app = app_entry.create_app()
 
     # Add endpoints and mocks for handling the external OAuth logic
-    mock_oauth_endpoint(app, monkeypatch_session, private_rsa_key, mock_oauth_client)
+    mock_oauth_endpoint(app, monkeypatch, private_rsa_key, mock_oauth_client)
 
     return app
 

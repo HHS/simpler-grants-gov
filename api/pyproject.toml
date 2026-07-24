@@ -49,6 +49,9 @@ dependencies = [
     "grants-shared==0.2.17",
 ]
 
+[tool.uv.sources]
+grants-shared = { path = "../backend/grants_shared" }
+
 [project.scripts]
 db-migrate = "src.db.migrations.run:up"
 db-migrate-down = "src.db.migrations.run:down"
