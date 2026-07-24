@@ -324,8 +324,6 @@ export const messages = {
         "Define who is eligible to apply for these funds. Select all applicable applicant types and provide any specific requirements or restrictions regarding organizational status or geographic location.",
       additionalInformationIntro:
         "Use this section to provide supplementary context, such as a summary of the program's goals, agency-specific links, and contact information for programmatic or technical inquiries.",
-      draftOnlyWarning:
-        "Only draft opportunities should be editable from this page.",
       notAvailable: "Not available",
       fundingTypeHint:
         "Select the legal relationship between the agency and the recipient",

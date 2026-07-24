@@ -56,7 +56,6 @@ type EligibilityCheckboxGroupProps = {
   baseId: string;
   initialSelectedValues: string[];
   onToggle: (value: string) => void;
-  disabled: boolean;
 };
 
 function EligibilityCheckboxGroup({
@@ -65,7 +64,6 @@ function EligibilityCheckboxGroup({
   baseId,
   initialSelectedValues,
   onToggle,
-  disabled,
 }: EligibilityCheckboxGroupProps) {
   return (
     <Fieldset className="margin-top-0 margin-bottom-4">
@@ -80,7 +78,6 @@ function EligibilityCheckboxGroup({
               label={eligibilityDisplayLabels[option.value] ?? option.label}
               defaultChecked={initialSelectedValues.includes(option.value)}
               onChange={() => onToggle(option.value)}
-              disabled={disabled}
             />
           </div>
         ))}
@@ -94,7 +91,6 @@ type OpportunityEditFormProps = {
   opportunitySummaryId: string;
   isForecast?: boolean;
   initialValues: OpportunityEditFormValues;
-  isDraft?: boolean;
   initialAttachments?: OpportunityAttachment[];
 };
 
@@ -103,7 +99,6 @@ export default function OpportunityEditForm({
   opportunitySummaryId,
   isForecast = false,
   initialValues,
-  isDraft = false,
   initialAttachments = [],
 }: OpportunityEditFormProps) {
   const t = useTranslations("OpportunityEdit");
@@ -251,14 +246,6 @@ export default function OpportunityEditForm({
         value={initialValues.awardSelectionMethod}
       />
 
-      {!isDraft ? (
-        <div className="margin-top-2">
-          <Alert type="warning" headingLevel="h3" noIcon>
-            {t("content.draftOnlyWarning")}
-          </Alert>
-        </div>
-      ) : null}
-
       {formState.errorMessage ? (
         <div className="margin-top-2">
           <Alert
@@ -334,7 +321,6 @@ export default function OpportunityEditForm({
                   name="funding-type-values"
                   defaultValue={initialValues.fundingType}
                   className="width-full"
-                  disabled={!isDraft}
                 >
                   <option value="">{t("content.select")}</option>
                   {fundingOptions.map((option) => (
@@ -360,7 +346,6 @@ export default function OpportunityEditForm({
                       label={t("labels.yes")}
                       value="true"
                       defaultChecked={initialValues.costSharing === true}
-                      disabled={!isDraft}
                     />
                   </div>
                   <div className="grid-col-6">
@@ -370,7 +355,6 @@ export default function OpportunityEditForm({
                       label={t("labels.no")}
                       value="false"
                       defaultChecked={initialValues.costSharing === false}
-                      disabled={!isDraft}
                     />
                   </div>
                 </div>
@@ -400,7 +384,6 @@ export default function OpportunityEditForm({
                     setFundingCategory(event.target.value);
                   }}
                   className="width-full"
-                  disabled={!isDraft}
                 >
                   <option value="">{t("content.selectFundingCategory")}</option>
                   {categoryOptions.map((option) => (
@@ -424,7 +407,6 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.fundingCategoryExplanation}
                 onTextChange={() => {}}
-                disabled={!isDraft}
               />
             </div>
           )}
@@ -448,7 +430,6 @@ export default function OpportunityEditForm({
                   type="text"
                   defaultValue={initialValues.expectedNumberOfAwards}
                   className="width-full"
-                  disabled={!isDraft}
                 />
               </FormGroup>
             </div>
@@ -475,7 +456,6 @@ export default function OpportunityEditForm({
                   )}
                   onBlur={singleFieldValidation}
                   className="width-full"
-                  disabled={!isDraft}
                 />
               </FormGroup>
             </div>
@@ -499,7 +479,6 @@ export default function OpportunityEditForm({
                   defaultValue={formatNumber(initialValues.awardMinimum)}
                   onBlur={singleFieldValidation}
                   className="width-full"
-                  disabled={!isDraft}
                 />
               </FormGroup>
             </div>
@@ -520,7 +499,6 @@ export default function OpportunityEditForm({
                   defaultValue={formatNumber(initialValues.awardMaximum)}
                   onBlur={singleFieldValidation}
                   className="width-full"
-                  disabled={!isDraft}
                 />
               </FormGroup>
             </div>
@@ -544,7 +522,6 @@ export default function OpportunityEditForm({
                   defaultValue={initialValues.publishDate}
                   placeholder="mm/dd/yyyy"
                   className="width-full"
-                  disabled={!isDraft}
                 />
               </FormGroup>
             </div>
@@ -565,7 +542,6 @@ export default function OpportunityEditForm({
                   placeholder="mm/dd/yyyy"
                   onChange={(value) => setCloseDate(value ?? "")}
                   className="width-full"
-                  disabled={!isDraft}
                 />
               </FormGroup>
             </div>
@@ -585,7 +561,6 @@ export default function OpportunityEditForm({
                   defaultValue={initialValues.closeDateExplanation}
                   rows={5}
                   className="width-full"
-                  disabled={!isDraft}
                 />
               </FormGroup>
             </div>
@@ -628,7 +603,6 @@ export default function OpportunityEditForm({
                   baseId="eligible-business"
                   initialSelectedValues={initialValues.eligibleApplicants}
                   onToggle={handleEligibilityToggle}
-                  disabled={!isDraft}
                 />
                 <EligibilityCheckboxGroup
                   title={t("labels.eligibilityEducation")}
@@ -636,7 +610,6 @@ export default function OpportunityEditForm({
                   baseId="eligible-education"
                   initialSelectedValues={initialValues.eligibleApplicants}
                   onToggle={handleEligibilityToggle}
-                  disabled={!isDraft}
                 />
                 <EligibilityCheckboxGroup
                   title={t("labels.eligibilityGovernment")}
@@ -644,7 +617,6 @@ export default function OpportunityEditForm({
                   baseId="eligible-government"
                   initialSelectedValues={initialValues.eligibleApplicants}
                   onToggle={handleEligibilityToggle}
-                  disabled={!isDraft}
                 />
               </div>
             </div>
@@ -656,7 +628,6 @@ export default function OpportunityEditForm({
                   baseId="eligible-nonprofit"
                   initialSelectedValues={initialValues.eligibleApplicants}
                   onToggle={handleEligibilityToggle}
-                  disabled={!isDraft}
                 />
                 <EligibilityCheckboxGroup
                   title={t("labels.eligibilityMiscellaneous")}
@@ -664,7 +635,6 @@ export default function OpportunityEditForm({
                   baseId="eligible-misc"
                   initialSelectedValues={initialValues.eligibleApplicants}
                   onToggle={handleEligibilityToggle}
-                  disabled={!isDraft}
                 />
               </div>
             </div>
@@ -687,7 +657,6 @@ export default function OpportunityEditForm({
                     ? [getFieldError("additionalEligibilityInfo") as string]
                     : []
                 }
-                disabled={!isDraft}
               />
             </div>
           )}
@@ -723,7 +692,6 @@ export default function OpportunityEditForm({
                   ? [getFieldError("description") as string]
                   : []
               }
-              disabled={!isDraft}
             />
           </div>
 
@@ -743,7 +711,6 @@ export default function OpportunityEditForm({
                     ? [getFieldError("additionalInfoUrl") as string]
                     : []
                 }
-                disabled={!isDraft}
               />
             </div>
             <div className="tablet:grid-col-6">
@@ -760,7 +727,6 @@ export default function OpportunityEditForm({
                     ? [getFieldError("additionalInfoUrlText") as string]
                     : []
                 }
-                disabled={!isDraft}
               />
             </div>
           </div>
@@ -780,7 +746,6 @@ export default function OpportunityEditForm({
                   ? [getFieldError("grantorContactDetails") as string]
                   : []
               }
-              disabled={!isDraft}
             />
           </div>
 
@@ -800,7 +765,6 @@ export default function OpportunityEditForm({
                     ? [getFieldError("contactEmail") as string]
                     : []
                 }
-                disabled={!isDraft}
               />
             </div>
             <div className="tablet:grid-col-6">
@@ -817,7 +781,6 @@ export default function OpportunityEditForm({
                     ? [getFieldError("contactEmailText") as string]
                     : []
                 }
-                disabled={!isDraft}
               />
             </div>
           </div>
@@ -839,7 +802,6 @@ export default function OpportunityEditForm({
         <OpportunityAttachmentUploadInput
           opportunityId={opportunityId}
           initialAttachments={initialAttachments}
-          isDraft={isDraft}
         />
       </section>
 

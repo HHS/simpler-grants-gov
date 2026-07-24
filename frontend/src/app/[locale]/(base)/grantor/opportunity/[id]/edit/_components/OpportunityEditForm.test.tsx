@@ -71,14 +71,12 @@ const renderOpportunityEditForm = (
       opportunityId="opportunity-123"
       opportunitySummaryId="summary-456"
       initialValues={initialValues}
-      isDraft
       {...props}
     />,
   );
 
 // ─── Rendering ───────────────────────────────────────────────────────────────
-// Verifies static structure: enum-backed controls, hidden fields, and
-// the edit-lock warning when isDraft=false.
+// Verifies static structure: enum-backed controls and hidden fields.
 describe("OpportunityEditForm — rendering", () => {
   beforeEach(() => {
     mockUseActionState.mockReturnValue([
@@ -139,38 +137,31 @@ describe("OpportunityEditForm — rendering", () => {
     );
   });
 
-  it("shows the non-draft warning when isDraft is false", () => {
-    renderOpportunityEditForm({ isDraft: false });
-
-    expect(screen.getByText("content.draftOnlyWarning")).toBeInTheDocument();
-  });
-
-  it("disables character-count fields when isDraft is false", () => {
-    renderOpportunityEditForm({ isDraft: false });
+  it("does not disable character-count fields (published opportunities are editable)", () => {
+    renderOpportunityEditForm();
 
     expect(
       screen.getByRole("textbox", { name: /labels\.description/i }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(
       screen.getByRole("textbox", { name: /labels\.grantorContactDetails/i }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(
       screen.getByRole("textbox", { name: "labels.additionalInfoUrl" }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(
       screen.getByRole("textbox", { name: "labels.additionalInfoUrlText" }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(
       screen.getByRole("textbox", { name: "labels.contactEmail" }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(
       screen.getByRole("textbox", { name: "labels.contactEmailText" }),
-    ).toBeDisabled();
+    ).toBeEnabled();
   });
 
-  it("disables fundingCategoryExplanation when isDraft is false and fundingCategories is 'other'", () => {
+  it("does not disable fundingCategoryExplanation when fundingCategories is 'other'", () => {
     renderOpportunityEditForm({
-      isDraft: false,
       initialValues: { ...initialValues, fundingCategories: "other" },
     });
 
@@ -178,12 +169,11 @@ describe("OpportunityEditForm — rendering", () => {
       screen.getByRole("textbox", {
         name: /labels\.fundingCategoryExplanation/i,
       }),
-    ).toBeDisabled();
+    ).toBeEnabled();
   });
 
-  it("disables additionalEligibilityInfo when isDraft is false and eligibleApplicants includes 'other'", () => {
+  it("does not disable additionalEligibilityInfo when eligibleApplicants includes 'other'", () => {
     renderOpportunityEditForm({
-      isDraft: false,
       initialValues: { ...initialValues, eligibleApplicants: ["other"] },
     });
 
@@ -191,7 +181,7 @@ describe("OpportunityEditForm — rendering", () => {
       screen.getByRole("textbox", {
         name: /labels\.additionalEligibilityInfo/i,
       }),
-    ).toBeDisabled();
+    ).toBeEnabled();
   });
 
   it("pre-checks eligibility checkboxes from initialValues", () => {
