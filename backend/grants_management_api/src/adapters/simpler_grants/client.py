@@ -59,8 +59,9 @@ class BaseSimplerGrantsClient(abc.ABC, metaclass=abc.ABCMeta):
 
         Raises:
             SimplerResponseException: If the API returns an error response (4xx, 5xx).
-            requests.RequestException: If there is a network error.
-            ValidationError: If there is an error parsing the response.
+            requests.Timeout: If the request times out.
+            requests.ConnectionError: If unable to connect to the API.
+            ValidationError: If the API returns a 2xx response but the data doesn't match the expected schema.
         """
         pass
 
@@ -116,7 +117,8 @@ class SimplerGrantsClient(BaseSimplerGrantsClient):
 
         Raises:
             SimplerResponseException: If the API returns an error response (4xx, 5xx).
-            requests.RequestException: If there is a network error (timeout, connection error, etc.).
+            requests.Timeout: If the request times out.
+            requests.ConnectionError: If unable to connect to the API.
         """
         url = self._build_url(path)
         headers = self._build_headers()
@@ -211,6 +213,8 @@ def _do_request_with_retry(
 ) -> requests.Response:
     """Make an HTTP request with retry logic.
 
+    Retries up to 3 times for timeout and connection errors with exponential backoff.
+
     Args:
         method: HTTP method.
         url: Full URL to request.
@@ -219,5 +223,9 @@ def _do_request_with_retry(
 
     Returns:
         The response object.
+
+    Raises:
+        requests.Timeout: If the request times out after retries.
+        requests.ConnectionError: If unable to connect after retries.
     """
     return requests.request(method, url, headers=headers, **kwargs)
