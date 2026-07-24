@@ -1,6 +1,6 @@
 /**
- * @feature Apply - Happy Path - Attachment Form Submission and Print View Workflow
- * @scenario Complete the Attachment Form Submission and Print View workflow for an <user type> user
+ * @feature Apply - Happy Path - PROJECT/PERFORMANCE SITE LOCATION(S) Submission and Print View Workflow
+ * @scenario Complete the PROJECT/PERFORMANCE SITE LOCATION(S) Submission and Print View workflow for an <user type> user
  */
 
 import {
@@ -38,24 +38,20 @@ const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-// Only the opportunity number is declared here.
-// All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
-// Unified opportunity for both local and staging environments.
-const OPPORTUNITY_NUMBER = "E2E-ATT-ORG-IND-01";
+const OPPORTUNITY_NUMBER = "E2E-PPSL-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
 const applicantScenarios = [
   {
-    testName: `Complete the Attachment Form Submission and Print View workflow for an Organization user`,
+    testName: `Complete the PROJECT/PERFORMANCE SITE LOCATION(S) Submission and Print View workflow for an Organization user`,
     orgLabel: testOrgLabel,
   },
   {
-    testName: `Complete the Attachment Form Submission and Print View workflow for an Individual user`,
+    testName: `Complete the PROJECT/PERFORMANCE SITE LOCATION(S) Submission and Print View workflow for an Individual user`,
     orgLabel: undefined,
   },
 ] as const;
 
-// Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
@@ -70,22 +66,23 @@ for (const { testName, orgLabel } of applicantScenarios) {
     ) => {
       test.setTimeout(300_000); // 5-min timeout
 
-      const isMobile = testInfo.project.name.match(/[Mm]obile/);
+      const isMobile = testInfo.project.use.isMobile ?? false;
       const baseSuffix = Date.now();
 
       // --- Login ---
       // Given the user is logged in
-      await authenticateE2eUser(page, context, !!isMobile);
+      await authenticateE2eUser(page, context, isMobile);
 
       // --- Navigate to Opportunity page and start a new application ---
-      // And the user launches the URL for an opportunity with an open Attachment Form competition
+      // And the user launches the URL for an opportunity with an open PPSL competition
       // When the user clicks "Start Application", selects applicant type and creates the application
       await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
       const applicationUrl = page.url();
 
       // --- Fill required forms and collect print URLs ---
-      // For each form on this opportunity: fill it, verify status, then capture the
-      // form URL *before* verifyFormStatusOnApplication navigates away to the app page.
+      // This opportunity contains a single form (PROJECT/PERFORMANCE SITE LOCATION(S)).
+      // The loop follows the shared pattern across all print view specs
+      // to maintain consistency, even though only one iteration is expected here.
       const filledForms: FilledFormEntry[] = [];
 
       for (const [index, form] of opportunityConfig.forms.entries()) {
@@ -137,10 +134,8 @@ for (const { testName, orgLabel } of applicantScenarios) {
       } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
-        // Form title heading is visible
         await expect(page.locator("h1")).toContainText(formName);
 
-        // User-entered fields - uses formConfig.fields (printTestId ?? testId)
         for (const [dataKey, testId] of Object.entries(
           userEnteredFieldTestIds,
         )) {
@@ -148,16 +143,12 @@ for (const { testName, orgLabel } of applicantScenarios) {
           await validatePrintViewField(page, testId, testData[dataKey]);
         }
 
-        // Attachment fields - filenames appear in section locators, not testId elements
-        const attachmentSections = [
-          { fieldKey: "att1", sectionId: "form-section-attachment1" },
-        ] as const;
-
-        for (const { fieldKey, sectionId } of attachmentSections) {
+        // Optional attachment - filename appears in section locator, not a testId element
+        if (testData["additional_locations_attachment"]) {
           await validateAttachmentPrintViewSection(
             page,
-            sectionId,
-            testData[fieldKey],
+            "form-section-additional_locations_attachment",
+            testData["additional_locations_attachment"],
           );
         }
       }

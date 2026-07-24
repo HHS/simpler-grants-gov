@@ -21,7 +21,7 @@ export default function VisionMission() {
             className="tablet:grid-col-4"
             key={`vision-mission-${contentRowsIdx}`}
           >
-            {contentRows.map((contentRowItem, contentRowItemIdx) => (
+            {contentRows.map((_contentRowItem, contentRowItemIdx) => (
               <div
                 className="margin-top-4"
                 key={`vision-mission-${contentRowsIdx}-${contentRowItemIdx}`}
