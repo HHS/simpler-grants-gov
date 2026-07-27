@@ -82,9 +82,8 @@ const resolveBaseChoiceLocator = async (
       (value) => page.locator(`input[type="checkbox"][value="${value}"]`),
     );
 
-    const valueBasedLocator = await resolveFirstAvailableLocator(
-      candidateLocators,
-    );
+    const valueBasedLocator =
+      await resolveFirstAvailableLocator(candidateLocators);
     if (valueBasedLocator) {
       return valueBasedLocator;
     }
@@ -120,10 +119,7 @@ export async function getChoiceLocator(
   data: string | boolean | undefined,
 ) {
   const hasConfiguredLocator = Boolean(
-    field.getByText ||
-      field.selector ||
-      field.testId ||
-      field.valueKey,
+    field.getByText || field.selector || field.testId || field.valueKey,
   );
   if (!hasConfiguredLocator && typeof data !== "string") {
     throw new Error(
