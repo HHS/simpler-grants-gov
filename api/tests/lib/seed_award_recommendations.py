@@ -36,10 +36,7 @@ from src.workflow.state_machine.award_recommendation_review_state_machine import
 from tests.lib.seed_data_utils import UserBuilder
 from tests.lib.seed_orgs_and_users import _add_application
 from tests.src.db.models.factories import AgencyFactory
-from tests.src.workflow.workflow_test_util import (
-    build_start_workflow_event,
-    send_process_event,
-)
+from tests.src.workflow.workflow_test_util import build_start_workflow_event, send_process_event
 
 logger = logging.getLogger(__name__)
 
@@ -213,7 +210,6 @@ def _setup_agency_and_users(db_session: db.Session) -> Agency:
     logger.info("")
 
     return agency
-
 
 
 CONTENT_CREATOR_USER_ID = uuid.UUID("660e8400-e29b-41d4-a716-446655440000")
