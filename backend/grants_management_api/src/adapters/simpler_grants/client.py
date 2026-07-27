@@ -45,7 +45,13 @@ class SimplerResponseException(Exception):
 
 
 class BaseSimplerGrantsClient(abc.ABC, metaclass=abc.ABCMeta):
-    """Base class for Simpler Grants API clients."""
+    """Base class for Simpler Grants API clients.
+
+    Note: implementation status
+    - SimplerGrantsClient: Done, for Real HTTP client
+    - MockSimplerGrantsClient: Pending, for testing purpose
+      TODO: Create the mock/test client with next ticket, when setting up the routes
+    """
 
     @abc.abstractmethod
     def get_opportunity(self, opportunity_id: UUID) -> SimplerOpportunityGetResponse:
