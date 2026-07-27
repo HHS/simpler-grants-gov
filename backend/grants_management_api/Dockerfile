@@ -54,6 +54,23 @@ RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
     (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /grants_management_api/dist /grants_management_api/src || true)
 
 #==============================================
+# Stage 2a: Graphviz downloader
+#==============================================
+# Graphviz is needed by `make create-erds` to render the ERD diagrams. The
+# python-base-image doesn't ship it, so we download the rpms in an Amazon Linux
+# stage and copy the resulting rootfs into the openapi-tools image below. This
+# keeps the dependency out of both the production release image and the
+# standard dev image. Only the docs-generation image carries it.
+FROM --platform=linux/amd64 amazonlinux:2023 AS graphviz-downloader
+
+RUN dnf -y install cpio && \
+    dnf -y install --downloadonly --downloaddir=/tmp/rpms \
+    graphviz-2.44.0-25.amzn2023.0.7 graphviz-gd cairo pango librsvg2 && \
+    mkdir -p /runtime/rootfs && cd /runtime/rootfs && \
+    for rpm in /tmp/rpms/*.rpm; do rpm2cpio "$rpm" | cpio -idmv; done && \
+    rm -rf /tmp/rpms
+
+#==============================================
 # Stage 2: Dev image
 #==============================================
 FROM base AS dev
@@ -84,6 +101,23 @@ RUN uv venv /opt/venv && uv sync --locked --all-groups
 
 
 CMD ["flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8089", "--reload"]
+
+#==============================================
+# Stage 2b: OpenAPI / ERD tooling image
+#==============================================
+# Derived from dev, this adds graphviz solely for generating the OpenAPI spec
+# and ERD diagrams (`make openapi-spec` / `make create-erds`). Keeping it in its
+# own stage means neither the release image nor the standard dev image ships
+# graphviz.
+FROM dev AS openapi-tools
+ARG RUN_USER
+
+# Copy graphviz in as root (before dropping back to the run user) so `dot -c`
+# can register the plugins.
+USER root
+COPY --from=graphviz-downloader /runtime/rootfs/ /
+RUN /usr/bin/dot -c
+USER ${RUN_USER}
 
 #==============================================
 # Stage 3: Minimal release runtime
