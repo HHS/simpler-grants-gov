@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 interface PrintErrorDiagnosticsProps {
   applicationId: string;
   applicationFormId: string;
@@ -11,36 +13,59 @@ export default function PrintErrorDiagnostics({
   errorCategory,
   hasInternalToken,
 }: PrintErrorDiagnosticsProps) {
+  const translate = useTranslations("PrintErrorDiagnostics");
+  const supportEmail = translate("supportEmail");
+  const supportPhone = translate("supportPhone");
+  const supportPhoneNumber = supportPhone.replace(/\D/g, "");
+
   return (
     <main>
-      <h1>PDF rendering failed</h1>
+      <h1>{translate("heading")}</h1>
 
-      <p>
-        This document is an error diagnostic page, not a valid application form
-        PDF.
-      </p>
+      <p>{translate("description")}</p>
 
-      <dl>
-        <div>
-          <dt>Application ID</dt>
-          <dd>{applicationId}</dd>
-        </div>
+      <p>{translate("supportInstructions")}</p>
 
-        <div>
-          <dt>Application form ID</dt>
-          <dd>{applicationFormId}</dd>
-        </div>
+      <section aria-labelledby="support-center-heading">
+        <h2 id="support-center-heading">{translate("supportCenterHeading")}</h2>
 
-        <div>
-          <dt>Error category</dt>
-          <dd>{errorCategory}</dd>
-        </div>
+        <p>{translate("technicalSupport")}</p>
 
-        <div>
-          <dt>Internal token present</dt>
-          <dd>{hasInternalToken ? "Yes" : "No"}</dd>
-        </div>
-      </dl>
+        <p>
+          <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
+        </p>
+
+        <p>
+          <a href={`tel:${supportPhoneNumber}`}>{supportPhone}</a>
+        </p>
+      </section>
+
+      <section aria-labelledby="diagnostic-details-heading">
+        <h2 id="diagnostic-details-heading">
+          {translate("diagnosticDetailsHeading")}
+        </h2>
+
+        <table>
+          <tbody>
+            <tr>
+              <th scope="row">{translate("applicationIdLabel")}</th>
+              <td>{applicationId}</td>
+            </tr>
+            <tr>
+              <th scope="row">{translate("applicationFormIdLabel")}</th>
+              <td>{applicationFormId}</td>
+            </tr>
+            <tr>
+              <th scope="row">{translate("errorCategoryLabel")}</th>
+              <td>{errorCategory}</td>
+            </tr>
+            <tr>
+              <th scope="row">{translate("internalTokenPresentLabel")}</th>
+              <td>{hasInternalToken ? translate("yes") : translate("no")}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
     </main>
   );
 }

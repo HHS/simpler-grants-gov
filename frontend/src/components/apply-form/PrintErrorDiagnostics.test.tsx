@@ -14,7 +14,7 @@ describe("PrintErrorDiagnostics", () => {
     render(<PrintErrorDiagnostics {...defaultProperties} />);
 
     expect(
-      screen.getByRole("heading", { name: "PDF rendering failed" }),
+      screen.getByRole("heading", { name: "heading" }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(defaultProperties.applicationId),
@@ -25,12 +25,12 @@ describe("PrintErrorDiagnostics", () => {
     expect(
       screen.getByText(defaultProperties.errorCategory),
     ).toBeInTheDocument();
-    expect(screen.getByText("Yes")).toBeInTheDocument();
+    expect(screen.getByText("yes")).toBeInTheDocument();
   });
 
   it.each([
-    { hasInternalToken: true, expectedDisplayValue: "Yes" },
-    { hasInternalToken: false, expectedDisplayValue: "No" },
+    { hasInternalToken: true, expectedDisplayValue: "yes" },
+    { hasInternalToken: false, expectedDisplayValue: "no" },
   ])(
     "renders token presence as $expectedDisplayValue when hasInternalToken is $hasInternalToken",
     ({ hasInternalToken, expectedDisplayValue }) => {
@@ -41,7 +41,7 @@ describe("PrintErrorDiagnostics", () => {
         />,
       );
 
-      expect(screen.getByText("Internal token present")).toBeInTheDocument();
+      expect(screen.getByText("internalTokenPresentLabel")).toBeInTheDocument();
       expect(screen.getByText(expectedDisplayValue)).toBeInTheDocument();
     },
   );
