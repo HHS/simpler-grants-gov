@@ -75,17 +75,9 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await createApplication(page, OPPORTUNITY_URL, orgLabel);
       const applicationUrl = page.url();
 
-      // When the user clicks on SF424B form link
-      // Then the form opens
-      // And the user fills out the form with valid test data
-      // And the user clicks Save
-      await fillForm(
-        testInfo,
-        page,
-        SF424B_FORM_CONFIG,
-        buildSF424BHappyPathTestData(Date.now()),
-        false,
-      );
+      // Fill and save, stay on form page to verify save success
+      const sf424bTestData = buildSF424BHappyPathTestData(Date.now());
+      await fillForm(testInfo, page, SF424B_FORM_CONFIG, sf424bTestData, false);
 
       // Verify save success alert on form page
       await verifyFormStatusAfterSave(page, "complete");
@@ -108,17 +100,9 @@ for (const { testName, orgLabel } of applicantScenarios) {
         "Yes",
       );
 
-      // When the user clicks on SF-LLL form link
-      // Then the form opens
-      // And the user fills out the form with valid test data
-      // And the user clicks Save
-      await fillForm(
-        testInfo,
-        page,
-        SFLLL_FORM_CONFIG,
-        buildSFLLLHappyPathTestData(Date.now()),
-        false,
-      );
+      // Fill and save, stay on form page to verify save success
+      const sflllTestData = buildSFLLLHappyPathTestData(Date.now());
+      await fillForm(testInfo, page, SFLLL_FORM_CONFIG, sflllTestData, false);
 
       // Verify SF-LLL save success alert on form page
       await verifyFormStatusAfterSave(page, "complete");
