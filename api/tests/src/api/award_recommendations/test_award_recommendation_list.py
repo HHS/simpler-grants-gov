@@ -529,6 +529,55 @@ class TestListAwardRecommendations200:
             str(ar2.award_recommendation_id),  # OPP-999
         ]
 
+    def test_list_award_recommendations_sort_by_total_received_count_ascending_with_zero(
+        self, client, db_session, agency, opportunity
+    ):
+        """Test that ARs with 0 submissions sort correctly at the start in ascending order"""
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        ar1 = AwardRecommendationFactory.create(
+            opportunity=opportunity, review_workflow=None, review_workflow_id=None
+        )
+        ar2 = AwardRecommendationFactory.create(
+            opportunity=opportunity, review_workflow=None, review_workflow_id=None
+        )
+        ar3 = AwardRecommendationFactory.create(
+            opportunity=opportunity, review_workflow=None, review_workflow_id=None
+        )
+
+        # ar1 has 0 submissions
+        # ar2 has 2 submissions
+        for _ in range(2):
+            AwardRecommendationApplicationSubmissionFactory.create(award_recommendation=ar2)
+        # ar3 has 5 submissions
+        for _ in range(5):
+            AwardRecommendationApplicationSubmissionFactory.create(award_recommendation=ar3)
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"agency_id": {"one_of": [str(agency.agency_id)]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                    "sort_order": [
+                        {"order_by": "total_received_count", "sort_direction": "ascending"}
+                    ],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        returned_ids = [d["award_recommendation_id"] for d in resp.json["data"]]
+        assert returned_ids == [
+            str(ar1.award_recommendation_id),  # 0 submissions
+            str(ar2.award_recommendation_id),  # 2 submissions
+            str(ar3.award_recommendation_id),  # 5 submissions
+        ]
+
 
 ####################################
 # 404 Tests

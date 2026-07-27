@@ -115,7 +115,9 @@ def list_award_recommendations(
         "award_recommendation_number": AwardRecommendation.award_recommendation_number,
         "opportunity_name": Opportunity.opportunity_title,
         "opportunity_number": Opportunity.opportunity_number,
-        "total_received_count": total_received_count_subquery.c.total_received_count,
+        "total_received_count": func.coalesce(
+            total_received_count_subquery.c.total_received_count, 0
+        ),
         "award_recommendation_status": AwardRecommendation.award_recommendation_status,
         "created_at": AwardRecommendation.created_at,
     }
