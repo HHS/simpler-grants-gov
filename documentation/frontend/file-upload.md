@@ -17,7 +17,24 @@ The component and the backend systems it communicates provide:
 
 The SimplerFileInput wraps the [Trussworks FileInput](https://github.com/trussworks/react-uswds/blob/main/src/components/forms/FileInput/FileInput.tsx).
 
-## Usage
+## End user usage
+
+To the end user, a SimplerFileInput implemented on a page or form will see usage flow something like this:
+
+- the user clicks on the input and selects file(s) from a system dialog, or drags and drops file(s) on to the input
+- the download / virus scan process begins and is tracked in the UI across the status listed below
+  - the user has the option to cancel the upload
+    - if "cancel" is clicked, the upload is stopped, and, if a single file input, the input returns to its original state
+- either the process completes successfully
+  - final success status message is shown
+    - this message will disappear on refresh
+  - depending on implementation, the uploaded file appears as an "existing file" with the ability to delete the file
+    - if a file is deleted such that there are no more existing files, the input will return to its original state
+- or encounters an error
+  - an error state is shown, with the ability to dismiss the error
+    - on error dismiss, the input returns to its original state
+
+Throughout the process any functionality tied to custom callbacks described below will also be run at specified status transition points.
 
 ### Upload States and Error Handling
 
@@ -71,6 +88,8 @@ If an upload on a single file input errors out, a new file can be uploaded once 
 
 Multi-file uploads will accept any number of files either concurrently or in sequence.
 
+## Dev usage
+
 ### Customization
 
 The following props are exposed by the component to allow for customization:
@@ -90,6 +109,7 @@ Callbacks are supported to allow pages to respond to events during upload in any
 
 - onDelete
   - callback to run when "delete" button is clicked
+    - in order to support the flexibility needed to cover the disparate use cases in the application, no built in deletion functionality exists out of the box in this component. Any deletion related actions must be implemented from this handler for each implementation of the SimplerFileInput component.
 - onError
   - callback to run after any error during upload or post upload
 - onSuccess
@@ -108,9 +128,9 @@ A successful file upload and virus scan will result in:
 
 In order to support actually doing something with the file after upload, the SimplerFileInput allows for a "post upload action". What the post upload action does will be different for each form but in most cases it will associate the file with a given entity and move the file into a permanent S3 bucket.
 
-For example, in the case of uploading a file to be attached to an application form, this function would make a request to attach the given file id as an attachment to a given form.
+For example, in the case of uploading a file to be attached to another entity (ex. application form, opportunity, award recommendation), this function would make a request to attach the given file id as an attachment to that entity. For an opportunity attachment, this could likely look like an API request to add a DB record on an `opportunity_attachment` table and move the file to an `opportunity_attachments` S3 bucket.
 
-On a technical level, once the file upload and virus scan have completed successfully, the component will call the postUploadAction function provided via prop with the file id returned from the file upload request.
+On a technical level, once the file upload and virus scan have completed successfully, the component will call the postUploadAction function provided via prop with the temporary file id returned from the file upload request.
 
 The upload process will not be considered complete until this function resolves, and will display the message provided in the postSaveActionProgressMessage prop while the request is in progress. If the function errors, the postSaveActionErrorMessage will be displayed to the user.
 
