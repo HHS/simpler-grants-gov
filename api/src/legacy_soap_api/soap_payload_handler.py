@@ -15,6 +15,10 @@ XML_DICT_KEY_ATTRIBUTE_PREFIX = "@"
 XML_DICT_KEY_TEXT_VALUE_KEY = "#text"
 CHUNK_SIZE = 1000
 NUMBER_OF_CHUNKS = 5
+SOAP_ENV_SHORT_PATTERNS = (b"<soap:Envelope", b"</soap:Envelope>")
+SOAP_ENV_LONG_PATTERNS = (b"<soapenv:Envelope", b"</soapenv:Envelope>")
+SOAP_PATTERNS = [SOAP_ENV_SHORT_PATTERNS, SOAP_ENV_LONG_PATTERNS]
+MAX_TAG_SIZE = len(SOAP_ENV_LONG_PATTERNS[1])
 
 
 class SOAPPayload:
@@ -207,25 +211,43 @@ def get_soap_envelope_from_payload(soap_message: str) -> SOAPEnvelopeData:
 
 
 def extract_soap_xml(soap_bytes: bytes) -> bytes:
-    soap_patterns = [b"<soap:Envelope", b"<soapenv:Envelope"]
-    max_tag_size = len(soap_patterns[1])
     bytes_stream = io.BytesIO(soap_bytes)
     buffer = b""
     total_bytes_read = 0
     count = NUMBER_OF_CHUNKS
+
+    start_position = -1
+    matched_end_pattern = None
+
+    # Scan chunk for opening tag
     while count > 0:
         chunk = bytes_stream.read(CHUNK_SIZE)
         if not chunk:
             break
         current_data = buffer + chunk
-        for pattern in soap_patterns:
-            match_index = current_data.find(pattern)
+        for start_pattern, end_pattern in SOAP_PATTERNS:
+            match_index = current_data.find(start_pattern)
             if match_index != -1:
                 start_position = (total_bytes_read - len(buffer)) + match_index
-                return soap_bytes[start_position:]
-        buffer = current_data[-max_tag_size:]
+                matched_end_pattern = end_pattern
+                break
+        if start_position != -1:
+            break
+        buffer = current_data[-MAX_TAG_SIZE:]
         total_bytes_read += len(chunk)
         count -= 1
+
+    if start_position == -1:
+        return b""
+
+    if matched_end_pattern is not None:
+        end_index = soap_bytes.find(matched_end_pattern, start_position)
+        # To handle scenarios where the xml is not closed, if you can't find the end tag then just return everything
+        if end_index == -1:
+            return soap_bytes[start_position:]
+
+        end_position = end_index + len(matched_end_pattern)
+        return soap_bytes[start_position:end_position]
     return b""
 
 

@@ -1,22 +1,27 @@
 import logging
+from uuid import UUID
 
 import flask
 from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
 from grants_shared.api import response
+from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.auth.api_jwt_auth import refresh_token_expiration
 from grants_shared.auth.login_gov_jwt_auth import get_final_redirect_uri
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import UserTokenLogoutResponseSchema, UserTokenRefreshResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.auth.auth_utils import get_login_gov_redirect_uri, with_login_redirect_error_handler
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.db.models.user_models import MgmtUserTokenSession
 from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
     handle_login_gov_token,
 )
+from src.services.users.user_can_access import check_user_can_access
 
 logger = logging.getLogger(__name__)
 
@@ -114,5 +119,38 @@ def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
         "Refreshed a user token",
         extra=user_token_session.get_log_extra(),
     )
+
+    return response.ApiResponse(message="Success")
+
+
+@user_blueprint.post("/<uuid:mgmt_user_id>/can_access")
+@user_blueprint.input(user_schemas.MgmtUserCanAccessRequestSchema, location="json")
+@user_blueprint.output(user_schemas.MgmtUserCanAccessResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403, 404])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def user_can_access(
+    db_session: db.Session, mgmt_user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Check whether the calling user can access a resource with the given privileges."""
+    add_extra_data_to_current_request_logs({"mgmt_user_id": mgmt_user_id})
+    logger.info("POST /v1/users/:mgmt_user_id/can_access")
+
+    # Get the user from multi-auth (supports both JWT and User API Key)
+    user = jwt_or_api_user_key_multi_auth.get_user()
+
+    # A user may only check access for themselves
+    if user.mgmt_user_id != mgmt_user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        db_session.add(user)
+        check_user_can_access(
+            db_session,
+            user=user,
+            resource_type=json_data["mgmt_resource_type"],
+            resource_id=json_data["mgmt_resource_id"],
+            privileges=set(json_data["mgmt_privileges"]),
+        )
 
     return response.ApiResponse(message="Success")

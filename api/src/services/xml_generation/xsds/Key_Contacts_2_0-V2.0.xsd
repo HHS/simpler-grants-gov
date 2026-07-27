@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--*******************************************************************************************************************-->
+<!-- TITLE: Key Contacts-->
+<!-- DESCRIPTION: -->
+<!-- FORM VERSION: 2-->
+<!-- SCHEMA VERSION: 2-->
+<!-- OMB NUMBER: 4040-XXX-->
+<!-- FORM EXPIRATION DATE:  XX/XX/05-->
+<!-- REVISION HISTORY:-->
+<!-- TO DO:-->
+<!--............1. Find "xmlns-" and replace it by "xmlns:"-->
+<!--*******************************************************************************************************************-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:codes="http://apply.grants.gov/system/UniversalCodes-V2.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:Key_Contacts_2_0="http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0" targetNamespace="http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="2.0">
+	<xs:import namespace="http://apply.grants.gov/system/UniversalCodes-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/UniversalCodes-V2.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:element name="Key_Contacts_2_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ApplicantOrganizationName" type="globLib:OrganizationNameDataType"/>
+				<xs:element name="RoleOnProject" maxOccurs="4">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="ContactProjectRole">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:minLength value="1"/>
+										<xs:maxLength value="45"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="ContactName" type="globLib:HumanNameDataType"/>
+							<xs:element name="ContactTitle" type="globLib:HumanTitleDataType" minOccurs="0"/>
+							<xs:element name="ContactOrganizationalAffiliation" type="globLib:OrganizationNameDataType" minOccurs="0"/>
+							<xs:element name="ContactAddress" type="globLib:AddressDataTypeV3"/>
+							<xs:element name="ContactPhone" type="globLib:TelephoneNumberDataType"/>
+							<xs:element name="ContactFax" type="globLib:TelephoneNumberDataType" minOccurs="0"/>
+							<xs:element name="ContactEmail" type="globLib:EmailDataType"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="2.0"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

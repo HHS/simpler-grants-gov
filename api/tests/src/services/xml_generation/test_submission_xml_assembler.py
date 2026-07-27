@@ -591,11 +591,13 @@ class TestSubmissionXMLAssembler:
 
         assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
 
-        # Should raise error because empty data is invalid
-        with pytest.raises(Exception) as exc_info:
-            assembler._generate_form_xml(empty_form)
+        # An empty response now generates a minimal document (just the root element with
+        # its required attributes); all form elements are optional at the generation layer.
+        form_xml = assembler._generate_form_xml(empty_form)
 
-        assert "XML generation failed" in str(exc_info.value)
+        assert form_xml
+        root = lxml_etree.fromstring(form_xml.encode("utf-8"))
+        assert root is not None
 
     def test_assembler_uses_application_data(
         self, sample_application, sample_application_submission

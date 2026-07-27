@@ -14,6 +14,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   verifyFormStatusAfterSave,
@@ -28,11 +29,14 @@ import {
   validateAttachmentPrintViewSection,
   validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
-import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
+import {
+  submitApplicationAndVerify,
+  verifySubmissionConfirmation,
+} from "tests/e2e/utils/submission/submit-application-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 
-const { testOrgLabel, targetEnv } = playwrightEnv;
+const { testOrgLabel } = playwrightEnv;
 
 // Only the opportunity number is declared here.
 // All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
@@ -53,12 +57,7 @@ const applicantScenarios = [
 
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
-  if (targetEnv === "staging") {
-    test.skip(
-      testInfo.project.name !== "Chrome",
-      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-    );
-  }
+  skipNonChromeOnStaging(testInfo);
 });
 
 for (const { testName, orgLabel } of applicantScenarios) {
@@ -90,11 +89,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
       const filledForms: FilledFormEntry[] = [];
 
       for (const [index, form] of opportunityConfig.forms.entries()) {
-        const testData = buildHappyPathTestData(
-          form.buildTestData,
-          baseSuffix + index,
-          form.formConfig,
-        );
+        const testData = buildHappyPathTestData(form, baseSuffix + index);
 
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
@@ -131,15 +126,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await submitApplicationAndVerify(page, "success");
 
       // --- Confirmation Page Validation ---
-      await expect(
-        page.getByRole("heading", {
-          name: /your application has been submitted/i,
-        }),
-      ).toBeVisible();
-
-      await expect(page.getByTestId("summary-box")).toContainText(
-        "Your application has been submitted",
-      );
+      await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one page per form) ---
       for (const {

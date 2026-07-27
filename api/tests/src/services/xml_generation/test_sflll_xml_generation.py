@@ -95,16 +95,19 @@ class TestSFLLLXMLGeneration:
                         "zip_code": "20005",
                     },
                 },
+                # Config-shaped, not schema-shaped: see KNOWN LIMITATION in sflll form_json.py.
                 "individual_performing_service": {
                     "individual": {
-                        "first_name": "Jane",
-                        "last_name": "Doe",
-                    },
-                    "address": {
-                        "street1": "789 Pennsylvania Ave",
-                        "city": "Washington",
-                        "state": "DC: District of Columbia",
-                        "zip_code": "20004",
+                        "name": {
+                            "first_name": "Jane",
+                            "last_name": "Doe",
+                        },
+                        "address": {
+                            "street1": "789 Pennsylvania Ave",
+                            "city": "Washington",
+                            "state": "DC: District of Columbia",
+                            "zip_code": "20004",
+                        },
                     },
                 },
                 "signature_block": {
@@ -180,7 +183,6 @@ class TestSFLLLXMLGeneration:
         # Verify award amount
         assert sflll.find(f".//{sflll_ns}AwardAmount").text == "500000.00"
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sflll_address_fields_include_state(self, sflll_application, db_session):
         """Test that SF-LLL addresses include State field (legacy fix)."""
         application_submission = ApplicationSubmissionFactory.create(
