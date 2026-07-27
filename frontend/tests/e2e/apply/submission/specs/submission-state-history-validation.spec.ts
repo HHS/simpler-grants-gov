@@ -116,15 +116,6 @@ test(
     );
 
     // Fill and save, stay on form page to verify save success
-    await fillForm(
-      testInfo,
-      page,
-      SF424B_FORM_CONFIG,
-      buildSF424BHappyPathTestData(Date.now()),
-      false,
-    );
-
-    // Fill and save, stay on form page to verify save success
     const sf424bTestData = buildSF424BHappyPathTestData(Date.now());
     await fillForm(testInfo, page, SF424B_FORM_CONFIG, sf424bTestData, false);
 
