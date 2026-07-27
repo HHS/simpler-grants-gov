@@ -1,25 +1,20 @@
-import type { fieldDefinitionsSF424B } from "tests/e2e/apply/fixtures/sf424b-field-definitions";
+import { fieldDefinitionsSF424B } from "tests/e2e/apply/fixtures/sf424b-field-definitions";
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import { ReadonlyFieldCheck } from "tests/e2e/utils/submission/post-submission-utils";
 import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
 
-export const sf424BHappyPathTestData = (
-  orgLabel: string,
-): Record<string, string> => ({
-  title: "TESTER",
-  organization: orgLabel,
-});
-
 // Readonly field checks derived from fill data - fieldIds match testIds in sf424b-field-definitions.ts
 export const sf424BReadonlyFields = (
-  orgLabel: string,
-): ReadonlyFieldCheck[] => [
-  { fieldId: "title", expectedValue: sf424BHappyPathTestData(orgLabel).title },
-  {
-    fieldId: "applicant_organization",
-    expectedValue: sf424BHappyPathTestData(orgLabel).organization,
-  },
-];
+  testData: Record<string, string>,
+): ReadonlyFieldCheck[] =>
+  Object.entries(testData)
+    .map(([dataKey, expectedValue]) => {
+      const def =
+        fieldDefinitionsSF424B[dataKey as keyof typeof fieldDefinitionsSF424B];
+      const fieldId = def?.printTestId ?? def?.testId;
+      return fieldId ? { fieldId, expectedValue } : null;
+    })
+    .filter((check): check is ReadonlyFieldCheck => check !== null);
 
 /**
  * Happy-path test data builder for the SF-424B form.

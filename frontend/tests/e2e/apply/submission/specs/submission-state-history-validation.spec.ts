@@ -4,6 +4,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import page from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/success/page";
 import {
   buildSF424BHappyPathTestData,
   sf424BReadonlyFields,
@@ -124,6 +125,10 @@ test(
       false,
     );
 
+    // Fill and save, stay on form page to verify save success
+    const sf424bTestData = buildSF424BHappyPathTestData(Date.now());
+    await fillForm(testInfo, page, SF424B_FORM_CONFIG, sf424bTestData, false);
+
     // Verify save success alert on form page
     await verifyFormStatusAfterSave(page, "complete");
 
@@ -156,7 +161,7 @@ test(
       page,
       SF424B_FORM_MATCHER,
       "SF-424B",
-      sf424BReadonlyFields(testOrgLabel),
+      sf424BReadonlyFields(sf424bTestData),
     );
   },
 );
