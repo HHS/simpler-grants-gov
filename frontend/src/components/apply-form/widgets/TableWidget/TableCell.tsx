@@ -1,7 +1,7 @@
 import { TableWidgetCellConfig } from "src/types/applyForm/types";
 import { formatTableCellValue } from "src/utils/applyForm/formatTableCellValue";
 
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 
 const READ_ONLY_OUTPUT_CLASS =
   "usa-input margin-0 width-full overflow-x-auto display-block border border-base-light bg-base-lightest text-right text-wrap";
@@ -11,6 +11,8 @@ type TableCellProps = {
   cell: TableWidgetCellConfig;
   /** Unique identifier for the cell */
   id: string;
+  /** HTML form name for the cell input */
+  name?: string;
   /** The value to display or edit in the cell */
   value?: number | string | null;
   /** Whether the cell should be disabled (read-only mode) */
@@ -18,6 +20,10 @@ type TableCellProps = {
   /** Callback when the cell value changes (only for editable input cells) */
   onChange?: (value: string) => void;
 };
+
+function getStringValue(value: number | string | null | undefined): string {
+  return value === undefined || value === null ? "" : String(value);
+}
 
 /**
  * TableCell renders a single cell in a table widget.
@@ -72,10 +78,18 @@ type TableCellProps = {
 function TableCell({
   cell,
   id,
+  name,
   value,
   disabled = false,
   onChange,
 }: TableCellProps) {
+  const [inputValue, setInputValue] = useState(getStringValue(value));
+  const [lastSyncedValue, setLastSyncedValue] = useState(value);
+  if (lastSyncedValue !== value) {
+    setLastSyncedValue(value);
+    setInputValue(getStringValue(value));
+  }
+
   if (cell.type === "plainText") {
     return (
       <span className="display-block text-wrap">{cell.staticContent}</span>
@@ -94,8 +108,8 @@ function TableCell({
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
 
-    // Only allow numeric input: integers, decimals, and negative numbers
     if (nextValue === "" || /^-?\d*\.?\d*$/.test(nextValue)) {
+      setInputValue(nextValue);
       onChange?.(nextValue);
     }
   };
@@ -106,11 +120,12 @@ function TableCell({
       className="usa-input margin-0 width-full overflow-x-auto"
       data-testid={`${id}-input`}
       id={id}
+      name={name}
       inputMode="decimal"
       onChange={handleChange}
       pattern="-?[0-9]*[.]?[0-9]*"
       type="text"
-      value={value === null ? undefined : value}
+      value={inputValue}
       disabled={disabled}
     />
   );
