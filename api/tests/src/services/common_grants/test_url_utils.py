@@ -37,9 +37,7 @@ class TestValidateUrlCompatible:
         assert validate_url_compatible("sam.gov") is None  # missing scheme
 
     def test_accepts_unencoded_braces_in_query(self):
-        """Agency URLs with raw {} in query strings (e.g. NASA NSPIRES solId GUIDs)
-        are RFC-invalid but accepted by every validator in the response pipeline;
-        they must be served, not dropped."""
+        """Raw {} in a query is RFC-invalid but the whole pipeline accepts it."""
         url = "https://nspires.nasaprs.com/x/summary.do?solId={9455D565-3411-0574}&method=init"
         assert validate_url_compatible(url) == url
 

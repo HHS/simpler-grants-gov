@@ -20,9 +20,7 @@ class _UrlValidator(BaseModel):
     """Pydantic HttpUrl validator.
 
     Mirrors the HttpUrl field in OpportunityBase and other CommonGrants models.
-    Deliberately not strict: the SDK models dropped model-level strict mode in
-    0.6.x, so strict here would drop URLs (e.g. unencoded ``{}`` in a query
-    string) that the response pipeline accepts and serves fine.
+    Not strict: strict drops URLs (e.g. raw ``{}`` in a query) the pipeline serves fine.
     """
 
     url: HttpUrl
