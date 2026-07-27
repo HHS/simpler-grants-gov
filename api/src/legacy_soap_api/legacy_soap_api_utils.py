@@ -217,16 +217,16 @@ def get_soap_error_response(
     faultstring: str = "Server error has occurred",
     headers: dict | None = None,
 ) -> SOAPResponse:
-    err = f"""
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-    <soap:Body>
-        <soap:Fault>
-            <faultcode>{faultcode}</faultcode>
-            <faultstring>{faultstring}</faultstring>
-        </soap:Fault>
-    </soap:Body>
-</soap:Envelope>
-""".encode()
+    err = (
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        f"<faultcode>{faultcode}</faultcode>"
+        f"<faultstring>{faultstring}</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    ).encode()
     return get_soap_response(data=err, status_code=500, headers=headers)
 
 
@@ -235,16 +235,16 @@ def get_soap_fault_error_response(
     faultstring: str = "Server error has occurred",
     headers: dict | None = None,
 ) -> SOAPResponse:
-    err = f"""
-    <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-        <soap:Body>
-            <soap:Fault>
-                <faultcode>{faultcode}</faultcode>
-                <faultstring>{faultstring}</faultstring>
-            </soap:Fault>
-        </soap:Body>
-    </soap:Envelope>
-    """.strip()
+    err = (
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        f"<faultcode>{faultcode}</faultcode>"
+        f"<faultstring>{faultstring}</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    )
     boundary_id = str(uuid.uuid4())
     mtom_response = (
         f"--uuid:{boundary_id}\r\n"
@@ -252,7 +252,7 @@ def get_soap_fault_error_response(
         f"Content-Transfer-Encoding: binary\r\n"
         f"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
         f"{err}\r\n"
-        f"--uuid:{boundary_id}--\r\n"
+        f"--uuid:{boundary_id}--"
     ).encode()
     response_headers = {
         "Content-Type": (
