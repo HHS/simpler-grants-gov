@@ -72,7 +72,6 @@ const playwrightEnv = {
   testUserEmail: process.env.STAGING_TEST_USER_EMAIL || "",
   testUserPassword: process.env.STAGING_TEST_USER_PASSWORD || "",
   testUserAuthKey: process.env.STAGING_TEST_USER_MFA_KEY || "",
-  stagingTestUserApiKey: process.env.STAGING_TEST_USER_API_KEY || "",
   testUserManagerApiKey,
 };
 
