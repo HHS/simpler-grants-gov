@@ -3,18 +3,21 @@ import { authenticator } from "otplib";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav } from "tests/e2e/playwrightUtils";
 
-// Error if env missing and running against staging
+const REMOTE_ENVS = ["staging", "dev", "grantor1"];
+const isRemoteEnv = REMOTE_ENVS.includes(playwrightEnv.targetEnv);
+
+// Error if env missing and running against remote envs
 if (
-  playwrightEnv.targetEnv === "staging" &&
+  isRemoteEnv &&
   (!playwrightEnv.testUserEmail ||
     !playwrightEnv.testUserPassword ||
     !playwrightEnv.testUserAuthKey)
 ) {
-  throw new Error("login credentials missing for staging test run");
+  throw new Error("login credentials missing for remote test run");
 }
 
 // --- Timeouts ---
-const TIMEOUT_HOME = playwrightEnv.targetEnv === "staging" ? 180000 : 60000;
+const TIMEOUT_HOME = isRemoteEnv ? 180000 : 60000;
 const TIMEOUT_MFA = 120000;
 
 // TOTP codes are valid for 30s windows. If we're within this many seconds

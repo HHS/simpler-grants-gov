@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import path from "path";
 
 import playwrightEnv from "./e2e/playwright-env";
 
@@ -101,6 +102,7 @@ export default defineConfig({
     targetEnv === "local"
       ? {
           command: "npm run start",
+          cwd: path.resolve(__dirname, ".."),
           url: baseUrl,
           reuseExistingServer: !isCi,
           env: webServerEnv,

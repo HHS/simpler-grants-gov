@@ -8,19 +8,27 @@ if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath, quiet: true });
 }
 
-const SUPPORTED_ENVS = ["local", "staging"];
+const SUPPORTED_ENVS = ["local", "dev", "staging", "grantor1"];
 
 // Base URLs for each environment, read from .env.local if present, else fallback to defaults
 const BASE_URLS: Record<string, string> = {
   local: process.env.LOCAL_BASE_URL || "http://127.0.0.1:3000",
+  dev: process.env.DEV_BASE_URL || "https://dev.simpler.grants.gov",
   staging: process.env.STAGING_BASE_URL || "https://staging.simpler.grants.gov",
+  grantor1:
+    process.env.GRANTOR1_BASE_URL ||
+    "https://grantor1.teams.simpler.grants.gov",
 };
 
 // API URLs for each environment, read from .env.local if present, else fallback to defaults
 const API_URLS: Record<string, string> = {
   local: process.env.LOCAL_API_URL || "http://127.0.0.1:8080",
+  dev: process.env.DEV_API_URL || "https://api.dev.simpler.grants.gov",
   staging:
     process.env.STAGING_API_URL || "https://api.staging.simpler.grants.gov",
+  grantor1:
+    process.env.GRANTOR1_API_URL ||
+    "https://api.staging.simpler.grants.gov",
 };
 
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
@@ -39,14 +47,18 @@ const apiUrl = API_URLS[targetEnv];
 // Must match the OAuth login name defined in seed_orgs_and_users.py.
 const TEST_USER_LABELS: Record<string, string> = {
   local: "one_org_user",
+  dev: "Automatic staging Organization for UEI AUTOHQDCCHBY",
   staging: "Automatic staging Organization for UEI AUTOHQDCCHBY",
+  grantor1: "Automatic staging Organization for UEI AUTOHQDCCHBY",
 };
 
 // Organization label shown in the "Start new application" modal dropdown.
 // Must match the legal_business_name in seed_orgs_and_users.py.
 const TEST_ORG_LABELS: Record<string, string> = {
   local: "Sally's Soup Emporium",
+  dev: "Automatic staging Organization for UEI AUTOHQDCCHBY",
   staging: "Automatic staging Organization for UEI AUTOHQDCCHBY",
+  grantor1: "Automatic staging Organization for UEI AUTOHQDCCHBY",
 };
 
 const testUserLabel = TEST_USER_LABELS[targetEnv];

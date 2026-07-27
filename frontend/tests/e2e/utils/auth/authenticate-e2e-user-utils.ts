@@ -2,7 +2,7 @@
  * authenticateE2eUser is a high-level helper for E2E test authentication.
  *
  * - Local: spoofs a session using loginUtils.ts with a fake JWT cookie.
- * - Staging (standalone run): spoofs a session using loginUtils.ts with a
+ * - Remote envs (staging/dev/grantor1 standalone run): spoof a session using loginUtils.ts with a
  *   fake JWT cookie or if spoofing is turned off (in the case where we want
  *   to specifically test the login process, for example, performs a real login
  *   with credentials and MFA using perform-login-utils.ts.
@@ -20,7 +20,7 @@ import { selectLocalTestUser } from "tests/e2e/utils/auth/select-local-test-user
 
 const { baseUrl, targetEnv, testUserLabel } = playwrightEnv;
 
-// used to simulate a staging login without performing any login actions
+// used to simulate a remote-env login without performing any login actions
 // calls dedicated API endpoint to fetch session token for a test user
 // and creates a frontend session based on the token from the response
 // requires STAGING_TEST_USER_MANAGER_API_KEY and STAGING_TEST_USER_ID to be set in env vars
@@ -69,7 +69,11 @@ export async function authenticateE2eUser(
     // selectLocalTestUser is a no-op if the dev quick-login dropdown is absent.
     await selectLocalTestUser(page, testUserLabel);
     await page.waitForTimeout(2000);
-  } else if (targetEnv === "staging") {
+  } else if (
+    targetEnv === "staging" ||
+    targetEnv === "dev" ||
+    targetEnv === "grantor1"
+  ) {
     if (attemptSpoof) {
       try {
         const spoofSuccessful = await attemptStagingSpoof(context);
