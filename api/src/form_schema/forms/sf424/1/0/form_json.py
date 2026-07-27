@@ -934,13 +934,20 @@ FORM_XML_TRANSFORM_RULES = {
     "competition_identification_title": {
         "xml_transform": {"target": "CompetitionIdentificationTitle"}
     },
+    # Attachment placeholders below map a field to itself only to reserve its XSD
+    # sequence position; the attachment transformer emits the actual element.
+    "areas_affected": {"xml_transform": {"target": "areas_affected"}},
     # Project information - direct field mappings
     "project_title": {"xml_transform": {"target": "ProjectTitle"}},
+    "additional_project_title": {"xml_transform": {"target": "additional_project_title"}},
     "congressional_district_applicant": {
         "xml_transform": {"target": "CongressionalDistrictApplicant"}
     },
     "congressional_district_program_project": {
         "xml_transform": {"target": "CongressionalDistrictProgramProject"}
+    },
+    "additional_congressional_districts": {
+        "xml_transform": {"target": "additional_congressional_districts"}
     },
     "project_start_date": {"xml_transform": {"target": "ProjectStartDate"}},
     "project_end_date": {"xml_transform": {"target": "ProjectEndDate"}},
@@ -1002,13 +1009,7 @@ FORM_XML_TRANSFORM_RULES = {
             "value_transform": {"type": "boolean_to_yes_no"},
         }
     },
-    # Attachment fields - pass through as-is for attachment transformer
     "debt_explanation": {"xml_transform": {"target": "debt_explanation"}},
-    "areas_affected": {"xml_transform": {"target": "areas_affected"}},
-    "additional_congressional_districts": {
-        "xml_transform": {"target": "additional_congressional_districts"}
-    },
-    "additional_project_title": {"xml_transform": {"target": "additional_project_title"}},
     "certification_agree": {
         "xml_transform": {
             "target": "CertificationAgree",

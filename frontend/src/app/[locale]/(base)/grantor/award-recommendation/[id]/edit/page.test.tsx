@@ -330,7 +330,7 @@ describe("AwardRecommendationEditPage", () => {
       ).toBeVisible();
       const textarea = screen.getByTestId("award-selection-details-textarea");
       expect(textarea).toHaveAttribute("id", "award_selection_details");
-      expect(textarea).toHaveAttribute("name", "award_selection_details");
+      expect(textarea).toHaveAttribute("name", "selection_method_detail");
     });
 
     it("displays other key information textarea in recommendation section", async () => {

@@ -54,6 +54,19 @@ def create_users(db_session: db.Session) -> None:
         scenario_name="Another JWT User",
     ).with_oauth_login("another_jwt_user").with_jwt_auth().build()
 
+    # Create users with API key auth setup
+    UserBuilder(
+        user_id=uuid.UUID("a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d"),
+        db_session=db_session,
+        scenario_name="API Key User",
+    ).with_oauth_login("api_key_user").with_api_key("local-dev-api-key-1").build()
+
+    UserBuilder(
+        user_id=uuid.UUID("b2c3d4e5-f6a7-4b5c-9d0e-1f2a3b4c5d6e"),
+        db_session=db_session,
+        scenario_name="Another API Key User",
+    ).with_oauth_login("another_api_key_user").with_api_key("local-dev-api-key-2").build()
+
 
 def create_teams() -> None:
     teams = f.TeamFactory.create_batch(size=10)

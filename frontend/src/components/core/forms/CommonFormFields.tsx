@@ -42,6 +42,7 @@ export const CommonTextInput = ({
   rawErrors?: string[];
 }) => {
   const error = rawErrors.length ? true : undefined;
+  const valueProps = value !== undefined ? { value } : { defaultValue };
   return (
     <>
       <FormGroup key={`form-group__text-input--${fieldId}`} error={error}>
@@ -61,8 +62,7 @@ export const CommonTextInput = ({
           onBlur={onFieldBlur}
           maxLength={fieldMaxLength}
           style={{ maxWidth: "550px" }}
-          defaultValue={defaultValue}
-          value={value}
+          {...valueProps}
         />
       </FormGroup>
     </>
@@ -148,6 +148,7 @@ export const CommonCharacterCount = ({
   disabled?: boolean;
 }) => {
   const error = rawErrors.length ? true : undefined;
+  const valueProps = value !== undefined ? { value } : { defaultValue };
   return (
     <>
       <FormGroup key={`form-group__text-input--${fieldId}`} error={error}>
@@ -162,8 +163,7 @@ export const CommonCharacterCount = ({
           id={fieldId}
           name={fieldId}
           maxLength={fieldMaxLength}
-          defaultValue={defaultValue}
-          value={value}
+          {...valueProps}
           onChange={onTextChange}
           onBlur={onFieldBlur}
           isTextArea={isTextArea}

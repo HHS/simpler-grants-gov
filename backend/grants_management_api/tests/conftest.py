@@ -17,6 +17,7 @@ from grants_shared.util.local import load_local_env_vars
 
 import src.app as app_entry
 import tests.db.models.factories as factories
+from src.auth.internal_resource import create_internal_resource
 from src.db import models
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.resource_automation.resource_automation import setup_resource_automation
@@ -146,6 +147,20 @@ def db_session(db_client: db.DBClient) -> db.Session:
     """
     with db_client.get_session() as session:
         yield session
+
+
+@pytest.fixture(scope="session")
+def internal_resource(monkeypatch_session, db_client):
+    """Create the statically defined internal resource for the test session.
+
+    Tests that need the internal resource to exist (e.g. checking internal-role access)
+    can depend on this fixture rather than creating one themselves. Scoped to the session
+    so we only create it once for the whole suite.
+    """
+    monkeypatch_session.setenv("MGMT_INTERNAL_RESOURCE_ID", "2a9c7e50-6b1e-4c8f-9d3a-5e7f1b2c4d6e")
+
+    with db_client.get_session() as db_session, db_session.begin():
+        create_internal_resource(db_session)
 
 
 @pytest.fixture

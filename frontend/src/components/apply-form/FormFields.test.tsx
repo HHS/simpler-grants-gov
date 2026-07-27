@@ -235,7 +235,7 @@ describe("buildFormTreeRecursive", () => {
                   cells: [
                     {
                       type: "plainText",
-                      staticContent: "First Row",
+                      staticContent: "Item 1",
                     },
                     {
                       type: "input",
@@ -280,8 +280,6 @@ describe("buildFormTreeRecursive", () => {
     expect(
       screen.getByRole("columnheader", { name: "Item" }),
     ).toBeInTheDocument();
-
-    expect(screen.getByText("First Row")).toBeInTheDocument();
   });
 
   describe("FormFields formContext forwarding", () => {

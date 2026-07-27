@@ -22,6 +22,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 from grants_shared.adapters.db import PostgresDBClient
+from grants_shared.util import file_util
 from grants_shared.util.local import error_if_not_local
 from lxml import etree
 from pydantic import Field
@@ -33,7 +34,6 @@ from src.db.models import staging
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import ApplicationSubmission
 from src.db.models.user_models import LegacyCertificate
-from src.util import file_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
