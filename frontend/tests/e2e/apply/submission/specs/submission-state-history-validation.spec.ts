@@ -4,7 +4,6 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import page from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/success/page";
 import {
   buildSF424BHappyPathTestData,
   sf424BReadonlyFields,
