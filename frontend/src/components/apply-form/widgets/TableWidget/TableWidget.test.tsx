@@ -108,6 +108,123 @@ describe("TableWidget", () => {
     });
   });
 
+  it("prefixes nested table input names with the multiField root when configured under one parent object", () => {
+    const tableProps: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        type: "multiField",
+        name: "budget_424c_table_1",
+        widget: "Table",
+        definition: ["/properties/budget_information"],
+        children: {
+          columns: [
+            { columnHeader: "Category" },
+            { columnHeader: "Total Cost" },
+          ],
+          rows: [
+            {
+              cells: [
+                { type: "plainText", staticContent: "Admin" },
+                {
+                  type: "input",
+                  definition:
+                    "/properties/administrative_and_legal_expenses/properties/total_cost",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    render(
+      <TableWidget
+        {...tableProps}
+        schema={{}}
+        rawErrors={[]}
+        value={{
+          administrative_and_legal_expenses: {
+            total_cost: 100,
+          },
+        }}
+        options={{}}
+      />,
+    );
+
+    expect(screen.getByTestId("budget_424c_table_1-0-1-input")).toHaveAttribute(
+      "name",
+      "budget_information--administrative_and_legal_expenses--total_cost",
+    );
+  });
+
+  it("renders read-only table values from form data", () => {
+    render(
+      <TableWidget
+        {...props}
+        schema={{}}
+        rawErrors={[]}
+        value={{ first_value: 50, second_value: 125 }}
+        options={{}}
+      />,
+    );
+
+    expect(
+      screen.getByTestId("summary_table_test-0-2-read-only"),
+    ).toHaveTextContent("125");
+  });
+
+  it("uses JSON schema definition paths for nested form values", () => {
+    const nestedProps: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        type: "multiField",
+        name: "nested_table_test",
+        widget: "Table",
+        definition: ["/properties/parent/properties/child"],
+        children: {
+          columns: [{ columnHeader: "Item" }, { columnHeader: "Child Value" }],
+          rows: [
+            {
+              cells: [
+                {
+                  type: "plainText",
+                  staticContent: "Nested item",
+                },
+                {
+                  type: "input",
+                  definition: "/properties/parent/properties/child",
+                  format: "integer",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+    const onChange = jest.fn();
+
+    render(
+      <TableWidget
+        {...nestedProps}
+        onChange={onChange}
+        schema={{}}
+        rawErrors={[]}
+        value={{ parent: { child: 10 } }}
+        options={{}}
+      />,
+    );
+
+    expect(screen.getByTestId("nested_table_test-0-1-input")).toHaveValue("10");
+
+    fireEvent.change(screen.getByTestId("nested_table_test-0-1-input"), {
+      target: { value: "25" },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      parent: { child: "25" },
+    });
+  });
+
   it("throws when a row does not contain one cell for each configured column", async () => {
     const { children: tableChildren, ...tableUiSchema } = props.uiSchemaField;
 
@@ -156,5 +273,37 @@ describe("TableWidget", () => {
     });
 
     expect(error.message).toBe("Table row 1 must contain exactly 3 cells.");
+  });
+
+  it("does not mutate the original value object when updating cells", () => {
+    const onChange = jest.fn();
+    const originalValue: Record<string, number> = {
+      first_value: 100,
+      second_value: 200,
+    };
+    const valueSnapshot = JSON.parse(
+      JSON.stringify(originalValue),
+    ) as unknown as Record<string, number>;
+
+    render(
+      <TableWidget
+        {...props}
+        onChange={onChange}
+        schema={{}}
+        rawErrors={[]}
+        value={originalValue}
+        options={{}}
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("summary_table_test-0-1-input"), {
+      target: { value: "250" },
+    });
+
+    expect(originalValue).toEqual(valueSnapshot);
+    expect(onChange).toHaveBeenCalledWith({
+      first_value: "250",
+      second_value: 200,
+    });
   });
 });
