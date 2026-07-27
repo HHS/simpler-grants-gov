@@ -1,7 +1,6 @@
 import { ApiRequestError } from "src/errors";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { createFormData } from "src/utils/fileUtils/createFormData";
 
 import { fetchFileUploadWithMethod } from "./fetchers";
 
@@ -48,14 +47,17 @@ export const uploadFileToS3 = async (
   // chunks on read (ex. split at `}{`)
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-
-  const fileFormData = createFormData(file.name, buffer, file.type, "file");
+  const fileFormData = new FormData();
   Object.entries(body).forEach(([key, value]) => {
     // don't overwrite the file field
     if (value && key !== "file") {
       fileFormData.append(key, value);
     }
   });
+  fileFormData.append(
+    "file",
+    new File([buffer] as BlobPart[], file.name, { type: file.type }),
+  );
   const s3Response = await fetch(url, {
     method: "POST",
     body: fileFormData,
