@@ -230,6 +230,8 @@ export const mockOpportunityDetail = {
     funding_instruments: null,
     is_cost_sharing: null,
     version_number: 1,
+    opportunity_summary_id: "1",
+    updated_at: "2024-01-01T00:00:00Z",
   },
 };
 

@@ -1,17 +1,38 @@
+import { get, set } from "lodash";
 import {
   UswdsWidgetProps,
   type UiSchemaTableColumn,
   type UiSchemaTableMultiField,
   type UiSchemaTableRow,
 } from "src/types/applyForm/types";
+import {
+  getFieldNameForHtml,
+  jsonSchemaPointerToPath,
+} from "src/utils/applyForm/applyFormUtils";
 
 import { useCallback, useMemo } from "react";
 import { Table } from "@trussworks/react-uswds";
 
 import TableCell from "./TableCell";
 
-function getFieldName(definition: string | undefined): string | undefined {
-  return definition?.split("/").filter(Boolean).pop();
+function getJsonSchemaValuePath(
+  definition: string | undefined,
+): string | undefined {
+  if (!definition) return undefined;
+
+  const jsonPath = jsonSchemaPointerToPath(definition);
+  return jsonPath.startsWith("$.") ? jsonPath.slice(2) : jsonPath;
+}
+
+function getJsonSchemaFieldName(
+  definition: string | undefined,
+): string | undefined {
+  if (!definition) return undefined;
+  return getFieldNameForHtml({ definition });
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /**
@@ -24,13 +45,13 @@ function getRenderValue(
   definition: string | undefined,
   value: unknown,
 ): string | number | undefined {
-  const fieldName = getFieldName(definition);
+  const valuePath = getJsonSchemaValuePath(definition);
 
-  if (!fieldName || !value || typeof value !== "object") {
+  if (!valuePath || !isObjectRecord(value)) {
     return undefined;
   }
 
-  const renderValue = (value as Record<string, unknown>)[fieldName];
+  const renderValue = get(value, valuePath);
   return typeof renderValue === "string" || typeof renderValue === "number"
     ? renderValue
     : undefined;
@@ -117,21 +138,17 @@ function TableWidget({
    */
   const handleCellChange = useCallback(
     (definition: string, nextValue: string) => {
-      const fieldName = getFieldName(definition);
+      const valuePath = getJsonSchemaValuePath(definition);
 
-      if (!fieldName) {
+      if (!valuePath) {
         return;
       }
 
-      const currentValue =
-        value && typeof value === "object" && !Array.isArray(value)
-          ? value
-          : {};
+      const currentValue = isObjectRecord(value) ? { ...value } : {};
 
-      onChange?.({
-        ...(currentValue as Record<string, unknown>),
-        [fieldName]: nextValue,
-      });
+      const nextFormValue = set(currentValue, valuePath, nextValue);
+
+      onChange?.(nextFormValue);
     },
     [onChange, value],
   );
@@ -160,6 +177,20 @@ function TableWidget({
       ),
     [handleCellChange, rows],
   );
+
+  const rootFieldName = Array.isArray(uiSchemaField?.definition)
+    ? uiSchemaField.definition.length === 1
+      ? getFieldNameForHtml({ definition: uiSchemaField.definition[0] })
+      : undefined
+    : getFieldNameForHtml({ definition: uiSchemaField?.definition });
+
+  const buildCellName = (
+    cellDefinition: string | undefined,
+  ): string | undefined => {
+    const cellFieldName = getJsonSchemaFieldName(cellDefinition);
+    if (!cellFieldName) return undefined;
+    return rootFieldName ? `${rootFieldName}--${cellFieldName}` : cellFieldName;
+  };
 
   if (
     uiSchemaField?.type !== "multiField" ||
@@ -227,6 +258,7 @@ function TableWidget({
                       cell.type === "input" ? isInteractionDisabled : false
                     }
                     id={cellId}
+                    name={buildCellName(cell.definition)}
                     onChange={
                       cell.type === "input" && cell.definition
                         ? cellChangeHandlers[cell.definition]

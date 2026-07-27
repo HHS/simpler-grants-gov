@@ -68,15 +68,18 @@ export function buildHappyPathTestData(
 ): Record<string, string> {
   const rawData = form.buildTestData(suffix);
 
-  // Completeness check: every non-attachment, non-conditional field in the form
-  // definition must have a value in the test data. This ensures the builder stays
-  // in sync with field definition changes automatically — no manual list to maintain.
+  // Completeness check: every non-attachment, non-conditional, user-entered field
+  // in the form definition must have a value in the test data. User-entered fields
+  // have either testId or selector defined; display-only fields (e.g., post-populated
+  // signature/date) have only printTestId and are skipped.
+  // This ensures the builder stays in sync with field definition changes automatically
+  // - no manual list to maintain.
   const missingKeys = Object.entries(form.formConfig.fields)
     .filter(
       ([key, def]) =>
-        def.testId !== undefined &&
         def.type !== "file" &&
         !def.dependsOn &&
+        (def.testId || def.selector) && // Only check user-entered fields
         rawData[key] === undefined,
     )
     .map(([key, def]) => `${key} (${def.field})`);

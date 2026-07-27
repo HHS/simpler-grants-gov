@@ -289,6 +289,295 @@ class TestListAwardRecommendations200:
         assert counts_by_id[str(ar_with_submissions.award_recommendation_id)] == 2
         assert counts_by_id[str(ar_without_submissions.award_recommendation_id)] == 0
 
+    def test_list_award_recommendations_sort_by_award_recommendation_number(
+        self, client, db_session, agency, opportunity
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        ar1 = AwardRecommendationFactory.create(
+            opportunity=opportunity,
+            award_recommendation_number="AR-AAA",
+            review_workflow=None,
+            review_workflow_id=None,
+        )
+        ar2 = AwardRecommendationFactory.create(
+            opportunity=opportunity,
+            award_recommendation_number="AR-ZZZ",
+            review_workflow=None,
+            review_workflow_id=None,
+        )
+        ar3 = AwardRecommendationFactory.create(
+            opportunity=opportunity,
+            award_recommendation_number="AR-MMM",
+            review_workflow=None,
+            review_workflow_id=None,
+        )
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"agency_id": {"one_of": [str(agency.agency_id)]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                    "sort_order": [
+                        {"order_by": "award_recommendation_number", "sort_direction": "ascending"}
+                    ],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        returned_ids = [d["award_recommendation_id"] for d in resp.json["data"]]
+        assert returned_ids == [
+            str(ar1.award_recommendation_id),
+            str(ar3.award_recommendation_id),
+            str(ar2.award_recommendation_id),
+        ]
+
+    def test_list_award_recommendations_sort_by_opportunity_name(self, client, db_session, agency):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        opp1 = OpportunityFactory.create(
+            agency_code=agency.agency_code, opportunity_title="Alpha Opportunity"
+        )
+        opp2 = OpportunityFactory.create(
+            agency_code=agency.agency_code, opportunity_title="Zulu Opportunity"
+        )
+        opp3 = OpportunityFactory.create(
+            agency_code=agency.agency_code, opportunity_title="Bravo Opportunity"
+        )
+
+        ar1 = AwardRecommendationFactory.create(
+            opportunity=opp1, review_workflow=None, review_workflow_id=None
+        )
+        ar2 = AwardRecommendationFactory.create(
+            opportunity=opp2, review_workflow=None, review_workflow_id=None
+        )
+        ar3 = AwardRecommendationFactory.create(
+            opportunity=opp3, review_workflow=None, review_workflow_id=None
+        )
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"agency_id": {"one_of": [str(agency.agency_id)]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                    "sort_order": [{"order_by": "opportunity_name", "sort_direction": "ascending"}],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        returned_ids = [d["award_recommendation_id"] for d in resp.json["data"]]
+        assert returned_ids == [
+            str(ar1.award_recommendation_id),
+            str(ar3.award_recommendation_id),
+            str(ar2.award_recommendation_id),
+        ]
+
+    def test_list_award_recommendations_sort_by_total_received_count(
+        self, client, db_session, agency, opportunity
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        ar1 = AwardRecommendationFactory.create(
+            opportunity=opportunity, review_workflow=None, review_workflow_id=None
+        )
+        ar2 = AwardRecommendationFactory.create(
+            opportunity=opportunity, review_workflow=None, review_workflow_id=None
+        )
+        ar3 = AwardRecommendationFactory.create(
+            opportunity=opportunity, review_workflow=None, review_workflow_id=None
+        )
+
+        # ar1 has 5 submissions
+        for _ in range(5):
+            AwardRecommendationApplicationSubmissionFactory.create(award_recommendation=ar1)
+
+        # ar2 has 2 submissions
+        for _ in range(2):
+            AwardRecommendationApplicationSubmissionFactory.create(award_recommendation=ar2)
+
+        # ar3 has 0 submissions
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"agency_id": {"one_of": [str(agency.agency_id)]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                    "sort_order": [
+                        {"order_by": "total_received_count", "sort_direction": "descending"}
+                    ],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        returned_ids = [d["award_recommendation_id"] for d in resp.json["data"]]
+        assert returned_ids == [
+            str(ar1.award_recommendation_id),
+            str(ar2.award_recommendation_id),
+            str(ar3.award_recommendation_id),
+        ]
+
+    def test_list_award_recommendations_sort_by_status(
+        self, client, db_session, agency, opportunity
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        AwardRecommendationFactory.create(
+            opportunity=opportunity,
+            award_recommendation_status=AwardRecommendationStatus.APPROVED,
+            review_workflow=None,
+            review_workflow_id=None,
+        )
+        AwardRecommendationFactory.create(
+            opportunity=opportunity,
+            award_recommendation_status=AwardRecommendationStatus.DRAFT,
+            review_workflow=None,
+            review_workflow_id=None,
+        )
+        AwardRecommendationFactory.create(
+            opportunity=opportunity,
+            award_recommendation_status=AwardRecommendationStatus.IN_REVIEW,
+            review_workflow=None,
+            review_workflow_id=None,
+        )
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"agency_id": {"one_of": [str(agency.agency_id)]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                    "sort_order": [
+                        {"order_by": "award_recommendation_status", "sort_direction": "ascending"}
+                    ],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        statuses = [d["award_recommendation_status"] for d in resp.json["data"]]
+        assert statuses == ["draft", "in_review", "approved"]
+
+    def test_list_award_recommendations_sort_by_opportunity_number(
+        self, client, db_session, agency
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        opp1 = OpportunityFactory.create(
+            agency_code=agency.agency_code, opportunity_number="OPP-001"
+        )
+        opp2 = OpportunityFactory.create(
+            agency_code=agency.agency_code, opportunity_number="OPP-999"
+        )
+        opp3 = OpportunityFactory.create(
+            agency_code=agency.agency_code, opportunity_number="OPP-500"
+        )
+
+        ar1 = AwardRecommendationFactory.create(
+            opportunity=opp1, review_workflow=None, review_workflow_id=None
+        )
+        ar2 = AwardRecommendationFactory.create(
+            opportunity=opp2, review_workflow=None, review_workflow_id=None
+        )
+        ar3 = AwardRecommendationFactory.create(
+            opportunity=opp3, review_workflow=None, review_workflow_id=None
+        )
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"agency_id": {"one_of": [str(agency.agency_id)]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                    "sort_order": [
+                        {"order_by": "opportunity_number", "sort_direction": "ascending"}
+                    ],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        returned_ids = [d["award_recommendation_id"] for d in resp.json["data"]]
+        assert returned_ids == [
+            str(ar1.award_recommendation_id),  # OPP-001
+            str(ar3.award_recommendation_id),  # OPP-500
+            str(ar2.award_recommendation_id),  # OPP-999
+        ]
+
+    def test_list_award_recommendations_sort_by_total_received_count_ascending_with_zero(
+        self, client, db_session, agency, opportunity
+    ):
+        """Test that ARs with 0 submissions sort correctly at the start in ascending order"""
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        ar1 = AwardRecommendationFactory.create(
+            opportunity=opportunity, review_workflow=None, review_workflow_id=None
+        )
+        ar2 = AwardRecommendationFactory.create(
+            opportunity=opportunity, review_workflow=None, review_workflow_id=None
+        )
+        ar3 = AwardRecommendationFactory.create(
+            opportunity=opportunity, review_workflow=None, review_workflow_id=None
+        )
+
+        # ar1 has 0 submissions
+        # ar2 has 2 submissions
+        for _ in range(2):
+            AwardRecommendationApplicationSubmissionFactory.create(award_recommendation=ar2)
+        # ar3 has 5 submissions
+        for _ in range(5):
+            AwardRecommendationApplicationSubmissionFactory.create(award_recommendation=ar3)
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"agency_id": {"one_of": [str(agency.agency_id)]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                    "sort_order": [
+                        {"order_by": "total_received_count", "sort_direction": "ascending"}
+                    ],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        returned_ids = [d["award_recommendation_id"] for d in resp.json["data"]]
+        assert returned_ids == [
+            str(ar1.award_recommendation_id),  # 0 submissions
+            str(ar2.award_recommendation_id),  # 2 submissions
+            str(ar3.award_recommendation_id),  # 5 submissions
+        ]
+
 
 ####################################
 # 404 Tests
@@ -477,6 +766,48 @@ class TestListAwardRecommendations422:
             API_URL,
             headers={"X-SGG-Token": token},
             json=_build_request([]),
+        )
+
+        assert resp.status_code == 422
+
+    def test_list_award_recommendations_invalid_sort_field_422(self, client, db_session, agency):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"agency_id": {"one_of": [str(agency.agency_id)]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                    "sort_order": [{"order_by": "invalid_field", "sort_direction": "ascending"}],
+                },
+            },
+        )
+
+        assert resp.status_code == 422
+
+    def test_list_award_recommendations_invalid_sort_direction_422(
+        self, client, db_session, agency
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
+        )
+
+        resp = client.post(
+            API_URL,
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"agency_id": {"one_of": [str(agency.agency_id)]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                    "sort_order": [{"order_by": "created_at", "sort_direction": "invalid"}],
+                },
+            },
         )
 
         assert resp.status_code == 422
