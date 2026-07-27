@@ -150,6 +150,10 @@ def test_award_recommendation_review_state_machine_happy_path(
         == AwardRecommendationStatus.IN_REVIEW
     )
 
+    assert (
+        state_machine.award_recommendation.review_workflow_id == state_machine.workflow.workflow_id
+    )
+
     state_machine = send_process_event(
         db_session=db_session,
         event_to_send="receive_gms_approval",
