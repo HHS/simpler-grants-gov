@@ -2647,9 +2647,11 @@ export const messages = {
     supportInstructions:
       "Please contact the support team and include the diagnostic details below.",
     supportCenterHeading: "Grants.gov Support Center",
-    technicalSupport: "For technical support, contact:",
+    supportAvailability:
+      "We are available 24 hours a day 7 days a week excluding federal holidays.",
     supportEmail: "support@grants.gov",
-    supportPhone: "1-800-518-4726",
+    supportUnitedStatesPhone: "1-800-518-4726 (U.S.)",
+    supportInternationalPhone: "1-606-545-5035 (International)",
     diagnosticDetailsHeading: "Diagnostic details",
     applicationIdLabel: "Application ID",
     applicationFormIdLabel: "Application form ID",

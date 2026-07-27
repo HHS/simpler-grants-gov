@@ -15,8 +15,16 @@ export default function PrintErrorDiagnostics({
 }: PrintErrorDiagnosticsProps) {
   const translate = useTranslations("PrintErrorDiagnostics");
   const supportEmail = translate("supportEmail");
-  const supportPhone = translate("supportPhone");
-  const supportPhoneNumber = supportPhone.replace(/\D/g, "");
+  const supportUnitedStatesPhone = translate("supportUnitedStatesPhone");
+  const supportUnitedStatesPhoneNumber = supportUnitedStatesPhone.replace(
+    /[^\d+-]/g,
+    "",
+  );
+  const supportInternationalPhone = translate("supportInternationalPhone");
+  const supportInternationalPhoneNumber = supportInternationalPhone.replace(
+    /[^\d+-]/g,
+    "",
+  );
 
   return (
     <main>
@@ -29,14 +37,22 @@ export default function PrintErrorDiagnostics({
       <section aria-labelledby="support-center-heading">
         <h2 id="support-center-heading">{translate("supportCenterHeading")}</h2>
 
-        <p>{translate("technicalSupport")}</p>
+        <p>{translate("supportAvailability")}</p>
 
         <p>
           <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
         </p>
 
         <p>
-          <a href={`tel:${supportPhoneNumber}`}>{supportPhone}</a>
+          <a href={`tel:${supportUnitedStatesPhoneNumber}`}>
+            {supportUnitedStatesPhone}
+          </a>
+        </p>
+
+        <p>
+          <a href={`tel:${supportInternationalPhoneNumber}`}>
+            {supportInternationalPhone}
+          </a>
         </p>
       </section>
 

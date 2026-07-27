@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { messages } from "src/i18n/messages/en";
 
 import PrintErrorDiagnostics from "src/components/apply-form/PrintErrorDiagnostics";
 
@@ -26,6 +27,28 @@ describe("PrintErrorDiagnostics", () => {
       screen.getByText(defaultProperties.errorCategory),
     ).toBeInTheDocument();
     expect(screen.getByText("yes")).toBeInTheDocument();
+  });
+
+  it("uses the standard Grants.gov Support Center messages", () => {
+    render(<PrintErrorDiagnostics {...defaultProperties} />);
+
+    expect(screen.getByText("supportInstructions")).toBeInTheDocument();
+    expect(screen.getByText("supportCenterHeading")).toBeInTheDocument();
+    expect(screen.getByText("supportAvailability")).toBeInTheDocument();
+    expect(screen.getByText("supportEmail")).toBeInTheDocument();
+    expect(screen.getByText("supportUnitedStatesPhone")).toBeInTheDocument();
+    expect(screen.getByText("supportInternationalPhone")).toBeInTheDocument();
+
+    expect(messages.PrintErrorDiagnostics).toMatchObject({
+      supportInstructions:
+        "Please contact the support team and include the diagnostic details below.",
+      supportCenterHeading: "Grants.gov Support Center",
+      supportAvailability:
+        "We are available 24 hours a day 7 days a week excluding federal holidays.",
+      supportEmail: "support@grants.gov",
+      supportUnitedStatesPhone: "1-800-518-4726 (U.S.)",
+      supportInternationalPhone: "1-606-545-5035 (International)",
+    });
   });
 
   it.each([
