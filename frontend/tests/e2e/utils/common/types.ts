@@ -26,6 +26,8 @@ export interface FillFieldDefinition {
   /** Field metadata used by type-specific handlers to locate and fill page fields. */
   field: string;
   type: FieldType;
+  /** Optional metadata key from fixtures, available for locator derivation. */
+  valueKey?: string;
   testId?: string;
   selector?: string;
   label?: string;

@@ -39,7 +39,7 @@ import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixture
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index";
+import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common";
 import { assertOverviewSectionStatus } from "tests/e2e/utils/opportunities/overview-status-utils";
 import { waitForOpportunityRowByStatus } from "tests/e2e/utils/opportunities/table-row-utils";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";

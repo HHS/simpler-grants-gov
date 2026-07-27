@@ -20,6 +20,7 @@ export const buildPageFieldsFromDefinitions = <TValueKey extends string>(
   return definitions.map((definition) => ({
     // Field identity and value resolution.
     field: definition.label,
+    valueKey: definition.valueKey,
     type: definition.type,
     value: fillData[definition.valueKey],
     label: definition.label,

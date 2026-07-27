@@ -68,7 +68,7 @@ export const checkboxHandler: FieldHandler = async (
     !field.selector &&
     !field.testId &&
     typeof data === "string";
-  const locator = getChoiceLocator(page, field, data);
+  const locator = await getChoiceLocator(page, field, data);
   const locatorCount = await locator.count();
   if (locatorCount === 0) {
     throw new Error(`Checkbox field ${field.field} was not found`);

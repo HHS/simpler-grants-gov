@@ -43,7 +43,7 @@ export const radioButtonHandler: FieldHandler = async (
     return;
   }
 
-  const locator = getChoiceLocator(page, field, data);
+  const locator = await getChoiceLocator(page, field, data);
   await locator.waitFor({ state: "visible", timeout: 5000 });
 
   if (await locator.isChecked()) {
