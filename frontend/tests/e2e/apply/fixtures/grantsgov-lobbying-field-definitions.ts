@@ -61,6 +61,20 @@ export const fieldDefinitionsGrantsGovLobbying: FormFillFieldDefinitions = {
     section: "Authorized Representative",
     field: "Authorized Representative Title",
   },
+  // Not user-entered: type "null" in FORM_UI_SCHEMA, populated via
+  // gg_post_population rules ("signature", "current_date") at submission time.
+  authorized_representative_signature: {
+    printTestId: "signature",
+    type: "text",
+    section: "Signature",
+    field: "Signature",
+  },
+  submitted_date: {
+    printTestId: "date_signed",
+    type: "text",
+    section: "Signature",
+    field: "Date",
+  },
 };
 
 export const GRANTSGOV_LOBBYING_FORM_CONFIG = {

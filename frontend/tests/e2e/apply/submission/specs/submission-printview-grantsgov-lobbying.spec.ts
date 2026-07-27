@@ -147,6 +147,16 @@ for (const { testName, orgLabel } of applicantScenarios) {
           if (testData[dataKey] === undefined) continue;
           await validatePrintViewField(page, testId, testData[dataKey]);
         }
+
+        // signature and date_signed are system post-populated at submission
+        // time (gg_post_population rules: "signature", "current_date"), not
+        // user-entered or opportunity-derived - assert they were populated
+        // rather than an exact value.
+        await expect(page.getByTestId("signature")).toBeVisible();
+        await expect(page.getByTestId("signature")).not.toBeEmpty();
+
+        await expect(page.getByTestId("date_signed")).toBeVisible();
+        await expect(page.getByTestId("date_signed")).not.toBeEmpty();
       }
     },
   );
