@@ -152,22 +152,30 @@ export async function saveAwardRecommendationSubmissionDetails(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export async function submitAwardRecommendationForReview(
-  _formData: FormData,
-): Promise<AwardRecommendationActionResponse> {
+  formData: FormData,
+): Promise<void> {
+  const awardRecommendationId = readStringValue(
+    formData.get("award_recommendation_id"),
+  );
+
   try {
-    // TODO: Implement submit for review functionality when endpoint is available
-    return {
-      success: true,
-    };
+    // TODO: Replace with workflow API call to determine correct reviewer type based on AR status
+    // For now, defaulting to content_creator - will be replaced when workflow endpoint is ready
+    const reviewerType = "content_creator";
+    
+    redirect(
+      `/grantor/award-recommendation/${awardRecommendationId}/submit-for-review?reviewerType=${reviewerType}`,
+    );
   } catch (e) {
+    if (isRedirectError(e)) {
+      throw e;
+    }
+
     const error = e as Error;
     console.error(
-      `Error submitting award recommendation - ${error.message} ${error.cause?.toString() || ""}`,
+      `Error navigating to submit review page - ${error.message} ${error.cause?.toString() || ""}`,
     );
-    return {
-      errorMessage: error.message,
-    };
+    throw error;
   }
 }

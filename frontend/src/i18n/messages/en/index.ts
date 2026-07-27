@@ -2358,6 +2358,71 @@ export const messages = {
       showingRange: "Showing {start}-{end} of {total}",
       editButton: "Edit",
     },
+    reviewForm: {
+      pageTitle: "Submit for Review | Simpler.Grants.gov",
+      pageDescription: "Submit award recommendation for review",
+      header: "Submit for Review",
+      loading: "Loading...",
+      contentCreator: {
+        title: "Submit for Review",
+      },
+      reviewer: {
+        title: "Review Award Recommendation",
+        question:
+          "Do you concur on behalf of the Grants Office that this document meets applicable grants management requirements?",
+        hintText: "{hintText}",
+        yesConcur: "Yes, approval obtained (attachment required)",
+        noIssues: "No, issues identified, changes needed (attachment required)",
+        hold: "Hold, review in progress",
+      },
+      fmo: {
+        title: "FMO Review",
+        question:
+          "Do you certify the availability of funds to support the recommendation documented in this document?",
+        hintText: "{hintText}",
+        fundsAvailable: "Yes, funds are available",
+        fundsContingent: "Yes, funds are contingent upon availability by",
+        dateLabel: "Date",
+        noCertification: "No, certification cannot be provided, changes needed",
+        hold: "Hold, review in progress",
+      },
+      reviewComment: {
+        label: "Review comments",
+        description: "Shown on the award recommendation document",
+      },
+      internalComment: {
+        checkboxLabel: "Add internal comments for your team",
+        label: "Internal comments",
+        description: "Only visible in workflow history",
+      },
+      supplementalDocuments: {
+        label: "Supplemental review documents",
+        description: "Choose the documents you'd like to include",
+        uploading: "Uploading document...",
+        uploadSuccess: "Document uploaded successfully",
+        uploadError: "Error uploading document. Please try again.",
+      },
+      attestation: {
+        contentCreator:
+          "I attest that I am providing my recommendation of the recipients identified in this document for award consideration",
+        reviewer:
+          "I attest that I am providing my approval of the recipients identified in this document for award consideration",
+      },
+      buttons: {
+        submit: "Submit review",
+        submitting: "Submitting...",
+        cancel: "Cancel",
+      },
+      errors: {
+        submitFailed: "Failed to submit review. Please try again.",
+        insufficientPrivileges:
+          "You do not have the required privileges to review award recommendations.",
+        invalidReviewerType:
+          "You do not have permission to review at this stage of the workflow.",
+        authFailed: "Failed to authenticate user. Please sign in and try again.",
+        loadingFailed: "Failed to load review form. Please try again.",
+      },
+    },
   },
   CreateAwardRecommendation: {
     pageTitle: "Create recommendation",
