@@ -149,7 +149,6 @@ describe("OpportunityEditForm — rendering", () => {
         opportunityId="opportunity-123"
         opportunitySummaryId="summary-456"
         initialValues={{ ...initialValues, applicant_types: [] }}
-        isDraft
       />,
     );
 
