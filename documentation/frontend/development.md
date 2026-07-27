@@ -245,6 +245,11 @@ Some functionality will not work locally without supplying the application envir
   - `MAILCHIMP_API_URL_PREFIX`
   - `MAILCHIMP_LIST_ID`
 
+Note that for New Relic to work locally, you will need to:
+
+- run your server with build and start, using the `start:nr` command
+- set the environment variables directly in your environment. Due to timing issues, New Relic will not properly bootstrap itself when reading environment variable values from a .env file. Ex `NEW_RELIC_APP_NAME=xxxx NEW_RELIC_LICENSE_KEY=xxxx npm run build && npm run start:nr`
+
 If you need to access this functionality locally, contact an engineer on the team to get access to the necessary secrets.
 
 ## Other topics
