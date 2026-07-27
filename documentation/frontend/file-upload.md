@@ -89,7 +89,7 @@ The following props are exposed by the component to allow for customization:
 Callbacks are supported to allow pages to respond to events during upload in any way that they need to. For instance, a page may want to display a custom banner on success or error, or run some logic or make an API call when the upload starts or completes.
 
 - onDelete
-  - callback to run after file deletion
+  - callback to run when "delete" button is clicked
 - onError
   - callback to run after any error during upload or post upload
 - onSuccess
