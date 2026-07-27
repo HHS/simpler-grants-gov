@@ -1,7 +1,6 @@
 """Tests for the transformation utility."""
 
 from datetime import date, datetime, timezone
-from urllib.parse import urlparse
 from uuid import uuid4
 
 from common_grants_sdk.schemas.pydantic import (
@@ -45,31 +44,6 @@ from src.services.common_grants.transformation import (
     validate_custom_field,
     validate_url,
 )
-
-
-def _legacy_validate_url(value: str | None) -> str | None:
-    """
-    Validate a URL string.
-
-    Args:
-        value: The string to validate
-
-    Returns:
-        A valid URL string or None
-    """
-    # Parse the string
-    parsed = urlparse(value)
-
-    # Check for scheme and netloc (i.e. it's a complete url)
-    if parsed.scheme and parsed.netloc:
-        return value
-
-    # Check for netloc only (i.e. it's a domain name)
-    if not parsed.scheme and parsed.netloc:
-        return f"https://{value}"
-
-    return None
-
 
 DEFAULT_MOCK_OPP_FIELDS = {
     "legacy_opportunity_id": 67890,
@@ -698,25 +672,73 @@ class TestTransformation:
         # Should return None for invalid data
         assert result is None
 
-    def test_validate_url_with_nasa_url_bug(self):
-        """Test that validate_url() properly rejects URLs that Pydantic HttpUrl rejects.
+    def test_validate_url_nasa_url_round_trips_through_response_pipeline(self):
+        """Guard: URLs that survive validate_url() must round-trip through the full
+        response pipeline — pydantic OpportunityBase construction AND the marshmallow
+        response load. The NASA URL (raw {} in the query string) is RFC-invalid but
+        accepted by both, so it must be served, not dropped.
 
-        This test reproduces a bug where validate_url() lets through URLs
-        that Pydantic's HttpUrl validation rejects, causing transformations to fail.
-
-        The NASA URL has curly braces or other characters that urlparse accepts but
-        Pydantic's strict HttpUrl validation rejects.
+        History: validate_url() once pre-screened with strict-mode HttpUrl because
+        SDK <=0.5.x ran model_validate() with model_config strict=True, which rejected
+        this URL and crashed the transformation. The SDK dropped model-level strict
+        in 0.6.x, so validate_url() is lax again. If a future SDK version re-tightens
+        URL validation, this test fails in CI instead of the URL 500ing (or being
+        silently dropped) in prod.
         """
-        # This URL has characters that urlparse accepts but Pydantic HttpUrl rejects
-        # Based on error: "non-URL code point" - likely curly braces or other invalid chars
+        from http import HTTPStatus
+
+        from common_grants_sdk.schemas.pydantic import (
+            OpportunitiesSearchResponse,
+            PaginatedResultsInfo,
+            SortedResultsInfo,
+        )
+
+        from src.api.common_grants.schemas.marshmallow.schemas import (
+            OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
+        )
+
         nasa_url = "https://nspires.nasaprs.com/external/solicitations/summary!init.do?solId={D8604BE7-CAB6-C1C0-B668-423042C43AA6}&path=&method=init"
 
-        # Old implementation used urlparse, new implementation uses Pydantic HttpUrl
-        old_result = _legacy_validate_url(nasa_url)
-        new_result = validate_url(nasa_url)
+        result = validate_url(nasa_url)
+        assert result == nasa_url, "validate_url() must accept the NASA URL unchanged"
 
-        assert old_result is not None, "_legacy_validate_url() should accept NASA URL"
-        assert new_result is None, "validate_url() should reject NASA URL"
+        opp_data = {
+            "opportunity_id": uuid4(),
+            "opportunity_title": "Test Opportunity",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "Test description",
+                "post_date": date(2024, 1, 1),
+                "close_date": date(2024, 12, 31),
+                "additional_info_url": nasa_url,
+                "additional_info_url_description": "NSPIRES solicitation",
+                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            },
+        }
+
+        cg_opportunity = transform_search_result_to_cg(opp_data)
+        assert cg_opportunity is not None
+        assert str(cg_opportunity.source) == nasa_url
+
+        response = OpportunitiesSearchResponse(
+            status=HTTPStatus.OK,
+            message="ok",
+            items=[cg_opportunity],
+            pagination_info=PaginatedResultsInfo(page=1, page_size=1, totalItems=1, totalPages=1),
+            sort_info=SortedResultsInfo(
+                sort_by=OppSortBy.LAST_MODIFIED_AT.value,
+                sort_order="desc",
+                errors=[],
+            ),
+            filter_info=build_filter_info(None),
+        )
+        response_json = response.model_dump(by_alias=True, mode="json")
+
+        validated = OpportunitiesSearchResponseSchema().load(response_json)
+        assert validated["items"][0]["source"] == nasa_url
 
     def test_validate_url_rejects_urls_that_marshmallow_url_field_rejects(self):
         """validate_url() must also reject URLs that pass Pydantic's HttpUrl but fail
@@ -896,17 +918,10 @@ class TestTransformation:
             assert getattr(r, "opportunity_id", None) == opp_id
             assert r.levelname == "WARNING"
 
-    def test_transform_search_result_to_cg_with_nasa_url_bug(self):
-        """Test that transformation works correctly with NASA URL that Pydantic rejects.
-
-        This test ensures that when validate_url() properly rejects invalid URLs,
-        the transformation still succeeds (with source=None) rather than failing.
-        """
-        # This URL has characters that urlparse accepts but Pydantic HttpUrl rejects
+    def test_transform_search_result_to_cg_with_nasa_url(self):
+        """RFC-invalid but pipeline-safe URLs (raw {} in query) must survive the
+        transformation into `source` rather than being dropped."""
         nasa_url = "https://nspires.nasaprs.com/external/solicitations/summary!init.do?solId={D8604BE7-CAB6-C1C0-B668-423042C43AA6}&path=&method=init"
-        assert (
-            _legacy_validate_url(nasa_url) is not None
-        ), "_legacy_validate_url() should accept NASA URL"
 
         opp_data = {
             "opportunity_id": uuid4(),
@@ -925,13 +940,10 @@ class TestTransformation:
             },
         }
 
-        # The transformation should succeed without raising a Pydantic validation error
         result = transform_search_result_to_cg(opp_data)
 
-        # After fix: validate_url() should reject the URL, so source should be None
-        # but transformation should still succeed
-        assert result is not None, "Transformation should succeed even with invalid URL"
-        assert result.source is None, "Invalid URL should result in source=None"
+        assert result is not None
+        assert str(result.source) == nasa_url
 
     def test_build_money_range_filter(self):
         """Test building money range filters."""
@@ -1087,8 +1099,9 @@ class TestTransformation:
         # Set up logging to capture info level logs
         caplog.set_level(logging.INFO)
 
-        # Test with an invalid URL that should trigger the logging
-        invalid_url = "https://example.com/path/{invalid-chars}"
+        # Comma-separated URL: pydantic accepts it, marshmallow rejects it, so the
+        # dual-check drops it and logs.
+        invalid_url = "https://example.com,https://other.example"
 
         result = validate_url(invalid_url)
 
@@ -1162,8 +1175,8 @@ class TestTransformation:
         # a data-suppression event, not a routine validation observation.
         caplog.set_level(logging.WARNING)
 
-        # Create opportunity data with an invalid URL
-        invalid_url = "https://example.com/path/{invalid}"
+        # Create opportunity data with an invalid URL (dual-check drops comma-URLs)
+        invalid_url = "https://example.com,https://other.example"
         opp_data = {
             "opportunity_id": uuid4(),
             "opportunity_title": "Test Opportunity",

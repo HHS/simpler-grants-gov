@@ -3,7 +3,7 @@
 import pytest
 from marshmallow import ValidationError as MarshmallowValidationError
 from marshmallow import fields as marshmallow_fields
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, HttpUrl
 
 from src.services.common_grants.url_utils import validate_url_compatible
 
@@ -11,7 +11,7 @@ from src.services.common_grants.url_utils import validate_url_compatible
 class _PydanticHttpUrl(BaseModel):
     """Minimal pydantic HttpUrl validator used to demonstrate the divergence."""
 
-    url: HttpUrl = Field(strict=True)
+    url: HttpUrl
 
 
 class TestValidateUrlCompatible:
@@ -35,6 +35,18 @@ class TestValidateUrlCompatible:
     def test_rejects_garbage(self):
         assert validate_url_compatible("not-a-url") is None
         assert validate_url_compatible("sam.gov") is None  # missing scheme
+
+    def test_accepts_unencoded_braces_in_query(self):
+        """Agency URLs with raw {} in query strings (e.g. NASA NSPIRES solId GUIDs)
+        are RFC-invalid but accepted by every validator in the response pipeline;
+        they must be served, not dropped."""
+        url = "https://nspires.nasaprs.com/x/summary.do?solId={9455D565-3411-0574}&method=init"
+        assert validate_url_compatible(url) == url
+
+    def test_rejects_non_http_schemes(self):
+        # HttpUrl restricts scheme to http/https regardless of strictness.
+        assert validate_url_compatible("javascript:alert(1)") is None
+        assert validate_url_compatible("ftp://example.gov/file") is None
 
     @pytest.mark.parametrize(
         "bad_url",

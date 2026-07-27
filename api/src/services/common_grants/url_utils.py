@@ -13,16 +13,19 @@ Background and reproduction: https://github.com/HHS/simpler-grants-gov/issues/99
 
 from marshmallow import ValidationError as MarshmallowValidationError
 from marshmallow import fields as marshmallow_fields
-from pydantic import BaseModel, Field, HttpUrl, ValidationError
+from pydantic import BaseModel, HttpUrl, ValidationError
 
 
 class _UrlValidator(BaseModel):
-    """Pydantic strict HttpUrl validator.
+    """Pydantic HttpUrl validator.
 
     Mirrors the HttpUrl field in OpportunityBase and other CommonGrants models.
+    Deliberately not strict: the SDK models dropped model-level strict mode in
+    0.6.x, so strict here would drop URLs (e.g. unencoded ``{}`` in a query
+    string) that the response pipeline accepts and serves fine.
     """
 
-    url: HttpUrl = Field(strict=True)
+    url: HttpUrl
 
 
 _marshmallow_url_field = marshmallow_fields.URL()
