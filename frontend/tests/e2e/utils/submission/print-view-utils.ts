@@ -68,7 +68,7 @@ export function buildHappyPathTestData(
 ): Record<string, string> {
   const rawData = form.buildTestData(suffix);
 
-  // Completeness check: every non-attachment, non-conditional, user-entered field 
+  // Completeness check: every non-attachment, non-conditional, user-entered field
   // in the form definition must have a value in the test data. User-entered fields
   // have either testId or selector defined; display-only fields (e.g., post-populated
   // signature/date) have only printTestId and are skipped.

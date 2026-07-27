@@ -148,11 +148,15 @@ for (const { testName, orgLabel } of applicantScenarios) {
           await validatePrintViewField(page, testId, testData[dataKey]);
         }
 
-        await expect(page.getByTestId("signature")).toBeVisible();
-        await expect(page.getByTestId("signature")).not.toBeEmpty();
+        await expect(
+          page.getByTestId("authorized_representative_signature"),
+        ).toBeVisible();
+        await expect(
+          page.getByTestId("authorized_representative_signature"),
+        ).not.toBeEmpty();
 
-        await expect(page.getByTestId("date_signed")).toBeVisible();
-        await expect(page.getByTestId("date_signed")).not.toBeEmpty();
+        await expect(page.getByTestId("submitted_date")).toBeVisible();
+        await expect(page.getByTestId("submitted_date")).not.toBeEmpty();
       }
     },
   );
