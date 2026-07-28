@@ -2,6 +2,7 @@ import { ApiRequestError } from "src/errors";
 import { logger } from "src/services/logger/simplerLogger";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 import { OptionalStringDict } from "src/types/generalTypes";
+import { createFormData } from "src/utils/fileUtils/createFormData";
 
 import { fetchFileUploadWithMethod } from "./fetchers";
 
@@ -48,26 +49,21 @@ export const uploadFileToS3 = async (
   // chunks on read (ex. split at `}{`)
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const fileFormData = new FormData();
+
+  const fileFormData = createFormData(file.name, buffer, file.type, "file");
   Object.entries(body).forEach(([key, value]) => {
     // don't overwrite the file field
     if (value && key !== "file") {
       fileFormData.append(key, value);
     }
   });
-  fileFormData.append(
-    "file",
-    new File([buffer] as BlobPart[], file.name, { type: file.type }),
-  );
-  // serialize the multipart body to a Blob so fetch sends a Content-Length
-  const multipartBody = await new Response(fileFormData).blob();
   const s3Response = await fetch(url, {
     method: "POST",
-    body: multipartBody,
-    headers: { "Content-Type": multipartBody.type },
+    body: fileFormData,
   });
   if (!s3Response.ok) {
-    logger.error(`S3 upload failed with status ${s3Response.status}`);
+    const errorBody = await s3Response.text();
+    logger.error(`S3 upload failed (${s3Response.status}): ${errorBody}`);
     throw new ApiRequestError("Error uploading file to S3");
   }
   return true;
