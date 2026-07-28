@@ -1,3 +1,4 @@
+import { ApiRequestError } from "src/errors";
 import getFormData from "src/utils/getFormData";
 
 const mockGetSession = jest.fn();
@@ -127,9 +128,39 @@ describe("getFormData", () => {
     expect(result).toEqual({ error: "TopLevelError" });
   });
 
-  it("returns TopLevelError when API throws a 404 error", async () => {
+  it("returns UnauthorizedError when the form-data request is rejected with status 401", async () => {
     mockGetSession.mockResolvedValue({ token: "session-token" });
-    mockGetApplicationFormDetails.mockRejectedValue({ status: 404 });
+    mockGetApplicationFormDetails.mockRejectedValue(
+      new ApiRequestError("Unauthorized", "APIRequestError", 401),
+    );
+
+    const result = await getFormData({
+      applicationId: "app1",
+      appFormId: "form1",
+    });
+
+    expect(result).toEqual({ error: "UnauthorizedError" });
+  });
+
+  it("returns NotFound when the form-data request is rejected with status 404", async () => {
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockGetApplicationFormDetails.mockRejectedValue(
+      new ApiRequestError("Not found", "APIRequestError", 404),
+    );
+
+    const result = await getFormData({
+      applicationId: "app1",
+      appFormId: "form1",
+    });
+
+    expect(result).toEqual({ error: "NotFound" });
+  });
+
+  it("returns TopLevelError when the rejected form-data request is neither unauthorized nor not found", async () => {
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockGetApplicationFormDetails.mockRejectedValue(
+      new ApiRequestError("Internal server error", "APIRequestError", 500),
+    );
 
     const result = await getFormData({
       applicationId: "app1",
