@@ -59,14 +59,15 @@ export const uploadFileToS3 = async (
     "file",
     new File([buffer] as BlobPart[], file.name, { type: file.type }),
   );
-  logger.info(`Uploading to ${url}`);
+  // serialize the multipart body to a Blob so fetch sends a Content-Length
+  const multipartBody = await new Response(fileFormData).blob();
   const s3Response = await fetch(url, {
     method: "POST",
-    body: fileFormData,
+    body: multipartBody,
+    headers: { "Content-Type": multipartBody.type },
   });
   if (!s3Response.ok) {
-    const errorBody = await s3Response.text();
-    logger.error(`S3 upload failed (${s3Response.status}): ${errorBody}`);
+    logger.error(`S3 upload failed (${s3Response.status})`);
     throw new ApiRequestError("Error uploading file to S3");
   }
   return true;
