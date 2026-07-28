@@ -207,11 +207,11 @@ sending it to real recipients. This includes organization invitations, workflow 
 messages, and scheduled notifications. Run `make run-email-notifications` after seeding
 suitable local data to generate scheduled messages.
 
-Host-run API commands use `localhost:1025` for SMTP, while Docker Compose routes the API
-to the `mailpit` service. No SMTP relay or forwarding is configured, and the application
-only permits this SMTP path when `ENVIRONMENT=local` and local AWS mode are active. To
-temporarily use the in-memory email mock instead, set `ENABLE_LOCAL_EMAIL_CAPTURE=FALSE`
-in `override.env`.
+`local.env` uses the Docker service name `mailpit` for SMTP. When running API commands
+outside Docker, set `LOCAL_EMAIL_SMTP_HOST=localhost` in `override.env`. No SMTP relay
+or forwarding is configured, and the application only permits this SMTP path when
+`ENVIRONMENT=local` and local AWS mode are active. To temporarily use the in-memory
+email mock instead, set `ENABLE_LOCAL_EMAIL_CAPTURE=FALSE` in `override.env`.
 
 #### S3 Mock
 

@@ -99,9 +99,6 @@ services:
         required: false
       - path: ./soap-api.env
         required: false
-    environment:
-      # local.env uses localhost for host-run commands; containers reach Mailpit by service name.
-      LOCAL_EMAIL_SMTP_HOST: mailpit
     ports:
       - 8080:8080
     volumes:

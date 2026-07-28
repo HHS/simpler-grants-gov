@@ -57,10 +57,11 @@ notification tasks use the same inbox; for example, a locally generated organiza
 invitation or workflow approval message appears there immediately. Scheduled notifications
 can be generated with `make run-email-notifications` after seeding suitable local data.
 
-`local.env` routes host-run commands to `localhost:1025`, while Docker Compose overrides
-the SMTP hostname to `mailpit`. The compose service does not configure SMTP relay or
-forwarding, so captured messages are not delivered externally. The application also
-refuses to use local SMTP unless both `ENVIRONMENT=local` and local AWS mode are active.
+`local.env` uses the Docker service name `mailpit` by default. For commands running
+outside Docker, set `LOCAL_EMAIL_SMTP_HOST=localhost` in `override.env`. The compose
+service does not configure SMTP relay or forwarding, so captured messages are not
+delivered externally. The application also refuses to use local SMTP unless both
+`ENVIRONMENT=local` and local AWS mode are active.
 
 To temporarily restore the in-memory email mock, set
 `ENABLE_LOCAL_EMAIL_CAPTURE=FALSE` in `override.env`.
