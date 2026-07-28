@@ -29,6 +29,7 @@ To the end user, a SimplerFileInput implemented on a page or form will see usage
   - final success status message is shown
     - this message will disappear on refresh
   - depending on implementation, the uploaded file appears as an "existing file" with the ability to delete the file
+    - this behavior is dependent on the needs of each implementation - "existing files" may represent persisted files, or references to temporary files stored in local state depending on the use case
     - if a file is deleted such that there are no more existing files, the input will return to its original state
 - or encounters an error
   - an error state is shown, with the ability to dismiss the error
