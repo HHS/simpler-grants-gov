@@ -325,6 +325,7 @@ export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefin
       label: "Contact email",
       type: "email",
       valueKey: "contactEmail",
+      selector: "#agency_email_address",
       required: false,
       maxLength: 130,
       characterLimitValidationMessage: "1 character over limit",
