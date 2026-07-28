@@ -57,7 +57,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 38
+    assert len(opportunities) == 39
 
     # Figure out the forms we added to each opportunity
     opp_form_ids_for_opps = set()
@@ -74,7 +74,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     # There should also be one opportunity with every form
     assert all_form_ids in opp_form_ids_for_opps
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 38
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 39
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
 
     # If we rerun the task, all opportunities should be skipped (including ALL-forms)
@@ -84,7 +84,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 38
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 39
 
 
 def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_session, forms):
@@ -133,6 +133,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "E2E-EPA4700-ORG-IND-01": uuid.UUID("95f80b3b-c119-4a89-a50f-1b47b95a9191"),
         "E2E-EPAKC-ORG-IND-01": uuid.UUID("1cc0cbb3-cc2a-4c09-a001-ad1f2d9aa631"),
         "E2E-GGLOB-ORG-IND-01": uuid.UUID("552d5866-501a-40b6-b1ce-2efc7a2d3aa5"),
+        "E2E-KC-ORG-IND-01": uuid.UUID("3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31"),
         "E2E-ONA-ORG-IND-01": uuid.UUID("717b7f78-52f2-49f9-b1b8-5d7118313d2a"),
         "E2E-PABS-ORG-IND-01": uuid.UUID("d3081452-2cf8-4817-9abf-812e5d794485"),
         "E2E-PABSS-ORG-IND-01": uuid.UUID("e3bfbd7b-2205-46a8-9aa3-714f7e130958"),
