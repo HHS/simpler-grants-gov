@@ -2513,6 +2513,7 @@ export const messages = {
     applicationRequirementsSubheader:
       "What applicants must submit, how they'll be scored, and the format rules.",
     button: {
+      processing: "Processing...",
       back: "Save and go back",
       saveAndExit: "Save and exit",
       saveAndContinue: "Save and continue",
@@ -2524,6 +2525,9 @@ export const messages = {
       unauthenticated: "You must be signed in to update this competition.",
       forbidden: "You do not have permission to update this competition.",
       notFound: "This competition could not be found.",
+      networkError: "A network error occurred.",
+      validationErrors: "Errors Found",
+      validationErrorBody: "Please correct the following errors:",
     },
     sectionSubmissionSetUp: {
       header: "Submission set-up",

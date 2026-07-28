@@ -1,8 +1,8 @@
 import "server-only";
 
 import {
-  CompetitionCreateApiResponse,
-  CompetitionCreateRequest,
+  CompetitionSaveApiResponse,
+  CompetitionSaveRequest,
 } from "src/types/competitionsResponseTypes";
 import {
   GrantorOpportunityApiResponse,
@@ -70,20 +70,27 @@ export async function publishOpportunityForGrantor(
 
 export async function createCompetitionForGrantor(
   opportunityId: string,
-): Promise<CompetitionCreateApiResponse> {
+  data: CompetitionSaveRequest,
+): Promise<CompetitionSaveApiResponse> {
   // All nullable fields are intentionally null; competition_title is intentionally ""
   // because the API accepts an empty string and the grantor fills it in later.
   // open_to_applicants requires minItems: 1, so both values are sent as the most
   // permissive default until the grantor configures the field.
   const response = await fetchGrantorOpportunityWithMethod("POST")({
     subPath: `${opportunityId}/competitions`,
-    body: {
-      competition_title: "",
-      opening_date: null,
-      closing_date: null,
-      contact_info: null,
-      open_to_applicants: ["individual", "organization"],
-    } satisfies CompetitionCreateRequest,
+    body: data,
   });
-  return (await response.json()) as CompetitionCreateApiResponse;
+  return (await response.json()) as CompetitionSaveApiResponse;
+}
+
+export async function updateCompetitionForGrantor(
+  opportunityId: string,
+  competitionId: string,
+  data: CompetitionSaveRequest,
+): Promise<CompetitionSaveApiResponse> {
+  const response = await fetchGrantorOpportunityWithMethod("PUT")({
+    subPath: `${opportunityId}/competitions/${competitionId}`,
+    body: data,
+  });
+  return (await response.json()) as CompetitionSaveApiResponse;
 }
