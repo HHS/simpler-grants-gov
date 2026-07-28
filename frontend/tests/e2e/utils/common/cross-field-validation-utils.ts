@@ -18,6 +18,30 @@ import { expect, Page } from "@playwright/test";
 
 import { resolveTextLocator } from "./text-locator-utils";
 
+const VALUE_KEY_LABELS: Record<string, string> = {
+  estimatedTotalProgramFunding: "Estimated total program funding",
+  awardMinimum: "Award minimum",
+  awardMaximum: "Award maximum",
+};
+
+const getFieldLocator = async (
+  page: Page,
+  field: CrossFieldValidationDefinition["fieldsToSet"][number],
+) => {
+  let locator = page.locator(field.selector).first();
+
+  if ((await locator.count()) > 0) {
+    return locator;
+  }
+
+  const fallbackLabel = VALUE_KEY_LABELS[field.valueKey];
+  if (fallbackLabel) {
+    locator = page.getByRole("textbox", { name: fallbackLabel }).first();
+  }
+
+  return locator;
+};
+
 export type CrossFieldValidationDefinition = {
   name: string;
   fieldsToSet: Array<{
@@ -51,8 +75,10 @@ export async function assertCrossFieldValidationsFromDefinitions(
 
   for (const definition of definitions) {
     for (const field of definition.fieldsToSet) {
-      await page.locator(field.selector).fill(field.invalidValue);
-      await page.locator(field.selector).blur();
+      const fieldLocator = await getFieldLocator(page, field);
+      await expect(fieldLocator).toBeVisible();
+      await fieldLocator.fill(field.invalidValue);
+      await fieldLocator.blur();
     }
 
     for (const triggerButtonName of triggerButtonNames) {
@@ -98,8 +124,10 @@ export async function assertCrossFieldValidationsFromDefinitions(
 
     for (const field of definition.fieldsToSet) {
       expect(fillData[field.valueKey]).toBeDefined();
-      await page.locator(field.selector).fill(String(fillData[field.valueKey]));
-      await page.locator(field.selector).blur();
+      const fieldLocator = await getFieldLocator(page, field);
+      await expect(fieldLocator).toBeVisible();
+      await fieldLocator.fill(String(fillData[field.valueKey]));
+      await fieldLocator.blur();
     }
   }
 }
