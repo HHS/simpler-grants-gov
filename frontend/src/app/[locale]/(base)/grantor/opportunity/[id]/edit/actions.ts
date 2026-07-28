@@ -64,8 +64,6 @@ const editOpportunityFormSchema = {
   agency_contact_description: { type: "string" },
   agency_email_address: { type: "string" },
   agency_email_address_description: { type: "string" },
-  "opportunity-attachment-upload": { type: "File" },
-  submitType: { type: "string" },
 };
 
 function readStringValue(value: FormDataEntryValue | null): string {
