@@ -41,7 +41,9 @@ from tests.src.workflow.workflow_test_util import build_start_workflow_event, se
 logger = logging.getLogger(__name__)
 
 
-def _build_award_recommendations(db_session: db.Session, seed_award_recommendation_workflows: bool) -> None:
+def _build_award_recommendations(
+    db_session: db.Session, seed_award_recommendation_workflows: bool
+) -> None:
     """
     Create award recommendations with application submissions for testing.
 

@@ -730,7 +730,8 @@ def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -
         seed_users="ALL" in steps or "users" in steps,
         seed_e2e="ALL" in steps or "e2e" in steps,
         seed_award_recommendations="ALL" in steps or "award_recommendations" in steps,
-        seed_award_recommendation_workflows="ALL" in steps or "award_recommendation_workflows" in steps
+        seed_award_recommendation_workflows="ALL" in steps
+        or "award_recommendation_workflows" in steps,
     )
 
     with grants_shared.logs.init("seed_local_db"):
