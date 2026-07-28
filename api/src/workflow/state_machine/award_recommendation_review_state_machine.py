@@ -5,6 +5,7 @@ from statemachine import Event
 from statemachine.states import States
 
 from src.constants.lookup_constants import (
+    ApprovalResponseType,
     ApprovalType,
     AwardRecommendationStatus,
     Privilege,
@@ -50,58 +51,73 @@ award_recommendation_review_config = WorkflowConfig(
         "receive_pqc_approval": ApprovalConfig(
             approval_type=ApprovalType.PQC_APPROVAL,
             approval_state=AwardRecommendationReviewState.PENDING_PQC_REVIEW,
-            required_privileges=[
-                Privilege.PQC_REVIEWER,
-            ],
+            required_privileges=[Privilege.PQC_REVIEWER],
+            allowed_approval_response_types={
+                ApprovalResponseType.APPROVED,
+            },
         ),
         "receive_gms_approval": ApprovalConfig(
             approval_type=ApprovalType.GMS_APPROVAL,
             approval_state=AwardRecommendationReviewState.PENDING_GMS_REVIEW,
-            required_privileges=[
-                Privilege.GMS_REVIEWER,
-            ],
+            required_privileges=[Privilege.GMS_REVIEWER],
+            allowed_approval_response_types={
+                ApprovalResponseType.APPROVED,
+                ApprovalResponseType.REQUIRES_MODIFICATION,
+            },
         ),
         "receive_fmo_approval": ApprovalConfig(
             approval_type=ApprovalType.FMO_APPROVAL,
             approval_state=AwardRecommendationReviewState.PENDING_FMO_REVIEW,
-            required_privileges=[
-                Privilege.FMO_REVIEWER,
-            ],
+            required_privileges=[Privilege.FMO_REVIEWER],
+            allowed_approval_response_types={
+                ApprovalResponseType.APPROVED,
+                ApprovalResponseType.REQUIRES_MODIFICATION,
+            },
         ),
         "receive_gmo_approval": ApprovalConfig(
             approval_type=ApprovalType.GMO_APPROVAL,
             approval_state=AwardRecommendationReviewState.PENDING_GMO_REVIEW,
-            required_privileges=[
-                Privilege.GMO_REVIEWER,
-            ],
+            required_privileges=[Privilege.GMO_REVIEWER],
+            allowed_approval_response_types={
+                ApprovalResponseType.APPROVED,
+                ApprovalResponseType.REQUIRES_MODIFICATION,
+            },
         ),
         "receive_agency_approval": ApprovalConfig(
             approval_type=ApprovalType.AGENCY_APPROVAL,
-            approval_state=(AwardRecommendationReviewState.PENDING_AGENCY_APPROVAL),
-            required_privileges=[
-                Privilege.FINAL_AWARD_REC_APPROVER,
-            ],
+            approval_state=AwardRecommendationReviewState.PENDING_AGENCY_APPROVAL,
+            required_privileges=[Privilege.FINAL_AWARD_REC_APPROVER],
+            allowed_approval_response_types={
+                ApprovalResponseType.APPROVED,
+                ApprovalResponseType.REQUIRES_MODIFICATION,
+            },
         ),
         "receive_departmental_approval": ApprovalConfig(
             approval_type=ApprovalType.DEPARTMENTAL_APPROVAL,
-            approval_state=(AwardRecommendationReviewState.PENDING_DEPARTMENTAL_APPROVAL),
-            required_privileges=[
-                Privilege.FINAL_AWARD_REC_APPROVER,
-            ],
+            approval_state=AwardRecommendationReviewState.PENDING_DEPARTMENTAL_APPROVAL,
+            required_privileges=[Privilege.FINAL_AWARD_REC_APPROVER],
+            allowed_approval_response_types={
+                ApprovalResponseType.APPROVED,
+                ApprovalResponseType.REQUIRES_MODIFICATION,
+            },
         ),
         "receive_interagency_approval": ApprovalConfig(
             approval_type=ApprovalType.INTERAGENCY_APPROVAL,
-            approval_state=(AwardRecommendationReviewState.PENDING_INTERAGENCY_APPROVAL),
-            required_privileges=[
-                Privilege.FINAL_AWARD_REC_APPROVER,
-            ],
+            approval_state=AwardRecommendationReviewState.PENDING_INTERAGENCY_APPROVAL,
+            required_privileges=[Privilege.FINAL_AWARD_REC_APPROVER],
+            allowed_approval_response_types={
+                ApprovalResponseType.APPROVED,
+                ApprovalResponseType.REQUIRES_MODIFICATION,
+            },
         ),
         "receive_executive_approval": ApprovalConfig(
             approval_type=ApprovalType.EXECUTIVE_APPROVAL,
-            approval_state=(AwardRecommendationReviewState.PENDING_EXECUTIVE_APPROVAL),
-            required_privileges=[
-                Privilege.FINAL_AWARD_REC_APPROVER,
-            ],
+            approval_state=AwardRecommendationReviewState.PENDING_EXECUTIVE_APPROVAL,
+            required_privileges=[Privilege.FINAL_AWARD_REC_APPROVER],
+            allowed_approval_response_types={
+                ApprovalResponseType.APPROVED,
+                ApprovalResponseType.REQUIRES_MODIFICATION,
+            },
         ),
     },
 )
