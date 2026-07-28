@@ -1,4 +1,5 @@
 import { ApiRequestError } from "src/errors";
+import { logger } from "src/services/logger/simplerLogger";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 import { OptionalStringDict } from "src/types/generalTypes";
 
@@ -58,11 +59,14 @@ export const uploadFileToS3 = async (
     "file",
     new File([buffer] as BlobPart[], file.name, { type: file.type }),
   );
+  logger.info(`Uploading to ${url}`);
   const s3Response = await fetch(url, {
     method: "POST",
     body: fileFormData,
   });
   if (!s3Response.ok) {
+    const errorBody = await s3Response.text();
+    logger.error(`S3 upload failed (${s3Response.status}): ${errorBody}`);
     throw new ApiRequestError("Error uploading file to S3");
   }
   return true;
