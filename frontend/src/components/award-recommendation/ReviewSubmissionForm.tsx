@@ -77,7 +77,7 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
         <FormGroup>
           <legend className="usa-legend text-bold">
             {t("fmo.question")}
-            <span className="text-secondary-vivid"> *</span>
+            <span className="usa-hint usa-hint--required text-no-underline"> *</span>
           </legend>
           <p className="text-base-dark margin-top-1 margin-bottom-2">
             {t("fmo.hintText")}
@@ -104,7 +104,7 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
                 <FormGroup>
                   <label htmlFor="contingent_date" className="usa-label">
                     {t("fmo.dateLabel")}
-                    <span className="text-secondary-vivid"> *</span>
+                    <span className="usa-hint usa-hint--required text-no-underline"> *</span>
                   </label>
                   <input
                     type="date"
@@ -143,7 +143,7 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
       <FormGroup>
         <legend className="usa-legend text-bold">
           {t("reviewer.question")}
-          <span className="text-secondary-vivid"> *</span>
+          <span className="usa-hint usa-hint--required text-no-underline"> *</span>
         </legend>
         <p className="text-base-dark margin-top-1 margin-bottom-2">
           {t("reviewer.hintText")}
@@ -201,7 +201,7 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
       <FormGroup>
         <label htmlFor="review_comment" className="usa-label text-bold">
           {t("reviewComment.label")}
-          <span className="text-secondary-vivid"> *</span>
+          <span className="usa-hint usa-hint--required text-no-underline"> *</span>
         </label>
         <p className="text-base-dark margin-top-1 margin-bottom-2">
           {t("reviewComment.description")}
@@ -233,7 +233,7 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
         <FormGroup>
           <label htmlFor="internal_comment" className="usa-label text-bold">
             {t("internalComment.label")}
-            <span className="text-secondary-vivid"> *</span>
+            <span className="usa-hint usa-hint--required text-no-underline"> *</span>
           </label>
           <p className="text-base-dark margin-top-1 margin-bottom-2">
             {t("internalComment.description")}
@@ -273,18 +273,17 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
         />
       </FormGroup>
 
-      <div className="bg-base-lightest padding-2 margin-top-3">
-        <p className="text-base margin-0">{attestationText}</p>
+      <div className="bg-base-lightest padding-2 padding-bottom-3 margin-top-3 margin-bottom-3 review-attestation-box">
+        <p className="text-base margin-top-0 margin-bottom-0">{attestationText}</p>
+        <ButtonGroup className="margin-top-3">
+          <Button type="submit" disabled={isSubmitting || !reviewComment.trim()} className="usa-button--compact">
+            {isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
+          </Button>
+          <Button type="button" outline onClick={onCancel} disabled={isSubmitting} className="usa-button--compact">
+            {t("buttons.cancel")}
+          </Button>
+        </ButtonGroup>
       </div>
-
-      <ButtonGroup className="margin-top-3">
-        <Button type="submit" disabled={isSubmitting || !reviewComment.trim()}>
-          {isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
-        </Button>
-        <Button type="button" outline onClick={onCancel} disabled={isSubmitting}>
-          {t("buttons.cancel")}
-        </Button>
-      </ButtonGroup>
     </form>
   );
 };

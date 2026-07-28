@@ -58,11 +58,17 @@ async function SubmitForReviewPageContent({
       <AwardRecommendationHero
         awardRecommendationDetails={awardRecommendationDetails}
         buttons={[]}
+        heading={t("reviewForm.header")}
+        showDateAndStatus={false}
+        additionalBreadcrumbs={[
+          {
+            title: t("reviewForm.header"),
+          },
+        ]}
       />
       <div className="grid-container margin-top-4">
         <Grid row>
-          <Grid col={12} desktop={{ col: 8 }} className="desktop:grid-offset-2">
-            <h1 className="margin-top-0">{t("reviewForm.header")}</h1>
+          <Grid col={12}>
             <ReviewSubmissionFormContainer
               awardRecommendationId={awardRecommendationId}
               expectedReviewerType={reviewerType}
