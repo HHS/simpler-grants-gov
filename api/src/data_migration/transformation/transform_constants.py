@@ -53,17 +53,10 @@ D = TypeVar("D", bound=ApiSchemaTable)
 
 type SourceSummary = Tforecast | Tsynopsis
 
-type SourceApplicantType = (
-    TapplicanttypesForecast
-    | TapplicanttypesSynopsis
-)
+type SourceApplicantType = (TapplicanttypesForecast | TapplicanttypesSynopsis)
 
-type SourceFundingCategory = (
-    TfundactcatForecast | TfundactcatSynopsis
-)
+type SourceFundingCategory = (TfundactcatForecast | TfundactcatSynopsis)
 
-type SourceFundingInstrument = (
-    TfundinstrForecast | TfundinstrSynopsis
-)
+type SourceFundingInstrument = (TfundinstrForecast | TfundinstrSynopsis)
 
 type SourceAny = SourceApplicantType | SourceFundingCategory | SourceFundingInstrument

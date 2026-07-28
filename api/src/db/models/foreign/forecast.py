@@ -4,7 +4,6 @@
 # The order of the columns must match the remote Oracle database. The names are not required to
 # match by oracle_fdw, but we are matching them for maintainability.
 #
-from sqlalchemy import and_
 from sqlalchemy.orm import Mapped, foreign, relationship
 
 from ..legacy_mixin import forecast_mixin
