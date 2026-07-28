@@ -14,7 +14,7 @@ export default function VisionGoals() {
           className="grid-row grid-gap"
           key={`vision-goals-${contentRowsIdx}`}
         >
-          {contentRows.map((contentRowItem, contentRowItemIdx) => (
+          {contentRows.map((_contentRowItem, contentRowItemIdx) => (
             <div
               className="margin-bottom-4 tablet:grid-col-6"
               key={`vision-goals-${contentRowsIdx}-${contentRowItemIdx}`}

@@ -30,7 +30,7 @@ dependencies = [
     "prettytable>=3.16.0,<4",
     "PyYAML>=6.0.3,<7",
     "python-statemachine>=3.0.0,<4",
-    "grants-shared==0.2.16",
+    "grants-shared==0.2.18",
 ]
 
 [dependency-groups]
@@ -55,6 +55,7 @@ dev = [
     "freezegun>=1.5.0,<2",
     "types-requests>=2.31,<3",
     "eralchemy>=1.7.0",
+    "graphviz>=0.21,<0.22",
 ]
 
 [project.scripts]
@@ -64,6 +65,7 @@ db-migrate-down-all = "src.db.migrations.run:downall"
 db-seed-local = "tests.lib.seed_local_db:seed_local_db"
 create-erds = "bin.create_erds:main"
 setup-postgres-db = "src.db.migrations.setup_local_postgres_db:setup_local_postgres_db"
+setup-internal-resource = "src.db.migrations.setup_local_postgres_db:setup_internal_resource"
 
 
 [tool.uv]

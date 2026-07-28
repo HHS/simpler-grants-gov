@@ -582,6 +582,7 @@ dev = [
     { name = "factory-boy" },
     { name = "faker" },
     { name = "freezegun" },
+    { name = "graphviz" },
     { name = "isort" },
     { name = "moto", extra = ["s3"] },
     { name = "mypy" },
@@ -600,7 +601,7 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.28.62,<2" },
     { name = "botocore", specifier = ">=1.31.62,<2" },
     { name = "flask-cors", specifier = ">=6.0.0,<7" },
-    { name = "grants-shared", specifier = "==0.2.16" },
+    { name = "grants-shared", specifier = "==0.2.18" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
     { name = "marshmallow", specifier = ">=3.20.1,<4" },
     { name = "newrelic", specifier = ">=12.1.0,<13" },
@@ -628,6 +629,7 @@ dev = [
     { name = "factory-boy", specifier = ">=3.3.0,<4" },
     { name = "faker", specifier = ">=28.0.0,<29" },
     { name = "freezegun", specifier = ">=1.5.0,<2" },
+    { name = "graphviz", specifier = ">=0.21,<0.22" },
     { name = "isort", specifier = ">=5.12.0,<6" },
     { name = "moto", extras = ["s3"], specifier = ">=5.0.0,<6" },
     { name = "mypy", specifier = ">=2.1.0,<3.0.0" },
@@ -641,7 +643,7 @@ dev = [
 
 [[package]]
 name = "grants-shared"
-version = "0.2.16"
+version = "0.2.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apiflask" },
@@ -664,9 +666,18 @@ dependencies = [
     { name = "smart-open" },
     { name = "sqlalchemy", extra = ["mypy"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/de/7c/c63f2b98cbf593fd201568363c2a3cca65a7d557500c4ed709cf6d78a275/grants_shared-0.2.16.tar.gz", hash = "sha256:6d34299ba7e22708160d5d0922660bbd118c59f9586c687b311671a1648824bc", size = 70355, upload-time = "2026-07-09T17:19:19.147Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7a/fb/6f7cea3a82dbd4141680e0ed0766643152b6f3dbff97d421f459a10481cf/grants_shared-0.2.18.tar.gz", hash = "sha256:eb1f07f7aa2710574ddc0cb87139dacb9afcec9a8bfc2c6bd99628443ba5b8ed", size = 71842, upload-time = "2026-07-22T18:46:47.202Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/05/b0/a4cf73c1069156a620fa9d13d8164d824a2cb03dc0e937f43977cf2bf4d0/grants_shared-0.2.16-py3-none-any.whl", hash = "sha256:ff5796f118de69418e2e2e7012412ee407368d725e6a87fe2b8848bf6a8c6f8b", size = 91243, upload-time = "2026-07-09T17:19:17.836Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/85/73a24fefe7da8e72a000c479f7cb982b89579d81d102ced597772a1eb7ad/grants_shared-0.2.18-py3-none-any.whl", hash = "sha256:f86acc5f71fa935282c2a48aee7fe09fecb72abb1a27e72cbf0f777f8051c0b3", size = 93315, upload-time = "2026-07-22T18:46:46.019Z" },
+]
+
+[[package]]
+name = "graphviz"
+version = "0.21"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/b3/3ac91e9be6b761a4b30d66ff165e54439dcd48b83f4e20d644867215f6ca/graphviz-0.21.tar.gz", hash = "sha256:20743e7183be82aaaa8ad6c93f8893c923bd6658a04c32ee115edb3c8a835f78", size = 200434, upload-time = "2025-06-15T09:35:05.824Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/91/4c/e0ce1ef95d4000ebc1c11801f9b944fa5910ecc15b5e351865763d8657f8/graphviz-0.21-py3-none-any.whl", hash = "sha256:54f33de9f4f911d7e84e4191749cac8cc5653f815b06738c54db9a15ab8b1e42", size = 47300, upload-time = "2025-06-15T09:35:04.433Z" },
 ]
 
 [[package]]

@@ -4,21 +4,15 @@ from typing import TypeVar
 from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.staging.forecast import (
     TapplicanttypesForecast,
-    TapplicanttypesForecastHist,
     Tforecast,
     TfundactcatForecast,
-    TfundactcatForecastHist,
     TfundinstrForecast,
-    TfundinstrForecastHist,
 )
 from src.db.models.staging.staging_base import StagingParamMixin
 from src.db.models.staging.synopsis import (
     TapplicanttypesSynopsis,
-    TapplicanttypesSynopsisHist,
     TfundactcatSynopsis,
-    TfundactcatSynopsisHist,
     TfundinstrSynopsis,
-    TfundinstrSynopsisHist,
     Tsynopsis,
 )
 
@@ -59,19 +53,10 @@ D = TypeVar("D", bound=ApiSchemaTable)
 
 type SourceSummary = Tforecast | Tsynopsis
 
-type SourceApplicantType = (
-    TapplicanttypesForecast
-    | TapplicanttypesForecastHist
-    | TapplicanttypesSynopsis
-    | TapplicanttypesSynopsisHist
-)
+type SourceApplicantType = (TapplicanttypesForecast | TapplicanttypesSynopsis)
 
-type SourceFundingCategory = (
-    TfundactcatForecast | TfundactcatForecastHist | TfundactcatSynopsis | TfundactcatSynopsisHist
-)
+type SourceFundingCategory = (TfundactcatForecast | TfundactcatSynopsis)
 
-type SourceFundingInstrument = (
-    TfundinstrForecastHist | TfundinstrForecast | TfundinstrSynopsisHist | TfundinstrSynopsis
-)
+type SourceFundingInstrument = (TfundinstrForecast | TfundinstrSynopsis)
 
 type SourceAny = SourceApplicantType | SourceFundingCategory | SourceFundingInstrument

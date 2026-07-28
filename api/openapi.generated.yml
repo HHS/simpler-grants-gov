@@ -211,6 +211,29 @@ paths:
         with endpoints.
 
         '
+  /v1/users/logout:
+    get:
+      parameters: []
+      responses:
+        '302':
+          content:
+            application/json:
+              schema: {}
+          description: Found
+      tags:
+      - User v1 - Internal Only
+      summary: User Logout
+      description: '
+
+        To use this endpoint, click [this link](/v1/users/logout) which will redirect
+        you
+
+        to an OAuth provider where you can logout of your account in both our system
+        and
+
+        the OAuth system.
+
+        '
   /v1/internal/roles:
     put:
       parameters: []
@@ -7146,6 +7169,7 @@ components:
           - SF424
           enum:
           - SF424
+          - SF424Short
           - SF424A
           - SF424B
           - SF424C
@@ -8897,6 +8921,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -9250,6 +9279,11 @@ components:
         order_by:
           type: string
           enum:
+          - award_recommendation_number
+          - opportunity_name
+          - opportunity_number
+          - total_received_count
+          - award_recommendation_status
           - created_at
           description: The field to sort the response by
         sort_direction:
@@ -9400,6 +9434,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -9579,6 +9618,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -10613,6 +10657,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -11124,6 +11173,11 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - pqc_reviewer
+            - gms_reviewer
+            - fmo_reviewer
+            - gmo_reviewer
+            - final_award_rec_approver
             - internal_s3_scan
             - manage_test_user_token
             type:
@@ -14902,14 +14956,14 @@ components:
       - message
       - status_code
   securitySchemes:
-    ApiUserKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
     InternalApiJwtAuth:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
+    ApiUserKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
     ApiJwtAuth:
       type: apiKey
       in: header

@@ -1,0 +1,223 @@
+name: Update Grants Management API ERD Diagrams and OpenAPI Docs
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Runs daily at 10 AM EST (staggered an hour after the api ci-openapi job)
+    - cron: '0 15 * * *'
+
+defaults:
+  run:
+    working-directory: ./backend/grants_management_api
+
+jobs:
+  update-openapi-docs:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # fetch full history so we can create branches properly
+
+      # Generate artifacts on the triggering ref before switching branches.
+      # The make targets build the profile-gated openapi-tools image on first
+      # use via `docker compose run`, which bakes in RUN_UID=$(id -u) so the
+      # container can write generated files back to the mounted checkout. (No DB
+      # is needed -- doc generation only reads SQLAlchemy metadata.)
+      - name: Create ERD diagram
+        run: make create-erds
+
+      - name: Update OpenAPI spec
+        run: make openapi-spec
+
+      - name: Stash generated artifacts
+        working-directory: .
+        run: |
+          mkdir -p /tmp/sgm-artifacts
+          cp -v backend/grants_management_api/openapi.generated.yml /tmp/sgm-artifacts/ || true
+          # The grants-management-api only owns the grantor-schema diagram; the
+          # api/staging diagrams live in the same folder but belong to the api's
+          # own ci-openapi workflow, so we deliberately don't touch them here.
+          cp -v documentation/api/database/erds/grantor-schema.png /tmp/sgm-artifacts/ || true
+
+      # Now create/switch to the bot branch based on main for a clean PR
+      - name: Setup branch
+        working-directory: .
+        run: |
+          git config user.name "nava-platform-bot"
+          git config user.email "platform-admins@navapbc.com"
+
+          BRANCH="nava-platform-bot/update-grants-management-api-docs"
+          echo "Branch name: $BRANCH"
+
+          git fetch origin main
+          git fetch origin "$BRANCH" || true
+
+          # Check if branch exists remotely and use it, otherwise create from main
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            echo "Remote branch exists, checking it out"
+            # Reset any local changes that might conflict with checkout
+            # (Artifacts are safe in /tmp/sgm-artifacts and will be restored after checkout)
+            git reset --hard HEAD || true
+            git clean -fd || true
+            # Force checkout/create the branch (creates if doesn't exist locally, resets if it does)
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            echo "Remote branch does not exist, creating from main"
+            git reset --hard HEAD || true
+            git clean -fd || true
+            git checkout -b "$BRANCH" origin/main
+          fi
+
+      - name: Rebase branch onto latest main
+        working-directory: .
+        run: |
+          BRANCH="nava-platform-bot/update-grants-management-api-docs"
+          git checkout "$BRANCH" || exit 1
+          git fetch origin main
+
+          if ! git rebase origin/main; then
+            git checkout --theirs . 2>/dev/null || true
+            git add . || true
+            # Restore our generated files
+            if [ -f /tmp/sgm-artifacts/openapi.generated.yml ]; then
+              cp -v /tmp/sgm-artifacts/openapi.generated.yml backend/grants_management_api/openapi.generated.yml
+              git add backend/grants_management_api/openapi.generated.yml || true
+            fi
+            if [ -f /tmp/sgm-artifacts/grantor-schema.png ]; then
+              cp -v /tmp/sgm-artifacts/grantor-schema.png documentation/api/database/erds/grantor-schema.png
+              git add documentation/api/database/erds/grantor-schema.png || true
+            fi
+            git rebase --continue
+          fi
+
+      - name: Restore artifacts
+        working-directory: .
+        run: |
+          # Restore generated files from temp stash
+          if [ -f /tmp/sgm-artifacts/openapi.generated.yml ]; then
+            cp -v /tmp/sgm-artifacts/openapi.generated.yml backend/grants_management_api/
+          fi
+          if [ -f /tmp/sgm-artifacts/grantor-schema.png ]; then
+            cp -v /tmp/sgm-artifacts/grantor-schema.png documentation/api/database/erds/
+          fi
+
+      - name: Commit & push changes
+        id: commit
+        working-directory: .
+        run: |
+          BRANCH="nava-platform-bot/update-grants-management-api-docs"
+
+          # Show file status before adding
+          echo "Files before git add:"
+          ls -lh backend/grants_management_api/openapi.generated.yml || echo "openapi.generated.yml not found"
+          ls -lh documentation/api/database/erds/grantor-schema.png || echo "ERD file not found"
+
+          # Add the generated spec and the grantor ERD diagram
+          git add backend/grants_management_api/openapi.generated.yml documentation/api/database/erds/grantor-schema.png
+
+          echo "Git status after adding files:"
+          git status
+
+          echo "Checking for staged changes:"
+          if git diff --cached --quiet; then
+            echo "No changes detected in staged files"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Changes detected! Showing diff:"
+          git diff --cached --stat
+
+          git commit -m "Update Grants Management API ERD Diagram and OpenAPI Spec"
+          git push --force --set-upstream origin "$BRANCH"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "Changes committed and pushed successfully"
+
+      - name: Debug - Check outputs
+        working-directory: .
+        run: |
+          echo "Changed value: ${{ steps.commit.outputs.changed }}"
+          echo "Condition will be: ${{ steps.commit.outputs.changed == 'true' }}"
+
+      - name: Create Pull Request (only if none exists)
+        if: steps.commit.outputs.changed == 'true'
+        working-directory: .
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          API="https://api.github.com/repos/${{ github.repository }}/pulls"
+          BRANCH="nava-platform-bot/update-grants-management-api-docs"
+
+          echo "Checking for existing PR..."
+          echo "API endpoint: $API?head=${{ github.repository_owner }}:$BRANCH&base=main"
+
+          # Check if a PR already exists
+          PR_RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                        -H "Accept: application/vnd.github+json" \
+                        "$API?head=${{ github.repository_owner }}:$BRANCH&base=main")
+
+          echo "PR check response:"
+          echo "$PR_RESPONSE" | jq '.'
+
+          PR_NUM=$(echo "$PR_RESPONSE" | jq '.[0].number // empty')
+
+          if [ -n "$PR_NUM" ]; then
+            echo "PR #$PR_NUM already exists — skipping creation."
+            exit 0
+          fi
+
+          echo "No existing PR found, creating new PR..."
+
+          # Create a new PR if none exists
+          CREATE_RESPONSE=$(curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Accept: application/vnd.github+json" \
+               "$API" \
+               -d "$(jq -n \
+                     --arg title "[Unticketed] Automated Update to Grants Management API ERD Diagram and OpenAPI Docs" \
+                     --arg head "$BRANCH" \
+                     --arg base "main" \
+                     --arg body "Automated update of the grants-management-api ERD diagram and OpenAPI spec." \
+                     '{title: $title, head: $head, base: $base, body: $body}')")
+
+          echo "PR creation response:"
+          echo "$CREATE_RESPONSE" | jq '.'
+
+          PR_URL=$(echo "$CREATE_RESPONSE" | jq -r '.html_url // empty')
+          if [ -n "$PR_URL" ]; then
+            echo "Successfully created PR: $PR_URL"
+          else
+            echo "Failed to create PR"
+            exit 1
+          fi
+
+          # Add reviewers to the newly created PR
+          NEW_PR_NUM=$(echo "$CREATE_RESPONSE" | jq -r '.number // empty')
+          if [ -n "$NEW_PR_NUM" ]; then
+            echo "Adding reviewers to PR #$NEW_PR_NUM..."
+            REVIEWER_RESPONSE=$(curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+                 -H "Accept: application/vnd.github+json" \
+                 "https://api.github.com/repos/${{ github.repository }}/pulls/$NEW_PR_NUM/requested_reviewers" \
+                 -d '{
+                   "reviewers": [
+                     "chouinar",
+                     "mdragon",
+                     "joshtonava",
+                     "jakobpederson",
+                     "chay-REIsys",
+                     "hao10282025-sudo",
+                     "kkrug",
+                     "dghazvini"
+                   ]
+                 }')
+
+            echo "Reviewer assignment response:"
+            echo "$REVIEWER_RESPONSE" | jq '.requested_reviewers[].login // "No reviewers in response"'
+
+            if echo "$REVIEWER_RESPONSE" | jq -e '.url' > /dev/null 2>&1; then
+              echo "Successfully requested reviewers"
+            else
+              echo "Warning: Could not add reviewers, but PR was created successfully"
+            fi
+          fi

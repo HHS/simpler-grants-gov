@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=24.13.0"
+    "node": ">=24.18.0"
   },
   "scripts": {
     "all-checks": "npm run lint && npm run ts:check && npm run format-check && npm run test && npm run build",
@@ -29,8 +29,7 @@
     "ts:check": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@newrelic/next": "^0.10.0",
-    "@next/third-parties": "16.2.6",
+    "@next/third-parties": "^16.2.11",
     "@opentelemetry/api": "^1.8.0",
     "@rjsf/utils": "^5.24.8",
     "@trussworks/react-uswds": "^11",
@@ -38,6 +37,7 @@
     "@zip.js/zip.js": "^2.7.60",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "autoprefixer": "^10.4.23",
     "clsx": "^2.1.1",
     "cookies-next": "^6.1.1",
     "dayjs": "^1.11.13",
@@ -49,8 +49,8 @@
     "json-pointer": "^0.6.2",
     "json-schema-merge-allof": "^0.8.1",
     "lodash": "^4.18.1",
-    "newrelic": "^12.7.0",
-    "next": "16.2.6",
+    "newrelic": "^14.3.2",
+    "next": "^16.2.11",
     "next-intl": "^4.8.1",
     "next-navigation-guard": "^0.2.0",
     "pino": "^9.6.0",
@@ -64,7 +64,7 @@
     "@ianvs/prettier-plugin-sort-imports": "^4.0.2",
     "@playwright/test": "^1.60.0",
     "@storybook/addon-docs": "^10.4.6",
-    "@storybook/nextjs-vite": "10.4.6",
+    "@storybook/nextjs-vite": "10.5.5",
     "@storybook/react": "10.4.6",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^5.16.5",
@@ -87,7 +87,7 @@
     "@typescript-eslint/parser": "^8",
     "dotenv": "^17.2.2",
     "eslint": "^9.39.0",
-    "eslint-config-next": "16.2.6",
+    "eslint-config-next": "^16.2.11",
     "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-jest": "^28",
     "eslint-plugin-jest-dom": "^5.0.1",
@@ -102,32 +102,23 @@
     "json-schema": "^0.4.0",
     "otplib": "^12.0.1",
     "pa11y-ci": "^4.1.1",
-    "postcss": "^8.4.31",
+    "postcss": "^8.5.1",
     "postcss-loader": "^8.0.0",
     "postcss-preset-env": "^10.0.0",
     "prettier": "^3.2.5",
     "sass": "^1.78.0",
     "storybook": "^10.4.6",
     "style-loader": "^3.3.2",
-    "typescript": "^5.9.2",
+    "typescript": "5.9.3",
     "vite": "^7.0.0"
   },
   "overrides": {
-    "@grpc/grpc-js": "1.13.5",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
     "next-navigation-guard": {
       "next": "^16.0.0"
     },
-    "flatted": "3.4.2",
-    "axios": "^1.15.2",
-    "follow-redirects": "^1.16.0",
-    "protobufjs": "^7.6.3",
-    "uuid": "^14.0.0",
     "ws": "^8.21.0",
-    "form-data": "^4.0.6",
-    "@opentelemetry/core": "^2.8.0",
-    "sharp": "^0.35.0"
+    "sharp": "^0.35.0",
+    "postcss": "^8.5.1"
   },
   "devEngines": {
     "packageManager": {

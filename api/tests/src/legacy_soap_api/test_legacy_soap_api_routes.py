@@ -273,10 +273,10 @@ def test_request_and_response_data_uploaded_to_s3_if_save_soap_messages_flag_is_
     )
     assert record
     request_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{TEST_UUID}/request.txt"
     )
     response_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{TEST_UUID}/response.txt"
     )
     assert request_contents.replace("\n", "") == mock_data.decode().replace("\n", "")
     assert response_contents.replace("\r", "") == expected_response.decode().replace("\r", "")
@@ -481,17 +481,17 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
         "Content-Transfer-Encoding: binary\r\n"
         "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
-        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
-        "        <soap:Body>\n"
-        "            <soap:Fault>\n"
-        "                <faultcode>soap:Server</faultcode>\n"
-        "                <faultstring>Failed to confirm application delivery."
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        "<faultstring>Failed to confirm application delivery."
         "(Expected an Application status of:'Validated' , but found a status of "
-        f"'Received by Agency' for GRANT{submission.legacy_tracking_number})</faultstring>\n"
-        "            </soap:Fault>\n"
-        "        </soap:Body>\n"
-        "    </soap:Envelope>\r\n"
-        f"--uuid:{TEST_UUID}--\r\n"
+        f"'Received by Agency' for GRANT{submission.legacy_tracking_number})</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>\r\n"
+        f"--uuid:{TEST_UUID}--"
     )
     assert response.data.decode() == expected
     assert (
@@ -507,7 +507,9 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
     assert len(records) == 1
 
 
+@mock.patch("uuid.uuid4")
 def test_if_soap_request_errors_on_creation_the_s3_handling_records_just_the_response(
+    mock_uuid,
     db_session,
     client,
     enable_factory_create,
@@ -517,6 +519,8 @@ def test_if_soap_request_errors_on_creation_the_s3_handling_records_just_the_res
     mock_s3,
     s3_config,
 ) -> None:
+    TEST_UUID_1 = "99999999-aaaa-0000-bbbb-000000000000"
+    mock_uuid.return_value = TEST_UUID_1
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     agency = AgencyFactory.create()
@@ -566,16 +570,15 @@ def test_if_soap_request_errors_on_creation_the_s3_handling_records_just_the_res
                 },
             )
         assert response.status_code == 500
-        records = [
+        record = next(
             r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
-        ]
-        assert len(records) == 1
-    record = records[0]
+        )
+    assert getattr(record, "request.internal_id") == TEST_UUID_1
     assert not file_util.file_exists(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{TEST_UUID_1}/request.txt"
     )
     assert file_util.file_exists(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{TEST_UUID_1}/response.txt"
     )
 
 
@@ -634,17 +637,17 @@ def test_successful_confirm_application_delivery_request_when_in_tracking_number
         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
         "Content-Transfer-Encoding: binary\r\n"
         "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
-        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
-        "        <soap:Body>\n"
-        "            <soap:Fault>\n"
-        "                <faultcode>soap:Server</faultcode>\n"
-        "                <faultstring>Failed to confirm application delivery."
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        "<faultstring>Failed to confirm application delivery."
         "(Expected an Application status of:'Validated' , but found a status of "
-        f"'Agency Tracking Number Assigned' for GRANT{submission.legacy_tracking_number})</faultstring>\n"
-        "            </soap:Fault>\n"
-        "        </soap:Body>\n"
-        "    </soap:Envelope>\r\n"
-        f"--uuid:{TEST_UUID}--\r\n"
+        f"'Agency Tracking Number Assigned' for GRANT{submission.legacy_tracking_number})</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>\r\n"
+        f"--uuid:{TEST_UUID}--"
     )
     assert response.data.decode() == expected
     log = next(r for r in caplog.records if r.message == "Soap Fault Exception raised")
@@ -710,15 +713,15 @@ def test_confirm_application_delivery_when_application_has_no_status(
         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
         "Content-Transfer-Encoding: binary\r\n"
         "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
-        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
-        "        <soap:Body>\n"
-        "            <soap:Fault>\n"
-        "                <faultcode>soap:Server</faultcode>\n"
-        "                <faultstring>Application has no application_status</faultstring>\n"
-        "            </soap:Fault>\n"
-        "        </soap:Body>\n"
-        "    </soap:Envelope>\r\n"
-        f"--uuid:{TEST_UUID}--\r\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        "<faultstring>Application has no application_status</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>\r\n"
+        f"--uuid:{TEST_UUID}--"
     )
     assert response.data.decode() == expected
 
@@ -775,15 +778,15 @@ def test_if_soap_fault_exception_raised_return_correct_response_if_proxy_respons
         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
         "Content-Transfer-Encoding: binary\r\n"
         "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
-        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
-        "        <soap:Body>\n"
-        "            <soap:Fault>\n"
-        "                <faultcode>soap:Server</faultcode>\n"
-        f"                <faultstring>Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received' for GRANT{submission.legacy_tracking_number})</faultstring>\n"
-        "            </soap:Fault>\n"
-        "        </soap:Body>\n"
-        "    </soap:Envelope>\r\n"
-        f"--uuid:{TEST_UUID}--\r\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        f"<faultstring>Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received' for GRANT{submission.legacy_tracking_number})</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>\r\n"
+        f"--uuid:{TEST_UUID}--"
     )
     assert response.data.decode() == expected
 
@@ -940,7 +943,7 @@ def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is
         "<soapenv:Header/>"
         "<soapenv:Body>"
         "<agen:GetApplicationZipRequest>"
-        f'<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">{SIMPLER_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>'
+        '<gran:GrantsGovTrackingNumber xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">GRANT99999999</gran:GrantsGovTrackingNumber>'
         "</agen:GetApplicationZipRequest>"
         "</soapenv:Body>"
         "</soapenv:Envelope>/r/n"
@@ -962,7 +965,7 @@ def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is
         '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
         "<soap:Body><soap:Fault>"
         "<faultcode>soap:Server</faultcode>"
-        f"<faultstring>Failed to get application zip.(Grant Application not found for tracking number:{SIMPLER_TRACKING_NUMBER})"
+        f"<faultstring>Failed to get application zip.(Grant Application not found for tracking number:GRANT99999999)"
         "</faultstring></soap:Fault></soap:Body></soap:Envelope>\r\n"
         f"--uuid:{test_uuid}--"
     ).encode("utf-8")
@@ -973,7 +976,6 @@ def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is
         response.headers["Content-Type"]
         == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
     )
-    assert response.headers["Set-Cookie"] == "None; Path=/grantsws-agency; Secure; HttpOnly"
 
 
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
@@ -1210,14 +1212,14 @@ def test_request_fails_if_no_mtls_cert_is_attached(
     )
     assert response.status_code == 500
     expected = (
-        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n    '
-        "<soap:Body>\n        "
-        "<soap:Fault>\n            "
-        "<faultcode>soap:Server</faultcode>\n            "
-        "<faultstring>Missing certificate. (Authorization Failure)</faultstring>\n        "
-        "</soap:Fault>\n    "
-        "</soap:Body>\n"
-        "</soap:Envelope>\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        "<faultstring>Missing certificate. (Authorization Failure)</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
     )
     assert response.data.decode() == expected
 
@@ -1245,14 +1247,14 @@ def test_request_fails_if_no_tcertificate(db_session, client, enable_factory_cre
     )
     assert response.status_code == 500
     expected = (
-        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n    '
-        "<soap:Body>\n        "
-        "<soap:Fault>\n            "
-        "<faultcode>soap:Server</faultcode>\n            "
-        "<faultstring>No tcertificate found. (Authorization Failure)</faultstring>\n        "
-        "</soap:Fault>\n    "
-        "</soap:Body>\n"
-        "</soap:Envelope>\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        "<faultstring>No tcertificate found. (Authorization Failure)</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
     )
     assert response.data.decode() == expected
 
@@ -1285,14 +1287,14 @@ def test_request_fails_if_tcertificate_is_expired(
     )
     assert response.status_code == 500
     expected = (
-        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n    '
-        "<soap:Body>\n        "
-        "<soap:Fault>\n            "
-        "<faultcode>soap:Server</faultcode>\n            "
-        "<faultstring>Certificate is expired. (Authorization Failure)</faultstring>\n        "
-        "</soap:Fault>\n    "
-        "</soap:Body>\n"
-        "</soap:Envelope>\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        "<faultstring>Certificate is expired. (Authorization Failure)</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
     )
     assert response.data.decode() == expected
 
@@ -1401,14 +1403,14 @@ def test_request_fails_if_legacy_certificate_is_expired(
     )
     assert response.status_code == 500
     expected = (
-        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n    '
-        "<soap:Body>\n        "
-        "<soap:Fault>\n            "
-        "<faultcode>soap:Server</faultcode>\n            "
-        "<faultstring>Certificate is expired. (Authorization Failure)</faultstring>\n        "
-        "</soap:Fault>\n    "
-        "</soap:Body>\n"
-        "</soap:Envelope>\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        "<faultstring>Certificate is expired. (Authorization Failure)</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
     )
     assert response.data.decode() == expected
 

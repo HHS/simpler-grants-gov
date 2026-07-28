@@ -41,6 +41,7 @@ export async function updateOpportunitySummaryForGrantor({
   const response = await fetchGrantorOpportunityWithMethod("PUT")({
     subPath: `${opportunityId}/summaries/${opportunitySummaryId}`,
     body,
+    // allowedErrorStatuses: [422],
   });
 
   return (await response.json()) as OpportunitySummaryDetailApiResponse;
