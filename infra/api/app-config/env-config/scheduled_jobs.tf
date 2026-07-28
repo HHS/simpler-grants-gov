@@ -114,7 +114,7 @@ locals {
     prod        = ["flask", "task", "sam-extracts"]
   }
   setup-lower-env-agencies-state = {
-    dev = "ENABLED"
+    dev         = "ENABLED"
     "infra-dev" = "ENABLED"
     staging     = "ENABLED"
     training    = "DISABLED"
