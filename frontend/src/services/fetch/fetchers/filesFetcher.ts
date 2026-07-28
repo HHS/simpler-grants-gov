@@ -59,9 +59,12 @@ export const uploadFileToS3 = async (
     "file",
     new File([buffer] as BlobPart[], file.name, { type: file.type }),
   );
+  // serialize the multipart body to a Blob so fetch sends a Content-Length
+  const multipartBody = await new Response(fileFormData).blob();
   const s3Response = await fetch(url, {
     method: "POST",
-    body: fileFormData,
+    body: multipartBody,
+    headers: { "Content-Type": multipartBody.type },
   });
   if (!s3Response.ok) {
     logger.error(`S3 upload failed with status ${s3Response.status}`);
