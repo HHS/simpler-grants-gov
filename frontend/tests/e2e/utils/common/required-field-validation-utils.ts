@@ -118,7 +118,9 @@ export async function assertRequiredFieldValidationsFromDefinitions(
         } else {
           // Field IDs can change as forms evolve; label lookup is more stable.
           const fieldByLabel = page
-            .getByLabel(new RegExp(`^${escapeRegExp(definition.label)}\\*?$`, "i"))
+            .getByLabel(
+              new RegExp(`^${escapeRegExp(definition.label)}\\*?$`, "i"),
+            )
             .first();
           if ((await fieldByLabel.count()) > 0) {
             inlineErrorScope = fieldByLabel.locator(

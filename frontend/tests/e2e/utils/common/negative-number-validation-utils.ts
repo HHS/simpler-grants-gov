@@ -74,7 +74,9 @@ export async function assertNegativeNumberValidationsFromDefinitions(
 
     if ((await field.count()) === 0 && fieldDefinition.label) {
       // Prefer accessible label matching when ids/selectors drift.
-      field = page.getByRole("textbox", { name: fieldDefinition.label }).first();
+      field = page
+        .getByRole("textbox", { name: fieldDefinition.label })
+        .first();
     }
 
     await expect(field).toBeVisible();
