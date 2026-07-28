@@ -6,7 +6,7 @@ import getFormData from "src/utils/getFormData";
 
 import { headers } from "next/headers";
 
-import PrintErrorDiagnostics from "src/components/apply-form/PrintErrorDiagnostics";
+import PrintViewErrorDiagnostics from "src/components/apply-form/PrintViewErrorDiagnostics";
 
 export const dynamic = "force-dynamic";
 
@@ -66,9 +66,11 @@ export default async function FormPage({ params }: FormPageProps) {
     internalToken,
   });
 
+  // Render diagnostics when getFormData fails or returns no form data.
+  // PrintForm has not rendered yet, so this does not catch widget/render errors.
   if (error || !data) {
     const applicationFormId = appFormId;
-    const errorCategory = error ?? "TopLevelError";
+    const errorCategory = error ?? "UnknownError";
     const hasInternalToken = Boolean(internalToken);
 
     logger.error(
@@ -83,7 +85,7 @@ export default async function FormPage({ params }: FormPageProps) {
     );
 
     return (
-      <PrintErrorDiagnostics
+      <PrintViewErrorDiagnostics
         applicationId={applicationId}
         applicationFormId={applicationFormId}
         errorCategory={errorCategory}

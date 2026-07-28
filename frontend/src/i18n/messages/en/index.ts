@@ -2640,7 +2640,7 @@ export const messages = {
       deleting: "Deleting...",
     },
   },
-  PrintErrorDiagnostics: {
+  PrintViewErrorDiagnostics: {
     heading: "PDF rendering failed",
     description:
       "This document is an error diagnostic page. The application form PDF could not be generated because the print page could not load or prepare the form data.",

@@ -1,18 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import { messages } from "src/i18n/messages/en";
 
-import PrintErrorDiagnostics from "src/components/apply-form/PrintErrorDiagnostics";
+import PrintViewErrorDiagnostics from "src/components/apply-form/PrintViewErrorDiagnostics";
 
-describe("PrintErrorDiagnostics", () => {
+describe("PrintViewErrorDiagnostics", () => {
   const defaultProperties = {
     applicationId: "application-123",
     applicationFormId: "application-form-456",
-    errorCategory: "TopLevelError" as const,
+    errorCategory: "UnknownError" as const,
     hasInternalToken: true,
   };
 
-  it("renders the PDF failure diagnostics with safe values", () => {
-    render(<PrintErrorDiagnostics {...defaultProperties} />);
+  it("renders the unknown category when form data is unavailable without a known getFormData error", () => {
+    render(<PrintViewErrorDiagnostics {...defaultProperties} />);
 
     expect(
       screen.getByRole("heading", { name: "heading" }),
@@ -30,7 +30,7 @@ describe("PrintErrorDiagnostics", () => {
   });
 
   it("uses the standard Grants.gov Support Center messages", () => {
-    render(<PrintErrorDiagnostics {...defaultProperties} />);
+    render(<PrintViewErrorDiagnostics {...defaultProperties} />);
 
     expect(screen.getByText("supportInstructions")).toBeInTheDocument();
     expect(screen.getByText("supportCenterHeading")).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe("PrintErrorDiagnostics", () => {
     expect(screen.getByText("supportUnitedStatesPhone")).toBeInTheDocument();
     expect(screen.getByText("supportInternationalPhone")).toBeInTheDocument();
 
-    expect(messages.PrintErrorDiagnostics).toMatchObject({
+    expect(messages.PrintViewErrorDiagnostics).toMatchObject({
       supportInstructions:
         "Please contact the support team and include the diagnostic details below.",
       supportCenterHeading: "Grants.gov Support Center",
@@ -58,7 +58,7 @@ describe("PrintErrorDiagnostics", () => {
     "renders token presence as $expectedDisplayValue when hasInternalToken is $hasInternalToken",
     ({ hasInternalToken, expectedDisplayValue }) => {
       render(
-        <PrintErrorDiagnostics
+        <PrintViewErrorDiagnostics
           {...defaultProperties}
           hasInternalToken={hasInternalToken}
         />,
