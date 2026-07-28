@@ -12,10 +12,8 @@ from grants_shared.task.ecs_background_task import ecs_background_task
 
 @pytest.fixture(autouse=True)
 def clear_maintenance_config_cache():
-    # The maintenance-mode config is @cache'd, so clear it around every test to
+    # The maintenance-mode config is @cache'd, so clear it before every test to
     # keep the ENABLE_MAINTENANCE_MODE env var from leaking across tests.
-    get_maintenance_mode_config.cache_clear()
-    yield
     get_maintenance_mode_config.cache_clear()
 
 
