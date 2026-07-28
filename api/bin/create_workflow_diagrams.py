@@ -9,7 +9,7 @@ from src.workflow.registry.workflow_registry import WorkflowRegistry
 
 # We import the state_machine directory so the module is loaded
 # and the workflows are populated into the WorkflowRegistry
-import src.workflow.state_machine  # noqa: F401 isort:skip
+import src.workflow.state_machine  # ruff: ignore[unused-import] isort:skip
 
 logger = logging.getLogger(__name__)
 
