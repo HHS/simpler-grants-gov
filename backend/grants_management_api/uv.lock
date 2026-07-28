@@ -601,7 +601,7 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.28.62,<2" },
     { name = "botocore", specifier = ">=1.31.62,<2" },
     { name = "flask-cors", specifier = ">=6.0.0,<7" },
-    { name = "grants-shared", specifier = "==0.2.16" },
+    { name = "grants-shared", specifier = "==0.2.18" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
     { name = "marshmallow", specifier = ">=3.20.1,<4" },
     { name = "newrelic", specifier = ">=12.1.0,<13" },
@@ -643,7 +643,7 @@ dev = [
 
 [[package]]
 name = "grants-shared"
-version = "0.2.16"
+version = "0.2.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apiflask" },
@@ -666,9 +666,9 @@ dependencies = [
     { name = "smart-open" },
     { name = "sqlalchemy", extra = ["mypy"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/de/7c/c63f2b98cbf593fd201568363c2a3cca65a7d557500c4ed709cf6d78a275/grants_shared-0.2.16.tar.gz", hash = "sha256:6d34299ba7e22708160d5d0922660bbd118c59f9586c687b311671a1648824bc", size = 70355, upload-time = "2026-07-09T17:19:19.147Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7a/fb/6f7cea3a82dbd4141680e0ed0766643152b6f3dbff97d421f459a10481cf/grants_shared-0.2.18.tar.gz", hash = "sha256:eb1f07f7aa2710574ddc0cb87139dacb9afcec9a8bfc2c6bd99628443ba5b8ed", size = 71842, upload-time = "2026-07-22T18:46:47.202Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/05/b0/a4cf73c1069156a620fa9d13d8164d824a2cb03dc0e937f43977cf2bf4d0/grants_shared-0.2.16-py3-none-any.whl", hash = "sha256:ff5796f118de69418e2e2e7012412ee407368d725e6a87fe2b8848bf6a8c6f8b", size = 91243, upload-time = "2026-07-09T17:19:17.836Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/85/73a24fefe7da8e72a000c479f7cb982b89579d81d102ced597772a1eb7ad/grants_shared-0.2.18-py3-none-any.whl", hash = "sha256:f86acc5f71fa935282c2a48aee7fe09fecb72abb1a27e72cbf0f777f8051c0b3", size = 93315, upload-time = "2026-07-22T18:46:46.019Z" },
 ]
 
 [[package]]
