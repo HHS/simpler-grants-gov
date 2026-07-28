@@ -247,7 +247,7 @@ export const ELIGIBILITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
     label: "Eligible applicants",
     type: "checkbox",
     valueKey: "eligibleApplicantsGroupRequired",
-    selector: 'input[name="eligibleApplicants"]',
+    selector: '#eligibility input[type="checkbox"]',
     inlineErrorSelector: '#eligibility [role="alert"]',
     selectFirstInGroup: true,
     required: true,

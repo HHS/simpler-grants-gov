@@ -696,7 +696,14 @@ class AwardRecommendationListRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "AwardRecommendationListPaginationSchema",
-            ["created_at"],
+            [
+                "award_recommendation_number",
+                "opportunity_name",
+                "opportunity_number",
+                "total_received_count",
+                "award_recommendation_status",
+                "created_at",
+            ],
             default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
         ),
         required=True,
