@@ -1,10 +1,12 @@
 from email.message import EmailMessage
+from unittest.mock import Mock
 
 import pytest
 
 import src.adapters.aws.local_email_adapter as local_email_adapter
 from src.adapters.aws.local_email_adapter import (
     LocalEmailConfig,
+    send_email_to_address,
     send_local_email,
     send_local_email_if_enabled,
 )
@@ -198,6 +200,96 @@ def test_send_local_email_if_disabled_does_not_connect(monkeypatch):
         )
         is None
     )
+
+
+def test_send_email_to_address_uses_local_capture_when_enabled(monkeypatch):
+    local_sender = Mock(return_value="<local-message-id>")
+    ses_sender = Mock()
+    monkeypatch.setattr(local_email_adapter, "send_local_email", local_sender)
+    monkeypatch.setattr(local_email_adapter, "send_ses_email", ses_sender)
+    config = LocalEmailConfig(
+        ENABLE_LOCAL_EMAIL_CAPTURE=True,
+        ENVIRONMENT="local",
+        LOCAL_EMAIL_SMTP_HOST="mailpit",
+    )
+
+    message_id = send_email_to_address(
+        to_address="recipient@example.com",
+        subject="A local message",
+        message="<p>Hello from local email</p>",
+        trace_id="trace-local",
+        cc_addresses=["copy@example.com"],
+        bcc_addresses=["hidden@example.com"],
+        headers={"Reply-To": "reply@example.com"},
+        config=config,
+    )
+
+    assert message_id == "<local-message-id>"
+    local_sender.assert_called_once_with(
+        to_address="recipient@example.com",
+        subject="A local message",
+        message="<p>Hello from local email</p>",
+        trace_id="trace-local",
+        cc_addresses=["copy@example.com"],
+        bcc_addresses=["hidden@example.com"],
+        headers={"Reply-To": "reply@example.com"},
+        config=config,
+    )
+    ses_sender.assert_not_called()
+
+
+def test_send_email_to_address_uses_ses_when_local_capture_is_disabled(monkeypatch):
+    local_sender = Mock()
+    ses_sender = Mock(return_value="<ses-message-id>")
+    monkeypatch.setattr(local_email_adapter, "send_local_email", local_sender)
+    monkeypatch.setattr(local_email_adapter, "send_ses_email", ses_sender)
+    config = LocalEmailConfig(
+        ENABLE_LOCAL_EMAIL_CAPTURE=False,
+        ENVIRONMENT="local",
+        LOCAL_EMAIL_SMTP_HOST="mailpit",
+    )
+
+    message_id = send_email_to_address(
+        to_address="recipient@example.com",
+        subject="An SES message",
+        message="<p>Hello from SES</p>",
+        trace_id="trace-ses",
+        config=config,
+    )
+
+    assert message_id == "<ses-message-id>"
+    local_sender.assert_not_called()
+    ses_sender.assert_called_once_with(
+        to_address="recipient@example.com",
+        subject="An SES message",
+        message="<p>Hello from SES</p>",
+    )
+
+
+def test_send_email_to_address_does_not_fall_back_to_ses_when_local_capture_fails(
+    monkeypatch,
+):
+    local_sender = Mock(side_effect=RuntimeError("Local capture failed"))
+    ses_sender = Mock()
+    monkeypatch.setattr(local_email_adapter, "send_local_email", local_sender)
+    monkeypatch.setattr(local_email_adapter, "send_ses_email", ses_sender)
+    config = LocalEmailConfig(
+        ENABLE_LOCAL_EMAIL_CAPTURE=True,
+        ENVIRONMENT="local",
+        LOCAL_EMAIL_SMTP_HOST="mailpit",
+    )
+
+    with pytest.raises(RuntimeError, match="Local capture failed"):
+        send_email_to_address(
+            to_address="recipient@example.com",
+            subject="Do not send through SES",
+            message="Local capture should fail closed.",
+            trace_id="trace-fail-closed",
+            config=config,
+        )
+
+    local_sender.assert_called_once()
+    ses_sender.assert_not_called()
 
 
 @pytest.mark.parametrize(

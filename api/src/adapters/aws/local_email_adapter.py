@@ -3,6 +3,7 @@ from email.message import EmailMessage
 from email.utils import formatdate, make_msgid
 
 from grants_shared.adapters.aws.aws_session import is_local_aws
+from grants_shared.adapters.aws.ses_adapter import send_email as send_ses_email
 from pydantic import Field
 
 from src.util.env_config import PydanticBaseEnvConfig
@@ -31,6 +32,39 @@ _PROTECTED_HEADERS = (
     "content-transfer-encoding",
     "x-simpler-trace-id",
 )
+
+
+def send_email_to_address(
+    to_address: str,
+    subject: str,
+    message: str,
+    trace_id: str,
+    cc_addresses: list[str] | None = None,
+    bcc_addresses: list[str] | None = None,
+    headers: dict[str, str] | None = None,
+    config: LocalEmailConfig | None = None,
+) -> str:
+    """Send an email using local capture when enabled, otherwise use SESv2."""
+    if config is None:
+        config = LocalEmailConfig()
+
+    if config.enabled:
+        return send_local_email(
+            to_address=to_address,
+            subject=subject,
+            message=message,
+            trace_id=trace_id,
+            cc_addresses=cc_addresses,
+            bcc_addresses=bcc_addresses,
+            headers=headers,
+            config=config,
+        )
+
+    return send_ses_email(
+        to_address=to_address,
+        subject=subject,
+        message=message,
+    )
 
 
 def send_local_email_if_enabled(
