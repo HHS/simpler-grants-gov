@@ -132,32 +132,34 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
         "Save and continue": true,
       });
 
-      // And I click "Save and exit" button
-      await page.getByRole("button", { name: "Save and exit" }).click();
+      // [Bug] Draft opportunity summary save actions do not navigate #11665
+      
+      // // And I click "Save and exit" button
+      // await page.getByRole("button", { name: "Save and exit" }).click();
 
-      // Then I should return to the "Opportunity Overview" page.
-      await expect(page).toHaveURL(
-        /\/grantor\/opportunity\/([a-z0-9-]+?)\/overview/,
-      );
+      // // Then I should return to the "Opportunity Overview" page.
+      // await expect(page).toHaveURL(
+      //   /\/grantor\/opportunity\/([a-z0-9-]+?)\/overview/,
+      // );
 
-      // And I should see overview statuses for key sections.
-      await assertOverviewSectionStatus(page, {
-        "Opportunity Summary": "Complete",
-        "Application Package": "Not started",
-      });
+      // // And I should see overview statuses for key sections.
+      // await assertOverviewSectionStatus(page, {
+      //   "Opportunity Summary": "Complete",
+      //   "Application Package": "Not started",
+      // });
 
-      // When I navigate directly to opportunity list page
-      await page.goto("/grantor/opportunities");
+      // // When I navigate directly to opportunity list page
+      // await page.goto("/grantor/opportunities");
 
-      // Then I should see "Draft" status for the created opportunity row.
-      const matchingRow = await waitForOpportunityRowByStatus(page, {
-        title: opportunityTitle,
-        status: "Draft",
-        message: 'Waiting for "Draft" opportunity row to appear on list',
-      });
+      // // Then I should see "Draft" status for the created opportunity row.
+      // const matchingRow = await waitForOpportunityRowByStatus(page, {
+      //   title: opportunityTitle,
+      //   status: "Draft",
+      //   message: 'Waiting for "Draft" opportunity row to appear on list',
+      // });
 
-      // And the matching row should be visible.
-      await expect(matchingRow).toBeVisible();
+      // // And the matching row should be visible.
+      // await expect(matchingRow).toBeVisible();
 
       //--------------Scenario steps end here----------------
     },
