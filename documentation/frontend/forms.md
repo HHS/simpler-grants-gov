@@ -54,7 +54,16 @@ This `formDataToObject` function will:
   - all FormData values are either strings or Blobs (Files) so in order to support numbers, booleans, arrays, etc., some conversion needs to happen here
 - convert formData into a nested JSON object shape
 
-In order to do this it needs to be passed a simple form data schema object that contains the necessary data about field types and data shapes.
+In order to do proper type conversion, the function needs to know what types to use for each field. This information comes in the form of a simple data schema object that looks something like this.
+
+```
+{
+  opportunity_id: { type: "string" },
+  funding_instruments: { items: { type: "string" } }, // array
+}
+```
+
+Notice that array data types should be denoted with `{ items: { type: <your-type> } }`
 
 ### Existing data -> UI
 
