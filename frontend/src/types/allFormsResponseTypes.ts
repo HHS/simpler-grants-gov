@@ -6,7 +6,7 @@ export type VersionInformation = {
   minor_version: number;
 };
 
-export interface Form {
+export interface FormType {
   form_id: string;
   name: string;
   short_name: string;
@@ -14,7 +14,7 @@ export interface Form {
 }
 
 export interface AllFormsApiResponse extends APIResponse {
-  data: Form[];
+  data: FormType[];
   message: string;
   status_code: number;
 }

@@ -5,10 +5,12 @@ import {
   parseErrorStatus,
 } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getForms } from "src/services/fetch/fetchers/allFormsFetcher";
 import {
   createCompetitionForGrantor,
   getOpportunityForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import { notFound, redirect } from "next/navigation";
@@ -16,6 +18,7 @@ import { Button, Link } from "@trussworks/react-uswds";
 
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
+import { FormSelectModal } from "./_components/FormSelectModal";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
@@ -35,6 +38,7 @@ const ButtonSaveAndExit = ({ url }: { url: string }) => {
 async function OpportunityCompetitionPage({ params }: PageProps) {
   const { id, locale } = await params;
   const overviewUrl = "../" + id + "/overview";
+  const forms = await getForms();
 
   let opportunityData;
   try {
@@ -55,12 +59,15 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
   }
 
   let competitionId: string;
+  let competition: Competition;
   if (opportunityData.competitions?.[0]?.competition_id) {
-    competitionId = opportunityData.competitions[0].competition_id;
+    competition = opportunityData.competitions[0];
+    competitionId = competition.competition_id;
   } else {
     try {
       const competitionResponse = await createCompetitionForGrantor(id);
-      competitionId = competitionResponse.data.competition_id;
+      competition = competitionResponse.data;
+      competitionId = competition.competition_id;
     } catch (error) {
       if (error instanceof MissingAuthError) {
         return <UnauthorizedMessage />;
@@ -85,6 +92,7 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
         <ButtonSaveAndExit url={overviewUrl} />
       </OpportunityDetailsHeader>
       <CompetitionForm opportunityId={id} competitionId={competitionId} />
+      <FormSelectModal competition={competition} forms={forms.data} />
     </>
   );
 }
