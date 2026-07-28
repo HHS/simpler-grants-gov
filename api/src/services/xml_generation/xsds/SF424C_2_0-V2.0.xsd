@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:SF424C_2_0="http://apply.grants.gov/forms/SF424C_2_0-V2.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" targetNamespace="http://apply.grants.gov/forms/SF424C_2_0-V2.0" elementFormDefault="qualified" attributeFormDefault="qualified" version="2.0">
+	<xs:import namespace="http://apply.grants.gov/system/Global-V1.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd"/>
+	<xs:import namespace="http://apply.grants.gov/system/GlobalLibrary-V2.0" schemaLocation="https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd"/>
+	<xs:element name="SF424C_2_0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ProjectCosts" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="AdministrationCost" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="LandCost" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="RelocationCost" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="ArchitecturalCost" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="OtherArchitecturalCost" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="InspectionFeesCost" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="SiteWorkCost" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="DemolitionCost" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="ConstructionCost" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="EquipmentCost" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="Miscellaneous" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="CostSubtotalBeforeContingencies" type="SF424C_2_0:CostTotalGroup"/>
+							<xs:element name="Contingencies" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+							<xs:element name="CostSubtotalAfterContingencies" type="SF424C_2_0:CostTotalGroup"/>
+					    <xs:element name="ProgramIncome" type="SF424C_2_0:CostAmountGroup" minOccurs="0"/>
+					    <xs:element name="TotalProjectCosts" type="SF424C_2_0:CostTotalGroup" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="FederalFundingPercentageShareValue" minOccurs="0">
+					<xs:simpleType>
+						<xs:restriction base="xs:int">
+						<xs:minInclusive value="0"/>
+						<xs:maxInclusive value="100"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+			  <xs:element name="FederalFundingShareValue" type="SF424C_2_0:SubtotalType" minOccurs="0"/>
+      </xs:sequence>
+			<xs:attribute name="programType" type="xs:string" use="required" fixed="Construction"/>
+			<xs:attribute name="FormVersion" type="globLib:FormVersionDataType" use="required" fixed="2.0"/>
+		</xs:complexType>
+	</xs:element>
+	<!--Custom types definitions-->
+  <xs:complexType name="CostAmountGroup">
+		<xs:sequence>
+		    <xs:element name="BudgetEstimatedCostAmount" type="SF424C_2_0:EnteredAmountType" minOccurs="0"/>
+		    <xs:element name="BudgetNonAllowableCostAmount" type="SF424C_2_0:EnteredAmountType" minOccurs="0"/>
+				<xs:element name="BudgetTotalAllowableCostAmount" type="SF424C_2_0:EnteredAmountType" minOccurs="0"/>
+		</xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CostTotalGroup">
+		<xs:sequence>
+		    <xs:element name="BudgetEstimatedCostAmount" type="SF424C_2_0:SubtotalType" minOccurs="0"/>
+		    <xs:element name="BudgetNonAllowableCostAmount" type="SF424C_2_0:SubtotalType" minOccurs="0"/>
+				<xs:element name="BudgetTotalAllowableCostAmount" type="SF424C_2_0:SubtotalType" minOccurs="0"/>
+		</xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="EnteredAmountType">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0.00"/>
+			<xs:maxInclusive value="9999999999.99"/>
+			<xs:totalDigits value="12"/>
+			<xs:fractionDigits value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+  <xs:simpleType name="SubtotalType">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0.00"/>
+			<xs:maxInclusive value="999999999999.99"/>
+			<xs:totalDigits value="14"/>
+			<xs:fractionDigits value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
+
+

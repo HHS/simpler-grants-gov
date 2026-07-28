@@ -1,7 +1,7 @@
 #==============================================
 # Stage 0: UV binary source
 #==============================================
-ARG UV_VERSION=0.11.15
+ARG UV_VERSION=0.11.33
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
 
 #==============================================
@@ -181,12 +181,12 @@ RUN dnf install -y \
       libsmartcols-2.37.4-1.amzn2023.0.5 \
       libuuid-2.37.4-1.amzn2023.0.5 && \
     # July ALAS batch: glib2 (1942), krb5-libs (1939), rust-toolset-srpm-macros (1951),
-    # kernel6.18-headers (1969), libacl (1986)
-    dnf update -y --releasever=2023.12.20260720 \
+    # kernel6.18-headers (ALAS2023-2026-2003), libacl (1986)
+    dnf update -y --releasever=2023.12.20260727 \
       glib2-2.82.2-770.amzn2023 \
       krb5-libs-1.21.3-8.amzn2023.0.1 \
       rust-toolset-srpm-macros-1.97.0-1.amzn2023.0.1 \
-      kernel6.18-headers-6.18.38-73.137.amzn2023 \
+      kernel6.18-headers-6.18.38-76.139.amzn2023 \
       libacl-2.4.0-1.amzn2023.0.1 && \
     dnf clean all && \
     # Remove the system Python RPMs

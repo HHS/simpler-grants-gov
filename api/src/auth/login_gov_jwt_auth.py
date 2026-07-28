@@ -55,3 +55,28 @@ def get_login_gov_redirect_uri(
     AuthHandler(db_session).create_login_gov_state(state, nonce)
 
     return f"{config.login_gov_auth_endpoint}?{encoded_params}"
+
+
+def get_login_gov_logout_redirect_uri(config: LoginGovConfig | None = None) -> str:
+    if config is None:
+        config = get_config()
+
+    redirect_uri = flask.url_for(
+        ".user_logout_callback", _external=True, _scheme=config.login_gov_redirect_scheme
+    )
+
+    url_params = {
+        "client_id": config.client_id,
+        "post_logout_redirect_uri": redirect_uri,
+        # Note that we don't use the state in the logout callback
+        # but include it just for consistency. There's no replay attack
+        # we need to prevent in callback logic since that endpoint just
+        # does a redirect to our frontend and doesn't care about anything else.
+        "state": uuid.uuid4(),
+    }
+
+    # We want to redirect to the logout endpoint of login.gov
+    # See: https://developers.login.gov/oidc/logout/
+    encoded_params = urllib.parse.urlencode(url_params)
+
+    return f"{config.login_gov_logout_endpoint}?{encoded_params}"
