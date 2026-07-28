@@ -17,8 +17,6 @@ locals {
       "--set-current",
       "--store-version"
     ],
-    # Mirrors dev. Note: DMS is disabled in infra-dev initially, so this load has
-    # nothing to pull until the Grants.gov Oracle/DMS connection is enabled.
     "infra-dev" = [
       "flask",
       "data-migration",
@@ -117,8 +115,6 @@ locals {
   }
   setup-lower-env-agencies-state = {
     dev = "ENABLED"
-    # infra-dev mirrors dev's scheduled-job states (DMS is disabled in infra-dev
-    # initially — see the load-transform-args note above).
     "infra-dev" = "ENABLED"
     staging     = "ENABLED"
     training    = "DISABLED"
