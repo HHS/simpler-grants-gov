@@ -65,8 +65,7 @@ export const uploadFileToS3 = async (
     body: fileFormData,
   });
   if (!s3Response.ok) {
-    const errorBody = await s3Response.text();
-    logger.error(`S3 upload failed (${s3Response.status}): ${errorBody}`);
+    logger.error(`S3 upload failed with status ${s3Response.status}`);
     throw new ApiRequestError("Error uploading file to S3");
   }
   return true;
