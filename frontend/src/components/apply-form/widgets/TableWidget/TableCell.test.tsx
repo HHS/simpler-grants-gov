@@ -167,6 +167,10 @@ describe("TableCell", () => {
     expect(screen.getByTestId("input-cell-read-only")).toHaveTextContent(
       "100.00",
     );
+    expect(screen.getByTestId("input-cell-read-only")).toHaveAttribute(
+      "tabindex",
+      "-1",
+    );
   });
 
   it("supports keyboard focus for editable values", async () => {
@@ -225,6 +229,7 @@ describe("TableCell", () => {
 
     const input = screen.getByTestId("input-cell-with-errors-input");
     expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveClass("usa-input--error");
     expect(input).toHaveAttribute(
       "aria-describedby",
       "error-for-input-cell-with-errors",

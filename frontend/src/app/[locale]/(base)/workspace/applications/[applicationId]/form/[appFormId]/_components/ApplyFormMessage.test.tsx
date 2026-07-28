@@ -303,14 +303,7 @@ describe("ApplyFormMessage", () => {
 
     await user.click(link);
 
-    // JSDOM does not automatically focus anchor targets; emulate navigation
-    window.location.hash = "#contact_people_test[1]--first_name";
-
-    // The TableWidget input for row 1 (entry 2) should exist and can be focused
     const input = screen.getByTestId("contact_people_test-1-0-input");
-
-    // Emulate browser focusing the anchor target after navigation
-    input.focus();
 
     expect(input).toHaveFocus();
   });

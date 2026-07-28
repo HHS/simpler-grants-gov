@@ -108,6 +108,105 @@ describe("TableWidget", () => {
     });
   });
 
+  it("uses the HTML field name as the editable input id for summary anchors", () => {
+    const tableProps: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        type: "multiField",
+        name: "budget_424c_table_1",
+        widget: "Table",
+        definition: ["/properties/budget_information"],
+        children: {
+          columns: [
+            { columnHeader: "Category" },
+            { columnHeader: "Total Cost" },
+          ],
+          rows: [
+            {
+              cells: [
+                { type: "plainText", staticContent: "Admin" },
+                {
+                  type: "input",
+                  definition:
+                    "/properties/administrative_and_legal_expenses/properties/total_cost",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    render(
+      <TableWidget
+        {...tableProps}
+        schema={{}}
+        rawErrors={[]}
+        value={{ administrative_and_legal_expenses: { total_cost: 100 } }}
+        options={{}}
+      />,
+    );
+
+    const input = screen.getByTestId("budget_424c_table_1-0-1-input");
+
+    expect(input).toHaveAttribute(
+      "id",
+      "budget_information--administrative_and_legal_expenses--total_cost",
+    );
+    expect(input).toHaveAttribute(
+      "name",
+      "budget_information--administrative_and_legal_expenses--total_cost",
+    );
+  });
+
+  it("uses the first column label as the row label and the column header for editable table input aria-labels", () => {
+    const tableProps: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        type: "multiField",
+        name: "budget_424c_table_1",
+        widget: "Table",
+        definition: ["/properties/budget_information"],
+        children: {
+          columns: [
+            { columnHeader: "Category" },
+            { columnHeader: "Total Cost" },
+          ],
+          rows: [
+            {
+              cells: [
+                {
+                  type: "plainText",
+                  staticContent: "Administrative and legal expenses",
+                },
+                {
+                  type: "input",
+                  definition:
+                    "/properties/administrative_and_legal_expenses/properties/total_cost",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    render(
+      <TableWidget
+        {...tableProps}
+        schema={{}}
+        rawErrors={[]}
+        value={{ administrative_and_legal_expenses: { total_cost: 100 } }}
+        options={{}}
+      />,
+    );
+
+    expect(screen.getByTestId("budget_424c_table_1-0-1-input")).toHaveAttribute(
+      "aria-label",
+      "Administrative and legal expenses, Total Cost",
+    );
+  });
+
   it("prefixes nested table input names with the multiField root when configured under one parent object", () => {
     const tableProps: TableWidgetProps = {
       ...props,

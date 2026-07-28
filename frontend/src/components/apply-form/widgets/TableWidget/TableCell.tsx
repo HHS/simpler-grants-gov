@@ -17,6 +17,8 @@ type TableCellProps = {
   id: string;
   /** HTML form name for the cell input */
   name?: string;
+  /** Optional accessible label for the editable input */
+  ariaLabel?: string;
   /** The value to display or edit in the cell */
   value?: number | string | null;
   /** Whether the cell should be disabled (read-only mode) */
@@ -80,6 +82,7 @@ function TableCell({
   cellErrors = [],
   id,
   name,
+  ariaLabel,
   value,
   disabled = false,
   onChange,
@@ -97,7 +100,11 @@ function TableCell({
   if (cell.type === "readOnly" || (cell.type === "input" && disabled)) {
     const renderedValue = formatTableCellValue(value, cell.format);
     return (
-      <span className={READ_ONLY_OUTPUT_CLASS} data-testid={`${id}-read-only`}>
+      <span
+        className={READ_ONLY_OUTPUT_CLASS}
+        data-testid={`${id}-read-only`}
+        tabIndex={-1}
+      >
         {renderedValue === "" ? "\u00A0" : renderedValue}
       </span>
     );
@@ -112,14 +119,17 @@ function TableCell({
     }
   };
   const hasError = cellErrors.length > 0;
+  const inputId = name ?? id;
   return (
     <>
       {hasError && <FieldErrors fieldName={id} rawErrors={cellErrors} />}
       <input
-        aria-label={`Editable table value for ${cell.definition}`}
-        className="usa-input margin-0 width-full overflow-x-auto"
+        aria-label={ariaLabel ?? `Editable table value for ${cell.definition}`}
+        className={`usa-input margin-0 width-full overflow-x-auto${
+          hasError ? " usa-input--error" : ""
+        }`}
         data-testid={`${id}-input`}
-        id={id}
+        id={inputId}
         name={name}
         inputMode="decimal"
         onChange={handleChange}
