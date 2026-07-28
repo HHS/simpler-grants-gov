@@ -200,3 +200,42 @@ def my_example_endpoint(db_session: db.Session) -> response.ApiResponse:
     return response.ApiResponse(message="Success", data=result)
 ```
 
+## Logout
+
+Logout will log you out of both our system by invalidating your
+JWT token obtained during login, as well as logging you out of
+login.gov. Our logout process works even if you provide no
+token, or your current token is invalid in order to ensure that
+if you want to logout, we'll always try to do as much as we can
+and log you out of login.gov.
+
+If a user is already fully logged out of both systems, logout
+will still work, and a user will be redirected through the flow
+although nothing will happen.
+
+### Logout Flow
+```mermaid
+sequenceDiagram
+    autonumber
+    participant frontend
+    participant api
+    participant login.gov
+
+    frontend->>+api: user clicks logout
+    Note over api: /users/logout
+
+    opt If token provided
+        Note over api: Invalidate JWT token
+    end
+
+    api->>-login.gov: redirect
+    activate login.gov
+    Note over login.gov: /logout
+    login.gov->>+api: redirect
+    deactivate login.gov
+
+    Note over api: /users/logout/callback
+
+    api->>-frontend: redirect
+    Note over frontend: /logout
+  ```

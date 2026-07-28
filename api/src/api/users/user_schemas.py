@@ -130,6 +130,20 @@ class UserLoginSchema(Schema):
     )
 
 
+class UserLoginGovLogoutCallbackSchema(Schema):
+    # This is defining the inputs we receive on the callback from login.gov's
+    # logout endpoint and must match:
+    # https://developers.login.gov/oidc/logout/
+    state = fields.String(
+        metadata={
+            "description": "The state value originally provided by us when calling login.gov"
+        },
+        # We don't use the state, but it can be passed, so allow it to be missing/null.
+        required=False,
+        allow_none=True,
+    )
+
+
 class UserTokenRefreshResponseSchema(AbstractResponseSchema):
     # No data returned
     data = fields.MixinField(metadata={"example": None})
