@@ -78,7 +78,7 @@ export default async function FormPage({ params }: FormPageProps) {
         event: "pdf_rendering_failed",
         application_id: applicationId,
         application_form_id: applicationFormId,
-        has_internal_token: hasInternalToken,
+        has_internal_token_header: hasInternalToken,
         error_category: errorCategory,
       },
       "PDF print page rendering failed",

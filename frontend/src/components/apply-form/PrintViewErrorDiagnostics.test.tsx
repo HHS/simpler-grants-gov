@@ -48,6 +48,7 @@ describe("PrintViewErrorDiagnostics", () => {
       supportEmail: "support@grants.gov",
       supportUnitedStatesPhone: "1-800-518-4726 (U.S.)",
       supportInternationalPhone: "1-606-545-5035 (International)",
+      internalTokenHeaderPresentLabel: "Internal token header present",
     });
   });
 
@@ -55,7 +56,7 @@ describe("PrintViewErrorDiagnostics", () => {
     { hasInternalToken: true, expectedDisplayValue: "yes" },
     { hasInternalToken: false, expectedDisplayValue: "no" },
   ])(
-    "renders token presence as $expectedDisplayValue when hasInternalToken is $hasInternalToken",
+    "renders internal token header presence as $expectedDisplayValue when hasInternalToken is $hasInternalToken",
     ({ hasInternalToken, expectedDisplayValue }) => {
       render(
         <PrintViewErrorDiagnostics
@@ -64,7 +65,9 @@ describe("PrintViewErrorDiagnostics", () => {
         />,
       );
 
-      expect(screen.getByText("internalTokenPresentLabel")).toBeInTheDocument();
+      expect(
+        screen.getByText("internalTokenHeaderPresentLabel"),
+      ).toBeInTheDocument();
       expect(screen.getByText(expectedDisplayValue)).toBeInTheDocument();
     },
   );

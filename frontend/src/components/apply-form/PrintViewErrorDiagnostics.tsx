@@ -99,7 +99,9 @@ export default function PrintViewErrorDiagnostics({
               <td>{errorCategory}</td>
             </tr>
             <tr>
-              <th scope="row">{translate("internalTokenPresentLabel")}</th>
+              <th scope="row">
+                {translate("internalTokenHeaderPresentLabel")}
+              </th>
               <td>{hasInternalToken ? translate("yes") : translate("no")}</td>
             </tr>
           </tbody>

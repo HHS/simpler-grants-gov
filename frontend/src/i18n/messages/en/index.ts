@@ -2656,7 +2656,7 @@ export const messages = {
     applicationIdLabel: "Application ID",
     applicationFormIdLabel: "Application form ID",
     errorCategoryLabel: "Error category",
-    internalTokenPresentLabel: "Internal token present",
+    internalTokenHeaderPresentLabel: "Internal token header present",
     yes: "Yes",
     no: "No",
   },
