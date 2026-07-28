@@ -323,17 +323,16 @@ wheels = [
 
 [[package]]
 name = "common-grants-sdk"
-version = "0.8.0"
+version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "marshmallow" },
     { name = "pydantic" },
-    { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/51/bd/1b0df14f72bcab03b5cca1f78cf8a61c43ae7f357bfedb4f338745d88586/common_grants_sdk-0.8.0.tar.gz", hash = "sha256:8cb1e9010511cd43f18fb18e645094a2c706c9c167940c6966ee1b01db51ed6c", size = 59135, upload-time = "2026-07-16T20:48:06.59Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/28/ab/14498c32bdd065a43b13e2ee11b3f0fdbe275eacd695bcc74b5db9a47e32/common_grants_sdk-0.7.0.tar.gz", hash = "sha256:31695f0a41d54aedb7b883c2ef711de8d8e1c3a486f03511c72ea234432dad58", size = 42450, upload-time = "2026-06-22T19:07:19.399Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d8/fe/57fe4d10574dc8f0bb9ce8c393209c57b66475d569ea808bc8b0a11c1849/common_grants_sdk-0.8.0-py3-none-any.whl", hash = "sha256:64887c563161132af2f9dac2e6521793a7844e5cfefba7e58253dca62c993f7a", size = 83543, upload-time = "2026-07-16T20:48:07.706Z" },
+    { url = "https://files.pythonhosted.org/packages/bf/3b/65b839f53001daf6b53de73acac291c4666de54ca0aab90536e60ac2c4dd/common_grants_sdk-0.7.0-py3-none-any.whl", hash = "sha256:26852c8f560302379b286c944c0b973658262660c9996c628b4556665ecef718", size = 64641, upload-time = "2026-06-22T19:07:20.2Z" },
 ]
 
 [[package]]
@@ -1798,7 +1797,7 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.14.3,<5" },
     { name = "boto3", specifier = ">=1.28.62,<2" },
     { name = "botocore", specifier = ">=1.31.62,<2" },
-    { name = "common-grants-sdk", specifier = "~=0.8.0" },
+    { name = "common-grants-sdk", specifier = "~=0.7.0" },
     { name = "defusedxml", specifier = ">=0.7.1,<0.8" },
     { name = "docraptor", specifier = ">=3.0.0,<4" },
     { name = "flask-cors", specifier = ">=6.0.0,<7" },
