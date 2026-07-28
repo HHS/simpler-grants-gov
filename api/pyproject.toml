@@ -40,7 +40,7 @@ dependencies = [
     "docraptor>=3.0.0,<4",
     "jsonpath-ng>=1.7.0,<2",
     "prettytable>=3.16.0,<4",
-    "common-grants-sdk~=0.7.0",
+    "common-grants-sdk~=0.8.0",
     "PyYAML>=6.0.3,<7",
     "jsonref>=1.1.0,<2",
     "urllib3>=2.7.0,<3",
@@ -82,7 +82,7 @@ dev = [
     "setuptools>=75.0.0,<76",
     "pydot==3.0.4",
     "sadisplay==0.4.9",
-    "ruff>=0.15.0,<0.16",
+    "ruff>=0.16,<0.17",
     "debugpy>=1.8.1,<2",
     "freezegun>=1.5.0,<2",
     "types-requests>=2.31,<3",
@@ -100,7 +100,7 @@ module-root = ""
 source-include = ["newrelic.ini"]
 
 [build-system]
-requires = ["uv_build>=0.11.28,<0.11.29"]
+requires = ["uv_build>=0.11.33,<0.11.34"]
 build-backend = "uv_build"
 
 [tool.black]
