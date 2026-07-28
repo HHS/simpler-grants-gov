@@ -59,7 +59,6 @@ export const uploadFileToS3 = async (
     "file",
     new File([buffer] as BlobPart[], file.name, { type: file.type }),
   );
-  logger.info(`Uploading to ${url}`);
   const s3Response = await fetch(url, {
     method: "POST",
     body: fileFormData,
