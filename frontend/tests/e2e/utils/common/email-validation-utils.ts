@@ -27,6 +27,15 @@ export type AssertEmailValidationsOptions = {
 const toKebabCase = (value: string): string =>
   value.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
 
+const toHumanLabel = (value: string): string =>
+  value
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[-_]/g, " ")
+    .trim();
+
+const escapeRegExp = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const resolveFieldLocatorSelector = (
   fieldDefinition: EmailValidationFieldDefinition,
 ): string => fieldDefinition.selector ?? `#${fieldDefinition.valueKey}`;
@@ -59,6 +68,13 @@ export async function assertEmailValidationsFromDefinitions(
     if (!(await field.count())) {
       const kebabSelector = `#${toKebabCase(fieldDefinition.valueKey)}`;
       field = page.locator(kebabSelector);
+    }
+
+    if (!(await field.count())) {
+      const label = toHumanLabel(fieldDefinition.valueKey);
+      field = page.getByRole("textbox", {
+        name: new RegExp(`^${escapeRegExp(label)}$`, "i"),
+      });
     }
 
     await expect(field).toBeVisible();
