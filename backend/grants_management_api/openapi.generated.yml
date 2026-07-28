@@ -120,6 +120,57 @@ paths:
       summary: User Token Refresh
       security:
       - ApiJwtAuth: []
+  /v1/users/{mgmt_user_id}/can_access:
+    post:
+      parameters:
+      - in: path
+        name: mgmt_user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MgmtUserCanAccessResponseSchema'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Check whether the calling user can access a resource with the given
+        privileges.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MgmtUserCanAccessRequestSchema'
+      security:
+      - ApiJwtAuth: &id001 []
+      - ApiUserKeyAuth: *id001
 openapi: 3.1.0
 components:
   schemas:
@@ -232,9 +283,68 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    MgmtUserCanAccessResponseSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    MgmtUserCanAccessRequestSchema:
+      type: object
+      properties:
+        mgmt_resource_id:
+          type: string
+          format: uuid
+          description: The ID of the resource to check access against
+          example: 123e4567-e89b-12d3-a456-426614174000
+        mgmt_resource_type:
+          description: The type of the resource to check access against
+          enum:
+          - internal
+          - department
+          - subagency
+          - team
+          - opportunity
+          type:
+          - string
+        mgmt_privileges:
+          type: array
+          minItems: 1
+          description: The privileges the user must have against the resource. The
+            user must have all of them.
+          items:
+            enum:
+            - view_department
+            - update_department
+            - manage_department_members
+            - view_subagency
+            - update_subagency
+            - manage_subagency_members
+            - view_team
+            - update_team
+            - manage_team_members
+            - create_team
+            - delete_team
+            type:
+            - string
+      required:
+      - mgmt_privileges
+      - mgmt_resource_id
+      - mgmt_resource_type
   securitySchemes:
     ApiJwtAuth:
       type: apiKey
       name: X-MGMT-Token
+      in: header
+    ApiUserKeyAuth:
+      type: apiKey
+      name: X-API-Key
       in: header
 
