@@ -2044,6 +2044,158 @@ KEY_CONTACTS_TEST_CASES = [
 ]
 
 
+SF424C_TEST_CASES = [
+    {
+        "name": "sf424c_construction_only",
+        "json_input": {
+            "budget_information": {
+                "construction": {
+                    "total_cost": "500000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "500000.00",
+                },
+                # CostSubtotalBeforeContingencies and CostSubtotalAfterContingencies
+                # have no minOccurs="0" in the XSD — they are required whenever
+                # ProjectCosts is present, regardless of how many rows are filled.
+                "subtotal_1": {
+                    "total_cost": "500000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "500000.00",
+                },
+                "subtotal_2": {
+                    "total_cost": "500000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "500000.00",
+                },
+                "total_project_costs": {
+                    "total_cost": "500000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "500000.00",
+                },
+            },
+            "federal_funding": {
+                "federal_percentage_share": 80,
+                "federal_funding_share": "400000.00",
+            },
+        },
+        "form_name": "SF424C",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424C_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        # All 16 rows filled — covers every XSD element inside ProjectCosts,
+        # including project_income (ProgramIncome) which sits between
+        # CostSubtotalAfterContingencies and TotalProjectCosts in the XSD sequence.
+        "name": "sf424c_all_budget_rows",
+        "json_input": {
+            "budget_information": {
+                "administrative_and_legal_expenses": {
+                    "total_cost": "10000.00",
+                    "non_allowable_cost": "1000.00",
+                    "total_allowable_cost": "9000.00",
+                },
+                "land_structures_rights_of_way": {
+                    "total_cost": "50000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "50000.00",
+                },
+                "relocation_expenses": {
+                    "total_cost": "5000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "5000.00",
+                },
+                "architectural_engineering_fees": {
+                    "total_cost": "30000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "30000.00",
+                },
+                "other_architectural_engineering_fees": {
+                    "total_cost": "10000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "10000.00",
+                },
+                "project_inspection_fees": {
+                    "total_cost": "8000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "8000.00",
+                },
+                "site_work": {
+                    "total_cost": "20000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "20000.00",
+                },
+                "demolition_and_removal": {
+                    "total_cost": "7000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "7000.00",
+                },
+                "construction": {
+                    "total_cost": "500000.00",
+                    "non_allowable_cost": "50000.00",
+                    "total_allowable_cost": "450000.00",
+                },
+                "equipment": {
+                    "total_cost": "75000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "75000.00",
+                },
+                "miscellaneous": {
+                    "total_cost": "5000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "5000.00",
+                },
+                "subtotal_1": {
+                    "total_cost": "720000.00",
+                    "non_allowable_cost": "51000.00",
+                    "total_allowable_cost": "669000.00",
+                },
+                "contingencies": {
+                    "total_cost": "36000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "36000.00",
+                },
+                "subtotal_2": {
+                    "total_cost": "756000.00",
+                    "non_allowable_cost": "51000.00",
+                    "total_allowable_cost": "705000.00",
+                },
+                "project_income": {
+                    "total_cost": "10000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "10000.00",
+                },
+                "total_project_costs": {
+                    "total_cost": "746000.00",
+                    "non_allowable_cost": "51000.00",
+                    "total_allowable_cost": "695000.00",
+                },
+            },
+            "federal_funding": {
+                "federal_percentage_share": 75,
+                "federal_funding_share": "521250.00",
+            },
+        },
+        "form_name": "SF424C",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424C_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        # No budget rows — ProjectCosts element is omitted entirely.
+        # Validates the root element with only federal funding fields.
+        "name": "sf424c_federal_funding_only",
+        "json_input": {
+            "federal_funding": {
+                "federal_percentage_share": 100,
+                "federal_funding_share": "250000.00",
+            },
+        },
+        "form_name": "SF424C",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424C_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+]
+
+
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
 
@@ -2054,6 +2206,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         SF424_TEST_CASES
         + SF424A_TEST_CASES
         + SF424B_TEST_CASES
+        + SF424C_TEST_CASES
         + SFLLL_TEST_CASES
         + CD511_TEST_CASES
         + GG_LOBBYING_FORM_TEST_CASES

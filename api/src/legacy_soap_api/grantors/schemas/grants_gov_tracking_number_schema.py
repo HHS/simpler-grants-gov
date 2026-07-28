@@ -29,3 +29,11 @@ class GrantsGovTrackingNumberRequiredSchema(BaseSOAPSchema):
                 message=INVALID_TRACKING_NUMBER_ERR, fault=InvalidGrantsGovTrackingNumber
             )
         return value
+
+    @field_validator("grants_gov_tracking_number", mode="before")
+    @classmethod
+    def get_value_from_dict(cls, value: str | dict) -> str | None:
+        if isinstance(value, dict):
+            return value.get("#text")
+        else:
+            return value

@@ -148,10 +148,10 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
         soap_request_dict = client.get_soap_request_dict()
         with pytest.raises(SOAPFaultException) as exc_info:
             grantors_schemas.GetApplicationZipRequest(**soap_request_dict)
-        assert exc_info.value.message == "No grants_gov_tracking_number provided."
+        assert exc_info.value.message == "GrantsGovTrackingNumber is a required value."
         assert (
             exc_info.value.fault.faultstring
-            == "Failed to validate request. cvc-pattern-valid: Value is not facet-valid with respect to pattern 'GRANT[0-9]{8}' for type 'GrantsGovTrackingNumberType'."
+            == "Failed to validate request. cvc-complex-type.2.4.b: The content of element is not complete. One of {https://apply.grants.gov/system/GrantsCommonElements-V1.0:GrantsGovTrackingNumber} is expected."
         )
 
     def test_get_application_zip_request_schema_handles_a_dict_for_the_grants_gov_tracking_number(

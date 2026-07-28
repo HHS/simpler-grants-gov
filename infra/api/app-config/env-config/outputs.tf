@@ -6,6 +6,7 @@ output "search_config" {
     engine_version          = var.search_engine_version
     volume_size             = var.search_data_volume_size
     availability_zone_count = var.search_availability_zone_count
+    sso_admin_role_name     = var.search_sso_admin_role_name
   } : null
 }
 

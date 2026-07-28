@@ -176,7 +176,7 @@ lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 
 # Docker starts the image for the DB but it's not quite
 # ready to accept connections so we add a brief wait script
-init-db: start-db setup-postgres-db db-migrate
+init-db: start-db setup-postgres-db db-migrate setup-internal-resource
 
 start-db:
 	docker compose -f ../docker-compose.db.yml up --detach grants-db
@@ -184,6 +184,9 @@ start-db:
 
 setup-postgres-db: ## Does any initial setup necessary for our local database to work
 	$(PY_RUN_CMD) setup-postgres-db
+
+setup-internal-resource: ## Create the statically defined internal resource record (runs after migrations)
+	$(PY_RUN_CMD) setup-internal-resource
 
 #########################
 # DB Migrations
@@ -244,7 +247,13 @@ start-mock-oauth2:
 cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of CLI commands)
 	$(FLASK_CMD) $(args)
 
-# TODO - in the API side, we use the openapi-tools docker image
-# We haven't set that up yet on this side, so changed it to grants-management-api for now
 openapi-spec: ## Generate OpenAPI spec
-	docker compose run --rm -e DB_CHECK_CONNECTION_ON_INIT=false grants-management-api flask --app src.app spec --format yaml --output openapi.generated.yml
+	docker compose run --rm -e DB_CHECK_CONNECTION_ON_INIT=false openapi-tools flask --app src.app spec --format yaml --output openapi.generated.yml
+
+##################################################
+# ERD Diagrams
+##################################################
+
+create-erds: ## Create ERD diagrams for our DB schema
+	docker compose run --rm openapi-tools create-erds
+	mv bin/*.png ../../documentation/api/database/erds

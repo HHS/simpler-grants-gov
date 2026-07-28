@@ -1,7 +1,7 @@
 // @ts-check
 
 const withNextIntl = require("next-intl/plugin")();
-const nrExternals = require("@newrelic/next/load-externals");
+const nrExternals = require("newrelic/load-externals");
 
 /**
  * Configure the base path for the app. Useful if you're deploying to a subdirectory (like GitHub Pages).

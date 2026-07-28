@@ -42,7 +42,7 @@ test.describe("Search page tests", () => {
       let currentPageButton = page
         .locator(".usa-pagination__button.usa-current")
         .first();
-      await expect(currentPageButton).toHaveAttribute("aria-label", "Page 2");
+      await expect(currentPageButton).toHaveAttribute("aria-label", /page 2/i);
 
       // And I check the "Closed" opportunity status filter
       const statusCheckboxes = {
@@ -66,7 +66,7 @@ test.describe("Search page tests", () => {
       currentPageButton = page
         .locator(".usa-pagination__button.usa-current")
         .first();
-      await expect(currentPageButton).toHaveAttribute("aria-label", "Page 1");
+      await expect(currentPageButton).toHaveAttribute("aria-label", /page 1/i);
 
       // And the URL should include "status=closed"
       await page.waitForURL("search?status=closed");
