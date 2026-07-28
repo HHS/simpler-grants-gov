@@ -1,4 +1,8 @@
-import { ApiRequestError, parseErrorStatus } from "src/errors";
+import {
+  ApiRequestError,
+  MissingAuthError,
+  parseErrorStatus,
+} from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import {
@@ -38,6 +42,9 @@ async function OpportunityOverviewPage({ params, searchParams }: PageProps) {
     const response = await getOpportunityForGrantor(id);
     opportunityData = response.data;
   } catch (error) {
+    if (error instanceof MissingAuthError) {
+      return <UnauthorizedMessage />;
+    }
     const status = parseErrorStatus(error as ApiRequestError);
     if (status === 404) {
       notFound();

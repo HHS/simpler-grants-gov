@@ -199,23 +199,18 @@ describe("OpportunityOverviewPage", () => {
       expect(screen.getByTestId("alert")).toBeVisible();
     });
 
-    // Documents current behavior, not desired behavior: unlike edit/page.tsx and
-    // competition/page.tsx, overview/page.tsx has no `instanceof MissingAuthError`
-    // branch, so this rethrows instead of rendering UnauthorizedMessage. Flagged
-    // separately as a possible follow-up - not changed as part of this ticket.
-    it("rethrows MissingAuthError instead of showing UnauthorizedMessage", async () => {
+    it("shows UnauthorizedMessage when getOpportunityForGrantor throws MissingAuthError", async () => {
       mockGetOpportunityForGrantor.mockRejectedValue(
         new MissingAuthError("missing auth"),
       );
 
-      const error = await wrapForExpectedError(() =>
-        OpportunityOverviewPage({
-          params: pageParams,
-          searchParams: emptySearchParams,
-        }),
-      );
+      const component = await OpportunityOverviewPage({
+        params: pageParams,
+        searchParams: emptySearchParams,
+      });
+      render(component);
 
-      expect(error).toBeInstanceOf(MissingAuthError);
+      expect(screen.getByTestId("alert")).toBeVisible();
     });
   });
 
