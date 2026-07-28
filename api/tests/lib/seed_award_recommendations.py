@@ -41,7 +41,7 @@ from tests.src.workflow.workflow_test_util import build_start_workflow_event, se
 logger = logging.getLogger(__name__)
 
 
-def _build_award_recommendations(db_session: db.Session) -> None:
+def _build_award_recommendations(db_session: db.Session, seed_award_recommendation_workflows: bool) -> None:
     """
     Create award recommendations with application submissions for testing.
 
@@ -93,9 +93,10 @@ def _build_award_recommendations(db_session: db.Session) -> None:
     award_recommendations_created.extend(
         _create_static_scenario(db_session, competition, applications[:10])
     )
-    award_recommendations_created.extend(
-        _create_workflow_state_scenarios(db_session, competition, applications)
-    )
+    if seed_award_recommendation_workflows:
+        award_recommendations_created.extend(
+            _create_workflow_state_scenarios(db_session, competition, applications)
+        )
 
     _log_summary(award_recommendations_created)
     seed_award_recommendation_risks_and_submissions(db_session, award_recommendations_created)
