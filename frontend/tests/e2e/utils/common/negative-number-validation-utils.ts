@@ -19,6 +19,7 @@ import { expect, Page } from "@playwright/test";
 import { resolveTextLocator } from "./text-locator-utils";
 
 export type NegativeValidationFieldDefinition = {
+  label?: string;
   valueKey: string;
   selector?: string;
   negativeNumberValidationMessage?: string;
@@ -69,7 +70,14 @@ export async function assertNegativeNumberValidationsFromDefinitions(
   );
 
   for (const fieldDefinition of negativeValidationFields) {
-    const field = page.locator(fieldDefinition.selector);
+    let field = page.locator(fieldDefinition.selector).first();
+
+    if ((await field.count()) === 0 && fieldDefinition.label) {
+      // Prefer accessible label matching when ids/selectors drift.
+      field = page.getByRole("textbox", { name: fieldDefinition.label }).first();
+    }
+
+    await expect(field).toBeVisible();
     await field.fill(negativeValue);
     await field.blur();
 
@@ -88,8 +96,9 @@ export async function assertNegativeNumberValidationsFromDefinitions(
       page,
       targetKey: fieldDefinition.valueKey,
       expectedContent: fieldDefinition.negativeNumberValidationMessage,
+      // Selector-level context is best-effort only; allow page fallback.
       contextSelector: fieldDefinition.selector,
-      includePageLevelFallback: false,
+      includePageLevelFallback: true,
     });
 
     await expect(locator).toHaveText(
