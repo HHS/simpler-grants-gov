@@ -5,6 +5,9 @@ import {
   type ValidationMetadata,
 } from "./types";
 
+const escapeRegExp = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 /**
  * Shared helpers for metadata-driven required-field validation assertions.
  *
@@ -102,14 +105,38 @@ export async function assertRequiredFieldValidationsFromDefinitions(
     for (const definition of getRequiredValidationFields(definitions)) {
       await expect(errorSummary).toContainText(definition.requiredFieldMessage);
 
-      const inlineErrorScope = definition.inlineErrorSelector
-        ? page.locator(definition.inlineErrorSelector).first()
-        : definition.selector
-          ? page
-              .locator(definition.selector)
-              .first()
-              .locator('xpath=ancestor::*[@data-testid="formGroup"][1]')
-          : page.locator("body");
+      let inlineErrorScope;
+
+      if (definition.inlineErrorSelector) {
+        inlineErrorScope = page.locator(definition.inlineErrorSelector).first();
+      } else if (definition.selector) {
+        const selectorField = page.locator(definition.selector).first();
+        if ((await selectorField.count()) > 0) {
+          inlineErrorScope = selectorField.locator(
+            'xpath=ancestor::*[@data-testid="formGroup"][1]',
+          );
+        } else {
+          // Field IDs can change as forms evolve; label lookup is more stable.
+          const fieldByLabel = page
+            .getByLabel(new RegExp(`^${escapeRegExp(definition.label)}\\*?$`, "i"))
+            .first();
+          if ((await fieldByLabel.count()) > 0) {
+            inlineErrorScope = fieldByLabel.locator(
+              'xpath=ancestor::*[@data-testid="formGroup"][1]',
+            );
+          } else {
+            inlineErrorScope = page
+              .getByRole("alert")
+              .filter({ hasText: definition.requiredFieldMessage })
+              .first();
+          }
+        }
+      } else {
+        inlineErrorScope = page
+          .getByRole("alert")
+          .filter({ hasText: definition.requiredFieldMessage })
+          .first();
+      }
 
       await expect(inlineErrorScope).toContainText(
         definition.requiredFieldMessage,

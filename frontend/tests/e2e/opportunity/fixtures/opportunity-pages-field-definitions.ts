@@ -141,7 +141,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
       label: "Expected number of awards",
       type: "text",
       valueKey: "expectedNumberOfAwards",
-      selector: "#expected-number-of-awards",
+      selector: "#expected_number_of_awards",
       required: false,
       // Un-comment after bug fixed
       // negativeNumberValidationMessage:
@@ -151,7 +151,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
       label: "Estimated total program funding",
       type: "text",
       valueKey: "estimatedTotalProgramFunding",
-      selector: "#estimated-total-program-funding",
+      selector: "#estimated_total_program_funding",
       required: false,
       negativeNumberValidationMessage:
         "Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
@@ -160,7 +160,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
       label: "Award minimum",
       type: "text",
       valueKey: "awardMinimum",
-      selector: "#award-minimum",
+      selector: "#award_floor",
       required: false,
       negativeNumberValidationMessage:
         "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
@@ -169,7 +169,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
       label: "Award maximum",
       type: "text",
       valueKey: "awardMaximum",
-      selector: "#award-maximum",
+      selector: "#award_ceiling",
       required: false,
       negativeNumberValidationMessage:
         "Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
@@ -178,7 +178,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
       label: "Publish date",
       type: "date",
       valueKey: "publishDate",
-      selector: "#publish-date",
+      selector: "#post_date",
       required: true,
       requiredFieldMessage: "Enter a publish date.",
     },
@@ -197,13 +197,13 @@ export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[
       name: "award min greater than award max",
       fieldsToSet: [
         {
-          selector: "#award-minimum",
+          selector: "#award_floor",
           valueKey: "awardMinimum",
           invalidValue: "100",
           expectedErrorMessage: "Award minimum cannot exceed Award maximum.",
         },
         {
-          selector: "#award-maximum",
+          selector: "#award_ceiling",
           valueKey: "awardMaximum",
           invalidValue: "50",
           expectedErrorMessage:
@@ -215,19 +215,19 @@ export const CROSS_FIELD_VALIDATION_DEFINITIONS: CrossFieldValidationDefinition[
       name: "award min and max greater than total funding",
       fieldsToSet: [
         {
-          selector: "#estimated-total-program-funding",
+          selector: "#estimated_total_program_funding",
           valueKey: "estimatedTotalProgramFunding",
           invalidValue: "100",
         },
         {
-          selector: "#award-minimum",
+          selector: "#award_floor",
           valueKey: "awardMinimum",
           invalidValue: "200",
           expectedErrorMessage:
             "Award minimum cannot exceed the Estimated Total Program Funding.",
         },
         {
-          selector: "#award-maximum",
+          selector: "#award_ceiling",
           valueKey: "awardMaximum",
           invalidValue: "300",
           expectedErrorMessage:
