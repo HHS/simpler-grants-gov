@@ -123,7 +123,6 @@ async function OpportunityEditPage({ params }: PageProps) {
               opportunitySummaryId={opportunitySummaryId}
               isForecast={!!opportunityData.forecast_summary}
               initialValues={initialValues}
-              isDraft={!!opportunityData.is_draft}
               initialAttachments={opportunityData.attachments ?? []}
             />
           </section>
