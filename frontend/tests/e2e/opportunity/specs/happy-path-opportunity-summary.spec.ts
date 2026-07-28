@@ -133,7 +133,7 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
       });
 
       // [Bug] Draft opportunity summary save actions do not navigate #11665
-      
+
       // // And I click "Save and exit" button
       // await page.getByRole("button", { name: "Save and exit" }).click();
 
@@ -160,7 +160,7 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
 
       // // And the matching row should be visible.
       // await expect(matchingRow).toBeVisible();
-      
+
       //--------------Scenario steps end here----------------
     },
   );
