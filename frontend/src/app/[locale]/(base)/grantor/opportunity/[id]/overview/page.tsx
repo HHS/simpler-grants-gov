@@ -79,7 +79,10 @@ async function OpportunityOverviewPage({ params, searchParams }: PageProps) {
         <OverviewButtons opportunityId={id} publishEnabled={publishEnabled} />
       </OpportunityDetailsHeader>
       <div className="grid-container padding-top-4 padding-bottom-4">
-        <div className="grid-row grid-gap-2 padding-top-2">
+        <div
+          className="grid-row grid-gap-2 padding-top-2"
+          data-testid="overview-row-edit"
+        >
           <div className="tablet:grid-col">
             <Link href={editUrl}>{t("labels.editOpportunityLink")}</Link>
           </div>
@@ -91,7 +94,10 @@ async function OpportunityOverviewPage({ params, searchParams }: PageProps) {
           </div>
         </div>
         <hr />
-        <div className="grid-row grid-gap-2 padding-top-2">
+        <div
+          className="grid-row grid-gap-2 padding-top-2"
+          data-testid="overview-row-competition"
+        >
           <div className="tablet:grid-col">
             <Link href={competitionUrl}>{t("labels.competitionLink")}</Link>
           </div>
