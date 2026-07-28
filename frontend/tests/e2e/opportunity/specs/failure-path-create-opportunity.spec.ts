@@ -118,11 +118,17 @@ test.describe("Opportunity failure path - create opportunity", () => {
       // When I reset to a fresh create form via UI.
       await openFreshCreateOpportunityForm(page);
 
+      // Use a fresh unique data set so required-field gating assertions are not
+      // affected by duplicate-number validation from earlier shards.
+      const postDuplicateFillData = buildOpportunityHappyPathFillData(
+        new Date(Date.now() + 1500),
+      );
+
       // Then I verify required-field gating of Save and continue.
       await fillRequiredFieldsAndAssertButtonState(
         page,
         CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
-        fillData,
+        postDuplicateFillData,
         {
           triggerButtonName: "Save and continue",
           additionalButtonStates: {
@@ -142,7 +148,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
           CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
           buildOverLimitFillData(
             CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
-            fillData,
+            postDuplicateFillData,
           ),
         ),
       );

@@ -133,12 +133,12 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
       });
 
       // And I click "Save and exit" button
-      await page.getByRole("button", { name: "Save and exit" }).click();
-
-      // Then I should return to the "Opportunity Overview" page.
-      await expect(page).toHaveURL(
-        /\/grantor\/opportunity\/([a-z0-9-]+?)\/overview/,
-      );
+      await Promise.all([
+        page.waitForURL(/\/grantor\/opportunity\/([a-z0-9-]+?)\/overview/, {
+          timeout: 15000,
+        }),
+        page.getByRole("button", { name: "Save and exit" }).click(),
+      ]);
 
       // And I should see overview statuses for key sections.
       await assertOverviewSectionStatus(page, {
