@@ -4,7 +4,7 @@ import { ApiRequestError, parseErrorStatus } from "src/errors";
 import {
   createOpportunitySummaryForGrantor,
   updateOpportunitySummaryForGrantor,
-} from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+} from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import {
   OpportunitySummaryUpdateRawData,
   OpportunitySummaryUpdateRequest,

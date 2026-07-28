@@ -4,7 +4,7 @@ import { ApiRequestError, parseErrorStatus } from "src/errors";
 import {
   createCompetitionForGrantor,
   updateCompetitionForGrantor,
-} from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+} from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import {
   ApplicantTypes,

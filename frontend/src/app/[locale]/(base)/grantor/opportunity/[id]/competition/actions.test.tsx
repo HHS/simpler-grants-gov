@@ -3,7 +3,7 @@ import { ApiRequestError } from "src/errors";
 import {
   createCompetitionForGrantor,
   updateCompetitionForGrantor,
-} from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+} from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 
 import { competitionFormAction, updateCompetition } from "./actions";
 
@@ -11,13 +11,10 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
 
-jest.mock(
-  "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher",
-  () => ({
-    createCompetitionForGrantor: jest.fn(),
-    updateCompetitionForGrantor: jest.fn(),
-  }),
-);
+jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
+  createCompetitionForGrantor: jest.fn(),
+  updateCompetitionForGrantor: jest.fn(),
+}));
 
 const mockRedirect = jest.fn();
 jest.mock("next/navigation", () => ({

@@ -48,13 +48,10 @@ jest.mock(
 
 const mockGetOpportunityForGrantor = jest.fn();
 
-jest.mock(
-  "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher",
-  () => ({
-    getOpportunityForGrantor: (...args: unknown[]) =>
-      mockGetOpportunityForGrantor(...args) as unknown,
-  }),
-);
+jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
+  getOpportunityForGrantor: (...args: unknown[]) =>
+    mockGetOpportunityForGrantor(...args) as unknown,
+}));
 
 const baseOpportunityData: DeepPartial<GrantorOpportunityDetail> = {
   opportunity_id: "opp-abc-123",
