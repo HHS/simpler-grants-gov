@@ -64,7 +64,7 @@
     "@ianvs/prettier-plugin-sort-imports": "^4.0.2",
     "@playwright/test": "^1.60.0",
     "@storybook/addon-docs": "^10.4.6",
-    "@storybook/nextjs-vite": "10.4.6",
+    "@storybook/nextjs-vite": "10.5.5",
     "@storybook/react": "10.4.6",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^5.16.5",

@@ -2640,6 +2640,26 @@ export const messages = {
       deleting: "Deleting...",
     },
   },
+  PrintViewErrorDiagnostics: {
+    heading: "PDF rendering failed",
+    description:
+      "This document is an error diagnostic page. The application form PDF could not be generated because the print page could not load or prepare the form data.",
+    supportInstructions:
+      "Please contact the support team and include the diagnostic details below.",
+    supportCenterHeading: "Grants.gov Support Center",
+    supportAvailability:
+      "We are available 24 hours a day 7 days a week excluding federal holidays.",
+    supportEmail: "support@grants.gov",
+    supportUnitedStatesPhone: "1-800-518-4726 (U.S.)",
+    supportInternationalPhone: "1-606-545-5035 (International)",
+    diagnosticDetailsHeading: "Diagnostic details",
+    applicationIdLabel: "Application ID",
+    applicationFormIdLabel: "Application form ID",
+    errorCategoryLabel: "Error category",
+    internalTokenHeaderPresentLabel: "Internal token header present",
+    yes: "Yes",
+    no: "No",
+  },
   ProgressChecker: {
     notStarted: "Not started",
     inProgress: "In progress",

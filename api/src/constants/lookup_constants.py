@@ -156,6 +156,7 @@ class FormFamily(StrEnum):
 
 class FormType(StrEnum):
     SF424 = "SF424"
+    SF424_SHORT = "SF424Short"
     SF424A = "SF424A"
     SF424B = "SF424B"
     SF424C = "SF424C"
