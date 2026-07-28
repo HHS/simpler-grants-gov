@@ -1001,8 +1001,9 @@ FORM_XML_TRANSFORM_RULES = {
                     "NonFederalResources": {
                         "item_field": "non_federal_resources",
                         "item_wrapper": "ResourceLineItem",
-                        # grant_program is Column A; looked up from within non_federal_resources
-                        "item_attributes": ["grant_program"],
+                        # grant_program (Column A) wins when present; activity_title is the
+                        # always-present fallback for the required activityTitle attribute.
+                        "item_attributes": ["activity_title", "grant_program"],
                         "total_field": "total_non_federal_resources",
                         "total_wrapper": "ResourceTotals",
                         # Override global field mappings for this section
@@ -1069,8 +1070,9 @@ FORM_XML_TRANSFORM_RULES = {
                     "FederalFundsNeeded": {
                         "item_field": "federal_fund_estimates",
                         "item_wrapper": "FundsLineItem",
-                        # grant_program is Column A; looked up from within federal_fund_estimates
-                        "item_attributes": ["grant_program"],
+                        # grant_program (Column A) wins when present; activity_title is the
+                        # always-present fallback for the required activityTitle attribute.
+                        "item_attributes": ["activity_title", "grant_program"],
                         "total_field": "total_federal_fund_estimates",
                         "total_wrapper": "FundsTotals",
                     },

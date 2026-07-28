@@ -156,6 +156,7 @@ class FormFamily(StrEnum):
 
 class FormType(StrEnum):
     SF424 = "SF424"
+    SF424_SHORT = "SF424Short"
     SF424A = "SF424A"
     SF424B = "SF424B"
     SF424C = "SF424C"
@@ -324,6 +325,13 @@ class Privilege(StrEnum):
     # These privileges are associated with workflow approvals
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
+
+    # Award recommendation workflow privileges
+    PQC_REVIEWER = "pqc_reviewer"
+    GMS_REVIEWER = "gms_reviewer"
+    FMO_REVIEWER = "fmo_reviewer"
+    GMO_REVIEWER = "gmo_reviewer"
+    FINAL_AWARD_REC_APPROVER = "final_award_rec_approver"
 
     INTERNAL_S3_SCAN = "internal_s3_scan"
 

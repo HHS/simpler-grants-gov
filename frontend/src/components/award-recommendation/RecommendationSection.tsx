@@ -64,7 +64,7 @@ export const RecommendationSection = ({
             </p>
             <CharacterCount
               id="award_selection_details"
-              name="award_selection_details"
+              name="selection_method_detail"
               maxLength={500}
               isTextArea
               defaultValue={recommendationMethodDetails || ""}

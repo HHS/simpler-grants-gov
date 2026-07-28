@@ -302,7 +302,9 @@ def login_gov_config(public_rsa_key, private_rsa_key):
         LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY=private_rsa_key,
         LOGIN_GOV_AUTH_ENDPOINT="http://localhost:3000/auth",
         LOGIN_GOV_TOKEN_ENDPOINT="http://localhost:3000/token",
+        LOGIN_GOV_LOGOUT_ENDPOINT="http://localhost:3000/logout",
         LOGIN_FINAL_DESTINATION="http://localhost:3000/final",
+        LOGOUT_FINAL_DESTINATION="http://localhost:3000/final-logout",
     )
 
 

@@ -206,6 +206,7 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.PROJECT_PERFORMANCE_SITE_LOCATION, 17),
         LookupStr(FormType.KEY_CONTACTS, 18),
         LookupStr(FormType.SF424C, 19),
+        LookupStr(FormType.SF424_SHORT, 20),
     ]
 )
 
@@ -349,6 +350,11 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.SUBMIT_AWARD_RECOMMENDATION, 31),
         LookupStr(Privilege.INTERNAL_S3_SCAN, 32),
         LookupStr(Privilege.MANAGE_TEST_USER_TOKEN, 33),
+        LookupStr(Privilege.PQC_REVIEWER, 34),
+        LookupStr(Privilege.GMS_REVIEWER, 35),
+        LookupStr(Privilege.FMO_REVIEWER, 36),
+        LookupStr(Privilege.GMO_REVIEWER, 37),
+        LookupStr(Privilege.FINAL_AWARD_REC_APPROVER, 38),
     ]
 )
 

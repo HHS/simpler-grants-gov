@@ -38,7 +38,7 @@ dependencies = [
 #
 # Any dependencies here are not available when we run our services or scripts non-locally
 dev = [
-    "black>=24.0.0,<25",
+    "black>=26.3.1,<27",
     "isort>=5.12.0,<6",
     "mypy>=2.1.0,<3.0.0",
     "moto[s3]>=5.0.0,<6",
@@ -55,6 +55,7 @@ dev = [
     "freezegun>=1.5.0,<2",
     "types-requests>=2.31,<3",
     "eralchemy>=1.7.0",
+    "graphviz>=0.21,<0.22",
 ]
 
 [project.scripts]
@@ -64,6 +65,7 @@ db-migrate-down-all = "src.db.migrations.run:downall"
 db-seed-local = "tests.lib.seed_local_db:seed_local_db"
 create-erds = "bin.create_erds:main"
 setup-postgres-db = "src.db.migrations.setup_local_postgres_db:setup_local_postgres_db"
+setup-internal-resource = "src.db.migrations.setup_local_postgres_db:setup_internal_resource"
 
 
 [tool.uv]

@@ -64,12 +64,21 @@ class ValidationTestRunner:
 
         converted = {}
         for uuid, data in attachment_mapping.items():
+            # HashValue may be a plain string or a {"@hashAlgorithm", "#text"} dict.
+            hash_data = data.get("HashValue", "")
+            if isinstance(hash_data, dict):
+                hash_value = hash_data.get("#text", "")
+                hash_algorithm = hash_data.get("@hashAlgorithm", "SHA-1")
+            else:
+                hash_value = hash_data
+                hash_algorithm = data.get("HashAlgorithm", "SHA-1")
+
             converted[uuid] = AttachmentInfo(
                 filename=data.get("FileName", ""),
                 mime_type=data.get("MimeType", ""),
                 file_location=data.get("FileLocation", ""),
-                hash_value=data.get("HashValue", ""),
-                hash_algorithm=data.get("HashAlgorithm", "SHA-1"),
+                hash_value=hash_value,
+                hash_algorithm=hash_algorithm,
             )
         return converted
 

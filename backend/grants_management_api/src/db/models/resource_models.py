@@ -164,12 +164,16 @@ class MgmtResourceUser(GrantorSchemaTable, TimestampMixin):
     )
     mgmt_user: Mapped[MgmtUser] = relationship(MgmtUser)
 
-    roles: Mapped[list[MgmtResourceUserRole]] = relationship(
+    resource_user_roles: Mapped[list[MgmtResourceUserRole]] = relationship(
         back_populates="mgmt_resource_user",
         uselist=True,
         cascade="all, delete-orphan",
         lazy="selectin",  # preload roles
     )
+
+    @property
+    def roles(self) -> list[MgmtRole]:
+        return [resource_user_role.mgmt_role for resource_user_role in self.resource_user_roles]
 
 
 class MgmtRole(GrantorSchemaTable, TimestampMixin):

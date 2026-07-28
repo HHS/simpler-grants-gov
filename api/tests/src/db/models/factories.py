@@ -61,6 +61,7 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     JobStatus,
     JobType,
+    OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
@@ -354,8 +355,7 @@ def get_db_session() -> db.Session:
     # _db_session is only set in the pytest fixture `enable_factory_create`
     # so that tests do not unintentionally write to the database.
     if _db_session is None:
-        raise Exception(
-            """Factory db_session is not initialized.
+        raise Exception("""Factory db_session is not initialized.
 
             If your tests don't need to cover database behavior, consider
             calling the `build()` method instead of `create()` on the factory to
@@ -363,8 +363,7 @@ def get_db_session() -> db.Session:
 
             If running tests that actually need data in the DB, pull in the
             `enable_factory_create` fixture to initialize the db_session.
-            """
-        )
+            """)
 
     return _db_session
 
@@ -2536,26 +2535,12 @@ class StagingTsynopsisFactory(TsynopsisFactory, AbstractStagingFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
 
 
-class StagingTsynopsisHistFactory(StagingTsynopsisFactory):
-    class Meta:
-        model = staging.synopsis.TsynopsisHist
-
-    revision_number = factory.Faker("random_int", min=1, max=25)
-
-
 class StagingTforecastFactory(TforecastFactory, AbstractStagingFactory):
     class Meta:
         model = staging.forecast.Tforecast
 
     opportunity = factory.SubFactory(StagingTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-
-
-class StagingTforecastHistFactory(StagingTforecastFactory):
-    class Meta:
-        model = staging.forecast.TforecastHist
-
-    revision_number = factory.Faker("random_int", min=1, max=25)
 
 
 class StagingTapplicanttypesForecastFactory(TapplicanttypesFactory, AbstractStagingFactory):
@@ -2573,15 +2558,6 @@ class StagingTapplicanttypesForecastFactory(TapplicanttypesFactory, AbstractStag
         )
 
 
-class StagingTapplicanttypesForecastHistFactory(StagingTapplicanttypesForecastFactory):
-    class Meta:
-        model = staging.forecast.TapplicanttypesForecastHist
-
-    forecast = factory.SubFactory(StagingTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class StagingTapplicanttypesSynopsisFactory(TapplicanttypesFactory, AbstractStagingFactory):
     class Meta:
         model = staging.synopsis.TapplicanttypesSynopsis
@@ -2595,15 +2571,6 @@ class StagingTapplicanttypesSynopsisFactory(TapplicanttypesFactory, AbstractStag
         orphaned_record = factory.Trait(
             synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
-
-
-class StagingTapplicanttypesSynopsisHistFactory(StagingTapplicanttypesSynopsisFactory):
-    class Meta:
-        model = staging.synopsis.TapplicanttypesSynopsisHist
-
-    synopsis = factory.SubFactory(StagingTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class StagingTfundactcatForecastFactory(TfundactcatFactory, AbstractStagingFactory):
@@ -2621,15 +2588,6 @@ class StagingTfundactcatForecastFactory(TfundactcatFactory, AbstractStagingFacto
         )
 
 
-class StagingTfundactcatForecastHistFactory(StagingTfundactcatForecastFactory):
-    class Meta:
-        model = staging.forecast.TfundactcatForecastHist
-
-    forecast = factory.SubFactory(StagingTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class StagingTfundactcatSynopsisFactory(TfundactcatFactory, AbstractStagingFactory):
     class Meta:
         model = staging.synopsis.TfundactcatSynopsis
@@ -2643,15 +2601,6 @@ class StagingTfundactcatSynopsisFactory(TfundactcatFactory, AbstractStagingFacto
         orphaned_record = factory.Trait(
             synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
-
-
-class StagingTfundactcatSynopsisHistFactory(StagingTfundactcatSynopsisFactory):
-    class Meta:
-        model = staging.synopsis.TfundactcatSynopsisHist
-
-    synopsis = factory.SubFactory(StagingTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class StagingTfundinstrForecastFactory(TfundinstrFactory, AbstractStagingFactory):
@@ -2669,15 +2618,6 @@ class StagingTfundinstrForecastFactory(TfundinstrFactory, AbstractStagingFactory
         )
 
 
-class StagingTfundinstrForecastHistFactory(StagingTfundinstrForecastFactory):
-    class Meta:
-        model = staging.forecast.TfundinstrForecastHist
-
-    forecast = factory.SubFactory(StagingTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class StagingTfundinstrSynopsisFactory(TfundinstrFactory, AbstractStagingFactory):
     class Meta:
         model = staging.synopsis.TfundinstrSynopsis
@@ -2691,15 +2631,6 @@ class StagingTfundinstrSynopsisFactory(TfundinstrFactory, AbstractStagingFactory
         orphaned_record = factory.Trait(
             synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
-
-
-class StagingTfundinstrSynopsisHistFactory(StagingTfundinstrSynopsisFactory):
-    class Meta:
-        model = staging.synopsis.TfundinstrSynopsisHist
-
-    synopsis = factory.SubFactory(StagingTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class StagingTgroupsFactory(AbstractStagingFactory):
@@ -2788,26 +2719,12 @@ class ForeignTsynopsisFactory(TsynopsisFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
 
 
-class ForeignTsynopsisHistFactory(ForeignTsynopsisFactory):
-    class Meta:
-        model = foreign.synopsis.TsynopsisHist
-
-    revision_number = factory.Faker("random_int", min=1, max=25)
-
-
 class ForeignTforecastFactory(TforecastFactory):
     class Meta:
         model = foreign.forecast.Tforecast
 
     opportunity = factory.SubFactory(ForeignTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-
-
-class ForeignTforecastHistFactory(ForeignTforecastFactory):
-    class Meta:
-        model = foreign.forecast.TforecastHist
-
-    revision_number = factory.Faker("random_int", min=1, max=25)
 
 
 class ForeignTapplicanttypesForecastFactory(TapplicanttypesFactory):
@@ -2820,15 +2737,6 @@ class ForeignTapplicanttypesForecastFactory(TapplicanttypesFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
 
 
-class ForeignTapplicanttypesForecastHistFactory(ForeignTapplicanttypesForecastFactory):
-    class Meta:
-        model = foreign.forecast.TapplicanttypesForecastHist
-
-    forecast = factory.SubFactory(ForeignTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class ForeignTapplicanttypesSynopsisFactory(TapplicanttypesFactory):
     class Meta:
         model = foreign.synopsis.TapplicanttypesSynopsis
@@ -2837,15 +2745,6 @@ class ForeignTapplicanttypesSynopsisFactory(TapplicanttypesFactory):
 
     synopsis = factory.SubFactory(ForeignTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-
-
-class ForeignTapplicanttypesSynopsisHistFactory(ForeignTapplicanttypesSynopsisFactory):
-    class Meta:
-        model = foreign.synopsis.TapplicanttypesSynopsisHist
-
-    synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class ForeignTfundactcatForecastFactory(TfundactcatFactory):
@@ -2858,15 +2757,6 @@ class ForeignTfundactcatForecastFactory(TfundactcatFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
 
 
-class ForeignTfundactcatForecastHistFactory(ForeignTfundactcatForecastFactory):
-    class Meta:
-        model = foreign.forecast.TfundactcatForecastHist
-
-    forecast = factory.SubFactory(ForeignTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class ForeignTfundactcatSynopsisFactory(TfundactcatFactory):
     class Meta:
         model = foreign.synopsis.TfundactcatSynopsis
@@ -2875,15 +2765,6 @@ class ForeignTfundactcatSynopsisFactory(TfundactcatFactory):
 
     synopsis = factory.SubFactory(ForeignTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-
-
-class ForeignTfundactcatSynopsisHistFactory(ForeignTfundactcatSynopsisFactory):
-    class Meta:
-        model = foreign.synopsis.TfundactcatSynopsisHist
-
-    synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class ForeignTfundinstrForecastFactory(TfundinstrFactory):
@@ -2896,15 +2777,6 @@ class ForeignTfundinstrForecastFactory(TfundinstrFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
 
 
-class ForeignTfundinstrForecastHistFactory(ForeignTfundinstrForecastFactory):
-    class Meta:
-        model = foreign.forecast.TfundinstrForecastHist
-
-    forecast = factory.SubFactory(ForeignTforecastHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
-
-
 class ForeignTfundinstrSynopsisFactory(TfundinstrFactory):
     class Meta:
         model = staging.synopsis.TfundinstrSynopsis
@@ -2913,15 +2785,6 @@ class ForeignTfundinstrSynopsisFactory(TfundinstrFactory):
 
     synopsis = factory.SubFactory(StagingTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-
-
-class ForeignTfundinstrSynopsisHistFactory(ForeignTfundinstrSynopsisFactory):
-    class Meta:
-        model = foreign.synopsis.TfundinstrSynopsisHist
-
-    synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
-    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
-    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
 class ForeignTsynopsisAttachmentFactory(TsynopsisAttachmentFactory):
@@ -3412,6 +3275,44 @@ class OrganizationAuditFactory(BaseFactory):
             organization_audit_event=OrganizationAuditEvent.USER_REMOVED,
             target_user=factory.SubFactory(UserFactory, with_profile=True),
             target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
+        )
+
+
+class OpportunityAuditFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityAudit
+
+    opportunity_audit_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    user = factory.SubFactory(UserFactory, with_profile=True)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    opportunity_audit_event = OpportunityAuditEvent.OPPORTUNITY_CREATED
+    opportunity_data = None
+    nonforecast_opportunity_summary = None
+    competition = None
+
+    class Params:
+        is_opportunity_created = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_CREATED,
+        )
+        is_opportunity_updated = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_UPDATED,
+        )
+        is_summary_created = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_SUMMARY_CREATED,
+        )
+        is_summary_updated = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.OPPORTUNITY_SUMMARY_UPDATED,
+        )
+        is_competition_created = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.COMPETITION_CREATED,
+        )
+        is_competition_updated = factory.Trait(
+            opportunity_audit_event=OpportunityAuditEvent.COMPETITION_UPDATED,
         )
 
 

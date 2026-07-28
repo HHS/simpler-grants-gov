@@ -530,6 +530,7 @@ The following forms currently have XML generation support:
 - **SF-424 (v4.0)**: Application for Federal Assistance
 - **SF-424A (v1.0)**: Budget Information - Non-Construction Programs
 - **SF-424B (v1.1)**: Assurances for Non-Construction Programs
+- **SF-424C (v2.0)**: Budget Information for Construction Programs (16-row budget table with required subtotals)
 - **SF-424D (v1.1)**: Assurances for Construction Programs
 - **SF-LLL (v2.0)**: Disclosure of Lobbying Activities
 - **CD-511 (v1.1)**: Certification Regarding Lobbying
@@ -542,6 +543,91 @@ The following forms currently have XML generation support:
 - **Project Abstract (v1.2)**: Project abstract file attachment
 - **Supplementary Cover Sheet for NEH Grant Programs (v3.0)**: NEH-specific supplementary cover sheet
 - **Project/Performance Site Location(s) (v4.0)**: Primary and additional project performance site locations with optional attachment
+- **Key Contacts (v2.0)**: Key contact persons form
+
+### Example: Key Contacts (v2.0)
+
+The Key Contacts form maps a list of 1–4 project contacts (`RoleOnProject[]`), each containing name, address, and contact details split across two namespaces:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for Key Contacts form",
+        "form_name": "Key_Contacts_2_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0",
+            "Key_Contacts_2_0": "http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Key_Contacts_2_0-V2.0.xsd",
+        "xml_structure": {
+            "root_element": "Key_Contacts_2_0",
+            "root_namespace_prefix": "Key_Contacts_2_0",
+            "root_attributes": {"FormVersion": "2.0"},
+        },
+    },
+    "applicant_organization_name": {"xml_transform": {"target": "ApplicantOrganizationName"}},
+    "key_contacts": {
+        "xml_transform": {"target": "RoleOnProject", "type": "array"},
+        "items": _key_contact_xml_fields(),
+    },
+}
+```
+
+**Key Contacts Field Mapping Notes:**
+
+- **Array transform**: `key_contacts` emits one `<RoleOnProject>` element per contact. The XSD requires at least 1 and allows at most 4 (`minOccurs=1, maxOccurs=4`).
+- **Dual namespace**: Outer contact elements (`ContactProjectRole`, `ContactName`, `ContactAddress`, `ContactPhone`, etc.) use the default form namespace. Name sub-fields (`PrefixName`, `FirstName`, `MiddleName`, `LastName`, `SuffixName`) and address sub-fields (`Street1`, `Street2`, `City`, `County`, `State`, `Province`, `ZipPostalCode`, `Country`) are typed via `globLib` (`HumanNameDataType` and `AddressDataTypeV3`) and use the `globLib` namespace.
+- **Province field**: Always included in the address mapping (shown unconditionally on this form, unlike other forms where it is conditional on non-US country selection).
+- **`codes` namespace**: Declared in the config because the XSD references `UniversalCodes-V2.0` for enum validation (e.g., state/country codes), even though no field mapping explicitly sets `"namespace": "codes"`.
+- **Helper function**: `_key_contact_xml_fields()` returns the per-contact field mapping dict, shared between all array items.
+- XSD reference: https://apply07.grants.gov/apply/forms/schemas/Key_Contacts_2_0-V2.0.xsd
+
+### Example: SF-424C (v2.0)
+
+The SF-424C form maps a 16-row construction budget table (`budget_information`) into a `ProjectCosts` wrapper, with federal funding fields placed at the root level:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "form_name": "SF424C_2_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SF424C_2_0-V2.0",
+            "SF424C_2_0": "http://apply.grants.gov/forms/SF424C_2_0-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424C_2_0-V2.0.xsd",
+        "xml_structure": {
+            "root_element": "SF424C_2_0",
+            "root_namespace_prefix": "SF424C_2_0",
+            "root_attributes": {"programType": "Construction", "FormVersion": "2.0"},
+        },
+    },
+    "budget_information": {
+        "xml_transform": {"target": "ProjectCosts", "type": "nested_object"},
+        "construction": {"xml_transform": {"target": "ConstructionCost"}},
+        "subtotal_1": {"xml_transform": {"target": "CostSubtotalBeforeContingencies"}},
+        # ... other rows
+    },
+    "federal_funding": {
+        # fields flatten to root — no wrapper element emitted
+        "federal_percentage_share": {"xml_transform": {"target": "FederalFundingPercentageShareValue"}},
+        "federal_funding_share": {"xml_transform": {"target": "FederalFundingShareValue"}},
+    },
+}
+```
+
+**SF-424C Field Mapping Notes:**
+
+- **Budget wrapper**: All budget rows nest inside a single `<ProjectCosts>` element via `type: "nested_object"`. If no budget rows are present, `ProjectCosts` is omitted entirely.
+- **Required subtotals**: `CostSubtotalBeforeContingencies` (row 12, mapped from `subtotal_1`) and `CostSubtotalAfterContingencies` (row 14, mapped from `subtotal_2`) have no `minOccurs="0"` in the XSD — they are **required** whenever `ProjectCosts` is present. Any input with budget rows must include both subtotals.
+- **Two cost types**: Regular rows use `CostAmountGroup` (decimal up to 9,999,999,999.99); subtotal/total rows use `CostTotalGroup` (decimal up to 999,999,999,999.99). The XSD enforces different precision limits for each.
+- **Federal funding at root**: `federal_funding.*` fields map directly to root-level elements (`FederalFundingPercentageShareValue`, `FederalFundingShareValue`) — there is no `<FederalFunding>` wrapper in the XSD.
+- **`programType` attribute**: Fixed to `"Construction"` and declared `use="required"` in the XSD. Set via `root_attributes`.
+- XSD reference: https://apply07.grants.gov/apply/forms/schemas/SF424C_2_0-V2.0.xsd
 
 ### Example: Project/Performance Site Location(s) (v4.0)
 

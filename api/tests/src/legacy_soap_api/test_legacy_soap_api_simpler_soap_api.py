@@ -22,9 +22,7 @@ class TestSimplerSoapApi:
                     </app:GetOpportunityListRequest>
                </soapenv:Body>
             </soapenv:Envelope>
-        """.encode(
-            "utf-8"
-        )
+        """.encode("utf-8")
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
@@ -57,9 +55,7 @@ class TestSimplerSoapApi:
                     </app:GetOpportunityListRequest>
                </soapenv:Body>
             </soapenv:Envelope>
-        """.encode(
-            "utf-8"
-        )
+        """.encode("utf-8")
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
@@ -92,9 +88,7 @@ class TestSimplerSoapApi:
                     </app:GetOpportunityListRequest>
                </soapenv:Body>
             </soapenv:Envelope>
-        """.encode(
-            "utf-8"
-        )
+        """.encode("utf-8")
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
@@ -125,9 +119,7 @@ class TestSimplerSoapApi:
                     </app:GetOpportunityListRequest>
                </soapenv:Body>
             </soapenv:Envelope>
-        """.encode(
-            "utf-8"
-        )
+        """.encode("utf-8")
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
@@ -157,9 +149,7 @@ class TestSimplerSoapApi:
                     </app:GetOpportunityListRequest>
                </soapenv:Body>
             </soapenv:Envelope>
-        """.encode(
-            "utf-8"
-        )
+        """.encode("utf-8")
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
@@ -189,9 +179,7 @@ class TestSimplerSoapApi:
                     </agen:GetApplicationZipRequest>
                 </soapenv:Body>
             </soapenv:Envelope>
-        """.encode(
-            "utf-8"
-        )
+        """.encode("utf-8")
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
@@ -221,9 +209,7 @@ class TestSimplerSoapApi:
                     </agen:GetApplicationZipRequest>
                 </soapenv:Body>
             </soapenv:Envelope>
-        """.encode(
-            "utf-8"
-        )
+        """.encode("utf-8")
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
