@@ -123,8 +123,8 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
         fillData,
         {
           negativeValue: "-10",
-          triggerButtonNames: ["Save and exit"],
-          pageUrlPattern: EDIT_OPPORTUNITY_URL_PATTERN,
+          triggerValidationWithButtonClick: false,
+          triggerButtonNames: ["No"],
         },
       );
 
