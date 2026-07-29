@@ -78,6 +78,29 @@ paths:
         with endpoints.
 
         '
+  /v1/users/logout:
+    get:
+      parameters: []
+      responses:
+        '302':
+          content:
+            application/json:
+              schema: {}
+          description: Found
+      tags:
+      - User v1 - Internal Only
+      summary: User Logout
+      description: '
+
+        To use this endpoint, click [this link](/v1/users/logout) which will redirect
+        you
+
+        to an OAuth provider where you can logout of your account in both our system
+        and
+
+        the OAuth system.
+
+        '
   /v1/users/token/logout:
     post:
       parameters: []

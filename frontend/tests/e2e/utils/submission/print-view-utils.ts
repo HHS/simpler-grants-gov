@@ -7,8 +7,15 @@ import type { ResolvedPrintViewForm } from "./opportunity-print-view.types";
  *
  * Workspace URL format:  /workspace/applications/{applicationId}/form/{appFormId}
  * Print URL format:      /print/application/{applicationId}/form/{appFormId}
+ *
+ * @throws if formUrl does not contain the expected /workspace/applications/ segment
  */
 export function buildPrintUrl(formUrl: string): string {
+  if (!/\/workspace\/applications\//.test(formUrl)) {
+    throw new Error(
+      `buildPrintUrl: "${formUrl}" does not match the expected workspace application form URL pattern (/workspace/applications/{id}/form/{id}); cannot derive a print view URL.`,
+    );
+  }
   return formUrl.replace(/\/workspace\/applications\//, "/print/application/");
 }
 
@@ -32,6 +39,7 @@ export async function navigateToPrintView(
   if (waitMs > 0) {
     await page.waitForTimeout(waitMs);
   }
+  await expect(page).toHaveURL(printUrl);
 }
 
 /**
