@@ -29,13 +29,11 @@ interface UploadedFile {
 interface OpportunityAttachmentUploadInputProps {
   opportunityId: string;
   initialAttachments?: OpportunityAttachment[];
-  isDraft?: boolean;
 }
 
 export function OpportunityAttachmentUploadInput({
   opportunityId,
   initialAttachments = [],
-  isDraft = false,
 }: OpportunityAttachmentUploadInputProps) {
   const t = useTranslations("OpportunityEdit.attachments");
 
@@ -141,7 +139,7 @@ export function OpportunityAttachmentUploadInput({
         ref={fileInputRef}
         type="file"
         multiple
-        disabled={isUploading || !isDraft}
+        disabled={isUploading}
         onChange={(e) => {
           // Per-file upload errors are caught inside handleFileChange.
           // This .catch() covers unexpected synchronous errors (e.g. FormData append failure).
@@ -159,7 +157,7 @@ export function OpportunityAttachmentUploadInput({
               className="display-flex flex-align-center padding-y-1 border-bottom border-base-lighter"
             >
               <span className="flex-fill font-sans-sm">{file.name}</span>
-              {file.deletable && isDraft && (
+              {file.deletable && (
                 <ModalToggleButton
                   modalRef={deleteModalRef}
                   opener

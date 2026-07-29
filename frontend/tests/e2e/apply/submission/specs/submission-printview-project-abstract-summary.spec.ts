@@ -49,11 +49,11 @@ const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
 const applicantScenarios = [
   {
-    testName: `Complete the Application Submission and Print View workflow for an Organization user`,
+    testName: `Complete the Project Abstract Summary Form Submission and Print View workflow for an Organization user`,
     orgLabel: testOrgLabel,
   },
   {
-    testName: `Complete the Application Submission and Print View workflow for an Individual user`,
+    testName: `Complete the Project Abstract Summary Form Submission and Print View workflow for an Individual user`,
     orgLabel: undefined,
   },
 ] as const;
