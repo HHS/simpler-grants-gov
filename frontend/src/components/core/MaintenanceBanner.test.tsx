@@ -6,7 +6,8 @@ const checkFeatureFlagMock = jest.fn();
 
 jest.mock("src/hooks/useFeatureFlags", () => ({
   useFeatureFlags: () => ({
-    checkFeatureFlag: (flagName: string) => checkFeatureFlagMock(flagName),
+    checkFeatureFlag: (flagName: string) =>
+      checkFeatureFlagMock(flagName) as boolean,
   }),
 }));
 
