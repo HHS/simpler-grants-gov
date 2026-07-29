@@ -2370,7 +2370,6 @@ export const messages = {
         title: "Review Award Recommendation",
         question:
           "Do you concur on behalf of the Grants Office that this document meets applicable grants management requirements?",
-        hintText: "{hintText}",
         yesConcur: "Yes, approval obtained (attachment required)",
         noIssues: "No, issues identified, changes needed (attachment required)",
         hold: "Hold, review in progress",
@@ -2379,7 +2378,6 @@ export const messages = {
         title: "FMO Review",
         question:
           "Do you certify the availability of funds to support the recommendation documented in this document?",
-        hintText: "{hintText}",
         fundsAvailable: "Yes, funds are available",
         fundsContingent: "Yes, funds are contingent upon availability by",
         dateLabel: "Date",

@@ -75,50 +75,46 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
     if (formType === "fmo_reviewer") {
       return (
         <FormGroup>
-          <legend className="usa-legend text-bold">
+          <legend className="usa-legend text-bold measure-none">
             {t("fmo.question")}
             <span className="usa-hint usa-hint--required text-no-underline"> *</span>
           </legend>
-          <p className="text-base-dark margin-top-1 margin-bottom-2">
-            {t("fmo.hintText")}
-          </p>
           <Radio
             id="funds_available"
+            className="margin-top-2"
             name="fmo_decision"
             label={t("fmo.fundsAvailable")}
             value="funds_available"
             checked={decision === "funds_available"}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDecision(e.target.value)}
           />
-          <div className="margin-left-4">
-            <Radio
-              id="funds_contingent"
-              name="fmo_decision"
-              label={t("fmo.fundsContingent")}
-              value="funds_contingent"
-              checked={decision === "funds_contingent"}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDecision(e.target.value)}
-            />
-            {decision === "funds_contingent" && (
-              <div className="margin-left-4 margin-top-2 margin-bottom-2">
-                <FormGroup>
-                  <label htmlFor="contingent_date" className="usa-label">
-                    {t("fmo.dateLabel")}
-                    <span className="usa-hint usa-hint--required text-no-underline"> *</span>
-                  </label>
-                  <input
-                    type="date"
-                    id="contingent_date"
-                    name="contingent_date"
-                    className="usa-input"
-                    value={contingentDate}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContingentDate(e.target.value)}
-                    required={decision === "funds_contingent"}
-                  />
-                </FormGroup>
-              </div>
-            )}
-          </div>
+          <Radio
+            id="funds_contingent"
+            name="fmo_decision"
+            label={t("fmo.fundsContingent")}
+            value="funds_contingent"
+            checked={decision === "funds_contingent"}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDecision(e.target.value)}
+          />
+          {decision === "funds_contingent" && (
+            <div className="margin-left-4 margin-top-2 margin-bottom-2">
+              <FormGroup>
+                <label htmlFor="contingent_date" className="usa-label">
+                  {t("fmo.dateLabel")}
+                  <span className="usa-hint usa-hint--required text-no-underline"> *</span>
+                </label>
+                <input
+                  type="date"
+                  id="contingent_date"
+                  name="contingent_date"
+                  className="usa-input"
+                  value={contingentDate}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContingentDate(e.target.value)}
+                  required={decision === "funds_contingent"}
+                />
+              </FormGroup>
+            </div>
+          )}
           <Radio
             id="no_certification"
             name="fmo_decision"
@@ -141,15 +137,13 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
 
     return (
       <FormGroup>
-        <legend className="usa-legend text-bold">
+        <legend className="usa-legend text-bold measure-none">
           {t("reviewer.question")}
           <span className="usa-hint usa-hint--required text-no-underline"> *</span>
         </legend>
-        <p className="text-base-dark margin-top-1 margin-bottom-2">
-          {t("reviewer.hintText")}
-        </p>
         <Radio
           id="yes_concur"
+          className="margin-top-2"
           name="reviewer_decision"
           label={t("reviewer.yesConcur")}
           value="yes_concur"
