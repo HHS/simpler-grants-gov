@@ -543,6 +543,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "bae608bd-56cf-4038-8436-02da6af72df8",
         ),
         (
+            "Key_Contacts",
+            "E2E-KC",
+            "Key Contacts",
+            "3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31",
+            "7c9e2b4a-1f6d-4a83-95b2-3d8e6f1c9a47",
+        ),
+        (
             "OtherNarrativeAttachments",
             "E2E-ONA",
             "Other Narrative Attachments",
