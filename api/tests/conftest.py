@@ -142,6 +142,9 @@ def set_env_var_defaults(monkeypatch_session):
     # Stops the local file-scan watcher from spawning a thread per app fixture.
     monkeypatch_session.setenv("ENABLE_LOCAL_FILE_SCANNER", "FALSE")
 
+    # Disable local email client in favor of mocks
+    monkeypatch_session.setenv("ENABLE_LOCAL_EMAIL_CAPTURE", "FALSE")
+
 
 @pytest.fixture(scope="session", autouse=True)
 def init_new_relic_app():
