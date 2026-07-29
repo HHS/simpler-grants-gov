@@ -37,6 +37,7 @@ from src.form_schema.forms import (
     EPA_FORM_4700_4_v5_0,
     EPA_KEY_CONTACT_v2_0,
     GG_LobbyingForm_v1_1,
+    KeyContacts_v2_0,
     OtherNarrativeAttachment_v1_2,
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -593,6 +594,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "Grants.gov Lobbying Form",
                 GG_LobbyingForm_v1_1.form_id,
                 "552d5866-501a-40b6-b1ce-2efc7a2d3aa5",
+            ),
+            (
+                "E2E-KC",
+                "Key Contacts Form",
+                KeyContacts_v2_0.form_id,
+                "3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31",
             ),
             (
                 "E2E-ONA",

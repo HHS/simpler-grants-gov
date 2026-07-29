@@ -98,7 +98,13 @@ export default async function getFormData({
     formValidationWarnings =
       (response.warnings as unknown as FormValidationWarning[]) || null;
   } catch (e) {
-    if (parseErrorStatus(e as ApiRequestError) === 404) {
+    const errorStatus = parseErrorStatus(e as ApiRequestError);
+
+    if (errorStatus === 401) {
+      return { error: "UnauthorizedError" };
+    }
+
+    if (errorStatus === 404) {
       console.error(
         `Error retrieving application details for applicationID (${applicationId}), appFormId ${appFormId}:`,
         e,
