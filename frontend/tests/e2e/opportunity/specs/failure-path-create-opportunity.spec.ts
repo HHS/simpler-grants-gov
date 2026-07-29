@@ -153,7 +153,13 @@ test.describe("Opportunity failure path - create opportunity", () => {
         ),
       );
 
-      // When I click "Save and continue" button
+      // And "Save and continue" should remain enabled while over-limit values exist.
+      await assertButtonEnabledDisabledStates(page, {
+        "Save and continue": true,
+        Cancel: true,
+      });
+
+      // When I click "Save and continue" after field-level validation renders.
       await page.getByRole("button", { name: "Save and continue" }).click();
 
       // And I remain on the create opportunity page
@@ -166,7 +172,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
         getCharacterLimitedFields(CREATE_OPPORTUNITY_FIELD_DEFINITIONS).length,
       );
 
-      // And "Save and continue" button should be enabled, "Cancel" button should remain enabled
+      // And "Save and continue" button should remain enabled, "Cancel" button should remain enabled
       await assertButtonEnabledDisabledStates(page, {
         "Save and continue": true,
         Cancel: true,
