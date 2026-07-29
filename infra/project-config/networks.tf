@@ -128,8 +128,8 @@ locals {
       database_subnet_group_name   = "infra-dev-simpler-grants"
       vpc_name                     = "infra-dev-simpler-grants"
       second_octet                 = 4               # The second octet of the VPC CIDR block (10.4.0.0/20)
-      grants_gov_oracle_cidr_block = "10.220.0.0/16" # Unused while enable_dms = false, but still read by the api/database layer
-      enable_dms                   = false           # does not peer with the Grants.gov Oracle DMS network
+      grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
+
       domain_config = {
         manage_dns  = false
         hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
