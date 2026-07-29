@@ -1,3 +1,5 @@
+"server only";
+
 import { CompetitionFormsApiResponse } from "src/types/competitionFormsResponseTypes";
 
 import { fetchCompetitionForms } from "./fetchers";

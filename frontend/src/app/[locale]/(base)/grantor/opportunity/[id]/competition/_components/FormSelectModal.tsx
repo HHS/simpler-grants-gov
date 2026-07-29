@@ -4,7 +4,7 @@ import { FormType } from "src/types/allFormsResponseTypes";
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { CSSProperties, RefObject, useEffect, useState } from "react";
+import { CSSProperties, RefObject, useState } from "react";
 import {
   Button,
   Grid,
@@ -25,7 +25,7 @@ const centeredStyle: CSSProperties = {
 };
 
 const alwaysRequiredForms: Record<string, boolean> = {
-  "1623b310-85be-496a-b84b-34bdee22a68a": true,
+  "1623b310-85be-496a-b84b-34bdee22a68a": true, // SF 424. As we start to support other form families, this will be replaced with a more complex function
 };
 
 const getStyle = (alwaysRequired: boolean) => {
@@ -53,7 +53,7 @@ const resetTableForms = (
       isSelected: typeof selectedForms[form.form_id] !== "undefined",
       isRequired:
         typeof selectedForms[form.form_id] === "undefined" ||
-        !!selectedForms[form.form_id],
+        selectedForms[form.form_id],
     };
   });
 };
@@ -110,6 +110,7 @@ export const FormSelectModal = ({
       }),
     })
       .then(() => {
+        setTableForms(resetTableForms(forms, selectedForms));
         return formModalRef.current?.toggleModal();
       })
       .catch((e) => {
@@ -128,7 +129,6 @@ export const FormSelectModal = ({
     handleCleanup();
     formModalRef.current?.toggleModal();
   };
-  useEffect(() => {}, [competition]);
   return (
     <>
       <SimplerModal
