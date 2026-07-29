@@ -97,7 +97,7 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init-components: init-db init-opensearch init-s3mock init-sqsmock init-dynamodb init-mock-soap-services
+init-components: init-db init-opensearch init-s3mock init-sqsmock init-dynamodb init-mock-soap-services init-mailpit
 
 init: setup-env-override-file build init-components ## Run all of the init tasks (including build) to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
 
@@ -254,6 +254,15 @@ start-mock-oauth2:
 	docker compose up --detach mock-oauth2-server
 
 ##################################################
+# Mailpit (local email capture)
+##################################################
+
+init-mailpit: start-mailpit
+
+start-mailpit:
+	docker compose up --detach mailpit
+
+##################################################
 # Testing
 ##################################################
 
@@ -350,8 +359,9 @@ run-workflow-service: ## Run the workflow service
 run-workflow-service-async: ## Run the workflow service without blocking
 	docker compose run --detach --rm grants-api flask workflow workflow-main
 
-run-generate-notifications: ## Send email notifications
-	$(FLASK_CMD) generate-notifications $(args)
+run-email-notifications: ## Send email notifications
+	$(FLASK_CMD) task email-notifications $(args)
+
 
 setup-api-data: db-seed-local populate-search-opportunities populate-search-agencies  ## Load all the data, especially useful for inital setup
 
