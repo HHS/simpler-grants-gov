@@ -139,9 +139,7 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
 
       // Fail fast if required validation is still present before submit.
       await expect(
-        page
-          .getByRole("alert")
-          .filter({ hasText: "Select a funding category." }),
+        page.getByRole("alert").filter({ hasText: "Select a funding category." }),
       ).toHaveCount(0);
 
       // And I click "Save and exit" button
