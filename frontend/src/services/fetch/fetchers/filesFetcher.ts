@@ -2,7 +2,6 @@ import { ApiRequestError } from "src/errors";
 import { logger } from "src/services/logger/simplerLogger";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { createFormData } from "src/utils/fileUtils/createFormData";
 
 import { fetchFileUploadWithMethod } from "./fetchers";
 
@@ -47,19 +46,22 @@ export const uploadFileToS3 = async (
   // TODO: throwing here will cause a batched chunk, I believe because the behavior is to batch chunks queued between
   // asynchronous calls. We can either make this asynchronous somehow, or build behavior into the stream reader to split batched
   // chunks on read (ex. split at `}{`)
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  const formData = new FormData();
 
-  const fileFormData = createFormData(file.name, buffer, file.type, "file");
   Object.entries(body).forEach(([key, value]) => {
-    // don't overwrite the file field
     if (value && key !== "file") {
-      fileFormData.append(key, value);
+      formData.append(key, value);
     }
   });
+  formData.append("file", file);
+
+  const multipartBody = await new Response(formData).blob();
   const s3Response = await fetch(url, {
     method: "POST",
-    body: fileFormData,
+    body: multipartBody,
+    headers: {
+      "Content-Type": multipartBody.type,
+    },
   });
   if (!s3Response.ok) {
     const errorBody = await s3Response.text();
