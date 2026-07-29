@@ -243,16 +243,39 @@ function TableWidget({
    * @param cellName - The HTML form name of the cell input
    * @returns An array of error messages for the cell, or an empty array if none
    */
+  const allCellNames = rows
+    .flatMap((row, rowIndex) =>
+      row.cells.map((cell) => buildCellName(cell.definition, rowIndex)),
+    )
+    .filter((name): name is string => Boolean(name));
+
+  const duplicateBaseNames = allCellNames.reduce<Record<string, number>>(
+    (counts, name) => {
+      const base = name.split("--").slice(-1)[0];
+      counts[base] = (counts[base] ?? 0) + 1;
+      return counts;
+    },
+    {},
+  );
+
   const getCellErrors = (cellName: string | undefined): string[] => {
     if (!cellName) return [];
 
-    // Accept errors that target either the generated cellName or the
-    // base field name (suffix). This keeps compatibility with older
-    // error formats that omit the prefixed multiField root.
+    const exactMatches = (rawErrors as FormValidationWarning[])
+      .filter((error) => error.field === cellName)
+      .map((error) => String(error.message));
+
+    if (exactMatches.length > 0) {
+      return exactMatches;
+    }
+
     const baseName = cellName.split("--").slice(-1)[0];
+    if (duplicateBaseNames[baseName] > 1) {
+      return [];
+    }
 
     return (rawErrors as FormValidationWarning[])
-      .filter((error) => error.field === cellName || error.field === baseName)
+      .filter((error) => error.field === baseName)
       .map((error) => String(error.message));
   };
 

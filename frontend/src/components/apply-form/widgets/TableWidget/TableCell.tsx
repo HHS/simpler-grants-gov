@@ -87,9 +87,14 @@ function TableCell({
   disabled = false,
   onChange,
 }: TableCellProps) {
-  const initialValue =
-    value === undefined || value === null ? "" : String(value);
-  const [inputValue, setInputValue] = useState(initialValue);
+  const [inputValue, setInputValue] = useState(
+    value === undefined || value === null ? "" : String(value),
+  );
+  const [lastSyncedValue, setLastSyncedValue] = useState(value);
+  if (lastSyncedValue !== value) {
+    setLastSyncedValue(value);
+    setInputValue(value === undefined || value === null ? "" : String(value));
+  }
 
   if (cell.type === "plainText") {
     return (

@@ -457,4 +457,56 @@ describe("TableWidget", () => {
     expect(screen.getByText("First value error")).toBeInTheDocument();
     expect(screen.queryByText("Should not appear")).not.toBeInTheDocument();
   });
+
+  it("does not apply base-name fallback when multiple cells share the same suffix", () => {
+    const propsWithAmbiguousSuffix: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        ...props.uiSchemaField,
+        children: {
+          columns: [
+            { columnHeader: "Item" },
+            { columnHeader: "First Total" },
+            { columnHeader: "Second Total" },
+          ],
+          rows: [
+            {
+              cells: [
+                { type: "plainText", staticContent: "Row 1" },
+                {
+                  type: "input",
+                  definition:
+                    "/properties/budget_information/items/properties/administrative_and_legal_expenses/properties/total_cost",
+                },
+                {
+                  type: "input",
+                  definition:
+                    "/properties/budget_information/items/properties/construction/properties/total_cost",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    render(
+      <TableWidget
+        {...propsWithAmbiguousSuffix}
+        schema={{}}
+        rawErrors={[
+          {
+            field: "total_cost",
+            message: "Total cost error",
+            type: "custom",
+            value: null,
+          },
+        ]}
+        value={{}}
+        options={{}}
+      />,
+    );
+
+    expect(screen.queryByText("Total cost error")).not.toBeInTheDocument();
+  });
 });

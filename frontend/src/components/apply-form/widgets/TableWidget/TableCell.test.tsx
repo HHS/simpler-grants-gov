@@ -57,6 +57,35 @@ describe("TableCell", () => {
     expect(input).toHaveClass("overflow-x-auto");
   });
 
+  it("updates the input display when the value prop changes", () => {
+    const { rerender } = render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+        }}
+        id="input-cell"
+        value="100"
+      />,
+    );
+
+    const input = screen.getByTestId("input-cell-input");
+    expect(input).toHaveValue("100");
+
+    rerender(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+        }}
+        id="input-cell"
+        value="200"
+      />,
+    );
+
+    expect(screen.getByTestId("input-cell-input")).toHaveValue("200");
+  });
+
   it("passes valid numeric input changes to onChange", () => {
     const onChange = jest.fn();
 
