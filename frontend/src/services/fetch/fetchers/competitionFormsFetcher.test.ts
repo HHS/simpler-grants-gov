@@ -16,10 +16,13 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 describe("getFormDetails", () => {
   afterEach(() => jest.clearAllMocks());
   it("calls fetchForm with the correct arguments", async () => {
-    await updateCompetitionForms({ competitionId: "an id", body: "a body" });
+    await updateCompetitionForms({
+      competitionId: "an id",
+      body: { forms: [] },
+    });
     expect(mockFetchCompetitionForm).toHaveBeenCalledWith({
       subPath: "an id/forms",
-      body: "a body",
+      body: { forms: [] },
     });
   });
 });

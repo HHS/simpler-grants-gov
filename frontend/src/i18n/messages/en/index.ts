@@ -1,5 +1,3 @@
-import { FormSelectModal } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/FormSelectModal";
-
 export const messages = {
   Homepage: {
     pageTitle: "Let's build a simpler Grants.gov together",

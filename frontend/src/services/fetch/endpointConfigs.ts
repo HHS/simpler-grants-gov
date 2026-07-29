@@ -74,6 +74,7 @@ export const fetchCompetitionFormsEndpoint = {
   version: "alpha",
   namespace: "competitions",
   method: "PUT" as ApiMethod,
+  requiresAuth: true,
 };
 
 export const fetchOpportunityEndpoint = {

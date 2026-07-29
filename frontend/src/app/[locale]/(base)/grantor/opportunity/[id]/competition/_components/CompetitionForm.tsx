@@ -3,24 +3,44 @@
 import { AgencyContact } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/AgencyContact";
 import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
 import { SubmissionWindow } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionWindow";
+import { FormType } from "src/types/allFormsResponseTypes";
+import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { Button, Link } from "@trussworks/react-uswds";
+import { useRef } from "react";
+import {
+  Button,
+  Link,
+  ModalRef,
+  ModalToggleButton,
+} from "@trussworks/react-uswds";
 
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
+import { FormSelectModal } from "./FormSelectModal";
 
 type CompetitionFormProps = {
   opportunityId: string;
   competitionId: string;
+  competition: Competition;
+  forms: FormType[];
+  submitCompetitionForms: (
+    competitionId: string,
+    body: { forms: { form_id: string; is_required: boolean }[] },
+  ) => Promise<void>;
 };
 
 export function CompetitionForm({
   opportunityId: _opportunityId,
   competitionId: _competitionId,
+  forms,
+  competition,
+  submitCompetitionForms,
 }: CompetitionFormProps) {
   const t = useTranslations("OpportunityCompetition");
   const editUrl = "../" + _opportunityId + "/edit";
   const overviewUrl = "../" + _opportunityId + "/overview";
+
+  const formModalRef = useRef<ModalRef | null>(null);
 
   const navigationItems = [
     {
@@ -81,6 +101,20 @@ export function CompetitionForm({
               <Link href={overviewUrl}>
                 <Button type="button">{t("button.saveAndContinue")}</Button>
               </Link>
+              <ModalToggleButton
+                modalRef={formModalRef}
+                opener
+                className="margin-y-2 usa-button usa-button--secondary usa-button--big"
+                type="button"
+              >
+                Open Modal Test
+              </ModalToggleButton>
+              <FormSelectModal
+                competition={competition}
+                forms={forms}
+                formModalRef={formModalRef}
+                submitCompetitionForms={submitCompetitionForms}
+              />
             </div>
           </section>
         </div>

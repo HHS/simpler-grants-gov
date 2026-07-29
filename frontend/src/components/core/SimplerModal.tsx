@@ -1,7 +1,6 @@
 import { useIsSSR } from "src/hooks/useIsSSR";
 
 import {
-  CSSProperties,
   KeyboardEventHandler,
   ReactNode,
   RefObject,

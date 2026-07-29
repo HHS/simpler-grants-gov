@@ -6,6 +6,7 @@ import {
 } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getForms } from "src/services/fetch/fetchers/allFormsFetcher";
+import { updateCompetitionForms } from "src/services/fetch/fetchers/competitionFormsFetcher";
 import {
   createCompetitionForGrantor,
   getOpportunityForGrantor,
@@ -18,7 +19,6 @@ import { Button, Link } from "@trussworks/react-uswds";
 
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
-import { FormSelectModal } from "./_components/FormSelectModal";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
@@ -33,6 +33,14 @@ const ButtonSaveAndExit = ({ url }: { url: string }) => {
       <Button type="button">{t("saveAndExit")}</Button>
     </Link>
   );
+};
+
+const submitCompetitionForms = async (
+  competitionId: string,
+  body: { forms: { form_id: string; is_required: boolean }[] },
+) => {
+  "use server";
+  await updateCompetitionForms({ competitionId, body });
 };
 
 async function OpportunityCompetitionPage({ params }: PageProps) {
@@ -91,8 +99,13 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
       >
         <ButtonSaveAndExit url={overviewUrl} />
       </OpportunityDetailsHeader>
-      <CompetitionForm opportunityId={id} competitionId={competitionId} />
-      <FormSelectModal competition={competition} forms={forms.data} />
+      <CompetitionForm
+        opportunityId={id}
+        competitionId={competitionId}
+        forms={forms.data}
+        competition={competition}
+        submitCompetitionForms={submitCompetitionForms}
+      />
     </>
   );
 }
