@@ -110,6 +110,11 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
         ),
       );
 
+      // Ensure select state is committed before submit to avoid flaky same-page re-submit.
+      await expect(
+        page.locator("#funding_categories option:checked").first(),
+      ).toHaveText(fillData.category);
+
       // Fill required Eligibility values.
       await fillPageFields(
         page,
@@ -131,6 +136,13 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
         "Save and go back": true,
         "Save and continue": true,
       });
+
+      // Fail fast if required validation is still present before submit.
+      await expect(
+        page
+          .getByRole("alert")
+          .filter({ hasText: "Select a funding category." }),
+      ).toHaveCount(0);
 
       // And I click "Save and exit" button
       await Promise.all([
