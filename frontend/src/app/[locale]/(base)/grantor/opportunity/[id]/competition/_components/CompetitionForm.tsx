@@ -31,6 +31,7 @@ export function CompetitionForm({
 
   const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsPending(true);
 
     // 1. Dynamically get the route and bind to the server action
     // The default route is triggered by the saveAndExit button in the header component

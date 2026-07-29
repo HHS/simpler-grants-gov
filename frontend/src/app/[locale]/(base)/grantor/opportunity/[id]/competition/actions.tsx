@@ -79,7 +79,6 @@ function formatValidationErrors(error: unknown) {
   if (error instanceof ApiRequestError) {
     const cause = error.cause as FrontendErrorCause;
     const details = cause.details;
-    // console.log("DEBUG: cause: ", cause);
     // NOTE: currently this only returning one error at a time (no list)
     const errorMessage = details.field + ": " + details.message;
     return [errorMessage];

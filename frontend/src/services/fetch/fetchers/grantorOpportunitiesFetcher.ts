@@ -121,10 +121,6 @@ export async function createCompetitionForGrantor(
   opportunityId: string,
   data: CompetitionSaveRequest,
 ): Promise<CompetitionSaveApiResponse> {
-  // All nullable fields are intentionally null; competition_title is intentionally ""
-  // because the API accepts an empty string and the grantor fills it in later.
-  // open_to_applicants requires minItems: 1, so both values are sent as the most
-  // permissive default until the grantor configures the field.
   const response = await fetchGrantorOpportunityWithMethod("POST")({
     subPath: `${opportunityId}/competitions`,
     body: data,

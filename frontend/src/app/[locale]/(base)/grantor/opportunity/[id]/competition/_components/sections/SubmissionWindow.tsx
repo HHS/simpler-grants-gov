@@ -30,7 +30,7 @@ export function SubmissionWindow() {
             />
             <DatePicker
               id="opening_date"
-              name="submissionsOpen"
+              name="opening_date"
               placeholder="mm/dd/yyyy"
               className="width-full"
             />
@@ -46,7 +46,7 @@ export function SubmissionWindow() {
             />
             <DatePicker
               id="closing_date"
-              name="submissionsClose"
+              name="closing_date"
               placeholder="mm/dd/yyyy"
               className="width-full"
             />
