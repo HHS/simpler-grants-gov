@@ -281,9 +281,7 @@ def test_convert_s3_to_cdn_url_invalid_path(s3_config):
         )
 
 
-def test_presign_or_s3_cdnify_url_returns_cdn_url_when_cdn_configured(
-    mock_s3_bucket, s3_config
-):
+def test_presign_or_s3_cdnify_url_returns_cdn_url_when_cdn_configured(mock_s3_bucket, s3_config):
     s3_config.cdn_url = "https://cdn.example.com"
     file_path = f"s3://{mock_s3_bucket}/path/to/file.pdf"
 
@@ -295,9 +293,7 @@ def test_presign_or_s3_cdnify_url_returns_cdn_url_when_cdn_configured(
     assert "X-Amz-Signature" not in url
 
 
-def test_presign_or_s3_cdnify_url_returns_presigned_url_when_cdn_unset(
-    mock_s3_bucket, s3_config
-):
+def test_presign_or_s3_cdnify_url_returns_presigned_url_when_cdn_unset(mock_s3_bucket, s3_config):
     assert s3_config.cdn_url is None
     file_path = f"s3://{mock_s3_bucket}/path/to/file.pdf"
 
@@ -348,9 +344,7 @@ def test_pre_sign_file_location_uses_configured_duration(mock_s3_bucket):
         "path/to/file (1) [copy].txt",
     ],
 )
-def test_pre_sign_file_location_uses_bucket_and_key_from_s3_path(
-    mock_s3_bucket, s3_config, key
-):
+def test_pre_sign_file_location_uses_bucket_and_key_from_s3_path(mock_s3_bucket, s3_config, key):
     file_path = f"s3://{mock_s3_bucket}/{key}"
     bucket, parsed_key = file_util.split_s3_url(file_path)
     assert bucket == mock_s3_bucket
@@ -360,9 +354,7 @@ def test_pre_sign_file_location_uses_bucket_and_key_from_s3_path(
     assert_presigned_url_targets_s3_path(url, bucket, key)
 
 
-def test_pre_sign_file_location_localhost_override_when_endpoint_set(
-    mock_s3_bucket, s3_config
-):
+def test_pre_sign_file_location_localhost_override_when_endpoint_set(mock_s3_bucket, s3_config):
     s3_config.aws_s3_endpoint_url = "http://mocks3:9090"
 
     url = file_util.pre_sign_file_location(
@@ -373,9 +365,7 @@ def test_pre_sign_file_location_localhost_override_when_endpoint_set(
     assert "mocks3" not in url
 
 
-def test_pre_sign_file_location_leaves_url_untouched_without_endpoint(
-    mock_s3_bucket, s3_config
-):
+def test_pre_sign_file_location_leaves_url_untouched_without_endpoint(mock_s3_bucket, s3_config):
     assert s3_config.aws_s3_endpoint_url is None
 
     url = file_util.pre_sign_file_location(
@@ -466,9 +456,7 @@ def test_pre_sign_upload_content_length_range_tracks_file_config(
 
 
 @pytest.mark.parametrize("include_if_none_match", [True, False])
-def test_pre_sign_upload_include_if_none_match(
-    mock_s3_bucket, s3_config, include_if_none_match
-):
+def test_pre_sign_upload_include_if_none_match(mock_s3_bucket, s3_config, include_if_none_match):
     result = file_util.pre_sign_upload(
         file_path=f"s3://{mock_s3_bucket}/some/file.txt",
         content_type="text/plain",
