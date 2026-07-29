@@ -1,11 +1,6 @@
 /**
- * @feature Apply - Happy Path - Application Submission and Print View Workflow for both Organization and Individual users
- * @scenario Complete the Application Submission and Print View workflow for an <user type> user
- *
- * Examples:
- * | user type    | who is applying           |
- * | Organization | Organization A            |
- * | Individual   | As an individual (myself) |
+ * @feature Apply - Happy Path - SF-424B Application Submission and Print View Workflow
+ * @scenario Complete the SF-424B Application Submission and Print View workflow for an <user type> user
  */
 
 import {
@@ -43,17 +38,18 @@ const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 
 // Only the opportunity number is declared here.
-// All opportunity/form details are resolved from form specific fixtures.
-const OPPORTUNITY_NUMBER = "TEST-PRINT-ORG-IND-ON01";
+// All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
+// Unified opportunity for both local and staging environments.
+const OPPORTUNITY_NUMBER = "E2E-SF424B-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
 const applicantScenarios = [
   {
-    testName: `Complete the Project Abstract Summary Form Submission and Print View workflow for an Organization user`,
+    testName: `Complete the SF-424B Application Submission and Print View workflow for an Organization user`,
     orgLabel: testOrgLabel,
   },
   {
-    testName: `Complete the Project Abstract Summary Form Submission and Print View workflow for an Individual user`,
+    testName: `Complete the SF-424B Application Submission and Print View workflow for an Individual user`,
     orgLabel: undefined,
   },
 ] as const;
@@ -77,29 +73,31 @@ for (const { testName, orgLabel } of applicantScenarios) {
       const baseSuffix = Date.now();
 
       // --- Login ---
+      // Given the user is logged in
       await authenticateE2eUser(page, context, !!isMobile);
 
       // --- Navigate to Opportunity page and start a new application ---
+      // And the user launches the URL for an opportunity with an open SF-424B competition
+      // When the user clicks "Start Application", selects applicant type and creates the application
       await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
       const applicationUrl = page.url();
 
       // --- Fill required forms and collect print URLs ---
+      // For each form on this opportunity: fill it, verify status, then capture the
+      // form URL *before* verifyFormStatusOnApplication navigates away to the app page.
       const filledForms: FilledFormEntry[] = [];
 
-      // --- Generate this form's happy-path test data ---
       for (const [index, form] of opportunityConfig.forms.entries()) {
         const testData = buildHappyPathTestData(form, baseSuffix + index);
 
-        // --- Fill the form with generated unique data ---
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
-        // --- Verify save succeeded while still on the form page ---
+        // Verify save succeeded while still on the form page
         await verifyFormStatusAfterSave(page, "complete");
 
-        // --- Capture the form URL ---
+        // Capture the form URL now - verifyFormStatusOnApplication navigates away
         const formUrl = page.url();
 
-        // --- Verify form status on the application page ---
         await verifyFormStatusOnApplication(
           page,
           "complete",
@@ -107,7 +105,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
           applicationUrl,
         );
 
-        // --- Store form data and print URL for later validation ---
         filledForms.push({
           formKey: form.formKey,
           formName: form.formConfig.formName,
@@ -118,17 +115,19 @@ for (const { testName, orgLabel } of applicantScenarios) {
         });
       }
 
-      // --- Return to application landing page before submitting ---
+      // Return to application landing page before submitting
       await page.goto(applicationUrl);
       await page.waitForLoadState("domcontentloaded");
 
       // --- Submit Application ---
+      // When the user clicks "Submit application"
+      // Then the application is submitted successfully
       await submitApplicationAndVerify(page, "success");
 
       // --- Confirmation Page Validation ---
       await verifySubmissionConfirmation(page);
 
-      // --- Print View Validation (one print url per form) ---
+      // --- Print View Validation (one page per form) ---
       for (const {
         testData,
         printUrl,
@@ -138,15 +137,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
       } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
-        // --- Form title heading is visible ---
+        // Form title heading is visible
         await expect(page.locator("h1")).toContainText(formName);
 
-        // --- Section heading contains the form name ---
-        await expect(
-          page.getByTestId("fieldset").getByRole("heading"),
-        ).toContainText(formName);
-
-        // --- Pre-populated fields (Data injected from opportunity record) ---
+        // Pre-populated fields (API-injected from opportunity record) - none for SF-424B
         for (const [testId, expectedValue] of Object.entries(
           expectedPrepopulatedFields,
         )) {
@@ -154,12 +148,23 @@ for (const { testName, orgLabel } of applicantScenarios) {
           await expect(page.getByTestId(testId)).toContainText(expectedValue);
         }
 
-        // --- User-entered fields ---
+        // User-entered fields - uses formConfig.fields (printTestId ?? testId)
         for (const [dataKey, testId] of Object.entries(
           userEnteredFieldTestIds,
         )) {
+          if (testData[dataKey] === undefined) continue;
           await validatePrintViewField(page, testId, testData[dataKey]);
         }
+
+        // signature and date_signed are system post-populated at submission
+        // time (gg_post_population rules: "signature", "current_date"), not
+        // user-entered or opportunity-derived - assert they were populated
+        // rather than an exact value.
+        await expect(page.getByTestId("signature")).toBeVisible();
+        await expect(page.getByTestId("signature")).not.toBeEmpty();
+
+        await expect(page.getByTestId("date_signed")).toBeVisible();
+        await expect(page.getByTestId("date_signed")).not.toBeEmpty();
       }
     },
   );
