@@ -9,12 +9,12 @@
 
 from types import ModuleType
 
-import rich  # noqa: F401 isort:skip
-import rich.panel  # noqa: F401 isort:skip
+import rich  # ruff: ignore[unused-import] isort:skip
+import rich.panel  # ruff: ignore[unused-import] isort:skip
 import rich.pretty
 
 import grants_shared.adapters.db as db
-import src.db  # noqa: F401 isort:skip
+import src.db  # ruff: ignore[unused-import] isort:skip
 import src.db.models
 import grants_shared.logs
 import src.util

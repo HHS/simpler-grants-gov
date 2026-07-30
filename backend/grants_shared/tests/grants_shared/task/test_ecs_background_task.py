@@ -5,8 +5,16 @@ import time
 import pytest
 from flask import Flask
 
+from grants_shared.api.maintenance_mode import MaintenanceModeLogEvent, get_maintenance_mode_config
 from grants_shared.logs.flask_logger import add_extra_data_to_global_logs, init_app
 from grants_shared.task.ecs_background_task import ecs_background_task
+
+
+@pytest.fixture(autouse=True)
+def clear_maintenance_config_cache():
+    # The maintenance-mode config is @cache'd, so clear it before every test to
+    # keep the ENABLE_MAINTENANCE_MODE env var from leaking across tests.
+    get_maintenance_mode_config.cache_clear()
 
 
 @pytest.fixture
@@ -98,3 +106,50 @@ def test_ecs_background_task_when_erroring(app, caplog, monkeypatch_session):
     assert last_record["levelname"] == "ERROR"
     assert last_record["message"] == "ECS task failed"
     assert last_record["exc_info_short"] == "ValueError('I am an error')"
+
+
+def test_ecs_background_task_skipped_during_maintenance_mode(app, caplog, monkeypatch):
+    caplog.set_level(logging.INFO)
+    monkeypatch.setenv("ENABLE_MAINTENANCE_MODE", "true")
+    get_maintenance_mode_config.cache_clear()
+
+    was_called = False
+
+    @ecs_background_task(task_name="my_maintenance_task")
+    def my_test_func():
+        nonlocal was_called
+        was_called = True
+        return "ran"
+
+    # The task exits cleanly without running its wrapped (DB-touching) body.
+    assert my_test_func() is None
+    assert was_called is False
+
+    skip_records = [
+        record
+        for record in caplog.records
+        if getattr(record, "maintenance_mode_event", None) == MaintenanceModeLogEvent.TASK_SKIPPED
+    ]
+    assert len(skip_records) == 1
+    assert skip_records[0].message == "Skipping ECS task due to maintenance mode"
+    assert skip_records[0].task_name == "my_maintenance_task"
+
+
+def test_ecs_background_task_runs_normally_when_maintenance_mode_off(app, caplog, monkeypatch):
+    caplog.set_level(logging.INFO)
+    monkeypatch.setenv("ENABLE_MAINTENANCE_MODE", "false")
+    get_maintenance_mode_config.cache_clear()
+
+    @ecs_background_task(task_name="my_non_maintenance_task")
+    def my_test_func(param1, param2):
+        return param1 + param2
+
+    # With maintenance off, the wrapped function runs and its return value is preserved.
+    assert my_test_func(2, 3) == 5
+
+    skip_records = [
+        record
+        for record in caplog.records
+        if getattr(record, "maintenance_mode_event", None) == MaintenanceModeLogEvent.TASK_SKIPPED
+    ]
+    assert len(skip_records) == 0

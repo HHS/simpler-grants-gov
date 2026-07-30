@@ -34,8 +34,53 @@ export async function openForm(
 ): Promise<boolean> {
   const formNameRegex =
     formMatcher instanceof RegExp ? formMatcher : new RegExp(formMatcher, "i");
+
+  // Check if we're already on the correct form page
+  const currentUrl = page.url();
+  const isOnFormPage = /\/applications\/[a-f0-9-]+\/form\/[a-f0-9-]+/.test(
+    currentUrl,
+  );
+
+  if (isOnFormPage) {
+    // Verify the form heading matches the expected form name
+    const formHeadingCount = await page
+      .getByText(formNameRegex)
+      .first()
+      .count();
+
+    if (formHeadingCount > 0) {
+      // Already on the correct form page
+      return true;
+    }
+  }
+
+  // Not on the form page or on wrong form - proceed with navigation
   const formsTable = page.locator(".simpler-application-forms-table").first();
-  await formsTable.waitFor({ state: "visible", timeout: 60000 });
+
+  try {
+    await formsTable.waitFor({ state: "visible", timeout: 60000 });
+  } catch (error) {
+    // If the table doesn't appear, check if the page loaded at all
+    const pageContent = await page.content();
+    const hasTableClass = pageContent.includes(
+      "simpler-application-forms-table",
+    );
+    const hasFormLinks = (await page.locator('a[href*="/form/"]').count()) > 0;
+
+    if (!hasTableClass && !hasFormLinks) {
+      throw new Error(
+        `Forms table failed to load. Page may not have rendered properly. ` +
+          `URL: ${page.url()}`,
+      );
+    }
+
+    // If we have form links but not the table, continue with the form links
+    if (hasFormLinks) {
+      // Proceed to find form by href link instead
+    } else {
+      throw error;
+    }
+  }
 
   const rowCandidates = formsTable.locator("tbody tr").filter({
     hasText: formNameRegex,

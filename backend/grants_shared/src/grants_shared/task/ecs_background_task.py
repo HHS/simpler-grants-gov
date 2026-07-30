@@ -5,11 +5,12 @@ import time
 import uuid
 from collections.abc import Callable, Generator
 from functools import wraps
-from typing import ParamSpec, TypeVar
+from typing import ParamSpec, TypeVar, cast
 
 import newrelic.agent
 import requests
 
+from grants_shared.api.maintenance_mode import MaintenanceModeLogEvent, is_maintenance_mode_enabled
 from grants_shared.logs.flask_logger import add_extra_data_to_global_logs
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,17 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
             with newrelic.agent.BackgroundTask(application, name=task_name, group="Python/ECSTask"):
                 # Wrap with our own logging (timing/general logs)
                 with _ecs_background_task_impl(task_name):
+                    # During a maintenance window the DB is unavailable, so skip the
+                    # task body rather than letting it fail mid-run. The task still
+                    # fires on its cron schedule; it just logs the skip and exits
+                    # cleanly. This runs inside the New Relic / logging wrapping so
+                    # the skip is still recorded — nothing above touches the DB.
+                    if is_maintenance_mode_enabled():
+                        logger.info(
+                            "Skipping ECS task due to maintenance mode",
+                            extra={"maintenance_mode_event": MaintenanceModeLogEvent.TASK_SKIPPED},
+                        )
+                        return cast(T, None)
                     # Finally actually run the task
                     return f(*args, **kwargs)
 
