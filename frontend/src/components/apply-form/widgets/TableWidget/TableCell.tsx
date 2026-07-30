@@ -3,16 +3,22 @@ import { formatTableCellValue } from "src/utils/applyForm/formatTableCellValue";
 
 import { ChangeEvent, useState } from "react";
 
+import { FieldErrors } from "src/components/core/forms/FieldErrors";
+
 const READ_ONLY_OUTPUT_CLASS =
   "usa-input margin-0 width-full overflow-x-auto display-block border border-base-light bg-base-lightest text-right text-wrap";
 
 type TableCellProps = {
   /** The cell configuration from the table widget schema */
   cell: TableWidgetCellConfig;
+  /** Validation errors for this Cell */
+  cellErrors?: string[];
   /** Unique identifier for the cell */
   id: string;
   /** HTML form name for the cell input */
   name?: string;
+  /** Optional accessible label for the editable input */
+  ariaLabel?: string;
   /** The value to display or edit in the cell */
   value?: number | string | null;
   /** Whether the cell should be disabled (read-only mode) */
@@ -20,10 +26,6 @@ type TableCellProps = {
   /** Callback when the cell value changes (only for editable input cells) */
   onChange?: (value: string) => void;
 };
-
-function getStringValue(value: number | string | null | undefined): string {
-  return value === undefined || value === null ? "" : String(value);
-}
 
 /**
  * TableCell renders a single cell in a table widget.
@@ -77,17 +79,21 @@ function getStringValue(value: number | string | null | undefined): string {
  */
 function TableCell({
   cell,
+  cellErrors = [],
   id,
   name,
+  ariaLabel,
   value,
   disabled = false,
   onChange,
 }: TableCellProps) {
-  const [inputValue, setInputValue] = useState(getStringValue(value));
+  const [inputValue, setInputValue] = useState(
+    value === undefined || value === null ? "" : String(value),
+  );
   const [lastSyncedValue, setLastSyncedValue] = useState(value);
   if (lastSyncedValue !== value) {
     setLastSyncedValue(value);
-    setInputValue(getStringValue(value));
+    setInputValue(value === undefined || value === null ? "" : String(value));
   }
 
   if (cell.type === "plainText") {
@@ -99,7 +105,11 @@ function TableCell({
   if (cell.type === "readOnly" || (cell.type === "input" && disabled)) {
     const renderedValue = formatTableCellValue(value, cell.format);
     return (
-      <span className={READ_ONLY_OUTPUT_CLASS} data-testid={`${id}-read-only`}>
+      <span
+        className={READ_ONLY_OUTPUT_CLASS}
+        data-testid={`${id}-read-only`}
+        tabIndex={-1}
+      >
         {renderedValue === "" ? "\u00A0" : renderedValue}
       </span>
     );
@@ -113,21 +123,29 @@ function TableCell({
       onChange?.(nextValue);
     }
   };
-
+  const hasError = cellErrors.length > 0;
+  const inputId = name ?? id;
   return (
-    <input
-      aria-label={`Editable table value for ${cell.definition}`}
-      className="usa-input margin-0 width-full overflow-x-auto"
-      data-testid={`${id}-input`}
-      id={id}
-      name={name}
-      inputMode="decimal"
-      onChange={handleChange}
-      pattern="-?[0-9]*[.]?[0-9]*"
-      type="text"
-      value={inputValue}
-      disabled={disabled}
-    />
+    <>
+      {hasError && <FieldErrors fieldName={id} rawErrors={cellErrors} />}
+      <input
+        aria-label={ariaLabel ?? `Editable table value for ${cell.definition}`}
+        className={`usa-input margin-0 width-full overflow-x-auto${
+          hasError ? " usa-input--error" : ""
+        }`}
+        data-testid={`${id}-input`}
+        id={inputId}
+        name={name}
+        inputMode="decimal"
+        onChange={handleChange}
+        pattern="-?[0-9]*[.]?[0-9]*"
+        type="text"
+        value={inputValue}
+        disabled={disabled}
+        aria-invalid={hasError}
+        aria-describedby={hasError ? `error-for-${id}` : undefined}
+      />
+    </>
   );
 }
 

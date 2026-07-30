@@ -13,17 +13,20 @@ export interface CompetitionInstructions {
 }
 export type CompetitionForms = { form: FormDetail; is_required: boolean }[];
 
+export type CompetitionFormsSubmitApi = {form_id: string; is_required: boolean}[];
+
 export type ApplicantTypes = "individual" | "organization";
 
-export type CompetitionCreateRequest = {
-  competition_title: string;
+// This is used for create and update
+export type CompetitionSaveRequest = {
+  competition_title: string | null;
   opening_date: string | null;
   closing_date: string | null;
   contact_info: string | null;
   open_to_applicants: ApplicantTypes[];
 };
 
-export interface CompetitionCreateApiResponse extends APIResponse {
+export interface CompetitionSaveApiResponse extends APIResponse {
   data: Competition;
 }
 

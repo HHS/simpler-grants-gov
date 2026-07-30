@@ -1,7 +1,7 @@
 "use client";
 
 import { FormType } from "src/types/allFormsResponseTypes";
-import { Competition } from "src/types/competitionsResponseTypes";
+import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import { CSSProperties, RefObject, useState } from "react";
@@ -38,27 +38,24 @@ const resetTableForms = (
     };
   });
 };
-const resetSelectedForms = (competition: Competition) => {
+const resetSelectedForms = (competitionForms: CompetitionFormsSubmitApi) => {
   const formHolder: Record<string, boolean> = { ...alwaysRequiredForms };
-  competition.competition_forms.forEach((form) => {
-    formHolder[form.form.form_id] = form.is_required;
+  competitionForms.forEach((form) => {
+    formHolder[form.form_id] = form.is_required;
   });
   return formHolder;
 };
 
 export const FormSelectModal = ({
-  competition,
+  competitionForms,
   forms,
   formModalRef,
   submitCompetitionForms,
 }: {
-  competition: Competition;
+  competitionForms: CompetitionFormsSubmitApi;
   forms: FormType[];
   formModalRef: RefObject<ModalRef | null>;
-  submitCompetitionForms: (
-    competitionId: string,
-    body: { forms: { form_id: string; is_required: boolean }[] },
-  ) => Promise<void>;
+  submitCompetitionForms: (forms: CompetitionFormsSubmitApi) => void;
 }) => {
   const toggleSelectAll = () => {
     if (Object.keys(selectedForms).length >= forms.length - 1) {
@@ -78,29 +75,24 @@ export const FormSelectModal = ({
     }
   };
   const [selectedForms, setSelectedForms] = useState<Record<string, boolean>>(
-    resetSelectedForms(competition),
+    resetSelectedForms(competitionForms),
   );
   const [tableForms, setTableForms] = useState(
     resetTableForms(forms, selectedForms),
   );
   const t = useTranslations("FormSelectModal");
   const handleSubmit = () => {
-    submitCompetitionForms(competition.competition_id, {
-      forms: Object.keys(selectedForms).map((key) => {
+    submitCompetitionForms(
+      Object.keys(selectedForms).map((key) => {
         return { form_id: key, is_required: selectedForms[key] };
       }),
-    })
-      .then(() => {
-        setTableForms(resetTableForms(forms, selectedForms));
-        return formModalRef.current?.toggleModal();
-      })
-      .catch((e) => {
-        console.error("Rejected Promise", e);
-      });
+    );
+    setTableForms(resetTableForms(forms, selectedForms));
+    formModalRef.current?.toggleModal();
   };
 
   const handleCleanup = () => {
-    const clearedSelectedForms = resetSelectedForms(competition);
+    const clearedSelectedForms = resetSelectedForms(competitionForms);
     const clearedTableForms = resetTableForms(forms, clearedSelectedForms);
     setSelectedForms(clearedSelectedForms);
     setTableForms(clearedTableForms);

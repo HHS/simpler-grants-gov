@@ -1,6 +1,7 @@
 "server only";
 
 import { CompetitionFormsApiResponse } from "src/types/competitionFormsResponseTypes";
+import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
 
 import { fetchCompetitionForms } from "./fetchers";
 
@@ -9,7 +10,7 @@ export async function updateCompetitionForms({
   body,
 }: {
   competitionId: string;
-  body: { forms: { form_id: string; is_required: boolean }[] };
+  body: { forms: CompetitionFormsSubmitApi[] };
 }): Promise<CompetitionFormsApiResponse> {
   const response = await fetchCompetitionForms({
     subPath: `${competitionId}/forms`,
