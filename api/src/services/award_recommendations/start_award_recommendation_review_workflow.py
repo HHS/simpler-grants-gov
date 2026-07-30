@@ -27,6 +27,7 @@ def start_award_recommendation_review(
     db_session: db.Session,
     user: User,
     award_recommendation_id: uuid.UUID,
+    review_data: dict,
 ) -> AwardRecommendation:
     """Start the award recommendation review process by queuing its workflow."""
     award_recommendation = get_award_recommendation_and_verify_access(
@@ -60,6 +61,13 @@ def start_award_recommendation_review(
         )
 
     # Queue the award recommendation review workflow
+    metadata = {
+        "comment": review_data.get("comment", ""),
+    }
+
+    if review_data.get("internal_comment"):
+        metadata["internal_comment"] = review_data["internal_comment"]
+
     event_id = uuid.uuid4()
     send_workflow_event_to_queue(
         WorkflowEvent(
@@ -71,6 +79,7 @@ def start_award_recommendation_review(
                 entity_type=WorkflowEntityType.AWARD_RECOMMENDATION,
                 entity_id=award_recommendation.award_recommendation_id,
             ),
+            metadata=metadata,
         )
     )
 
