@@ -23,15 +23,18 @@ export default function MaintenanceBanner({ message }: Props) {
   }
 
   return (
-    <GridContainer className="padding-y-1">
-      <Alert
-        type="info"
-        headingLevel="h2"
-        slim={true}
-        data-testid="maintenance-banner"
-      >
-        {message}
-      </Alert>
-    </GridContainer>
+    <div className="bg-info-lighter">
+      <GridContainer className="padding-y-1">
+        <Alert
+          type="info"
+          headingLevel="h2"
+          slim={true}
+          className="border-0"
+          data-testid="maintenance-banner"
+        >
+          {message}
+        </Alert>
+      </GridContainer>
+    </div>
   );
 }
