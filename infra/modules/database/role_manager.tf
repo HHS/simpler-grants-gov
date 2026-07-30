@@ -30,9 +30,9 @@ resource "aws_lambda_function" "role_manager" {
 
   environment {
     variables = {
-      DB_HOST                = aws_rds_cluster.db.endpoint
-      DB_PORT                = aws_rds_cluster.db.port
-      DB_USER                = local.master_username
+      DB_HOST = aws_rds_cluster.db.endpoint
+      DB_PORT = aws_rds_cluster.db.port
+      DB_USER                = aws_rds_cluster.db.master_username
       DB_NAME                = aws_rds_cluster.db.database_name
       DB_PASSWORD_PARAM_NAME = local.db_password_param_name
       DB_PASSWORD_SECRET_ARN = aws_rds_cluster.db.master_user_secret[0].secret_arn
