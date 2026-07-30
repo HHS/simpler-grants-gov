@@ -135,7 +135,6 @@ export const FileInputStatusDisplay = ({
   if (!status) {
     return;
   }
-  console.log("!!!", status);
 
   // this relies on some magic strings, it's not great!
   // refactor this to be more flexible in terms of tracking progress
