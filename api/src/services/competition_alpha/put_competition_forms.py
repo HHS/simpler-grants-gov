@@ -68,7 +68,7 @@ def set_competition_forms(
     competition = get_competition(db_session, competition_id)
 
     # Check user access
-    verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, competition.opportunity.agency_record)
+    verify_access(user, {Privilege.UPDATE_OPPORTUNITY, Privilege.MANAGE_COMPETITION}, competition.opportunity.agency_record)
 
     requested_forms = json_data["forms"]
     requested_form_ids = [f["form_id"] for f in requested_forms]
