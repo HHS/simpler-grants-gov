@@ -90,7 +90,8 @@ async function FormPage({ params }: formPageProps) {
   } = data;
 
   const useVirusScanning = formName === "Attachment Form";
-  const isBudgetForm = formName.includes("SF-424A");
+  const isBudgetForm =
+    formName.includes("SF-424A") || formName.includes("SF-424C");
 
   const warnings = isBudgetForm
     ? formValidationWarnings?.map((warning) => ({

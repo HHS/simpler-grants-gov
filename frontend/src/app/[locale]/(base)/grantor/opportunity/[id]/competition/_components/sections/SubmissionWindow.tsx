@@ -24,13 +24,13 @@ export function SubmissionWindow() {
         <div className="tablet:grid-col-6">
           <FormGroup>
             <DynamicFieldLabel
-              idFor="submissions-open"
+              idFor="opening_date"
               title={t("submissionsOpen")}
               description={t("submissionsOpenHint")}
             />
             <DatePicker
-              id="submissions-open"
-              name="submissionsOpen"
+              id="opening_date"
+              name="opening_date"
               placeholder="mm/dd/yyyy"
               className="width-full"
             />
@@ -39,14 +39,14 @@ export function SubmissionWindow() {
         <div className="tablet:grid-col-6">
           <FormGroup>
             <DynamicFieldLabel
-              idFor="submissions-close"
+              idFor="closing_date"
               title={t("submissionsClose")}
               description={t("submissionsCloseHint")}
               required={true}
             />
             <DatePicker
-              id="submissions-close"
-              name="submissionsClose"
+              id="closing_date"
+              name="closing_date"
               placeholder="mm/dd/yyyy"
               className="width-full"
             />

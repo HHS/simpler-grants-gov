@@ -82,6 +82,14 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-maintenance-mode"
     },
+    FEATURE_MAINTENANCE_BANNER_ENABLED = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-maintenance-banner-enabled"
+    },
+    MAINTENANCE_BANNER_MESSAGE = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/maintenance-banner-message"
+    },
     FEATURE_OPPORTUNITIES_LIST_OFF = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-opportunities-list-off"
