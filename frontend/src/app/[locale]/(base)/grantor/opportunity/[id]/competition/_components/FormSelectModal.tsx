@@ -190,7 +190,7 @@ export const FormSelectModal = ({
                     </span>
                     {alwaysRequired ? (
                       <span className="always-required-label">
-                        Always Required
+                        {t("requiredStates.always")}
                       </span>
                     ) : (
                       <></>
@@ -207,7 +207,7 @@ export const FormSelectModal = ({
                           className="usa-icon usa-icon--size-3"
                         />
                       </span>
-                      <span>Auto added</span>
+                      <span>{t("requiredStates.auto")}</span>
                     </span>
                   ) : (
                     <span>
