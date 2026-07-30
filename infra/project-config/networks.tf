@@ -156,5 +156,24 @@ locals {
         certificate_configs = {}
       }
     }
+    # ---------------------------------------------------------------------------
+    # infra-staging environment (AWS account 317380566348, the "staging" account)
+    #
+    # ---------------------------------------------------------------------------
+    infra-staging = {
+      account_name                 = "staging" # AWS account 317380566348 (see infra/accounts/staging.317380566348.s3.tfbackend)
+      database_subnet_group_name   = "infra-staging"
+      vpc_name                     = "infra-staging"
+      second_octet                 = 6               # The second octet of the VPC CIDR block (10.6.0.0/20)
+      grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
+
+
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
   }
 }

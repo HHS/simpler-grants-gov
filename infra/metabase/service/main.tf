@@ -1,7 +1,9 @@
 data "aws_vpc" "network" {
   filter {
-    name   = "tag:Name"
-    values = [module.project_config.network_configs[local.environment_config.network_name].vpc_name]
+    name = "tag:Name"
+    # Resolve the VPC by the environment's network_name so the environment name
+    # and its VPC/network name may differ (e.g. infra-dev -> infra-dev-simpler-grants).
+    values = [local.network_config.vpc_name]
   }
 }
 
@@ -32,6 +34,8 @@ locals {
 
   environment_config = module.app_config.environment_configs[var.environment_name]
   service_config     = local.environment_config.service_config
+
+  network_config = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
@@ -51,6 +55,7 @@ terraform {
 
 provider "aws" {
   region = local.service_config.region
+  allowed_account_ids = [module.expected_account.account_id]
   default_tags {
     tags = local.tags
   }
@@ -62,6 +67,19 @@ module "project_config" {
 
 module "app_config" {
   source = "../app-config"
+}
+
+# Resolve the account this environment must deploy to
+module "expected_account" {
+  source       = "../../modules/account-id-by-name"
+  account_name = local.network_config.account_name
+  accounts_dir = "${path.module}/../../accounts"
+}
+
+module "account_guard" {
+  source              = "../../modules/aws-account-guard"
+  expected_account_id = module.expected_account.account_id
+  context             = "the ${var.environment_name} metabase service"
 }
 
 data "aws_rds_cluster" "db_cluster" {
