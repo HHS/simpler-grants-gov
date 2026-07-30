@@ -13,6 +13,7 @@ import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
 import Header from "./header/Header";
 import { PivRequiredModal } from "./loginModal/PivRequiredModal";
+import MaintenanceBanner from "./MaintenanceBanner";
 import RouteFocusManager from "./RouteFocusManager";
 
 type Props = {
@@ -55,6 +56,7 @@ export default async function Layout({ children, locale }: Props) {
             }
             testUsers={testUsers}
           />
+          <MaintenanceBanner message={environment.MAINTENANCE_BANNER_MESSAGE} />
           <RouteFocusManager>
             <main
               id="main-content"
