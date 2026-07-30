@@ -2,8 +2,6 @@ import { act, render, screen } from "@testing-library/react";
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { UploadFileMetadata } from "src/types/fileUploadTypes";
-import { ApplicationAttachmentStatus } from "src/utils/applyForm/applicationAttachmentUtils";
-
 import ApplicationAttachmentWidget from "src/components/apply-form/widgets/ApplicationAttachmentWidget";
 
 type UseApplicationAttachmentsResult = {
@@ -300,11 +298,12 @@ describe("ApplicationAttachmentWidget", () => {
   it("passes the upload status messages to the file input", () => {
     render(<ApplicationAttachmentWidget {...defaultProps} />);
 
+    // This tests that the correct i18n keys are used for lookup.
     expect(getSimplerFileInputProps()).toEqual(
       expect.objectContaining({
-        postUploadActionProgressMessage: ApplicationAttachmentStatus.uploading,
-        postUploadActionSuccessMessage: ApplicationAttachmentStatus.success,
-        postUploadActionErrorMessage: ApplicationAttachmentStatus.error,
+        postUploadActionProgressMessage: "uploading",
+        postUploadActionSuccessMessage: "success",
+        postUploadActionErrorMessage: "error",
       }),
     );
   });

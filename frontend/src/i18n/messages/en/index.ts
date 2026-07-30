@@ -542,6 +542,13 @@ export const messages = {
       uploadBy: "Upload by",
       uploadDate: "Upload date",
     },
+    attachmentUpload: {
+      error:
+        "Processing failed due to a system error. Try uploading your file again.",
+      success:
+        "Success: File scan complete.  “Save” this form to attach the file.",
+      uploading: "Uploading...",
+    },
     historyTable: {
       applicationHistory: "Application History",
       timestamp: "Timestamp",

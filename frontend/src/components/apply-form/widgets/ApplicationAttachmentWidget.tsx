@@ -6,11 +6,9 @@ import { ApplicationAttachmentCreateResponse } from "src/types/applicationRespon
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { UploadFileMetadata } from "src/types/fileUploadTypes";
-import {
-  ApplicationAttachmentStatus,
-  mapAttachmentsToFileMetadata,
-} from "src/utils/applyForm/applicationAttachmentUtils";
+import { mapAttachmentsToFileMetadata } from "src/utils/applyForm/applicationAttachmentUtils";
 
+import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import { FormGroup } from "@trussworks/react-uswds";
@@ -31,6 +29,7 @@ const ApplicationAttachmentWidget = ({
   schema: { description, title },
   value,
 }: UswdsWidgetProps) => {
+  const t = useTranslations("Application.attachmentUpload");
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   const { clientFetch: createApplicationAttachmentFetcher } =
     useClientFetch<ApplicationAttachmentCreateResponse>(
@@ -97,9 +96,9 @@ const ApplicationAttachmentWidget = ({
       <SimplerFileInput
         id={`${id}-wrapper`}
         postUploadAction={handleUploadApplicationAttachment}
-        postUploadActionProgressMessage={ApplicationAttachmentStatus.uploading}
-        postUploadActionSuccessMessage={ApplicationAttachmentStatus.success}
-        postUploadActionErrorMessage={ApplicationAttachmentStatus.error}
+        postUploadActionProgressMessage={t("uploading")}
+        postUploadActionSuccessMessage={t("success")}
+        postUploadActionErrorMessage={t("error")}
         onDelete={handleDeletattachment}
         disabled={disabled}
         readOnly={readOnly}

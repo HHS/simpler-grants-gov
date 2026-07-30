@@ -1,8 +1,5 @@
 import { Attachment } from "src/types/attachmentTypes";
-import {
-  ApplicationAttachmentStatus,
-  mapAttachmentsToFileMetadata,
-} from "src/utils/applyForm/applicationAttachmentUtils";
+import { mapAttachmentsToFileMetadata } from "src/utils/applyForm/applicationAttachmentUtils";
 
 describe("mapAttachmentsToFileMetadata", () => {
   const attachment: Attachment = {
@@ -50,16 +47,5 @@ describe("mapAttachmentsToFileMetadata", () => {
 
   it("returns an empty list when there are no attachments", () => {
     expect(mapAttachmentsToFileMetadata([])).toEqual([]);
-  });
-});
-
-describe("ApplicationAttachmentStatus", () => {
-  it("provides a user facing message for each upload phase", () => {
-    expect(ApplicationAttachmentStatus.uploading).toEqual(expect.any(String));
-    expect(ApplicationAttachmentStatus.uploading).not.toHaveLength(0);
-    expect(ApplicationAttachmentStatus.success).toEqual(expect.any(String));
-    expect(ApplicationAttachmentStatus.success).not.toHaveLength(0);
-    expect(ApplicationAttachmentStatus.error).toEqual(expect.any(String));
-    expect(ApplicationAttachmentStatus.error).not.toHaveLength(0);
   });
 });
