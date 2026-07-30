@@ -60,7 +60,8 @@ export const uploadFileToS3 = async (
       "Content-Type": "multipart/form-data",
     },
   });
-  if (s3Response.status !== 204) {
+  // Local s3mock returns 200 and S3 API returns 204
+  if (!(s3Response.status === 200 || s3Response.status === 204)) {
     throw new ApiRequestError("Error uploading file to S3");
   }
   return true;
