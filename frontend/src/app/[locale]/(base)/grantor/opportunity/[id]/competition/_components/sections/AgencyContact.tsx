@@ -180,7 +180,7 @@ export function AgencyContact() {
             isTextArea={false}
             labelText={t("fullName")}
             description=""
-            fieldId="fullName"
+            fieldId="contact_name"
             fieldMaxLength={255}
             isRequired={true}
             defaultValue=""
@@ -197,7 +197,7 @@ export function AgencyContact() {
             isTextArea={false}
             labelText={t("personTitle")}
             description=""
-            fieldId="title"
+            fieldId="contact_title"
             fieldMaxLength={255}
             isRequired={false}
             onTextChange={() => {}}
@@ -213,7 +213,7 @@ export function AgencyContact() {
             isTextArea={false}
             labelText={t("emailAddress")}
             description={t("emailAddressHint")}
-            fieldId="emailAddress"
+            fieldId="contact_email"
             fieldMaxLength={255}
             isRequired={true}
             defaultValue=""
@@ -227,7 +227,7 @@ export function AgencyContact() {
         {/* Phone number */}
         <div className="tablet:grid-col">
           <CommonTextInput
-            fieldId="phoneNumber"
+            fieldId="contact_phone"
             labelText={t("phoneNumber")}
             description={t("phoneNumberHint")}
             isRequired={true}
