@@ -166,7 +166,7 @@ locals {
       vpc_name                     = "infra-staging"
       second_octet                 = 6               # The second octet of the VPC CIDR block (10.6.0.0/20)
       grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
-
+      enable_dms                   = true            # peers with the Grants.gov Oracle DMS network, mirroring staging
 
       domain_config = {
         manage_dns  = false

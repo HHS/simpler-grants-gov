@@ -56,8 +56,12 @@ module "infra_staging_config" {
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 
-    # Workflow. Mirrors staging's internal user; the infra-staging database needs a
-    # matching user row (it will have one if seeded from a staging snapshot).
+    # Workflow. This is staging's internal user id, reused because infra-staging's database
+    # is restored from a staging snapshot and therefore carries the same user row. The
+    # workflow service REQUIRES this row to exist: brought up against an empty database it
+    # will fail at runtime, not at apply time, so a non-snapshot bring-up must either seed
+    # this user or point this at one that exists. Same arrangement as infra-dev, which
+    # reuses dev's id for the same reason.
     WORKFLOW_SERVICE_INTERNAL_USER_ID = "903bf2e6-b213-4744-9f95-66ccfd98a819"
 
     # Job lock — enabled in dev/staging while we validate it
