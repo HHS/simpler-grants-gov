@@ -18,31 +18,12 @@ import {
 import { SimplerModal } from "src/components/core/SimplerModal";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
-const centeredStyle: CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-};
+const checkboxStyle: CSSProperties = { width: 20, height: 20 };
 
 const alwaysRequiredForms: Record<string, boolean> = {
   "1623b310-85be-496a-b84b-34bdee22a68a": true, // SF 424. As we start to support other form families, this will be replaced with a more complex function
 };
 
-const getStyle = (alwaysRequired: boolean) => {
-  const style: CSSProperties = {
-    border: "1px",
-    borderStyle: "solid",
-    borderRadius: "4px",
-    marginBottom: "8px",
-  };
-  if (alwaysRequired) {
-    style.borderColor = "#5ABF95";
-    style.backgroundColor = "#DBF6ED";
-  } else {
-    style.borderColor = "#E6E6E2";
-  }
-  return style;
-};
 const resetTableForms = (
   forms: FormType[],
   selectedForms: Record<string, boolean>,
@@ -138,60 +119,40 @@ export const FormSelectModal = ({
         onClose={handleCleanup}
         className="text-wrap maxw-tablet-lg"
       >
-        <div
-          style={{
-            fontSize: 32,
-            fontWeight: 700,
-            marginLeft: 30,
-            marginBottom: 20,
-          }}
-        >
-          {t("heading")}
-        </div>
+        <div className="form-modal-header">{t("heading")}</div>
         <div style={{ padding: 0, overflowY: "scroll", height: "60vh" }}>
           <GridContainer>
-            <Grid row>
-              <Grid
-                col
-                style={{
-                  fontWeight: "400",
-                  fontSize: "16px",
-                  backgroundColor: "#F0F0EC",
-                  height: "65px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
+            <Grid row className="form-modal-select-all">
+              <Grid col={1} className="centered-content">
                 <input
                   type="checkbox"
                   checked={
                     Object.keys(selectedForms).length >= forms.length - 1
                   }
-                  style={{ width: "20px" }}
+                  style={checkboxStyle}
                   onChange={() => {
                     toggleSelectAll();
                   }}
-                />{" "}
-                {t("selectAll")}
+                />
               </Grid>
+              <Grid col={11}>{t("selectAll")}</Grid>
             </Grid>
             {tableForms.map((form, index) => {
               const alwaysRequired = !!alwaysRequiredForms[form.form_id];
               return (
                 <Grid
                   row
-                  style={getStyle(alwaysRequired)}
+                  className={`form-modal-rows ${alwaysRequired ? "form-modal-always-required" : "form-modal-optional"}`}
                   key={`forms-table-row-${index}`}
                 >
-                  <Grid col={1} style={centeredStyle}>
+                  <Grid col={1} className="centered-content">
                     {!alwaysRequired ? (
                       <input
                         type="checkbox"
                         checked={
                           typeof selectedForms[form.form_id] !== "undefined"
                         }
-                        style={{ width: "20px" }}
+                        style={checkboxStyle}
                         onChange={(e) => {
                           if (e.target.checked) {
                             form.isSelected = true;
@@ -217,7 +178,7 @@ export const FormSelectModal = ({
                   <Grid col={5} style={{ fontWeight: "bold" }}>
                     <div
                       style={{
-                        fontSize: "14px",
+                        fontSize: 14,
                       }}
                     >
                       {form.short_name.split("_")[0].substring(0, 25)}{" "}
@@ -231,31 +192,18 @@ export const FormSelectModal = ({
                         {form.current_version.minor_version}
                       </span>
                       {alwaysRequired ? (
-                        <span
-                          style={{
-                            backgroundColor: "#2E8367",
-                            color: "white",
-                            fontWeight: "normal",
-                            marginLeft: "8px",
-                            fontSize: 12,
-                            paddingLeft: 4,
-                            paddingRight: 4,
-                            paddingTop: 2,
-                            paddingBottom: 2,
-                            borderRadius: 2,
-                          }}
-                        >
+                        <span className="always-required-label">
                           Always Required
                         </span>
                       ) : (
                         <></>
                       )}
                     </div>
-                    <div style={{ fontSize: "16px" }}>
+                    <div style={{ fontSize: 16 }}>
                       {form.name.split(" (")[0]}
                     </div>
                   </Grid>
-                  <Grid col={6} style={centeredStyle}>
+                  <Grid col={6} className="centered-content">
                     {alwaysRequired ? (
                       <span style={{ color: "#286846" }}>
                         <span style={{ position: "relative", top: 5 }}>
