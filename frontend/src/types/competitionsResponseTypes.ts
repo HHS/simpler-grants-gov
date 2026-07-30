@@ -13,7 +13,10 @@ export interface CompetitionInstructions {
 }
 export type CompetitionForms = { form: FormDetail; is_required: boolean }[];
 
-export type CompetitionFormsSubmitApi = {form_id: string; is_required: boolean}[];
+export type CompetitionFormsSubmitApi = {
+  form_id: string;
+  is_required: boolean;
+}[];
 
 export type ApplicantTypes = "individual" | "organization";
 
