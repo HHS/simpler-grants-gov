@@ -54,7 +54,7 @@ terraform {
 }
 
 provider "aws" {
-  region = local.service_config.region
+  region              = local.service_config.region
   allowed_account_ids = [module.expected_account.account_id]
   default_tags {
     tags = local.tags
