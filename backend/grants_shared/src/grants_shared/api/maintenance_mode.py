@@ -17,6 +17,7 @@ class MaintenanceModeLogEvent(StrEnum):
     """Distinct, queryable event types for maintenance-mode log records."""
 
     REQUEST_REJECTED = "maintenance_mode_request_rejected"
+    TASK_SKIPPED = "maintenance_mode_task_skipped"
 
 
 class MaintenanceModeConfig(PydanticBaseEnvConfig):

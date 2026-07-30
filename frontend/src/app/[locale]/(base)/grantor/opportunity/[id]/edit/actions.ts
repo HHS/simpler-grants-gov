@@ -4,11 +4,8 @@ import { ApiRequestError, parseErrorStatus } from "src/errors";
 import {
   createOpportunitySummaryForGrantor,
   updateOpportunitySummaryForGrantor,
-} from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
-import {
-  OpportunitySummaryUpdateRawData,
-  OpportunitySummaryUpdateRequest,
-} from "src/types/opportunity/opportunityResponseTypes";
+} from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import { OpportunitySummaryUpdateRawData } from "src/types/opportunity/opportunityResponseTypes";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 import { formDataToObject } from "src/utils/formData/formDataToJson";
 import { z } from "zod";
@@ -58,8 +55,8 @@ const editOpportunityFormSchema = {
   post_date: { type: "string" },
   close_date: { type: "string" },
   close_date_description: { type: "string" },
-  funding_instruments: { items: { type: "string" } }, // array
-  funding_categories: { items: { type: "string" } }, // array
+  funding_instruments: { type: "string" },
+  funding_categories: { type: "string" },
   applicant_types: { items: { type: "string" } }, // array
   summary_description: { type: "string" },
   additional_info_url: { type: "string" },
@@ -261,16 +258,23 @@ export async function saveOpportunityEditAction(
 
   try {
     if (!opportunitySummaryId) {
+      const rawBody = {
+        ...formDataToObject<OpportunitySummaryUpdateRawData>(
+          formData,
+          editOpportunityFormSchema,
+          null,
+        ),
+        is_forecast: isForecast,
+      };
+
+      const body = {
+        ...rawBody,
+        funding_categories: [rawBody.funding_categories],
+        funding_instruments: [rawBody.funding_instruments],
+      };
       const createResponse = await createOpportunitySummaryForGrantor({
         opportunityId,
-        body: {
-          ...formDataToObject<OpportunitySummaryUpdateRequest>(
-            formData,
-            editOpportunityFormSchema,
-            null,
-          ),
-          is_forecast: isForecast,
-        },
+        body: body,
       });
 
       return {
