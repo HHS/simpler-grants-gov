@@ -49,6 +49,21 @@ describe("TableWidget", () => {
     },
   };
 
+  it("applies the fixed table-layout class so colgroup widths are respected", () => {
+    render(
+      <TableWidget
+        {...props}
+        schema={{}}
+        rawErrors={[]}
+        value={{}}
+        options={{}}
+      />,
+    );
+    expect(screen.getByTestId("table")).toHaveClass(
+      "applyform-table-fixed-layout",
+    );
+  });
+
   it("renders configured table headers and cells", () => {
     render(
       <TableWidget

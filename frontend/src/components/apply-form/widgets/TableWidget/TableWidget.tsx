@@ -10,6 +10,7 @@ import {
   getFieldNameForHtml,
   jsonSchemaPointerToPath,
 } from "src/utils/applyForm/applyFormUtils";
+import { formatTableCellValue } from "src/utils/applyForm/formatTableCellValue";
 
 import { useCallback, useMemo } from "react";
 import { Table } from "@trussworks/react-uswds";
@@ -49,6 +50,81 @@ function getRenderValue(
   return typeof renderValue === "string" || typeof renderValue === "number"
     ? renderValue
     : undefined;
+}
+
+const TEXT_COLUMN_UNIT = 16;
+
+const MIN_COLUMN_WIDTH_PERCENT = 10;
+
+const NUMERIC_UNIT_PADDING = 2;
+
+/**
+ * Determine whether a column is a "text" column (i.e. every populated cell
+ * in that column is plainText). Text columns can wrap, so they're sized
+ * differently from numeric input/readOnly columns, which must stay on one line.
+ */
+function isPlainTextColumn(
+  rows: UiSchemaTableRow[],
+  colIndex: number,
+): boolean {
+  const cell = rows
+    .map((row) => row.cells[colIndex])
+    .find((candidate) => candidate !== undefined);
+  return !cell || cell.type === "plainText";
+}
+
+/**
+ * Estimate how many "character units" a numeric (input/readOnly) column
+ * needs by finding the longest formatted value across all rows.
+ */
+function getMaxFormattedLength(
+  rows: UiSchemaTableRow[],
+  colIndex: number,
+  value: unknown,
+): number {
+  let maxLen = 0;
+  rows.forEach((row) => {
+    const cell = row.cells[colIndex];
+    if (!cell || cell.type === "plainText") return;
+    const renderValue = getRenderValue(cell.definition, value);
+    const formatted = formatTableCellValue(renderValue, cell.format);
+    if (formatted.length > maxLen) {
+      maxLen = formatted.length;
+    }
+  });
+  return maxLen;
+}
+
+/**
+ * Compute column widths (as percentages summing to 100) based on the actual
+ * content each column needs to display, rather than a fixed width from the
+ * schema. Numeric columns get width proportional to their longest formatted
+ * value (since numbers can't wrap onto multiple lines); plainText columns get
+ * a fixed, smaller allotment since text can wrap. This keeps values from
+ * overflowing their cells both on screen and when printed.
+ */
+function computeColumnWidths(
+  columns: UiSchemaTableColumn[],
+  rows: UiSchemaTableRow[],
+  value: unknown,
+): number[] {
+  const units = columns.map((_, colIndex) => {
+    if (isPlainTextColumn(rows, colIndex)) {
+      return TEXT_COLUMN_UNIT;
+    }
+    return getMaxFormattedLength(rows, colIndex, value) + NUMERIC_UNIT_PADDING;
+  });
+
+  const total = units.reduce((sum, unit) => sum + unit, 0) || 1;
+  const rawPercentages = units.map((unit) => (unit / total) * 100);
+
+  // Enforce a minimum width so no column collapses, then renormalize to 100%.
+  const clamped = rawPercentages.map((pct) =>
+    Math.max(pct, MIN_COLUMN_WIDTH_PERCENT),
+  );
+  const clampedTotal = clamped.reduce((sum, pct) => sum + pct, 0);
+
+  return clamped.map((pct) => (pct / clampedTotal) * 100);
 }
 
 /**
@@ -154,6 +230,11 @@ function TableWidget({
   const rows: UiSchemaTableRow[] =
     (uiSchemaField as UiSchemaTableMultiField | undefined)?.children?.rows ??
     [];
+
+  const columnWidths = useMemo(
+    () => computeColumnWidths(columns, rows, value),
+    [columns, rows, value],
+  );
 
   const cellChangeHandlers = useMemo(
     () =>
@@ -303,84 +384,110 @@ function TableWidget({
   });
 
   return (
-    <Table
-      bordered
-      fullWidth
-      scrollable
-      data-testid="table"
-      data-table-name={uiSchemaField.name}
-      data-table-column-count={columns.length}
-      data-table-row-count={rows.length}
-      caption={
-        <span className="usa-sr-only">{label ?? uiSchemaField.name}</span>
-      }
-    >
-      <thead>
-        <tr>
-          {columns.map((column) => (
-            <th
+    <>
+      {/*
+        @trussworks/react-uswds's TableProps intentionally omits `style`, so
+        table-layout: fixed (needed for the colgroup percentages below to be
+        respected instead of overridden by content width) is applied via this
+        class instead of an inline style.
+      */}
+      <style>{`.applyform-table-fixed-layout { table-layout: fixed; }`}</style>
+      <Table
+        bordered
+        fullWidth
+        scrollable
+        className="width-full overflow-wrap applyform-table-fixed-layout"
+        data-testid="table"
+        data-table-name={uiSchemaField.name}
+        data-table-column-count={columns.length}
+        data-table-row-count={rows.length}
+        caption={
+          <span className="usa-sr-only">{label ?? uiSchemaField.name}</span>
+        }
+      >
+        <colgroup>
+          {columns.map((column, index) => (
+            <col
               key={column.columnHeader}
-              scope="col"
-              style={column.width ? { width: `${column.width}%` } : undefined}
-            >
-              {column.columnHeader}
-            </th>
+              style={{ width: `${columnWidths[index]}%` }}
+            />
           ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, rowIndex) => {
-          const rowLabel =
-            row.cells[0]?.type === "plainText"
-              ? row.cells[0].staticContent
-              : undefined;
+        </colgroup>
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th
+                key={column.columnHeader}
+                scope="col"
+                style={{
+                  whiteSpace: "normal",
+                  overflowWrap: "anywhere",
+                }}
+              >
+                {column.columnHeader}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => {
+            const rowLabel =
+              row.cells[0]?.type === "plainText"
+                ? row.cells[0].staticContent
+                : undefined;
 
-          return (
-            <tr key={`table-row-${rowIndex}`}>
-              {row.cells.map((cell, cellIndex) => {
-                const cellId = `${uiSchemaField.name}-${rowIndex}-${cellIndex}`;
+            return (
+              <tr key={`table-row-${rowIndex}`}>
+                {row.cells.map((cell, cellIndex) => {
+                  const cellId = `${uiSchemaField.name}-${rowIndex}-${cellIndex}`;
 
-                return (
-                  <td
-                    key={`table-row-${rowIndex}-cell-${cellIndex}`}
-                    data-table-cell-type={cell.type}
-                  >
-                    <TableCell
-                      cell={cell}
-                      cellErrors={getCellErrors(
-                        buildCellName(cell.definition, rowIndex),
-                      )}
-                      disabled={
-                        cell.type === "input" ? isInteractionDisabled : false
-                      }
-                      id={cellId}
-                      name={buildCellName(cell.definition, rowIndex)}
-                      ariaLabel={
-                        cell.type === "input"
-                          ? [rowLabel, columns[cellIndex]?.columnHeader]
-                              .filter(Boolean)
-                              .join(", ")
-                          : undefined
-                      }
-                      onChange={
-                        cell.type === "input" && cell.definition
-                          ? cellChangeHandlers[cell.definition]
-                          : undefined
-                      }
-                      value={
-                        cell.type === "plainText"
-                          ? undefined
-                          : getRenderValue(cell.definition, value)
-                      }
-                    />
-                  </td>
-                );
-              })}
-            </tr>
-          );
-        })}
-      </tbody>
-    </Table>
+                  return (
+                    <td
+                      key={`table-row-${rowIndex}-cell-${cellIndex}`}
+                      data-table-cell-type={cell.type}
+                      style={{
+                        whiteSpace: "normal",
+                        overflowWrap: "anywhere",
+                        verticalAlign: "top",
+                      }}
+                    >
+                      <TableCell
+                        cell={cell}
+                        cellErrors={getCellErrors(
+                          buildCellName(cell.definition, rowIndex),
+                        )}
+                        disabled={
+                          cell.type === "input" ? isInteractionDisabled : false
+                        }
+                        id={cellId}
+                        name={buildCellName(cell.definition, rowIndex)}
+                        ariaLabel={
+                          cell.type === "input"
+                            ? [rowLabel, columns[cellIndex]?.columnHeader]
+                                .filter(Boolean)
+                                .join(", ")
+                            : undefined
+                        }
+                        onChange={
+                          cell.type === "input" && cell.definition
+                            ? cellChangeHandlers[cell.definition]
+                            : undefined
+                        }
+                        value={
+                          cell.type === "plainText"
+                            ? undefined
+                            : getRenderValue(cell.definition, value)
+                        }
+                      />
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </Table>
+    </>
   );
 }
 

@@ -34,6 +34,9 @@ describe("TableCell", () => {
     expect(screen.getByTestId("read-only-cell-read-only")).toHaveTextContent(
       "$1,234.50",
     );
+    expect(screen.getByTestId("read-only-cell-read-only")).toHaveTextContent(
+      "$1,234.50",
+    );
   });
 
   it("renders an editable numeric text input", () => {
@@ -54,7 +57,8 @@ describe("TableCell", () => {
     expect(input).toHaveAttribute("type", "text");
     expect(input).toHaveAttribute("inputmode", "decimal");
     expect(input).toHaveValue("1250.5");
-    expect(input).toHaveClass("overflow-x-auto");
+    expect(input).not.toHaveClass("width-full");
+    expect(input).toHaveStyle("width: 100%");
   });
 
   it("updates the input display when the value prop changes", () => {
@@ -200,6 +204,14 @@ describe("TableCell", () => {
       "tabindex",
       "-1",
     );
+
+    expect(screen.getByTestId("input-cell-read-only")).toHaveTextContent(
+      "100.00",
+    );
+    expect(screen.getByTestId("input-cell-read-only")).toHaveAttribute(
+      "tabindex",
+      "-1",
+    );
   });
 
   it("supports keyboard focus for editable values", async () => {
@@ -241,6 +253,45 @@ describe("TableCell", () => {
     expect(screen.getByTestId("read-only-cell-read-only")).toHaveClass(
       "text-wrap",
     );
+  });
+  it("never allows a numeric read-only value to break mid-number", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "readOnly",
+          definition: "/properties/total",
+          format: "dollar",
+        }}
+        id="read-only-cell"
+        value={928886}
+      />,
+    );
+
+    const readOnlyEl = screen.getByTestId("read-only-cell-read-only");
+    expect(readOnlyEl).toHaveStyle("white-space: nowrap");
+    expect(readOnlyEl).not.toHaveStyle("overflow-wrap: anywhere");
+    expect(readOnlyEl).not.toHaveStyle("word-break: break-all");
+    expect(readOnlyEl).not.toHaveStyle("word-break: break-word");
+  });
+
+  it("never allows a numeric input value to break mid-number", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+          format: "dollar",
+        }}
+        id="input-cell"
+        value={928886}
+      />,
+    );
+
+    const input = screen.getByTestId("input-cell-input");
+    expect(input).toHaveStyle("white-space: nowrap");
+    expect(input).not.toHaveStyle("overflow-wrap: anywhere");
+    expect(input).not.toHaveStyle("word-break: break-all");
+    expect(input).not.toHaveStyle("word-break: break-word");
   });
 
   it("renders validation errors when cellErrors provided", () => {
