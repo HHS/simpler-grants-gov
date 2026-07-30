@@ -65,13 +65,10 @@ const mockGetOpportunityForGrantor = jest.fn().mockResolvedValue({
     forecast_summary: { opportunity_summary_id: "summary-1" },
   },
 });
-jest.mock(
-  "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher",
-  () => ({
-    getOpportunityForGrantor: (arg: unknown): unknown =>
-      mockGetOpportunityForGrantor(arg) as Promise<GrantorOpportunityDetail[]>,
-  }),
-);
+jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
+  getOpportunityForGrantor: (arg: unknown): unknown =>
+    mockGetOpportunityForGrantor(arg) as Promise<GrantorOpportunityDetail[]>,
+}));
 
 const pageParams = new Promise<{ id: string; locale: string }>((resolve) => {
   resolve({ id: "opportunity-123", locale: "en" });
