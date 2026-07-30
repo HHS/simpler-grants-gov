@@ -339,6 +339,7 @@ FORM_XML_TRANSFORM_RULES = {
             "EPA4700_4_5_0": "http://apply.grants.gov/forms/EPA4700_4_5_0-V5.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
             "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
         "xml_structure": {

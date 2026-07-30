@@ -379,10 +379,13 @@ def test_user_callback_error_in_token_302(client, enable_factory_create, caplog)
     assert resp_json["error_description"] == "internal error"
 
     # Verify it errored because of the response from token Oauth
-    assert (
-        "Unexpected error occurred in login flow via raise_flask_error: default mock error description"
-        in caplog.messages
+    log_record = next(
+        record
+        for record in caplog.records
+        if getattr(record, "message", None)
+        == "Unexpected error occurred in login flow via raise_flask_error"
     )
+    assert getattr(log_record, "error.message", None) == "default mock error description"
 
 
 @pytest.mark.parametrize(

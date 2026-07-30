@@ -568,6 +568,40 @@ class AwardRecommendationAttachmentDeleteResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
 
+class AwardRecommendationAttachmentCreateRequestSchema(Schema):
+    """Schema for POST award recommendation attachment from a scanned pending file"""
+
+    pending_file_id = fields.UUID(
+        required=True,
+        metadata={
+            "description": "The ID of the pending (virus-scanned) file to attach",
+        },
+    )
+    award_recommendation_attachment_type = fields.Enum(
+        AwardRecommendationAttachmentType,
+        required=True,
+        metadata={"description": "The type of the attachment"},
+    )
+    file_name = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Optional override for the uploaded file name",
+            "example": "terms_and_conditions.pdf",
+        },
+    )
+
+
+class AwardRecommendationAttachmentCreateSchema(Schema):
+    award_recommendation_attachment_id = fields.UUID(
+        metadata={"description": "The ID of the created award recommendation attachment"}
+    )
+
+
+class AwardRecommendationAttachmentCreateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(AwardRecommendationAttachmentCreateSchema())
+
+
 class AwardRecommendationDeleteResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
@@ -696,7 +730,14 @@ class AwardRecommendationListRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "AwardRecommendationListPaginationSchema",
-            ["created_at"],
+            [
+                "award_recommendation_number",
+                "opportunity_name",
+                "opportunity_number",
+                "total_received_count",
+                "award_recommendation_status",
+                "created_at",
+            ],
             default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
         ),
         required=True,

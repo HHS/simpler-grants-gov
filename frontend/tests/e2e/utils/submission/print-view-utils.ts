@@ -7,8 +7,15 @@ import type { ResolvedPrintViewForm } from "./opportunity-print-view.types";
  *
  * Workspace URL format:  /workspace/applications/{applicationId}/form/{appFormId}
  * Print URL format:      /print/application/{applicationId}/form/{appFormId}
+ *
+ * @throws if formUrl does not contain the expected /workspace/applications/ segment
  */
 export function buildPrintUrl(formUrl: string): string {
+  if (!/\/workspace\/applications\//.test(formUrl)) {
+    throw new Error(
+      `buildPrintUrl: "${formUrl}" does not match the expected workspace application form URL pattern (/workspace/applications/{id}/form/{id}); cannot derive a print view URL.`,
+    );
+  }
   return formUrl.replace(/\/workspace\/applications\//, "/print/application/");
 }
 
@@ -32,6 +39,7 @@ export async function navigateToPrintView(
   if (waitMs > 0) {
     await page.waitForTimeout(waitMs);
   }
+  await expect(page).toHaveURL(printUrl);
 }
 
 /**
@@ -68,13 +76,19 @@ export function buildHappyPathTestData(
 ): Record<string, string> {
   const rawData = form.buildTestData(suffix);
 
-  // Completeness check: every non-attachment, non-conditional field in the form
-  // definition must have a value in the test data. This ensures the builder stays
-  // in sync with field definition changes automatically — no manual list to maintain.
+  // Completeness check: every non-attachment, non-conditional, user-entered field
+  // in the form definition must have a value in the test data. User-entered fields
+  // have either testId or selector defined; display-only fields (e.g., post-populated
+  // signature/date) have only printTestId and are skipped.
+  // This ensures the builder stays in sync with field definition changes automatically
+  // - no manual list to maintain.
   const missingKeys = Object.entries(form.formConfig.fields)
     .filter(
       ([key, def]) =>
-        def.type !== "file" && !def.dependsOn && rawData[key] === undefined,
+        def.type !== "file" &&
+        !def.dependsOn &&
+        (def.testId || def.selector) && // Only check user-entered fields
+        rawData[key] === undefined,
     )
     .map(([key, def]) => `${key} (${def.field})`);
 

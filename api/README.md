@@ -39,6 +39,33 @@ root
 
 See [development.md](../documentation/api/development.md) for installation and development instructions.
 
+### Inspecting local email
+
+Local development captures email in [Mailpit](https://mailpit.axllent.org/) instead of
+sending it to real recipients. `make init` starts Mailpit with the other local
+dependencies. To start it on its own, run the following from `api/`:
+
+```bash
+make init-mailpit
+```
+
+The equivalent Compose command is `docker compose up --detach mailpit`.
+
+Open [http://localhost:8025](http://localhost:8025) to inspect message content,
+recipients, sender, headers, timestamps, and raw MIME source. The local API and
+notification tasks use the same inbox; for example, a locally generated organization
+invitation or workflow approval message appears there immediately. Scheduled notifications
+can be generated with `make run-email-notifications` after seeding suitable local data.
+
+`local.env` uses the Docker service name `mailpit` by default. For commands running
+outside Docker, set `LOCAL_EMAIL_SMTP_HOST=localhost` in `override.env`. The compose
+service does not configure SMTP relay or forwarding, so captured messages are not
+delivered externally. The application also refuses to use local SMTP unless both
+`ENVIRONMENT=local` and local AWS mode are active.
+
+To temporarily restore the in-memory email mock, set
+`ENABLE_LOCAL_EMAIL_CAPTURE=FALSE` in `override.env`.
+
 ## Running tests locally
 1. Run `make init` or have run it previously
 2. Run the tests `make test` or if you've set your PY Approach to local you probably want to run the tests in Docker so you don't have to deal with Env Vars and other config `PY_RUN_APPOACH=docker make test`
@@ -57,8 +84,8 @@ make test args="-x -s -vv tests/src/api/users/test_user_route_login.py"
 ### Locally
 
 ```bash
-make run-generate-notifications
-# executes uv run flask task generate-notifications
+make run-email-notifications
+# executes uv run flask task email-notifications
 
 # more generically, you can construct uv run flask calls with make cmd
 make cmd args="data-migration setup-foreign-tables"
@@ -80,7 +107,7 @@ CLI commands are of the form `<task group> <task name> <any other params>`. So i
 3. Run the job
 
    ```bash
-   bin/run-command api <env> '["flask", "task", "generate-notifications"]'
+   bin/run-command api <env> '["flask", "task", "email-notifications"]'
    ```
 
 ## Technical Information

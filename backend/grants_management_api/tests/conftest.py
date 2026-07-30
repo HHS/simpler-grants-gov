@@ -22,7 +22,7 @@ from src.db import models
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.resource_automation.resource_automation import setup_resource_automation
 from tests.test_utils import db_testing
-from tests.test_utils.auth_test_utils import mock_oauth_endpoint
+from tests.test_utils.auth_test_utils import mock_oauth_endpoint, mock_oauth_logout_endpoint
 
 ####################
 # General test setup/utils
@@ -253,12 +253,19 @@ def app(
         "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8089/test-endpoint/oauth-authorize"
     )
     monkeypatch_session.setenv(
+        "LOGIN_GOV_LOGOUT_ENDPOINT", "http://localhost:8089/test-endpoint/oauth-logout"
+    )  # setup in mock_oauth_logout_endpoint below
+    monkeypatch_session.setenv(
         "LOGIN_FINAL_DESTINATION", "http://localhost:8089/v1/users/login/result"
     )
+    monkeypatch_session.setenv(
+        "LOGOUT_FINAL_DESTINATION", "http://localhost:8089/test-endpoint/oauth-logout-result"
+    )  # setup in mock_oauth_logout_endpoint below
     app = app_entry.create_app()
 
     # Add endpoints and mocks for handling the external OAuth logic
     mock_oauth_endpoint(app, monkeypatch_session, private_rsa_key, mock_oauth_client)
+    mock_oauth_logout_endpoint(app)
 
     return app
 
