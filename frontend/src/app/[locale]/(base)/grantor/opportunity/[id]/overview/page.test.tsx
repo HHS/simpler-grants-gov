@@ -35,13 +35,10 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
 }));
 
 const mockGetOpportunityForGrantor = jest.fn();
-jest.mock(
-  "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher",
-  () => ({
-    getOpportunityForGrantor: (...args: unknown[]) =>
-      mockGetOpportunityForGrantor(...args) as unknown,
-  }),
-);
+jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
+  getOpportunityForGrantor: (...args: unknown[]) =>
+    mockGetOpportunityForGrantor(...args) as unknown,
+}));
 
 jest.mock(
   "src/components/grantor-opportunities/OpportunityDetailsHeader",
