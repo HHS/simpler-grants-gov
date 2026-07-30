@@ -1,5 +1,5 @@
+import axios from "axios";
 import { ApiRequestError } from "src/errors";
-import { logger } from "src/services/logger/simplerLogger";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 import { OptionalStringDict } from "src/types/generalTypes";
 
@@ -55,17 +55,12 @@ export const uploadFileToS3 = async (
   });
   formData.append("file", file);
 
-  const multipartBody = await new Response(formData).blob();
-  const s3Response = await fetch(url, {
-    method: "POST",
-    body: multipartBody,
+  const s3Response = await axios.post(url, formData, {
     headers: {
-      "Content-Type": multipartBody.type,
+      "Content-Type": "multipart/form-data",
     },
   });
-  if (!s3Response.ok) {
-    const errorBody = await s3Response.text();
-    logger.error(`S3 upload failed (${s3Response.status}): ${errorBody}`);
+  if (s3Response.status !== 204) {
     throw new ApiRequestError("Error uploading file to S3");
   }
   return true;
