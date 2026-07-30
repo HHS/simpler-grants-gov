@@ -125,7 +125,7 @@ const ApplyForm = ({
   validationWarnings:
     FormattedFormValidationWarning[] | FormValidationWarning[] | null;
   attachments: Attachment[];
-  useVirusScanning?: boolean;
+  useVirusScanning?: boolean; // Temporary for initial integration. Will be removed in #11352
   isBudgetForm?: boolean;
   applicationStatus?: string;
   createdAt?: string;

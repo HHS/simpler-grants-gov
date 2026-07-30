@@ -354,7 +354,7 @@ describe("ApplicationAttachmentWidget", () => {
 
     expect(getSimplerFileInputProps()).toEqual(
       expect.objectContaining({
-        id: "test-attachment-field",
+        id: "test-attachment-field-wrapper",
         disabled: true,
         readOnly: true,
       }),

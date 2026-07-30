@@ -95,7 +95,7 @@ const ApplicationAttachmentWidget = ({
         <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       <SimplerFileInput
-        id={id}
+        id={`${id}-wrapper`}
         postUploadAction={handleUploadApplicationAttachment}
         postUploadActionProgressMessage={ApplicationAttachmentStatus.uploading}
         postUploadActionSuccessMessage={ApplicationAttachmentStatus.success}
