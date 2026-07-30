@@ -45,6 +45,7 @@ class SeedConfig:
     seed_users: bool
     seed_e2e: bool
     seed_award_recommendations: bool
+    seed_award_recommendation_workflows: bool
 
 
 def _build_opportunities(
@@ -542,6 +543,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "bae608bd-56cf-4038-8436-02da6af72df8",
         ),
         (
+            "Key_Contacts",
+            "E2E-KC",
+            "Key Contacts",
+            "3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31",
+            "7c9e2b4a-1f6d-4a83-95b2-3d8e6f1c9a47",
+        ),
+        (
             "OtherNarrativeAttachments",
             "E2E-ONA",
             "Other Narrative Attachments",
@@ -729,6 +737,8 @@ def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -
         seed_users="ALL" in steps or "users" in steps,
         seed_e2e="ALL" in steps or "e2e" in steps,
         seed_award_recommendations="ALL" in steps or "award_recommendations" in steps,
+        seed_award_recommendation_workflows="ALL" in steps
+        or "award_recommendation_workflows" in steps,
     )
 
     with grants_shared.logs.init("seed_local_db"):
@@ -764,5 +774,5 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
     if seed_config.seed_e2e:
         _build_users_and_tokens(db_session)
     if seed_config.seed_award_recommendations:
-        _build_award_recommendations(db_session)
+        _build_award_recommendations(db_session, seed_config.seed_award_recommendation_workflows)
     db_session.commit()
