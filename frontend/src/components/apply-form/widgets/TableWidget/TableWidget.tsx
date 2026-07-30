@@ -1,5 +1,6 @@
 import { get, set } from "lodash";
 import {
+  FormValidationWarning,
   UswdsWidgetProps,
   type UiSchemaTableColumn,
   type UiSchemaTableMultiField,
@@ -22,13 +23,6 @@ function getJsonSchemaValuePath(
 
   const jsonPath = jsonSchemaPointerToPath(definition);
   return jsonPath.startsWith("$.") ? jsonPath.slice(2) : jsonPath;
-}
-
-function getJsonSchemaFieldName(
-  definition: string | undefined,
-): string | undefined {
-  if (!definition) return undefined;
-  return getFieldNameForHtml({ definition });
 }
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
@@ -128,6 +122,7 @@ function TableWidget({
   isFormLocked,
   label,
   onChange,
+  rawErrors = [],
   uiSchemaField,
   value,
 }: UswdsWidgetProps) {
@@ -144,9 +139,9 @@ function TableWidget({
         return;
       }
 
-      const currentValue = isObjectRecord(value) ? { ...value } : {};
+      const currentValue = isObjectRecord(value) ? value : {};
 
-      const nextFormValue = set(currentValue, valuePath, nextValue);
+      const nextFormValue = set({ ...currentValue }, valuePath, nextValue);
 
       onChange?.(nextFormValue);
     },
@@ -178,18 +173,110 @@ function TableWidget({
     [handleCellChange, rows],
   );
 
-  const rootFieldName = Array.isArray(uiSchemaField?.definition)
-    ? uiSchemaField.definition.length === 1
-      ? getFieldNameForHtml({ definition: uiSchemaField.definition[0] })
-      : undefined
-    : getFieldNameForHtml({ definition: uiSchemaField?.definition });
+  let rootFieldName: string | undefined;
+  let rootFromDefinition = false;
+
+  if (
+    Array.isArray(uiSchemaField?.definition) &&
+    uiSchemaField.definition.length === 1
+  ) {
+    const def = uiSchemaField.definition[0];
+    const listMatch = def.match(
+      /^\/properties\/([^/]+)\/items\/properties\/.+$/,
+    );
+    if (listMatch) {
+      rootFieldName = listMatch[1];
+      rootFromDefinition = true;
+    } else {
+      rootFieldName = getFieldNameForHtml({ definition: def });
+      rootFromDefinition = true;
+    }
+  } else if (uiSchemaField?.name) {
+    rootFieldName = uiSchemaField.name;
+  } else if (typeof uiSchemaField?.definition === "string") {
+    rootFieldName = getFieldNameForHtml({
+      definition: uiSchemaField.definition,
+    });
+  } else {
+    rootFieldName = undefined;
+  }
 
   const buildCellName = (
     cellDefinition: string | undefined,
+    rowIndex?: number,
   ): string | undefined => {
-    const cellFieldName = getJsonSchemaFieldName(cellDefinition);
-    if (!cellFieldName) return undefined;
-    return rootFieldName ? `${rootFieldName}--${cellFieldName}` : cellFieldName;
+    if (!cellDefinition) return undefined;
+
+    // Handle field-list child definitions: /properties/<list>/items/properties/<child>
+    const listMatch = cellDefinition.match(
+      /^\/properties\/([^/]+)\/items\/properties\/(.+)$/,
+    );
+    if (listMatch) {
+      const [, listName, childPath] = listMatch;
+      const childParts = childPath
+        .split(/\/(?:properties\/)?/)
+        .filter(Boolean)
+        .map((p) => p.replace(/\\/g, ""));
+      const childHtml = childParts.join("--");
+      const indexPart = typeof rowIndex === "number" ? `[${rowIndex}]` : `[0]`;
+      return `${listName}${indexPart}--${childHtml}`;
+    }
+
+    // Non-list child: build a field name from the cell definition.
+    const childHtml = getFieldNameForHtml({ definition: cellDefinition });
+    if (!childHtml) return undefined;
+
+    if (!rootFieldName) return childHtml;
+
+    if (rootFromDefinition) {
+      return `${rootFieldName}--${childHtml}`;
+    }
+
+    return typeof rowIndex === "number"
+      ? `${rootFieldName}[${rowIndex}]--${childHtml}`
+      : `${rootFieldName}--${childHtml}`;
+  };
+
+  /**
+   * Get validation errors for a specific cell based on its HTML form name.
+   * Matches the cell's Name against the error field paths.
+   * @param cellName - The HTML form name of the cell input
+   * @returns An array of error messages for the cell, or an empty array if none
+   */
+  const allCellNames = rows
+    .flatMap((row, rowIndex) =>
+      row.cells.map((cell) => buildCellName(cell.definition, rowIndex)),
+    )
+    .filter((name): name is string => Boolean(name));
+
+  const duplicateBaseNames = allCellNames.reduce<Record<string, number>>(
+    (counts, name) => {
+      const base = name.split("--").slice(-1)[0];
+      counts[base] = (counts[base] ?? 0) + 1;
+      return counts;
+    },
+    {},
+  );
+
+  const getCellErrors = (cellName: string | undefined): string[] => {
+    if (!cellName) return [];
+
+    const exactMatches = (rawErrors as FormValidationWarning[])
+      .filter((error) => error.field === cellName)
+      .map((error) => String(error.message));
+
+    if (exactMatches.length > 0) {
+      return exactMatches;
+    }
+
+    const baseName = cellName.split("--").slice(-1)[0];
+    if (duplicateBaseNames[baseName] > 1) {
+      return [];
+    }
+
+    return (rawErrors as FormValidationWarning[])
+      .filter((error) => error.field === baseName)
+      .map((error) => String(error.message));
   };
 
   if (
@@ -242,39 +329,56 @@ function TableWidget({
         </tr>
       </thead>
       <tbody>
-        {rows.map((row, rowIndex) => (
-          <tr key={`table-row-${rowIndex}`}>
-            {row.cells.map((cell, cellIndex) => {
-              const cellId = `${uiSchemaField.name}-${rowIndex}-${cellIndex}`;
+        {rows.map((row, rowIndex) => {
+          const rowLabel =
+            row.cells[0]?.type === "plainText"
+              ? row.cells[0].staticContent
+              : undefined;
 
-              return (
-                <td
-                  key={`table-row-${rowIndex}-cell-${cellIndex}`}
-                  data-table-cell-type={cell.type}
-                >
-                  <TableCell
-                    cell={cell}
-                    disabled={
-                      cell.type === "input" ? isInteractionDisabled : false
-                    }
-                    id={cellId}
-                    name={buildCellName(cell.definition)}
-                    onChange={
-                      cell.type === "input" && cell.definition
-                        ? cellChangeHandlers[cell.definition]
-                        : undefined
-                    }
-                    value={
-                      cell.type === "plainText"
-                        ? undefined
-                        : getRenderValue(cell.definition, value)
-                    }
-                  />
-                </td>
-              );
-            })}
-          </tr>
-        ))}
+          return (
+            <tr key={`table-row-${rowIndex}`}>
+              {row.cells.map((cell, cellIndex) => {
+                const cellId = `${uiSchemaField.name}-${rowIndex}-${cellIndex}`;
+
+                return (
+                  <td
+                    key={`table-row-${rowIndex}-cell-${cellIndex}`}
+                    data-table-cell-type={cell.type}
+                  >
+                    <TableCell
+                      cell={cell}
+                      cellErrors={getCellErrors(
+                        buildCellName(cell.definition, rowIndex),
+                      )}
+                      disabled={
+                        cell.type === "input" ? isInteractionDisabled : false
+                      }
+                      id={cellId}
+                      name={buildCellName(cell.definition, rowIndex)}
+                      ariaLabel={
+                        cell.type === "input"
+                          ? [rowLabel, columns[cellIndex]?.columnHeader]
+                              .filter(Boolean)
+                              .join(", ")
+                          : undefined
+                      }
+                      onChange={
+                        cell.type === "input" && cell.definition
+                          ? cellChangeHandlers[cell.definition]
+                          : undefined
+                      }
+                      value={
+                        cell.type === "plainText"
+                          ? undefined
+                          : getRenderValue(cell.definition, value)
+                      }
+                    />
+                  </td>
+                );
+              })}
+            </tr>
+          );
+        })}
       </tbody>
     </Table>
   );
