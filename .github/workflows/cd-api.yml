@@ -24,6 +24,7 @@ on:
           - staging
           - infra-staging
           - training
+          - infra-grantor1
           - infra-training
           - grantee1
           - grantee2
