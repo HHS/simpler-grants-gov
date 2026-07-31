@@ -8,7 +8,9 @@ import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
 const mockGetAwardRecommendationDetails = jest.fn();
 
 jest.mock("next/navigation", () => ({
-  redirect: jest.fn(),
+  redirect: jest.fn(() => {
+    throw new Error("NEXT_REDIRECT");
+  }),
 }));
 
 jest.mock("react", () => ({
@@ -203,10 +205,12 @@ describe("SubmitForReviewPage", () => {
       new Error("Fetch failed"),
     );
 
-    await SubmitForReviewPage({
-      params: mockParams,
-      searchParams: mockSearchParams,
-    });
+    await expect(
+      SubmitForReviewPage({
+        params: mockParams,
+        searchParams: mockSearchParams,
+      }),
+    ).rejects.toThrow("NEXT_REDIRECT");
 
     expect(redirect).toHaveBeenCalledWith(
       "/grantor/award-recommendation/test-id-123/edit",
@@ -216,10 +220,12 @@ describe("SubmitForReviewPage", () => {
   it("redirects to edit page when award recommendation details is null", async () => {
     mockGetAwardRecommendationDetails.mockResolvedValue(null);
 
-    await SubmitForReviewPage({
-      params: mockParams,
-      searchParams: mockSearchParams,
-    });
+    await expect(
+      SubmitForReviewPage({
+        params: mockParams,
+        searchParams: mockSearchParams,
+      }),
+    ).rejects.toThrow("NEXT_REDIRECT");
 
     expect(redirect).toHaveBeenCalledWith(
       "/grantor/award-recommendation/test-id-123/edit",

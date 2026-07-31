@@ -7,6 +7,7 @@ import {
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
+  fetchWorkflowEndpoint,
   getApplicationForPrintEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
@@ -176,4 +177,8 @@ export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
 
 export const getApplicationForPrint = requesterForEndpoint(
   getApplicationForPrintEndpoint,
+);
+
+export const fetchWorkflow = cache(
+  requesterForEndpoint(fetchWorkflowEndpoint),
 );

@@ -71,6 +71,7 @@ async function SubmitForReviewPageContent({
           <Grid col={12}>
             <ReviewSubmissionFormContainer
               awardRecommendationId={awardRecommendationId}
+              reviewWorkflowId={awardRecommendationDetails.review_workflow_id}
               expectedReviewerType={reviewerType}
             />
           </Grid>

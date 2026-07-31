@@ -2417,6 +2417,8 @@ export const messages = {
           "You do not have permission to review at this stage of the workflow.",
         authFailed: "Failed to authenticate user. Please sign in and try again.",
         loadingFailed: "Failed to load review form. Please try again.",
+        noWorkflow:
+          "No workflow is associated with this award recommendation.",
       },
     },
   },
