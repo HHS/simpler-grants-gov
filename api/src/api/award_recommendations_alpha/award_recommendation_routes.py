@@ -239,8 +239,8 @@ def award_recommendation_update(
 @award_recommendation_blueprint.post(
     "/award-recommendations/<uuid:award_recommendation_id>/start-review"
 )
-@award_recommendation_blueprint.output(AwardRecommendationGetResponseSchema)
 @award_recommendation_blueprint.input(AwardRecommendationStartReviewRequestSchema, location="json")
+@award_recommendation_blueprint.output(AwardRecommendationGetResponseSchema)
 @award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @award_recommendation_blueprint.doc(responses=[200, 403, 404, 422, 500])
 @flask_db.with_db_session()

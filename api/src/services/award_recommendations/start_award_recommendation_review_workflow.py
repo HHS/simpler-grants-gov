@@ -2,6 +2,7 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+from grants_shared.api.response import ValidationErrorDetail
 from grants_shared.api.route_utils import raise_flask_error
 
 from src.auth.endpoint_access_util import verify_access
@@ -18,9 +19,45 @@ from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
 )
 from src.services.workflows.send_workflow_event import send_workflow_event_to_queue
+from src.validation.validation_constants import ValidationErrorType
 from src.workflow.event.workflow_event import StartWorkflowEventContext, WorkflowEvent
 
 logger = logging.getLogger(__name__)
+
+
+def validate_award_recommendation_ready_for_review(
+    award_recommendation: AwardRecommendation,
+) -> None:
+    """Validate that an award recommendation can begin the review process."""
+    if award_recommendation.award_recommendation_status != AwardRecommendationStatus.DRAFT:
+        message = "Award recommendation is not in Draft status"
+
+        raise_flask_error(
+            422,
+            message=message,
+            validation_issues=[
+                ValidationErrorDetail(
+                    type=ValidationErrorType.AWARD_RECOMMENDATION_NOT_DRAFT,
+                    message=message,
+                    field="award_recommendation_status",
+                )
+            ],
+        )
+
+    if award_recommendation.review_workflow_id is not None:
+        message = "Award recommendation review process has already been started"
+
+        raise_flask_error(
+            422,
+            message=message,
+            validation_issues=[
+                ValidationErrorDetail(
+                    type=(ValidationErrorType.AWARD_RECOMMENDATION_REVIEW_ALREADY_STARTED),
+                    message=message,
+                    field="review_workflow_id",
+                )
+            ],
+        )
 
 
 def start_award_recommendation_review(
@@ -46,23 +83,10 @@ def start_award_recommendation_review(
         agency,
     )
 
-    # Only draft award recommendations can begin the review process
-    if award_recommendation.award_recommendation_status != AwardRecommendationStatus.DRAFT:
-        raise_flask_error(
-            422,
-            message="Award recommendation is not in Draft status",
-        )
+    validate_award_recommendation_ready_for_review(award_recommendation)
 
-    # Prevent starting another review workflow
-    if award_recommendation.review_workflow_id is not None:
-        raise_flask_error(
-            422,
-            message="Award recommendation review process has already been started",
-        )
-
-    # Queue the award recommendation review workflow
     metadata = {
-        "comment": review_data.get("comment", ""),
+        "comment": review_data["comment"],
     }
 
     if review_data.get("internal_comment"):
