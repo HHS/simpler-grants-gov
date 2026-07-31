@@ -2196,6 +2196,132 @@ SF424C_TEST_CASES = [
 ]
 
 
+# Sample test cases for SF-424 Short validation
+_SF424_SHORT_CONTACT = {
+    "name": {
+        "first_name": "Jane",
+        "last_name": "Doe",
+    },
+    "title": "Project Director",
+    "email": "jane.doe@example.org",
+    "phone_number": "555-123-4567",
+    "address": {
+        "street1": "123 Main St",
+        "city": "Washington",
+        "state": "DC: District of Columbia",
+        "zip_code": "20001",
+        "country": "USA: UNITED STATES",
+    },
+}
+
+SF424_SHORT_TEST_CASES = [
+    {
+        "name": "sf424_short_minimal_valid",
+        "json_input": {
+            "agency_name": "Department of Research",
+            "funding_opportunity_number": "TEST-SF424S-FON-001",
+            "funding_opportunity_title": "SF-424 Short Test Opportunity",
+            "organization_name": "Test Research University",
+            "applicant": {
+                "street1": "123 Main St",
+                "city": "Washington",
+                "state": "DC: District of Columbia",
+                "zip_code": "20001",
+                "country": "USA: UNITED STATES",
+            },
+            "applicant_type_code": ["C: City or Township Government"],
+            "employer_taxpayer_identification_number": "123456789",
+            "sam_uei": "TEST12345678",
+            "congressional_district_applicant": "DC-001",
+            "project_title": "SF-424 Short XSD Validation Test",
+            "project_description": "A test project for XSD validation.",
+            "project_start_date": "2025-01-01",
+            "project_end_date": "2025-12-31",
+            "project_director": _SF424_SHORT_CONTACT,
+            "same_as_project_director": False,
+            "contact_person": _SF424_SHORT_CONTACT,
+            "application_certification": True,
+            "authorized_representative": {
+                "first_name": "Bob",
+                "last_name": "Smith",
+            },
+            "authorized_representative_title": "Director",
+            "authorized_representative_email": "bob.smith@example.org",
+            "authorized_representative_phone_number": "555-987-6543",
+        },
+        "form_name": "SF424_Short_3_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "sf424_short_with_optional_fields",
+        "json_input": {
+            "agency_name": "National Institutes of Health",
+            "funding_opportunity_number": "TEST-SF424S-FON-002",
+            "funding_opportunity_title": "SF-424 Short Full Fields Test",
+            "organization_name": "State University Research Foundation",
+            "assistance_listing_number": "93.456",
+            "assistance_listing_program_title": "Research Grants Program",
+            "applicant": {
+                "street1": "456 University Ave",
+                "street2": "Suite 200",
+                "city": "Boston",
+                "state": "MA: Massachusetts",
+                "zip_code": "02115",
+                "country": "USA: UNITED STATES",
+            },
+            "applicant_web_address": "https://example.edu",
+            "applicant_type_code": ["A: State Government", "X: Other (specify)"],
+            "applicant_type_other_specify": "Research Consortium",
+            "employer_taxpayer_identification_number": "987654321",
+            "sam_uei": "UNIRESEARCH12",
+            "congressional_district_applicant": "MA-008",
+            "project_title": "Advanced Research in Public Health",
+            "project_description": "A comprehensive study on public health outcomes.",
+            "project_start_date": "2025-03-01",
+            "project_end_date": "2026-02-28",
+            "project_director": _SF424_SHORT_CONTACT,
+            "same_as_project_director": False,
+            "contact_person": {
+                "name": {
+                    "prefix": "Dr",
+                    "first_name": "Alice",
+                    "middle_name": "Marie",
+                    "last_name": "Johnson",
+                    "suffix": "PhD",
+                },
+                "title": "Grants Administrator",
+                "email": "alice.johnson@example.edu",
+                "phone_number": "617-555-0001",
+                "fax": "617-555-0002",
+                "address": {
+                    "street1": "456 University Ave",
+                    "city": "Boston",
+                    "state": "MA: Massachusetts",
+                    "zip_code": "02115",
+                    "country": "USA: UNITED STATES",
+                },
+            },
+            "application_certification": True,
+            "authorized_representative": {
+                "prefix": "Dr",
+                "first_name": "Robert",
+                "middle_name": "James",
+                "last_name": "Williams",
+                "suffix": "Jr",
+            },
+            "authorized_representative_title": "Vice President for Research",
+            "authorized_representative_email": "r.williams@example.edu",
+            "authorized_representative_phone_number": "617-555-0099",
+            "authorized_representative_fax": "617-555-0100",
+        },
+        "form_name": "SF424_Short_3_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
+        "pretty_print": True,
+    },
+]
+
+
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
 
@@ -2218,6 +2344,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + OTHER_NARRATIVE_ATTACHMENTS_TEST_CASES
         + PERFORMANCE_SITE_TEST_CASES
         + KEY_CONTACTS_TEST_CASES
+        + SF424_SHORT_TEST_CASES
     )
 
 

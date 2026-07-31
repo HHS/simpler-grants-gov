@@ -11,6 +11,7 @@ from lxml import etree as lxml_etree
 
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.forms.sf424_short import SF424Short_v3_0
 from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from src.services.xml_generation.validation.xsd_validator import XSDValidator
@@ -816,3 +817,123 @@ class TestSubmissionXSDValidation:
         assert sflll_validation[
             "valid"
         ], f"SF-LLL subawardee validation failed: {sflll_validation['error_message']}"
+
+    @pytest.fixture
+    def sf424_short_application(self, enable_factory_create, seed_form_registry):
+        """Create an application with SF-424 Short form and minimal XSD-compliant data."""
+        agency = AgencyFactory.create()
+
+        opportunity = OpportunityFactory.create(
+            opportunity_number="TEST-SF424S-001",
+            opportunity_title="SF-424 Short Test Opportunity",
+            agency_code=agency.agency_code,
+        )
+
+        assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity, assistance_listing_number="93.456"
+        )
+
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            public_competition_id="TEST-SF424S-COMP-001",
+            opening_date=date(2025, 1, 1),
+            closing_date=date(2025, 12, 31),
+            opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
+        )
+
+        application = ApplicationFactory.create(
+            competition=competition, application_name="SF-424 Short Test Application"
+        )
+
+        competition_form = CompetitionFormFactory.create(
+            competition=competition, form=SF424Short_v3_0
+        )
+
+        _contact = {
+            "name": {"first_name": "Jane", "last_name": "Doe"},
+            "title": "Project Director",
+            "email": "jane.doe@example.org",
+            "phone_number": "555-123-4567",
+            "address": {
+                "street1": "123 Main St",
+                "city": "Washington",
+                "state": "DC: District of Columbia",
+                "zip_code": "20001",
+                "country": "USA: UNITED STATES",
+            },
+        }
+
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "agency_name": "Department of Research",
+                "funding_opportunity_number": "TEST-SF424S-FON-001",
+                "funding_opportunity_title": "SF-424 Short Test Opportunity",
+                "organization_name": "Test Research University",
+                "applicant": {
+                    "street1": "123 Main St",
+                    "city": "Washington",
+                    "state": "DC: District of Columbia",
+                    "zip_code": "20001",
+                    "country": "USA: UNITED STATES",
+                },
+                "applicant_type_code": ["C: City or Township Government"],
+                "employer_taxpayer_identification_number": "123456789",
+                "sam_uei": "TEST12345678",
+                "congressional_district_applicant": "DC-001",
+                "project_title": "SF-424 Short XSD Validation Test",
+                "project_description": "A test project for XSD validation.",
+                "project_start_date": "2025-01-01",
+                "project_end_date": "2025-12-31",
+                "project_director": _contact,
+                "contact_person": _contact,
+                "application_certification": True,
+                "authorized_representative": {"first_name": "Bob", "last_name": "Smith"},
+                "authorized_representative_title": "Director",
+                "authorized_representative_email": "bob.smith@example.org",
+                "authorized_representative_phone_number": "555-987-6543",
+            },
+        )
+
+        return application
+
+    def test_sf424_short_submission_xml_validates_against_xsd(
+        self, sf424_short_application, xsd_validator
+    ):
+        """Test that SF-424 Short submission XML validates against the legacy XSD schema."""
+        application_submission = ApplicationSubmissionFactory.create(
+            application=sf424_short_application,
+            legacy_tracking_number=77777777,
+        )
+
+        assembler = SubmissionXMLAssembler(sf424_short_application, application_submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        assert xml_string is not None
+        assert len(xml_string) > 0
+
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
+        assert forms_element is not None, "Forms element not found in submission XML"
+
+        sf424_short_ns = "{http://apply.grants.gov/forms/SF424_Short_3_0-V3.0}"
+        sf424_short_elements = forms_element.findall(f".//{sf424_short_ns}SF424_Short_3_0")
+        assert len(sf424_short_elements) == 1, "Expected exactly one SF424_Short_3_0 element"
+
+        sf424_short_xml = lxml_etree.tostring(sf424_short_elements[0], encoding="unicode")
+        xsd_path = self._get_xsd_file_path(
+            xsd_validator,
+            "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
+        )
+        validation_result = xsd_validator.validate_xml(sf424_short_xml, xsd_path)
+
+        assert validation_result["valid"], (
+            f"SF-424 Short XSD validation failed:\n"
+            f"Error: {validation_result['error_message']}\n"
+            f"Generated XML:\n{sf424_short_xml[:1000]}"
+        )
