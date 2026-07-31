@@ -192,5 +192,21 @@ locals {
         certificate_configs = {}
       }
     }
+    infra-grantee1 = {
+      account_name                 = "simpler-grants-gov" # AWS account 315341936575 (reuses the main account with its own VPC)
+      database_subnet_group_name   = "infra-grantee1"
+      vpc_name                     = "infra-grantee1"
+      second_octet                 = 8               # The second octet of the VPC CIDR block (10.8.0.0/20)
+      grants_gov_oracle_cidr_block = "10.207.0.0/16" # MicroHealth managed CIDR block (unused; DMS peering is disabled for this env)
+
+      enable_dms = false
+
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
   }
 }
