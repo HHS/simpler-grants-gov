@@ -68,8 +68,6 @@ def put_competition_forms(
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
-        logger.info("USER INFO")
-        logger.info(user)
         competition = set_competition_forms(db_session, user, competition_id, json_data)
 
         return response.ApiResponse(message="Success", data=competition)

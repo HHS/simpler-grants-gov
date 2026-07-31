@@ -1,5 +1,3 @@
-"server only";
-
 import { CompetitionFormsApiResponse } from "src/types/competitionFormsResponseTypes";
 import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
 

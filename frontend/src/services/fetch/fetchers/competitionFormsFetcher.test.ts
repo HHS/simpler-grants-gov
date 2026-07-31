@@ -16,7 +16,7 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 describe("getFormDetails", () => {
   afterEach(() => jest.clearAllMocks());
   it("calls fetchForm with the correct arguments", async () => {
-    await updateCompetitionForms({
+    const results = await updateCompetitionForms({
       competitionId: "an id",
       body: { forms: [] },
     });
@@ -24,5 +24,6 @@ describe("getFormDetails", () => {
       subPath: "an id/forms",
       body: { forms: [] },
     });
+    expect(results).toEqual({ some: "response body" });
   });
 });
