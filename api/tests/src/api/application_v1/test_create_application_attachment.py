@@ -3,7 +3,7 @@ import uuid
 import grants_shared.util.file_util as file_util
 from sqlalchemy import select
 
-from src.constants.lookup_constants import ApplicationAuditEvent, FileScanStatus, Privilege
+from src.constants.lookup_constants import FileScanStatus, Privilege
 from src.db.models.competition_models import ApplicationAttachment
 from tests.lib.application_test_utils import create_user_in_app
 from tests.src.db.models.factories import (
