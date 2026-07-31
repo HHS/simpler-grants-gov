@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<SF424_Short_3_0:SF424_Short_3_0 xmlns:SF424_Short_3_0="http://apply.grants.gov/forms/SF424_Short_3_0-V3.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" SF424_Short_3_0:FormVersion="3.0">
+<SF424_Short_3_0:SF424_Short_3_0 xmlns:SF424_Short_3_0="http://apply.grants.gov/forms/SF424_Short_3_0-V3.0" xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0" xmlns:glob="http://apply.grants.gov/system/Global-V1.0" xmlns:att="http://apply.grants.gov/system/Attachments-V1.0" SF424_Short_3_0:FormVersion="3.0">
   <SF424_Short_3_0:AgencyName>Department of Health and Human Services</SF424_Short_3_0:AgencyName>
   <SF424_Short_3_0:CFDANumber>93.456</SF424_Short_3_0:CFDANumber>
   <SF424_Short_3_0:CFDAProgramTitle>Public Health Research Grants</SF424_Short_3_0:CFDAProgramTitle>
@@ -7,14 +7,14 @@
   <SF424_Short_3_0:FundingOpportunityNumber>HHS-2025-001</SF424_Short_3_0:FundingOpportunityNumber>
   <SF424_Short_3_0:FundingOpportunityTitle>SF-424 Short Snapshot Test Opportunity</SF424_Short_3_0:FundingOpportunityTitle>
   <SF424_Short_3_0:OrganizationName>State University Research Foundation</SF424_Short_3_0:OrganizationName>
-  <globLib:Address>
+  <SF424_Short_3_0:Address>
     <globLib:Street1>456 University Ave</globLib:Street1>
     <globLib:Street2>Suite 200</globLib:Street2>
     <globLib:City>Boston</globLib:City>
     <globLib:State>MA: Massachusetts</globLib:State>
     <globLib:ZipPostalCode>02115</globLib:ZipPostalCode>
     <globLib:Country>USA: UNITED STATES</globLib:Country>
-  </globLib:Address>
+  </SF424_Short_3_0:Address>
   <SF424_Short_3_0:ApplicantWebAddress>https://example.edu</SF424_Short_3_0:ApplicantWebAddress>
   <SF424_Short_3_0:ApplicantTypeCode1>A: State Government</SF424_Short_3_0:ApplicantTypeCode1>
   <SF424_Short_3_0:ApplicantTypeCode2>X: Other (specify)</SF424_Short_3_0:ApplicantTypeCode2>
