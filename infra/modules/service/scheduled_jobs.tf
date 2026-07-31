@@ -4,6 +4,8 @@ resource "aws_scheduler_schedule" "scheduled_jobs" {
   # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
   # checkov:skip=CKV_AWS_297:Encrypt with customer key in future work
 
+  depends_on = [aws_iam_role_policy_attachment.scheduler]
+
   name                         = "${var.service_name}-${each.key}"
   state                        = each.value.state
   schedule_expression          = each.value.schedule_expression
@@ -40,6 +42,8 @@ locals {
 
 resource "aws_sfn_state_machine" "scheduled_jobs" {
   for_each = var.scheduled_jobs
+
+  depends_on = [aws_iam_role_policy_attachment.workflow_orchestrator]
 
   name     = "${var.service_name}-${each.key}"
   role_arn = aws_iam_role.workflow_orchestrator.arn

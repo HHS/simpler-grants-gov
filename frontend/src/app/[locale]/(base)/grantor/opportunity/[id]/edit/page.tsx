@@ -5,7 +5,7 @@ import {
   parseErrorStatus,
 } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+import { getOpportunityForGrantor } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { buildOpportunityEditInitialValues } from "src/utils/opportunityEditFormConfig";
 

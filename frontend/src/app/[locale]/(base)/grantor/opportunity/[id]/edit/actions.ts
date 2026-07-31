@@ -4,7 +4,7 @@ import { ApiRequestError, parseErrorStatus } from "src/errors";
 import {
   createOpportunitySummaryForGrantor,
   updateOpportunitySummaryForGrantor,
-} from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+} from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { OpportunitySummaryUpdateRawData } from "src/types/opportunity/opportunityResponseTypes";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 import { formDataToObject } from "src/utils/formData/formDataToJson";

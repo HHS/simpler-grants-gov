@@ -57,6 +57,35 @@ describe("TableCell", () => {
     expect(input).toHaveClass("overflow-x-auto");
   });
 
+  it("updates the input display when the value prop changes", () => {
+    const { rerender } = render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+        }}
+        id="input-cell"
+        value="100"
+      />,
+    );
+
+    const input = screen.getByTestId("input-cell-input");
+    expect(input).toHaveValue("100");
+
+    rerender(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+        }}
+        id="input-cell"
+        value="200"
+      />,
+    );
+
+    expect(screen.getByTestId("input-cell-input")).toHaveValue("200");
+  });
+
   it("passes valid numeric input changes to onChange", () => {
     const onChange = jest.fn();
 
@@ -167,6 +196,10 @@ describe("TableCell", () => {
     expect(screen.getByTestId("input-cell-read-only")).toHaveTextContent(
       "100.00",
     );
+    expect(screen.getByTestId("input-cell-read-only")).toHaveAttribute(
+      "tabindex",
+      "-1",
+    );
   });
 
   it("supports keyboard focus for editable values", async () => {
@@ -210,31 +243,64 @@ describe("TableCell", () => {
     );
   });
 
-  it("updates the input value when the value prop changes after initial render", () => {
-    const { rerender } = render(
+  it("renders validation errors when cellErrors provided", () => {
+    render(
       <TableCell
         cell={{
           type: "input",
           definition: "/properties/federal_share",
         }}
-        id="input-cell"
-        value={100}
+        cellErrors={["Must be greater than zero", "Cannot exceed budget"]}
+        id="input-cell-with-errors"
+        value="0"
       />,
     );
 
-    expect(screen.getByTestId("input-cell-input")).toHaveValue("100");
+    const input = screen.getByTestId("input-cell-with-errors-input");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveClass("usa-input--error");
+    expect(input).toHaveAttribute(
+      "aria-describedby",
+      "error-for-input-cell-with-errors",
+    );
 
-    rerender(
+    // FieldErrors component should render the errors
+    expect(screen.getByText("Must be greater than zero")).toBeInTheDocument();
+    expect(screen.getByText("Cannot exceed budget")).toBeInTheDocument();
+  });
+
+  it("does not set aria-invalid when no cellErrors", () => {
+    render(
       <TableCell
         cell={{
           type: "input",
           definition: "/properties/federal_share",
         }}
-        id="input-cell"
-        value={250}
+        cellErrors={[]}
+        id="input-cell-no-errors"
+        value="100"
       />,
     );
 
-    expect(screen.getByTestId("input-cell-input")).toHaveValue("250");
+    const input = screen.getByTestId("input-cell-no-errors-input");
+    expect(input).toHaveAttribute("aria-invalid", "false");
+    expect(input).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("defaults to no cellErrors when prop not provided", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+        }}
+        id="input-cell-default"
+        value="50"
+      />,
+    );
+
+    const input = screen.getByTestId("input-cell-default-input");
+    expect(input).toHaveAttribute("aria-invalid", "false");
+    expect(input).not.toHaveAttribute("aria-describedby");
   });
 });

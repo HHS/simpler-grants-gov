@@ -22,6 +22,7 @@ on:
           - dev
           - infra-dev
           - staging
+          - infra-staging
           - training
           - grantee1
           - grantee2

@@ -252,6 +252,9 @@ class AwardRecommendationStatus(StrEnum):
     DRAFT = "draft"
     IN_REVIEW = "in_review"
     APPROVED = "approved"
+    SUBMITTED = "submitted"
+    REVISION_REQUESTED = "revision_requested"
+    IN_REVISION = "in_revision"
 
 
 class AwardRecommendationType(StrEnum):
@@ -412,6 +415,7 @@ class WorkflowType(StrEnum):
     OPPORTUNITY_PUBLISH = "opportunity_publish"
     APPLICATION_SUBMISSION = "application_submission"
     INITIAL_PROTOTYPE = "initial_prototype"
+    AWARD_RECOMMENDATION_REVIEW = "award_recommendation_review"
 
     # Because of how we use the workflow type to find
     # the state machine and its configuration, we need
@@ -431,6 +435,16 @@ class ApprovalType(StrEnum):
 
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
+
+    # Award recommendation workflow approvals
+    PQC_APPROVAL = "pqc_approval"
+    GMS_APPROVAL = "gms_approval"
+    FMO_APPROVAL = "fmo_approval"
+    GMO_APPROVAL = "gmo_approval"
+    AGENCY_APPROVAL = "agency_approval"
+    DEPARTMENTAL_APPROVAL = "departmental_approval"
+    INTERAGENCY_APPROVAL = "interagency_approval"
+    EXECUTIVE_APPROVAL = "executive_approval"
 
 
 class ApprovalResponseType(StrEnum):
