@@ -546,7 +546,7 @@ export const messages = {
       error:
         "Processing failed due to a system error. Try uploading your file again.",
       success:
-        "Success: File scan complete.  “Save” this form to attach the file.",
+        "Success: File scan complete. “Save” this form to attach the file.",
       uploading: "Uploading...",
     },
     historyTable: {

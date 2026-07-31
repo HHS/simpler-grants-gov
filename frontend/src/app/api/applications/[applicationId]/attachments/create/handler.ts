@@ -8,33 +8,39 @@ export const createApplicationAttachmentHandler = async (
   req: Request,
   options: { params: Promise<{ applicationId: string }> },
 ) => {
-  const params = options.params;
   const session = await getSession();
 
   if (!session || !session.token) {
-    return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
+    return NextResponse.json({ message: "Unauthenticated" }, { status: 401 });
   }
 
-  const { applicationId } = await params;
-  const { pending_file_id } = (await req.json()) as {
-    pending_file_id: string;
-  };
+  const { applicationId } = await options.params;
 
-  let errorMessage: string = "";
-  if (!pending_file_id) errorMessage = "Missing pending_file_id";
-  else if (!applicationId) errorMessage = "Missing applicationId";
-  if (errorMessage)
-    return NextResponse.json({ error: errorMessage }, { status: 400 });
+  let pendingFileId: string | undefined;
+  try {
+    ({ pending_file_id: pendingFileId } = (await req.json()) as {
+      pending_file_id?: string;
+    });
+  } catch {
+    return NextResponse.json(
+      { message: "Malformed request body" },
+      { status: 400 },
+    );
+  }
+
+  if (!pendingFileId) {
+    return NextResponse.json(
+      { message: "Missing pending_file_id" },
+      { status: 400 },
+    );
+  }
 
   try {
-    const res = await createApplicationAttachment(
-      applicationId,
-      pending_file_id,
-    );
+    const res = await createApplicationAttachment(applicationId, pendingFileId);
     return NextResponse.json({ data: res.data });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
-    return Response.json(
+    return NextResponse.json(
       {
         message: `Error failed to upload attachment: ${message}`,
       },
