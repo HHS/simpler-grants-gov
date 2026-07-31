@@ -1,4 +1,4 @@
-import playwrightEnv from "tests/e2e/playwright-env";
+import playwrightEnv, { SUPPORTED_ENVS } from "tests/e2e/playwright-env";
 
 /*
   Central map of E2E test users, keyed by a readable identifier and resolving to
@@ -12,6 +12,10 @@ import playwrightEnv from "tests/e2e/playwright-env";
 */
 
 export type TestUserKey = "primaryOrgAdmin" | "orgMember";
+// Organization ids used to build org-scoped URLs (e.g. the org detail page).
+export type TestOrgKey = "e2eTestOrg";
+
+const targetEnv = playwrightEnv.targetEnv as (typeof SUPPORTED_ENVS)[number];
 
 // Local ids match api/tests/lib/seed_e2e.py + api/tests/lib/seed_orgs_and_users.py.
 const LOCAL_TEST_USER_IDS: Record<TestUserKey, string> = {
@@ -36,9 +40,6 @@ const STAGING_TEST_USER_IDS: Record<TestUserKey, string> = {
   orgMember: "ba856cd5-e047-436e-9b6b-f53b4cc534cc",
 };
 
-// Organization ids used to build org-scoped URLs (e.g. the org detail page).
-export type TestOrgKey = "e2eTestOrg";
-
 const LOCAL_TEST_ORG_IDS: Record<TestOrgKey, string> = {
   // "E2E Test Organization" — orgMember above is a member of this org.
   e2eTestOrg: "e5f6a7b8-c9d0-4e5f-8a0b-1c2d3e4f5061",
@@ -51,14 +52,23 @@ const STAGING_TEST_ORG_IDS: Record<TestOrgKey, string> = {
   e2eTestOrg: "9c6fcfb9-029d-4b69-af43-3b41257639f5",
 };
 
-const isStaging = playwrightEnv.targetEnv === "staging";
+export const TEST_USER_IDS = {
+  local: LOCAL_TEST_USER_IDS,
+  staging: STAGING_TEST_USER_IDS,
+  grantee1: STAGING_TEST_USER_IDS,
+  grantee2: STAGING_TEST_USER_IDS,
+  grantor1: STAGING_TEST_USER_IDS,
+  grantor2: STAGING_TEST_USER_IDS,
+};
 
-export const TEST_USER_IDS = isStaging
-  ? STAGING_TEST_USER_IDS
-  : LOCAL_TEST_USER_IDS;
+export const TEST_ORG_IDS = {
+  local: LOCAL_TEST_ORG_IDS,
+  staging: STAGING_TEST_ORG_IDS,
+  grantee1: STAGING_TEST_ORG_IDS,
+  grantee2: STAGING_TEST_ORG_IDS,
+  grantor1: STAGING_TEST_ORG_IDS,
+  grantor2: STAGING_TEST_ORG_IDS,
+};
 
-export const TEST_ORG_IDS = isStaging
-  ? STAGING_TEST_ORG_IDS
-  : LOCAL_TEST_ORG_IDS;
-
-export const getTestUserId = (key: TestUserKey): string => TEST_USER_IDS[key];
+export const getTestUserId = (key: TestUserKey): string =>
+  TEST_USER_IDS[targetEnv][key];

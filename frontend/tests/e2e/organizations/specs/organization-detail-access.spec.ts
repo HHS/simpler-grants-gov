@@ -35,7 +35,7 @@ test.describe("Organization detail page access", () => {
   // Run staging on Chrome only, mirroring the other staging auth specs;
   // cross-browser staging spoofing hasn't been validated yet.
   test.beforeEach(({ page: _ }, testInfo) => {
-    if (targetEnv === "staging") {
+    if (targetEnv !== "local") {
       test.skip(
         testInfo.project.name !== "Chrome",
         "Staging auth specs run on Chrome only",

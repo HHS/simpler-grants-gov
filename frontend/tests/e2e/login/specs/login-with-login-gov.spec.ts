@@ -28,7 +28,7 @@ test.describe("Login.gov based authentication tests", () => {
 
   // Skip test if env missing
   const envMissing =
-    targetEnv !== "staging" ||
+    targetEnv === "local" ||
     !testUserEmail ||
     !testUserPassword ||
     !testUserAuthKey;
@@ -53,7 +53,7 @@ test.describe("Login.gov based authentication tests", () => {
         // Given the user launches the application
         await page.goto(baseUrl, {
           waitUntil: "domcontentloaded",
-          timeout: targetEnv === "staging" ? 180000 : 60000,
+          timeout: targetEnv !== "local" ? 180000 : 60000,
         });
 
         // When the user clicks the "Sign in" button
