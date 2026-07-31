@@ -1,5 +1,10 @@
 # analytics service for the infra-training environment (AWS account 049145893907, network_name "infra-training").
-
+#
+# infra-training mirrors the existing training environment's analytics service +
+# database. A few environment-specific settings are deferred for the initial
+# bring-up because they don't exist yet in the new account:
+#   - HTTPS/custom domains: no ACM certificate
+#   - New Relic entity GUIDs: will migrate existing training to it
 module "infra_training_config" {
   source         = "./env-config"
   project_name   = local.project_name
@@ -19,6 +24,9 @@ module "infra_training_config" {
     # Mirrors training, which posts results to the #z_bot-sprint-reporting channel in slack
     ACTION = "post-results"
   }
+  # Records the intended hostname for this environment; it does not create any DNS
+  # or ACM resources on its own (same as infra-dev/infra-staging). The ACM cert lookup
+  # is gated on enable_https
   domain_name                     = "data.training.simpler.grants.gov"
   enable_https                    = false # No ACM cert / hosted zone in the infra-training account yet
   has_database                    = local.has_database

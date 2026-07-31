@@ -9,7 +9,9 @@ module "infra_training_config" {
   environment    = "infra-training"
   network_name   = "infra-training"
 
-  # Analytics database that Metabase connects to
+  # Analytics database that Metabase connects to. Must match the cluster name the
+  # analytics database module creates for this environment, which is
+  # "${app_name}-${environment}" (see analytics/app-config/env-config/database.tf).
   analytics_database_cluster_name = "analytics-infra-training"
 
   domain_name  = null
