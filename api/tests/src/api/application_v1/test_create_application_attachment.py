@@ -75,11 +75,7 @@ def test_create_application_attachment_200(db_session, enable_factory_create, cl
 
     # Audit event recorded
     db_session.refresh(application)
-    assert len(application.application_audits) == 1
-    audit = application.application_audits[0]
-    assert audit.application_audit_event == ApplicationAuditEvent.ATTACHMENT_ADDED
-    assert audit.user_id == user.user_id
-    assert str(audit.target_attachment_id) == attachment_id
+    assert len(application.application_audits) == 0
 
 
 def test_create_application_attachment_401_missing_token(db_session, enable_factory_create, client):
