@@ -2,6 +2,7 @@ import { act, render, screen } from "@testing-library/react";
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { UploadFileMetadata } from "src/types/fileUploadTypes";
+
 import ApplicationAttachmentWidget from "src/components/apply-form/widgets/ApplicationAttachmentWidget";
 
 type UseApplicationAttachmentsResult = {
@@ -317,7 +318,7 @@ describe("ApplicationAttachmentWidget", () => {
     );
 
     expect(getSimplerFileInputProps().labelId).toEqual(
-      "error-for-test-attachment-field",
+      "error-for-test-attachment-field-visible",
     );
   });
 
@@ -325,7 +326,7 @@ describe("ApplicationAttachmentWidget", () => {
     render(<ApplicationAttachmentWidget {...defaultProps} />);
 
     expect(getSimplerFileInputProps().labelId).toEqual(
-      "label-for-test-attachment-field",
+      "label-for-test-attachment-field-visible",
     );
   });
 
@@ -353,7 +354,7 @@ describe("ApplicationAttachmentWidget", () => {
 
     expect(getSimplerFileInputProps()).toEqual(
       expect.objectContaining({
-        id: "test-attachment-field-wrapper",
+        id: "test-attachment-field-visible",
         disabled: true,
         readOnly: true,
       }),

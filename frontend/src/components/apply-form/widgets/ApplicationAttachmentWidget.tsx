@@ -65,11 +65,12 @@ const ApplicationAttachmentWidget = ({
     return Promise.resolve(undefined);
   };
 
+  const visibleInputId = `${id}-visible`;
   const error = rawErrors.length ? true : undefined;
   const describedby = error
-    ? `error-for-${id}`
+    ? `error-for-${visibleInputId}`
     : title
-      ? `label-for-${id}`
+      ? `label-for-${visibleInputId}`
       : "app-form-attachment-upload-label";
 
   const existingFiles: UploadFileMetadata[] = attachment
@@ -79,7 +80,7 @@ const ApplicationAttachmentWidget = ({
   return (
     <FormGroup key={`form-group__multi-file-upload--${id}`} error={error}>
       <DynamicFieldLabel
-        idFor={id}
+        idFor={visibleInputId}
         title={title}
         required={required}
         description={description}
@@ -88,13 +89,14 @@ const ApplicationAttachmentWidget = ({
       <input
         type="hidden"
         name={id}
+        id={id}
         value={attachment?.application_attachment_id ?? ""}
       />
       {error && (
         <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       <SimplerFileInput
-        id={`${id}-wrapper`}
+        id={visibleInputId}
         postUploadAction={handleUploadApplicationAttachment}
         postUploadActionProgressMessage={t("uploading")}
         postUploadActionSuccessMessage={t("success")}
