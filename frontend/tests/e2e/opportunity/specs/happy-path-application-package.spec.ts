@@ -90,9 +90,9 @@ test.describe("Grantor Opportunity Competition Happy Path", () => {
         /\/grantor\/opportunity\/([a-z0-9-]+?)\/competition/,
       );
 
-      // And I should see the "Back" and "Save and exit" buttons enabled.
+      // And I should see the "Save and go back" and "Save and exit" buttons enabled.
       await assertButtonEnabledDisabledStates(page, {
-        Back: true,
+        "Save and go back": true,
         "Save and exit": true,
       });
 
@@ -125,7 +125,7 @@ test.describe("Grantor Opportunity Competition Happy Path", () => {
 
       // And all save actions should remain enabled.
       await assertButtonEnabledDisabledStates(page, {
-        Back: true,
+        "Save and go back": true,
         "Save and exit": true,
       });
 
