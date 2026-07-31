@@ -55,14 +55,25 @@ export const uploadFileToS3 = async (
   });
   formData.append("file", file);
 
-  const s3Response = await axios.post(url, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  // Local s3mock returns 200 and S3 API returns 204
-  if (!(s3Response.status === 200 || s3Response.status === 204)) {
-    throw new ApiRequestError("Error uploading file to S3");
+  try {
+    await axios.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  } catch (error) {
+    const defaultErrorMessage = "Error uploading file to S3";
+    if (axios.isAxiosError(error)) {
+      // Non 2XX response status
+      if (error.response) {
+        console.error(
+          `${defaultErrorMessage} with status: ${error.response.status}`,
+        );
+      }
+    } else {
+      console.error(defaultErrorMessage);
+    }
+    throw new ApiRequestError(defaultErrorMessage);
   }
   return true;
 };

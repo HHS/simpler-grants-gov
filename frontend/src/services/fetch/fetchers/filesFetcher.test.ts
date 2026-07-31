@@ -23,7 +23,16 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
 
 jest.mock("axios", () => ({
   post: (...args: unknown[]) => mockAxiosPost(...args) as unknown,
+  isAxiosError: (error: unknown): boolean =>
+    !!(error as { isAxiosError?: boolean } | null)?.isAxiosError,
 }));
+
+// the shape of an AxiosError as far as uploadFileToS3 is concerned. `response`
+// is absent when the request never got one
+const axiosError = (response?: { status: number }) => ({
+  isAxiosError: true,
+  response,
+});
 
 describe("fetchFileUploadDetails", () => {
   afterEach(() => {
@@ -49,8 +58,15 @@ describe("fetchFileUploadDetails", () => {
 });
 
 describe("uploadFileToS3", () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
+    consoleErrorSpy.mockRestore();
   });
 
   const postedFormDataEntries = () => {
@@ -79,8 +95,24 @@ describe("uploadFileToS3", () => {
     ]);
     expect(response).toEqual(true);
   });
+  it("skips empty body values and does not let a body `file` key clobber the upload", async () => {
+    mockAxiosPost.mockResolvedValue({ status: 204 });
+    const fakeFile = new File(["hi"], "hi.txt");
+
+    await uploadFileToS3(
+      "some url",
+      { something: "else", empty: "", file: "not-the-real-file" },
+      fakeFile,
+    );
+
+    expect(postedFormDataEntries()).toEqual([
+      ["something", "else"],
+      ["file", "hi.txt"],
+    ]);
+  });
   it("throws on failed request", async () => {
-    mockAxiosPost.mockResolvedValue({ status: 403 });
+    // axios rejects on a non-2xx status rather than resolving
+    mockAxiosPost.mockRejectedValue(axiosError({ status: 403 }));
     const fakeFile = new File(["hi"], "hi.txt");
     const jsonBody = { something: "else" };
     const err = await wrapForExpectedError(async () => {
@@ -96,6 +128,33 @@ describe("uploadFileToS3", () => {
       ["file", "hi.txt"],
     ]);
     expect(err).toBeInstanceOf(ApiRequestError);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Error uploading file to S3 with status: 403",
+    );
+  });
+  it("throws when the request fails without a response", async () => {
+    mockAxiosPost.mockRejectedValue(axiosError());
+    const fakeFile = new File(["hi"], "hi.txt");
+
+    const err = await wrapForExpectedError(async () => {
+      return await uploadFileToS3("some url", { something: "else" }, fakeFile);
+    });
+
+    expect(err).toBeInstanceOf(ApiRequestError);
+    expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining("with status"),
+    );
+  });
+  it("throws when the failure is not an axios error", async () => {
+    mockAxiosPost.mockRejectedValue(new Error("something else went wrong"));
+    const fakeFile = new File(["hi"], "hi.txt");
+
+    const err = await wrapForExpectedError(async () => {
+      return await uploadFileToS3("some url", { something: "else" }, fakeFile);
+    });
+
+    expect(err).toBeInstanceOf(ApiRequestError);
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Error uploading file to S3");
   });
 });
 
