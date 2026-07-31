@@ -8,10 +8,9 @@ from sqlalchemy import func, select
 
 from src.app_config import AppConfig
 from src.auth.endpoint_access_util import check_user_access
-from src.constants.lookup_constants import ApplicationAuditEvent, Privilege, SubmissionIssue
+from src.constants.lookup_constants import Privilege, SubmissionIssue
 from src.db.models.competition_models import ApplicationAttachment
 from src.db.models.user_models import User
-from src.services.applications.application_audit import add_audit_event
 from src.services.applications.create_application_attachment import (
     build_s3_application_attachment_path,
 )
@@ -97,14 +96,6 @@ def create_application_attachment_from_pending_file(
     application_attachment.file_size_bytes = file_size_bytes
     application_attachment.user = user
     db_session.add(application_attachment)
-
-    add_audit_event(
-        db_session=db_session,
-        application=application,
-        user=user,
-        audit_event=ApplicationAuditEvent.ATTACHMENT_ADDED,
-        target_attachment=application_attachment,
-    )
 
     # Move (not copy) after all DB operations — pending file is consumed and
     # its status is set to PROCESSED.
