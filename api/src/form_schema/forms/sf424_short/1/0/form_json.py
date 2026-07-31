@@ -49,6 +49,7 @@ FORM_JSON_SCHEMA = {
         "project_start_date",
         "project_end_date",
         "project_director",
+        "contact_person",
         "application_certification",
         "authorized_representative",
         "authorized_representative_title",
@@ -66,28 +67,6 @@ FORM_JSON_SCHEMA = {
                 "required": ["applicant_type_code"],  # Only run rule if applicant_type_code is set
             },
             "then": {"required": ["applicant_type_other_specify"]},
-        },
-        # Item 8 (Primary Contact / Grants Administrator) - "Same as Project Director".
-        # When the applicant marks the contact as the same as the project director, the
-        # separate contact_person block must be empty (the applicant skips item 8).
-        {
-            "if": {
-                "properties": {"same_as_project_director": {"const": True}},
-                "required": ["same_as_project_director"],
-            },
-            # contact_person must be empty (no populated sub-fields) when the contact is the
-            # same as the project director. maxProperties: 0 targets the error at the field.
-            "then": {"properties": {"contact_person": {"maxProperties": 0}}},
-        },
-        # Otherwise the primary contact (item 8) must be provided.
-        {
-            "if": {
-                "not": {
-                    "properties": {"same_as_project_director": {"const": True}},
-                    "required": ["same_as_project_director"],
-                }
-            },
-            "then": {"required": ["contact_person"]},
         },
     ],
     "$defs": {
