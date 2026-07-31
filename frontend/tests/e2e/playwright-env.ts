@@ -28,10 +28,12 @@ export const SUPPORTED_ENVS = [
   "grantor2",
 ] as const;
 
+export type SupportedEnvs = (typeof SUPPORTED_ENVS)[number];
+
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 const testOrgLabel = TEST_ORG_LABELS[targetEnv];
 
-if (SUPPORTED_ENVS.indexOf(targetEnv) === -1) {
+if (SUPPORTED_ENVS.indexOf(targetEnv as SupportedEnvs) === -1) {
   throw new Error(
     `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${SUPPORTED_ENVS.join(", ")}`,
   );

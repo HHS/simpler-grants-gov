@@ -22,12 +22,6 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-22.04
     steps:
-      - name: Check target environment
-        run: |
-          if [[ "${{ inputs.target }}" -ne "staging" &&  "${{ inputs.target }}" -ne "grantee1" && "${{ inputs.target }}" -ne "grantee2" && "${{ inputs.target }}" -ne "grantor1" && "${{ inputs.target }}" -ne "grantor2"]]; then
-            echo "Unsupported target environment"
-            exit 1
-          fi
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Setup Node.js
@@ -61,6 +55,12 @@ jobs:
       #   run: |
       #     npx playwright install --with-deps
 
+      - name: Check target environment
+        run: |
+          if [[ "${{ inputs.target }}" != "staging" &&  "${{ inputs.target }}" != "grantee1" && "${{ inputs.target }}" != "grantee2" && "${{ inputs.target }}" != "grantor1" && "${{ inputs.target }}" != "grantor2" ]]; then
+            echo "Unsupported target environment"
+            exit 1
+          fi
       - name: Set target environment
         run: |
           if [[ -z "${{ inputs.target }}" ]]; then

@@ -1,4 +1,4 @@
-import playwrightEnv, { SUPPORTED_ENVS } from "tests/e2e/playwright-env";
+import playwrightEnv, { SupportedEnvs } from "tests/e2e/playwright-env";
 
 /*
   Central map of E2E test users, keyed by a readable identifier and resolving to
@@ -15,7 +15,7 @@ export type TestUserKey = "primaryOrgAdmin" | "orgMember";
 // Organization ids used to build org-scoped URLs (e.g. the org detail page).
 export type TestOrgKey = "e2eTestOrg";
 
-const targetEnv = playwrightEnv.targetEnv as (typeof SUPPORTED_ENVS)[number];
+const targetEnv = playwrightEnv.targetEnv as SupportedEnvs;
 
 // Local ids match api/tests/lib/seed_e2e.py + api/tests/lib/seed_orgs_and_users.py.
 const LOCAL_TEST_USER_IDS: Record<TestUserKey, string> = {
@@ -72,3 +72,6 @@ export const TEST_ORG_IDS = {
 
 export const getTestUserId = (key: TestUserKey): string =>
   TEST_USER_IDS[targetEnv][key];
+
+export const getTestOrgId = (key: TestOrgKey): string =>
+  TEST_ORG_IDS[targetEnv][key];
