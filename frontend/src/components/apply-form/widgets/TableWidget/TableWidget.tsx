@@ -52,16 +52,15 @@ function getRenderValue(
     : undefined;
 }
 
-const TEXT_COLUMN_UNIT = 16;
-
-const MIN_COLUMN_WIDTH_PERCENT = 10;
-
-const NUMERIC_UNIT_PADDING = 2;
+const PRINT_TEXT_COLUMN_UNIT = 16;
+// Floor so no column collapses to an unusable sliver in print.
+const PRINT_MIN_COLUMN_WIDTH_PERCENT = 10;
 
 /**
  * Determine whether a column is a "text" column (i.e. every populated cell
  * in that column is plainText). Text columns can wrap, so they're sized
- * differently from numeric input/readOnly columns, which must stay on one line.
+ * differently from numeric input/readOnly columns, which must stay on one
+ * line when printed.
  */
 function isPlainTextColumn(
   rows: UiSchemaTableRow[],
@@ -74,8 +73,9 @@ function isPlainTextColumn(
 }
 
 /**
- * Estimate how many "character units" a numeric (input/readOnly) column
- * needs by finding the longest formatted value across all rows.
+ * Find the longest formatted value in a numeric (input/readOnly) column,
+ * across all rows — including computed subtotal/total rows, whose values
+ * can run a digit or two longer than any single input row.
  */
 function getMaxFormattedLength(
   rows: UiSchemaTableRow[],
@@ -96,23 +96,25 @@ function getMaxFormattedLength(
 }
 
 /**
- * Compute column widths (as percentages summing to 100) based on the actual
- * content each column needs to display, rather than a fixed width from the
- * schema. Numeric columns get width proportional to their longest formatted
- * value (since numbers can't wrap onto multiple lines); plainText columns get
- * a fixed, smaller allotment since text can wrap. This keeps values from
- * overflowing their cells both on screen and when printed.
+ * Compute print-only column widths (as percentages summing to 100) based on
+ * the actual content each column needs to display. Numeric columns get width
+ * proportional to their longest formatted value, with a safety buffer that
+ * scales with length (subtotal/total rows tend to be a digit or two longer
+ * than regular rows, and need enough breathing room not to overflow).
+ * plainText columns get a fixed, smaller allotment since text can wrap.
  */
-function computeColumnWidths(
+function computePrintColumnWidths(
   columns: UiSchemaTableColumn[],
   rows: UiSchemaTableRow[],
   value: unknown,
 ): number[] {
   const units = columns.map((_, colIndex) => {
     if (isPlainTextColumn(rows, colIndex)) {
-      return TEXT_COLUMN_UNIT;
+      return PRINT_TEXT_COLUMN_UNIT;
     }
-    return getMaxFormattedLength(rows, colIndex, value) + NUMERIC_UNIT_PADDING;
+    const maxLen = getMaxFormattedLength(rows, colIndex, value);
+    const buffer = Math.max(2, Math.ceil(maxLen * 0.15));
+    return maxLen + buffer;
   });
 
   const total = units.reduce((sum, unit) => sum + unit, 0) || 1;
@@ -120,7 +122,7 @@ function computeColumnWidths(
 
   // Enforce a minimum width so no column collapses, then renormalize to 100%.
   const clamped = rawPercentages.map((pct) =>
-    Math.max(pct, MIN_COLUMN_WIDTH_PERCENT),
+    Math.max(pct, PRINT_MIN_COLUMN_WIDTH_PERCENT),
   );
   const clampedTotal = clamped.reduce((sum, pct) => sum + pct, 0);
 
@@ -231,8 +233,9 @@ function TableWidget({
     (uiSchemaField as UiSchemaTableMultiField | undefined)?.children?.rows ??
     [];
 
-  const columnWidths = useMemo(
-    () => computeColumnWidths(columns, rows, value),
+  // Only used by the print stylesheet below — does not affect on-screen widths.
+  const printColumnWidths = useMemo(
+    () => computePrintColumnWidths(columns, rows, value),
     [columns, rows, value],
   );
 
@@ -386,17 +389,35 @@ function TableWidget({
   return (
     <>
       {/*
-        @trussworks/react-uswds's TableProps intentionally omits `style`, so
-        table-layout: fixed (needed for the colgroup percentages below to be
-        respected instead of overridden by content width) is applied via this
-        class instead of an inline style.
+        Print-only overrides. On screen this changes nothing — table-layout
+        stays at its default (auto) and the colgroup widths below are inert
+        until @media print switches the table to a fixed layout and applies
+        them. This also stops a row's cells from splitting across a page
+        break, which the browser's default table pagination allows otherwise.
       */}
-      <style>{`.applyform-table-fixed-layout { table-layout: fixed; }`}</style>
+      <style>{`
+        @media print {
+          .applyform-budget-table {
+            table-layout: fixed;
+          }
+          .applyform-budget-table col {
+            width: var(--applyform-print-col-width) !important;
+          }
+          .applyform-budget-table tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+          .applyform-budget-table .applyform-table-cell-value {
+            white-space: nowrap !important;
+            overflow: visible !important;
+          }
+        }
+      `}</style>
       <Table
         bordered
         fullWidth
         scrollable
-        className="width-full overflow-wrap applyform-table-fixed-layout"
+        className="applyform-budget-table"
         data-testid="table"
         data-table-name={uiSchemaField.name}
         data-table-column-count={columns.length}
@@ -409,7 +430,11 @@ function TableWidget({
           {columns.map((column, index) => (
             <col
               key={column.columnHeader}
-              style={{ width: `${columnWidths[index]}%` }}
+              style={
+                {
+                  "--applyform-print-col-width": `${printColumnWidths[index]}%`,
+                } as React.CSSProperties
+              }
             />
           ))}
         </colgroup>
@@ -419,10 +444,7 @@ function TableWidget({
               <th
                 key={column.columnHeader}
                 scope="col"
-                style={{
-                  whiteSpace: "normal",
-                  overflowWrap: "anywhere",
-                }}
+                style={column.width ? { width: `${column.width}%` } : undefined}
               >
                 {column.columnHeader}
               </th>
@@ -445,11 +467,6 @@ function TableWidget({
                     <td
                       key={`table-row-${rowIndex}-cell-${cellIndex}`}
                       data-table-cell-type={cell.type}
-                      style={{
-                        whiteSpace: "normal",
-                        overflowWrap: "anywhere",
-                        verticalAlign: "top",
-                      }}
                     >
                       <TableCell
                         cell={cell}

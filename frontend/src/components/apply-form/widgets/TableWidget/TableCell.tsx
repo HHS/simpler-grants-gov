@@ -6,7 +6,7 @@ import { ChangeEvent, useState } from "react";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
 
 const READ_ONLY_OUTPUT_CLASS =
-  "usa-input margin-0 display-inline-block border border-base-light bg-base-lightest text-right text-wrap";
+  "usa-input margin-0 width-full overflow-x-auto display-block border border-base-light bg-base-lightest text-right text-wrap applyform-table-cell-value";
 
 type TableCellProps = {
   /** The cell configuration from the table widget schema */
@@ -109,15 +109,6 @@ function TableCell({
         className={READ_ONLY_OUTPUT_CLASS}
         data-testid={`${id}-read-only`}
         tabIndex={-1}
-        style={{
-          display: "inline-block",
-          width: "100%",
-          boxSizing: "border-box",
-          overflow: "visible",
-          whiteSpace: "nowrap",
-          overflowWrap: "normal",
-          wordBreak: "normal",
-        }}
       >
         {renderedValue === "" ? "\u00A0" : renderedValue}
       </span>
@@ -139,7 +130,9 @@ function TableCell({
       {hasError && <FieldErrors fieldName={id} rawErrors={cellErrors} />}
       <input
         aria-label={ariaLabel ?? `Editable table value for ${cell.definition}`}
-        className={`usa-input margin-0${hasError ? " usa-input--error" : ""}`}
+        className={`usa-input margin-0 width-full overflow-x-auto applyform-table-cell-value${
+          hasError ? " usa-input--error" : ""
+        }`}
         data-testid={`${id}-input`}
         id={inputId}
         name={name}
@@ -151,15 +144,6 @@ function TableCell({
         disabled={disabled}
         aria-invalid={hasError}
         aria-describedby={hasError ? `error-for-${id}` : undefined}
-        style={{
-          display: "inline-block",
-          width: "100%",
-          boxSizing: "border-box",
-          overflow: "visible",
-          whiteSpace: "nowrap",
-          overflowWrap: "normal",
-          wordBreak: "normal",
-        }}
       />
     </>
   );
