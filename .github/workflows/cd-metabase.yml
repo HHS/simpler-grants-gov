@@ -21,6 +21,7 @@ on:
           - staging
           - infra-staging
           - training
+          - infra-training
           - grantee1
           - prod
       image_tag:
