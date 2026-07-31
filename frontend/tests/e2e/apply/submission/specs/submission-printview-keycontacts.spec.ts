@@ -10,6 +10,10 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import {
+  buildKeyContactsHappyPathTestData,
+  buildKeyContactsRequiredFieldsHappyPathTestData,
+} from "tests/e2e/apply/fixtures/key-contacts-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -26,28 +30,53 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
-  validatePrintViewField,
+  validateAllPrintViews,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
   submitApplicationAndVerify,
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE, FULL_REGRESSION } =
+  VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
 const OPPORTUNITY_NUMBER = "E2E-KC-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
+/**
+ * Test scenarios cover both minimal (required fields only) and complete
+ * (all required + optional fields) happy-path submissions for both
+ * Organization and Individual user types.
+ *
+ * Minimal scenarios: SMOKE tags (fast smoke tests)
+ * Complete scenarios: FULL_REGRESSION tags (comprehensive coverage)
+ */
 const applicantScenarios = [
   {
-    testName: `Complete the Key Contacts Application Submission and Print View workflow for an Organization user`,
+    testName: `Key Contacts - Required fields only - Organization user`,
     orgLabel: testOrgLabel,
+    tags: [SMOKE, GRANTEE, APPLY, APPLY_FORMS],
+    buildTestData: buildKeyContactsRequiredFieldsHappyPathTestData,
   },
   {
-    testName: `Complete the Key Contacts Application Submission and Print View workflow for an Individual user`,
+    testName: `Key Contacts - Complete form - Organization user`,
+    orgLabel: testOrgLabel,
+    tags: [FULL_REGRESSION, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION],
+    buildTestData: buildKeyContactsHappyPathTestData,
+  },
+  {
+    testName: `Key Contacts - Required fields only - Individual user`,
     orgLabel: undefined,
+    tags: [SMOKE, GRANTEE, APPLY, APPLY_FORMS],
+    buildTestData: buildKeyContactsRequiredFieldsHappyPathTestData,
+  },
+  {
+    testName: `Key Contacts - Complete form - Individual user`,
+    orgLabel: undefined,
+    tags: [FULL_REGRESSION, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION],
+    buildTestData: buildKeyContactsHappyPathTestData,
   },
 ] as const;
 
@@ -55,10 +84,10 @@ test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { testName, orgLabel } of applicantScenarios) {
+for (const { testName, orgLabel, tags, buildTestData } of applicantScenarios) {
   test(
     testName,
-    { tag: [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    { tag: [...tags] }, // Convert readonly array to mutable
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,
@@ -76,7 +105,12 @@ for (const { testName, orgLabel } of applicantScenarios) {
       const filledForms: FilledFormEntry[] = [];
 
       for (const [index, form] of opportunityConfig.forms.entries()) {
-        const testData = buildHappyPathTestData(form, baseSuffix + index);
+        // Use scenario-specific builder for Key Contacts form,
+        // or fall back to generic builder for other forms
+        const testData =
+          form.formKey === "keyContacts"
+            ? buildTestData(baseSuffix + index)
+            : buildHappyPathTestData(form, baseSuffix + index);
 
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
@@ -109,31 +143,8 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
       await verifySubmissionConfirmation(page);
 
-      for (const {
-        testData,
-        printUrl,
-        expectedPrepopulatedFields,
-        userEnteredFieldTestIds,
-        formName,
-      } of filledForms) {
-        await navigateToPrintView(page, printUrl);
-
-        await expect(page.locator("h1")).toContainText(formName);
-
-        for (const [testId, expectedValue] of Object.entries(
-          expectedPrepopulatedFields,
-        )) {
-          await expect(page.getByTestId(testId)).toBeVisible();
-          await expect(page.getByTestId(testId)).toContainText(expectedValue);
-        }
-
-        for (const [dataKey, testId] of Object.entries(
-          userEnteredFieldTestIds,
-        )) {
-          if (testData[dataKey] === undefined) continue;
-          await validatePrintViewField(page, testId, testData[dataKey]);
-        }
-      }
+      // --- Print View Validation (one page per form) ---
+      await validateAllPrintViews(page, filledForms);
     },
   );
 }

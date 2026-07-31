@@ -26,6 +26,7 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
+  validateAllPrintViews,
   validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
@@ -128,38 +129,14 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one page per form) ---
-      for (const {
-        testData,
-        printUrl,
-        expectedPrepopulatedFields,
-        userEnteredFieldTestIds,
-        formName,
-      } of filledForms) {
+      await validateAllPrintViews(page, filledForms);
+
+      // --- SF-424B Post-Population Field Validation ---
+      // signature and date_signed are system post-populated at submission time
+      // (gg_post_population rules: "signature", "current_date")
+      for (const { printUrl } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
-        // Form title heading is visible
-        await expect(page.locator("h1")).toContainText(formName);
-
-        // Pre-populated fields (API-injected from opportunity record) - none for SF-424B
-        for (const [testId, expectedValue] of Object.entries(
-          expectedPrepopulatedFields,
-        )) {
-          await expect(page.getByTestId(testId)).toBeVisible();
-          await expect(page.getByTestId(testId)).toContainText(expectedValue);
-        }
-
-        // User-entered fields - uses formConfig.fields (printTestId ?? testId)
-        for (const [dataKey, testId] of Object.entries(
-          userEnteredFieldTestIds,
-        )) {
-          if (testData[dataKey] === undefined) continue;
-          await validatePrintViewField(page, testId, testData[dataKey]);
-        }
-
-        // signature and date_signed are system post-populated at submission
-        // time (gg_post_population rules: "signature", "current_date"), not
-        // user-entered or opportunity-derived - assert they were populated
-        // rather than an exact value.
         await expect(page.getByTestId("signature")).toBeVisible();
         await expect(page.getByTestId("signature")).not.toBeEmpty();
 

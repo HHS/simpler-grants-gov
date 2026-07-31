@@ -1,6 +1,9 @@
 import { expect, type Page } from "@playwright/test";
 
-import type { ResolvedPrintViewForm } from "./opportunity-print-view.types";
+import type {
+  FilledFormEntry,
+  ResolvedPrintViewForm,
+} from "./opportunity-print-view.types";
 
 /**
  * Converts a workspace application form URL to its corresponding print view URL.
@@ -160,4 +163,49 @@ export async function validateAttachmentPrintViewSection(
   await expect(section).toBeVisible();
   await expect(section.getByRole("listitem")).toBeVisible({ timeout: 15000 });
   await expect(section).toContainText(fileName);
+}
+
+/**
+ * Validates all forms in the filledForms array against their print views.
+ * This is the standard validation pattern used across all submission-printview specs.
+ *
+ * For each form:
+ * 1. Navigate to the print view URL
+ * 2. Verify the form title is visible in h1 heading
+ * 3. Validate pre-populated fields (API-injected from opportunity)
+ * 4. Validate user-entered fields using their testIds/printTestIds
+ *
+ * @param page       - The Playwright page object
+ * @param filledForms - Array of FilledFormEntry objects from the spec
+ */
+export async function validateAllPrintViews(
+  page: Page,
+  filledForms: FilledFormEntry[],
+): Promise<void> {
+  for (const {
+    testData,
+    printUrl,
+    expectedPrepopulatedFields,
+    userEnteredFieldTestIds,
+    formName,
+  } of filledForms) {
+    await navigateToPrintView(page, printUrl);
+
+    // Form title heading is visible
+    await expect(page.locator("h1")).toContainText(formName);
+
+    // Pre-populated fields (API-injected from opportunity record)
+    for (const [testId, expectedValue] of Object.entries(
+      expectedPrepopulatedFields,
+    )) {
+      await expect(page.getByTestId(testId)).toBeVisible();
+      await expect(page.getByTestId(testId)).toContainText(expectedValue);
+    }
+
+    // User-entered fields - uses formConfig.fields (printTestId ?? testId)
+    for (const [dataKey, testId] of Object.entries(userEnteredFieldTestIds)) {
+      if (testData[dataKey] === undefined) continue;
+      await validatePrintViewField(page, testId, testData[dataKey]);
+    }
+  }
 }
