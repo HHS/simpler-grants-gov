@@ -306,18 +306,36 @@ def test_sf424_short_v3_0_authorized_representative_agreement_copy(
     )
 
 
-def test_sf424_short_v3_0_pre_and_post_populated_fields_are_read_only(
+def test_sf424_short_v3_0_pre_and_post_populated_fields_use_null_ui_fields(
+    sf424_short_v3_0,
+):
+    expected_null_definitions = {
+        "/properties/agency_name",
+        "/properties/assistance_listing_number",
+        "/properties/assistance_listing_program_title",
+        "/properties/date_received",
+        "/properties/funding_opportunity_number",
+        "/properties/funding_opportunity_title",
+        "/properties/sam_uei",
+        "/properties/aor_signature",
+        "/properties/authorized_representative_date_signed",
+    }
+    actual_null_definitions = {
+        field["definition"]
+        for section in sf424_short_v3_0.form_ui_schema
+        for field in section["children"]
+        if field["type"] == "null"
+    }
+
+    assert actual_null_definitions == expected_null_definitions
+
+
+def test_sf424_short_v3_0_only_post_populated_fields_use_json_schema_read_only(
     sf424_short_v3_0,
 ):
     schema_properties = sf424_short_v3_0.form_json_schema["properties"]
     expected_read_only_fields = {
-        "agency_name",
-        "assistance_listing_number",
-        "assistance_listing_program_title",
         "date_received",
-        "funding_opportunity_number",
-        "funding_opportunity_title",
-        "sam_uei",
         "aor_signature",
         "authorized_representative_date_signed",
     }

@@ -117,7 +117,6 @@ FORM_JSON_SCHEMA = {
             "description": "Pre-populated from the Application cover sheet.",
             "minLength": 1,
             "maxLength": 60,
-            "readOnly": True,
         },
         "assistance_listing_number": {
             "type": "string",
@@ -125,7 +124,6 @@ FORM_JSON_SCHEMA = {
             "description": "Pre-populated from the Application cover sheet.",
             "minLength": 1,
             "maxLength": 15,
-            "readOnly": True,
         },
         "assistance_listing_program_title": {
             "type": "string",
@@ -133,7 +131,6 @@ FORM_JSON_SCHEMA = {
             "description": "Pre-populated from the Application cover sheet.",
             "minLength": 1,
             "maxLength": 120,
-            "readOnly": True,
         },
         "date_received": {
             "type": "string",
@@ -148,7 +145,6 @@ FORM_JSON_SCHEMA = {
             "description": "Pre-populated from the Application cover sheet.",
             "minLength": 1,
             "maxLength": 40,
-            "readOnly": True,
         },
         "funding_opportunity_title": {
             "type": "string",
@@ -156,7 +152,6 @@ FORM_JSON_SCHEMA = {
             "description": "Pre-populated from the Application cover sheet.",
             "minLength": 1,
             "maxLength": 255,
-            "readOnly": True,
         },
         "organization_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
@@ -207,7 +202,6 @@ FORM_JSON_SCHEMA = {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("sam_uei")}],
             "title": "SAM UEI",
             "description": "UEI of the applicant organization. This field is pre-populated from the Application cover sheet.",
-            "readOnly": True,
         },
         "congressional_district_applicant": {
             "type": "string",
@@ -336,15 +330,15 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "name": "federal_agency",
         "label": "1. Name of Federal Agency",
-        "children": [{"type": "field", "definition": "/properties/agency_name"}],
+        "children": [{"type": "null", "definition": "/properties/agency_name"}],
     },
     {
         "type": "section",
         "name": "assistance_listing",
         "label": "2. Assistance Listing Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/assistance_listing_number"},
-            {"type": "field", "definition": "/properties/assistance_listing_program_title"},
+            {"type": "null", "definition": "/properties/assistance_listing_number"},
+            {"type": "null", "definition": "/properties/assistance_listing_program_title"},
         ],
     },
     {
@@ -358,8 +352,8 @@ FORM_UI_SCHEMA = [
         "name": "funding_opportunity",
         "label": "4. Funding Opportunity Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/funding_opportunity_number"},
-            {"type": "field", "definition": "/properties/funding_opportunity_title"},
+            {"type": "null", "definition": "/properties/funding_opportunity_number"},
+            {"type": "null", "definition": "/properties/funding_opportunity_title"},
         ],
     },
     {
@@ -384,7 +378,7 @@ FORM_UI_SCHEMA = [
             },
             {"type": "field", "definition": "/properties/applicant_type_other_specify"},
             {"type": "field", "definition": "/properties/employer_taxpayer_identification_number"},
-            {"type": "field", "definition": "/properties/sam_uei"},
+            {"type": "null", "definition": "/properties/sam_uei"},
             {"type": "field", "definition": "/properties/congressional_district_applicant"},
         ],
     },
