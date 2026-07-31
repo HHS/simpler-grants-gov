@@ -54,7 +54,7 @@ locals {
     infra-dev = module.infra_dev_config
     # infra-staging is a staging-like environment in the "staging" AWS account
     # (317380566348), running in the "infra-staging" VPC.
-    infra-staging = module.infra_staging_config
+    infra-staging  = module.infra_staging_config
     infra-training = module.infra_training_config
   }
 
