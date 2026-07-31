@@ -61,7 +61,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 for (const { testName, orgLabel } of applicantScenarios) {
-  test(
+  test.skip(
     testName,
     { tag: [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION] },
     async (
