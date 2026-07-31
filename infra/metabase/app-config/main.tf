@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "grantee1", "infra-dev", "infra-staging", "infra-training"]
+  environments = ["dev", "staging", "prod", "training", "grantee1", "infra-dev", "infra-staging", "infra-training", "infra-grantee1"]
   project_name = module.project_config.project_name
 
   # Metabase uses the analytics database instead of its own
@@ -30,7 +30,8 @@ locals {
     infra-dev = module.infra_dev_config
     # infra-staging is a staging-like environment in the "staging" AWS account
     # (317380566348), running in the "infra-staging" VPC.
-    infra-staging = module.infra_staging_config
+    infra-staging  = module.infra_staging_config
+    infra-grantee1 = module.infra_grantee1_config
 
     infra-training = module.infra_training_config
   }
@@ -44,9 +45,10 @@ locals {
     prod           = "simpler-grants-gov"
     training       = "simpler-grants-gov"
     grantee1       = "simpler-grants-gov"
-    infra-dev      = "dev"      # infra-dev environment lives in AWS account 061664787759
-    infra-staging  = "staging"  # infra-staging environment lives in AWS account 317380566348
-    infra-training = "training" # infra-training environment lives in AWS account 049145893907
+    infra-dev      = "dev"                # infra-dev environment lives in AWS account 061664787759
+    infra-staging  = "staging"            # infra-staging environment lives in AWS account 317380566348
+    infra-grantee1 = "simpler-grants-gov" # reuses the main simpler-grants-gov account (315341936575) with its own VPC
+    infra-training = "training"           # infra-training environment lives in AWS account 049145893907
   }
 
   # Use the same shared network as analytics since metabase shares its database
