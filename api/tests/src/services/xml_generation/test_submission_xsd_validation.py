@@ -894,6 +894,9 @@ class TestSubmissionXSDValidation:
                 "authorized_representative_title": "Director",
                 "authorized_representative_email": "bob.smith@example.org",
                 "authorized_representative_phone_number": "555-987-6543",
+                "date_received": "2025-01-15",
+                "aor_signature": "bob.smith@example.org",
+                "authorized_representative_date_signed": "2025-01-15",
             },
         )
 

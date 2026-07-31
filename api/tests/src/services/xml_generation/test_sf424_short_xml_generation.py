@@ -91,6 +91,9 @@ _MINIMAL_DATA = {
     "authorized_representative_title": "Director",
     "authorized_representative_email": "bob.smith@example.org",
     "authorized_representative_phone_number": "555-987-6543",
+    "date_received": "2025-01-15",
+    "aor_signature": "bob.smith@example.org",
+    "authorized_representative_date_signed": "2025-01-15",
 }
 
 
@@ -106,7 +109,7 @@ class TestSF424ShortXMLGeneration:
     def test_namespace_declaration(self):
         """Generated XML includes the SF424_Short_3_0 namespace declaration."""
         xml_data = _generate({"agency_name": "Test Agency"})
-        assert f'xmlns="{NS}"' in xml_data
+        assert f'xmlns:SF424_Short_3_0="{NS}"' in xml_data
 
     def test_agency_name_maps_to_element(self):
         """agency_name maps to AgencyName element."""
@@ -273,7 +276,7 @@ _SNAPSHOT_DATA = {
     "applicant_type_code": ["A: State Government", "X: Other (specify)"],
     "applicant_type_other_specify": "Research Consortium",
     "employer_taxpayer_identification_number": "987654321",
-    "sam_uei": "UNIRESEARCH12",
+    "sam_uei": "UNIRESEARCH1",
     "congressional_district_applicant": "MA-008",
     "project_title": "Advanced Research in Public Health",
     "project_description": "A comprehensive study on public health outcomes.",
@@ -328,6 +331,7 @@ _SNAPSHOT_DATA = {
     "authorized_representative_email": "r.williams@example.edu",
     "authorized_representative_phone_number": "617-555-0099",
     "authorized_representative_fax": "617-555-0100",
+    "date_received": "2025-01-15",
     "aor_signature": "r.williams@example.edu",
     "authorized_representative_date_signed": "2025-02-15",
 }
