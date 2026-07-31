@@ -4,7 +4,6 @@
  */
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
@@ -25,7 +24,6 @@ import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-pri
 import {
   buildHappyPathTestData,
   buildPrintUrl,
-  navigateToPrintView,
   validateAllPrintViews,
   validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
@@ -158,7 +156,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await validateAllPrintViews(page, filledForms);
 
       // --- SF-424A Form-Specific Validation ---
-      for (const { formKey, testData } of filledForms) {
+      for (const { formKey } of filledForms) {
         // SF-424A validation - strict computed totals checks with activity-specific expectations
         // Test data uses unique values per activity (01, 02, 03, 04)
         // requirement. Totals are still deterministic and calculated per activity index.

@@ -4,7 +4,6 @@
  */
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
@@ -28,7 +27,6 @@ import {
   navigateToPrintView,
   validateAllPrintViews,
   validateAttachmentPrintViewSection,
-  validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
   submitApplicationAndVerify,

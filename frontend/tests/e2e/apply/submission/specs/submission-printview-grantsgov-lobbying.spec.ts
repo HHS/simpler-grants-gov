@@ -27,7 +27,6 @@ import {
   buildPrintUrl,
   navigateToPrintView,
   validateAllPrintViews,
-  validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
   submitApplicationAndVerify,
