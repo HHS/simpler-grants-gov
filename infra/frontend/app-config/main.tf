@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2", "grantor1", "infra-dev"]
+  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2", "grantor1", "infra-dev", "infra-staging"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -62,6 +62,8 @@ locals {
     # frontend run in the infra-dev VPC; its infra-dev-grants-management VPC holds a separate stub service
     # (see infra/sgm/service).
     infra-dev = module.infra_dev_config
+
+    infra-staging = module.infra_staging_config
   }
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
@@ -93,14 +95,15 @@ locals {
   #     prod    = "prod"
   #   }
   account_names_by_environment = {
-    shared    = "simpler-grants-gov"
-    dev       = "simpler-grants-gov"
-    staging   = "simpler-grants-gov"
-    prod      = "simpler-grants-gov"
-    grantee1  = "simpler-grants-gov"
-    grantee2  = "simpler-grants-gov"
-    grantor1  = "simpler-grants-gov"
-    infra-dev = "dev" # infra-dev environment lives in AWS account 061664787759
+    shared        = "simpler-grants-gov"
+    dev           = "simpler-grants-gov"
+    staging       = "simpler-grants-gov"
+    prod          = "simpler-grants-gov"
+    grantee1      = "simpler-grants-gov"
+    grantee2      = "simpler-grants-gov"
+    grantor1      = "simpler-grants-gov"
+    infra-dev     = "dev"     # infra-dev environment lives in AWS account 061664787759
+    infra-staging = "staging" # infra-staging environment lives in AWS account 317380566348
   }
 
   # The name of the network that contains the resources shared across all

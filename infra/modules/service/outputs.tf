@@ -18,7 +18,7 @@ output "load_balancer_arn_suffix" {
 }
 
 output "application_log_group" {
-  value = local.log_group_name
+  value = aws_cloudwatch_log_group.service_logs.name
 }
 
 output "application_log_stream_prefix" {

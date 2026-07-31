@@ -7,11 +7,11 @@ module "monitoring" {
   source = "../../modules/monitoring"
 
   # Module takes service and ALB names to link all alerts with corresponding targets
-  service_name                                = local.service_name
-  load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
+  service_name             = local.service_name
+  load_balancer_arn_suffix = module.service.load_balancer_arn_suffix
+  # Passing the log group name in orders the metric filter after the log group, which
+  # replaces the blanket depends_on = [module.service] this used to carry.
+  application_log_group                       = module.service.application_log_group
   email_alert_recipients                      = local.monitoring_config.email_alert_recipients
   incident_management_service_integration_url = local.incident_management_service_integration_url
-
-  # Ensure the log group created by the service module exists before creating metric filters
-  depends_on = [module.service]
 }
