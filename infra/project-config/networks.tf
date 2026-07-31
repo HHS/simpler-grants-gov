@@ -175,5 +175,22 @@ locals {
         certificate_configs = {}
       }
     }
+
+    infra-training = {
+      account_name                 = "training" # AWS account 049145893907 (see infra/accounts/training.049145893907.s3.tfbackend)
+      database_subnet_group_name   = "infra-training"
+      vpc_name                     = "infra-training"
+      second_octet                 = 7               # The second octet of the VPC CIDR block (10.7.0.0/20)
+      grants_gov_oracle_cidr_block = "10.207.0.0/16" # MicroHealth managed CIDR block where the training origin Oracle database for Grants.gov is located
+
+      enable_dms = true
+
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
   }
 }
