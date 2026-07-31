@@ -16,6 +16,10 @@ on:
         type: choice
         options:
           - staging
+          - grantee1
+          - grantee2
+          - grantor1
+          - grantor2
       playwright_tags:
         description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         type: string
@@ -39,10 +43,21 @@ jobs:
   e2e-tests-deployed:
     runs-on: ubuntu-22.04
     steps:
+      - name: Check target environment
+        run: |
+          if [[ "${{ inputs.target }}" -ne "staging" &&  "${{ inputs.target }}" -ne "grantee1" && "${{ inputs.target }}" -ne "grantee2" && "${{ inputs.target }}" -ne "grantor1" && "${{ inputs.target }}" -ne "grantor2"]]; then
+            echo "Unsupported target environment"
+            exit 1
+          fi
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Set target
-        run: if [[ -z "${{ inputs.target }}" ]]; then echo "defaulted_target=staging" >> "$GITHUB_ENV"; else echo "defaulted_target=${{ inputs.target }}" >> "$GITHUB_ENV"; fi
+      - name: Set target environment
+        run: |
+          if [[ -z "${{ inputs.target }}" ]]; then
+            echo "defaulted_target=staging" >> "$GITHUB_ENV";
+          else
+            echo "defaulted_target=${{ inputs.target }}" >> "$GITHUB_ENV";
+          fi
       - name: Determine test groups to run
         shell: bash
         run: |
@@ -74,7 +89,7 @@ jobs:
     secrets: inherit
     with:
       run_id: ${{ github.run_id }}
-      target: ${{ inputs.target || 'staging' }}
+      target: ${{ inputs.target }}
   send-slack-notification:
     if: failure()
     needs: [create-report]
