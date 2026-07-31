@@ -10,8 +10,8 @@ import pytest
 from lxml import etree as lxml_etree
 
 from src.form_schema.forms.sf424 import SF424_v4_0
-from src.form_schema.forms.sf424a import SF424a_v1_0
 from src.form_schema.forms.sf424_short import SF424Short_v3_0
+from src.form_schema.forms.sf424a import SF424a_v1_0
 from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from src.services.xml_generation.validation.xsd_validator import XSDValidator

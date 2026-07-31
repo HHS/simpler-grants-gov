@@ -9,7 +9,9 @@ from pathlib import Path
 import pytest
 from lxml import etree as lxml_etree
 
-from src.form_schema.forms.sf424_short import FORM_XML_TRANSFORM_RULES as SF424_SHORT_TRANSFORM_RULES
+from src.form_schema.forms.sf424_short import (
+    FORM_XML_TRANSFORM_RULES as SF424_SHORT_TRANSFORM_RULES,
+)
 from src.form_schema.forms.sf424_short import SF424Short_v3_0
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
@@ -417,9 +419,9 @@ class TestSF424ShortXSDValidation:
         xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
 
         result = self._extract_and_validate(xml_string, xsd_validator)
-        assert result["valid"], (
-            f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
-        )
+        assert result[
+            "valid"
+        ], f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
 
     def test_full_valid_validates_against_xsd(
         self, enable_factory_create, xsd_validator, seed_form_registry
@@ -432,6 +434,6 @@ class TestSF424ShortXSDValidation:
         xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
 
         result = self._extract_and_validate(xml_string, xsd_validator)
-        assert result["valid"], (
-            f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
-        )
+        assert result[
+            "valid"
+        ], f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
