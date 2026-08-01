@@ -28,6 +28,9 @@ on:
           - grantee1
           - grantee2
           - grantor1
+          - infra-grantee1
+          - infra-grantee2
+          - infra-grantor1
           - prod
       version:
         required: true
