@@ -53,6 +53,9 @@ module "infra_grantee2_config" {
   search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_73856a8074e1d297"
 
   service_override_extra_environment_variables = {
+
+    ENABLE_WORKFLOW_ENDPOINTS = 1
+
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "true"
 
