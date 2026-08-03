@@ -324,6 +324,18 @@ def test_sf424_short_v3_0_authorized_representative_agreement_copy(
     assert agreement_schema["description"].count("The list of certifications") == 1
     assert agreement_schema["description"].count("By signing this application") == 1
 
+    authorized_representative_section = next(
+        section
+        for section in sf424_short_v3_0.form_ui_schema
+        if section["name"] == "authorized_representative"
+    )
+    agreement_field = authorized_representative_section["children"][0]
+    assert agreement_field == {
+        "type": "field",
+        "definition": "/properties/application_certification",
+        "printDescription": True,
+    }
+
 
 def test_sf424_short_v3_0_pre_and_post_populated_fields_use_null_ui_fields(
     sf424_short_v3_0,

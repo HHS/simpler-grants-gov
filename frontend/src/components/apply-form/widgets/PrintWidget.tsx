@@ -14,6 +14,7 @@ function PrintWidget<
   value,
   formClassName,
   inputClassName,
+  uiSchemaField,
 }: UswdsWidgetProps<T, S, F>) {
   const { description, title } = schema as S;
   const toDisplay = (inputValue: unknown): string => {
@@ -42,9 +43,12 @@ function PrintWidget<
           </span>
         )}
       </div>
-      {description && (
-        <p className="text-base-dark margin-top-0">{description}</p>
-      )}
+      {uiSchemaField &&
+        "printDescription" in uiSchemaField &&
+        uiSchemaField.printDescription &&
+        description && (
+          <p className="text-base-dark margin-top-0">{description}</p>
+        )}
       <div data-testid={id} className={inputClassName} id={id} key={id}>
         {toDisplay(value)}
       </div>

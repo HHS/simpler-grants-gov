@@ -413,7 +413,11 @@ FORM_UI_SCHEMA = [
         "name": "authorized_representative",
         "label": "9. Authorized Representative",
         "children": [
-            {"type": "field", "definition": "/properties/application_certification"},
+            {
+                "type": "field",
+                "definition": "/properties/application_certification",
+                "printDescription": True,
+            },
             {
                 "type": "field",
                 "definition": "/properties/authorized_representative/properties/prefix",
