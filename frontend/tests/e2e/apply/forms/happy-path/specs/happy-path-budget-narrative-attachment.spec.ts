@@ -12,6 +12,7 @@ import {
 } from "@playwright/test";
 import { BUDGET_NARRATIVE_ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/budget-narrative-attachment-field-definitions";
 import { budgetNarrativeAttachmentHappyPathTestData } from "tests/e2e/apply/fixtures/budget-narrative-attachment-fill-data";
+import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -21,15 +22,8 @@ import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
-const { testOrgLabel, targetEnv } = playwrightEnv;
+const { testOrgLabel } = playwrightEnv;
 
-// Environment-specific opportunity IDs
-// Staging: 39df8091-6e99-4b0f-9db7-1f3aca9cb6e5
-// Local:   c3c59562-a54f-4203-b0f6-98f2f0383481
-const OPPORTUNITY_ID =
-  targetEnv === "staging"
-    ? "39df8091-6e99-4b0f-9db7-1f3aca9cb6e5"
-    : "c3c59562-a54f-4203-b0f6-98f2f0383481";
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 // Skip non-Chrome browsers in staging

@@ -33,7 +33,6 @@ import {
   REQUIRED_FIELD_DEFINITIONS,
 } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
 import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixtures/opportunity-pages-fill-data";
-import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createAuthenticatedPageLifecycle } from "tests/e2e/utils/common/auth-storage-state-utils";
 import { assertCharacterLimitValidationsFromDefinitions } from "tests/e2e/utils/common/character-limit-validation-utils";
@@ -45,7 +44,6 @@ import { assertRequiredFieldValidationsFromDefinitions } from "tests/e2e/utils/c
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
 
 const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
-const { targetEnv } = playwrightEnv;
 
 async function setupAndNavigateToOpportunitySummary(page: Page) {
   const fillData = buildOpportunityHappyPathFillData(new Date());
@@ -72,7 +70,6 @@ async function setupAndNavigateToOpportunitySummary(page: Page) {
 test.describe("Grantor Opportunity Summary Failure Path", () => {
   // One-login-per-spec lifecycle shared across failure-path specs.
   const authenticatedLifecycle = createAuthenticatedPageLifecycle({
-    targetEnv,
     skipTest: (condition, description) => test.skip(condition, description),
   });
 

@@ -14,7 +14,7 @@ import {
 
 const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
 
-const SEARCH_TIMEOUT = playwrightEnv.targetEnv === "staging" ? 15000 : 5000;
+const SEARCH_TIMEOUT = playwrightEnv.targetEnv !== "local" ? 15000 : 5000;
 
 test.describe("Search error page", () => {
   test(
