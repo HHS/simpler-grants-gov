@@ -19,9 +19,13 @@ export async function submitReviewForAwardRecommendation(
         internal_comment: formData.internal_comment,
       }),
       ...(formData.decision && { decision: formData.decision }),
-      ...(formData.contingent_date && { contingent_date: formData.contingent_date }),
+      ...(formData.contingent_date && {
+        contingent_date: formData.contingent_date,
+      }),
       ...(formData.supplemental_documents && {
-        supplemental_document_ids: formData.supplemental_documents.map((doc) => doc.id),
+        supplemental_document_ids: formData.supplemental_documents.map(
+          (doc) => doc.id,
+        ),
       }),
     };
 

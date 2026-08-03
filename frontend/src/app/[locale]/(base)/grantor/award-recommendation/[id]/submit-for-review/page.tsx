@@ -1,14 +1,15 @@
 import { Metadata } from "next";
+import { ReviewSubmissionFormContainer } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/submit-for-review/_components/ReviewSubmissionFormContainer";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
+
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Grid } from "@trussworks/react-uswds";
 
-import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
-import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { WithFeatureFlagProps } from "src/types/uiTypes";
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
-import { ReviewSubmissionFormContainer } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/submit-for-review/_components/ReviewSubmissionFormContainer";
 
 export async function generateMetadata({
   params,
@@ -30,7 +31,9 @@ export type SubmitForReviewPageProps = {
   params: Promise<{ locale: string; id: string }>;
 } & WithFeatureFlagProps;
 
-async function SubmitForReviewPageContent({ params }: SubmitForReviewPageProps) {
+async function SubmitForReviewPageContent({
+  params,
+}: SubmitForReviewPageProps) {
   const { id: awardRecommendationId } = await params;
   const t = await getTranslations("AwardRecommendation");
 

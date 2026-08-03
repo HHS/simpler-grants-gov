@@ -32,11 +32,11 @@ describe("ReviewSubmissionForm", () => {
         <ReviewSubmissionForm {...defaultProps} formType="content_creator" />,
       );
 
-      expect(
-        screen.queryByText("reviewer.question"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("reviewer.question")).not.toBeInTheDocument();
       expect(screen.queryByText("fmo.question")).not.toBeInTheDocument();
-      expect(screen.getByLabelText("reviewComment.label *")).toBeInTheDocument();
+      expect(
+        screen.getByLabelText("reviewComment.label *"),
+      ).toBeInTheDocument();
     });
 
     it("shows attestation text for content creator", () => {
@@ -75,7 +75,9 @@ describe("ReviewSubmissionForm", () => {
         <ReviewSubmissionForm {...defaultProps} formType="fmo_reviewer" />,
       );
 
-      expect(screen.queryByLabelText("fmo.dateLabel *")).not.toBeInTheDocument();
+      expect(
+        screen.queryByLabelText("fmo.dateLabel *"),
+      ).not.toBeInTheDocument();
 
       const contingentRadio = screen.getByLabelText("fmo.fundsContingent");
       await user.click(contingentRadio);
@@ -96,7 +98,9 @@ describe("ReviewSubmissionForm", () => {
       const fundsAvailableRadio = screen.getByLabelText("fmo.fundsAvailable");
       await user.click(fundsAvailableRadio);
 
-      expect(screen.queryByLabelText("fmo.dateLabel *")).not.toBeInTheDocument();
+      expect(
+        screen.queryByLabelText("fmo.dateLabel *"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -104,7 +108,9 @@ describe("ReviewSubmissionForm", () => {
     it("renders review comment textarea with character count", () => {
       render(<ReviewSubmissionForm {...defaultProps} />);
 
-      expect(screen.getByLabelText("reviewComment.label *")).toBeInTheDocument();
+      expect(
+        screen.getByLabelText("reviewComment.label *"),
+      ).toBeInTheDocument();
       expect(screen.getByText("reviewComment.description")).toBeInTheDocument();
     });
 
@@ -154,12 +160,12 @@ describe("ReviewSubmissionForm", () => {
       const user = userEvent.setup();
       render(<ReviewSubmissionForm {...defaultProps} />);
 
-      const checkbox = screen.getByLabelText(
-        "internalComment.checkboxLabel",
-      );
+      const checkbox = screen.getByLabelText("internalComment.checkboxLabel");
       await user.click(checkbox);
 
-      expect(screen.getByLabelText("internalComment.label *")).toBeInTheDocument();
+      expect(
+        screen.getByLabelText("internalComment.label *"),
+      ).toBeInTheDocument();
       expect(
         screen.getByText("internalComment.description"),
       ).toBeInTheDocument();
@@ -169,11 +175,11 @@ describe("ReviewSubmissionForm", () => {
       const user = userEvent.setup();
       render(<ReviewSubmissionForm {...defaultProps} />);
 
-      const checkbox = screen.getByLabelText(
-        "internalComment.checkboxLabel",
-      );
+      const checkbox = screen.getByLabelText("internalComment.checkboxLabel");
       await user.click(checkbox);
-      expect(screen.getByLabelText("internalComment.label *")).toBeInTheDocument();
+      expect(
+        screen.getByLabelText("internalComment.label *"),
+      ).toBeInTheDocument();
 
       await user.click(checkbox);
       expect(
@@ -231,14 +237,10 @@ describe("ReviewSubmissionForm", () => {
       const reviewTextarea = screen.getByLabelText("reviewComment.label *");
       await user.type(reviewTextarea, "Public comment");
 
-      const checkbox = screen.getByLabelText(
-        "internalComment.checkboxLabel",
-      );
+      const checkbox = screen.getByLabelText("internalComment.checkboxLabel");
       await user.click(checkbox);
 
-      const internalTextarea = screen.getByLabelText(
-        "internalComment.label *",
-      );
+      const internalTextarea = screen.getByLabelText("internalComment.label *");
       await user.type(internalTextarea, "Internal comment");
 
       const submitButton = screen.getByRole("button", {

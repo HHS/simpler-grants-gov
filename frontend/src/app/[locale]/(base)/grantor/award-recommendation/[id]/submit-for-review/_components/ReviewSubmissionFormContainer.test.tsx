@@ -1,9 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { identity } from "lodash";
-import { useRouter } from "next/navigation";
-import * as useClientFetchModule from "src/hooks/useClientFetch";
 import { submitReviewForAwardRecommendation } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/submit-for-review/actions";
+import * as useClientFetchModule from "src/hooks/useClientFetch";
+
+import { useRouter } from "next/navigation";
 
 import { ReviewSubmissionFormContainer } from "./ReviewSubmissionFormContainer";
 
@@ -16,28 +17,25 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock("src/hooks/useClientFetch");
-jest.mock(
-  "src/components/award-recommendation/ReviewSubmissionForm",
-  () => ({
-    ReviewSubmissionForm: ({
-      formType,
-      onCancel,
-      onSubmit,
-    }: {
-      formType: string;
-      onCancel: () => void;
-      onSubmit: (data: unknown) => void;
-    }) => (
-      <div>
-        <div data-testid="form-type">{formType}</div>
-        <button onClick={onCancel}>Cancel</button>
-        <button onClick={() => onSubmit({ review_comment: "test" })}>
-          Submit
-        </button>
-      </div>
-    ),
-  }),
-);
+jest.mock("src/components/award-recommendation/ReviewSubmissionForm", () => ({
+  ReviewSubmissionForm: ({
+    formType,
+    onCancel,
+    onSubmit,
+  }: {
+    formType: string;
+    onCancel: () => void;
+    onSubmit: (data: unknown) => void;
+  }) => (
+    <div>
+      <div data-testid="form-type">{formType}</div>
+      <button onClick={onCancel}>Cancel</button>
+      <button onClick={() => onSubmit({ review_comment: "test" })}>
+        Submit
+      </button>
+    </div>
+  ),
+}));
 
 jest.mock("src/components/core/Spinner", () => ({
   __esModule: true,
@@ -71,7 +69,10 @@ describe("ReviewSubmissionFormContainer", () => {
             {
               role_id: "role-1",
               role_name: "Award Recommendation User",
-              privileges: ["update_award_recommendation", "create_award_recommendation"],
+              privileges: [
+                "update_award_recommendation",
+                "create_award_recommendation",
+              ],
             },
           ],
         },
@@ -138,7 +139,7 @@ describe("ReviewSubmissionFormContainer", () => {
       (useClientFetchModule.useClientFetch as jest.Mock).mockReturnValue({
         clientFetch: mockClientFetch,
       });
-      
+
       const fmoPrivileges = {
         data: {
           ...mockPrivilegesResponse.data,
@@ -189,7 +190,7 @@ describe("ReviewSubmissionFormContainer", () => {
       (useClientFetchModule.useClientFetch as jest.Mock).mockReturnValue({
         clientFetch: mockClientFetch,
       });
-      
+
       const reviewerPrivileges = {
         data: {
           ...mockPrivilegesResponse.data,
@@ -261,7 +262,7 @@ describe("ReviewSubmissionFormContainer", () => {
       (useClientFetchModule.useClientFetch as jest.Mock).mockReturnValue({
         clientFetch: mockClientFetch,
       });
-      
+
       const noPrivilegesResponse = {
         data: {
           user_id: "user-123",
@@ -315,7 +316,7 @@ describe("ReviewSubmissionFormContainer", () => {
       (useClientFetchModule.useClientFetch as jest.Mock).mockReturnValue({
         clientFetch: mockClientFetch,
       });
-      
+
       const contentCreatorPrivileges = {
         data: {
           ...mockPrivilegesResponse.data,
@@ -359,7 +360,9 @@ describe("ReviewSubmissionFormContainer", () => {
         expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
       });
 
-      expect(screen.getByText("errors.invalidReviewerType")).toBeInTheDocument();
+      expect(
+        screen.getByText("errors.invalidReviewerType"),
+      ).toBeInTheDocument();
     });
 
     it("shows error when workflow fetch fails", async () => {
@@ -392,8 +395,10 @@ describe("ReviewSubmissionFormContainer", () => {
       (useClientFetchModule.useClientFetch as jest.Mock).mockReturnValue({
         clientFetch: mockClientFetch,
       });
-      
-      (submitReviewForAwardRecommendation as jest.Mock).mockResolvedValue({ success: true });
+
+      (submitReviewForAwardRecommendation as jest.Mock).mockResolvedValue({
+        success: true,
+      });
 
       mockClientFetch
         .mockResolvedValueOnce(mockPrivilegesResponse)
@@ -418,7 +423,9 @@ describe("ReviewSubmissionFormContainer", () => {
           "ar-123",
           { review_comment: "test" },
         );
-        expect(mockPush).toHaveBeenCalledWith("/grantor/award-recommendation/ar-123");
+        expect(mockPush).toHaveBeenCalledWith(
+          "/grantor/award-recommendation/ar-123",
+        );
       });
     });
 
@@ -427,7 +434,7 @@ describe("ReviewSubmissionFormContainer", () => {
       (useClientFetchModule.useClientFetch as jest.Mock).mockReturnValue({
         clientFetch: mockClientFetch,
       });
-      
+
       (submitReviewForAwardRecommendation as jest.Mock).mockResolvedValue({
         success: false,
         errorMessage: "Submit failed",

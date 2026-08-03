@@ -187,6 +187,4 @@ export const getApplicationForPrint = requesterForEndpoint(
   getApplicationForPrintEndpoint,
 );
 
-export const fetchWorkflow = cache(
-  requesterForEndpoint(fetchWorkflowEndpoint),
-);
+export const fetchWorkflow = cache(requesterForEndpoint(fetchWorkflowEndpoint));

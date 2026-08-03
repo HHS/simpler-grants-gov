@@ -1,14 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getWorkflowDetails } from "src/services/fetch/fetchers/workflowFetcher";
 import { readError } from "src/errors";
 import { getSession } from "src/services/auth/session";
+import { getWorkflowDetails } from "src/services/fetch/fetchers/workflowFetcher";
+
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   _request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
-  
+
   if (!id) {
     return NextResponse.json(
       { error: "Workflow ID is required" },
@@ -31,9 +32,9 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching workflow details:", error);
     const { status, message, cause } = readError(error as Error, 500);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: message,
         errorType: cause?.type,
       },

@@ -1,19 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Alert } from "@trussworks/react-uswds";
-import { useTranslations } from "next-intl";
-
-import {
-  ReviewSubmissionForm,
-  ReviewFormType,
-  ReviewFormData,
-} from "src/components/award-recommendation/ReviewSubmissionForm";
 import { submitReviewForAwardRecommendation } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/submit-for-review/actions";
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { WorkflowState } from "src/types/workflowTypes";
 import { UserPrivilegesResponse } from "src/types/userTypes";
+import { WorkflowState } from "src/types/workflowTypes";
+
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Alert } from "@trussworks/react-uswds";
+
+import {
+  ReviewFormData,
+  ReviewFormType,
+  ReviewSubmissionForm,
+} from "src/components/award-recommendation/ReviewSubmissionForm";
 import Spinner from "src/components/core/Spinner";
 
 interface ReviewSubmissionFormContainerProps {
@@ -53,13 +54,12 @@ export const ReviewSubmissionFormContainer: React.FC<
     const determineFormType = async () => {
       try {
         // Step 1: Check user privileges for authorization
-        const privilegesResponse = await clientFetch(
-          `/api/user/privileges`,
-          { method: "POST" }
-        ) as { data: UserPrivilegesResponse };
+        const privilegesResponse = (await clientFetch(`/api/user/privileges`, {
+          method: "POST",
+        })) as { data: UserPrivilegesResponse };
 
         const userPrivileges = privilegesResponse.data;
-        
+
         // Extract all privileges from agency roles
         const allPrivileges: string[] = [];
         userPrivileges.agency_users?.forEach((agencyUser) => {
@@ -69,7 +69,7 @@ export const ReviewSubmissionFormContainer: React.FC<
         });
 
         // Check if user has any review-related privileges
-        const hasReviewPrivileges = 
+        const hasReviewPrivileges =
           allPrivileges.includes("view_award_recommendation") ||
           allPrivileges.includes("fmo_reviewer") ||
           allPrivileges.includes("pqc_reviewer") ||
@@ -91,34 +91,37 @@ export const ReviewSubmissionFormContainer: React.FC<
         // Step 2: Check if review_workflow_id exists
         if (!reviewWorkflowId) {
           setErrorMessage(
-            t("errors.noWorkflow") || "No workflow associated with this award recommendation.",
+            t("errors.noWorkflow") ||
+              "No workflow associated with this award recommendation.",
           );
           setIsLoading(false);
           return;
         }
 
         // Step 3: Fetch workflow details to determine form type
-        const workflowResponse = await clientFetch(
+        const workflowResponse = (await clientFetch(
           `/api/workflows/${reviewWorkflowId}`,
-          { method: "GET" }
-        ) as { data: { current_workflow_state: WorkflowState } };
+          { method: "GET" },
+        )) as { data: { current_workflow_state: WorkflowState } };
 
-        const currentWorkflowState = workflowResponse.data.current_workflow_state;
+        const currentWorkflowState =
+          workflowResponse.data.current_workflow_state;
 
         // Step 4: Determine form type based on workflow state
-        const determinedFormType = getFormTypeFromWorkflowState(currentWorkflowState);
+        const determinedFormType =
+          getFormTypeFromWorkflowState(currentWorkflowState);
 
         // Step 5: Validate user has privilege for the determined form type
         let hasRequiredPrivilege = false;
         if (determinedFormType === "fmo_reviewer") {
           hasRequiredPrivilege = allPrivileges.includes("fmo_reviewer");
         } else if (determinedFormType === "reviewer") {
-          hasRequiredPrivilege = 
+          hasRequiredPrivilege =
             allPrivileges.includes("pqc_reviewer") ||
             allPrivileges.includes("gms_reviewer") ||
             allPrivileges.includes("gmo_reviewer");
         } else if (determinedFormType === "content_creator") {
-          hasRequiredPrivilege = 
+          hasRequiredPrivilege =
             allPrivileges.includes("update_award_recommendation") ||
             allPrivileges.includes("create_award_recommendation");
         }

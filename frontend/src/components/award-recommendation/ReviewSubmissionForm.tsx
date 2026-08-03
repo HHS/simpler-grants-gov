@@ -1,5 +1,8 @@
 "use client";
 
+import { UploadFileMetadata } from "src/types/fileUploadTypes";
+
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import {
   Button,
@@ -9,9 +12,8 @@ import {
   FormGroup,
   Radio,
 } from "@trussworks/react-uswds";
-import { useTranslations } from "next-intl";
+
 import { SimplerFileInput } from "src/components/core/fileInput/SimplerFileInput";
-import { UploadFileMetadata } from "src/types/fileUploadTypes";
 
 export type ReviewFormType = "content_creator" | "reviewer" | "fmo_reviewer";
 
@@ -58,7 +60,8 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
         has_internal_comment: hasInternalComment,
         decision: decision || undefined,
         contingent_date: contingentDate || undefined,
-        supplemental_documents: uploadedFiles.length > 0 ? uploadedFiles : undefined,
+        supplemental_documents:
+          uploadedFiles.length > 0 ? uploadedFiles : undefined,
       });
     } catch (error) {
       console.error("Error submitting review:", error);
@@ -77,7 +80,10 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
         <FormGroup>
           <legend className="usa-legend text-bold measure-none">
             {t("fmo.question")}
-            <span className="usa-hint usa-hint--required text-no-underline"> *</span>
+            <span className="usa-hint usa-hint--required text-no-underline">
+              {" "}
+              *
+            </span>
           </legend>
           <Radio
             id="funds_available"
@@ -86,7 +92,9 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
             label={t("fmo.fundsAvailable")}
             value="funds_available"
             checked={decision === "funds_available"}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDecision(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setDecision(e.target.value)
+            }
           />
           <Radio
             id="funds_contingent"
@@ -94,14 +102,19 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
             label={t("fmo.fundsContingent")}
             value="funds_contingent"
             checked={decision === "funds_contingent"}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDecision(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setDecision(e.target.value)
+            }
           />
           {decision === "funds_contingent" && (
             <div className="margin-left-4 margin-top-2 margin-bottom-2">
               <FormGroup>
                 <label htmlFor="contingent_date" className="usa-label">
                   {t("fmo.dateLabel")}
-                  <span className="usa-hint usa-hint--required text-no-underline"> *</span>
+                  <span className="usa-hint usa-hint--required text-no-underline">
+                    {" "}
+                    *
+                  </span>
                 </label>
                 <input
                   type="date"
@@ -109,7 +122,9 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
                   name="contingent_date"
                   className="usa-input"
                   value={contingentDate}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContingentDate(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setContingentDate(e.target.value)
+                  }
                   required={decision === "funds_contingent"}
                 />
               </FormGroup>
@@ -121,7 +136,9 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
             label={t("fmo.noCertification")}
             value="no_certification"
             checked={decision === "no_certification"}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDecision(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setDecision(e.target.value)
+            }
           />
           <Radio
             id="hold_review"
@@ -129,7 +146,9 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
             label={t("fmo.hold")}
             value="hold_review"
             checked={decision === "hold_review"}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDecision(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setDecision(e.target.value)
+            }
           />
         </FormGroup>
       );
@@ -139,7 +158,10 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
       <FormGroup>
         <legend className="usa-legend text-bold measure-none">
           {t("reviewer.question")}
-          <span className="usa-hint usa-hint--required text-no-underline"> *</span>
+          <span className="usa-hint usa-hint--required text-no-underline">
+            {" "}
+            *
+          </span>
         </legend>
         <Radio
           id="yes_concur"
@@ -148,7 +170,9 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
           label={t("reviewer.yesConcur")}
           value="yes_concur"
           checked={decision === "yes_concur"}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDecision(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setDecision(e.target.value)
+          }
         />
         <Radio
           id="no_issues"
@@ -156,7 +180,9 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
           label={t("reviewer.noIssues")}
           value="no_issues"
           checked={decision === "no_issues"}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDecision(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setDecision(e.target.value)
+          }
         />
         <Radio
           id="hold_review"
@@ -164,14 +190,20 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
           label={t("reviewer.hold")}
           value="hold_review"
           checked={decision === "hold_review"}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDecision(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setDecision(e.target.value)
+          }
         />
       </FormGroup>
     );
   };
 
   const postUploadAction = (fileId: string, _signal: AbortSignal) => {
-    return Promise.resolve({ id: fileId, fileName: fileId, updatedAt: new Date().toISOString() });
+    return Promise.resolve({
+      id: fileId,
+      fileName: fileId,
+      updatedAt: new Date().toISOString(),
+    });
   };
 
   const handleDelete = (fileId: string) => {
@@ -196,7 +228,10 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
       <FormGroup>
         <label htmlFor="review_comment" className="usa-label text-bold">
           {t("reviewComment.label")}
-          <span className="usa-hint usa-hint--required text-no-underline"> *</span>
+          <span className="usa-hint usa-hint--required text-no-underline">
+            {" "}
+            *
+          </span>
         </label>
         <p className="text-base-dark margin-top-1 margin-bottom-2">
           {t("reviewComment.description")}
@@ -207,7 +242,9 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
           maxLength={2000}
           isTextArea
           value={reviewComment}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setReviewComment(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setReviewComment(e.target.value)
+          }
           rows={6}
           className="maxw-full"
           required
@@ -220,7 +257,9 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
           name="has_internal_comment"
           label={t("internalComment.checkboxLabel")}
           checked={hasInternalComment}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setHasInternalComment(e.target.checked)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setHasInternalComment(e.target.checked)
+          }
         />
       </FormGroup>
 
@@ -228,7 +267,10 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
         <FormGroup>
           <label htmlFor="internal_comment" className="usa-label text-bold">
             {t("internalComment.label")}
-            <span className="usa-hint usa-hint--required text-no-underline"> *</span>
+            <span className="usa-hint usa-hint--required text-no-underline">
+              {" "}
+              *
+            </span>
           </label>
           <p className="text-base-dark margin-top-1 margin-bottom-2">
             {t("internalComment.description")}
@@ -239,7 +281,9 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
             maxLength={2000}
             isTextArea
             value={internalComment}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInternalComment(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setInternalComment(e.target.value)
+            }
             rows={6}
             className="maxw-full"
             required={hasInternalComment}
@@ -259,7 +303,9 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
           labelId="supplemental_documents"
           postUploadAction={postUploadAction}
           postUploadActionProgressMessage={t("supplementalDocuments.uploading")}
-          postUploadActionSuccessMessage={t("supplementalDocuments.uploadSuccess")}
+          postUploadActionSuccessMessage={t(
+            "supplementalDocuments.uploadSuccess",
+          )}
           postUploadActionErrorMessage={t("supplementalDocuments.uploadError")}
           onDelete={handleDelete}
           onSuccess={handleUploadSuccess}
@@ -269,12 +315,24 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
       </FormGroup>
 
       <div className="bg-base-lightest padding-2 padding-bottom-3 margin-top-3 margin-bottom-3 review-attestation-box">
-        <p className="text-base margin-top-0 margin-bottom-0">{attestationText}</p>
+        <p className="text-base margin-top-0 margin-bottom-0">
+          {attestationText}
+        </p>
         <ButtonGroup className="margin-top-3">
-          <Button type="submit" disabled={isSubmitting || !reviewComment.trim()} className="usa-button--compact">
+          <Button
+            type="submit"
+            disabled={isSubmitting || !reviewComment.trim()}
+            className="usa-button--compact"
+          >
             {isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
           </Button>
-          <Button type="button" outline onClick={onCancel} disabled={isSubmitting} className="usa-button--compact">
+          <Button
+            type="button"
+            outline
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="usa-button--compact"
+          >
             {t("buttons.cancel")}
           </Button>
         </ButtonGroup>

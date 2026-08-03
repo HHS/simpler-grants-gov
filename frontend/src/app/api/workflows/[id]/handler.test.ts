@@ -1,6 +1,7 @@
+import { NotFoundError } from "src/errors";
 import * as sessionModule from "src/services/auth/session";
 import * as workflowFetcherModule from "src/services/fetch/fetchers/workflowFetcher";
-import { NotFoundError } from "src/errors";
+
 import { NextRequest, NextResponse } from "next/server";
 
 import { GET } from "./handler";
@@ -37,23 +38,25 @@ describe("GET /api/workflows/[id]", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock NextResponse.json to return proper response objects
-    (NextResponse.json as jest.Mock).mockImplementation((data: unknown, init?: ResponseInit) => {
-      const status = init?.status || 200;
-      return {
-        json: jest.fn().mockResolvedValue(data),
-        status,
-        ok: status >= 200 && status < 300,
-      };
-    });
+    (NextResponse.json as jest.Mock).mockImplementation(
+      (data: unknown, init?: ResponseInit) => {
+        const status = init?.status || 200;
+        return {
+          json: jest.fn().mockResolvedValue(data),
+          status,
+          ok: status >= 200 && status < 300,
+        };
+      },
+    );
   });
 
   it("returns workflow details when request is valid", async () => {
     (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
-    (
-      workflowFetcherModule.getWorkflowDetails as jest.Mock
-    ).mockResolvedValue(mockWorkflowDetails);
+    (workflowFetcherModule.getWorkflowDetails as jest.Mock).mockResolvedValue(
+      mockWorkflowDetails,
+    );
 
     const req = {} as NextRequest;
     const params = Promise.resolve({ id: "workflow-123" });
@@ -98,7 +101,7 @@ describe("GET /api/workflows/[id]", () => {
     const consoleErrorSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    
+
     (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
     (workflowFetcherModule.getWorkflowDetails as jest.Mock).mockRejectedValue(
       new NotFoundError("Workflow not found"),
@@ -115,7 +118,7 @@ describe("GET /api/workflows/[id]", () => {
     );
     expect(json.error).toBeDefined();
     expect(res.status).toBe(404);
-    
+
     consoleErrorSpy.mockRestore();
   });
 
@@ -123,7 +126,7 @@ describe("GET /api/workflows/[id]", () => {
     const consoleErrorSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    
+
     (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
     (workflowFetcherModule.getWorkflowDetails as jest.Mock).mockRejectedValue(
       new Error("Database error"),
@@ -140,7 +143,7 @@ describe("GET /api/workflows/[id]", () => {
     );
     expect(json.error).toBeDefined();
     expect(res.status).toBe(500);
-    
+
     consoleErrorSpy.mockRestore();
   });
 });

@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
+import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
+
 import { redirect } from "next/navigation";
 
 import SubmitForReviewPage from "./page";
-import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
 
 const mockGetAwardRecommendationDetails = jest.fn();
 
@@ -25,13 +26,10 @@ jest.mock("next-intl/server", () => ({
   setRequestLocale: identity,
 }));
 
-jest.mock(
-  "src/services/fetch/fetchers/awardRecommendationFetcher",
-  () => ({
-    getAwardRecommendationDetails: (...args: unknown[]): Promise<unknown> =>
-      mockGetAwardRecommendationDetails(...args) as Promise<unknown>,
-  }),
-);
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
+  getAwardRecommendationDetails: (...args: unknown[]): Promise<unknown> =>
+    mockGetAwardRecommendationDetails(...args) as Promise<unknown>,
+}));
 
 jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
   __esModule: true,
@@ -72,25 +70,22 @@ jest.mock(
   }),
 );
 
-jest.mock(
-  "./_components/ReviewSubmissionFormContainer",
-  () => ({
-    ReviewSubmissionFormContainer: ({
-      awardRecommendationId,
-      expectedReviewerType,
-    }: {
-      awardRecommendationId: string;
-      expectedReviewerType?: string;
-    }) => (
-      <div data-testid="review-submission-form-container">
-        <div data-testid="award-rec-id">{awardRecommendationId}</div>
-        {expectedReviewerType && (
-          <div data-testid="reviewer-type">{expectedReviewerType}</div>
-        )}
-      </div>
-    ),
-  }),
-);
+jest.mock("./_components/ReviewSubmissionFormContainer", () => ({
+  ReviewSubmissionFormContainer: ({
+    awardRecommendationId,
+    expectedReviewerType,
+  }: {
+    awardRecommendationId: string;
+    expectedReviewerType?: string;
+  }) => (
+    <div data-testid="review-submission-form-container">
+      <div data-testid="award-rec-id">{awardRecommendationId}</div>
+      {expectedReviewerType && (
+        <div data-testid="reviewer-type">{expectedReviewerType}</div>
+      )}
+    </div>
+  ),
+}));
 
 describe("SubmitForReviewPage", () => {
   const mockParams = Promise.resolve({
