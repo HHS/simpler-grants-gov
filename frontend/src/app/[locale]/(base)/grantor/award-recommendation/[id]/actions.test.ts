@@ -7,6 +7,7 @@ import {
 
 const mockUpdateAwardRecommendationSubmissionDetails = jest.fn();
 const mockUpdateAwardRecommendation = jest.fn();
+const mockRedirect = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
   updateAwardRecommendationSubmissionDetails: (
@@ -15,6 +16,13 @@ jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
     mockUpdateAwardRecommendationSubmissionDetails(...args) as Promise<unknown>,
   updateAwardRecommendation: (...args: unknown[]): Promise<unknown> =>
     mockUpdateAwardRecommendation(...args) as Promise<unknown>,
+}));
+
+jest.mock("next/navigation", () => ({
+  redirect: (...args: unknown[]) => {
+    mockRedirect(...args);
+    throw new Error("NEXT_REDIRECT");
+  },
 }));
 
 jest.mock("next-intl/server", () => ({
