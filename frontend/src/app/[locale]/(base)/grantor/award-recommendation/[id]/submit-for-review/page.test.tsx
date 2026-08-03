@@ -78,7 +78,7 @@ describe("SubmitForReviewPage", () => {
     mockGetAwardRecommendationDetails.mockResolvedValue(
       mockAwardRecommendationDetails,
     );
-    
+
     // Mock privileges API response
     mockClientFetch.mockResolvedValueOnce({
       data: {
@@ -97,7 +97,7 @@ describe("SubmitForReviewPage", () => {
         ],
       },
     });
-    
+
     // Mock workflow API response
     mockClientFetch.mockResolvedValueOnce({
       data: {
