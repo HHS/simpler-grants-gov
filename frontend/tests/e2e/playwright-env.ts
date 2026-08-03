@@ -21,6 +21,19 @@ const TEST_ORG_LABELS: Record<string, string> = {
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 const testOrgLabel = TEST_ORG_LABELS[targetEnv];
 
+const isLocal = targetEnv === "local";
+const baseUrl =
+  process.env.PLAYWRIGHT_BASE_URL || (isLocal ? "http://127.0.0.1:3000" : "");
+const apiUrl =
+  process.env.PLAYWRIGHT_API_URL || (isLocal ? "http://127.0.0.1:8080" : "");
+
+// this does what it can to prevent the app from starting with mismatched target env and url variable assignments
+if (!baseUrl || !apiUrl) {
+  throw new Error(
+    `PLAYWRIGHT_BASE_URL and PLAYWRIGHT_API_URL must be set when PLAYWRIGHT_TARGET_ENV=${targetEnv}`,
+  );
+}
+
 if (SUPPORTED_ENVS.indexOf(targetEnv as SupportedEnvs) === -1) {
   throw new Error(
     `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${SUPPORTED_ENVS.join(", ")}`,
@@ -37,8 +50,8 @@ const webServerEnv: Record<string, string> = Object.fromEntries(
 
 const playwrightEnv = {
   webServerEnv,
-  baseUrl: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000",
-  apiUrl: process.env.PLAYWRIGHT_API_URL || "http://127.0.0.1:8080",
+  baseUrl,
+  apiUrl,
   targetEnv,
   testOrgLabel,
   isCi: process.env.CI,
