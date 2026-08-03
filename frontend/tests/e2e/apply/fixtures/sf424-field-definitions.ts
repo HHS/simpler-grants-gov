@@ -3,7 +3,7 @@ import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 export const SF424_FORM_MATCHER =
-  /SF\s*[-‑–—]?\s*424(?![A-Za-z0-9]|\s+Short\b)|Application\s+for\s+Federal\s+Assistance/i;
+  /Application\s+for\s+Federal\s+Assistance\s*\(SF\s*[-‑–—]?\s*424\)/i;
 
 // maxLength values sourced from:
 // api/src/form_schema/forms/sf424/1/0/form_json.py
