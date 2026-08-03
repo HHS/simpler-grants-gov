@@ -176,6 +176,7 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
 
   const handleDelete = (fileId: string) => {
     setUploadedFiles(uploadedFiles.filter((file) => file.id !== fileId));
+    return Promise.resolve();
   };
 
   const handleUploadSuccess = (result: unknown) => {
