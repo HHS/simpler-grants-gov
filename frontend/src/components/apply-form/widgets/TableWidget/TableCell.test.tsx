@@ -341,4 +341,25 @@ describe("TableCell", () => {
     expect(input).toHaveAttribute("aria-invalid", "false");
     expect(input).not.toHaveAttribute("aria-describedby");
   });
+  it("wraps long error text without breaking words mid-way", () => {
+    render(
+      <TableCell
+        cell={{ type: "input", definition: "/properties/federal_share" }}
+        cellErrors={[
+          "This is a very long validation error message that should wrap onto multiple lines",
+        ]}
+        id="input-cell-long-error"
+        value="0"
+      />,
+    );
+
+    const errorText = screen.getByText(
+      /This is a very long validation error message/,
+    );
+    const container = errorText.closest("div");
+
+    expect(container).toHaveStyle("white-space: normal");
+    expect(container).not.toHaveStyle("word-break: break-all");
+    expect(container).not.toHaveStyle("overflow-wrap: anywhere");
+  });
 });

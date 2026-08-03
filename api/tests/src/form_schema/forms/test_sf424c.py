@@ -144,7 +144,7 @@ def test_sf424c_v2_0_construction_total_cost_required(sf424c_v2_0):
     validation_issues = validate_json_schema_for_form(data, sf424c_v2_0)
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "required"
-    assert validation_issues[0].field == "$.budget_information.construction"
+    assert validation_issues[0].field == "$.budget_information.construction.total_cost"
 
 
 def test_sf424c_v2_0_other_rows_total_cost_not_required(sf424c_v2_0):
