@@ -56,7 +56,7 @@ def update_competition_flag_route(
 @competition_blueprint.put("/competitions/<uuid:competition_id>/forms")
 @competition_blueprint.input(competition_schema.CompetitionFormsSetRequestSchema, location="json")
 @competition_blueprint.output(competition_schema.CompetitionResponseAlphaSchema())
-@competition_blueprint.auth_required(api_user_key_auth)
+@competition_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def put_competition_forms(
     db_session: db.Session, competition_id: uuid.UUID, json_data: dict
@@ -65,7 +65,7 @@ def put_competition_forms(
     logger.info("PUT /alpha/competitions/:competition_id/forms")
 
     with db_session.begin():
-        user = api_user_key_auth.get_user()
+        user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
         competition = set_competition_forms(db_session, user, competition_id, json_data)
