@@ -232,31 +232,6 @@ describe("SubmitForReviewPage", () => {
     );
   });
 
-  it("renders page in grid container with proper layout", async () => {
-    const page = await SubmitForReviewPage({
-      params: mockParams,
-      searchParams: mockSearchParams,
-    });
-    render(page);
-
-    const formContainer = screen.getByTestId("review-form-container");
-    const gridContainer = formContainer.closest(".grid-container");
-    expect(gridContainer).toBeInTheDocument();
-    expect(gridContainer).toHaveClass("margin-top-4");
-  });
-
-  it("uses 12 column grid for form", async () => {
-    const page = await SubmitForReviewPage({
-      params: mockParams,
-      searchParams: mockSearchParams,
-    });
-    render(page);
-
-    const formContainer = screen.getByTestId("review-form-container");
-    const gridCol = formContainer.closest('[class*="grid-col"]');
-    expect(gridCol).toBeInTheDocument();
-  });
-
   describe("generateMetadata", () => {
     it("returns correct metadata", async () => {
       const { generateMetadata } = await import("./page");

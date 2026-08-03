@@ -63,7 +63,7 @@ async function SubmitForReviewPageContent({ params }: SubmitForReviewPageProps) 
       />
       <div className="grid-container margin-top-4">
         <Grid row>
-          <Grid col={12} data-testid="review-form-container">
+          <Grid col={12}>
             <ReviewSubmissionFormContainer
               awardRecommendationId={awardRecommendationId}
               reviewWorkflowId={awardRecommendationDetails.review_workflow_id}

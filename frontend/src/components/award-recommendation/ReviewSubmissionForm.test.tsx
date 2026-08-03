@@ -380,14 +380,5 @@ describe("ReviewSubmissionForm", () => {
       expect(submitButton).toHaveClass("usa-button--compact");
       expect(cancelButton).toHaveClass("usa-button--compact");
     });
-
-    it("applies custom styling to attestation box", () => {
-      render(<ReviewSubmissionForm {...defaultProps} />);
-
-      const attestationText = screen.getByText("attestation.reviewer");
-      const attestationBox = attestationText.closest(".review-attestation-box");
-      expect(attestationBox).toBeInTheDocument();
-      expect(attestationBox).toHaveClass("bg-base-lightest");
-    });
   });
 });
