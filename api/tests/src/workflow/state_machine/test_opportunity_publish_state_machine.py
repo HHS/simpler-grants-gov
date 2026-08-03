@@ -92,7 +92,7 @@ def test_opportunity_publish_happy_path(
     assert result["opportunity_id"] == str(opportunity.opportunity_id)
     assert result["opportunity_title"] == opportunity.opportunity_title
 
-    # Verify a version was created immediately at publish time 
+    # Verify a version was created immediately at publish time
     # a grantee saving the opportunity right now already has a version to
     # diff against, rather than waiting for the next hourly batch run.
     versions = db_session.scalars(
