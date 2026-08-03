@@ -15,7 +15,7 @@ function PrintWidget<
   formClassName,
   inputClassName,
 }: UswdsWidgetProps<T, S, F>) {
-  const { title } = schema as S;
+  const { description, title } = schema as S;
   const toDisplay = (inputValue: unknown): string => {
     if (inputValue === null || inputValue === undefined) {
       return schema.type === "boolean" ? "No" : "";
@@ -42,6 +42,9 @@ function PrintWidget<
           </span>
         )}
       </div>
+      {description && (
+        <p className="text-base-dark margin-top-0">{description}</p>
+      )}
       <div data-testid={id} className={inputClassName} id={id} key={id}>
         {toDisplay(value)}
       </div>

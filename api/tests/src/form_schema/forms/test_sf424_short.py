@@ -220,12 +220,15 @@ def full_valid_json_v3_0(valid_json_v3_0, contact_person_group):
 
 
 def test_sf424_short_v3_0_form_title_and_ui_section_order(sf424_short_v3_0):
-    assert sf424_short_v3_0.form_name == "SF-424 Short Organizational"
+    assert (
+        sf424_short_v3_0.form_name
+        == "APPLICATION FOR FEDERAL DOMESTIC ASSISTANCE-SHORT ORGANIZATIONAL (SF-424)"
+    )
     assert [section["label"] for section in sf424_short_v3_0.form_ui_schema] == [
         "1. Name of Federal Agency",
-        "2. Assistance Listing Number/Title",
+        "2. Assistance Listing Number and Title",
         "3. Date Received",
-        "4. Funding Opportunity Number/Title",
+        "4. Funding Opportunity Number and Title",
         "5. Applicant Information",
         "6. Project Information",
         "7. Project Director",
@@ -299,11 +302,25 @@ def test_sf424_short_v3_0_authorized_representative_agreement_copy(
     sf424_short_v3_0,
 ):
     agreement_schema = sf424_short_v3_0.form_json_schema["properties"]["application_certification"]
+    expected_description = (
+        "** The list of certifications and assurances, or an internet site where you may "
+        "obtain this list, is contained in the announcement or agency specific instructions. "
+        "By signing this application, I certify (1) to the statements contained in the list "
+        "of certifications and (2) that the statements herein are true, complete and accurate "
+        "to the best of my knowledge. I also provide the required assurances and agree to "
+        "comply with any resulting terms if I accept an award. I am aware that any false, "
+        "fictitious, or fraudulent statements or claims may subject me to criminal, civil, or "
+        "administrative penalties. (U.S. Code, Title 18, Section 1001)"
+    )
 
     assert agreement_schema["title"] == "** I Agree"
-    assert agreement_schema["description"].startswith(
-        "** The list of certifications and assurances"
-    )
+    assert agreement_schema["description"] == expected_description
+    assert agreement_schema["description"].startswith("** The list of certifications")
+    assert agreement_schema["description"].index(
+        "** The list of certifications"
+    ) < agreement_schema["description"].index("By signing this application")
+    assert agreement_schema["description"].count("The list of certifications") == 1
+    assert agreement_schema["description"].count("By signing this application") == 1
 
 
 def test_sf424_short_v3_0_pre_and_post_populated_fields_use_null_ui_fields(

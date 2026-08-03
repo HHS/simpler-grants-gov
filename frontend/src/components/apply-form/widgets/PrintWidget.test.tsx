@@ -69,6 +69,29 @@ describe("PrintWidget", () => {
     expect(screen.getByText("Custom Test Value")).toBeInTheDocument();
   });
 
+  it("displays the field description once between the title and value", () => {
+    const description =
+      "** The list of certifications and assurances. By signing this application, I certify the statements are true.";
+    const props = {
+      ...defaultProps,
+      schema: {
+        ...defaultProps.schema,
+        title: "** I Agree",
+        description,
+      },
+      value: true,
+    };
+
+    render(<PrintWidget {...props} />);
+
+    expect(screen.getByText("** I Agree")).toBeInTheDocument();
+    expect(screen.getAllByText(description)).toHaveLength(1);
+    expect(screen.getByText(description)).toHaveTextContent(
+      /^\*\* The list of certifications.*By signing this application/,
+    );
+    expect(screen.getByText("Yes")).toBeInTheDocument();
+  });
+
   it("displays empty string when value is null", () => {
     const propsWithNull = { ...defaultProps, value: null as unknown as string };
 
