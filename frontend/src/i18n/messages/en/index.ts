@@ -2212,7 +2212,7 @@ export const messages = {
       commentsLabel: "Recommendation comments",
       commentsDescription:
         "Add any needed context for your recommendations for any selected group or single application.",
-      exceptionDetailLabel: "Reason for exception",
+      exceptionDetailLabel: "Exceptions to selection method",
       exceptionDetailDescription:
         "Select one or more applications and explain any exceptions to the general selection method. For example, the reasons for any applications skipped on the merit review ranking or other similar exceptions.",
       fundingHeading: "Funding recommendations",
