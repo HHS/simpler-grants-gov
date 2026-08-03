@@ -206,6 +206,7 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.PROJECT_PERFORMANCE_SITE_LOCATION, 17),
         LookupStr(FormType.KEY_CONTACTS, 18),
         LookupStr(FormType.SF424C, 19),
+        LookupStr(FormType.SF424_SHORT, 20),
     ]
 )
 
@@ -266,6 +267,9 @@ AWARD_RECOMMENDATION_STATUS_CONFIG: LookupConfig[AwardRecommendationStatus] = Lo
         LookupStr(AwardRecommendationStatus.DRAFT, 1),
         LookupStr(AwardRecommendationStatus.IN_REVIEW, 2),
         LookupStr(AwardRecommendationStatus.APPROVED, 3),
+        LookupStr(AwardRecommendationStatus.SUBMITTED, 4),
+        LookupStr(AwardRecommendationStatus.REVISION_REQUESTED, 5),
+        LookupStr(AwardRecommendationStatus.IN_REVISION, 6),
     ]
 )
 
@@ -400,6 +404,7 @@ WORKFLOW_TYPE_CONFIG: LookupConfig[WorkflowType] = LookupConfig(
         LookupStr(WorkflowType.BASIC_TEST_WORKFLOW, 4),
         LookupStr(WorkflowType.NO_CONCURRENT_TEST_WORKFLOW, 5),
         LookupStr(WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW, 6),
+        LookupStr(WorkflowType.AWARD_RECOMMENDATION_REVIEW, 7),
     ]
 )
 
@@ -408,6 +413,14 @@ APPROVAL_TYPE_CONFIG: LookupConfig[ApprovalType] = LookupConfig(
         LookupStr(ApprovalType.INITIAL_PROTOTYPE_APPROVAL, 1),
         LookupStr(ApprovalType.PROGRAM_OFFICER_APPROVAL, 2),
         LookupStr(ApprovalType.BUDGET_OFFICER_APPROVAL, 3),
+        LookupStr(ApprovalType.PQC_APPROVAL, 4),
+        LookupStr(ApprovalType.GMS_APPROVAL, 5),
+        LookupStr(ApprovalType.FMO_APPROVAL, 6),
+        LookupStr(ApprovalType.GMO_APPROVAL, 7),
+        LookupStr(ApprovalType.AGENCY_APPROVAL, 8),
+        LookupStr(ApprovalType.DEPARTMENTAL_APPROVAL, 9),
+        LookupStr(ApprovalType.INTERAGENCY_APPROVAL, 10),
+        LookupStr(ApprovalType.EXECUTIVE_APPROVAL, 11),
     ]
 )
 

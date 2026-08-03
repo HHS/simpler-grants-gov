@@ -22,8 +22,17 @@ KNOWN_XSD_DEPENDENCIES = {
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
         "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
     ],
+    "SF424_Short_3_0-V3.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
+    ],
     "SF424A-V1.0.xsd": [
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+    ],
+    "SF424C_2_0-V2.0.xsd": [
+        "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",
+        "https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd",
     ],
     "SF424B-V1.1.xsd": [
         "https://apply07.grants.gov/apply/system/schemas/Global-V1.0.xsd",

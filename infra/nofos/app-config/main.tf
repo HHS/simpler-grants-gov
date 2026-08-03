@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "grantee1"]
+  environments = ["dev", "staging", "prod", "training", "grantee1", "infra-dev", "infra-staging", "infra-training"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -49,18 +49,28 @@ locals {
     prod     = module.prod_config
     training = module.training_config
     grantee1 = module.grantee1_config
+    # infra-dev is a dev-like environment in the "dev" AWS account (061664787759),
+    # running in the "infra-dev-simpler-grants" VPC.
+    infra-dev = module.infra_dev_config
+    # infra-staging is a staging-like environment in the "staging" AWS account
+    # (317380566348), running in the "infra-staging" VPC.
+    infra-staging  = module.infra_staging_config
+    infra-training = module.infra_training_config
   }
 
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
   # across environments use the key "shared".
   account_names_by_environment = {
-    shared   = "simpler-grants-gov"
-    dev      = "simpler-grants-gov"
-    staging  = "simpler-grants-gov"
-    prod     = "simpler-grants-gov"
-    training = "simpler-grants-gov"
-    grantee1 = "simpler-grants-gov"
+    shared         = "simpler-grants-gov"
+    dev            = "simpler-grants-gov"
+    staging        = "simpler-grants-gov"
+    prod           = "simpler-grants-gov"
+    training       = "simpler-grants-gov"
+    grantee1       = "simpler-grants-gov"
+    infra-dev      = "dev"      # infra-dev environment lives in AWS account 061664787759
+    infra-staging  = "staging"  # infra-staging environment lives in AWS account 317380566348
+    infra-training = "training" # infra-training environment lives in AWS account 049145893907
   }
 
   # The name of the network that contains the resources shared across all

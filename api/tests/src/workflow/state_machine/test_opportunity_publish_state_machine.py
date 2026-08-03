@@ -2,8 +2,10 @@ from datetime import date
 
 import pytest
 from freezegun import freeze_time
+from sqlalchemy import select
 
 from src.constants.lookup_constants import OpportunityStatus, WorkflowType
+from src.db.models.opportunity_models import OpportunityVersion
 from src.workflow.handler.event_handler import EventHandler
 from src.workflow.state_machine.opportunity_publish_state_machine import OpportunityPublishState
 from src.workflow.workflow_errors import InvalidEventError
@@ -63,7 +65,7 @@ def test_opportunity_publish_happy_path(
     assert workflow.workflow_event_history[0].is_successfully_processed is True
 
     # Several event transitions automatically fire in sequence
-    assert len(workflow.workflow_audits) == 5
+    assert len(workflow.workflow_audits) == 6
     audits = sorted(workflow.workflow_audits, key=lambda audit: audit.created_at)
 
     assert audits[0].source_state == OpportunityPublishState.START
@@ -79,13 +81,26 @@ def test_opportunity_publish_happy_path(
     assert audits[3].target_state == OpportunityPublishState.OPPORTUNITY_WRITTEN_TO_SEARCH
 
     assert audits[4].source_state == OpportunityPublishState.OPPORTUNITY_WRITTEN_TO_SEARCH
-    assert audits[4].target_state == OpportunityPublishState.END
+    assert audits[4].target_state == OpportunityPublishState.OPPORTUNITY_VERSION_STORED
+
+    assert audits[5].source_state == OpportunityPublishState.OPPORTUNITY_VERSION_STORED
+    assert audits[5].target_state == OpportunityPublishState.END
 
     # Verify the opportunity is in the search index
     result = search_client.get(opportunity_index_alias, opportunity.opportunity_id)
     assert result is not None
     assert result["opportunity_id"] == str(opportunity.opportunity_id)
     assert result["opportunity_title"] == opportunity.opportunity_title
+
+    # Verify a version was created immediately at publish time
+    # a grantee saving the opportunity right now already has a version to
+    # diff against, rather than waiting for the next hourly batch run.
+    versions = db_session.scalars(
+        select(OpportunityVersion).where(
+            OpportunityVersion.opportunity_id == opportunity.opportunity_id
+        )
+    ).all()
+    assert len(versions) == 1
 
 
 @pytest.mark.parametrize(

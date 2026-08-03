@@ -2044,6 +2044,290 @@ KEY_CONTACTS_TEST_CASES = [
 ]
 
 
+SF424C_TEST_CASES = [
+    {
+        "name": "sf424c_construction_only",
+        "json_input": {
+            "budget_information": {
+                "construction": {
+                    "total_cost": "500000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "500000.00",
+                },
+                # CostSubtotalBeforeContingencies and CostSubtotalAfterContingencies
+                # have no minOccurs="0" in the XSD — they are required whenever
+                # ProjectCosts is present, regardless of how many rows are filled.
+                "subtotal_1": {
+                    "total_cost": "500000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "500000.00",
+                },
+                "subtotal_2": {
+                    "total_cost": "500000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "500000.00",
+                },
+                "total_project_costs": {
+                    "total_cost": "500000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "500000.00",
+                },
+            },
+            "federal_funding": {
+                "federal_percentage_share": 80,
+                "federal_funding_share": "400000.00",
+            },
+        },
+        "form_name": "SF424C",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424C_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        # All 16 rows filled — covers every XSD element inside ProjectCosts,
+        # including project_income (ProgramIncome) which sits between
+        # CostSubtotalAfterContingencies and TotalProjectCosts in the XSD sequence.
+        "name": "sf424c_all_budget_rows",
+        "json_input": {
+            "budget_information": {
+                "administrative_and_legal_expenses": {
+                    "total_cost": "10000.00",
+                    "non_allowable_cost": "1000.00",
+                    "total_allowable_cost": "9000.00",
+                },
+                "land_structures_rights_of_way": {
+                    "total_cost": "50000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "50000.00",
+                },
+                "relocation_expenses": {
+                    "total_cost": "5000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "5000.00",
+                },
+                "architectural_engineering_fees": {
+                    "total_cost": "30000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "30000.00",
+                },
+                "other_architectural_engineering_fees": {
+                    "total_cost": "10000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "10000.00",
+                },
+                "project_inspection_fees": {
+                    "total_cost": "8000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "8000.00",
+                },
+                "site_work": {
+                    "total_cost": "20000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "20000.00",
+                },
+                "demolition_and_removal": {
+                    "total_cost": "7000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "7000.00",
+                },
+                "construction": {
+                    "total_cost": "500000.00",
+                    "non_allowable_cost": "50000.00",
+                    "total_allowable_cost": "450000.00",
+                },
+                "equipment": {
+                    "total_cost": "75000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "75000.00",
+                },
+                "miscellaneous": {
+                    "total_cost": "5000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "5000.00",
+                },
+                "subtotal_1": {
+                    "total_cost": "720000.00",
+                    "non_allowable_cost": "51000.00",
+                    "total_allowable_cost": "669000.00",
+                },
+                "contingencies": {
+                    "total_cost": "36000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "36000.00",
+                },
+                "subtotal_2": {
+                    "total_cost": "756000.00",
+                    "non_allowable_cost": "51000.00",
+                    "total_allowable_cost": "705000.00",
+                },
+                "project_income": {
+                    "total_cost": "10000.00",
+                    "non_allowable_cost": "0.00",
+                    "total_allowable_cost": "10000.00",
+                },
+                "total_project_costs": {
+                    "total_cost": "746000.00",
+                    "non_allowable_cost": "51000.00",
+                    "total_allowable_cost": "695000.00",
+                },
+            },
+            "federal_funding": {
+                "federal_percentage_share": 75,
+                "federal_funding_share": "521250.00",
+            },
+        },
+        "form_name": "SF424C",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424C_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        # No budget rows — ProjectCosts element is omitted entirely.
+        # Validates the root element with only federal funding fields.
+        "name": "sf424c_federal_funding_only",
+        "json_input": {
+            "federal_funding": {
+                "federal_percentage_share": 100,
+                "federal_funding_share": "250000.00",
+            },
+        },
+        "form_name": "SF424C",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424C_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+]
+
+
+# Sample test cases for SF-424 Short validation
+_SF424_SHORT_CONTACT = {
+    "name": {
+        "first_name": "Jane",
+        "last_name": "Doe",
+    },
+    "title": "Project Director",
+    "email": "jane.doe@example.org",
+    "phone_number": "555-123-4567",
+    "address": {
+        "street1": "123 Main St",
+        "city": "Washington",
+        "state": "DC: District of Columbia",
+        "zip_code": "20001",
+        "country": "USA: UNITED STATES",
+    },
+}
+
+SF424_SHORT_TEST_CASES = [
+    {
+        "name": "sf424_short_minimal_valid",
+        "json_input": {
+            "agency_name": "Department of Research",
+            "funding_opportunity_number": "TEST-SF424S-FON-001",
+            "funding_opportunity_title": "SF-424 Short Test Opportunity",
+            "organization_name": "Test Research University",
+            "applicant": {
+                "street1": "123 Main St",
+                "city": "Washington",
+                "state": "DC: District of Columbia",
+                "zip_code": "20001",
+                "country": "USA: UNITED STATES",
+            },
+            "applicant_type_code": ["C: City or Township Government"],
+            "employer_taxpayer_identification_number": "123456789",
+            "sam_uei": "TEST12345678",
+            "congressional_district_applicant": "DC-001",
+            "project_title": "SF-424 Short XSD Validation Test",
+            "project_description": "A test project for XSD validation.",
+            "project_start_date": "2025-01-01",
+            "project_end_date": "2025-12-31",
+            "project_director": _SF424_SHORT_CONTACT,
+            "same_as_project_director": False,
+            "contact_person": _SF424_SHORT_CONTACT,
+            "application_certification": True,
+            "authorized_representative": {
+                "first_name": "Bob",
+                "last_name": "Smith",
+            },
+            "authorized_representative_title": "Director",
+            "authorized_representative_email": "bob.smith@example.org",
+            "authorized_representative_phone_number": "555-987-6543",
+            "date_received": "2025-01-15",
+            "aor_signature": "bob.smith@example.org",
+            "authorized_representative_date_signed": "2025-01-15",
+        },
+        "form_name": "SF424_Short_3_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "sf424_short_with_optional_fields",
+        "json_input": {
+            "agency_name": "National Institutes of Health",
+            "funding_opportunity_number": "TEST-SF424S-FON-002",
+            "funding_opportunity_title": "SF-424 Short Full Fields Test",
+            "organization_name": "State University Research Foundation",
+            "assistance_listing_number": "93.456",
+            "assistance_listing_program_title": "Research Grants Program",
+            "applicant": {
+                "street1": "456 University Ave",
+                "street2": "Suite 200",
+                "city": "Boston",
+                "state": "MA: Massachusetts",
+                "zip_code": "02115",
+                "country": "USA: UNITED STATES",
+            },
+            "applicant_web_address": "https://example.edu",
+            "applicant_type_code": ["A: State Government", "X: Other (specify)"],
+            "applicant_type_other_specify": "Research Consortium",
+            "employer_taxpayer_identification_number": "987654321",
+            "sam_uei": "UNIRESEARCH1",
+            "congressional_district_applicant": "MA-008",
+            "project_title": "Advanced Research in Public Health",
+            "project_description": "A comprehensive study on public health outcomes.",
+            "project_start_date": "2025-03-01",
+            "project_end_date": "2026-02-28",
+            "project_director": _SF424_SHORT_CONTACT,
+            "same_as_project_director": False,
+            "contact_person": {
+                "name": {
+                    "prefix": "Dr",
+                    "first_name": "Alice",
+                    "middle_name": "Marie",
+                    "last_name": "Johnson",
+                    "suffix": "PhD",
+                },
+                "title": "Grants Administrator",
+                "email": "alice.johnson@example.edu",
+                "phone_number": "617-555-0001",
+                "fax": "617-555-0002",
+                "address": {
+                    "street1": "456 University Ave",
+                    "city": "Boston",
+                    "state": "MA: Massachusetts",
+                    "zip_code": "02115",
+                    "country": "USA: UNITED STATES",
+                },
+            },
+            "application_certification": True,
+            "authorized_representative": {
+                "prefix": "Dr",
+                "first_name": "Robert",
+                "middle_name": "James",
+                "last_name": "Williams",
+                "suffix": "Jr",
+            },
+            "authorized_representative_title": "Vice President for Research",
+            "authorized_representative_email": "r.williams@example.edu",
+            "authorized_representative_phone_number": "617-555-0099",
+            "authorized_representative_fax": "617-555-0100",
+            "date_received": "2025-01-15",
+            "aor_signature": "r.williams@example.edu",
+            "authorized_representative_date_signed": "2025-01-15",
+        },
+        "form_name": "SF424_Short_3_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
+        "pretty_print": True,
+    },
+]
+
+
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
 
@@ -2054,6 +2338,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         SF424_TEST_CASES
         + SF424A_TEST_CASES
         + SF424B_TEST_CASES
+        + SF424C_TEST_CASES
         + SFLLL_TEST_CASES
         + CD511_TEST_CASES
         + GG_LOBBYING_FORM_TEST_CASES
@@ -2065,6 +2350,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + OTHER_NARRATIVE_ATTACHMENTS_TEST_CASES
         + PERFORMANCE_SITE_TEST_CASES
         + KEY_CONTACTS_TEST_CASES
+        + SF424_SHORT_TEST_CASES
     )
 
 

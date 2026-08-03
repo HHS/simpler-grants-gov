@@ -359,7 +359,7 @@ KeyContacts_v2_0 = Form(
     # No rule schema needed — no conditional fields, attachments, or pre/post-population
     form_rule_schema=None,
     json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
-    form_instruction_id=None,
+    form_instruction_id=uuid.UUID("f47ac10b-58cc-4372-a567-0e02b2c3d479"),
     form_type=FormType.KEY_CONTACTS,
     sgg_version="1.0",
     is_deprecated=False,

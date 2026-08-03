@@ -113,11 +113,23 @@ export const ApplyFormMessage = ({
         {t("validationMessage")}
         <ul>
           {uniqueValidationWarnings.map((warning) => {
-            const link = isBudgetForm ? (
-              <a href={`#${warning.field}`}>{warning.message}</a>
-            ) : (
-              <a href={`#${warning.htmlField || ""}`}>
-                {getWarningLinkText(warning)}
+            const targetId = isBudgetForm
+              ? warning.field
+              : warning.htmlField || warning.field;
+            const link = (
+              <a
+                href={`#${targetId}`}
+                onClick={(event) => {
+                  if (!targetId) return;
+                  const targetElement = document.getElementById(targetId);
+                  if (targetElement) {
+                    event.preventDefault();
+                    targetElement.focus();
+                    window.location.hash = `#${targetId}`;
+                  }
+                }}
+              >
+                {isBudgetForm ? warning.message : getWarningLinkText(warning)}
               </a>
             );
             return <li key={getWarningKey(warning)}>{link}</li>;

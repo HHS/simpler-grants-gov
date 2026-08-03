@@ -18,7 +18,10 @@ on:
         type: choice
         options:
           - dev
+          - infra-dev
+          - infra-staging
           - training
+          - infra-training
           - grantee1
           - prod
       version:
