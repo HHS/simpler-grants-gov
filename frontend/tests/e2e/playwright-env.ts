@@ -50,8 +50,8 @@ const webServerEnv: Record<string, string> = Object.fromEntries(
 
 const playwrightEnv = {
   webServerEnv,
-  baseUrl,
-  apiUrl,
+  baseUrl: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000",
+  apiUrl: process.env.PLAYWRIGHT_API_URL || "http://127.0.0.1:8080",
   targetEnv,
   testOrgLabel,
   isCi: process.env.CI,
