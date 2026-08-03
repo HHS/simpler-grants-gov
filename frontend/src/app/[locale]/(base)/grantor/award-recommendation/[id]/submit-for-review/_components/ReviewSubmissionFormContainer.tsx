@@ -14,11 +14,11 @@ import { submitReviewForAwardRecommendation } from "src/app/[locale]/(base)/gran
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { WorkflowState } from "src/types/workflowTypes";
 import { UserPrivilegesResponse } from "src/types/userTypes";
+import Spinner from "src/components/core/Spinner";
 
 interface ReviewSubmissionFormContainerProps {
   awardRecommendationId: string;
   reviewWorkflowId?: string;
-  expectedReviewerType?: string;
 }
 
 // Map workflow states to form types
@@ -41,7 +41,7 @@ const getFormTypeFromWorkflowState = (state: WorkflowState): ReviewFormType => {
 
 export const ReviewSubmissionFormContainer: React.FC<
   ReviewSubmissionFormContainerProps
-> = ({ awardRecommendationId, reviewWorkflowId, expectedReviewerType }) => {
+> = ({ awardRecommendationId, reviewWorkflowId }) => {
   const router = useRouter();
   const t = useTranslations("AwardRecommendation.reviewForm");
   const [formType, setFormType] = useState<ReviewFormType | null>(null);
@@ -70,6 +70,7 @@ export const ReviewSubmissionFormContainer: React.FC<
 
         // Check if user has any review-related privileges
         const hasReviewPrivileges = 
+          allPrivileges.includes("view_award_recommendation") ||
           allPrivileges.includes("fmo_reviewer") ||
           allPrivileges.includes("pqc_reviewer") ||
           allPrivileges.includes("gms_reviewer") ||
@@ -142,7 +143,7 @@ export const ReviewSubmissionFormContainer: React.FC<
     };
 
     determineFormType();
-  }, [reviewWorkflowId, expectedReviewerType, t, clientFetch]);
+  }, [reviewWorkflowId, t, clientFetch]);
 
   const handleSubmit = async (formData: ReviewFormData) => {
     setErrorMessage(null);
@@ -168,7 +169,11 @@ export const ReviewSubmissionFormContainer: React.FC<
   };
 
   if (isLoading) {
-    return <div className="margin-top-4">{t("loading")}</div>;
+    return (
+      <div className="display-flex flex-justify-center padding-y-4">
+        <Spinner className="height-3 width-3" />
+      </div>
+    );
   }
 
   if (errorMessage || !formType) {

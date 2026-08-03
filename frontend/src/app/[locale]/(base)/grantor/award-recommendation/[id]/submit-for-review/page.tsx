@@ -28,15 +28,10 @@ export const dynamic = "force-dynamic";
 
 export type SubmitForReviewPageProps = {
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ reviewerType?: string }>;
 } & WithFeatureFlagProps;
 
-async function SubmitForReviewPageContent({ 
-  params, 
-  searchParams 
-}: SubmitForReviewPageProps) {
+async function SubmitForReviewPageContent({ params }: SubmitForReviewPageProps) {
   const { id: awardRecommendationId } = await params;
-  const { reviewerType } = await searchParams;
   const t = await getTranslations("AwardRecommendation");
 
   let awardRecommendationDetails: AwardRecommendationDetails | null = null;
@@ -72,7 +67,6 @@ async function SubmitForReviewPageContent({
             <ReviewSubmissionFormContainer
               awardRecommendationId={awardRecommendationId}
               reviewWorkflowId={awardRecommendationDetails.review_workflow_id}
-              expectedReviewerType={reviewerType}
             />
           </Grid>
         </Grid>

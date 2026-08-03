@@ -160,12 +160,8 @@ export async function submitAwardRecommendationForReview(
   );
 
   try {
-    // TODO: Replace with workflow API call to determine correct reviewer type based on AR status
-    // For now, defaulting to content_creator - will be replaced when workflow endpoint is ready
-    const reviewerType = "content_creator";
-    
     redirect(
-      `/grantor/award-recommendation/${awardRecommendationId}/submit-for-review?reviewerType=${reviewerType}`,
+      `/grantor/award-recommendation/${awardRecommendationId}/submit-for-review`,
     );
   } catch (e) {
     if (isRedirectError(e)) {
