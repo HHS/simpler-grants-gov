@@ -7,27 +7,37 @@ import {
   CompetitionActionState,
   competitionFormAction,
 } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/actions";
+import { FormType } from "src/types/allFormsResponseTypes";
+import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import React, { useState } from "react";
-import { Alert, Button } from "@trussworks/react-uswds";
+import React, { useRef, useState } from "react";
+import { Alert, Button, ModalRef } from "@trussworks/react-uswds";
+
+import { FormSelectModal } from "./FormSelectModal";
 
 type CompetitionFormProps = {
   opportunityId: string;
   competitionId: string;
+  forms: FormType[];
 };
 
 export function CompetitionForm({
   opportunityId: _opportunityId,
   competitionId: _competitionId,
+  forms,
 }: CompetitionFormProps) {
   const t = useTranslations("OpportunityCompetition");
+
+  const formModalRef = useRef<ModalRef | null>(null);
 
   // Store the server response
   const [formState, setFormState] = useState<CompetitionActionState | null>(
     null,
   );
   const [isPending, setIsPending] = useState(false);
+  const [competitionForms, setCompetitionForms] =
+    useState<CompetitionFormsSubmitApi>([]);
 
   const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -99,6 +109,14 @@ export function CompetitionForm({
                   {isPending ? t("button.processing") : t("button.back")}
                 </Button>
               </div>
+              <FormSelectModal
+                competitionForms={competitionForms}
+                forms={forms}
+                formModalRef={formModalRef}
+                submitCompetitionForms={(forms: CompetitionFormsSubmitApi) => {
+                  setCompetitionForms(forms);
+                }}
+              />
               <Button type="submit" data-submit-type="saveAndContinue">
                 {isPending
                   ? t("button.processing")
