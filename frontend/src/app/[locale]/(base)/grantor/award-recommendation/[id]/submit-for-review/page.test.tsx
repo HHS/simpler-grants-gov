@@ -59,6 +59,29 @@ jest.mock("src/components/core/fileInput/SimplerFileInput", () => ({
   SimplerFileInput: () => <div data-testid="file-input">File Input</div>,
 }));
 
+jest.mock("src/components/core/Spinner", () => ({
+  __esModule: true,
+  default: () => <div data-testid="spinner">Loading</div>,
+}));
+
+jest.mock(
+  "src/components/award-recommendation/AwardRecommendationHero",
+  () => ({
+    __esModule: true,
+    default: ({ heading }: { heading: string }) => (
+      <div data-testid="hero">
+        <h1>{heading}</h1>
+      </div>
+    ),
+  }),
+);
+
+jest.mock("./_components/ReviewSubmissionFormContainer", () => ({
+  ReviewSubmissionFormContainer: () => (
+    <div data-testid="form-container">Form Container</div>
+  ),
+}));
+
 jest.mock(
   "src/app/[locale]/(base)/grantor/award-recommendation/[id]/submit-for-review/actions",
   () => ({
@@ -79,31 +102,36 @@ describe("SubmitForReviewPage", () => {
       mockAwardRecommendationDetails,
     );
 
-    // Mock privileges API response
-    mockClientFetch.mockResolvedValueOnce({
-      data: {
-        user_id: "user-123",
-        agency_users: [
-          {
-            agency: { agency_id: "agency-1" },
-            agency_user_roles: [
+    // Mock API responses - use mockImplementation to handle multiple calls
+    mockClientFetch.mockImplementation((url: string) => {
+      if (url.includes("/api/user/privileges")) {
+        return Promise.resolve({
+          data: {
+            user_id: "user-123",
+            agency_users: [
               {
-                role_id: "role-1",
-                role_name: "Test Role",
-                privileges: ["update_award_recommendation"],
+                agency: { agency_id: "agency-1" },
+                agency_user_roles: [
+                  {
+                    role_id: "role-1",
+                    role_name: "Test Role",
+                    privileges: ["update_award_recommendation"],
+                  },
+                ],
               },
             ],
           },
-        ],
-      },
-    });
-
-    // Mock workflow API response
-    mockClientFetch.mockResolvedValueOnce({
-      data: {
-        workflow_id: "workflow-123",
-        current_workflow_state: "start",
-      },
+        });
+      }
+      if (url.includes("/api/workflows/")) {
+        return Promise.resolve({
+          data: {
+            workflow_id: "workflow-123",
+            current_workflow_state: "start",
+          },
+        });
+      }
+      return Promise.resolve({ data: {} });
     });
   });
 
@@ -114,10 +142,8 @@ describe("SubmitForReviewPage", () => {
     });
     render(page);
 
-    // Check that the page renders with heading
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "reviewForm.header",
-    );
+    // Check for the heading text using findByText (async)
+    expect(await screen.findByText("reviewForm.header")).toBeInTheDocument();
   });
 
   it("fetches award recommendation details with correct id", async () => {
