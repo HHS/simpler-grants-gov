@@ -107,6 +107,47 @@ def test_write_debug_data_to_s3(
     )
 
 
+def test_write_debug_data_to_s3_does_not_write_get_application_zip_response(
+    app,
+    db_session,
+    enable_factory_create,
+    monkeypatch,
+    mock_s3_bucket,
+    s3_config,
+) -> None:
+    test_uuid = uuid.uuid4()
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
+    soap_legacy_response = SOAPResponse(
+        data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={"xyz": "abc"}
+    )
+    soap_request = create_soap_request(SOAP_PAYLOAD, operation_name="GetApplicationZipRequest")
+    with app.test_request_context("/"):
+        flask.g.internal_request_id = test_uuid
+        write_debug_data_to_s3(soap_request, soap_legacy_response)
+    request_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/request.txt"
+    )
+    response_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/response.txt"
+    )
+    response_headers_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/response_headers.txt"
+    )
+    request_headers_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/request_headers.txt"
+    )
+    assert request_contents.replace("\n", "") == SOAP_PAYLOAD.decode().replace("\n", "")
+    assert response_contents.replace("\r", "") == "GetApplicationZip response not currently logged"
+    assert response_headers_contents.replace("\r", "") == json.dumps({"xyz": "abc"})
+    assert request_headers_contents.replace("\r", "") == json.dumps(
+        {
+            "X-Gg-S2S-Uri": "https://google.com/xyz",
+            "Soapaction": f"{GRANTOR_SOAP_ACTION_PATH}/GetApplicationZip",
+        }
+    )
+
+
 def test_write_debug_data_to_s3_handles_a_null_soap_request(
     app,
     caplog,

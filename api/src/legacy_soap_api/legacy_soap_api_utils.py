@@ -590,11 +590,18 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
                 base_path,
                 "response.txt",
             )
-            file_util.write_to_file(
-                response_s3_path,
-                soap_response.to_bytes().decode("utf-8"),
-                content_type=text_content_type,
-            )
+            if soap_request and soap_request.operation_name == "GetApplicationZipRequest":
+                file_util.write_to_file(
+                    response_s3_path,
+                    "GetApplicationZip response not currently logged",
+                    content_type=text_content_type,
+                )
+            else:
+                file_util.write_to_file(
+                    response_s3_path,
+                    soap_response.to_bytes().decode("utf-8"),
+                    content_type=text_content_type,
+                )
             response_headers_s3_path = file_util.join(
                 base_path,
                 "response_headers.txt",
