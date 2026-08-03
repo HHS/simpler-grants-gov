@@ -12,12 +12,7 @@ import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import React, { useRef, useState } from "react";
-import {
-  Alert,
-  Button,
-  ModalRef,
-  ModalToggleButton,
-} from "@trussworks/react-uswds";
+import { Alert, Button, ModalRef } from "@trussworks/react-uswds";
 
 import { FormSelectModal } from "./FormSelectModal";
 
@@ -114,14 +109,6 @@ export function CompetitionForm({
                   {isPending ? t("button.processing") : t("button.back")}
                 </Button>
               </div>
-              <ModalToggleButton
-                modalRef={formModalRef}
-                opener
-                className="margin-y-2 usa-button usa-button--secondary usa-button--big"
-                type="button"
-              >
-                Open Modal Test
-              </ModalToggleButton>
               <FormSelectModal
                 competitionForms={competitionForms}
                 forms={forms}
