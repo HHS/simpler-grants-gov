@@ -44,7 +44,7 @@ def validate_award_recommendation_ready_for_review(
             ],
         )
 
-    if award_recommendation.review_workflow_id is not None:
+    if award_recommendation.review_workflow is not None:
         message = "Award recommendation review process has already been started"
 
         raise_flask_error(
@@ -54,7 +54,6 @@ def validate_award_recommendation_ready_for_review(
                 ValidationErrorDetail(
                     type=(ValidationErrorType.AWARD_RECOMMENDATION_REVIEW_ALREADY_STARTED),
                     message=message,
-                    field="review_workflow_id",
                 )
             ],
         )

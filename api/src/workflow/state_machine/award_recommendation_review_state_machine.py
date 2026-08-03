@@ -138,10 +138,7 @@ class AwardRecommendationReviewStateMachine(BaseStateMachine):
     start_workflow = Event(
         states.START.to(
             states.PENDING_PQC_REVIEW,
-            on=[
-                "assign_review_workflow",
-                "set_status_submitted",
-            ],
+            on="set_status_submitted",
         ),
     )
 
@@ -326,13 +323,6 @@ class AwardRecommendationReviewStateMachine(BaseStateMachine):
     ):
         super().__init__(model=model, **kwargs)
         self.award_recommendation = model.award_recommendation
-
-    #############################
-    # Award recommendation workflow handlers
-    #############################
-
-    def assign_review_workflow(self, **kwargs: Any) -> None:
-        self.award_recommendation.review_workflow_id = self.workflow.workflow_id
 
     #############################
     # Award recommendation status handlers

@@ -71,12 +71,21 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
 
     is_deleted: Mapped[bool] = mapped_column(default=False)
 
-    review_workflow_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID, ForeignKey("api.workflow.workflow_id")
-    )
     review_workflow: Mapped[Workflow | None] = relationship(
-        "Workflow", foreign_keys=[review_workflow_id]
+        "Workflow",
+        back_populates="award_recommendation",
+        uselist=False,
+        lazy="joined",
+        cascade="all, delete-orphan",
+        single_parent=True,
     )
+
+    @property
+    def review_workflow_id(self) -> uuid.UUID | None:
+        if self.review_workflow is None:
+            return None
+
+        return self.review_workflow.workflow_id
 
     award_recommendation_application_submissions: Mapped[
         list[AwardRecommendationApplicationSubmission]

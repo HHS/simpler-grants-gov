@@ -13,6 +13,8 @@ from tests.src.db.models.factories import (
     WorkflowFactory,
 )
 
+API_URL = "/alpha/award-recommendations"
+
 
 @pytest.fixture
 def award_recommendation_auth_data(
@@ -29,9 +31,6 @@ def award_recommendation_auth_data(
     )
 
     return user, agency, token, api_key_id
-
-
-API_URL = "/alpha/award-recommendations"
 
 
 @pytest.fixture
@@ -51,15 +50,13 @@ def existing_award_recommendation(
 
     award_recommendation = AwardRecommendationFactory.create(
         opportunity=opportunity,
+        award_recommendation_status=AwardRecommendationStatus.DRAFT,
     )
 
-    award_recommendation.award_recommendation_status = AwardRecommendationStatus.DRAFT
-    award_recommendation.review_workflow_id = None
-
-    db_session.commit()
     db_session.refresh(award_recommendation)
 
     assert award_recommendation.award_recommendation_status == AwardRecommendationStatus.DRAFT
+    assert award_recommendation.review_workflow is None
     assert award_recommendation.review_workflow_id is None
 
     return award_recommendation
@@ -87,9 +84,9 @@ def test_award_recommendation_start_review_success(
         },
     )
 
-    assert response.status_code == 200
-
     response_json = response.get_json()
+
+    assert response.status_code == 200, response_json
     assert response_json["message"] == "Success"
 
     # The workflow has only been queued, so the response should still show
@@ -111,6 +108,7 @@ def test_award_recommendation_start_review_success(
         existing_award_recommendation.award_recommendation_status
         == AwardRecommendationStatus.SUBMITTED
     )
+    assert existing_award_recommendation.review_workflow is not None
     assert existing_award_recommendation.review_workflow_id is not None
 
     # Verify the Award Recommendation Review workflow was created.
@@ -124,7 +122,8 @@ def test_award_recommendation_start_review_success(
     assert workflow is not None
     assert workflow.workflow_type == WorkflowType.AWARD_RECOMMENDATION_REVIEW
     assert workflow.award_recommendation_id == existing_award_recommendation.award_recommendation_id
-    assert workflow.workflow_id == existing_award_recommendation.review_workflow_id
+    assert existing_award_recommendation.review_workflow == workflow
+    assert existing_award_recommendation.review_workflow_id == workflow.workflow_id
 
 
 def test_award_recommendation_start_review_without_internal_comment(
@@ -148,9 +147,9 @@ def test_award_recommendation_start_review_without_internal_comment(
         },
     )
 
-    assert response.status_code == 200
-
     response_json = response.get_json()
+
+    assert response.status_code == 200, response_json
     assert response_json["message"] == "Success"
 
     with app.app_context():
@@ -165,6 +164,7 @@ def test_award_recommendation_start_review_without_internal_comment(
         existing_award_recommendation.award_recommendation_status
         == AwardRecommendationStatus.SUBMITTED
     )
+    assert existing_award_recommendation.review_workflow is not None
     assert existing_award_recommendation.review_workflow_id is not None
 
 
@@ -210,7 +210,6 @@ def test_award_recommendation_start_review_not_draft(
     award_recommendation = AwardRecommendationFactory.create(
         opportunity=opportunity,
         award_recommendation_status=AwardRecommendationStatus.SUBMITTED,
-        review_workflow_id=None,
     )
 
     response = client.post(
@@ -221,9 +220,9 @@ def test_award_recommendation_start_review_not_draft(
         },
     )
 
-    assert response.status_code == 422
-
     response_json = response.get_json()
+
+    assert response.status_code == 422, response_json
     assert response_json["message"] == "Award recommendation is not in Draft status"
 
 
@@ -245,7 +244,6 @@ def test_award_recommendation_start_review_already_started(
     award_recommendation = AwardRecommendationFactory.create(
         opportunity=opportunity,
         award_recommendation_status=AwardRecommendationStatus.DRAFT,
-        review_workflow_id=None,
     )
 
     workflow = WorkflowFactory.create(
@@ -254,8 +252,10 @@ def test_award_recommendation_start_review_already_started(
         opportunity=None,
     )
 
-    award_recommendation.review_workflow_id = workflow.workflow_id
-    db_session.commit()
+    db_session.refresh(award_recommendation)
+
+    assert award_recommendation.review_workflow == workflow
+    assert award_recommendation.review_workflow_id == workflow.workflow_id
 
     response = client.post(
         (f"{API_URL}/" f"{award_recommendation.award_recommendation_id}" "/start-review"),
@@ -279,7 +279,7 @@ def test_award_recommendation_start_review_no_permission(
     enable_factory_create,
 ):
     """Test starting review without submit permission."""
-    user, agency, token, _ = create_user_in_agency_with_jwt_and_api_key(
+    _, agency, token, _ = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
         privileges=[
             Privilege.VIEW_AWARD_RECOMMENDATION,
@@ -295,7 +295,6 @@ def test_award_recommendation_start_review_no_permission(
     award_recommendation = AwardRecommendationFactory.create(
         opportunity=opportunity,
         award_recommendation_status=AwardRecommendationStatus.DRAFT,
-        review_workflow_id=None,
     )
 
     response = client.post(
@@ -306,9 +305,9 @@ def test_award_recommendation_start_review_no_permission(
         },
     )
 
-    assert response.status_code == 403
-
     response_json = response.get_json()
+
+    assert response.status_code == 403, response_json
     assert response_json["message"] == "Forbidden"
 
 
@@ -338,7 +337,6 @@ def test_award_recommendation_start_review_different_agency(
     award_recommendation = AwardRecommendationFactory.create(
         opportunity=opportunity,
         award_recommendation_status=AwardRecommendationStatus.DRAFT,
-        review_workflow_id=None,
     )
 
     response = client.post(
@@ -349,9 +347,9 @@ def test_award_recommendation_start_review_different_agency(
         },
     )
 
-    assert response.status_code == 403
-
     response_json = response.get_json()
+
+    assert response.status_code == 403, response_json
     assert response_json["message"] == "Forbidden"
 
 
@@ -372,9 +370,9 @@ def test_award_recommendation_start_review_not_found(
         },
     )
 
-    assert response.status_code == 404
-
     response_json = response.get_json()
+
+    assert response.status_code == 404, response_json
     assert response_json["message"] == (
         "Could not find Award Recommendation with ID " f"{award_recommendation_id}"
     )

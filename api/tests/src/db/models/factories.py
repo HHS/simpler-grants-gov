@@ -994,8 +994,6 @@ class AwardRecommendationFactory(BaseFactory):
     other_key_information = sometimes_none(factory.Faker("paragraph"))
 
     is_deleted = False
-    review_workflow = factory.SubFactory("tests.src.db.models.factories.WorkflowFactory")
-    review_workflow_id = factory.LazyAttribute(lambda s: s.review_workflow.workflow_id)
 
 
 class AwardRecommendationAttachmentFactory(BaseFactory):
@@ -3387,44 +3385,68 @@ class WorkflowFactory(BaseFactory):
         model = workflow_models.Workflow
 
     workflow_id = Generators.UuidObj
-    workflow_type = factory.fuzzy.FuzzyChoice(WorkflowType)
+    workflow_type = WorkflowType.BASIC_TEST_WORKFLOW
     current_workflow_state = "start"
     is_active = True
 
-    # By default, we'll associate a workflow with an opportunity
-    # Use the params below to change this, or pass in your own.
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(
-        lambda e: e.opportunity.opportunity_id if e.opportunity is not None else None
-    )
+    opportunity = None
+    application = None
+    application_submission = None
+    award_recommendation = None
 
-    class Params:
-        has_opportunity = factory.Trait(
-            opportunity=factory.SubFactory(OpportunityFactory),
-            opportunity_id=factory.LazyAttribute(lambda e: e.opportunity.opportunity_id),
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        workflow_type = kwargs.get(
+            "workflow_type",
+            WorkflowType.BASIC_TEST_WORKFLOW,
         )
 
-        has_application = factory.Trait(
-            application=factory.SubFactory(ApplicationFactory),
-            application_id=factory.LazyAttribute(lambda e: e.application.application_id),
-            opportunity=None,
-        )
+        entity_fields = {
+            "opportunity": "opportunity_id",
+            "application": "application_id",
+            "application_submission": "application_submission_id",
+            "award_recommendation": "award_recommendation_id",
+        }
 
-        has_application_submission = factory.Trait(
-            application_submission=factory.SubFactory(ApplicationSubmissionFactory),
-            application_submission_id=factory.LazyAttribute(
-                lambda e: e.application_submission.application_submission_id
-            ),
-            opportunity=None,
-        )
+        supplied_entities = [
+            relationship_name
+            for relationship_name, id_name in entity_fields.items()
+            if (kwargs.get(relationship_name) is not None or kwargs.get(id_name) is not None)
+        ]
 
-        has_award_recommendation = factory.Trait(
-            award_recommendation=factory.SubFactory(AwardRecommendationFactory),
-            award_recommendation_id=factory.LazyAttribute(
-                lambda e: e.award_recommendation.award_recommendation_id
-            ),
-            opportunity=None,
-        )
+        if len(supplied_entities) > 1:
+            raise ValueError(
+                "WorkflowFactory requires exactly one workflow entity; "
+                f"received: {', '.join(supplied_entities)}"
+            )
+
+        if len(supplied_entities) > 1:
+            raise ValueError(
+                "WorkflowFactory requires exactly one workflow entity; "
+                f"received: {', '.join(supplied_entities)}"
+            )
+
+        if not supplied_entities:
+            if workflow_type in {
+                WorkflowType.BASIC_TEST_WORKFLOW,
+                WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,
+                WorkflowType.INITIAL_PROTOTYPE,
+                WorkflowType.OPPORTUNITY_PUBLISH,
+            }:
+                kwargs["opportunity"] = OpportunityFactory.create()
+
+            elif workflow_type == WorkflowType.AWARD_RECOMMENDATION_REVIEW:
+                kwargs["award_recommendation"] = AwardRecommendationFactory.create()
+
+            else:
+                raise ValueError(
+                    "WorkflowFactory does not know which entity belongs to "
+                    f"workflow type {workflow_type}. Pass opportunity, "
+                    "application, application_submission, or "
+                    "award_recommendation explicitly."
+                )
+
+        return super()._create(model_class, *args, **kwargs)
 
 
 class WorkflowEventHistoryFactory(BaseFactory):

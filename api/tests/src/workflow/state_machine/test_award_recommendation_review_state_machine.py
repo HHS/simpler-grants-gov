@@ -30,8 +30,6 @@ def award_recommendation(opportunity):
         opportunity=opportunity,
         award_recommendation_status=AwardRecommendationStatus.DRAFT,
         is_deleted=False,
-        review_workflow=None,
-        review_workflow_id=None,
     )
 
 
@@ -347,7 +345,6 @@ def test_award_recommendation_review_requires_modification(
     award_recommendation.status = AwardRecommendationStatus.IN_REVIEW
 
     workflow = WorkflowFactory.create(
-        has_award_recommendation=True,
         workflow_type=WorkflowType.AWARD_RECOMMENDATION_REVIEW,
         current_workflow_state=starting_state,
         award_recommendation=award_recommendation,
@@ -394,7 +391,6 @@ def test_award_recommendation_review_revision_loop(
     award_recommendation.status = AwardRecommendationStatus.IN_REVIEW
 
     workflow = WorkflowFactory.create(
-        has_award_recommendation=True,
         workflow_type=WorkflowType.AWARD_RECOMMENDATION_REVIEW,
         current_workflow_state=AwardRecommendationReviewState.PENDING_GMS_REVIEW,
         award_recommendation=award_recommendation,
@@ -483,7 +479,6 @@ def test_award_recommendation_review_invalid_events(
     user = UserFactory.create()
 
     workflow = WorkflowFactory.create(
-        has_award_recommendation=True,
         workflow_type=WorkflowType.AWARD_RECOMMENDATION_REVIEW,
         current_workflow_state=AwardRecommendationReviewState.START,
         award_recommendation=award_recommendation,
@@ -568,7 +563,6 @@ def test_award_recommendation_review_state_privileges(
     disallowed_user = request.getfixturevalue(disallowed_user_fixture)
 
     workflow = WorkflowFactory.create(
-        has_award_recommendation=True,
         workflow_type=WorkflowType.AWARD_RECOMMENDATION_REVIEW,
         award_recommendation=award_recommendation,
     )
@@ -610,7 +604,6 @@ def test_award_recommendation_non_approval_events_not_in_approval_mapping(
     """
 
     workflow = WorkflowFactory.create(
-        has_award_recommendation=True,
         workflow_type=WorkflowType.AWARD_RECOMMENDATION_REVIEW,
         award_recommendation=award_recommendation,
     )

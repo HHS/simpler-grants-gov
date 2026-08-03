@@ -45,8 +45,6 @@ def award_recommendation(opportunity):
         additional_info="Some additional info",
         other_key_information="Some key info",
         is_deleted=False,
-        review_workflow=None,
-        review_workflow_id=None,
     )
 
 
@@ -79,7 +77,6 @@ class TestGetAwardRecommendation200:
         assert data["selection_method_detail"] == "Top ranked applicants"
         assert data["additional_info"] == "Some additional info"
         assert data["other_key_information"] == "Some key info"
-        assert data["review_workflow_id"] is None
 
     def test_get_award_recommendation_includes_opportunity_200(
         self, client, db_session, agency, opportunity, award_recommendation
@@ -188,8 +185,6 @@ class TestGetAwardRecommendation200:
             selection_method_detail=None,
             additional_info=None,
             other_key_information=None,
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         user, _, token = create_user_in_agency_with_jwt(
@@ -208,7 +203,6 @@ class TestGetAwardRecommendation200:
         assert data["selection_method_detail"] is None
         assert data["additional_info"] is None
         assert data["other_key_information"] is None
-        assert data["review_workflow_id"] is None
 
 
 ####################################
@@ -240,8 +234,6 @@ class TestGetAwardRecommendation404:
         ar = AwardRecommendationFactory.create(
             opportunity=opportunity,
             is_deleted=True,
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         user, _, token = create_user_in_agency_with_jwt(
