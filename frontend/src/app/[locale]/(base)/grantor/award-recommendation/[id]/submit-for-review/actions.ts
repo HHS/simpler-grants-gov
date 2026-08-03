@@ -7,7 +7,8 @@ export type ReviewActionResponse = {
   errorMessage?: string;
 };
 
-export function submitReviewForAwardRecommendation(
+// eslint-disable-next-line @typescript-eslint/require-await
+export async function submitReviewForAwardRecommendation(
   awardRecommendationId: string,
   formData: ReviewFormData,
 ): Promise<ReviewActionResponse> {

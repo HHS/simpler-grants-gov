@@ -3,12 +3,10 @@ import { identity } from "lodash";
 import {
   saveAwardRecommendation,
   saveAwardRecommendationSubmissionDetails,
-  submitAwardRecommendationForReview,
 } from "./actions";
 
 const mockUpdateAwardRecommendationSubmissionDetails = jest.fn();
 const mockUpdateAwardRecommendation = jest.fn();
-const mockRedirect = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
   updateAwardRecommendationSubmissionDetails: (
@@ -17,13 +15,6 @@ jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
     mockUpdateAwardRecommendationSubmissionDetails(...args) as Promise<unknown>,
   updateAwardRecommendation: (...args: unknown[]): Promise<unknown> =>
     mockUpdateAwardRecommendation(...args) as Promise<unknown>,
-}));
-
-jest.mock("next/navigation", () => ({
-  redirect: (...args: unknown[]) => {
-    mockRedirect(...args);
-    throw new Error("NEXT_REDIRECT");
-  },
 }));
 
 jest.mock("next-intl/server", () => ({
@@ -72,15 +63,6 @@ describe("Award Recommendation Actions", () => {
 
       expect(result.success).toBeUndefined();
       expect(result.errorMessage).toBe("Boom");
-    });
-  });
-
-  describe("submitAwardRecommendationForReview", () => {
-    it("returns success", async () => {
-      const result = await submitAwardRecommendationForReview(new FormData());
-
-      expect(result.success).toBe(true);
-      expect(result.errorMessage).toBeUndefined();
     });
   });
 

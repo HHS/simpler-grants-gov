@@ -20,7 +20,6 @@ import { RecommendationSection } from "src/components/award-recommendation/Recom
 import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
 import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
-import { submitAwardRecommendationForReview } from "./actions";
 
 export async function generateMetadata({
   params,
@@ -124,9 +123,9 @@ async function AwardRecommendationPageContent({
       outline: true,
     },
     {
-      type: "action",
+      type: "navigation",
       label: t("heroButtons.submitForReview"),
-      formAction: submitAwardRecommendationForReview,
+      href: `/grantor/award-recommendation/${awardRecommendationId}/submit-for-review`,
     },
   ];
 

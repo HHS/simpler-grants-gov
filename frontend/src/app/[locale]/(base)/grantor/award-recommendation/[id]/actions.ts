@@ -151,27 +151,3 @@ export async function saveAwardRecommendationSubmissionDetails(
     throw error;
   }
 }
-
-export function submitAwardRecommendationForReview(
-  formData: FormData,
-): void {
-  const awardRecommendationId = readStringValue(
-    formData.get("award_recommendation_id"),
-  );
-
-  try {
-    redirect(
-      `/grantor/award-recommendation/${awardRecommendationId}/submit-for-review`,
-    );
-  } catch (e) {
-    if (isRedirectError(e)) {
-      throw e;
-    }
-
-    const error = e as Error;
-    console.error(
-      `Error navigating to submit review page - ${error.message} ${error.cause?.toString() || ""}`,
-    );
-    throw error;
-  }
-}
