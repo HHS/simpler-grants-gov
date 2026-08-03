@@ -148,6 +148,8 @@ def contact_person_group():
 
 @pytest.fixture
 def valid_json_v3_0(contact_person_group):
+    # Minimal valid response. contact_person is always required regardless of the
+    # same_as_project_director checkbox value — the user always fills in Section 8 directly.
     return {
         "agency_name": "Department of Research",
         "funding_opportunity_number": "ABC-123",
@@ -404,7 +406,7 @@ def test_sf424_short_v3_0_empty_json(sf424_short_v3_0):
         "$.project_start_date",
         "$.project_end_date",
         "$.project_director",
-        "$.contact_person",
+        "$.contact_person",  # always required
         "$.application_certification",
         "$.authorized_representative",
         "$.authorized_representative_title",
@@ -518,7 +520,8 @@ def test_sf424_short_v3_0_conditionally_required_fields(
         assert validation_issue.field in required_fields
 
 
-def test_sf424_short_v3_0_contact_person_is_always_required(sf424_short_v3_0, valid_json_v3_0):
+def test_sf424_short_v3_0_contact_person_always_required(sf424_short_v3_0, valid_json_v3_0):
+    """contact_person is always required regardless of the same_as_project_director flag."""
     data = valid_json_v3_0
     del data["contact_person"]
 
@@ -526,18 +529,6 @@ def test_sf424_short_v3_0_contact_person_is_always_required(sf424_short_v3_0, va
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "required"
     assert validation_issues[0].field == "$.contact_person"
-
-
-def test_sf424_short_v3_0_same_as_project_director_does_not_change_contact_validation(
-    sf424_short_v3_0, valid_json_v3_0, contact_person_group
-):
-    data = valid_json_v3_0 | {
-        "same_as_project_director": True,
-        "contact_person": contact_person_group,
-    }
-
-    validation_issues = validate_json_schema_for_form(data, sf424_short_v3_0)
-    assert validation_issues == []
 
 
 @pytest.mark.parametrize(

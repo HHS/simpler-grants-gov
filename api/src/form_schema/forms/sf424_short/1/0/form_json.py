@@ -503,15 +503,16 @@ FORM_XML_TRANSFORM_RULES = {
     "_xml_config": {
         "description": "XML transformation rules for converting Simpler SF-424 Short JSON to Grants.gov XML format",
         # NOTE: the top-level applicant Address element is in the form namespace per the XSD,
-        # while the Name/Address groups inside ProjectDirectorGroup/ContactPersonGroup are in the
-        # globLib namespace. The XML transformer currently keys namespaces by element name, so
-        # the shared "Address"/"Street1"/... names resolve to a single namespace. Full XSD-valid
-        # output (and its validation test) is handled with the SF-424 Short XML generation work.
+        # while the Address groups inside ProjectDirectorGroup/ContactPersonGroup are in globLib.
+        # The applicant Address uses "namespace": "default" to force the form namespace and
+        # prevent the globLib namespace from the contact person groups from bleeding onto it.
         "version": "1.0",
         "form_name": "SF424_Short_3_0",
         "namespaces": {
             "default": "http://apply.grants.gov/forms/SF424_Short_3_0-V3.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
         "xml_structure": {"root_element": "SF424_Short_3_0", "version": "3.0"},
@@ -531,7 +532,10 @@ FORM_XML_TRANSFORM_RULES = {
     # Applicant information
     "organization_name": {"xml_transform": {"target": "OrganizationName"}},
     "applicant": {
-        "xml_transform": {"target": "Address", "type": "nested_object"},
+        # "namespace": "default" forces the Address element into the form's default namespace
+        # (SF424_Short_3_0), preventing the globLib namespace used by the contact person group's
+        # nested Address elements from bleeding onto this top-level element.
+        "xml_transform": {"target": "Address", "namespace": "default", "type": "nested_object"},
         "street1": {"xml_transform": {"target": "Street1", "namespace": "globLib"}},
         "street2": {"xml_transform": {"target": "Street2", "namespace": "globLib"}},
         "city": {"xml_transform": {"target": "City", "namespace": "globLib"}},

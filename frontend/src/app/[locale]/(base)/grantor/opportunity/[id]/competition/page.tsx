@@ -5,6 +5,7 @@ import {
   parseErrorStatus,
 } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getForms } from "src/services/fetch/fetchers/allFormsFetcher";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 
 import { useTranslations } from "next-intl";
@@ -39,6 +40,7 @@ const ButtonSaveAndExit = () => {
 
 async function OpportunityCompetitionPage({ params }: PageProps) {
   const { id, locale } = await params;
+  const forms = await getForms();
   const t = await getTranslations({
     locale,
     namespace: "OpportunityCompetition",
@@ -110,7 +112,11 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
           <LeftHandFormNav title={t("leftNavTitle")} fields={navigationItems} />
 
           <section className="order-2 width-full maxw-tablet-xl padding-top-4">
-            <CompetitionForm opportunityId={id} competitionId={competitionId} />
+            <CompetitionForm
+              opportunityId={id}
+              competitionId={competitionId}
+              forms={forms.data}
+            />
           </section>
         </div>
       </div>
