@@ -171,7 +171,7 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
   };
 
   const postUploadAction = (fileId: string, _signal: AbortSignal) => {
-    return { id: fileId, fileName: fileId, updatedAt: new Date().toISOString() };
+    return Promise.resolve({ id: fileId, fileName: fileId, updatedAt: new Date().toISOString() });
   };
 
   const handleDelete = (fileId: string) => {

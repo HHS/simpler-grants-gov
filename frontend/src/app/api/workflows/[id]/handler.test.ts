@@ -1,7 +1,7 @@
 import * as sessionModule from "src/services/auth/session";
 import * as workflowFetcherModule from "src/services/fetch/fetchers/workflowFetcher";
 import { NotFoundError } from "src/errors";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { GET } from "./handler";
 
@@ -55,7 +55,7 @@ describe("GET /api/workflows/[id]", () => {
       workflowFetcherModule.getWorkflowDetails as jest.Mock
     ).mockResolvedValue(mockWorkflowDetails);
 
-    const req = {} as any;
+    const req = {} as NextRequest;
     const params = Promise.resolve({ id: "workflow-123" });
     const res = await GET(req, { params });
     const json = (await res.json()) as { data: typeof mockWorkflowDetails };
@@ -71,7 +71,7 @@ describe("GET /api/workflows/[id]", () => {
   it("returns 400 when workflow ID is missing", async () => {
     (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
 
-    const req = {} as any;
+    const req = {} as NextRequest;
     const params = Promise.resolve({ id: "" });
     const res = await GET(req, { params });
     const json = (await res.json()) as { error: string };
@@ -84,7 +84,7 @@ describe("GET /api/workflows/[id]", () => {
   it("returns 401 when user is not authenticated", async () => {
     (sessionModule.getSession as jest.Mock).mockResolvedValue(null);
 
-    const req = {} as any;
+    const req = {} as NextRequest;
     const params = Promise.resolve({ id: "workflow-123" });
     const res = await GET(req, { params });
     const json = (await res.json()) as { error: string };
@@ -104,7 +104,7 @@ describe("GET /api/workflows/[id]", () => {
       new NotFoundError("Workflow not found"),
     );
 
-    const req = {} as any;
+    const req = {} as NextRequest;
     const params = Promise.resolve({ id: "nonexistent-workflow" });
     const res = await GET(req, { params });
     const json = (await res.json()) as { error: string };
@@ -129,7 +129,7 @@ describe("GET /api/workflows/[id]", () => {
       new Error("Database error"),
     );
 
-    const req = {} as any;
+    const req = {} as NextRequest;
     const params = Promise.resolve({ id: "workflow-123" });
     const res = await GET(req, { params });
     const json = (await res.json()) as { error: string };
