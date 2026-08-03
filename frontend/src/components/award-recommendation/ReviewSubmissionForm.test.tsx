@@ -137,7 +137,7 @@ describe("ReviewSubmissionForm", () => {
       const submitButton = screen.getByRole("button", {
         name: "buttons.submit",
       });
-      expect(submitButton).not.toBeDisabled();
+      expect(submitButton).toBeEnabled();
     });
   });
 
@@ -382,11 +382,10 @@ describe("ReviewSubmissionForm", () => {
     });
 
     it("applies custom styling to attestation box", () => {
-      const { container } = render(<ReviewSubmissionForm {...defaultProps} />);
+      render(<ReviewSubmissionForm {...defaultProps} />);
 
-      const attestationBox = container.querySelector(
-        ".review-attestation-box",
-      );
+      const attestationText = screen.getByText("attestation.reviewer");
+      const attestationBox = attestationText.closest(".review-attestation-box");
       expect(attestationBox).toBeInTheDocument();
       expect(attestationBox).toHaveClass("bg-base-lightest");
     });

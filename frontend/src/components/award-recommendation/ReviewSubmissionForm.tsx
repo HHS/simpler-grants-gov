@@ -33,7 +33,7 @@ interface ReviewSubmissionFormProps {
 
 export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
   formType,
-  awardRecommendationId,
+  awardRecommendationId: _awardRecommendationId,
   onSubmit,
   onCancel,
 }) => {
@@ -170,11 +170,11 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
     );
   };
 
-  const postUploadAction = async (fileId: string, signal: AbortSignal) => {
+  const postUploadAction = (fileId: string, _signal: AbortSignal) => {
     return { id: fileId, fileName: fileId, updatedAt: new Date().toISOString() };
   };
 
-  const handleDelete = async (fileId: string) => {
+  const handleDelete = (fileId: string) => {
     setUploadedFiles(uploadedFiles.filter((file) => file.id !== fileId));
   };
 
@@ -189,7 +189,7 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
       : t("attestation.reviewer");
 
   return (
-    <form onSubmit={handleSubmit} className="usa-form maxw-full">
+    <form onSubmit={(e) => void handleSubmit(e)} className="usa-form maxw-full">
       {renderDecisionSection()}
 
       <FormGroup>

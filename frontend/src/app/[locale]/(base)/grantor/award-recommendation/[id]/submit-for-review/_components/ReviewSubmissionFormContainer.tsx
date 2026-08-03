@@ -142,7 +142,7 @@ export const ReviewSubmissionFormContainer: React.FC<
       }
     };
 
-    determineFormType();
+    void determineFormType();
   }, [reviewWorkflowId, t, clientFetch]);
 
   const handleSubmit = async (formData: ReviewFormData) => {

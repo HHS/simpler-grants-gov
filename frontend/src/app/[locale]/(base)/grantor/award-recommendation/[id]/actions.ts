@@ -152,9 +152,9 @@ export async function saveAwardRecommendationSubmissionDetails(
   }
 }
 
-export async function submitAwardRecommendationForReview(
+export function submitAwardRecommendationForReview(
   formData: FormData,
-): Promise<void> {
+): void {
   const awardRecommendationId = readStringValue(
     formData.get("award_recommendation_id"),
   );

@@ -7,7 +7,7 @@ export type ReviewActionResponse = {
   errorMessage?: string;
 };
 
-export async function submitReviewForAwardRecommendation(
+export function submitReviewForAwardRecommendation(
   awardRecommendationId: string,
   formData: ReviewFormData,
 ): Promise<ReviewActionResponse> {
@@ -24,21 +24,21 @@ export async function submitReviewForAwardRecommendation(
       }),
     };
 
-    console.log(
-      `Submitting review for award recommendation ${awardRecommendationId}`,
-      workflowEventMetadata,
-    );
+    // TODO: Call backend API to submit review with workflowEventMetadata
+    // Placeholder implementation - server action will make async API call
+    void awardRecommendationId;
+    void workflowEventMetadata;
 
-    return {
+    return Promise.resolve({
       success: true,
-    };
+    });
   } catch (e) {
     const error = e as Error;
     console.error(
       `Error submitting review for award recommendation - ${error.message} ${error.cause?.toString() || ""}`,
     );
-    return {
+    return Promise.resolve({
       errorMessage: error.message,
-    };
+    });
   }
 }

@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { identity } from "lodash";
 import { useRouter } from "next/navigation";
 import * as useClientFetchModule from "src/hooks/useClientFetch";
+import { submitReviewForAwardRecommendation } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/submit-for-review/actions";
 
 import { ReviewSubmissionFormContainer } from "./ReviewSubmissionFormContainer";
 
@@ -392,10 +393,7 @@ describe("ReviewSubmissionFormContainer", () => {
         clientFetch: mockClientFetch,
       });
       
-      const {
-        submitReviewForAwardRecommendation,
-      } = require("src/app/[locale]/(base)/grantor/award-recommendation/[id]/submit-for-review/actions");
-      submitReviewForAwardRecommendation.mockResolvedValue({ success: true });
+      (submitReviewForAwardRecommendation as jest.Mock).mockResolvedValue({ success: true });
 
       mockClientFetch
         .mockResolvedValueOnce(mockPrivilegesResponse)
@@ -430,10 +428,7 @@ describe("ReviewSubmissionFormContainer", () => {
         clientFetch: mockClientFetch,
       });
       
-      const {
-        submitReviewForAwardRecommendation,
-      } = require("src/app/[locale]/(base)/grantor/award-recommendation/[id]/submit-for-review/actions");
-      submitReviewForAwardRecommendation.mockResolvedValue({
+      (submitReviewForAwardRecommendation as jest.Mock).mockResolvedValue({
         success: false,
         errorMessage: "Submit failed",
       });

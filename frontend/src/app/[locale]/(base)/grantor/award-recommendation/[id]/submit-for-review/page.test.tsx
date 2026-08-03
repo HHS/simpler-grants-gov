@@ -28,8 +28,8 @@ jest.mock("next-intl/server", () => ({
 jest.mock(
   "src/services/fetch/fetchers/awardRecommendationFetcher",
   () => ({
-    getAwardRecommendationDetails: (...args: unknown[]) =>
-      mockGetAwardRecommendationDetails(...args),
+    getAwardRecommendationDetails: (...args: unknown[]): Promise<unknown> =>
+      mockGetAwardRecommendationDetails(...args) as Promise<unknown>,
   }),
 );
 
@@ -237,9 +237,10 @@ describe("SubmitForReviewPage", () => {
       params: mockParams,
       searchParams: mockSearchParams,
     });
-    const { container } = render(page);
+    render(page);
 
-    const gridContainer = container.querySelector(".grid-container");
+    const formContainer = screen.getByTestId("review-form-container");
+    const gridContainer = formContainer.closest(".grid-container");
     expect(gridContainer).toBeInTheDocument();
     expect(gridContainer).toHaveClass("margin-top-4");
   });
@@ -249,9 +250,10 @@ describe("SubmitForReviewPage", () => {
       params: mockParams,
       searchParams: mockSearchParams,
     });
-    const { container } = render(page);
+    render(page);
 
-    const gridCol = container.querySelector('[class*="grid-col"]');
+    const formContainer = screen.getByTestId("review-form-container");
+    const gridCol = formContainer.closest('[class*="grid-col"]');
     expect(gridCol).toBeInTheDocument();
   });
 
@@ -279,8 +281,8 @@ describe("SubmitForReviewPage", () => {
 
   describe("Dynamic Rendering", () => {
     it("forces dynamic rendering", async () => {
-      const module = await import("./page");
-      expect(module.dynamic).toBe("force-dynamic");
+      const { dynamic } = await import("./page");
+      expect(dynamic).toBe("force-dynamic");
     });
   });
 });
