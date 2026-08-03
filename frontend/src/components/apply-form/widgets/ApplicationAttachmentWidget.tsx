@@ -93,7 +93,10 @@ const ApplicationAttachmentWidget = ({
         value={attachment?.application_attachment_id ?? ""}
       />
       {error && (
-        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
+        <FieldErrors
+          fieldName={visibleInputId}
+          rawErrors={rawErrors as string[]}
+        />
       )}
       <SimplerFileInput
         id={visibleInputId}
