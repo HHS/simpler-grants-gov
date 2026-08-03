@@ -127,7 +127,18 @@ function TableCell({
   const inputId = name ?? id;
   return (
     <>
-      {hasError && <FieldErrors fieldName={id} rawErrors={cellErrors} />}
+      {hasError && (
+        <div
+          className="display-block width-full"
+          style={{
+            whiteSpace: "normal",
+            wordBreak: "normal",
+            overflowWrap: "normal",
+          }}
+        >
+          <FieldErrors fieldName={id} rawErrors={cellErrors} />
+        </div>
+      )}
       <input
         aria-label={ariaLabel ?? `Editable table value for ${cell.definition}`}
         className={`usa-input margin-0 width-full overflow-x-auto applyform-table-cell-value${
