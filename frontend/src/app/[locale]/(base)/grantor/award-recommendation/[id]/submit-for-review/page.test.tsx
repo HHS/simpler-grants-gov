@@ -73,16 +73,11 @@ jest.mock(
 jest.mock("./_components/ReviewSubmissionFormContainer", () => ({
   ReviewSubmissionFormContainer: ({
     awardRecommendationId,
-    expectedReviewerType,
   }: {
     awardRecommendationId: string;
-    expectedReviewerType?: string;
   }) => (
     <div data-testid="review-submission-form-container">
       <div data-testid="award-rec-id">{awardRecommendationId}</div>
-      {expectedReviewerType && (
-        <div data-testid="reviewer-type">{expectedReviewerType}</div>
-      )}
     </div>
   ),
 }));
@@ -157,31 +152,6 @@ describe("SubmitForReviewPage", () => {
 
     const awardRecId = screen.getByTestId("award-rec-id");
     expect(awardRecId).toHaveTextContent("test-id-123");
-  });
-
-  it("passes reviewer type from search params to form container", async () => {
-    const searchParamsWithType = Promise.resolve({
-      reviewerType: "fmo_reviewer",
-    });
-
-    const page = await SubmitForReviewPage({
-      params: mockParams,
-      searchParams: searchParamsWithType,
-    });
-    render(page);
-
-    const reviewerType = screen.getByTestId("reviewer-type");
-    expect(reviewerType).toHaveTextContent("fmo_reviewer");
-  });
-
-  it("does not display reviewer type when not provided in search params", async () => {
-    const page = await SubmitForReviewPage({
-      params: mockParams,
-      searchParams: mockSearchParams,
-    });
-    render(page);
-
-    expect(screen.queryByTestId("reviewer-type")).not.toBeInTheDocument();
   });
 
   it("fetches award recommendation details with correct id", async () => {
