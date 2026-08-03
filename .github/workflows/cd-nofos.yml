@@ -21,6 +21,7 @@ on:
           - infra-dev
           - infra-staging
           - training
+          - infra-training
           - grantee1
           - prod
       version:
