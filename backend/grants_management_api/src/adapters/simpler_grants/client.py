@@ -45,13 +45,7 @@ class SimplerResponseException(Exception):
 
 
 class BaseSimplerGrantsClient(abc.ABC, metaclass=abc.ABCMeta):
-    """Base class for Simpler Grants API clients.
-
-    Note: implementation status
-    - SimplerGrantsClient: Done, for Real HTTP client
-    - MockSimplerGrantsClient: Pending, for testing purpose
-      TODO: Create the mock/test client with next ticket, when setting up the routes
-    """
+    """Base class for Simpler Grants API clients."""
 
     @abc.abstractmethod
     def get_opportunity(self, opportunity_id: UUID) -> SimplerOpportunityGetResponse:
@@ -209,7 +203,7 @@ class SimplerGrantsClient(BaseSimplerGrantsClient):
     stop=stop_after_attempt(3),
     # Wait at least 1 second between retries with some random exponential backoff jitter
     wait=wait_fixed(1) + wait_random_exponential(multiplier=1, max=10),
-    # Only retry for timeouts and 5xx errors
+    # Only retry for timeouts and connection errors
     retry=retry_if_exception_type((requests.Timeout, requests.exceptions.ConnectionError)),
     # Raise the actual error, not a retry wrapped error
     reraise=True,

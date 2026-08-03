@@ -1,12 +1,12 @@
-"""Tests for the Simpler Grants API client."""
-
 import uuid
+from datetime import date
 from unittest.mock import patch
 
 import pytest
 import requests
 import requests_mock
 from pydantic import ValidationError
+from tenacity import wait_none
 
 from src.adapters.simpler_grants.client import SimplerGrantsClient, SimplerResponseException
 from src.adapters.simpler_grants.config import SimplerGrantsConfig
@@ -65,7 +65,7 @@ def test_get_opportunity_success(client):
         assert result.data.opportunity_title == "Test Opportunity"
         assert result.data.opportunity_status == SimplerOpportunityStatus.POSTED
         assert result.data.summary is not None
-        assert str(result.data.summary.post_date) == "2024-01-15"
+        assert result.data.summary.post_date == date(2024, 1, 15)
 
 
 def test_get_opportunity_not_found(client):
@@ -166,6 +166,87 @@ def test_get_opportunity_timeout(client):
 
         with pytest.raises(requests.exceptions.Timeout):
             client.get_opportunity(opportunity_id)
+
+
+def test_get_opportunity_retries_on_timeout(client):
+    """Test that the client retries 3 times on timeout before failing."""
+    opportunity_id = uuid.uuid4()
+
+    # Patch the retry decorator to not wait between attempts (makes test fast)
+    with patch("src.adapters.simpler_grants.client._do_request_with_retry.retry.wait", wait_none()):
+        # Mock requests.request to fail twice with timeout, then succeed
+        with patch("src.adapters.simpler_grants.client.requests.request") as mock_request:
+            # Create a successful response for the third attempt
+            mock_response = requests.Response()
+            mock_response.status_code = 200
+            mock_response._content = str.encode(
+                '{"message": "Success", "data": {"opportunity_id": "'
+                + str(opportunity_id)
+                + '", "opportunity_title": "Test", "opportunity_status": "posted", "summary": null}}'
+            )
+
+            # First two calls raise Timeout, third call succeeds
+            mock_request.side_effect = [
+                requests.exceptions.Timeout("Timeout 1"),
+                requests.exceptions.Timeout("Timeout 2"),
+                mock_response,
+            ]
+
+            # Should succeed after retries
+            result = client.get_opportunity(opportunity_id)
+
+            # Verify it was called 3 times (2 failures + 1 success)
+            assert mock_request.call_count == 3
+            assert result.data.opportunity_id == opportunity_id
+
+
+def test_get_opportunity_retries_exhausted(client):
+    """Test that the client raises timeout after exhausting all 3 retry attempts."""
+    opportunity_id = uuid.uuid4()
+
+    # Patch the retry decorator to not wait between attempts (makes test fast)
+    with patch("src.adapters.simpler_grants.client._do_request_with_retry.retry.wait", wait_none()):
+        # Mock requests.request to always fail with timeout
+        with patch("src.adapters.simpler_grants.client.requests.request") as mock_request:
+            mock_request.side_effect = requests.exceptions.Timeout("Persistent timeout")
+
+            # Should raise after 3 attempts
+            with pytest.raises(requests.exceptions.Timeout):
+                client.get_opportunity(opportunity_id)
+
+            # Verify it tried 3 times
+            assert mock_request.call_count == 3
+
+
+def test_get_opportunity_retries_on_connection_error(client):
+    """Test that the client retries 3 times on connection error before failing."""
+    opportunity_id = uuid.uuid4()
+
+    # Patch the retry decorator to not wait between attempts (makes test fast)
+    with patch("src.adapters.simpler_grants.client._do_request_with_retry.retry.wait", wait_none()):
+        # Mock requests.request to fail once with connection error, then succeed
+        with patch("src.adapters.simpler_grants.client.requests.request") as mock_request:
+            # Create a successful response for the second attempt
+            mock_response = requests.Response()
+            mock_response.status_code = 200
+            mock_response._content = str.encode(
+                '{"message": "Success", "data": {"opportunity_id": "'
+                + str(opportunity_id)
+                + '", "opportunity_title": "Test", "opportunity_status": "posted", "summary": null}}'
+            )
+
+            # First call raises ConnectionError, second call succeeds
+            mock_request.side_effect = [
+                requests.exceptions.ConnectionError("Connection failed"),
+                mock_response,
+            ]
+
+            # Should succeed after retry
+            result = client.get_opportunity(opportunity_id)
+
+            # Verify it was called 2 times (1 failure + 1 success)
+            assert mock_request.call_count == 2
+            assert result.data.opportunity_id == opportunity_id
 
 
 def test_get_opportunity_invalid_json_response(client):
