@@ -15,6 +15,7 @@ from src.services.current_opportunity.determine_current_opportunity_summary impo
     determine_current_and_status,
     is_opportunity_changed,
 )
+from src.services.opportunities_v1.opportunity_version import save_opportunity_version
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.registry.workflow_client_registry import get_workflow_client_registry
@@ -32,6 +33,7 @@ class OpportunityPublishState(StrEnum):
     DRAFT_FLAG_FLIPPED = "draft_flag_flipped"
     CURRENT_OPPORTUNITY_SUMMARY_CALCULATED = "current_opportunity_summary_calculated"
     OPPORTUNITY_WRITTEN_TO_SEARCH = "opportunity_written_to_search"
+    OPPORTUNITY_VERSION_STORED = "opportunity_version_stored"
 
     END = "end"
 
@@ -51,6 +53,7 @@ class OpportunityPublishStateMachine(BaseStateMachine):
         OPP_PUBLISH_WRITTEN_TO_SEARCH_INDEX = "opp_publish_written_to_search_index"
         OPP_PUBLISH_NOT_WRITTEN_TO_SEARCH_INDEX = "opp_publish_not_written_to_search_index"
         OPP_PUBLISH_ERROR_WRITING_TO_SEARCH_INDEX = "opp_publish_error_writing_to_search_index"
+        OPP_PUBLISH_VERSION_STORED = "opp_publish_version_stored"
 
     ### States
     states = States.from_enum(
@@ -80,16 +83,25 @@ class OpportunityPublishStateMachine(BaseStateMachine):
     )
 
     # Write the opportunity to search and then
-    # do finish_publish
+    # do store_opportunity_version
     write_opportunity_to_search = Event(
         states.CURRENT_OPPORTUNITY_SUMMARY_CALCULATED.to(
-            states.OPPORTUNITY_WRITTEN_TO_SEARCH, after="finish_publish"
+            states.OPPORTUNITY_WRITTEN_TO_SEARCH, after="store_opportunity_version"
+        ),
+    )
+
+    # Store the opportunity's first version immediately at publish time
+    # (rather than waiting for the next hourly StoreOpportunityVersionTask
+    # run) and then do finish_publish
+    store_opportunity_version = Event(
+        states.OPPORTUNITY_WRITTEN_TO_SEARCH.to(
+            states.OPPORTUNITY_VERSION_STORED, after="finish_publish"
         ),
     )
 
     # End the publish workflow
     finish_publish = Event(
-        states.OPPORTUNITY_WRITTEN_TO_SEARCH.to(states.END),
+        states.OPPORTUNITY_VERSION_STORED.to(states.END),
     )
 
     def __init__(self, model: OpportunityPersistenceModel, **kwargs: Any):
@@ -216,3 +228,23 @@ class OpportunityPublishStateMachine(BaseStateMachine):
         except Exception:
             logger.exception("Failed to write opportunity to search index", extra=log_extra)
             state_machine_event.increment(self.Metrics.OPP_PUBLISH_ERROR_WRITING_TO_SEARCH_INDEX)
+
+    @store_opportunity_version.on
+    def handle_store_opportunity_version(self, state_machine_event: StateMachineEvent) -> None:
+        """Create the opportunity's first version snapshot immediately at publish time.
+
+        Without this, a grantee who saves the opportunity before the next hourly
+        StoreOpportunityVersionTask run has no prior version to diff against, and
+        never receives an edit-notification email for that opportunity.
+        """
+        log_extra = state_machine_event.get_log_extra() | {
+            "opportunity_id": self.opportunity.opportunity_id,
+        }
+
+        version_created = save_opportunity_version(self.db_session, self.opportunity)
+
+        logger.info(
+            "Stored opportunity version during publish",
+            extra=log_extra | {"version_created": version_created},
+        )
+        state_machine_event.increment(self.Metrics.OPP_PUBLISH_VERSION_STORED)

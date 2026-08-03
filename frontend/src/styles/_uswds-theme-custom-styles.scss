@@ -1586,6 +1586,58 @@ $simpler-switch-transition-easing: ease;
   }
 }
 
+// Form Select Modal Styles
+.centered-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.always-required-label {
+  background-color: #2e8367;
+  color: white;
+  font-weight: normal;
+  margin-left: 8px;
+  font-size: 12px;
+  padding: 2px 4px 2px 4px;
+  border-radius: 2px;
+}
+
+.form-modal-select-all {
+  font-weight: 400;
+  font-size: 16;
+  background-color: #f0f0ec;
+  height: 65px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.form-modal-rows {
+  border: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.form-modal-always-required {
+  border-color: #5abf95;
+  background-color: #dbf6ed;
+}
+
+.form-modal-optional {
+  border-color: #e6e6e2;
+}
+
+.form-modal-header {
+  font-size: 32px;
+  font-weight: 700;
+  margin-left: 30px;
+  margin-bottom: 20px;
+}
+
 // hide native file input status / preview
 .usa-file-input__preview {
   display: none;

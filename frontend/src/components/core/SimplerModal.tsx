@@ -116,6 +116,7 @@ export function SimplerModal({
       className={className}
       aria-labelledby={`${modalId}-heading`}
       aria-describedby={`${modalId}-description`}
+      style={{ margin: 0 }}
       id={modalId}
       // On the server, `renderToPortal` must be false to avoid SSR errors.
       // On the client, the modal renders into a portal for proper a11y and

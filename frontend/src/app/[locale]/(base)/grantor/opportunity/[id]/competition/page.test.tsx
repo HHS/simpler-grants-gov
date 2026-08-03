@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { identity } from "lodash";
 import OpportunityCompetitionPage from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/page";
 import { MissingAuthError } from "src/errors";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
@@ -15,7 +14,7 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: identity,
+  getTranslations: () => Promise.resolve((key: string) => key),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -49,16 +48,22 @@ jest.mock(
 
 const mockGetOpportunityForGrantor = jest.fn();
 const mockCreateCompetitionForGrantor = jest.fn();
+const mockAllForms = jest.fn();
+const mockCompetitionForms = jest.fn();
 
-jest.mock(
-  "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher",
-  () => ({
-    getOpportunityForGrantor: (...args: unknown[]) =>
-      mockGetOpportunityForGrantor(...args) as unknown,
-    createCompetitionForGrantor: (...args: unknown[]) =>
-      mockCreateCompetitionForGrantor(...args) as unknown,
-  }),
-);
+jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
+  getOpportunityForGrantor: (...args: unknown[]) =>
+    mockGetOpportunityForGrantor(...args) as unknown,
+}));
+
+jest.mock("src/services/fetch/fetchers/allFormsFetcher", () => ({
+  getForms: (...args: unknown[]) => mockAllForms(...args) as unknown,
+}));
+
+jest.mock("src/services/fetch/fetchers/competitionFormsFetcher", () => ({
+  updateCompetitionForms: (...args: unknown[]) =>
+    mockAllForms(...args) as unknown,
+}));
 
 const baseOpportunityData: DeepPartial<GrantorOpportunityDetail> = {
   opportunity_id: "opp-abc-123",
@@ -79,36 +84,26 @@ describe("OpportunityCompetitionPage", () => {
       mockCreateCompetitionForGrantor.mockResolvedValue({
         data: { competition_id: "new-competition-id" },
       });
+      mockCompetitionForms.mockResolvedValue({
+        data: [],
+      });
+      mockAllForms.mockResolvedValue({
+        data: [
+          {
+            current_version: {
+              legacy_form_version: "2.1",
+              major_version: 4,
+              minor_version: 0,
+            },
+            form_id: "123e4567-e89b-12d3-a456-426614174000",
+            name: "Application for Federal Assistance",
+            short_name: "SF-424",
+          },
+        ],
+      });
     });
 
-    it("calls createCompetitionForGrantor when competitions is an empty array", async () => {
-      mockGetOpportunityForGrantor.mockResolvedValue({
-        data: { ...baseOpportunityData, competitions: [] },
-      });
-      const component = await OpportunityCompetitionPage({
-        params: pageParams,
-      });
-      render(component);
-
-      expect(mockCreateCompetitionForGrantor).toHaveBeenCalledTimes(1);
-      expect(mockCreateCompetitionForGrantor).toHaveBeenCalledWith(
-        testOpportunityId,
-      );
-    });
-
-    it("calls createCompetitionForGrantor with the opportunity id", async () => {
-      const component = await OpportunityCompetitionPage({
-        params: pageParams,
-      });
-      render(component);
-
-      expect(mockCreateCompetitionForGrantor).toHaveBeenCalledTimes(1);
-      expect(mockCreateCompetitionForGrantor).toHaveBeenCalledWith(
-        testOpportunityId,
-      );
-    });
-
-    it("passes the new competition_id to CompetitionForm", async () => {
+    it("passes an empty string to CompetitionForm", async () => {
       const component = await OpportunityCompetitionPage({
         params: pageParams,
       });
@@ -116,7 +111,7 @@ describe("OpportunityCompetitionPage", () => {
 
       expect(screen.getByTestId("competition-form")).toHaveAttribute(
         "data-competition-id",
-        "new-competition-id",
+        "",
       );
     });
 
@@ -139,15 +134,6 @@ describe("OpportunityCompetitionPage", () => {
           competitions: [{ competition_id: "existing-competition-id" }],
         },
       });
-    });
-
-    it("does not call createCompetitionForGrantor", async () => {
-      const component = await OpportunityCompetitionPage({
-        params: pageParams,
-      });
-      render(component);
-
-      expect(mockCreateCompetitionForGrantor).not.toHaveBeenCalled();
     });
 
     it("passes the existing competition_id to CompetitionForm", async () => {
@@ -182,22 +168,6 @@ describe("OpportunityCompetitionPage", () => {
         params: pageParams,
       });
       render(component);
-
-      expect(screen.getByTestId("alert")).toBeVisible();
-    });
-
-    it("returns UnauthorizedMessage when createCompetitionForGrantor throws MissingAuthError", async () => {
-      mockGetOpportunityForGrantor.mockResolvedValue({
-        data: { ...baseOpportunityData, competitions: null },
-      });
-      mockCreateCompetitionForGrantor.mockRejectedValue(
-        new MissingAuthError("Missing auth"),
-      );
-      const component = await OpportunityCompetitionPage({
-        params: pageParams,
-      });
-      render(component);
-
       expect(screen.getByTestId("alert")).toBeVisible();
     });
   });

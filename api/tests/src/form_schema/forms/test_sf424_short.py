@@ -31,8 +31,8 @@ def contact_person_group():
 
 @pytest.fixture
 def valid_json_v3_0(contact_person_group):
-    # Minimal valid response - the primary contact is the same as the project director,
-    # so the contact_person block is intentionally omitted.
+    # Minimal valid response. contact_person is always required regardless of the
+    # same_as_project_director checkbox value — the user always fills in Section 8 directly.
     return {
         "agency_name": "Department of Research",
         "funding_opportunity_number": "ABC-123",
@@ -55,6 +55,7 @@ def valid_json_v3_0(contact_person_group):
         "project_end_date": "2026-12-31",
         "project_director": contact_person_group,
         "same_as_project_director": True,
+        "contact_person": contact_person_group,
         "application_certification": True,
         "authorized_representative": {
             "first_name": "Bob",
@@ -132,8 +133,7 @@ def test_sf424_short_v3_0_empty_json(sf424_short_v3_0):
         "$.project_start_date",
         "$.project_end_date",
         "$.project_director",
-        # contact_person is required because same_as_project_director is not True
-        "$.contact_person",
+        "$.contact_person",  # always required
         "$.application_certification",
         "$.authorized_representative",
         "$.authorized_representative_title",
@@ -222,11 +222,6 @@ def test_sf424_short_v3_0_applicant_type_length(
 @pytest.mark.parametrize(
     "data,required_fields",
     [
-        # Same as project director -> contact person must be empty
-        (
-            {"same_as_project_director": False},
-            ["$.contact_person"],
-        ),
         # Address in the US requires state and zip
         (
             {
@@ -252,29 +247,14 @@ def test_sf424_short_v3_0_conditionally_required_fields(
         assert validation_issue.field in required_fields
 
 
-def test_sf424_short_v3_0_contact_person_required_when_not_same(sf424_short_v3_0, valid_json_v3_0):
-    """When same_as_project_director is not True, the primary contact is required."""
+def test_sf424_short_v3_0_contact_person_always_required(sf424_short_v3_0, valid_json_v3_0):
+    """contact_person is always required regardless of the same_as_project_director flag."""
     data = valid_json_v3_0
-    del data["same_as_project_director"]
+    del data["contact_person"]
 
     validation_issues = validate_json_schema_for_form(data, sf424_short_v3_0)
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "required"
-    assert validation_issues[0].field == "$.contact_person"
-
-
-def test_sf424_short_v3_0_contact_person_must_be_empty_when_same(
-    sf424_short_v3_0, valid_json_v3_0, contact_person_group
-):
-    """When same_as_project_director is True, providing a populated contact fails validation."""
-    data = valid_json_v3_0 | {
-        "same_as_project_director": True,
-        "contact_person": contact_person_group,
-    }
-
-    validation_issues = validate_json_schema_for_form(data, sf424_short_v3_0)
-    assert len(validation_issues) == 1
-    assert validation_issues[0].type == "maxProperties"
     assert validation_issues[0].field == "$.contact_person"
 
 

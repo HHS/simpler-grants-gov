@@ -3,9 +3,16 @@ from enum import StrEnum
 
 import grants_shared.adapters.db as db
 from sqlalchemy import select
-from sqlalchemy.orm import lazyload, selectinload
+from sqlalchemy.orm import selectinload
 
-from src.db.models.opportunity_models import Opportunity, OpportunityChangeAudit
+from src.db.models.agency_models import Agency
+from src.db.models.competition_models import Competition
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    Opportunity,
+    OpportunityChangeAudit,
+    OpportunitySummary,
+)
 from src.services.opportunities_v1.opportunity_version import save_opportunity_version
 from src.task.task import Task
 from src.util.env_config import PydanticBaseEnvConfig
@@ -62,19 +69,31 @@ class StoreOpportunityVersionTask(Task):
             .where(OpportunityChangeAudit.is_loaded_to_version_table.isnot(True))
             # We filter drafts out of creating versions, so just don't fetch them.
             .where(Opportunity.is_draft.is_(False))
-            .options(selectinload("*"))
-            # Do not load the following relationships, they aren't needed
-            # here so save the memory
             .options(
-                lazyload(OpportunityChangeAudit.opportunity, Opportunity.all_opportunity_summaries),
-                lazyload(
-                    OpportunityChangeAudit.opportunity,
-                    Opportunity.all_opportunity_notification_logs,
-                ),
-                lazyload(
-                    OpportunityChangeAudit.opportunity, Opportunity.saved_opportunities_by_users
-                ),
-                lazyload(OpportunityChangeAudit.opportunity, Opportunity.competitions),
+                # The opportunity
+                selectinload(OpportunityChangeAudit.opportunity).options(
+                    # Opportunity summary
+                    selectinload(Opportunity.current_opportunity_summary)
+                    .selectinload(CurrentOpportunitySummary.opportunity_summary)
+                    .options(
+                        selectinload(OpportunitySummary.link_funding_instruments),
+                        selectinload(OpportunitySummary.link_funding_categories),
+                        selectinload(OpportunitySummary.link_applicant_types),
+                    ),
+                    # Attachments
+                    selectinload(Opportunity.opportunity_attachments),
+                    # Competitions
+                    selectinload(Opportunity.competitions).options(
+                        selectinload(Competition.competition_instructions),
+                        selectinload(Competition.opportunity_assistance_listing),
+                        selectinload(Competition.link_competition_open_to_applicant),
+                        selectinload(Competition.competition_forms),
+                    ),
+                    # Assistance listing number
+                    selectinload(Opportunity.opportunity_assistance_listings),
+                    # Agency
+                    selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency),
+                )
             )
             # We fetch a lot of data here, so we process in batches
             # in case we're doing a backfill. Most times this won't really matter.

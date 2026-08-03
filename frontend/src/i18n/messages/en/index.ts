@@ -901,6 +901,21 @@ export const messages = {
       "You must sign in with your government employee ID. Make sure you've set up your Personal Identity Verification (PIV) or Common Access Card (CAC) as a two-factor authentication method.",
     button: "Sign in using PIV/CAC",
   },
+  FormSelectModal: {
+    title: "Form Library",
+    heading: "Select Forms",
+    selectAll: "Select all",
+    buttons: {
+      cancel: "Cancel",
+      save: "Save",
+    },
+    requiredStates: {
+      required: "Required",
+      conditional: "Conditionally Required",
+      auto: "Auto added",
+      always: "Always required",
+    },
+  },
   Footer: {
     agencyName: "Grants.gov",
     agencyContactCenter: "Grants.gov Program Management Office",
@@ -2576,9 +2591,21 @@ export const messages = {
     applicationRequirementsSubheader:
       "What applicants must submit, how they'll be scored, and the format rules.",
     button: {
-      back: "Back",
+      processing: "Processing...",
+      back: "Save and go back",
       saveAndExit: "Save and exit",
       saveAndContinue: "Save and continue",
+    },
+    alerts: {
+      success: "Saved successfully",
+      successBody: "Your changes have been saved.",
+      genericError: "Unable to save competition updates.",
+      unauthenticated: "You must be signed in to update this competition.",
+      forbidden: "You do not have permission to update this competition.",
+      notFound: "This competition could not be found.",
+      networkError: "A network error occurred.",
+      validationErrors: "Errors Found",
+      validationErrorBody: "Please correct the following errors:",
     },
     sectionSubmissionSetUp: {
       header: "Submission set-up",
