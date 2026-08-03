@@ -28,6 +28,7 @@ import {
   type TestInfo,
   type WorkerInfo,
 } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 
 export type AuthenticatedStorageState = Awaited<
@@ -68,7 +69,6 @@ export async function createPageWithStorageState(
 }
 
 type AuthLifecycleOptions = {
-  targetEnv: string;
   timeoutMs?: number;
   stagingProjectName?: string;
   stagingSkipMessage?: string;
@@ -98,7 +98,7 @@ export function createAuthenticatedPageLifecycle(
       workerInfo: WorkerInfo,
     ): Promise<void> => {
       if (
-        options.targetEnv === "staging" &&
+        playwrightEnv.targetEnv !== "local" &&
         workerInfo.project.name !== stagingProjectName
       ) {
         return;
@@ -121,7 +121,7 @@ export function createAuthenticatedPageLifecycle(
     ): Promise<void> => {
       testInfo.setTimeout(timeoutMs);
 
-      if (options.targetEnv === "staging") {
+      if (playwrightEnv.targetEnv !== "local") {
         options.skipTest?.(
           testInfo.project.name !== stagingProjectName,
           stagingSkipMessage,

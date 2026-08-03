@@ -18,7 +18,7 @@ async function assertSavedOpportunitiesPageReady(
 
   title: string,
 ): Promise<void> {
-  const timeout = targetEnv === "staging" ? 30000 : 5000;
+  const timeout = targetEnv !== "local" ? 30000 : 5000;
 
   await expect(page).toHaveTitle("Saved opportunities | Simpler.Grants.gov", {
     timeout,
@@ -100,7 +100,7 @@ export async function ensureOpportunityIsSaved(
 
   title: string,
 ): Promise<void> {
-  const timeout = targetEnv === "staging" ? 30000 : 5000;
+  const timeout = targetEnv !== "local" ? 30000 : 5000;
 
   await expect(page).toHaveTitle("Saved opportunities | Simpler.Grants.gov", {
     timeout,
