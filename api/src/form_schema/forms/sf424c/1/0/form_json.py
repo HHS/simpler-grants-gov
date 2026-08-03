@@ -65,7 +65,6 @@ FORM_JSON_SCHEMA = {
                 "total_project_costs": {
                     # Row 16 — Total project costs (row 14 - row 15)
                     "allOf": [{"$ref": "#/$defs/budget_calculated_row"}],
-                    
                 },
             },
         },
@@ -589,7 +588,7 @@ FORM_UI_SCHEMA = [
                                     "type": "plainText",
                                     "staticContent": "Federal percentage share \n(Consult Federal agency for Federal percentage share.)",
                                 },
-                                { 
+                                {
                                     "type": "input",
                                     "definition": "/properties/federal_percentage_share",
                                     "format": "percentage",
@@ -1071,6 +1070,3 @@ SF424c_v2_0 = Form(
     sgg_version="1.0",
     is_deprecated=False,
 )
-
-
-
