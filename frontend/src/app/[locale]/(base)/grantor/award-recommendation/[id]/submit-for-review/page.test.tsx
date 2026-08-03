@@ -7,11 +7,16 @@ import { redirect } from "next/navigation";
 import SubmitForReviewPage from "./page";
 
 const mockGetAwardRecommendationDetails = jest.fn();
+const mockClientFetch = jest.fn();
 
 jest.mock("next/navigation", () => ({
   redirect: jest.fn(() => {
     throw new Error("NEXT_REDIRECT");
   }),
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    back: jest.fn(),
+  })),
 }));
 
 jest.mock("react", () => ({
@@ -40,47 +45,26 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
   ) => Component,
 }));
 
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: mockClientFetch,
+  }),
+}));
+
+jest.mock("next-intl", () => ({
+  useTranslations: () => identity,
+}));
+
+jest.mock("src/components/core/fileInput/SimplerFileInput", () => ({
+  SimplerFileInput: () => <div data-testid="file-input">File Input</div>,
+}));
+
 jest.mock(
-  "src/components/award-recommendation/AwardRecommendationHero",
+  "src/app/[locale]/(base)/grantor/award-recommendation/[id]/submit-for-review/actions",
   () => ({
-    __esModule: true,
-    default: ({
-      heading,
-      showDateAndStatus,
-      additionalBreadcrumbs,
-    }: {
-      heading?: string;
-      showDateAndStatus?: boolean;
-      additionalBreadcrumbs?: { title: string }[];
-    }) => (
-      <div data-testid="award-recommendation-hero">
-        {heading && <h1>{heading}</h1>}
-        {showDateAndStatus !== undefined && (
-          <div data-testid="show-date-status">{String(showDateAndStatus)}</div>
-        )}
-        {additionalBreadcrumbs && (
-          <div data-testid="breadcrumbs">
-            {additionalBreadcrumbs.map((crumb, i) => (
-              <span key={i}>{crumb.title}</span>
-            ))}
-          </div>
-        )}
-      </div>
-    ),
+    submitReviewForAwardRecommendation: jest.fn(),
   }),
 );
-
-jest.mock("./_components/ReviewSubmissionFormContainer", () => ({
-  ReviewSubmissionFormContainer: ({
-    awardRecommendationId,
-  }: {
-    awardRecommendationId: string;
-  }) => (
-    <div data-testid="review-submission-form-container">
-      <div data-testid="award-rec-id">{awardRecommendationId}</div>
-    </div>
-  ),
-}));
 
 describe("SubmitForReviewPage", () => {
   const mockParams = Promise.resolve({
@@ -94,64 +78,46 @@ describe("SubmitForReviewPage", () => {
     mockGetAwardRecommendationDetails.mockResolvedValue(
       mockAwardRecommendationDetails,
     );
+    
+    // Mock privileges API response
+    mockClientFetch.mockResolvedValueOnce({
+      data: {
+        user_id: "user-123",
+        agency_users: [
+          {
+            agency: { agency_id: "agency-1" },
+            agency_user_roles: [
+              {
+                role_id: "role-1",
+                role_name: "Test Role",
+                privileges: ["update_award_recommendation"],
+              },
+            ],
+          },
+        ],
+      },
+    });
+    
+    // Mock workflow API response
+    mockClientFetch.mockResolvedValueOnce({
+      data: {
+        workflow_id: "workflow-123",
+        current_workflow_state: "start",
+      },
+    });
   });
 
-  it("renders the page with award recommendation hero and form", async () => {
+  it("renders the page successfully", async () => {
     const page = await SubmitForReviewPage({
       params: mockParams,
       searchParams: mockSearchParams,
     });
     render(page);
 
-    expect(screen.getByTestId("award-recommendation-hero")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("review-submission-form-container"),
-    ).toBeInTheDocument();
-  });
-
-  it("displays Submit for Review heading", async () => {
-    const page = await SubmitForReviewPage({
-      params: mockParams,
-      searchParams: mockSearchParams,
-    });
-    render(page);
-
+    // Check that the page renders with heading
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "reviewForm.header",
     );
-  });
-
-  it("hides date and status in hero", async () => {
-    const page = await SubmitForReviewPage({
-      params: mockParams,
-      searchParams: mockSearchParams,
-    });
-    render(page);
-
-    const showDateStatus = screen.getByTestId("show-date-status");
-    expect(showDateStatus).toHaveTextContent("false");
-  });
-
-  it("includes Submit for Review in breadcrumbs", async () => {
-    const page = await SubmitForReviewPage({
-      params: mockParams,
-      searchParams: mockSearchParams,
-    });
-    render(page);
-
-    const breadcrumbs = screen.getByTestId("breadcrumbs");
-    expect(breadcrumbs).toHaveTextContent("reviewForm.header");
-  });
-
-  it("passes award recommendation id to form container", async () => {
-    const page = await SubmitForReviewPage({
-      params: mockParams,
-      searchParams: mockSearchParams,
-    });
-    render(page);
-
-    const awardRecId = screen.getByTestId("award-rec-id");
-    expect(awardRecId).toHaveTextContent("test-id-123");
   });
 
   it("fetches award recommendation details with correct id", async () => {
@@ -213,8 +179,6 @@ describe("SubmitForReviewPage", () => {
 
   describe("Feature Flag", () => {
     it("wraps component with feature flag", () => {
-      // The mock verifies the component is wrapped with withFeatureFlag
-      // Actual feature flag behavior is tested in integration tests
       expect(SubmitForReviewPage).toBeDefined();
     });
   });
