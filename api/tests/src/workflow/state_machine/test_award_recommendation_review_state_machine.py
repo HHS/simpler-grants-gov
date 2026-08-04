@@ -148,6 +148,11 @@ def test_award_recommendation_review_state_machine_happy_path(
         == AwardRecommendationStatus.IN_REVIEW
     )
 
+    db_session.expire(
+        state_machine.award_recommendation,
+        ["review_workflow"],
+    )
+
     assert (
         state_machine.award_recommendation.review_workflow_id == state_machine.workflow.workflow_id
     )

@@ -72,6 +72,7 @@ from src.constants.lookup_constants import (
     SamGovImportType,
     SamGovProcessingStatus,
     UserType,
+    WorkflowEntityType,
     WorkflowType,
 )
 from src.constants.static_role_values import (
@@ -86,6 +87,7 @@ from src.db.models import agency_models
 from src.db.models.agency_models import Agency
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.form_schema.forms import SF424_v4_0, init_form_registry
+from src.workflow.registry.workflow_registry import WorkflowRegistry
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
 SCHEMA = OpportunityVersionSchema()
@@ -3402,49 +3404,44 @@ class WorkflowFactory(BaseFactory):
         )
 
         entity_fields = {
-            "opportunity": "opportunity_id",
-            "application": "application_id",
-            "application_submission": "application_submission_id",
-            "award_recommendation": "award_recommendation_id",
+            WorkflowEntityType.OPPORTUNITY: "opportunity",
+            WorkflowEntityType.APPLICATION: "application",
+            WorkflowEntityType.APPLICATION_SUBMISSION: "application_submission",
+            WorkflowEntityType.AWARD_RECOMMENDATION: "award_recommendation",
         }
 
         supplied_entities = [
-            relationship_name
-            for relationship_name, id_name in entity_fields.items()
-            if (kwargs.get(relationship_name) is not None or kwargs.get(id_name) is not None)
+            field_name
+            for field_name in entity_fields.values()
+            if kwargs.get(field_name) is not None
         ]
 
         if len(supplied_entities) > 1:
             raise ValueError(
                 "WorkflowFactory requires exactly one workflow entity; "
-                f"received: {', '.join(supplied_entities)}"
-            )
-
-        if len(supplied_entities) > 1:
-            raise ValueError(
-                "WorkflowFactory requires exactly one workflow entity; "
-                f"received: {', '.join(supplied_entities)}"
+                f"received: {', '.join(sorted(supplied_entities))}"
             )
 
         if not supplied_entities:
-            if workflow_type in {
-                WorkflowType.BASIC_TEST_WORKFLOW,
-                WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,
-                WorkflowType.INITIAL_PROTOTYPE,
-                WorkflowType.OPPORTUNITY_PUBLISH,
-            }:
-                kwargs["opportunity"] = OpportunityFactory.create()
+            config, _ = WorkflowRegistry.get_state_machine_for_workflow_type(workflow_type)
 
-            elif workflow_type == WorkflowType.AWARD_RECOMMENDATION_REVIEW:
-                kwargs["award_recommendation"] = AwardRecommendationFactory.create()
+            factory_by_entity_type = {
+                WorkflowEntityType.OPPORTUNITY: OpportunityFactory,
+                WorkflowEntityType.APPLICATION: ApplicationFactory,
+                WorkflowEntityType.APPLICATION_SUBMISSION: (ApplicationSubmissionFactory),
+                WorkflowEntityType.AWARD_RECOMMENDATION: (AwardRecommendationFactory),
+            }
 
-            else:
+            entity_factory = factory_by_entity_type.get(config.entity_type)
+            entity_field = entity_fields.get(config.entity_type)
+
+            if entity_factory is None or entity_field is None:
                 raise ValueError(
-                    "WorkflowFactory does not know which entity belongs to "
-                    f"workflow type {workflow_type}. Pass opportunity, "
-                    "application, application_submission, or "
-                    "award_recommendation explicitly."
+                    "WorkflowFactory does not have a factory configured for "
+                    f"workflow entity type {config.entity_type}"
                 )
+
+            kwargs[entity_field] = entity_factory.create()
 
         return super()._create(model_class, *args, **kwargs)
 

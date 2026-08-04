@@ -107,12 +107,11 @@ class Workflow(ApiSchemaTable, TimestampMixin):
 
     award_recommendation_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey(AwardRecommendation.award_recommendation_id),
-        unique=True,
     )
 
     award_recommendation: Mapped[AwardRecommendation | None] = relationship(
         AwardRecommendation,
-        back_populates="review_workflow",
+        back_populates="workflows",
         foreign_keys=[award_recommendation_id],
     )
 

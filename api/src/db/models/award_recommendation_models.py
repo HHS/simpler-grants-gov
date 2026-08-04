@@ -78,6 +78,7 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         lazy="joined",
         cascade="all, delete-orphan",
         single_parent=True,
+        viewonly=True,
     )
 
     @property
@@ -147,6 +148,11 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
     award_recommendation_audit_events: Mapped[list[AwardRecommendationAudit]] = relationship(
         back_populates="award_recommendation",
         uselist=True,
+        cascade="all, delete-orphan",
+    )
+    workflows: Mapped[list["Workflow"]] = relationship(
+        "Workflow",
+        back_populates="award_recommendation",
         cascade="all, delete-orphan",
     )
 
