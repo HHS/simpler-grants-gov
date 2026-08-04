@@ -1651,6 +1651,20 @@ PROJECT_ABSTRACT_SUMMARY_TEST_CASES = [
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSummary_2_0-V2.0.xsd",
         "pretty_print": True,
     },
+    {
+        # Mirrors the legacy Grants.gov submission captured for issue #9132 (legacy form ID 591).
+        "name": "project_abstract_summary_legacy_parity",
+        "json_input": {
+            "funding_opportunity_number": "SIMP-PROJABSTRACTSUMMARY-07282026",
+            "assistance_listing_number": "00.000",
+            "applicant_name": "m h",
+            "project_title": "adsf",
+            "project_abstract": "asdfsdf",
+        },
+        "form_name": "Project_AbstractSummary_2_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSummary_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
 ]
 
 # Sample test cases for EPA Key Contacts validation
@@ -1828,7 +1842,6 @@ OTHER_NARRATIVE_ATTACHMENTS_TEST_CASES = [
         },
     }
 ]
-
 
 # Sample test cases for Project/Performance Site Location v4.0 validation
 PERFORMANCE_SITE_TEST_CASES = [
