@@ -71,6 +71,7 @@ export const UiJsonSchema: RJSFSchema = {
           ],
         },
         attachmentType: { type: "string" },
+        printDescription: { type: "boolean" },
       },
       required: ["type"],
       anyOf: [

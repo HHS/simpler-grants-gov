@@ -869,6 +869,7 @@ describe("addPrintWidgetToFields", () => {
         type: "field" as const,
         definition: "/properties/name" as const,
         schema: { title: "Name", type: "string" },
+        printDescription: true,
       },
       {
         type: "field" as const,
@@ -885,6 +886,7 @@ describe("addPrintWidgetToFields", () => {
         type: "field",
         definition: "/properties/name",
         schema: { title: "Name", type: "string" },
+        printDescription: true,
         widget: "Print",
       },
       {
