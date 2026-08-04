@@ -5,6 +5,7 @@ import {
   createOpportunitySummaryForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { OpportunitySummaryUpdateRawData } from "src/types/opportunity/opportunityResponseTypes";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 import { formDataToObject } from "src/utils/formData/formDataToJson";
@@ -68,6 +69,80 @@ const editOpportunityFormSchema = {
 
 function readStringValue(value: FormDataEntryValue | null): string {
   return typeof value === "string" ? value : "";
+}
+
+// These fields display comma-formatted (formatNumber() in OpportunityEditForm.tsx) but are
+// never stripped before submit, so the API's integer validation 422s on the raw comma string.
+const CURRENCY_FIELD_NAMES = [
+  "award_floor",
+  "award_ceiling",
+  "estimated_total_program_funding",
+] as const;
+
+function stripCurrencyFormatting(formData: FormData) {
+  for (const fieldName of CURRENCY_FIELD_NAMES) {
+    const rawValue = formData.get(fieldName);
+    if (typeof rawValue === "string") {
+      formData.set(fieldName, rawValue.replace(/[$,\s]/g, ""));
+    }
+  }
+}
+
+const EDIT_FORM_FIELD_NAMES = new Set<keyof OpportunityEditValidationErrors>([
+  "opportunity_title",
+  "category",
+  "summary_description",
+  "post_date",
+  "close_date",
+  "agency_email_address",
+  "agency_email_address_description",
+  "award_floor",
+  "award_ceiling",
+  "funding_instruments",
+  "funding_categories",
+  "expected_number_of_awards",
+  "estimated_total_program_funding",
+  "applicant_types",
+  "applicant_eligibility_description",
+  "additional_info_url",
+  "additional_info_url_description",
+  "agency_contact_description",
+]);
+
+// Maps a 422's errors[] to inline validationErrors by field, with a top-level errorMessage
+// fallback for field-less business-rule errors (which return an empty errors[] and put the
+// real text in the response's top-level message instead).
+function mapApiValidationErrors(
+  response: { errors?: unknown[] | null; message?: string },
+  genericMessage: string,
+): Pick<OpportunityEditActionState, "validationErrors" | "errorMessage"> {
+  const validationErrors: OpportunityEditValidationErrors = {};
+  const unmappedMessages: string[] = [];
+
+  for (const rawError of response.errors ?? []) {
+    const error = rawError as FrontendErrorDetails;
+    const message = error.message ?? genericMessage;
+    const field = error.field as
+      keyof OpportunityEditValidationErrors | undefined;
+
+    if (field && EDIT_FORM_FIELD_NAMES.has(field)) {
+      validationErrors[field] = [...(validationErrors[field] ?? []), message];
+    } else {
+      unmappedMessages.push(message);
+    }
+  }
+
+  const hasFieldErrors = Object.keys(validationErrors).length > 0;
+
+  return {
+    validationErrors: hasFieldErrors ? validationErrors : undefined,
+    errorMessage:
+      unmappedMessages.length > 0
+        ? unmappedMessages.join(" ")
+        : hasFieldErrors
+          ? undefined
+          : response.message || genericMessage,
+  };
 }
 
 async function validateOpportunityEditForm(formData: FormData) {
@@ -235,6 +310,8 @@ export async function saveOpportunityEditAction(
 ): Promise<OpportunityEditActionState> {
   const alerts = await getTranslations("OpportunityEdit.content.alerts");
 
+  stripCurrencyFormatting(formData);
+
   const opportunityId = readStringValue(formData.get("opportunity_id")).trim();
   const opportunitySummaryId = readStringValue(
     formData.get("opportunity_summary_id"),
@@ -277,6 +354,11 @@ export async function saveOpportunityEditAction(
         body: body,
       });
 
+      if (createResponse.status_code === 422) {
+        console.error("API side validation errors:", createResponse.errors);
+        return mapApiValidationErrors(createResponse, alerts("genericError"));
+      }
+
       return {
         successMessage: alerts("success"),
         newOpportunitySummaryId: createResponse.data.opportunity_summary_id,
@@ -308,11 +390,7 @@ export async function saveOpportunityEditAction(
     });
     if (response.status_code === 422) {
       console.error("API side validation errors:", response.errors);
-      throw new ApiRequestError(
-        "API side validation errors",
-        "validation",
-        422,
-      );
+      return mapApiValidationErrors(response, alerts("genericError"));
     }
     return {
       successMessage: alerts("success"),
@@ -336,12 +414,6 @@ export async function saveOpportunityEditAction(
     if (status === 404) {
       return {
         errorMessage: alerts("notFound"),
-      };
-    }
-
-    if (status === 422) {
-      return {
-        errorMessage: alerts("draftOnly"),
       };
     }
 

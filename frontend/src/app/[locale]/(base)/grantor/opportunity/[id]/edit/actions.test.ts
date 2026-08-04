@@ -327,7 +327,9 @@ describe("saveOpportunityEditAction", () => {
     });
   });
 
-  it("maps 422 to a draft-state error", async () => {
+  it("maps an unexpected thrown 422 to a generic save error", async () => {
+    // A real 422 now resolves via allowedErrorStatuses rather than throwing (see tests
+    // below). This covers the defensive fallback if one is ever thrown some other way.
     const formData = buildValidFormData();
     formData.set("opportunity_id", "opp-123");
     formData.set("opportunity_summary_id", "sum-456");
@@ -339,8 +341,134 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result).toEqual({
-      errorMessage: "draftOnly",
+      errorMessage: "genericError",
     });
+  });
+
+  it("maps 422 response field errors to inline validationErrors", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue({
+      ...successfulSummaryUpdateResponse,
+      status_code: 422,
+      errors: [
+        {
+          field: "award_floor",
+          message: "Not a valid integer.",
+          type: "invalid",
+        },
+        {
+          field: "award_ceiling",
+          message: "Not a valid integer.",
+          type: "invalid",
+        },
+      ],
+    });
+
+    const result = await saveOpportunityEditAction(initialState, formData);
+
+    expect(result).toEqual({
+      validationErrors: {
+        award_floor: ["Not a valid integer."],
+        award_ceiling: ["Not a valid integer."],
+      },
+      errorMessage: undefined,
+    });
+  });
+
+  it("maps 422 response errors with no matching form field to a top-level errorMessage", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue({
+      ...successfulSummaryUpdateResponse,
+      status_code: 422,
+      errors: [
+        {
+          field: "opportunity_summary_id",
+          message: "Only draft opportunity summaries can be updated.",
+          type: "invalid",
+        },
+      ],
+    });
+
+    const result = await saveOpportunityEditAction(initialState, formData);
+
+    expect(result).toEqual({
+      validationErrors: undefined,
+      errorMessage: "Only draft opportunity summaries can be updated.",
+    });
+  });
+
+  it("falls back to the response's top-level message when a 422 has an empty errors array", async () => {
+    // Business-rule errors like validate_opportunity_created_in_simpler_grants call
+    // raise_flask_error with a message and no validation_issues, so errors comes back
+    // empty and the real text lives only in the top-level message.
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue({
+      ...successfulSummaryUpdateResponse,
+      status_code: 422,
+      message: "Only opportunities created in Simpler Grants can be updated",
+      errors: [],
+    });
+
+    const result = await saveOpportunityEditAction(initialState, formData);
+
+    expect(result).toEqual({
+      validationErrors: undefined,
+      errorMessage:
+        "Only opportunities created in Simpler Grants can be updated",
+    });
+  });
+
+  it("strips comma-formatted currency fields before sending the update request", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    formData.set("opportunity_summary_id", "sum-456");
+    formData.set("estimated_total_program_funding", "1,000,000");
+    formData.set("award_floor", "100,000");
+    formData.set("award_ceiling", "500,000");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    await saveOpportunityEditAction(initialState, formData);
+
+    const firstCall = mockUpdateOpportunitySummaryForGrantor.mock.calls[0];
+    expect(firstCall?.[0].body.estimated_total_program_funding).toBe(1000000);
+    expect(firstCall?.[0].body.award_floor).toBe(100000);
+    expect(firstCall?.[0].body.award_ceiling).toBe(500000);
+  });
+
+  it("strips comma-formatted currency fields before sending the create request", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunity_id", "opp-123");
+    // opportunity_summary_id not set - takes the create path
+    formData.set("estimated_total_program_funding", "1,000,000");
+    formData.set("award_floor", "100,000");
+    formData.set("award_ceiling", "500,000");
+
+    mockCreateOpportunitySummaryForGrantor.mockResolvedValue({
+      message: "success",
+      status_code: 201,
+      data: { opportunity_summary_id: "new-sum-789" },
+    } as unknown as Awaited<
+      ReturnType<typeof createOpportunitySummaryForGrantor>
+    >);
+
+    await saveOpportunityEditAction(initialState, formData);
+
+    const firstCall = mockCreateOpportunitySummaryForGrantor.mock.calls[0];
+    expect(firstCall?.[0].body.estimated_total_program_funding).toBe(1000000);
+    expect(firstCall?.[0].body.award_floor).toBe(100000);
+    expect(firstCall?.[0].body.award_ceiling).toBe(500000);
   });
 
   it("maps 401 to an unauthenticated error", async () => {

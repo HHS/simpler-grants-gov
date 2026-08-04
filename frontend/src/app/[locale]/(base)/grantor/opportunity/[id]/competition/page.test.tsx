@@ -47,10 +47,22 @@ jest.mock(
 );
 
 const mockGetOpportunityForGrantor = jest.fn();
+const mockCreateCompetitionForGrantor = jest.fn();
+const mockAllForms = jest.fn();
+const mockCompetitionForms = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
   getOpportunityForGrantor: (...args: unknown[]) =>
     mockGetOpportunityForGrantor(...args) as unknown,
+}));
+
+jest.mock("src/services/fetch/fetchers/allFormsFetcher", () => ({
+  getForms: (...args: unknown[]) => mockAllForms(...args) as unknown,
+}));
+
+jest.mock("src/services/fetch/fetchers/competitionFormsFetcher", () => ({
+  updateCompetitionForms: (...args: unknown[]) =>
+    mockAllForms(...args) as unknown,
 }));
 
 const baseOpportunityData: DeepPartial<GrantorOpportunityDetail> = {
@@ -68,6 +80,26 @@ describe("OpportunityCompetitionPage", () => {
     beforeEach(() => {
       mockGetOpportunityForGrantor.mockResolvedValue({
         data: { ...baseOpportunityData, competitions: null },
+      });
+      mockCreateCompetitionForGrantor.mockResolvedValue({
+        data: { competition_id: "new-competition-id" },
+      });
+      mockCompetitionForms.mockResolvedValue({
+        data: [],
+      });
+      mockAllForms.mockResolvedValue({
+        data: [
+          {
+            current_version: {
+              legacy_form_version: "2.1",
+              major_version: 4,
+              minor_version: 0,
+            },
+            form_id: "123e4567-e89b-12d3-a456-426614174000",
+            name: "Application for Federal Assistance",
+            short_name: "SF-424",
+          },
+        ],
       });
     });
 

@@ -269,6 +269,7 @@ type UiSchemaBasicField = {
   type: "field" | "null";
   widget?: WidgetTypes;
   name?: string;
+  printDescription?: boolean;
 } & (
   | {
       definition: DefinitionPath;

@@ -434,12 +434,31 @@ class XMLGenerationService:
             if value_attributes and not attributes:
                 attributes = value_attributes
 
-            # Create nested element for dictionary values
-            if field_name in namespace_fields:
-                # Use configured namespace
+            # Create nested element for dictionary values.
+            # Check __namespace__ first — the transformer embeds this on nested objects so that
+            # the same element name (e.g. "Address") can appear in different namespaces at
+            # different nesting levels, without the flat namespace_fields dict causing collisions.
+            explicit_ns = value.get("__namespace__")
+            if explicit_ns is not None:
+                if explicit_ns == "default":
+                    namespace_uri = (
+                        nsmap.get(root_element_name or "", "") if root_element_name else ""
+                    )
+                else:
+                    namespace_uri = nsmap.get(explicit_ns, "")
+                element_name = f"{{{namespace_uri}}}{field_name}" if namespace_uri else field_name
+                nested_element = lxml_etree.SubElement(parent, element_name)
+            elif field_name in namespace_fields:
+                # Fall back to the flat namespace_fields dict for elements that don't carry
+                # __namespace__ (simple values, legacy nested objects without a namespace key)
                 namespace_prefix = namespace_fields[field_name]
-                namespace_uri = nsmap.get(namespace_prefix, "")
-                element_name = f"{{{namespace_uri}}}{field_name}"
+                if namespace_prefix == "default":
+                    namespace_uri = (
+                        nsmap.get(root_element_name or "", "") if root_element_name else ""
+                    )
+                else:
+                    namespace_uri = nsmap.get(namespace_prefix, "")
+                element_name = f"{{{namespace_uri}}}{field_name}" if namespace_uri else field_name
                 nested_element = lxml_etree.SubElement(parent, element_name)
             else:
                 # Use default namespace (derived from root element name)

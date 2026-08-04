@@ -1,3 +1,5 @@
+import "server-only";
+
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { fetchCompetition } from "./fetchers";

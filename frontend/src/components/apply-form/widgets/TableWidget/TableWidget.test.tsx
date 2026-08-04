@@ -1,8 +1,16 @@
+import { readFileSync } from "fs";
+import path from "path";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { TableWidgetProps } from "src/types/applyForm/types";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 import TableWidget from "./TableWidget";
+
+const printStylesPath = path.resolve(
+  __dirname,
+  "../../../../styles/_uswds-theme-custom-styles.scss",
+);
+const printStylesCss = readFileSync(printStylesPath, "utf8");
 
 describe("TableWidget", () => {
   const props: TableWidgetProps = {
@@ -600,7 +608,7 @@ describe("TableWidget", () => {
       expect(numeric).not.toEqual([50, 25, 25]);
     });
 
-    it("prevents a table row from splitting across a page when printed", () => {
+    it("does not inline print styles in the component; they live in the shared print stylesheet", () => {
       render(
         <TableWidget
           {...props}
@@ -611,21 +619,24 @@ describe("TableWidget", () => {
         />,
       );
 
-      const stylesheet = Array.from(document.styleSheets).find((sheet) =>
-        Array.from(sheet.cssRules).some((rule) =>
-          rule.cssText.includes(".applyform-budget-table tr"),
-        ),
-      );
-      expect(stylesheet).toBeDefined();
-      const cssText = Array.from(stylesheet!.cssRules)
-        .map((rule) => rule.cssText)
-        .join("\n");
+      expect(screen.getByTestId("table")).not.toHaveAttribute("style");
+      expect(printStylesCss).toMatch(/\.applyform-budget-table/);
+    });
 
-      expect(cssText).toMatch(
-        /\.applyform-budget-table tr\s*{[^}]*break-inside:\s*avoid;/,
+    it("prevents a table row from splitting across a page when printed", () => {
+      const tableBlockMatch = printStylesCss.match(
+        /\.applyform-budget-table\s*{[\s\S]*?\r?\n {2}}\r?\n/,
       );
-      expect(cssText).toMatch(
-        /\.applyform-budget-table tr\s*{[^}]*page-break-inside:\s*avoid;/,
+      expect(tableBlockMatch).not.toBeNull();
+      const tableBlock = tableBlockMatch![0];
+
+      expect(tableBlock).toMatch(/tr\s*{[^}]*break-inside:\s*avoid;/);
+      expect(tableBlock).toMatch(/tr\s*{[^}]*page-break-inside:\s*avoid;/);
+    });
+
+    it("resets overflow and max-height on the USWDS scrollable table wrapper during print so the table can paginate across pages", () => {
+      expect(printStylesCss).toMatch(
+        /\.usa-table-container--scrollable\s*{\s*overflow:\s*visible\s*!important;\s*max-height:\s*none\s*!important;/,
       );
     });
 
@@ -640,14 +651,12 @@ describe("TableWidget", () => {
         />,
       );
 
-      const stylesheet = Array.from(document.styleSheets).find(
-        (sheet) =>
-          sheet.cssRules.length > 0 &&
-          Array.from(sheet.cssRules).some((rule) =>
-            rule.cssText.startsWith("@media print"),
-          ),
-      );
-      expect(stylesheet).toBeDefined();
+      // The print rules for .applyform-budget-table live inside an
+      // @media print block in the shared stylesheet.
+      const printBlockStart = printStylesCss.indexOf("@media print");
+      expect(printBlockStart).toBeGreaterThan(-1);
+      const printBlock = printStylesCss.slice(printBlockStart);
+      expect(printBlock.indexOf(".applyform-budget-table")).toBeGreaterThan(-1);
 
       // No inline width leaks onto the table itself outside print.
       expect(screen.getByTestId("table")).not.toHaveAttribute("style");
