@@ -52,9 +52,9 @@ function getRenderValue(
     : undefined;
 }
 
-const PRINT_TEXT_COLUMN_UNIT = 16;
+const PRINT_TEXT_COLUMN_UNIT = 8;
 // Floor so no column collapses to an unusable sliver in print.
-const PRINT_MIN_COLUMN_WIDTH_PERCENT = 10;
+const PRINT_MIN_COLUMN_WIDTH_PERCENT = 6;
 
 /**
  * Determine whether a column is a "text" column (i.e. every populated cell
@@ -388,31 +388,6 @@ function TableWidget({
 
   return (
     <>
-      {/*
-        Print-only overrides. On screen this changes nothing — table-layout
-        stays at its default (auto) and the colgroup widths below are inert
-        until @media print switches the table to a fixed layout and applies
-        them. This also stops a row's cells from splitting across a page
-        break, which the browser's default table pagination allows otherwise.
-      */}
-      <style>{`
-        @media print {
-          .applyform-budget-table {
-            table-layout: fixed;
-          }
-          .applyform-budget-table col {
-            width: var(--applyform-print-col-width) !important;
-          }
-          .applyform-budget-table tr {
-            break-inside: avoid;
-            page-break-inside: avoid;
-          }
-          .applyform-budget-table .applyform-table-cell-value {
-            white-space: nowrap !important;
-            overflow: visible !important;
-          }
-        }
-      `}</style>
       <Table
         bordered
         fullWidth
