@@ -1,8 +1,8 @@
 """remove review workflow id
 
-Revision ID: ea0414bb4d8a
+Revision ID: 956a32b92993
 Revises: 0b3e125c6bac
-Create Date: 2026-07-31 20:13:53.927785
+Create Date: 2026-08-04 19:45:35.619365
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "ea0414bb4d8a"
+revision = "956a32b92993"
 down_revision = "0b3e125c6bac"
 branch_labels = None
 depends_on = None
