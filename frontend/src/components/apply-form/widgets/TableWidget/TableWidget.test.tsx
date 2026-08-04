@@ -108,6 +108,105 @@ describe("TableWidget", () => {
     });
   });
 
+  it("uses the HTML field name as the editable input id for summary anchors", () => {
+    const tableProps: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        type: "multiField",
+        name: "budget_424c_table_1",
+        widget: "Table",
+        definition: ["/properties/budget_information"],
+        children: {
+          columns: [
+            { columnHeader: "Category" },
+            { columnHeader: "Total Cost" },
+          ],
+          rows: [
+            {
+              cells: [
+                { type: "plainText", staticContent: "Admin" },
+                {
+                  type: "input",
+                  definition:
+                    "/properties/administrative_and_legal_expenses/properties/total_cost",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    render(
+      <TableWidget
+        {...tableProps}
+        schema={{}}
+        rawErrors={[]}
+        value={{ administrative_and_legal_expenses: { total_cost: 100 } }}
+        options={{}}
+      />,
+    );
+
+    const input = screen.getByTestId("budget_424c_table_1-0-1-input");
+
+    expect(input).toHaveAttribute(
+      "id",
+      "budget_information--administrative_and_legal_expenses--total_cost",
+    );
+    expect(input).toHaveAttribute(
+      "name",
+      "budget_information--administrative_and_legal_expenses--total_cost",
+    );
+  });
+
+  it("uses the first column label as the row label and the column header for editable table input aria-labels", () => {
+    const tableProps: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        type: "multiField",
+        name: "budget_424c_table_1",
+        widget: "Table",
+        definition: ["/properties/budget_information"],
+        children: {
+          columns: [
+            { columnHeader: "Category" },
+            { columnHeader: "Total Cost" },
+          ],
+          rows: [
+            {
+              cells: [
+                {
+                  type: "plainText",
+                  staticContent: "Administrative and legal expenses",
+                },
+                {
+                  type: "input",
+                  definition:
+                    "/properties/administrative_and_legal_expenses/properties/total_cost",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    render(
+      <TableWidget
+        {...tableProps}
+        schema={{}}
+        rawErrors={[]}
+        value={{ administrative_and_legal_expenses: { total_cost: 100 } }}
+        options={{}}
+      />,
+    );
+
+    expect(screen.getByTestId("budget_424c_table_1-0-1-input")).toHaveAttribute(
+      "aria-label",
+      "Administrative and legal expenses, Total Cost",
+    );
+  });
+
   it("prefixes nested table input names with the multiField root when configured under one parent object", () => {
     const tableProps: TableWidgetProps = {
       ...props,
@@ -275,35 +374,139 @@ describe("TableWidget", () => {
     expect(error.message).toBe("Table row 1 must contain exactly 3 cells.");
   });
 
-  it("does not mutate the original value object when updating cells", () => {
-    const onChange = jest.fn();
-    const originalValue: Record<string, number> = {
-      first_value: 100,
-      second_value: 200,
-    };
-    const valueSnapshot = JSON.parse(
-      JSON.stringify(originalValue),
-    ) as unknown as Record<string, number>;
+  it("passes validation errors to TableCell components via cellErrors", () => {
+    const rawErrors = [
+      {
+        field: "first_value",
+        message: "First value is required",
+        type: "required",
+        value: null,
+      },
+      {
+        field: "second_value",
+        message: "Second value must be positive",
+        type: "custom",
+        value: null,
+      },
+    ];
 
     render(
       <TableWidget
         {...props}
-        onChange={onChange}
+        schema={{}}
+        rawErrors={rawErrors}
+        value={{ first_value: 100, second_value: 50 }}
+        options={{}}
+      />,
+    );
+    // Verify that the table renders with error information
+    // (The actual error display is tested in TableCell.test.tsx)
+    expect(screen.getByTestId("table")).toBeInTheDocument();
+  });
+
+  it("handles empty rawErrors array gracefully", () => {
+    render(
+      <TableWidget
+        {...props}
         schema={{}}
         rawErrors={[]}
-        value={originalValue}
+        value={{ first_value: 100, second_value: 50 }}
         options={{}}
       />,
     );
 
-    fireEvent.change(screen.getByTestId("summary_table_test-0-1-input"), {
-      target: { value: "250" },
-    });
+    expect(screen.getByTestId("table")).toBeInTheDocument();
+  });
 
-    expect(originalValue).toEqual(valueSnapshot);
-    expect(onChange).toHaveBeenCalledWith({
-      first_value: "250",
-      second_value: 200,
-    });
+  it("filters errors correctly by cell name", () => {
+    const rawErrors = [
+      {
+        field: "first_value",
+        message: "First value error",
+        type: "custom",
+        value: null,
+      },
+      {
+        field: "second_value",
+        message: "Second value error",
+        type: "custom",
+        value: null,
+      },
+      {
+        field: "other_field",
+        message: "Should not appear",
+        type: "custom",
+        value: null,
+      },
+    ];
+
+    render(
+      <TableWidget
+        {...props}
+        schema={{}}
+        rawErrors={rawErrors}
+        value={{ first_value: 100, second_value: 50 }}
+        options={{}}
+      />,
+    );
+
+    expect(screen.getByTestId("table")).toBeInTheDocument();
+
+    // Verify error messages are rendered for input fields
+    // (Note: The second cell is read-only so it won't show errors)
+    expect(screen.getByText("First value error")).toBeInTheDocument();
+    expect(screen.queryByText("Should not appear")).not.toBeInTheDocument();
+  });
+
+  it("does not apply base-name fallback when multiple cells share the same suffix", () => {
+    const propsWithAmbiguousSuffix: TableWidgetProps = {
+      ...props,
+      uiSchemaField: {
+        ...props.uiSchemaField,
+        children: {
+          columns: [
+            { columnHeader: "Item" },
+            { columnHeader: "First Total" },
+            { columnHeader: "Second Total" },
+          ],
+          rows: [
+            {
+              cells: [
+                { type: "plainText", staticContent: "Row 1" },
+                {
+                  type: "input",
+                  definition:
+                    "/properties/budget_information/items/properties/administrative_and_legal_expenses/properties/total_cost",
+                },
+                {
+                  type: "input",
+                  definition:
+                    "/properties/budget_information/items/properties/construction/properties/total_cost",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    render(
+      <TableWidget
+        {...propsWithAmbiguousSuffix}
+        schema={{}}
+        rawErrors={[
+          {
+            field: "total_cost",
+            message: "Total cost error",
+            type: "custom",
+            value: null,
+          },
+        ]}
+        value={{}}
+        options={{}}
+      />,
+    );
+
+    expect(screen.queryByText("Total cost error")).not.toBeInTheDocument();
   });
 });

@@ -34,7 +34,7 @@ export function SubmissionSetUp() {
         </div>
         <div className="tablet:grid-col">
           <CommonTextInput
-            fieldId="competition-title"
+            fieldId="competition_title"
             labelText={t("competitionTitle")}
             description={t("competitionTitleHint")}
             isRequired={false}
@@ -44,7 +44,7 @@ export function SubmissionSetUp() {
         </div>
       </div>
       <CommonSelectInput
-        fieldId="who-can-apply"
+        fieldId="open_to_applicants"
         labelText={t("whoCanApply")}
         description={t("whoCanApplyHint")}
         isRequired={true}

@@ -35,7 +35,27 @@ locals {
       "--set-current",
       "--store-version"
     ],
+    # Mirrors staging.
+    "infra-staging" = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
     training = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
+    # Mirrors training.
+    "infra-training" = [
       "flask",
       "data-migration",
       "load-transform",
@@ -53,6 +73,16 @@ locals {
       "--set-current",
       "--store-version"
     ],
+    # Mirrors grantee1.
+    "infra-grantee1" = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
     grantee2 = [
       "flask",
       "data-migration",
@@ -62,7 +92,27 @@ locals {
       "--set-current",
       "--store-version"
     ],
+    # Mirrors grantee2.
+    "infra-grantee2" = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
     grantor1 = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
+    # Mirrors grantor1.
+    "infra-grantor1" = [
       "flask",
       "data-migration",
       "load-transform",
@@ -97,6 +147,11 @@ locals {
       ]
       */
     }
+
+    "infra-training" = {
+      cpu = 1024
+      mem = 4096
+    }
     prod = {
       cpu = 1024
       mem = 4096
@@ -104,74 +159,109 @@ locals {
   }
   sam-extract-args = {
     # In dev/staging we don't fetch extracts, but generate our own
-    dev         = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
-    "infra-dev" = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
-    staging     = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
-    training    = ["flask", "task", "sam-extracts"]
-    grantee1    = ["flask", "task", "sam-extracts"]
-    grantee2    = ["flask", "task", "sam-extracts"]
-    grantor1    = ["flask", "task", "sam-extracts"]
-    prod        = ["flask", "task", "sam-extracts"]
+    dev              = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    "infra-dev"      = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    staging          = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    "infra-staging"  = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    training         = ["flask", "task", "sam-extracts"]
+    "infra-training" = ["flask", "task", "sam-extracts"]
+    grantee1         = ["flask", "task", "sam-extracts"]
+    "infra-grantee1" = ["flask", "task", "sam-extracts"]
+    grantee2         = ["flask", "task", "sam-extracts"]
+    "infra-grantee2" = ["flask", "task", "sam-extracts"]
+    grantor1         = ["flask", "task", "sam-extracts"]
+    "infra-grantor1" = ["flask", "task", "sam-extracts"]
+    prod             = ["flask", "task", "sam-extracts"]
   }
   setup-lower-env-agencies-state = {
-    dev         = "ENABLED"
-    "infra-dev" = "ENABLED"
-    staging     = "ENABLED"
-    training    = "DISABLED"
-    grantee1    = "DISABLED"
-    grantee2    = "DISABLED"
-    grantor1    = "DISABLED"
-    prod        = "DISABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "DISABLED"
+    "infra-training" = "DISABLED"
+    grantee1         = "DISABLED"
+    "infra-grantee1" = "DISABLED"
+    grantee2         = "DISABLED"
+    "infra-grantee2" = "DISABLED"
+    grantor1         = "DISABLED"
+    "infra-grantor1" = "DISABLED"
+    prod             = "DISABLED"
   }
   build-automatic-opportunities-state = {
-    dev         = "ENABLED"
-    "infra-dev" = "ENABLED"
-    staging     = "ENABLED"
-    training    = "ENABLED"
-    grantee1    = "DISABLED"
-    grantee2    = "DISABLED"
-    grantor1    = "DISABLED"
-    prod        = "DISABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
+    grantee1         = "DISABLED"
+    "infra-grantee1" = "DISABLED"
+    grantee2         = "DISABLED"
+    "infra-grantee2" = "DISABLED"
+    grantor1         = "DISABLED"
+    "infra-grantor1" = "DISABLED"
+    prod             = "DISABLED"
   }
   load-transform-state = {
-    dev         = "ENABLED"
-    "infra-dev" = "ENABLED"
-    staging     = "ENABLED"
-    training    = "ENABLED"
-    grantee1    = "ENABLED"
-    grantee2    = "ENABLED"
-    grantor1    = "ENABLED"
-    prod        = "ENABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
+    grantee1         = "ENABLED"
+    "infra-grantee1" = "ENABLED"
+    grantee2         = "ENABLED"
+    "infra-grantee2" = "ENABLED"
+    grantor1         = "ENABLED"
+    "infra-grantor1" = "ENABLED"
+    prod             = "ENABLED"
   }
   sam-extracts-state = {
-    dev         = "ENABLED"
-    "infra-dev" = "ENABLED"
-    staging     = "ENABLED"
-    training    = "ENABLED"
-    grantee1    = "ENABLED"
-    grantee2    = "ENABLED"
-    grantor1    = "ENABLED"
-    prod        = "ENABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
+    grantee1         = "ENABLED"
+    "infra-grantee1" = "ENABLED"
+    grantee2         = "ENABLED"
+    "infra-grantee2" = "ENABLED"
+    grantor1         = "ENABLED"
+    "infra-grantor1" = "ENABLED"
+    prod             = "ENABLED"
   }
   create-analytics-db-csvs-state = {
-    dev         = "ENABLED"
-    "infra-dev" = "ENABLED"
-    staging     = "ENABLED"
-    training    = "ENABLED"
-    grantee1    = "ENABLED"
-    grantee2    = "ENABLED"
-    grantor1    = "ENABLED"
-    prod        = "ENABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
+    grantee1         = "ENABLED"
+    "infra-grantee1" = "ENABLED"
+    grantee2         = "ENABLED"
+    "infra-grantee2" = "ENABLED"
+    grantor1         = "ENABLED"
+    "infra-grantor1" = "ENABLED"
+    prod             = "ENABLED"
   }
   email-notification-opportunity-state = {
-    dev         = "ENABLED"
-    "infra-dev" = "ENABLED"
-    staging     = "ENABLED"
-    training    = "ENABLED"
-    grantee1    = "DISABLED"
-    grantee2    = "DISABLED"
-    grantor1    = "DISABLED"
-    prod        = "ENABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
+    grantee1         = "DISABLED"
+    "infra-grantee1" = "DISABLED"
+    grantee2         = "DISABLED"
+    "infra-grantee2" = "DISABLED"
+    grantor1         = "DISABLED"
+    "infra-grantor1" = "DISABLED"
+    prod             = "ENABLED"
   }
   scheduled_jobs = {
     load-transform = {

@@ -19,6 +19,9 @@ on:
           - dev
           - staging
           - grantee1
+          - infra-grantee1
+          - infra-grantee2
+          - infra-grantor1
       value:
         description: Feature flag value
         required: true
