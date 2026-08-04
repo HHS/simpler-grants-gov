@@ -185,6 +185,88 @@ describe("ApplicationAttachmentWidget", () => {
     expect(getHiddenInput(container, "test-attachment-field")).toHaveValue("");
   });
 
+  it("picks up the attachment matching the value when attachments load after mount", () => {
+    mockUseApplicationAttachments.mockReturnValue({ attachments: null });
+    const { container, rerender } = render(
+      <ApplicationAttachmentWidget {...defaultProps} value="uuid-1" />,
+    );
+
+    expect(getHiddenInput(container, "test-attachment-field")).toHaveValue("");
+    mockUseApplicationAttachments.mockReturnValue({
+      attachments: [existingAttachment],
+    });
+
+    rerender(<ApplicationAttachmentWidget {...defaultProps} value="uuid-1" />);
+    expect(getHiddenInput(container, "test-attachment-field")).toHaveValue(
+      "uuid-1",
+    );
+    expect(getSimplerFileInputProps().existingFiles).toHaveLength(1);
+  });
+
+  it("clears the displayed attachment when the parent resets the value", () => {
+    const { container, rerender } = render(
+      <ApplicationAttachmentWidget {...defaultProps} value="uuid-1" />,
+    );
+    expect(getHiddenInput(container, "test-attachment-field")).toHaveValue(
+      "uuid-1",
+    );
+
+    rerender(
+      <ApplicationAttachmentWidget {...defaultProps} value={undefined} />,
+    );
+
+    expect(getHiddenInput(container, "test-attachment-field")).toHaveValue("");
+    expect(getSimplerFileInputProps().existingFiles).toEqual([]);
+  });
+
+  it("displays the attachment matching a new value when the parent changes it", () => {
+    mockUseApplicationAttachments.mockReturnValue({
+      attachments: [existingAttachment, newAttachment],
+    });
+    const { container, rerender } = render(
+      <ApplicationAttachmentWidget {...defaultProps} value="uuid-1" />,
+    );
+
+    rerender(
+      <ApplicationAttachmentWidget {...defaultProps} value="uuid-new" />,
+    );
+
+    expect(getHiddenInput(container, "test-attachment-field")).toHaveValue(
+      "uuid-new",
+    );
+    expect(getSimplerFileInputProps().existingFiles).toEqual([
+      expect.objectContaining({ id: "uuid-new" }),
+    ]);
+  });
+
+  it("keeps a just-uploaded attachment when the value updates before the attachments context refreshes", async () => {
+    mockClientFetch.mockResolvedValue({ data: newAttachment });
+
+    const { container, rerender } = render(
+      <ApplicationAttachmentWidget {...defaultProps} value={undefined} />,
+    );
+
+    await act(async () => {
+      await getSimplerFileInputProps().postUploadAction(
+        "pending-file-1",
+        new AbortController().signal,
+      );
+    });
+
+    // the parent reflects the reported value back, but the attachments
+    // context does not contain the new attachment yet
+    rerender(
+      <ApplicationAttachmentWidget {...defaultProps} value="uuid-new" />,
+    );
+
+    expect(getHiddenInput(container, "test-attachment-field")).toHaveValue(
+      "uuid-new",
+    );
+    expect(getSimplerFileInputProps().existingFiles).toEqual([
+      expect.objectContaining({ id: "uuid-new" }),
+    ]);
+  });
+
   it("creates an application attachment on upload and reports the new id via onChange", async () => {
     mockClientFetch.mockResolvedValue({ data: newAttachment });
     const onChange = jest.fn();

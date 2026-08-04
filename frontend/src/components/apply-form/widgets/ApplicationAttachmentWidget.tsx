@@ -10,7 +10,7 @@ import { mapAttachmentsToFileMetadata } from "src/utils/applyForm/applicationAtt
 
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FormGroup } from "@trussworks/react-uswds";
 
 import { SimplerFileInput } from "src/components/core/fileInput/SimplerFileInput";
@@ -43,6 +43,29 @@ const ApplicationAttachmentWidget = ({
     ) ?? null,
   );
 
+  useEffect(() => {
+    const selectedAttachmentId =
+      typeof value === "string" && value ? value : null;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAttachment((currentAttachment) => {
+      if (!selectedAttachmentId) {
+        return null;
+      }
+      if (
+        currentAttachment?.application_attachment_id === selectedAttachmentId
+      ) {
+        return currentAttachment;
+      }
+      return (
+        attachments?.find(
+          (attachmentItem) =>
+            attachmentItem.application_attachment_id === selectedAttachmentId,
+        ) ?? null
+      );
+    });
+  }, [value, attachments]);
+
   const handleUploadApplicationAttachment = async (
     fileId: string,
     abortSignal: AbortSignal,
@@ -59,7 +82,7 @@ const ApplicationAttachmentWidget = ({
     setAttachment(response.data);
   };
 
-  const handleDeletattachment = (): Promise<undefined> => {
+  const handleDeleteAttachment = (): Promise<undefined> => {
     setAttachment(null);
     onChange?.(undefined);
     return Promise.resolve(undefined);
@@ -104,7 +127,7 @@ const ApplicationAttachmentWidget = ({
         postUploadActionProgressMessage={t("uploading")}
         postUploadActionSuccessMessage={t("success")}
         postUploadActionErrorMessage={t("error")}
-        onDelete={handleDeletattachment}
+        onDelete={handleDeleteAttachment}
         disabled={disabled}
         readOnly={readOnly}
         required={required}
