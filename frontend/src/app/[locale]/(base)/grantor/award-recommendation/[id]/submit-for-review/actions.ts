@@ -29,8 +29,13 @@ export async function submitReviewForAwardRecommendation(
       }),
     };
 
-    // TODO: Call backend API to submit review with workflowEventMetadata
-    // Placeholder implementation - server action will make async API call
+    // TODO: INCOMPLETE - Backend API integration not implemented
+    // This server action is a stub that returns success without making API calls
+    // Required implementation:
+    // 1. POST to /api/award-recommendations/{id}/reviews with workflowEventMetadata
+    // 2. Handle workflow state transitions based on decision type
+    // 3. Associate uploaded supplemental documents with the review submission
+    // 4. Return actual API response with success/error from backend
     void awardRecommendationId;
     void workflowEventMetadata;
 

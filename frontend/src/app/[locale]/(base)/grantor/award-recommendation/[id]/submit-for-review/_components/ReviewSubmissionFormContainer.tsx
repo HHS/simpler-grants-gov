@@ -148,6 +148,8 @@ export const ReviewSubmissionFormContainer: React.FC<
     void determineFormType();
   }, [reviewWorkflowId, t, clientFetch]);
 
+  // TODO: Submit handler calls server action but full workflow integration incomplete
+  // Needs backend API endpoints for review submission and workflow state transitions
   const handleSubmit = async (formData: ReviewFormData) => {
     setErrorMessage(null);
     try {

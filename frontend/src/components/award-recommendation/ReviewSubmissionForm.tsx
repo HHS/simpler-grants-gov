@@ -49,6 +49,8 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadFileMetadata[]>([]);
 
+  // TODO: Form submission collects data but backend integration is incomplete
+  // Review workflow state transitions and file associations need full implementation
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -198,6 +200,8 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
     );
   };
 
+  // TODO: File upload handler is stubbed - needs to be connected to actual file upload API
+  // Currently returns mock data and does not persist files to backend
   const postUploadAction = (fileId: string, _signal: AbortSignal) => {
     return Promise.resolve({
       id: fileId,
@@ -206,6 +210,8 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
     });
   };
 
+  // TODO: File delete handler only removes from local state - does not delete from backend
+  // Needs to call API endpoint to delete file from storage when backend is ready
   const handleDelete = (fileId: string) => {
     setUploadedFiles(uploadedFiles.filter((file) => file.id !== fileId));
     return Promise.resolve();
