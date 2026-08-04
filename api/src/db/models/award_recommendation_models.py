@@ -150,7 +150,7 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         uselist=True,
         cascade="all, delete-orphan",
     )
-    workflows: Mapped[list["Workflow"]] = relationship(
+    workflows: Mapped[list[Workflow]] = relationship(
         "Workflow",
         back_populates="award_recommendation",
         cascade="all, delete-orphan",
