@@ -4,6 +4,25 @@
 
 E2E tests are run using Playwright. See [development.md](/DEVELOPMENT.md) for more general info!
 
+### Running against deployed environments
+
+Playwright tests can be directed at any deployed environment by adjusting environment variables set in your `.env.local` file. For example, when running against staging:
+
+```
+PLAYWRIGHT_TARGET_ENV=staging
+PLAYWRIGHT_BASE_URL=https://staging.simpler.grants.gov
+PLAYWRIGHT_API_URL=https://api.staging.simpler.grants.gov
+TEST_USER_EMAIL=<from 1password>
+TEST_USER_PASSWORD=<from 1password>
+TEST_USER_MFA_KEY=<from 1password>
+SESSION_SECRET=<from 1password>
+TEST_USER_MANAGER_API_KEY=<from 1password>
+```
+
+Note that tests will still run without having secret env vars set, but tests involving login will fail.
+
+The correct values for secrets can be found in 1Password, AWS SSM, or ask a team member.
+
 ### Spoofing logins
 
 There are situations where we want to be able to test a "logged in" experience without having to script the test through the full login flow. In order to support this we have built a system to spoof the user login by placing a session cookie into the browser context. This system works by creating a client side cookie on the browser context within Playwright that will function the same as the session cookie produced as the output of the real login process.
@@ -18,13 +37,9 @@ The system is defined in [Login Utils](https://github.com/HHS/simpler-grants-gov
 - set `SESSION_SECRET` and `TEST_USER_MANAGER_API_KEY` in your frontend `.env.local`. `TEST_USER_MANAGER_API_KEY` must match `LOCAL_TEST_USER_MANAGER_API_KEY` in `api/local.env` (default: `local-manager-key`).
 - that's it! Running e2e tests using spoofing should now work.
 
-#### Staging setup
+#### Switching between local and deployed environments
 
-Staging runs on a deployed server, so Playwright requests the session token from the same staging-only internal endpoint. To run spoofed logins against staging, set `PLAYWRIGHT_TARGET_ENV=staging`, `SESSION_SECRET`, and `TEST_USER_MANAGER_API_KEY` in `.env.local`. The staging values for `SESSION_SECRET` and `TEST_USER_MANAGER_API_KEY` (the staging test-user-manager's API key) can be found in 1Password, AWS SSM, or ask a team member.
-
-#### Switching between local and staging
-
-Both targets read the **same** env var, `TEST_USER_MANAGER_API_KEY` — only its value differs (the local `make db-seed-local` default `local-manager-key` vs. the staging manager key). So to switch targets on your machine, change `PLAYWRIGHT_TARGET_ENV` and swap the `TEST_USER_MANAGER_API_KEY` (and `SESSION_SECRET`) value to match. In CI this is handled automatically: the local workflow passes `local-manager-key` and the staging workflow injects the staging key, both into `TEST_USER_MANAGER_API_KEY`.
+Whether running against a local or deployed environment, Playwright reads the **same** env var, `TEST_USER_MANAGER_API_KEY` — only its value differs (the local `make db-seed-local` default `local-manager-key` vs. the key for the deployed environment). So to switch targets on your machine, change `PLAYWRIGHT_TARGET_ENV` and swap the `TEST_USER_MANAGER_API_KEY` (and `SESSION_SECRET`) value to match. In CI this is handled automatically: the local workflow passes `local-manager-key` and the deployed workflow injects the key for the deployed environment, both into `TEST_USER_MANAGER_API_KEY`.
 
 ### Test groups
 

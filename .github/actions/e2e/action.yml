@@ -127,6 +127,13 @@ runs:
       run: |
         npx playwright install --with-deps webkit
 
+    - name: Set target urls for environment
+      shell: bash
+      run: |
+        if [[ ${{ inputs.target }} = "staging" ]]; then
+          echo "base_url=https://staging.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.staging.simpler.grants.gov" >> "$GITHUB_ENV"
+        fi
     - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
       if: ${{ inputs.playwright_tags == '' }}
       working-directory: ./frontend
@@ -135,6 +142,8 @@ runs:
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
+        PLAYWRIGHT_API_URL: ${{ env.api_url }}
         PLAYWRIGHT_WORKERS: ${{ inputs.workers }}
         STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
@@ -154,6 +163,8 @@ runs:
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
+        PLAYWRIGHT_API_URL: ${{ env.api_url }}
         PLAYWRIGHT_WORKERS: ${{ inputs.workers }}
         STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}

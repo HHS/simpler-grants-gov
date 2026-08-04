@@ -3,11 +3,11 @@ from datetime import timedelta
 from uuid import UUID, uuid4
 
 from grants_shared.adapters import db
+from grants_shared.adapters.aws.ses_adapter import send_email
 from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util import datetime_util
 from sqlalchemy import desc, select
 
-from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege
 from src.db.models.entity_models import (
@@ -46,34 +46,28 @@ def _send_invitation_email(
     config = get_email_config()
     subject, content = build_invitation_email(invitation, organization, config)
 
-    # Generate a trace ID for correlating logs with Pinpoint email delivery
+    # Generate a trace ID for correlating logs with SES email delivery
     trace_id = str(uuid4())
 
-    logger.info(
-        "Sending invitation email",
-        extra={
-            "invitation_id": invitation.organization_invitation_id,
-            "pinpoint_trace_id": trace_id,
-        },
-    )
+    log_extra = {
+        "invitation_id": invitation.organization_invitation_id,
+        "ses_trace_id": trace_id,
+    }
+
+    logger.info("Sending invitation email", extra=log_extra)
 
     try:
-        send_pinpoint_email_raw(
+        message_id = send_email(
             to_address=invitee_email,
             subject=subject,
             message=content,
-            app_id=config.app_id,
-            trace_id=trace_id,
         )
         logger.info(
             "Invitation email sent successfully",
-            extra={"invitation_id": invitation.organization_invitation_id},
+            extra=log_extra | {"ses_message_id": message_id},
         )
     except Exception:
-        logger.exception(
-            "Failed to send invitation email",
-            extra={"invitation_id": invitation.organization_invitation_id},
-        )
+        logger.exception("Failed to send invitation email", extra=log_extra)
         # Don't raise - email failure should not block invitation creation
 
 
