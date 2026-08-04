@@ -353,13 +353,12 @@ describe("TableCell", () => {
       />,
     );
 
-    const errorText = screen.getByText(
-      /This is a very long validation error message/,
+    const errorContainer = screen.getByTestId(
+      "input-cell-long-error-error-container",
     );
-    const container = errorText.closest("div");
 
-    expect(container).toHaveStyle("white-space: normal");
-    expect(container).not.toHaveStyle("word-break: break-all");
-    expect(container).not.toHaveStyle("overflow-wrap: anywhere");
+    expect(errorContainer).toHaveStyle("white-space: normal");
+    expect(errorContainer).not.toHaveStyle("word-break: break-all");
+    expect(errorContainer).not.toHaveStyle("overflow-wrap: anywhere");
   });
 });

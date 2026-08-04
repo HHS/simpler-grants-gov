@@ -130,6 +130,7 @@ function TableCell({
       {hasError && (
         <div
           className="display-block width-full"
+          data-testid={`${id}-error-container`}
           style={{
             whiteSpace: "normal",
             wordBreak: "normal",
