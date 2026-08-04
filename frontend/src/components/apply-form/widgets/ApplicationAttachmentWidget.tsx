@@ -20,6 +20,7 @@ import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 const ApplicationAttachmentWidget = ({
   disabled,
+  formContext,
   id,
   onChange,
   options,
@@ -29,6 +30,7 @@ const ApplicationAttachmentWidget = ({
   schema: { description, title },
   value,
 }: UswdsWidgetProps) => {
+  const markFormDirty = formContext?.widgetSupport?.markFormDirty;
   const t = useTranslations("Application.attachmentUpload");
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   const { clientFetch: createApplicationAttachmentFetcher } =
@@ -85,6 +87,7 @@ const ApplicationAttachmentWidget = ({
   const handleDeleteAttachment = (): Promise<undefined> => {
     setAttachment(null);
     onChange?.(undefined);
+    markFormDirty?.();
     return Promise.resolve(undefined);
   };
 
@@ -127,6 +130,7 @@ const ApplicationAttachmentWidget = ({
         postUploadActionProgressMessage={t("uploading")}
         postUploadActionSuccessMessage={t("success")}
         postUploadActionErrorMessage={t("error")}
+        onStart={markFormDirty}
         onDelete={handleDeleteAttachment}
         disabled={disabled}
         readOnly={readOnly}

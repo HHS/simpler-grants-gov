@@ -16,6 +16,7 @@ type SimplerFileInputMockProps = {
   postUploadActionSuccessMessage?: string;
   postUploadActionErrorMessage?: string;
   onDelete: (fileId: string) => Promise<unknown>;
+  onStart?: () => void;
   existingFiles?: UploadFileMetadata[];
   disabled?: boolean;
   readOnly?: boolean;
@@ -376,6 +377,43 @@ describe("ApplicationAttachmentWidget", () => {
     });
 
     expect(onChange).toHaveBeenCalledWith(undefined);
+  });
+
+  it("marks the form dirty when an upload starts", () => {
+    const markFormDirty = jest.fn();
+
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: { useVirusScanning: true, markFormDirty },
+        }}
+      />,
+    );
+
+    getSimplerFileInputProps().onStart?.();
+
+    expect(markFormDirty).toHaveBeenCalled();
+  });
+
+  it("marks the form dirty when the attachment is deleted", async () => {
+    const markFormDirty = jest.fn();
+
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        value="uuid-1"
+        formContext={{
+          widgetSupport: { useVirusScanning: true, markFormDirty },
+        }}
+      />,
+    );
+
+    await act(async () => {
+      await getSimplerFileInputProps().onDelete("uuid-1");
+    });
+
+    expect(markFormDirty).toHaveBeenCalled();
   });
 
   it("passes the upload status messages to the file input", () => {
