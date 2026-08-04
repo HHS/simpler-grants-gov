@@ -1,8 +1,16 @@
+import { readFileSync } from "fs";
+import path from "path";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { TableWidgetProps } from "src/types/applyForm/types";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 import TableWidget from "./TableWidget";
+
+const printStylesPath = path.resolve(
+  __dirname,
+  "../../../../styles/_uswds-theme-custom-styles.scss",
+);
+const printStylesCss = readFileSync(printStylesPath, "utf8");
 
 describe("TableWidget", () => {
   const props: TableWidgetProps = {
@@ -48,6 +56,19 @@ describe("TableWidget", () => {
       },
     },
   };
+
+  it("applies the print-scoped table class used to force fixed table-layout in print", () => {
+    render(
+      <TableWidget
+        {...props}
+        schema={{}}
+        rawErrors={[]}
+        value={{}}
+        options={{}}
+      />,
+    );
+    expect(screen.getByTestId("table")).toHaveClass("applyform-budget-table");
+  });
 
   it("renders configured table headers and cells", () => {
     render(
@@ -508,5 +529,188 @@ describe("TableWidget", () => {
     );
 
     expect(screen.queryByText("Total cost error")).not.toBeInTheDocument();
+  });
+
+  describe("print layout behavior", () => {
+    it("keeps the interactive on-screen header widths driven by configured column.width", () => {
+      const widthProps: TableWidgetProps = {
+        ...props,
+        uiSchemaField: {
+          ...props.uiSchemaField,
+          children: {
+            columns: [
+              { columnHeader: "Item", width: 50 },
+              { columnHeader: "First Value", width: 25 },
+              { columnHeader: "Second Value", width: 25 },
+            ],
+            rows: props.uiSchemaField.children.rows,
+          },
+        },
+      };
+
+      render(
+        <TableWidget
+          {...widthProps}
+          schema={{}}
+          rawErrors={[]}
+          value={{ first_value: 100, second_value: 200 }}
+          options={{}}
+        />,
+      );
+
+      const headers = screen.getAllByRole("columnheader");
+      expect(headers[0]).toHaveStyle("width: 50%");
+      expect(headers[1]).toHaveStyle("width: 25%");
+      expect(headers[2]).toHaveStyle("width: 25%");
+    });
+
+    it("computes print-only column widths from content, independent of configured column.width", () => {
+      const widthProps: TableWidgetProps = {
+        ...props,
+        uiSchemaField: {
+          ...props.uiSchemaField,
+          children: {
+            columns: [
+              { columnHeader: "Item", width: 50 },
+              { columnHeader: "First Value", width: 25 },
+              { columnHeader: "Second Value", width: 25 },
+            ],
+            rows: props.uiSchemaField.children.rows,
+          },
+        },
+      };
+
+      render(
+        <TableWidget
+          {...widthProps}
+          schema={{}}
+          rawErrors={[]}
+          value={{ first_value: 100, second_value: 200 }}
+          options={{}}
+        />,
+      );
+
+      const tableHtml = screen.getByTestId("table").innerHTML;
+      const colStyles = Array.from(
+        tableHtml.matchAll(/<col[^>]*style="([^"]*)"/g),
+      ).map((match) => match[1]);
+      const printWidths = colStyles.map((style) => {
+        const match = /--applyform-print-col-width:\s*([\d.]+)%/.exec(style);
+        return match ? `${match[1]}%` : "";
+      });
+
+      // Widths should sum to 100% but NOT equal the configured 50/25/25 split —
+      // proving print sizing is content-derived, not copied from column.width.
+      const numeric = printWidths.map((w) => parseFloat(w));
+      const total = numeric.reduce((sum, w) => sum + w, 0);
+
+      expect(total).toBeCloseTo(100, 1);
+      expect(numeric).not.toEqual([50, 25, 25]);
+    });
+
+    it("does not inline print styles in the component; they live in the shared print stylesheet", () => {
+      render(
+        <TableWidget
+          {...props}
+          schema={{}}
+          rawErrors={[]}
+          value={{}}
+          options={{}}
+        />,
+      );
+
+      expect(screen.getByTestId("table")).not.toHaveAttribute("style");
+      expect(printStylesCss).toMatch(/\.applyform-budget-table/);
+    });
+
+    it("prevents a table row from splitting across a page when printed", () => {
+      const tableBlockMatch = printStylesCss.match(
+        /\.applyform-budget-table\s*{[\s\S]*?\r?\n {2}}\r?\n/,
+      );
+      expect(tableBlockMatch).not.toBeNull();
+      const tableBlock = tableBlockMatch![0];
+
+      expect(tableBlock).toMatch(/tr\s*{[^}]*break-inside:\s*avoid;/);
+      expect(tableBlock).toMatch(/tr\s*{[^}]*page-break-inside:\s*avoid;/);
+    });
+
+    it("resets overflow and max-height on the USWDS scrollable table wrapper during print so the table can paginate across pages", () => {
+      expect(printStylesCss).toMatch(
+        /\.usa-table-container--scrollable\s*{\s*overflow:\s*visible\s*!important;\s*max-height:\s*none\s*!important;/,
+      );
+    });
+
+    it("scopes print-only layout changes to @media print, leaving the interactive form untouched", () => {
+      render(
+        <TableWidget
+          {...props}
+          schema={{}}
+          rawErrors={[]}
+          value={{}}
+          options={{}}
+        />,
+      );
+
+      // The print rules for .applyform-budget-table live inside an
+      // @media print block in the shared stylesheet.
+      const printBlockStart = printStylesCss.indexOf("@media print");
+      expect(printBlockStart).toBeGreaterThan(-1);
+      const printBlock = printStylesCss.slice(printBlockStart);
+      expect(printBlock.indexOf(".applyform-budget-table")).toBeGreaterThan(-1);
+
+      // No inline width leaks onto the table itself outside print.
+      expect(screen.getByTestId("table")).not.toHaveAttribute("style");
+
+      const tableHtml = screen.getByTestId("table").innerHTML;
+      const colStyleStrings = Array.from(
+        tableHtml.matchAll(/<col[^>]*style="([^"]*)"/g),
+      ).map((match) => match[1]);
+      expect(colStyleStrings).not.toHaveLength(0);
+      colStyleStrings.forEach((style) => {
+        expect(style).toContain("--applyform-print-col-width");
+      });
+    });
+
+    it("assigns distinct print widths based on content for text and long numeric columns", () => {
+      const longValueProps: TableWidgetProps = {
+        ...props,
+        uiSchemaField: {
+          ...props.uiSchemaField,
+          children: {
+            columns: [
+              { columnHeader: "Item" },
+              { columnHeader: "First Value" },
+              { columnHeader: "Second Value" },
+            ],
+            rows: props.uiSchemaField.children.rows,
+          },
+        },
+      };
+
+      render(
+        <TableWidget
+          {...longValueProps}
+          schema={{}}
+          rawErrors={[]}
+          value={{ first_value: 100, second_value: 987654321 }}
+          options={{}}
+        />,
+      );
+
+      const tableHtml = screen.getByTestId("table").innerHTML;
+      const colStyleStrings = Array.from(
+        tableHtml.matchAll(/<col[^>]*style="([^"]*)"/g),
+      ).map((match) => match[1]);
+      const widths = colStyleStrings.map((style) => {
+        const match = /--applyform-print-col-width:\s*([\d.]+)%/.exec(style);
+        return match ? parseFloat(match[1]) : 0;
+      });
+      const textColWidth = widths[0];
+      const longNumberColWidth = widths[2];
+
+      expect(textColWidth).toBeGreaterThan(0);
+      expect(longNumberColWidth).toBeGreaterThan(0);
+      expect(textColWidth).not.toBe(longNumberColWidth);
+    });
   });
 });

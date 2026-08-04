@@ -6,7 +6,7 @@ import { ChangeEvent, useState } from "react";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
 
 const READ_ONLY_OUTPUT_CLASS =
-  "usa-input margin-0 width-full overflow-x-auto display-block border border-base-light bg-base-lightest text-right text-wrap";
+  "usa-input margin-0 width-full overflow-x-auto display-block border border-base-light bg-base-lightest text-right text-wrap applyform-table-cell-value";
 
 type TableCellProps = {
   /** The cell configuration from the table widget schema */
@@ -130,7 +130,7 @@ function TableCell({
       {hasError && <FieldErrors fieldName={id} rawErrors={cellErrors} />}
       <input
         aria-label={ariaLabel ?? `Editable table value for ${cell.definition}`}
-        className={`usa-input margin-0 width-full overflow-x-auto${
+        className={`usa-input margin-0 width-full overflow-x-auto applyform-table-cell-value${
           hasError ? " usa-input--error" : ""
         }`}
         data-testid={`${id}-input`}

@@ -943,6 +943,33 @@ dl {
     word-break: break-word !important;
     line-height: 1.2 !important;
   }
+
+  // TableWidget (apply-form budget/summary tables)
+  // Forces a fixed table-layout and applies the content-derived column
+  // widths TableWidget computes at render time (--applyform-print-col-width
+  // custom properties on each <col>). On screen this table stays at its
+  // default auto layout; these rules only take effect at print time.
+  .applyform-budget-table {
+    table-layout: fixed;
+
+    col {
+      width: var(--applyform-print-col-width) !important;
+    }
+
+    tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .applyform-table-cell-value {
+      white-space: nowrap !important;
+      overflow: visible !important;
+    }
+  }
+  .usa-table-container--scrollable {
+    overflow: visible !important;
+    max-height: none !important;
+  }
 }
 
 #user-control {
