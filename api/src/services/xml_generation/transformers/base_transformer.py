@@ -329,6 +329,13 @@ class RecursiveXMLTransformer:
 
             nested_result = {}
 
+            # Embed the namespace so the service can resolve the wrapper element's namespace
+            # per-instance rather than relying on the flat global namespace_fields dict.
+            # This prevents collisions when the same element name (e.g. "Address") appears in
+            # both the form's default namespace and the globLib namespace in different contexts.
+            if "namespace" in transform_rule:
+                nested_result["__namespace__"] = transform_rule["namespace"]
+
             # Process attributes if specified
             if "attributes" in transform_rule:
                 attributes = {}

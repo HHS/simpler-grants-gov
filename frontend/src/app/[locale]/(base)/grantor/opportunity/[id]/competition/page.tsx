@@ -5,15 +5,15 @@ import {
   parseErrorStatus,
 } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import {
-  createCompetitionForGrantor,
-  getOpportunityForGrantor,
-} from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+import { getForms } from "src/services/fetch/fetchers/allFormsFetcher";
+import { getOpportunityForGrantor } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 
 import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
-import { Button, Link } from "@trussworks/react-uswds";
+import { Button } from "@trussworks/react-uswds";
 
+import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { OpportunityDetailsHeader } from "src/components/grantor-opportunities/OpportunityDetailsHeader";
 
@@ -23,18 +23,28 @@ type PageProps = {
 
 export const dynamic = "force-dynamic";
 
-const ButtonSaveAndExit = ({ url }: { url: string }) => {
-  const t = useTranslations("OpportunityCompetition.button");
+const ButtonSaveAndExit = () => {
+  const t = useTranslations("OpportunityCompetition");
   return (
-    <Link href={url}>
-      <Button type="button">{t("saveAndExit")}</Button>
-    </Link>
+    <>
+      <Button
+        type="submit"
+        form="opportunity-competition-form"
+        className="margin-left-1"
+      >
+        {t("button.saveAndExit")}
+      </Button>
+    </>
   );
 };
 
 async function OpportunityCompetitionPage({ params }: PageProps) {
   const { id, locale } = await params;
-  const overviewUrl = "../" + id + "/overview";
+  const forms = await getForms();
+  const t = await getTranslations({
+    locale,
+    namespace: "OpportunityCompetition",
+  });
 
   let opportunityData;
   try {
@@ -54,38 +64,63 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
     throw error;
   }
 
-  let competitionId: string;
+  // NOTE: Currently we are only supporting a single competition
+  let competitionId: string = "";
   if (opportunityData.competitions?.[0]?.competition_id) {
     competitionId = opportunityData.competitions[0].competition_id;
-  } else {
-    try {
-      const competitionResponse = await createCompetitionForGrantor(id);
-      competitionId = competitionResponse.data.competition_id;
-    } catch (error) {
-      if (error instanceof MissingAuthError) {
-        return <UnauthorizedMessage />;
-      }
-      const status = parseErrorStatus(error as ApiRequestError);
-      if (status === 404) {
-        notFound();
-      }
-      if (status === 403) {
-        return <UnauthorizedMessage />;
-      }
-      throw error;
-    }
   }
 
+  const navigationItems = [
+    {
+      text: t("applicationRequirements"),
+      href: "application-requirements",
+    },
+    {
+      text: t("sectionSubmissionSetUp.header"),
+      href: "submission-set-up",
+    },
+    {
+      text: t("sectionSubmissionWindow.header"),
+      href: "submission-window",
+    },
+    {
+      text: t("sectionAgencyContact.header"),
+      href: "agency-contact",
+    },
+    {
+      text: t("sectionApplicationChecklist.header"),
+      href: "application-checklist",
+    },
+    {
+      text: t("sectionNarrativeFormatInstructions.header"),
+      href: "narrative-format-instructions",
+    },
+  ];
+
   return (
-    <>
+    <div className="bg-white">
       <OpportunityDetailsHeader
         opportunityData={opportunityData}
         locale={locale}
+        hasBackToOverview={true}
       >
-        <ButtonSaveAndExit url={overviewUrl} />
+        <ButtonSaveAndExit />
       </OpportunityDetailsHeader>
-      <CompetitionForm opportunityId={id} competitionId={competitionId} />
-    </>
+
+      <div className="grid-container padding-bottom-4">
+        <div className="usa-in-page-nav-container">
+          <LeftHandFormNav title={t("leftNavTitle")} fields={navigationItems} />
+
+          <section className="order-2 width-full maxw-tablet-xl padding-top-4">
+            <CompetitionForm
+              opportunityId={id}
+              competitionId={competitionId}
+              forms={forms.data}
+            />
+          </section>
+        </div>
+      </div>
+    </div>
   );
 }
 

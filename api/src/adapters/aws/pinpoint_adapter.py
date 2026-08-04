@@ -8,6 +8,8 @@ from grants_shared.adapters.aws import get_boto_session
 from grants_shared.adapters.aws.aws_session import is_local_aws
 from pydantic import BaseModel, Field
 
+from src.adapters.aws.local_email_adapter import send_local_email_if_enabled
+
 logger = logging.getLogger(__name__)
 
 # An example of what the Pinpoint response looks like:
@@ -89,12 +91,30 @@ def send_pinpoint_email_raw(
     pinpoint_client: botocore.client.BaseClient | None = None,
     trace_id: str | None = None,
 ) -> PinpointResponse:
+    if trace_id is None:
+        trace_id = str(uuid.uuid4())
+
+    message_id = send_local_email_if_enabled(
+        to_address=to_address,
+        subject=subject,
+        message=message,
+        trace_id=trace_id,
+    )
+    if message_id is not None:
+        return PinpointResponse(
+            Result={
+                to_address: PinpointResult(
+                    DeliveryStatus="SUCCESSFUL",
+                    StatusCode=200,
+                    StatusMessage="Captured by local SMTP server",
+                    MessageId=message_id,
+                    TraceId=trace_id,
+                )
+            }
+        )
 
     if pinpoint_client is None:
         pinpoint_client = get_pinpoint_client()
-
-    if trace_id is None:
-        trace_id = str(uuid.uuid4())
 
     # Based on: https://docs.aws.amazon.com/code-library/latest/ug/python_3_pinpoint_code_examples.html
     request = {
