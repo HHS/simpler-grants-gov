@@ -591,10 +591,8 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
                 "response.txt",
             )
             if soap_request and soap_request.operation_name == "GetApplicationZipRequest":
-                file_util.write_to_file(
-                    response_s3_path,
-                    "GetApplicationZip response not currently logged",
-                    content_type=text_content_type,
+                logger.info(
+                    "soap_client: response is not currently being logged to s3",
                 )
             else:
                 file_util.write_to_file(
