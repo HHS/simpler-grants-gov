@@ -22,6 +22,10 @@ interface ReviewSubmissionFormContainerProps {
   reviewWorkflowId?: string;
 }
 
+// TODO: Form type determination needs improvement
+// Current implementation defaults to "content_creator" for unknown states
+// Should default to error state and only allow content_creator edit mode for specific roles
+// All other users should be redirected to view-only mode instead of edit form
 // Map workflow states to form types
 const getFormTypeFromWorkflowState = (state: WorkflowState): ReviewFormType => {
   switch (state) {
@@ -40,6 +44,10 @@ const getFormTypeFromWorkflowState = (state: WorkflowState): ReviewFormType => {
   }
 };
 
+// TODO: Access control needs refinement for edit vs view mode
+// Currently all authorized users can access this submit-for-review page
+// Should implement logic: only content creators can edit, all others redirect to view-only mode
+// Non-content-creator users should be routed to detail page instead of edit form
 export const ReviewSubmissionFormContainer: React.FC<
   ReviewSubmissionFormContainerProps
 > = ({ awardRecommendationId, reviewWorkflowId }) => {
@@ -112,6 +120,9 @@ export const ReviewSubmissionFormContainer: React.FC<
           getFormTypeFromWorkflowState(currentWorkflowState);
 
         // Step 5: Validate user has privilege for the determined form type
+        // TODO: Improve privilege validation logic to be more explicit
+        // Consider defaulting to error state rather than allowing access when uncertain
+        // Add specific error messages for each privilege failure scenario
         let hasRequiredPrivilege = false;
         if (determinedFormType === "fmo_reviewer") {
           hasRequiredPrivilege = allPrivileges.includes("fmo_reviewer");
@@ -169,6 +180,9 @@ export const ReviewSubmissionFormContainer: React.FC<
     }
   };
 
+  // TODO: Cancel routing logic may need adjustment based on user role
+  // Currently always routes to /edit page regardless of user privileges
+  // Consider routing based on user's actual permissions (edit vs view)
   const handleCancel = () => {
     router.push(`/grantor/award-recommendation/${awardRecommendationId}/edit`);
   };

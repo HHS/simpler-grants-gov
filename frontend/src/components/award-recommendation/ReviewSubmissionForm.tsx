@@ -72,6 +72,10 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
     }
   };
 
+  // TODO: Decision values need final approval before backend integration
+  // Current decision values (funds_available, funds_contingent, no_certification, etc.) 
+  // were implemented but may require modification based on final business requirements
+  // Verify these align with backend workflow state transitions before completing API integration
   const renderDecisionSection = () => {
     if (formType === "content_creator") {
       return null;
