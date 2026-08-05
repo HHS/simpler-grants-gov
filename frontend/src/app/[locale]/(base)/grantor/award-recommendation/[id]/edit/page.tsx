@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { submitAwardRecommendationForReview } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/actions";
 import AwardRecommendationEditForm from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/edit/_components/AwardRecommendationEditForm";
 import AwardRecommendationSaveButton from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/edit/_components/AwardRecommendationSaveButton";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
@@ -143,9 +142,9 @@ async function AwardRecommendationEditPageContent({
       outline: true,
     },
     {
-      type: "action",
+      type: "navigation",
       label: t("heroButtons.submitForReview"),
-      formAction: submitAwardRecommendationForReview,
+      href: `/grantor/award-recommendation/${awardRecommendationId}/submit-for-review`,
     },
   ];
 
