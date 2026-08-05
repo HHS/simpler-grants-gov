@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { saveAwardRecommendationSubmissionDetails } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/actions";
-import { RecommendationDetailsSection } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
+import RecommendationSubmissionEditForm from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationSubmissionEditForm";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
@@ -13,7 +13,7 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { Alert, GridContainer } from "@trussworks/react-uswds";
+import { Alert } from "@trussworks/react-uswds";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
 
@@ -138,46 +138,39 @@ async function AwardRecommendationSubmissionEditPageContent({
   };
 
   return (
-    <form action={saveAwardRecommendationSubmissionDetails}>
-      <Suspense
-        fallback={
-          <span data-testid="award-recommendation-hero-fallback"></span>
-        }
-      >
-        <AwardRecommendationHero
-          heading={editTitle}
-          showDateAndStatus={false}
-          buttons={heroButtons}
-          externalLink={externalLink}
-          additionalBreadcrumbs={[
-            {
-              title: t("awardRecs"),
-              path: "/",
-            },
-            {
-              title: `${t("heroTitle")}: ${awardRecommendationNumber}`,
-              path: editPageHref,
-            },
-            {
-              title: editTitle,
-            },
-          ]}
-        />
-      </Suspense>
-      <GridContainer>
-        <input
-          type="hidden"
-          name="award_recommendation_id"
-          value={awardRecommendationId}
-        />
-        <input
-          type="hidden"
-          name="award_recommendation_application_submission_id"
-          value={applicationSubmissionId}
-        />
-        <RecommendationDetailsSection submission={submission} />
-      </GridContainer>
-    </form>
+    <RecommendationSubmissionEditForm
+      action={saveAwardRecommendationSubmissionDetails}
+      awardRecommendationId={awardRecommendationId}
+      applicationSubmissionId={applicationSubmissionId}
+      submission={submission}
+      hero={
+        <Suspense
+          fallback={
+            <span data-testid="award-recommendation-hero-fallback"></span>
+          }
+        >
+          <AwardRecommendationHero
+            heading={editTitle}
+            showDateAndStatus={false}
+            buttons={heroButtons}
+            externalLink={externalLink}
+            additionalBreadcrumbs={[
+              {
+                title: t("awardRecs"),
+                path: "/",
+              },
+              {
+                title: `${t("heroTitle")}: ${awardRecommendationNumber}`,
+                path: editPageHref,
+              },
+              {
+                title: editTitle,
+              },
+            ]}
+          />
+        </Suspense>
+      }
+    />
   );
 }
 
