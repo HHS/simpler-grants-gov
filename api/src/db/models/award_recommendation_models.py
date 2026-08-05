@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
 class AwardRecommendation(ApiSchemaTable, TimestampMixin):
     __tablename__ = "award_recommendation"
-
+    # adding comment to test if this is a new commit
     award_recommendation_id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid.uuid4
     )
