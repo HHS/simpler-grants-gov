@@ -1672,3 +1672,14 @@ $simpler-switch-transition-easing: ease;
 .usa-file-input__preview-image {
   display: none;
 }
+
+// Review Submission Form Attestation Box
+.review-attestation-box {
+  border-left: 0.5rem solid color("mint-50");
+}
+
+// Compact button styling for review forms
+.usa-button--compact {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
