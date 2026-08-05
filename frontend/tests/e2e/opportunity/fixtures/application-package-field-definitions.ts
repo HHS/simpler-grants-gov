@@ -125,6 +125,7 @@ export const APPLICATION_PACKAGE_AGENCY_CONTACT_FIELD_DEFINITIONS: ApplicationPa
       label: "Email address",
       type: "email",
       valueKey: "emailAddress",
+      skipEmailTypeCheck: true,
       required: true,
       maxLength: 255,
       characterLimitValidationMessage: "1 character over limit",

@@ -59,6 +59,11 @@ export interface FillFieldDefinition {
    * truthy data instead of throwing an ambiguity error.
    */
   selectFirstInGroup?: boolean;
+  /**
+   * Skip strict `type="email"` assertions in the shared email handler for
+   * known UI inputs that intentionally do not render as native email inputs.
+   */
+  skipEmailTypeCheck?: boolean;
 }
 
 /** Value primitives accepted by metadata-driven fill helpers. */
