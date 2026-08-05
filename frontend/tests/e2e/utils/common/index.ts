@@ -14,7 +14,6 @@
 import { formatNumberWithCommas } from "./number-formatters";
 
 // Field interaction helpers.
-export { fillEmailByLabel } from "./email-field";
 export { selectOptionByLabel } from "./select-field";
 export { fillDateByLabel } from "./date-field";
 
