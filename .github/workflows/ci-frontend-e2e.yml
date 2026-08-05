@@ -357,31 +357,48 @@ jobs:
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build
 
-      - name: Get list of changed files
-        id: changed-files
+      - name: Get list of changed apply form files
+        id: changed-apply-form-files
         uses: tj-actions/changed-files@v47.0.6
         with:
           files: |
             frontend/tests/e2e/apply/forms/**/*.spec.ts
             frontend/src/components/applyForm/**
-            frontend/src/app/[locale]/workspace/applications/[applicationId]/**/*.tsx
+            frontend/src/app/**/workspace/applications/*/**/*.tsx
             api/src/form_schema/forms/**
             api/src/form_schema/shared/**
             api/src/form_schema/rule_processing/**
 
+      - name: Get list of changed opportunity management files
+        id: changed-opportunity-management-files
+        uses: tj-actions/changed-files@v47.0.6
+        with:
+          files: |
+            frontend/src/app/**/grantor/opportunities/**
+            frontend/src/app/**/grantor/opportunity/*/edit/**
+            frontend/src/app/**/grantor/opportunity/*/overview/**
+            frontend/src/components/grantor-opportunities/**
+            frontend/src/services/fetch/fetchers/grantorOpportunitiesFetcher.ts
+            api/src/api/opportunities_grantor_v1/**
+            api/src/services/opportunities_grantor_v1/**
+
       - name: Determine test groups to run
         shell: bash
         env:
-          ANY_CHANGED_FILES: ${{ steps.changed-files.outputs.any_changed }}
+          APPLY_FORMS_CHANGED: ${{ steps.changed-apply-form-files.outputs.any_changed }}
+          OPPORTUNITY_MANAGEMENT_CHANGED: ${{ steps.changed-opportunity-management-files.outputs.any_changed }}
         run: |
-          echo "Any apply form files changed?"
-          echo "$ANY_CHANGED_FILES"
+          echo "Any apply form files changed? $APPLY_FORMS_CHANGED"
+          echo "Any opportunity management files changed? $OPPORTUNITY_MANAGEMENT_CHANGED"
           if [[ $GITHUB_EVENT_NAME = "pull_request" ]]; then
-            if [[ $ANY_CHANGED_FILES = "false" ]]; then
-              echo "test_group_tags=@smoke" >> "$GITHUB_ENV"
-            else
-              echo "test_group_tags=@smoke|@apply-forms" >> "$GITHUB_ENV"
+            test_group_tags="@smoke"
+            if [[ $APPLY_FORMS_CHANGED = "true" ]]; then
+              test_group_tags="$test_group_tags|@apply-forms"
             fi
+            if [[ $OPPORTUNITY_MANAGEMENT_CHANGED = "true" ]]; then
+              test_group_tags="$test_group_tags|@opportunity-management"
+            fi
+            echo "test_group_tags=$test_group_tags" >> "$GITHUB_ENV"
           elif [[ $GITHUB_EVENT_NAME = "push" ]]; then
             echo "test_group_tags=@smoke|@core-regression" >> "$GITHUB_ENV"
           else
