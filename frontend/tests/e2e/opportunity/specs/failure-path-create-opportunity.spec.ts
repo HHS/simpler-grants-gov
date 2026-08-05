@@ -36,7 +36,7 @@ import {
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 
-const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
+const { GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
 
 /** Resets create-opportunity state by canceling and reopening a fresh create page. */
@@ -61,7 +61,7 @@ test.describe("Opportunity failure path - create opportunity", () => {
 
   test(
     "Create opportunity failure path - required fields validation and button enable/disable states",
-    { tag: [GRANTOR, CORE_REGRESSION] },
+    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,
