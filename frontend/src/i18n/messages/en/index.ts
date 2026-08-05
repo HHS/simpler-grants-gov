@@ -2596,6 +2596,11 @@ export const messages = {
           "Incorrect text format. Please ensure there are no spaces or missing characters.",
       },
     },
+    sectionRequiredForms: {
+      header: "Forms in this package",
+      subHeader: "Select the forms applicants must complete.",
+      selectFormsButton: "Select forms",
+    },
   },
   FeatureFlagsAdmin: {
     heading: "Refresh your page",
