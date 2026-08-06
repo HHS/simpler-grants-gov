@@ -200,8 +200,9 @@ export async function validateAllPrintViews(
     await expect(printViewWrapper).toBeVisible();
 
     // Verify there are no visible editable controls (read-only state verification)
-    const visibleInputs = page.locator("input:visible");
-    const visibleTextareas = page.locator("textarea:visible");
+    // Scope to only inputs/textareas within the print wrapper to avoid catching browser UI elements
+    const visibleInputs = printViewWrapper.locator("input:visible");
+    const visibleTextareas = printViewWrapper.locator("textarea:visible");
     await expect(visibleInputs).toHaveCount(0);
     await expect(visibleTextareas).toHaveCount(0);
 
