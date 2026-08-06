@@ -943,6 +943,33 @@ dl {
     word-break: break-word !important;
     line-height: 1.2 !important;
   }
+
+  // TableWidget (apply-form budget/summary tables)
+  // Forces a fixed table-layout and applies the content-derived column
+  // widths TableWidget computes at render time (--applyform-print-col-width
+  // custom properties on each <col>). On screen this table stays at its
+  // default auto layout; these rules only take effect at print time.
+  .applyform-budget-table {
+    table-layout: fixed;
+
+    col {
+      width: var(--applyform-print-col-width) !important;
+    }
+
+    tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .applyform-table-cell-value {
+      white-space: nowrap !important;
+      overflow: visible !important;
+    }
+  }
+  .usa-table-container--scrollable {
+    overflow: visible !important;
+    max-height: none !important;
+  }
 }
 
 #user-control {
@@ -1586,10 +1613,73 @@ $simpler-switch-transition-easing: ease;
   }
 }
 
+// Form Select Modal Styles
+.centered-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.always-required-label {
+  background-color: #2e8367;
+  color: white;
+  font-weight: normal;
+  margin-left: 8px;
+  font-size: 12px;
+  padding: 2px 4px 2px 4px;
+  border-radius: 2px;
+}
+
+.form-modal-select-all {
+  font-weight: 400;
+  font-size: 16;
+  background-color: #f0f0ec;
+  height: 65px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.form-modal-rows {
+  border: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.form-modal-always-required {
+  border-color: #5abf95;
+  background-color: #dbf6ed;
+}
+
+.form-modal-optional {
+  border-color: #e6e6e2;
+}
+
+.form-modal-header {
+  font-size: 32px;
+  font-weight: 700;
+  margin-left: 30px;
+  margin-bottom: 20px;
+}
+
 // hide native file input status / preview
 .usa-file-input__preview {
   display: none;
 }
 .usa-file-input__preview-image {
   display: none;
+}
+
+// Review Submission Form Attestation Box
+.review-attestation-box {
+  border-left: 0.5rem solid color("mint-50");
+}
+
+// Compact button styling for review forms
+.usa-button--compact {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }

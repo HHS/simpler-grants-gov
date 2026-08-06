@@ -8,6 +8,123 @@ from src.services.applications.application_validation import (
 )
 from tests.lib.data_factories import setup_application_for_form_validation
 
+EXPECTED_SECTION_FIELDS = {
+    "federal_agency": ["/properties/agency_name"],
+    "assistance_listing": [
+        "/properties/assistance_listing_number",
+        "/properties/assistance_listing_program_title",
+    ],
+    "date_received": ["/properties/date_received"],
+    "funding_opportunity": [
+        "/properties/funding_opportunity_number",
+        "/properties/funding_opportunity_title",
+    ],
+    "applicant_information": [
+        "/properties/organization_name",
+        "/properties/applicant/properties/street1",
+        "/properties/applicant/properties/street2",
+        "/properties/applicant/properties/city",
+        "/properties/applicant/properties/county",
+        "/properties/applicant/properties/state",
+        "/properties/applicant/properties/province",
+        "/properties/applicant/properties/country",
+        "/properties/applicant/properties/zip_code",
+        "/properties/applicant_web_address",
+        "/properties/applicant_type_code",
+        "/properties/applicant_type_other_specify",
+        "/properties/employer_taxpayer_identification_number",
+        "/properties/sam_uei",
+        "/properties/congressional_district_applicant",
+    ],
+    "project_information": [
+        "/properties/project_title",
+        "/properties/project_description",
+        "/properties/project_start_date",
+        "/properties/project_end_date",
+    ],
+    "project_director": [
+        "/properties/project_director/properties/name/properties/prefix",
+        "/properties/project_director/properties/name/properties/first_name",
+        "/properties/project_director/properties/name/properties/middle_name",
+        "/properties/project_director/properties/name/properties/last_name",
+        "/properties/project_director/properties/name/properties/suffix",
+        "/properties/project_director/properties/title",
+        "/properties/project_director/properties/email",
+        "/properties/project_director/properties/phone_number",
+        "/properties/project_director/properties/fax",
+        "/properties/project_director/properties/address/properties/street1",
+        "/properties/project_director/properties/address/properties/street2",
+        "/properties/project_director/properties/address/properties/city",
+        "/properties/project_director/properties/address/properties/county",
+        "/properties/project_director/properties/address/properties/state",
+        "/properties/project_director/properties/address/properties/province",
+        "/properties/project_director/properties/address/properties/country",
+        "/properties/project_director/properties/address/properties/zip_code",
+    ],
+    "contact_person": [
+        "/properties/same_as_project_director",
+        "/properties/contact_person/properties/name/properties/prefix",
+        "/properties/contact_person/properties/name/properties/first_name",
+        "/properties/contact_person/properties/name/properties/middle_name",
+        "/properties/contact_person/properties/name/properties/last_name",
+        "/properties/contact_person/properties/name/properties/suffix",
+        "/properties/contact_person/properties/title",
+        "/properties/contact_person/properties/email",
+        "/properties/contact_person/properties/phone_number",
+        "/properties/contact_person/properties/fax",
+        "/properties/contact_person/properties/address/properties/street1",
+        "/properties/contact_person/properties/address/properties/street2",
+        "/properties/contact_person/properties/address/properties/city",
+        "/properties/contact_person/properties/address/properties/county",
+        "/properties/contact_person/properties/address/properties/state",
+        "/properties/contact_person/properties/address/properties/province",
+        "/properties/contact_person/properties/address/properties/country",
+        "/properties/contact_person/properties/address/properties/zip_code",
+    ],
+    "authorized_representative": [
+        "/properties/application_certification",
+        "/properties/authorized_representative/properties/prefix",
+        "/properties/authorized_representative/properties/first_name",
+        "/properties/authorized_representative/properties/middle_name",
+        "/properties/authorized_representative/properties/last_name",
+        "/properties/authorized_representative/properties/suffix",
+        "/properties/authorized_representative_title",
+        "/properties/authorized_representative_email",
+        "/properties/authorized_representative_phone_number",
+        "/properties/authorized_representative_fax",
+        "/properties/aor_signature",
+        "/properties/authorized_representative_date_signed",
+    ],
+}
+
+
+def _find_property(schema: dict, property_name: str) -> dict | None:
+    properties = schema.get("properties", {})
+    if property_name in properties:
+        return properties[property_name]
+
+    for combined_schema in schema.get("allOf", []):
+        matching_property = _find_property(combined_schema, property_name)
+        if matching_property is not None:
+            return matching_property
+
+    return None
+
+
+def _resolve_ui_definition(schema: dict, definition: str) -> dict | None:
+    definition_parts = definition.removeprefix("/").split("/")
+    resolved_schema = schema
+
+    for index in range(0, len(definition_parts), 2):
+        if definition_parts[index] != "properties":
+            return None
+
+        resolved_schema = _find_property(resolved_schema, definition_parts[index + 1])
+        if resolved_schema is None:
+            return None
+
+    return resolved_schema
+
 
 @pytest.fixture
 def contact_person_group():
@@ -31,8 +148,8 @@ def contact_person_group():
 
 @pytest.fixture
 def valid_json_v3_0(contact_person_group):
-    # Minimal valid response - the primary contact is the same as the project director,
-    # so the contact_person block is intentionally omitted.
+    # Minimal valid response. contact_person is always required regardless of the
+    # same_as_project_director checkbox value — the user always fills in Section 8 directly.
     return {
         "agency_name": "Department of Research",
         "funding_opportunity_number": "ABC-123",
@@ -55,6 +172,7 @@ def valid_json_v3_0(contact_person_group):
         "project_end_date": "2026-12-31",
         "project_director": contact_person_group,
         "same_as_project_director": True,
+        "contact_person": contact_person_group,
         "application_certification": True,
         "authorized_representative": {
             "first_name": "Bob",
@@ -68,8 +186,7 @@ def valid_json_v3_0(contact_person_group):
 
 @pytest.fixture
 def full_valid_json_v3_0(valid_json_v3_0, contact_person_group):
-    # All optional fields set and the primary contact provided separately from the
-    # project director (same_as_project_director is False).
+    # All optional fields set with a separate primary contact.
     contact = contact_person_group | {
         "name": {
             "prefix": "Mrs",
@@ -104,6 +221,175 @@ def full_valid_json_v3_0(valid_json_v3_0, contact_person_group):
     }
 
 
+def test_sf424_short_v3_0_form_title_and_ui_section_order(sf424_short_v3_0):
+    assert (
+        sf424_short_v3_0.form_name
+        == "APPLICATION FOR FEDERAL DOMESTIC ASSISTANCE-SHORT ORGANIZATIONAL (SF-424)"
+    )
+    assert [section["label"] for section in sf424_short_v3_0.form_ui_schema] == [
+        "1. Name of Federal Agency",
+        "2. Assistance Listing Number and Title",
+        "3. Date Received",
+        "4. Funding Opportunity Number and Title",
+        "5. Applicant Information",
+        "6. Project Information",
+        "7. Project Director",
+        "8. Primary Contact/Grants Administrator",
+        "9. Authorized Representative",
+    ]
+
+
+def test_sf424_short_v3_0_ui_fields_are_in_expected_sections(sf424_short_v3_0):
+    actual_section_fields = {
+        section["name"]: [child["definition"] for child in section["children"]]
+        for section in sf424_short_v3_0.form_ui_schema
+    }
+
+    assert actual_section_fields == EXPECTED_SECTION_FIELDS
+
+
+def test_sf424_short_v3_0_ui_copy_and_widgets(sf424_short_v3_0):
+    schema_properties = sf424_short_v3_0.form_json_schema["properties"]
+    applicant_section = next(
+        section
+        for section in sf424_short_v3_0.form_ui_schema
+        if section["name"] == "applicant_information"
+    )
+    applicant_type_field = next(
+        field
+        for field in applicant_section["children"]
+        if field["definition"] == "/properties/applicant_type_code"
+    )
+
+    assert schema_properties["organization_name"]["description"] == (
+        "Enter the legal name of applicant that will undertake the assistance activity. "
+        "This is the name that the organization has registered with the System for Award "
+        "Management (SAM.gov). Information on registering with SAM may be obtained by "
+        "visiting the Grants.gov website."
+    )
+    assert schema_properties["applicant_web_address"]["title"] == "Web Address"
+    assert schema_properties["applicant_type_code"]["description"] == (
+        "Select a minimum of one applicant type or select up to three applicant types in "
+        "accordance with agency instructions. If “Other” is selected, then specify Other "
+        "Type of Applicant in text box."
+    )
+    assert schema_properties["applicant_type_code"]["minItems"] == 1
+    assert schema_properties["applicant_type_code"]["maxItems"] == 3
+    assert applicant_type_field["widget"] == "MultiSelect"
+    assert schema_properties["congressional_district_applicant"]["description"] == (
+        "Congressional District of Applicant is required: Enter the Congressional District "
+        "in the format: 2 character State Abbreviation - 3 character District Number. "
+        "Examples: CA-005 for California's 5th District, CA-012 for California's 12th "
+        "District, NC-103 for North Carolina's 103rd District. If outside the U.S., enter "
+        "00-000."
+    )
+    assert schema_properties["project_start_date"]["format"] == "date"
+    assert schema_properties["project_end_date"]["format"] == "date"
+
+
+def test_sf424_short_v3_0_same_as_project_director_checkbox_configuration(
+    sf424_short_v3_0,
+):
+    checkbox_schema = sf424_short_v3_0.form_json_schema["properties"]["same_as_project_director"]
+
+    assert checkbox_schema["type"] == "boolean"
+    assert checkbox_schema["title"] == (
+        "Same as Project Director (if checked, fill in information same as Project "
+        "Director above)"
+    )
+    assert "default" not in checkbox_schema
+
+
+def test_sf424_short_v3_0_authorized_representative_agreement_copy(
+    sf424_short_v3_0,
+):
+    agreement_schema = sf424_short_v3_0.form_json_schema["properties"]["application_certification"]
+    expected_description = (
+        "** The list of certifications and assurances, or an internet site where you may "
+        "obtain this list, is contained in the announcement or agency specific instructions. "
+        "By signing this application, I certify (1) to the statements contained in the list "
+        "of certifications and (2) that the statements herein are true, complete and accurate "
+        "to the best of my knowledge. I also provide the required assurances and agree to "
+        "comply with any resulting terms if I accept an award. I am aware that any false, "
+        "fictitious, or fraudulent statements or claims may subject me to criminal, civil, or "
+        "administrative penalties. (U.S. Code, Title 18, Section 1001)"
+    )
+
+    assert agreement_schema["title"] == "** I Agree"
+    assert agreement_schema["description"] == expected_description
+    assert agreement_schema["description"].startswith("** The list of certifications")
+    assert agreement_schema["description"].index(
+        "** The list of certifications"
+    ) < agreement_schema["description"].index("By signing this application")
+    assert agreement_schema["description"].count("The list of certifications") == 1
+    assert agreement_schema["description"].count("By signing this application") == 1
+
+    authorized_representative_section = next(
+        section
+        for section in sf424_short_v3_0.form_ui_schema
+        if section["name"] == "authorized_representative"
+    )
+    agreement_field = authorized_representative_section["children"][0]
+    assert agreement_field == {
+        "type": "field",
+        "definition": "/properties/application_certification",
+        "printDescription": True,
+    }
+
+
+def test_sf424_short_v3_0_pre_and_post_populated_fields_use_null_ui_fields(
+    sf424_short_v3_0,
+):
+    expected_null_definitions = {
+        "/properties/agency_name",
+        "/properties/assistance_listing_number",
+        "/properties/assistance_listing_program_title",
+        "/properties/date_received",
+        "/properties/funding_opportunity_number",
+        "/properties/funding_opportunity_title",
+        "/properties/sam_uei",
+        "/properties/aor_signature",
+        "/properties/authorized_representative_date_signed",
+    }
+    actual_null_definitions = {
+        field["definition"]
+        for section in sf424_short_v3_0.form_ui_schema
+        for field in section["children"]
+        if field["type"] == "null"
+    }
+
+    assert actual_null_definitions == expected_null_definitions
+
+
+def test_sf424_short_v3_0_only_post_populated_fields_use_json_schema_read_only(
+    sf424_short_v3_0,
+):
+    schema_properties = sf424_short_v3_0.form_json_schema["properties"]
+    expected_read_only_fields = {
+        "date_received",
+        "aor_signature",
+        "authorized_representative_date_signed",
+    }
+    actual_read_only_fields = {
+        field_name
+        for field_name, field_schema in schema_properties.items()
+        if field_schema.get("readOnly") is True
+    }
+
+    assert actual_read_only_fields == expected_read_only_fields
+
+
+def test_sf424_short_v3_0_ui_schema_is_print_view_compatible(sf424_short_v3_0):
+    for section in sf424_short_v3_0.form_ui_schema:
+        assert section["type"] == "section"
+        for field in section["children"]:
+            assert field["type"] in {"field", "null"}
+            assert (
+                _resolve_ui_definition(sf424_short_v3_0.form_json_schema, field["definition"])
+                is not None
+            )
+
+
 def test_sf424_short_v3_0_valid_json(sf424_short_v3_0, valid_json_v3_0):
     validation_issues = validate_json_schema_for_form(valid_json_v3_0, sf424_short_v3_0)
     assert len(validation_issues) == 0
@@ -132,8 +418,7 @@ def test_sf424_short_v3_0_empty_json(sf424_short_v3_0):
         "$.project_start_date",
         "$.project_end_date",
         "$.project_director",
-        # contact_person is required because same_as_project_director is not True
-        "$.contact_person",
+        "$.contact_person",  # always required
         "$.application_certification",
         "$.authorized_representative",
         "$.authorized_representative_title",
@@ -222,11 +507,6 @@ def test_sf424_short_v3_0_applicant_type_length(
 @pytest.mark.parametrize(
     "data,required_fields",
     [
-        # Same as project director -> contact person must be empty
-        (
-            {"same_as_project_director": False},
-            ["$.contact_person"],
-        ),
         # Address in the US requires state and zip
         (
             {
@@ -252,29 +532,14 @@ def test_sf424_short_v3_0_conditionally_required_fields(
         assert validation_issue.field in required_fields
 
 
-def test_sf424_short_v3_0_contact_person_required_when_not_same(sf424_short_v3_0, valid_json_v3_0):
-    """When same_as_project_director is not True, the primary contact is required."""
+def test_sf424_short_v3_0_contact_person_always_required(sf424_short_v3_0, valid_json_v3_0):
+    """contact_person is always required regardless of the same_as_project_director flag."""
     data = valid_json_v3_0
-    del data["same_as_project_director"]
+    del data["contact_person"]
 
     validation_issues = validate_json_schema_for_form(data, sf424_short_v3_0)
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "required"
-    assert validation_issues[0].field == "$.contact_person"
-
-
-def test_sf424_short_v3_0_contact_person_must_be_empty_when_same(
-    sf424_short_v3_0, valid_json_v3_0, contact_person_group
-):
-    """When same_as_project_director is True, providing a populated contact fails validation."""
-    data = valid_json_v3_0 | {
-        "same_as_project_director": True,
-        "contact_person": contact_person_group,
-    }
-
-    validation_issues = validate_json_schema_for_form(data, sf424_short_v3_0)
-    assert len(validation_issues) == 1
-    assert validation_issues[0].type == "maxProperties"
     assert validation_issues[0].field == "$.contact_person"
 
 

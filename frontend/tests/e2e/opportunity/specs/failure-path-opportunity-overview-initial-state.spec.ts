@@ -25,7 +25,7 @@ import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-
 import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
 
-const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
+const { GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
 
 test.describe("Grantor opportunity overview failure path - initial state gating", () => {
@@ -40,7 +40,7 @@ test.describe("Grantor opportunity overview failure path - initial state gating"
 
   test(
     "Verifies bypass attempt fails and stays on the same overview page",
-    { tag: [GRANTOR, CORE_REGRESSION] },
+    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,

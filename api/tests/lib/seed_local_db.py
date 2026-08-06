@@ -45,6 +45,7 @@ class SeedConfig:
     seed_users: bool
     seed_e2e: bool
     seed_award_recommendations: bool
+    seed_award_recommendation_workflows: bool
 
 
 def _build_opportunities(
@@ -736,6 +737,8 @@ def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -
         seed_users="ALL" in steps or "users" in steps,
         seed_e2e="ALL" in steps or "e2e" in steps,
         seed_award_recommendations="ALL" in steps or "award_recommendations" in steps,
+        seed_award_recommendation_workflows="ALL" in steps
+        or "award_recommendation_workflows" in steps,
     )
 
     with grants_shared.logs.init("seed_local_db"):
@@ -771,5 +774,5 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
     if seed_config.seed_e2e:
         _build_users_and_tokens(db_session)
     if seed_config.seed_award_recommendations:
-        _build_award_recommendations(db_session)
+        _build_award_recommendations(db_session, seed_config.seed_award_recommendation_workflows)
     db_session.commit()

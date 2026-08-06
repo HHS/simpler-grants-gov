@@ -5,8 +5,11 @@ import {
   EndpointConfig,
   fetchAwardRecommendationEndpoint,
   fetchCompetitionEndpoint,
+  fetchCompetitionFormsEndpoint,
   fetchFormEndpoint,
+  fetchFormsEndpoint,
   fetchOpportunityEndpoint,
+  fetchWorkflowEndpoint,
   getApplicationForPrintEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
@@ -128,8 +131,14 @@ export const fetchOpportunity = cache(
 
 export const fetchForm = cache(requesterForEndpoint(fetchFormEndpoint));
 
+export const fetchForms = cache(requesterForEndpoint(fetchFormsEndpoint));
+
 export const fetchCompetition = cache(
   requesterForEndpoint(fetchCompetitionEndpoint),
+);
+
+export const fetchCompetitionForms = cache(
+  requesterForEndpoint(fetchCompetitionFormsEndpoint),
 );
 
 export const fetchApplicationWithMethod = (
@@ -177,3 +186,5 @@ export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
 export const getApplicationForPrint = requesterForEndpoint(
   getApplicationForPrintEndpoint,
 );
+
+export const fetchWorkflow = cache(requesterForEndpoint(fetchWorkflowEndpoint));

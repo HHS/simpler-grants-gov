@@ -62,6 +62,21 @@ export const fetchFormEndpoint = {
   method: "GET" as ApiMethod,
 };
 
+export const fetchFormsEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "forms",
+  method: "GET" as ApiMethod,
+};
+
+export const fetchCompetitionFormsEndpoint = {
+  basePath: environment.API_URL,
+  version: "alpha",
+  namespace: "competitions",
+  method: "PUT" as ApiMethod,
+  requiresAuth: true,
+};
+
 export const fetchOpportunityEndpoint = {
   basePath: environment.API_URL,
   version: "v1",
@@ -163,3 +178,11 @@ export const toDynamicFilesEndpoint = (type: "POST" | "GET") => ({
   method: type as ApiMethod,
   requiresAuth: true,
 });
+
+export const fetchWorkflowEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "workflows",
+  method: "GET" as ApiMethod,
+  requiresAuth: true,
+};

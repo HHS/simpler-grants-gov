@@ -49,6 +49,7 @@ FORM_JSON_SCHEMA = {
         "project_start_date",
         "project_end_date",
         "project_director",
+        "contact_person",
         "application_certification",
         "authorized_representative",
         "authorized_representative_title",
@@ -66,28 +67,6 @@ FORM_JSON_SCHEMA = {
                 "required": ["applicant_type_code"],  # Only run rule if applicant_type_code is set
             },
             "then": {"required": ["applicant_type_other_specify"]},
-        },
-        # Item 8 (Primary Contact / Grants Administrator) - "Same as Project Director".
-        # When the applicant marks the contact as the same as the project director, the
-        # separate contact_person block must be empty (the applicant skips item 8).
-        {
-            "if": {
-                "properties": {"same_as_project_director": {"const": True}},
-                "required": ["same_as_project_director"],
-            },
-            # contact_person must be empty (no populated sub-fields) when the contact is the
-            # same as the project director. maxProperties: 0 targets the error at the field.
-            "then": {"properties": {"contact_person": {"maxProperties": 0}}},
-        },
-        # Otherwise the primary contact (item 8) must be provided.
-        {
-            "if": {
-                "not": {
-                    "properties": {"same_as_project_director": {"const": True}},
-                    "required": ["same_as_project_director"],
-                }
-            },
-            "then": {"required": ["contact_person"]},
         },
     ],
     "$defs": {
@@ -177,7 +156,7 @@ FORM_JSON_SCHEMA = {
         "organization_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Legal Name",
-            "description": "Enter the legal name of the applicant that will undertake the assistance activity. This is the organization that has registered with the System for Award Management (SAM). Information on registering with SAM may be obtained by visiting SAM.gov.",
+            "description": "Enter the legal name of applicant that will undertake the assistance activity. This is the name that the organization has registered with the System for Award Management (SAM.gov). Information on registering with SAM may be obtained by visiting the Grants.gov website.",
         },
         "applicant": {
             "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
@@ -197,7 +176,7 @@ FORM_JSON_SCHEMA = {
             # together into a single array value.
             "type": "array",
             "title": "Type of Applicant",
-            "description": "Select the appropriate applicant types.",
+            "description": "Select a minimum of one applicant type or select up to three applicant types in accordance with agency instructions. If “Other” is selected, then specify Other Type of Applicant in text box.",
             "minItems": 1,
             "maxItems": 3,
             "items": {
@@ -227,7 +206,7 @@ FORM_JSON_SCHEMA = {
         "congressional_district_applicant": {
             "type": "string",
             "title": "Congressional District of Applicant",
-            "description": "Enter the Congressional District in the format: 2 character state Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district.If outside the US, enter 00-000.",
+            "description": "Congressional District of Applicant is required: Enter the Congressional District in the format: 2 character State Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th District, CA-012 for California's 12th District, NC-103 for North Carolina's 103rd District. If outside the U.S., enter 00-000.",
             "minLength": 1,
             "maxLength": 6,
         },
@@ -264,18 +243,17 @@ FORM_JSON_SCHEMA = {
         },
         "same_as_project_director": {
             "type": "boolean",
-            "title": "Same as Project Director",
-            "description": "Check if the primary contact / grants administrator is the same as the project director.",
+            "title": "Same as Project Director (if checked, fill in information same as Project Director above)",
         },
         "contact_person": {
             "allOf": [{"$ref": "#/$defs/contact_person_group"}],
             "title": "Primary Contact/Grants Administrator",
-            "description": "Enter information about the primary contact. Leave blank if the primary contact is the same as the project director.",
+            "description": "Enter information about the primary contact.",
         },
         "application_certification": {
             "type": "boolean",
-            "title": "Certification",
-            "description": "By signing this application, I certify (1) to the statements contained in the list of certifications and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fraudulent statements or claims may subject me to criminal, civil, or administrative penalties. (U.S. Code, Title 18, Section 1001)",
+            "title": "** I Agree",
+            "description": "** The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions. By signing this application, I certify (1) to the statements contained in the list of certifications and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fraudulent statements or claims may subject me to criminal, civil, or administrative penalties. (U.S. Code, Title 18, Section 1001)",
         },
         "authorized_representative": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
@@ -352,15 +330,15 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "name": "federal_agency",
         "label": "1. Name of Federal Agency",
-        "children": [{"type": "field", "definition": "/properties/agency_name"}],
+        "children": [{"type": "null", "definition": "/properties/agency_name"}],
     },
     {
         "type": "section",
         "name": "assistance_listing",
-        "label": "2. Assistance Listing Number/Title",
+        "label": "2. Assistance Listing Number and Title",
         "children": [
-            {"type": "field", "definition": "/properties/assistance_listing_number"},
-            {"type": "field", "definition": "/properties/assistance_listing_program_title"},
+            {"type": "null", "definition": "/properties/assistance_listing_number"},
+            {"type": "null", "definition": "/properties/assistance_listing_program_title"},
         ],
     },
     {
@@ -372,10 +350,10 @@ FORM_UI_SCHEMA = [
     {
         "type": "section",
         "name": "funding_opportunity",
-        "label": "4. Funding Opportunity Number/Title",
+        "label": "4. Funding Opportunity Number and Title",
         "children": [
-            {"type": "field", "definition": "/properties/funding_opportunity_number"},
-            {"type": "field", "definition": "/properties/funding_opportunity_title"},
+            {"type": "null", "definition": "/properties/funding_opportunity_number"},
+            {"type": "null", "definition": "/properties/funding_opportunity_title"},
         ],
     },
     {
@@ -393,10 +371,14 @@ FORM_UI_SCHEMA = [
             {"type": "field", "definition": "/properties/applicant/properties/country"},
             {"type": "field", "definition": "/properties/applicant/properties/zip_code"},
             {"type": "field", "definition": "/properties/applicant_web_address"},
-            {"type": "field", "definition": "/properties/applicant_type_code"},
+            {
+                "type": "field",
+                "definition": "/properties/applicant_type_code",
+                "widget": "MultiSelect",
+            },
             {"type": "field", "definition": "/properties/applicant_type_other_specify"},
             {"type": "field", "definition": "/properties/employer_taxpayer_identification_number"},
-            {"type": "field", "definition": "/properties/sam_uei"},
+            {"type": "null", "definition": "/properties/sam_uei"},
             {"type": "field", "definition": "/properties/congressional_district_applicant"},
         ],
     },
@@ -431,7 +413,11 @@ FORM_UI_SCHEMA = [
         "name": "authorized_representative",
         "label": "9. Authorized Representative",
         "children": [
-            {"type": "field", "definition": "/properties/application_certification"},
+            {
+                "type": "field",
+                "definition": "/properties/application_certification",
+                "printDescription": True,
+            },
             {
                 "type": "field",
                 "definition": "/properties/authorized_representative/properties/prefix",
@@ -521,15 +507,16 @@ FORM_XML_TRANSFORM_RULES = {
     "_xml_config": {
         "description": "XML transformation rules for converting Simpler SF-424 Short JSON to Grants.gov XML format",
         # NOTE: the top-level applicant Address element is in the form namespace per the XSD,
-        # while the Name/Address groups inside ProjectDirectorGroup/ContactPersonGroup are in the
-        # globLib namespace. The XML transformer currently keys namespaces by element name, so
-        # the shared "Address"/"Street1"/... names resolve to a single namespace. Full XSD-valid
-        # output (and its validation test) is handled with the SF-424 Short XML generation work.
+        # while the Address groups inside ProjectDirectorGroup/ContactPersonGroup are in globLib.
+        # The applicant Address uses "namespace": "default" to force the form namespace and
+        # prevent the globLib namespace from the contact person groups from bleeding onto it.
         "version": "1.0",
         "form_name": "SF424_Short_3_0",
         "namespaces": {
             "default": "http://apply.grants.gov/forms/SF424_Short_3_0-V3.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
         "xml_structure": {"root_element": "SF424_Short_3_0", "version": "3.0"},
@@ -549,7 +536,10 @@ FORM_XML_TRANSFORM_RULES = {
     # Applicant information
     "organization_name": {"xml_transform": {"target": "OrganizationName"}},
     "applicant": {
-        "xml_transform": {"target": "Address", "type": "nested_object"},
+        # "namespace": "default" forces the Address element into the form's default namespace
+        # (SF424_Short_3_0), preventing the globLib namespace used by the contact person group's
+        # nested Address elements from bleeding onto this top-level element.
+        "xml_transform": {"target": "Address", "namespace": "default", "type": "nested_object"},
         "street1": {"xml_transform": {"target": "Street1", "namespace": "globLib"}},
         "street2": {"xml_transform": {"target": "Street2", "namespace": "globLib"}},
         "city": {"xml_transform": {"target": "City", "namespace": "globLib"}},
@@ -633,7 +623,7 @@ SF424Short_v3_0 = Form(
     # https://www.grants.gov/forms/form-items-description/fid/711
     form_id=uuid.UUID("cf355a4d-d840-43fd-a78f-729edf41ab4c"),
     legacy_form_id=711,
-    form_name="Application for Federal Domestic Assistance - Short Organizational",
+    form_name="APPLICATION FOR FEDERAL DOMESTIC ASSISTANCE-SHORT ORGANIZATIONAL (SF-424)",
     short_form_name="SF424_Short_3_0",
     form_version="3.0",
     agency_code="SGG",
@@ -642,7 +632,7 @@ SF424Short_v3_0 = Form(
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
     json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
-    # SF-424 Short does not currently have instructions loaded
+    form_instruction_id=uuid.UUID("550e8400-e29b-41d4-a716-446655440000"),
     form_type=FormType.SF424_SHORT,
     sgg_version="1.0",
     is_deprecated=False,

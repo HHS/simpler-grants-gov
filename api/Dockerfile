@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:9d1e227@sha256:45a6c0735a62abad927e5a5b1f223c41001817af6254f0786cd4c863a89e1b5b AS base
+FROM ghcr.io/hhs/python-base-image:49895e8@sha256:ead026784cd26089903fbaadff28fb50e80c837cfe881f5eed2ede9dc2b301e8 AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -141,4 +141,4 @@ USER ${RUN_USER}
 # from the WORKDIR (/api) when the file is present. We pass it explicitly as a guardrail --
 # if the config is ever dropped from the image again, gunicorn fails fast at startup
 # instead of silently falling back to its defaults (1 sync worker, 1 thread).
-CMD ["gunicorn", "-c", "gunicorn.conf.py", "--worker-tmp-dir=/dev/shm", "src.app:create_app()", "--log-level", "debug"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "--worker-tmp-dir=/dev/shm", "src.app:create_app()"]
