@@ -1,6 +1,9 @@
+import base64
+import json
 import os
 import uuid
-from urllib.parse import parse_qs, urlparse
+from types import SimpleNamespace
+from urllib.parse import parse_qs, unquote, urlparse
 
 import boto3
 import faker
@@ -11,6 +14,20 @@ import grants_shared.util.file_util as file_util
 from grants_shared.adapters.aws import S3Config
 
 fake = faker.Faker()
+
+
+def decode_presigned_post_policy(fields: dict) -> dict:
+    """Decode the base64 policy JSON embedded in a generate_presigned_post result."""
+    return json.loads(base64.b64decode(fields["policy"]))
+
+
+def assert_presigned_url_targets_s3_path(url: str, bucket: str, key: str) -> None:
+    """Assert a GET presigned URL targets the given bucket/key without checking the signature."""
+    parsed = urlparse(url)
+    decoded_path = unquote(parsed.path)
+    # Path-style: /bucket/key — virtual-hosted: bucket.s3.../key
+    assert bucket in parsed.netloc or decoded_path.startswith(f"/{bucket}/")
+    assert decoded_path.endswith(key)
 
 
 def create_file(root_path, file_path):
@@ -264,6 +281,36 @@ def test_convert_s3_to_cdn_url_invalid_path(s3_config):
         )
 
 
+def test_presign_or_s3_cdnify_url_returns_cdn_url_when_cdn_configured(mock_s3_bucket, s3_config):
+    s3_config.cdn_url = "https://cdn.example.com"
+    file_path = f"s3://{mock_s3_bucket}/path/to/file.pdf"
+
+    url = file_util.presign_or_s3_cdnify_url(file_path, s3_config=s3_config)
+
+    assert url == "https://cdn.example.com/path/to/file.pdf"
+    # CDN branch must not produce a signed URL
+    assert "X-Amz-Expires" not in url
+    assert "X-Amz-Signature" not in url
+
+
+def test_presign_or_s3_cdnify_url_returns_presigned_url_when_cdn_unset(mock_s3_bucket, s3_config):
+    assert s3_config.cdn_url is None
+    file_path = f"s3://{mock_s3_bucket}/path/to/file.pdf"
+
+    url = file_util.presign_or_s3_cdnify_url(file_path, s3_config=s3_config)
+
+    query = parse_qs(urlparse(url).query)
+    assert "X-Amz-Expires" in query
+    assert_presigned_url_targets_s3_path(url, mock_s3_bucket, "path/to/file.pdf")
+
+
+def test_presign_or_s3_cdnify_url_raises_for_non_s3_path_when_cdn_set(s3_config):
+    s3_config.cdn_url = "https://cdn.example.com"
+
+    with pytest.raises(ValueError, match="Expected s3:// path"):
+        file_util.presign_or_s3_cdnify_url("http://not-s3/file.txt", s3_config=s3_config)
+
+
 def test_write_to_file(tmp_path):
     contents = fake.sentence(25)
     file_path = tmp_path / "my_file_to_write.txt"
@@ -288,6 +335,58 @@ def test_pre_sign_file_location_uses_configured_duration(mock_s3_bucket):
     assert int(query["X-Amz-Expires"][0]) == 900
 
 
+@pytest.mark.parametrize(
+    "key",
+    [
+        "file.txt",
+        "path/to/nested/file.txt",
+        "path/to/my file.txt",
+        "path/to/file (1) [copy].txt",
+    ],
+)
+def test_pre_sign_file_location_uses_bucket_and_key_from_s3_path(mock_s3_bucket, s3_config, key):
+    file_path = f"s3://{mock_s3_bucket}/{key}"
+    bucket, parsed_key = file_util.split_s3_url(file_path)
+    assert bucket == mock_s3_bucket
+    assert parsed_key == key
+
+    url = file_util.pre_sign_file_location(file_path, s3_config=s3_config)
+    assert_presigned_url_targets_s3_path(url, bucket, key)
+
+
+def test_pre_sign_file_location_localhost_override_when_endpoint_set(mock_s3_bucket, s3_config):
+    s3_config.aws_s3_endpoint_url = "http://mocks3:9090"
+
+    url = file_util.pre_sign_file_location(
+        f"s3://{mock_s3_bucket}/some/file.txt", s3_config=s3_config
+    )
+
+    assert url.startswith("http://localhost:9090")
+    assert "mocks3" not in url
+
+
+def test_pre_sign_file_location_leaves_url_untouched_without_endpoint(mock_s3_bucket, s3_config):
+    assert s3_config.aws_s3_endpoint_url is None
+
+    url = file_util.pre_sign_file_location(
+        f"s3://{mock_s3_bucket}/some/file.txt", s3_config=s3_config
+    )
+
+    assert not url.startswith("http://localhost:9090")
+    assert_presigned_url_targets_s3_path(url, mock_s3_bucket, "some/file.txt")
+
+
+def test_pre_sign_file_location_uses_non_default_duration(mock_s3_bucket, s3_config):
+    s3_config.presigned_s3_duration = 3600
+
+    url = file_util.pre_sign_file_location(
+        f"s3://{mock_s3_bucket}/some/file.txt", s3_config=s3_config
+    )
+
+    query = parse_qs(urlparse(url).query)
+    assert int(query["X-Amz-Expires"][0]) == 3600
+
+
 def test_presigned_post_local_override_with_s3_endpoint_url(mock_s3_bucket, s3_config):
     file_id = uuid.uuid4()
     user_id = uuid.uuid4()
@@ -305,3 +404,92 @@ def test_presigned_post_local_override_with_s3_endpoint_url(mock_s3_bucket, s3_c
     )
 
     assert result["url"].startswith("http://localhost:9090")
+
+
+def test_pre_sign_upload_pins_content_type_and_metadata(mock_s3_bucket, s3_config):
+    """Content-Type and each metadata entry appear in both Fields and Conditions."""
+    file_id = str(uuid.uuid4())
+    user_id = str(uuid.uuid4())
+    content_type = "application/pdf"
+    metadata = {"file-id": file_id, "user-id": user_id}
+
+    result = file_util.pre_sign_upload(
+        file_path=f"s3://{mock_s3_bucket}/unscanned/{file_id}/report.pdf",
+        content_type=content_type,
+        metadata=metadata,
+        s3_config=s3_config,
+    )
+
+    fields = result["fields"]
+    assert fields["Content-Type"] == content_type
+    assert fields["x-amz-meta-file-id"] == file_id
+    assert fields["x-amz-meta-user-id"] == user_id
+
+    conditions = decode_presigned_post_policy(fields)["conditions"]
+    assert {"Content-Type": content_type} in conditions
+    assert {"x-amz-meta-file-id": file_id} in conditions
+    assert {"x-amz-meta-user-id": user_id} in conditions
+
+
+def test_pre_sign_upload_content_length_range_tracks_file_config(
+    mock_s3_bucket, s3_config, monkeypatch
+):
+    """content-length-range uses FileConfig.max_file_upload_size_bytes, not a hardcoded cap."""
+    custom_max = 5 * 1024 * 1024
+    monkeypatch.setattr(
+        file_util,
+        "get_default_file_config",
+        lambda: SimpleNamespace(max_file_upload_size_bytes=custom_max),
+    )
+
+    result = file_util.pre_sign_upload(
+        file_path=f"s3://{mock_s3_bucket}/some/file.txt",
+        content_type="text/plain",
+        metadata={"file-id": str(uuid.uuid4())},
+        s3_config=s3_config,
+    )
+
+    conditions = decode_presigned_post_policy(result["fields"])["conditions"]
+    assert ["content-length-range", 1, custom_max] in conditions
+    # Guard against accidentally hardcoding the 2 GiB default
+    assert ["content-length-range", 1, 2 * 1024 * 1024 * 1024] not in conditions
+
+
+@pytest.mark.parametrize("include_if_none_match", [True, False])
+def test_pre_sign_upload_include_if_none_match(mock_s3_bucket, s3_config, include_if_none_match):
+    result = file_util.pre_sign_upload(
+        file_path=f"s3://{mock_s3_bucket}/some/file.txt",
+        content_type="text/plain",
+        metadata={"file-id": str(uuid.uuid4())},
+        s3_config=s3_config,
+        include_if_none_match=include_if_none_match,
+    )
+
+    conditions = decode_presigned_post_policy(result["fields"])["conditions"]
+    if_none_match_condition = {"IfNoneMatch": "*"}
+    if include_if_none_match:
+        assert if_none_match_condition in conditions
+    else:
+        assert if_none_match_condition not in conditions
+
+
+def test_pre_sign_upload_returns_url_and_signed_fields(mock_s3_bucket, s3_config):
+    result = file_util.pre_sign_upload(
+        file_path=f"s3://{mock_s3_bucket}/some/file.txt",
+        content_type="text/plain",
+        metadata={"file-id": str(uuid.uuid4())},
+        s3_config=s3_config,
+    )
+
+    assert "url" in result
+    assert result["url"].startswith("http")
+    assert mock_s3_bucket in result["url"]
+
+    fields = result["fields"]
+    assert "policy" in fields
+    # Presence of a signature field not its value, which changes with botocore
+    assert "x-amz-signature" in fields or "signature" in fields
+    # Policy must be decodable JSON with conditions (structure, not signature bytes)
+    policy = decode_presigned_post_policy(fields)
+    assert "conditions" in policy
+    assert isinstance(policy["conditions"], list)
