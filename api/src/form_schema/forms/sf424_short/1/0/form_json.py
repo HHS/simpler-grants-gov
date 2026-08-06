@@ -632,7 +632,7 @@ SF424Short_v3_0 = Form(
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
     json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
-    # SF-424 Short does not currently have instructions loaded
+    form_instruction_id=uuid.UUID("550e8400-e29b-41d4-a716-446655440000"),
     form_type=FormType.SF424_SHORT,
     sgg_version="1.0",
     is_deprecated=False,

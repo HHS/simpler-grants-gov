@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import { RecommendationDetailForm } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
 import { AwardRecommendationSubmission } from "src/types/awardRecommendationTypes";
@@ -307,38 +307,79 @@ describe("RecommendationDetailForm", () => {
     });
   });
 
-  describe("required fields", () => {
-    it("marks recommendation type as required", () => {
-      render(<RecommendationDetailForm submission={mockSubmission} />);
+  describe("validation", () => {
+    it("shows recommendation and amount errors when validate is called with empty values", async () => {
+      const ref = { current: null as null | { validate: () => boolean } };
+      render(
+        <RecommendationDetailForm
+          ref={(instance) => {
+            ref.current = instance;
+          }}
+          submission={{
+            ...mockSubmission,
+            submission_detail: undefined,
+          }}
+        />,
+      );
 
-      const select = screen.getByRole("combobox", {
-        name: /recommendationLabel/i,
+      act(() => {
+        expect(ref.current?.validate()).toBe(false);
       });
-      expect(select).toBeRequired();
+      expect(
+        await screen.findByText("validationErrorHeading"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByText("recommendationRequired").length,
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText("amountRecommendedRequired").length,
+      ).toBeGreaterThanOrEqual(1);
     });
 
-    it("marks recommended amount as required", () => {
-      render(<RecommendationDetailForm submission={mockSubmission} />);
+    it("shows exception detail error when exception is checked and reason is empty", async () => {
+      const ref = { current: null as null | { validate: () => boolean } };
+      render(
+        <RecommendationDetailForm
+          ref={(instance) => {
+            ref.current = instance;
+          }}
+          submission={{
+            ...mockSubmission,
+            submission_detail: {
+              award_recommendation_type: "recommended_without_funding",
+              recommended_amount: "75000.00",
+              has_exception: true,
+              exception_detail: "",
+            },
+          }}
+        />,
+      );
 
-      const input = screen.getByDisplayValue("$75,000");
-      expect(input).toBeRequired();
+      act(() => {
+        expect(ref.current?.validate()).toBe(false);
+      });
+      expect(
+        await screen.findAllByText("exceptionDetailRequired"),
+      ).not.toHaveLength(0);
     });
 
-    it("marks exception detail as required when shown", () => {
-      const submissionWithException: AwardRecommendationSubmission = {
-        ...mockSubmission,
-        submission_detail: {
-          award_recommendation_type: "recommended_without_funding",
-          recommended_amount: "75000.00",
-          has_exception: true,
-          exception_detail: "Test exception",
-        },
-      };
+    it("passes validation when required fields are filled", () => {
+      const ref = { current: null as null | { validate: () => boolean } };
+      render(
+        <RecommendationDetailForm
+          ref={(instance) => {
+            ref.current = instance;
+          }}
+          submission={mockSubmission}
+        />,
+      );
 
-      render(<RecommendationDetailForm submission={submissionWithException} />);
-
-      const textarea = screen.getByTestId("exception-detail-textarea");
-      expect(textarea).toBeRequired();
+      act(() => {
+        expect(ref.current?.validate()).toBe(true);
+      });
+      expect(
+        screen.queryByText("validationErrorHeading"),
+      ).not.toBeInTheDocument();
     });
   });
 });
