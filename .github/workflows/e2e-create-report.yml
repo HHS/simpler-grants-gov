@@ -55,12 +55,26 @@ jobs:
       #   run: |
       #     npx playwright install --with-deps
 
+      - name: Set target environment
+        run: |
+          if [[ -z "${{ inputs.target }}" ]]; then
+            echo "defaulted_target=staging" >> "$GITHUB_ENV";
+          else
+            echo "defaulted_target=${{ inputs.target }}" >> "$GITHUB_ENV";
+          fi
+      - name: Check target environment
+        run: |
+          if [[ "${{ inputs.target }}" != "local" && "${{ inputs.target }}" != "staging" && "${{ inputs.target }}" != "grantee1" && "${{ inputs.target }}" != "grantee2" && "${{ inputs.target }}" != "grantor1" && "${{ inputs.target }}" != "grantor2" ]]; then
+            echo "Unsupported target environment"
+            exit 1
+          fi
+
       - name: Download All Blob Reports
         uses: actions/download-artifact@v7
         with:
           path: frontend/all-blob-reports
           run-id: ${{ inputs.run_id }}
-          pattern: blob-report-shard-${{ inputs.target }}-*
+          pattern: blob-report-shard-${{ env.defaulted_target }}-*
           merge-multiple: true
       - name: Verify Downloaded Artifacts
         run: |
@@ -75,6 +89,6 @@ jobs:
       - name: Upload Merged HTML Report
         uses: actions/upload-artifact@v7
         with:
-          name: merged-html-report-${{ inputs.target }}
+          name: merged-html-report-${{ env.defaulted_target }}
           path: frontend/playwright-report
           retention-days: 30
