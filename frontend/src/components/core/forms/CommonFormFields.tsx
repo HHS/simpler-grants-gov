@@ -246,3 +246,62 @@ export const CommonSelectInput = ({
     </>
   );
 };
+
+// ----------------------------------------------------------
+// Common Textarea with enforced word limit and error block
+// ----------------------------------------------------------
+export const CommonWordLimit = ({
+  labelText,
+  description, // or instructions
+  fieldId,
+  isRequired,
+  fieldMaxLength,
+  onTextChange,
+  defaultValue = "",
+  rawErrors = [],
+}: {
+  labelText: string;
+  description: string;
+  fieldId: string;
+  isRequired: boolean;
+  fieldMaxLength: number;
+  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  defaultValue?: string;
+  rawErrors?: string[];
+}) => {
+  const error = rawErrors.length ? true : undefined;
+  const [content, setContent] = useState(defaultValue);
+  const wordCount =
+    content.trim() === "" ? 0 : content.trim().split(/\s+/).length;
+  return (
+    <>
+      <FormGroup key={`form-group__text-input--${fieldId}`} error={error}>
+        <DynamicFieldLabel
+          idFor={fieldId}
+          title={labelText}
+          required={isRequired}
+          description={description}
+        />
+        {error && <FieldErrors fieldName={fieldId} rawErrors={rawErrors} />}
+        <Textarea
+          name={fieldId}
+          id={fieldId}
+          error={wordCount > fieldMaxLength}
+          onChange={(event) => {
+            setContent(event.target.value);
+            onTextChange(event);
+          }}
+          value={content}
+        />
+        {wordCount > fieldMaxLength ? (
+          <FieldErrors
+            fieldName={fieldId}
+            rawErrors={[`${wordCount - fieldMaxLength} words over limit`]}
+          />
+        ) : (
+          <p className="text-base-dark margin-top-0">{`${fieldMaxLength - wordCount} words allowed`}</p>
+        )}
+      </FormGroup>
+    </>
+  );
+};
