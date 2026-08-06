@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { RequiredForms } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/RequiredForms";
+import { FormType } from "src/types/allFormsResponseTypes";
 
 jest.mock("next-intl", () => ({
   useTranslations: jest.fn(() => (key: string) => key),
@@ -8,12 +9,13 @@ jest.mock("next-intl", () => ({
 describe("RequiredForms", () => {
   const alwaysRequiredFormId = "1623b310-85be-496a-b84b-34bdee22a68a";
 
-  const mockFormDetails = [
+  const mockFormDetails: FormType[] = [
     {
       form_id: alwaysRequiredFormId,
       short_name: "SF424_V1",
       name: "Application for Federal Assistance (SF-424)",
       current_version: {
+        legacy_form_version: "",
         major_version: 1,
         minor_version: 0,
       },
@@ -23,11 +25,12 @@ describe("RequiredForms", () => {
       short_name: "CD511_V2",
       name: "Certification Form (CD-511)",
       current_version: {
+        legacy_form_version: "",
         major_version: 2,
         minor_version: 1,
       },
     },
-  ] as any;
+  ];
 
   afterEach(() => {
     jest.clearAllMocks();
