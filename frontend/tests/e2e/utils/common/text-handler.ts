@@ -30,15 +30,19 @@ export const textHandler: FieldHandler = async (
       `Text field ${field.field} requires string data, received ${typeof data}`,
     );
   }
-  const locator = field.testId
-    ? page.getByTestId(field.testId)
-    : field.label
-      ? page.getByLabel(field.label, { exact: field.labelExact })
-      : null;
+  // Prefer explicit selectors for stable targeting when labels are ambiguous
+  // (e.g., "Title" and "Competition title" on the same page).
+  const locator = field.selector
+    ? page.locator(field.selector)
+    : field.testId
+      ? page.getByTestId(field.testId)
+      : field.label
+        ? page.getByLabel(field.label, { exact: field.labelExact })
+        : null;
 
   if (!locator) {
     throw new Error(
-      `Text field ${field.field} requires either testId or label`,
+      `Text field ${field.field} requires selector, testId, or label`,
     );
   }
 
