@@ -219,7 +219,6 @@
       "matchFileNames": [
         "analytics/pyproject.toml",
         "api/pyproject.toml",
-        "backend/grants_shared/pyproject.toml",
         "api/docker-python-base"
       ],
       "matchPackagePatterns": ["python"]
