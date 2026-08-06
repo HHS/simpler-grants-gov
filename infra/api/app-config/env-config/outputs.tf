@@ -33,7 +33,9 @@ output "service_config" {
     domain_name                     = var.domain_name
     secondary_domain_names          = var.secondary_domain_names
     s3_cdn_domain_name              = var.s3_cdn_domain_name
+    enable_cdn_alias                = var.enable_cdn_alias
     mtls_domain_name                = var.mtls_domain_name
+    enable_api_gateway_domain_name  = var.enable_api_gateway_domain_name
     enable_https                    = var.enable_https
     region                          = var.default_region
     cpu                             = var.instance_cpu

@@ -189,7 +189,8 @@ module "service" {
   file_upload_jobs = local.service_config.file_upload_jobs
   scheduled_jobs   = local.environment_config.scheduled_jobs
 
-  enable_alb_cdn = true
+  enable_alb_cdn   = true
+  enable_cdn_alias = local.service_config.enable_cdn_alias
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids

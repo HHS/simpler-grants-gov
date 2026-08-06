@@ -31,6 +31,14 @@ variable "enable_https" {
   default     = false
 }
 
+variable "enable_cdn_alias" {
+  type        = bool
+  description = <<EOT
+    temp for environment migrations
+  EOT
+  default     = true
+}
+
 variable "enable_identity_provider" {
   type        = bool
   description = "Enables identity provider"
