@@ -55,18 +55,18 @@ jobs:
       #   run: |
       #     npx playwright install --with-deps
 
-      - name: Check target environment
-        run: |
-          if [[ "${{ inputs.target }}" != "local" && "${{ inputs.target }}" != "staging" && "${{ inputs.target }}" != "grantee1" && "${{ inputs.target }}" != "grantee2" && "${{ inputs.target }}" != "grantor1" && "${{ inputs.target }}" != "grantor2" ]]; then
-            echo "Unsupported target environment"
-            exit 1
-          fi
       - name: Set target environment
         run: |
           if [[ -z "${{ inputs.target }}" ]]; then
             echo "defaulted_target=staging" >> "$GITHUB_ENV";
           else
             echo "defaulted_target=${{ inputs.target }}" >> "$GITHUB_ENV";
+          fi
+      - name: Check target environment
+        run: |
+          if [[ "${{ inputs.target }}" != "local" && "${{ inputs.target }}" != "staging" && "${{ inputs.target }}" != "grantee1" && "${{ inputs.target }}" != "grantee2" && "${{ inputs.target }}" != "grantor1" && "${{ inputs.target }}" != "grantor2" ]]; then
+            echo "Unsupported target environment"
+            exit 1
           fi
 
       - name: Download All Blob Reports

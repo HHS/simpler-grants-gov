@@ -61,16 +61,10 @@ const webServerEnv: Record<string, string> = Object.fromEntries(
   }).filter(([, value]) => typeof value === "string"),
 );
 
-if (SUPPORTED_ENVS.indexOf(targetEnv as SupportedEnvs) === -1) {
-  throw new Error(
-    `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${SUPPORTED_ENVS.join(", ")}`,
-  );
-}
-
 const playwrightEnv = {
   webServerEnv,
-  baseUrl: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000",
-  apiUrl: process.env.PLAYWRIGHT_API_URL || "http://127.0.0.1:8080",
+  baseUrl,
+  apiUrl,
   targetEnv,
   testOrgLabel,
   isCi: process.env.CI,
