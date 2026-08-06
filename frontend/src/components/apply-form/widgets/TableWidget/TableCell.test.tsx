@@ -56,6 +56,50 @@ describe("TableCell", () => {
     expect(input).toHaveValue("1250.5");
   });
 
+  it("renders a dollar-formatted input with a visible currency prefix wrapper", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+          format: "dollar",
+        }}
+        id="dollar-input-cell"
+        value={1234.5}
+      />,
+    );
+
+    const input = screen.getByTestId("dollar-input-cell-input");
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveClass("applyform-table-cell-value");
+    expect(input).toHaveValue("1234.5");
+    expect(screen.getByTestId("dollar-input-cell-dollar-wrapper")).toHaveClass(
+      "simpler-currency-input-wrapper",
+    );
+  });
+
+  it("renders a percentage-formatted input with a visible percentage suffix wrapper", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/effort_percentage",
+          format: "percentage",
+        }}
+        id="percentage-input-cell"
+        value={12.5}
+      />,
+    );
+
+    const input = screen.getByTestId("percentage-input-cell-input");
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveClass("applyform-table-cell-value");
+    expect(input).toHaveValue("12.5");
+    expect(
+      screen.getByTestId("percentage-input-cell-percentage-wrapper"),
+    ).toHaveClass("simpler-percentage-input-wrapper");
+  });
+
   it("updates the input display when the value prop changes", () => {
     const { rerender } = render(
       <TableCell

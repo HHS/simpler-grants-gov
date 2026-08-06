@@ -27,8 +27,14 @@ def _required(
 
     for field_name in required:
         if field_name not in instance:
+            row_title = _.get("row_title") if isinstance(_, dict) else None
             yield jsonschema.ValidationError(
-                f"{field_name!r} is a required property", path=[field_name]
+                (
+                    f"{row_title} {field_name.replace('_', ' ').title()} is a required property"
+                    if row_title
+                    else f"{field_name!r} is a required property"
+                ),
+                path=[field_name],
             )
 
 

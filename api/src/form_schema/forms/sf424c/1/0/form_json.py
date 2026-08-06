@@ -15,56 +15,72 @@ FORM_JSON_SCHEMA = {
             "properties": {
                 "administrative_and_legal_expenses": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Administrative and Legal Expenses",
                 },
                 "land_structures_rights_of_way": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Land, Structures, Rights-of-Way, Appraisals, etc.",
                 },
                 "relocation_expenses": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Relocation Expenses and Payments",
                 },
                 "architectural_engineering_fees": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Architectural and Engineering Fees",
                 },
                 "other_architectural_engineering_fees": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Other Architectural and Engineering Fees",
                 },
                 "project_inspection_fees": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Project Inspection Fees",
                 },
                 "site_work": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Site Work",
                 },
                 "demolition_and_removal": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Demolition and Removal",
                 },
                 "construction": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Construction",
                     "required": ["total_cost"],
                 },
                 "equipment": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Equipment",
                 },
                 "miscellaneous": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Miscellaneous",
                 },
                 "subtotal_1": {
                     # Row 12 — Subtotal (sum of rows 1–11)
                     "allOf": [{"$ref": "#/$defs/budget_calculated_row"}],
+                    "row_title": "Subtotal",
                 },
                 "contingencies": {
                     # Row 13
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Contingencies",
                 },
                 "subtotal_2": {
                     # Row 14 — Subtotal (rows 12 + 13)
                     "allOf": [{"$ref": "#/$defs/budget_calculated_row"}],
+                    "row_title": "Subtotal",
                 },
                 "project_income": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "row_title": "Project Income",
                 },
                 "total_project_costs": {
                     # Row 16 — Total project costs (row 14 - row 15)
                     "allOf": [{"$ref": "#/$defs/budget_calculated_row"}],
+                    "row_title": "Total Project Costs",
                 },
             },
         },

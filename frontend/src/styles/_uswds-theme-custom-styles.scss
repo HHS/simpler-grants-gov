@@ -681,6 +681,23 @@ dl {
   }
 }
 
+.simpler-percentage-input-wrapper {
+  position: relative;
+  display: inline-block;
+  &::after {
+    content: "%";
+    position: absolute;
+    right: 10px;
+    bottom: -0.5rem;
+    transform: translateY(-50%);
+  }
+
+  input {
+    padding-right: 25px;
+    margin-top: 0 !important;
+  }
+}
+
 .simpler-page-anchor-offset {
   @include at-media("desktop") {
     scroll-margin-top: 6rem;
