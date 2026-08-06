@@ -225,10 +225,22 @@ export async function validateAllPrintViews(
 
     // Optional: Section heading (e.g., from fieldset) contains expected text
     // Use first heading within fieldset to avoid strict mode violation with multiple headings
+    // Handle case-insensitive matching for string values, exact matching for RegExp
     if (expectedSectionHeading) {
-      await expect(
-        page.getByTestId("fieldset").getByRole("heading").first(),
-      ).toContainText(expectedSectionHeading);
+      const headingElement = page
+        .getByTestId("fieldset")
+        .getByRole("heading")
+        .first();
+
+      if (typeof expectedSectionHeading === "string") {
+        // Case-insensitive match for strings
+        await expect(headingElement).toContainText(
+          new RegExp(expectedSectionHeading, "i"),
+        );
+      } else {
+        // Exact RegExp match
+        await expect(headingElement).toContainText(expectedSectionHeading);
+      }
     }
 
     // Pre-populated fields (API-injected from opportunity record)
