@@ -8794,6 +8794,9 @@ components:
           type: string
           description: The last name of the user
           example: Smith
+      required:
+      - first_name
+      - last_name
     WorkflowUserSchema:
       type: object
       properties:
