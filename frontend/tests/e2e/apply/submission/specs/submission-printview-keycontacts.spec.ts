@@ -131,6 +131,7 @@ for (const { testName, orgLabel, tags, buildTestData } of applicantScenarios) {
           printUrl,
           expectedPrepopulatedFields: form.expectedPrepopulatedFields,
           userEnteredFieldTestIds: form.userEnteredFieldTestIds,
+          expectedSectionHeading: form.formConfig.formName,
         });
       }
 

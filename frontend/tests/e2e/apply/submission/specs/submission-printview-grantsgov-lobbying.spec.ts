@@ -113,7 +113,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
           printUrl: buildPrintUrl(formUrl),
           expectedPrepopulatedFields: form.expectedPrepopulatedFields,
           userEnteredFieldTestIds: form.userEnteredFieldTestIds,
-          expectedSectionHeading: form.formConfig.formName,
         });
       }
 
