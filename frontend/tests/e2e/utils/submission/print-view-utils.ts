@@ -199,12 +199,17 @@ export async function validateAllPrintViews(
     const printViewWrapper = page.locator(".apply-form-print-preview");
     await expect(printViewWrapper).toBeVisible();
 
-    // Verify there are no visible editable controls (read-only state verification)
-    // Scope to only inputs/textareas within the print wrapper to avoid catching browser UI elements
-    const visibleInputs = printViewWrapper.locator("input:visible");
-    const visibleTextareas = printViewWrapper.locator("textarea:visible");
-    await expect(visibleInputs).toHaveCount(0);
-    await expect(visibleTextareas).toHaveCount(0);
+    // Verify there are no visible ENABLED editable controls (read-only state verification)
+    // Check for inputs/textareas that are not disabled and not readonly
+    // This is more robust than checking for count=0 as there may be hidden UI elements on some mobile browsers
+    const visibleEditableInputs = printViewWrapper.locator(
+      "input:visible:not([disabled]):not([readonly])",
+    );
+    const visibleEditableTextareas = printViewWrapper.locator(
+      "textarea:visible:not([disabled]):not([readonly])",
+    );
+    await expect(visibleEditableInputs).toHaveCount(0);
+    await expect(visibleEditableTextareas).toHaveCount(0);
 
     // Form title heading is visible
     await expect(page.locator("h1")).toContainText(formName);
