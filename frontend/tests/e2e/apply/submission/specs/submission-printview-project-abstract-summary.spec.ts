@@ -113,6 +113,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
           printUrl: buildPrintUrl(formUrl),
           expectedPrepopulatedFields: form.expectedPrepopulatedFields,
           userEnteredFieldTestIds: form.userEnteredFieldTestIds,
+          expectedSectionHeading: form.formConfig.formName,
         });
       }
 
@@ -128,9 +129,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
       // --- Print View Validation (one print url per form) ---
       await validateAllPrintViews(page, filledForms);
-
-      // Note: This spec previously had additional validation for section headings
-      // that may need to be re-added if tests fail. The standard helper validates h1 headings.
     },
   );
 }

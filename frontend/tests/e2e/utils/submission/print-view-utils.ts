@@ -169,11 +169,13 @@ export async function validateAttachmentPrintViewSection(
  * Validates all forms in the filledForms array against their print views.
  * This is the standard validation pattern used across all submission-printview specs.
  *
- * For each form:
- * 1. Navigate to the print view URL
- * 2. Verify the form title is visible in h1 heading
- * 3. Validate pre-populated fields (API-injected from opportunity)
- * 4. Validate user-entered fields using their testIds/printTestIds
+ * Validations include:
+ * 1. Print view wrapper exists (indicates read-only print layout, not editable form)
+ * 2. No visible editable controls (inputs, textareas) to ensure read-only state
+ * 3. Form title is visible in h1 heading
+ * 4. Optional: Section heading (from fieldset) if expectedSectionHeading provided
+ * 5. Pre-populated fields (API-injected from opportunity)
+ * 6. User-entered fields using their testIds/printTestIds
  *
  * @param page       - The Playwright page object
  * @param filledForms - Array of FilledFormEntry objects from the spec
@@ -188,11 +190,30 @@ export async function validateAllPrintViews(
     expectedPrepopulatedFields,
     userEnteredFieldTestIds,
     formName,
+    expectedSectionHeading,
   } of filledForms) {
     await navigateToPrintView(page, printUrl);
 
+    // Verify print-view wrapper exists (indicates read-only print layout)
+    // The wrapper has class "apply-form-print-preview" which contains the form content
+    const printViewWrapper = page.locator(".apply-form-print-preview");
+    await expect(printViewWrapper).toBeVisible();
+
+    // Verify there are no visible editable controls (read-only state verification)
+    const visibleInputs = page.locator("input:visible");
+    const visibleTextareas = page.locator("textarea:visible");
+    await expect(visibleInputs).toHaveCount(0);
+    await expect(visibleTextareas).toHaveCount(0);
+
     // Form title heading is visible
     await expect(page.locator("h1")).toContainText(formName);
+
+    // Optional: Section heading (e.g., from fieldset) contains expected text
+    if (expectedSectionHeading) {
+      await expect(
+        page.getByTestId("fieldset").getByRole("heading"),
+      ).toContainText(expectedSectionHeading);
+    }
 
     // Pre-populated fields (API-injected from opportunity record)
     for (const [testId, expectedValue] of Object.entries(
