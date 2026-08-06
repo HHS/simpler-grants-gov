@@ -58,6 +58,9 @@ module "training_config" {
     # Workflow
     WORKFLOW_SERVICE_INTERNAL_USER_ID = "00bcaf8e-dd04-4fd1-9fb3-ea872a93178d"
     ENABLE_WORKFLOW_ENDPOINTS         = 1
+
+    # Virus scanning endpoints
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

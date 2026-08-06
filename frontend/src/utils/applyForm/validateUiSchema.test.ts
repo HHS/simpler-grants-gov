@@ -68,6 +68,7 @@ describe("validateFormData", () => {
         {
           type: "field",
           definition: "/properties/TestField",
+          printDescription: true,
         },
       ];
 

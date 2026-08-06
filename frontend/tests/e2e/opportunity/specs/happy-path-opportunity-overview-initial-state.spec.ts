@@ -34,7 +34,7 @@ import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index"
 import { assertOverviewSectionStatus } from "tests/e2e/utils/opportunities/overview-status-utils";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
 
-const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
+const { GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
 
 test.describe("Grantor opportunity overview happy path - initial state", () => {
@@ -49,7 +49,7 @@ test.describe("Grantor opportunity overview happy path - initial state", () => {
 
   test(
     "Verifies initial state of opportunity overview page with happy path fixture data",
-    { tag: [GRANTOR, CORE_REGRESSION] },
+    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,
