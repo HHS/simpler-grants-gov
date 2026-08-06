@@ -9,7 +9,7 @@ module "infra_dev_config" {
   environment                     = "infra-dev"
   network_name                    = "infra-dev-simpler-grants"
   domain_name                     = "dev.simpler.grants.gov"
-  enable_cdn_alias                = false # See the cutover order above.
+  enable_cdn_alias                = false # dev still holds this alias; flip to true after DNS moves.
   enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
