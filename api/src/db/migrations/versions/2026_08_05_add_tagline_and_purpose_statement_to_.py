@@ -1,7 +1,7 @@
 """add tagline and purpose_statement to opportunity
 
 Revision ID: 15bfdec59153
-Revises: 0b3e125c6bac
+Revises: 956a32b92993
 Create Date: 2026-08-05 16:35:51.131047
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "15bfdec59153"
-down_revision = "0b3e125c6bac"
+down_revision = "956a32b92993"
 branch_labels = None
 depends_on = None
 
