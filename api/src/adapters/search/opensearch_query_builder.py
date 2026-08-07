@@ -175,6 +175,28 @@ class SearchQueryBuilder:
 
         return self
 
+    def filter_match_bool_prefix(
+        self, query: str, fields: list[str], query_operator: str
+    ) -> typing.Self:
+        """
+        Adds a multi_match bool_prefix query which queries against the provided fields.
+
+        This goes in the filter block, so it acts as a binary filter and does not affect
+        scoring. Use it when results are sorted by a field rather than by relevancy.
+        """
+        self.filters.append(
+            {
+                "multi_match": {
+                    "query": query,
+                    "fields": fields,
+                    "type": "bool_prefix",
+                    "operator": query_operator,
+                }
+            }
+        )
+
+        return self
+
     def filter_terms(self, field: str, terms: list) -> typing.Self:
         """
         For a given field, apply an AND-based filter to a set of values.
