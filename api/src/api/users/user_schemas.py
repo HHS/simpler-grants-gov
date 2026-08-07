@@ -515,7 +515,22 @@ class UserApiKeyListResponseSchema(AbstractResponseSchema):
 
 
 class UserUpdateProfileRequestSchema(UserProfile):
-    pass
+    first_name = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={
+            "description": "The first name of the user",
+            "example": "John",
+        },
+    )
+    last_name = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={
+            "description": "The last name of the user",
+            "example": "Smith",
+        },
+    )
 
 
 class UserUpdateProfileResponseSchema(AbstractResponseSchema):

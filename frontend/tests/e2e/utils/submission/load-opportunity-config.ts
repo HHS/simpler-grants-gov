@@ -2,6 +2,8 @@ import { ATTACHMENT_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/attachment
 import { ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/attachment-field-definitions";
 import { GRANTSGOV_LOBBYING_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/grantsgov-lobbying-data";
 import { GRANTSGOV_LOBBYING_FORM_CONFIG } from "tests/e2e/apply/fixtures/grantsgov-lobbying-field-definitions";
+import { KEY_CONTACTS_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/key-contacts-data";
+import { KEY_CONTACTS_FORM_CONFIG } from "tests/e2e/apply/fixtures/key-contacts-field-definitions";
 import { PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-abstract-summary-data";
 import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import { PPSL_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/project-performance-site-location-data";
@@ -31,6 +33,7 @@ import type {
 const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   ATTACHMENT_OPPORTUNITY_DATA,
   GRANTSGOV_LOBBYING_OPPORTUNITY_DATA,
+  KEY_CONTACTS_OPPORTUNITY_DATA,
   PPSL_OPPORTUNITY_DATA,
   PROJECT_ABSTRACT_SUMMARY_OPPORTUNITY_DATA,
   SF424_OPPORTUNITY_DATA,
@@ -47,6 +50,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
 const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   attachment: ATTACHMENT_FORM_CONFIG,
   grantsGovLobbying: GRANTSGOV_LOBBYING_FORM_CONFIG,
+  keyContacts: KEY_CONTACTS_FORM_CONFIG,
   ppsl: PPSL_FORM_CONFIG,
   projectAbstractSummary: PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,
   sf424: SF424_FORM_CONFIG,
