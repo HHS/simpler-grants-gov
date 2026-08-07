@@ -36,6 +36,22 @@ variable "mtls_domain_name" {
   default     = null
 }
 
+variable "enable_cdn_alias" {
+  type        = bool
+  description = <<EOT
+    temp for environment migrations
+  EOT
+  default     = true
+}
+
+variable "enable_api_gateway_domain_name" {
+  type        = bool
+  description = <<EOT
+    temp for environment migrations
+  EOT
+  default     = true
+}
+
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"

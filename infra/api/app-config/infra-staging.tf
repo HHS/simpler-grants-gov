@@ -10,7 +10,15 @@ module "infra_staging_config" {
 
   domain_name            = "api.staging.simpler.grants.gov"
   secondary_domain_names = ["alb.staging.simpler.grants.gov"]
-  enable_https           = false
+  enable_https           = true
+
+  # Both of these are globally unique per AWS service; staging releases them first (see staging.tf).
+  enable_api_gateway_domain_name = true
+
+  s3_cdn_domain_name = "files.staging.simpler.grants.gov"
+  enable_cdn_alias   = true
+
+  mtls_domain_name = "soap.staging.simpler.grants.gov"
 
   has_database                  = local.has_database
   database_enable_http_endpoint = true
@@ -47,12 +55,15 @@ module "infra_staging_config" {
     ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
     ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
 
+    # Override the env-config default, which would derive a nonexistent hhs-infra-staging client id.
+    LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-staging-simpler-grants-gov"
+
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation
-    FRONTEND_URL             = "https://infra-staging.simpler.grants.gov"
+    FRONTEND_URL             = "https://staging.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 

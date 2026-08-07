@@ -1,8 +1,6 @@
 # frontend service for the infra-dev environment (AWS account 061664787759, network_name "infra-dev-simpler-grants").
 #
-# Mirrors the existing dev frontend. HTTPS/custom domain is deferred for the
-# initial bring-up until an ACM cert + Route53 hosted zone exist in the new
-# account; the intended domain is shown in a comment below.
+
 module "infra_dev_config" {
   source                          = "./env-config"
   project_name                    = local.project_name
@@ -10,8 +8,9 @@ module "infra_dev_config" {
   default_region                  = module.project_config.default_region
   environment                     = "infra-dev"
   network_name                    = "infra-dev-simpler-grants"
-  domain_name                     = null # "infra-dev.simpler.grants.gov" once DNS + certs exist
-  enable_https                    = false
+  domain_name                     = "dev.simpler.grants.gov"
+  enable_cdn_alias                = true # dev still holds this alias; flip to true after DNS moves.
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider

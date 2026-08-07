@@ -4,10 +4,9 @@
 # OpenSearch, and the workflow service). A few environment-specific settings are
 # deferred for the initial infrastructure bring-up because they don't exist yet
 # in the new account:
-#   - HTTPS/custom domains: no ACM certificate or Route53 hosted zone yet.
 #   - Notifications: no SES domain identity yet.
 #   - New Relic entity GUIDs: create the infra-dev entities, then fill these in.
-# The intended infra-dev domain names are shown in comments below.
+
 module "infra_dev_config" {
   source         = "./env-config"
   project_name   = local.project_name
@@ -18,7 +17,14 @@ module "infra_dev_config" {
 
   domain_name            = "api.dev.simpler.grants.gov"
   secondary_domain_names = ["alb.dev.simpler.grants.gov"]
-  enable_https           = false
+  enable_https           = true
+
+  enable_api_gateway_domain_name = true
+
+  s3_cdn_domain_name = "files.dev.simpler.grants.gov"
+  enable_cdn_alias   = true
+
+  mtls_domain_name = "soap.dev.simpler.grants.gov"
 
   has_database                  = local.has_database
   database_enable_http_endpoint = true
@@ -55,12 +61,14 @@ module "infra_dev_config" {
     ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
     ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
 
+    LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-dev-simpler-grants-gov"
+
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "true"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation
-    FRONTEND_URL             = "https://infra-dev.simpler.grants.gov"
+    FRONTEND_URL             = "https://dev.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 
