@@ -124,27 +124,52 @@ function TableCell({
     }
   };
   const hasError = cellErrors.length > 0;
+  const inputWrapperClass =
+    cell.format === "dollar"
+      ? "simpler-currency-input-wrapper width-full display-block"
+      : cell.format === "percentage"
+        ? "simpler-percentage-input-wrapper width-full display-block"
+        : "";
+  const inputWrapperTestId = inputWrapperClass
+    ? `${id}-${cell.format}-wrapper`
+    : undefined;
   const inputId = name ?? id;
   return (
     <>
-      {hasError && <FieldErrors fieldName={id} rawErrors={cellErrors} />}
-      <input
-        aria-label={ariaLabel ?? `Editable table value for ${cell.definition}`}
-        className={`usa-input margin-0 width-full overflow-x-auto applyform-table-cell-value${
-          hasError ? " usa-input--error" : ""
-        }`}
-        data-testid={`${id}-input`}
-        id={inputId}
-        name={name}
-        inputMode="decimal"
-        onChange={handleChange}
-        pattern="-?[0-9]*[.]?[0-9]*"
-        type="text"
-        value={inputValue}
-        disabled={disabled}
-        aria-invalid={hasError}
-        aria-describedby={hasError ? `error-for-${id}` : undefined}
-      />
+      {hasError && (
+        <div
+          className="display-block width-full"
+          data-testid={`${id}-error-container`}
+          style={{
+            whiteSpace: "normal",
+            wordBreak: "normal",
+            overflowWrap: "normal",
+          }}
+        >
+          <FieldErrors fieldName={id} rawErrors={cellErrors} />
+        </div>
+      )}
+      <div className={inputWrapperClass} data-testid={inputWrapperTestId}>
+        <input
+          aria-label={
+            ariaLabel ?? `Editable table value for ${cell.definition}`
+          }
+          className={`usa-input margin-0 width-full overflow-x-auto applyform-table-cell-value${
+            hasError ? " usa-input--error" : ""
+          }`}
+          data-testid={`${id}-input`}
+          id={inputId}
+          name={name}
+          inputMode="decimal"
+          onChange={handleChange}
+          pattern="-?[0-9]*[.]?[0-9]*"
+          type="text"
+          value={inputValue}
+          disabled={disabled}
+          aria-invalid={hasError}
+          aria-describedby={hasError ? `error-for-${id}` : undefined}
+        />
+      </div>
     </>
   );
 }

@@ -66,6 +66,31 @@ NESTED_REQUIRED = Form(
     },
 )
 
+ROW_TITLE_FORM = Form(
+    form_id=uuid.UUID("00000000-0000-0000-0000-000000000004"),
+    form_name="Row Title Test Form",
+    short_form_name="row_title_test",
+    form_version="1.0",
+    agency_code="SGG",
+    form_ui_schema={},
+    form_json_schema={
+        "type": "object",
+        "properties": {
+            "construction": {
+                "type": "object",
+                "properties": {
+                    "total_cost": {"type": "number"},
+                    "non_allowable_cost": {"type": "number"},
+                },
+                "required": ["total_cost"],
+                "row_title": "Construction",
+            },
+            "federal_percentage_share": {"type": "number"},
+        },
+        "required": ["federal_percentage_share"],
+    },
+)
+
 
 @pytest.mark.parametrize(
     "data,expected_issues",
@@ -196,3 +221,50 @@ def test_validate_json_schema_required_path():
             type="required", message="'other_field' is a required property", field="$.other_field"
         ),
     }
+
+
+@pytest.mark.parametrize(
+    "data,expected_issues",
+    [
+        ({"construction": {"total_cost": 100}, "federal_percentage_share": 10}, []),
+        (
+            {"construction": {}, "federal_percentage_share": 10},
+            [
+                ValidationErrorDetail(
+                    type="required",
+                    message="Construction Total Cost is a required property",
+                    field="$.construction.total_cost",
+                )
+            ],
+        ),
+        (
+            {"construction": {"total_cost": 100}},
+            [
+                ValidationErrorDetail(
+                    type="required",
+                    message="'federal_percentage_share' is a required property",
+                    field="$.federal_percentage_share",
+                )
+            ],
+        ),
+        (
+            {"construction": {}},
+            [
+                ValidationErrorDetail(
+                    type="required",
+                    message="Construction Total Cost is a required property",
+                    field="$.construction.total_cost",
+                ),
+                ValidationErrorDetail(
+                    type="required",
+                    message="'federal_percentage_share' is a required property",
+                    field="$.federal_percentage_share",
+                ),
+            ],
+        ),
+    ],
+)
+def test_validate_json_schema_row_title(data, expected_issues):
+    validation_issues = validate_json_schema_for_form(data, ROW_TITLE_FORM)
+
+    assert set(validation_issues) == set(expected_issues)

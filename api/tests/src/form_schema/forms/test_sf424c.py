@@ -131,6 +131,36 @@ def test_sf424c_v2_0_percentage_negative(sf424c_v2_0):
     assert validation_issues[0].field == "$.federal_funding.federal_percentage_share"
 
 
+def test_sf424c_v2_0_construction_total_cost_required(sf424c_v2_0):
+    """construction.total_cost is required — missing it fails schema validation,
+    unlike other budget rows (e.g. site_work) which stay fully optional."""
+    data = {
+        "budget_information": {
+            "construction": {
+                "non_allowable_cost": "5000.00",
+            }
+        }
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424c_v2_0)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "required"
+    assert validation_issues[0].field == "$.budget_information.construction.total_cost"
+    assert validation_issues[0].message == "Construction Total Cost is a required property"
+
+
+def test_sf424c_v2_0_other_rows_total_cost_not_required(sf424c_v2_0):
+    """Unlike construction, other budget rows (e.g. site_work) don't require total_cost."""
+    data = {
+        "budget_information": {
+            "site_work": {
+                "non_allowable_cost": "5000.00",
+            }
+        }
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424c_v2_0)
+    assert len(validation_issues) == 0
+
+
 def test_sf424c_v2_0_rules_empty_state(
     enable_factory_create, verify_no_warning_error_logs, sf424c_v2_0
 ):
