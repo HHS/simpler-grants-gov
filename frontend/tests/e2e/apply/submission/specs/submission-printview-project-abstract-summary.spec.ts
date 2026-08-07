@@ -9,7 +9,6 @@
  */
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
@@ -30,8 +29,7 @@ import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-pri
 import {
   buildHappyPathTestData,
   buildPrintUrl,
-  navigateToPrintView,
-  validatePrintViewField,
+  validateAllPrintViews,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
   submitApplicationAndVerify,
@@ -115,6 +113,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
           printUrl: buildPrintUrl(formUrl),
           expectedPrepopulatedFields: form.expectedPrepopulatedFields,
           userEnteredFieldTestIds: form.userEnteredFieldTestIds,
+          expectedSectionHeading: form.formConfig.formName,
         });
       }
 
@@ -129,38 +128,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one print url per form) ---
-      for (const {
-        testData,
-        printUrl,
-        expectedPrepopulatedFields,
-        userEnteredFieldTestIds,
-        formName,
-      } of filledForms) {
-        await navigateToPrintView(page, printUrl);
-
-        // --- Form title heading is visible ---
-        await expect(page.locator("h1")).toContainText(formName);
-
-        // --- Section heading contains the form name ---
-        await expect(
-          page.getByTestId("fieldset").getByRole("heading"),
-        ).toContainText(formName);
-
-        // --- Pre-populated fields (Data injected from opportunity record) ---
-        for (const [testId, expectedValue] of Object.entries(
-          expectedPrepopulatedFields,
-        )) {
-          await expect(page.getByTestId(testId)).toBeVisible();
-          await expect(page.getByTestId(testId)).toContainText(expectedValue);
-        }
-
-        // --- User-entered fields ---
-        for (const [dataKey, testId] of Object.entries(
-          userEnteredFieldTestIds,
-        )) {
-          await validatePrintViewField(page, testId, testData[dataKey]);
-        }
-      }
+      await validateAllPrintViews(page, filledForms);
     },
   );
 }
