@@ -48,10 +48,10 @@ export function RequiredForms({
           className="form-modal-rows form-modal-optional padding-2 margin-bottom-0 bg-base-lightest"
         >
           <Grid col={8} className="text-bold">
-            Item
+            {t("labelForm")}
           </Grid>
           <Grid col={4} className="text-bold text-right">
-            Requirement
+            {t("labelRequirement")}
           </Grid>
         </Grid>
         {competitionForms.map((form, index) => {

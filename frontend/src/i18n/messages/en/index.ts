@@ -2670,6 +2670,8 @@ export const messages = {
       header: "Forms in this package",
       subHeader: "Select the forms applicants must complete.",
       selectFormsButton: "Select forms",
+      labelForm: "Item",
+      labelRequirement: "Requirement",
     },
   },
   FeatureFlagsAdmin: {

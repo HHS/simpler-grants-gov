@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { axe } from "jest-axe";
 import { RequiredForms } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/RequiredForms";
 import { FormType } from "src/types/allFormsResponseTypes";
 
@@ -152,6 +153,42 @@ describe("RequiredForms", () => {
       expect(
         screen.queryByText("requiredStates.required"),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("accessibility", () => {
+    it("passes accessibility scan when rendering a required form", async () => {
+      const { container } = render(
+        <RequiredForms
+          competitionForms={[
+            {
+              form_id: alwaysRequiredFormId,
+              is_required: true,
+            },
+          ]}
+          formDetails={mockFormDetails}
+        />,
+      );
+
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
+    });
+
+    it("passes accessibility scan when rendering a conditional form", async () => {
+      const { container } = render(
+        <RequiredForms
+          competitionForms={[
+            {
+              form_id: "conditional-form-id",
+              is_required: false,
+            },
+          ]}
+          formDetails={mockFormDetails}
+        />,
+      );
+
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
     });
   });
 });
