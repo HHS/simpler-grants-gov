@@ -1,7 +1,7 @@
+import axios from "axios";
 import { ApiRequestError } from "src/errors";
 import { FileUploadDetailsResponse } from "src/types/apiResponseTypes";
 import { OptionalStringDict } from "src/types/generalTypes";
-import { createFormData } from "src/utils/fileUtils/createFormData";
 
 import { fetchFileUploadWithMethod } from "./fetchers";
 
@@ -46,22 +46,34 @@ export const uploadFileToS3 = async (
   // TODO: throwing here will cause a batched chunk, I believe because the behavior is to batch chunks queued between
   // asynchronous calls. We can either make this asynchronous somehow, or build behavior into the stream reader to split batched
   // chunks on read (ex. split at `}{`)
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  const formData = new FormData();
 
-  const fileFormData = createFormData(file.name, buffer, file.type, "file");
   Object.entries(body).forEach(([key, value]) => {
-    // don't overwrite the file field
     if (value && key !== "file") {
-      fileFormData.append(key, value);
+      formData.append(key, value);
     }
   });
-  const s3Response = await fetch(url, {
-    method: "POST",
-    body: fileFormData,
-  });
-  if (!s3Response.ok) {
-    throw new ApiRequestError("Error uploading file to S3");
+  formData.append("file", file);
+
+  try {
+    await axios.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  } catch (error) {
+    const defaultErrorMessage = "Error uploading file to S3";
+    if (axios.isAxiosError(error)) {
+      // Non 2XX response status
+      if (error.response) {
+        console.error(
+          `${defaultErrorMessage} with status: ${error.response.status}`,
+        );
+      }
+    } else {
+      console.error(defaultErrorMessage);
+    }
+    throw new ApiRequestError(defaultErrorMessage);
   }
   return true;
 };

@@ -47,6 +47,7 @@ interface WidgetSupport {
     deletedEntryIndex: number,
   ) => void;
   markFormDirty?: () => void;
+  useVirusScanning: boolean;
 }
 
 interface ApplyFormFormContext {
@@ -114,6 +115,7 @@ const ApplyForm = ({
   applicationStatus,
   createdAt,
   updatedAt,
+  useVirusScanning = false,
 }: {
   applicationId: string;
   formId: string;
@@ -123,6 +125,7 @@ const ApplyForm = ({
   validationWarnings:
     FormattedFormValidationWarning[] | FormValidationWarning[] | null;
   attachments: Attachment[];
+  useVirusScanning?: boolean; // Temporary for initial integration. Will be removed in #11352
   isBudgetForm?: boolean;
   applicationStatus?: string;
   createdAt?: string;
@@ -233,6 +236,7 @@ const ApplyForm = ({
         deletedEntryIndexesByFieldListPath,
         onFieldListEntryDelete: handleFieldListEntryDelete,
         markFormDirty: handleFormEdited,
+        useVirusScanning,
       },
     }),
     [
@@ -240,6 +244,7 @@ const ApplyForm = ({
       displayValidationWarnings,
       formObject,
       formSchema,
+      useVirusScanning,
     ],
   );
 
