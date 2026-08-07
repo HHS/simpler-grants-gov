@@ -2,6 +2,7 @@ import {
   formatCurrency,
   formatCurrencyString,
   getNumericAmountFromString,
+  sanitizeCurrencyInput,
 } from "src/utils/formatCurrencyUtil";
 
 describe("formatCurrency", () => {
@@ -87,5 +88,26 @@ describe("getNumericAmountFromString", () => {
 
   it("parses large formatted amounts", () => {
     expect(getNumericAmountFromString("$1,234,567.89")).toBe(1234567.89);
+  });
+});
+
+describe("sanitizeCurrencyInput", () => {
+  it("strips letters and other non-numeric characters", () => {
+    expect(sanitizeCurrencyInput("12a3b")).toBe("123");
+    expect(sanitizeCurrencyInput("$1,234")).toBe("1234");
+  });
+
+  it("allows a single decimal point and at most two decimal places", () => {
+    expect(sanitizeCurrencyInput("12.345")).toBe("12.34");
+    expect(sanitizeCurrencyInput("12.3.4")).toBe("12.34");
+  });
+
+  it("allows only a leading minus sign", () => {
+    expect(sanitizeCurrencyInput("-12.5")).toBe("-12.5");
+    expect(sanitizeCurrencyInput("12-5")).toBe("125");
+  });
+
+  it("returns an empty string when there are no numeric characters", () => {
+    expect(sanitizeCurrencyInput("abc")).toBe("");
   });
 });

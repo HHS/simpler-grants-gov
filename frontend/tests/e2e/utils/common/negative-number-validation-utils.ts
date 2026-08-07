@@ -73,6 +73,24 @@ export async function assertNegativeNumberValidationsFromDefinitions(
     await field.fill(negativeValue);
     await field.blur();
 
+    const { locator, useContainsText } = await resolveTextLocator({
+      page,
+      targetKey: fieldDefinition.valueKey,
+      expectedContent: fieldDefinition.negativeNumberValidationMessage,
+      contextSelector: fieldDefinition.selector,
+      includePageLevelFallback: false,
+    });
+
+    if (useContainsText) {
+      await expect(locator).toContainText(
+        fieldDefinition.negativeNumberValidationMessage,
+      );
+    } else {
+      await expect(locator).toHaveText(
+        fieldDefinition.negativeNumberValidationMessage,
+      );
+    }
+
     if (shouldClickTriggerButtons) {
       for (const triggerButtonName of triggerButtonNames) {
         await page.getByRole("button", { name: triggerButtonName }).click();
@@ -83,18 +101,6 @@ export async function assertNegativeNumberValidationsFromDefinitions(
     } else if (options?.pageUrlPattern) {
       await expect(page).toHaveURL(options.pageUrlPattern);
     }
-
-    const { locator } = await resolveTextLocator({
-      page,
-      targetKey: fieldDefinition.valueKey,
-      expectedContent: fieldDefinition.negativeNumberValidationMessage,
-      contextSelector: fieldDefinition.selector,
-      includePageLevelFallback: false,
-    });
-
-    await expect(locator).toHaveText(
-      fieldDefinition.negativeNumberValidationMessage,
-    );
 
     expect(fillData[fieldDefinition.valueKey]).toBeDefined();
     await field.fill(String(fillData[fieldDefinition.valueKey]));
