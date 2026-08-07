@@ -231,12 +231,10 @@ class TestGetAwardRecommendation200:
 
         # Sanity-check the setup: both workflows belong to the same award recommendation.
         assert (
-            review_workflow.award_recommendation_id
-            == award_recommendation.award_recommendation_id
+            review_workflow.award_recommendation_id == award_recommendation.award_recommendation_id
         )
         assert (
-            other_workflow.award_recommendation_id
-            == award_recommendation.award_recommendation_id
+            other_workflow.award_recommendation_id == award_recommendation.award_recommendation_id
         )
 
         # Ensure the filtered relationship is loaded from the database after
@@ -332,7 +330,7 @@ class TestGetAwardRecommendation200:
             award_recommendation.award_recommendation_id
         )
         assert data["review_workflow_id"] is None
-        
+
 
 ####################################
 # 404 Tests

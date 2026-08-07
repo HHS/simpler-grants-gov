@@ -9,7 +9,8 @@ from grants_shared.db.models.base import TimestampMixin
 from grants_shared.util.file_util import pre_sign_file_location
 from sqlalchemy import ForeignKey, Numeric, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import foreign, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, foreign, mapped_column, relationship
+from sqlalchemy.sql.elements import ColumnElement
 
 from src.constants.lookup_constants import (
     AwardRecommendationAttachmentType,
@@ -38,15 +39,15 @@ if TYPE_CHECKING:
     from src.db.models.opportunity_models import Opportunity
     from src.db.models.workflow_models import Workflow, WorkflowApproval
 
-def _review_workflow_join():
+
+def _review_workflow_join() -> ColumnElement[bool]:
     from src.db.models.workflow_models import Workflow
 
     return and_(
-        AwardRecommendation.award_recommendation_id
-        == foreign(Workflow.award_recommendation_id),
-        Workflow.workflow_type
-        == WorkflowType.AWARD_RECOMMENDATION_REVIEW,
+        AwardRecommendation.award_recommendation_id == foreign(Workflow.award_recommendation_id),
+        Workflow.workflow_type == WorkflowType.AWARD_RECOMMENDATION_REVIEW,
     )
+
 
 class AwardRecommendation(ApiSchemaTable, TimestampMixin):
     __tablename__ = "award_recommendation"
@@ -81,7 +82,7 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
 
     is_deleted: Mapped[bool] = mapped_column(default=False)
 
-    review_workflow: Mapped["Workflow | None"] = relationship(
+    review_workflow: Mapped[Workflow | None] = relationship(
         "Workflow",
         primaryjoin=_review_workflow_join,
         uselist=False,
@@ -89,8 +90,8 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         lazy="joined",
         overlaps="workflows,award_recommendation",
     )
-    
-    workflows: Mapped[list["Workflow"]] = relationship(
+
+    workflows: Mapped[list[Workflow]] = relationship(
         "Workflow",
         back_populates="award_recommendation",
         cascade="all, delete-orphan",
