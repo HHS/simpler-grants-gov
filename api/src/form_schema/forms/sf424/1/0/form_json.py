@@ -918,6 +918,18 @@ FORM_XML_TRANSFORM_RULES = {
                 "source_field": "applicant_type_code",
                 "target_pattern": "ApplicantTypeCode{index}",
                 "max_count": 3,  # SF-424 supports up to 3 applicant type codes
+                # Normalize legacy casing: option H was stored with lowercase "state"
+                # but the XSD requires capital "State".
+                # passthrough_unknown=True leaves all other option codes unchanged.
+                "item_value_transform": {
+                    "type": "map_values",
+                    "params": {
+                        "mappings": {
+                            "H: Public/state Controlled Institution of Higher Education": "H: Public/State Controlled Institution of Higher Education",
+                        },
+                        "passthrough_unknown": True,
+                    },
+                },
             },
         }
     },
@@ -1000,6 +1012,19 @@ FORM_XML_TRANSFORM_RULES = {
             "target": "StateReview",
             "null_handling": "default_value",
             "default_value": NO_VALUE,  # Use constant from value_transformers
+            # Normalize legacy casing: form enum and stored values use lowercase "state",
+            # but the XSD requires capital "State" in options a and b.
+            # passthrough_unknown=True ensures option c (and any future values) pass through unchanged.
+            "value_transform": {
+                "type": "map_values",
+                "params": {
+                    "mappings": {
+                        "a. This application was made available to the state under the Executive Order 12372 Process for review on": "a. This application was made available to the State under the Executive Order 12372 Process for review on",
+                        "b. Program is subject to E.O. 12372 but has not been selected by the state for review.": "b. Program is subject to E.O. 12372 but has not been selected by the State for review.",
+                    },
+                    "passthrough_unknown": True,
+                },
+            },
         }
     },
     "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},
