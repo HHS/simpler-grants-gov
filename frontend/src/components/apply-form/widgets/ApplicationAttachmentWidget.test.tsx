@@ -17,6 +17,7 @@ type SimplerFileInputMockProps = {
   postUploadActionErrorMessage?: string;
   onDelete: (fileId: string) => Promise<unknown>;
   onStart?: () => void;
+  onComplete?: () => void;
   existingFiles?: UploadFileMetadata[];
   disabled?: boolean;
   readOnly?: boolean;
@@ -35,7 +36,7 @@ jest.mock("src/hooks/ApplicationAttachments", () => ({
 const mockClientFetch = jest.fn();
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
-    clientFetch: (...args: unknown[]) => mockClientFetch(...args) as unknown,
+    clientFetch: mockClientFetch,
   }),
 }));
 
@@ -59,6 +60,10 @@ const getHiddenInput = (container: HTMLElement, name: string) =>
   container.querySelector<HTMLInputElement>(
     `input[type="hidden"][name="${name}"]`,
   );
+
+const incrementAttachmentsProcessing = jest.fn();
+const decrementAttachmentsProcessing = jest.fn();
+const markFormDirty = jest.fn();
 
 describe("ApplicationAttachmentWidget", () => {
   const existingAttachment: Attachment = {
@@ -380,8 +385,6 @@ describe("ApplicationAttachmentWidget", () => {
   });
 
   it("marks the form dirty when an upload starts", () => {
-    const markFormDirty = jest.fn();
-
     render(
       <ApplicationAttachmentWidget
         {...defaultProps}
@@ -396,9 +399,86 @@ describe("ApplicationAttachmentWidget", () => {
     expect(markFormDirty).toHaveBeenCalled();
   });
 
-  it("marks the form dirty when the attachment is deleted", async () => {
-    const markFormDirty = jest.fn();
+  it("increments the attachments uploading counter and marks the form dirty when an upload starts", () => {
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: {
+            useVirusScanning: true,
+            markFormDirty,
+            attachmentsUploadingCounter: {
+              incrementAttachmentsProcessing,
+              decrementAttachmentsProcessing,
+            },
+          },
+        }}
+      />,
+    );
+    getSimplerFileInputProps().onStart?.();
+    expect(incrementAttachmentsProcessing).toHaveBeenCalledTimes(1);
+    expect(decrementAttachmentsProcessing).not.toHaveBeenCalled();
+    expect(markFormDirty).toHaveBeenCalled();
+  });
 
+  it("decrements the attachments uploading counter when an upload completes", () => {
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: {
+            useVirusScanning: true,
+            attachmentsUploadingCounter: {
+              incrementAttachmentsProcessing,
+              decrementAttachmentsProcessing,
+            },
+          },
+        }}
+      />,
+    );
+    getSimplerFileInputProps().onComplete?.();
+    expect(decrementAttachmentsProcessing).toHaveBeenCalledTimes(1);
+    expect(incrementAttachmentsProcessing).not.toHaveBeenCalled();
+  });
+
+  it("increments and decrements the counter once per upload lifecycle", () => {
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: {
+            useVirusScanning: true,
+            attachmentsUploadingCounter: {
+              incrementAttachmentsProcessing,
+              decrementAttachmentsProcessing,
+            },
+          },
+        }}
+      />,
+    );
+
+    getSimplerFileInputProps().onStart?.();
+    getSimplerFileInputProps().onComplete?.();
+    expect(incrementAttachmentsProcessing).toHaveBeenCalledTimes(1);
+    expect(decrementAttachmentsProcessing).toHaveBeenCalledTimes(1);
+  });
+
+  it("handles upload start and completion when no uploading counter support is provided", () => {
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: { useVirusScanning: true },
+        }}
+      />,
+    );
+    expect(() => {
+      getSimplerFileInputProps().onStart?.();
+      getSimplerFileInputProps().onComplete?.();
+    }).not.toThrow();
+  });
+
+  it("marks the form dirty when the attachment is deleted", async () => {
     render(
       <ApplicationAttachmentWidget
         {...defaultProps}
