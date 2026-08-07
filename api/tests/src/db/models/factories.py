@@ -72,6 +72,7 @@ from src.constants.lookup_constants import (
     SamGovImportType,
     SamGovProcessingStatus,
     UserType,
+    WorkflowEntityType,
     WorkflowType,
 )
 from src.constants.static_role_values import (
@@ -86,6 +87,7 @@ from src.db.models import agency_models
 from src.db.models.agency_models import Agency
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.form_schema.forms import SF424_v4_0, init_form_registry
+from src.workflow.registry.workflow_registry import WorkflowRegistry
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
 SCHEMA = OpportunityVersionSchema()
@@ -995,8 +997,6 @@ class AwardRecommendationFactory(BaseFactory):
     other_key_information = sometimes_none(factory.Faker("paragraph"))
 
     is_deleted = False
-    review_workflow = factory.SubFactory("tests.src.db.models.factories.WorkflowFactory")
-    review_workflow_id = factory.LazyAttribute(lambda s: s.review_workflow.workflow_id)
 
 
 class AwardRecommendationAttachmentFactory(BaseFactory):
@@ -3388,44 +3388,63 @@ class WorkflowFactory(BaseFactory):
         model = workflow_models.Workflow
 
     workflow_id = Generators.UuidObj
-    workflow_type = factory.fuzzy.FuzzyChoice(WorkflowType)
+    workflow_type = WorkflowType.BASIC_TEST_WORKFLOW
     current_workflow_state = "start"
     is_active = True
 
-    # By default, we'll associate a workflow with an opportunity
-    # Use the params below to change this, or pass in your own.
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(
-        lambda e: e.opportunity.opportunity_id if e.opportunity is not None else None
-    )
+    opportunity = None
+    application = None
+    application_submission = None
+    award_recommendation = None
 
-    class Params:
-        has_opportunity = factory.Trait(
-            opportunity=factory.SubFactory(OpportunityFactory),
-            opportunity_id=factory.LazyAttribute(lambda e: e.opportunity.opportunity_id),
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        workflow_type = kwargs.get(
+            "workflow_type",
+            WorkflowType.BASIC_TEST_WORKFLOW,
         )
 
-        has_application = factory.Trait(
-            application=factory.SubFactory(ApplicationFactory),
-            application_id=factory.LazyAttribute(lambda e: e.application.application_id),
-            opportunity=None,
-        )
+        entity_fields = {
+            WorkflowEntityType.OPPORTUNITY: "opportunity",
+            WorkflowEntityType.APPLICATION: "application",
+            WorkflowEntityType.APPLICATION_SUBMISSION: "application_submission",
+            WorkflowEntityType.AWARD_RECOMMENDATION: "award_recommendation",
+        }
 
-        has_application_submission = factory.Trait(
-            application_submission=factory.SubFactory(ApplicationSubmissionFactory),
-            application_submission_id=factory.LazyAttribute(
-                lambda e: e.application_submission.application_submission_id
-            ),
-            opportunity=None,
-        )
+        supplied_entities = [
+            field_name
+            for field_name in entity_fields.values()
+            if kwargs.get(field_name) is not None
+        ]
 
-        has_award_recommendation = factory.Trait(
-            award_recommendation=factory.SubFactory(AwardRecommendationFactory),
-            award_recommendation_id=factory.LazyAttribute(
-                lambda e: e.award_recommendation.award_recommendation_id
-            ),
-            opportunity=None,
-        )
+        if len(supplied_entities) > 1:
+            raise ValueError(
+                "WorkflowFactory requires exactly one workflow entity; "
+                f"received: {', '.join(sorted(supplied_entities))}"
+            )
+
+        if not supplied_entities:
+            config, _ = WorkflowRegistry.get_state_machine_for_workflow_type(workflow_type)
+
+            factory_by_entity_type = {
+                WorkflowEntityType.OPPORTUNITY: OpportunityFactory,
+                WorkflowEntityType.APPLICATION: ApplicationFactory,
+                WorkflowEntityType.APPLICATION_SUBMISSION: (ApplicationSubmissionFactory),
+                WorkflowEntityType.AWARD_RECOMMENDATION: (AwardRecommendationFactory),
+            }
+
+            entity_factory = factory_by_entity_type.get(config.entity_type)
+            entity_field = entity_fields.get(config.entity_type)
+
+            if entity_factory is None or entity_field is None:
+                raise ValueError(
+                    "WorkflowFactory does not have a factory configured for "
+                    f"workflow entity type {config.entity_type}"
+                )
+
+            kwargs[entity_field] = entity_factory.create()
+
+        return super()._create(model_class, *args, **kwargs)
 
 
 class WorkflowEventHistoryFactory(BaseFactory):
