@@ -66,6 +66,9 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     )
     category_explanation: Mapped[str | None]
 
+    tagline: Mapped[str | None]
+    purpose_statement: Mapped[str | None]
+
     is_draft: Mapped[bool] = mapped_column(index=True)
 
     revision_number: Mapped[int | None]

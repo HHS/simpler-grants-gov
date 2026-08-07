@@ -1,11 +1,14 @@
 "use client";
 
-import { RecommendationDetailForm } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
+import {
+  RecommendationDetailForm,
+  RecommendationDetailFormHandle,
+} from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
 import { useSelectedSubmissions } from "src/hooks/useSelectedSubmissions";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, ButtonGroup } from "@trussworks/react-uswds";
 
 import SelectedApplicationsTable from "src/components/award-recommendation/SelectedApplicationsTable";
@@ -22,6 +25,7 @@ export default function EditRecommendationsForm({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<RecommendationDetailFormHandle>(null);
 
   const { selectedSubmissions, hasSelections } = useSelectedSubmissions(
     awardRecommendationId,
@@ -37,6 +41,10 @@ export default function EditRecommendationsForm({
   };
 
   const handleSave = () => {
+    if (!formRef.current?.validate()) {
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -96,6 +104,7 @@ export default function EditRecommendationsForm({
 
       <div className="margin-top-4">
         <RecommendationDetailForm
+          ref={formRef}
           submission={isSingleSubmission ? selectedSubmissions[0] : undefined}
           submissions={isMultipleSubmissions ? selectedSubmissions : undefined}
         />

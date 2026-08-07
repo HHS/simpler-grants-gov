@@ -8,13 +8,23 @@ import {
   formatCurrency,
   formatCurrencyString,
   getNumericAmountFromString,
+  sanitizeCurrencyInput,
 } from "src/utils/formatCurrencyUtil";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 import {
+  ChangeEvent,
+  ForwardedRef,
+  forwardRef,
+  useImperativeHandle,
+  useState,
+} from "react";
+import {
+  Alert,
   CharacterCount,
   Checkbox,
+  ErrorMessage,
+  FormGroup,
   Grid,
   Label,
   Select,
@@ -37,6 +47,20 @@ const defaultHasExceptionByRecommendationType: Record<
   not_recommended: false,
 };
 
+const isAmountEmpty = (value: string) =>
+  (value ?? "").replace(/[$,\s]/g, "") === "";
+
+export type RecommendationFieldErrors = {
+  recommendation?: string;
+  exceptionDetail?: string;
+  recommendedAmount?: string;
+  recommendedAmounts?: Record<string, string>;
+};
+
+export type RecommendationDetailFormHandle = {
+  validate: () => boolean;
+};
+
 type RecommendationDetailFormProps = {
   submission?: AwardRecommendationSubmission;
   submissions?: AwardRecommendationSubmission[];
@@ -47,30 +71,37 @@ type RecommendationFieldsProps = {
   namePrefix: string;
   generalCommentDefaultValue?: string;
   exceptionDetailDefaultValue?: string;
-  initialRecommendationType?: AwardRecommendationType;
-  initialHasException?: boolean;
+  recommendationType: AwardRecommendationType | "";
+  hasException: boolean;
+  exceptionDetail: string;
+  onRecommendationTypeChange: (value: AwardRecommendationType | "") => void;
+  onHasExceptionChange: (value: boolean) => void;
+  onExceptionDetailChange: (value: string) => void;
+  errors: RecommendationFieldErrors;
 };
 
 const RecommendationFields = ({
   submissionId,
   namePrefix,
   generalCommentDefaultValue,
-  exceptionDetailDefaultValue,
-  initialRecommendationType = "recommended_for_funding",
-  initialHasException = false,
+  recommendationType,
+  hasException,
+  exceptionDetail,
+  onRecommendationTypeChange,
+  onHasExceptionChange,
+  onExceptionDetailChange,
+  errors,
 }: RecommendationFieldsProps) => {
   const t = useTranslations("AwardRecommendation.recommendationDetails");
-  const [recommendationType, setRecommendationType] =
-    useState<AwardRecommendationType>(initialRecommendationType);
-  const [hasException, setHasException] = useState(initialHasException);
 
   const canHaveException =
+    recommendationType !== "" &&
     exceptionEligibleRecommendationTypes.includes(recommendationType);
   const showExceptionDetail = canHaveException && hasException;
 
   return (
     <>
-      <div className="margin-bottom-3">
+      <FormGroup error={!!errors.recommendation} className="margin-bottom-3">
         <Label
           htmlFor={`award_recommendation_type_${submissionId}`}
           className="text-bold margin-bottom-1"
@@ -78,21 +109,28 @@ const RecommendationFields = ({
           <span>{t("recommendationLabel")}</span>
           <RequiredFieldIndicator> *</RequiredFieldIndicator>
         </Label>
+        {errors.recommendation && (
+          <ErrorMessage>{errors.recommendation}</ErrorMessage>
+        )}
         <Select
           id={`award_recommendation_type_${submissionId}`}
           name={`${namePrefix}[award_recommendation_type]`}
           value={recommendationType}
           onChange={(event) => {
-            const nextRecommendationType = event.target
-              .value as AwardRecommendationType;
-            setRecommendationType(nextRecommendationType);
-            setHasException(
-              defaultHasExceptionByRecommendationType[nextRecommendationType],
+            const nextValue = event.target.value as
+              AwardRecommendationType | "";
+            onRecommendationTypeChange(nextValue);
+            if (nextValue === "") {
+              onHasExceptionChange(false);
+              return;
+            }
+            onHasExceptionChange(
+              defaultHasExceptionByRecommendationType[nextValue],
             );
           }}
           className="maxw-card-lg"
-          required
         >
+          <option value="">{t("selectOnePlaceholder")}</option>
           <option value="recommended_for_funding">
             {t("recommendationOptions.recommended")}
           </option>
@@ -103,7 +141,7 @@ const RecommendationFields = ({
             {t("recommendationOptions.notRecommended")}
           </option>
         </Select>
-      </div>
+      </FormGroup>
 
       {canHaveException && (
         <Checkbox
@@ -111,7 +149,7 @@ const RecommendationFields = ({
           name={`${namePrefix}[has_exception]`}
           label={t("hasExceptionLabel")}
           checked={hasException}
-          onChange={(event) => setHasException(event.target.checked)}
+          onChange={(event) => onHasExceptionChange(event.target.checked)}
         />
       )}
 
@@ -135,26 +173,34 @@ const RecommendationFields = ({
       </div>
 
       {showExceptionDetail && (
-        <div className="margin-bottom-3">
-          <p className="text-bold margin-bottom-1 font-sans-sm">
+        <FormGroup error={!!errors.exceptionDetail} className="margin-bottom-3">
+          <Label
+            htmlFor={`exception_detail_${submissionId}`}
+            className="text-bold margin-bottom-1"
+          >
             <span>{t("exceptionDetailLabel")}</span>
             <RequiredFieldIndicator> *</RequiredFieldIndicator>
-          </p>
+          </Label>
           <p className="text-base margin-top-1 margin-bottom-2">
             {t("exceptionDetailDescription")}
           </p>
+          {errors.exceptionDetail && (
+            <ErrorMessage>{errors.exceptionDetail}</ErrorMessage>
+          )}
           <CharacterCount
             id={`exception_detail_${submissionId}`}
             name={`${namePrefix}[exception_detail]`}
             maxLength={1000}
             isTextArea
-            defaultValue={exceptionDetailDefaultValue || ""}
+            value={exceptionDetail}
+            onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+              onExceptionDetailChange(event.target.value)
+            }
             rows={6}
             className="maxw-full"
             data-testid="exception-detail-textarea"
-            required
           />
-        </div>
+        </FormGroup>
       )}
     </>
   );
@@ -164,10 +210,12 @@ const FundingRecommendationRow = ({
   submission,
   recommendedAmount,
   onRecommendedAmountChange,
+  error,
 }: {
   submission: AwardRecommendationSubmission;
   recommendedAmount: string;
   onRecommendedAmountChange: (value: string) => void;
+  error?: string;
 }) => {
   const submissionId =
     submission.award_recommendation_application_submission_id;
@@ -181,17 +229,27 @@ const FundingRecommendationRow = ({
         )}
       </td>
       <td>
-        <TextInput
-          id={`recommended_amount_${submissionId}`}
-          name={`award_recommendation_submissions[${submissionId}][recommended_amount]`}
-          type="text"
-          value={recommendedAmount}
-          onChange={(event) => onRecommendedAmountChange(event.target.value)}
-          onBlur={(event) =>
-            onRecommendedAmountChange(formatCurrencyString(event.target.value))
-          }
-          required
-        />
+        <FormGroup error={!!error} className="margin-0">
+          {error && <ErrorMessage>{error}</ErrorMessage>}
+          <TextInput
+            id={`recommended_amount_${submissionId}`}
+            name={`award_recommendation_submissions[${submissionId}][recommended_amount]`}
+            type="text"
+            inputMode="decimal"
+            value={recommendedAmount}
+            onChange={(event) =>
+              onRecommendedAmountChange(
+                sanitizeCurrencyInput(event.target.value),
+              )
+            }
+            onBlur={(event) =>
+              onRecommendedAmountChange(
+                formatCurrencyString(event.target.value),
+              )
+            }
+            validationStatus={error ? "error" : undefined}
+          />
+        </FormGroup>
       </td>
     </tr>
   );
@@ -199,28 +257,16 @@ const FundingRecommendationRow = ({
 
 const FundingSectionMultiple = ({
   submissions,
+  recommendedAmounts,
+  onRecommendedAmountChange,
+  amountErrors,
 }: {
   submissions: AwardRecommendationSubmission[];
+  recommendedAmounts: Record<string, string>;
+  onRecommendedAmountChange: (submissionId: string, value: string) => void;
+  amountErrors?: Record<string, string>;
 }) => {
   const t = useTranslations("AwardRecommendation.recommendationDetails");
-
-  const [recommendedAmounts, setRecommendedAmounts] = useState<
-    Record<string, string>
-  >(() => {
-    const initial: Record<string, string> = {};
-    submissions.forEach((sub) => {
-      initial[sub.award_recommendation_application_submission_id] =
-        formatCurrencyString(sub.submission_detail?.recommended_amount);
-    });
-    return initial;
-  });
-
-  const handleAmountChange = (submissionId: string, value: string) => {
-    setRecommendedAmounts((prev) => ({
-      ...prev,
-      [submissionId]: value,
-    }));
-  };
 
   const totalRequested = submissions.reduce(
     (sum, s) =>
@@ -277,10 +323,15 @@ const FundingSectionMultiple = ({
                   ]
                 }
                 onRecommendedAmountChange={(value) =>
-                  handleAmountChange(
+                  onRecommendedAmountChange(
                     sub.award_recommendation_application_submission_id,
                     value,
                   )
+                }
+                error={
+                  amountErrors?.[
+                    sub.award_recommendation_application_submission_id
+                  ]
                 }
               />
             ))}
@@ -298,15 +349,18 @@ const FundingSectionMultiple = ({
 
 const FundingSectionSingle = ({
   submission,
+  recommendedAmount,
+  onRecommendedAmountChange,
+  error,
 }: {
   submission: AwardRecommendationSubmission;
+  recommendedAmount: string;
+  onRecommendedAmountChange: (value: string) => void;
+  error?: string;
 }) => {
   const t = useTranslations("AwardRecommendation.recommendationDetails");
   const submissionId =
     submission.award_recommendation_application_submission_id;
-  const [recommendedAmount, setRecommendedAmount] = useState(
-    formatCurrencyString(submission.submission_detail?.recommended_amount),
-  );
 
   return (
     <div className="margin-top-4">
@@ -325,90 +379,217 @@ const FundingSectionSingle = ({
           </p>
         </Grid>
         <Grid col={12} tablet={{ col: 6 }}>
-          <Label
-            htmlFor={`recommended_amount_${submissionId}`}
-            className="text-bold margin-top-0 margin-bottom-1"
-          >
-            <span>{t("amountRecommendedLabel")}</span>
-            <RequiredFieldIndicator> *</RequiredFieldIndicator>
-          </Label>
-          <TextInput
-            id={`recommended_amount_${submissionId}`}
-            name={`award_recommendation_submissions[${submissionId}][recommended_amount]`}
-            type="text"
-            value={recommendedAmount}
-            onChange={(event) => setRecommendedAmount(event.target.value)}
-            onBlur={(event) =>
-              setRecommendedAmount(formatCurrencyString(event.target.value))
-            }
-            required
-          />
+          <FormGroup error={!!error}>
+            <Label
+              htmlFor={`recommended_amount_${submissionId}`}
+              className="text-bold margin-top-0 margin-bottom-1"
+            >
+              <span>{t("amountRecommendedLabel")}</span>
+              <RequiredFieldIndicator> *</RequiredFieldIndicator>
+            </Label>
+            {error && <ErrorMessage>{error}</ErrorMessage>}
+            <TextInput
+              id={`recommended_amount_${submissionId}`}
+              name={`award_recommendation_submissions[${submissionId}][recommended_amount]`}
+              type="text"
+              inputMode="decimal"
+              value={recommendedAmount}
+              onChange={(event) =>
+                onRecommendedAmountChange(
+                  sanitizeCurrencyInput(event.target.value),
+                )
+              }
+              onBlur={(event) =>
+                onRecommendedAmountChange(
+                  formatCurrencyString(event.target.value),
+                )
+              }
+              validationStatus={error ? "error" : undefined}
+            />
+          </FormGroup>
         </Grid>
       </Grid>
     </div>
   );
 };
 
-export const RecommendationDetailForm = ({
-  submission,
-  submissions,
-}: RecommendationDetailFormProps) => {
-  const isMultipleSubmissions = submissions && submissions.length > 1;
-  const singleSubmission =
-    submission ||
-    (submissions && submissions.length === 1 ? submissions[0] : null);
+export const RecommendationDetailForm = forwardRef(
+  function RecommendationDetailForm(
+    { submission, submissions }: RecommendationDetailFormProps,
+    ref: ForwardedRef<RecommendationDetailFormHandle>,
+  ) {
+    const t = useTranslations("AwardRecommendation.recommendationDetails");
+    const isMultipleSubmissions = submissions && submissions.length > 1;
+    const singleSubmission =
+      submission ||
+      (submissions && submissions.length === 1 ? submissions[0] : null);
 
-  if (!singleSubmission && !isMultipleSubmissions) {
-    return null;
-  }
+    const initialDetail = singleSubmission?.submission_detail;
+    const [recommendationType, setRecommendationType] = useState<
+      AwardRecommendationType | ""
+    >(initialDetail?.award_recommendation_type ?? "");
+    const [hasException, setHasException] = useState(
+      Boolean(initialDetail?.has_exception),
+    );
+    const [exceptionDetail, setExceptionDetail] = useState(
+      initialDetail?.exception_detail ?? "",
+    );
+    const [errors, setErrors] = useState<RecommendationFieldErrors>({});
 
-  if (isMultipleSubmissions) {
+    const [singleRecommendedAmount, setSingleRecommendedAmount] = useState(
+      formatCurrencyString(initialDetail?.recommended_amount),
+    );
+    const [recommendedAmounts, setRecommendedAmounts] = useState<
+      Record<string, string>
+    >(() => {
+      const initial: Record<string, string> = {};
+      (submissions ?? []).forEach((sub) => {
+        initial[sub.award_recommendation_application_submission_id] =
+          formatCurrencyString(sub.submission_detail?.recommended_amount);
+      });
+      return initial;
+    });
+
+    const validate = (): boolean => {
+      const nextErrors: RecommendationFieldErrors = {};
+
+      if (!recommendationType) {
+        nextErrors.recommendation = t("recommendationRequired");
+      }
+
+      const canHaveException =
+        recommendationType !== "" &&
+        exceptionEligibleRecommendationTypes.includes(recommendationType);
+      if (canHaveException && hasException && !exceptionDetail.trim()) {
+        nextErrors.exceptionDetail = t("exceptionDetailRequired");
+      }
+
+      if (isMultipleSubmissions && submissions) {
+        const amountErrors: Record<string, string> = {};
+        submissions.forEach((sub) => {
+          const id = sub.award_recommendation_application_submission_id;
+          if (isAmountEmpty(recommendedAmounts[id] ?? "")) {
+            amountErrors[id] = t("amountRecommendedRequired");
+          }
+        });
+        if (Object.keys(amountErrors).length > 0) {
+          nextErrors.recommendedAmounts = amountErrors;
+          // Also surface a single amount message in the top alert
+          nextErrors.recommendedAmount = t("amountRecommendedRequired");
+        }
+      } else if (isAmountEmpty(singleRecommendedAmount)) {
+        nextErrors.recommendedAmount = t("amountRecommendedRequired");
+      }
+
+      setErrors(nextErrors);
+      return Object.keys(nextErrors).length === 0;
+    };
+
+    useImperativeHandle(ref, () => ({ validate }), [
+      recommendationType,
+      hasException,
+      exceptionDetail,
+      singleRecommendedAmount,
+      recommendedAmounts,
+      isMultipleSubmissions,
+      submissions,
+      t,
+    ]);
+
+    if (!singleSubmission && !isMultipleSubmissions) {
+      return null;
+    }
+
+    const alertMessages = [
+      errors.recommendation,
+      errors.exceptionDetail,
+      errors.recommendedAmount,
+    ].filter(Boolean) as string[];
+
+    const submissionId = isMultipleSubmissions
+      ? "bulk"
+      : singleSubmission!.award_recommendation_application_submission_id;
+    const namePrefix = isMultipleSubmissions
+      ? "bulk_edit"
+      : `award_recommendation_submissions[${submissionId}]`;
+
     return (
       <div className="margin-bottom-4" data-testid="recommendation-detail-form">
-        <RecommendationFields submissionId="bulk" namePrefix="bulk_edit[" />
-        <FundingSectionMultiple submissions={submissions} />
+        {alertMessages.length > 0 && (
+          <Alert
+            type="error"
+            heading={t("validationErrorHeading")}
+            headingLevel="h3"
+            validation
+            className="margin-bottom-3"
+          >
+            <ul className="usa-list margin-top-1 margin-bottom-0">
+              {alertMessages.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          </Alert>
+        )}
+
+        <RecommendationFields
+          submissionId={submissionId}
+          namePrefix={namePrefix}
+          generalCommentDefaultValue={
+            isMultipleSubmissions ? undefined : initialDetail?.general_comment
+          }
+          recommendationType={recommendationType}
+          hasException={hasException}
+          exceptionDetail={exceptionDetail}
+          onRecommendationTypeChange={setRecommendationType}
+          onHasExceptionChange={setHasException}
+          onExceptionDetailChange={setExceptionDetail}
+          errors={errors}
+        />
+
+        {isMultipleSubmissions ? (
+          <FundingSectionMultiple
+            submissions={submissions}
+            recommendedAmounts={recommendedAmounts}
+            onRecommendedAmountChange={(id, value) =>
+              setRecommendedAmounts((prev) => ({ ...prev, [id]: value }))
+            }
+            amountErrors={errors.recommendedAmounts}
+          />
+        ) : (
+          <FundingSectionSingle
+            submission={singleSubmission!}
+            recommendedAmount={singleRecommendedAmount}
+            onRecommendedAmountChange={setSingleRecommendedAmount}
+            error={errors.recommendedAmount}
+          />
+        )}
       </div>
     );
-  }
+  },
+);
 
-  const detail = singleSubmission!.submission_detail;
-  const submissionId =
-    singleSubmission!.award_recommendation_application_submission_id;
+export const RecommendationDetailsSection = forwardRef(
+  function RecommendationDetailsSection(
+    {
+      submission,
+    }: {
+      submission: AwardRecommendationSubmission;
+    },
+    ref: ForwardedRef<RecommendationDetailFormHandle>,
+  ) {
+    const t = useTranslations("AwardRecommendation.recommendationDetails");
 
-  return (
-    <div className="margin-bottom-4" data-testid="recommendation-detail-form">
-      <RecommendationFields
-        submissionId={submissionId}
-        namePrefix={`award_recommendation_submissions[${submissionId}]`}
-        generalCommentDefaultValue={detail?.general_comment}
-        exceptionDetailDefaultValue={detail?.exception_detail}
-        initialRecommendationType={
-          detail?.award_recommendation_type ?? "recommended_for_funding"
-        }
-        initialHasException={Boolean(detail?.has_exception)}
-      />
-      <FundingSectionSingle submission={singleSubmission!} />
-    </div>
-  );
-};
-
-export const RecommendationDetailsSection = ({
-  submission,
-}: {
-  submission: AwardRecommendationSubmission;
-}) => {
-  const t = useTranslations("AwardRecommendation.recommendationDetails");
-
-  return (
-    <div>
-      <Grid row className="grid-gap">
-        <Grid col={9} tablet={{ col: 9 }}>
-          <div className="margin-top-3 margin-bottom-3">
-            <h2 className="margin-top-0 margin-bottom-2">{t("heading")}</h2>
-            <RecommendationDetailForm submission={submission} />
-          </div>
+    return (
+      <div>
+        <Grid row className="grid-gap">
+          <Grid col={9} tablet={{ col: 9 }}>
+            <div className="margin-top-3 margin-bottom-3">
+              <h2 className="margin-top-0 margin-bottom-2">{t("heading")}</h2>
+              <RecommendationDetailForm submission={submission} ref={ref} />
+            </div>
+          </Grid>
         </Grid>
-      </Grid>
-    </div>
-  );
-};
+      </div>
+    );
+  },
+);

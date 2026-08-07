@@ -12,6 +12,7 @@ import grants_shared.adapters.db as db
 import requests
 from defusedxml import minidom
 from grants_shared.adapters.aws import S3Config
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from grants_shared.util import file_util
 from lxml import etree
 from sqlalchemy import exists, select
@@ -470,15 +471,7 @@ def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | No
         return None
     if soap_request.operation_name in AlternateSoapOperation:
         tracking_number = get_gov_grants_tracking_number(xml_bytes)
-        logger.info(
-            "simpler_soap_api: tracking number check",
-            extra={
-                "tracking_number_length": len(tracking_number) if tracking_number else None,
-                "is_simpler_tracking_number": (
-                    tracking_number.startswith("GRANT8") if tracking_number else False
-                ),
-            },
-        )
+        add_extra_data_to_current_request_logs({"grants_gov_tracking_number": tracking_number})
         is_zip = soap_request.operation_name == AlternateSoapOperation.GET_APPLICATION_ZIP
         if tracking_number and (
             tracking_number.startswith("GRANT8") or tracking_number.startswith("GRANT9")
@@ -590,11 +583,16 @@ def write_debug_data_to_s3(soap_request: SOAPRequest | None, soap_response: SOAP
                 base_path,
                 "response.txt",
             )
-            file_util.write_to_file(
-                response_s3_path,
-                soap_response.to_bytes().decode("utf-8"),
-                content_type=text_content_type,
-            )
+            if soap_request and soap_request.operation_name == "GetApplicationZipRequest":
+                logger.info(
+                    "soap_client: response is not currently being logged to s3",
+                )
+            else:
+                file_util.write_to_file(
+                    response_s3_path,
+                    soap_response.to_bytes().decode("utf-8"),
+                    content_type=text_content_type,
+                )
             response_headers_s3_path = file_util.join(
                 base_path,
                 "response_headers.txt",
