@@ -19,7 +19,7 @@ export function RequiredForms({
   const t = useTranslations("OpportunityCompetition.sectionRequiredForms");
   const tForm = useTranslations("FormSelectModal");
 
-  // Initialize the list of required forms
+  // Initialize the list of required forms.
   if (competitionForms.length == 0) {
     alwaysRequiredForms.forEach((alwaysRequiredForm) => {
       const form = {
