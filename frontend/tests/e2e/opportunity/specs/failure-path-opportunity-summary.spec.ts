@@ -43,6 +43,7 @@ import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index"
 import { assertNegativeNumberValidationsFromDefinitions } from "tests/e2e/utils/common/negative-number-validation-utils";
 import { assertRequiredFieldValidationsFromDefinitions } from "tests/e2e/utils/common/required-field-validation-utils";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
+import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 
 const { GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
@@ -113,6 +114,16 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
       const testPage = authenticatedLifecycle.getPage();
       const fillData = await setupAndNavigateToOpportunitySummary(testPage);
 
+      // Prime required fields to isolate negative-number assertions from
+      // unrelated required-field gating errors.
+      await fillPageFields(
+        testPage,
+        buildPageFieldsFromDefinitions(
+          REQUIRED_FIELD_DEFINITIONS.filter((field) => field.required),
+          fillData,
+        ),
+      );
+
       //--------------Scenario steps start here----------------
       // When I click the configured trigger button
       // Then negative number validation errors are shown on the page.
@@ -123,7 +134,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
         fillData,
         {
           negativeValue: "-10",
-          triggerButtonNames: ["Save and exit"],
+          triggerValidationWithButtonClick: false,
           pageUrlPattern: EDIT_OPPORTUNITY_URL_PATTERN,
         },
       );
