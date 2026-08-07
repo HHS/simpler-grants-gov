@@ -61,6 +61,8 @@ module "infra_dev_config" {
     ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
     ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
 
+    LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-dev-simpler-grants-gov"
+
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "true"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
