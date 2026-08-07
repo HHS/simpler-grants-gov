@@ -7,10 +7,11 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { searchOpportunitiesByAgency } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { LocalizedPageProps, TFn } from "src/types/intl";
-import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { BaseOpportunity, OpportunityStatus } from "src/types/opportunity/opportunityResponseTypes";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
+import { formatTimestamp } from "src/utils/generalUtils";
 import {
   checkRequiredPrivileges,
   UserPrivilegeRequest,
@@ -28,6 +29,8 @@ import {
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
 import OpportunitiesPagination from "./_components/OpportunitiesPagination";
+import OpportunityStatusTag from "src/components/opportunity/OpportunityStatusTag";
+import { PopoverMenu } from "src/components/core/PopoverMenu";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");
@@ -119,22 +122,38 @@ const NoAgenciesPage = () => {
   );
 };
 
-const EditAction = ({
+const ActionMenu = ({
   canUpdate,
   opportunityId,
+  status,
 }: {
   canUpdate: boolean;
   opportunityId: string;
+  status: string;
 }) => {
   const t = useTranslations("Opportunities");
-  return canUpdate ? (
-    <span>
-      <a href={`/grantor/opportunity/${opportunityId}/overview`}>
+  
+  // Only show action menu for editable opportunities
+  const isSgmOpportunity = true; // We'll determine this from the row data
+  const isEditable =
+    status.toLowerCase() === "draft" ||
+    status.toLowerCase() === "forecasted" ||
+    status.toLowerCase() === "posted";
+
+  if (!isEditable || !canUpdate) {
+    return null;
+  }
+
+  return (
+    <PopoverMenu>
+      <a
+        href={`/grantor/opportunity/${opportunityId}/overview`}
+        className="usa-button usa-button--unstyled width-full text-left padding-y-1 padding-x-2 hover:bg-base-lighter display-block text-no-underline"
+      >
         {t("actionButtons.edit")}
       </a>
-    </span>
-  ) : (
-    <span>{t("actionButtons.edit")}</span>
+      {/* TODO: Add Copy and Delete actions in separate ticket */}
+    </PopoverMenu>
   );
 };
 
@@ -153,8 +172,15 @@ const transformTableRowData = (
         ? `/grantor/opportunity/${opportunity.opportunity_id}/edit`
         : ``
       : `/opportunity/${opportunity.opportunity_id}`;
+    
+    // Determine opportunity type (Competitive, etc.)
+    // TODO: Add proper type field to BaseOpportunity when available
+    const opportunityType = "Competitive";
+    
+    // Format last updated date
+    const lastUpdated = formatTimestamp(opportunity.updated_at);
+
     return [
-      { cellData: opportunity.agency_name },
       {
         cellData: opportunityTitleUrl ? (
           <a href={opportunityTitleUrl}>{opportunity.opportunity_title}</a>
@@ -162,27 +188,28 @@ const transformTableRowData = (
           <span>{opportunity.opportunity_title}</span>
         ),
       },
+      { cellData: opportunity.opportunity_number },
+      { cellData: opportunityType },
+      { cellData: lastUpdated },
       {
-        cellData: status,
+        cellData: (
+          <OpportunityStatusTag
+            status={
+              opportunity.is_draft
+                ? "draft"
+                : (opportunity.opportunity_status as OpportunityStatus)
+            }
+          />
+        ),
       },
       {
-        cellData:
-          // Only allow editing if this is an SGM created opportunity
-          isSgmOpportunity &&
-          // and the status is draft, posted or forecasted
-          (status.toLowerCase() === "draft" ||
-            status.toLowerCase() === "forecasted" ||
-            status.toLowerCase() === "posted") ? (
-            <span>
-              <EditAction
-                canUpdate={canUpdate}
-                opportunityId={opportunity.opportunity_id}
-              />
-              , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
-            </span>
-          ) : (
-            "" // Don't show any actions for published opportunities
-          ),
+        cellData: (
+          <ActionMenu
+            canUpdate={canUpdate && isSgmOpportunity}
+            opportunityId={opportunity.opportunity_id}
+            status={status}
+          />
+        ),
       },
     ];
   });
@@ -250,8 +277,10 @@ const OpportunitiesTable = ({
   const t = useTranslations("Opportunities");
 
   const headerTitles: TableCellData[] = [
-    { cellData: t("tableHeadings.agency") },
     { cellData: t("tableHeadings.title") },
+    { cellData: t("tableHeadings.oppNumber") },
+    { cellData: t("tableHeadings.type") },
+    { cellData: t("tableHeadings.lastUpdated") },
     { cellData: t("tableHeadings.status") },
     { cellData: t("tableHeadings.actions") },
   ];

@@ -442,6 +442,7 @@ class OpportunityFactory(BaseFactory):
     )
 
     is_draft = False  # Because we filter out drafts, just default these to False
+    is_simpler_grants_opportunity = False  # Default to imported opportunities; set True for SGM-created ones
 
     revision_number = 0  # We'll want to consider how we handle this when we add history
 

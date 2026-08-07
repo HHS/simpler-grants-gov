@@ -122,6 +122,56 @@ def _build_opportunities(
     # create a few Assistance Listing records
     factories.AssistanceListingFactory.create_batch(size=5)
 
+    # Create SGM opportunities with various statuses for testing status badges
+    # These opportunities have is_simpler_grants_opportunity=True to distinguish them from Grants.gov ones
+    # Available status badges: Draft (is_draft=True), Open/Posted, Forecasted, Closed, Archived
+    # Note: Both SGM and Grants.gov opportunities show their actual status
+    logger.info("Creating SGM opportunities with various statuses")
+    
+    # Draft SGM opportunities
+    factories.OpportunityFactory.create_batch(
+        size=3,
+        is_simpler_grants_opportunity=True,
+        is_draft=True,
+        agency_code="USAID-ETH",
+    )
+    
+    # Posted SGM opportunities
+    factories.OpportunityFactory.create_batch(
+        size=2,
+        is_simpler_grants_opportunity=True,
+        is_draft=False,
+        is_posted_summary=True,
+        agency_code="USAID-ETH",
+    )
+    
+    # Forecasted SGM opportunities
+    factories.OpportunityFactory.create_batch(
+        size=2,
+        is_simpler_grants_opportunity=True,
+        is_draft=False,
+        is_forecasted_summary=True,
+        agency_code="USAID-SAF",
+    )
+    
+    # Closed SGM opportunities
+    factories.OpportunityFactory.create_batch(
+        size=2,
+        is_simpler_grants_opportunity=True,
+        is_draft=False,
+        is_closed_summary=True,
+        agency_code="USAID-SAF",
+    )
+    
+    # Archived SGM opportunities
+    factories.OpportunityFactory.create_batch(
+        size=2,
+        is_simpler_grants_opportunity=True,
+        is_draft=False,
+        is_archived_non_forecast_summary=True,
+        agency_code="USAID-ETH",
+    )
+
     logger.info("Finished creating opportunities")
 
 

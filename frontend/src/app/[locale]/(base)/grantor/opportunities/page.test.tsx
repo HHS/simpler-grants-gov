@@ -213,6 +213,8 @@ const basicOpportunity: DeepPartial<BaseOpportunity> = {
   opportunity_id: "89a44d32-0d90-4514-85a9-d5491f1c454d",
   opportunity_status: "posted",
   opportunity_title: "Test Opportunity",
+  opportunity_number: "FO-26-00001",
+  updated_at: "2024-04-29T06:43:00Z",
 };
 
 describe("Opportunities", () => {
@@ -530,13 +532,15 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(screen.getAllByText("tableHeadings.agency")).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.title")).toHaveLength(2);
+      expect(screen.getAllByText("tableHeadings.oppNumber")).toHaveLength(2);
+      expect(screen.getAllByText("tableHeadings.type")).toHaveLength(2);
+      expect(screen.getAllByText("tableHeadings.lastUpdated")).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.status")).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.actions")).toHaveLength(2);
     });
 
-    it("renders opportunity name and agency", async () => {
+    it("renders opportunity name and number", async () => {
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
@@ -544,7 +548,7 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByText("Test Opportunity")).toBeVisible();
-      expect(await screen.findByText("Agency One")).toBeVisible();
+      expect(await screen.findByText("FO-26-00001")).toBeVisible();
     });
 
     it("renders create opportunity button with placeholder URL", async () => {
@@ -564,14 +568,14 @@ describe("Opportunities", () => {
       );
     });
 
-    it("renders status", async () => {
+    it("renders status tag", async () => {
       const component = await OpportunitiesListPage({
         params: localeParams,
         searchParams: Promise.resolve({ agency: agency1.agency_id }),
       });
       render(component);
 
-      expect(await screen.findByText("posted")).toBeVisible();
+      expect(await screen.findByTestId("opportunity-status-tag")).toBeVisible();
     });
   });
 
@@ -597,7 +601,7 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("draft")).toBeVisible();
+      expect(await screen.findByTestId("opportunity-status-draft")).toBeVisible();
       expect(
         await screen.findByRole("link", { name: "actionButtons.edit" }),
       ).toBeVisible();
@@ -621,10 +625,8 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("draft")).toBeVisible();
-      // this is the span
-      expect(screen.getByText("actionButtons.edit")).toBeInTheDocument();
-      // the href link should not be displayed
+      expect(await screen.findByTestId("opportunity-status-draft")).toBeVisible();
+      // the href link should not be displayed (no action menu for read-only)
       expect(
         screen.queryByRole("link", { name: "actionButtons.edit" }),
       ).not.toBeInTheDocument();
@@ -679,7 +681,7 @@ describe("Opportunities", () => {
       mockFetchUserAgencies.mockResolvedValue([agency1]);
     });
 
-    it("for SGM draft opportunities, render action buttons only", async () => {
+    it("for SGM draft opportunities, render action menu with edit button", async () => {
       mockSearchForOpportunities.mockResolvedValue({
         data: [sgmOpportunity],
         pagination_info: { total_pages: 1, total_records: 1 },
@@ -690,13 +692,12 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("draft")).toBeVisible();
+      expect(await screen.findByTestId("opportunity-status-draft")).toBeVisible();
       expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
-      expect(screen.getByText(/actionButtons.copy/i)).toBeInTheDocument();
-      expect(screen.getByText(/actionButtons.delete/i)).toBeInTheDocument();
+      // TODO: Copy and Delete will be added in a separate ticket
     });
 
-    it("for SGM posted opportunities, render view opportunity link and action buttons", async () => {
+    it("for SGM posted opportunities, render view opportunity link and action menu", async () => {
       sgmOpportunity.is_draft = false;
       sgmOpportunity.opportunity_status = "posted";
       mockSearchForOpportunities.mockResolvedValue({
@@ -709,18 +710,16 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("posted")).toBeVisible();
+      expect(await screen.findByTestId("opportunity-status-posted")).toBeVisible();
       const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
       });
       expect(oppTitlelink).toHaveAttribute("href", viewLink);
       expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
-      expect(screen.getByText(/actionButtons.copy/i)).toBeInTheDocument();
-      expect(screen.getByText(/actionButtons.delete/i)).toBeInTheDocument();
     });
 
-    it("for SGM forecasted opportunities, render view opportunity link and action buttons", async () => {
+    it("for SGM forecasted opportunities, render view opportunity link and action menu", async () => {
       sgmOpportunity.is_draft = false;
       sgmOpportunity.opportunity_status = "forecasted";
       mockSearchForOpportunities.mockResolvedValue({
@@ -733,15 +732,13 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("forecasted")).toBeVisible();
+      expect(await screen.findByTestId("opportunity-status-forecasted")).toBeVisible();
       const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
       });
       expect(oppTitlelink).toHaveAttribute("href", viewLink);
       expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
-      expect(screen.getByText(/actionButtons.copy/i)).toBeInTheDocument();
-      expect(screen.getByText(/actionButtons.delete/i)).toBeInTheDocument();
     });
 
     it("for SGM closed opportunities, render view opportunity link only", async () => {
@@ -757,7 +754,7 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("closed")).toBeVisible();
+      expect(await screen.findByTestId("opportunity-status-closed")).toBeVisible();
       const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
@@ -778,7 +775,7 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("archived")).toBeVisible();
+      expect(await screen.findByTestId("opportunity-status-archived")).toBeVisible();
       const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
@@ -786,7 +783,7 @@ describe("Opportunities", () => {
       expect(oppTitlelink).toHaveAttribute("href", viewLink);
     });
 
-    it("for Grants.gov posted opportunities, render view opportunity link only", async () => {
+    it("for Grants.gov posted opportunities, render view opportunity link and posted status", async () => {
       basicOpportunity.opportunity_status = "posted";
       mockSearchForOpportunities.mockResolvedValue({
         data: [basicOpportunity],
@@ -798,7 +795,7 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("posted")).toBeVisible();
+      expect(await screen.findByTestId("opportunity-status-posted")).toBeVisible();
       const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
@@ -806,7 +803,7 @@ describe("Opportunities", () => {
       expect(oppTitlelink).toHaveAttribute("href", viewLink);
     });
 
-    it("for Grants.gov forecasted opportunities, render view opportunity link only", async () => {
+    it("for Grants.gov forecasted opportunities, render view opportunity link and forecasted status", async () => {
       basicOpportunity.opportunity_status = "forecasted";
       mockSearchForOpportunities.mockResolvedValue({
         data: [basicOpportunity],
@@ -818,7 +815,7 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByText("forecasted")).toBeVisible();
+      expect(await screen.findByTestId("opportunity-status-forecasted")).toBeVisible();
       const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
