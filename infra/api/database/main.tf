@@ -37,6 +37,41 @@ locals {
   environment_config = module.app_config.environment_configs[var.environment_name]
   database_config    = local.environment_config.database_config
   network_config     = module.project_config.network_configs[local.environment_config.network_name]
+
+  # Which environments may be seeded from THIS environment's snapshots, used by
+  # .github/workflows/restore-db-cross-env.yml.
+  #
+  # Only needed where source and target live in different AWS accounts. The
+  # legacy environments (dev, staging, grantee*, grantor*) all share one account,
+  # so restores between them need no cross-account grant and they are absent
+  # here. The infra-* environments each have their own account, so seeding
+  # infra-dev from infra-staging requires infra-staging's KMS key to name
+  # infra-dev's account.
+  #
+  # Restores flow "down" from more-production-like environments, which is why
+  # infra-staging grants infra-dev and not the reverse.
+  snapshot_restore_targets = {
+    "infra-staging" = ["infra-dev"]
+  }
+
+  snapshot_share_account_ids = [
+    for env in lookup(local.snapshot_restore_targets, var.environment_name, []) :
+    local.account_ids_by_name[module.project_config.network_configs[module.app_config.environment_configs[env].network_name].account_name]
+    # Skip targets whose account has no tfbackend file, so a partially
+    # bootstrapped project still plans.
+    if contains(
+      keys(local.account_ids_by_name),
+      module.project_config.network_configs[module.app_config.environment_configs[env].network_name].account_name
+    )
+  ]
+
+  account_ids_by_name = data.external.account_ids_by_name.result
+}
+
+# Resolves account name -> account id from the infra/accounts/*.s3.tfbackend
+# filenames, the same source of truth the rest of the project uses.
+data "external" "account_ids_by_name" {
+  program = ["${path.module}/../../../bin/account-ids-by-name"]
 }
 
 terraform {
@@ -125,4 +160,5 @@ module "database" {
   newrelic_entity_guid         = local.database_config.newrelic_entity_guid
   deletion_protection          = local.database_config.deletion_protection
   snapshot_identifier          = var.database_snapshot_id
+  snapshot_share_account_ids   = local.snapshot_share_account_ids
 }
