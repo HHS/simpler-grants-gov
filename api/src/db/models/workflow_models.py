@@ -113,6 +113,7 @@ class Workflow(ApiSchemaTable, TimestampMixin):
         AwardRecommendation,
         back_populates="workflows",
         foreign_keys=[award_recommendation_id],
+        overlaps="review_workflow",
     )
 
     def get_log_extra(self) -> dict[str, Any]:

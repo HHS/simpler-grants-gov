@@ -9,7 +9,7 @@ from grants_shared.db.models.base import TimestampMixin
 from grants_shared.util.file_util import pre_sign_file_location
 from sqlalchemy import ForeignKey, Numeric, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import foreign, Mapped, mapped_column, relationship
 
 from src.constants.lookup_constants import (
     AwardRecommendationAttachmentType,
@@ -19,6 +19,7 @@ from src.constants.lookup_constants import (
     AwardRecommendationStatus,
     AwardRecommendationType,
     AwardSelectionMethod,
+    WorkflowType,
 )
 from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.lookup_models import (
@@ -37,6 +38,15 @@ if TYPE_CHECKING:
     from src.db.models.opportunity_models import Opportunity
     from src.db.models.workflow_models import Workflow, WorkflowApproval
 
+def _review_workflow_join():
+    from src.db.models.workflow_models import Workflow
+
+    return and_(
+        AwardRecommendation.award_recommendation_id
+        == foreign(Workflow.award_recommendation_id),
+        Workflow.workflow_type
+        == WorkflowType.AWARD_RECOMMENDATION_REVIEW,
+    )
 
 class AwardRecommendation(ApiSchemaTable, TimestampMixin):
     __tablename__ = "award_recommendation"
@@ -71,14 +81,20 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
 
     is_deleted: Mapped[bool] = mapped_column(default=False)
 
-    review_workflow: Mapped[Workflow | None] = relationship(
+    review_workflow: Mapped["Workflow | None"] = relationship(
+        "Workflow",
+        primaryjoin=_review_workflow_join,
+        uselist=False,
+        viewonly=True,
+        lazy="joined",
+        overlaps="workflows,award_recommendation",
+    )
+    
+    workflows: Mapped[list["Workflow"]] = relationship(
         "Workflow",
         back_populates="award_recommendation",
-        uselist=False,
-        lazy="joined",
         cascade="all, delete-orphan",
-        single_parent=True,
-        viewonly=True,
+        overlaps="review_workflow",
     )
 
     @property
@@ -148,11 +164,6 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
     award_recommendation_audit_events: Mapped[list[AwardRecommendationAudit]] = relationship(
         back_populates="award_recommendation",
         uselist=True,
-        cascade="all, delete-orphan",
-    )
-    workflows: Mapped[list[Workflow]] = relationship(
-        "Workflow",
-        back_populates="award_recommendation",
         cascade="all, delete-orphan",
     )
 

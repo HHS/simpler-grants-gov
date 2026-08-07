@@ -7,6 +7,7 @@ from src.constants.lookup_constants import (
     AwardRecommendationStatus,
     AwardSelectionMethod,
     Privilege,
+    WorkflowType,
 )
 from src.db.models.opportunity_models import Opportunity
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt
@@ -15,6 +16,7 @@ from tests.src.db.models.factories import (
     AwardRecommendationApplicationSubmissionFactory,
     AwardRecommendationFactory,
     OpportunityFactory,
+    WorkflowFactory,
 )
 
 API_URL = "/alpha/award-recommendations"
@@ -204,6 +206,133 @@ class TestGetAwardRecommendation200:
         assert data["additional_info"] is None
         assert data["other_key_information"] is None
 
+    def test_get_award_recommendation_returns_review_workflow_id_with_multiple_workflows_200(
+        self,
+        client,
+        db_session,
+        agency,
+        award_recommendation,
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session,
+            agency=agency,
+            privileges=[Privilege.VIEW_AWARD_RECOMMENDATION],
+        )
+
+        review_workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.AWARD_RECOMMENDATION_REVIEW,
+            award_recommendation=award_recommendation,
+        )
+
+        other_workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+            award_recommendation=award_recommendation,
+        )
+
+        # Sanity-check the setup: both workflows belong to the same award recommendation.
+        assert (
+            review_workflow.award_recommendation_id
+            == award_recommendation.award_recommendation_id
+        )
+        assert (
+            other_workflow.award_recommendation_id
+            == award_recommendation.award_recommendation_id
+        )
+
+        # Ensure the filtered relationship is loaded from the database after
+        # both workflow records have been created.
+        db_session.expire(
+            award_recommendation,
+            ["workflows", "review_workflow"],
+        )
+
+        resp = client.get(
+            f"{API_URL}/{award_recommendation.award_recommendation_id}",
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 200
+
+        data = resp.json["data"]
+
+        assert data["review_workflow_id"] == str(review_workflow.workflow_id)
+        assert data["review_workflow_id"] != str(other_workflow.workflow_id)
+
+    def test_get_award_recommendation_review_workflow_filters_by_type_200(
+        self,
+        client,
+        db_session,
+        agency,
+        award_recommendation,
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session,
+            agency=agency,
+            privileges=[Privilege.VIEW_AWARD_RECOMMENDATION],
+        )
+
+        review_workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.AWARD_RECOMMENDATION_REVIEW,
+            award_recommendation=award_recommendation,
+        )
+
+        other_workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+            award_recommendation=award_recommendation,
+        )
+
+        db_session.expire(
+            award_recommendation,
+            ["workflows", "review_workflow"],
+        )
+
+        resp = client.get(
+            f"{API_URL}/{award_recommendation.award_recommendation_id}",
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 200
+        data = resp.json["data"]
+
+        assert data["review_workflow_id"] == str(review_workflow.workflow_id)
+        assert data["review_workflow_id"] != str(other_workflow.workflow_id)
+
+    def test_get_award_recommendation_non_review_workflow_is_not_review_workflow_200(
+        self,
+        client,
+        db_session,
+        agency,
+        award_recommendation,
+    ):
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session,
+            agency=agency,
+            privileges=[Privilege.VIEW_AWARD_RECOMMENDATION],
+        )
+
+        other_workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+            award_recommendation=award_recommendation,
+        )
+
+        db_session.expire(
+            award_recommendation,
+            ["workflows", "review_workflow"],
+        )
+
+        resp = client.get(
+            f"{API_URL}/{award_recommendation.award_recommendation_id}",
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 200
+        data = resp.json["data"]
+
+        assert other_workflow.award_recommendation_id == (
+            award_recommendation.award_recommendation_id
+        )
+        assert data["review_workflow_id"] is None
+        
 
 ####################################
 # 404 Tests
