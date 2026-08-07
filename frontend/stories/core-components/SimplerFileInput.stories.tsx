@@ -54,6 +54,20 @@ export const DisabledExistingFiles = (): React.ReactElement => (
   />
 );
 
+export const ReadOnlyExistingFiles = (): React.ReactElement => (
+  <SimplerFileInput
+    {...defaultArgs}
+    readOnly={true}
+    existingFiles={[
+      {
+        id: "1",
+        fileName: "file.txt",
+        updatedAt: new Date().toString(),
+      },
+    ]}
+  />
+);
+
 export const MultiFile = (): React.ReactElement => (
   <SimplerFileInput {...defaultArgs} multiFile={true} />
 );

@@ -227,7 +227,7 @@ export const SimplerFileInput = ({
           deleteModalRef.current?.toggleModal();
         }}
         filesWithDeleteError={filesWithDeleteError}
-        disabled={disabled}
+        disabled={disabled || readOnly}
       />
       <DeleteFileModal
         // note that this only supports deleting one file at a time.
