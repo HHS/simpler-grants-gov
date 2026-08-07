@@ -124,6 +124,14 @@ resource "aws_kms_key_policy" "db" {
 data "aws_iam_policy_document" "db_kms" {
   count = length(var.snapshot_share_account_ids) > 0 ? 1 : 0
 
+  # The kms:* / Resource "*" below is the account-root statement AWS requires on
+  # every key policy (see the note on aws_kms_key_policy.db). It cannot be
+  # narrowed without making the key unmanageable, and it is scoped to this
+  # account's own root. Same rationale as infra/modules/storage/encryption.tf.
+  # checkov:skip=CKV_AWS_109:Root account requires full KMS permissions to enable IAM-based access control
+  # checkov:skip=CKV_AWS_111:Root account requires full KMS permissions to enable IAM-based access control
+  # checkov:skip=CKV_AWS_356:A key policy's resource is always the key it is attached to; "*" is the only valid value
+
   # Equivalent of the AWS default key policy. Required — see note above.
   statement {
     sid    = "EnableIAMUserPermissions"
