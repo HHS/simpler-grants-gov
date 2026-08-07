@@ -657,6 +657,12 @@ class BuildAutomaticOpportunitiesTask(Task):
                 "dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6",
             ),
             (
+                "E2E-SF424C",
+                "Budget Information for Construction Programs (SF-424C)",
+                SF424c_v2_0.form_id,
+                "a4c8e1f2-3b6d-4e91-8a2c-7f5b9d3e6a18",
+            ),
+            (
                 "E2E-SF424D",
                 "Assurances for Construction Programs (SF-424D)",
                 SF424d_v1_1.form_id,
