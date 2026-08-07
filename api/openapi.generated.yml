@@ -5753,9 +5753,9 @@ components:
           example: research
         query_operator:
           default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchQueryOperator
-          - OR
+          - AND
           description: Query operator for combining search conditions
-          example: OR
+          example: AND
           enum:
           - AND
           - OR
