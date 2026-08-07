@@ -140,7 +140,7 @@ def test_successful_confirm_application_delivery_request(
 
 
 def test_successful_confirm_application_delivery_request_if_grants_gov_tracking_number_is_parsed_as_a_string(
-    db_session, client, enable_factory_create
+    db_session, client, enable_factory_create, caplog
 ) -> None:
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
@@ -194,6 +194,9 @@ def test_successful_confirm_application_delivery_request_if_grants_gov_tracking_
         )
     )
     assert db_session.execute(count_query).scalar() == 1
+
+    end_message = next(record for record in caplog.records if record.message == "end request")
+    assert end_message.grants_gov_tracking_number == f"GRANT{submission.legacy_tracking_number}"
 
 
 @mock.patch("uuid.uuid4")
