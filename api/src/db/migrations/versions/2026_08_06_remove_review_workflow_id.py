@@ -1,7 +1,7 @@
 """remove review workflow id
 
 Revision ID: 956a32b92993
-Revises: 0b3e125c6bac
+Revises: 15bfdec59153
 Create Date: 2026-08-04 19:45:35.619365
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "956a32b92993"
-down_revision = "0b3e125c6bac"
+down_revision = "15bfdec59153"
 branch_labels = None
 depends_on = None
 
