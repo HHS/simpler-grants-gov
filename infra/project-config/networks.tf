@@ -170,6 +170,8 @@ locals {
       grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
       enable_dms                   = true            # peers with the Grants.gov Oracle DMS network, mirroring staging
 
+      dms_transit_gateway_id = "tgw-03ae893b3141f907a" # reach the Oracle CIDR via the transit gateway instead of the VPC peering
+
       domain_config = {
         manage_dns  = false
         hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
