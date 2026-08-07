@@ -103,7 +103,6 @@ def test_can_user_do_agency_approval_application(
     application_workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         application=application,
-        has_application=True,
     )
 
     all_events = BasicTestStateMachine.get_valid_events()
@@ -162,7 +161,6 @@ def test_can_user_do_agency_approval_application_submission(
     application_workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         application_submission=application_submission,
-        has_application_submission=True,
     )
 
     all_events = BasicTestStateMachine.get_valid_events()
@@ -219,7 +217,6 @@ def test_can_user_do_agency_approval_award_recommendation(
     award_recommendation_workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         award_recommendation=award_recommendation,
-        has_award_recommendation=True,
     )
 
     all_events = BasicTestStateMachine.get_valid_events()

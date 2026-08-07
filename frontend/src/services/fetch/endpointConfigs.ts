@@ -188,3 +188,11 @@ export const toDynamicFilesEndpoint = (type: "POST" | "GET") => ({
   method: type as ApiMethod,
   requiresAuth: true,
 });
+
+export const fetchWorkflowEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "workflows",
+  method: "GET" as ApiMethod,
+  requiresAuth: true,
+};
