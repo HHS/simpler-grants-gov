@@ -1,6 +1,6 @@
 /**
- * @feature Apply - Happy Path - Attachment Form Submission and Print View Workflow
- * @scenario Complete the Attachment Form Submission and Print View workflow for an <user type> user
+ * @feature Apply - Happy Path - Key Contacts Application Submission and Print View Workflow
+ * @scenario Complete the Key Contacts Application Submission and Print View workflow for an <user type> user
  */
 
 import {
@@ -9,6 +9,10 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import {
+  buildKeyContactsHappyPathTestData,
+  buildKeyContactsRequiredFieldsHappyPathTestData,
+} from "tests/e2e/apply/fixtures/key-contacts-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -24,79 +28,94 @@ import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-pri
 import {
   buildHappyPathTestData,
   buildPrintUrl,
-  navigateToPrintView,
   validateAllPrintViews,
-  validateAttachmentPrintViewSection,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
   submitApplicationAndVerify,
   verifySubmissionConfirmation,
 } from "tests/e2e/utils/submission/submit-application-utils";
 
-const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE, FULL_REGRESSION } =
+  VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-// Only the opportunity number is declared here.
-// All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
-// Unified opportunity for both local and staging environments.
-const OPPORTUNITY_NUMBER = "E2E-ATT-ORG-IND-01";
+const OPPORTUNITY_NUMBER = "E2E-KC-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
+/**
+ * Test scenarios cover both minimal (required fields only) and complete
+ * (all required + optional fields) happy-path submissions for both
+ * Organization and Individual user types.
+ *
+ * Minimal scenarios: SMOKE tags (fast smoke tests)
+ * Complete scenarios: FULL_REGRESSION tags (comprehensive coverage)
+ */
 const applicantScenarios = [
   {
-    testName: `Complete the Attachment Form Submission and Print View workflow for an Organization user`,
+    testName: `Key Contacts - Required fields only - Organization user`,
     orgLabel: testOrgLabel,
+    tags: [SMOKE, GRANTEE, APPLY, APPLY_FORMS],
+    buildTestData: buildKeyContactsRequiredFieldsHappyPathTestData,
   },
   {
-    testName: `Complete the Attachment Form Submission and Print View workflow for an Individual user`,
+    testName: `Key Contacts - Complete form - Organization user`,
+    orgLabel: testOrgLabel,
+    tags: [FULL_REGRESSION, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION],
+    buildTestData: buildKeyContactsHappyPathTestData,
+  },
+  {
+    testName: `Key Contacts - Required fields only - Individual user`,
     orgLabel: undefined,
+    tags: [SMOKE, GRANTEE, APPLY, APPLY_FORMS],
+    buildTestData: buildKeyContactsRequiredFieldsHappyPathTestData,
+  },
+  {
+    testName: `Key Contacts - Complete form - Individual user`,
+    orgLabel: undefined,
+    tags: [FULL_REGRESSION, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION],
+    buildTestData: buildKeyContactsHappyPathTestData,
   },
 ] as const;
 
-// Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { testName, orgLabel } of applicantScenarios) {
+for (const { testName, orgLabel, tags, buildTestData } of applicantScenarios) {
   test(
     testName,
-    { tag: [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    { tag: [...tags] }, // Convert readonly array to mutable
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,
     ) => {
-      test.setTimeout(300_000); // 5-min timeout
+      test.setTimeout(300_000);
 
       const isMobile = testInfo.project.name.match(/[Mm]obile/);
       const baseSuffix = Date.now();
 
-      // --- Login ---
-      // Given the user is logged in
       await authenticateE2eUser(page, context, !!isMobile);
 
-      // --- Navigate to Opportunity page and start a new application ---
-      // And the user launches the URL for an opportunity with an open Attachment Form competition
-      // When the user clicks "Start Application", selects applicant type and creates the application
       await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
       const applicationUrl = page.url();
 
-      // --- Fill required forms and collect print URLs ---
-      // For each form on this opportunity: fill it, verify status, then capture the
-      // form URL *before* verifyFormStatusOnApplication navigates away to the app page.
       const filledForms: FilledFormEntry[] = [];
 
       for (const [index, form] of opportunityConfig.forms.entries()) {
-        const testData = buildHappyPathTestData(form, baseSuffix + index);
+        // Use scenario-specific builder for Key Contacts form,
+        // or fall back to generic builder for other forms
+        const testData =
+          form.formKey === "keyContacts"
+            ? buildTestData(baseSuffix + index)
+            : buildHappyPathTestData(form, baseSuffix + index);
 
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
-        // Verify save succeeded while still on the form page
         await verifyFormStatusAfterSave(page, "complete");
 
-        // Capture the form URL now - verifyFormStatusOnApplication navigates away
         const formUrl = page.url();
+        const printUrl = buildPrintUrl(formUrl);
 
         await verifyFormStatusOnApplication(
           page,
@@ -109,43 +128,22 @@ for (const { testName, orgLabel } of applicantScenarios) {
           formKey: form.formKey,
           formName: form.formConfig.formName,
           testData,
-          printUrl: buildPrintUrl(formUrl),
+          printUrl,
           expectedPrepopulatedFields: form.expectedPrepopulatedFields,
           userEnteredFieldTestIds: form.userEnteredFieldTestIds,
+          expectedSectionHeading: form.formConfig.formName,
         });
       }
 
-      // Return to application landing page before submitting
       await page.goto(applicationUrl);
       await page.waitForLoadState("domcontentloaded");
 
-      // --- Submit Application ---
-      // When the user clicks "Submit application"
-      // Then the application is submitted successfully
       await submitApplicationAndVerify(page, "success");
 
-      // --- Confirmation Page Validation ---
       await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one page per form) ---
       await validateAllPrintViews(page, filledForms);
-
-      // --- Attachment-Specific Validation ---
-      for (const { testData, printUrl } of filledForms) {
-        await navigateToPrintView(page, printUrl);
-
-        const attachmentSections = [
-          { fieldKey: "att1", sectionId: "form-section-attachment1" },
-        ] as const;
-
-        for (const { fieldKey, sectionId } of attachmentSections) {
-          await validateAttachmentPrintViewSection(
-            page,
-            sectionId,
-            testData[fieldKey],
-          );
-        }
-      }
     },
   );
 }
