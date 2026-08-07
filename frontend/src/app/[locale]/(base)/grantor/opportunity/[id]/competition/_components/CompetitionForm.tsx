@@ -1,6 +1,7 @@
 "use client";
 
 import { AgencyContact } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/AgencyContact";
+import { RequiredForms } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/RequiredForms";
 import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
 import { SubmissionWindow } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionWindow";
 import {
@@ -12,7 +13,12 @@ import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import React, { useRef, useState } from "react";
-import { Alert, Button, ModalRef } from "@trussworks/react-uswds";
+import {
+  Alert,
+  Button,
+  ModalRef,
+  ModalToggleButton,
+} from "@trussworks/react-uswds";
 
 import { FormSelectModal } from "./FormSelectModal";
 
@@ -98,6 +104,18 @@ export function CompetitionForm({
               <SubmissionSetUp />
               <SubmissionWindow />
               <AgencyContact />
+              <RequiredForms
+                competitionForms={competitionForms}
+                formDetails={forms}
+              />
+              <ModalToggleButton
+                modalRef={formModalRef}
+                opener
+                className="usa-button usa-button--secondary"
+                type="button"
+              >
+                {t("sectionRequiredForms.selectFormsButton")}
+              </ModalToggleButton>
             </div>
             <div className="display-flex flex-justify margin-top-4">
               <div className="display-flex gap-2">
