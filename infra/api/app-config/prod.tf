@@ -100,6 +100,9 @@ module "prod_config" {
     FRONTEND_URL             = "https://simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
     PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
+
+    # Virus scanning endpoints
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
   }
   instance_cpu    = 2048
   instance_memory = 4096
