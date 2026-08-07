@@ -219,7 +219,7 @@ PQC_REVIEWER = Role(
     is_core=True,
     link_privileges=get_link_privileges(
         PQC_REVIEWER_ID,
-        [Privilege.PQC_REVIEWER],
+        [Privilege.PQC_REVIEWER, Privilege.VIEW_AWARD_RECOMMENDATION],
     ),
     link_role_types=[LinkRoleRoleType(role_id=PQC_REVIEWER_ID, role_type=RoleType.AGENCY)],
 )
@@ -231,7 +231,7 @@ GMS_REVIEWER = Role(
     is_core=True,
     link_privileges=get_link_privileges(
         GMS_REVIEWER_ID,
-        [Privilege.GMS_REVIEWER],
+        [Privilege.GMS_REVIEWER, Privilege.VIEW_AWARD_RECOMMENDATION],
     ),
     link_role_types=[LinkRoleRoleType(role_id=GMS_REVIEWER_ID, role_type=RoleType.AGENCY)],
 )
@@ -243,7 +243,7 @@ FMO_REVIEWER = Role(
     is_core=True,
     link_privileges=get_link_privileges(
         FMO_REVIEWER_ID,
-        [Privilege.FMO_REVIEWER],
+        [Privilege.FMO_REVIEWER, Privilege.VIEW_AWARD_RECOMMENDATION],
     ),
     link_role_types=[LinkRoleRoleType(role_id=FMO_REVIEWER_ID, role_type=RoleType.AGENCY)],
 )
@@ -255,7 +255,7 @@ GMO_REVIEWER = Role(
     is_core=True,
     link_privileges=get_link_privileges(
         GMO_REVIEWER_ID,
-        [Privilege.GMO_REVIEWER],
+        [Privilege.GMO_REVIEWER, Privilege.VIEW_AWARD_RECOMMENDATION],
     ),
     link_role_types=[LinkRoleRoleType(role_id=GMO_REVIEWER_ID, role_type=RoleType.AGENCY)],
 )
@@ -267,7 +267,7 @@ FINAL_AWARD_REC_APPROVER = Role(
     is_core=True,
     link_privileges=get_link_privileges(
         FINAL_AWARD_REC_APPROVER_ID,
-        [Privilege.FINAL_AWARD_REC_APPROVER],
+        [Privilege.FINAL_AWARD_REC_APPROVER, Privilege.VIEW_AWARD_RECOMMENDATION],
     ),
     link_role_types=[
         LinkRoleRoleType(role_id=FINAL_AWARD_REC_APPROVER_ID, role_type=RoleType.AGENCY)
