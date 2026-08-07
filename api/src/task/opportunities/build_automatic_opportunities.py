@@ -46,6 +46,7 @@ from src.form_schema.forms import (
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
+    SF424c_v2_0,
     SF424d_v1_1,
     SF424Short_v3_0,
     SFLLL_v2_0,
