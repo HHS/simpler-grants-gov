@@ -409,6 +409,7 @@ export interface UswdsWidgetProps<
         deletedEntryIndex: number,
       ) => void;
       markFormDirty?: () => void;
+      attachmentsUploadingCounter?: Record<string, () => void>;
     };
   };
 }
