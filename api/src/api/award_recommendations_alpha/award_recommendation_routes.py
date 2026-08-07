@@ -27,6 +27,7 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationRiskListResponseSchema,
     AwardRecommendationRiskRequestSchema,
     AwardRecommendationRiskResponseSchema,
+    AwardRecommendationStartReviewRequestSchema,
     AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema,
     AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema,
     AwardRecommendationSubmissionListRequestSchema,
@@ -70,6 +71,9 @@ from src.services.award_recommendations.list_award_recommendation_submissions im
     list_award_recommendation_submissions,
 )
 from src.services.award_recommendations.list_award_recommendations import list_award_recommendations
+from src.services.award_recommendations.start_award_recommendation_review_workflow import (
+    start_award_recommendation_review,
+)
 from src.services.award_recommendations.update_award_recommendation import (
     update_award_recommendation,
 )
@@ -235,6 +239,38 @@ def award_recommendation_update(
         )
 
     return response.ApiResponse(message="Success", data=updated_award_recommendation)
+
+
+@award_recommendation_blueprint.post(
+    "/award-recommendations/<uuid:award_recommendation_id>/start-review"
+)
+@award_recommendation_blueprint.input(AwardRecommendationStartReviewRequestSchema, location="json")
+@award_recommendation_blueprint.output(AwardRecommendationGetResponseSchema)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@award_recommendation_blueprint.doc(responses=[200, 403, 404, 422, 500])
+@flask_db.with_db_session()
+def award_recommendation_start_review(
+    db_session: db.Session, award_recommendation_id: uuid.UUID, json_data: dict
+) -> response.ApiResponse:
+    """Start the award recommendation review process."""
+    add_extra_data_to_current_request_logs({"award_recommendation_id": award_recommendation_id})
+    logger.info("POST /alpha/award-recommendations/:award_recommendation_id")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        award_recommendation = start_award_recommendation_review(
+            db_session,
+            user,
+            award_recommendation_id,
+            json_data,
+        )
+
+    return response.ApiResponse(
+        message="Success",
+        data=award_recommendation,
+    )
 
 
 @award_recommendation_blueprint.put(
