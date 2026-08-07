@@ -14,6 +14,8 @@ const SaveButtonTooltipTrigger = forwardRef<
   React.HTMLProps<HTMLSpanElement>
 >((props, ref) => <span {...props} ref={ref} />);
 
+SaveButtonTooltipTrigger.displayName = "SaveButtonTooltipTrigger";
+
 type ApplyFormActionButtonsProps = {
   applicationId: string;
   onSaveClick: () => void;

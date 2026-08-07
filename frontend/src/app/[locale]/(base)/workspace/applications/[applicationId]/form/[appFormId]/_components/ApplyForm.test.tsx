@@ -1,5 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyForm";
 import { UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
@@ -62,6 +63,19 @@ jest.mock("src/services/auth/session", () => ({
 
 jest.mock("next-navigation-guard", () => ({
   useNavigationGuard: () => jest.fn(),
+}));
+
+const mockClientFetch = jest.fn();
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: mockClientFetch,
+  }),
+}));
+
+// mock attachment FormData. The actual data is not ever processed so can
+// be left empty for mocking purposes
+jest.mock("src/utils/fileUtils/createFormData", () => ({
+  createFormDataForFile: () => Promise.resolve(new FormData()),
 }));
 
 const formSchema: RJSFSchema = {
@@ -138,6 +152,7 @@ const attachmentFormSchema: RJSFSchema = {
   title: "attachment form schema",
   properties: {
     att1: { type: "string", title: "Attachment 1" },
+    att2: { type: "string", title: "Attachment 2" },
   },
 };
 
@@ -145,17 +160,21 @@ const attachmentUiSchema: UiSchema = [
   {
     type: "section",
     label: "1) Attachment 1",
-    name: "attachment1",
+    name: "attachments",
     children: [
       {
         type: "field",
         definition: "/properties/att1",
         widget: "Attachment",
       },
+      {
+        type: "field",
+        definition: "/properties/att2",
+        widget: "Attachment",
+      },
     ],
   },
 ];
-
 const savedAttachment: Attachment = {
   application_attachment_id: "22222222-2222-4222-8222-222222222222",
   file_name: "narrative.pdf",
@@ -637,7 +656,7 @@ describe("ApplyForm", () => {
       );
 
       // the virus scanning widget keeps its native file input mounted
-      expect(screen.getByTestId("file-input")).toBeInTheDocument();
+      expect(screen.getAllByTestId("file-input")).toHaveLength(2);
 
       // the saved attachment's metadata is resolved from the attachments prop
       expect(screen.getByTestId("file-input-existing-files")).toHaveTextContent(
@@ -661,8 +680,10 @@ describe("ApplyForm", () => {
       );
 
       expect(screen.getByText("Attachment 1")).toBeInTheDocument();
+      expect(screen.getByText("Attachment 2")).toBeInTheDocument();
       expect(getHiddenInput(container, "att1")).toHaveValue("");
-      expect(screen.getByTestId("file-input")).toBeInTheDocument();
+      expect(getHiddenInput(container, "att2")).toHaveValue("");
+      expect(screen.getAllByTestId("file-input")).toHaveLength(2);
       expect(
         screen.queryByTestId("file-input-existing-files"),
       ).not.toBeInTheDocument();
@@ -692,11 +713,92 @@ describe("ApplyForm", () => {
 
       // but unmounts its file input once a file exists, and renders the
       // file name without the existing-files display
-      expect(screen.queryByTestId("file-input")).not.toBeInTheDocument();
+      const fileInputs = screen.getAllByTestId("file-input-input");
+      expect(fileInputs).toHaveLength(1);
+      expect(fileInputs[0]).toHaveAttribute("id", "att2");
       expect(
         screen.queryByTestId("file-input-existing-files"),
       ).not.toBeInTheDocument();
       expect(screen.getByText("narrative.pdf")).toBeInTheDocument();
+    });
+  });
+
+  describe("save button during attachment uploads", () => {
+    const renderAttachmentForm = () =>
+      render(
+        <ApplyForm
+          applicationId="application-123"
+          formId="test"
+          formSchema={attachmentFormSchema}
+          savedFormData={{}}
+          uiSchema={attachmentUiSchema}
+          validationWarnings={[]}
+          attachments={[]}
+          applicationStatus="in_progress"
+          useVirusScanning={true}
+        />,
+      );
+
+    const getSaveButton = () => screen.getByTestId("apply-form-save");
+
+    const uploadFileTo = async (fileInput: HTMLElement, fileName: string) => {
+      await userEvent.upload(
+        fileInput,
+        new File(["file content"], fileName, { type: "application/pdf" }),
+      );
+    };
+
+    it("keeps the save button enabled without a tooltip when no uploads are in progress", () => {
+      renderAttachmentForm();
+      expect(getSaveButton()).toBeEnabled();
+      expect(screen.queryByTestId("triggerElement")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("tooltipBody")).not.toBeInTheDocument();
+    });
+
+    it("disables the save button while an attachment upload is in progress", async () => {
+      // the upload request never resolves, so the upload stays in progress
+      mockClientFetch.mockReturnValue(new Promise(() => {}));
+      renderAttachmentForm();
+
+      const [firstFileInput] = await screen.findAllByTestId("file-input-input");
+      await uploadFileTo(firstFileInput, "attachment.pdf");
+
+      await waitFor(() => {
+        expect(getSaveButton()).toBeDisabled();
+      });
+    });
+
+    it("shows a tooltip only while the disabled save button is hovered", async () => {
+      mockClientFetch.mockReturnValue(new Promise(() => {}));
+      renderAttachmentForm();
+
+      const [firstFileInput] = await screen.findAllByTestId("file-input-input");
+      await uploadFileTo(firstFileInput, "attachment.pdf");
+
+      const tooltipTrigger = await screen.findByTestId("triggerElement");
+      expect(
+        within(tooltipTrigger).getByTestId("apply-form-save"),
+      ).toBeDisabled();
+
+      //the button is hiden until hovered over
+      expect(screen.getByTestId("tooltipBody")).toHaveAttribute(
+        "aria-hidden",
+        "true",
+      );
+
+      await userEvent.hover(tooltipTrigger);
+      expect(screen.getByTestId("tooltipBody")).toHaveTextContent(
+        "saveDisabledTooltip",
+      );
+      expect(screen.getByTestId("tooltipBody")).toHaveAttribute(
+        "aria-hidden",
+        "false",
+      );
+      await userEvent.unhover(tooltipTrigger);
+      expect(screen.getByTestId("tooltipBody")).toHaveAttribute(
+        "aria-hidden",
+        "true",
+      );
     });
   });
 });
