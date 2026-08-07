@@ -19,6 +19,8 @@ module "infra_dev_config" {
   secondary_domain_names = ["alb.dev.simpler.grants.gov"]
   enable_https           = true
 
+  enable_api_gateway_domain_name = true
+
   s3_cdn_domain_name = "files.dev.simpler.grants.gov"
   enable_cdn_alias   = true
 

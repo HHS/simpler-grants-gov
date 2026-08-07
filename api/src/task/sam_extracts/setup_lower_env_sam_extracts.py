@@ -51,8 +51,8 @@ class SetupLowerEnvSamExtractsTask(Task):
         # We do not want to let this task run outside of our development
         # environments. While it shouldn't be configured to do so, this
         # is making extra certain that that is the case.
-        if self.environment not in ("local", "dev", "staging"):
-            raise Exception("ENVIRONMENT must be local, dev or staging")
+        if self.environment not in ("local", "dev", "infra-dev", "staging"):
+            raise Exception("ENVIRONMENT must be local, dev, infra-dev or staging")
 
         with self.db_session.begin():
             # Multiple extract files in one day runs into logic issues with
