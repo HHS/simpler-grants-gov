@@ -34,6 +34,16 @@ export async function uploadFile(
   await fileInput.setInputFiles(filePath);
 }
 
+export async function uploadFileBySelector(
+  page: Page,
+  selector: string,
+  filePath: string | string[],
+): Promise<void> {
+  const fileInput = page.locator(selector).first();
+  await fileInput.waitFor({ state: "visible", timeout: 30000 });
+  await fileInput.setInputFiles(filePath);
+}
+
 export async function expectUploadedFileVisible(
   page: Page,
   fileName: string,
