@@ -1,10 +1,18 @@
 import path from "path";
-import { expect, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
+import {
+  expect,
+  type BrowserContext,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 
-export const TEST_UPLOAD_DIR = path.resolve(__dirname, "../../test-upload-files");
+export const TEST_UPLOAD_DIR = path.resolve(
+  __dirname,
+  "../../test-upload-files",
+);
 
 export async function openApplicationForm(
   page: Page,
@@ -49,7 +57,9 @@ export async function expectUploadedFileVisible(
   fileName: string,
   timeoutMs = 60000,
 ): Promise<void> {
-  await expect(page.getByText(fileName).first()).toBeVisible({ timeout: timeoutMs });
+  await expect(page.getByText(fileName).first()).toBeVisible({
+    timeout: timeoutMs,
+  });
 }
 
 export async function deleteUploadedFile(
@@ -59,9 +69,11 @@ export async function deleteUploadedFile(
   const deleteButton = page.getByRole("button", { name: /delete/i }).first();
   await deleteButton.click();
 
-  const confirmDeleteButton = page.getByRole("button", {
-    name: /delete file/i,
-  }).first();
+  const confirmDeleteButton = page
+    .getByRole("button", {
+      name: /delete file/i,
+    })
+    .first();
   await expect(confirmDeleteButton).toBeVisible({ timeout: 30000 });
   await confirmDeleteButton.click();
 
@@ -76,14 +88,18 @@ export async function assertFileInputVisible(
   page: Page,
   fileInputTestId = "file-input-input",
 ): Promise<void> {
-  await expect(page.getByTestId(fileInputTestId).first()).toBeVisible({ timeout: 30000 });
+  await expect(page.getByTestId(fileInputTestId).first()).toBeVisible({
+    timeout: 30000,
+  });
 }
 
 export async function assertFileInputHidden(
   page: Page,
   fileInputTestId = "file-input-input",
 ): Promise<void> {
-  await expect(page.getByTestId(fileInputTestId).first()).not.toBeVisible({ timeout: 30000 });
+  await expect(page.getByTestId(fileInputTestId).first()).not.toBeVisible({
+    timeout: 30000,
+  });
 }
 
 export async function expectUploadStatusMessage(

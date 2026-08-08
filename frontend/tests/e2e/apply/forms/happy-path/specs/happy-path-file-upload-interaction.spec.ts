@@ -1,7 +1,11 @@
-import { expect, test, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
 import {
-  OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER,
-} from "tests/e2e/apply/fixtures/other-narrative-attachment-field-definitions";
+  expect,
+  test,
+  type BrowserContext,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
+import { OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER } from "tests/e2e/apply/fixtures/other-narrative-attachment-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
@@ -9,10 +13,10 @@ import {
   abortAttachmentUploadRequest,
   assertFileInputHidden,
   assertFileInputVisible,
-  deleteUploadedFile,
   delayAttachmentUploadRequest,
-  expectUploadStatusMessage,
+  deleteUploadedFile,
   expectUploadedFileVisible,
+  expectUploadStatusMessage,
   openApplicationForm,
   TEST_UPLOAD_DIR,
   uploadFile,
@@ -57,7 +61,9 @@ test.describe("File upload interactions - Other Narrative Attachments", () => {
 
       await expectUploadStatusMessage(page, /uploading/i);
       await expectUploadedFileVisible(page, "sample-upload-kb.pdf");
-      await expect(page.getByRole("button", { name: /delete/i }).first()).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /delete/i }).first(),
+      ).toBeVisible();
       await assertFileInputHidden(page);
     },
   );
@@ -135,7 +141,9 @@ test.describe("File upload interactions - Other Narrative Attachments", () => {
 
       await uploadFile(page, [SAMPLE_UPLOAD_FILE, SAMPLE_UPLOAD_FILE]);
       await expectUploadedFileVisible(page, "sample-upload-kb.pdf");
-      await expect(page.getByRole("button", { name: /delete/i }).first()).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /delete/i }).first(),
+      ).toBeVisible();
     },
   );
 });
