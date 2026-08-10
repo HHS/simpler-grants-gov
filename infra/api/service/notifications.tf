@@ -9,8 +9,8 @@ locals {
     AWS_SES_FROM_EMAIL = module.notifications[0].from_email
   } : {}
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
-  pinpoint_app_id       = local.notifications_config != null ? module.notifications[0].app_id : ""
-  ses_configuration_set = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
+  pinpoint_app_id        = local.notifications_config != null ? module.notifications[0].app_id : ""
+  ses_configuration_set  = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
 
 }
 
