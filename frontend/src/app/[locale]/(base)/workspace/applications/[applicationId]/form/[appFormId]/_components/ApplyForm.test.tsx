@@ -1,9 +1,20 @@
+import { ReadableStream as NodeReadableStream } from "stream/web";
 import { RJSFSchema } from "@rjsf/utils";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyForm";
 import { UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
+import {
+  createAdvanceStreamTrigger,
+  makeAdvanceableTestStreamForTrigger,
+} from "src/utils/testing/streamTestUtils";
+
+// jsdom doesn't implement ReadableStream, which makeAdvanceableTestStreamForTrigger
+// needs. Node's implementation is API compatible for the upload stream tests below.
+global.ReadableStream =
+  global.ReadableStream ??
+  (NodeReadableStream as unknown as typeof ReadableStream);
 
 const pushMock = jest.fn();
 
@@ -750,7 +761,9 @@ describe("ApplyForm", () => {
 
     it("keeps the save button enabled without a tooltip when no uploads are in progress", () => {
       renderAttachmentForm();
-      expect(getSaveButton()).toBeEnabled();
+      const saveButton = getSaveButton();
+      expect(saveButton).toBeEnabled();
+      expect(saveButton).toHaveAttribute("aria-disabled", "false");
       expect(screen.queryByTestId("triggerElement")).not.toBeInTheDocument();
       expect(screen.queryByTestId("tooltipBody")).not.toBeInTheDocument();
     });
@@ -764,7 +777,116 @@ describe("ApplyForm", () => {
       await uploadFileTo(firstFileInput, "attachment.pdf");
 
       await waitFor(() => {
-        expect(getSaveButton()).toBeDisabled();
+        expect(getSaveButton()).toHaveAttribute("aria-disabled", "true");
+      });
+      expect(getSaveButton()).toHaveAccessibleDescription(
+        "saveDisabledTooltipMessage",
+      );
+    });
+
+    it("keeps the save button rendered while transitioning to disabled", async () => {
+      mockClientFetch.mockReturnValue(new Promise(() => {}));
+      renderAttachmentForm();
+      const [firstFileInput] = await screen.findAllByTestId("file-input-input");
+      await uploadFileTo(firstFileInput, "attachment.pdf");
+      expect(getSaveButton()).toHaveAttribute("aria-disabled", "true");
+      expect(screen.getByTestId("triggerElement")).toBeInTheDocument();
+    });
+
+    it("blocks form submission when the save button is clicked during an upload", async () => {
+      mockClientFetch.mockReturnValue(new Promise(() => {}));
+      renderAttachmentForm();
+
+      const [firstFileInput] = await screen.findAllByTestId("file-input-input");
+      await uploadFileTo(firstFileInput, "attachment.pdf");
+
+      await waitFor(() => {
+        expect(getSaveButton()).toHaveAttribute("aria-disabled", "true");
+      });
+
+      await userEvent.click(getSaveButton());
+      expect(mockHandleFormAction).not.toHaveBeenCalled();
+    });
+
+    it("re-enables the save button after an upload fails", async () => {
+      let failUpload: (error: Error) => void = () => undefined;
+      mockClientFetch.mockReturnValue(
+        new Promise((_resolve, reject) => {
+          failUpload = reject;
+        }),
+      );
+      renderAttachmentForm();
+      const [firstFileInput] = await screen.findAllByTestId("file-input-input");
+      await uploadFileTo(firstFileInput, "attachment.pdf");
+
+      await waitFor(() => {
+        expect(getSaveButton()).toHaveAttribute("aria-disabled", "true");
+      });
+
+      failUpload(new Error("upload failed"));
+
+      await waitFor(() => {
+        expect(getSaveButton()).toHaveAttribute("aria-disabled", "false");
+      });
+      expect(screen.queryByTestId("triggerElement")).not.toBeInTheDocument();
+    });
+
+    it("re-enables the save button after an upload completes successfully", async () => {
+      const trigger = createAdvanceStreamTrigger();
+      const scanStream = makeAdvanceableTestStreamForTrigger(
+        [
+          JSON.stringify({
+            status: "scan-complete",
+            pendingFileId: "pending-file-1",
+          }),
+        ],
+        trigger,
+      );
+      mockClientFetch.mockImplementation((url: string) =>
+        url === "/api/file"
+          ? Promise.resolve({ body: scanStream }) // keeps stream in progress
+          : Promise.resolve({ data: savedAttachment }), // triggers onComplete and decrements uploading counter
+      );
+
+      renderAttachmentForm();
+
+      const [firstFileInput] = await screen.findAllByTestId("file-input-input");
+      await uploadFileTo(firstFileInput, "attachment.pdf");
+
+      await waitFor(() => {
+        expect(getSaveButton()).toHaveAttribute("aria-disabled", "true");
+      });
+
+      trigger.advance();
+
+      await waitFor(() => {
+        expect(getSaveButton()).toHaveAttribute("aria-disabled", "false");
+      });
+      expect(screen.queryByTestId("triggerElement")).not.toBeInTheDocument();
+    });
+
+    it("re-enables the save button when the scan stream errors", async () => {
+      const trigger = createAdvanceStreamTrigger();
+      // passing ["error"] invokes error
+      const scanStream = makeAdvanceableTestStreamForTrigger(
+        ["error"],
+        trigger,
+      );
+      mockClientFetch.mockResolvedValue({ body: scanStream });
+
+      renderAttachmentForm();
+
+      const [firstFileInput] = await screen.findAllByTestId("file-input-input");
+      await uploadFileTo(firstFileInput, "attachment.pdf");
+
+      await waitFor(() => {
+        expect(getSaveButton()).toHaveAttribute("aria-disabled", "true");
+      });
+
+      trigger.advance();
+
+      await waitFor(() => {
+        expect(getSaveButton()).toHaveAttribute("aria-disabled", "false");
       });
     });
 
@@ -778,9 +900,9 @@ describe("ApplyForm", () => {
       const tooltipTrigger = await screen.findByTestId("triggerElement");
       expect(
         within(tooltipTrigger).getByTestId("apply-form-save"),
-      ).toBeDisabled();
+      ).toHaveAttribute("aria-disabled", "true");
 
-      //the button is hiden until hovered over
+      // the tooltip is hidden until the trigger is hovered over
       expect(screen.getByTestId("tooltipBody")).toHaveAttribute(
         "aria-hidden",
         "true",
@@ -795,6 +917,30 @@ describe("ApplyForm", () => {
         "false",
       );
       await userEvent.unhover(tooltipTrigger);
+      expect(screen.getByTestId("tooltipBody")).toHaveAttribute(
+        "aria-hidden",
+        "true",
+      );
+    });
+
+    it("shows the tooltip when the disabled save button receives keyboard focus", async () => {
+      mockClientFetch.mockReturnValue(new Promise(() => {}));
+      renderAttachmentForm();
+      const [firstFileInput] = await screen.findAllByTestId("file-input-input");
+      await uploadFileTo(firstFileInput, "attachment.pdf");
+      await screen.findByTestId("triggerElement");
+
+      act(() => {
+        getSaveButton().focus();
+      });
+      expect(screen.getByTestId("tooltipBody")).toHaveAttribute(
+        "aria-hidden",
+        "false",
+      );
+
+      act(() => {
+        getSaveButton().blur(); // lose focus on button
+      });
       expect(screen.getByTestId("tooltipBody")).toHaveAttribute(
         "aria-hidden",
         "true",
