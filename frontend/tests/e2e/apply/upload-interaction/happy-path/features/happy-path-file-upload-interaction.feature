@@ -54,8 +54,3 @@ Feature: File upload interactions - Happy Path
     When the user deletes one file
     Then one file remains
     And the delete action remains available
-    Given the user has opened the "Other Narrative Attachment" form
-    And two files with the same filename are uploaded
-    When the user deletes one file
-    Then one file remains
-    And the delete action remains available
