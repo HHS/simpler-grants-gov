@@ -35,6 +35,8 @@ export function CreateOpportunityForm({
   const [selectedAgencyId, setAgencyId] = useState<string>(defaultAgencyId);
   const [opportunityNumber, setOppNbr] = useState<string>("");
   const [opportunityTitle, setOppTitle] = useState<string>("");
+  const [tagline, setTagline] = useState<string>("");
+  const [purposeStatement, setPurposeStatement] = useState<string>("");
   const [selectedCategoryId, setCategory] = useState<string>("");
   const [categoryExplanation, setExplain] = useState<string>("");
   const [assistanceListingNumber, setAssistanceListingNumber] =
@@ -87,6 +89,8 @@ export function CreateOpportunityForm({
       const allReqFieldsFilled =
         opportunityNumber.trim() !== "" &&
         opportunityTitle.trim() !== "" &&
+        tagline.trim() !== "" &&
+        purposeStatement.trim() !== "" &&
         assistanceListingNumber.trim() !== "" &&
         selectedAgencyId.trim() !== "" &&
         ((selectedCategoryId.trim() !== "" &&
@@ -98,6 +102,8 @@ export function CreateOpportunityForm({
     [
       opportunityNumber,
       opportunityTitle,
+      tagline,
+      purposeStatement,
       selectedAgencyId,
       selectedCategoryId,
       categoryExplanation,
@@ -111,6 +117,12 @@ export function CreateOpportunityForm({
   };
   const onOppTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setOppTitle(e.target.value);
+  };
+  const onTaglineChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTagline(e.target.value);
+  };
+  const onPurposeStatementChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPurposeStatement(e.target.value);
   };
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setAgencyId(e.target.value);
@@ -164,6 +176,30 @@ export function CreateOpportunityForm({
             isRequired={true}
             onTextChange={onOppTitleChange}
             defaultValue={response?.data?.opportunity_title || ""}
+          />
+
+          {/* Tagline */}
+          <CommonCharacterCount
+            isTextArea={true}
+            labelText={t("CreateOpportunityForm.tagLine")}
+            description={t("CreateOpportunityForm.tagLineDesc")}
+            fieldId="tagline"
+            fieldMaxLength={255}
+            isRequired={true}
+            onTextChange={onTaglineChange}
+            defaultValue={response?.data?.tagline || ""}
+          />
+
+          {/* Purpose Statement */}
+          <CommonCharacterCount
+            isTextArea={true}
+            labelText={t("CreateOpportunityForm.purposeStatement")}
+            description={t("CreateOpportunityForm.purposeStatementDesc")}
+            fieldId="purposeStatement"
+            fieldMaxLength={255}
+            isRequired={true}
+            onTextChange={onPurposeStatementChange}
+            defaultValue={response?.data?.purpose_statement || ""}
           />
 
           {/* Agency */}
