@@ -400,6 +400,7 @@ export interface UswdsWidgetProps<
     rootSchema?: RJSFSchema;
     rootFormData?: unknown;
     widgetSupport?: {
+      useVirusScanning: boolean;
       validationWarnings?:
         FormattedFormValidationWarning[] | FormValidationWarning[];
       deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
