@@ -1,5 +1,7 @@
+import copy
 from collections.abc import Sequence
 from enum import StrEnum
+from typing import Any
 
 from grants_shared.adapters import db
 from grants_shared.util.datetime_util import get_now_us_eastern_datetime
@@ -8,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.adapters import search
+from src.adapters.search.opensearch_client import DEFAULT_INDEX_ANALYSIS
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
@@ -16,6 +19,44 @@ from src.task.task import Task, logger
 from src.util.env_config import PydanticBaseEnvConfig
 
 SCHEMA = AgencyV1Schema()
+
+# The default analyzer stems every token ("housing" becomes "hous"), which means a
+# partially typed word won't always be a prefix of the token that got indexed. Agency
+# names are additionally indexed unstemmed so that search-as-you-type keeps matching
+# no matter how much of a word the user has typed so far.
+AGENCY_INDEX_ANALYSIS: dict[str, Any] = copy.deepcopy(DEFAULT_INDEX_ANALYSIS)
+AGENCY_INDEX_ANALYSIS["analyzer"]["unstemmed"] = {
+    "type": "custom",
+    "filter": ["lowercase"],
+    "tokenizer": "standard",
+}
+
+# Matches what dynamic mapping would produce for a string field, plus the unstemmed sub-field.
+# The keyword sub-field is what agency name sorting is applied to.
+#
+# Only the sub-fields name an analyzer. Mapping a field explicitly doesn't opt it out of the
+# index defaults, so `agency_name` itself is still analyzed by the `default` analyzer above
+# and remains stemmed ("Department of Housing" indexes as depart/of/hous), while
+# `agency_name.unstemmed` keeps the whole word.
+# See: https://docs.opensearch.org/latest/analyzers/index/#analyzers-for-fields
+AGENCY_NAME_MAPPING = {
+    "type": "text",
+    "fields": {
+        "keyword": {"type": "keyword", "ignore_above": 256},
+        "unstemmed": {"type": "text", "analyzer": "unstemmed"},
+    },
+}
+
+# We explicitly map `opportunity_statuses` as a `keyword` field so that it supports
+# exact match filtering, aggregations, and sorting
+# See: https://docs.opensearch.org/docs/latest/field-types/supported-field-types/keyword/
+AGENCY_INDEX_MAPPINGS = {
+    "properties": {
+        "opportunity_statuses": {"type": "keyword"},
+        "agency_name": AGENCY_NAME_MAPPING,
+        "top_level_agency": {"properties": {"agency_name": AGENCY_NAME_MAPPING}},
+    }
+}
 
 
 class LoadAgenciesToIndexConfig(PydanticBaseEnvConfig):
@@ -50,14 +91,12 @@ class LoadAgenciesToIndex(Task):
     def run_task(self) -> None:
         logger.info("Creating search index")
         # create the index
-        # Here, we explicitly map `opportunity_statuses` as a`keyword` field
-        # so that it supports exact match filtering, aggregations, and sorting
-        # See: https://docs.opensearch.org/docs/latest/field-types/supported-field-types/keyword/
         self.search_client.create_index(
             self.index_name,
             shard_count=self.config.shard_count,
             replica_count=self.config.replica_count,
-            mappings={"properties": {"opportunity_statuses": {"type": "keyword"}}},
+            analysis=AGENCY_INDEX_ANALYSIS,
+            mappings=AGENCY_INDEX_MAPPINGS,
         )
         # load the records
         agencies = self.fetch_agencies()

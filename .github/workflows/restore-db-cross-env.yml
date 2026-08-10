@@ -1,0 +1,386 @@
+name: Restore DB across accounts
+run-name: Seed ${{ inputs.target_environment }} DB from ${{ inputs.source_environment }}${{ inputs.dry_run && ' (dry run)' || '' }}
+
+# Seeds one environment's database from another environment's snapshot when the
+# two live in DIFFERENT AWS accounts — i.e. the separated infra-* environments.
+#
+# This is a NEW workflow rather than a change to restore-db-from-snapshot.yml,
+# which stays as-is until cutover. The two cover different topologies:
+#
+#   restore-db-from-snapshot.yml  (existing, unchanged)
+#     api-staging -> grantee1 / grantee2 / grantor1
+#     All in account 315341936575. Same account, so it authenticates ONCE and
+#     restores an automated snapshot directly.
+#
+#   restore-db-cross-env.yml      (this file)
+#     api-infra-staging (317380566348) -> api-infra-dev (061664787759)
+#     Different accounts, so an automated snapshot cannot be used at all and
+#     two sets of credentials are required.
+#
+# WHY CROSS-ACCOUNT NEEDS MORE THAN A SECOND CREDENTIALS STEP
+#
+#   1. Two sets of credentials — one for the source account, one for the target.
+#   2. A MANUAL snapshot. Automated snapshots ("rds:api-infra-staging-…") cannot
+#      be shared cross-account; AWS rejects it with
+#      InvalidDBClusterSnapshotStateFault. The automated snapshot is therefore
+#      copied to a manual one first.
+#   3. The copy shared with the target (rds:ModifyDBClusterSnapshotAttribute).
+#   4. A KMS key policy granting the target account kms:Decrypt / kms:CreateGrant.
+#      That is Terraform, not workflow: see snapshot_share_account_ids in
+#      infra/modules/database and snapshot_restore_targets in
+#      infra/api/database/main.tf. Sharing the snapshot alone is NOT enough —
+#      without key access the restore fails in the target account.
+#
+# Allowed directions are pinned by that Terraform config, not by this workflow:
+# a restore only works if the source cluster's key policy already names the
+# target account. Today that is infra-staging -> infra-dev.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: Environment to restore INTO (its cluster is REPLACED)
+        required: true
+        default: infra-dev
+        type: choice
+        options:
+          - infra-dev
+      source_environment:
+        description: Environment whose data is copied FROM
+        required: true
+        default: infra-staging
+        type: choice
+        options:
+          - infra-staging
+      snapshot_id:
+        description: "Source snapshot (leave blank for the source environment's latest automated snapshot)"
+        required: false
+        type: string
+        default: ""
+      dry_run:
+        description: "Dry run: resolve and report, make no changes"
+        required: false
+        type: boolean
+        default: true
+      confirm:
+        description: "Type the target environment name to confirm a real restore (ignored on dry runs)"
+        required: false
+        type: string
+        default: ""
+
+# Serialize on the target: two restores into the same cluster would race on both
+# RDS and the Terraform state lock.
+concurrency:
+  group: restore-db-${{ inputs.target_environment }}
+  cancel-in-progress: false
+
+jobs:
+  share-snapshot:
+    name: Copy and share source snapshot
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      shared_snapshot_arn: ${{ steps.share.outputs.shared_snapshot_arn }}
+      source_snapshot_id: ${{ steps.resolve.outputs.snapshot_id }}
+      manual_copy_id: ${{ steps.share.outputs.manual_copy_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate inputs
+        env:
+          TARGET_ENV: ${{ inputs.target_environment }}
+          SOURCE_ENV: ${{ inputs.source_environment }}
+          CONFIRM: ${{ inputs.confirm }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [[ "$TARGET_ENV" == "$SOURCE_ENV" ]]; then
+            echo "::error::Source and target are both '$TARGET_ENV'."
+            echo "::error::This workflow seeds one environment from a DIFFERENT one."
+            exit 1
+          fi
+
+          if [[ "$DRY_RUN" != "true" && "$CONFIRM" != "$TARGET_ENV" ]]; then
+            echo "::error::This REPLACES the '$TARGET_ENV' cluster and every row in it,"
+            echo "::error::overwriting it with data from '$SOURCE_ENV'."
+            echo "::error::Re-run with confirm='$TARGET_ENV', or set dry_run=true to preview."
+            exit 1
+          fi
+
+          echo "Seeding ${TARGET_ENV} from ${SOURCE_ENV} (dry_run=${DRY_RUN})."
+
+      # ---- SOURCE account ----
+      - name: Configure AWS credentials (source account)
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: api
+          environment: ${{ inputs.source_environment }}
+
+      - name: Resolve source snapshot
+        id: resolve
+        env:
+          SNAPSHOT_ID_INPUT: ${{ inputs.snapshot_id }}
+          SOURCE_ENV: ${{ inputs.source_environment }}
+        run: |
+          # Cluster naming: infra/api/app-config/env-config/database.tf
+          #   cluster_name = "${app_name}-${environment}"
+          SOURCE_CLUSTER_ID="api-${SOURCE_ENV}"
+
+          if [[ -n "$SNAPSHOT_ID_INPUT" ]]; then
+            SNAPSHOT_ID="$SNAPSHOT_ID_INPUT"
+            if [[ ! "$SNAPSHOT_ID" =~ ^(rds:)?${SOURCE_CLUSTER_ID}- ]]; then
+              echo "::error::Snapshot must belong to the ${SOURCE_CLUSTER_ID} cluster."
+              echo "::error::Provided: ${SNAPSHOT_ID}"
+              exit 1
+            fi
+          else
+            echo "Finding latest automated snapshot for ${SOURCE_CLUSTER_ID}..."
+            SNAPSHOT_ID=$(aws rds describe-db-cluster-snapshots \
+              --db-cluster-identifier "${SOURCE_CLUSTER_ID}" \
+              --snapshot-type automated \
+              --query 'sort_by(DBClusterSnapshots, &SnapshotCreateTime)[-1].DBClusterSnapshotIdentifier' \
+              --output text)
+
+            if [[ -z "$SNAPSHOT_ID" || "$SNAPSHOT_ID" == "None" ]]; then
+              echo "::error::No automated snapshots found for ${SOURCE_CLUSTER_ID}."
+              echo "::error::Confirm the cluster exists and automated backups are enabled,"
+              echo "::error::or pass an explicit snapshot_id."
+              exit 1
+            fi
+          fi
+
+          echo "snapshot_id=${SNAPSHOT_ID}" >> "$GITHUB_OUTPUT"
+          echo "Source snapshot: ${SNAPSHOT_ID}"
+
+      - name: Copy to a shareable manual snapshot and share it
+        id: share
+        if: ${{ !inputs.dry_run }}
+        env:
+          SOURCE_ENV: ${{ inputs.source_environment }}
+          TARGET_ENV: ${{ inputs.target_environment }}
+          SOURCE_SNAPSHOT_ID: ${{ steps.resolve.outputs.snapshot_id }}
+        run: |
+          set -euo pipefail
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          # Manual copies must not start with "rds:" (reserved for automated
+          # snapshots), so this is a fresh name rather than a derived one.
+          MANUAL_COPY_ID="api-${SOURCE_ENV}-to-${TARGET_ENV}-${TIMESTAMP}"
+
+          SOURCE_KMS_KEY_ID=$(aws rds describe-db-clusters \
+            --db-cluster-identifier "api-${SOURCE_ENV}" \
+            --query 'DBClusters[0].KmsKeyId' --output text)
+          if [[ -z "$SOURCE_KMS_KEY_ID" || "$SOURCE_KMS_KEY_ID" == "None" ]]; then
+            echo "::error::Could not read the KMS key for cluster api-${SOURCE_ENV}."
+            exit 1
+          fi
+          echo "Source cluster KMS key: ${SOURCE_KMS_KEY_ID}"
+
+          # Checked explicitly rather than relying on `set -e`: a failure inside
+          # command substitution during an assignment does NOT abort the script,
+          # so without this an unknown environment name would silently yield an
+          # empty account id and we would share with --values-to-add "".
+          TARGET_ACCOUNT_NAME=$(terraform -chdir=infra/api/app-config output -json account_names_by_environment \
+            | jq -r --arg env "${TARGET_ENV}" '.[$env]') || true
+          TARGET_ACCOUNT_ID=$(./bin/account-ids-by-name \
+            | jq -r --arg name "${TARGET_ACCOUNT_NAME}" '.[$name]') || true
+          if [[ ! "$TARGET_ACCOUNT_ID" =~ ^[0-9]{12}$ ]]; then
+            echo "::error::Could not resolve an AWS account id for environment '${TARGET_ENV}'."
+            echo "::error::account_name='${TARGET_ACCOUNT_NAME}' account_id='${TARGET_ACCOUNT_ID}'"
+            exit 1
+          fi
+          echo "Target account: ${TARGET_ACCOUNT_ID}"
+
+          echo "Copying ${SOURCE_SNAPSHOT_ID} -> ${MANUAL_COPY_ID}"
+          aws rds copy-db-cluster-snapshot \
+            --source-db-cluster-snapshot-identifier "${SOURCE_SNAPSHOT_ID}" \
+            --target-db-cluster-snapshot-identifier "${MANUAL_COPY_ID}" \
+            --kms-key-id "${SOURCE_KMS_KEY_ID}" \
+            --tags "Key=Purpose,Value=CrossEnvRestore" \
+                   "Key=SourceEnvironment,Value=${SOURCE_ENV}" \
+                   "Key=TargetEnvironment,Value=${TARGET_ENV}" \
+            > /dev/null
+
+          echo "Waiting for the copy to become available..."
+          aws rds wait db-cluster-snapshot-available \
+            --db-cluster-snapshot-identifier "${MANUAL_COPY_ID}"
+
+          echo "Sharing with ${TARGET_ACCOUNT_ID}"
+          aws rds modify-db-cluster-snapshot-attribute \
+            --db-cluster-snapshot-identifier "${MANUAL_COPY_ID}" \
+            --attribute-name restore \
+            --values-to-add "${TARGET_ACCOUNT_ID}" \
+            > /dev/null
+
+          SHARED_ARN=$(aws rds describe-db-cluster-snapshots \
+            --db-cluster-snapshot-identifier "${MANUAL_COPY_ID}" \
+            --query 'DBClusterSnapshots[0].DBClusterSnapshotArn' --output text)
+
+          echo "manual_copy_id=${MANUAL_COPY_ID}" >> "$GITHUB_OUTPUT"
+          echo "shared_snapshot_arn=${SHARED_ARN}" >> "$GITHUB_OUTPUT"
+          echo "Shared snapshot ARN: ${SHARED_ARN}"
+
+      - name: Summarize dry run
+        if: inputs.dry_run
+        env:
+          SOURCE_ENV: ${{ inputs.source_environment }}
+          TARGET_ENV: ${{ inputs.target_environment }}
+          SOURCE_SNAPSHOT_ID: ${{ steps.resolve.outputs.snapshot_id }}
+        run: |
+          {
+            echo "## Dry run — no changes made"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| **Source snapshot** | \`${SOURCE_SNAPSHOT_ID}\` (${SOURCE_ENV}) |"
+            echo "| **Would seed** | \`api-${TARGET_ENV}\` |"
+            echo ""
+            echo "A real run would copy that snapshot to a shareable manual one,"
+            echo "share it with the ${TARGET_ENV} account, then replace the"
+            echo "\`api-${TARGET_ENV}\` cluster from it."
+            echo ""
+            echo "Re-run with \`dry_run: false\` and \`confirm: ${TARGET_ENV}\` to apply."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  restore:
+    name: Restore into target
+    needs: [share-snapshot]
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-24.04
+    # Aurora restore + instance creation typically takes 30-60 minutes.
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      id-token: write
+    # Approval gate for the destructive half.
+    environment: ${{ inputs.target_environment }}
+    outputs:
+      backup_snapshot_id: ${{ steps.backup.outputs.backup_snapshot_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+      # ---- TARGET account ----
+      - name: Configure AWS credentials (target account)
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: api
+          environment: ${{ inputs.target_environment }}
+
+      - name: Back up the target before overwriting it
+        id: backup
+        env:
+          TARGET_ENV: ${{ inputs.target_environment }}
+          SOURCE_SNAPSHOT: ${{ needs.share-snapshot.outputs.shared_snapshot_arn }}
+        run: |
+          set -euo pipefail
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          BACKUP_SNAPSHOT_ID="api-${TARGET_ENV}-pre-restore-${TIMESTAMP}"
+
+          echo "Creating ${BACKUP_SNAPSHOT_ID}"
+          aws rds create-db-cluster-snapshot \
+            --db-cluster-identifier "api-${TARGET_ENV}" \
+            --db-cluster-snapshot-identifier "${BACKUP_SNAPSHOT_ID}" \
+            --tags "Key=Purpose,Value=PreRestoreBackup" \
+                   "Key=RestoredFrom,Value=${SOURCE_SNAPSHOT}" \
+            > /dev/null
+
+          aws rds wait db-cluster-snapshot-available \
+            --db-cluster-snapshot-identifier "${BACKUP_SNAPSHOT_ID}"
+
+          echo "backup_snapshot_id=${BACKUP_SNAPSHOT_ID}" >> "$GITHUB_OUTPUT"
+          echo "Backup ready: ${BACKUP_SNAPSHOT_ID}"
+
+      - name: Terraform init
+        run: |
+          terraform -chdir="infra/api/database" init \
+            -input=false \
+            -reconfigure \
+            -backend-config="${{ inputs.target_environment }}.s3.tfbackend"
+
+      # -replace forces recreation from the snapshot; snapshot_identifier is in
+      # the module's lifecycle.ignore_changes, so a plain apply is a no-op.
+      - name: Apply restore
+        run: |
+          terraform -chdir="infra/api/database" apply \
+            -auto-approve \
+            -var="environment_name=${{ inputs.target_environment }}" \
+            -var="database_snapshot_id=${{ needs.share-snapshot.outputs.shared_snapshot_arn }}" \
+            -replace="module.database.aws_rds_cluster.db"
+
+      # always() so the rollback pointer is recorded even when the apply failed
+      # partway — that is exactly when someone needs the backup id.
+      - name: Write job summary
+        if: ${{ always() && steps.backup.outcome == 'success' }}
+        env:
+          TARGET_ENV: ${{ inputs.target_environment }}
+          SOURCE_ENV: ${{ inputs.source_environment }}
+          SOURCE_SNAPSHOT: ${{ needs.share-snapshot.outputs.shared_snapshot_arn }}
+          BACKUP_SNAPSHOT_ID: ${{ steps.backup.outputs.backup_snapshot_id }}
+        run: |
+          {
+            echo "## Cross-account DB restore"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| **Target cluster** | \`api-${TARGET_ENV}\` |"
+            echo "| **Seeded from** | \`${SOURCE_SNAPSHOT}\` (${SOURCE_ENV}) |"
+            echo "| **Pre-restore backup** | \`${BACKUP_SNAPSHOT_ID}\` |"
+            echo ""
+            echo "### Rollback"
+            echo "\`api-${TARGET_ENV}\`'s previous contents are in"
+            echo "\`${BACKUP_SNAPSHOT_ID}\`, in this environment's own account."
+            echo "Restore it in place to undo — no cross-account sharing needed."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  cleanup:
+    name: Clean up shared snapshot copy
+    needs: [share-snapshot, restore]
+    # always() so the manual copy is not left behind (it is billed, and stays
+    # shared with the target account) when the restore fails.
+    if: ${{ always() && !inputs.dry_run && needs.share-snapshot.outputs.manual_copy_id != '' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (source account)
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: api
+          environment: ${{ inputs.source_environment }}
+
+      - name: Delete the manual snapshot copy
+        env:
+          MANUAL_COPY_ID: ${{ needs.share-snapshot.outputs.manual_copy_id }}
+        run: |
+          echo "Deleting ${MANUAL_COPY_ID}"
+          # Best-effort: a failure here leaks a snapshot but must not fail the
+          # run, since the restore itself may have succeeded.
+          aws rds delete-db-cluster-snapshot \
+            --db-cluster-snapshot-identifier "${MANUAL_COPY_ID}" > /dev/null \
+            && echo "Deleted." \
+            || echo "::warning::Could not delete ${MANUAL_COPY_ID}; remove it manually."
+
+  run-migrations:
+    name: Run DB migrations
+    needs: [restore]
+    # The seeded cluster carries the SOURCE environment's schema, which may
+    # predate the target's migrations.
+    if: ${{ !inputs.dry_run && success() }}
+    uses: ./.github/workflows/database-migrations.yml
+    with:
+      app_name: api
+      environment: ${{ inputs.target_environment }}
+      version: ${{ github.sha }}
+
+  send-slack-notification:
+    if: failure()
+    needs: [share-snapshot, restore, run-migrations]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit

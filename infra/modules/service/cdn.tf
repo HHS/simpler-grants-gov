@@ -8,6 +8,7 @@ locals {
 
   # The domain name of the CDN, ie. URL people use in order to access the CDN.
   # Null outputs here result in the CDN content being served from the CDN's default domain name.
+  #   - If var.enable_cdn_alias is false, then return null, whatever the origin is
   #   - If the origin is an ALB, and the ALB's domain name is not null,
   #     then use the domain name of the ALB
   #   - If the origin is an ALB, and the ALB's domain name is null,
@@ -16,9 +17,9 @@ locals {
   #     then use the domain name of the S3 bucket
   #   - If the origin is an S3 bucket, and the S3 bucket's desired domain name is null,
   #     then return null
-  cdn_domain_name         = var.enable_alb_cdn && var.domain_name != null ? var.domain_name : var.enable_s3_cdn && var.s3_cdn_domain_name != null ? var.s3_cdn_domain_name : null
+  cdn_domain_name         = !var.enable_cdn_alias ? null : var.enable_alb_cdn && var.domain_name != null ? var.domain_name : var.enable_s3_cdn && var.s3_cdn_domain_name != null ? var.s3_cdn_domain_name : null
   cdn_domain_name_env_var = local.cdn_domain_name != null ? local.cdn_domain_name : length(aws_cloudfront_distribution.cdn) != 0 ? aws_cloudfront_distribution.cdn[0].domain_name : null
-  cdn_certificate_arn     = var.enable_s3_cdn ? var.s3_cdn_certificate_arn : var.enable_alb_cdn ? var.certificate_arn : null
+  cdn_certificate_arn     = !var.enable_cdn_alias ? null : var.enable_s3_cdn ? var.s3_cdn_certificate_arn : var.enable_alb_cdn ? var.certificate_arn : null
 
   # The domain name of the origin, ie. where the content is being served from.
   #   - If the origin is an ALB, this is the DNS name of the ALB
