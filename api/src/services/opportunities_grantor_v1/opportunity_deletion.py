@@ -39,7 +39,6 @@ def delete_opportunity(
 
     # Soft delete the opportunity
     opportunity.is_deleted = True
-    db_session.commit()
 
     logger.info(
         "Deleted opportunity",
