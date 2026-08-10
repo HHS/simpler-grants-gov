@@ -28,7 +28,7 @@ import {
 export type OpportunityFieldValueKey =
   | "opportunityNumber"
   | "opportunityTitle"
-  | "tagLine"
+  | "tagline"
   | "purposeStatement"
   | "grantSelectionMethod"
   | "assistanceListingNumber"
@@ -107,7 +107,7 @@ export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinitio
     {
       label: "Tagline",
       type: "textarea",
-      valueKey: "tagLine",
+      valueKey: "tagline",
       required: true,
       maxLength: 255,
       characterLimitValidationMessage: "1 character over limit",

@@ -183,8 +183,8 @@ export function CreateOpportunityForm({
           {/* Tagline */}
           <CommonCharacterCount
             isTextArea={true}
-            labelText={t("CreateOpportunityForm.tagLine")}
-            description={t("CreateOpportunityForm.tagLineDesc")}
+            labelText={t("CreateOpportunityForm.tagline")}
+            description={t("CreateOpportunityForm.taglineDesc")}
             fieldId="tagline"
             fieldMaxLength={255}
             isRequired={true}

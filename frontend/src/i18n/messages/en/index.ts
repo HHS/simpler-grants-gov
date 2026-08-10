@@ -2559,8 +2559,8 @@ export const messages = {
       opportunityTitle: "Opportunity title",
       opportunityTitleDesc:
         "Provide a concise, descriptive name that helps applicants identify the grant's purpose.",
-      tagLine: "Tagline",
-      tagLineDesc:
+      tagline: "Tagline",
+      taglineDesc:
         "A specific one-sentence purpose statement that summarizes the highest-level goal.",
       purposeStatement: "Purpose statement",
       purposeStatementDesc:
