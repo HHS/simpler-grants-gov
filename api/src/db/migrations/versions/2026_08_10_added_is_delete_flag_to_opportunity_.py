@@ -1,7 +1,7 @@
 """Added is_delete flag to Opportunity table
 
 Revision ID: 65431e8d567a
-Revises: 15bfdec59153
+Revises: 956a32b92993
 Create Date: 2026-08-10 14:55:03.468115
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "65431e8d567a"
-down_revision = "15bfdec59153"
+down_revision = "956a32b92993"
 branch_labels = None
 depends_on = None
 
