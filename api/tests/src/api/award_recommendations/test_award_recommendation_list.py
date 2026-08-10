@@ -40,8 +40,6 @@ def award_recommendation(opportunity):
         opportunity=opportunity,
         award_recommendation_status=AwardRecommendationStatus.DRAFT,
         is_deleted=False,
-        review_workflow=None,
-        review_workflow_id=None,
     )
 
 
@@ -82,28 +80,20 @@ class TestListAwardRecommendations200:
         ar1 = AwardRecommendationFactory.create(
             opportunity=opportunity,
             created_at=t1,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         ar2 = AwardRecommendationFactory.create(
             opportunity=opportunity,
             created_at=t2,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         ar3 = AwardRecommendationFactory.create(
             opportunity=opportunity,
             created_at=t3,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         # Deleted award recs should be excluded
         AwardRecommendationFactory.create(
             opportunity=opportunity,
             created_at=datetime.datetime(2026, 1, 4, tzinfo=datetime.UTC),
             is_deleted=True,
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         resp = client.post(
@@ -150,14 +140,10 @@ class TestListAwardRecommendations200:
         ar1 = AwardRecommendationFactory.create(
             opportunity=opportunity,
             created_at=t1,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         ar2 = AwardRecommendationFactory.create(
             opportunity=opportunity,
             created_at=t2,
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         resp = client.post(
@@ -180,8 +166,6 @@ class TestListAwardRecommendations200:
         other_opportunity = OpportunityFactory.create(agency_code=other_agency.agency_code)
         other_ar = AwardRecommendationFactory.create(
             opportunity=other_opportunity,
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         user, _, token = create_user_in_agency_with_jwt(
@@ -213,8 +197,6 @@ class TestListAwardRecommendations200:
         other_opportunity = OpportunityFactory.create(agency_code=other_agency.agency_code)
         AwardRecommendationFactory.create(
             opportunity=other_opportunity,
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         user, _, token = create_user_in_agency_with_jwt(
@@ -258,13 +240,9 @@ class TestListAwardRecommendations200:
 
         ar_with_submissions = AwardRecommendationFactory.create(
             opportunity=opportunity,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         ar_without_submissions = AwardRecommendationFactory.create(
             opportunity=opportunity,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         AwardRecommendationApplicationSubmissionFactory.create(
             award_recommendation=ar_with_submissions
@@ -299,20 +277,14 @@ class TestListAwardRecommendations200:
         ar1 = AwardRecommendationFactory.create(
             opportunity=opportunity,
             award_recommendation_number="AR-AAA",
-            review_workflow=None,
-            review_workflow_id=None,
         )
         ar2 = AwardRecommendationFactory.create(
             opportunity=opportunity,
             award_recommendation_number="AR-ZZZ",
-            review_workflow=None,
-            review_workflow_id=None,
         )
         ar3 = AwardRecommendationFactory.create(
             opportunity=opportunity,
             award_recommendation_number="AR-MMM",
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         resp = client.post(
@@ -353,15 +325,9 @@ class TestListAwardRecommendations200:
             agency_code=agency.agency_code, opportunity_title="Bravo Opportunity"
         )
 
-        ar1 = AwardRecommendationFactory.create(
-            opportunity=opp1, review_workflow=None, review_workflow_id=None
-        )
-        ar2 = AwardRecommendationFactory.create(
-            opportunity=opp2, review_workflow=None, review_workflow_id=None
-        )
-        ar3 = AwardRecommendationFactory.create(
-            opportunity=opp3, review_workflow=None, review_workflow_id=None
-        )
+        ar1 = AwardRecommendationFactory.create(opportunity=opp1)
+        ar2 = AwardRecommendationFactory.create(opportunity=opp2)
+        ar3 = AwardRecommendationFactory.create(opportunity=opp3)
 
         resp = client.post(
             API_URL,
@@ -391,15 +357,9 @@ class TestListAwardRecommendations200:
             db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
         )
 
-        ar1 = AwardRecommendationFactory.create(
-            opportunity=opportunity, review_workflow=None, review_workflow_id=None
-        )
-        ar2 = AwardRecommendationFactory.create(
-            opportunity=opportunity, review_workflow=None, review_workflow_id=None
-        )
-        ar3 = AwardRecommendationFactory.create(
-            opportunity=opportunity, review_workflow=None, review_workflow_id=None
-        )
+        ar1 = AwardRecommendationFactory.create(opportunity=opportunity)
+        ar2 = AwardRecommendationFactory.create(opportunity=opportunity)
+        ar3 = AwardRecommendationFactory.create(opportunity=opportunity)
 
         # ar1 has 5 submissions
         for _ in range(5):
@@ -444,20 +404,14 @@ class TestListAwardRecommendations200:
         AwardRecommendationFactory.create(
             opportunity=opportunity,
             award_recommendation_status=AwardRecommendationStatus.APPROVED,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         AwardRecommendationFactory.create(
             opportunity=opportunity,
             award_recommendation_status=AwardRecommendationStatus.DRAFT,
-            review_workflow=None,
-            review_workflow_id=None,
         )
         AwardRecommendationFactory.create(
             opportunity=opportunity,
             award_recommendation_status=AwardRecommendationStatus.IN_REVIEW,
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         resp = client.post(
@@ -496,15 +450,9 @@ class TestListAwardRecommendations200:
             agency_code=agency.agency_code, opportunity_number="OPP-500"
         )
 
-        ar1 = AwardRecommendationFactory.create(
-            opportunity=opp1, review_workflow=None, review_workflow_id=None
-        )
-        ar2 = AwardRecommendationFactory.create(
-            opportunity=opp2, review_workflow=None, review_workflow_id=None
-        )
-        ar3 = AwardRecommendationFactory.create(
-            opportunity=opp3, review_workflow=None, review_workflow_id=None
-        )
+        ar1 = AwardRecommendationFactory.create(opportunity=opp1)
+        ar2 = AwardRecommendationFactory.create(opportunity=opp2)
+        ar3 = AwardRecommendationFactory.create(opportunity=opp3)
 
         resp = client.post(
             API_URL,
@@ -537,15 +485,9 @@ class TestListAwardRecommendations200:
             db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
         )
 
-        ar1 = AwardRecommendationFactory.create(
-            opportunity=opportunity, review_workflow=None, review_workflow_id=None
-        )
-        ar2 = AwardRecommendationFactory.create(
-            opportunity=opportunity, review_workflow=None, review_workflow_id=None
-        )
-        ar3 = AwardRecommendationFactory.create(
-            opportunity=opportunity, review_workflow=None, review_workflow_id=None
-        )
+        ar1 = AwardRecommendationFactory.create(opportunity=opportunity)
+        ar2 = AwardRecommendationFactory.create(opportunity=opportunity)
+        ar3 = AwardRecommendationFactory.create(opportunity=opportunity)
 
         # ar1 has 0 submissions
         # ar2 has 2 submissions

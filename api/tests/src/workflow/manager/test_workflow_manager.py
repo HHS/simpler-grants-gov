@@ -155,7 +155,6 @@ def test_workflow_sqs_messages_process_batch_success(workflow_sqs_queue, app):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     process_workflow_context = ProcessWorkflowEventContext(
@@ -226,7 +225,6 @@ def test_workflow_sqs_messages_process_batch_retryable(workflow_sqs_queue, app):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state="not-a-valid-state",
-        has_opportunity=True,
     )
 
     process_workflow_context = ProcessWorkflowEventContext(
@@ -292,7 +290,6 @@ def test_workflow_sqs_messages_process_batch_mix_cases(workflow_sqs_queue, app, 
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     process_workflow_context = ProcessWorkflowEventContext(
@@ -319,7 +316,6 @@ def test_workflow_sqs_messages_process_batch_mix_cases(workflow_sqs_queue, app, 
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state="not-a-valid-state",
-        has_opportunity=True,
     )
 
     process_workflow_context = ProcessWorkflowEventContext(
@@ -347,7 +343,6 @@ def test_workflow_sqs_messages_process_batch_mix_cases(workflow_sqs_queue, app, 
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     process_workflow_context = ProcessWorkflowEventContext(
@@ -393,7 +388,6 @@ def test_process_sqs_event_success(app, db_session):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -431,7 +425,6 @@ def test_process_sqs_event_retryable_error(app):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state="not-a-valid-state",
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -457,7 +450,6 @@ def test_process_sqs_event_non_retryable_error(app, db_session):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -498,7 +490,6 @@ def test_process_sqs_event_general_error(mock_event_handler_preprocess, app):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(

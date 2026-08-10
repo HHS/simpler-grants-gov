@@ -44,8 +44,6 @@ def award_recommendation(opportunity):
         additional_info="Some additional info",
         other_key_information="Some key info",
         is_deleted=False,
-        review_workflow=None,
-        review_workflow_id=None,
     )
 
 
@@ -235,8 +233,6 @@ class TestUpdateAwardRecommendation404:
         ar = AwardRecommendationFactory.create(
             opportunity=opportunity,
             is_deleted=True,
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         user, _, token = create_user_in_agency_with_jwt(

@@ -113,6 +113,10 @@ export interface ApplicationAttachmentUploadResponse extends APIResponse {
   };
 }
 
+export interface ApplicationAttachmentCreateResponse extends APIResponse {
+  data: Attachment;
+}
+
 export interface ApplicationStartApiResponse extends APIResponse {
   data: {
     application_id: string;

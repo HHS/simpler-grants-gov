@@ -542,6 +542,13 @@ export const messages = {
       uploadBy: "Upload by",
       uploadDate: "Upload date",
     },
+    attachmentUpload: {
+      error:
+        "Processing failed due to a system error. Try uploading your file again.",
+      success:
+        "Success: File scan complete. “Save” this form to attach the file.",
+      uploading: "Uploading...",
+    },
     historyTable: {
       applicationHistory: "Application History",
       timestamp: "Timestamp",
@@ -2222,6 +2229,7 @@ export const messages = {
         recommendedWithoutFunding: "Recommended but not funded",
         notRecommended: "Not recommended",
       },
+      selectOnePlaceholder: "Select one",
       hasExceptionLabel: "Contains exceptions to selection method",
       commentsLabel: "Recommendation comments",
       commentsDescription:
@@ -2236,6 +2244,10 @@ export const messages = {
       amountRequestedLabel: "Amount Requested",
       amountRecommendedLabel: "Amount Recommended",
       totalLabel: "Total",
+      validationErrorHeading: "There is a problem with your recommendation",
+      recommendationRequired: "Select your recommendation",
+      exceptionDetailRequired: "Enter a reason for this exception",
+      amountRecommendedRequired: "Enter an amount recommended",
     },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",

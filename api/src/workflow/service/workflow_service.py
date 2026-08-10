@@ -78,7 +78,7 @@ def get_workflow_entity(
         return {"award_recommendation": award_recommendation}
 
     else:  # Any unconfigured entity types will result in an error
-        logger.warning("Entity type is not supported for workflow", extra=log_extra)  # type: ignore[unreachable]
+        logger.warning("Entity type is not supported for workflow", extra=log_extra)
         raise ImplementationMissingError("Entity type is not supported for workflow")
 
 

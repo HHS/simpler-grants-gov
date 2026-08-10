@@ -87,7 +87,7 @@ The component supports both single and multi file uploads based on the `multiFil
 
 If an upload on a single file input errors out, a new file can be uploaded once the error is dismissed
 
-Multi-file uploads will accept any number of files either concurrently or in sequence.
+Multi-file uploads will accept any number of files either concurrently or in sequence. Note that all API calls made during a multi file upload are made per file - no batch API calls will be made at any part of the process.
 
 ## Dev usage
 
@@ -136,6 +136,8 @@ On a technical level, once the file upload and virus scan have completed success
 The upload process will not be considered complete until this function resolves, and will display the message provided in the postSaveActionProgressMessage prop while the request is in progress. If the function errors, the postSaveActionErrorMessage will be displayed to the user.
 
 Note that postUploadAction is a required prop, since without a post upload action, the file upload itself will only create the file in s3 and record it in a temporary file table, and not create an idea of what the file represents in the system. Thus, there is no reasonable use case for file upload that will not involve a post upload action to provide context for where the file should be referenced.
+
+For handling multi-file uploads, the post upload action will be called independently for each file - there is no need to support batch processes in the post upload action.
 
 ### Display of existing / previously uploaded files
 
