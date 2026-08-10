@@ -106,5 +106,9 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/X-API-KEY"
     },
+    AUTH_LOGOUT_URL = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/auth-logout-url"
+    },
   }
 }

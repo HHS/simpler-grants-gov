@@ -1,37 +1,34 @@
 import { render } from "@testing-library/react";
-import LoginPage from "src/app/[locale]/(base)/login/page";
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
-import * as React from "react";
+import { PostAuthRedirect } from "./PostAuthRedirect";
 
 const mockPush = jest.fn();
-
-jest.mock("react", () => {
-  const actualModule = jest.requireActual<typeof React>("react");
-  return {
-    ...actualModule,
-  };
-});
+const mockUseSearchParams = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
   }),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => mockUseSearchParams() as unknown,
 }));
 
 const mockGetItem = jest.spyOn(SessionStorage, "getItem");
+const mockSetItem = jest.spyOn(SessionStorage, "setItem");
 const mockRemoveItem = jest.spyOn(SessionStorage, "removeItem");
 
-describe("Login Page", () => {
+describe("PostAuthRedirect", () => {
   beforeEach(() => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+  });
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
   it("should redirect to stored URL from session storage", () => {
     mockGetItem.mockReturnValue("/test-redirect-path");
 
-    render(<LoginPage />);
+    render(<PostAuthRedirect errorMessage="oops" />);
 
     expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
@@ -42,7 +39,7 @@ describe("Login Page", () => {
   it("should redirect to home if no redirect URL is stored", () => {
     mockGetItem.mockReturnValue(null);
 
-    render(<LoginPage />);
+    render(<PostAuthRedirect errorMessage="oops" />);
 
     expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
@@ -53,7 +50,7 @@ describe("Login Page", () => {
   it("should redirect to home if redirect URL is empty", () => {
     mockGetItem.mockReturnValue("");
 
-    render(<LoginPage />);
+    render(<PostAuthRedirect errorMessage="oops" />);
 
     expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
@@ -64,7 +61,7 @@ describe("Login Page", () => {
   it("should redirect to home if redirect URL doesn't start with /", () => {
     mockGetItem.mockReturnValue("https://malicious-site.com");
 
-    render(<LoginPage />);
+    render(<PostAuthRedirect errorMessage="oops" />);
 
     expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("post-auth-redirect");
@@ -75,9 +72,36 @@ describe("Login Page", () => {
   it("should display 'Redirecting...' text", () => {
     mockGetItem.mockReturnValue("/some-path");
 
-    const { container } = render(<LoginPage />);
+    const { container } = render(<PostAuthRedirect errorMessage="oops" />);
 
     expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
     expect(container).toHaveTextContent("Redirecting...");
+  });
+
+  it("should display custom display text if supplied", () => {
+    mockGetItem.mockReturnValue("/some-path");
+
+    const { container } = render(
+      <PostAuthRedirect errorMessage="oops" displayMessage="custom..." />,
+    );
+
+    expect(mockGetItem).toHaveBeenCalledWith("post-auth-redirect");
+    expect(container).toHaveTextContent("custom...");
+  });
+
+  it("should set pivError if specified and param received", () => {
+    mockGetItem.mockReturnValue("/some-path");
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams({ pivError: "true" }),
+    );
+    render(
+      <PostAuthRedirect
+        errorMessage="oops"
+        displayMessage="custom..."
+        checkPiv={true}
+      />,
+    );
+
+    expect(mockSetItem).toHaveBeenCalledWith("showPivError", "true");
   });
 });

@@ -1,65 +1,39 @@
-// import { render, screen, waitFor } from "@testing-library/react";
-// import userEvent from "@testing-library/user-event";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
-// import { SignOutNavLink } from "./SignOutNavLink";
+import { SignOutNavLink } from "./SignOutNavLink";
 
-const mockPush = jest.fn();
-const mockRefresh = jest.fn();
-const mockLogoutLocalUser = jest.fn();
-const mockUseUser = jest.fn(() => ({
-  user: {
-    token: "faketoken",
-  },
-  hasBeenLoggedOut: false,
-  resetHasBeenLoggedOut: jest.fn(),
-  logoutLocalUser: mockLogoutLocalUser,
+const mockStoreCurrentPage = jest.fn();
+
+jest.mock("src/utils/userUtils", () => ({
+  storeCurrentPage: () => mockStoreCurrentPage() as unknown,
 }));
 
-jest.mock("src/hooks/useFeatureFlags", () => ({
-  useFeatureFlags: () => ({
-    checkFeatureFlag: () => true,
-  }),
-}));
+describe("SignOutNavLink", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn(() => Promise.resolve({})) as jest.Mock;
+  });
 
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: (url: unknown): unknown => mockPush(url),
-    refresh: mockRefresh,
-  }),
-}));
+  it("renders Sign out text", () => {
+    const onClick = jest.fn();
+    render(<SignOutNavLink closeDropdownAndMobileNav={onClick} />);
 
-jest.mock("src/services/auth/useUser", () => ({
-  useUser: () => mockUseUser(),
-}));
+    expect(screen.getByText("logout")).toBeInTheDocument();
+  });
 
-// describe("SignOutNavLink", () => {
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//     global.fetch = jest.fn(() => Promise.resolve({})) as jest.Mock;
-//   });
+  it("calls closeDropdownAndMobileNav when clicked after logout", async () => {
+    const onClick = jest.fn();
+    const user = userEvent.setup();
+    render(<SignOutNavLink closeDropdownAndMobileNav={onClick} />);
 
-//   it("renders Sign out text", () => {
-//     const onClick = jest.fn();
-//     render(<SignOutNavLink onClick={onClick} />);
+    const signOutLabel = screen.getByText("logout");
+    await user.click(signOutLabel);
 
-//     expect(screen.getByText("logout")).toBeInTheDocument();
-//   });
-
-//   it("calls onClick when clicked after logout", async () => {
-//     const onClick = jest.fn();
-//     const user = userEvent.setup();
-//     render(<SignOutNavLink onClick={onClick} />);
-
-//     const signOutLabel = screen.getByText("logout");
-//     await user.click(signOutLabel);
-
-//     await waitFor(() => {
-//       expect(global.fetch).toHaveBeenCalledWith("/api/auth/logout", {
-//         method: "POST",
-//       });
-//       expect(mockLogoutLocalUser).toHaveBeenCalled();
-//       expect(mockRefresh).toHaveBeenCalled();
-//       expect(onClick).toHaveBeenCalled();
-//     });
-//   });
-// });
+    await waitFor(() => {
+      // gotta figure out how to mock location, may not be possible
+      expect(mockStoreCurrentPage).toHaveBeenCalled();
+      expect(onClick).toHaveBeenCalled();
+    });
+  });
+});
