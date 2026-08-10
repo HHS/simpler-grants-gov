@@ -348,6 +348,11 @@ export type UiSchema = UiSchemaNode[];
 export type TextTypes =
   "text" | "email" | "number" | "password" | "search" | "tel" | "url";
 
+export type AttachmentsUploadingCounter = {
+  incrementAttachmentsProcessing: () => void;
+  decrementAttachmentsProcessing: () => void;
+};
+
 // extends the WidgetProps type from rjsf for USWDS and this project implementation
 // see https://github.com/rjsf-team/react-jsonschema-form/blob/7395afcdee6aaea128d943dd17e126c4ed301e58/packages/utils/src/types.ts#L898
 export interface UswdsWidgetProps<
@@ -409,7 +414,7 @@ export interface UswdsWidgetProps<
         deletedEntryIndex: number,
       ) => void;
       markFormDirty?: () => void;
-      attachmentsUploadingCounter?: Record<string, () => void>;
+      attachmentsUploadingCounter?: AttachmentsUploadingCounter;
     };
   };
 }

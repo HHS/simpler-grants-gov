@@ -5,6 +5,7 @@ import { isEmpty } from "lodash";
 import { handleFormAction } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/actions";
 import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 import {
+  AttachmentsUploadingCounter,
   FormattedFormValidationWarning,
   FormValidationWarning,
   UiSchema,
@@ -47,7 +48,7 @@ interface WidgetSupport {
   ) => void;
   markFormDirty?: () => void;
   useVirusScanning: boolean;
-  attachmentsUploadingCounter?: Record<string, () => void>;
+  attachmentsUploadingCounter?: AttachmentsUploadingCounter;
 }
 
 interface ApplyFormFormContext {
@@ -181,7 +182,7 @@ const ApplyForm = ({
     }, validationWarnings);
   }, [validationWarnings, deletedEntryIndexesByFieldListPath]);
 
-  const attachmentsUploadingCounter: Record<string, () => void> = useMemo(
+  const attachmentsUploadingCounter: AttachmentsUploadingCounter = useMemo(
     () => ({
       incrementAttachmentsProcessing: () =>
         setAttachmentsUploading((prevState) => prevState + 1),

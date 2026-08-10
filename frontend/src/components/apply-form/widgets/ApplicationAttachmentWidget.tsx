@@ -94,12 +94,12 @@ const ApplicationAttachmentWidget = ({
   };
 
   const handleStartAttachmentUpload = () => {
-    attachmentsUploadingCounter?.incrementAttachmentsProcessing();
     markFormDirty?.();
+    attachmentsUploadingCounter?.incrementAttachmentsProcessing();
   };
 
-  const handleOnUploadComplete = () => {
-    attachmentsUploadingCounter?.decrementAttachmentsProcessing?.();
+  const handleUploadComplete = () => {
+    attachmentsUploadingCounter?.decrementAttachmentsProcessing();
   };
 
   const visibleInputId = `${id}-visible`;
@@ -141,7 +141,7 @@ const ApplicationAttachmentWidget = ({
         postUploadActionProgressMessage={t("uploading")}
         postUploadActionSuccessMessage={t("success")}
         postUploadActionErrorMessage={t("error")}
-        onComplete={handleOnUploadComplete}
+        onComplete={handleUploadComplete}
         onStart={handleStartAttachmentUpload}
         onDelete={handleDeleteAttachment}
         disabled={disabled}

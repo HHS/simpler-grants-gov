@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import React, { forwardRef } from "react";
 import { Button, ButtonGroup } from "@trussworks/react-uswds";
 
-import { DynamicTooltipWrapper } from "src/components/core/tooltip/TooltipWrapper";
+import { TooltipWrapper } from "src/components/core/tooltip/TooltipWrapper";
 
 // tooltip trigger that wraps the save button so the tooltip can act on disabled button
 const SaveButtonTooltipTrigger = forwardRef<
@@ -15,6 +15,8 @@ const SaveButtonTooltipTrigger = forwardRef<
 >((props, ref) => <span {...props} ref={ref} />);
 
 SaveButtonTooltipTrigger.displayName = "SaveButtonTooltipTrigger";
+
+const SAVE_DISABLED_MESSAGE_ID = "apply-form-save-disabled-message";
 
 type ApplyFormActionButtonsProps = {
   applicationId: string;
@@ -42,6 +44,8 @@ const ApplyFormActionButtons = ({
     router.push(`/workspace/applications/${applicationId}`);
   };
 
+  // aria-disabled rather than disabled keeps the button focusable, so keyboard
+  // users can reach it and trigger the explanatory tooltip.
   const saveButton = (
     <Button
       data-testid="apply-form-save"
@@ -49,10 +53,17 @@ const ApplyFormActionButtons = ({
       name="apply-form-button"
       className="margin-top-05 flex-1"
       value="save"
-      onClick={onSaveClick}
-      disabled={disableSaveButton}
-      // a disabled button swallows mouse events, so let them pass through tothe tooltip trigger wrapping the button
-      style={disableSaveButton ? { pointerEvents: "none" } : undefined}
+      aria-disabled={disableSaveButton}
+      aria-describedby={
+        disableSaveButton ? SAVE_DISABLED_MESSAGE_ID : undefined
+      }
+      onClick={(e) => {
+        if (disableSaveButton) {
+          e.preventDefault();
+          return;
+        }
+        onSaveClick();
+      }}
     >
       {pending ? savingText : savingAndRefreshingText}
     </Button>
@@ -64,14 +75,21 @@ const ApplyFormActionButtons = ({
       style={{ gap: "24px" }}
     >
       {disableSaveButton ? (
-        <DynamicTooltipWrapper
-          label={saveDisabledTooltipText}
-          position="top"
-          asCustom={SaveButtonTooltipTrigger}
-          wrapperclasses="simpler-tooltip"
-        >
-          {saveButton}
-        </DynamicTooltipWrapper>
+        <>
+          <TooltipWrapper
+            label={saveDisabledTooltipText}
+            position="top"
+            asCustom={SaveButtonTooltipTrigger}
+            wrapperclasses="simpler-tooltip"
+          >
+            {saveButton}
+          </TooltipWrapper>
+          {/* the tooltip body is aria-hidden until hovered, so give screen
+              readers a stable description of why saving is unavailable */}
+          <span id={SAVE_DISABLED_MESSAGE_ID} className="usa-sr-only">
+            {saveDisabledTooltipText}
+          </span>
+        </>
       ) : (
         saveButton
       )}
