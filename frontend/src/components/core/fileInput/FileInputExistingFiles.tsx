@@ -10,10 +10,12 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 export const FileInputExistingFiles = ({
   existingFiles,
   onDelete,
+  disabled = false,
   filesWithDeleteError = [] as string[],
 }: {
   existingFiles?: UploadFileMetadata[];
   onDelete: (fileToDelete: UploadFileMetadata) => void;
+  disabled?: boolean;
   filesWithDeleteError?: string[];
 }) => {
   const t = useTranslations("FileInput.existingFiles");
@@ -51,6 +53,7 @@ export const FileInputExistingFiles = ({
             <Button
               type="button"
               unstyled
+              disabled={disabled}
               onClick={() => {
                 void onDelete(existingFile);
               }}

@@ -4,7 +4,6 @@
  */
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
@@ -26,8 +25,8 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
+  validateAllPrintViews,
   validateAttachmentPrintViewSection,
-  validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
   submitApplicationAndVerify,
@@ -126,25 +125,12 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one page per form) ---
-      for (const {
-        testData,
-        printUrl,
-        userEnteredFieldTestIds,
-        formName,
-      } of filledForms) {
-        await navigateToPrintView(page, printUrl);
+      await validateAllPrintViews(page, filledForms);
 
-        await expect(page.locator("h1")).toContainText(formName);
-
-        for (const [dataKey, testId] of Object.entries(
-          userEnteredFieldTestIds,
-        )) {
-          if (testData[dataKey] === undefined) continue;
-          await validatePrintViewField(page, testId, testData[dataKey]);
-        }
-
-        // Optional attachment - filename appears in section locator, not a testId element
+      // --- Optional Attachment Validation ---
+      for (const { testData, printUrl } of filledForms) {
         if (testData["additional_locations_attachment"]) {
+          await navigateToPrintView(page, printUrl);
           await validateAttachmentPrintViewSection(
             page,
             "form-section-additional_locations_attachment",

@@ -456,6 +456,7 @@ class ApprovalResponseType(StrEnum):
 class WorkflowEntityType(StrEnum):
     OPPORTUNITY = "opportunity"
     APPLICATION = "application"
+    APPLICATION_SUBMISSION = "application_submission"
     AWARD_RECOMMENDATION = "award_recommendation"
 
 

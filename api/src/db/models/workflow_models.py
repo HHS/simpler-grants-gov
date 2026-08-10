@@ -106,10 +106,14 @@ class Workflow(ApiSchemaTable, TimestampMixin):
     )
 
     award_recommendation_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey(AwardRecommendation.award_recommendation_id)
+        ForeignKey(AwardRecommendation.award_recommendation_id),
     )
+
     award_recommendation: Mapped[AwardRecommendation | None] = relationship(
-        AwardRecommendation, foreign_keys=[award_recommendation_id]
+        AwardRecommendation,
+        back_populates="workflows",
+        foreign_keys=[award_recommendation_id],
+        overlaps="review_workflow",
     )
 
     def get_log_extra(self) -> dict[str, Any]:
