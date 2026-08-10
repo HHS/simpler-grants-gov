@@ -53,6 +53,25 @@ def test_opportunity_delete_200_success(
     )
 
 
+def test_opportunity_delete_422_already_deleted(client, grantor_auth_data, enable_factory_create):
+    """Test deleting an already deleted opportunity returns 422."""
+    _, agency, token, _ = grantor_auth_data
+    deleted_opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code,
+        is_draft=True,
+        is_simpler_grants_opportunity=True,
+        is_deleted=True,
+    )
+
+    resp = client.delete(
+        f"/v1/grantors/opportunities/{deleted_opportunity.opportunity_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert resp.status_code == 422
+    assert resp.get_json()["message"] == "Opportunity has already been deleted"
+
+
 def test_opportunity_delete_401_no_token(client, existing_opportunity):
     """Test missing auth returns 401."""
     resp = client.delete(f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}")

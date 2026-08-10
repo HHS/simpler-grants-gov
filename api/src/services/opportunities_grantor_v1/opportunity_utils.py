@@ -22,3 +22,9 @@ def validate_opportunity_created_in_simpler_grants(opportunity: Opportunity) -> 
         raise_flask_error(
             422, message="Only opportunities created in Simpler Grants can be updated"
         )
+
+
+def validate_opportunity_not_deleted(opportunity: Opportunity) -> None:
+    """Raise a 422 error if the opportunity has already been marked as deleted."""
+    if opportunity.is_deleted:
+        raise_flask_error(422, message="Opportunity has already been deleted")

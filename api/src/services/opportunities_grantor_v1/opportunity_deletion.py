@@ -10,6 +10,7 @@ from src.services.opportunities_grantor_v1.get_opportunity import get_opportunit
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
     validate_opportunity_is_draft,
+    validate_opportunity_not_deleted,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,9 @@ def delete_opportunity(
 
     # Verify opportunity was created in Simpler Grants
     validate_opportunity_created_in_simpler_grants(opportunity)
+
+    # Prevent repeated delete attempts against already deleted records
+    validate_opportunity_not_deleted(opportunity)
 
     # Check if the opportunity is published - published opportunities cannot be deleted
     validate_opportunity_is_draft(opportunity)
