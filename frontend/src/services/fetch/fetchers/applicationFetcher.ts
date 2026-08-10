@@ -1,10 +1,12 @@
 import {
   fetchApplicationWithMethod,
+  fetchApplicationWithMethodV1,
   getApplicationForPrint,
 } from "src/services/fetch/fetchers/fetchers";
 import { ApplicationSubmissionsRequestBody } from "src/types/application/applicationSubmissionRequestTypes";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
+  ApplicationAttachmentCreateResponse,
   ApplicationAttachmentUploadResponse,
   ApplicationDetailApiResponse,
   ApplicationFormDetailApiResponse,
@@ -257,4 +259,19 @@ export const uploadAttachment = async (
   });
 
   return (await response.json()) as ApplicationAttachmentUploadResponse;
+};
+
+export const createApplicationAttachment = async (
+  applicationId: string,
+  pending_file_id: string,
+): Promise<ApplicationAttachmentCreateResponse> => {
+  const additionalHeaders = {
+    Accept: "application/json",
+  };
+  const response = await fetchApplicationWithMethodV1("POST")({
+    subPath: `${applicationId}/attachments`,
+    additionalHeaders,
+    body: { pending_file_id },
+  });
+  return (await response.json()) as ApplicationAttachmentCreateResponse;
 };

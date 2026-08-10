@@ -4,7 +4,6 @@
  */
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
@@ -25,7 +24,7 @@ import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-pri
 import {
   buildHappyPathTestData,
   buildPrintUrl,
-  navigateToPrintView,
+  validateAllPrintViews,
   validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
@@ -154,36 +153,11 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one page per form) ---
-      for (const {
-        formKey,
-        testData,
-        printUrl,
-        expectedPrepopulatedFields,
-        userEnteredFieldTestIds,
-        formName,
-      } of filledForms) {
-        await navigateToPrintView(page, printUrl);
+      // Skip editable input check for SF-424A as it uses custom table rendering with visible inputs
+      await validateAllPrintViews(page, filledForms, ["sf424a"]);
 
-        // Form title heading is visible
-        await expect(page.locator("h1")).toContainText(formName);
-
-        // Pre-populated fields (API-injected from opportunity record)
-        for (const [testId, expectedValue] of Object.entries(
-          expectedPrepopulatedFields,
-        )) {
-          await expect(page.getByTestId(testId)).toBeVisible();
-          await expect(page.getByTestId(testId)).toContainText(expectedValue);
-        }
-
-        // User-entered fields - testIds derived from formConfig.fields (printTestId ?? testId)
-        // Skip fields not present in testData (e.g. conditional fields that weren't filled)
-        for (const [dataKey, testId] of Object.entries(
-          userEnteredFieldTestIds,
-        )) {
-          if (testData[dataKey] === undefined) continue;
-          await validatePrintViewField(page, testId, testData[dataKey]);
-        }
-
+      // --- SF-424A Form-Specific Validation ---
+      for (const { formKey } of filledForms) {
         // SF-424A validation - strict computed totals checks with activity-specific expectations
         // Test data uses unique values per activity (01, 02, 03, 04)
         // requirement. Totals are still deterministic and calculated per activity index.
