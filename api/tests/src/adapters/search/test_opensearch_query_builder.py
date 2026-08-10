@@ -835,6 +835,90 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         validate_valid_request(search_client, search_index, builder, expected_results)
 
     @pytest.mark.parametrize(
+        "query,fields,query_operator,expected_results",
+        [
+            # whole words match even though the index stems them (dragons -> dragon)
+            (
+                "Dragons",
+                ["title"],
+                "AND",
+                [DANCE_WITH_DRAGONS],
+            ),
+            # only the final term is treated as a prefix
+            (
+                "Dance with Drag",
+                ["title"],
+                "AND",
+                [DANCE_WITH_DRAGONS],
+            ),
+            (
+                "kings",
+                ["title"],
+                "AND",
+                [WAY_OF_KINGS, CLASH_OF_KINGS, RETURN_OF_THE_KING],
+            ),
+            # AND requires all terms to match within a single field
+            (
+                "king Tolkien",
+                ["title", "author"],
+                "AND",
+                [],
+            ),
+            (
+                "king Tolkien",
+                ["title", "author"],
+                "OR",
+                [
+                    WAY_OF_KINGS,
+                    CLASH_OF_KINGS,
+                    FELLOWSHIP_OF_THE_RING,
+                    TWO_TOWERS,
+                    RETURN_OF_THE_KING,
+                ],
+            ),
+            (
+                "how to make a pizza",
+                ["title", "author"],
+                "AND",
+                [],
+            ),
+        ],
+    )
+    def test_query_builder_filter_match_bool_prefix(
+        self, search_client, search_index, query, fields, query_operator, expected_results
+    ):
+        builder = SearchQueryBuilder().sort_by([("id", SortDirection.ASCENDING)])
+        builder.filter_match_bool_prefix(query, fields, query_operator)
+
+        resp = builder.build()
+
+        assert resp["query"] == {
+            "bool": {
+                "filter": [
+                    {
+                        "multi_match": {
+                            "query": query,
+                            "fields": fields,
+                            "type": "bool_prefix",
+                            "operator": query_operator,
+                        }
+                    }
+                ]
+            }
+        }
+
+        validate_valid_request(search_client, search_index, builder, expected_results)
+
+    def test_filter_match_bool_prefix_does_not_score(self, search_client, search_index):
+        """Filter context means every hit comes back with the same score."""
+        builder = SearchQueryBuilder().filter_match_bool_prefix("kings", ["title"], "AND")
+
+        resp = search_client.search(search_index, builder.build())
+
+        assert len(resp.records) > 1
+        assert {record["relevancy_score"] for record in resp.records} == {0.0}
+
+    @pytest.mark.parametrize(
         "query,fields,expected_results,expected_aggregations",
         [
             (
