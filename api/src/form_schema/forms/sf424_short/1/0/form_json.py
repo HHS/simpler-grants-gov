@@ -49,6 +49,12 @@ FORM_JSON_SCHEMA = {
         "project_start_date",
         "project_end_date",
         "project_director",
+        # Section 8 is always required, which intentionally differs from legacy: the XSD marks
+        # ContactPersonGroup minOccurs="0" and the .dat makes it conditionally optional when
+        # "Same as Project Director" is checked. Per epic #10796 the checkbox is informational
+        # only - it does not auto-populate, hide, or clear Section 8 - so the applicant always
+        # fills it in and it is always required. See the SF-424 Short notes in
+        # api/src/services/xml_generation/README.md.
         "contact_person",
         "application_certification",
         "authorized_representative",
