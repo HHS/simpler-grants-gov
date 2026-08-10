@@ -56,6 +56,12 @@ variable "environment" {
   type        = string
 }
 
+variable "app_environment_name" {
+  description = "environment name the app sees in its ENVIRONMENT variable and New Relic labels; defaults to var.environment"
+  type        = string
+  default     = null
+}
+
 variable "extra_identity_provider_callback_urls" {
   type        = list(string)
   description = "List of additional URLs that the identity provider will redirect the user to after a successful sign-in. Used for local development."

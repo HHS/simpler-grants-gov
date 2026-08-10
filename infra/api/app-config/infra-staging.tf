@@ -8,6 +8,8 @@ module "infra_staging_config" {
   environment    = "infra-staging"
   network_name   = "infra-staging"
 
+  app_environment_name = "staging"
+
   domain_name            = "api.staging.simpler.grants.gov"
   secondary_domain_names = ["alb.staging.simpler.grants.gov"]
   enable_https           = true
@@ -23,16 +25,16 @@ module "infra_staging_config" {
   has_database                  = local.has_database
   database_enable_http_endpoint = true
   database_engine_version       = "17.7"
-  database_deletion_protection  = false # non-prod experimental environment
-  database_newrelic_entity_guid = ""    # Populate once the New Relic entity for the infra-staging RDS cluster exists
+  database_deletion_protection  = false                                             # non-prod experimental environment
+  database_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMjA3MTAxMDcwODY2NTUyNTU" # Same entity as staging
 
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
   enable_notifications            = false # Enable once an SES domain identity exists for infra-staging
 
-  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the infra-staging primary ALB exists
-  service_newrelic_mtls_entity_guid = "" # Populate once the New Relic entity for the infra-staging mTLS ALB exists
-  api_host_newrelic_entity_guid     = "" # Populate once the New Relic entity for the infra-staging ECS service host exists
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwzMDI2MDE0OTk3ODY3NDMwMjA3"
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMzgzNjIwODA5MTQ5MzcxNTc5OA"
+  api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058OTc2Mzk2OTQ1"
 
   # Sizing mirrors staging.
   instance_memory                 = 4096

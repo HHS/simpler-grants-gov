@@ -21,6 +21,12 @@ variable "environment_name" {
   default     = ""
 }
 
+variable "app_environment_name" {
+  type        = string
+  description = "Value of the container's ENVIRONMENT variable; defaults to environment_name"
+  default     = null
+}
+
 variable "hostname" {
   type        = string
   description = "The hostname to override the default AWS configuration"

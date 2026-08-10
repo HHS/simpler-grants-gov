@@ -163,6 +163,8 @@ module "service" {
   service_name     = local.service_name
   environment_name = var.environment_name
 
+  app_environment_name = local.service_config.app_environment_name
+
   image_repository_arn = local.image_repository_arn
   image_repository_url = local.image_repository_url
 

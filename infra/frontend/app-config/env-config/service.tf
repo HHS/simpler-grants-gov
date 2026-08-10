@@ -1,6 +1,7 @@
 locals {
   service_config = {
     service_name                  = "${var.app_name}-${var.environment}"
+    app_environment_name          = local.app_environment_name
     region                        = var.default_region
     cpu                           = var.service_cpu
     memory                        = var.service_memory

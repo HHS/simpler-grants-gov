@@ -30,6 +30,7 @@ output "service_config" {
     instance_cpu                    = var.instance_cpu
     instance_memory                 = var.instance_memory
     service_name                    = "${local.prefix}${var.app_name}-${var.environment}"
+    app_environment_name            = coalesce(var.app_environment_name, var.environment)
     domain_name                     = var.domain_name
     secondary_domain_names          = var.secondary_domain_names
     s3_cdn_domain_name              = var.s3_cdn_domain_name

@@ -37,7 +37,7 @@ locals {
     { name : "AWS_DEFAULT_REGION", value : data.aws_region.current.name },
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "GENERAL_S3_BUCKET_URL", value : aws_s3_bucket.general_purpose.bucket_regional_domain_name },
-    { name : "ENVIRONMENT", value : var.environment_name },
+    { name : "ENVIRONMENT", value : coalesce(var.app_environment_name, var.environment_name) },
     { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
     # TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
     # { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
