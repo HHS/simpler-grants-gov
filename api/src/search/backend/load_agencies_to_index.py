@@ -33,6 +33,12 @@ AGENCY_INDEX_ANALYSIS["analyzer"]["unstemmed"] = {
 
 # Matches what dynamic mapping would produce for a string field, plus the unstemmed sub-field.
 # The keyword sub-field is what agency name sorting is applied to.
+#
+# Only the sub-fields name an analyzer. Mapping a field explicitly doesn't opt it out of the
+# index defaults, so `agency_name` itself is still analyzed by the `default` analyzer above
+# and remains stemmed ("Department of Housing" indexes as depart/of/hous), while
+# `agency_name.unstemmed` keeps the whole word.
+# See: https://docs.opensearch.org/latest/analyzers/index/#analyzers-for-fields
 AGENCY_NAME_MAPPING = {
     "type": "text",
     "fields": {

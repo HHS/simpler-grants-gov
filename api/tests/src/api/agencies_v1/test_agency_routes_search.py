@@ -309,3 +309,56 @@ class TestAgencySearchQuery(BaseTestClass):
         assert [d["agency_name"] for d in resp.json["data"]] == sorted(
             agency.agency_name for agency in NAMED_AGENCIES
         )
+
+
+class TestAgencySearchQueryBeforeReindex(BaseTestClass):
+    """Search against an index built before the unstemmed sub-fields existed.
+
+    Between deploying and the next run of the hourly load-agency-data job, the live index
+    has no unstemmed sub-fields. OpenSearch ignores unmapped fields in a multi_match rather
+    than erroring, so search keeps working against the stemmed fields alone.
+    """
+
+    @pytest.fixture(scope="class", autouse=True)
+    def setup_search_data(self, agency_index_alias, search_client):
+        index_name = f"test-agency-index-{uuid.uuid4().int}"
+        # the mapping as it was before the unstemmed sub-fields were added
+        search_client.create_index(
+            index_name, mappings={"properties": {"opportunity_statuses": {"type": "keyword"}}}
+        )
+
+        schema = AgencyV1Schema()
+        json_records = [schema.dump(agency) for agency in NAMED_AGENCIES]
+        for record in json_records:
+            record["opportunity_statuses"] = [OpportunityStatus.POSTED.value]
+
+        search_client.bulk_upsert(index_name, json_records, "agency_id", refresh=True)
+        search_client.swap_alias_index(index_name, agency_index_alias)
+
+        return index_name
+
+    @pytest.mark.parametrize(
+        "search_request,expected_result",
+        [
+            (_query_request("Department of Energy"), [ENERGY]),
+            (_query_request("Department of Defense"), [DEFENSE, DEFENSE_AMC]),
+            (_query_request("Energy"), [ENERGY]),
+            (_query_request("DOE"), [ENERGY]),
+            (_query_request("Department"), NAMED_AGENCIES),
+            (_query_request("not an agency"), []),
+            # partially typed words that stemming truncates are the one case the unstemmed
+            # sub-fields fix, so these stay unmatched until the index is rebuilt
+            (_query_request("Housing"), [HOUSING]),
+            (_query_request("Housi"), []),
+        ],
+    )
+    def test_search_agencies_by_name(
+        self, client, user_api_key_id, search_request, expected_result
+    ):
+        resp = client.post(
+            "/v1/agencies/search", json=search_request, headers={"X-API-Key": user_api_key_id}
+        )
+
+        assert resp.status_code == 200
+        data = resp.json["data"]
+        assert [d["agency_id"] for d in data] == [str(exp.agency_id) for exp in expected_result]

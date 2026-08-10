@@ -181,8 +181,14 @@ class SearchQueryBuilder:
         """
         Adds a multi_match bool_prefix query which queries against the provided fields.
 
+        Every term is analyzed the same way the index was, and the final term is matched
+        as a prefix, which makes this a good fit for search-as-you-type.
+
         This goes in the filter block, so it acts as a binary filter and does not affect
         scoring. Use it when results are sorted by a field rather than by relevancy.
+
+        See: https://docs.opensearch.org/latest/query-dsl/full-text/match-bool-prefix/
+        and: https://docs.opensearch.org/latest/query-dsl/full-text/multi-match/
         """
         self.filters.append(
             {
