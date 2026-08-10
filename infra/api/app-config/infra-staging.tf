@@ -49,7 +49,7 @@ module "infra_staging_config" {
   has_search            = true
   search_engine_version = "OpenSearch_2.15"
 
-  search_sso_admin_role_name = null
+  search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_e85dcedcdbe7e774"
 
   service_override_extra_environment_variables = {
     ENABLE_WORKFLOW_ENDPOINTS             = 1
