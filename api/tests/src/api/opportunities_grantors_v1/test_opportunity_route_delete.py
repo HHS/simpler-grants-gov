@@ -124,7 +124,7 @@ def test_opportunity_delete_422_published_opportunity(
     )
 
     assert resp.status_code == 422
-    assert resp.get_json()["message"] == "Published opportunities cannot be deleted"
+    assert resp.get_json()["message"] == "Only draft opportunities can be updated"
 
 
 def test_opportunity_delete_422_non_simpler_grants_opportunity(

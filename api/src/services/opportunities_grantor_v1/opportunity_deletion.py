@@ -2,7 +2,6 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
-from grants_shared.api.route_utils import raise_flask_error
 
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
@@ -10,6 +9,7 @@ from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
+    validate_opportunity_is_draft,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,8 +31,7 @@ def delete_opportunity(
     validate_opportunity_created_in_simpler_grants(opportunity)
 
     # Check if the opportunity is published - published opportunities cannot be deleted
-    if not opportunity.is_draft:
-        raise_flask_error(422, message="Published opportunities cannot be deleted")
+    validate_opportunity_is_draft(opportunity)
 
     # Soft delete the opportunity
     opportunity.is_deleted = True
