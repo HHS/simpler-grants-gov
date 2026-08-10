@@ -623,7 +623,7 @@ SF424Short_v3_0 = Form(
     # https://www.grants.gov/forms/form-items-description/fid/711
     form_id=uuid.UUID("cf355a4d-d840-43fd-a78f-729edf41ab4c"),
     legacy_form_id=711,
-    form_name="APPLICATION FOR FEDERAL DOMESTIC ASSISTANCE-SHORT ORGANIZATIONAL (SF-424)",
+    form_name="Application for Federal Domestic Assistance-Short Organizational (SF-424)",
     short_form_name="SF424_Short_3_0",
     form_version="3.0",
     agency_code="SGG",

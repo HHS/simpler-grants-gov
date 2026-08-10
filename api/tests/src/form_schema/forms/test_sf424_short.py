@@ -224,7 +224,7 @@ def full_valid_json_v3_0(valid_json_v3_0, contact_person_group):
 def test_sf424_short_v3_0_form_title_and_ui_section_order(sf424_short_v3_0):
     assert (
         sf424_short_v3_0.form_name
-        == "APPLICATION FOR FEDERAL DOMESTIC ASSISTANCE-SHORT ORGANIZATIONAL (SF-424)"
+        == "Application for Federal Domestic Assistance-Short Organizational (SF-424)"
     )
     assert [section["label"] for section in sf424_short_v3_0.form_ui_schema] == [
         "1. Name of Federal Agency",
