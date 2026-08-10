@@ -842,10 +842,11 @@ describe("ApplyForm", () => {
         ],
         trigger,
       );
-      mockClientFetch.mockImplementation((url: string) =>
-        url === "/api/file"
-          ? Promise.resolve({ body: scanStream }) // keeps stream in progress
-          : Promise.resolve({ data: savedAttachment }), // triggers onComplete and decrements uploading counter
+      mockClientFetch.mockImplementation(
+        (url: string) =>
+          url === "/api/file"
+            ? Promise.resolve({ body: scanStream }) // keeps stream in progress
+            : Promise.resolve({ data: savedAttachment }), // triggers onComplete and decrements uploading counter
       );
 
       renderAttachmentForm();
