@@ -1,3 +1,18 @@
+# dev is handing its hostnames over to infra-dev, which mirrors dev in AWS account
+# 061664787759 using the same domain names. Two of those names are globally unique
+# per service in AWS, so they cannot exist in both accounts at the same time and
+# dev has to give them up first (see the domain settings below):
+#   - api.dev.simpler.grants.gov as an API Gateway custom domain name. Otherwise
+#     infra-dev's CreateDomainName fails with "The domain name you provided already
+#     exists". Set enable_api_gateway_domain_name = false rather than clearing
+#     domain_name, which must stay set: it is the ALB's cert/listener domain and it
+#     is interpolated into every API Gateway integration URI.
+#   - files.dev.simpler.grants.gov as a CloudFront alternate domain name. Otherwise
+#     infra-dev's UpdateDistribution fails with CNAMEAlreadyExists. s3_cdn_domain_name
+#     is therefore unset (it was "files.dev.simpler.grants.gov"), which leaves dev's
+#     CDN serving from its default *.cloudfront.net name and certificate — that
+#     default name also becomes the service's CDN_URL.
+# Flip the flag back to true / restore s3_cdn_domain_name to hand the names back.
 module "dev_config" {
   source                            = "./env-config"
   project_name                      = local.project_name
@@ -7,7 +22,7 @@ module "dev_config" {
   network_name                      = "dev"
   domain_name                       = "api.dev.simpler.grants.gov"
   secondary_domain_names            = ["alb.dev.simpler.grants.gov"]
-  s3_cdn_domain_name                = "files.dev.simpler.grants.gov"
+  enable_api_gateway_domain_name    = false
   mtls_domain_name                  = "soap.dev.simpler.grants.gov"
   enable_https                      = true
   has_database                      = local.has_database
