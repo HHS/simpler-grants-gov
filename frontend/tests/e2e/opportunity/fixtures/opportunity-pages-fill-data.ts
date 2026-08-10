@@ -32,7 +32,7 @@ export const buildOpportunityHappyPathFillData = (
   return {
     opportunityNumber: buildTimestampValue("Opp", now),
     opportunityTitle: buildTimestampValue("Title", now),
-    tagLine: "Help fund the next great idea",
+    tagline: "Help fund the next great idea",
     purposeStatement: "Provide funding for innovative projects",
     grantSelectionMethod: "Discretionary",
     assistanceListingNumber: "00.000",
