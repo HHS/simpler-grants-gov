@@ -121,7 +121,9 @@ export function CreateOpportunityForm({
   const onTaglineChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTagline(e.target.value);
   };
-  const onPurposeStatementChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const onPurposeStatementChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
     setPurposeStatement(e.target.value);
   };
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
