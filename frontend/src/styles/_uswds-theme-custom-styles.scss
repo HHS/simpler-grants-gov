@@ -670,13 +670,13 @@ dl {
   &::after {
     content: "$";
     position: absolute;
-    left: 10px;
+    left: 0.625rem;
     bottom: -0.5rem;
     transform: translateY(-50%);
   }
 
   input {
-    padding-left: 25px;
+    padding-left: 1.563rem;
     margin-top: 0 !important;
   }
 }
@@ -687,13 +687,13 @@ dl {
   &::after {
     content: "%";
     position: absolute;
-    right: 10px;
+    right: 0.625rem;
     bottom: -0.5rem;
     transform: translateY(-50%);
   }
 
   input {
-    padding-right: 25px;
+    padding-right: 1.563rem;
     margin-top: 0 !important;
   }
 }
