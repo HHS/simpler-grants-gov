@@ -209,7 +209,6 @@ export async function stubStreamingAttachmentUpload(
   page: Page,
   pendingFileId = "fake-pending-file-id",
   applicationAttachmentId = "fake-attachment-id",
-  delayMs = 100,
 ): Promise<void> {
   await page.route("**/api/file*", async (route) => {
     const body =
