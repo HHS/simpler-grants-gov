@@ -2,6 +2,12 @@
  * @feature File upload interactions - Failure Path
  * @featureFile e2e/apply/upload-interaction/failure-path/features/failure-path-file-upload-interaction.feature
  * @scenario Upload error handling for narrative attachments and project abstracts
+ *
+ * Notes for reviewer (what happens in this test):
+ * 1) Authenticates and opens the relevant application form.
+ * 2) Stubs failed and aborted attachment uploads.
+ * 3) Verifies that no file is saved on error or abort.
+ * 4) Confirms the upload chooser remains visible so the user can retry.
  */
 
 import {

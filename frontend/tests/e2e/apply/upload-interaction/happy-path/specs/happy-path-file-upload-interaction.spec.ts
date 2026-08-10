@@ -7,7 +7,7 @@
  * 1) Authenticates and opens the relevant application form.
  * 2) Uploads files using single-file and multi-file attachments.
  * 3) Verifies upload success, status messages, file input visibility, and delete controls.
- * 4) Covers abort, failure, single-file restrictions, and duplicate-file deletion behavior.
+ * 4) Covers single-file restrictions, upload input visibility, and duplicate-file deletion behavior.
  *
  * Why these forms are in scope:
  * - Project Abstract uses the single-file attachment flow and status display path.
@@ -46,9 +46,9 @@ import {
   assertFileInputVisible,
   delayAttachmentUploadRequest,
   deleteUploadedFile,
-  expectUploadStatusMessage,
   expectUploadedFileCount,
   expectUploadedFileVisible,
+  expectUploadStatusMessage,
   openApplicationForm,
   stubStreamingAttachmentUpload,
   TEST_UPLOAD_DIR,
@@ -223,7 +223,10 @@ test.describe("File upload interactions - Other Narrative Attachments", () => {
       );
 
       // Then upload progress is shown and the 'choose from folder' link is hidden
-      await expectUploadStatusMessage(page, /queued|uploading|starting scan|scan complete/i);
+      await expectUploadStatusMessage(
+        page,
+        /queued|uploading|starting scan|scan complete/i,
+      );
       await assertFileInputHidden(
         page,
         fieldDefinitionsProjectAbstract.attachment,
