@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
 import OpportunitiesListPage from "src/app/[locale]/(base)/grantor/opportunities/page";
@@ -602,6 +602,11 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByTestId("opportunity-status-draft")).toBeVisible();
+      
+      // Click the popover menu button to reveal Edit link
+      const popoverButton = screen.getByRole("button", { expanded: false });
+      fireEvent.click(popoverButton);
+      
       expect(
         await screen.findByRole("link", { name: "actionButtons.edit" }),
       ).toBeVisible();
@@ -693,6 +698,11 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByTestId("opportunity-status-draft")).toBeVisible();
+      
+      // Click the popover menu button to reveal Edit link
+      const popoverButton = screen.getByRole("button", { expanded: false });
+      fireEvent.click(popoverButton);
+      
       expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
       // TODO: Copy and Delete will be added in a separate ticket
     });
@@ -716,6 +726,11 @@ describe("Opportunities", () => {
         name: "Test Opportunity",
       });
       expect(oppTitlelink).toHaveAttribute("href", viewLink);
+      
+      // Click the popover menu button to reveal Edit link
+      const popoverButton = screen.getByRole("button", { expanded: false });
+      fireEvent.click(popoverButton);
+      
       expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
     });
 
@@ -738,6 +753,11 @@ describe("Opportunities", () => {
         name: "Test Opportunity",
       });
       expect(oppTitlelink).toHaveAttribute("href", viewLink);
+      
+      // Click the popover menu button to reveal Edit link
+      const popoverButton = screen.getByRole("button", { expanded: false });
+      fireEvent.click(popoverButton);
+      
       expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
     });
 

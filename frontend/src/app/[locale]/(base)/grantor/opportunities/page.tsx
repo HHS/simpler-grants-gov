@@ -173,9 +173,11 @@ const transformTableRowData = (
         : ``
       : `/opportunity/${opportunity.opportunity_id}`;
     
-    // Determine opportunity type (Competitive, etc.)
-    // TODO: Add proper type field to BaseOpportunity when available
-    const opportunityType = "Competitive";
+    // Get funding instrument types from summary
+    const fundingInstruments = opportunity.summary?.funding_instruments || [];
+    const opportunityType = fundingInstruments.length > 0 
+      ? fundingInstruments.join(", ") 
+      : "";
     
     // Format last updated date
     const lastUpdated = formatTimestamp(opportunity.updated_at);
