@@ -31,6 +31,7 @@ import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-sta
 import {
   abortAttachmentUploadRequest,
   assertFileInputVisible,
+  expectUploadStatusMessage,
   failAttachmentUploadRequest,
   openApplicationForm,
   TEST_UPLOAD_DIR,
@@ -63,6 +64,7 @@ test.describe("File upload interactions - Failure Path", () => {
     ) => {
       test.setTimeout(300_000);
 
+      // Given the user has opened the "Other Narrative Attachment" form
       await openApplicationForm(
         page,
         context,
@@ -72,16 +74,22 @@ test.describe("File upload interactions - Failure Path", () => {
         OPPORTUNITY_URL,
       );
 
+      // When the upload request is aborted before completion
       await abortAttachmentUploadRequest(page);
+
+      // And the user uploads a file
       await uploadFile(
         page,
         SAMPLE_UPLOAD_FILE,
         fieldDefinitionsOtherNarrativeAttachment.attachments,
       );
 
+      // Then no file is saved
       await expect(page.locator(`text=${SAMPLE_FILE_NAME}`)).toHaveCount(0, {
         timeout: 60000,
       });
+
+      // And the 'choose from folder' link remains visible
       await assertFileInputVisible(
         page,
         fieldDefinitionsOtherNarrativeAttachment.attachments,
@@ -98,6 +106,7 @@ test.describe("File upload interactions - Failure Path", () => {
     ) => {
       test.setTimeout(300_000);
 
+      // Given the user has opened the "Project Abstract" form
       await openApplicationForm(
         page,
         context,
@@ -107,16 +116,25 @@ test.describe("File upload interactions - Failure Path", () => {
         OPPORTUNITY_URL,
       );
 
+      // When the upload request fails
       await failAttachmentUploadRequest(page);
+
+      // And the user uploads a file
       await uploadFile(
         page,
         SAMPLE_UPLOAD_FILE,
         fieldDefinitionsProjectAbstract.attachment,
       );
 
+      // Then an upload error is displayed
+      await expectUploadStatusMessage(page, "Upload failed");
+
+      // And no file is saved
       await expect(page.locator(`text=${SAMPLE_FILE_NAME}`)).toHaveCount(0, {
         timeout: 60000,
       });
+
+      // And the 'choose from folder' link remains visible
       await assertFileInputVisible(
         page,
         fieldDefinitionsProjectAbstract.attachment,
