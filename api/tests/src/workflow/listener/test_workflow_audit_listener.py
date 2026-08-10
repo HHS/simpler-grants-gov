@@ -54,7 +54,6 @@ def test_workflow_audit_created_on_process_workflow(db_session, enable_factory_c
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -91,7 +90,6 @@ def test_workflow_audit_captures_metadata(db_session, enable_factory_create):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     # Create event with metadata
