@@ -10,13 +10,13 @@ import grants_shared.adapters.db.flask_db as flask_db
 import grants_shared.util.file_util as file_util
 from grants_shared.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
 from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.db.models.auth_base_models import BaseUser
 from grants_shared.util import datetime_util
 from pydantic import Field
 from sqlalchemy import select
 
 from src.constants.lookup_constants import FileScanStatus
 from src.db.models.file_upload_models import PendingFile
-from src.db.models.user_models import User
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -186,7 +186,7 @@ def _metadata_for_status(status: FileScanStatus, pending_file_id: uuid.UUID) -> 
 
 def stream_file_scan_results(
     pending_file_id: uuid.UUID,
-    user: User,
+    user: BaseUser,
     dynamodb_client: DynamoDBClient,
     config: FileScanStreamConfig | None = None,
     dynamodb_config: DynamoDBConfig | None = None,
@@ -209,6 +209,7 @@ def stream_file_scan_results(
         dynamodb_config = DynamoDBConfig()
 
     table_name = dynamodb_config.file_scan_cache_table_name
+    user_id = user.get_user_id()
 
     # First lookup happens outside the generator so that 404/403/500 results in
     # a proper HTTP status code rather than a truncated stream. A malformed
@@ -218,12 +219,12 @@ def stream_file_scan_results(
     if record is None:
         raise_flask_error(404, "File scan record not found")
 
-    if record.user_id != str(user.user_id):
+    if record.user_id != str(user_id):
         logger.warning(
             "User attempted to access another user's file scan results",
             extra={
                 "pending_file_id": pending_file_id,
-                "user_id": user.user_id,
+                "user_id": user_id,
                 "record_user_id": record.user_id,
             },
         )
@@ -252,7 +253,7 @@ def stream_file_scan_results(
                     "File scan results stream reached terminal status",
                     extra={
                         "pending_file_id": pending_file_id,
-                        "user_id": user.user_id,
+                        "user_id": user_id,
                         "file_scan_status": status,
                         "stream_duration_seconds": elapsed,
                     },
@@ -264,7 +265,7 @@ def stream_file_scan_results(
                     "File scan results stream reached max duration",
                     extra={
                         "pending_file_id": pending_file_id,
-                        "user_id": user.user_id,
+                        "user_id": user_id,
                         "last_file_scan_status": status,
                         "stream_duration_seconds": elapsed,
                     },
@@ -275,7 +276,7 @@ def stream_file_scan_results(
 
             try:
                 next_record = _fetch_next_record(
-                    dynamodb_client, table_name, pending_file_id, user.user_id
+                    dynamodb_client, table_name, pending_file_id, user_id
                 )
             except InvalidFileScanRecordError:
                 # Streaming has already started so we can't change the HTTP
@@ -285,7 +286,7 @@ def stream_file_scan_results(
                     "Invalid file scan record encountered mid-stream, aborting",
                     extra={
                         "pending_file_id": pending_file_id,
-                        "user_id": user.user_id,
+                        "user_id": user_id,
                         "stream_duration_seconds": elapsed,
                     },
                 )
