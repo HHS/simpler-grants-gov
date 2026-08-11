@@ -157,16 +157,35 @@ export function CreateOpportunityForm({
         className="flex-1 margin-top-2 simpler-apply-form"
       >
         <div data-testid="formGroup" className="width-full">
-          {/* Opportunity Number */}
-          <CommonCharacterCount
-            labelText={t("CreateOpportunityForm.opportunityNumber")}
-            description={t("CreateOpportunityForm.opportunityNumberDesc")}
-            fieldId="opportunityNumber"
-            fieldMaxLength={40}
-            isRequired={true}
-            onTextChange={onOppNbrChange}
-            defaultValue={response?.data?.opportunity_number || ""}
-          />
+          <div className="grid-row grid-gap">
+            {/* Opportunity Number */}
+            <div className="tablet:grid-col-6">
+              <CommonCharacterCount
+                labelText={t("CreateOpportunityForm.opportunityNumber")}
+                description={t("CreateOpportunityForm.opportunityNumberDesc")}
+                fieldId="opportunityNumber"
+                fieldMaxLength={40}
+                isRequired={true}
+                onTextChange={onOppNbrChange}
+                defaultValue={response?.data?.opportunity_number || ""}
+              />
+            </div>
+
+            {/* Assistance Listing Number (ALN) placed to the right */}
+            <div className="tablet:grid-col-6">
+              <CommonCharacterCount
+                labelText={t("CreateOpportunityForm.assistanceListingNumber")}
+                description={t(
+                  "CreateOpportunityForm.assistanceListingNumberDesc",
+                )}
+                fieldId="assistanceListingNumber"
+                fieldMaxLength={6}
+                isRequired={true}
+                onTextChange={onAlnChange}
+                defaultValue={response?.data?.assistance_listing_number || ""}
+              />
+            </div>
+          </div>
 
           {/* Opportunity Title */}
           <CommonCharacterCount
@@ -182,7 +201,6 @@ export function CreateOpportunityForm({
 
           {/* Tagline */}
           <CommonCharacterCount
-            isTextArea={true}
             labelText={t("CreateOpportunityForm.tagline")}
             description={t("CreateOpportunityForm.taglineDesc")}
             fieldId="tagline"
@@ -194,7 +212,6 @@ export function CreateOpportunityForm({
 
           {/* Purpose Statement */}
           <CommonCharacterCount
-            isTextArea={true}
             labelText={t("CreateOpportunityForm.purposeStatement")}
             description={t("CreateOpportunityForm.purposeStatementDesc")}
             fieldId="purposeStatement"
@@ -240,16 +257,7 @@ export function CreateOpportunityForm({
             />
           )}
 
-          {/* Assistance Listing Number (ALN) */}
-          <CommonCharacterCount
-            labelText={t("CreateOpportunityForm.assistanceListingNumber")}
-            description={t("CreateOpportunityForm.assistanceListingNumberDesc")}
-            fieldId="assistanceListingNumber"
-            fieldMaxLength={6}
-            isRequired={true}
-            onTextChange={onAlnChange}
-            defaultValue={response?.data?.assistance_listing_number || ""}
-          />
+          {/* ALN moved above to align with Opportunity Number */}
         </div>
 
         <div className="display-flex flex-left margin-top-5">

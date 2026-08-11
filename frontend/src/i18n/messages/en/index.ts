@@ -2573,7 +2573,7 @@ export const messages = {
         'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
       assistanceListingNumber: "Assistance listing number",
       assistanceListingNumberDesc:
-        "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
+        "Enter the 5-digit code from SAM.gov (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
     },
   },
