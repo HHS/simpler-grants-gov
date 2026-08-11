@@ -119,6 +119,11 @@ jobs:
 
           echo "Seeding ${TARGET_ENV} from ${SOURCE_ENV} (dry_run=${DRY_RUN})."
 
+      # Required before configure-aws-credentials: that action shells out to
+      # terraform to resolve environment -> network -> account -> role.
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
       # ---- SOURCE account ----
       - name: Configure AWS credentials (source account)
         uses: ./.github/actions/configure-aws-credentials
@@ -356,6 +361,10 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+
+      # Required before configure-aws-credentials — see note in share-snapshot.
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
 
       - name: Configure AWS credentials (source account)
         uses: ./.github/actions/configure-aws-credentials
