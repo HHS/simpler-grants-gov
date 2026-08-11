@@ -134,7 +134,6 @@ const ActionMenu = ({
   const t = useTranslations("Opportunities");
   
   // Only show action menu for editable opportunities
-  const isSgmOpportunity = true; // We'll determine this from the row data
   const isEditable =
     status.toLowerCase() === "draft" ||
     status.toLowerCase() === "forecasted" ||
@@ -204,7 +203,7 @@ const transformTableRowData = (
             status={
               opportunity.is_draft
                 ? "draft"
-                : (opportunity.opportunity_status as OpportunityStatus)
+                : opportunity.opportunity_status
             }
           />
         ),
