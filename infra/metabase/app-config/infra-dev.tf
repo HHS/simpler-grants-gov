@@ -11,12 +11,8 @@ module "infra_dev_config" {
   # Analytics database that Metabase connects to
   analytics_database_cluster_name = "analytics-infra-dev"
 
-  # Intended domain: data.dev.simpler.grants.gov
-  # Enable HTTPS (and set domain_name) once an ACM certificate and a Route53
-  # hosted zone exist in the infra-dev account. Until then the service is only
-  # reachable over HTTP via the load balancer's AWS-generated DNS name.
-  domain_name  = null
-  enable_https = false
+  domain_name  = "data.dev.simpler.grants.gov"
+  enable_https = true
 
   # When we set memory at 1024 and 2048 metabase is intermittently running into oom.
   service_cpu    = 1024
