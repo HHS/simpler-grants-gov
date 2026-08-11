@@ -5,6 +5,7 @@ export const clientTokenRefreshInterval = 10 * 60 * 1000;
 export const clientTokenExpirationInterval = 15 * 60 * 1000;
 
 export const LOGIN_URL = "/api/auth/login";
+export const LOGOUT_URL = "/api/auth/logout";
 
 export const applicationTestUserId = "5b4807c5-57d4-4867-b722-1658b47c59ba";
 

@@ -65,7 +65,10 @@ describe("storeCurrentPage", () => {
 
   it("should store URL in session storage if pathname and search", () => {
     storeCurrentPage("path", "/search");
-    expect(mockSetItem).toHaveBeenCalledWith("login-redirect", "path/search");
+    expect(mockSetItem).toHaveBeenCalledWith(
+      "post-auth-redirect",
+      "path/search",
+    );
   });
 
   it("should not store URL in session storage if pathname and search are empty", () => {

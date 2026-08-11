@@ -71,7 +71,7 @@ test.describe("Login Page Redirect", () => {
     async ({ page }) => {
       // Given I have stored "/grantor/opportunities" as the login redirect
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "/grantor/opportunities");
+        sessionStorage.setItem("post-auth-redirect", "/grantor/opportunities");
       });
       // When I open the login page
       await page.goto("/login", { waitUntil: "domcontentloaded" });
