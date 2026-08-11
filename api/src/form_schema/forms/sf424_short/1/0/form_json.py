@@ -560,6 +560,18 @@ FORM_XML_TRANSFORM_RULES = {
                 "source_field": "applicant_type_code",
                 "target_pattern": "ApplicantTypeCode{index}",
                 "max_count": 3,  # SF-424 Short supports up to 3 applicant type codes
+                # Normalize legacy casing: option H was stored with lowercase "state"
+                # but the XSD requires capital "State".
+                # passthrough_unknown=True leaves all other option codes unchanged.
+                "item_value_transform": {
+                    "type": "map_values",
+                    "params": {
+                        "mappings": {
+                            "H: Public/state Controlled Institution of Higher Education": "H: Public/State Controlled Institution of Higher Education",
+                        },
+                        "passthrough_unknown": True,
+                    },
+                },
             },
         }
     },
