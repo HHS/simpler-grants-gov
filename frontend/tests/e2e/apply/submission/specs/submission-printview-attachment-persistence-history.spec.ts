@@ -4,8 +4,8 @@
  */
 
 import {
-  expect,
   test,
+  expect,
   type Browser,
   type BrowserContext,
   type Page,
@@ -45,8 +45,16 @@ const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 const attachmentForm = opportunityConfig.forms[0];
 
 const applicantScenarios = [
-  { scenarioName: "Organization applicant", orgLabel: testOrgLabel },
-  { scenarioName: "Individual applicant", orgLabel: undefined },
+  {
+    scenarioName: "Organization applicant",
+    orgLabel: testOrgLabel,
+    expectedApplicantAddedActivity: "Organization Added",
+  },
+  {
+    scenarioName: "Individual applicant",
+    orgLabel: undefined,
+    expectedApplicantAddedActivity: "User added:",
+  },
 ] as const;
 
 test.beforeEach(({ page: _ }, testInfo) => {
@@ -54,9 +62,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 async function verifyVirusScanPassedAndUploaded(page: Page, fileName: string) {
-  await expect(
-    page.getByRole("progressbar", { name: "Loading!" }),
-  ).toBeVisible();
+  await expect(page.getByRole("progressbar", { name: "Loading!" })).toBeVisible();
   await expect(page.getByTestId("file-input-existing-files")).toContainText(
     fileName,
     { timeout: 30_000 },
@@ -66,7 +72,11 @@ async function verifyVirusScanPassedAndUploaded(page: Page, fileName: string) {
   ).toContainText("Delete");
 }
 
-for (const { scenarioName, orgLabel } of applicantScenarios) {
+for (const {
+  scenarioName,
+  orgLabel,
+  expectedApplicantAddedActivity,
+} of applicantScenarios) {
   test.describe.serial(scenarioName, () => {
     let browser: Browser;
     let context: BrowserContext;
@@ -123,8 +133,11 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
         expect(activities.some((a) => a.includes("Attachment added"))).toBe(
           false,
         );
-        expect(activities).toEqual(
-          expect.arrayContaining(["Organization Added", "Application created"]),
+        expect(
+          activities.some((a) => a.includes(expectedApplicantAddedActivity)),
+        ).toBe(true);
+        expect(activities.some((a) => a.includes("Application created"))).toBe(
+          true,
         );
       },
     );
@@ -154,9 +167,7 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
 
         const activities = await getApplicationHistoryActivities(page);
         expect(
-          activities.some((a) =>
-            a.includes("Attachment added: sample-upload-kb.pdf"),
-          ),
+          activities.some((a) => a.includes("Attachment added: sample-upload-kb.pdf")),
         ).toBe(true);
       },
     );
@@ -174,8 +185,7 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
 
         // Third history checkpoint: confirm submission itself was recorded, and that
         // the attachment activity from the previous test is still present alongside it.
-        const postSubmitActivities =
-          await getApplicationHistoryActivities(page);
+        const postSubmitActivities = await getApplicationHistoryActivities(page);
         expect(postSubmitActivities[0]).toContain("Application submitted");
         expect(
           postSubmitActivities.some((a) =>
@@ -191,8 +201,7 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
             formName: attachmentForm.formConfig.formName,
             testData,
             printUrl,
-            expectedPrepopulatedFields:
-              attachmentForm.expectedPrepopulatedFields,
+            expectedPrepopulatedFields: attachmentForm.expectedPrepopulatedFields,
             userEnteredFieldTestIds: attachmentForm.userEnteredFieldTestIds,
           },
         ];
