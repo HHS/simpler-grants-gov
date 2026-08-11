@@ -37,7 +37,7 @@ SCAN_RECORD_STATUS_ATTR = "status"
 
 class FileScanStreamConfig(PydanticBaseEnvConfig):
     poll_interval_seconds: float = Field(alias="FILE_SCAN_RESULTS_POLL_INTERVAL_SECONDS", default=3)
-    max_duration_seconds: float = Field(alias="FILE_SCAN_RESULTS_MAX_DURATION_SECONDS", default=900)
+    max_duration_seconds: float = Field(alias="FILE_SCAN_RESULTS_MAX_DURATION_SECONDS", default=60)
 
 
 @dataclass(frozen=True)
