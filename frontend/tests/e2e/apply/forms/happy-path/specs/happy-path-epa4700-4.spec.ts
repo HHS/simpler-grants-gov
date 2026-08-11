@@ -12,10 +12,10 @@ import {
 } from "@playwright/test";
 import { EPA4700_4_FORM_CONFIG } from "tests/e2e/apply/fixtures/epa4700-4-field-definitions";
 import { epa4700_4HappyPathTestData } from "tests/e2e/apply/fixtures/epa4700-4-fill-data";
+import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
-import { getOpportunityId } from "tests/e2e/utils/application/get-opportunityId-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
@@ -24,7 +24,7 @@ import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-sta
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
-const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
+const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
