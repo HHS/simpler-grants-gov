@@ -27,8 +27,8 @@ export const FileInputExistingFiles = ({
       const hasError = filesWithDeleteError.findIndex(
         (fileWithDeleteError) => fileWithDeleteError === existingFile.id,
       );
-      // an attachment can be listed before its server metadata is available
-      // will cause no timestamp to show - omitting instead of rendering "Invalid Date"
+      // a file can be listed before its server metadata is available, so the timestamp is
+      // omitted rather than rendered as "Invalid Date"
       const updatedAtDate = existingFile.updatedAt
         ? new Date(existingFile.updatedAt)
         : undefined;

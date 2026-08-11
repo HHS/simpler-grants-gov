@@ -10,11 +10,8 @@ const GENERIC_FAILURE_MESSAGE = "Error failed to upload attachment";
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/*
-  pending_file_id arrives from the browser, so it is validated at runtime
-  Anything that is not a nonblank UUID string (arrays,
-  objects, numbers, null, whitespace, malformed uuids) is rejected.
-*/
+// pending_file_id arrives from the browser, so anything that is not a UUID string is
+// rejected before it reaches the API
 const parsePendingFileId = (value: unknown): string | null => {
   if (typeof value !== "string") {
     return null;

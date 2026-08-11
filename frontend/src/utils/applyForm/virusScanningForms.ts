@@ -1,9 +1,9 @@
-// #11350 - forms whose single Attachment fields use the virus scanning input
+// #11350 - forms whose single-file attachment fields use the virus scanning input
 const SINGLE_ATTACHMENT_FORM_NAMES: ReadonlySet<string> = new Set([
   "Attachment Form",
 ]);
 
-// #11351 - forms whose AttachmentArray fields use the virus scanning input
+// #11351 - forms whose multiple-file attachment fields use the virus scanning input
 const MULTI_ATTACHMENT_FORM_NAMES: ReadonlySet<string> = new Set([
   "Application for Federal Assistance (SF-424)",
 ]);

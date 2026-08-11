@@ -10,9 +10,9 @@ import { widgetComponents } from "./Widgets";
 */
 
 const mockLegacyAttachmentWidget = jest.fn();
-const mockLegacyAttachmentArrayWidget = jest.fn();
+const mockLegacyMultipleAttachmentWidget = jest.fn();
 const mockVirusScanningAttachmentWidget = jest.fn();
-const mockVirusScanningAttachmentArrayWidget = jest.fn();
+const mockVirusScanningMultipleAttachmentWidget = jest.fn();
 
 jest.mock("./AttachmentUploadWidget", () => ({
   __esModule: true,
@@ -22,7 +22,7 @@ jest.mock("./AttachmentUploadWidget", () => ({
 jest.mock("./MultipleAttachmentUploadWidget", () => ({
   __esModule: true,
   default: (props: unknown) =>
-    mockLegacyAttachmentArrayWidget(props) as unknown,
+    mockLegacyMultipleAttachmentWidget(props) as unknown,
 }));
 
 jest.mock("./ApplicationAttachmentWidget", () => ({
@@ -31,10 +31,10 @@ jest.mock("./ApplicationAttachmentWidget", () => ({
     mockVirusScanningAttachmentWidget(props) as unknown,
 }));
 
-jest.mock("./ApplicationAttachmentArrayWidget", () => ({
+jest.mock("./ApplicationMultipleAttachmentWidget", () => ({
   __esModule: true,
   default: (props: unknown) =>
-    mockVirusScanningAttachmentArrayWidget(props) as unknown,
+    mockVirusScanningMultipleAttachmentWidget(props) as unknown,
 }));
 
 const buildProps = (
@@ -70,8 +70,10 @@ describe("widgetComponents attachment selection", () => {
         buildProps({ useMultiAttachmentVirusScanning: true }),
       );
 
-      expect(mockVirusScanningAttachmentArrayWidget).toHaveBeenCalledTimes(1);
-      expect(mockLegacyAttachmentArrayWidget).not.toHaveBeenCalled();
+      expect(mockVirusScanningMultipleAttachmentWidget).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockLegacyMultipleAttachmentWidget).not.toHaveBeenCalled();
     });
 
     it("uses the legacy widget when multi attachment virus scanning is disabled", () => {
@@ -80,8 +82,8 @@ describe("widgetComponents attachment selection", () => {
         buildProps({ useMultiAttachmentVirusScanning: false }),
       );
 
-      expect(mockLegacyAttachmentArrayWidget).toHaveBeenCalledTimes(1);
-      expect(mockVirusScanningAttachmentArrayWidget).not.toHaveBeenCalled();
+      expect(mockLegacyMultipleAttachmentWidget).toHaveBeenCalledTimes(1);
+      expect(mockVirusScanningMultipleAttachmentWidget).not.toHaveBeenCalled();
     });
 
     it("uses the legacy widget when there is no widget support in context", () => {
@@ -91,8 +93,8 @@ describe("widgetComponents attachment selection", () => {
         rawErrors: [],
       });
 
-      expect(mockLegacyAttachmentArrayWidget).toHaveBeenCalledTimes(1);
-      expect(mockVirusScanningAttachmentArrayWidget).not.toHaveBeenCalled();
+      expect(mockLegacyMultipleAttachmentWidget).toHaveBeenCalledTimes(1);
+      expect(mockVirusScanningMultipleAttachmentWidget).not.toHaveBeenCalled();
     });
 
     it("is not switched by the single attachment gate", () => {
@@ -104,8 +106,8 @@ describe("widgetComponents attachment selection", () => {
         }),
       );
 
-      expect(mockLegacyAttachmentArrayWidget).toHaveBeenCalledTimes(1);
-      expect(mockVirusScanningAttachmentArrayWidget).not.toHaveBeenCalled();
+      expect(mockLegacyMultipleAttachmentWidget).toHaveBeenCalledTimes(1);
+      expect(mockVirusScanningMultipleAttachmentWidget).not.toHaveBeenCalled();
     });
   });
 
@@ -149,7 +151,9 @@ describe("widgetComponents attachment selection", () => {
         "AttachmentArray",
         buildProps({ useMultiAttachmentVirusScanning: true }),
       );
-      expect(mockVirusScanningAttachmentArrayWidget).toHaveBeenCalledTimes(1);
+      expect(mockVirusScanningMultipleAttachmentWidget).toHaveBeenCalledTimes(
+        1,
+      );
     });
   });
 });

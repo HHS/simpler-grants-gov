@@ -7,13 +7,12 @@ import userEvent from "@testing-library/user-event";
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 
-import ApplicationAttachmentArrayWidget from "src/components/apply-form/widgets/ApplicationAttachmentArrayWidget";
+import ApplicationMultipleAttachmentWidget from "src/components/apply-form/widgets/ApplicationMultipleAttachmentWidget";
 
 /*
-  SimplerFileInput is deliberately NOT mocked here - these tests drive the real native
-  file input, the real existing file rows and delete controls, and the real FieldErrors
-  DOM, so accessibility and locked/read-only behavior are asserted against what a user
-  and a screen reader would actually encounter.
+  SimplerFileInput is deliberately NOT mocked - driving the real file input, file rows and
+  errors means accessibility and locked/read-only behavior are asserted against the DOM a
+  user and a screen reader would actually encounter.
 */
 
 type UseApplicationAttachmentsResult = {
@@ -118,7 +117,7 @@ const mockUploadThenCreate = (attachments: Attachment[]) => {
   });
 };
 
-describe("ApplicationAttachmentArrayWidget", () => {
+describe("ApplicationMultipleAttachmentWidget", () => {
   beforeEach(() => {
     global.AbortController = fakeAbortController;
     fakeAbortController.mockImplementation(() => ({
@@ -144,7 +143,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
   describe("Initialization from saved values and context", () => {
     it("starts empty when there is no saved value", () => {
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} />,
+        <ApplicationMultipleAttachmentWidget {...defaultProps} />,
       );
 
       expect(hiddenValue(container)).toEqual([]);
@@ -159,7 +158,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       });
 
       const { container } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1", "uuid-2"]}
         />,
@@ -176,7 +175,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       });
 
       const { container } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={JSON.stringify(["uuid-1"])}
         />,
@@ -188,7 +187,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
 
     it("ignores a value that is not a list of ids", () => {
       const { container } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={{ nope: true }}
         />,
@@ -203,7 +202,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       });
 
       render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1", "uuid-2"]}
         />,
@@ -217,7 +216,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       mockUseApplicationAttachments.mockReturnValue({ attachments: null });
 
       render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1"]}
         />,
@@ -231,7 +230,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
     it("picks up file names when attachment context arrives after mount", () => {
       mockUseApplicationAttachments.mockReturnValue({ attachments: null });
       const { rerender } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1"]}
         />,
@@ -244,7 +243,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne],
       });
       rerender(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1"]}
         />,
@@ -261,7 +260,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne],
       });
       const { rerender } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1"]}
         />,
@@ -275,7 +274,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         ],
       });
       rerender(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1"]}
         />,
@@ -292,7 +291,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne, attachmentTwo],
       });
       const { container, rerender } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1"]}
         />,
@@ -300,7 +299,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       expect(hiddenValue(container)).toEqual(["uuid-1"]);
 
       rerender(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1", "uuid-2"]}
         />,
@@ -316,14 +315,14 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne, attachmentTwo],
       });
       const { container, rerender } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1", "uuid-2"]}
         />,
       );
 
       rerender(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-2"]}
         />,
@@ -339,14 +338,14 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne, attachmentTwo],
       });
       const { container, rerender } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1", "uuid-2"]}
         />,
       );
 
       rerender(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-2", "uuid-1"]}
         />,
@@ -363,7 +362,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne],
       });
       const { container, rerender } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1"]}
         />,
@@ -371,7 +370,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       expect(hiddenValue(container)).toEqual(["uuid-1"]);
 
       rerender(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={undefined}
         />,
@@ -386,7 +385,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
     it("does not discard a completed upload on an unrelated parent rerender", async () => {
       mockUploadThenCreate([attachmentOne]);
       const { container, rerender } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} />,
+        <ApplicationMultipleAttachmentWidget {...defaultProps} />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -395,7 +394,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
 
       // parent rerenders with the same (still unsaved) value
       rerender(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={undefined}
         />,
@@ -409,7 +408,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
     it("adds one successful attachment to the value", async () => {
       mockUploadThenCreate([attachmentOne]);
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} />,
+        <ApplicationMultipleAttachmentWidget {...defaultProps} />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -428,7 +427,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
     it("adds several successful attachments from one selection", async () => {
       mockUploadThenCreate([attachmentOne, attachmentTwo]);
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} />,
+        <ApplicationMultipleAttachmentWidget {...defaultProps} />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -449,7 +448,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       });
       mockUploadThenCreate([attachmentTwo]);
       const { container } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1"]}
         />,
@@ -468,7 +467,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       // first create succeeds, second rejects
       mockUploadThenCreate([attachmentOne]);
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} />,
+        <ApplicationMultipleAttachmentWidget {...defaultProps} />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -499,7 +498,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       });
 
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} />,
+        <ApplicationMultipleAttachmentWidget {...defaultProps} />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -526,7 +525,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       });
 
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} />,
+        <ApplicationMultipleAttachmentWidget {...defaultProps} />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -544,7 +543,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       // both uploads resolve to the same attachment id
       mockUploadThenCreate([attachmentOne, attachmentOne]);
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} />,
+        <ApplicationMultipleAttachmentWidget {...defaultProps} />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -561,7 +560,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       mockUploadThenCreate([attachmentOne, attachmentTwo]);
       const markFormDirty = jest.fn();
       render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           formContext={{
             widgetSupport: {
@@ -587,7 +586,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       clientFetchMock.mockImplementation(() =>
         Promise.resolve(new Response(new ReadableStream({ start: () => {} }))),
       );
-      render(<ApplicationAttachmentArrayWidget {...defaultProps} />);
+      render(<ApplicationMultipleAttachmentWidget {...defaultProps} />);
 
       const input = await screen.findByTestId("file-input-input");
       await userEvent.upload(input, [
@@ -607,7 +606,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
       clientFetchMock.mockImplementation(() =>
         Promise.resolve(new Response(new ReadableStream({ start: () => {} }))),
       );
-      render(<ApplicationAttachmentArrayWidget {...defaultProps} />);
+      render(<ApplicationMultipleAttachmentWidget {...defaultProps} />);
 
       const input = await screen.findByTestId("file-input-input");
       await userEvent.upload(input, [
@@ -634,7 +633,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         Promise.resolve(new Response(new ReadableStream({ start: () => {} }))),
       );
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} />,
+        <ApplicationMultipleAttachmentWidget {...defaultProps} />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -651,7 +650,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne, attachmentTwo],
       });
       return render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1", "uuid-2"]}
           formContext={{
@@ -723,7 +722,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne],
       });
       render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1"]}
           {...overrides}
@@ -766,7 +765,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne],
       });
       const { container } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           value={["uuid-1"]}
           disabled={true}
@@ -778,14 +777,17 @@ describe("ApplicationAttachmentArrayWidget", () => {
 
   describe("Labelling and validation", () => {
     it("renders the field title and associates it with the visible input", () => {
-      render(<ApplicationAttachmentArrayWidget {...defaultProps} />);
+      render(<ApplicationMultipleAttachmentWidget {...defaultProps} />);
 
       expect(screen.getByText("Additional Project Title")).toBeInTheDocument();
     });
 
     it("shows the required indicator when the field is required", () => {
       render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} required={true} />,
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          required={true}
+        />,
       );
 
       expect(screen.getByText("*")).toBeInTheDocument();
@@ -796,7 +798,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne],
       });
       render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           required={true}
           value={["uuid-1"]}
@@ -809,7 +811,10 @@ describe("ApplicationAttachmentArrayWidget", () => {
 
     it("sets native required on the chooser when required and nothing is attached", async () => {
       render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} required={true} />,
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          required={true}
+        />,
       );
 
       expect(await screen.findByTestId("file-input-input")).toBeRequired();
@@ -818,7 +823,10 @@ describe("ApplicationAttachmentArrayWidget", () => {
     it("clears native required once an upload succeeds", async () => {
       mockUploadThenCreate([attachmentOne]);
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} required={true} />,
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          required={true}
+        />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -836,7 +844,10 @@ describe("ApplicationAttachmentArrayWidget", () => {
         Promise.resolve(new Response(new ReadableStream({ start: () => {} }))),
       );
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} required={true} />,
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          required={true}
+        />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -861,7 +872,10 @@ describe("ApplicationAttachmentArrayWidget", () => {
         return Promise.reject(new Error("should not be called"));
       });
       render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} required={true} />,
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          required={true}
+        />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -880,7 +894,10 @@ describe("ApplicationAttachmentArrayWidget", () => {
         Promise.resolve(new Response(new ReadableStream({ start: () => {} }))),
       );
       render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} required={true} />,
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          required={true}
+        />,
       );
 
       const input = await screen.findByTestId("file-input-input");
@@ -895,7 +912,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
         attachments: [attachmentOne],
       });
       const { container } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           required={true}
           value={["uuid-1"]}
@@ -919,7 +936,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
 
     it("renders the validation error and marks the input invalid", async () => {
       render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           rawErrors={["This field is required"]}
         />,
@@ -943,7 +960,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
 
     it("marks the input valid once the validation error clears", async () => {
       const { rerender } = render(
-        <ApplicationAttachmentArrayWidget
+        <ApplicationMultipleAttachmentWidget
           {...defaultProps}
           rawErrors={["This field is required"]}
         />,
@@ -954,7 +971,10 @@ describe("ApplicationAttachmentArrayWidget", () => {
       );
 
       rerender(
-        <ApplicationAttachmentArrayWidget {...defaultProps} rawErrors={[]} />,
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          rawErrors={[]}
+        />,
       );
 
       expect(await screen.findByTestId("file-input-input")).toHaveAttribute(
@@ -964,7 +984,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
     });
 
     it("describes the input by the label alone when there is no error", async () => {
-      render(<ApplicationAttachmentArrayWidget {...defaultProps} />);
+      render(<ApplicationMultipleAttachmentWidget {...defaultProps} />);
 
       expect(await screen.findByTestId("file-input-input")).toHaveAttribute(
         "aria-describedby",
@@ -974,7 +994,7 @@ describe("ApplicationAttachmentArrayWidget", () => {
 
     it("keeps the hidden form input and the visible chooser on distinct ids", async () => {
       const { container } = render(
-        <ApplicationAttachmentArrayWidget {...defaultProps} />,
+        <ApplicationMultipleAttachmentWidget {...defaultProps} />,
       );
 
       expect(getHiddenInput(container)).toHaveAttribute(

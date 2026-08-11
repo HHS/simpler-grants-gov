@@ -28,14 +28,12 @@ type SimplerFileInputProps = {
   required?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
-  // ids of every element describing this input (label / help text / field errors).
-  // combined into a single aria-describedby value, so callers can pass more than one.
-  // required so a caller cannot silently drop the input's description - pass an empty
-  // array when nothing on the page describes the input.
+  // ids of the elements describing this input (label, help text, field errors), combined
+  // into one aria-describedby. Required, so a caller cannot silently drop the
+  // description - pass an empty array when nothing describes the input.
   describedByIds: string[];
-  // set when the surrounding form considers the field invalid (ex. JSON schema
-  // validation). Kept separate from internal upload errors so that a later
-  // successful upload does not clear a form level validation error.
+  // set when the form considers the field invalid. Kept separate from upload errors so a
+  // later successful upload does not clear a form level validation error.
   formInvalid?: boolean;
   multiFile?: boolean;
 };
@@ -61,13 +59,12 @@ export const SimplerFileInput = ({
 }: SimplerFileInputProps) => {
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
-  // monotonic counter rather than a timestamp - a batch of files selected at once
-  // would otherwise share an upload id, since Date.now() does not advance between them
+  // a counter rather than a timestamp: files selected in one batch would otherwise share
+  // an upload id, since Date.now() does not advance between them
   const uploadIdCounter = useRef(0);
 
-  // locked (disabled) and read only forms must not offer any way to add or remove files.
-  // note that readOnly is deliberately not forwarded to the native input - it has no
-  // effect on <input type="file">, so we disable the control instead.
+  // readOnly is deliberately not forwarded to the native input - it has no effect on
+  // <input type="file">, so the control is disabled instead
   const isEditable = !disabled && !readOnly;
 
   const [filePendingDeletion, setFilePendingDeletion] =
@@ -117,10 +114,9 @@ export const SimplerFileInput = ({
       ? [changeEvent.target.files[0]]
       : Array.from(changeEvent.target.files);
 
-    // upload ids are assigned before the setter, so the updater stays pure and a
-    // repeated invocation cannot advance the counter
+    // ids are assigned outside the setter, so a repeated invocation cannot advance the
+    // counter; the functional setter keeps rapid selections from clobbering each other
     const newUploads = toUploadMetadata(filesToUpload);
-    // functional setter so that rapid successive selections do not clobber each other
     setActiveUploads((previousActiveUploads) => [
       ...previousActiveUploads,
       ...newUploads,
@@ -202,11 +198,10 @@ export const SimplerFileInput = ({
 
   const describedBy = describedByIds.filter(Boolean).join(" ") || undefined;
 
-  // a field that already has attachments is satisfied. The chooser itself is always
-  // empty, so leaving the native required flag set would block form submission (and for
-  // a single file field the chooser is hidden at that point, which makes the browser
-  // validation message unreachable). Required-ness is still communicated by the field
-  // label and enforced by form schema validation.
+  // a field that already has files is satisfied, but the chooser itself is always empty -
+  // keeping the native flag set would block submission, and for a single file field the
+  // chooser is hidden by then, so the browser's message would be unreachable. The label
+  // and form schema validation still convey that the field is required.
   const nativeRequired = required && !existingFiles?.length;
 
   return (
@@ -267,8 +262,8 @@ export const SimplerFileInput = ({
         filesWithDeleteError={filesWithDeleteError}
         disabled={disabled || readOnly}
       />
-      {/* the modal is not rendered at all when the field is locked or read only,
-          so there is no way to reach the delete confirmation by pointer or keyboard */}
+      {/* not rendered when locked or read only, so the delete confirmation cannot be
+          reached by pointer or keyboard */}
       {isEditable && (
         <DeleteFileModal
           // note that this only supports deleting one file at a time.

@@ -53,13 +53,9 @@ export const parseAttachmentIds = (value: unknown): string[] => {
 };
 
 /*
-  builds the aria-describedby id list for an attachment field's native input.
-  Both the label and the field errors describe the input, so when validation
-  fails while a title is present, both ids must be referenced.
-
-  Returns an empty list when neither is present. A field with no title renders no label
-  element (DynamicFieldLabel returns null), so there is nothing to point at - emitting an
-  id for an element that does not exist would leave a dangling aria-describedby.
+  Both the label and the field errors describe the input, so a failing validation on a
+  titled field must reference both ids. An untitled field renders no label element at all
+  (DynamicFieldLabel returns null), so omitting its id avoids a dangling aria-describedby.
 */
 export const buildAttachmentDescribedByIds = ({
   visibleInputId,

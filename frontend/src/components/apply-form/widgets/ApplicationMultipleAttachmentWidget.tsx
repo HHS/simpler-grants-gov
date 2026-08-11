@@ -29,39 +29,22 @@ import { FieldErrors } from "src/components/core/forms/FieldErrors";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /*
-  Virus scanning file input for form fields that hold multiple attachments.
+  Virus-scanning attachment input for form fields that allow multiple files.
+  Uploads and deletions update the form locally and persist when the form is saved.
 
-  Conditionally rendered in place of MultipleAttachmentUploadWidget - see
-  src/utils/applyForm/virusScanningForms.ts for the temporary rollout gate, removed
-  in #11352.
-
-  Value contract: the persisted value is an ordered array of application_attachment_id
-  strings, serialized onto the hidden input. In-flight upload state (progress, scan,
-  cancellation, per file errors) lives inside SimplerFileInput and never reaches form
-  data - only a successfully created attachment id is added to the selection.
-
-  Lifecycle note: additions and deletions here are local until the form is saved. Save
-  associates added attachments with the form and records application history; navigating
-  away without saving leaves the previously saved state untouched. The underlying
-  ApplicationAttachment row and S3 object are still created at upload time, so an
-  abandoned upload leaves an unreferenced record that counts toward the per application
-  attachment limit. Cleaning those up requires separate backend lifecycle work.
+  Rendered in place of MultipleAttachmentUploadWidget for the forms listed in
+  src/utils/applyForm/virusScanningForms.ts, until that rollout gate is removed in #11352.
 */
 
 /*
-  Placeholder shown for a selected attachment id whose metadata is not available yet -
-  either a saved id before the attachment context loads, or the brief interval after an
-  upload before refreshed context includes it.
-
-  Deliberately the same literal the existing attachment widgets use rather than an i18n
-  string: AttachmentUploadWidget, MultipleAttachmentUploadWidget and
-  MultiAttachmentUploadList compare file names against this exact value to decide how to
-  render a row, so a translated value here would silently diverge from those checks.
-  Consolidating it belongs with the legacy widget cleanup in #11352.
+  Fallback name used when attachment metadata has not loaded yet.
+  Matches the existing attachment widgets, which compare file names against this exact
+  value to decide how to render a row, so it cannot be translated independently of them.
+  Consolidate when the legacy widgets are removed in #11352.
 */
 const PREVIOUSLY_UPLOADED_FILE_NAME = "(Previously uploaded file)";
 
-const ApplicationAttachmentArrayWidget = ({
+const ApplicationMultipleAttachmentWidget = ({
   disabled,
   formContext,
   id,
@@ -84,11 +67,9 @@ const ApplicationAttachmentArrayWidget = ({
     );
 
   /*
-    The apply form pipeline does not feed onChange results back into `value` - `value`
-    is the last saved response. So the current selection is local state seeded from the
-    saved value, and is only re-seeded when the saved value itself actually changes
-    (a parent update or a form reset). That keeps a parent rerender from discarding an
-    upload that has just completed.
+    `value` is the last saved response, not a live value - the apply form does not feed
+    onChange back into it. Re-seeding only when the saved value actually changes keeps a
+    parent rerender from discarding an upload that has just completed.
   */
   const [selectedAttachmentIds, setSelectedAttachmentIds] = useState<string[]>(
     () => parseAttachmentIds(value),
@@ -99,15 +80,15 @@ const ApplicationAttachmentArrayWidget = ({
 
   const savedAttachmentIds = useMemo(() => parseAttachmentIds(value), [value]);
   const serializedSavedValue = JSON.stringify(savedAttachmentIds);
-  // adjusting state during render rather than in an effect, so a changed saved value is
-  // applied in the same pass and no effect can later overwrite a completed upload
+  // adjusted during render rather than in an effect, so no effect can later overwrite a
+  // completed upload
   if (serializedSavedValue !== lastSeenSavedValue) {
     setLastSeenSavedValue(serializedSavedValue);
     setSelectedAttachmentIds(savedAttachmentIds);
   }
 
-  // metadata for attachments uploaded in this session, used only until the refreshed
-  // attachment context includes them
+  // metadata for files uploaded in this session, used only until the attachment context
+  // refreshes to include them
   const [locallyUploadedAttachments, setLocallyUploadedAttachments] = useState<
     Record<string, Attachment>
   >({});
@@ -120,12 +101,8 @@ const ApplicationAttachmentArrayWidget = ({
     return byId;
   }, [contextAttachments]);
 
-  /*
-    The server attachment is always preferred over a locally held copy, even when the id
-    is unchanged, so refreshed metadata (file name, size, timestamps, download path) is
-    never left stale. The local copy is the fallback for the short interval after an
-    upload before refreshed context includes it.
-  */
+  // server metadata always wins over the local copy, so a refreshed file name or download
+  // path is never left stale
   const existingFiles: UploadFileMetadata[] = useMemo(
     () =>
       selectedAttachmentIds.map((attachmentId) => {
@@ -144,11 +121,8 @@ const ApplicationAttachmentArrayWidget = ({
     [selectedAttachmentIds, contextAttachmentsById, locallyUploadedAttachments],
   );
 
-  /*
-    Runs once per uploaded file after its scan completes. Each file gets its own request,
-    so a failure is isolated to that file - SimplerFileInput surfaces the error on that
-    row only and already successful attachments are left in place.
-  */
+  // one request per uploaded file, so a failure is isolated to that file and already
+  // successful attachments are left in place
   const handleCreateApplicationAttachment = useCallback(
     async (pendingFileId: string, abortSignal: AbortSignal) => {
       const response = await createApplicationAttachmentFetcher(
@@ -165,8 +139,7 @@ const ApplicationAttachmentArrayWidget = ({
         ...previous,
         [attachment.application_attachment_id]: attachment,
       }));
-      // functional setter plus an id check, so a repeated success callback for the same
-      // attachment cannot add it twice
+      // id check, so a repeated success callback cannot add the same attachment twice
       setSelectedAttachmentIds((previousIds) =>
         previousIds.includes(attachment.application_attachment_id)
           ? previousIds
@@ -178,11 +151,8 @@ const ApplicationAttachmentArrayWidget = ({
     [applicationId, createApplicationAttachmentFetcher],
   );
 
-  /*
-    Removal is local only. The attachment is not deleted from the application here - the
-    form save diffs the attachment ids and performs the deletion and history event, so
-    navigating away without saving restores the previously saved state.
-  */
+  // removal is local only - saving the form is what actually deletes the attachment, so
+  // navigating away without saving restores the previously saved state
   const handleDeleteAttachment = useCallback(
     (attachmentId: string): Promise<undefined> => {
       setSelectedAttachmentIds((previousIds) =>
@@ -194,11 +164,8 @@ const ApplicationAttachmentArrayWidget = ({
     [markFormDirty],
   );
 
-  /*
-    Notify the parent when the selection changes. The apply form pipeline does not
-    currently supply onChange, so this is only for consumers that do - the hidden input
-    above remains the value that is actually submitted.
-  */
+  // only for consumers that pass onChange - the apply form does not, and submits the
+  // hidden input below instead
   const lastNotifiedSelection = useRef(JSON.stringify(selectedAttachmentIds));
   useEffect(() => {
     const serialized = JSON.stringify(selectedAttachmentIds);
@@ -226,8 +193,7 @@ const ApplicationAttachmentArrayWidget = ({
         description={description}
         labelType={labelType}
       />
-      {/* the hidden input carries the canonical value - an ordered array of
-          application_attachment_id strings */}
+      {/* the submitted value: the selected attachment ids, in display order */}
       <input
         type="hidden"
         name={id}
@@ -260,4 +226,4 @@ const ApplicationAttachmentArrayWidget = ({
   );
 };
 
-export default ApplicationAttachmentArrayWidget;
+export default ApplicationMultipleAttachmentWidget;
