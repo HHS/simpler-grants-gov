@@ -49,6 +49,12 @@ FORM_JSON_SCHEMA = {
         "project_start_date",
         "project_end_date",
         "project_director",
+        # Section 8 is always required, which intentionally differs from legacy: the XSD marks
+        # ContactPersonGroup minOccurs="0" and the .dat makes it conditionally optional when
+        # "Same as Project Director" is checked. Per epic #10796 the checkbox is informational
+        # only - it does not auto-populate, hide, or clear Section 8 - so the applicant always
+        # fills it in and it is always required. See the SF-424 Short notes in
+        # api/src/services/xml_generation/README.md.
         "contact_person",
         "application_certification",
         "authorized_representative",
@@ -635,7 +641,7 @@ SF424Short_v3_0 = Form(
     # https://www.grants.gov/forms/form-items-description/fid/711
     form_id=uuid.UUID("cf355a4d-d840-43fd-a78f-729edf41ab4c"),
     legacy_form_id=711,
-    form_name="APPLICATION FOR FEDERAL DOMESTIC ASSISTANCE-SHORT ORGANIZATIONAL (SF-424)",
+    form_name="Application for Federal Domestic Assistance-Short Organizational (SF-424)",
     short_form_name="SF424_Short_3_0",
     form_version="3.0",
     agency_code="SGG",
