@@ -19,9 +19,9 @@ export async function assertApplicationHistoryVisible(
 
   // Wait for table to be visible (may take longer on mobile)
   // Look for either a standard table or a responsive data table container
-  const tableContainer = page.locator(
-    "table, [role='table'], [data-testid*='responsive-data']",
-  ).first();
+  const tableContainer = page
+    .locator("table, [role='table'], [data-testid*='responsive-data']")
+    .first();
   await expect(tableContainer).toBeVisible({ timeout: 10000 });
 }
 
