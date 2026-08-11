@@ -21,3 +21,10 @@ jobs:
     secrets: inherit
     with:
       playwright_tags: "@smoke|@core-regression|@full-regression"
+  send-slack-notification:
+    if: failure()
+    needs: [daily-e2e-tests-deployed, daily-e2e-tests-local]
+    uses: ./.github/workflows/send-slack-notification.yml
+    with:
+      "channel_id": "alerts-e2e"
+    secrets: inherit

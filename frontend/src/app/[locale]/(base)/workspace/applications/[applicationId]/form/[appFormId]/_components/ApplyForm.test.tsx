@@ -2,6 +2,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { render, screen, waitFor } from "@testing-library/react";
 import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyForm";
 import { UiSchema } from "src/types/applyForm/types";
+import { Attachment } from "src/types/attachmentTypes";
 
 const pushMock = jest.fn();
 
@@ -14,6 +15,7 @@ jest.mock("next/navigation", () => ({
     back: jest.fn(),
     forward: jest.fn(),
   }),
+  useParams: () => ({ applicationId: "application-123" }),
 }));
 
 type FormActionArgs = [
@@ -42,6 +44,8 @@ jest.mock(
   () => ({
     handleFormAction: (...args: [...FormActionArgs]) =>
       mockHandleFormAction(...args),
+    // referenced by useAttachmentDelete within the legacy attachment widget
+    deleteAttachmentAction: jest.fn(),
   }),
 );
 
@@ -128,6 +132,45 @@ const uiSchema: UiSchema = [
     ],
   },
 ];
+
+// mirrors the shape of the Attachment Form's schema after processing ($refs resolved, allOf merged)
+const attachmentFormSchema: RJSFSchema = {
+  title: "attachment form schema",
+  properties: {
+    att1: { type: "string", title: "Attachment 1" },
+  },
+};
+
+const attachmentUiSchema: UiSchema = [
+  {
+    type: "section",
+    label: "1) Attachment 1",
+    name: "attachment1",
+    children: [
+      {
+        type: "field",
+        definition: "/properties/att1",
+        widget: "Attachment",
+      },
+    ],
+  },
+];
+
+const savedAttachment: Attachment = {
+  application_attachment_id: "22222222-2222-4222-8222-222222222222",
+  file_name: "narrative.pdf",
+  download_path: "/download/narrative.pdf",
+  file_size_bytes: 2048,
+  mime_type: "application/pdf",
+  created_at: "2024-01-01T00:00:00.000Z",
+  updated_at: "2024-01-02T00:00:00.000Z",
+};
+
+const getHiddenInput = (container: HTMLElement, name: string) =>
+  // eslint-disable-next-line testing-library/no-node-access
+  container.querySelector<HTMLInputElement>(
+    `input[type="hidden"][name="${name}"]`,
+  );
 
 describe("ApplyForm", () => {
   beforeEach(() => {
@@ -567,6 +610,93 @@ describe("ApplyForm", () => {
     await waitFor(() => {
       const alert = screen.getByTestId("alert");
       expect(alert).toHaveTextContent("savedMessage");
+    });
+  });
+
+  describe("attachment widget rendering", () => {
+    it("renders the virus scanning attachment widget for a saved attachment when useVirusScanning is on", () => {
+      const { container } = render(
+        <ApplyForm
+          applicationId="application-123"
+          formId="test"
+          formSchema={attachmentFormSchema}
+          savedFormData={{
+            att1: savedAttachment.application_attachment_id,
+          }}
+          uiSchema={attachmentUiSchema}
+          validationWarnings={[]}
+          attachments={[savedAttachment]}
+          applicationStatus="in_progress"
+          useVirusScanning={true}
+        />,
+      );
+
+      // the hidden input carries the saved attachment id into the form submission
+      expect(getHiddenInput(container, "att1")).toHaveValue(
+        savedAttachment.application_attachment_id,
+      );
+
+      // the virus scanning widget keeps its native file input mounted
+      expect(screen.getByTestId("file-input")).toBeInTheDocument();
+
+      // the saved attachment's metadata is resolved from the attachments prop
+      expect(screen.getByTestId("file-input-existing-files")).toHaveTextContent(
+        "narrative.pdf",
+      );
+    });
+
+    it("renders an empty virus scanning attachment field when there is no saved value", () => {
+      const { container } = render(
+        <ApplyForm
+          applicationId="application-123"
+          formId="test"
+          formSchema={attachmentFormSchema}
+          savedFormData={{}}
+          uiSchema={attachmentUiSchema}
+          validationWarnings={[]}
+          attachments={[savedAttachment]}
+          applicationStatus="in_progress"
+          useVirusScanning={true}
+        />,
+      );
+
+      expect(screen.getByText("Attachment 1")).toBeInTheDocument();
+      expect(getHiddenInput(container, "att1")).toHaveValue("");
+      expect(screen.getByTestId("file-input")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("file-input-existing-files"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("renders the legacy attachment widget when useVirusScanning is off", () => {
+      const { container } = render(
+        <ApplyForm
+          applicationId="application-123"
+          formId="test"
+          formSchema={attachmentFormSchema}
+          savedFormData={{
+            att1: savedAttachment.application_attachment_id,
+          }}
+          uiSchema={attachmentUiSchema}
+          validationWarnings={[]}
+          attachments={[savedAttachment]}
+          applicationStatus="in_progress"
+          useVirusScanning={false}
+        />,
+      );
+
+      // the legacy widget still submits the saved attachment id
+      expect(getHiddenInput(container, "att1")).toHaveValue(
+        savedAttachment.application_attachment_id,
+      );
+
+      // but unmounts its file input once a file exists, and renders the
+      // file name without the existing-files display
+      expect(screen.queryByTestId("file-input")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("file-input-existing-files"),
+      ).not.toBeInTheDocument();
+      expect(screen.getByText("narrative.pdf")).toBeInTheDocument();
     });
   });
 });

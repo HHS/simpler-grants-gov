@@ -4,10 +4,9 @@
 # OpenSearch, and the workflow service). A few environment-specific settings are
 # deferred for the initial infrastructure bring-up because they don't exist yet
 # in the new account:
-#   - HTTPS/custom domains: no ACM certificate or Route53 hosted zone yet.
 #   - Notifications: no SES domain identity yet.
 #   - New Relic entity GUIDs: create the infra-dev entities, then fill these in.
-# The intended infra-dev domain names are shown in comments below.
+
 module "infra_dev_config" {
   source         = "./env-config"
   project_name   = local.project_name
@@ -16,23 +15,32 @@ module "infra_dev_config" {
   environment    = "infra-dev"
   network_name   = "infra-dev-simpler-grants"
 
+  app_environment_name = "dev"
+
   domain_name            = "api.dev.simpler.grants.gov"
   secondary_domain_names = ["alb.dev.simpler.grants.gov"]
-  enable_https           = false
+  enable_https           = true
+
+  enable_api_gateway_domain_name = true
+
+  s3_cdn_domain_name = "files.dev.simpler.grants.gov"
+  enable_cdn_alias   = true
+
+  mtls_domain_name = "soap.dev.simpler.grants.gov"
 
   has_database                  = local.has_database
   database_enable_http_endpoint = true
   database_engine_version       = "17.7"
-  database_deletion_protection  = false # non-prod experimental environment
-  database_newrelic_entity_guid = ""    # Populate once the New Relic entity for the infra-dev RDS cluster exists
+  database_deletion_protection  = false                                              # non-prod experimental environment
+  database_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXw3NDM0NDY4MDExNzAwMjY1NzM1" # Same entity as dev
 
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
   enable_notifications            = false # Enable once an SES domain identity exists for infra-dev
 
-  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the infra-dev primary ALB exists
-  service_newrelic_mtls_entity_guid = "" # Populate once the New Relic entity for the infra-dev mTLS ALB exists
-  api_host_newrelic_entity_guid     = "" # Populate once the New Relic entity for the infra-dev ECS service host exists
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyODk0OTk3NTE4Nzc4MzA4NzUz"
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtNTc4NjYzMjA1MjA4MDAyNTA2Mg"
+  api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058OTc2NDAyMDk4"
 
   # Sizing mirrors dev.
   instance_desired_instance_count = 2
@@ -55,12 +63,14 @@ module "infra_dev_config" {
     ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
     ENABLE_FILE_UPLOAD_ENDPOINTS          = 1
 
+    LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-dev-simpler-grants-gov"
+
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "true"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation
-    FRONTEND_URL             = "https://infra-dev.simpler.grants.gov"
+    FRONTEND_URL             = "https://dev.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 

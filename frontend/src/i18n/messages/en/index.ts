@@ -542,6 +542,13 @@ export const messages = {
       uploadBy: "Upload by",
       uploadDate: "Upload date",
     },
+    attachmentUpload: {
+      error:
+        "Processing failed due to a system error. Try uploading your file again.",
+      success:
+        "Success: File scan complete. “Save” this form to attach the file.",
+      uploading: "Uploading...",
+    },
     historyTable: {
       applicationHistory: "Application History",
       timestamp: "Timestamp",
@@ -2665,6 +2672,13 @@ export const messages = {
         invalidEmail:
           "Incorrect text format. Please ensure there are no spaces or missing characters.",
       },
+    },
+    sectionRequiredForms: {
+      header: "Forms in this package",
+      subHeader: "Select the forms applicants must complete.",
+      selectFormsButton: "Select forms",
+      labelForm: "Item",
+      labelRequirement: "Requirement",
     },
   },
   FeatureFlagsAdmin: {
