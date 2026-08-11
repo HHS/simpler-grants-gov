@@ -148,8 +148,9 @@ export async function competitionFormAction(
   requiredForms: CompetitionFormsSubmitApi,
   formData: FormData,
 ): Promise<CompetitionActionState> {
-  // PLACEHOLDER: we will save these objects later
-  // console.log("DEBUG: requiredForms: ", requiredForms);
+  if (!requiredForms) {
+    // PLACEHOLDER to remove lint errors. We will save these objects later.
+  }
 
   // 1. Save the form; if there are API errors, display them
   const saveResult = await updateCompetition(formData);

@@ -7,6 +7,10 @@ jest.mock("next-intl", () => ({
   useTranslations: jest.fn(() => (key: string) => key),
 }));
 
+const alwaysRequiredForms: Record<string, boolean> = {
+  "1623b310-85be-496a-b84b-34bdee22a68a": true,
+};
+
 describe("RequiredForms", () => {
   const alwaysRequiredFormId = "1623b310-85be-496a-b84b-34bdee22a68a";
 
@@ -41,7 +45,8 @@ describe("RequiredForms", () => {
     it("renders required status when is_required is true", () => {
       render(
         <RequiredForms
-          competitionForms={[
+          alwaysRequiredForms={alwaysRequiredForms}
+          requiredForms={[
             {
               form_id: alwaysRequiredFormId,
               is_required: true,
@@ -57,7 +62,8 @@ describe("RequiredForms", () => {
     it("renders conditional status when is_required is false", () => {
       render(
         <RequiredForms
-          competitionForms={[
+          alwaysRequiredForms={alwaysRequiredForms}
+          requiredForms={[
             {
               form_id: "conditional-form-id",
               is_required: false,
@@ -77,7 +83,8 @@ describe("RequiredForms", () => {
     it("renders the always label for forms in the always required list", () => {
       render(
         <RequiredForms
-          competitionForms={[
+          alwaysRequiredForms={alwaysRequiredForms}
+          requiredForms={[
             {
               form_id: alwaysRequiredFormId,
               is_required: true,
@@ -90,14 +97,24 @@ describe("RequiredForms", () => {
       expect(screen.getByText("requiredStates.always")).toBeInTheDocument();
     });
 
-    it("automatically adds the always required form when competitionForms is empty", () => {
+    it("renders no requirements when requiredForms is empty", () => {
       render(
-        <RequiredForms competitionForms={[]} formDetails={mockFormDetails} />,
+        <RequiredForms
+          alwaysRequiredForms={alwaysRequiredForms}
+          requiredForms={[]}
+          formDetails={mockFormDetails}
+        />,
       );
 
-      expect(screen.getByText("requiredStates.always")).toBeInTheDocument();
-
-      expect(screen.getByText("requiredStates.required")).toBeInTheDocument();
+      expect(
+        screen.queryByText("requiredStates.always"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("requiredStates.required"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("requiredStates.conditional"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -105,7 +122,8 @@ describe("RequiredForms", () => {
     it("renders the form short name and version", () => {
       render(
         <RequiredForms
-          competitionForms={[
+          alwaysRequiredForms={alwaysRequiredForms}
+          requiredForms={[
             {
               form_id: alwaysRequiredFormId,
               is_required: true,
@@ -122,7 +140,8 @@ describe("RequiredForms", () => {
     it("renders form name without the parenthetical suffix", () => {
       render(
         <RequiredForms
-          competitionForms={[
+          alwaysRequiredForms={alwaysRequiredForms}
+          requiredForms={[
             {
               form_id: alwaysRequiredFormId,
               is_required: true,
@@ -140,7 +159,8 @@ describe("RequiredForms", () => {
     it("does not render a requirement label when matching form details are not found", () => {
       render(
         <RequiredForms
-          competitionForms={[
+          alwaysRequiredForms={alwaysRequiredForms}
+          requiredForms={[
             {
               form_id: "missing-form",
               is_required: true,
@@ -160,7 +180,8 @@ describe("RequiredForms", () => {
     it("passes accessibility scan when rendering a required form", async () => {
       const { container } = render(
         <RequiredForms
-          competitionForms={[
+          alwaysRequiredForms={alwaysRequiredForms}
+          requiredForms={[
             {
               form_id: alwaysRequiredFormId,
               is_required: true,
@@ -177,7 +198,8 @@ describe("RequiredForms", () => {
     it("passes accessibility scan when rendering a conditional form", async () => {
       const { container } = render(
         <RequiredForms
-          competitionForms={[
+          alwaysRequiredForms={alwaysRequiredForms}
+          requiredForms={[
             {
               form_id: "conditional-form-id",
               is_required: false,
