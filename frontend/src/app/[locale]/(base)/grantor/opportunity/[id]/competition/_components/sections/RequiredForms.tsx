@@ -6,29 +6,17 @@ import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
 import { useTranslations } from "next-intl";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-// SF 424. As we start to support other form families, this will be replaced with a more complex function
-const alwaysRequiredForms: string[] = ["1623b310-85be-496a-b84b-34bdee22a68a"];
-
 export function RequiredForms({
-  competitionForms = [],
+  alwaysRequiredForms,
+  requiredForms = [],
   formDetails,
 }: {
-  competitionForms?: CompetitionFormsSubmitApi;
+  alwaysRequiredForms: Record<string, boolean>;
+  requiredForms?: CompetitionFormsSubmitApi;
   formDetails: FormType[];
 }) {
   const t = useTranslations("OpportunityCompetition.sectionRequiredForms");
   const tForm = useTranslations("FormSelectModal");
-
-  // Initialize the list of required forms.
-  if (competitionForms.length == 0) {
-    alwaysRequiredForms.forEach((alwaysRequiredForm) => {
-      const form = {
-        form_id: alwaysRequiredForm,
-        is_required: true,
-      };
-      competitionForms.push(form);
-    });
-  }
 
   return (
     <div
@@ -54,8 +42,8 @@ export function RequiredForms({
             {t("labelRequirement")}
           </Grid>
         </Grid>
-        {competitionForms.map((form, index) => {
-          const alwaysRequired = alwaysRequiredForms.includes(form.form_id);
+        {requiredForms.map((form, index) => {
+          const alwaysRequired = alwaysRequiredForms[form.form_id] === true;
           const formData = formDetails.find(
             (details) => details.form_id === form.form_id,
           );
