@@ -88,6 +88,8 @@ export async function createOpportunitySummaryForGrantor({
   const response = await fetchGrantorOpportunityWithMethod("POST")({
     subPath: `${opportunityId}/summaries`,
     body,
+    // want to allow responses with failed validations through so we can properly handle displaying validation errors
+    allowedErrorStatuses: [422],
   });
 
   return (await response.json()) as OpportunitySummaryDetailApiResponse;
@@ -101,6 +103,8 @@ export async function updateOpportunitySummaryForGrantor({
   const response = await fetchGrantorOpportunityWithMethod("PUT")({
     subPath: `${opportunityId}/summaries/${opportunitySummaryId}`,
     body,
+    // want to allow responses with failed validations through so we can properly handle displaying validation errors
+    allowedErrorStatuses: [422],
   });
 
   return (await response.json()) as OpportunitySummaryDetailApiResponse;

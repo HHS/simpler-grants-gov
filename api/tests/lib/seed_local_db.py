@@ -592,6 +592,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "f0a1b2c3-d4e5-6789-0abc-def123456789",
         ),
         (
+            "SF424_Short_3_0",
+            "E2E-SF424SHORT",
+            "SF-424 Short Organizational",
+            "425c2ffe-6fbd-4852-ab72-b64467fe3df0",
+            "e5a3d7f1-9c26-4b84-9a15-6d3f827a1b4e",
+        ),
+        (
             "SF424A",
             "E2E-SF424A",
             "Budget Information for Non-Construction Programs (SF-424A)",
@@ -604,6 +611,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "Assurances for Non-Construction Programs (SF-424B)",
             "dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6",
             "15d10405-d81b-4b8e-ae56-8ac1bd4c5560",
+        ),
+        (
+            "SF424C",
+            "E2E-SF424C",
+            "Budget Information for Construction Programs (SF-424C)",
+            "a4c8e1f2-3b6d-4e91-8a2c-7f5b9d3e6a18",
+            "d9f2b6e4-1c8a-4b73-9e6f-2a5d8c4b7f19",
         ),
         (
             "SF424D",

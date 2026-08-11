@@ -8,6 +8,7 @@ import {
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import {
   ApplicantTypes,
+  CompetitionFormsSubmitApi,
   CompetitionSaveRequest,
 } from "src/types/competitionsResponseTypes";
 
@@ -144,8 +145,13 @@ export async function updateCompetition(
 
 export async function competitionFormAction(
   submitType: string,
+  requiredForms: CompetitionFormsSubmitApi,
   formData: FormData,
 ): Promise<CompetitionActionState> {
+  if (!requiredForms) {
+    // PLACEHOLDER to remove lint errors. We will save these objects later.
+  }
+
   // 1. Save the form; if there are API errors, display them
   const saveResult = await updateCompetition(formData);
   if (saveResult.errorMessage) {

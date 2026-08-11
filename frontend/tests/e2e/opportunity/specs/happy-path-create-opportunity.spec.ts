@@ -23,7 +23,7 @@ import { assertButtonEnabledDisabledStates } from "tests/e2e/utils/common/index"
 import { waitForOpportunityRowByStatus } from "tests/e2e/utils/opportunities/table-row-utils";
 import { fillPageFields } from "tests/e2e/utils/pages/general-pages-filling";
 
-const { GRANTOR, CORE_REGRESSION } = VALID_TAGS;
+const { GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
 
 test.describe("Grantor Opportunity Happy Path", () => {
@@ -38,7 +38,7 @@ test.describe("Grantor Opportunity Happy Path", () => {
 
   test(
     "Create opportunity draft and verify draft status on list page",
-    { tag: [GRANTOR, CORE_REGRESSION] },
+    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,

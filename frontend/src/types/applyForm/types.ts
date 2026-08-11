@@ -269,6 +269,7 @@ type UiSchemaBasicField = {
   type: "field" | "null";
   widget?: WidgetTypes;
   name?: string;
+  printDescription?: boolean;
 } & (
   | {
       definition: DefinitionPath;
@@ -399,6 +400,7 @@ export interface UswdsWidgetProps<
     rootSchema?: RJSFSchema;
     rootFormData?: unknown;
     widgetSupport?: {
+      useVirusScanning: boolean;
       validationWarnings?:
         FormattedFormValidationWarning[] | FormValidationWarning[];
       deletedEntryIndexesByFieldListPath?: Record<string, number[]>;

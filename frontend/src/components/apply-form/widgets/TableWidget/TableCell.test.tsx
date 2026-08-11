@@ -54,7 +54,6 @@ describe("TableCell", () => {
     expect(input).toHaveAttribute("type", "text");
     expect(input).toHaveAttribute("inputmode", "decimal");
     expect(input).toHaveValue("1250.5");
-    expect(input).toHaveClass("overflow-x-auto");
   });
 
   it("updates the input display when the value prop changes", () => {
@@ -243,6 +242,46 @@ describe("TableCell", () => {
     );
   });
 
+  it("renders numeric read-only values as a single unbroken value in the current cell layout", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "readOnly",
+          definition: "/properties/total",
+          format: "dollar",
+        }}
+        id="read-only-cell"
+        value={928886}
+      />,
+    );
+
+    const readOnlyEl = screen.getByTestId("read-only-cell-read-only");
+    expect(readOnlyEl).toHaveClass("applyform-table-cell-value");
+    expect(readOnlyEl).not.toHaveStyle("overflow-wrap: anywhere");
+    expect(readOnlyEl).not.toHaveStyle("word-break: break-all");
+    expect(readOnlyEl).not.toHaveStyle("word-break: break-word");
+  });
+
+  it("renders numeric input values without adding mid-number break styles", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+          format: "dollar",
+        }}
+        id="input-cell"
+        value={928886}
+      />,
+    );
+
+    const input = screen.getByTestId("input-cell-input");
+    expect(input).toHaveClass("applyform-table-cell-value");
+    expect(input).not.toHaveStyle("overflow-wrap: anywhere");
+    expect(input).not.toHaveStyle("word-break: break-all");
+    expect(input).not.toHaveStyle("word-break: break-word");
+  });
+
   it("renders validation errors when cellErrors provided", () => {
     render(
       <TableCell
@@ -264,7 +303,6 @@ describe("TableCell", () => {
       "error-for-input-cell-with-errors",
     );
 
-    // FieldErrors component should render the errors
     expect(screen.getByText("Must be greater than zero")).toBeInTheDocument();
     expect(screen.getByText("Cannot exceed budget")).toBeInTheDocument();
   });

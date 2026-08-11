@@ -162,6 +162,60 @@ FORM_XML_TRANSFORM_RULES = {
 }
 ```
 
+### Example: SF-424 Short (v3.0)
+
+The SF-424 Short form uses `ContactPersonDataTypeV3` from GlobalLibrary for both the Project Director (Section 7) and the Primary Contact (Section 8):
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for SF-424 Short",
+        "form_name": "SF424_Short_3_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SF424_Short_3_0-V3.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
+        "xml_structure": {"root_element": "SF424_Short_3_0", "version": "3.0"},
+    },
+    "agency_name": {"xml_transform": {"target": "AgencyName"}},
+    "applicant_type_code_mapping": {
+        "xml_transform": {
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "one_to_many",
+                "source_field": "applicant_type_code",
+                "target_pattern": "ApplicantTypeCode{index}",
+                "max_count": 3,
+            },
+        }
+    },
+    "project_director": _contact_person_group_xml("ProjectDirectorGroup"),
+    "same_as_project_director": {
+        "xml_transform": {
+            "target": "SameAsProjectDirector",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "contact_person": _contact_person_group_xml("ContactPersonGroup"),
+    # ... additional fields
+}
+```
+
+**SF-424 Short Field Mapping Notes:**
+
+- **ContactPersonDataTypeV3**: Both `project_director` (Section 7) and `contact_person` (Section 8) use the same nested structure (`ContactPersonGroup`/`ProjectDirectorGroup`) with Name, Title, Address, Phone, Fax, and Email sub-elements typed in the `globLib` namespace.
+- **Helper function**: `_contact_person_group_xml(target)` generates the nested `ContactPersonDataTypeV3` structure, accepting the XML target element name as a parameter. The base dict uses a `PLACEHOLDER` sentinel that the helper overwrites with the real target.
+- **Applicant type code — one-to-many**: `applicant_type_code` (a list of up to 3 values) maps to separate indexed elements `ApplicantTypeCode1`, `ApplicantTypeCode2`, `ApplicantTypeCode3` via the `one_to_many` conditional transform.
+- **Boolean fields**: `same_as_project_director` and `application_certification` use `boolean_to_yes_no` (True → `Y: Yes`, False → `N: No`).
+- **Section 8 always required — intentional difference from legacy**: `contact_person` (Section 8) is always required regardless of the `same_as_project_director` checkbox.
+  - _Legacy_: `ContactPersonGroup` is optional in the XSD (`minOccurs="0"`), and the .dat makes Section 8 conditionally optional when the applicant checks "Same as Project Director".
+  - _Simpler_: `contact_person` is listed unconditionally in `FORM_JSON_SCHEMA["required"]`. Checking the box does not auto-populate, hide, disable, or clear Section 8, and does not change validation. The checkbox is informational only — its sole effect is the `SameAsProjectDirector` element in the XML.
+  - _Why_: per epic [#10796](https://github.com/HHS/simpler-grants-gov/issues/10796), "Section 8 will not auto-populate with Section 7 information upon checking the box of 'Same as Project Director'. Instead, we will inform the user to fill out the information with the same information that was in Section 7 if the box is checked." Because the applicant always fills in Section 8, it is always required. This is a Product-approved divergence, not an oversight; the conditional validation that originally shipped in #10817 was intentionally removed in #10820 to match the epic. Locked in by `test_sf424_short_v3_0_contact_person_always_required`.
+- **`date_received`** uses `null_handling: include_null` so an empty element is always emitted in the XML output.
+- Post-population rules auto-fill `date_received`, `aor_signature`, and `authorized_representative_date_signed` on submission.
+- XSD reference: https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd
+
 ### Example: CD-511 (Certification Regarding Lobbying)
 
 The CD-511 form uses nested `HumanNameDataType` structure with GlobalLibrary namespace for contact names:
@@ -528,6 +582,7 @@ FORM_XML_TRANSFORM_RULES = {
 The following forms currently have XML generation support:
 
 - **SF-424 (v4.0)**: Application for Federal Assistance
+- **SF-424 Short (v3.0)**: Application for Federal Domestic Assistance - Short Organizational
 - **SF-424A (v1.0)**: Budget Information - Non-Construction Programs
 - **SF-424B (v1.1)**: Assurances for Non-Construction Programs
 - **SF-424C (v2.0)**: Budget Information for Construction Programs (16-row budget table with required subtotals)

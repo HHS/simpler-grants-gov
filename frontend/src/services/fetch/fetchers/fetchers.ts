@@ -9,11 +9,13 @@ import {
   fetchFormEndpoint,
   fetchFormsEndpoint,
   fetchOpportunityEndpoint,
+  fetchWorkflowEndpoint,
   getApplicationForPrintEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
+  toDynamicApplicationsEndpointV1,
   toDynamicAwardRecommendationEndpoint,
   toDynamicFilesEndpoint,
   toDynamicGrantorAgenciesEndpoint,
@@ -144,6 +146,9 @@ export const fetchApplicationWithMethod = (
   type: "POST" | "GET" | "PUT" | "DELETE",
 ) => requesterForEndpoint(toDynamicApplicationsEndpoint(type));
 
+export const fetchApplicationWithMethodV1 = (type: "POST") =>
+  requesterForEndpoint(toDynamicApplicationsEndpointV1(type));
+
 export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,
 );
@@ -185,3 +190,5 @@ export const fetchFileUploadWithMethod = (type: "POST" | "GET") =>
 export const getApplicationForPrint = requesterForEndpoint(
   getApplicationForPrintEndpoint,
 );
+
+export const fetchWorkflow = cache(requesterForEndpoint(fetchWorkflowEndpoint));

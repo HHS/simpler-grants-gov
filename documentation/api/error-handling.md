@@ -89,14 +89,14 @@ structure is simple and just requires flattening the dictionary, but the error m
 unfortunately only provide a message, when we want a message AND code for the particular error.
 
 To work around this challenge, we created our own derived versions of the Marshmallow schema,
-field, and validator classes in the [extensions folder](../../backend/grants_shared/src/grants_shared/api/schemas/extension).
+field, and validator classes in the [extensions folder](https://github.com/HHS/grants-shared/tree/main/backend/grants_shared/src/grants_shared/api/schemas/extension).
 
-These extend the Marshmallow classes to instead output their errors as a [MarshmallowErrorContainer](../../backend/grants_shared/src/grants_shared/api/schemas/extension/schema_common.py)
+These extend the Marshmallow classes to instead output their errors as a [MarshmallowErrorContainer](https://github.com/HHS/grants-shared/blob/main/backend/grants_shared/src/grants_shared/api/schemas/extension/schema_common.py)
 
 This is done by modifying the default error message that each validation rule has to instead
 be a `MarshmallowErrorContainer` object. For most of the fields, this is just a bit of configuration,
 but the validators required re-implementing them as they handled errors directly in validation.
 
-When Marshmallow throws its errors, our [process_marshmallow_issues](../../backend/grants_shared/src/grants_shared/api/response.py) function
+When Marshmallow throws its errors, our [process_marshmallow_issues](https://github.com/HHS/grants-shared/blob/main/backend/grants_shared/src/grants_shared/api/response.py) function
 will get called which handles flattening the errors, and then restructuring them into
 proper format.
