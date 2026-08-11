@@ -13,9 +13,14 @@ run-name: Seed ${{ inputs.target_environment }} DB from ${{ inputs.source_enviro
 #     restores an automated snapshot directly.
 #
 #   restore-db-cross-env.yml      (this file)
-#     api-infra-staging (317380566348) -> api-infra-dev (061664787759)
+#     api-infra-staging (317380566348)
+#       -> infra-grantee1 / infra-grantee2 / infra-grantor1 / infra-dev
+#          (all in 061664787759)
 #     Different accounts, so an automated snapshot cannot be used at all and
 #     two sets of credentials are required.
+#
+#     All four targets share one account, so a single KMS grant on
+#     infra-staging's key covers every one of them.
 #
 # WHY CROSS-ACCOUNT NEEDS MORE THAN A SECOND CREDENTIALS STEP
 #
@@ -41,9 +46,12 @@ on:
       target_environment:
         description: Environment to restore INTO (its cluster is REPLACED)
         required: true
-        default: infra-dev
+        default: infra-grantee1
         type: choice
         options:
+          - infra-grantee1
+          - infra-grantee2
+          - infra-grantor1
           - infra-dev
       source_environment:
         description: Environment whose data is copied FROM
