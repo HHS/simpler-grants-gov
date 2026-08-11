@@ -4,7 +4,6 @@
  */
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
@@ -26,8 +25,8 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
+  validateAllPrintViews,
   validateAttachmentPrintViewSection,
-  validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
   submitApplicationAndVerify,
@@ -129,37 +128,14 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one page per form) ---
-      for (const {
-        formKey,
-        testData,
-        printUrl,
-        expectedPrepopulatedFields,
-        userEnteredFieldTestIds,
-        formName,
-      } of filledForms) {
-        await navigateToPrintView(page, printUrl);
+      await validateAllPrintViews(page, filledForms);
 
-        // Form title heading is visible
-        await expect(page.locator("h1")).toContainText(formName);
-
-        // Pre-populated fields (API-injected from opportunity record)
-        for (const [testId, expectedValue] of Object.entries(
-          expectedPrepopulatedFields,
-        )) {
-          await expect(page.getByTestId(testId)).toBeVisible();
-          await expect(page.getByTestId(testId)).toContainText(expectedValue);
-        }
-
-        // User-entered fields - uses formConfig.fields (printTestId ?? testId)
-        for (const [dataKey, testId] of Object.entries(
-          userEnteredFieldTestIds,
-        )) {
-          if (testData[dataKey] === undefined) continue;
-          await validatePrintViewField(page, testId, testData[dataKey]);
-        }
-
-        // SF-424 attachments - filenames are in the section, not testId elements, so use the section locator
+      // --- SF-424 Attachment-Specific Validation ---
+      for (const { formKey, testData, printUrl } of filledForms) {
+        // SF-424 attachments - filenames are in the section, not testId elements
         if (formKey === "sf424") {
+          await navigateToPrintView(page, printUrl);
+
           const sf424AttachmentSections = [
             {
               fieldKey: "areas_affected_attachment",

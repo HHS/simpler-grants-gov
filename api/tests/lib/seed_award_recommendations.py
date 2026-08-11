@@ -434,8 +434,6 @@ def _create_workflow_state_scenarios(
             award_recommendation_status=AwardRecommendationStatus.DRAFT,
             award_selection_method=AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY,
             additional_info=f"Seeded workflow scenario for state '{target_state.value}'.",
-            review_workflow=None,
-            review_workflow_id=None,
         )
 
         application = applications[index % len(applications)]
@@ -452,13 +450,11 @@ def _create_workflow_state_scenarios(
 
         if target_state == AwardRecommendationReviewState.START:
             workflow = factories.WorkflowFactory.create(
-                has_award_recommendation=True,
                 workflow_type=WorkflowType.AWARD_RECOMMENDATION_REVIEW,
                 current_workflow_state=AwardRecommendationReviewState.START,
                 award_recommendation=award_recommendation,
             )
             award_recommendation.review_workflow = workflow
-            award_recommendation.review_workflow_id = workflow.workflow_id
             db_session.add(award_recommendation)
             db_session.flush()
         elif target_state in revision_states:

@@ -1086,3 +1086,23 @@ class BulkUpdateSubmissionDetailsResponseSchema(AbstractResponseSchema):
         fields.Nested(BulkUpdateSubmissionDetailsResponseDataSchema),
         metadata={"description": "The updated award recommendation submission details"},
     )
+
+
+class AwardRecommendationStartReviewRequestSchema(Schema):
+    """Schema for starting the award recommendation review."""
+
+    comment = fields.String(
+        required=True,
+        metadata={
+            "description": "Comment provided by the submitter.",
+            "example": "Ready for review.",
+        },
+    )
+
+    internal_comment = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Internal comment visible only to reviewers.",
+            "example": "Budget issue resolved with program office.",
+        },
+    )

@@ -36,6 +36,22 @@ variable "mtls_domain_name" {
   default     = null
 }
 
+variable "enable_cdn_alias" {
+  type        = bool
+  description = <<EOT
+    temp for environment migrations
+  EOT
+  default     = true
+}
+
+variable "enable_api_gateway_domain_name" {
+  type        = bool
+  description = <<EOT
+    temp for environment migrations
+  EOT
+  default     = true
+}
+
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"
@@ -63,6 +79,12 @@ variable "enable_notifications" {
 variable "environment" {
   description = "name of the application environment (e.g. dev, staging, prod)"
   type        = string
+}
+
+variable "app_environment_name" {
+  description = "environment name the app sees in its ENVIRONMENT variable; defaults to var.environment"
+  type        = string
+  default     = null
 }
 
 variable "extra_identity_provider_callback_urls" {
