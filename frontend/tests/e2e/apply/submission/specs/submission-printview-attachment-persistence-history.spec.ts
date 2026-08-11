@@ -4,8 +4,8 @@
  */
 
 import {
-  test,
   expect,
+  test,
   type Browser,
   type BrowserContext,
   type Page,
@@ -62,7 +62,9 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 async function verifyVirusScanPassedAndUploaded(page: Page, fileName: string) {
-  await expect(page.getByRole("progressbar", { name: "Loading!" })).toBeVisible();
+  await expect(
+    page.getByRole("progressbar", { name: "Loading!" }),
+  ).toBeVisible();
   await expect(page.getByTestId("file-input-existing-files")).toContainText(
     fileName,
     { timeout: 30_000 },
@@ -167,7 +169,9 @@ for (const {
 
         const activities = await getApplicationHistoryActivities(page);
         expect(
-          activities.some((a) => a.includes("Attachment added: sample-upload-kb.pdf")),
+          activities.some((a) =>
+            a.includes("Attachment added: sample-upload-kb.pdf"),
+          ),
         ).toBe(true);
       },
     );
@@ -185,7 +189,8 @@ for (const {
 
         // Third history checkpoint: confirm submission itself was recorded, and that
         // the attachment activity from the previous test is still present alongside it.
-        const postSubmitActivities = await getApplicationHistoryActivities(page);
+        const postSubmitActivities =
+          await getApplicationHistoryActivities(page);
         expect(postSubmitActivities[0]).toContain("Application submitted");
         expect(
           postSubmitActivities.some((a) =>
@@ -201,7 +206,8 @@ for (const {
             formName: attachmentForm.formConfig.formName,
             testData,
             printUrl,
-            expectedPrepopulatedFields: attachmentForm.expectedPrepopulatedFields,
+            expectedPrepopulatedFields:
+              attachmentForm.expectedPrepopulatedFields,
             userEnteredFieldTestIds: attachmentForm.userEnteredFieldTestIds,
           },
         ];
