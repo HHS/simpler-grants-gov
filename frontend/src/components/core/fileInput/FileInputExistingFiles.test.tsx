@@ -114,4 +114,32 @@ describe("FileInputExistingFiles", () => {
       updatedAt: testDateTwo.toString(),
     });
   });
+  it("disables delete button when input is disabled", async () => {
+    const onDeleteMock = jest.fn();
+    const fileOne = generateFile(testDateOne, 1);
+    const fileTwo = generateFile(testDateTwo, 2);
+    render(
+      <FileInputExistingFiles
+        existingFiles={[fileOne, fileTwo]}
+        onDelete={onDeleteMock}
+        disabled={true}
+      />,
+    );
+
+    const deleteButtons = await screen.findAllByRole("button", {
+      name: "delete",
+    });
+    expect(deleteButtons).toHaveLength(2);
+
+    const firstButton = deleteButtons[0];
+    const secondButton = deleteButtons[1];
+    expect(firstButton).toBeDisabled();
+    expect(secondButton).toBeDisabled();
+
+    await userEvent.click(firstButton);
+    expect(onDeleteMock).not.toHaveBeenCalled();
+
+    await userEvent.click(secondButton);
+    expect(onDeleteMock).not.toHaveBeenCalled();
+  });
 });

@@ -11,12 +11,9 @@ module "infra_staging_config" {
   # Analytics database that Metabase connects to
   analytics_database_cluster_name = "analytics-infra-staging"
 
-  # Intended domain: data.staging.simpler.grants.gov
-  # Enable HTTPS (and set domain_name) once an ACM certificate and a Route53
-  # hosted zone exist in the infra-staging account. Until then the service is only
-  # reachable over HTTP via the load balancer's AWS-generated DNS name.
-  domain_name  = null
-  enable_https = false
+  # ALB-only, so this can coexist with staging's until DNS moves.
+  domain_name  = "data.staging.simpler.grants.gov"
+  enable_https = true
 
   service_cpu    = 1024
   service_memory = 4096

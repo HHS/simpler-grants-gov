@@ -14,6 +14,8 @@ run-name: Release Deploy ${{ inputs.version || github.ref_name }} to ${{ github.
 #   - workflow_dispatch: the optional `version` input (a tag, branch, or SHA),
 #     falling back to the branch/tag the workflow was run from (github.ref).
 #
+# Selecting dev or staging deploys the infra-dev / infra-staging environment.
+#
 # All CI checks and vulnerability scans run in parallel for speed.
 # Only the deployment phase is serialized.
 
@@ -130,7 +132,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "api"
-      environment: ${{ inputs.environment || 'prod' }}
+      environment: ${{ inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment || 'prod' }}
       version: ${{ inputs.version || github.ref }}
 
   # 2. Deploy Frontend after API completes successfully
@@ -140,7 +142,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "frontend"
-      environment: ${{ inputs.environment || 'prod' }}
+      environment: ${{ inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment || 'prod' }}
       version: ${{ inputs.version || github.ref }}
 
   # 3. Deploy Analytics after API completes successfully
@@ -150,7 +152,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "analytics"
-      environment: ${{ inputs.environment || 'prod' }}
+      environment: ${{ inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment || 'prod' }}
       version: ${{ inputs.version || github.ref }}
 
   # 3b. Deploy NOFOs (skipped - they deploy manually)
@@ -161,7 +163,7 @@ jobs:
     needs: [nofos-checks, nofos-vulnerability-scans, deploy-api]
     uses: ./.github/workflows/deploy-nofos.yml
     with:
-      environment: ${{ inputs.environment || 'prod' }}
+      environment: ${{ inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment || 'prod' }}
       version: ${{ inputs.version || github.ref }}
 
   # =====================================================
