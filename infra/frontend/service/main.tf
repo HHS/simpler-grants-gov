@@ -163,6 +163,8 @@ module "service" {
   service_name     = local.service_name
   environment_name = var.environment_name
 
+  app_environment_name = local.service_config.app_environment_name
+
   image_repository_arn = local.image_repository_arn
   image_repository_url = local.image_repository_url
 
@@ -189,7 +191,8 @@ module "service" {
   file_upload_jobs = local.service_config.file_upload_jobs
   scheduled_jobs   = local.environment_config.scheduled_jobs
 
-  enable_alb_cdn = true
+  enable_alb_cdn   = true
+  enable_cdn_alias = local.service_config.enable_cdn_alias
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
