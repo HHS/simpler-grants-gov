@@ -4,6 +4,7 @@ import jsonschema
 import pytest
 from grants_shared.api.response import ValidationErrorDetail
 
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.form_schema.jsonschema_validator import validate_json_schema, validate_json_schema_for_form
 
@@ -66,10 +67,53 @@ NESTED_REQUIRED = Form(
     },
 )
 
-ROW_TITLE_FORM = Form(
+TABLE_FORM = Form(
     form_id=uuid.UUID("00000000-0000-0000-0000-000000000004"),
-    form_name="Row Title Test Form",
-    short_form_name="row_title_test",
+    form_name="Table Test Form",
+    short_form_name="table_test",
+    form_version="1.0",
+    agency_code="SGG",
+    form_type=FormType.SF424C,
+    form_ui_schema={},
+    form_json_schema={
+        "type": "object",
+        "properties": {
+            "budget_information": {
+                "type": "object",
+                "properties": {
+                    "construction": {
+                        "type": "object",
+                        "properties": {
+                            "total_cost": {"type": "number"},
+                            "non_allowable_cost": {"type": "number"},
+                        },
+                        "required": ["total_cost"],
+                        "title": "Construction",
+                    },
+                    "equipment": {
+                        "type": "object",
+                        "properties": {
+                            "total_cost": {"type": "number"},
+                        },
+                        "required": ["total_cost"],
+                        "title": "Equipment",
+                    },
+                },
+                "required": [],
+            },
+            "federal_percentage_share": {"type": "number"},
+        },
+        "required": ["federal_percentage_share"],
+    },
+)
+
+# Same shape as TABLE_FORM, but without form_type=SF424C, to prove that a
+# "title" on a required object only affects messages for forms that opt in
+# to TABLE_VALIDATOR - not every form that happens to use "title".
+NON_TABLE_FORM_WITH_TITLE = Form(
+    form_id=uuid.UUID("00000000-0000-0000-0000-000000000005"),
+    form_name="Non-Table Form With Title",
+    short_form_name="non_table_test",
     form_version="1.0",
     agency_code="SGG",
     form_ui_schema={},
@@ -78,16 +122,12 @@ ROW_TITLE_FORM = Form(
         "properties": {
             "construction": {
                 "type": "object",
-                "properties": {
-                    "total_cost": {"type": "number"},
-                    "non_allowable_cost": {"type": "number"},
-                },
+                "properties": {"total_cost": {"type": "number"}},
                 "required": ["total_cost"],
-                "row_title": "Construction",
+                "title": "Construction",
             },
-            "federal_percentage_share": {"type": "number"},
         },
-        "required": ["federal_percentage_share"],
+        "required": [],
     },
 )
 
@@ -226,45 +266,77 @@ def test_validate_json_schema_required_path():
 @pytest.mark.parametrize(
     "data,expected_issues",
     [
-        ({"construction": {"total_cost": 100}, "federal_percentage_share": 10}, []),
         (
-            {"construction": {}, "federal_percentage_share": 10},
+            {
+                "budget_information": {
+                    "construction": {"total_cost": 100},
+                    "equipment": {"total_cost": 100},
+                },
+                "federal_percentage_share": 10,
+            },
+            [],
+        ),
+        (
+            {
+                "budget_information": {"construction": {}, "equipment": {"total_cost": 100}},
+                "federal_percentage_share": 10,
+            },
             [
                 ValidationErrorDetail(
                     type="required",
-                    message="Construction Total Cost is a required property",
-                    field="$.construction.total_cost",
+                    message="Construction Total Cost is required",
+                    field="$.budget_information.construction.total_cost",
                 )
             ],
         ),
         (
-            {"construction": {"total_cost": 100}},
+            {
+                "budget_information": {"construction": {"total_cost": 100}, "equipment": {}},
+                "federal_percentage_share": 10,
+            },
+            [
+                ValidationErrorDetail(
+                    type="required",
+                    message="Equipment Total Cost is required",
+                    field="$.budget_information.equipment.total_cost",
+                )
+            ],
+        ),
+        (
+            {
+                "budget_information": {
+                    "construction": {"total_cost": 100},
+                    "equipment": {"total_cost": 100},
+                }
+            },
             [
                 ValidationErrorDetail(
                     type="required",
                     message="'federal_percentage_share' is a required property",
                     field="$.federal_percentage_share",
                 )
-            ],
-        ),
-        (
-            {"construction": {}},
-            [
-                ValidationErrorDetail(
-                    type="required",
-                    message="Construction Total Cost is a required property",
-                    field="$.construction.total_cost",
-                ),
-                ValidationErrorDetail(
-                    type="required",
-                    message="'federal_percentage_share' is a required property",
-                    field="$.federal_percentage_share",
-                ),
             ],
         ),
     ],
 )
-def test_validate_json_schema_row_title(data, expected_issues):
-    validation_issues = validate_json_schema_for_form(data, ROW_TITLE_FORM)
+def test_validate_json_schema_table_form_title(data, expected_issues):
+    validation_issues = validate_json_schema_for_form(data, TABLE_FORM)
 
     assert set(validation_issues) == set(expected_issues)
+
+
+def test_validate_json_schema_title_ignored_outside_table_validator():
+    """A "title" on a required object only triggers the custom message for
+    forms using TABLE_VALIDATOR (SF-424C) - any other form keeps the default
+    message even if it happens to set "title" on the same object."""
+    validation_issues = validate_json_schema_for_form(
+        {"construction": {}}, NON_TABLE_FORM_WITH_TITLE
+    )
+
+    assert validation_issues == [
+        ValidationErrorDetail(
+            type="required",
+            message="'total_cost' is a required property",
+            field="$.construction.total_cost",
+        )
+    ]

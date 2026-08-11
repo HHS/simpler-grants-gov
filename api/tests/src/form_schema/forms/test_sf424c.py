@@ -10,7 +10,7 @@ from tests.lib.data_factories import setup_application_for_form_validation
 
 @pytest.fixture
 def minimal_valid_sf424c_v2_0() -> dict:
-    # All fields are optional — an empty submission is valid.
+    # Empty draft is valid; conditional required applies when budget_information is present.
     return {}
 
 
@@ -67,7 +67,7 @@ def full_valid_sf424c_v2_0() -> dict:
 
 
 def test_sf424c_v2_0_minimal_valid_json(minimal_valid_sf424c_v2_0, sf424c_v2_0):
-    """Empty submission is valid — all fields are optional."""
+    """Empty draft dict is valid when root-level required is empty - must pass schema validation."""
     validation_issues = validate_json_schema_for_form(minimal_valid_sf424c_v2_0, sf424c_v2_0)
     assert len(validation_issues) == 0
 
@@ -81,12 +81,6 @@ def test_sf424c_v2_0_one_row_valid_json(one_row_sf424c_v2_0, sf424c_v2_0):
 def test_sf424c_v2_0_full_valid_json(full_valid_sf424c_v2_0, sf424c_v2_0):
     """A fully populated form with all rows and federal funding passes schema validation."""
     validation_issues = validate_json_schema_for_form(full_valid_sf424c_v2_0, sf424c_v2_0)
-    assert len(validation_issues) == 0
-
-
-def test_sf424c_v2_0_no_required_fields(sf424c_v2_0):
-    """SF-424C has no required fields — an empty dict must pass schema validation."""
-    validation_issues = validate_json_schema_for_form({}, sf424c_v2_0)
     assert len(validation_issues) == 0
 
 
@@ -131,6 +125,31 @@ def test_sf424c_v2_0_percentage_negative(sf424c_v2_0):
     assert validation_issues[0].field == "$.federal_funding.federal_percentage_share"
 
 
+def test_sf424c_v2_0_budget_information_requires_construction(sf424c_v2_0):
+    """If budget_information is present, construction is required by schema."""
+    data = {"budget_information": {}}
+    issues = validate_json_schema_for_form(data, sf424c_v2_0)
+    assert len(issues) == 1
+    assert issues[0].type == "required"
+    assert issues[0].field == "$.budget_information.construction"
+
+
+def test_sf424c_v2_0_budget_information_other_row_still_requires_construction(sf424c_v2_0):
+    """Providing other budget rows without construction still fails required validation."""
+    data = {"budget_information": {"site_work": {"non_allowable_cost": "1.00"}}}
+    issues = validate_json_schema_for_form(data, sf424c_v2_0)
+    assert len(issues) == 1
+    assert issues[0].type == "required"
+    assert issues[0].field == "$.budget_information.construction"
+
+
+def test_sf424c_v2_0_construction_total_cost_only_is_valid(sf424c_v2_0):
+    """construction with total_cost only satisfies required constraints and is schema-valid."""
+    data = {"budget_information": {"construction": {"total_cost": "0.00"}}}
+    issues = validate_json_schema_for_form(data, sf424c_v2_0)
+    assert len(issues) == 0
+
+
 def test_sf424c_v2_0_construction_total_cost_required(sf424c_v2_0):
     """construction.total_cost is required — missing it fails schema validation,
     unlike other budget rows (e.g. site_work) which stay fully optional."""
@@ -145,7 +164,7 @@ def test_sf424c_v2_0_construction_total_cost_required(sf424c_v2_0):
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "required"
     assert validation_issues[0].field == "$.budget_information.construction.total_cost"
-    assert validation_issues[0].message == "Construction Total Cost is a required property"
+    assert validation_issues[0].message == "Construction Total Cost is required"
 
 
 def test_sf424c_v2_0_other_rows_total_cost_not_required(sf424c_v2_0):
@@ -154,7 +173,10 @@ def test_sf424c_v2_0_other_rows_total_cost_not_required(sf424c_v2_0):
         "budget_information": {
             "site_work": {
                 "non_allowable_cost": "5000.00",
-            }
+            },
+            "construction": {
+                "total_cost": "0.00",
+            },
         }
     }
     validation_issues = validate_json_schema_for_form(data, sf424c_v2_0)
