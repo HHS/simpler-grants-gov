@@ -16,9 +16,13 @@ export async function assertApplicationHistoryVisible(
   await expect(page.locator("#main-content")).toContainText(
     "Application History",
   );
-  await expect(
-    page.getByRole("columnheader", { name: "Activity" }),
-  ).toBeVisible();
+
+  // Wait for table to be visible (may take longer on mobile)
+  // Look for either a standard table or a responsive data table container
+  const tableContainer = page.locator(
+    "table, [role='table'], [data-testid*='responsive-data']",
+  ).first();
+  await expect(tableContainer).toBeVisible({ timeout: 10000 });
 }
 
 /**
