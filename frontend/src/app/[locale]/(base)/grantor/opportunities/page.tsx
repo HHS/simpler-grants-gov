@@ -173,10 +173,15 @@ const transformTableRowData = (
         : ``
       : `/opportunity/${opportunity.opportunity_id}`;
     
-    // Get funding instrument types from summary
+    // Get funding instrument types from summary and format them
     const fundingInstruments = opportunity.summary?.funding_instruments || [];
-    const opportunityType = fundingInstruments.length > 0 
-      ? fundingInstruments.join(", ") 
+    const formattedInstruments = fundingInstruments.map(instrument => 
+      instrument.split('_').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ).join(' ')
+    );
+    const opportunityType = formattedInstruments.length > 0 
+      ? formattedInstruments.join(", ") 
       : "";
     
     // Format last updated date
@@ -281,7 +286,7 @@ const OpportunitiesTable = ({
   const headerTitles: TableCellData[] = [
     { cellData: t("tableHeadings.title") },
     { cellData: t("tableHeadings.oppNumber") },
-    { cellData: t("tableHeadings.type") },
+    { cellData: t("tableHeadings.fundingInstrumentType") },
     { cellData: t("tableHeadings.lastUpdated") },
     { cellData: t("tableHeadings.status") },
     { cellData: t("tableHeadings.actions") },

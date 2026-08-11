@@ -534,7 +534,7 @@ describe("Opportunities", () => {
 
       expect(screen.getAllByText("tableHeadings.title")).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.oppNumber")).toHaveLength(2);
-      expect(screen.getAllByText("tableHeadings.type")).toHaveLength(2);
+      expect(screen.getAllByText("tableHeadings.fundingInstrumentType")).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.lastUpdated")).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.status")).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.actions")).toHaveLength(2);

@@ -2034,7 +2034,7 @@ export const messages = {
       agency: "Agency",
       title: "Title",
       oppNumber: "Opp. Number",
-      type: "Type",
+      fundingInstrumentType: "Funding Instrument Type",
       lastUpdated: "Last Updated",
       status: "Status",
       actions: "Action",
