@@ -7,7 +7,7 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { searchOpportunitiesByAgency } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { LocalizedPageProps, TFn } from "src/types/intl";
-import { BaseOpportunity, OpportunityStatus } from "src/types/opportunity/opportunityResponseTypes";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
