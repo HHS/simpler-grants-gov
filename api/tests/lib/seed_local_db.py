@@ -127,7 +127,7 @@ def _build_opportunities(
     # Available status badges: Draft (is_draft=True), Open/Posted, Forecasted, Closed, Archived
     # Note: Both SGM and Grants.gov opportunities show their actual status
     logger.info("Creating SGM opportunities with various statuses")
-    
+
     # Draft SGM opportunities
     factories.OpportunityFactory.create_batch(
         size=3,
@@ -135,7 +135,7 @@ def _build_opportunities(
         is_draft=True,
         agency_code="USAID-ETH",
     )
-    
+
     # Posted SGM opportunities
     factories.OpportunityFactory.create_batch(
         size=2,
@@ -144,7 +144,7 @@ def _build_opportunities(
         is_posted_summary=True,
         agency_code="USAID-ETH",
     )
-    
+
     # Forecasted SGM opportunities
     factories.OpportunityFactory.create_batch(
         size=2,
@@ -153,7 +153,7 @@ def _build_opportunities(
         is_forecasted_summary=True,
         agency_code="USAID-SAF",
     )
-    
+
     # Closed SGM opportunities
     factories.OpportunityFactory.create_batch(
         size=2,
@@ -162,7 +162,7 @@ def _build_opportunities(
         is_closed_summary=True,
         agency_code="USAID-SAF",
     )
-    
+
     # Archived SGM opportunities
     factories.OpportunityFactory.create_batch(
         size=2,

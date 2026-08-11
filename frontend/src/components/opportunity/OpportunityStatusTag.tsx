@@ -7,7 +7,7 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 /**
  * Displays status badges for opportunities
- * 
+ *
  * Status badge styling:
  * - Draft: Light yellow background (bg-accent-warm-lighter) with warning icon
  * - Open/Posted: Light mint green background (bg-mint-cool-5), no icon

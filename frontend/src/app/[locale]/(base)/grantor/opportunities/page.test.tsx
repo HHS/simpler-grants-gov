@@ -534,7 +534,9 @@ describe("Opportunities", () => {
 
       expect(screen.getAllByText("tableHeadings.title")).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.oppNumber")).toHaveLength(2);
-      expect(screen.getAllByText("tableHeadings.fundingInstrumentType")).toHaveLength(2);
+      expect(
+        screen.getAllByText("tableHeadings.fundingInstrumentType"),
+      ).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.lastUpdated")).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.status")).toHaveLength(2);
       expect(screen.getAllByText("tableHeadings.actions")).toHaveLength(2);
@@ -601,12 +603,14 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByTestId("opportunity-status-draft")).toBeVisible();
-      
+      expect(
+        await screen.findByTestId("opportunity-status-draft"),
+      ).toBeVisible();
+
       // Click the popover menu button to reveal Edit link
       const popoverButton = screen.getByRole("button", { expanded: false });
       fireEvent.click(popoverButton);
-      
+
       expect(
         await screen.findByRole("link", { name: "actionButtons.edit" }),
       ).toBeVisible();
@@ -630,7 +634,9 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByTestId("opportunity-status-draft")).toBeVisible();
+      expect(
+        await screen.findByTestId("opportunity-status-draft"),
+      ).toBeVisible();
       // the href link should not be displayed (no action menu for read-only)
       expect(
         screen.queryByRole("link", { name: "actionButtons.edit" }),
@@ -697,12 +703,14 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByTestId("opportunity-status-draft")).toBeVisible();
-      
+      expect(
+        await screen.findByTestId("opportunity-status-draft"),
+      ).toBeVisible();
+
       // Click the popover menu button to reveal Edit link
       const popoverButton = screen.getByRole("button", { expanded: false });
       fireEvent.click(popoverButton);
-      
+
       expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
       // TODO: Copy and Delete will be added in a separate ticket
     });
@@ -720,17 +728,19 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByTestId("opportunity-status-posted")).toBeVisible();
+      expect(
+        await screen.findByTestId("opportunity-status-posted"),
+      ).toBeVisible();
       const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
       });
       expect(oppTitlelink).toHaveAttribute("href", viewLink);
-      
+
       // Click the popover menu button to reveal Edit link
       const popoverButton = screen.getByRole("button", { expanded: false });
       fireEvent.click(popoverButton);
-      
+
       expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
     });
 
@@ -747,17 +757,19 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByTestId("opportunity-status-forecasted")).toBeVisible();
+      expect(
+        await screen.findByTestId("opportunity-status-forecasted"),
+      ).toBeVisible();
       const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
       });
       expect(oppTitlelink).toHaveAttribute("href", viewLink);
-      
+
       // Click the popover menu button to reveal Edit link
       const popoverButton = screen.getByRole("button", { expanded: false });
       fireEvent.click(popoverButton);
-      
+
       expect(screen.getByText(/actionButtons.edit/i)).toBeInTheDocument();
     });
 
@@ -774,7 +786,9 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByTestId("opportunity-status-closed")).toBeVisible();
+      expect(
+        await screen.findByTestId("opportunity-status-closed"),
+      ).toBeVisible();
       const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
@@ -795,7 +809,9 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByTestId("opportunity-status-archived")).toBeVisible();
+      expect(
+        await screen.findByTestId("opportunity-status-archived"),
+      ).toBeVisible();
       const viewLink = "/opportunity/" + sgmOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
@@ -815,7 +831,9 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByTestId("opportunity-status-posted")).toBeVisible();
+      expect(
+        await screen.findByTestId("opportunity-status-posted"),
+      ).toBeVisible();
       const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
@@ -835,7 +853,9 @@ describe("Opportunities", () => {
       });
       render(component);
 
-      expect(await screen.findByTestId("opportunity-status-forecasted")).toBeVisible();
+      expect(
+        await screen.findByTestId("opportunity-status-forecasted"),
+      ).toBeVisible();
       const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",

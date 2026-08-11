@@ -24,13 +24,13 @@ import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
+import { PopoverMenu } from "src/components/core/PopoverMenu";
 import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/core/TableWithResponsiveHeader";
-import OpportunitiesPagination from "./_components/OpportunitiesPagination";
 import OpportunityStatusTag from "src/components/opportunity/OpportunityStatusTag";
-import { PopoverMenu } from "src/components/core/PopoverMenu";
+import OpportunitiesPagination from "./_components/OpportunitiesPagination";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");
@@ -132,7 +132,7 @@ const ActionMenu = ({
   status: string;
 }) => {
   const t = useTranslations("Opportunities");
-  
+
   // Only show action menu for editable opportunities
   const isEditable =
     status.toLowerCase() === "draft" ||
@@ -171,18 +171,20 @@ const transformTableRowData = (
         ? `/grantor/opportunity/${opportunity.opportunity_id}/edit`
         : ``
       : `/opportunity/${opportunity.opportunity_id}`;
-    
+
     // Get funding instrument types from summary and format them
     const fundingInstruments = opportunity.summary?.funding_instruments || [];
-    const formattedInstruments = fundingInstruments.map(instrument => 
-      instrument.split('_').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-      ).join(' ')
+    const formattedInstruments = fundingInstruments.map((instrument) =>
+      instrument
+        .split("_")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+        )
+        .join(" "),
     );
-    const opportunityType = formattedInstruments.length > 0 
-      ? formattedInstruments.join(", ") 
-      : "";
-    
+    const opportunityType =
+      formattedInstruments.length > 0 ? formattedInstruments.join(", ") : "";
+
     // Format last updated date
     const lastUpdated = formatTimestamp(opportunity.updated_at);
 
@@ -201,9 +203,7 @@ const transformTableRowData = (
         cellData: (
           <OpportunityStatusTag
             status={
-              opportunity.is_draft
-                ? "draft"
-                : opportunity.opportunity_status
+              opportunity.is_draft ? "draft" : opportunity.opportunity_status
             }
           />
         ),
