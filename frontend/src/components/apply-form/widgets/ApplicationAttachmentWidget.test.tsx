@@ -421,6 +421,33 @@ describe("ApplicationAttachmentWidget", () => {
     expect(markFormDirty).toHaveBeenCalled();
   });
 
+  it("does not increment the attachments uploading counter when markFormDirty throws", () => {
+    const throwingMarkFormDirty = jest.fn(() => {
+      throw new Error("markFormDirty failed");
+    });
+
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: {
+            useVirusScanning: true,
+            markFormDirty: throwingMarkFormDirty,
+            attachmentsUploadingCounter: {
+              incrementAttachmentsProcessing,
+              decrementAttachmentsProcessing,
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(() => getSimplerFileInputProps().onStart?.()).toThrow(
+      "markFormDirty failed",
+    );
+    expect(incrementAttachmentsProcessing).not.toHaveBeenCalled();
+  });
+
   it("decrements the attachments uploading counter when an upload completes", () => {
     render(
       <ApplicationAttachmentWidget
