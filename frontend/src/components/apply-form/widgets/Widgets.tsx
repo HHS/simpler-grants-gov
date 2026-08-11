@@ -6,6 +6,7 @@ import {
 
 import { JSX } from "react";
 
+import ApplicationAttachmentArrayWidget from "./ApplicationAttachmentArrayWidget";
 import ApplicationAttachmentWidget from "./ApplicationAttachmentWidget";
 import AttachmentWidget from "./AttachmentUploadWidget";
 import Budget424aSectionA from "./budget/Budget424aSectionA";
@@ -43,7 +44,9 @@ export const widgetComponents: Record<
       ? ApplicationAttachmentWidget(widgetProps)
       : AttachmentWidget(widgetProps),
   AttachmentArray: (widgetProps: UswdsWidgetProps) =>
-    AttachmentArrayWidget(widgetProps),
+    widgetProps.formContext?.widgetSupport?.useMultiAttachmentVirusScanning
+      ? ApplicationAttachmentArrayWidget(widgetProps)
+      : AttachmentArrayWidget(widgetProps),
   Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionA(widgetProps),
   Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>

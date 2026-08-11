@@ -8,6 +8,10 @@ import {
   buildWarningTree,
   pointerToFieldName,
 } from "src/utils/applyForm/applyFormUtils";
+import {
+  supportsMultiAttachmentVirusScanning,
+  supportsSingleAttachmentVirusScanning,
+} from "src/utils/applyForm/virusScanningForms";
 import getFormData from "src/utils/getFormData";
 
 import { getTranslations } from "next-intl/server";
@@ -89,7 +93,9 @@ async function FormPage({ params }: formPageProps) {
     updatedAt,
   } = data;
 
-  const useVirusScanning = formName === "Attachment Form";
+  const useVirusScanning = supportsSingleAttachmentVirusScanning(formName);
+  const useMultiAttachmentVirusScanning =
+    supportsMultiAttachmentVirusScanning(formName);
   const isBudgetForm =
     formName.includes("SF-424A") || formName.includes("SF-424C");
 
@@ -138,6 +144,7 @@ async function FormPage({ params }: formPageProps) {
           createdAt={createdAt}
           updatedAt={updatedAt}
           useVirusScanning={useVirusScanning}
+          useMultiAttachmentVirusScanning={useMultiAttachmentVirusScanning}
         />
       </GridContainer>
     </>

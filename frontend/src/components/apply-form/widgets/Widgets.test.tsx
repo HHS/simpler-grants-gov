@@ -1,0 +1,155 @@
+import { render } from "@testing-library/react";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
+
+import { widgetComponents } from "./Widgets";
+
+/*
+  Covers the temporary virus scanning rollout gate: which attachment widget the
+  Attachment and AttachmentArray widget types resolve to. Removed along with the gate
+  in #11352.
+*/
+
+const mockLegacyAttachmentWidget = jest.fn();
+const mockLegacyAttachmentArrayWidget = jest.fn();
+const mockVirusScanningAttachmentWidget = jest.fn();
+const mockVirusScanningAttachmentArrayWidget = jest.fn();
+
+jest.mock("./AttachmentUploadWidget", () => ({
+  __esModule: true,
+  default: (props: unknown) => mockLegacyAttachmentWidget(props) as unknown,
+}));
+
+jest.mock("./MultipleAttachmentUploadWidget", () => ({
+  __esModule: true,
+  default: (props: unknown) =>
+    mockLegacyAttachmentArrayWidget(props) as unknown,
+}));
+
+jest.mock("./ApplicationAttachmentWidget", () => ({
+  __esModule: true,
+  default: (props: unknown) =>
+    mockVirusScanningAttachmentWidget(props) as unknown,
+}));
+
+jest.mock("./ApplicationAttachmentArrayWidget", () => ({
+  __esModule: true,
+  default: (props: unknown) =>
+    mockVirusScanningAttachmentArrayWidget(props) as unknown,
+}));
+
+const buildProps = (
+  widgetSupport: Partial<{
+    useVirusScanning: boolean;
+    useMultiAttachmentVirusScanning: boolean;
+  }>,
+): UswdsWidgetProps => ({
+  id: "attachment_field",
+  schema: { type: "string", title: "Attachment field" },
+  rawErrors: [],
+  formContext: {
+    widgetSupport: {
+      useVirusScanning: false,
+      useMultiAttachmentVirusScanning: false,
+      ...widgetSupport,
+    },
+  },
+});
+
+const renderWidgetType = (
+  type: "Attachment" | "AttachmentArray",
+  props: UswdsWidgetProps,
+) => render(<>{widgetComponents[type](props)}</>);
+
+describe("widgetComponents attachment selection", () => {
+  afterEach(() => jest.clearAllMocks());
+
+  describe("AttachmentArray", () => {
+    it("uses the virus scanning widget when multi attachment virus scanning is enabled", () => {
+      renderWidgetType(
+        "AttachmentArray",
+        buildProps({ useMultiAttachmentVirusScanning: true }),
+      );
+
+      expect(mockVirusScanningAttachmentArrayWidget).toHaveBeenCalledTimes(1);
+      expect(mockLegacyAttachmentArrayWidget).not.toHaveBeenCalled();
+    });
+
+    it("uses the legacy widget when multi attachment virus scanning is disabled", () => {
+      renderWidgetType(
+        "AttachmentArray",
+        buildProps({ useMultiAttachmentVirusScanning: false }),
+      );
+
+      expect(mockLegacyAttachmentArrayWidget).toHaveBeenCalledTimes(1);
+      expect(mockVirusScanningAttachmentArrayWidget).not.toHaveBeenCalled();
+    });
+
+    it("uses the legacy widget when there is no widget support in context", () => {
+      renderWidgetType("AttachmentArray", {
+        id: "attachment_field",
+        schema: { type: "string" },
+        rawErrors: [],
+      });
+
+      expect(mockLegacyAttachmentArrayWidget).toHaveBeenCalledTimes(1);
+      expect(mockVirusScanningAttachmentArrayWidget).not.toHaveBeenCalled();
+    });
+
+    it("is not switched by the single attachment gate", () => {
+      renderWidgetType(
+        "AttachmentArray",
+        buildProps({
+          useVirusScanning: true,
+          useMultiAttachmentVirusScanning: false,
+        }),
+      );
+
+      expect(mockLegacyAttachmentArrayWidget).toHaveBeenCalledTimes(1);
+      expect(mockVirusScanningAttachmentArrayWidget).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Attachment", () => {
+    it("is not switched by the multi attachment gate", () => {
+      renderWidgetType(
+        "Attachment",
+        buildProps({
+          useVirusScanning: false,
+          useMultiAttachmentVirusScanning: true,
+        }),
+      );
+
+      expect(mockLegacyAttachmentWidget).toHaveBeenCalledTimes(1);
+      expect(mockVirusScanningAttachmentWidget).not.toHaveBeenCalled();
+    });
+
+    it("still uses the virus scanning widget when the single attachment gate is enabled", () => {
+      renderWidgetType("Attachment", buildProps({ useVirusScanning: true }));
+
+      expect(mockVirusScanningAttachmentWidget).toHaveBeenCalledTimes(1);
+      expect(mockLegacyAttachmentWidget).not.toHaveBeenCalled();
+    });
+
+    it("uses the legacy widget when both gates are disabled", () => {
+      renderWidgetType("Attachment", buildProps({}));
+
+      expect(mockLegacyAttachmentWidget).toHaveBeenCalledTimes(1);
+      expect(mockVirusScanningAttachmentWidget).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Print rendering", () => {
+    it("uses a non editable renderer for print attachments", () => {
+      // print forms swap attachment fields to the PrintAttachment widget, which is
+      // separate from both upload widgets and renders no controls
+      expect(widgetComponents.PrintAttachment).not.toBe(
+        widgetComponents.AttachmentArray,
+      );
+      renderWidgetType(
+        "AttachmentArray",
+        buildProps({ useMultiAttachmentVirusScanning: true }),
+      );
+      expect(mockVirusScanningAttachmentArrayWidget).toHaveBeenCalledTimes(1);
+    });
+  });
+});

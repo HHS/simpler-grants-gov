@@ -27,8 +27,15 @@ export const FileInputExistingFiles = ({
       const hasError = filesWithDeleteError.findIndex(
         (fileWithDeleteError) => fileWithDeleteError === existingFile.id,
       );
-      // depending on how this comes back from the API we may want do something different in terms of date formatting
-      const timestampDisplay = `${t("savedOn")} ${formatDateWithNoPreformattedExpectations(new Date(existingFile.updatedAt))}`;
+      // an attachment can be listed before its server metadata is available
+      // will cause no timestamp to show - omitting instead of rendering "Invalid Date"
+      const updatedAtDate = existingFile.updatedAt
+        ? new Date(existingFile.updatedAt)
+        : undefined;
+      const timestampDisplay =
+        updatedAtDate && !Number.isNaN(updatedAtDate.valueOf())
+          ? `${t("savedOn")} ${formatDateWithNoPreformattedExpectations(updatedAtDate)}`
+          : "";
       return (
         <Grid
           key={existingFile.id}

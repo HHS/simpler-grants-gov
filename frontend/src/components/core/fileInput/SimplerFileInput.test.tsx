@@ -74,7 +74,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       expect(
@@ -94,7 +94,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       // this id looks wrong but that's what Trussworks called it
@@ -130,7 +130,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -166,7 +166,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -214,7 +214,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -262,7 +262,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -289,7 +289,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
           onError={mockOnError}
         />,
       );
@@ -329,7 +329,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -373,7 +373,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
           onError={mockOnError}
         />,
       );
@@ -422,7 +422,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
           onError={mockOnError}
         />,
       );
@@ -465,7 +465,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -518,7 +518,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -566,7 +566,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -602,7 +602,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -642,7 +642,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -680,7 +680,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -712,7 +712,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -749,7 +749,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -781,7 +781,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -809,7 +809,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -831,7 +831,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
           existingFiles={[fakeExistingFile]}
         />,
       );
@@ -878,7 +878,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -939,7 +939,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -970,7 +970,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
           existingFiles={[fakeExistingFile]}
         />,
       );
@@ -1003,7 +1003,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
           existingFiles={[fakeExistingFile]}
         />,
       );
@@ -1019,6 +1019,247 @@ describe("SimplerFileInput", () => {
       expect(screen.getByLabelText("cautionDeletingAttachment")).toBeVisible();
     });
   });
+  describe("Accessibility", () => {
+    // deliberately render native input
+    it("combines multiple describedByIds into a single aria-describedby", async () => {
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          id="file-input-test"
+          describedByIds={["label-for-field", "error-for-field"]}
+        />,
+      );
+      expect(await screen.findByTestId("file-input-input")).toHaveAttribute(
+        "aria-describedby",
+        "label-for-field error-for-field",
+      );
+    });
+    it("omits aria-describedby when no ids are provided", async () => {
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          id="file-input-test"
+          describedByIds={[]}
+        />,
+      );
+      expect(await screen.findByTestId("file-input-input")).not.toHaveAttribute(
+        "aria-describedby",
+      );
+    });
+    it("reports invalid when the form validation state is invalid", async () => {
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          id="file-input-test"
+          describedByIds={["file-input-label"]}
+          formInvalid={true}
+        />,
+      );
+      expect(await screen.findByTestId("file-input-input")).toHaveAttribute(
+        "aria-invalid",
+        "true",
+      );
+    });
+    it("reports valid when neither the form nor the upload process is in error", async () => {
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          id="file-input-test"
+          describedByIds={["file-input-label"]}
+        />,
+      );
+      expect(await screen.findByTestId("file-input-input")).toHaveAttribute(
+        "aria-invalid",
+        "false",
+      );
+    });
+    it("reports invalid when an upload fails even though the form is valid", async () => {
+      const trigger = createAdvanceStreamTrigger();
+      clientFetchMock.mockResolvedValue(
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            [
+              JSON.stringify({ status: "uploading" }),
+              JSON.stringify({ status: "error", error: "yes" }),
+            ],
+            trigger,
+          ),
+        ),
+      );
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          id="file-input-test"
+          describedByIds={["file-input-label"]}
+          multiFile={true}
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      expect(input).toHaveAttribute("aria-invalid", "false");
+
+      await userEvent.upload(input, new File(["test content"], "test.txt"));
+      trigger.advance();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      trigger.advance();
+
+      await waitFor(() =>
+        expect(input).toHaveAttribute("aria-invalid", "true"),
+      );
+    });
+    it("stays invalid on a form error after an upload error is dismissed", async () => {
+      const trigger = createAdvanceStreamTrigger();
+      clientFetchMock.mockResolvedValue(
+        new Response(
+          makeAdvanceableTestStreamForTrigger(
+            [
+              JSON.stringify({ status: "uploading" }),
+              JSON.stringify({ status: "error", error: "yes" }),
+            ],
+            trigger,
+          ),
+        ),
+      );
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          id="file-input-test"
+          describedByIds={["file-input-label"]}
+          formInvalid={true}
+          multiFile={true}
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, new File(["test content"], "test.txt"));
+      trigger.advance();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      trigger.advance();
+
+      await waitFor(async () =>
+        expect(
+          await screen.findByTestId("file-upload-status-display"),
+        ).toHaveTextContent("uploadError"),
+      );
+      await userEvent.click(screen.getByRole("button", { name: "dismiss" }));
+
+      // the upload error is gone, but the form level error must still be reported
+      expect(
+        screen.queryByTestId("file-upload-status-display"),
+      ).not.toBeInTheDocument();
+      expect(input).toHaveAttribute("aria-invalid", "true");
+    });
+    it("renders a unique status display and dismiss control per upload row", async () => {
+      clientFetchMock.mockResolvedValue(new Response());
+      render(
+        <SimplerFileInput
+          onDelete={() => Promise.resolve()}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          id="file-input-test"
+          describedByIds={["file-input-label"]}
+          multiFile={true}
+        />,
+      );
+      const input = await screen.findByTestId("file-input-input");
+      // same file name selected twice - upload ids must still be distinct
+      await userEvent.upload(input, [
+        new File(["a"], "same-name.txt"),
+        new File(["b"], "same-name.txt"),
+      ]);
+      expect(
+        await screen.findAllByTestId("file-upload-status-display"),
+      ).toHaveLength(2);
+    });
+  });
+
+  describe("Locked and read only fields", () => {
+    const renderNonEditable = (
+      overrides: {
+        disabled?: boolean;
+        readOnly?: boolean;
+        onDelete?: jest.Mock;
+      } = {},
+    ) => {
+      const { onDelete = jest.fn().mockResolvedValue(true), ...rest } =
+        overrides;
+      render(
+        <SimplerFileInput
+          onDelete={onDelete}
+          postUploadAction={() => Promise.resolve(undefined)}
+          postUploadActionProgressMessage="post upload action in progress"
+          id="file-input-test"
+          describedByIds={["file-input-label"]}
+          existingFiles={[fakeExistingFile]}
+          {...rest}
+        />,
+      );
+    };
+
+    it("disables the native input when disabled", async () => {
+      renderNonEditable({ disabled: true });
+      expect(await screen.findByTestId("file-input-input")).toBeDisabled();
+    });
+    it("disables the native input when read only", async () => {
+      renderNonEditable({ readOnly: true });
+      expect(await screen.findByTestId("file-input-input")).toBeDisabled();
+    });
+    it("still lists existing files when disabled", () => {
+      renderNonEditable({ disabled: true });
+      expect(screen.getByText(fakeExistingFile.fileName)).toBeInTheDocument();
+    });
+    // the delete control is rendered disabled rather than omitted, so existing files stay
+    // listed while deletion cannot be triggered by pointer or keyboard
+    it("disables the delete control for existing files when disabled", () => {
+      renderNonEditable({ disabled: true });
+      expect(screen.getByRole("button", { name: "delete" })).toBeDisabled();
+    });
+    it("disables the delete control for existing files when read only", () => {
+      renderNonEditable({ readOnly: true });
+      expect(screen.getByRole("button", { name: "delete" })).toBeDisabled();
+    });
+    it("does not render the delete confirmation modal when disabled", () => {
+      renderNonEditable({ disabled: true });
+      // no confirmation control exists, so it cannot be reached by keyboard or pointer
+      expect(
+        screen.queryByRole("button", { name: "deleteFileCta" }),
+      ).not.toBeInTheDocument();
+    });
+    it("does not render the delete confirmation modal when read only", () => {
+      renderNonEditable({ readOnly: true });
+      expect(
+        screen.queryByRole("button", { name: "deleteFileCta" }),
+      ).not.toBeInTheDocument();
+    });
+    it("does not upload when a file is selected on a disabled input", async () => {
+      renderNonEditable({ disabled: true });
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, new File(["test content"], "test.txt"));
+      expect(
+        screen.queryByTestId("file-upload-status-display"),
+      ).not.toBeInTheDocument();
+    });
+    it("keeps delete available when editable", async () => {
+      const onDelete = jest.fn().mockResolvedValue(true);
+      renderNonEditable({ onDelete });
+      await userEvent.click(screen.getByRole("button", { name: "delete" }));
+      await userEvent.click(
+        screen.getByRole("button", { name: "deleteFileCta" }),
+      );
+      expect(onDelete).toHaveBeenCalledWith(fakeExistingFile.id);
+    });
+  });
+
   describe("Multifile v Non-multifile", () => {
     it("[non-multifile] clears file input on cancel", async () => {
       const controllerAbortMock = jest.fn();
@@ -1045,7 +1286,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -1080,7 +1321,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -1102,7 +1343,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
         />,
       );
       const input = await screen.findByTestId("file-input-input");
@@ -1125,7 +1366,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
           multiFile={true}
         />,
       );
@@ -1150,7 +1391,7 @@ describe("SimplerFileInput", () => {
           postUploadActionSuccessMessage="post upload action success"
           postUploadActionErrorMessage="post upload action error"
           id="file-input-test"
-          labelId="file-input-label"
+          describedByIds={["file-input-label"]}
           multiFile={true}
         />,
       );
@@ -1183,7 +1424,7 @@ describe("SimplerFileInput", () => {
         postUploadActionSuccessMessage="post upload action success"
         postUploadActionErrorMessage="post upload action error"
         id="file-input-test"
-        labelId="file-input-label"
+        describedByIds={["file-input-label"]}
       />,
     );
     const input = await screen.findByTestId("file-input-input");

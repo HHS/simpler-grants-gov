@@ -90,8 +90,10 @@ export const buildSF424HappyPathTestData = (
     authorized_representative_fax: "3333333333",
     authorized_representative_email: `aor${shortSuffix}@test.com`,
     areas_affected_attachment: SF424_TEST_UPLOAD_FILE,
-    additional_project_title_attachment: SF424_TEST_UPLOAD_FILE,
-    additional_congressional_attachment: SF424_TEST_UPLOAD_FILE,
+    // Both of SF-424's multiple attachment fields are intentionally omitted (#11351):
+    // additional_project_title_attachment and additional_congressional_attachment.
+    //
+    // Re-enable both when in #11352.
   } satisfies Partial<Record<keyof typeof fieldDefinitionsSF424, string>>;
 };
 

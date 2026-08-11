@@ -48,6 +48,7 @@ interface WidgetSupport {
   ) => void;
   markFormDirty?: () => void;
   useVirusScanning: boolean;
+  useMultiAttachmentVirusScanning: boolean;
 }
 
 interface ApplyFormFormContext {
@@ -116,6 +117,7 @@ const ApplyForm = ({
   createdAt,
   updatedAt,
   useVirusScanning = false,
+  useMultiAttachmentVirusScanning = false,
 }: {
   applicationId: string;
   formId: string;
@@ -126,6 +128,7 @@ const ApplyForm = ({
     FormattedFormValidationWarning[] | FormValidationWarning[] | null;
   attachments: Attachment[];
   useVirusScanning?: boolean; // Temporary for initial integration. Will be removed in #11352
+  useMultiAttachmentVirusScanning?: boolean; // Temporary for initial integration. Will be removed in #11352
   isBudgetForm?: boolean;
   applicationStatus?: string;
   createdAt?: string;
@@ -237,6 +240,7 @@ const ApplyForm = ({
         onFieldListEntryDelete: handleFieldListEntryDelete,
         markFormDirty: handleFormEdited,
         useVirusScanning,
+        useMultiAttachmentVirusScanning,
       },
     }),
     [
@@ -245,6 +249,7 @@ const ApplyForm = ({
       formObject,
       formSchema,
       useVirusScanning,
+      useMultiAttachmentVirusScanning,
     ],
   );
 

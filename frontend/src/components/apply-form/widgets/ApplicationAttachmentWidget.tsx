@@ -6,7 +6,10 @@ import { ApplicationAttachmentCreateResponse } from "src/types/applicationRespon
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { UploadFileMetadata } from "src/types/fileUploadTypes";
-import { mapAttachmentsToFileMetadata } from "src/utils/applyForm/applicationAttachmentUtils";
+import {
+  buildAttachmentDescribedByIds,
+  mapAttachmentsToFileMetadata,
+} from "src/utils/applyForm/applicationAttachmentUtils";
 
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
@@ -93,11 +96,11 @@ const ApplicationAttachmentWidget = ({
 
   const visibleInputId = `${id}-visible`;
   const error = rawErrors.length ? true : undefined;
-  const describedby = error
-    ? `error-for-${visibleInputId}`
-    : title
-      ? `label-for-${visibleInputId}`
-      : "app-form-attachment-upload-label";
+  const describedByIds = buildAttachmentDescribedByIds({
+    visibleInputId,
+    hasTitle: Boolean(title),
+    hasError: Boolean(error),
+  });
 
   const existingFiles: UploadFileMetadata[] = attachment
     ? mapAttachmentsToFileMetadata([attachment])
@@ -135,7 +138,8 @@ const ApplicationAttachmentWidget = ({
         disabled={disabled}
         readOnly={readOnly}
         required={required}
-        labelId={describedby}
+        describedByIds={describedByIds}
+        formInvalid={Boolean(error)}
         existingFiles={existingFiles}
       />
     </FormGroup>
