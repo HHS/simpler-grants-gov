@@ -4,6 +4,7 @@ import {
   createCompetitionForGrantor,
   updateCompetitionForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
 
 import { competitionFormAction, updateCompetition } from "./actions";
 
@@ -29,6 +30,13 @@ const mockCreateCompetitionForGrantor = jest.mocked(
 const mockUpdateCompetitionForGrantor = jest.mocked(
   updateCompetitionForGrantor,
 );
+
+const mockRequiredForms: CompetitionFormsSubmitApi = [
+  {
+    form_id: "1623b310-85be-496a-b84b-34bdee22a68a",
+    is_required: true,
+  },
+];
 
 const successfulCreateResponse = {
   message: "success",
@@ -215,7 +223,7 @@ describe("competitionFormAction", () => {
 
     mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
 
-    await competitionFormAction("saveAndExit", formData);
+    await competitionFormAction("saveAndExit", mockRequiredForms, formData);
 
     expect(mockUpdateCompetitionForGrantor).toHaveBeenCalledTimes(1);
     expect(mockRedirect).toHaveBeenCalledWith("../overview");
@@ -226,7 +234,7 @@ describe("competitionFormAction", () => {
 
     mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
 
-    await competitionFormAction("saveAndGoBack", formData);
+    await competitionFormAction("saveAndGoBack", mockRequiredForms, formData);
 
     expect(mockUpdateCompetitionForGrantor).toHaveBeenCalledTimes(1);
     expect(mockRedirect).toHaveBeenCalledWith("../edit");
@@ -237,7 +245,7 @@ describe("competitionFormAction", () => {
 
     mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
 
-    await competitionFormAction("saveAndContinue", formData);
+    await competitionFormAction("saveAndContinue", mockRequiredForms, formData);
 
     expect(mockUpdateCompetitionForGrantor).toHaveBeenCalledTimes(1);
     expect(mockRedirect).toHaveBeenCalledWith("../overview");
@@ -250,7 +258,11 @@ describe("competitionFormAction", () => {
       new ApiRequestError("forbidden", "APIRequestError", 403),
     );
 
-    const result = await competitionFormAction("saveAndContinue", formData);
+    const result = await competitionFormAction(
+      "saveAndContinue",
+      mockRequiredForms,
+      formData,
+    );
 
     expect(mockUpdateCompetitionForGrantor).toHaveBeenCalledTimes(1);
     expect(mockRedirect).not.toHaveBeenCalled();
@@ -264,7 +276,11 @@ describe("competitionFormAction", () => {
 
     mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
 
-    const result = await competitionFormAction("unknownType", formData);
+    const result = await competitionFormAction(
+      "unknownType",
+      mockRequiredForms,
+      formData,
+    );
 
     expect(mockUpdateCompetitionForGrantor).toHaveBeenCalledTimes(1);
     expect(mockRedirect).not.toHaveBeenCalled();
