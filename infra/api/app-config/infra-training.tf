@@ -18,16 +18,16 @@ module "infra_training_config" {
   has_database                  = local.has_database
   database_enable_http_endpoint = true
   database_engine_version       = "17.7"
-  database_deletion_protection  = false # non-prod experimental environment
-  database_newrelic_entity_guid = ""    # Populate once the New Relic entity for the infra-training RDS cluster exists
+  database_deletion_protection  = false                                                # non-prod experimental environment
+  database_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMjEwNzYwNjQ1MjUwNjc2ODE4OQ" # Same entity as training
 
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
   enable_notifications            = false # Enable once an SES domain identity exists for infra-training
 
-  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the infra-training primary ALB exists
-  service_newrelic_mtls_entity_guid = "" # Populate once the New Relic entity for the infra-training mTLS ALB exists
-  api_host_newrelic_entity_guid     = "" # Populate once the New Relic entity for the infra-training ECS service host exists
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwtNTMyNjczNTExNjkwODE1NjMyMA"
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwxMTEyMzE1NDM1OTM1OTM5OTYy"
+  api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058OTgyMjgwNTEz"
 
   # Sizing mirrors training.
   instance_desired_instance_count = 2
@@ -41,14 +41,12 @@ module "infra_training_config" {
   has_search            = true
   search_engine_version = "OpenSearch_2.15"
 
-  # The reserved-SSO role suffix (AWSReservedSSO_<PermissionSet>_<suffix>) is generated
-  # per AWS account, so the env-config default (which matches the shared account) does not
-  # exist in 049145893907. null falls back to the account root principal; replace with this
-  # account's own AWSReservedSSO_* role name once IAM Identity Center is wired up.
-  search_sso_admin_role_name = null
+  search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_43bdcb088d20dc60"
 
   service_override_extra_environment_variables = {
     SAM_GOV_BASE_URL = "https://api.sam.gov"
+
+    LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-training-simpler-grants-gov"
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"
