@@ -31,6 +31,8 @@ const ApplicationAttachmentWidget = ({
   value,
 }: UswdsWidgetProps) => {
   const markFormDirty = formContext?.widgetSupport?.markFormDirty;
+  const attachmentsUploadingCounter =
+    formContext?.widgetSupport?.attachmentsUploadingCounter;
   const t = useTranslations("Application.attachmentUpload");
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   const { clientFetch: createApplicationAttachmentFetcher } =
@@ -91,6 +93,15 @@ const ApplicationAttachmentWidget = ({
     return Promise.resolve(undefined);
   };
 
+  const handleStartAttachmentUpload = () => {
+    markFormDirty?.();
+    attachmentsUploadingCounter?.incrementAttachmentsProcessing();
+  };
+
+  const handleUploadComplete = () => {
+    attachmentsUploadingCounter?.decrementAttachmentsProcessing();
+  };
+
   const visibleInputId = `${id}-visible`;
   const error = rawErrors.length ? true : undefined;
   const describedby = error
@@ -130,7 +141,8 @@ const ApplicationAttachmentWidget = ({
         postUploadActionProgressMessage={t("uploading")}
         postUploadActionSuccessMessage={t("success")}
         postUploadActionErrorMessage={t("error")}
-        onStart={markFormDirty}
+        onComplete={handleUploadComplete}
+        onStart={handleStartAttachmentUpload}
         onDelete={handleDeleteAttachment}
         disabled={disabled}
         readOnly={readOnly}

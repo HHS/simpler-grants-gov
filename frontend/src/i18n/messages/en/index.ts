@@ -591,6 +591,8 @@ export const messages = {
       returnToApplication: "Return to application",
       saving: "Saving...",
       savingAndRefreshing: "Save and refresh",
+      saveDisabledTooltipMessage:
+        "Save disabled while file upload is processing.",
       lastUpdatedMessage: "This form was last updated on",
       createdMessage: "This form was created on",
     },
@@ -2678,6 +2680,13 @@ export const messages = {
         invalidEmail:
           "Incorrect text format. Please ensure there are no spaces or missing characters.",
       },
+    },
+    sectionRequiredForms: {
+      header: "Forms in this package",
+      subHeader: "Select the forms applicants must complete.",
+      selectFormsButton: "Select forms",
+      labelForm: "Item",
+      labelRequirement: "Requirement",
     },
   },
   FeatureFlagsAdmin: {
