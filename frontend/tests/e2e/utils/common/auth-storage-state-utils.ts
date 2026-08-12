@@ -31,8 +31,8 @@ import {
   type TestInfo,
   type WorkerInfo,
 } from "@playwright/test";
-import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
+import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 
 export type AuthenticatedStorageState = Awaited<
   ReturnType<BrowserContext["storageState"]>
@@ -196,7 +196,9 @@ export function createAuthenticatedApplicationLifecycle(
       testInfo: TestInfo,
     ): Promise<void> => {
       // The inner lifecycle only needs browser, but Playwright requires the full fixture type.
-      const authenticatedLifecycleArgs = { browser } as AuthenticatedLifecycleBeforeEachArgs;
+      const authenticatedLifecycleArgs = {
+        browser,
+      } as AuthenticatedLifecycleBeforeEachArgs;
       await authenticatedLifecycle.beforeEach(
         authenticatedLifecycleArgs,
         testInfo,

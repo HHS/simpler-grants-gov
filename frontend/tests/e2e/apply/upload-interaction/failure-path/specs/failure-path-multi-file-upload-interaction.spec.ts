@@ -13,8 +13,8 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createAuthenticatedApplicationLifecycle } from "tests/e2e/utils/common/auth-storage-state-utils";
 import {
-  assertUploadDidNotSave,
   abortAttachmentUploadRequest,
+  assertUploadDidNotSave,
   failAttachmentUploadRequest,
   TEST_UPLOAD_DIR,
   uploadFile,

@@ -46,43 +46,42 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 test.describe("File upload interactions - Project Abstract", () => {
+  // Comment this test for only streamed upload endpoint that supports virus scanning
+  //   test(
+  //     "single-file upload hides the file input while the upload is in progress",
+  //     { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+  //     async (
+  //       { page, context }: { page: Page; context: BrowserContext },
+  //       testInfo: TestInfo,
+  //     ) => {
+  //       test.setTimeout(300_000);
 
-// Comment this test for only streamed upload endpoint that supports virus scanning
-//   test(
-//     "single-file upload hides the file input while the upload is in progress",
-//     { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
-//     async (
-//       { page, context }: { page: Page; context: BrowserContext },
-//       testInfo: TestInfo,
-//     ) => {
-//       test.setTimeout(300_000);
+  //       await openApplicationForm(
+  //         page,
+  //         context,
+  //         testInfo,
+  //         PROJECT_ABSTRACT_FORM_MATCHER,
+  //         testOrgLabel,
+  //         OPPORTUNITY_URL,
+  //       );
 
-//       await openApplicationForm(
-//         page,
-//         context,
-//         testInfo,
-//         PROJECT_ABSTRACT_FORM_MATCHER,
-//         testOrgLabel,
-//         OPPORTUNITY_URL,
-//       );
+  //       await stubStreamingAttachmentUpload(page);
+  //       await uploadFile(
+  //         page,
+  //         SAMPLE_UPLOAD_FILE,
+  //         fieldDefinitionsProjectAbstract.attachment,
+  //       );
 
-//       await stubStreamingAttachmentUpload(page);
-//       await uploadFile(
-//         page,
-//         SAMPLE_UPLOAD_FILE,
-//         fieldDefinitionsProjectAbstract.attachment,
-//       );
-
-//       await expectUploadStatusMessage(
-//         page,
-//         /queued|uploading|starting scan|scan complete/i,
-//       );
-//       await assertFileInputHidden(
-//         page,
-//         fieldDefinitionsProjectAbstract.attachment,
-//       );
-//     },
-//   );
+  //       await expectUploadStatusMessage(
+  //         page,
+  //         /queued|uploading|starting scan|scan complete/i,
+  //       );
+  //       await assertFileInputHidden(
+  //         page,
+  //         fieldDefinitionsProjectAbstract.attachment,
+  //       );
+  //     },
+  //   );
 
   test(
     "single-file inputs do not allow multiple files",
