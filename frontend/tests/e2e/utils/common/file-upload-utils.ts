@@ -23,6 +23,7 @@ import {
   type BrowserContext,
   type Locator,
   type Page,
+  type Route,
   type TestInfo,
 } from "@playwright/test";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -202,7 +203,7 @@ export async function failAttachmentUploadRequest(
   status = 500,
   responseBody = { error: "Upload failed" },
 ): Promise<void> {
-  const failRoute = async (route: any) => {
+  const failRoute = async (route: Route) => {
     await route.fulfill({
       status,
       headers: { "Content-Type": "application/json" },
@@ -336,13 +337,15 @@ export async function abortAttachmentUploadRequest(
   page: Page,
   delayMs = 0,
 ): Promise<void> {
-  const abortRoute = async (route: any) => {
+  const abortRoute = async (route: Route) => {
     if (delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
     await route.abort("aborted");
   };
 
-  page.route("**/api/file*", abortRoute);
-  page.route("**/api/applications/**/attachments*", abortRoute);
+  await Promise.all([
+    page.route("**/api/file*", abortRoute),
+    page.route("**/api/applications/**/attachments*", abortRoute),
+  ]);
 }

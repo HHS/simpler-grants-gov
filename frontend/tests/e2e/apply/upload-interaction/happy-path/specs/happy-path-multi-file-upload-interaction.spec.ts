@@ -111,7 +111,10 @@ test.describe("File upload interactions - Other Narrative Attachments", () => {
 
       await deleteUploadedFile(page, SAMPLE_FILE_NAME);
 
-      await assertFileInputVisible(page);
+      await assertFileInputVisible(
+        page,
+        fieldDefinitionsOtherNarrativeAttachment.attachments,
+      );
     },
   );
 
