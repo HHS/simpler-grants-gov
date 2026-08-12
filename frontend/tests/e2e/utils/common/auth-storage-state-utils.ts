@@ -87,6 +87,7 @@ export function createAuthenticatedPageLifecycle(
   options: AuthLifecycleOptions,
 ) {
   const timeoutMs = options.timeoutMs ?? 300_000;
+  const targetEnv = options.targetEnv;
   const stagingProjectName = options.stagingProjectName ?? "Chrome";
   const stagingSkipMessage =
     options.stagingSkipMessage ??
@@ -170,7 +171,6 @@ export function createAuthenticatedPageLifecycle(
  * Options for creating an authenticated application lifecycle.
  */
 type AuthenticatedApplicationLifecycleOptions = AuthLifecycleOptions & {
-  targetEnv: string;
   opportunityUrl: string;
   organizationLabel?: string;
 };
