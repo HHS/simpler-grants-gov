@@ -18,12 +18,11 @@ export const config = {
   matcher: [
     /*
      * Run Middleware on all request paths except these:
-     * - Api routes
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - images (static files in public/images/ directory)
      */
-    "/((?!_next/static|_next/image|sitemap|public|img|uswds|images|robots.txt|site.webmanifest|favicon.ico).*)",
+    "/((?!_next/static|_next/image|sitemap|public|img|uswds|images|robots.txt|site.webmanifest|favicon.ico|api/file).*)",
     /**
      * Fix issue where the pattern above was causing middleware
      * to not run on the homepage:
