@@ -72,7 +72,6 @@ export async function createPageWithStorageState(
 }
 
 type AuthLifecycleOptions = {
-  targetEnv: string;
   timeoutMs?: number;
   stagingProjectName?: string;
   stagingSkipMessage?: string;
@@ -102,7 +101,7 @@ export function createAuthenticatedPageLifecycle(
       workerInfo: WorkerInfo,
     ): Promise<void> => {
       if (
-        options.targetEnv === "staging" &&
+        playwrightEnv.targetEnv !== "local" &&
         workerInfo.project.name !== stagingProjectName
       ) {
         return;
@@ -125,7 +124,7 @@ export function createAuthenticatedPageLifecycle(
     ): Promise<void> => {
       testInfo.setTimeout(timeoutMs);
 
-      if (options.targetEnv === "staging") {
+      if (playwrightEnv.targetEnv !== "local") {
         options.skipTest?.(
           testInfo.project.name !== stagingProjectName,
           stagingSkipMessage,
