@@ -15,9 +15,9 @@ const errorStatuses = new Map([
   ["queued", "pre-upload-error"],
   ["starting", "pre-upload-error"],
   ["uploading", "upload-error"],
-  ["infected", "infected"],
-  ["pending", "scan-error"],
   ["starting-scan", "scan-error"],
+  ["in_progress", "scan-error"],
+  ["infected", "infected"],
   ["complete", "file-id-error"], // assuming that any error in this state is due to a missing file id
   ["post-upload", "post-upload-error"],
 ]);
@@ -144,7 +144,7 @@ export const FileInputStatusDisplay = ({
     starting: t("starting"),
     uploading: t("uploading"),
     "starting-scan": t("startingScan"),
-    pending: t("scanning"),
+    in_progress: t("scanning"),
     infected: t("infected"),
     complete: t("scanComplete"),
     "scan-complete": t("scanComplete"),
