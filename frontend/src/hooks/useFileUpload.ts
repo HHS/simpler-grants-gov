@@ -189,6 +189,7 @@ export const useFileUpload = ({
           }
           const postUploadAbortController = new AbortController();
           setCurrentStatus("post-upload");
+          console.log(`~~~ set post upload status ~~~`);
           setPostUploadController(postUploadAbortController);
           return postUploadAction(
             pendingFileId,
@@ -242,5 +243,6 @@ export const useFileUpload = ({
     ],
   );
 
+  console.log(`~~~ useFileUpload render: ${currentStatus} ~~~`);
   return useFileUploadInterface;
 };

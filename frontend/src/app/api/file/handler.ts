@@ -60,6 +60,7 @@ const orchestrateFileUpload = async (
   responseStreamController: ReadableStreamDefaultController,
   file: File,
 ) => {
+  console.warn("~~~ processUploadInStream: orchestrating file upload ~~~");
   responseStreamController.enqueue(JSON.stringify({ status: "starting" }));
   // call Simpler API to obtain details for S3 upload and pending file id
   const fileUploadDetails = await fetchFileUploadDetails(file.name, file.type);
@@ -95,7 +96,11 @@ const processUploadInStream = (file: File): ReadableStream<string> => {
   const responseStream = new ReadableStream<string>({
     start: async (responseStreamController) => {
       try {
+        console.warn(
+          "~~~ processUploadInStream: orchestrating file upload ~~~",
+        );
         await orchestrateFileUpload(responseStreamController, file);
+        console.warn("~~~ processUploadInStream: closing response stream ~~~");
         responseStreamController.close();
       } catch (e) {
         console.error("Error in file upload orchestration stream", e);
@@ -115,7 +120,9 @@ const processUploadInStream = (file: File): ReadableStream<string> => {
 // uploads file to S3 and sends the client updates about upload and virus scan progress
 export const handleFileUpload = async (request: NextRequest) => {
   try {
+    console.warn("~~~ handleFileUpload: gathering form data ~~~");
     const formData = await request.formData();
+    console.warn("~~~ handleFileUpload: pulling file attachment ~~~");
     const file = formData.get("file_attachment") as File;
 
     if (!file) {
@@ -126,8 +133,10 @@ export const handleFileUpload = async (request: NextRequest) => {
       );
     }
 
+    console.warn("~~~ handleFileUpload: opening response stream ~~~");
     // all calls to manage upload are made within the streaming process
     const responseStream = processUploadInStream(file);
+    console.warn("~~~ handleFileUpload: sending response ~~~");
     const responseToClient = new NextResponse(responseStream);
 
     return responseToClient;
