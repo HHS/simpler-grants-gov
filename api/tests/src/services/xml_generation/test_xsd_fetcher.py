@@ -2,8 +2,6 @@
 
 from unittest.mock import Mock, patch
 
-import pytest
-
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher, discover_xsd_dependencies
 
 XSD_NS = "http://www.w3.org/2001/XMLSchema"
