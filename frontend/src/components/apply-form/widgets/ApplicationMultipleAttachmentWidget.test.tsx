@@ -117,6 +117,62 @@ const mockUploadThenCreate = (attachments: Attachment[]) => {
   });
 };
 
+/*
+  Tracks the save-button upload counter the way ApplyForm does, so a test can assert the
+  running balance mid-flight rather than only the final call counts.
+*/
+const buildUploadingCounter = () => {
+  const state = { balance: 0, peak: 0 };
+  return {
+    state,
+    counter: {
+      incrementAttachmentsProcessing: jest.fn(() => {
+        state.balance += 1;
+        state.peak = Math.max(state.peak, state.balance);
+      }),
+      decrementAttachmentsProcessing: jest.fn(() => {
+        state.balance -= 1;
+      }),
+    },
+  };
+};
+
+/*
+  Uploads stream successfully, but each create-attachment call stays pending until the
+  returned deferred is settled - which is what lets a test hold several uploads in flight
+  at once and finish them one at a time.
+*/
+const mockUploadWithPendingCreates = (fileCount: number) => {
+  const deferreds = Array.from({ length: fileCount }, () => {
+    let settle!: (value: { data: Attachment }) => void;
+    let fail!: (reason: Error) => void;
+    const promise = new Promise<{ data: Attachment }>((resolve, reject) => {
+      settle = resolve;
+      fail = reject;
+    });
+    // an unhandled rejection would fail the suite if a test only ever calls fail()
+    promise.catch(() => undefined);
+    return { promise, settle, fail };
+  });
+
+  let uploadCount = 0;
+  let createCount = 0;
+  clientFetchMock.mockImplementation((url: string) => {
+    if (url === "/api/file") {
+      const pendingFileId = `pending-${uploadCount}`;
+      uploadCount += 1;
+      return Promise.resolve(
+        new Response(makeScanStream({ status: "complete", pendingFileId })),
+      );
+    }
+    const deferred = deferreds[createCount];
+    createCount += 1;
+    return deferred.promise;
+  });
+
+  return deferreds;
+};
+
 describe("ApplicationMultipleAttachmentWidget", () => {
   beforeEach(() => {
     global.AbortController = fakeAbortController;
@@ -581,6 +637,31 @@ describe("ApplicationMultipleAttachmentWidget", () => {
       expect(markFormDirty).toHaveBeenCalledTimes(2);
     });
 
+    it("marks the form dirty and increments the counter on the same upload start", async () => {
+      mockUploadThenCreate([attachmentOne]);
+      const markFormDirty = jest.fn();
+      const { counter } = buildUploadingCounter();
+      render(
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          formContext={{
+            widgetSupport: {
+              useVirusScanning: false,
+              useMultiAttachmentVirusScanning: true,
+              markFormDirty,
+              attachmentsUploadingCounter: counter,
+            },
+          }}
+        />,
+      );
+
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, new File(["a"], "budget.pdf"));
+
+      expect(markFormDirty).toHaveBeenCalledTimes(1);
+      expect(counter.incrementAttachmentsProcessing).toHaveBeenCalledTimes(1);
+    });
+
     it("shows an independent in-progress status row per file", async () => {
       // a stream that never emits, so both uploads stay in progress and both rows remain
       clientFetchMock.mockImplementation(() =>
@@ -641,6 +722,177 @@ describe("ApplicationMultipleAttachmentWidget", () => {
       await userEvent.click(screen.getByRole("button", { name: "cancel" }));
 
       expect(hiddenValue(container)).toEqual([]);
+    });
+  });
+
+  /*
+    The save button is disabled while the counter is above zero (#11902), so these assert
+    the balance rather than the button - the button itself lives in ApplyForm.
+  */
+  describe("Save button upload counter", () => {
+    const renderWithCounter = (
+      counter: {
+        incrementAttachmentsProcessing: () => void;
+        decrementAttachmentsProcessing: () => void;
+      },
+      markFormDirty = jest.fn(),
+    ) =>
+      render(
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          formContext={{
+            widgetSupport: {
+              useVirusScanning: false,
+              useMultiAttachmentVirusScanning: true,
+              markFormDirty,
+              attachmentsUploadingCounter: counter,
+            },
+          }}
+        />,
+      );
+
+    it("increments once per file in a batch", async () => {
+      mockUploadWithPendingCreates(3);
+      const { counter, state } = buildUploadingCounter();
+      renderWithCounter(counter);
+
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, [
+        new File(["a"], "budget.pdf"),
+        new File(["b"], "narrative.pdf"),
+        new File(["c"], "appendix.pdf"),
+      ]);
+
+      await waitFor(() =>
+        expect(counter.incrementAttachmentsProcessing).toHaveBeenCalledTimes(3),
+      );
+      expect(state.balance).toBe(3);
+      expect(counter.decrementAttachmentsProcessing).not.toHaveBeenCalled();
+    });
+
+    it("decrements when an upload completes", async () => {
+      mockUploadThenCreate([attachmentOne]);
+      const { counter, state } = buildUploadingCounter();
+      const { container } = renderWithCounter(counter);
+
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, new File(["a"], "budget.pdf"));
+
+      await waitFor(() => expect(hiddenValue(container)).toEqual(["uuid-1"]));
+      await waitFor(() =>
+        expect(counter.decrementAttachmentsProcessing).toHaveBeenCalledTimes(1),
+      );
+      expect(state.balance).toBe(0);
+    });
+
+    it("stays above zero until every concurrent upload has finished", async () => {
+      const deferreds = mockUploadWithPendingCreates(2);
+      const { counter, state } = buildUploadingCounter();
+      renderWithCounter(counter);
+
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, [
+        new File(["a"], "budget.pdf"),
+        new File(["b"], "narrative.pdf"),
+      ]);
+
+      // both in flight - save must be disabled
+      await waitFor(() => expect(state.balance).toBe(2));
+
+      deferreds[0].settle({ data: attachmentOne });
+      // one finished, one still in flight - save must remain disabled
+      await waitFor(() => expect(state.balance).toBe(1));
+
+      deferreds[1].settle({ data: attachmentTwo });
+      // all finished - save may be enabled again
+      await waitFor(() => expect(state.balance).toBe(0));
+
+      expect(counter.incrementAttachmentsProcessing).toHaveBeenCalledTimes(2);
+      expect(counter.decrementAttachmentsProcessing).toHaveBeenCalledTimes(2);
+    });
+
+    it("decrements a failed upload so the counter cannot get stuck", async () => {
+      const deferreds = mockUploadWithPendingCreates(1);
+      const { counter, state } = buildUploadingCounter();
+      const { container } = renderWithCounter(counter);
+
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, new File(["a"], "budget.pdf"));
+      await waitFor(() => expect(state.balance).toBe(1));
+
+      deferreds[0].fail(new Error("create failed"));
+
+      await waitFor(() => expect(state.balance).toBe(0));
+      expect(hiddenValue(container)).toEqual([]);
+    });
+
+    it("decrements a canceled upload so the counter cannot get stuck", async () => {
+      clientFetchMock.mockImplementation(() =>
+        Promise.resolve(new Response(new ReadableStream({ start: () => {} }))),
+      );
+      const { counter, state } = buildUploadingCounter();
+      renderWithCounter(counter);
+
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, new File(["a"], "budget.pdf"));
+      await waitFor(() => expect(state.balance).toBe(1));
+
+      await userEvent.click(screen.getByRole("button", { name: "cancel" }));
+
+      await waitFor(() => expect(state.balance).toBe(0));
+    });
+
+    it("uploads normally when the form provides no counter", async () => {
+      mockUploadThenCreate([attachmentOne]);
+      const markFormDirty = jest.fn();
+      const { container } = render(
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          formContext={{
+            widgetSupport: {
+              useVirusScanning: false,
+              useMultiAttachmentVirusScanning: true,
+              markFormDirty,
+            },
+          }}
+        />,
+      );
+
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, new File(["a"], "budget.pdf"));
+
+      await waitFor(() => expect(hiddenValue(container)).toEqual(["uuid-1"]));
+      expect(markFormDirty).toHaveBeenCalledTimes(1);
+    });
+
+    /*
+      #11902 added widgetSupport fixtures that omit useMultiAttachmentVirusScanning, so the
+      property is optional. Omitting it must read as "off" and must not break the widget
+      when it is rendered directly.
+    */
+    it("works when useMultiAttachmentVirusScanning is omitted entirely", async () => {
+      mockUploadThenCreate([attachmentOne]);
+      const markFormDirty = jest.fn();
+      const { counter, state } = buildUploadingCounter();
+      const { container } = render(
+        <ApplicationMultipleAttachmentWidget
+          {...defaultProps}
+          formContext={{
+            widgetSupport: {
+              useVirusScanning: true,
+              markFormDirty,
+              attachmentsUploadingCounter: counter,
+            },
+          }}
+        />,
+      );
+
+      const input = await screen.findByTestId("file-input-input");
+      await userEvent.upload(input, new File(["a"], "budget.pdf"));
+
+      await waitFor(() => expect(hiddenValue(container)).toEqual(["uuid-1"]));
+      await waitFor(() => expect(state.balance).toBe(0));
+      expect(markFormDirty).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -97,6 +97,20 @@ describe("widgetComponents attachment selection", () => {
       expect(mockVirusScanningMultipleAttachmentWidget).not.toHaveBeenCalled();
     });
 
+    // the property is optional, so widgetSupport fixtures that predate it (#11902) must
+    // still resolve to the legacy widget rather than undefined behavior
+    it("uses the legacy widget when the multi attachment gate is omitted", () => {
+      renderWidgetType("AttachmentArray", {
+        id: "attachment_field",
+        schema: { type: "string" },
+        rawErrors: [],
+        formContext: { widgetSupport: { useVirusScanning: true } },
+      });
+
+      expect(mockLegacyMultipleAttachmentWidget).toHaveBeenCalledTimes(1);
+      expect(mockVirusScanningMultipleAttachmentWidget).not.toHaveBeenCalled();
+    });
+
     it("is not switched by the single attachment gate", () => {
       renderWidgetType(
         "AttachmentArray",

@@ -57,6 +57,8 @@ const ApplicationMultipleAttachmentWidget = ({
   value,
 }: UswdsWidgetProps) => {
   const markFormDirty = formContext?.widgetSupport?.markFormDirty;
+  const attachmentsUploadingCounter =
+    formContext?.widgetSupport?.attachmentsUploadingCounter;
   const t = useTranslations("Application.attachmentUpload");
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -164,6 +166,21 @@ const ApplicationMultipleAttachmentWidget = ({
     [markFormDirty],
   );
 
+  /*
+    SimplerFileInput renders one upload per selected file and fires these per file, so a
+    batch increments once per file and each file decrements as it settles. onComplete runs
+    from a `finally`, so failed and canceled uploads decrement too and the save button
+    cannot stay disabled on a stuck count.
+  */
+  const handleUploadStart = useCallback(() => {
+    markFormDirty?.();
+    attachmentsUploadingCounter?.incrementAttachmentsProcessing();
+  }, [markFormDirty, attachmentsUploadingCounter]);
+
+  const handleUploadComplete = useCallback(() => {
+    attachmentsUploadingCounter?.decrementAttachmentsProcessing();
+  }, [attachmentsUploadingCounter]);
+
   // only for consumers that pass onChange - the apply form does not, and submits the
   // hidden input below instead
   const lastNotifiedSelection = useRef(JSON.stringify(selectedAttachmentIds));
@@ -213,7 +230,8 @@ const ApplicationMultipleAttachmentWidget = ({
         postUploadActionProgressMessage={t("uploading")}
         postUploadActionSuccessMessage={t("success")}
         postUploadActionErrorMessage={t("error")}
-        onStart={markFormDirty}
+        onStart={handleUploadStart}
+        onComplete={handleUploadComplete}
         onDelete={handleDeleteAttachment}
         disabled={disabled}
         readOnly={readOnly}
