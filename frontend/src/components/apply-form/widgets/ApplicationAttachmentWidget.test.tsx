@@ -391,8 +391,8 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useVirusScanning: true,
-            useMultiAttachmentVirusScanning: false,
+            useSingleAttachmentVirusScanning: true,
+            useMultipleAttachmentVirusScanning: false,
             markFormDirty,
           },
         }}
@@ -410,7 +410,7 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useVirusScanning: true,
+            useSingleAttachmentVirusScanning: true,
             markFormDirty,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
@@ -436,7 +436,7 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useVirusScanning: true,
+            useSingleAttachmentVirusScanning: true,
             markFormDirty: throwingMarkFormDirty,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
@@ -459,7 +459,7 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useVirusScanning: true,
+            useSingleAttachmentVirusScanning: true,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
               decrementAttachmentsProcessing,
@@ -479,7 +479,7 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useVirusScanning: true,
+            useSingleAttachmentVirusScanning: true,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
               decrementAttachmentsProcessing,
@@ -500,7 +500,7 @@ describe("ApplicationAttachmentWidget", () => {
       <ApplicationAttachmentWidget
         {...defaultProps}
         formContext={{
-          widgetSupport: { useVirusScanning: true },
+          widgetSupport: { useSingleAttachmentVirusScanning: true },
         }}
       />,
     );
@@ -517,8 +517,8 @@ describe("ApplicationAttachmentWidget", () => {
         value="uuid-1"
         formContext={{
           widgetSupport: {
-            useVirusScanning: true,
-            useMultiAttachmentVirusScanning: false,
+            useSingleAttachmentVirusScanning: true,
+            useMultipleAttachmentVirusScanning: false,
             markFormDirty,
           },
         }}

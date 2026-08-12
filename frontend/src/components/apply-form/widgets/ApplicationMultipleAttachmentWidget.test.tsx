@@ -620,8 +620,8 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           {...defaultProps}
           formContext={{
             widgetSupport: {
-              useVirusScanning: false,
-              useMultiAttachmentVirusScanning: true,
+              useSingleAttachmentVirusScanning: false,
+              useMultipleAttachmentVirusScanning: true,
               markFormDirty,
             },
           }}
@@ -646,8 +646,8 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           {...defaultProps}
           formContext={{
             widgetSupport: {
-              useVirusScanning: false,
-              useMultiAttachmentVirusScanning: true,
+              useSingleAttachmentVirusScanning: false,
+              useMultipleAttachmentVirusScanning: true,
               markFormDirty,
               attachmentsUploadingCounter: counter,
             },
@@ -742,8 +742,8 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           {...defaultProps}
           formContext={{
             widgetSupport: {
-              useVirusScanning: false,
-              useMultiAttachmentVirusScanning: true,
+              useSingleAttachmentVirusScanning: false,
+              useMultipleAttachmentVirusScanning: true,
               markFormDirty,
               attachmentsUploadingCounter: counter,
             },
@@ -850,8 +850,8 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           {...defaultProps}
           formContext={{
             widgetSupport: {
-              useVirusScanning: false,
-              useMultiAttachmentVirusScanning: true,
+              useSingleAttachmentVirusScanning: false,
+              useMultipleAttachmentVirusScanning: true,
               markFormDirty,
             },
           }}
@@ -866,11 +866,11 @@ describe("ApplicationMultipleAttachmentWidget", () => {
     });
 
     /*
-      #11902 added widgetSupport fixtures that omit useMultiAttachmentVirusScanning, so the
+      #11902 added widgetSupport fixtures that omit useMultipleAttachmentVirusScanning, so the
       property is optional. Omitting it must read as "off" and must not break the widget
       when it is rendered directly.
     */
-    it("works when useMultiAttachmentVirusScanning is omitted entirely", async () => {
+    it("works when useMultipleAttachmentVirusScanning is omitted entirely", async () => {
       mockUploadThenCreate([attachmentOne]);
       const markFormDirty = jest.fn();
       const { counter, state } = buildUploadingCounter();
@@ -879,7 +879,7 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           {...defaultProps}
           formContext={{
             widgetSupport: {
-              useVirusScanning: true,
+              useSingleAttachmentVirusScanning: true,
               markFormDirty,
               attachmentsUploadingCounter: counter,
             },
@@ -907,8 +907,8 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           value={["uuid-1", "uuid-2"]}
           formContext={{
             widgetSupport: {
-              useVirusScanning: false,
-              useMultiAttachmentVirusScanning: true,
+              useSingleAttachmentVirusScanning: false,
+              useMultipleAttachmentVirusScanning: true,
               markFormDirty,
             },
           }}

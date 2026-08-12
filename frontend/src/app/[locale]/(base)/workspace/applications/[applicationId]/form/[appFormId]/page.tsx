@@ -9,7 +9,7 @@ import {
   pointerToFieldName,
 } from "src/utils/applyForm/applyFormUtils";
 import {
-  supportsMultiAttachmentVirusScanning,
+  supportsMultipleAttachmentVirusScanning,
   supportsSingleAttachmentVirusScanning,
 } from "src/utils/applyForm/virusScanningForms";
 import getFormData from "src/utils/getFormData";
@@ -93,9 +93,10 @@ async function FormPage({ params }: formPageProps) {
     updatedAt,
   } = data;
 
-  const useVirusScanning = supportsSingleAttachmentVirusScanning(formName);
-  const useMultiAttachmentVirusScanning =
-    supportsMultiAttachmentVirusScanning(formName);
+  const useSingleAttachmentVirusScanning =
+    supportsSingleAttachmentVirusScanning(formName);
+  const useMultipleAttachmentVirusScanning =
+    supportsMultipleAttachmentVirusScanning(formName);
   const isBudgetForm =
     formName.includes("SF-424A") || formName.includes("SF-424C");
 
@@ -143,8 +144,10 @@ async function FormPage({ params }: formPageProps) {
           applicationStatus={application_status}
           createdAt={createdAt}
           updatedAt={updatedAt}
-          useVirusScanning={useVirusScanning}
-          useMultiAttachmentVirusScanning={useMultiAttachmentVirusScanning}
+          useSingleAttachmentVirusScanning={useSingleAttachmentVirusScanning}
+          useMultipleAttachmentVirusScanning={
+            useMultipleAttachmentVirusScanning
+          }
         />
       </GridContainer>
     </>

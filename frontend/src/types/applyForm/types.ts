@@ -406,10 +406,10 @@ export interface UswdsWidgetProps<
     rootFormData?: unknown;
     widgetSupport?: {
       // temporary virus scanning, removed in #11352
-      useVirusScanning: boolean;
+      useSingleAttachmentVirusScanning: boolean;
       // optional so a caller that only cares about single attachments can omit it;
       // absent is read as "off", the same as false
-      useMultiAttachmentVirusScanning?: boolean;
+      useMultipleAttachmentVirusScanning?: boolean;
       validationWarnings?:
         FormattedFormValidationWarning[] | FormValidationWarning[];
       deletedEntryIndexesByFieldListPath?: Record<string, number[]>;

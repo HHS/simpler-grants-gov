@@ -40,11 +40,11 @@ export const widgetComponents: Record<
   PrintAttachment: (widgetProps: UswdsWidgetProps) =>
     PrintAttachmentWidget(widgetProps),
   Attachment: (widgetProps: UswdsWidgetProps) =>
-    widgetProps.formContext?.widgetSupport?.useVirusScanning
+    widgetProps.formContext?.widgetSupport?.useSingleAttachmentVirusScanning
       ? ApplicationAttachmentWidget(widgetProps)
       : AttachmentWidget(widgetProps),
   AttachmentArray: (widgetProps: UswdsWidgetProps) =>
-    widgetProps.formContext?.widgetSupport?.useMultiAttachmentVirusScanning
+    widgetProps.formContext?.widgetSupport?.useMultipleAttachmentVirusScanning
       ? ApplicationMultipleAttachmentWidget(widgetProps)
       : AttachmentArrayWidget(widgetProps),
   Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>

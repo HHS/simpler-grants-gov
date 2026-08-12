@@ -39,8 +39,8 @@ jest.mock("./ApplicationMultipleAttachmentWidget", () => ({
 
 const buildProps = (
   widgetSupport: Partial<{
-    useVirusScanning: boolean;
-    useMultiAttachmentVirusScanning: boolean;
+    useSingleAttachmentVirusScanning: boolean;
+    useMultipleAttachmentVirusScanning: boolean;
   }>,
 ): UswdsWidgetProps => ({
   id: "attachment_field",
@@ -48,8 +48,8 @@ const buildProps = (
   rawErrors: [],
   formContext: {
     widgetSupport: {
-      useVirusScanning: false,
-      useMultiAttachmentVirusScanning: false,
+      useSingleAttachmentVirusScanning: false,
+      useMultipleAttachmentVirusScanning: false,
       ...widgetSupport,
     },
   },
@@ -64,10 +64,10 @@ describe("widgetComponents attachment selection", () => {
   afterEach(() => jest.clearAllMocks());
 
   describe("AttachmentArray", () => {
-    it("uses the virus scanning widget when multi attachment virus scanning is enabled", () => {
+    it("uses the virus scanning widget when multiple attachment virus scanning is enabled", () => {
       renderWidgetType(
         "AttachmentArray",
-        buildProps({ useMultiAttachmentVirusScanning: true }),
+        buildProps({ useMultipleAttachmentVirusScanning: true }),
       );
 
       expect(mockVirusScanningMultipleAttachmentWidget).toHaveBeenCalledTimes(
@@ -76,10 +76,10 @@ describe("widgetComponents attachment selection", () => {
       expect(mockLegacyMultipleAttachmentWidget).not.toHaveBeenCalled();
     });
 
-    it("uses the legacy widget when multi attachment virus scanning is disabled", () => {
+    it("uses the legacy widget when multiple attachment virus scanning is disabled", () => {
       renderWidgetType(
         "AttachmentArray",
-        buildProps({ useMultiAttachmentVirusScanning: false }),
+        buildProps({ useMultipleAttachmentVirusScanning: false }),
       );
 
       expect(mockLegacyMultipleAttachmentWidget).toHaveBeenCalledTimes(1);
@@ -99,12 +99,14 @@ describe("widgetComponents attachment selection", () => {
 
     // the property is optional, so widgetSupport fixtures that predate it (#11902) must
     // still resolve to the legacy widget rather than undefined behavior
-    it("uses the legacy widget when the multi attachment gate is omitted", () => {
+    it("uses the legacy widget when the multiple attachment gate is omitted", () => {
       renderWidgetType("AttachmentArray", {
         id: "attachment_field",
         schema: { type: "string" },
         rawErrors: [],
-        formContext: { widgetSupport: { useVirusScanning: true } },
+        formContext: {
+          widgetSupport: { useSingleAttachmentVirusScanning: true },
+        },
       });
 
       expect(mockLegacyMultipleAttachmentWidget).toHaveBeenCalledTimes(1);
@@ -115,8 +117,8 @@ describe("widgetComponents attachment selection", () => {
       renderWidgetType(
         "AttachmentArray",
         buildProps({
-          useVirusScanning: true,
-          useMultiAttachmentVirusScanning: false,
+          useSingleAttachmentVirusScanning: true,
+          useMultipleAttachmentVirusScanning: false,
         }),
       );
 
@@ -126,12 +128,12 @@ describe("widgetComponents attachment selection", () => {
   });
 
   describe("Attachment", () => {
-    it("is not switched by the multi attachment gate", () => {
+    it("is not switched by the multiple attachment gate", () => {
       renderWidgetType(
         "Attachment",
         buildProps({
-          useVirusScanning: false,
-          useMultiAttachmentVirusScanning: true,
+          useSingleAttachmentVirusScanning: false,
+          useMultipleAttachmentVirusScanning: true,
         }),
       );
 
@@ -140,7 +142,10 @@ describe("widgetComponents attachment selection", () => {
     });
 
     it("still uses the virus scanning widget when the single attachment gate is enabled", () => {
-      renderWidgetType("Attachment", buildProps({ useVirusScanning: true }));
+      renderWidgetType(
+        "Attachment",
+        buildProps({ useSingleAttachmentVirusScanning: true }),
+      );
 
       expect(mockVirusScanningAttachmentWidget).toHaveBeenCalledTimes(1);
       expect(mockLegacyAttachmentWidget).not.toHaveBeenCalled();
@@ -163,7 +168,7 @@ describe("widgetComponents attachment selection", () => {
       );
       renderWidgetType(
         "AttachmentArray",
-        buildProps({ useMultiAttachmentVirusScanning: true }),
+        buildProps({ useMultipleAttachmentVirusScanning: true }),
       );
       expect(mockVirusScanningMultipleAttachmentWidget).toHaveBeenCalledTimes(
         1,

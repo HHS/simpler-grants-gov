@@ -4,7 +4,7 @@ const SINGLE_ATTACHMENT_FORM_NAMES: ReadonlySet<string> = new Set([
 ]);
 
 // #11351 - forms whose multiple-file attachment fields use the virus scanning input
-const MULTI_ATTACHMENT_FORM_NAMES: ReadonlySet<string> = new Set([
+const MULTIPLE_ATTACHMENT_FORM_NAMES: ReadonlySet<string> = new Set([
   "Application for Federal Assistance (SF-424)",
 ]);
 
@@ -12,6 +12,6 @@ export const supportsSingleAttachmentVirusScanning = (
   formName: string | undefined,
 ): boolean => (formName ? SINGLE_ATTACHMENT_FORM_NAMES.has(formName) : false);
 
-export const supportsMultiAttachmentVirusScanning = (
+export const supportsMultipleAttachmentVirusScanning = (
   formName: string | undefined,
-): boolean => (formName ? MULTI_ATTACHMENT_FORM_NAMES.has(formName) : false);
+): boolean => (formName ? MULTIPLE_ATTACHMENT_FORM_NAMES.has(formName) : false);

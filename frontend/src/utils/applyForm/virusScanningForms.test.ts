@@ -1,5 +1,5 @@
 import {
-  supportsMultiAttachmentVirusScanning,
+  supportsMultipleAttachmentVirusScanning,
   supportsSingleAttachmentVirusScanning,
 } from "src/utils/applyForm/virusScanningForms";
 
@@ -14,9 +14,9 @@ const SF424C = "Budget Information for Construction Programs (SF-424C)";
 const SF424D = "Assurances for Construction Programs (SF-424D)";
 const ATTACHMENT_FORM = "Attachment Form";
 
-describe("supportsMultiAttachmentVirusScanning", () => {
+describe("supportsMultipleAttachmentVirusScanning", () => {
   it("enables the virus scanning input for SF-424", () => {
-    expect(supportsMultiAttachmentVirusScanning(SF424)).toBe(true);
+    expect(supportsMultipleAttachmentVirusScanning(SF424)).toBe(true);
   });
 
   it.each([
@@ -28,14 +28,14 @@ describe("supportsMultiAttachmentVirusScanning", () => {
     ["Attachment Form", ATTACHMENT_FORM],
     ["Project Narrative Attachment Form", "Project Narrative Attachment Form"],
   ])("does not enable it for %s", (_label, formName) => {
-    expect(supportsMultiAttachmentVirusScanning(formName)).toBe(false);
+    expect(supportsMultipleAttachmentVirusScanning(formName)).toBe(false);
   });
 
   it("does not match on a substring of the SF-424 name", () => {
     // SF-424 Short's registered name contains "(SF-424)", so a pattern match would
     // wrongly select it. This asserts the guard against reintroducing that.
     expect(SF424_SHORT).toContain("(SF-424)");
-    expect(supportsMultiAttachmentVirusScanning(SF424_SHORT)).toBe(false);
+    expect(supportsMultipleAttachmentVirusScanning(SF424_SHORT)).toBe(false);
   });
 
   it.each([
@@ -45,7 +45,7 @@ describe("supportsMultiAttachmentVirusScanning", () => {
     ["an empty name", ""],
     ["an undefined name", undefined],
   ])("does not enable it for %s", (_label, formName) => {
-    expect(supportsMultiAttachmentVirusScanning(formName)).toBe(false);
+    expect(supportsMultipleAttachmentVirusScanning(formName)).toBe(false);
   });
 });
 
