@@ -2725,6 +2725,7 @@ export const messages = {
       cancel: "Cancel",
       dismiss: "Dismiss",
       queued: "Queued",
+      starting: "Starting upload process",
       uploading: "Uploading...",
       startingScan: "Upload complete. Starting security scan",
       scanning: "Upload complete. Running security scan...",
