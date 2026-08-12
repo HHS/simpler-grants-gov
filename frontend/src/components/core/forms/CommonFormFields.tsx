@@ -299,7 +299,7 @@ export const CommonWordLimit = ({
             rawErrors={[`${wordCount - fieldMaxLength} words over limit`]}
           />
         ) : (
-          <p className="text-base-dark margin-top-0">{`${fieldMaxLength - wordCount} words allowed`}</p>
+          <p className="text-base-dark margin-top-0">{`${fieldMaxLength - wordCount} words ${wordCount ? "left" : "allowed"}`}</p>
         )}
       </FormGroup>
     </>
