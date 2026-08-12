@@ -21,7 +21,7 @@ import { expect, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import { TEST_ORG_IDS } from "tests/e2e/utils/auth/test-users";
+import { getTestOrgId } from "tests/e2e/utils/auth/test-users";
 
 const { AUTH, CORE_REGRESSION } = VALID_TAGS;
 
@@ -35,7 +35,7 @@ test.describe("Organization detail page access", () => {
   // Run staging on Chrome only, mirroring the other staging auth specs;
   // cross-browser staging spoofing hasn't been validated yet.
   test.beforeEach(({ page: _ }, testInfo) => {
-    if (targetEnv === "staging") {
+    if (targetEnv !== "local") {
       test.skip(
         testInfo.project.name !== "Chrome",
         "Staging auth specs run on Chrome only",
@@ -56,9 +56,12 @@ test.describe("Organization detail page access", () => {
       await authenticateE2eUser(page, context, isMobile, "orgMember");
 
       // When the user navigates to their organization's detail page
-      await page.goto(`/workspace/organizations/${TEST_ORG_IDS.e2eTestOrg}`, {
-        waitUntil: "domcontentloaded",
-      });
+      await page.goto(
+        `/workspace/organizations/${getTestOrgId("e2eTestOrg")}`,
+        {
+          waitUntil: "domcontentloaded",
+        },
+      );
 
       // Then the organization name is shown as the page heading
       await expect(
