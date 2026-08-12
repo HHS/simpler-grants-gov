@@ -1,15 +1,12 @@
 /**
  * @feature File upload interactions - Failure Path
- * @featureFile e2e/apply/upload-interaction/failure-path/features/failure-path-file-upload-interaction.feature
+ * @featureFile e2e/apply/upload-interaction/failure-path/features/failure-path-multi-file-upload-interaction.feature
  * @scenario Upload error handling for other narrative attachment multi-file uploads
  */
 
 import {
-  expect,
   test,
-  type BrowserContext,
   type Page,
-  type TestInfo,
 } from "@playwright/test";
 import {
   fieldDefinitionsOtherNarrativeAttachment,
@@ -17,14 +14,15 @@ import {
 } from "tests/e2e/apply/fixtures/other-narrative-attachment-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import { createAuthenticatedApplicationLifecycle } from "tests/e2e/utils/common/auth-storage-state-utils";
 import {
-  assertFileInputVisible,
+  assertUploadDidNotSave,
   abortAttachmentUploadRequest,
-  openApplicationForm,
+  failAttachmentUploadRequest,
   TEST_UPLOAD_DIR,
   uploadFile,
 } from "tests/e2e/utils/common/file-upload-utils";
+import { openApplicationForm } from "tests/e2e/utils/forms/form-navigation-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;
@@ -37,44 +35,80 @@ const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 const SAMPLE_FILE_NAME = "sample-upload-kb.pdf";
 const SAMPLE_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/${SAMPLE_FILE_NAME}`;
 
-// Skip non-Chrome browsers in staging
-test.beforeEach(({ page: _ }, testInfo) => {
-  skipNonChromeOnStaging(testInfo);
+const authenticatedLifecycle = createAuthenticatedApplicationLifecycle({
+  targetEnv,
+  opportunityUrl: OPPORTUNITY_URL,
+  organizationLabel: testOrgLabel,
+  timeoutMs: 300_000,
+  skipTest: (condition, description) => test.skip(condition, description),
 });
 
-test.describe("File upload interactions - Failure Path", () => {
+test.beforeAll(authenticatedLifecycle.beforeAll);
+test.beforeEach(authenticatedLifecycle.beforeEach);
+test.afterEach(authenticatedLifecycle.afterEach);
+
+test.describe("Multi file upload interactions - Failure Path", () => {
   test(
     "aborted upload keeps the choose from folder link visible",
     { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
-    async (
-      { page, context }: { page: Page; context: BrowserContext },
-      testInfo: TestInfo,
-    ) => {
-      test.setTimeout(300_000);
+    async () => {
+      const page = authenticatedLifecycle.getPage();
 
+      // Given the applicant has opened the Other Narrative Attachment form
       await openApplicationForm(
         page,
-        context,
-        testInfo,
+        authenticatedLifecycle.getApplicationUrl(),
         OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER,
-        testOrgLabel,
-        OPPORTUNITY_URL,
       );
 
+      // And the upload request is aborted before completion
       await abortAttachmentUploadRequest(page);
 
+      // When the applicant selects a file for upload
       await uploadFile(
         page,
         SAMPLE_UPLOAD_FILE,
         fieldDefinitionsOtherNarrativeAttachment.attachments,
       );
 
-      await expect(page.locator(`text=${SAMPLE_FILE_NAME}`)).toHaveCount(0, {
-        timeout: 60000,
-      });
-
-      await assertFileInputVisible(
+      // Then I should not see the file saved and the "choose from folder" link should remain visible
+      await assertUploadDidNotSave(
         page,
+        SAMPLE_FILE_NAME,
+        0,
+        fieldDefinitionsOtherNarrativeAttachment.attachments,
+      );
+    },
+  );
+  
+  test(
+    "failed upload keeps the choose from folder link visible",
+    { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    async () => {
+      const page = authenticatedLifecycle.getPage();
+
+      // Given the applicant has opened the Other Narrative Attachment form
+      await openApplicationForm(
+        page,
+        authenticatedLifecycle.getApplicationUrl(),
+        OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER,
+      );
+
+      // And the upload request is forced to fail
+      await failAttachmentUploadRequest(page);
+
+      // When the applicant selects a file for upload
+      await uploadFile(
+        page,
+        SAMPLE_UPLOAD_FILE,
+        fieldDefinitionsOtherNarrativeAttachment.attachments,
+      );
+
+      // Then I should not see the file saved and the "choose from folder" link should remain visible
+      await assertUploadDidNotSave(
+        page,
+        SAMPLE_FILE_NAME,
+        0,
         fieldDefinitionsOtherNarrativeAttachment.attachments,
       );
     },

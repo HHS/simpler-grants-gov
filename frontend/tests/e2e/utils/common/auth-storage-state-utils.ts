@@ -3,17 +3,20 @@
  *
  * Reviewer guide:
  * - createAuthenticatedStorageState: logs in once and returns a reusable storage state.
- *   Call this in beforeAll so auth cost is paid only once per worker.
+ *   Call this in beforeAll so auth cost is paid once per worker.
  * - createPageWithStorageState: creates a fresh browser context + page from a stored auth state.
  *   Call this in beforeEach so each test gets an isolated page without re-authenticating.
- * - createAuthenticatedPageLifecycle: convenience factory that wires both helpers into
- *   beforeAll / beforeEach / afterEach callbacks ready to pass to test.beforeAll etc.
- *   Returns getPage() and getContext() accessors for use inside test bodies.
+ * - createAuthenticatedPageLifecycle: convenience factory that wires those helpers into
+ *   beforeAll / beforeEach / afterEach callbacks, reuses auth state per worker, and exposes
+ *   getPage/getContext for test code.
+ * - createAuthenticatedApplicationLifecycle: extends the auth lifecycle by creating one
+ *   application on first use and caching its URL for all tests in the spec.
+ *   This avoids repeated application creation across a spec.
  *
  * Tester parameter guide:
  * - targetEnv: pass playwrightEnv.targetEnv from the spec; controls staging-only skip logic.
  * - skipTest: pass (condition, description) => test.skip(condition, description) from the spec.
- * - timeoutMs: defaults to 300 000 ms; override per spec if needed.
+ * - timeoutMs: defaults to 300_000 ms; override per spec if needed.
  * - stagingProjectName: defaults to "Chrome"; staging MFA is limited to one browser.
  * - stagingSkipMessage: override the skip reason text if needed.
  */
@@ -29,6 +32,7 @@ import {
   type WorkerInfo,
 } from "@playwright/test";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 
 export type AuthenticatedStorageState = Awaited<
   ReturnType<BrowserContext["storageState"]>
@@ -158,6 +162,64 @@ export function createAuthenticatedPageLifecycle(
         throw new Error("Authenticated test page is not initialized");
       }
       return page;
+    },
+  };
+}
+
+/**
+ * Options for creating an authenticated application lifecycle.
+ */
+type AuthenticatedApplicationLifecycleOptions = AuthLifecycleOptions & {
+  opportunityUrl: string;
+  organizationLabel?: string;
+};
+
+/**
+ * Creates an authenticated application lifecycle for use in Playwright tests.
+ * This wraps the authenticated page lifecycle and adds application-specific setup.
+ */
+export function createAuthenticatedApplicationLifecycle(
+  options: AuthenticatedApplicationLifecycleOptions,
+) {
+  const authenticatedLifecycle = createAuthenticatedPageLifecycle(options);
+  type AuthenticatedLifecycleBeforeEachArgs = Parameters<
+    typeof authenticatedLifecycle.beforeEach
+  >[0];
+  let applicationUrl: string | undefined;
+
+  return {
+    beforeAll: authenticatedLifecycle.beforeAll,
+
+    beforeEach: async (
+      { browser }: AuthenticatedLifecycleBeforeEachArgs,
+      testInfo: TestInfo,
+    ): Promise<void> => {
+      // The inner lifecycle only needs browser, but Playwright requires the full fixture type.
+      const authenticatedLifecycleArgs = { browser } as AuthenticatedLifecycleBeforeEachArgs;
+      await authenticatedLifecycle.beforeEach(
+        authenticatedLifecycleArgs,
+        testInfo,
+      );
+
+      const authenticatedPage = authenticatedLifecycle.getPage();
+      if (!applicationUrl) {
+        await createApplication(
+          authenticatedPage,
+          options.opportunityUrl,
+          options.organizationLabel,
+        );
+        applicationUrl = authenticatedPage.url();
+      }
+    },
+
+    afterEach: authenticatedLifecycle.afterEach,
+    getContext: authenticatedLifecycle.getContext,
+    getPage: authenticatedLifecycle.getPage,
+    getApplicationUrl: (): string => {
+      if (!applicationUrl) {
+        throw new Error("Application URL is not initialized");
+      }
+      return applicationUrl;
     },
   };
 }

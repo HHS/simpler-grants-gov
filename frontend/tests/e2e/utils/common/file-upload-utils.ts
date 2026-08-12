@@ -3,7 +3,7 @@
  *
  * Reviewer guide (what logic):
  * These helpers cover common upload scenarios for E2E tests:
- * - opening the correct application form,
+ * - authenticating and opening the correct application form,
  * - locating the file input,
  * - uploading files,
  * - checking uploaded file status,
@@ -12,8 +12,8 @@
  *
  * Common update points:
  * - TEST_UPLOAD_DIR: fixture files used for upload tests
- * - openApplicationForm: which form to open and which org to use
- * - resolveFileInputLocator: how the file input is found
+ * - openApplicationFormWithAuth: authenticates, creates an application, and opens the correct form
+ * - resolveFileInputLocator: how the file input is found from a field config or test ID
  * - stubStreamingAttachmentUpload: mock file streaming and attachment save
  */
 
@@ -37,10 +37,12 @@ export const TEST_UPLOAD_DIR = path.resolve(
 );
 
 /**
- * Ensure the test user is authenticated, create a new application,
- * then open the requested form by matcher.
+ * Authenticate the test user, create a new application, and open the requested form.
+ *
+ * This helper is intentionally higher-level: it handles auth, application setup,
+ * and then uses the form matcher to navigate to the target form.
  */
-export async function openApplicationForm(
+export async function openApplicationFormWithAuth(
   page: Page,
   context: BrowserContext,
   testInfo: TestInfo,
@@ -62,6 +64,10 @@ type FileInputTarget = string | FillFieldDefinition;
 
 /**
  * Find the file input element from a test ID or a field definition.
+ *
+ * Supports either a string test ID or a field definition object.
+ * When a field definition is provided, selector lookup takes precedence
+ * over testId lookup.
  */
 function resolveFileInputLocator(page: Page, target: FileInputTarget): Locator {
   if (typeof target === "string") {
@@ -80,6 +86,9 @@ function resolveFileInputLocator(page: Page, target: FileInputTarget): Locator {
 
 /**
  * Upload one or more files using the resolved file input.
+ *
+ * If the resolved input does not accept multiple files and an array is
+ * provided, only the first file is uploaded to avoid invalid input behavior.
  */
 export async function uploadFile(
   page: Page,
@@ -175,7 +184,9 @@ export async function deleteUploadedFile(
   await confirmDeleteButton.click();
 
   if (fileName) {
-    await expect(page.locator(`xpath=//span[contains(normalize-space(.), "${fileName}")]`)).toHaveCount(0, {
+    await expect(
+      page.locator(`xpath=//span[contains(normalize-space(.), "${fileName}")]`),
+    ).toHaveCount(0, {
       timeout: 60000,
     });
   }
@@ -205,6 +216,9 @@ export async function failAttachmentUploadRequest(
 
 /**
  * Stub the streaming upload flow and the attachment creation API.
+ *
+ * This simulates the real upload lifecycle by returning multiple upload
+ * progress states before the attachment is created.
  */
 export async function stubStreamingAttachmentUpload(
   page: Page,
@@ -258,8 +272,26 @@ export async function assertFileInputHidden(
   });
 }
 
+export async function assertUploadDidNotSave(
+  page: Page,
+  fileName: string,
+  expectedCount: number,
+  fileInputTarget: FileInputTarget = "file-input-input",
+): Promise<void> {
+  await expect(page.locator(`text=${fileName}`)).toHaveCount(expectedCount, {
+    timeout: 60000,
+  });
+
+  if (expectedCount === 0) {
+    await assertFileInputVisible(page, fileInputTarget);
+  }
+}
+
 /**
  * Wait for the upload status message text to appear.
+ *
+ * Some pages render a dedicated status display, while others only show
+ * transient status text in the page body. This helper checks both.
  */
 export async function expectUploadStatusMessage(
   page: Page,
@@ -298,6 +330,7 @@ export async function delayAttachmentUploadRequest(
  *
  * This aborts both the streaming file upload request and the subsequent
  * attachment creation request, which is more reliable for fast uploads.
+ * It ensures a cancelled upload does not leave behind a partially saved attachment.
  */
 export async function abortAttachmentUploadRequest(
   page: Page,
