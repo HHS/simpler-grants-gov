@@ -16,7 +16,7 @@ from src.services.xml_generation.validation.test_cases import (
     get_test_cases_by_form,
 )
 from src.services.xml_generation.validation.test_runner import ValidationTestRunner
-from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
+from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher, get_all_form_xsd_urls
 from src.task.task_blueprint import task_blueprint
 
 
@@ -309,35 +309,29 @@ def fetch_xsds_command(
         if not xsd_dir:
             xsd_dir = str(Path(__file__).resolve().parents[2] / "src/services/xml_generation/xsds")
 
-        # Get test cases to determine which XSDs we need
+        # Get the XSD URL(s) to fetch directly from each form's own
+        # configuration (api/form_schema) instead of a hardcoded list.
+        init_form_registry()
+        form_xsd_urls = get_all_form_xsd_urls()
+
         if form:
-            test_cases = get_test_cases_by_form(form)
-            if not test_cases:
-                click.echo(f"Error: No test cases found for form: {form}", err=True)
+            xsd_url = form_xsd_urls.get(form.upper())
+            if not xsd_url:
+                click.echo(f"Error: No XSD URL configured for form: {form}", err=True)
                 sys.exit(1)
+            xsd_urls = {xsd_url}
             click.echo(f"Fetching XSD for form: {form}")
         else:
-            test_cases = get_all_test_cases()
-            if not test_cases:
-                click.echo("Error: No test cases found", err=True)
+            xsd_urls = set(form_xsd_urls.values())
+            if not xsd_urls:
+                click.echo("Error: No forms with XSD URLs found", err=True)
                 sys.exit(1)
-            click.echo(f"Fetching XSDs for {len(test_cases)} test cases")
+            click.echo(f"Fetching XSDs for {len(xsd_urls)} form(s)")
 
         # Initialize fetcher with XSD directory
         fetcher = XSDFetcher(xsd_dir=xsd_dir)
         click.echo(f"XSD Directory: {fetcher.xsd_dir}")
         click.echo("")
-
-        # Track unique XSD URLs to avoid duplicate downloads
-        xsd_urls = set()
-        for test_case in test_cases:
-            xsd_url = test_case.get("xsd_url")
-            if xsd_url and xsd_url not in xsd_urls:
-                xsd_urls.add(xsd_url)
-
-        if not xsd_urls:
-            click.echo("Warning: No XSD URLs found in test cases", err=True)
-            sys.exit(0)
 
         click.echo(f"Found {len(xsd_urls)} unique XSD files to fetch")
         click.echo("")
