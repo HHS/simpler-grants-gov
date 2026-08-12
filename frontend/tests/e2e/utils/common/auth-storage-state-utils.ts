@@ -72,7 +72,7 @@ export async function createPageWithStorageState(
 }
 
 type AuthLifecycleOptions = {
-  targetEnv: string;
+  targetEnv?: string;
   timeoutMs?: number;
   stagingProjectName?: string;
   stagingSkipMessage?: string;
