@@ -591,6 +591,8 @@ export const messages = {
       returnToApplication: "Return to application",
       saving: "Saving...",
       savingAndRefreshing: "Save and refresh",
+      saveDisabledTooltipMessage:
+        "Save disabled while file upload is processing.",
       lastUpdatedMessage: "This form was last updated on",
       createdMessage: "This form was created on",
     },
@@ -2033,13 +2035,23 @@ export const messages = {
     tableHeadings: {
       agency: "Agency",
       title: "Title",
+      oppNumber: "Opp. Number",
+      fundingInstrumentType: "Funding Instrument Type",
+      lastUpdated: "Last Updated",
       status: "Status",
-      actions: "Actions",
+      actions: "Action",
     },
     actionButtons: {
       edit: "Edit",
       copy: "Copy",
       delete: "Delete",
+    },
+    statusTag: {
+      draft: "Draft",
+      posted: "Open",
+      forecasted: "Forecasted",
+      archived: "Archived",
+      closed: "Closed",
     },
   },
   Organizations: {

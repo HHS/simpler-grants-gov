@@ -21,7 +21,7 @@ import {
   type TestUserKey,
 } from "tests/e2e/utils/auth/test-users";
 
-const { baseUrl, targetEnv, apiUrl, testUserManagerApiKey } = playwrightEnv;
+const { baseUrl, apiUrl, testUserManagerApiKey } = playwrightEnv;
 
 // Fetches a server-side session token for a test user by calling the internal
 // e2e-token endpoint with the manager API key and the target user id.
@@ -52,10 +52,6 @@ export async function authenticateE2eUser(
   isMobile: boolean,
   testUserKey: TestUserKey = "primaryOrgAdmin",
 ): Promise<void> {
-  if (targetEnv !== "local" && targetEnv !== "staging") {
-    throw new Error(`Unsupported env ${targetEnv}`);
-  }
-
   const userId = getTestUserId(testUserKey);
   const token = await fetchE2eSessionToken(userId);
   await createSpoofedSessionCookie(context, token);

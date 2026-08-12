@@ -62,10 +62,10 @@ const getMatchingRowByLinkAndStatusLocator = (
     }),
   });
 
-  // Opportunity list tables usually render status in responsive-data "-2".
+  // Opportunity list tables usually render status in responsive-data "-4".
   const rowsByStatusCell = rowsByTitle.filter({
     has: page
-      .locator('td [data-testid^="responsive-data-"][data-testid$="-2"]')
+      .locator('td [data-testid^="responsive-data-"][data-testid$="-4"]')
       .filter({ hasText: statusText }),
   });
 
