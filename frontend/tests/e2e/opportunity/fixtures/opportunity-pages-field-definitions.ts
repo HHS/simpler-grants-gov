@@ -28,6 +28,8 @@ import {
 export type OpportunityFieldValueKey =
   | "opportunityNumber"
   | "opportunityTitle"
+  | "tagline"
+  | "purposeStatement"
   | "grantSelectionMethod"
   | "assistanceListingNumber"
   | "fundingType"
@@ -98,6 +100,22 @@ export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinitio
       label: "Opportunity title",
       type: "textarea",
       valueKey: "opportunityTitle",
+      required: true,
+      maxLength: 255,
+      characterLimitValidationMessage: "1 character over limit",
+    },
+    {
+      label: "Tagline",
+      type: "textarea",
+      valueKey: "tagline",
+      required: true,
+      maxLength: 255,
+      characterLimitValidationMessage: "1 character over limit",
+    },
+    {
+      label: "Purpose statement",
+      type: "textarea",
+      valueKey: "purposeStatement",
       required: true,
       maxLength: 255,
       characterLimitValidationMessage: "1 character over limit",

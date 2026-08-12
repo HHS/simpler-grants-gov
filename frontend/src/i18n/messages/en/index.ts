@@ -2571,6 +2571,12 @@ export const messages = {
       opportunityTitle: "Opportunity title",
       opportunityTitleDesc:
         "Provide a concise, descriptive name that helps applicants identify the grant's purpose.",
+      tagline: "Tagline",
+      taglineDesc:
+        "A specific one-sentence purpose statement that summarizes the highest-level goal.",
+      purposeStatement: "Purpose statement",
+      purposeStatementDesc:
+        "Provide a one-line statement that helps applicants understand the grant's purpose.",
       agency: "Agency",
       category: "Grant selection method",
       categoryDesc: "Choose the evaluation process used to award these funds.",
@@ -2579,7 +2585,7 @@ export const messages = {
         'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
       assistanceListingNumber: "Assistance listing number",
       assistanceListingNumberDesc:
-        "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
+        "Enter the 5-digit code from SAM.gov (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
     },
   },

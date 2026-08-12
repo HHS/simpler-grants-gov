@@ -62,6 +62,22 @@ class OpportunityCreateRequestSchema(Schema):
             "example": "Research Grant for Climate Innovation",
         },
     )
+    tagline = fields.String(
+        required=True,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "A short tagline for the opportunity",
+            "example": "Accelerating climate innovation",
+        },
+    )
+    purpose_statement = fields.String(
+        required=True,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "A brief statement describing the purpose of the opportunity",
+            "example": "Support research that advances innovative climate technologies.",
+        },
+    )
     agency_id = fields.UUID(
         required=True,
         metadata={
