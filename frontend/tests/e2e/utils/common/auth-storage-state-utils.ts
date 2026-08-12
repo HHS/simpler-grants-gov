@@ -170,6 +170,7 @@ export function createAuthenticatedPageLifecycle(
  * Options for creating an authenticated application lifecycle.
  */
 type AuthenticatedApplicationLifecycleOptions = AuthLifecycleOptions & {
+  targetEnv: string;
   opportunityUrl: string;
   organizationLabel?: string;
 };
