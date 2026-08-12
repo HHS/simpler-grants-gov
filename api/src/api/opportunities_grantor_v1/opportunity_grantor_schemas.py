@@ -631,6 +631,19 @@ class DeleteAttachmentResponseV1Schema(ResponseWithErrorsSchema):
     pass
 
 
+class OpportunityAttachmentCreateFromPendingFileRequestV1Schema(Schema):
+    pending_file_id = fields.UUID(
+        required=True,
+        metadata={"description": "The ID of the pending (virus-scanned) file to attach"},
+    )
+
+
+class OpportunityAttachmentCreateFromPendingFileResponseV1Schema(AbstractResponseSchema):
+    """Response Schema for the temporary pending-file Upload Attachment Endpoint"""
+
+    data = fields.Nested(OpportunityAttachmentV1Schema())
+
+
 class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunityGrantorSchema())
 
