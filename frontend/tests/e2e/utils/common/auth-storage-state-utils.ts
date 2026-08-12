@@ -72,6 +72,7 @@ export async function createPageWithStorageState(
 }
 
 type AuthLifecycleOptions = {
+  targetEnv: string;
   timeoutMs?: number;
   stagingProjectName?: string;
   stagingSkipMessage?: string;
@@ -86,6 +87,7 @@ export function createAuthenticatedPageLifecycle(
   options: AuthLifecycleOptions,
 ) {
   const timeoutMs = options.timeoutMs ?? 300_000;
+  const targetEnv = options.targetEnv;
   const stagingProjectName = options.stagingProjectName ?? "Chrome";
   const stagingSkipMessage =
     options.stagingSkipMessage ??
@@ -101,7 +103,7 @@ export function createAuthenticatedPageLifecycle(
       workerInfo: WorkerInfo,
     ): Promise<void> => {
       if (
-        playwrightEnv.targetEnv !== "local" &&
+        options.targetEnv === "staging" &&
         workerInfo.project.name !== stagingProjectName
       ) {
         return;
@@ -124,7 +126,7 @@ export function createAuthenticatedPageLifecycle(
     ): Promise<void> => {
       testInfo.setTimeout(timeoutMs);
 
-      if (playwrightEnv.targetEnv !== "local") {
+      if (options.targetEnv === "staging") {
         options.skipTest?.(
           testInfo.project.name !== stagingProjectName,
           stagingSkipMessage,
@@ -169,7 +171,6 @@ export function createAuthenticatedPageLifecycle(
  * Options for creating an authenticated application lifecycle.
  */
 type AuthenticatedApplicationLifecycleOptions = AuthLifecycleOptions & {
-  targetEnv: string;
   opportunityUrl: string;
   organizationLabel?: string;
 };
