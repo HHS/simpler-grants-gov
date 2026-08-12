@@ -4,7 +4,7 @@
  * @scenario Upload error handling for project abstract single-file attachments
  */
 
-import { expect, test, type Page } from "@playwright/test";
+import { test } from "@playwright/test";
 import {
   fieldDefinitionsProjectAbstract,
   PROJECT_ABSTRACT_FORM_MATCHER,
@@ -14,7 +14,6 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { createAuthenticatedApplicationLifecycle } from "tests/e2e/utils/common/auth-storage-state-utils";
 import {
   abortAttachmentUploadRequest,
-  assertFileInputVisible,
   assertUploadDidNotSave,
   failAttachmentUploadRequest,
   TEST_UPLOAD_DIR,

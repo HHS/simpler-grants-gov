@@ -4,10 +4,7 @@
  * @scenario Upload error handling for other narrative attachment multi-file uploads
  */
 
-import {
-  test,
-  type Page,
-} from "@playwright/test";
+import { test } from "@playwright/test";
 import {
   fieldDefinitionsOtherNarrativeAttachment,
   OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER,
@@ -80,7 +77,7 @@ test.describe("Multi file upload interactions - Failure Path", () => {
       );
     },
   );
-  
+
   test(
     "failed upload keeps the choose from folder link visible",
     { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },

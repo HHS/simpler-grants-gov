@@ -23,7 +23,7 @@ import {
   deleteUploadedFile,
   expectUploadedFileCount,
   expectUploadedFileVisible,
-  openApplicationForm,
+  openApplicationFormWithAuth,
   TEST_UPLOAD_DIR,
   uploadFile,
 } from "tests/e2e/utils/common/file-upload-utils";
@@ -54,7 +54,7 @@ test.describe("File upload interactions - Other Narrative Attachments", () => {
     ) => {
       test.setTimeout(300_000);
 
-      await openApplicationForm(
+      await openApplicationFormWithAuth(
         page,
         context,
         testInfo,
@@ -93,7 +93,7 @@ test.describe("File upload interactions - Other Narrative Attachments", () => {
     ) => {
       test.setTimeout(300_000);
 
-      await openApplicationForm(
+      await openApplicationFormWithAuth(
         page,
         context,
         testInfo,
@@ -124,7 +124,7 @@ test.describe("File upload interactions - Other Narrative Attachments", () => {
     ) => {
       test.setTimeout(300_000);
 
-      await openApplicationForm(
+      await openApplicationFormWithAuth(
         page,
         context,
         testInfo,
@@ -161,7 +161,7 @@ test.describe("File upload interactions - Other Narrative Attachments", () => {
     ) => {
       test.setTimeout(300_000);
 
-      await openApplicationForm(
+      await openApplicationFormWithAuth(
         page,
         context,
         testInfo,
