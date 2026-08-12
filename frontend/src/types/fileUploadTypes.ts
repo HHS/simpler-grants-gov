@@ -3,6 +3,7 @@ export const fileUploadProcessStatus = [
   "queued", // fetching s3 upload metadata
   "uploading", // uploading file to s3
   "starting-scan", // making request for scan status, no status yet received from API
+  "pending", // recieved scan status from API but scan not yet started
   "in_progress", // API supplied status while undergoing virus scan
   "scan-complete", // Synthetic status used for sending back pending file id, same visually as "complete"
   "complete", // API supplied status for complete virus scan

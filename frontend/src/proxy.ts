@@ -82,7 +82,6 @@ export default function proxy(request: NextRequest): NextResponse {
   const cacheControl: string[] = [];
 
   // only allow for cdn testing/troubleshooting in lower envs
-
   if (isACdnTestRequest(request)) {
     const testResponse = applyCorrelationId(request, handleCdnTest(request));
     logRequest(request, testResponse);
