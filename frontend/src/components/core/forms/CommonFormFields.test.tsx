@@ -263,7 +263,7 @@ describe("CommonWordLimit", () => {
     });
     expect(element).toBeInTheDocument();
     expect(element).toHaveValue("");
-    const charCountText = screen.getByText("40 words allowed");
+    const charCountText = screen.getByText("40 wordsAllowed");
     expect(charCountText).toBeInTheDocument();
   });
   it("Renders the element with a default value", () => {
@@ -274,7 +274,7 @@ describe("CommonWordLimit", () => {
     });
     expect(element).toBeInTheDocument();
     expect(element).toHaveValue("Prefilled text 2");
-    const charCountText = screen.getByText("37 words left");
+    const charCountText = screen.getByText("wordsLeft");
     expect(charCountText).toBeInTheDocument();
     expect(element instanceof HTMLInputElement).not.toBe(true);
     expect(element instanceof HTMLTextAreaElement).toBe(true);
@@ -292,7 +292,7 @@ describe("CommonWordLimit", () => {
     expect(mockOnChangeWordLimit).toHaveBeenCalledTimes(1);
     expect(mockOnChangeWordLimit).toHaveBeenCalledWith(expect.any(Object));
     // Validate the character count message
-    const charCountText = screen.getByText("10 words over limit");
+    const charCountText = screen.getByText("wordsError");
     expect(charCountText).toBeInTheDocument();
   });
 });
