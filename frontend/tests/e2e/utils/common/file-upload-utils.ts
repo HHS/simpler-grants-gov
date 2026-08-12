@@ -121,9 +121,7 @@ export async function expectUploadedFileVisible(
 ): Promise<void> {
   await expect(
     page
-      .locator(
-        `xpath=//div[contains(normalize-space(.), "${fileName}")]/ancestor::div[1]`,
-      )
+      .locator(`xpath=//span[contains(normalize-space(.), "${fileName}")]`)
       .first(),
   ).toBeVisible({
     timeout: timeoutMs,
@@ -140,9 +138,7 @@ export async function expectUploadedFileCount(
   timeoutMs = 60000,
 ): Promise<void> {
   await expect(
-    page.locator(
-      `xpath=//div[contains(normalize-space(.), "${fileName}")]/ancestor::div[1]`,
-    ),
+    page.locator(`xpath=//span[contains(normalize-space(.), "${fileName}")]`),
   ).toHaveCount(count, {
     timeout: timeoutMs,
   });
@@ -179,27 +175,32 @@ export async function deleteUploadedFile(
   await confirmDeleteButton.click();
 
   if (fileName) {
-    await expect(page.locator(`text=${fileName}`)).toHaveCount(0, {
+    await expect(page.locator(`xpath=//span[contains(normalize-space(.), "${fileName}")]`)).toHaveCount(0, {
       timeout: 60000,
     });
   }
 }
 
 /**
- * Stub the attachment upload endpoint so it returns a failure response.
+ * Stub the attachment upload endpoints so the upload fails.
+ *
+ * Some forms upload via /api/file and others use /api/applications/:id/attachments.
  */
 export async function failAttachmentUploadRequest(
   page: Page,
   status = 500,
   responseBody = { error: "Upload failed" },
 ): Promise<void> {
-  await page.route("**/api/file*", async (route) => {
+  const failRoute = async (route: any) => {
     await route.fulfill({
       status,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(responseBody),
     });
-  });
+  };
+
+  await page.route("**/api/file*", failRoute);
+  await page.route("**/api/applications/**/attachments*", failRoute);
 }
 
 /**
@@ -293,11 +294,22 @@ export async function delayAttachmentUploadRequest(
 }
 
 /**
- * Abort the upload request to simulate a cancel mid-upload.
+ * Abort upload-related requests to simulate a cancel before the attachment is saved.
+ *
+ * This aborts both the streaming file upload request and the subsequent
+ * attachment creation request, which is more reliable for fast uploads.
  */
-export async function abortAttachmentUploadRequest(page: Page): Promise<void> {
-  await page.route("**/api/file*", async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    await route.abort();
-  });
+export async function abortAttachmentUploadRequest(
+  page: Page,
+  delayMs = 0,
+): Promise<void> {
+  const abortRoute = async (route: any) => {
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+    await route.abort("aborted");
+  };
+
+  page.route("**/api/file*", abortRoute);
+  page.route("**/api/applications/**/attachments*", abortRoute);
 }
