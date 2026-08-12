@@ -405,4 +405,90 @@ describe("TableCell", () => {
     expect(errorContainer).not.toHaveStyle("word-break: break-all");
     expect(errorContainer).not.toHaveStyle("overflow-wrap: anywhere");
   });
+
+  it("renders validation errors for readOnly cells and exposes a matching id", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "readOnly",
+          definition: "/properties/total_allowable_cost",
+          format: "dollar",
+        }}
+        cellErrors={["Total allowable cost cannot be negative"]}
+        id="total-allowable-cost-cell"
+        name="budget_information--construction--total_allowable_cost"
+        value={-100}
+      />,
+    );
+
+    const readOnlyEl = screen.getByTestId(
+      "total-allowable-cost-cell-read-only",
+    );
+
+    // The error-summary link targets this id, so it must exist on the
+    // read-only span, not just on editable inputs.
+    expect(readOnlyEl).toHaveAttribute(
+      "id",
+      "budget_information--construction--total_allowable_cost",
+    );
+    expect(readOnlyEl).toHaveAttribute("aria-invalid", "true");
+    expect(readOnlyEl).toHaveAttribute(
+      "aria-describedby",
+      "error-for-total-allowable-cost-cell",
+    );
+    expect(readOnlyEl).toHaveClass("usa-input--error");
+
+    expect(
+      screen.getByText("Total allowable cost cannot be negative"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders validation errors for disabled input cells (rendered read-only) and exposes a matching id", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/total_allowable_cost",
+          format: "dollar",
+        }}
+        cellErrors={["Total allowable cost cannot be negative"]}
+        disabled
+        id="total-allowable-cost-cell"
+        name="budget_information--construction--total_allowable_cost"
+        value={-100}
+      />,
+    );
+
+    const readOnlyEl = screen.getByTestId(
+      "total-allowable-cost-cell-read-only",
+    );
+
+    expect(readOnlyEl).toHaveAttribute(
+      "id",
+      "budget_information--construction--total_allowable_cost",
+    );
+    expect(readOnlyEl).toHaveAttribute("aria-invalid", "true");
+    expect(
+      screen.getByText("Total allowable cost cannot be negative"),
+    ).toBeInTheDocument();
+  });
+
+  it("does not set aria-invalid or an id-based error link on readOnly cells with no errors", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "readOnly",
+          definition: "/properties/total",
+          format: "dollar",
+        }}
+        id="read-only-cell"
+        value={1234.5}
+      />,
+    );
+
+    const readOnlyEl = screen.getByTestId("read-only-cell-read-only");
+    expect(readOnlyEl).toHaveAttribute("aria-invalid", "false");
+    expect(readOnlyEl).not.toHaveAttribute("aria-describedby");
+    expect(readOnlyEl).not.toHaveClass("usa-input--error");
+  });
 });

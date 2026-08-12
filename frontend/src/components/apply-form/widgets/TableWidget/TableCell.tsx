@@ -102,16 +102,40 @@ function TableCell({
     );
   }
 
+  const hasError = cellErrors.length > 0;
+  const inputId = name ?? id;
+
   if (cell.type === "readOnly" || (cell.type === "input" && disabled)) {
     const renderedValue = formatTableCellValue(value, cell.format);
+
     return (
-      <span
-        className={READ_ONLY_OUTPUT_CLASS}
-        data-testid={`${id}-read-only`}
-        tabIndex={-1}
-      >
-        {renderedValue === "" ? "\u00A0" : renderedValue}
-      </span>
+      <>
+        {hasError && (
+          <div
+            className="display-block width-full"
+            data-testid={`${id}-error-container`}
+            style={{
+              whiteSpace: "normal",
+              wordBreak: "normal",
+              overflowWrap: "normal",
+            }}
+          >
+            <FieldErrors fieldName={id} rawErrors={cellErrors} />
+          </div>
+        )}
+        <span
+          className={`${READ_ONLY_OUTPUT_CLASS}${
+            hasError ? " usa-input--error border-error" : ""
+          }`}
+          data-testid={`${id}-read-only`}
+          id={inputId}
+          tabIndex={-1}
+          aria-invalid={hasError}
+          aria-describedby={hasError ? `error-for-${id}` : undefined}
+        >
+          {renderedValue === "" ? "\u00A0" : renderedValue}
+        </span>
+      </>
     );
   }
 
@@ -123,7 +147,6 @@ function TableCell({
       onChange?.(nextValue);
     }
   };
-  const hasError = cellErrors.length > 0;
   const inputWrapperClass =
     cell.format === "dollar"
       ? "simpler-currency-input-wrapper width-full display-block"
@@ -133,7 +156,6 @@ function TableCell({
   const inputWrapperTestId = inputWrapperClass
     ? `${id}-${cell.format}-wrapper`
     : undefined;
-  const inputId = name ?? id;
   return (
     <>
       {hasError && (
