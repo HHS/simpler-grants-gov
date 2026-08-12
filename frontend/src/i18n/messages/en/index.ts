@@ -2724,7 +2724,8 @@ export const messages = {
     statusDisplay: {
       cancel: "Cancel",
       dismiss: "Dismiss",
-      queued: "Queued",
+      processing: "Processing file",
+      starting: "Starting upload",
       uploading: "Uploading...",
       startingScan: "Upload complete. Starting security scan",
       scanning: "Upload complete. Running security scan...",

@@ -187,7 +187,7 @@ describe("SimplerFileInput", () => {
       await waitFor(async () =>
         expect(
           await screen.findByTestId("file-upload-status-display"),
-        ).toHaveTextContent("scanning"),
+        ).toHaveTextContent("startingScan"),
       );
     });
 
@@ -663,7 +663,7 @@ describe("SimplerFileInput", () => {
       await waitFor(async () =>
         expect(
           await screen.findByTestId("file-upload-status-display"),
-        ).toHaveTextContent("scanning"),
+        ).toHaveTextContent("startingScan"),
       );
     });
   });

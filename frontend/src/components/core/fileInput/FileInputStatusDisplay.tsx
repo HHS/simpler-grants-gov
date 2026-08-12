@@ -12,10 +12,12 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 // maps upload statuses to the error message to show if error occurs while in those statuses
 const errorStatuses = new Map([
-  ["queued", "pre-upload-error"],
+  ["processing", "pre-upload-error"],
+  ["starting", "pre-upload-error"],
   ["uploading", "upload-error"],
   ["infected", "infected"],
   ["pending", "scan-error"],
+  ["in_progress", "scan-error"],
   ["starting-scan", "scan-error"],
   ["complete", "file-id-error"], // assuming that any error in this state is due to a missing file id
   ["post-upload", "post-upload-error"],
@@ -139,10 +141,12 @@ export const FileInputStatusDisplay = ({
   // this relies on some magic strings, it's not great!
   // refactor this to be more flexible in terms of tracking progress
   const messagesMap: { [key in FileUploadStatus]: string } = {
-    queued: t("queued"),
+    processing: t("queued"),
+    starting: t("starting"),
     uploading: t("uploading"),
     "starting-scan": t("startingScan"),
-    pending: t("scanning"),
+    pending: t("startingScan"),
+    in_progress: t("scanning"),
     infected: t("infected"),
     complete: t("scanComplete"),
     "scan-complete": t("scanComplete"),
