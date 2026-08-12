@@ -1,6 +1,7 @@
 // These fields are meant to be reusable and provide a consistent look and feel for all pages.
 // For examples, see page opportunities/create
 
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import {
   CharacterCount,
@@ -269,6 +270,7 @@ export const CommonWordLimit = ({
   defaultValue?: string;
   rawErrors?: string[];
 }) => {
+  const t = useTranslations("CommonWordLimit");
   const error = rawErrors.length ? true : undefined;
   const [content, setContent] = useState(defaultValue);
   const wordCount =
@@ -287,6 +289,7 @@ export const CommonWordLimit = ({
           name={fieldId}
           id={fieldId}
           error={wordCount > fieldMaxLength}
+          aria-describedby={`label-for-${fieldId}`}
           onChange={(event) => {
             setContent(event.target.value);
             onTextChange(event);
@@ -296,10 +299,14 @@ export const CommonWordLimit = ({
         {wordCount > fieldMaxLength ? (
           <FieldErrors
             fieldName={fieldId}
-            rawErrors={[`${wordCount - fieldMaxLength} words over limit`]}
+            rawErrors={[t("wordsError", { num: wordCount - fieldMaxLength })]}
           />
         ) : (
-          <p className="text-base-dark margin-top-0">{`${fieldMaxLength - wordCount} words ${wordCount ? "left" : "allowed"}`}</p>
+          <p className="text-base-dark margin-top-0">
+            {wordCount
+              ? t("wordsLeft", { num: fieldMaxLength - wordCount })
+              : `${fieldMaxLength} ${t("wordsAllowed")}`}
+          </p>
         )}
       </FormGroup>
     </>
