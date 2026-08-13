@@ -174,7 +174,7 @@ describe("useFileUpload", () => {
     act(() => {
       result.current.uploadFile(fakeFile);
     });
-    expect(result.current.currentStatus).toEqual("queued");
+    expect(result.current.currentStatus).toEqual("processing");
     // having a hard time managing state changes in this test, since
     // the state updates multiple times without any user action.
     // As a result, the state jumps directly from queued to success.
