@@ -154,7 +154,7 @@ const nextConfig = {
   // warning about unrecognized key can be ignored
   api: {
     bodyParser: {
-      sizeLimit: "2000mb",
+      sizeLimit: "200mb",
     },
   },
   basePath,
@@ -188,9 +188,9 @@ const nextConfig = {
   },
   experimental: {
     testProxy: true,
-    proxyClientMaxBodySize: "2000mb",
+    proxyClientMaxBodySize: "200mb",
     serverActions: {
-      bodySizeLimit: "2000mb",
+      bodySizeLimit: "200mb",
     },
   },
   async redirects() {
