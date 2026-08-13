@@ -1978,6 +1978,12 @@ export const messages = {
       },
     },
   },
+  CommonWordLimit: {
+    wordsAllowed: "words allowed",
+    wordsLeft: "{num, plural, =1 {1 word left} other {# words left}}",
+    wordsError:
+      "{num, plural, =1 {1 word over limit} other {# words over limit}}",
+  },
   Applications: {
     numApplications: "{num, plural, =1 {1 application} other {# applications}}",
     errorMessage:
