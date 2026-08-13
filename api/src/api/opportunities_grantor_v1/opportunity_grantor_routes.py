@@ -406,7 +406,7 @@ def competition_update(
 def competition_instruction_upload(
     db_session: db.Session, opportunity_id: UUID, competition_id: UUID, json_data: dict
 ) -> response.ApiResponse:
-    """Upload an instruction file to a competition"""
+    """Upload an instruction file to a competition from a pending (virus-scanned) file"""
     add_extra_data_to_current_request_logs(
         {"opportunity_id": opportunity_id, "competition_id": competition_id}
     )
