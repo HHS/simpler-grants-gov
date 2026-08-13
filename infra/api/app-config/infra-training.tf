@@ -23,7 +23,7 @@ module "infra_training_config" {
 
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
-  enable_notifications            = false # Enable once an SES domain identity exists for infra-training
+  enable_notifications            = true
 
   service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the infra-training primary ALB exists
   service_newrelic_mtls_entity_guid = "" # Populate once the New Relic entity for the infra-training mTLS ALB exists
