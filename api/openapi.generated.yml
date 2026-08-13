@@ -6237,6 +6237,18 @@ components:
           - 'null'
           description: The title of the opportunity
           example: Research into conservation techniques
+        tagline:
+          type:
+          - string
+          - 'null'
+          description: A short tagline for the opportunity
+          example: Accelerating climate innovation
+        purpose_statement:
+          type:
+          - string
+          - 'null'
+          description: A brief statement describing the purpose of the opportunity
+          example: Support research that advances innovative climate technologies.
         agency:
           type:
           - string
@@ -7454,6 +7466,18 @@ components:
           - 'null'
           description: The title of the opportunity
           example: Research into conservation techniques
+        tagline:
+          type:
+          - string
+          - 'null'
+          description: A short tagline for the opportunity
+          example: Accelerating climate innovation
+        purpose_statement:
+          type:
+          - string
+          - 'null'
+          description: A brief statement describing the purpose of the opportunity
+          example: Support research that advances innovative climate technologies.
         agency:
           type:
           - string
@@ -7591,6 +7615,16 @@ components:
           maxLength: 255
           description: The title of the opportunity
           example: Research Grant for Climate Innovation
+        tagline:
+          type: string
+          maxLength: 255
+          description: A short tagline for the opportunity
+          example: Accelerating climate innovation
+        purpose_statement:
+          type: string
+          maxLength: 255
+          description: A brief statement describing the purpose of the opportunity
+          example: Support research that advances innovative climate technologies.
         agency_id:
           type: string
           format: uuid
@@ -7624,6 +7658,8 @@ components:
       - category
       - opportunity_number
       - opportunity_title
+      - purpose_statement
+      - tagline
     FormResponseAlphaSchema:
       type: object
       properties:
@@ -10475,6 +10511,18 @@ components:
           - 'null'
           description: The title of the opportunity
           example: Research into conservation techniques
+        tagline:
+          type:
+          - string
+          - 'null'
+          description: A short tagline for the opportunity
+          example: Accelerating climate innovation
+        purpose_statement:
+          type:
+          - string
+          - 'null'
+          description: A brief statement describing the purpose of the opportunity
+          example: Support research that advances innovative climate technologies.
         agency:
           type:
           - string
@@ -15167,12 +15215,12 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-    ApiUserKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
     InternalApiJwtAuth:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
+    ApiUserKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
 
