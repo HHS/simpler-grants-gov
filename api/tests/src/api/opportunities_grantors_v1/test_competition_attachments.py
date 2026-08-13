@@ -20,8 +20,9 @@ def make_pending_file(
     user, s3_config, file_scan_status=FileScanStatus.COMPLETE, file_name="instructions.pdf"
 ):
     """Create a PendingFile backed by a real S3 file."""
+    file_name = "instructions.pdf"
     source_location = f"{s3_config.file_scan_bucket_path}/scan_complete/{uuid.uuid4()}/{file_name}"
-    file_util.write_to_file(source_location, "This is instruction content")
+    file_util.write_to_file(source_location, "test file content")
     return PendingFileFactory.create(
         user=user,
         file_name=file_name,
@@ -107,10 +108,12 @@ def test_upload_instructions_success_single_file(
 
     assert instruction is not None
     assert instruction.file_name == "instructions.pdf"
-    assert file_util.file_exists(instruction.file_location) is True
 
-    # Pending file was moved out of its scanned location and marked PROCESSED
+    # File moved to attachment bucket, no longer at pending location
+    assert file_util.file_exists(instruction.file_location) is True
     assert file_util.file_exists(pending_file.file_location) is False
+
+    # Pending file status updated to PROCESSED
     db_session.refresh(pending_file)
     assert pending_file.file_scan_status == FileScanStatus.PROCESSED
 
@@ -206,7 +209,10 @@ def test_upload_instructions_competition_wrong_opportunity(
 
     assert resp.status_code == 404
     response_json = resp.get_json()
-    assert "not found for opportunity" in response_json["message"]
+    assert (
+        response_json["message"]
+        == f"Competition {competition.competition_id} not found for opportunity {other_opportunity.opportunity_id}"
+    )
 
 
 def test_upload_instructions_nonexistent_pending_file(
@@ -420,7 +426,10 @@ def test_delete_instruction_competition_wrong_opportunity(
 
     assert resp.status_code == 404
     response_json = resp.get_json()
-    assert "not found for opportunity" in response_json["message"]
+    assert (
+        response_json["message"]
+        == f"Competition {existing_competition.competition_id} not found for opportunity {other_opportunity.opportunity_id}"
+    )
 
 
 def test_delete_instruction_nonexistent_instruction(
