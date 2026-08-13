@@ -1731,7 +1731,7 @@ def test_calls_simpler_if_using_simpler_tracking_number(
 
 
 @mock.patch("uuid.uuid4")
-def test_calls_simpler_if_using_simpler_tracking_number_handles_alternate_request(
+def test_update_application_info_successfully_handles_alternate_request_body(
     mock_uuid,
     db_session,
     client,
