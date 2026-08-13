@@ -423,3 +423,9 @@ variable "newrelic_host_entity_guid" {
   description = "New Relic entity GUID for the ECS service, used to correlate container logs with the infrastructure entity in New Relic."
   default     = null
 }
+
+variable "newrelic_service_name" {
+  type        = string
+  description = "Name reported to New Relic as entity.name/hostname in forwarded logs; defaults to service_name."
+  default     = null
+}
