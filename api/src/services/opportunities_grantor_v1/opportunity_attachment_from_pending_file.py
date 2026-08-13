@@ -40,11 +40,11 @@ def create_opportunity_attachment_from_pending_file(
     pending_file = fetch_and_validate_scan_complete_file(db_session, pending_file_id, user)
 
     attachment_id = uuid.uuid4()
-    # secure_filename makes the file safe for path operations and strips
-    # non-ascii characters before we hand it to s3 - matches the pending-file
-    # pattern in create_application_attachment_from_pending_file.py. The raw
-    # name is kept for the DB record's display file_name below.
-    secure_file_name = file_util.get_secure_file_name(pending_file.file_name)
+    # pending_file.file_location already ends in a secure_filename-sanitized
+    # name (applied once at presign time) - reuse it instead of re-sanitizing
+    # pending_file.file_name from scratch. The raw name is kept for the DB
+    # record's display file_name below.
+    secure_file_name = file_util.get_file_name(pending_file.file_location)
 
     s3_config = S3Config()
     s3_file_location = get_s3_attachment_path(
