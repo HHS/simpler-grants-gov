@@ -1,18 +1,34 @@
 import uuid
-from io import BytesIO
 
 import pytest
 from grants_shared.util import file_util
 from sqlalchemy import select
 
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import FileScanStatus, Privilege
 from src.db.models import competition_models
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import (
     CompetitionFactory,
     CompetitionInstructionFactory,
     OpportunityFactory,
+    PendingFileFactory,
+    UserFactory,
 )
+
+
+def make_pending_file(
+    user, s3_config, file_scan_status=FileScanStatus.COMPLETE, file_name="instructions.pdf"
+):
+    """Create a PendingFile backed by a real S3 file."""
+    source_location = f"{s3_config.file_scan_bucket_path}/scan_complete/{uuid.uuid4()}/{file_name}"
+    file_util.write_to_file(source_location, "This is instruction content")
+    return PendingFileFactory.create(
+        user=user,
+        file_name=file_name,
+        file_location=source_location,
+        file_scan_status=file_scan_status,
+        mime_type="application/pdf",
+    )
 
 
 @pytest.fixture
@@ -58,30 +74,31 @@ def test_upload_instructions_success_single_file(
     grantor_auth_data,
     existing_opportunity,
     existing_competition,
-    mock_s3_bucket,
-    other_mock_s3_bucket,
+    s3_config,
     db_session,
 ):
     """Test successful upload of a single instruction file"""
-    _, _, token, _ = grantor_auth_data
+    user, _, token, _ = grantor_auth_data
 
-    file_content = b"This is instruction content"
+    pending_file = make_pending_file(user, s3_config)
 
     resp = client.post(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
+        json={"pending_file_id": str(pending_file.pending_file_id)},
     )
 
-    assert resp.status_code == 200
+    assert resp.status_code == 200, resp.get_json()
     response_json = resp.get_json()
     assert response_json["message"] == "Instruction uploaded successfully"
-    assert "data" in response_json
-    assert "competition_instruction_id" in response_json["data"]
-    assert isinstance(response_json["data"]["competition_instruction_id"], str)
+    data = response_json["data"]
+    assert "competition_instruction_id" in data
+    assert data["file_name"] == "instructions.pdf"
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
     # Verify database record
-    instruction_id = response_json["data"]["competition_instruction_id"]
+    instruction_id = data["competition_instruction_id"]
     instruction = db_session.execute(
         select(competition_models.CompetitionInstruction).where(
             competition_models.CompetitionInstruction.competition_instruction_id == instruction_id
@@ -92,9 +109,14 @@ def test_upload_instructions_success_single_file(
     assert instruction.file_name == "instructions.pdf"
     assert file_util.file_exists(instruction.file_location) is True
 
+    # Pending file was moved out of its scanned location and marked PROCESSED
+    assert file_util.file_exists(pending_file.file_location) is False
+    db_session.refresh(pending_file)
+    assert pending_file.file_scan_status == FileScanStatus.PROCESSED
+
 
 def test_upload_instructions_unauthorized(
-    client, db_session, existing_opportunity, existing_competition
+    client, db_session, existing_opportunity, existing_competition, s3_config
 ):
     """Test upload without proper authorization"""
     # Create a user without UPDATE_OPPORTUNITY privilege
@@ -103,12 +125,12 @@ def test_upload_instructions_unauthorized(
         privileges=[Privilege.VIEW_OPPORTUNITY],
     )
 
-    file_content = b"This is instruction content"
+    pending_file = make_pending_file(user, s3_config)
 
     resp = client.post(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
+        json={"pending_file_id": str(pending_file.pending_file_id)},
     )
 
     assert resp.status_code == 403
@@ -117,18 +139,18 @@ def test_upload_instructions_unauthorized(
 
 
 def test_upload_instructions_nonexistent_opportunity(
-    client, grantor_auth_data, existing_competition
+    client, grantor_auth_data, existing_competition, s3_config
 ):
     """Test upload with non-existent opportunity ID"""
-    _, _, token, _ = grantor_auth_data
+    user, _, token, _ = grantor_auth_data
 
     non_existent_opportunity_id = uuid.uuid4()
-    file_content = b"This is instruction content"
+    pending_file = make_pending_file(user, s3_config)
 
     resp = client.post(
         f"/v1/grantors/opportunities/{non_existent_opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
+        json={"pending_file_id": str(pending_file.pending_file_id)},
     )
 
     assert resp.status_code == 404
@@ -140,18 +162,18 @@ def test_upload_instructions_nonexistent_opportunity(
 
 
 def test_upload_instructions_nonexistent_competition(
-    client, grantor_auth_data, existing_opportunity
+    client, grantor_auth_data, existing_opportunity, s3_config
 ):
     """Test upload with non-existent competition ID"""
-    _, _, token, _ = grantor_auth_data
+    user, _, token, _ = grantor_auth_data
 
     non_existent_competition_id = uuid.uuid4()
-    file_content = b"This is instruction content"
+    pending_file = make_pending_file(user, s3_config)
 
     resp = client.post(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{non_existent_competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
+        json={"pending_file_id": str(pending_file.pending_file_id)},
     )
 
     assert resp.status_code == 404
@@ -163,10 +185,10 @@ def test_upload_instructions_nonexistent_competition(
 
 
 def test_upload_instructions_competition_wrong_opportunity(
-    client, grantor_auth_data, existing_competition, enable_factory_create
+    client, grantor_auth_data, existing_competition, enable_factory_create, s3_config
 ):
     """Test upload when competition doesn't belong to the specified opportunity"""
-    _, agency, token, _ = grantor_auth_data
+    user, agency, token, _ = grantor_auth_data
 
     # Create a different opportunity
     other_opportunity = OpportunityFactory.create(
@@ -174,12 +196,12 @@ def test_upload_instructions_competition_wrong_opportunity(
     )
 
     competition = existing_competition
-    file_content = b"This is instruction content"
+    pending_file = make_pending_file(user, s3_config)
 
     resp = client.post(
         f"/v1/grantors/opportunities/{other_opportunity.opportunity_id}/competitions/{competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
+        json={"pending_file_id": str(pending_file.pending_file_id)},
     )
 
     assert resp.status_code == 404
@@ -187,31 +209,67 @@ def test_upload_instructions_competition_wrong_opportunity(
     assert "not found for opportunity" in response_json["message"]
 
 
-def test_upload_instructions_invalid_file(
+def test_upload_instructions_nonexistent_pending_file(
     client, grantor_auth_data, existing_opportunity, existing_competition
 ):
-    """Test upload with invalid file data"""
+    """Test upload with a pending_file_id that does not exist"""
     _, _, token, _ = grantor_auth_data
 
-    # Create an invalid "file" (just a string, not a file storage object)
-    invalid_file = "This is not a valid file"
+    missing_pending_file_id = uuid.uuid4()
 
     resp = client.post(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": invalid_file},
+        json={"pending_file_id": str(missing_pending_file_id)},
+    )
+
+    assert resp.status_code == 404
+    response_json = resp.get_json()
+    assert response_json["message"] == "Pending file not found"
+
+
+def test_upload_instructions_pending_file_belongs_to_other_user(
+    client, grantor_auth_data, existing_opportunity, existing_competition, s3_config
+):
+    """Test upload with a pending_file_id owned by a different user"""
+    _, _, token, _ = grantor_auth_data
+    other_user = UserFactory.create()
+    pending_file = make_pending_file(other_user, s3_config)
+
+    resp = client.post(
+        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
+        headers={"X-SGG-Token": token},
+        json={"pending_file_id": str(pending_file.pending_file_id)},
+    )
+
+    assert resp.status_code == 403
+    response_json = resp.get_json()
+    assert response_json["message"] == "You do not have permission to access this file"
+
+
+def test_upload_instructions_pending_file_scan_not_complete(
+    client, grantor_auth_data, existing_opportunity, existing_competition, s3_config
+):
+    """Test upload with a pending_file_id whose scan status is not complete"""
+    user, _, token, _ = grantor_auth_data
+    pending_file = make_pending_file(user, s3_config, file_scan_status=FileScanStatus.PENDING)
+
+    resp = client.post(
+        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/competitions/{existing_competition.competition_id}/instructions",
+        headers={"X-SGG-Token": token},
+        json={"pending_file_id": str(pending_file.pending_file_id)},
     )
 
     assert resp.status_code == 422
     response_json = resp.get_json()
-    assert response_json["message"] == "Validation error"
+    assert response_json["message"] == "File cannot be used, status must be complete"
 
 
 def test_upload_instructions_non_sgm_opportunity(
-    client, db_session, grantor_auth_data, enable_factory_create
+    client, db_session, grantor_auth_data, enable_factory_create, s3_config
 ):
     """Test upload to a non-SGM opportunity"""
-    _, agency, token, _ = grantor_auth_data
+    user, agency, token, _ = grantor_auth_data
 
     # Create a non-SGM opportunity
     non_sgm_opportunity = OpportunityFactory.create(
@@ -223,12 +281,12 @@ def test_upload_instructions_non_sgm_opportunity(
         opportunity=non_sgm_opportunity, opportunity_id=non_sgm_opportunity.opportunity_id
     )
 
-    file_content = b"This is instruction content"
+    pending_file = make_pending_file(user, s3_config)
 
     resp = client.post(
         f"/v1/grantors/opportunities/{non_sgm_opportunity.opportunity_id}/competitions/{competition.competition_id}/instructions",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": (BytesIO(file_content), "instructions.pdf", "application/pdf")},
+        json={"pending_file_id": str(pending_file.pending_file_id)},
     )
 
     assert resp.status_code == 422

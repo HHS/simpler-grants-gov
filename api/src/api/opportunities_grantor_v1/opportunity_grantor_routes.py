@@ -354,7 +354,7 @@ def competition_update(
     "/opportunities/<uuid:opportunity_id>/competitions/<uuid:competition_id>/instructions"
 )
 @opportunity_grantor_blueprint.input(
-    opportunity_grantor_schemas.CompetitionInstructionUploadRequestV1Schema(), location="files"
+    opportunity_grantor_schemas.CompetitionInstructionUploadRequestV1Schema(), location="json"
 )
 @opportunity_grantor_blueprint.output(
     opportunity_grantor_schemas.CompetitionInstructionUploadResponseV1Schema()
@@ -363,7 +363,7 @@ def competition_update(
 @opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
 @flask_db.with_db_session()
 def competition_instruction_upload(
-    db_session: db.Session, opportunity_id: UUID, competition_id: UUID, files_data: dict
+    db_session: db.Session, opportunity_id: UUID, competition_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     """Upload an instruction file to a competition"""
     add_extra_data_to_current_request_logs(
@@ -377,13 +377,13 @@ def competition_instruction_upload(
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
-        instruction_id = upload_competition_instruction(
-            db_session, user, opportunity_id, competition_id, files_data["file_attachment"]
+        instruction = upload_competition_instruction(
+            db_session, user, opportunity_id, competition_id, json_data["pending_file_id"]
         )
 
     return response.ApiResponse(
         message="Instruction uploaded successfully",
-        data={"competition_instruction_id": instruction_id},
+        data=instruction,
     )
 
 
