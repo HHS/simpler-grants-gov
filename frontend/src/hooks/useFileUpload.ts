@@ -152,7 +152,7 @@ export const useFileUpload = ({
       const uploadAbortController = new AbortController();
 
       setFileName(fileName);
-      setCurrentStatus("queued");
+      setCurrentStatus("processing");
       setUploadController(uploadAbortController);
 
       try {

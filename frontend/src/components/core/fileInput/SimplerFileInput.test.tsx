@@ -109,7 +109,7 @@ describe("SimplerFileInput", () => {
         await screen.findByTestId("file-upload-status-display"),
       ).toBeInTheDocument();
     });
-    it("displays a 'queued' message when queued", async () => {
+    it("displays a 'processing' message when processing", async () => {
       const trigger = createAdvanceStreamTrigger();
       clientFetchMock.mockResolvedValue(
         new Response(
@@ -142,7 +142,7 @@ describe("SimplerFileInput", () => {
       );
       expect(
         await screen.findByTestId("file-upload-status-display"),
-      ).toHaveTextContent("queued");
+      ).toHaveTextContent("processing");
     });
 
     it("displays a sequential status messages as received from streaming response", async () => {
@@ -153,6 +153,7 @@ describe("SimplerFileInput", () => {
             [
               JSON.stringify({ status: "uploading" }),
               JSON.stringify({ status: "pending" }),
+              JSON.stringify({ status: "in_progress" }),
             ],
             trigger,
           ),
@@ -181,6 +182,13 @@ describe("SimplerFileInput", () => {
         expect(
           await screen.findByTestId("file-upload-status-display"),
         ).toHaveTextContent("uploading"),
+      );
+
+      trigger.advance();
+      await waitFor(async () =>
+        expect(
+          await screen.findByTestId("file-upload-status-display"),
+        ).toHaveTextContent("startingScan"),
       );
 
       trigger.advance();
@@ -663,7 +671,7 @@ describe("SimplerFileInput", () => {
       await waitFor(async () =>
         expect(
           await screen.findByTestId("file-upload-status-display"),
-        ).toHaveTextContent("scanning"),
+        ).toHaveTextContent("startingScan"),
       );
     });
   });
