@@ -36,7 +36,7 @@ module "infra_dev_config" {
 
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
-  enable_notifications            = false # Enable once an SES domain identity exists for infra-dev
+  enable_notifications            = true
 
   service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyODk0OTk3NTE4Nzc4MzA4NzUz"
   service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtNTc4NjYzMjA1MjA4MDAyNTA2Mg"
