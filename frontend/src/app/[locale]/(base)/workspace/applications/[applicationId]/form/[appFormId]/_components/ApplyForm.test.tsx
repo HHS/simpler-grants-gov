@@ -644,7 +644,7 @@ describe("ApplyForm", () => {
   });
 
   describe("attachment widget rendering", () => {
-    it("renders the virus scanning attachment widget for a saved attachment when useVirusScanning is on", () => {
+    it("renders the virus scanning attachment widget for a saved attachment when useSingleAttachmentVirusScanning is on", () => {
       const { container } = render(
         <ApplyForm
           applicationId="application-123"
@@ -657,7 +657,7 @@ describe("ApplyForm", () => {
           validationWarnings={[]}
           attachments={[savedAttachment]}
           applicationStatus="in_progress"
-          useVirusScanning={true}
+          useSingleAttachmentVirusScanning={true}
         />,
       );
 
@@ -686,7 +686,7 @@ describe("ApplyForm", () => {
           validationWarnings={[]}
           attachments={[savedAttachment]}
           applicationStatus="in_progress"
-          useVirusScanning={true}
+          useSingleAttachmentVirusScanning={true}
         />,
       );
 
@@ -700,7 +700,7 @@ describe("ApplyForm", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("renders the legacy attachment widget when useVirusScanning is off", () => {
+    it("renders the legacy attachment widget when useSingleAttachmentVirusScanning is off", () => {
       const { container } = render(
         <ApplyForm
           applicationId="application-123"
@@ -713,7 +713,7 @@ describe("ApplyForm", () => {
           validationWarnings={[]}
           attachments={[savedAttachment]}
           applicationStatus="in_progress"
-          useVirusScanning={false}
+          useSingleAttachmentVirusScanning={false}
         />,
       );
 
@@ -746,7 +746,7 @@ describe("ApplyForm", () => {
           validationWarnings={[]}
           attachments={[]}
           applicationStatus="in_progress"
-          useVirusScanning={true}
+          useSingleAttachmentVirusScanning={true}
         />,
       );
 

@@ -405,7 +405,11 @@ export interface UswdsWidgetProps<
     rootSchema?: RJSFSchema;
     rootFormData?: unknown;
     widgetSupport?: {
-      useVirusScanning: boolean;
+      // temporary virus scanning, removed in #11352
+      useSingleAttachmentVirusScanning: boolean;
+      // optional so a caller that only cares about single attachments can omit it;
+      // absent is read as "off", the same as false
+      useMultipleAttachmentVirusScanning?: boolean;
       validationWarnings?:
         FormattedFormValidationWarning[] | FormValidationWarning[];
       deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
