@@ -308,7 +308,7 @@ class OpportunitySummaryBaseRequestSchema(Schema):
     summary_description = fields.String(
         required=True,
         allow_none=True,
-        validate=validators.Length(max=18000),
+        validate=validators.WordLimit(max=500),
         metadata={"description": "Opportunity summary", "example": "This opportunity..."},
     )
 

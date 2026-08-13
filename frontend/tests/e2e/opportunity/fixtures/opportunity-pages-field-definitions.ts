@@ -318,8 +318,8 @@ export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefin
       valueKey: "description",
       selector: "#summary_description",
       required: false,
-      maxLength: 1800,
-      characterLimitValidationMessage: "1 character over limit",
+      wordLimit: 500,
+      wordLimitValidationMessage: "1 character over limit",
       exact: true,
     },
     {

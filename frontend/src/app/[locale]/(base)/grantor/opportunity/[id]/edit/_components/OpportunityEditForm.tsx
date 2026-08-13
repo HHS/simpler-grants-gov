@@ -37,7 +37,10 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import { CommonCharacterCount } from "src/components/core/forms/CommonFormFields";
+import {
+  CommonCharacterCount,
+  CommonWordLimit,
+} from "src/components/core/forms/CommonFormFields";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 
 function formatNumber(value: string): string {
@@ -694,12 +697,11 @@ export default function OpportunityEditForm({
 
         <div className="display-flex flex-column gap-2">
           <div className="width-full">
-            <CommonCharacterCount
-              isTextArea={true}
+            <CommonWordLimit
               labelText={t("labels.description")}
               description={t("content.descriptionHint")}
               fieldId="summary_description"
-              fieldMaxLength={1800}
+              fieldMaxLength={500}
               isRequired={false}
               defaultValue={initialValues.summary_description}
               onTextChange={() => {}}
