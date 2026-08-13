@@ -141,7 +141,7 @@ export const FileInputStatusDisplay = ({
   // this relies on some magic strings, it's not great!
   // refactor this to be more flexible in terms of tracking progress
   const messagesMap: { [key in FileUploadStatus]: string } = {
-    processing: t("queued"),
+    processing: t("processing"),
     starting: t("starting"),
     uploading: t("uploading"),
     "starting-scan": t("startingScan"),
