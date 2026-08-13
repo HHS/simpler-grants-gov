@@ -46,6 +46,12 @@ def discover_xsd_dependencies(xsd_content: bytes, source_url: str) -> list[str]:
     except etree.XMLSyntaxError as e:
         raise XSDFetchError(f"Failed to parse XSD from {source_url}: {e}") from e
 
+    if root.tag != f"{{{XSD_NAMESPACE}}}schema":
+        raise XSDFetchError(f"Not an XSD schema document (root={root.tag}) from {source_url}")
+        root = etree.fromstring(xsd_content)
+    except etree.XMLSyntaxError as e:
+        raise XSDFetchError(f"Failed to parse XSD from {source_url}: {e}") from e
+
     dependency_urls = []
     for tag in DEPENDENCY_TAGS:
         for elem in root.findall(f"{{{XSD_NAMESPACE}}}{tag}"):
