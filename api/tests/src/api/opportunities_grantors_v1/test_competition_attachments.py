@@ -16,9 +16,7 @@ from tests.src.db.models.factories import (
 )
 
 
-def make_pending_file(
-    user, s3_config, file_scan_status=FileScanStatus.COMPLETE, file_name="instructions.pdf"
-):
+def make_pending_file(user, s3_config, file_scan_status=FileScanStatus.COMPLETE):
     """Create a PendingFile backed by a real S3 file."""
     file_name = "instructions.pdf"
     source_location = f"{s3_config.file_scan_bucket_path}/scan_complete/{uuid.uuid4()}/{file_name}"
