@@ -6,7 +6,7 @@ Training: https://trainingapply.grants.gov/apply/system/schemas/AgencyUpdateAppl
 Production: https://apply07.grants.gov/apply/system/schemas/AgencyUpdateApplicationInfo-V1.0.xsd
 """
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from src.legacy_soap_api.grantors.schemas.grants_gov_tracking_number_schema import (
     GrantsGovTrackingNumberRequiredSchema,
@@ -19,6 +19,13 @@ class UpdateApplicationInfoRequest(GrantsGovTrackingNumberRequiredSchema):
         default=None, alias="AssignAgencyTrackingNumber"
     )
     save_agency_notes: str | None = Field(default=None, alias="SaveAgencyNotes", min_length=1)
+
+    @field_validator("assign_agency_tracking_number", mode="before")
+    @classmethod
+    def get_agency_tracking_number_value_from_dict(cls, value: str | dict) -> str | None:
+        if isinstance(value, dict):
+            return value.get("#text")
+        return value
 
 
 class SaveAgencyNotesResult(BaseSOAPSchema):
