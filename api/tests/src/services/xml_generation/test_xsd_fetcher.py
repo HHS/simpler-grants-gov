@@ -174,21 +174,35 @@ class TestFetchXsdWithDependencies:
         assert len(result["errors"]) == 1
         assert result["errors"][0]["url"] == url_b
 
-    def test_fetch_all_collapses_shared_dependencies_across_top_level_urls(self, tmp_path):
-        """Two top-level forms sharing a common dependency should only fetch it once."""
+    def test_invalid_response_is_not_persisted_or_marked_fetched(self, tmp_path):
+        """A corrupt/invalid downloaded response must not be written to disk
+        or counted as fetched -- otherwise it would satisfy
+        ``xsd_path.exists()`` and get silently reused as "stored" forever.
+        """
         url_a = "https://example.com/a.xsd"
-        url_b = "https://example.com/b.xsd"
-        url_shared = "https://example.com/shared.xsd"
+        content_map = {url_a: b"this is not valid xml <<<"}
 
-        content_map = {
-            url_a: _xsd("urn:a", deps=[("import", "shared.xsd")]),
-            url_b: _xsd("urn:b", deps=[("import", "shared.xsd")]),
-            url_shared: _xsd("urn:shared"),
-        }
+        fetcher = XSDFetcher(xsd_dir=tmp_path)
+        with patch("requests.get", side_effect=self._mock_get(content_map)):
+            result = fetcher.fetch_xsd_with_dependencies(url_a)
+
+        assert result["fetched"] == []
+        assert result["stored"] == []
+        assert len(result["errors"]) == 1
+        assert result["errors"][0]["url"] == url_a
+        # The bad response must never be written to disk.
+        assert not (tmp_path / "a.xsd").exists()
+
+    def test_invalid_response_is_retried_on_next_run(self, tmp_path):
+        """Since a bad response is never persisted, a second run should
+        attempt the download again instead of finding a cached bad file.
+        """
+        url_a = "https://example.com/a.xsd"
+        content_map = {url_a: b"this is not valid xml <<<"}
 
         fetcher = XSDFetcher(xsd_dir=tmp_path)
         with patch("requests.get", side_effect=self._mock_get(content_map)) as mock_get:
-            result = fetcher.fetch_all([url_a, url_b])
+            fetcher.fetch_xsd_with_dependencies(url_a)
+            fetcher.fetch_xsd_with_dependencies(url_a)
 
-        assert set(result["fetched"]) == {url_a, url_b, url_shared}
-        assert mock_get.call_count == 3
+        assert mock_get.call_count == 2

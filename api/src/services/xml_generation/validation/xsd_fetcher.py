@@ -35,6 +35,11 @@ def discover_xsd_dependencies(xsd_content: bytes, source_url: str) -> list[str]:
 
     Returns:
         A list of absolute URLs for the dependencies declared in the schema.
+
+    Raises:
+        XSDFetchError: If ``xsd_content`` is not well-formed XML. Callers
+            should treat this as a hard failure for the URL being processed
+            rather than caching or reporting it as fetched.
     """
     try:
         root = etree.fromstring(xsd_content)
@@ -86,6 +91,14 @@ class XSDFetcher:
         ``xs:redefine`` declarations, so nested (transitive) dependencies are
         followed automatically. Already-visited URLs (including circular
         references back to a schema earlier in the chain) are skipped.
+
+        A freshly downloaded response is always parsed *before* it is
+        written to disk or counted as fetched. Persisting first would let an
+        invalid or corrupted response get cached as if it were a good
+        schema — it would satisfy ``xsd_path.exists()`` on every later run
+        and be silently reused as "stored" forever. Validating first means a
+        bad response is never written and never reported as a success; it
+        surfaces in ``errors`` instead, and the retry stays possible next run.
         """
         if visited is None:
             visited = set()
@@ -100,26 +113,27 @@ class XSDFetcher:
 
         try:
             xsd_path = self._local_path_for(xsd_url)
+            is_freshly_downloaded = not xsd_path.exists()
 
-            if xsd_path.exists():
-                logger.debug(f"Using existing XSD: {xsd_path}")
-                result["stored"].append(xsd_url)
-                xsd_content = xsd_path.read_bytes()
-            else:
+            if is_freshly_downloaded:
                 logger.info(f"Downloading XSD: {xsd_url}")
                 response = requests.get(xsd_url, timeout=30)
                 response.raise_for_status()
                 xsd_content = response.content
+            else:
+                logger.debug(f"Using existing XSD: {xsd_path}")
+                xsd_content = xsd_path.read_bytes()
 
+            # Validate before persisting or reporting success (see docstring).
+            dependencies = discover_xsd_dependencies(xsd_content, xsd_url)
+
+            if is_freshly_downloaded:
                 with open(xsd_path, "wb") as f:
                     f.write(xsd_content)
-
                 logger.info(f"Downloaded and stored: {xsd_path}")
                 result["fetched"].append(xsd_url)
-
-            # Discover dependencies directly from the schema we just fetched
-            # (or already had), instead of a hardcoded lookup table.
-            dependencies = discover_xsd_dependencies(xsd_content, xsd_url)
+            else:
+                result["stored"].append(xsd_url)
 
             for dep_url in dependencies:
                 try:
@@ -138,52 +152,3 @@ class XSDFetcher:
             result["errors"].append({"url": xsd_url, "error": str(e)})
 
         return result
-
-    def fetch_all(self, xsd_urls: list[str]) -> dict[str, Any]:
-        """Fetch a list of top-level XSD URLs and all of their dependencies.
-
-        Args:
-            xsd_urls: Top-level XSD URLs to fetch (e.g. one per form).
-
-        Returns:
-            Combined fetched/stored/errors across all URLs, with duplicates
-            across URLs collapsed via a shared ``visited`` set.
-        """
-        visited: set[str] = set()
-        combined: dict[str, Any] = {"fetched": [], "stored": [], "errors": []}
-
-        for xsd_url in xsd_urls:
-            single_result = self.fetch_xsd_with_dependencies(xsd_url, visited)
-            combined["fetched"].extend(single_result["fetched"])
-            combined["stored"].extend(single_result["stored"])
-            combined["errors"].extend(single_result["errors"])
-
-        return combined
-
-
-def get_all_form_xsd_urls() -> dict[str, str]:
-    """Get the XSD schema URL for every registered form.
-
-    Reads each form's configuration directly from the form_schema registry
-    (api/form_schema) instead of a hardcoded list, so newly added forms are
-    picked up automatically.
-
-    Returns:
-        Mapping of form short name (uppercase) to its XSD schema URL. Forms
-        without an ``xsd_url`` configured (e.g. no XML transform config yet)
-        are omitted.
-    """
-    from src.form_schema.forms import get_active_forms, init_form_registry
-
-    init_form_registry()
-
-    xsd_urls: dict[str, str] = {}
-    for form in get_active_forms():
-        xml_config = (form.json_to_xml_schema or {}).get("_xml_config", {})
-        xsd_url = xml_config.get("xsd_url")
-        if xsd_url:
-            xsd_urls[form.short_form_name.upper()] = xsd_url
-        else:
-            logger.debug(f"No xsd_url configured for form: {form.short_form_name}")
-
-    return xsd_urls

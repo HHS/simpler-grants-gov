@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 
 from src.form_schema.forms import init_form_registry
-from src.services.xml_generation.config import _build_xml_form_map
+from src.services.xml_generation.config import _build_xml_form_map, _build_xml_form_xsd_url_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.validation.test_cases import (
@@ -16,7 +16,7 @@ from src.services.xml_generation.validation.test_cases import (
     get_test_cases_by_form,
 )
 from src.services.xml_generation.validation.test_runner import ValidationTestRunner
-from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher, get_all_form_xsd_urls
+from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
 
 
@@ -312,7 +312,7 @@ def fetch_xsds_command(
         # Get the XSD URL(s) to fetch directly from each form's own
         # configuration (api/form_schema) instead of a hardcoded list.
         init_form_registry()
-        form_xsd_urls = get_all_form_xsd_urls()
+        form_xsd_urls = _build_xml_form_xsd_url_map()
 
         if form:
             xsd_url = form_xsd_urls.get(form.upper())
