@@ -119,7 +119,6 @@ The following members of the Simpler Grants community have made significant open
 * Jack [jackvansickle1](https://github.com/jackvansickle1), who created the features needed for testing email functionality locally, including the [follow-through to work through developer feedback to get these features merged](https://github.com/HHS/simpler-grants-gov/pull/11516).
 * Sayed ([@MozamilS](https://github.com/MozamilS)) for work on display filters, including multiple review cycles with our team,  
 * Matt ([@mvanhorn](https://github.com/mvanhorn)) for identifying a UI issue and updating testing to go with the update,  
-* Vivay ([@vijaygovindaraja](https://github.com/vijaygovindaraja)) for [Fixing the search loading state by adding Suspense boundary around filters](https://github.com/HHS/simpler-grants-gov/pull/9295),
 * Arpit ( [Arpitjain099](https://github.com/arpitjain099) ) for contributions to a significant bug fix to [redirect grantor opportunities when a search returns empty data due to query page number parameters](https://github.com/HHS/simpler-grants-gov/pull/10980)
 
 ## Policies
