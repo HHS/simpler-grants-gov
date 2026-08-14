@@ -71,6 +71,7 @@ test(
   "can view the 'View all deliverables on Github'",
   { tag: [STATIC, EXTENDED] },
   async ({ page }) => {
+    console.log("A MINOR CHANGE KFKFKFKFKFF");
     const newTabPromise = page.waitForEvent("popup");
 
     // When I click "View all deliverables on Github"

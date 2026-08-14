@@ -66,6 +66,7 @@ test(
   "can navigate to ethnio in new tab",
   { tag: [STATIC, EXTENDED] },
   async ({ page, context }) => {
+    console.log("A MINOR CHANGE KFKFKFKFKFF");
     // Given I should see "Sign up to participate in future user studies"
     const ethnioLink = page.getByRole("link", {
       name: /Sign up to participate in future user studies/i,
