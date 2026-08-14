@@ -27,6 +27,13 @@ class UpdateApplicationInfoRequest(GrantsGovTrackingNumberRequiredSchema):
             return value.get("#text")
         return value
 
+    @field_validator("save_agency_notes", mode="before")
+    @classmethod
+    def get_save_agency_notes_value_from_dict(cls, value: str | dict) -> str | None:
+        if isinstance(value, dict):
+            return value.get("#text")
+        return value
+
 
 class SaveAgencyNotesResult(BaseSOAPSchema):
     success: str | None = Field(default=None, alias="ns9:Success")
