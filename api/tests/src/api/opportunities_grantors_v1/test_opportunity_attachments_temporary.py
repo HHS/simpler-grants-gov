@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 from grants_shared.util import file_util
+from sqlalchemy import select
 
 from src.constants.lookup_constants import FileScanStatus, Privilege
 from src.db.models import opportunity_models
@@ -65,11 +66,12 @@ def test_create_from_pending_file_200(
     assert data["file_name"] == "test-attachment.pdf"
     assert data["mime_type"] == "application/pdf"
 
-    attachment = (
-        db_session.query(opportunity_models.OpportunityAttachment)
-        .filter_by(attachment_id=data["opportunity_attachment_id"])
-        .one()
-    )
+    attachment = db_session.execute(
+        select(opportunity_models.OpportunityAttachment).where(
+            opportunity_models.OpportunityAttachment.attachment_id
+            == data["opportunity_attachment_id"]
+        )
+    ).scalar_one()
     assert file_util.file_exists(attachment.file_location) is True
     assert file_util.file_exists(pending_file.file_location) is False
     db_session.refresh(pending_file)
