@@ -12,6 +12,7 @@
  */
 
 import {
+  expect,
   test,
   type BrowserContext,
   type Page,
@@ -32,6 +33,7 @@ import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-pri
 import {
   buildHappyPathTestData,
   buildPrintUrl,
+  navigateToPrintView,
   validateAllPrintViews,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
@@ -132,5 +134,19 @@ test(
     // form has no attachment fields (areas_affected, additional_project_title,
     // additional_congressional_districts, debt_explanation all live only on the long form).
     await validateAllPrintViews(page, filledForms);
+
+    // --- Post-Population Field Validation ---
+    // aor_signature and authorized_representative_date_signed are system post-populated at
+    // submission time (gg_post_population rules: "signature", "current_date") - same pattern
+    // as SF-424B's signature/date_signed check.
+    for (const { printUrl } of filledForms) {
+      await navigateToPrintView(page, printUrl);
+
+      await expect(page.getByTestId("signature")).toBeVisible();
+      await expect(page.getByTestId("signature")).not.toBeEmpty();
+
+      await expect(page.getByTestId("date_signed")).toBeVisible();
+      await expect(page.getByTestId("date_signed")).not.toBeEmpty();
+    }
   },
 );

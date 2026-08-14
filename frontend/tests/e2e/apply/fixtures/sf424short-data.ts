@@ -1,4 +1,4 @@
-import type { fieldDefinitionsSF424Short } from "tests/e2e/apply/fixtures/sf424-short-field-definitions";
+import type { fieldDefinitionsSF424Short } from "tests/e2e/apply/fixtures/sf424short-field-definitions";
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
 
