@@ -55,6 +55,24 @@ describe("FileInputStatusDisplay", () => {
       "uploadError",
     );
   });
+  it("displays file size error message when a file is too large", () => {
+    render(
+      <FileInputStatusDisplay
+        onCancel={jest.fn()}
+        onDismiss={jest.fn()}
+        fileName="a_file.txt"
+        error={true}
+        status={"too-large"}
+        postUploadActionProgressMessage={""}
+        postUploadActionSuccessMessage={""}
+        postUploadActionErrorMessage={""}
+        maxFileSizeBytes={200 * 1024 * 1024}
+      />,
+    );
+    expect(screen.getByTestId("file-upload-status-display")).toHaveTextContent(
+      "fileTooLarge",
+    );
+  });
   it("displays postUploadActionProgressMessage while performing post upload action", () => {
     render(
       <FileInputStatusDisplay
