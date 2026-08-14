@@ -152,6 +152,9 @@ export default function OpportunityEditForm({
     const form = event.currentTarget.form;
     if (!form) return;
     const formData = new FormData(form);
+    const expectedNumberOfAwards = getNumericAmountFromString(
+      formData.get("expected_number_of_awards") as string | null,
+    );
     const estTotalFunding = getNumericAmountFromString(
       formData.get("estimated_total_program_funding") as string | null,
     );
@@ -162,12 +165,13 @@ export default function OpportunityEditForm({
       formData.get("award_ceiling") as string | null,
     );
     // clear old error messages
+    setSingleFrontendError("expected_number_of_awards", null);
     setSingleFrontendError("award_floor", null);
     setSingleFrontendError("award_ceiling", null);
     setSingleFrontendError("estimated_total_program_funding", null);
     const maxLimit = 1000000000000000;
 
-    //--- min & max values for Award Minimum, Award Minimum and Total Program Funding ---
+    //--- min & max values for Award Minimum, Award Minimum, Total Program Funding, and Expected Number of Awards ---
     if (awardMin < 0 || awardMin >= maxLimit) {
       const errMsg = t("validationErrors.awardMinCurrencyInput");
       setSingleFrontendError("award_floor", errMsg);
@@ -179,6 +183,12 @@ export default function OpportunityEditForm({
     if (estTotalFunding < 0 || estTotalFunding >= maxLimit) {
       const errMsg = t("validationErrors.totalFundingCurrencyInput");
       setSingleFrontendError("estimated_total_program_funding", errMsg);
+    }
+    if (expectedNumberOfAwards < 0 || expectedNumberOfAwards >= maxLimit) {
+      setSingleFrontendError(
+        "expected_number_of_awards",
+        t("validationErrors.expectedNumberOfAwaredsInput"),
+      );
     }
   };
 
@@ -436,6 +446,7 @@ export default function OpportunityEditForm({
                   name="expected_number_of_awards"
                   type="text"
                   defaultValue={initialValues.expected_number_of_awards}
+                  onBlur={singleFieldValidation}
                   className="width-full"
                 />
               </FormGroup>
