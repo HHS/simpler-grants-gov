@@ -12904,7 +12904,7 @@ components:
           type:
           - string
           - 'null'
-          maxLength: 18000
+          maxLength: 500
           description: Opportunity summary
           example: This opportunity...
         is_cost_sharing:
@@ -14984,7 +14984,7 @@ components:
           type:
           - string
           - 'null'
-          maxLength: 18000
+          maxLength: 500
           description: Opportunity summary
           example: This opportunity...
         is_cost_sharing:
@@ -15298,12 +15298,12 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
     ApiUserKeyAuth:
       type: apiKey
       in: header
       name: X-API-Key
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
 
