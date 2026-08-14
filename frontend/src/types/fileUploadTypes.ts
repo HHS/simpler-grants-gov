@@ -10,6 +10,7 @@ export const fileUploadProcessStatus = [
   "post-upload",
   "success",
   "infected", // technically an error state, but it will be returned directly from the API so we need to treat it this way for now
+  "too-large", // client side status for files that exceed specified max file size
 ] as const;
 
 export type FileUploadProcessStatus = (typeof fileUploadProcessStatus)[number];
