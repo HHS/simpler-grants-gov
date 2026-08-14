@@ -357,6 +357,10 @@ jobs:
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build
 
+      #
+      #   CHECKS FOR CHANGED FILES
+      #
+
       - name: Check for updates to core e2e files
         id: changed-e2e-utils
         uses: tj-actions/changed-files@v47.0.6
@@ -404,10 +408,15 @@ jobs:
         env:
           APPLY_FORMS_CHANGED: ${{ steps.changed-apply-form-files.outputs.any_changed }}
           OPPORTUNITY_MANAGEMENT_CHANGED: ${{ steps.changed-opportunity-management-files.outputs.any_changed }}
+          E2E_SPECS_CHANGED: ${{ steps.changed-e2e-spec-files.outputs.any_changed }}
+          E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
+
         run: |
           echo "Any apply form files changed? $APPLY_FORMS_CHANGED"
           echo "Any opportunity management files changed? $OPPORTUNITY_MANAGEMENT_CHANGED"
-          echo "Any opportunity management files changed? $OPPORTUNITY_MANAGEMENT_CHANGED"
+          echo "Any e2e spec files changed? $E2E_SPECS_CHANGED"
+          echo "Any e2e util files changed? $E2E_UTILS_CHANGED"
+
           if [[ $GITHUB_EVENT_NAME = "pull_request" ]]; then
             test_group_tags="@smoke"
             if [[ $APPLY_FORMS_CHANGED = "true" ]]; then
@@ -423,7 +432,22 @@ jobs:
             echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
           fi
 
-      # run all tests if any e2e utils have changed
+      #
+      #   TEST RUNS
+      #
+      #   Will always run at least one of the following three steps, based on this logic
+      #
+      #   - Any e2e utils have changed?
+      #       - Yes
+      #         - Run All E2E tests (utils updated)
+      #`      - No
+      #         - Any specific spec files to run supplied?
+      #           - Yes
+      #             - Run E2E tests
+      #             - Run E2E tests for changed spec files
+      #           - No
+      #             - Run E2E tests
+
       - name: Run All E2E tests (utils updated)
         uses: ./.github/actions/e2e
         env:
