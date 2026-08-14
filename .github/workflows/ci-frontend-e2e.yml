@@ -361,16 +361,6 @@ jobs:
       #   CHECKS FOR CHANGED FILES
       #
 
-      - name: Check for updates to core e2e files
-        id: changed-e2e-utils
-        uses: tj-actions/changed-files@v47.0.6
-        with:
-          files: |
-            tests/utils/**
-            tests/playwright.config.ts
-            tests/playwright-env.ts
-            tests/playwrightUtils.ts
-
       - name: Get list of changed apply form files
         id: changed-apply-form-files
         uses: tj-actions/changed-files@v47.0.6
@@ -396,12 +386,22 @@ jobs:
             api/src/api/opportunities_grantor_v1/**
             api/src/services/opportunities_grantor_v1/**
 
+      - name: Check for updates to core e2e files
+        id: changed-e2e-utils
+        uses: tj-actions/changed-files@v47.0.6
+        with:
+          files: |
+            frontend/tests/utils/**
+            frontend/tests/playwright.config.ts
+            frontend/tests/playwright-env.ts
+            frontend/tests/playwrightUtils.ts
+
       - name: Get list of changed e2e spec files
         id: changed-e2e-spec-files
         uses: tj-actions/changed-files@v47.0.6
         with:
           files: |
-            tests/**/*.spec.ts
+            frontend/tests/**/*.spec.ts
 
       - name: Determine test groups to run
         shell: bash
