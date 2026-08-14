@@ -620,8 +620,6 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           {...defaultProps}
           formContext={{
             widgetSupport: {
-              useSingleAttachmentVirusScanning: false,
-              useMultipleAttachmentVirusScanning: true,
               markFormDirty,
             },
           }}
@@ -646,8 +644,6 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           {...defaultProps}
           formContext={{
             widgetSupport: {
-              useSingleAttachmentVirusScanning: false,
-              useMultipleAttachmentVirusScanning: true,
               markFormDirty,
               attachmentsUploadingCounter: counter,
             },
@@ -742,8 +738,6 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           {...defaultProps}
           formContext={{
             widgetSupport: {
-              useSingleAttachmentVirusScanning: false,
-              useMultipleAttachmentVirusScanning: true,
               markFormDirty,
               attachmentsUploadingCounter: counter,
             },
@@ -850,8 +844,6 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           {...defaultProps}
           formContext={{
             widgetSupport: {
-              useSingleAttachmentVirusScanning: false,
-              useMultipleAttachmentVirusScanning: true,
               markFormDirty,
             },
           }}
@@ -862,36 +854,6 @@ describe("ApplicationMultipleAttachmentWidget", () => {
       await userEvent.upload(input, new File(["a"], "budget.pdf"));
 
       await waitFor(() => expect(hiddenValue(container)).toEqual(["uuid-1"]));
-      expect(markFormDirty).toHaveBeenCalledTimes(1);
-    });
-
-    /*
-      #11902 added widgetSupport fixtures that omit useMultipleAttachmentVirusScanning, so the
-      property is optional. Omitting it must read as "off" and must not break the widget
-      when it is rendered directly.
-    */
-    it("works when useMultipleAttachmentVirusScanning is omitted entirely", async () => {
-      mockUploadThenCreate([attachmentOne]);
-      const markFormDirty = jest.fn();
-      const { counter, state } = buildUploadingCounter();
-      const { container } = render(
-        <ApplicationMultipleAttachmentWidget
-          {...defaultProps}
-          formContext={{
-            widgetSupport: {
-              useSingleAttachmentVirusScanning: true,
-              markFormDirty,
-              attachmentsUploadingCounter: counter,
-            },
-          }}
-        />,
-      );
-
-      const input = await screen.findByTestId("file-input-input");
-      await userEvent.upload(input, new File(["a"], "budget.pdf"));
-
-      await waitFor(() => expect(hiddenValue(container)).toEqual(["uuid-1"]));
-      await waitFor(() => expect(state.balance).toBe(0));
       expect(markFormDirty).toHaveBeenCalledTimes(1);
     });
   });
@@ -907,8 +869,6 @@ describe("ApplicationMultipleAttachmentWidget", () => {
           value={["uuid-1", "uuid-2"]}
           formContext={{
             widgetSupport: {
-              useSingleAttachmentVirusScanning: false,
-              useMultipleAttachmentVirusScanning: true,
               markFormDirty,
             },
           }}
