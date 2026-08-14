@@ -308,7 +308,7 @@ class OpportunitySummaryBaseRequestSchema(Schema):
     summary_description = fields.String(
         required=True,
         allow_none=True,
-        validate=validators.Length(max=18000),
+        validate=validators.WordLimit(max=500),
         metadata={"description": "Opportunity summary", "example": "This opportunity..."},
     )
 
@@ -645,6 +645,19 @@ class DeleteAttachmentResponseV1Schema(ResponseWithErrorsSchema):
     """Response Schema for Delete Attachment Endpoint"""
 
     pass
+
+
+class OpportunityAttachmentCreateFromPendingFileRequestV1Schema(Schema):
+    pending_file_id = fields.UUID(
+        required=True,
+        metadata={"description": "The ID of the pending (virus-scanned) file to attach"},
+    )
+
+
+class OpportunityAttachmentCreateFromPendingFileResponseV1Schema(AbstractResponseSchema):
+    """Response Schema for the temporary pending-file Upload Attachment Endpoint"""
+
+    data = fields.Nested(OpportunityAttachmentV1Schema())
 
 
 class OpportunityPublishResponseV1Schema(AbstractResponseSchema):

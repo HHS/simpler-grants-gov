@@ -28,15 +28,14 @@ type SimplerFileInputProps = {
   required?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
-  labelId: string;
+  // ids of the elements describing this input (label, help text, field errors), combined
+  // into one aria-describedby. Required, so a caller cannot silently drop the
+  // description - pass an empty array when nothing describes the input.
+  describedByIds: string[];
+  // set when the form considers the field invalid. Kept separate from upload errors so a
+  // later successful upload does not clear a form level validation error.
+  formInvalid?: boolean;
   multiFile?: boolean;
-};
-
-const toUploadMetadata = (files: File[]) => {
-  return files.map((file) => {
-    const uploadId = `${file.name}_${Date.now()}`;
-    return { uploadId, file };
-  });
 };
 
 export const SimplerFileInput = ({
@@ -45,7 +44,7 @@ export const SimplerFileInput = ({
   postUploadActionSuccessMessage,
   postUploadActionErrorMessage,
   id,
-  labelId,
+  describedByIds,
   existingFiles,
   onDelete,
   onStart = noop,
@@ -55,10 +54,18 @@ export const SimplerFileInput = ({
   disabled = false,
   readOnly = false,
   required = false,
+  formInvalid = false,
   multiFile = false,
 }: SimplerFileInputProps) => {
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
+  // a counter rather than a timestamp: files selected in one batch would otherwise share
+  // an upload id, since Date.now() does not advance between them
+  const uploadIdCounter = useRef(0);
+
+  // readOnly is deliberately not forwarded to the native input - it has no effect on
+  // <input type="file">, so the control is disabled instead
+  const isEditable = !disabled && !readOnly;
 
   const [filePendingDeletion, setFilePendingDeletion] =
     useState<UploadFileMetadata>();
@@ -72,7 +79,17 @@ export const SimplerFileInput = ({
   >([]);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
 
+  const toUploadMetadata = (files: File[]) => {
+    return files.map((file) => {
+      uploadIdCounter.current += 1;
+      return { uploadId: `${file.name}_${uploadIdCounter.current}`, file };
+    });
+  };
+
   const trackUpload = (changeEvent: ChangeEvent<HTMLInputElement>) => {
+    if (!isEditable) {
+      return;
+    }
     if (!changeEvent.target.files?.length) {
       console.error("no files!");
       return;
@@ -97,12 +114,21 @@ export const SimplerFileInput = ({
       ? [changeEvent.target.files[0]]
       : Array.from(changeEvent.target.files);
 
-    setActiveUploads([...activeUploads, ...toUploadMetadata(filesToUpload)]);
+    // ids are assigned outside the setter, so a repeated invocation cannot advance the
+    // counter; the functional setter keeps rapid selections from clobbering each other
+    const newUploads = toUploadMetadata(filesToUpload);
+    setActiveUploads((previousActiveUploads) => [
+      ...previousActiveUploads,
+      ...newUploads,
+    ]);
   };
 
   // this does not update the list of existing / previously uploaded files internally,
   // and relies on the parent to update that list upon successful deletion
   const handleDeleteFile = useCallback(() => {
+    if (!isEditable) {
+      return;
+    }
     if (!filePendingDeletion) {
       console.error("Attempting to delete, but no file selected");
       return;
@@ -126,7 +152,7 @@ export const SimplerFileInput = ({
           filesWithDeleteError.concat([filePendingDeletion.id]),
         );
       });
-  }, [filePendingDeletion, onDelete, filesWithDeleteError]);
+  }, [isEditable, filePendingDeletion, onDelete, filesWithDeleteError]);
 
   // hide the "select file" display if
   //  * there are any existing files and not multifile uploader
@@ -170,20 +196,27 @@ export const SimplerFileInput = ({
     }
   };
 
+  const describedBy = describedByIds.filter(Boolean).join(" ") || undefined;
+
+  // a field that already has files is satisfied, but the chooser itself is always empty -
+  // keeping the native flag set would block submission, and for a single file field the
+  // chooser is hidden by then, so the browser's message would be unreachable. The label
+  // and form schema validation still convey that the field is required.
+  const nativeRequired = required && !existingFiles?.length;
+
   return (
     <>
       <FileInput
         id={id}
         name={id}
         ref={fileInputRef}
-        required={required}
-        disabled={disabled}
-        readOnly={readOnly}
+        required={nativeRequired}
+        disabled={!isEditable}
         onChange={(e) => {
           trackUpload(e);
         }}
-        aria-describedby={labelId}
-        aria-invalid={!!uploadErrors.length}
+        aria-describedby={describedBy}
+        aria-invalid={formInvalid || !!uploadErrors.length}
         className={hideNativeInput ? "display-none" : ""}
         multiple={multiFile}
         changeSelectedFileText="Add file"
@@ -229,14 +262,18 @@ export const SimplerFileInput = ({
         filesWithDeleteError={filesWithDeleteError}
         disabled={disabled || readOnly}
       />
-      <DeleteFileModal
-        // note that this only supports deleting one file at a time.
-        deletePending={deletePending}
-        handleDeleteFile={handleDeleteFile}
-        modalId={`${id}-delete-file-modal`}
-        modalRef={deleteModalRef}
-        pendingDeleteName={filePendingDeletion?.fileName}
-      />
+      {/* not rendered when locked or read only, so the delete confirmation cannot be
+          reached by pointer or keyboard */}
+      {isEditable && (
+        <DeleteFileModal
+          // note that this only supports deleting one file at a time.
+          deletePending={deletePending}
+          handleDeleteFile={handleDeleteFile}
+          modalId={`${id}-delete-file-modal`}
+          modalRef={deleteModalRef}
+          pendingDeleteName={filePendingDeletion?.fileName}
+        />
+      )}
     </>
   );
 };

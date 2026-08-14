@@ -265,8 +265,10 @@ the paid banner + status:paid.
 🎉 Paid! @handle, your $AMOUNT bounty for #NNN was sent via Tremendous on <date> — check the email on your GitHub account.
 
 Thank you for contributing to Simpler Grants. Two quick things:
-- [We'd love 2 minutes of your feedback on how this went](https://docs.google.com/forms/d/e/1FAIpQLSe0r5sFEXpWL6HxglPAEkj9s4ktMELJ3pi6m_BCntZ_7ucpKA/viewform?usp=dialog)
+- You'll receive an email asking you to give feedback on the process. We'd love to hear how this went!
 - This isn't a one-time thing — browse the [open bounties](README.md#bounty-board) anytime, and unpaid contributions are just as welcome.
 
 Hope to see you on the next one. 🙌
 ```
+
+Sent to the participant via email: [We'd love 2 minutes of your feedback on how this went](https://docs.google.com/forms/d/e/1FAIpQLSe0r5sFEXpWL6HxglPAEkj9s4ktMELJ3pi6m_BCntZ_7ucpKA/viewform?usp=dialog)

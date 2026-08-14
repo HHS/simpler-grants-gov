@@ -304,6 +304,9 @@ module "service" {
     # OpenSearch IAM policy for query operations
     local.search_config != null ? {
       opensearch_query = data.aws_iam_policy.opensearch_query[0].arn,
+    } : {},
+    local.external_ses_email_domain != null ? {
+      external_ses_access = aws_iam_policy.external_ses_access[0].arn,
     } : {}
   )
 

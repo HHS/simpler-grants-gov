@@ -1978,6 +1978,12 @@ export const messages = {
       },
     },
   },
+  CommonWordLimit: {
+    wordsAllowed: "words allowed",
+    wordsLeft: "{num, plural, =1 {1 word left} other {# words left}}",
+    wordsError:
+      "{num, plural, =1 {1 word over limit} other {# words over limit}}",
+  },
   Applications: {
     numApplications: "{num, plural, =1 {1 application} other {# applications}}",
     errorMessage:
@@ -2742,7 +2748,8 @@ export const messages = {
     statusDisplay: {
       cancel: "Cancel",
       dismiss: "Dismiss",
-      queued: "Queued",
+      processing: "Processing file",
+      starting: "Starting upload",
       uploading: "Uploading...",
       startingScan: "Upload complete. Starting security scan",
       scanning: "Upload complete. Running security scan...",

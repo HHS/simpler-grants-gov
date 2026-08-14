@@ -1,9 +1,8 @@
 # Overview
 
-This folder contains our backend python applications.
-
-We're currently in the middle of a substantial refactor,
-so not all of the functionality has moved yet.
+This folder contains any shared resources between our
+backend applications which currently consists of our [API](../api)
+and [Analytics](../analytics) code.
 
 # Local Postgres Database
 
