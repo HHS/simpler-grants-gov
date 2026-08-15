@@ -11,9 +11,11 @@ import {
   ELIGIBILITY_OPTIONS,
   fundingOptions,
 } from "src/constants/opportunity";
+import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchemas.zod";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
-import { getNumericAmountFromString } from "src/utils/formatCurrencyUtil";
 import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
+import { getOpportunitySummaryValidationData } from "src/utils/validation/opportunitySummaryValidation";
+import { getValidationTypeFromZodIssue } from "src/utils/validation/zodValidation";
 
 import { useTranslations } from "next-intl";
 import {
@@ -99,6 +101,35 @@ type OpportunityEditFormProps = {
   initialAttachments?: OpportunityAttachment[];
 };
 
+const EDIT_FORM_FIELD_NAMES = new Set<keyof OpportunityEditValidationErrors>([
+  "opportunity_title",
+  "category",
+  "summary_description",
+  "post_date",
+  "close_date",
+  "agency_email_address",
+  "agency_email_address_description",
+  "award_floor",
+  "award_ceiling",
+  "funding_instruments",
+  "funding_categories",
+  "expected_number_of_awards",
+  "estimated_total_program_funding",
+  "applicant_types",
+  "applicant_eligibility_description",
+  "additional_info_url",
+  "additional_info_url_description",
+  "agency_contact_description",
+]);
+
+function isOpportunityEditField(
+  field: string,
+): field is keyof OpportunityEditValidationErrors {
+  return EDIT_FORM_FIELD_NAMES.has(
+    field as keyof OpportunityEditValidationErrors,
+  );
+}
+
 export default function OpportunityEditForm({
   opportunityId,
   opportunitySummaryId,
@@ -148,38 +179,69 @@ export default function OpportunityEditForm({
     }
   }
 
-  const singleFieldValidation = (event: React.FocusEvent<HTMLInputElement>) => {
-    const form = event.currentTarget.form;
-    if (!form) return;
-    const formData = new FormData(form);
-    const estTotalFunding = getNumericAmountFromString(
-      formData.get("estimated_total_program_funding") as string | null,
-    );
-    const awardMin = getNumericAmountFromString(
-      formData.get("award_floor") as string | null,
-    );
-    const awardMax = getNumericAmountFromString(
-      formData.get("award_ceiling") as string | null,
-    );
-    // clear old error messages
-    setSingleFrontendError("award_floor", null);
-    setSingleFrontendError("award_ceiling", null);
-    setSingleFrontendError("estimated_total_program_funding", null);
-    const maxLimit = 1000000000000000;
+  const handleDatePickerBlur = (
+    field: keyof OpportunityEditValidationErrors,
+  ) => {
+    if (!formRef.current) return;
 
-    //--- min & max values for Award Minimum, Award Minimum and Total Program Funding ---
-    if (awardMin < 0 || awardMin >= maxLimit) {
-      const errMsg = t("validationErrors.awardMinCurrencyInput");
-      setSingleFrontendError("award_floor", errMsg);
+    validateFieldFromForm(field, formRef.current);
+  };
+
+  const validateFieldFromForm = (
+    field: keyof OpportunityEditValidationErrors,
+    form: HTMLFormElement,
+  ) => {
+    const formData = new FormData(form);
+
+    setSingleFrontendError(field, null);
+
+    const result = OpportunitySummaryCreateRequestV1Schema.safeParse(
+      getOpportunitySummaryValidationData(formData),
+    );
+
+    if (result.success) {
+      return;
     }
-    if (awardMax < 0 || awardMax >= maxLimit) {
-      const errMsg = t("validationErrors.awardMaxCurrencyInput");
-      setSingleFrontendError("award_ceiling", errMsg);
+
+    const fieldIssues = result.error.issues.filter(
+      (issue) => issue.path[0]?.toString() === field,
+    );
+
+    for (const issue of fieldIssues) {
+      const validationType = getValidationTypeFromZodIssue(issue);
+      if (!validationType) continue;
+
+      const fieldKey = `validationErrors.${field}.${validationType}`;
+      const genericKey = `validationErrors.generic.${validationType}`;
+
+      const message = t.has(fieldKey)
+        ? t(fieldKey)
+        : t.has(genericKey)
+          ? t(genericKey)
+          : issue.message;
+
+      setSingleFrontendError(field, message);
     }
-    if (estTotalFunding < 0 || estTotalFunding >= maxLimit) {
-      const errMsg = t("validationErrors.totalFundingCurrencyInput");
-      setSingleFrontendError("estimated_total_program_funding", errMsg);
+  };
+
+  const handleFieldBlur = (event: React.FocusEvent<HTMLFormElement>) => {
+    const target = event.target;
+
+    if (!(
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLSelectElement ||
+      target instanceof HTMLTextAreaElement
+    )) {
+      return;
     }
+
+    const field = target.name;
+
+    if (!field || !isOpportunityEditField(field)) {
+      return;
+    }
+
+    validateFieldFromForm(field, event.currentTarget);
   };
 
   // Shared toggle handler for eligibility checkboxes.
@@ -230,6 +292,7 @@ export default function OpportunityEditForm({
         formData.set("submitType", "saveAndExit");
         startTransition(() => formAction(formData));
       }}
+      onBlurCapture={handleFieldBlur}
       noValidate
     >
       <input type="hidden" name="opportunity_id" value={opportunityId} />
@@ -461,7 +524,6 @@ export default function OpportunityEditForm({
                   defaultValue={formatNumber(
                     initialValues.estimated_total_program_funding,
                   )}
-                  onBlur={singleFieldValidation}
                   className="width-full"
                 />
               </FormGroup>
@@ -484,7 +546,6 @@ export default function OpportunityEditForm({
                   name="award_floor"
                   type="text"
                   defaultValue={formatNumber(initialValues.award_floor)}
-                  onBlur={singleFieldValidation}
                   className="width-full"
                 />
               </FormGroup>
@@ -504,7 +565,6 @@ export default function OpportunityEditForm({
                   name="award_ceiling"
                   type="text"
                   defaultValue={formatNumber(initialValues.award_ceiling)}
-                  onBlur={singleFieldValidation}
                   className="width-full"
                 />
               </FormGroup>
@@ -529,6 +589,7 @@ export default function OpportunityEditForm({
                   defaultValue={initialValues.post_date}
                   placeholder="mm/dd/yyyy"
                   className="width-full"
+                  onBlur={() => handleDatePickerBlur("post_date")}
                 />
               </FormGroup>
             </div>
@@ -549,6 +610,7 @@ export default function OpportunityEditForm({
                   placeholder="mm/dd/yyyy"
                   onChange={(value) => setCloseDate(value ?? "")}
                   className="width-full"
+                  onBlur={() => handleDatePickerBlur("close_date")}
                 />
               </FormGroup>
             </div>

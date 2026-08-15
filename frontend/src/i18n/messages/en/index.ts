@@ -377,6 +377,27 @@ export const messages = {
       },
     },
     validationErrors: {
+      award_floor: {
+        min_or_max_value:
+          "🤩Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+      },
+      award_ceiling: {
+        min_or_max_value:
+          "🤩Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+      },
+      estimated_total_program_funding: {
+        min_or_max_value:
+          "🤩Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+      },
+      post_date: {
+        not_null: "👺Publish date is required.",
+        invalid: "🤮Enter a valid publish date.",
+      },
+      generic: {
+        min_or_max_value: "Enter a value within the allowed range.",
+        not_null: "🤩This field is required.",
+        invalid: "🤮Enter a valid value.",
+      },
       title: "Enter a title.",
       awardSelectionMethod: "Select an award selection method.",
       description: "Enter a description.",

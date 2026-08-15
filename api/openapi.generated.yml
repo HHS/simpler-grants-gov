@@ -42,7 +42,6 @@ tags:
     interoperability across grant systems. Learn more by visiting CommonGrants.org
 - name: LOCAL ONLY
 - name: Workflow
-servers: .
 paths:
   /health:
     get:
@@ -771,6 +770,7 @@ paths:
         '200':
           content:
             text/csv: {}
+          description: Successful response
       tags:
       - Opportunity v1
       summary: Opportunity Search Csv
@@ -5866,8 +5866,7 @@ components:
           description: Query string which searches against several text fields
           example: research
         query_operator:
-          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchQueryOperator
-          - AND
+          default: AND
           description: Query operator for combining search conditions
           example: AND
           enum:
@@ -6333,8 +6332,7 @@ components:
           example: Department of Examples
         category:
           description: The opportunity category
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
-          - discretionary
+          example: discretionary
           enum: &id061
           - discretionary
           - mandatory
@@ -6363,8 +6361,7 @@ components:
           $ref: '#/components/schemas/OpportunitySummaryV1Schema'
         opportunity_status:
           description: The current status of the opportunity
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
-          - posted
+          example: posted
           enum: &id064
           - forecasted
           - posted
@@ -6779,8 +6776,7 @@ components:
       type: object
       properties:
         scoring_rule:
-          default: !!python/object/apply:src.services.opportunities_v1.experimental_constant.ScoringRule
-          - default
+          default: default
           description: Scoring rule to query against OpenSearch
           enum:
           - default
@@ -6855,8 +6851,7 @@ components:
           description: Query string which searches against several text fields
           example: research
         query_operator:
-          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchQueryOperator
-          - AND
+          default: AND
           description: Query operator for combining search conditions
           example: OR
           enum:
@@ -6877,8 +6872,7 @@ components:
           - object
           $ref: '#/components/schemas/OpportunityPaginationV1Schema'
         format:
-          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchResponseFormat
-          - json
+          default: json
           description: Response serialization. `json` returns the standard envelope
             with facet counts. `csv` returns a CSV file; pagination and sort_order
             match the JSON response for the same request. For a bulk export (up to
@@ -6921,8 +6915,7 @@ components:
           example: user@example.com
         external_user_type:
           description: The Oauth2 provider through which a user was authenticated
-          example: !!python/object/apply:src.constants.lookup_constants.ExternalUserType
-          - login_gov
+          example: login_gov
           enum:
           - login_gov
           type:
@@ -7346,8 +7339,7 @@ components:
           additionalProperties: {}
         form_type:
           description: The type of the form
-          example: !!python/object/apply:src.constants.lookup_constants.FormType
-          - SF424
+          example: SF424
           enum:
           - SF424
           - SF424Short
@@ -7482,9 +7474,7 @@ components:
           type: array
           description: List of applicant types who are eligible for this competition
           example:
-          - !!python/object/apply:src.constants.lookup_constants.CompetitionOpenToApplicant
             - individual
-          - !!python/object/apply:src.constants.lookup_constants.CompetitionOpenToApplicant
             - organization
           items:
             enum:
@@ -7555,15 +7545,14 @@ components:
           description: The name of the agency who created the opportunity
           example: Department of Examples
         top_level_agency_name:
-          type:
+          type: 
           - string
           - 'null'
           description: The name of the top level agency who created the oppportunity
           example: Department of Examples
         category:
           description: The opportunity category
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
-          - discretionary
+          example: discretionary
           enum: *id061
           type:
           - string
@@ -7585,8 +7574,7 @@ components:
           $ref: '#/components/schemas/OpportunitySummaryV1Schema'
         opportunity_status:
           description: The current status of the opportunity
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
-          - posted
+          example: posted
           enum: *id064
           type: *id065
         top_level_agency_code:
@@ -7751,8 +7739,7 @@ components:
           description: Query string which searches against several text fields
           example: research
         query_operator:
-          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchQueryOperator
-          - AND
+          default: AND
           description: Query operator for combining search conditions
           example: OR
           enum:
@@ -9058,8 +9045,7 @@ components:
           example: Approved with conditions
         approval_type:
           description: The type of approval
-          example: !!python/object/apply:src.constants.lookup_constants.ApprovalType
-          - program_officer_approval
+          example: program_officer_approval
           enum:
           - initial_prototype_approval
           - program_officer_approval
@@ -9076,8 +9062,7 @@ components:
           - string
         approval_response_type:
           description: The response type of the approval
-          example: !!python/object/apply:src.constants.lookup_constants.ApprovalResponseType
-          - approved
+          example: approved
           enum:
           - approved
           - declined
@@ -9093,8 +9078,7 @@ components:
       properties:
         approval_type:
           description: The type of approval required
-          example: !!python/object/apply:src.constants.lookup_constants.ApprovalType
-          - program_officer_approval
+          example: program_officer_approval
           enum:
           - initial_prototype_approval
           - program_officer_approval
@@ -9113,7 +9097,6 @@ components:
           type: array
           description: List of privileges required to provide this approval
           example:
-          - !!python/object/apply:src.constants.lookup_constants.Privilege
             - program_officer_approval
           items:
             enum:
@@ -9161,9 +9144,7 @@ components:
           type: array
           description: List of approval response types allowed for this approval
           example:
-          - !!python/object/apply:src.constants.lookup_constants.ApprovalResponseType
             - approved
-          - !!python/object/apply:src.constants.lookup_constants.ApprovalResponseType
             - requires_modification
           items:
             enum:
@@ -9190,8 +9171,7 @@ components:
           example: 123e4567-e89b-12d3-a456-426614174000
         workflow_type:
           description: The type of workflow
-          example: !!python/object/apply:src.constants.lookup_constants.WorkflowType
-          - opportunity_publish
+          example: opportunity_publish
           enum:
           - opportunity_publish
           - application_submission
@@ -10607,8 +10587,7 @@ components:
           example: Department of Examples
         category:
           description: The opportunity category
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
-          - discretionary
+          example: discretionary
           enum: *id061
           type:
           - string
@@ -10630,8 +10609,7 @@ components:
           $ref: '#/components/schemas/OpportunitySummaryV1Schema'
         opportunity_status:
           description: The current status of the opportunity
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
-          - posted
+          example: posted
           enum: *id064
           type: *id065
         top_level_agency_code:
@@ -10779,8 +10757,7 @@ components:
       properties:
         status:
           description: The current scan status of the file
-          example: !!python/object/apply:src.constants.lookup_constants.FileScanStatus
-          - pending
+          example: pending
           enum:
           - pending
           - in_progress
@@ -11101,8 +11078,7 @@ components:
           example: My Research Grant Application
         application_status:
           description: Current status of the application
-          example: !!python/object/apply:src.constants.lookup_constants.ApplicationStatus
-          - in_progress
+          example: in_progress
           enum:
           - in_progress
           - submitted
@@ -11159,8 +11135,7 @@ components:
             $ref: '#/components/schemas/ApplicationFormGetResponseDataSchema'
         application_status:
           description: Current status of the application
-          example: !!python/object/apply:src.constants.lookup_constants.ApplicationStatus
-          - in_progress
+          example: in_progress
           enum:
           - in_progress
           - submitted
@@ -11378,7 +11353,6 @@ components:
           type: array
           description: List of privileges for this role
           example:
-          - !!python/object/apply:src.constants.lookup_constants.Privilege
             - manage_org_members
           items:
             enum:
@@ -11696,8 +11670,7 @@ components:
           example: my title
         opportunity_status:
           description: The current status of the opportunity
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
-          - posted
+          example: posted
           enum:
           - forecasted
           - posted
@@ -11743,8 +11716,7 @@ components:
           type: array
           minItems: 1
           items:
-            example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
-            - posted
+            example: posted
             enum:
             - forecasted
             - posted
@@ -12554,8 +12526,7 @@ components:
           type: array
           minItems: 1
           items:
-            example: !!python/object/apply:src.constants.lookup_constants.ApplicationAuditEvent
-            - application_created
+            example: application_created
             enum:
             - application_created
             - application_name_changed
@@ -13437,9 +13408,7 @@ components:
           minItems: 1
           description: List of applicant types eligible for this competition
           example: &id073
-          - !!python/object/apply:src.constants.lookup_constants.CompetitionOpenToApplicant
             - individual
-          - !!python/object/apply:src.constants.lookup_constants.CompetitionOpenToApplicant
             - organization
           items:
             enum: &id074
@@ -13568,8 +13537,7 @@ components:
           type: array
           minItems: 1
           items:
-            example: !!python/object/apply:src.constants.lookup_constants.OpportunityAuditEvent
-            - opportunity_created
+            example: opportunity_created
             enum:
             - opportunity_created
             - opportunity_updated
@@ -14357,8 +14325,7 @@ components:
           type: array
           minItems: 1
           items:
-            example: !!python/object/apply:src.constants.lookup_constants.AwardRecommendationAuditEvent
-            - award_recommendation_created
+            example: award_recommendation_created
             enum:
             - award_recommendation_created
             - award_recommendation_updated
