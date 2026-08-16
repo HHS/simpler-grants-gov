@@ -15,7 +15,11 @@ import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchema
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
 import { getOpportunitySummaryValidationData } from "src/utils/validation/opportunitySummaryValidation";
-import { isFieldInSchema, normalizeDateValue, getZodValidationErrors  } from "src/utils/validation/zodValidation";
+import {
+  getZodValidationErrors,
+  isFieldInSchema,
+  normalizeDateValue,
+} from "src/utils/validation/zodValidation";
 
 import { useTranslations } from "next-intl";
 import {
@@ -109,7 +113,9 @@ export default function OpportunityEditForm({
   initialAttachments = [],
 }: OpportunityEditFormProps) {
   const t = useTranslations("OpportunityEdit");
-  const validationTranslations = useTranslations("OpportunityEdit.validationErrors");
+  const validationTranslations = useTranslations(
+    "OpportunityEdit.validationErrors",
+  );
   const genericTranslations = useTranslations("genericValidationMessages");
   const formRef = useRef<HTMLFormElement>(null);
   const [currentSummaryId, setCurrentSummaryId] =
@@ -199,13 +205,11 @@ export default function OpportunityEditForm({
   const handleFieldBlur = (event: React.FocusEvent<HTMLFormElement>) => {
     const target = event.target;
 
-    if (
-      !(
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLSelectElement ||
-        target instanceof HTMLTextAreaElement
-      )
-    ) {
+    if (!(
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLSelectElement ||
+      target instanceof HTMLTextAreaElement
+    )) {
       return;
     }
 
@@ -267,7 +271,7 @@ export default function OpportunityEditForm({
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         formData.set("post_date", normalizeDateValue(postDate) ?? "");
-        formData.set("close_date", normalizeDateValue(closeDate) || "",);
+        formData.set("close_date", normalizeDateValue(closeDate) || "");
         formData.set("submitType", "saveAndExit");
         startTransition(() => formAction(formData));
       }}
@@ -882,7 +886,7 @@ export default function OpportunityEditForm({
               if (!formRef.current) return;
               const formData = new FormData(formRef.current);
               formData.set("post_date", normalizeDateValue(postDate) ?? "");
-              formData.set("close_date", normalizeDateValue(closeDate) || "",);
+              formData.set("close_date", normalizeDateValue(closeDate) || "");
               formData.set("submitType", "saveAndGoBack");
               startTransition(() => formAction(formData));
             }}
@@ -897,7 +901,7 @@ export default function OpportunityEditForm({
             if (!formRef.current) return;
             const formData = new FormData(formRef.current);
             formData.set("post_date", normalizeDateValue(postDate) ?? "");
-            formData.set("close_date", normalizeDateValue(closeDate) || "",);
+            formData.set("close_date", normalizeDateValue(closeDate) || "");
             formData.set("submitType", "saveAndContinue");
             startTransition(() => formAction(formData));
           }}

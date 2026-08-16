@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import dayjs from "dayjs";
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
+import { z } from "zod";
 
 export function getValidationTypeFromZodIssue(
   issue: z.ZodIssue,
@@ -38,7 +38,6 @@ export function getValidationTypeFromZodIssue(
       return null;
   }
 }
-
 
 type FormDataAdapters = Record<string, (formData: FormData) => unknown>;
 
@@ -171,19 +170,14 @@ export function getTranslatedValidationMessage(
   return fallbackMessage;
 }
 
-
-export function mapApiValidationErrors<
-  TShape extends z.ZodRawShape,
->(
+export function mapApiValidationErrors<TShape extends z.ZodRawShape>(
   response: { errors?: unknown[] | null; message?: string },
   schema: z.ZodObject<TShape>,
   fieldTranslations: ValidationTranslator,
   genericTranslations: ValidationTranslator,
   genericMessage: string,
 ): {
-  validationErrors?: Partial<
-    Record<Extract<keyof TShape, string>, string[]>
-  >;
+  validationErrors?: Partial<Record<Extract<keyof TShape, string>, string[]>>;
   errorMessage?: string;
 } {
   const validationErrors: Partial<
@@ -205,10 +199,7 @@ export function mapApiValidationErrors<
     );
 
     if (field && isFieldInSchema(schema, field)) {
-      validationErrors[field] = [
-        ...(validationErrors[field] ?? []),
-        message,
-      ];
+      validationErrors[field] = [...(validationErrors[field] ?? []), message];
     } else {
       unmappedMessages.push(message);
     }
@@ -217,9 +208,7 @@ export function mapApiValidationErrors<
   const hasFieldErrors = Object.keys(validationErrors).length > 0;
 
   return {
-    validationErrors: hasFieldErrors
-      ? validationErrors
-      : undefined,
+    validationErrors: hasFieldErrors ? validationErrors : undefined,
     errorMessage:
       unmappedMessages.length > 0
         ? unmappedMessages.join(" ")
@@ -236,14 +225,10 @@ export function normalizeDateValue(value: string | null): string | null {
 
   const parsed = dayjs(value, ["MM/DD/YYYY", "YYYY-MM-DD"], true);
 
-  return parsed.isValid()
-    ? parsed.format("YYYY-MM-DD")
-    : value;
+  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : value;
 }
 
-export function getZodValidationMessages<
-  TShape extends z.ZodRawShape,
->(
+export function getZodValidationMessages<TShape extends z.ZodRawShape>(
   error: z.ZodError,
   validationData: Record<string, unknown>,
   schema: z.ZodObject<TShape>,
@@ -291,9 +276,7 @@ export function getZodValidationMessages<
   return validationErrors;
 }
 
-export function getZodValidationErrors<
-  TShape extends z.ZodRawShape,
->(
+export function getZodValidationErrors<TShape extends z.ZodRawShape>(
   error: z.ZodError,
   validationData: Record<string, unknown>,
   schema: z.ZodObject<TShape>,

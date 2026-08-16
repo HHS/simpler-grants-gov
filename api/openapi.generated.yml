@@ -7474,8 +7474,8 @@ components:
           type: array
           description: List of applicant types who are eligible for this competition
           example:
-            - individual
-            - organization
+          - individual
+          - organization
           items:
             enum:
             - individual
@@ -7545,7 +7545,7 @@ components:
           description: The name of the agency who created the opportunity
           example: Department of Examples
         top_level_agency_name:
-          type: 
+          type:
           - string
           - 'null'
           description: The name of the top level agency who created the oppportunity
@@ -7851,6 +7851,7 @@ components:
           type: string
           description: Email address of the user
           example: example@example.com
+          format: email
         first_name:
           type:
           - string
@@ -9097,7 +9098,7 @@ components:
           type: array
           description: List of privileges required to provide this approval
           example:
-            - program_officer_approval
+          - program_officer_approval
           items:
             enum:
             - manage_org_members
@@ -9144,8 +9145,8 @@ components:
           type: array
           description: List of approval response types allowed for this approval
           example:
-            - approved
-            - requires_modification
+          - approved
+          - requires_modification
           items:
             enum:
             - approved
@@ -11353,7 +11354,7 @@ components:
           type: array
           description: List of privileges for this role
           example:
-            - manage_org_members
+          - manage_org_members
           items:
             enum:
             - manage_org_members
@@ -11988,6 +11989,7 @@ components:
           type: string
           description: Email address of the user to invite
           example: user@example.com
+          format: email
         role_ids:
           type: array
           minItems: 1
@@ -13110,6 +13112,7 @@ components:
           maxLength: 130
           description: The contact email of the agency who owns the opportunity
           example: fake_email@grants.gov
+          format: email
         agency_email_address_description:
           type:
           - string
@@ -13408,8 +13411,8 @@ components:
           minItems: 1
           description: List of applicant types eligible for this competition
           example: &id073
-            - individual
-            - organization
+          - individual
+          - organization
           items:
             enum: &id074
             - individual
@@ -15128,6 +15131,7 @@ components:
           maxLength: 130
           description: The contact email of the agency who owns the opportunity
           example: fake_email@grants.gov
+          format: email
         agency_email_address_description:
           type:
           - string
@@ -15261,6 +15265,10 @@ components:
       - message
       - status_code
   securitySchemes:
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
     ApiJwtAuth:
       type: apiKey
       in: header
@@ -15269,8 +15277,4 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
 

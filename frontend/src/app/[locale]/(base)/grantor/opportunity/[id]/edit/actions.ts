@@ -12,10 +12,10 @@ import {
   getZodValidationErrors,
   mapApiValidationErrors,
 } from "src/utils/validation/zodValidation";
+import type { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import type { z } from "zod";
 
 export type OpportunityEditValidationErrors = Partial<
   Record<
@@ -117,8 +117,6 @@ export async function saveOpportunityEditAction(
       body,
     });
 
-    console.log("🚨🚨🚨🚨🚨response:", response);
-
     if (response.status_code === 422) {
       return mapApiValidationErrors(
         response,
@@ -173,13 +171,13 @@ export async function opportunityEditFormAction(
   }
 
   const submitType = formData.get("submitType");
-
-  if (
-    ["saveAndExit", "saveAndGoBack", "saveAndContinue"].includes(
-      submitType?.toString() ?? "",
-    )
-  ) {
+  if (submitType === "saveAndExit") {
     redirect("../overview");
+  } else if (submitType === "saveAndGoBack") {
+    redirect("../overview");
+  } else if (submitType === "saveAndContinue") {
+    redirect("../competition");
+  } else {
+    return saveResult;
   }
-  return saveResult;
 }

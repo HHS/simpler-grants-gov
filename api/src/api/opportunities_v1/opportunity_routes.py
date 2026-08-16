@@ -263,7 +263,14 @@ def opportunity_search(
 @opportunity_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @opportunity_blueprint.doc(
     description=SHARED_ALPHA_DESCRIPTION,
-    responses={200: {"content": {"text/csv": {}}}},  # type: ignore
+    responses={
+        200: {
+            "description": "Successful response",
+            "content": {
+                "text/csv": {},
+            },
+        }
+    },
 )
 @flask_opensearch.with_search_client()
 def opportunity_search_csv(search_client: search.SearchClient, search_params: dict) -> Response:

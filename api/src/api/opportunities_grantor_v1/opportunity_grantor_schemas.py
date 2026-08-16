@@ -526,7 +526,10 @@ class OpportunitySummaryBaseRequestSchema(Schema):
     agency_email_address = fields.String(
         required=True,
         allow_none=True,
-        validate=validators.Length(max=130),
+        validate=[
+            validators.Length(max=130),
+            validators.Email(),
+        ],
         metadata={
             "description": "The contact email of the agency who owns the opportunity",
             "example": "fake_email@grants.gov",
