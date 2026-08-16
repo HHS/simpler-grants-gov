@@ -1,4 +1,3 @@
-import { identity } from "lodash";
 import { ApiRequestError } from "src/errors";
 import {
   createOpportunitySummaryForGrantor,
@@ -11,12 +10,9 @@ import {
   type OpportunityEditActionState,
 } from "./actions";
 
-const mockTranslator = Object.assign(
-  (key: string) => key,
-  {
-    has: () => true,
-  },
-);
+const mockTranslator = Object.assign((key: string) => key, {
+  has: () => true,
+});
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => mockTranslator,
@@ -126,9 +122,10 @@ describe("saveOpportunityEditAction", () => {
 
     expect(result.validationErrors).toEqual({
       post_date: ["post_date.required"],
-      funding_instruments: ["fundingType"],
-      funding_categories: ["fundingCategory"],
+      funding_instruments: ["funding_instruments.min_or_max_value"],
+      funding_categories: ["funding_categories.min_or_max_value"],
       applicant_types: ["applicant_types.min_or_max_value"],
+      is_forecast: ["is_forecast.required"],
     });
   });
 
@@ -151,8 +148,8 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      award_floor: ["awardMinLessThanMax"],
-      award_ceiling: ["awardMaxGreaterThanMin"],
+      award_floor: ["award_floor.award_ceiling_numeric_order"],
+      award_ceiling: ["award_ceiling.award_floor_numeric_order"],
     });
   });
 
@@ -165,8 +162,16 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      award_floor: ["awardMinLessThanTotal"],
-      award_ceiling: ["awardMaxLessThanTotal"],
+      award_floor: [
+        "award_floor.estimated_total_program_funding_numeric_order",
+      ],
+      award_ceiling: [
+        "award_ceiling.estimated_total_program_funding_numeric_order",
+      ],
+      estimated_total_program_funding: [
+        "estimated_total_program_funding.award_ceiling_numeric_order",
+        "estimated_total_program_funding.award_floor_numeric_order",
+      ],
     });
   });
 
@@ -178,7 +183,8 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      closeDate: ["closeDateOrder"],
+      close_date: ["close_date.post_date_date_order"],
+      post_date: ["post_date.close_date_date_order"],
     });
   });
 
@@ -189,7 +195,7 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      closeDate: ["closeDateOrder"],
+      post_date: ["post_date.invalid"],
     });
   });
 
@@ -200,7 +206,7 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      closeDate: ["closeDateOrder"],
+      close_date: ["close_date.invalid"],
     });
   });
 
@@ -379,8 +385,8 @@ describe("saveOpportunityEditAction", () => {
 
     expect(result).toEqual({
       validationErrors: {
-        award_floor: ["Not a valid integer."],
-        award_ceiling: ["Not a valid integer."],
+        award_floor: ["award_floor.invalid"],
+        award_ceiling: ["award_ceiling.invalid"],
       },
       errorMessage: undefined,
     });
@@ -517,11 +523,19 @@ describe("opportunityEditFormAction", () => {
     jest.resetAllMocks();
   });
 
-  it("returns validation errors and does not publish when save has validation errors", async () => {
-    const formData = new FormData();
-    formData.set("opportunity_id", "opp-123");
+  it("returns validation errors and does not save when required fields are missing", async () => {
+    const formData = buildValidFormData();
     formData.set("opportunity_summary_id", "sum-456");
-    // post_date missing - triggers validation error
+
+    formData.delete("post_date");
+    formData.delete("funding_instruments");
+    formData.delete("funding_categories");
+
+    for (const key of Array.from(formData.keys())) {
+      if (key.startsWith("applicant_types[")) {
+        formData.delete(key);
+      }
+    }
 
     const result = await opportunityEditFormAction(initialState, formData);
 

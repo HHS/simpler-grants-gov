@@ -7318,10 +7318,86 @@ export const OpportunitySummaryCreateRequestV1Schema = zod.object({
   "applicant_types": zod.array(zod.enum(['state_governments', 'county_governments', 'city_or_township_governments', 'special_district_governments', 'independent_school_districts', 'public_and_state_institutions_of_higher_education', 'private_institutions_of_higher_education', 'federally_recognized_native_american_tribal_governments', 'other_native_american_tribal_organizations', 'public_and_indian_housing_authorities', 'nonprofits_non_higher_education_with_501c3', 'nonprofits_non_higher_education_without_501c3', 'individuals', 'for_profit_organizations_other_than_small_businesses', 'small_businesses', 'other', 'unrestricted'])).min(1).describe('Types of applicants eligible for this opportunity'),
   "applicant_eligibility_description": zod.string().max(opportunitySummaryCreateRequestV1SchemaApplicantEligibilityDescriptionMax).nullish().describe('Additional information about the types of applicants that are eligible'),
   "agency_contact_description": zod.string().max(opportunitySummaryCreateRequestV1SchemaAgencyContactDescriptionMax).nullable().describe('Information regarding contacting the agency who owns the opportunity'),
-  "agency_email_address": zod.string().email().max(opportunitySummaryCreateRequestV1SchemaAgencyEmailAddressMax).nullable().describe('Theeeeeee contact email of the agency who owns the opportunity'),
+  "agency_email_address": zod.string().email().max(opportunitySummaryCreateRequestV1SchemaAgencyEmailAddressMax).nullable().describe('The contact email of the agency who owns the opportunity'),
   "agency_email_address_description": zod.string().max(opportunitySummaryCreateRequestV1SchemaAgencyEmailAddressDescriptionMax).nullable().describe('The text for the link to the agency email address'),
   "is_forecast": zod.boolean().describe('Whether the opportunity is forecasted')
-});
+}).superRefine((data, ctx) => {
+    if (
+      data["award_ceiling"] != null &&
+      data["estimated_total_program_funding"] != null &&
+      typeof data["award_ceiling"] === "number" &&
+      typeof data["estimated_total_program_funding"] === "number" &&
+      !(data["award_ceiling"] <= data["estimated_total_program_funding"])
+    ) {
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["award_ceiling"],
+                message: "estimated_total_program_funding_numeric_order",
+                });
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["estimated_total_program_funding"],
+                message: "award_ceiling_numeric_order",
+                });
+    }
+
+    if (
+      data["award_floor"] != null &&
+      data["estimated_total_program_funding"] != null &&
+      typeof data["award_floor"] === "number" &&
+      typeof data["estimated_total_program_funding"] === "number" &&
+      !(data["award_floor"] <= data["estimated_total_program_funding"])
+    ) {
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["award_floor"],
+                message: "estimated_total_program_funding_numeric_order",
+                });
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["estimated_total_program_funding"],
+                message: "award_floor_numeric_order",
+                });
+    }
+
+    if (
+      data["award_floor"] != null &&
+      data["award_ceiling"] != null &&
+      typeof data["award_floor"] === "number" &&
+      typeof data["award_ceiling"] === "number" &&
+      !(data["award_floor"] <= data["award_ceiling"])
+    ) {
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["award_floor"],
+                message: "award_ceiling_numeric_order",
+                });
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["award_ceiling"],
+                message: "award_floor_numeric_order",
+                });
+    }
+
+    if (
+      data["post_date"] != null &&
+      data["close_date"] != null &&
+      zod.string().date().safeParse(data["post_date"]).success &&
+      zod.string().date().safeParse(data["close_date"]).success &&
+      !(data["post_date"] <= data["close_date"])
+    ) {
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["post_date"],
+                message: "close_date_date_order",
+                });
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["close_date"],
+                message: "post_date_date_order",
+                });
+    }
+  });
 
 export type OpportunitySummaryCreateRequestV1Schema = zod.input<typeof OpportunitySummaryCreateRequestV1Schema>;
 export type OpportunitySummaryCreateRequestV1SchemaOutput = zod.output<typeof OpportunitySummaryCreateRequestV1Schema>;
@@ -7533,7 +7609,26 @@ export const CompetitionCreateRequestSchema = zod.object({
   "closing_date": zod.string().date().nullable().describe('The closing date of the competition'),
   "contact_info": zod.string().nullable().describe('Contact information for the competition'),
   "open_to_applicants": zod.array(zod.enum(['individual', 'organization'])).min(1).describe('List of applicant types eligible for this competition')
-});
+}).superRefine((data, ctx) => {
+    if (
+      data["opening_date"] != null &&
+      data["closing_date"] != null &&
+      zod.string().date().safeParse(data["opening_date"]).success &&
+      zod.string().date().safeParse(data["closing_date"]).success &&
+      !(data["opening_date"] <= data["closing_date"])
+    ) {
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["opening_date"],
+                message: "closing_date_date_order",
+                });
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["closing_date"],
+                message: "opening_date_date_order",
+                });
+    }
+  });
 
 export type CompetitionCreateRequestSchema = zod.input<typeof CompetitionCreateRequestSchema>;
 export type CompetitionCreateRequestSchemaOutput = zod.output<typeof CompetitionCreateRequestSchema>;
@@ -8744,7 +8839,26 @@ export const CompetitionUpdateRequestSchema = zod.object({
   "closing_date": zod.string().date().nullable().describe('The closing date of the competition'),
   "contact_info": zod.string().nullable().describe('Contact information for the competition'),
   "open_to_applicants": zod.array(zod.enum(['individual', 'organization'])).min(1).describe('List of applicant types eligible for this competition')
-});
+}).superRefine((data, ctx) => {
+    if (
+      data["opening_date"] != null &&
+      data["closing_date"] != null &&
+      zod.string().date().safeParse(data["opening_date"]).success &&
+      zod.string().date().safeParse(data["closing_date"]).success &&
+      !(data["opening_date"] <= data["closing_date"])
+    ) {
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["opening_date"],
+                message: "closing_date_date_order",
+                });
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["closing_date"],
+                message: "opening_date_date_order",
+                });
+    }
+  });
 
 export type CompetitionUpdateRequestSchema = zod.input<typeof CompetitionUpdateRequestSchema>;
 export type CompetitionUpdateRequestSchemaOutput = zod.output<typeof CompetitionUpdateRequestSchema>;
@@ -8910,9 +9024,85 @@ export const OpportunitySummaryUpdateRequestV1Schema = zod.object({
   "applicant_types": zod.array(zod.enum(['state_governments', 'county_governments', 'city_or_township_governments', 'special_district_governments', 'independent_school_districts', 'public_and_state_institutions_of_higher_education', 'private_institutions_of_higher_education', 'federally_recognized_native_american_tribal_governments', 'other_native_american_tribal_organizations', 'public_and_indian_housing_authorities', 'nonprofits_non_higher_education_with_501c3', 'nonprofits_non_higher_education_without_501c3', 'individuals', 'for_profit_organizations_other_than_small_businesses', 'small_businesses', 'other', 'unrestricted'])).min(1).describe('Types of applicants eligible for this opportunity'),
   "applicant_eligibility_description": zod.string().max(opportunitySummaryUpdateRequestV1SchemaApplicantEligibilityDescriptionMax).nullish().describe('Additional information about the types of applicants that are eligible'),
   "agency_contact_description": zod.string().max(opportunitySummaryUpdateRequestV1SchemaAgencyContactDescriptionMax).nullable().describe('Information regarding contacting the agency who owns the opportunity'),
-  "agency_email_address": zod.string().email().max(opportunitySummaryUpdateRequestV1SchemaAgencyEmailAddressMax).nullable().describe('Theeeeeee contact email of the agency who owns the opportunity'),
+  "agency_email_address": zod.string().email().max(opportunitySummaryUpdateRequestV1SchemaAgencyEmailAddressMax).nullable().describe('The contact email of the agency who owns the opportunity'),
   "agency_email_address_description": zod.string().max(opportunitySummaryUpdateRequestV1SchemaAgencyEmailAddressDescriptionMax).nullable().describe('The text for the link to the agency email address')
-});
+}).superRefine((data, ctx) => {
+    if (
+      data["award_ceiling"] != null &&
+      data["estimated_total_program_funding"] != null &&
+      typeof data["award_ceiling"] === "number" &&
+      typeof data["estimated_total_program_funding"] === "number" &&
+      !(data["award_ceiling"] <= data["estimated_total_program_funding"])
+    ) {
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["award_ceiling"],
+                message: "estimated_total_program_funding_numeric_order",
+                });
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["estimated_total_program_funding"],
+                message: "award_ceiling_numeric_order",
+                });
+    }
+
+    if (
+      data["award_floor"] != null &&
+      data["estimated_total_program_funding"] != null &&
+      typeof data["award_floor"] === "number" &&
+      typeof data["estimated_total_program_funding"] === "number" &&
+      !(data["award_floor"] <= data["estimated_total_program_funding"])
+    ) {
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["award_floor"],
+                message: "estimated_total_program_funding_numeric_order",
+                });
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["estimated_total_program_funding"],
+                message: "award_floor_numeric_order",
+                });
+    }
+
+    if (
+      data["award_floor"] != null &&
+      data["award_ceiling"] != null &&
+      typeof data["award_floor"] === "number" &&
+      typeof data["award_ceiling"] === "number" &&
+      !(data["award_floor"] <= data["award_ceiling"])
+    ) {
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["award_floor"],
+                message: "award_ceiling_numeric_order",
+                });
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["award_ceiling"],
+                message: "award_floor_numeric_order",
+                });
+    }
+
+    if (
+      data["post_date"] != null &&
+      data["close_date"] != null &&
+      zod.string().date().safeParse(data["post_date"]).success &&
+      zod.string().date().safeParse(data["close_date"]).success &&
+      !(data["post_date"] <= data["close_date"])
+    ) {
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["post_date"],
+                message: "close_date_date_order",
+                });
+                ctx.addIssue({
+                code: zod.ZodIssueCode.custom,
+                path: ["close_date"],
+                message: "post_date_date_order",
+                });
+    }
+  });
 
 export type OpportunitySummaryUpdateRequestV1Schema = zod.input<typeof OpportunitySummaryUpdateRequestV1Schema>;
 export type OpportunitySummaryUpdateRequestV1SchemaOutput = zod.output<typeof OpportunitySummaryUpdateRequestV1Schema>;

@@ -1,8 +1,12 @@
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-
 import { z } from "zod";
 
-import { isFieldInSchema, unwrapSchema } from "./zodFormData";
+import {
+  getFieldSchema,
+  isFieldInSchema,
+  unwrapSchema,
+  ZodSchema,
+} from "./zodFormData";
 
 type ValidationTranslator = {
   has: (key: string) => boolean;
@@ -12,7 +16,7 @@ type ValidationTranslator = {
 export function getValidationTypeFromZodIssue(
   issue: z.ZodIssue,
   value: unknown,
-  fieldSchema: z.ZodTypeAny,
+  fieldSchema: ZodSchema,
 ): string | null {
   if (value === "") {
     const { nullable, optional } = unwrapSchema(fieldSchema);
@@ -40,6 +44,9 @@ export function getValidationTypeFromZodIssue(
 
     case z.ZodIssueCode.invalid_string:
       return "invalid";
+
+    case z.ZodIssueCode.custom:
+      return issue.message;
 
     default:
       return null;
@@ -70,17 +77,15 @@ export function getTranslatedValidationMessage(
   return fallbackMessage;
 }
 
-export function getZodValidationErrors<TShape extends z.ZodRawShape>(
+export function getZodValidationErrors(
   error: z.ZodError,
   validationData: Record<string, unknown>,
-  schema: z.ZodObject<TShape>,
+  schema: z.ZodTypeAny,
   fieldTranslations: ValidationTranslator,
   genericTranslations: ValidationTranslator,
   field?: string,
-): Partial<Record<Extract<keyof TShape, string>, string[]>> {
-  const validationErrors: Partial<
-    Record<Extract<keyof TShape, string>, string[]>
-  > = {};
+): Record<string, string[]> {
+  const validationErrors: Record<string, string[]> = {};
 
   for (const issue of error.issues) {
     const issueField = issue.path[0]?.toString();
@@ -93,7 +98,11 @@ export function getZodValidationErrors<TShape extends z.ZodRawShape>(
       continue;
     }
 
-    const fieldSchema = schema.shape[issueField];
+    const fieldSchema = getFieldSchema(schema, issueField);
+
+    if (!fieldSchema) {
+      continue;
+    }
 
     const validationType = getValidationTypeFromZodIssue(
       issue,
@@ -118,41 +127,35 @@ export function getZodValidationErrors<TShape extends z.ZodRawShape>(
   return validationErrors;
 }
 
-export function mapApiValidationErrors<TShape extends z.ZodRawShape>(
+export function mapApiValidationErrors(
   response: { errors?: unknown[] | null; message?: string },
-  schema: z.ZodObject<TShape>,
+  schema: z.ZodTypeAny,
   fieldTranslations: ValidationTranslator,
   genericTranslations: ValidationTranslator,
   genericMessage: string,
 ): {
-  validationErrors?: Partial<Record<Extract<keyof TShape, string>, string[]>>;
+  validationErrors?: Record<string, string[]>;
   errorMessage?: string;
 } {
-  const validationErrors: Partial<
-    Record<Extract<keyof TShape, string>, string[]>
-  > = {};
-
+  const validationErrors: Record<string, string[]> = {};
   const unmappedMessages: string[] = [];
 
   for (const rawError of response.errors ?? []) {
     const error = rawError as FrontendErrorDetails;
     const field = error.field;
 
-    const message = getTranslatedValidationMessage(
-      fieldTranslations,
-      genericTranslations,
-      field ?? "",
-      error.type ?? null,
-      error.message ?? genericMessage,
-    );
-
     if (field && isFieldInSchema(schema, field)) {
-      validationErrors[field] = [
-        ...(validationErrors[field] ?? []),
-        message,
-      ];
+      const message = getTranslatedValidationMessage(
+        fieldTranslations,
+        genericTranslations,
+        field,
+        error.type ?? null,
+        error.message ?? genericMessage,
+      );
+
+      validationErrors[field] = [...(validationErrors[field] ?? []), message];
     } else {
-      unmappedMessages.push(message);
+      unmappedMessages.push(error.message ?? genericMessage);
     }
   }
 

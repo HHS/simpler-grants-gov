@@ -1,4 +1,5 @@
 import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchemas.zod";
+import { z } from "zod";
 
 import { formDataToZodInput } from "./zodFormData";
 
@@ -21,7 +22,9 @@ const opportunitySummaryFormDataAdapters = {
 
 export function getOpportunitySummaryValidationData(
   formData: FormData,
-  overrides: Partial<OpportunitySummaryCreateRequestV1Schema> = {},
+  overrides: Partial<
+    z.input<typeof OpportunitySummaryCreateRequestV1Schema>
+  > = {},
 ) {
   return {
     ...formDataToZodInput(
@@ -29,7 +32,6 @@ export function getOpportunitySummaryValidationData(
       OpportunitySummaryCreateRequestV1Schema,
       opportunitySummaryFormDataAdapters,
     ),
-
     ...overrides,
   };
 }

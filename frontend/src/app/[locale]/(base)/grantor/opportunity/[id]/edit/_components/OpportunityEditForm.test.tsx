@@ -21,12 +21,9 @@ jest.mock(
 
 jest.mock("next-intl", () => ({
   useTranslations: () => {
-    const t = Object.assign(
-      (key: string) => key,
-      {
-        has: () => true,
-      },
-    );
+    const t = Object.assign((key: string) => key, {
+      has: () => true,
+    });
 
     return t;
   },
@@ -34,12 +31,9 @@ jest.mock("next-intl", () => ({
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => {
-    const t = Object.assign(
-      (key: string) => key,
-      {
-        has: () => true,
-      },
-    );
+    const t = Object.assign((key: string) => key, {
+      has: () => true,
+    });
 
     return t;
   },
@@ -964,11 +958,20 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
 
   it("awardMinimum should show an error if the value is greater than the max allowed", async () => {
     const user = userEvent.setup();
-    renderOpportunityEditForm();
+
+    renderOpportunityEditForm({
+      initialValues: {
+        ...initialValues,
+        award_ceiling: "",
+        estimated_total_program_funding: "",
+      },
+    });
 
     const input = screen.getByRole("textbox", {
       name: /labels\.awardMinimum/i,
     });
+
+    await user.clear(input);
     await user.type(input, overMaxLimit);
     await user.tab();
 
@@ -979,11 +982,19 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
 
   it("awardMaximum should show an error if the value is greater than the max allowed", async () => {
     const user = userEvent.setup();
-    renderOpportunityEditForm();
+
+    renderOpportunityEditForm({
+      initialValues: {
+        ...initialValues,
+        estimated_total_program_funding: "",
+      },
+    });
 
     const input = screen.getByRole("textbox", {
       name: /labels\.awardMaximum/i,
     });
+
+    await user.clear(input);
     await user.type(input, overMaxLimit);
     await user.tab();
 
@@ -994,11 +1005,20 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
 
   it("estimatedTotalProgramFunding should show an error if the value is greater than the max allowed", async () => {
     const user = userEvent.setup();
-    renderOpportunityEditForm();
+
+    renderOpportunityEditForm({
+      initialValues: {
+        ...initialValues,
+        award_floor: "",
+        award_ceiling: "",
+      },
+    });
 
     const input = screen.getByRole("textbox", {
       name: /labels\.estimatedTotalProgramFunding/i,
     });
+
+    await user.clear(input);
     await user.type(input, overMaxLimit);
     await user.tab();
 
@@ -1025,11 +1045,18 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
 
   it("awardMaximum should show an error if the value is less than 0", async () => {
     const user = userEvent.setup();
-    renderOpportunityEditForm();
+
+    renderOpportunityEditForm({
+      initialValues: {
+        ...initialValues,
+        award_floor: "",
+      },
+    });
 
     const input = screen.getByRole("textbox", {
       name: /labels\.awardMaximum/i,
     });
+
     await user.clear(input);
     await user.type(input, "-50000");
     await user.tab();
@@ -1041,11 +1068,19 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
 
   it("estimatedTotalProgramFunding should show an error if the value is less than 0", async () => {
     const user = userEvent.setup();
-    renderOpportunityEditForm();
+
+    renderOpportunityEditForm({
+      initialValues: {
+        ...initialValues,
+        award_floor: "",
+        award_ceiling: "",
+      },
+    });
 
     const input = screen.getByRole("textbox", {
       name: /labels\.estimatedTotalProgramFunding/i,
     });
+
     await user.clear(input);
     await user.type(input, "-1000");
     await user.tab();

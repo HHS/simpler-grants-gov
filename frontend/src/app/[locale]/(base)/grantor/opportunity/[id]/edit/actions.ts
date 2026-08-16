@@ -60,9 +60,16 @@ export async function saveOpportunityEditAction(
     getTranslations("genericValidationMessages"),
   ]);
 
-  const opportunityId = formData.get("opportunity_id")?.toString().trim() || "";
+  const opportunityIdValue = formData.get("opportunity_id");
+  const opportunitySummaryIdValue = formData.get("opportunity_summary_id");
+
+  const opportunityId =
+    typeof opportunityIdValue === "string" ? opportunityIdValue.trim() : "";
+
   const opportunitySummaryId =
-    formData.get("opportunity_summary_id")?.toString().trim() || "";
+    typeof opportunitySummaryIdValue === "string"
+      ? opportunitySummaryIdValue.trim()
+      : "";
 
   if (!opportunityId) {
     return {
@@ -111,6 +118,7 @@ export async function saveOpportunityEditAction(
         newOpportunitySummaryId: createResponse.data.opportunity_summary_id,
       };
     }
+
     const response = await updateOpportunitySummaryForGrantor({
       opportunityId,
       opportunitySummaryId,
@@ -157,7 +165,6 @@ export async function saveOpportunityEditAction(
     };
   }
 }
-
 export async function opportunityEditFormAction(
   prevState: OpportunityEditActionState,
   formData: FormData,

@@ -1,15 +1,38 @@
 import { z } from "zod";
 
+type ZodObjectSchema = z.ZodObject<Record<string, ZodSchema>>;
+
 type FormDataAdapters = Record<string, (formData: FormData) => unknown>;
 
-export function formDataToZodInput<T extends z.ZodRawShape>(
+export type ZodSchema = z.ZodType<unknown, z.ZodTypeDef, unknown>;
+
+export function getZodObjectSchema(
+  schema: z.ZodTypeAny,
+): ZodObjectSchema | null {
+  let current = schema as ZodSchema;
+
+  while (current instanceof z.ZodEffects) {
+    current = current.innerType() as ZodSchema;
+  }
+
+  return current instanceof z.ZodObject ? (current as ZodObjectSchema) : null;
+}
+
+export function formDataToZodInput(
   formData: FormData,
-  schema: z.ZodObject<T>,
+  schema: z.ZodTypeAny,
   adapters: FormDataAdapters = {},
 ) {
   const result: Record<string, unknown> = {};
+  const objectSchema = getZodObjectSchema(schema);
 
-  for (const [fieldName, fieldSchema] of Object.entries(schema.shape)) {
+  if (!objectSchema) {
+    throw new Error("Expected a Zod object schema");
+  }
+
+  const shape = objectSchema.shape;
+
+  for (const [fieldName, fieldSchema] of Object.entries(shape)) {
     const adapter = adapters[fieldName];
 
     if (adapter) {
@@ -26,13 +49,15 @@ export function formDataToZodInput<T extends z.ZodRawShape>(
 
 function normalizeValueForSchema(
   value: FormDataEntryValue | null,
-  schema: z.ZodTypeAny,
+  schema: ZodSchema,
 ): unknown {
-  const { schema: unwrappedSchema, nullable, optional } = unwrapSchema(schema);
+  const { schema: unwrappedSchema, nullable } = unwrapSchema(schema);
 
   if (value === null) {
-    if (nullable) return null;
-    if (optional) return undefined;
+    if (nullable) {
+      return null;
+    }
+
     return undefined;
   }
 
@@ -54,15 +79,20 @@ function normalizeValueForSchema(
   }
 
   if (unwrappedSchema instanceof z.ZodBoolean) {
-    if (value === "true") return true;
-    if (value === "false") return false;
+    if (value === "true") {
+      return true;
+    }
+
+    if (value === "false") {
+      return false;
+    }
   }
 
   return value;
 }
 
-export function unwrapSchema(schema: z.ZodTypeAny): {
-  schema: z.ZodTypeAny;
+export function unwrapSchema(schema: ZodSchema): {
+  schema: ZodSchema;
   nullable: boolean;
   optional: boolean;
 } {
@@ -73,13 +103,13 @@ export function unwrapSchema(schema: z.ZodTypeAny): {
   while (true) {
     if (current instanceof z.ZodNullable) {
       nullable = true;
-      current = current.unwrap();
+      current = current.unwrap() as ZodSchema;
       continue;
     }
 
     if (current instanceof z.ZodOptional) {
       optional = true;
-      current = current.unwrap();
+      current = current.unwrap() as ZodSchema;
       continue;
     }
 
@@ -93,9 +123,20 @@ export function unwrapSchema(schema: z.ZodTypeAny): {
   };
 }
 
-export function isFieldInSchema<T extends z.ZodRawShape>(
-  schema: z.ZodObject<T>,
+export function getFieldSchema(
+  schema: z.ZodTypeAny,
   field: string,
-): field is Extract<keyof T, string> {
-  return field in schema.shape;
+): ZodSchema | undefined {
+  const objectSchema = getZodObjectSchema(schema);
+
+  return objectSchema?.shape[field];
+}
+
+export function isFieldInSchema<TField extends string>(
+  schema: z.ZodTypeAny,
+  field: string,
+): field is TField {
+  const objectSchema = getZodObjectSchema(schema);
+
+  return !!objectSchema && field in objectSchema.shape;
 }

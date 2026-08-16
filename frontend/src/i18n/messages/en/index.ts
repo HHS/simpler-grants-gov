@@ -390,21 +390,44 @@ export const messages = {
       award_floor: {
         min_or_max_value:
           "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+
+        award_ceiling_numeric_order:
+          "Award minimum must be less than or equal to award maximum.",
+
+        estimated_total_program_funding_numeric_order:
+          "Award minimum must be less than or equal to estimated total program funding.",
       },
       award_ceiling: {
         min_or_max_value:
           "Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+
+        award_floor_numeric_order:
+          "Award maximum must be greater than or equal to award minimum.",
+
+        estimated_total_program_funding_numeric_order:
+          "Award maximum must be less than or equal to estimated total program funding.",
       },
       estimated_total_program_funding: {
         min_or_max_value:
           "Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+
+        award_floor_numeric_order:
+          "Estimated total program funding must be greater than or equal to award minimum.",
+
+        award_ceiling_numeric_order:
+          "Estimated total program funding must be greater than or equal to award maximum.",
       },
       post_date: {
         required: "Publish date is required.",
         invalid: "Enter a valid publish date.",
+        close_date_date_order:
+          "Publish date must be on or before the close date.",
       },
+
       close_date: {
         invalid: "Enter a valid close date.",
+        post_date_date_order:
+          "Close date must be on or after the publish date.",
       },
       title: "Enter a title.",
       awardSelectionMethod: "Select an award selection method.",

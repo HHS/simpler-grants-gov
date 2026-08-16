@@ -13005,11 +13005,11 @@ components:
           type: array
           minItems: 1
           description: Categories of funding for this opportunity
-          example: &id076
+          example: &id077
           - education
           - health
           items:
-            enum: &id077
+            enum: &id078
             - recovery_act
             - agriculture
             - arts
@@ -13038,7 +13038,7 @@ components:
             - other
             - energy_infrastructure_and_critical_mineral_and_materials
             - recreation_and_tourism
-            type: &id078
+            type: &id079
             - string
         funding_category_description:
           type:
@@ -13051,26 +13051,26 @@ components:
           type: array
           minItems: 1
           description: Types of funding instruments used for this opportunity
-          example: &id079
+          example: &id080
           - cooperative_agreement
           - grant
           items:
-            enum: &id080
+            enum: &id081
             - cooperative_agreement
             - grant
             - procurement_contract
             - other
-            type: &id081
+            type: &id082
             - string
         applicant_types:
           type: array
           minItems: 1
           description: Types of applicants eligible for this opportunity
-          example: &id082
+          example: &id083
           - state_governments
           - county_governments
           items:
-            enum: &id083
+            enum: &id084
             - state_governments
             - county_governments
             - city_or_township_governments
@@ -13088,7 +13088,7 @@ components:
             - small_businesses
             - other
             - unrestricted
-            type: &id084
+            type: &id085
             - string
         applicant_eligibility_description:
           type:
@@ -13137,6 +13137,49 @@ components:
       - is_forecast
       - post_date
       - summary_description
+      x-relational-validations:
+      - &id086
+        left_field: award_ceiling
+        operator: less_than_or_equal
+        right_field: estimated_total_program_funding
+        target_fields:
+        - award_ceiling
+        - estimated_total_program_funding
+        error_type: invalid
+        validation_type: numeric_order
+        message: Award maximum must be less than or equal to estimated total program
+          funding
+      - &id087
+        left_field: award_floor
+        operator: less_than_or_equal
+        right_field: estimated_total_program_funding
+        target_fields:
+        - award_floor
+        - estimated_total_program_funding
+        error_type: invalid
+        validation_type: numeric_order
+        message: Award minimum must be less than or equal to estimated total program
+          funding
+      - &id088
+        left_field: award_floor
+        operator: less_than_or_equal
+        right_field: award_ceiling
+        target_fields:
+        - award_floor
+        - award_ceiling
+        error_type: invalid
+        validation_type: numeric_order
+        message: Award floor must be less than or equal to award ceiling
+      - &id089
+        left_field: post_date
+        operator: less_than_or_equal
+        right_field: close_date
+        target_fields:
+        - post_date
+        - close_date
+        error_type: invalid
+        validation_type: date_order
+        message: Post date must be less than or equal to close date
     SavedOpportunityNotificationsSelfSchema:
       type: object
       properties:
@@ -13425,6 +13468,17 @@ components:
       - contact_info
       - open_to_applicants
       - opening_date
+      x-relational-validations:
+      - &id076
+        left_field: opening_date
+        operator: less_than_or_equal
+        right_field: closing_date
+        target_fields:
+        - opening_date
+        - closing_date
+        error_type: invalid
+        validation_type: date_order
+        message: Closing date must be on or after opening date
     OrganizationRemoveUserResponseSchema:
       type: object
       properties:
@@ -14849,6 +14903,8 @@ components:
       - contact_info
       - open_to_applicants
       - opening_date
+      x-relational-validations:
+      - *id076
     ApplicationAttachmentGetSchema:
       type: object
       properties:
@@ -15082,10 +15138,10 @@ components:
           type: array
           minItems: 1
           description: Categories of funding for this opportunity
-          example: *id076
+          example: *id077
           items:
-            enum: *id077
-            type: *id078
+            enum: *id078
+            type: *id079
         funding_category_description:
           type:
           - string
@@ -15097,18 +15153,18 @@ components:
           type: array
           minItems: 1
           description: Types of funding instruments used for this opportunity
-          example: *id079
+          example: *id080
           items:
-            enum: *id080
-            type: *id081
+            enum: *id081
+            type: *id082
         applicant_types:
           type: array
           minItems: 1
           description: Types of applicants eligible for this opportunity
-          example: *id082
+          example: *id083
           items:
-            enum: *id083
-            type: *id084
+            enum: *id084
+            type: *id085
         applicant_eligibility_description:
           type:
           - string
@@ -15151,6 +15207,11 @@ components:
       - is_cost_sharing
       - post_date
       - summary_description
+      x-relational-validations:
+      - *id086
+      - *id087
+      - *id088
+      - *id089
     DeleteAttachmentResponseV1Schema:
       type: object
       properties:
@@ -15265,10 +15326,6 @@ components:
       - message
       - status_code
   securitySchemes:
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
     ApiJwtAuth:
       type: apiKey
       in: header
@@ -15277,4 +15334,8 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
 

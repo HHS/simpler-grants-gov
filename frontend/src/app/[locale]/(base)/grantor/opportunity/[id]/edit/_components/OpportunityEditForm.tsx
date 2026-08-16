@@ -13,11 +13,11 @@ import {
 } from "src/constants/opportunity";
 import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchemas.zod";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
+import { normalizeDateString } from "src/utils/dateUtil";
 import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
 import { getOpportunitySummaryValidationData } from "src/utils/validation/opportunitySummaryValidation";
-import { normalizeDateString } from "src/utils/dateUtil";
-import { getZodValidationErrors } from "src/utils/validation/zodValidation";
 import { isFieldInSchema } from "src/utils/validation/zodFormData";
+import { getZodValidationErrors } from "src/utils/validation/zodValidation";
 
 import { useTranslations } from "next-intl";
 import {
@@ -165,13 +165,16 @@ export default function OpportunityEditForm({
     validateFieldFromForm(field, formRef.current);
   };
 
-  const validateFieldFromForm = (
-    field: keyof OpportunityEditValidationErrors,
-    form: HTMLFormElement,
-  ) => {
+  const validateFieldFromForm = (field: string, form: HTMLFormElement) => {
     const formData = new FormData(form);
 
-    setSingleFrontendError(field, null);
+    if (!isFieldInSchema(OpportunitySummaryCreateRequestV1Schema, field)) {
+      return;
+    }
+
+    const validationField = field as keyof OpportunityEditValidationErrors;
+
+    setSingleFrontendError(validationField, null);
 
     const validationData = getOpportunitySummaryValidationData(formData, {
       post_date: normalizeDateString(postDate) ?? "",
@@ -196,7 +199,7 @@ export default function OpportunityEditForm({
 
     setFrontendErrors((currentValues) => ({
       ...currentValues,
-      [field]: validationErrors[field] ?? [],
+      [validationField]: validationErrors[field] ?? [],
     }));
   };
 
@@ -213,10 +216,7 @@ export default function OpportunityEditForm({
 
     const field = target.name;
 
-    if (
-      !field ||
-      !isFieldInSchema(OpportunitySummaryCreateRequestV1Schema, field)
-    ) {
+    if (!field) {
       return;
     }
 
