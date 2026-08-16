@@ -20,11 +20,29 @@ jest.mock(
 );
 
 jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: () => {
+    const t = Object.assign(
+      (key: string) => key,
+      {
+        has: () => true,
+      },
+    );
+
+    return t;
+  },
 }));
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: () => (key: string) => key,
+  getTranslations: () => {
+    const t = Object.assign(
+      (key: string) => key,
+      {
+        has: () => true,
+      },
+    );
+
+    return t;
+  },
 }));
 
 jest.mock("src/services/auth/session", () => ({
@@ -955,7 +973,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText("validationErrors.awardMinCurrencyInput"),
+      screen.getByText("award_floor.min_or_max_value"),
     ).toBeInTheDocument();
   });
 
@@ -970,7 +988,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText("validationErrors.awardMaxCurrencyInput"),
+      screen.getByText("award_ceiling.min_or_max_value"),
     ).toBeInTheDocument();
   });
 
@@ -985,7 +1003,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText("validationErrors.totalFundingCurrencyInput"),
+      screen.getByText("estimated_total_program_funding.min_or_max_value"),
     ).toBeInTheDocument();
   });
 
@@ -1001,7 +1019,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText("validationErrors.awardMinCurrencyInput"),
+      screen.getByText("award_floor.min_or_max_value"),
     ).toBeInTheDocument();
   });
 
@@ -1017,7 +1035,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText("validationErrors.awardMaxCurrencyInput"),
+      screen.getByText("award_ceiling.min_or_max_value"),
     ).toBeInTheDocument();
   });
 
@@ -1033,7 +1051,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText("validationErrors.totalFundingCurrencyInput"),
+      screen.getByText("estimated_total_program_funding.min_or_max_value"),
     ).toBeInTheDocument();
   });
 });

@@ -15,11 +15,9 @@ import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchema
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
 import { getOpportunitySummaryValidationData } from "src/utils/validation/opportunitySummaryValidation";
-import {
-  getZodValidationErrors,
-  isFieldInSchema,
-  normalizeDateValue,
-} from "src/utils/validation/zodValidation";
+import { normalizeDateString } from "src/utils/dateUtil";
+import { getZodValidationErrors } from "src/utils/validation/zodValidation";
+import { isFieldInSchema } from "src/utils/validation/zodFormData";
 
 import { useTranslations } from "next-intl";
 import {
@@ -176,8 +174,8 @@ export default function OpportunityEditForm({
     setSingleFrontendError(field, null);
 
     const validationData = getOpportunitySummaryValidationData(formData, {
-      post_date: normalizeDateValue(postDate) ?? "",
-      close_date: normalizeDateValue(closeDate) || null,
+      post_date: normalizeDateString(postDate) ?? "",
+      close_date: normalizeDateString(closeDate) || null,
     });
 
     const result =
@@ -270,8 +268,8 @@ export default function OpportunityEditForm({
       onSubmit={(e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        formData.set("post_date", normalizeDateValue(postDate) ?? "");
-        formData.set("close_date", normalizeDateValue(closeDate) || "");
+        formData.set("post_date", normalizeDateString(postDate) ?? "");
+        formData.set("close_date", normalizeDateString(closeDate) || "");
         formData.set("submitType", "saveAndExit");
         startTransition(() => formAction(formData));
       }}
@@ -885,8 +883,8 @@ export default function OpportunityEditForm({
             onClick={() => {
               if (!formRef.current) return;
               const formData = new FormData(formRef.current);
-              formData.set("post_date", normalizeDateValue(postDate) ?? "");
-              formData.set("close_date", normalizeDateValue(closeDate) || "");
+              formData.set("post_date", normalizeDateString(postDate) ?? "");
+              formData.set("close_date", normalizeDateString(closeDate) || "");
               formData.set("submitType", "saveAndGoBack");
               startTransition(() => formAction(formData));
             }}
@@ -900,8 +898,8 @@ export default function OpportunityEditForm({
           onClick={() => {
             if (!formRef.current) return;
             const formData = new FormData(formRef.current);
-            formData.set("post_date", normalizeDateValue(postDate) ?? "");
-            formData.set("close_date", normalizeDateValue(closeDate) || "");
+            formData.set("post_date", normalizeDateString(postDate) ?? "");
+            formData.set("close_date", normalizeDateString(closeDate) || "");
             formData.set("submitType", "saveAndContinue");
             startTransition(() => formAction(formData));
           }}

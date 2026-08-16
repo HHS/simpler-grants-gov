@@ -11,8 +11,15 @@ import {
   type OpportunityEditActionState,
 } from "./actions";
 
+const mockTranslator = Object.assign(
+  (key: string) => key,
+  {
+    has: () => true,
+  },
+);
+
 jest.mock("next-intl/server", () => ({
-  getTranslations: () => identity,
+  getTranslations: () => mockTranslator,
 }));
 
 jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
@@ -83,8 +90,9 @@ const successfulSummaryUpdateResponse: Awaited<
 function buildValidFormData() {
   const formData = new FormData();
   formData.set("opportunity_id", "opp-123");
+  formData.set("is_forecast", "false");
   formData.set("opportunity_title", "Example opportunity");
-  formData.set("caetgory", "discretionary");
+  formData.set("category", "discretionary");
   formData.set("summary_description", "Summary text");
   formData.set("post_date", "2026-03-11");
   formData.set("close_date", "2026-04-11");
@@ -117,10 +125,10 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      post_date: ["publishDate"],
+      post_date: ["post_date.required"],
       funding_instruments: ["fundingType"],
       funding_categories: ["fundingCategory"],
-      applicant_types: ["eligibleApplicants"],
+      applicant_types: ["applicant_types.min_or_max_value"],
     });
   });
 
@@ -131,7 +139,7 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      agency_email_address: ["contactEmailInvalid"],
+      agency_email_address: ["agency_email_address.invalid"],
     });
   });
 
@@ -518,10 +526,10 @@ describe("opportunityEditFormAction", () => {
     const result = await opportunityEditFormAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      post_date: ["publishDate"],
-      funding_instruments: ["fundingType"],
-      funding_categories: ["fundingCategory"],
-      applicant_types: ["eligibleApplicants"],
+      post_date: ["post_date.required"],
+      funding_instruments: ["funding_instruments.min_or_max_value"],
+      funding_categories: ["funding_categories.min_or_max_value"],
+      applicant_types: ["applicant_types.min_or_max_value"],
     });
     expect(mockUpdateOpportunitySummaryForGrantor).not.toHaveBeenCalled();
   });
@@ -663,7 +671,7 @@ describe("opportunityEditFormAction", () => {
     expect(mockUpdateOpportunitySummaryForGrantor).not.toHaveBeenCalledTimes(1);
     expect(mockRedirect).not.toHaveBeenCalledWith("../competition");
     expect(result.validationErrors).toEqual({
-      agency_email_address: ["contactEmailInvalid"],
+      agency_email_address: ["agency_email_address.invalid"],
     });
   });
 });

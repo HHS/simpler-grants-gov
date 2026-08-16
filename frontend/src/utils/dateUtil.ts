@@ -25,6 +25,17 @@ export function formatDate(dateStr: string | null): string {
   return dayjs(dateStr).format("LL");
 }
 
+// Normalize valid "MM/DD/YYYY" or "YYYY-MM-DD" dates to "YYYY-MM-DD", preserving invalid values
+export function normalizeDateString(value: string | null): string | null {
+  if (!value) {
+    return value;
+  }
+
+  const parsed = dayjs(value, ["MM/DD/YYYY", "YYYY-MM-DD"], true);
+
+  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : value;
+}
+
 // "2025-01-15 22:22:22" -> "Jan 15, 2025 10:22 PM"
 export function formatDateTime(dateStr: string | null): string {
   if (!dateStr || !dayjs(dateStr).isValid()) {
