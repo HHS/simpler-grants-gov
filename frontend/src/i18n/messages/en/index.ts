@@ -377,26 +377,34 @@ export const messages = {
       },
     },
     validationErrors: {
+      funding_instruments: {
+        min_or_max_value: "Select at least one funding instrument.",
+      },
+      funding_categories: {
+        min_or_max_value: "Select at least one funding category.",
+      },
+      expected_number_of_awards: {
+        min_or_max_value:
+          "Expected number of awards must be greater than or equal to zero and less than 1,000,000,000.",
+      },
       award_floor: {
         min_or_max_value:
-          "🤩Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+          "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       },
       award_ceiling: {
         min_or_max_value:
-          "🤩Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+          "Award maximum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       },
       estimated_total_program_funding: {
         min_or_max_value:
-          "🤩Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
+          "Estimated total program funding must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       },
       post_date: {
-        not_null: "👺Publish date is required.",
-        invalid: "🤮Enter a valid publish date.",
+        required: "Publish date is required.",
+        invalid: "Enter a valid publish date.",
       },
-      generic: {
-        min_or_max_value: "Enter a value within the allowed range.",
-        not_null: "🤩This field is required.",
-        invalid: "🤮Enter a valid value.",
+      close_date: {
+        invalid: "Enter a valid close date.",
       },
       title: "Enter a title.",
       awardSelectionMethod: "Select an award selection method.",
@@ -997,6 +1005,11 @@ export const messages = {
       "Sign in or user authorization failed. Please try again.",
     signInCTA: "Sign in first in order to view this page",
     unauthorizedExplanation: "This content is not available",
+  },
+  genericValidationMessages: {
+    min_or_max_value: "Enter a value within the allowed range.",
+    required: "This field is required.",
+    invalid: "Enter a valid value.",
   },
   Search: {
     title: "Search | Simpler.Grants.gov",

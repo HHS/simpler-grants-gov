@@ -15,7 +15,7 @@ import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchema
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
 import { getOpportunitySummaryValidationData } from "src/utils/validation/opportunitySummaryValidation";
-import { getValidationTypeFromZodIssue } from "src/utils/validation/zodValidation";
+import { isFieldInSchema, normalizeDateValue, getZodValidationErrors  } from "src/utils/validation/zodValidation";
 
 import { useTranslations } from "next-intl";
 import {
@@ -101,35 +101,6 @@ type OpportunityEditFormProps = {
   initialAttachments?: OpportunityAttachment[];
 };
 
-const EDIT_FORM_FIELD_NAMES = new Set<keyof OpportunityEditValidationErrors>([
-  "opportunity_title",
-  "category",
-  "summary_description",
-  "post_date",
-  "close_date",
-  "agency_email_address",
-  "agency_email_address_description",
-  "award_floor",
-  "award_ceiling",
-  "funding_instruments",
-  "funding_categories",
-  "expected_number_of_awards",
-  "estimated_total_program_funding",
-  "applicant_types",
-  "applicant_eligibility_description",
-  "additional_info_url",
-  "additional_info_url_description",
-  "agency_contact_description",
-]);
-
-function isOpportunityEditField(
-  field: string,
-): field is keyof OpportunityEditValidationErrors {
-  return EDIT_FORM_FIELD_NAMES.has(
-    field as keyof OpportunityEditValidationErrors,
-  );
-}
-
 export default function OpportunityEditForm({
   opportunityId,
   opportunitySummaryId,
@@ -138,6 +109,8 @@ export default function OpportunityEditForm({
   initialAttachments = [],
 }: OpportunityEditFormProps) {
   const t = useTranslations("OpportunityEdit");
+  const validationTranslations = useTranslations("OpportunityEdit.validationErrors");
+  const genericTranslations = useTranslations("genericValidationMessages");
   const formRef = useRef<HTMLFormElement>(null);
   const [currentSummaryId, setCurrentSummaryId] =
     useState(opportunitySummaryId);
@@ -148,6 +121,7 @@ export default function OpportunityEditForm({
     initialValues.funding_categories,
   );
   const [closeDate, setCloseDate] = useState(initialValues.close_date);
+  const [postDate, setPostDate] = useState(initialValues.post_date);
   const [selectedEligibility, setSelectedEligibility] = useState<string[]>(
     initialValues.applicant_types,
   );
@@ -158,7 +132,7 @@ export default function OpportunityEditForm({
   const validationErrors: OpportunityEditValidationErrors | undefined =
     formState.validationErrors;
 
-  //--- Validations for Award Minimum, Award Maximum and Total Program Funding ---
+  // Client-side validation errors shown as fields are blurred.
   const [frontendErrors, setFrontendErrors] =
     useState<OpportunityEditValidationErrors>({});
 
@@ -195,49 +169,52 @@ export default function OpportunityEditForm({
 
     setSingleFrontendError(field, null);
 
-    const result = OpportunitySummaryCreateRequestV1Schema.safeParse(
-      getOpportunitySummaryValidationData(formData),
-    );
+    const validationData = getOpportunitySummaryValidationData(formData, {
+      post_date: normalizeDateValue(postDate) ?? "",
+      close_date: normalizeDateValue(closeDate) || null,
+    });
+
+    const result =
+      OpportunitySummaryCreateRequestV1Schema.safeParse(validationData);
 
     if (result.success) {
       return;
     }
 
-    const fieldIssues = result.error.issues.filter(
-      (issue) => issue.path[0]?.toString() === field,
+    const validationErrors = getZodValidationErrors(
+      result.error,
+      validationData,
+      OpportunitySummaryCreateRequestV1Schema,
+      validationTranslations,
+      genericTranslations,
+      field,
     );
 
-    for (const issue of fieldIssues) {
-      const validationType = getValidationTypeFromZodIssue(issue);
-      if (!validationType) continue;
-
-      const fieldKey = `validationErrors.${field}.${validationType}`;
-      const genericKey = `validationErrors.generic.${validationType}`;
-
-      const message = t.has(fieldKey)
-        ? t(fieldKey)
-        : t.has(genericKey)
-          ? t(genericKey)
-          : issue.message;
-
-      setSingleFrontendError(field, message);
-    }
+    setFrontendErrors((currentValues) => ({
+      ...currentValues,
+      [field]: validationErrors[field] ?? [],
+    }));
   };
 
   const handleFieldBlur = (event: React.FocusEvent<HTMLFormElement>) => {
     const target = event.target;
 
-    if (!(
-      target instanceof HTMLInputElement ||
-      target instanceof HTMLSelectElement ||
-      target instanceof HTMLTextAreaElement
-    )) {
+    if (
+      !(
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLSelectElement ||
+        target instanceof HTMLTextAreaElement
+      )
+    ) {
       return;
     }
 
     const field = target.name;
 
-    if (!field || !isOpportunityEditField(field)) {
+    if (
+      !field ||
+      !isFieldInSchema(OpportunitySummaryCreateRequestV1Schema, field)
+    ) {
       return;
     }
 
@@ -255,11 +232,11 @@ export default function OpportunityEditForm({
   function getFieldError(
     fieldName: keyof OpportunityEditValidationErrors,
   ): string | undefined {
-    let fieldErrors = validationErrors?.[fieldName];
-    if (!fieldErrors) {
-      fieldErrors = frontendErrors?.[fieldName];
+    if (fieldName in frontendErrors) {
+      return frontendErrors[fieldName]?.join(" ");
     }
-    return fieldErrors?.join(" ");
+
+    return validationErrors?.[fieldName]?.join(" ");
   }
 
   useEffect(() => {
@@ -289,6 +266,8 @@ export default function OpportunityEditForm({
       onSubmit={(e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
+        formData.set("post_date", normalizeDateValue(postDate) ?? "");
+        formData.set("close_date", normalizeDateValue(closeDate) || "",);
         formData.set("submitType", "saveAndExit");
         startTransition(() => formAction(formData));
       }}
@@ -588,6 +567,7 @@ export default function OpportunityEditForm({
                   name="post_date"
                   defaultValue={initialValues.post_date}
                   placeholder="mm/dd/yyyy"
+                  onChange={(value) => setPostDate(value ?? "")}
                   className="width-full"
                   onBlur={() => handleDatePickerBlur("post_date")}
                 />
@@ -901,6 +881,8 @@ export default function OpportunityEditForm({
             onClick={() => {
               if (!formRef.current) return;
               const formData = new FormData(formRef.current);
+              formData.set("post_date", normalizeDateValue(postDate) ?? "");
+              formData.set("close_date", normalizeDateValue(closeDate) || "",);
               formData.set("submitType", "saveAndGoBack");
               startTransition(() => formAction(formData));
             }}
@@ -914,6 +896,8 @@ export default function OpportunityEditForm({
           onClick={() => {
             if (!formRef.current) return;
             const formData = new FormData(formRef.current);
+            formData.set("post_date", normalizeDateValue(postDate) ?? "");
+            formData.set("close_date", normalizeDateValue(closeDate) || "",);
             formData.set("submitType", "saveAndContinue");
             startTransition(() => formAction(formData));
           }}
