@@ -17,10 +17,7 @@ from src.services.opportunities_grantor_v1.get_opportunity import get_opportunit
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
 )
-from src.services.opportunity_attachments.attachment_util import (
-    adjust_legacy_file_name,
-    get_s3_attachment_path,
-)
+from src.services.opportunity_attachments.attachment_util import get_s3_attachment_path
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +40,15 @@ def create_opportunity_attachment_from_pending_file(
     pending_file = fetch_and_validate_scan_complete_file(db_session, pending_file_id, user)
 
     attachment_id = uuid.uuid4()
-    file_name = adjust_legacy_file_name(pending_file.file_name)
+    # pending_file.file_location already ends in a secure_filename-sanitized
+    # name (applied once at presign time) - reuse it instead of re-sanitizing
+    # pending_file.file_name from scratch. The raw name is kept for the DB
+    # record's display file_name below.
+    secure_file_name = file_util.get_file_name(pending_file.file_location)
 
     s3_config = S3Config()
     s3_file_location = get_s3_attachment_path(
-        file_name=file_name,
+        file_name=secure_file_name,
         opportunity_attachment_id=attachment_id,
         opportunity=opportunity,
         s3_config=s3_config,
@@ -59,7 +60,7 @@ def create_opportunity_attachment_from_pending_file(
         opportunity_id=opportunity_id,
         file_location=s3_file_location,
         mime_type=pending_file.mime_type,
-        file_name=file_name,
+        file_name=pending_file.file_name,
         file_description="",
         file_size_bytes=file_size_bytes,
         legacy_attachment_id=None,
