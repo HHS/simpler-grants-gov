@@ -96,7 +96,7 @@ export const buildSF424ShortHappyPathTestData = (
  * registered in load-opportunity-config.ts before this fixture can run.
  */
 export const SF424_SHORT_OPPORTUNITY_DATA: PrintViewFormData = {
-  opportunityId: "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+  opportunityId: "425c2ffe-6fbd-4852-ab72-b64467fe3df0",
   opportunityNumber: "E2E-SF424SHORT-ORG-IND-01",
   formKey: "sf424short",
   expectedPrepopulatedFields: {
