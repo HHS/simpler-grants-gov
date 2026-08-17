@@ -127,9 +127,11 @@ class TestCheckXsdDriftTask(BaseTestClass):
 
         mock_post.assert_called_once()
         _, kwargs = mock_post.call_args
-        slack_message = kwargs["json"]["text"]
-        assert "Global-V1.0.xsd" in slack_message
-        assert "SF424A-V1.0.xsd" in slack_message
+        payload = kwargs["json"]
+        blocks = payload["attachments"][0]["blocks"]
+        schema_section_text = blocks[1]["text"]["text"]
+        assert "Global-V1.0.xsd" in schema_section_text
+        assert "SF424A-V1.0.xsd" in schema_section_text
 
         assert task.metrics[CheckXsdDriftTask.Metrics.XSDS_DRIFTED] == 2
         assert task.increment.call_count == 1
@@ -193,31 +195,44 @@ class TestCheckXsdDriftTask(BaseTestClass):
             task.run_task()
 
     def test_format_slack_message_contains_schema_names(self, task):
-        """Slack message formatting includes all schema names and proper formatting."""
+        """Slack message formatting includes all schema names and proper structure."""
         schemas = ["Global-V1.0.xsd", "SF424A-V1.0.xsd", "NACI-V1.0.xsd"]
-        message = task._format_slack_message(schemas)
+        payload = task._format_slack_message(schemas, schemas_checked=24, fetch_errors=0)
 
-        # Verify message contains all schemas
-        assert "Global-V1.0.xsd" in message
-        assert "SF424A-V1.0.xsd" in message
-        assert "NACI-V1.0.xsd" in message
+        blocks = payload["attachments"][0]["blocks"]
 
-        # Verify message has proper structure
-        assert ":warning:" in message
-        assert "*XSD schema drift detected*" in message
-        assert "grants.gov" in message
-        assert "XML validation" in message
+        header_block = blocks[0]
+        assert header_block["type"] == "header"
+        assert "XSD schema drift detected" in header_block["text"]["text"]
+
+        schema_section_text = blocks[1]["text"]["text"]
+        assert "Global-V1.0.xsd" in schema_section_text
+        assert "SF424A-V1.0.xsd" in schema_section_text
+        assert "NACI-V1.0.xsd" in schema_section_text
+        assert "grants.gov" in schema_section_text
+        assert "XML validation" in schema_section_text
+
+        fields_block = blocks[2]
+        field_texts = [f["text"] for f in fields_block["fields"]]
+        assert any("*Schemas checked:*\n24" in t for t in field_texts)
+        assert any("*Schemas drifted:*\n3" in t for t in field_texts)
+        assert any("*Fetch errors:*\n0" in t for t in field_texts)
+
+        actions_block = blocks[3]
+        assert actions_block["elements"][0]["url"] == task.config.github_xsds_folder_url
+
+        context_block = blocks[4]
+        assert context_block["elements"][0]["text"] == "Weekly XSD Drift Check"
 
     def test_format_slack_message_sorted_alphabetically(self, task):
         """Slack message lists schemas in alphabetical order."""
         schemas = ["SF424A-V1.0.xsd", "Global-V1.0.xsd", "NACI-V1.0.xsd"]
-        message = task._format_slack_message(schemas)
+        payload = task._format_slack_message(schemas, schemas_checked=24, fetch_errors=0)
 
-        # Extract the list part of the message (after the last \n before the list)
-        lines = message.split("\n")
-        schema_lines = [line for line in lines if line.startswith("- `")]
+        schema_section_text = payload["attachments"][0]["blocks"][1]["text"]["text"]
+        lines = [line for line in schema_section_text.split("\n") if line.startswith("\u2022")]
 
         # Verify they're sorted
-        assert "`Global-V1.0.xsd`" in schema_lines[0]
-        assert "`NACI-V1.0.xsd`" in schema_lines[1]
-        assert "`SF424A-V1.0.xsd`" in schema_lines[2]
+        assert "Global-V1.0.xsd" in lines[0]
+        assert "NACI-V1.0.xsd" in lines[1]
+        assert "SF424A-V1.0.xsd" in lines[2]

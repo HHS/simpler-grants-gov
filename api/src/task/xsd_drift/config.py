@@ -21,6 +21,11 @@ class XsdDriftConfig(PydanticBaseEnvConfig):
     # Base URL grants.gov XSDs are served from - reused by XSDFetcher
     grants_gov_schema_base_url: str = "https://apply07.grants.gov/apply/system/schemas"
 
+    # Link included on the Slack alert button, pointing at the committed XSDs folder
+    github_xsds_folder_url: str = (
+        "https://github.com/HHS/simpler-grants-gov/tree/main/api/src/services/xml_generation/xsds"
+    )
+
     # Cached webhook URL to avoid repeated AWS API calls
     _cached_webhook_url: str | None = None
 

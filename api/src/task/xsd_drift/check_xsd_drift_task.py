@@ -12,6 +12,7 @@ import logging
 import tempfile
 from enum import StrEnum
 from pathlib import Path
+from typing import Any
 
 import requests
 from grants_shared.adapters import db
@@ -29,6 +30,10 @@ logger = logging.getLogger(__name__)
 # Directory containing the XSDs committed to the repo (source of truth
 # used for XML validation elsewhere in the codebase).
 COMMITTED_XSD_DIR = Path(__file__).parent.parent.parent / "services" / "xml_generation" / "xsds"
+
+# Slack attachment sidebar color for the drift alert (matches the existing
+# Security Hub alert styling on the shared webhook).
+SLACK_ALERT_COLOR = "#E01E5A"
 
 
 @task_blueprint.cli.command(
@@ -69,7 +74,8 @@ class CheckXsdDriftTask(Task):
             fetcher = XSDFetcher(tmp_dir)
 
             committed_files = sorted(self.committed_xsd_dir.glob("*.xsd"))
-            self.set_metrics({self.Metrics.XSDS_CHECKED: len(committed_files)})
+            schemas_checked = len(committed_files)
+            self.set_metrics({self.Metrics.XSDS_CHECKED: schemas_checked})
 
             for committed_path in committed_files:
                 filename = committed_path.name
@@ -107,7 +113,11 @@ class CheckXsdDriftTask(Task):
         )
 
         if drifted_schemas:
-            self._send_slack_alert(drifted_schemas)
+            self._send_slack_alert(
+                drifted_schemas,
+                schemas_checked=schemas_checked,
+                fetch_errors=len(fetch_errors),
+            )
             self.increment(self.Metrics.SLACK_ALERT_SENT)
         else:
             logger.info("No XSD drift detected this week")
@@ -129,43 +139,115 @@ class CheckXsdDriftTask(Task):
                 sha256_hash.update(chunk)
         return sha256_hash.hexdigest()
 
-    def _format_slack_message(self, drifted_schemas: list[str]) -> str:
-        """Format the XSD drift alert message for Slack.
+    def _format_slack_message(
+        self, drifted_schemas: list[str], schemas_checked: int, fetch_errors: int
+    ) -> dict[str, Any]:
+        """Format the XSD drift alert message as a Slack Block Kit payload.
 
         Args:
             drifted_schemas: List of schema filenames that have drifted
+            schemas_checked: Total number of committed schemas checked
+            fetch_errors: Number of schemas that failed to fetch
 
         Returns:
-            Formatted Slack message text
+            Slack message payload (``text`` fallback plus rich ``attachments``)
         """
-        schema_list = "\n".join(f"- `{name}`" for name in sorted(drifted_schemas))
-        return (
-            ":warning: *XSD schema drift detected*\n"
-            "The following schemas differ from the live copies on grants.gov "
-            "and need to be refreshed in the repo, followed by a re-run of "
-            "XML validation:\n"
-            f"{schema_list}"
+        schema_links = "\n".join(
+            f"\u2022 <{self.config.grants_gov_schema_base_url}/{name}|{name}>"
+            for name in sorted(drifted_schemas)
         )
 
-    def _send_slack_alert(self, drifted_schemas: list[str]) -> None:
+        return {
+            "text": "XSD schema drift detected",
+            "attachments": [
+                {
+                    "color": SLACK_ALERT_COLOR,
+                    "blocks": [
+                        {
+                            "type": "header",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "\u2757 XSD schema drift detected",
+                                "emoji": True,
+                            },
+                        },
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": (
+                                    "The following schemas differ from the live copies "
+                                    "on grants.gov and need to be refreshed in the repo, "
+                                    "followed by a re-run of XML validation:\n"
+                                    f"{schema_links}"
+                                ),
+                            },
+                        },
+                        {
+                            "type": "section",
+                            "fields": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Schemas checked:*\n{schemas_checked}",
+                                },
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Schemas drifted:*\n{len(drifted_schemas)}",
+                                },
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Fetch errors:*\n{fetch_errors}",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "actions",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "View xsds folder on GitHub",
+                                    },
+                                    "url": self.config.github_xsds_folder_url,
+                                }
+                            ],
+                        },
+                        {
+                            "type": "context",
+                            "elements": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": "Weekly XSD Drift Check",
+                                }
+                            ],
+                        },
+                    ],
+                }
+            ],
+        }
+
+    def _send_slack_alert(
+        self, drifted_schemas: list[str], schemas_checked: int, fetch_errors: int
+    ) -> None:
         """Send alert to Slack about detected XSD drift.
 
         Args:
             drifted_schemas: List of schema filenames that have drifted
+            schemas_checked: Total number of committed schemas checked
+            fetch_errors: Number of schemas that failed to fetch
 
         Raises:
             requests.RequestException: If Slack API call fails
         """
-        message = self._format_slack_message(drifted_schemas)
+        payload = self._format_slack_message(drifted_schemas, schemas_checked, fetch_errors)
 
         try:
             logger.info(
                 "Posting XSD drift alert to Slack",
                 extra={"schemas_count": len(drifted_schemas)},
             )
-            response = requests.post(
-                self.config.slack_webhook_url, json={"text": message}, timeout=10
-            )
+            response = requests.post(self.config.slack_webhook_url, json=payload, timeout=10)
             response.raise_for_status()
         except requests.RequestException as e:
             logger.exception(
