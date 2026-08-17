@@ -48,6 +48,7 @@ const { testOrgLabel } = playwrightEnv;
 // Only the opportunity number is declared here.
 // All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
 const OPPORTUNITY_NUMBER = "E2E-SF424SHORT-ORG-IND-01";
+
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
@@ -62,14 +63,11 @@ test(
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,
   ) => {
-    test.setTimeout(300_000); // 5-min timeout
-
-    const isMobile = testInfo.project.name.match(/[Mm]obile/);
-    const baseSuffix = Date.now();
-
     // --- Login ---
     // Given the user is logged in
-    await authenticateE2eUser(page, context, !!isMobile);
+    const viewportSize = page.viewportSize();
+    const isMobile = viewportSize ? viewportSize.width < 1024 : false;
+    await authenticateE2eUser(page, context, isMobile);
 
     // --- Navigate to Opportunity page and start a new application ---
     // And the user launches the URL for an opportunity with an open SF-424 Short competition
@@ -85,6 +83,7 @@ test(
     // For each form on this opportunity: fill it, verify status, then capture the
     // form URL *before* verifyFormStatusOnApplication navigates away to the app page.
     const filledForms: FilledFormEntry[] = [];
+    const baseSuffix = Date.now();
 
     for (const [index, form] of opportunityConfig.forms.entries()) {
       const testData = buildHappyPathTestData(form, baseSuffix + index);

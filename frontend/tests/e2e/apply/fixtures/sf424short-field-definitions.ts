@@ -122,8 +122,8 @@ export const fieldDefinitionsSF424Short: FormFillFieldDefinitions = {
     field: "Project Title",
   },
   project_description: {
-    testId: "project_description",
-    type: "text",
+    selector: "#project_description",
+    type: "textarea",
     maxLength: 1000, // FORM_JSON_SCHEMA.properties.project_description
     section: "Section 6",
     field: "Project Description",
