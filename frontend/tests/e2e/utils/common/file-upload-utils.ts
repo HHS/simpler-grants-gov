@@ -71,7 +71,10 @@ type FileInputTarget = string | FillFieldDefinition;
  * When a field definition is provided, selector lookup takes precedence
  * over testId lookup.
  */
-export function resolveFileInputLocator(page: Page, target: FileInputTarget): Locator {
+export function resolveFileInputLocator(
+  page: Page,
+  target: FileInputTarget,
+): Locator {
   if (typeof target === "string") {
     return page.getByTestId(target).first();
   }
