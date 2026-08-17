@@ -92,12 +92,15 @@ export const useFileUpload = ({
           let payloadJson: FileUploadStatusUpdate;
           const payloadString = new TextDecoder().decode(value);
           const payloadJsonStrings = unbatchStreamChunkJSON(payloadString);
+          console.log("[useFileUpload] payloadString:", payloadString);
+          console.log("[useFileUpload] payloadJsonStrings:", payloadJsonStrings);
           // process each json chunk, since it's possible that chunks were batched
           // it may not be doing anything from the UI perspective to process anything except the final
           // batched update, but leaving this just in case we need to process a file id from a batched update
           payloadJsonStrings.forEach((payloadString: string) => {
             try {
               payloadJson = JSON.parse(payloadString) as FileUploadStatusUpdate;
+              console.log("[useFileUpload] parsed payloadJson:", payloadJson);
             } catch (e) {
               console.error(
                 "Error parsing json from file upload stream payload",
@@ -113,9 +116,11 @@ export const useFileUpload = ({
               }
               error = new Error(payloadJson.error);
             } else if (payloadJson?.status) {
+              console.log("[useFileUpload] setting status", payloadJson.status);
               setCurrentStatus(payloadJson.status as FileUploadProcessStatus);
               if (payloadJson.pendingFileId) {
                 newFileId = payloadJson.pendingFileId;
+                console.log("[useFileUpload] got pendingFileId", newFileId);
               }
             }
           });
@@ -187,6 +192,7 @@ export const useFileUpload = ({
               "upload stream completed without sending pending file id, possible due to upload cancellation",
             );
           }
+          console.log("[useFileUpload] initiating postUploadAction for pendingFileId", pendingFileId);
           const postUploadAbortController = new AbortController();
           setCurrentStatus("post-upload");
           setPostUploadController(postUploadAbortController);

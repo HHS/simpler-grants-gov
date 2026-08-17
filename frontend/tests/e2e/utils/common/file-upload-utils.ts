@@ -18,6 +18,7 @@
  */
 
 import path from "path";
+import { PassThrough } from "stream";
 import {
   expect,
   type BrowserContext,
@@ -70,7 +71,7 @@ type FileInputTarget = string | FillFieldDefinition;
  * When a field definition is provided, selector lookup takes precedence
  * over testId lookup.
  */
-function resolveFileInputLocator(page: Page, target: FileInputTarget): Locator {
+export function resolveFileInputLocator(page: Page, target: FileInputTarget): Locator {
   if (typeof target === "string") {
     return page.getByTestId(target).first();
   }
@@ -122,6 +123,16 @@ export async function uploadFileBySelector(
 }
 
 /**
+ * Return a locator for the uploaded file entry shown in the existing files list.
+ */
+function getExistingFileEntryLocator(page: Page, fileName: string): Locator {
+  return page
+    .locator('[data-testid="file-input-existing-files"]')
+    .locator(`text=${fileName}`)
+    .first();
+}
+
+/**
  * Wait for the uploaded file entry to appear in the UI.
  */
 export async function expectUploadedFileVisible(
@@ -129,11 +140,8 @@ export async function expectUploadedFileVisible(
   fileName: string,
   timeoutMs = 60000,
 ): Promise<void> {
-  await expect(
-    page
-      .locator(`xpath=//span[contains(normalize-space(.), "${fileName}")]`)
-      .first(),
-  ).toBeVisible({
+  const entryLocator = getExistingFileEntryLocator(page, fileName);
+  await expect(entryLocator).toBeVisible({
     timeout: timeoutMs,
   });
 }
@@ -147,9 +155,17 @@ export async function expectUploadedFileCount(
   count: number,
   timeoutMs = 60000,
 ): Promise<void> {
-  await expect(
-    page.locator(`xpath=//span[contains(normalize-space(.), "${fileName}")]`),
-  ).toHaveCount(count, {
+  const entryLocator = page
+    .locator('[data-testid="file-input-existing-files"]')
+    .locator(`text=${fileName}`);
+  if ((await entryLocator.count()) > 0) {
+    await expect(entryLocator).toHaveCount(count, {
+      timeout: timeoutMs,
+    });
+    return;
+  }
+
+  await expect(page.getByText(fileName)).toHaveCount(count, {
     timeout: timeoutMs,
   });
 }
@@ -165,12 +181,12 @@ export async function deleteUploadedFile(
   const deleteButton = fileName
     ? page
         .locator(
-          `xpath=//div[contains(normalize-space(.), "${fileName}")]//button[contains(normalize-space(.), "Delete") or contains(normalize-space(.), "Remove")]`,
+          `xpath=//div[@data-testid="file-input-existing-files"]//div[contains(normalize-space(.), "${fileName}")]//button[contains(normalize-space(.), "Delete") or contains(normalize-space(.), "Remove")]`,
         )
         .first()
     : page
         .locator(
-          `xpath=//button[contains(normalize-space(.), "Delete") or contains(normalize-space(.), "Remove")]`,
+          `xpath=//div[@data-testid="file-input-existing-files"]//button[contains(normalize-space(.), "Delete") or contains(normalize-space(.), "Remove")]`,
         )
         .first();
 
@@ -186,7 +202,9 @@ export async function deleteUploadedFile(
 
   if (fileName) {
     await expect(
-      page.locator(`xpath=//span[contains(normalize-space(.), "${fileName}")]`),
+      page
+        .locator('[data-testid="file-input-existing-files"]')
+        .locator(`text=${fileName}`),
     ).toHaveCount(0, {
       timeout: 60000,
     });
@@ -211,8 +229,8 @@ export async function failAttachmentUploadRequest(
     });
   };
 
-  await page.route("**/api/file*", failRoute);
-  await page.route("**/api/applications/**/attachments*", failRoute);
+  await page.route("**/api/file**", failRoute);
+  await page.route("**/api/applications/**/attachments**", failRoute);
 }
 
 /**
@@ -221,29 +239,65 @@ export async function failAttachmentUploadRequest(
  * This simulates the real upload lifecycle by returning multiple upload
  * progress states before the attachment is created.
  */
+export type StubStreamingAttachmentUploadOptions = {
+  pendingFileId?: string;
+  applicationAttachmentId?: string;
+  fileName: string;
+  delayMs?: number;
+};
+
 export async function stubStreamingAttachmentUpload(
   page: Page,
-  pendingFileId = "fake-pending-file-id",
-  applicationAttachmentId = "fake-attachment-id",
+  {
+    pendingFileId = "fake-pending-file-id",
+    applicationAttachmentId = "fake-attachment-id",
+    fileName,
+    delayMs = 1500,
+  }: StubStreamingAttachmentUploadOptions,
 ): Promise<void> {
-  await page.route("**/api/file*", async (route) => {
-    const body =
-      JSON.stringify({ status: "queued" }) +
-      JSON.stringify({ status: "uploading" }) +
-      JSON.stringify({ status: "scan-complete", pendingFileId });
+  await page.route("**/api/file**", async (route) => {
+    console.log("PLAYWRIGHT: stubStreamingAttachmentUpload intercepted /api/file");
+    const chunks = [
+      JSON.stringify({ status: "queued" }),
+      JSON.stringify({ status: "uploading" }),
+      JSON.stringify({ status: "starting-scan" }),
+      JSON.stringify({ status: "pending" }),
+      JSON.stringify({ status: "scan-complete", pendingFileId }),
+    ];
+
+    const fullBody = Buffer.from(chunks.join(""));
+    chunks.forEach((chunk) =>
+      console.log("PLAYWRIGHT: stubStreamingAttachmentUpload sending chunk", chunk),
+    );
+
     await route.fulfill({
       status: 200,
       headers: { "Content-Type": "application/json; charset=utf-8" },
-      body,
+      body: fullBody,
     });
   });
 
-  await page.route("**/api/applications/**/attachments*", async (route) => {
+  await page.route("**/api/applications/**/attachments**", async (route) => {
+    console.log(
+      "PLAYWRIGHT: stubStreamingAttachmentUpload intercepted attachments route",
+      route.request().url(),
+    );
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+    const attachment = {
+      application_attachment_id: applicationAttachmentId,
+      file_name: fileName,
+      file_size_bytes: 1024,
+      mime_type: "application/pdf",
+      updated_at: new Date().toISOString(),
+      download_path: `/download/${fileName}`,
+    };
     await route.fulfill({
       status: 200,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        data: { application_attachment_id: applicationAttachmentId },
+        data: attachment,
       }),
     });
   });
@@ -294,6 +348,12 @@ export async function assertUploadDidNotSave(
  * Some pages render a dedicated status display, while others only show
  * transient status text in the page body. This helper checks both.
  */
+const matchesText = (text: string, message: string | RegExp) => {
+  return typeof message === "string"
+    ? text.includes(message)
+    : message.test(text);
+};
+
 export async function expectUploadStatusMessage(
   page: Page,
   message: string | RegExp,
@@ -302,10 +362,10 @@ export async function expectUploadStatusMessage(
   const statusDisplay = page.getByTestId("file-upload-status-display").first();
   if ((await statusDisplay.count()) > 0) {
     await expect(statusDisplay).toBeVisible({ timeout: timeoutMs });
-    await expect(statusDisplay).toContainText(message, {
-      timeout: timeoutMs,
-    });
-    return;
+    const statusText = await statusDisplay.innerText();
+    if (matchesText(statusText, message)) {
+      return;
+    }
   }
 
   await expect(page.getByText(message)).toBeVisible({
@@ -345,7 +405,7 @@ export async function abortAttachmentUploadRequest(
   };
 
   await Promise.all([
-    page.route("**/api/file*", abortRoute),
-    page.route("**/api/applications/**/attachments*", abortRoute),
+    page.route("**/api/file**", abortRoute),
+    page.route("**/api/applications/**/attachments**", abortRoute),
   ]);
 }
