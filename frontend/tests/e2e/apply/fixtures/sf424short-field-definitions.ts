@@ -144,36 +144,37 @@ export const fieldDefinitionsSF424Short: FormFillFieldDefinitions = {
   },
 
   // Section 7 - Project Director (contact_person_group)
+  // NOTE: Name and address fields use nested testIds: --name--, --address--
   project_director_prefix: {
-    testId: "project_director--prefix",
+    testId: "project_director--name--prefix",
     type: "text",
     maxLength: 10, // common_shared.py.person_name.prefix
     section: "Section 7",
     field: "Project Director Prefix",
   },
   project_director_first_name: {
-    testId: "project_director--first_name",
+    testId: "project_director--name--first_name",
     type: "text",
     maxLength: 35, // common_shared.py.person_name.first_name
     section: "Section 7",
     field: "Project Director First Name",
   },
   project_director_middle_name: {
-    testId: "project_director--middle_name",
+    testId: "project_director--name--middle_name",
     type: "text",
     maxLength: 25, // common_shared.py.person_name.middle_name
     section: "Section 7",
     field: "Project Director Middle Name",
   },
   project_director_last_name: {
-    testId: "project_director--last_name",
+    testId: "project_director--name--last_name",
     type: "text",
     maxLength: 60, // common_shared.py.person_name.last_name
     section: "Section 7",
     field: "Project Director Last Name",
   },
   project_director_suffix: {
-    testId: "project_director--suffix",
+    testId: "project_director--name--suffix",
     type: "text",
     maxLength: 10, // common_shared.py.person_name.suffix
     section: "Section 7",
@@ -208,42 +209,42 @@ export const fieldDefinitionsSF424Short: FormFillFieldDefinitions = {
     field: "Project Director Fax",
   },
   project_director_street1: {
-    testId: "project_director--street1",
+    testId: "project_director--address--street1",
     type: "text",
     maxLength: 55, // address_shared.py.street1
     section: "Section 7",
     field: "Project Director Street 1",
   },
   project_director_street2: {
-    testId: "project_director--street2",
+    testId: "project_director--address--street2",
     type: "text",
     maxLength: 55, // address_shared.py.street2
     section: "Section 7",
     field: "Project Director Street 2",
   },
   project_director_city: {
-    testId: "project_director--city",
+    testId: "project_director--address--city",
     type: "text",
     maxLength: 35, // address_shared.py.city
     section: "Section 7",
     field: "Project Director City",
   },
   project_director_state: {
-    selector: "#project_director--state",
-    printTestId: "project_director--state",
+    selector: "#project_director--address--state",
+    printTestId: "project_director--address--state",
     type: "dropdown",
     section: "Section 7",
     field: "Project Director State",
   },
   project_director_country: {
-    selector: "#project_director--country",
-    printTestId: "project_director--country",
+    selector: "#project_director--address--country",
+    printTestId: "project_director--address--country",
     type: "dropdown",
     section: "Section 7",
     field: "Project Director Country",
   },
   project_director_zip_code: {
-    testId: "project_director--zip_code",
+    testId: "project_director--address--zip_code",
     type: "text",
     maxLength: 30, // address_shared.py.zip_code
     section: "Section 7",
@@ -261,35 +262,35 @@ export const fieldDefinitionsSF424Short: FormFillFieldDefinitions = {
     field: "Same as Project Director",
   },
   contact_person_prefix: {
-    testId: "contact_person--prefix",
+    testId: "contact_person--name--prefix",
     type: "text",
     maxLength: 10,
     section: "Section 8",
     field: "Contact Person Prefix",
   },
   contact_person_first_name: {
-    testId: "contact_person--first_name",
+    testId: "contact_person--name--first_name",
     type: "text",
     maxLength: 35,
     section: "Section 8",
     field: "Contact Person First Name",
   },
   contact_person_middle_name: {
-    testId: "contact_person--middle_name",
+    testId: "contact_person--name--middle_name",
     type: "text",
     maxLength: 25,
     section: "Section 8",
     field: "Contact Person Middle Name",
   },
   contact_person_last_name: {
-    testId: "contact_person--last_name",
+    testId: "contact_person--name--last_name",
     type: "text",
     maxLength: 60,
     section: "Section 8",
     field: "Contact Person Last Name",
   },
   contact_person_suffix: {
-    testId: "contact_person--suffix",
+    testId: "contact_person--name--suffix",
     type: "text",
     maxLength: 10,
     section: "Section 8",
@@ -324,42 +325,42 @@ export const fieldDefinitionsSF424Short: FormFillFieldDefinitions = {
     field: "Contact Person Fax",
   },
   contact_person_street1: {
-    testId: "contact_person--street1",
+    testId: "contact_person--address--street1",
     type: "text",
     maxLength: 55,
     section: "Section 8",
     field: "Contact Person Street 1",
   },
   contact_person_street2: {
-    testId: "contact_person--street2",
+    testId: "contact_person--address--street2",
     type: "text",
     maxLength: 55,
     section: "Section 8",
     field: "Contact Person Street 2",
   },
   contact_person_city: {
-    testId: "contact_person--city",
+    testId: "contact_person--address--city",
     type: "text",
     maxLength: 35,
     section: "Section 8",
     field: "Contact Person City",
   },
   contact_person_state: {
-    selector: "#contact_person--state",
-    printTestId: "contact_person--state",
+    selector: "#contact_person--address--state",
+    printTestId: "contact_person--address--state",
     type: "dropdown",
     section: "Section 8",
     field: "Contact Person State",
   },
   contact_person_country: {
-    selector: "#contact_person--country",
-    printTestId: "contact_person--country",
+    selector: "#contact_person--address--country",
+    printTestId: "contact_person--address--country",
     type: "dropdown",
     section: "Section 8",
     field: "Contact Person Country",
   },
   contact_person_zip_code: {
-    testId: "contact_person--zip_code",
+    testId: "contact_person--address--zip_code",
     type: "text",
     maxLength: 30,
     section: "Section 8",
@@ -411,28 +412,28 @@ export const fieldDefinitionsSF424Short: FormFillFieldDefinitions = {
     field: "Authorized Representative Suffix",
   },
   authorized_representative_title: {
-    testId: "authorized_representative_title",
+    testId: "authorized_representative--title",
     type: "text",
     maxLength: 45, // common_shared.py.contact_person_title
     section: "Section 9",
     field: "Authorized Representative Title",
   },
   authorized_representative_email: {
-    testId: "authorized_representative_email",
+    testId: "authorized_representative--email",
     type: "text",
     maxLength: 60, // common_shared.py.contact_email
     section: "Section 9",
     field: "Authorized Representative Email",
   },
   authorized_representative_phone_number: {
-    testId: "authorized_representative_phone_number",
+    testId: "authorized_representative--phone_number",
     type: "text",
     maxLength: 25, // common_shared.py.phone_number
     section: "Section 9",
     field: "Authorized Representative Telephone Number",
   },
   authorized_representative_fax: {
-    testId: "authorized_representative_fax",
+    testId: "authorized_representative--fax",
     type: "text",
     maxLength: 25, // common_shared.py.phone_number
     section: "Section 9",
@@ -492,17 +493,23 @@ export const SF424_SHORT_REQUIRED_FIELD_ERRORS: FieldError[] = [
   },
   { fieldId: "project_director--email", message: "Email is required" },
   {
-    fieldId: "contact_person--first_name",
+    fieldId: "contact_person--name--first_name",
     message: "First Name is required",
   },
   {
-    fieldId: "contact_person--last_name",
+    fieldId: "contact_person--name--last_name",
     message: "Last Name is required",
   },
   { fieldId: "contact_person--title", message: "Title is required" },
-  { fieldId: "contact_person--street1", message: "Street 1 is required" },
-  { fieldId: "contact_person--city", message: "City is required" },
-  { fieldId: "contact_person--country", message: "Country is required" },
+  {
+    fieldId: "contact_person--address--street1",
+    message: "Street 1 is required",
+  },
+  { fieldId: "contact_person--address--city", message: "City is required" },
+  {
+    fieldId: "contact_person--address--country",
+    message: "Country is required",
+  },
   {
     fieldId: "contact_person--phone_number",
     message: "Telephone Number is required",
@@ -520,13 +527,13 @@ export const SF424_SHORT_REQUIRED_FIELD_ERRORS: FieldError[] = [
     fieldId: "authorized_representative--last_name",
     message: "Last Name is required",
   },
-  { fieldId: "authorized_representative_title", message: "Title is required" },
+  { fieldId: "authorized_representative--title", message: "Title is required" },
   {
-    fieldId: "authorized_representative_email",
+    fieldId: "authorized_representative--email",
     message: "Email is required",
   },
   {
-    fieldId: "authorized_representative_phone_number",
+    fieldId: "authorized_representative--phone_number",
     message: "Telephone Number is required",
   },
 ];
