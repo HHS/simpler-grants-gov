@@ -412,28 +412,28 @@ export const fieldDefinitionsSF424Short: FormFillFieldDefinitions = {
     field: "Authorized Representative Suffix",
   },
   authorized_representative_title: {
-    testId: "authorized_representative--title",
+    testId: "authorized_representative_title",
     type: "text",
     maxLength: 45, // common_shared.py.contact_person_title
     section: "Section 9",
     field: "Authorized Representative Title",
   },
   authorized_representative_email: {
-    testId: "authorized_representative--email",
+    testId: "authorized_representative_email",
     type: "text",
     maxLength: 60, // common_shared.py.contact_email
     section: "Section 9",
     field: "Authorized Representative Email",
   },
   authorized_representative_phone_number: {
-    testId: "authorized_representative--phone_number",
+    testId: "authorized_representative_phone_number",
     type: "text",
     maxLength: 25, // common_shared.py.phone_number
     section: "Section 9",
     field: "Authorized Representative Telephone Number",
   },
   authorized_representative_fax: {
-    testId: "authorized_representative--fax",
+    testId: "authorized_representative_fax",
     type: "text",
     maxLength: 25, // common_shared.py.phone_number
     section: "Section 9",
@@ -527,13 +527,13 @@ export const SF424_SHORT_REQUIRED_FIELD_ERRORS: FieldError[] = [
     fieldId: "authorized_representative--last_name",
     message: "Last Name is required",
   },
-  { fieldId: "authorized_representative--title", message: "Title is required" },
+  { fieldId: "authorized_representative_title", message: "Title is required" },
   {
-    fieldId: "authorized_representative--email",
+    fieldId: "authorized_representative_email",
     message: "Email is required",
   },
   {
-    fieldId: "authorized_representative--phone_number",
+    fieldId: "authorized_representative_phone_number",
     message: "Telephone Number is required",
   },
 ];
