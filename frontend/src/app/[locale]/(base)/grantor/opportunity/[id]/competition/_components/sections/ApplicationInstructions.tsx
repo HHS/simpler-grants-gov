@@ -36,7 +36,7 @@ export function ApplicationInstructions({}) {
   };
 
   function getFileMetadata(fileId: string) {
-    // TODO: call a backend API to get this info
+    // TODO: call a backend API to get this info.
     // This is a dummy record for testing until the API is created.
     const fileInfo: UploadFileMetadata = {
       id: "unique-id-123",
