@@ -120,7 +120,7 @@ Starting from the root directory.
 
 ```sh
 cd api
-make remake-backend
+make remake-backend // this is not necessary if the API is already seeded and running
 make start
 ```
 
