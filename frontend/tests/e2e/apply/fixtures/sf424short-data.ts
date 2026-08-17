@@ -97,11 +97,12 @@ export const buildSF424ShortHappyPathTestData = (
  */
 export const SF424_SHORT_OPPORTUNITY_DATA: PrintViewFormData = {
   opportunityId: "b2c3d4e5-f6a7-8901-bcde-f12345678901",
-  opportunityNumber: "E2E-SF424SHORT-ORG-01",
+  opportunityNumber: "E2E-SF424SHORT-ORG-IND-01",
   formKey: "sf424short",
   expectedPrepopulatedFields: {
     funding_opportunity_number: "E2E-SF424SHORT-ORG-IND-01",
-    funding_opportunity_title: "E2E SF-424 Short Organizational ORG IND OT01",
+    funding_opportunity_title:
+      "E2E SF-424 Short Organizational ORG IND OT01",
     assistance_listing_number: "10.960",
     agency_name: "Simpler Grants.gov",
     assistance_listing_program_title: "Technical Agricultural Assistance",
