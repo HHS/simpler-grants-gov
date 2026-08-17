@@ -50,7 +50,9 @@ export const textHandler: FieldHandler = async (
   // fields on mobile where form rendering may be progressive/async.
   // On Mobile Chrome, form sections may not render until scrolled into view,
   // so retry with scroll attempts if initial wait fails.
-  let lastError: Error | undefined;
+  let lastError: Error = new Error(
+    `Text field ${field.field} (testId: ${field.testId}) could not be found after 3 retry attempts with scroll`,
+  );
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       await locator.waitFor({ state: "attached", timeout: 4000 });
@@ -59,7 +61,7 @@ export const textHandler: FieldHandler = async (
       await locator.fill(data);
       return;
     } catch (error) {
-      lastError = error as Error;
+      lastError = error instanceof Error ? error : new Error(String(error));
       // Retry: scroll to bottom and top to trigger lazy-loading
       if (attempt < 2) {
         await page.evaluate(() => {
