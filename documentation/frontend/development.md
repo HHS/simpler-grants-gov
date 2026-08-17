@@ -112,7 +112,9 @@ describe('MyComponent', () => {
 
 E2E test filenames end with `.spec.ts` and are found in the `tests/e2e` directory.
 
-To run E2E tests via CLI, start from the repository root directory.
+To run E2E tests via CLI:
+
+Starting from the root directory. 
 
 1. Initialize, seed, and start the local API:
 
