@@ -48,8 +48,32 @@ export const textHandler: FieldHandler = async (
 
   // Use longer timeout (10s) for field attachment to handle lazy-loaded
   // fields on mobile where form rendering may be progressive/async.
-  await locator.waitFor({ state: "attached", timeout: 10000 });
-  await locator.scrollIntoViewIfNeeded();
-  await locator.waitFor({ state: "visible", timeout: 5000 });
-  await locator.fill(data);
+  // On Mobile Chrome, form sections may not render until scrolled into view,
+  // so retry with scroll attempts if initial wait fails.
+  let lastError: Error | undefined;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await locator.waitFor({ state: "attached", timeout: 4000 });
+      await locator.scrollIntoViewIfNeeded();
+      await locator.waitFor({ state: "visible", timeout: 5000 });
+      await locator.fill(data);
+      return;
+    } catch (error) {
+      lastError = error as Error;
+      // Retry: scroll to bottom and top to trigger lazy-loading
+      if (attempt < 2) {
+        await page.evaluate(() => {
+          window.scrollBy(0, 500);
+        });
+        await page.waitForTimeout(200);
+        await page.evaluate(() => {
+          window.scrollBy(0, -500);
+        });
+        await page.waitForTimeout(200);
+      }
+    }
+  }
+  
+  // All retries exhausted
+  throw lastError;
 };
