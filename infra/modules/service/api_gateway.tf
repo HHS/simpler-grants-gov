@@ -75,7 +75,16 @@ locals {
       "v1/users/login"                      = [{ "method" : "GET" }],
       "v1/users/logout"                     = [{ "method" : "GET" }],
       "v1/users/token"                      = [],
-      "v1/files/{file_id}"                  = [],
+      # ClamAV scanner callback:
+      "v1/files/{file_id}" = [{
+        "method" : "POST",
+        "method_parameters" : {
+          "method.request.path.file_id" = true
+        },
+        "request_parameters" : {
+          "integration.request.path.file_id" : "method.request.path.file_id",
+        }
+      }],
   }][var.enable_api_gateway ? 1 : 0]
 
   third_level_endpoints = [
