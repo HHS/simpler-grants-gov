@@ -18,7 +18,6 @@
  */
 
 import path from "path";
-import { PassThrough } from "stream";
 import {
   expect,
   type BrowserContext,
