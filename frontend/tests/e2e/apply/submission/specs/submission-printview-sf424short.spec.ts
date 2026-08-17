@@ -47,9 +47,6 @@ const { testOrgLabel } = playwrightEnv;
 
 // Only the opportunity number is declared here.
 // All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
-// TODO: E2E-SF424SHORT-ORG-01 must be seeded (build_automatic_opportunities.py) and
-// registered in load-opportunity-config.ts before this spec can run - see the TODO on
-// SF424_SHORT_OPPORTUNITY_DATA in sf424-short-data.ts.
 const OPPORTUNITY_NUMBER = "E2E-SF424SHORT-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
