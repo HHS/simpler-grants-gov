@@ -25,6 +25,12 @@ export async function assertApplicationHistoryVisible(
   await expect(tableContainer).toBeVisible({ timeout: 10000 });
 }
 
+function NOTHING() {
+  console.error("SOMETHING");
+}
+
+NOTHING();
+
 /**
  * Reads every "Activity" value currently rendered in the Application History
  * table, in display order (index 0 = most recent), by walking the
