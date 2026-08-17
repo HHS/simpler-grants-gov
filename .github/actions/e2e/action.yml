@@ -168,7 +168,7 @@ runs:
         TEST_USER_MANAGER_API_KEY: ${{ inputs.test_user_manager_api_key }}
 
       run: |
-        npm run test:e2e -- ${{ env.spec_files }}
+        npm run test:e2e -- ${{ inputs.spec_files }}
       shell: bash
 
     - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
