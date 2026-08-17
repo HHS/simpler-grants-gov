@@ -1,0 +1,765 @@
+"""Unit tests for Metabase backup functionality."""
+
+# pylint: disable=wrong-import-order
+
+import json
+from pathlib import Path
+from unittest.mock import MagicMock
+
+import pytest
+import requests
+from analytics.integrations.metabase.backup_v2 import MetabaseBackupV2
+from requests.exceptions import HTTPError, RequestException
+
+
+@pytest.fixture(name="backup_instance")
+def _backup_instance(tmp_path: Path) -> MetabaseBackupV2:
+    """Create a MetabaseBackupV2 instance with a mocked requests client."""
+    backup = MetabaseBackupV2(
+        api_url="http://metabase.example.com/api",
+        api_key="test-key",
+        output_dir=str(tmp_path),
+    )
+    backup._requests = MagicMock()  # pylint: disable=protected-access
+    return backup
+
+
+def _response(payload: object) -> MagicMock:
+    """Build a mock requests.Response with the given JSON payload."""
+    mock_resp = MagicMock(spec=requests.Response)
+    mock_resp.json.return_value = payload
+    mock_resp.raise_for_status.return_value = None
+    return mock_resp
+
+
+def test_init(backup_instance: MetabaseBackupV2) -> None:
+    """Test initialization of MetabaseBackupV2."""
+    assert backup_instance.api_url == "http://metabase.example.com/api"
+    assert backup_instance.api_key == "test-key"
+    assert backup_instance.headers == {
+        "x-api-key": "test-key",
+        "Content-Type": "application/json",
+    }
+    assert backup_instance.stats["collections_processed"] == 0
+
+
+def test_get_collections_filters_personal_sample_archived(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that personal/sample/archived collections are excluded."""
+    payload = [
+        {"id": 1, "name": "Real", "location": "/"},
+        {"id": 2, "name": "Personal", "location": "/", "is_personal": True},
+        {"id": 3, "name": "Sample", "location": "/", "is_sample": True},
+        {"id": 4, "name": "Archived", "location": "/", "archived": True},
+        {"id": 5, "name": "Missing location fields"},
+    ]
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = _response(payload)
+
+    result = backup_instance.get_collections()
+
+    assert [c["id"] for c in result] == [1]
+
+
+def test_get_collections_excludes_import_trees(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that 'Import ...' trees are excluded entirely when a real collection exists."""
+    payload = [
+        {"id": 1, "name": "Real", "location": "/"},
+        {"id": 2, "name": "Sprint_Metrics", "location": "/1/"},
+        {"id": 10, "name": "Import 2026-08-05_040849", "location": "/"},
+        {"id": 11, "name": "Sprint_Metrics", "location": "/10/"},
+        {"id": 12, "name": "Dashboards", "location": "/10/"},
+        {"id": 20, "name": "Import 2026-08-05_043629", "location": "/"},
+        {"id": 21, "name": "Sprint_Metrics", "location": "/20/"},
+    ]
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = _response(payload)
+
+    result = backup_instance.get_collections()
+
+    assert [c["id"] for c in result] == [1, 2]
+
+
+def test_get_collections_keeps_newest_import_when_no_real_collection(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that the newest 'Import ...' tree is kept when it's all that exists."""
+    payload = [
+        {"id": 10, "name": "Import 2026-08-05_040849", "location": "/"},
+        {"id": 11, "name": "Sprint_Metrics", "location": "/10/"},
+        {"id": 20, "name": "Import 2026-08-05_043629", "location": "/"},
+        {"id": 21, "name": "Sprint_Metrics", "location": "/20/"},
+    ]
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = _response(payload)
+
+    result = backup_instance.get_collections()
+
+    assert [c["id"] for c in result] == [20, 21]
+
+
+def test_get_collections_ignores_builtin_examples_when_choosing_newest_import(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that Metabase's built-in sample 'Examples' collection doesn't count as a real one."""
+    payload = [
+        {"id": 2, "name": "Examples", "location": "/", "is_sample": True},
+        {"id": 10, "name": "Import 2026-08-05_040849", "location": "/"},
+        {"id": 11, "name": "Sprint_Metrics", "location": "/10/"},
+        {"id": 20, "name": "Import 2026-08-05_043629", "location": "/"},
+        {"id": 21, "name": "Sprint_Metrics", "location": "/20/"},
+    ]
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = _response(payload)
+
+    result = backup_instance.get_collections()
+
+    assert [c["id"] for c in result] == [20, 21]
+
+
+def test_get_items_keeps_cards_and_dashboards(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that get_items keeps card and dashboard models, drops everything else."""
+    payload = {
+        "data": [
+            {"id": 1, "name": "A Card", "model": "card"},
+            {"id": 2, "name": "A Dashboard", "model": "dashboard"},
+            {"id": 3, "name": "A Collection", "model": "collection"},
+            {"id": 4, "model": "card"},  # missing name
+        ],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = _response(payload)
+
+    result = backup_instance.get_items(1)
+
+    assert [i["id"] for i in result] == [1, 2]
+
+
+def test_get_card_detail_success(backup_instance: MetabaseBackupV2) -> None:
+    """Test fetching a card's full detail."""
+    payload = {"id": 1, "name": "Some Card"}
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = _response(payload)
+
+    assert backup_instance.get_card_detail(1) == payload
+
+
+def test_get_card_detail_permission_denied_returns_none(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a 403 response is treated as skip-this-card, not a hard failure."""
+    error_response = MagicMock()
+    error_response.status_code = 403
+    http_error = HTTPError()
+    http_error.response = error_response
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.side_effect = http_error
+
+    assert backup_instance.get_card_detail(1) is None
+
+
+def test_get_card_detail_request_exception_returns_none(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a generic request failure is treated as skip-this-card."""
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.side_effect = RequestException("boom")
+
+    assert backup_instance.get_card_detail(1) is None
+
+
+def test_extract_query_valid(backup_instance: MetabaseBackupV2) -> None:
+    """Test extracting and formatting a valid query."""
+    card = {
+        "id": 1,
+        "dataset_query": {"native": {"query": "select * from table where id = 1"}},
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    query = backup_instance._extract_query(card)
+
+    assert query is not None
+    assert "SELECT" in query
+
+
+def test_extract_query_missing_keywords_returns_none(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a query missing select/from/where is rejected."""
+    card = {"id": 1, "dataset_query": {"native": {"query": "not a sql query"}}}
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    assert backup_instance._extract_query(card) is None
+
+
+def test_extract_query_missing_returns_none(backup_instance: MetabaseBackupV2) -> None:
+    """Test that a card with no query at all is rejected."""
+    card = {"id": 1, "dataset_query": {}}
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    assert backup_instance._extract_query(card) is None
+
+
+def test_rewrite_references_known_id_becomes_restore_placeholder(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a reference to a known id is rewritten to {{#restore:key}}."""
+    query = "WITH ranked_statuses AS {{#143-ranked-statuses}} SELECT 1"
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    resolved = backup_instance._rewrite_references(query, {143: "Ranked_Statuses"})
+
+    assert resolved == "WITH ranked_statuses AS {{#restore:Ranked_Statuses}} SELECT 1"
+
+
+def test_rewrite_references_external_id_left_untouched(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a reference to an id outside this backup is left as-is."""
+    query = "WITH x AS {{#999-some-external-question}} SELECT 1"
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    resolved = backup_instance._rewrite_references(query, {})
+
+    assert resolved == query
+
+
+def test_resolve_card_strips_card_type_template_tags(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that "card"-type template tags are stripped, others kept."""
+    card = {
+        "id": 55,
+        "name": "Deliverable Issues Done",
+        "dataset_query": {
+            "native": {
+                "query": "WITH x AS {{#143-ranked-statuses}} SELECT * FROM x "
+                "WHERE {{deliverable_title}}",
+                "template-tags": {
+                    "#143-ranked-statuses": {"type": "card", "card-id": 143},
+                    "deliverable_title": {
+                        "type": "dimension",
+                        "name": "deliverable_title",
+                    },
+                },
+            },
+        },
+        "display": "table",
+        "visualization_settings": {},
+        "parameters": [],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    resolved = backup_instance._resolve_card(card, {143: "Ranked_Statuses"})
+
+    assert resolved is not None
+    assert "#143-ranked-statuses" not in resolved["template_tags"]
+    assert "deliverable_title" in resolved["template_tags"]
+    assert resolved["key"] == "Deliverable_Issues_Done"
+    assert resolved["dependencies"] == {"Ranked_Statuses"}
+
+
+def test_check_collisions_none_when_unique(backup_instance: MetabaseBackupV2) -> None:
+    """Test that unique card and collection names raise nothing."""
+    cards = [{"id": 1, "name": "A"}, {"id": 2, "name": "B"}]
+    collections = [{"id": 10, "name": "X"}, {"id": 11, "name": "Y"}]
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._check_collisions(cards, collections)  # should not raise
+
+
+def test_check_collisions_reports_card_and_collection_collisions_together(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that both card-name and collection-name collisions are reported together."""
+    cards = [
+        {"id": 1, "name": "Same Name"},
+        {"id": 2, "name": "Same Name"},
+    ]
+    collections = [
+        {"id": 10, "name": "Same Folder"},
+        {"id": 11, "name": "Same Folder"},
+    ]
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    with pytest.raises(RuntimeError) as exc_info:
+        backup_instance._check_collisions(cards, collections)
+
+    message = str(exc_info.value)
+    assert "Same_Name" in message
+    assert "[1, 2]" in message
+    assert "Same_Folder" in message
+    assert "[10, 11]" in message
+
+
+def test_assign_levels_two_level_chain(backup_instance: MetabaseBackupV2) -> None:
+    """Test that a question referencing a shared building block is level 1."""
+    resolved_cards = {
+        "Shared_Thing": {"dependencies": set()},
+        "Consumer": {"dependencies": {"Shared_Thing"}},
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    levels = backup_instance._assign_levels(resolved_cards)
+
+    assert levels["Shared_Thing"] == 0
+    assert levels["Consumer"] == 1
+
+
+def test_assign_levels_three_level_chain(backup_instance: MetabaseBackupV2) -> None:
+    """Test that level assignment isn't hardcoded to two levels."""
+    resolved_cards = {
+        "A": {"dependencies": set()},
+        "B": {"dependencies": {"A"}},
+        "C": {"dependencies": {"B"}},
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    levels = backup_instance._assign_levels(resolved_cards)
+
+    assert levels == {"A": 0, "B": 1, "C": 2}
+
+
+def test_assign_levels_ignores_external_dependency(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a dependency on a question outside this set doesn't affect level."""
+    resolved_cards = {
+        "Consumer": {"dependencies": {"Not_In_This_Backup"}},
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    levels = backup_instance._assign_levels(resolved_cards)
+
+    assert levels["Consumer"] == 0
+
+
+def test_assign_levels_detects_cycle(backup_instance: MetabaseBackupV2) -> None:
+    """Test that a circular reference raises a clear error instead of hanging."""
+    resolved_cards = {
+        "A": {"dependencies": {"B"}},
+        "B": {"dependencies": {"A"}},
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    with pytest.raises(RuntimeError, match="Circular reference"):
+        backup_instance._assign_levels(resolved_cards)
+
+
+def test_assign_levels_standalone_card_gets_deepest_level(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """
+    Test that a standalone card lands at the deepest level, not level 0.
+
+    A card with no dependencies and no dependents must land at the same
+    deepest level as the chain's shallowest node, not get pulled down to
+    level 0 just because it happens to have no dependencies of its own.
+    """
+    resolved_cards = {
+        "Shared_Thing": {"dependencies": set()},
+        "Consumer": {"dependencies": {"Shared_Thing"}},
+        "Standalone": {"dependencies": set()},
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    levels = backup_instance._assign_levels(resolved_cards)
+
+    assert levels["Shared_Thing"] == 0
+    assert levels["Consumer"] == 1
+    assert levels["Standalone"] == 1
+
+
+def test_assign_levels_all_standalone_lands_at_level_zero(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """When nothing references anything, everything settles at a single level 0."""
+    resolved_cards = {
+        "A": {"dependencies": set()},
+        "B": {"dependencies": set()},
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    levels = backup_instance._assign_levels(resolved_cards)
+
+    assert levels == {"A": 0, "B": 0}
+
+
+def test_assign_levels_empty_dict(backup_instance: MetabaseBackupV2) -> None:
+    """Test that an empty input returns an empty level map without error."""
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    assert backup_instance._assign_levels({}) == {}
+
+
+def test_write_question_creates_sql_and_sidecar(
+    backup_instance: MetabaseBackupV2,
+    tmp_path: Path,
+) -> None:
+    """Test that a resolved card is written as .sql + sidecar .json."""
+    card = {
+        "key": "My_Question",
+        "id": 1,
+        "name": "My Question",
+        "query": "SELECT 1",
+        "display": "line",
+        "visualization_settings": {"foo": "bar"},
+        "description": "A description",
+        "template_tags": {},
+        "parameters": [],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._write_question(card, level=1, folder="Some_Collection")
+
+    sql_path = tmp_path / "level_1" / "Some_Collection" / "My_Question.sql"
+    json_path = tmp_path / "level_1" / "Some_Collection" / "My_Question.json"
+    assert sql_path.read_text() == "SELECT 1\n"
+    metadata = json.loads(json_path.read_text())
+    assert metadata == {
+        "name": "My Question",
+        "display": "line",
+        "visualization_settings": {"foo": "bar"},
+        "description": "A description",
+    }
+
+
+def test_resolve_dashboard_translates_tabs_and_dashcards(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test translating a live dashboard's tabs/dashcards/parameters to restore schema."""
+    dashboard = {
+        "name": "Delivery Metrics",
+        "description": None,
+        "width": "fixed",
+        "auto_apply_filters": True,
+        "tabs": [
+            {"id": 5, "name": "Tab Two", "position": 1},
+            {"id": 4, "name": "Tab One", "position": 0},
+        ],
+        "parameters": [
+            {
+                "id": "abc123",
+                "slug": "deliverable",
+                "name": "Deliverable",
+                "type": "string/=",
+                "sectionId": "string",
+                "isMultiSelect": False,
+                "required": True,
+                "default": ["Some Deliverable"],
+                "values_source_type": "card",
+                "values_source_config": {
+                    "card_id": 49,
+                    "value_field": ["field", "title", {"base-type": "type/Text"}],
+                },
+            },
+        ],
+        "dashcards": [
+            {
+                "id": 1,
+                "dashboard_tab_id": 4,
+                "card_id": 100,
+                "col": 0,
+                "row": 0,
+                "size_x": 12,
+                "size_y": 4,
+                "visualization_settings": {"card.title": "Hello"},
+                "parameter_mappings": [
+                    {
+                        "parameter_id": "abc123",
+                        "card_id": 100,
+                        "target": ["dimension", ["template-tag", "deliverable_title"]],
+                    },
+                ],
+            },
+            {
+                "id": 2,
+                "dashboard_tab_id": 5,
+                "card_id": None,
+                "col": 0,
+                "row": 0,
+                "size_x": 24,
+                "size_y": 1,
+                "visualization_settings": {
+                    "text": "# {{deliverable_title}}",
+                    "virtual_card": {"display": "text"},
+                },
+                "parameter_mappings": [
+                    {
+                        "parameter_id": "abc123",
+                        "target": ["text-tag", "deliverable_title"],
+                    },
+                ],
+            },
+        ],
+    }
+    id_to_key = {100: "Some_Question", 49: "All_Deliverables_Titles"}
+
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    spec = backup_instance._resolve_dashboard(dashboard, id_to_key)
+
+    assert spec["tabs"] == ["Tab One", "Tab Two"]
+    assert (
+        spec["parameters"][0]["values_source_config"]["card"]
+        == "All_Deliverables_Titles"
+    )
+
+    card_dashcard = spec["dashcards"][0]
+    assert card_dashcard["tab"] == "Tab One"
+    assert card_dashcard["card"] == "Some_Question"
+    assert card_dashcard["parameter_mappings"] == [
+        {"parameter": "abc123", "target_tag": "deliverable_title"},
+    ]
+
+    text_dashcard = spec["dashcards"][1]
+    assert text_dashcard["tab"] == "Tab Two"
+    assert "card" not in text_dashcard
+    assert text_dashcard["text"] == "# {{deliverable_title}}"
+    assert "visualization_settings" not in text_dashcard
+    assert text_dashcard["parameter_mappings"] == [
+        {"parameter": "abc123", "target_tag": "deliverable_title"},
+    ]
+
+
+def test_resolve_dashcard_unresolved_external_card_raises(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a dashcard referencing a card outside this backup fails fast."""
+    dashcard = {
+        "dashboard_tab_id": 1,
+        "card_id": 999,
+        "col": 0,
+        "row": 0,
+        "size_x": 1,
+        "size_y": 1,
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    with pytest.raises(RuntimeError, match="999"):
+        backup_instance._resolve_dashcard(dashcard, {}, {}, "Some Dashboard")
+
+
+def test_resolve_dashboard_parameter_unresolved_external_card_raises(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a filter sourced from a card outside this backup fails fast."""
+    param = {
+        "id": "abc",
+        "slug": "x",
+        "name": "X",
+        "type": "string/=",
+        "values_source_type": "card",
+        "values_source_config": {"card_id": 999, "value_field": []},
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    with pytest.raises(RuntimeError, match="999"):
+        backup_instance._resolve_dashboard_parameter(param, {})
+
+
+def test_resolve_parameter_mapping_dimension(backup_instance: MetabaseBackupV2) -> None:
+    """Test translating a dimension-target parameter_mapping."""
+    mapping = {
+        "parameter_id": "abc",
+        "card_id": 1,
+        "target": ["dimension", ["template-tag", "deliverable_title"]],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    assert backup_instance._resolve_parameter_mapping(mapping) == {
+        "parameter": "abc",
+        "target_tag": "deliverable_title",
+    }
+
+
+def test_resolve_parameter_mapping_text_tag(backup_instance: MetabaseBackupV2) -> None:
+    """Test translating a text-tag-target parameter_mapping (virtual dashcard)."""
+    mapping = {"parameter_id": "abc", "target": ["text-tag", "deliverable_title"]}
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    assert backup_instance._resolve_parameter_mapping(mapping) == {
+        "parameter": "abc",
+        "target_tag": "deliverable_title",
+    }
+
+
+def test_resolve_parameter_mapping_unexpected_shape_raises(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that an unrecognized target shape fails fast instead of guessing."""
+    mapping = {"parameter_id": "abc", "target": ["something-else", "x"]}
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    with pytest.raises(RuntimeError, match="Unexpected"):
+        backup_instance._resolve_parameter_mapping(mapping)
+
+
+def test_snapshot_and_wipe_output_tree(
+    backup_instance: MetabaseBackupV2,
+    tmp_path: Path,
+) -> None:
+    """Test that snapshotting hashes files and wiping removes level_*/dashboards only."""
+    (tmp_path / "level_0" / "Coll").mkdir(parents=True)
+    (tmp_path / "level_0" / "Coll" / "Q.sql").write_text("SELECT 1")
+    (tmp_path / "dashboards" / "Coll").mkdir(parents=True)
+    (tmp_path / "dashboards" / "Coll" / "D.json").write_text("{}")
+    (tmp_path / "CHANGELOG.txt").write_text("keep me")
+
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    snapshot = backup_instance._snapshot_output_tree()
+    assert "level_0/Coll/Q.sql" in snapshot
+    assert "dashboards/Coll/D.json" in snapshot
+
+    backup_instance._wipe_output_tree()
+
+    assert not (tmp_path / "level_0").exists()
+    assert not (tmp_path / "dashboards").exists()
+    assert (tmp_path / "CHANGELOG.txt").exists()
+
+
+def test_record_changes_added_removed_modified(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test diffing two snapshots into added/removed/modified counts."""
+    before = {"a.sql": "hash1", "b.sql": "hash2"}
+    after = {"a.sql": "hash1", "b.sql": "hash-changed", "c.sql": "hash3"}
+
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._record_changes(before, after)
+
+    assert backup_instance.stats["files_added"] == 1
+    assert backup_instance.stats["files_removed"] == 0
+    assert backup_instance.stats["files_modified"] == 1
+
+
+def test_write_changelog(backup_instance: MetabaseBackupV2, tmp_path: Path) -> None:
+    """Test that a changelog entry is written and prepended on subsequent runs."""
+    backup_instance.stats.update(
+        {
+            "collections_processed": 2,
+            "questions_processed": 5,
+            "questions_skipped": 1,
+            "dashboards_processed": 1,
+            "dashboards_skipped": 0,
+            "files_added": 3,
+            "files_modified": 1,
+            "files_removed": 0,
+        },
+    )
+
+    backup_instance.write_changelog()
+
+    content = (tmp_path / "CHANGELOG.txt").read_text()
+    assert "Backup completed at" in content
+    assert "Collections processed: 2" in content
+    assert "Questions processed: 5" in content
+    assert "Files added: 3" in content
+
+    backup_instance.write_changelog()
+    content = (tmp_path / "CHANGELOG.txt").read_text()
+    assert content.count("Backup completed at") == 2
+    assert content.startswith("\n=== Backup completed at")
+
+
+def test_backup_integration(backup_instance: MetabaseBackupV2, tmp_path: Path) -> None:
+    """Test the full backup() flow: two questions (one dependent) + one dashboard."""
+    collections_payload = [
+        {"id": 10, "name": "Shared", "location": "/"},
+        {"id": 11, "name": "Deliverable Data", "location": "/"},
+        {"id": 12, "name": "Dashboards", "location": "/"},
+    ]
+    items_by_collection = {
+        10: {"data": [{"id": 100, "name": "Ranked Statuses", "model": "card"}]},
+        11: {"data": [{"id": 101, "name": "My Question", "model": "card"}]},
+        12: {"data": [{"id": 200, "name": "My Dashboard", "model": "dashboard"}]},
+    }
+    card_details = {
+        100: {
+            "id": 100,
+            "name": "Ranked Statuses",
+            "dataset_query": {"native": {"query": "SELECT 'Backlog' AS status"}},
+            "display": "table",
+            "visualization_settings": {},
+        },
+        101: {
+            "id": 101,
+            "name": "My Question",
+            "dataset_query": {
+                "native": {
+                    "query": "WITH x AS {{#100-ranked-statuses}} SELECT * FROM x",
+                },
+            },
+            "display": "table",
+            "visualization_settings": {},
+        },
+    }
+    dashboard_detail = {
+        "id": 200,
+        "name": "My Dashboard",
+        "tabs": [{"id": 1, "name": "Only Tab", "position": 0}],
+        "parameters": [],
+        "dashcards": [
+            {
+                "id": 1,
+                "dashboard_tab_id": 1,
+                "card_id": 101,
+                "col": 0,
+                "row": 0,
+                "size_x": 12,
+                "size_y": 4,
+            },
+        ],
+    }
+
+    def fake_get(url: str, **_kwargs: object) -> MagicMock:
+        if url.endswith("/collection/?exclude-other-user-collections=true"):
+            return _response(collections_payload)
+        for collection_id, payload in items_by_collection.items():
+            if url.endswith(f"/collection/{collection_id}/items"):
+                return _response(payload)
+        for card_id, detail in card_details.items():
+            if url.endswith(f"/card/{card_id}"):
+                return _response(detail)
+        if url.endswith("/dashboard/200"):
+            return _response(dashboard_detail)
+        message = f"Unexpected URL: {url}"
+        raise AssertionError(message)
+
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.side_effect = fake_get
+
+    backup_instance.backup()
+
+    assert (tmp_path / "level_0" / "Shared" / "Ranked_Statuses.sql").exists()
+    assert (tmp_path / "level_1" / "Deliverable_Data" / "My_Question.sql").exists()
+    consumer_sql = (
+        tmp_path / "level_1" / "Deliverable_Data" / "My_Question.sql"
+    ).read_text()
+    assert "{{#restore:Ranked_Statuses}}" in consumer_sql
+
+    dashboard_path = tmp_path / "dashboards" / "Dashboards" / "My_Dashboard.json"
+    assert dashboard_path.exists()
+    dashboard_spec = json.loads(dashboard_path.read_text())
+    assert dashboard_spec["dashcards"][0]["card"] == "My_Question"
+
+    assert (tmp_path / "CHANGELOG.txt").exists()
+    changelog = (tmp_path / "CHANGELOG.txt").read_text()
+    assert "Questions processed: 2" in changelog
+    assert "Dashboards processed: 1" in changelog

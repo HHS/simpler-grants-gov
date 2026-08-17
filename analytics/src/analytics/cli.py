@@ -21,6 +21,8 @@ from analytics.integrations.extracts.load_opportunity_data import (
     extract_copy_opportunity_data,
 )
 from analytics.integrations.metabase.backup import MetabaseBackup
+from analytics.integrations.metabase.backup_v2 import MetabaseBackupV2
+from analytics.integrations.metabase.restore import MetabaseRestore
 from analytics.logs import init as init_logging
 from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
@@ -247,3 +249,41 @@ def backup_metabase() -> None:
     # Create backup handler and run backup
     backup = MetabaseBackup(api_url, api_key, output_dir)
     backup.backup()
+
+
+@metabase_app.command(name="backup-v2")
+def backup_metabase_v2() -> None:
+    """Back up Metabase questions and dashboards to disk, including sidecar metadata."""
+    api_url = os.getenv("MB_API_URL")
+    api_key = os.getenv("MB_API_KEY")
+    output_dir = os.getenv("MB_BACKUP_V2_DIR", "metabase-backup-v2")
+
+    if not api_url or not api_key:
+        logger.error("MB_API_URL and MB_API_KEY must be set")
+        return
+
+    backup = MetabaseBackupV2(api_url, api_key, output_dir)
+    backup.backup()
+
+
+@metabase_app.command(name="restore")
+def restore_metabase(
+    restore_dir: Annotated[
+        str,
+        typer.Option(help="Path to the restore directory"),
+    ] = "metabase-restore",
+    collection_name: Annotated[
+        str,
+        typer.Option(help="Base name for the new collection; a timestamp is appended"),
+    ] = "Import",
+) -> None:
+    """Publish restore content to Metabase in a new timestamped collection."""
+    api_url = os.getenv("MB_API_URL")
+    api_key = os.getenv("MB_API_KEY")
+
+    if not api_url or not api_key:
+        logger.error("MB_API_URL and MB_API_KEY must be set")
+        return
+
+    restore = MetabaseRestore(api_url, api_key, restore_dir, collection_name)
+    restore.restore()
