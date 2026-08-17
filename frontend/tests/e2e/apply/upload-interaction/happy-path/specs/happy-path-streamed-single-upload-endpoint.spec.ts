@@ -61,7 +61,12 @@ test.beforeEach(({ page }, testInfo) => {
   page.on("requestfailed", (request) => {
     const url = request.url();
     if (url.includes("/api/file") || url.includes("/api/applications/")) {
-      console.log("PAGE REQUEST FAILED:", request.method(), url, request.failure()?.errorText);
+      console.log(
+        "PAGE REQUEST FAILED:",
+        request.method(),
+        url,
+        request.failure()?.errorText,
+      );
     }
   });
   page.on("response", (response) => {
@@ -104,11 +109,12 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
         delayMs: 1500,
       });
 
-      const attachmentSaveResponse = page.waitForResponse((response) =>
-        response.request().method() === "POST" &&
-        response.url().includes("/api/applications/") &&
-        response.url().includes("/attachments") &&
-        response.status() === 200,
+      const attachmentSaveResponse = page.waitForResponse(
+        (response) =>
+          response.request().method() === "POST" &&
+          response.url().includes("/api/applications/") &&
+          response.url().includes("/attachments") &&
+          response.status() === 200,
       );
 
       // When the applicant uploads a file
@@ -127,9 +133,11 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
       // And the attachment save request should complete successfully.
       await attachmentSaveResponse;
 
-      const saveButton = page.getByRole("button", {
-        name: /save and refresh/i,
-      }).first();
+      const saveButton = page
+        .getByRole("button", {
+          name: /save and refresh/i,
+        })
+        .first();
       await expect(saveButton).toBeEnabled({ timeout: 60000 });
 
       // Cleanup: the upload cancel action should no longer be available.
