@@ -4,6 +4,10 @@
 
 locals {
   nr_host_log_forwarder_name = "${var.service_name}-nr-host-log-forwarder"
+
+  # New Relic reporting identity, which may differ from the AWS resource name when an
+  # environment stands in for another (e.g. infra-staging reports as frontend-staging).
+  newrelic_service_name = coalesce(var.newrelic_service_name, var.service_name)
 }
 
 data "aws_ssm_parameter" "newrelic_license_key_host" {
@@ -47,6 +51,7 @@ resource "aws_lambda_function" "nr_host_log_forwarder" {
       AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
       ECS_SERVICE_NAME        = var.service_name
       ECS_CLUSTER_NAME        = var.service_name
+      NR_ENTITY_NAME          = local.newrelic_service_name
       NR_ENTITY_GUID          = var.newrelic_host_entity_guid != null ? var.newrelic_host_entity_guid : ""
     }
   }

@@ -6,7 +6,6 @@ from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
@@ -26,8 +25,7 @@ notification_config = None
 
 
 @pytest.fixture
-def user_with_email(db_session, user, monkeypatch):
-    monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+def user_with_email(db_session, user):
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
@@ -76,6 +74,8 @@ def test_search_notifications_cli(
     user,
     user_with_email,
     caplog,
+    ses_client,
+    get_sent_emails,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
 
@@ -114,8 +114,6 @@ def test_search_notifications_cli(
         .count()
     )
 
-    _clear_mock_responses()
-
     result = cli_runner.invoke(
         args=["task", "email-notifications"],
         env={"RESET_EMAILS_WITHOUT_SENDING": "false", "SYNC_SUPPRESSED_EMAILS": "false"},
@@ -148,12 +146,10 @@ def test_search_notifications_cli(
     db_session.refresh(saved_search)
     assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
-    # Verify email was sent via Pinpoint
-    mock_responses = _get_mock_responses()
-    assert len(mock_responses) == 1
-
-    request = mock_responses[0][0]
-    assert request["MessageRequest"]["Addresses"] == {"test@example.com": {"ChannelType": "EMAIL"}}
+    # Verify email was sent via SES
+    emails = get_sent_emails()
+    assert len(emails) == 1
+    assert emails[0].destinations["ToAddresses"] == ["test@example.com"]
 
     # Verify notification log was created
     notification_logs = (
@@ -353,6 +349,8 @@ def test_search_notification_email_format_single_opportunity(
     setup_opensearch_data,
     enable_factory_create,
     user_with_email,
+    ses_client,
+    get_sent_emails,
 ):
     """Test that verifies the format of search notification emails"""
     # Create test opportunities with known data
@@ -387,8 +385,6 @@ def test_search_notification_email_format_single_opportunity(
         searched_opportunity_ids=[OPPORTUNITIES[0].opportunity_id],  # Test single opportunity
     )
 
-    _clear_mock_responses()
-
     # Run notification task
     result = cli_runner.invoke(
         args=["task", "email-notifications"],
@@ -396,20 +392,16 @@ def test_search_notification_email_format_single_opportunity(
     )
     assert result.exit_code == 0
 
-    # Get the email content from mock responses
-    mock_responses = _get_mock_responses()
-    assert len(mock_responses) == 1
+    # Get the email content from the captured SES messages
+    emails = get_sent_emails()
+    assert len(emails) == 1
 
     assert (
-        mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-            "SimpleEmail"
-        ]["Subject"]["Data"]
+        emails[0].subject
         == f"New Grant Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
     )
 
-    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-        "SimpleEmail"
-    ]["TextPart"]["Data"]
+    email_content = emails[0].body
 
     # Test single opportunity format
     expected_single = f"""A funding opportunity matching your saved search query was recently published.
@@ -434,6 +426,8 @@ def test_search_notification_email_format_no_close_date(
     setup_opensearch_data,
     enable_factory_create,
     user_with_email,
+    ses_client,
+    get_sent_emails,
 ):
     """Test that verifies the format of search notification emails when there's no close date"""
     # Create test opportunity with post date but no close date
@@ -471,8 +465,6 @@ def test_search_notification_email_format_no_close_date(
         ],  # Previous results
     )
 
-    _clear_mock_responses()
-
     # Run notification task
     result = cli_runner.invoke(
         args=["task", "email-notifications"],
@@ -480,13 +472,11 @@ def test_search_notification_email_format_no_close_date(
     )
     assert result.exit_code == 0
 
-    # Get the email content from mock responses
-    mock_responses = _get_mock_responses()
-    assert len(mock_responses) == 1
+    # Get the email content from the captured SES messages
+    emails = get_sent_emails()
+    assert len(emails) == 1
 
-    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-        "SimpleEmail"
-    ]["TextPart"]["Data"]
+    email_content = emails[0].body
 
     # Test opportunity with no close date format
     expected_content = f"""A funding opportunity matching your saved search query was recently published.
@@ -511,6 +501,8 @@ def test_search_notification_email_format_multiple_opportunities(
     setup_opensearch_data,
     enable_factory_create,
     user_with_email,
+    ses_client,
+    get_sent_emails,
 ):
     """Test that verifies the format of search notification emails"""
     # Create test opportunities with known data
@@ -568,8 +560,6 @@ def test_search_notification_email_format_multiple_opportunities(
         ],  # Test single opportunity
     )
 
-    _clear_mock_responses()
-
     # Run notification task
     result = cli_runner.invoke(
         args=["task", "email-notifications"],
@@ -577,20 +567,16 @@ def test_search_notification_email_format_multiple_opportunities(
     )
     assert result.exit_code == 0
 
-    # Get the email content from mock responses
-    mock_responses = _get_mock_responses()
-    assert len(mock_responses) == 1
+    # Get the email content from the captured SES messages
+    emails = get_sent_emails()
+    assert len(emails) == 1
 
     assert (
-        mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-            "SimpleEmail"
-        ]["Subject"]["Data"]
+        emails[0].subject
         == f"2 New Grants Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
     )
 
-    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-        "SimpleEmail"
-    ]["TextPart"]["Data"]
+    email_content = emails[0].body
 
     # Verify both opportunities are in the email (order may vary)
     assert (

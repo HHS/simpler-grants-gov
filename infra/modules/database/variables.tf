@@ -126,3 +126,26 @@ variable "deletion_protection" {
   description = "Whether to enable deletion protection on the cluster and backup vault. Set to false for environments that need automated teardown."
   default     = true
 }
+
+variable "snapshot_share_account_ids" {
+  type        = list(string)
+  description = <<-EOT
+    AWS account ids allowed to decrypt this cluster's storage KMS key, so that
+    snapshots of this cluster can be shared with — and restored into — those
+    accounts. Used by the cross-environment DB restore workflow to seed one
+    environment from another.
+
+    Only needed for environments in their own AWS account (the infra-* set).
+    Environments that share an account restore from each other without any
+    cross-account grant, so they leave this empty.
+
+    Grants kms:Decrypt / kms:DescribeKey / kms:CreateGrant to the listed
+    accounts. Sharing an encrypted snapshot is not sufficient on its own:
+    without access to the key, RestoreDBClusterFromSnapshot fails in the
+    target account.
+
+    Leave empty (the default) to keep the key private to this account, which
+    also preserves the AWS default key policy.
+  EOT
+  default     = []
+}

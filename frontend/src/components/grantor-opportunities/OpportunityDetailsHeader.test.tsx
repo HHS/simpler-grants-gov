@@ -119,6 +119,21 @@ describe("OpportunityDetailsHeader", () => {
     expect(screen.getByText("01/08/2026")).toBeInTheDocument();
   });
 
+  it("formats last updated in Eastern Time near UTC midnight", () => {
+    // 8:38 PM ET on 06/20/2026 is 00:38 UTC on 06/21/2026
+    render(
+      <OpportunityDetailsHeader
+        opportunityData={{
+          ...mockOpportunityData,
+          updated_at: "2026-06-21T00:38:00Z",
+        }}
+        locale="en"
+      />,
+    );
+    expect(screen.getByText("06/20/2026")).toBeInTheDocument();
+    expect(screen.queryByText("06/21/2026")).not.toBeInTheDocument();
+  });
+
   it("renders -- for missing title", () => {
     render(
       <OpportunityDetailsHeader

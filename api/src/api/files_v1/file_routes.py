@@ -13,7 +13,7 @@ import src.api.files_v1.file_schemas as file_schemas
 from src.api.files_v1.file_blueprint import file_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
-from src.services.files.create_presigned_upload import create_presigned_upload
+from src.services.files.create_presigned_upload import SimplerPresignFileUploadService
 from src.services.files.stream_file_scan_results import stream_file_scan_results
 from src.services.files.update_pending_file_scan_status import update_pending_file_scan_status
 
@@ -42,10 +42,8 @@ def create_presigned_upload_route(db_session: db.Session, json_data: dict) -> re
 
     with db_session.begin():
         db_session.add(user)
-        result = create_presigned_upload(
-            db_session=db_session,
-            user=user,
-            request_data=json_data,
+        result = SimplerPresignFileUploadService(db_session).create_presigned_upload(
+            user=user, file_name=json_data["file_name"], mime_type=json_data["mime_type"]
         )
 
     add_extra_data_to_current_request_logs({"pending_file_id": result.pending_file_id})
