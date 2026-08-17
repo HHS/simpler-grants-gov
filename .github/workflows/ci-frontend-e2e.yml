@@ -391,7 +391,7 @@ jobs:
         uses: tj-actions/changed-files@v47.0.6
         with:
           files: |
-            frontend/tests/utils/**
+            frontend/tests/util/**
             frontend/tests/playwright.config.ts
             frontend/tests/playwright-env.ts
             frontend/tests/playwrightUtils.ts
