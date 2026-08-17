@@ -256,7 +256,6 @@ export async function stubStreamingAttachmentUpload(
   }: StubStreamingAttachmentUploadOptions,
 ): Promise<void> {
   await page.route("**/api/file**", async (route) => {
-    console.log("PLAYWRIGHT: stubStreamingAttachmentUpload intercepted /api/file");
     const chunks = [
       JSON.stringify({ status: "queued" }),
       JSON.stringify({ status: "uploading" }),
@@ -266,10 +265,6 @@ export async function stubStreamingAttachmentUpload(
     ];
 
     const fullBody = Buffer.from(chunks.join(""));
-    chunks.forEach((chunk) =>
-      console.log("PLAYWRIGHT: stubStreamingAttachmentUpload sending chunk", chunk),
-    );
-
     await route.fulfill({
       status: 200,
       headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -278,10 +273,6 @@ export async function stubStreamingAttachmentUpload(
   });
 
   await page.route("**/api/applications/**/attachments**", async (route) => {
-    console.log(
-      "PLAYWRIGHT: stubStreamingAttachmentUpload intercepted attachments route",
-      route.request().url(),
-    );
     if (delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
