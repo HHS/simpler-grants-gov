@@ -80,9 +80,7 @@ export function getOpportunityListPageLocator(
   definition: OpportunityListPageFieldDefinition,
 ) {
   if (definition.role) {
-    const options = definition.name
-      ? { name: definition.name }
-      : undefined;
+    const options = definition.name ? { name: definition.name } : undefined;
 
     return page.getByRole(definition.role, options);
   }

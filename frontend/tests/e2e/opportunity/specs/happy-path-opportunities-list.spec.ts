@@ -33,8 +33,8 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
-  OPPORTUNITIES_LIST_PAGE_DEFINITIONS,
   getOpportunityListPageLocator,
+  OPPORTUNITIES_LIST_PAGE_DEFINITIONS,
 } from "tests/e2e/opportunity/fixtures/opportunity-list-definition";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
