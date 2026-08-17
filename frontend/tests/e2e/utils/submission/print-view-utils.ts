@@ -247,8 +247,18 @@ export async function validateAllPrintViews(
     for (const [testId, expectedValue] of Object.entries(
       expectedPrepopulatedFields,
     )) {
-      await expect(page.getByTestId(testId)).toBeVisible();
-      await expect(page.getByTestId(testId)).toContainText(expectedValue);
+      const locator = page.getByTestId(testId);
+      await expect(locator).toBeVisible();
+
+      // For input elements, check the value attribute; for other elements, check visible text
+      const elementType = await locator.evaluate((el) =>
+        el.tagName.toLowerCase(),
+      );
+      if (elementType === "input") {
+        await expect(locator).toHaveValue(expectedValue);
+      } else {
+        await expect(locator).toContainText(expectedValue);
+      }
     }
 
     // User-entered fields - uses formConfig.fields (printTestId ?? testId)
