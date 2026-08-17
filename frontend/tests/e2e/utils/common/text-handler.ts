@@ -75,7 +75,7 @@ export const textHandler: FieldHandler = async (
       }
     }
   }
-  
+
   // All retries exhausted
   throw lastError;
 };
