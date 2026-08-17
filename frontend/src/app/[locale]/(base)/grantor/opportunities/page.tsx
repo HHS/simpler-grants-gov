@@ -32,7 +32,7 @@ import {
 import OpportunityStatusTag from "src/components/opportunity/OpportunityStatusTag";
 import OpportunitiesPagination from "./_components/OpportunitiesPagination";
 
-export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
+const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");
   return (
     <GridContainer>

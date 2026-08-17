@@ -6,12 +6,14 @@ import {
   createOpportunitySummaryForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
-import { OpportunitySummaryCreateRequest } from "src/types/opportunity/opportunityResponseTypes";
-import { getOpportunitySummaryValidationData } from "src/utils/validation/opportunitySummaryValidation";
 import {
-  getZodValidationErrors,
-  mapApiValidationErrors,
-} from "src/utils/validation/zodValidation";
+  getOpportunitySummaryValidationData,
+  toOpportunitySummaryRequest,
+} from "src/utils/validation/opportunitySummaryValidation";
+import {
+  mapServerApiValidationErrors,
+  validateZodFormData,
+} from "src/utils/validation/zodServerValidation";
 import type { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
@@ -31,33 +33,13 @@ export type OpportunityEditActionState = {
   newOpportunitySummaryId?: string;
 };
 
-function toOpportunitySummaryRequest(
-  data: z.output<typeof OpportunitySummaryCreateRequestV1Schema>,
-): OpportunitySummaryCreateRequest {
-  return {
-    ...data,
-    close_date: data.close_date ?? null,
-    close_date_description: data.close_date_description ?? null,
-    expected_number_of_awards: data.expected_number_of_awards ?? null,
-    estimated_total_program_funding:
-      data.estimated_total_program_funding ?? null,
-    additional_info_url: data.additional_info_url ?? null,
-    additional_info_url_description:
-      data.additional_info_url_description ?? null,
-    funding_category_description: data.funding_category_description ?? null,
-    applicant_eligibility_description:
-      data.applicant_eligibility_description ?? null,
-  };
-}
-
 export async function saveOpportunityEditAction(
   _prevState: OpportunityEditActionState,
   formData: FormData,
 ): Promise<OpportunityEditActionState> {
-  const [alerts, fieldTranslations, genericTranslations] = await Promise.all([
+  const [alerts, fieldTranslations] = await Promise.all([
     getTranslations("OpportunityEdit.content.alerts"),
     getTranslations("OpportunityEdit.validationErrors"),
-    getTranslations("genericValidationMessages"),
   ]);
 
   const opportunityIdValue = formData.get("opportunity_id");
@@ -77,24 +59,20 @@ export async function saveOpportunityEditAction(
     };
   }
 
-  const validationData = getOpportunitySummaryValidationData(formData);
+  const validation = await validateZodFormData({
+    schema: OpportunitySummaryCreateRequestV1Schema,
+    formData,
+    fieldTranslations,
+    getValidationData: getOpportunitySummaryValidationData,
+  });
 
-  const validatedFields =
-    OpportunitySummaryCreateRequestV1Schema.safeParse(validationData);
-
-  if (!validatedFields.success) {
+  if (!validation.success) {
     return {
-      validationErrors: getZodValidationErrors(
-        validatedFields.error,
-        validationData,
-        OpportunitySummaryCreateRequestV1Schema,
-        fieldTranslations,
-        genericTranslations,
-      ),
+      validationErrors: validation.validationErrors,
     };
   }
 
-  const body = toOpportunitySummaryRequest(validatedFields.data);
+  const body = toOpportunitySummaryRequest(validation.data);
 
   try {
     if (!opportunitySummaryId) {
@@ -104,11 +82,10 @@ export async function saveOpportunityEditAction(
       });
 
       if (createResponse.status_code === 422) {
-        return mapApiValidationErrors(
+        return mapServerApiValidationErrors(
           createResponse,
           OpportunitySummaryCreateRequestV1Schema,
           fieldTranslations,
-          genericTranslations,
           alerts("genericError"),
         );
       }
@@ -126,11 +103,10 @@ export async function saveOpportunityEditAction(
     });
 
     if (response.status_code === 422) {
-      return mapApiValidationErrors(
+      return mapServerApiValidationErrors(
         response,
         OpportunitySummaryCreateRequestV1Schema,
         fieldTranslations,
-        genericTranslations,
         alerts("genericError"),
       );
     }

@@ -12,12 +12,11 @@ import {
   fundingOptions,
 } from "src/constants/opportunity";
 import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchemas.zod";
+import { useZodFormValidation } from "src/hooks/useZodValidation";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
-import { normalizeDateString } from "src/utils/dateUtil";
 import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
 import { getOpportunitySummaryValidationData } from "src/utils/validation/opportunitySummaryValidation";
-import { isFieldInSchema } from "src/utils/validation/zodFormData";
-import { getZodValidationErrors } from "src/utils/validation/zodValidation";
+import { stripCommasFromNumberString } from "tests/e2e/utils/common/number-formatters";
 
 import { useTranslations } from "next-intl";
 import {
@@ -46,12 +45,6 @@ import {
   CommonWordLimit,
 } from "src/components/core/forms/CommonFormFields";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
-
-function formatNumber(value: string): string {
-  const raw = value.replace(/,/g, "");
-  if (!raw || isNaN(Number(raw))) return value;
-  return Number(raw).toLocaleString("en-US");
-}
 
 const eligibilityDisplayLabels: Record<string, string> = Object.fromEntries(
   ELIGIBILITY_OPTIONS.map(({ value, label }) => [value, label]),
@@ -111,10 +104,6 @@ export default function OpportunityEditForm({
   initialAttachments = [],
 }: OpportunityEditFormProps) {
   const t = useTranslations("OpportunityEdit");
-  const validationTranslations = useTranslations(
-    "OpportunityEdit.validationErrors",
-  );
-  const genericTranslations = useTranslations("genericValidationMessages");
   const formRef = useRef<HTMLFormElement>(null);
   const [currentSummaryId, setCurrentSummaryId] =
     useState(opportunitySummaryId);
@@ -125,7 +114,6 @@ export default function OpportunityEditForm({
     initialValues.funding_categories,
   );
   const [closeDate, setCloseDate] = useState(initialValues.close_date);
-  const [postDate, setPostDate] = useState(initialValues.post_date);
   const [selectedEligibility, setSelectedEligibility] = useState<string[]>(
     initialValues.applicant_types,
   );
@@ -133,94 +121,22 @@ export default function OpportunityEditForm({
     validationErrors: {},
   });
 
-  const validationErrors: OpportunityEditValidationErrors | undefined =
-    formState.validationErrors;
-
-  // Client-side validation errors shown as fields are blurred.
-  const [frontendErrors, setFrontendErrors] =
-    useState<OpportunityEditValidationErrors>({});
-
-  function setSingleFrontendError<
-    K extends keyof OpportunityEditValidationErrors,
-  >(fieldname: K, error: string | null) {
-    if (!error) {
-      // clear the list of errors for this field
-      setFrontendErrors((currentValues) => ({
-        ...currentValues,
-        [fieldname]: [],
-      }));
-    } else {
-      setFrontendErrors((currentValues) => ({
-        ...currentValues,
-        [fieldname]: [error],
-      }));
-    }
-  }
+  const fieldTranslations = useTranslations("OpportunityEdit.validationErrors");
+  const { getFieldError, getFieldErrors, handleFieldBlur, validateField } =
+    useZodFormValidation({
+      schema: OpportunitySummaryCreateRequestV1Schema,
+      serverErrors: formState.validationErrors,
+      fieldTranslations: fieldTranslations,
+      getValidationData: (formData) =>
+        getOpportunitySummaryValidationData(formData),
+    });
 
   const handleDatePickerBlur = (
     field: keyof OpportunityEditValidationErrors,
   ) => {
     if (!formRef.current) return;
 
-    validateFieldFromForm(field, formRef.current);
-  };
-
-  const validateFieldFromForm = (field: string, form: HTMLFormElement) => {
-    const formData = new FormData(form);
-
-    if (!isFieldInSchema(OpportunitySummaryCreateRequestV1Schema, field)) {
-      return;
-    }
-
-    const validationField = field as keyof OpportunityEditValidationErrors;
-
-    setSingleFrontendError(validationField, null);
-
-    const validationData = getOpportunitySummaryValidationData(formData, {
-      post_date: normalizeDateString(postDate) ?? "",
-      close_date: normalizeDateString(closeDate) || null,
-    });
-
-    const result =
-      OpportunitySummaryCreateRequestV1Schema.safeParse(validationData);
-
-    if (result.success) {
-      return;
-    }
-
-    const validationErrors = getZodValidationErrors(
-      result.error,
-      validationData,
-      OpportunitySummaryCreateRequestV1Schema,
-      validationTranslations,
-      genericTranslations,
-      field,
-    );
-
-    setFrontendErrors((currentValues) => ({
-      ...currentValues,
-      [validationField]: validationErrors[field] ?? [],
-    }));
-  };
-
-  const handleFieldBlur = (event: React.FocusEvent<HTMLFormElement>) => {
-    const target = event.target;
-
-    if (!(
-      target instanceof HTMLInputElement ||
-      target instanceof HTMLSelectElement ||
-      target instanceof HTMLTextAreaElement
-    )) {
-      return;
-    }
-
-    const field = target.name;
-
-    if (!field) {
-      return;
-    }
-
-    validateFieldFromForm(field, event.currentTarget);
+    fieldTranslations(field, formRef.current);
   };
 
   // Shared toggle handler for eligibility checkboxes.
@@ -229,16 +145,6 @@ export default function OpportunityEditForm({
       ? selectedEligibility.filter((v) => v !== value)
       : [...selectedEligibility, value];
     setSelectedEligibility(next);
-  }
-
-  function getFieldError(
-    fieldName: keyof OpportunityEditValidationErrors,
-  ): string | undefined {
-    if (fieldName in frontendErrors) {
-      return frontendErrors[fieldName]?.join(" ");
-    }
-
-    return validationErrors?.[fieldName]?.join(" ");
   }
 
   useEffect(() => {
@@ -268,8 +174,6 @@ export default function OpportunityEditForm({
       onSubmit={(e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        formData.set("post_date", normalizeDateString(postDate) ?? "");
-        formData.set("close_date", normalizeDateString(closeDate) || "");
         formData.set("submitType", "saveAndExit");
         startTransition(() => formAction(formData));
       }}
@@ -502,7 +406,7 @@ export default function OpportunityEditForm({
                   id="estimated_total_program_funding"
                   name="estimated_total_program_funding"
                   type="text"
-                  defaultValue={formatNumber(
+                  defaultValue={stripCommasFromNumberString(
                     initialValues.estimated_total_program_funding,
                   )}
                   className="width-full"
@@ -526,7 +430,9 @@ export default function OpportunityEditForm({
                   id="award_floor"
                   name="award_floor"
                   type="text"
-                  defaultValue={formatNumber(initialValues.award_floor)}
+                  defaultValue={stripCommasFromNumberString(
+                    initialValues.award_floor,
+                  )}
                   className="width-full"
                 />
               </FormGroup>
@@ -545,7 +451,9 @@ export default function OpportunityEditForm({
                   id="award_ceiling"
                   name="award_ceiling"
                   type="text"
-                  defaultValue={formatNumber(initialValues.award_ceiling)}
+                  defaultValue={stripCommasFromNumberString(
+                    initialValues.award_ceiling,
+                  )}
                   className="width-full"
                 />
               </FormGroup>
@@ -569,9 +477,12 @@ export default function OpportunityEditForm({
                   name="post_date"
                   defaultValue={initialValues.post_date}
                   placeholder="mm/dd/yyyy"
-                  onChange={(value) => setPostDate(value ?? "")}
                   className="width-full"
-                  onBlur={() => handleDatePickerBlur("post_date")}
+                  onBlur={() => {
+                    if (formRef.current) {
+                      validateField("post_date", formRef.current);
+                    }
+                  }}
                 />
               </FormGroup>
             </div>
@@ -711,15 +622,7 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.applicant_eligibility_description}
                 onTextChange={() => {}}
-                rawErrors={
-                  getFieldError("applicant_eligibility_description")
-                    ? [
-                        getFieldError(
-                          "applicant_eligibility_description",
-                        ) as string,
-                      ]
-                    : []
-                }
+                rawErrors={getFieldErrors("applicant_eligibility_description")}
               />
             </div>
           )}
@@ -749,11 +652,7 @@ export default function OpportunityEditForm({
               isRequired={false}
               defaultValue={initialValues.summary_description}
               onTextChange={() => {}}
-              rawErrors={
-                getFieldError("summary_description")
-                  ? [getFieldError("summary_description") as string]
-                  : []
-              }
+              rawErrors={getFieldErrors("summary_description")}
             />
           </div>
 
@@ -768,11 +667,7 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.additional_info_url}
                 onTextChange={() => {}}
-                rawErrors={
-                  getFieldError("additional_info_url")
-                    ? [getFieldError("additional_info_url") as string]
-                    : []
-                }
+                rawErrors={getFieldErrors("additional_info_url")}
               />
             </div>
             <div className="tablet:grid-col-6">
@@ -784,15 +679,7 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.additional_info_url_description}
                 onTextChange={() => {}}
-                rawErrors={
-                  getFieldError("additional_info_url_description")
-                    ? [
-                        getFieldError(
-                          "additional_info_url_description",
-                        ) as string,
-                      ]
-                    : []
-                }
+                rawErrors={getFieldErrors("additional_info_url_description")}
               />
             </div>
           </div>
@@ -807,11 +694,7 @@ export default function OpportunityEditForm({
               isRequired={false}
               defaultValue={initialValues.agency_contact_description}
               onTextChange={() => {}}
-              rawErrors={
-                getFieldError("agency_contact_description")
-                  ? [getFieldError("agency_contact_description") as string]
-                  : []
-              }
+              rawErrors={getFieldErrors("agency_contact_description")}
             />
           </div>
 
@@ -826,11 +709,7 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.agency_email_address}
                 onTextChange={() => {}}
-                rawErrors={
-                  getFieldError("agency_email_address")
-                    ? [getFieldError("agency_email_address") as string]
-                    : []
-                }
+                rawErrors={getFieldErrors("agency_email_address")}
               />
             </div>
             <div className="tablet:grid-col-6">
@@ -842,15 +721,7 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.agency_email_address_description}
                 onTextChange={() => {}}
-                rawErrors={
-                  getFieldError("agency_email_address_description")
-                    ? [
-                        getFieldError(
-                          "agency_email_address_description",
-                        ) as string,
-                      ]
-                    : []
-                }
+                rawErrors={getFieldErrors("agency_email_address_description")}
               />
             </div>
           </div>
@@ -883,8 +754,6 @@ export default function OpportunityEditForm({
             onClick={() => {
               if (!formRef.current) return;
               const formData = new FormData(formRef.current);
-              formData.set("post_date", normalizeDateString(postDate) ?? "");
-              formData.set("close_date", normalizeDateString(closeDate) || "");
               formData.set("submitType", "saveAndGoBack");
               startTransition(() => formAction(formData));
             }}
@@ -898,8 +767,6 @@ export default function OpportunityEditForm({
           onClick={() => {
             if (!formRef.current) return;
             const formData = new FormData(formRef.current);
-            formData.set("post_date", normalizeDateString(postDate) ?? "");
-            formData.set("close_date", normalizeDateString(closeDate) || "");
             formData.set("submitType", "saveAndContinue");
             startTransition(() => formAction(formData));
           }}

@@ -1,3 +1,4 @@
+import { normalizeDateString } from "src/utils/dateUtil";
 import { z } from "zod";
 
 type ZodObjectSchema = z.ZodObject<Record<string, ZodSchema>>;
@@ -85,6 +86,16 @@ function normalizeValueForSchema(
 
     if (value === "false") {
       return false;
+    }
+  }
+
+  if (unwrappedSchema instanceof z.ZodString) {
+    const isDate = unwrappedSchema._def.checks.some(
+      (check) => check.kind === "date",
+    );
+
+    if (isDate) {
+      return normalizeDateString(value) ?? value;
     }
   }
 
