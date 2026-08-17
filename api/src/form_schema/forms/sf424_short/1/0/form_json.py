@@ -49,6 +49,12 @@ FORM_JSON_SCHEMA = {
         "project_start_date",
         "project_end_date",
         "project_director",
+        # Section 8 is always required, which intentionally differs from legacy: the XSD marks
+        # ContactPersonGroup minOccurs="0" and the .dat makes it conditionally optional when
+        # "Same as Project Director" is checked. Per epic #10796 the checkbox is informational
+        # only - it does not auto-populate, hide, or clear Section 8 - so the applicant always
+        # fills it in and it is always required. See the SF-424 Short notes in
+        # api/src/services/xml_generation/README.md.
         "contact_person",
         "application_certification",
         "authorized_representative",
@@ -560,6 +566,18 @@ FORM_XML_TRANSFORM_RULES = {
                 "source_field": "applicant_type_code",
                 "target_pattern": "ApplicantTypeCode{index}",
                 "max_count": 3,  # SF-424 Short supports up to 3 applicant type codes
+                # Normalize legacy casing: option H was stored with lowercase "state"
+                # but the XSD requires capital "State".
+                # passthrough_unknown=True leaves all other option codes unchanged.
+                "item_value_transform": {
+                    "type": "map_values",
+                    "params": {
+                        "mappings": {
+                            "H: Public/state Controlled Institution of Higher Education": "H: Public/State Controlled Institution of Higher Education",
+                        },
+                        "passthrough_unknown": True,
+                    },
+                },
             },
         }
     },
@@ -623,7 +641,7 @@ SF424Short_v3_0 = Form(
     # https://www.grants.gov/forms/form-items-description/fid/711
     form_id=uuid.UUID("cf355a4d-d840-43fd-a78f-729edf41ab4c"),
     legacy_form_id=711,
-    form_name="APPLICATION FOR FEDERAL DOMESTIC ASSISTANCE-SHORT ORGANIZATIONAL (SF-424)",
+    form_name="Application for Federal Domestic Assistance-Short Organizational (SF-424)",
     short_form_name="SF424_Short_3_0",
     form_version="3.0",
     agency_code="SGG",
@@ -632,7 +650,7 @@ SF424Short_v3_0 = Form(
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
     json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
-    # SF-424 Short does not currently have instructions loaded
+    form_instruction_id=uuid.UUID("550e8400-e29b-41d4-a716-446655440000"),
     form_type=FormType.SF424_SHORT,
     sgg_version="1.0",
     is_deprecated=False,

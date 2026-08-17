@@ -12,7 +12,7 @@ import {
 
 const { targetEnv } = playwrightEnv;
 
-const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 30000 : 10000;
+const FILTER_OPTIONS_TIMEOUT = targetEnv !== "local" ? 30000 : 10000;
 
 const getBrowserType = (page: Page, projectName?: string) => {
   if (projectName) {
@@ -151,7 +151,7 @@ export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBoxLabel = page
     .locator(`label[for="${idWithoutHash}"]:visible`)
     .first();
-  const timeout = targetEnv === "staging" ? 120000 : 30000;
+  const timeout = targetEnv !== "local" ? 120000 : 30000;
   await checkBox.waitFor({ state: "attached", timeout });
   await checkBoxLabel.waitFor({ state: "visible", timeout });
   await checkBoxLabel.scrollIntoViewIfNeeded();
@@ -223,7 +223,7 @@ export async function selectSortBy(
   projectName?: string,
 ) {
   const timeoutOption =
-    targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
+    targetEnv !== "local" ? { timeout: 60000 } : { timeout: 10000 };
   const sortSelectElement = drawer
     ? page.locator("#search-sort-by-select-drawer")
     : page.locator("#search-sort-by-select").first();
@@ -238,7 +238,7 @@ export async function selectSortBy(
   await sortSelectElement.selectOption(sortByValue);
 
   // For mobile drawer on staging, wait longer as it can be very slow
-  if (drawer && targetEnv === "staging") {
+  if (drawer && targetEnv !== "local") {
     await page.waitForTimeout(5000);
   }
 
@@ -247,7 +247,7 @@ export async function selectSortBy(
 
 export async function expectSortBy(page: Page, value: string, drawer = false) {
   const timeoutOption =
-    targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
+    targetEnv !== "local" ? { timeout: 60000 } : { timeout: 10000 };
   const sortSelectElement = drawer
     ? page.locator("#search-sort-by-select-drawer")
     : page.locator("#search-sort-by-select").first();
@@ -258,7 +258,7 @@ export async function waitForSearchResultsInitialLoad(
   page: Page,
   timeoutOverride?: number,
 ) {
-  let timeout = targetEnv === "staging" ? 180000 : 60000;
+  let timeout = targetEnv !== "local" ? 180000 : 60000;
   if (timeoutOverride) {
     timeout = timeoutOverride;
   }
@@ -384,7 +384,7 @@ export async function ensureAccordionExpanded(
   const button = page.locator(
     `button.usa-accordion__button:has-text("${accordionTitle}"):visible`,
   );
-  const timeout = targetEnv === "staging" ? 120000 : 30000;
+  const timeout = targetEnv !== "local" ? 120000 : 30000;
   await button.waitFor({ state: "visible", timeout });
   await button.scrollIntoViewIfNeeded();
   await page.waitForTimeout(100);

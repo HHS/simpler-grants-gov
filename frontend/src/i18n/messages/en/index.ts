@@ -542,6 +542,13 @@ export const messages = {
       uploadBy: "Upload by",
       uploadDate: "Upload date",
     },
+    attachmentUpload: {
+      error:
+        "Processing failed due to a system error. Try uploading your file again.",
+      success:
+        "Success: File scan complete. “Save” this form to attach the file.",
+      uploading: "Uploading...",
+    },
     historyTable: {
       applicationHistory: "Application History",
       timestamp: "Timestamp",
@@ -584,6 +591,8 @@ export const messages = {
       returnToApplication: "Return to application",
       saving: "Saving...",
       savingAndRefreshing: "Save and refresh",
+      saveDisabledTooltipMessage:
+        "Save disabled while file upload is processing.",
       lastUpdatedMessage: "This form was last updated on",
       createdMessage: "This form was created on",
     },
@@ -1969,6 +1978,12 @@ export const messages = {
       },
     },
   },
+  CommonWordLimit: {
+    wordsAllowed: "words allowed",
+    wordsLeft: "{num, plural, =1 {1 word left} other {# words left}}",
+    wordsError:
+      "{num, plural, =1 {1 word over limit} other {# words over limit}}",
+  },
   Applications: {
     numApplications: "{num, plural, =1 {1 application} other {# applications}}",
     errorMessage:
@@ -2026,13 +2041,23 @@ export const messages = {
     tableHeadings: {
       agency: "Agency",
       title: "Title",
+      oppNumber: "Opp. Number",
+      fundingInstrumentType: "Funding Instrument Type",
+      lastUpdated: "Last Updated",
       status: "Status",
-      actions: "Actions",
+      actions: "Action",
     },
     actionButtons: {
       edit: "Edit",
       copy: "Copy",
       delete: "Delete",
+    },
+    statusTag: {
+      draft: "Draft",
+      posted: "Open",
+      forecasted: "Forecasted",
+      archived: "Archived",
+      closed: "Closed",
     },
   },
   Organizations: {
@@ -2222,6 +2247,7 @@ export const messages = {
         recommendedWithoutFunding: "Recommended but not funded",
         notRecommended: "Not recommended",
       },
+      selectOnePlaceholder: "Select one",
       hasExceptionLabel: "Contains exceptions to selection method",
       commentsLabel: "Recommendation comments",
       commentsDescription:
@@ -2236,6 +2262,10 @@ export const messages = {
       amountRequestedLabel: "Amount Requested",
       amountRecommendedLabel: "Amount Recommended",
       totalLabel: "Total",
+      validationErrorHeading: "There is a problem with your recommendation",
+      recommendationRequired: "Select your recommendation",
+      exceptionDetailRequired: "Enter a reason for this exception",
+      amountRecommendedRequired: "Enter an amount recommended",
     },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
@@ -2371,6 +2401,71 @@ export const messages = {
       showingRange: "Showing {start}-{end} of {total}",
       editButton: "Edit",
     },
+    reviewForm: {
+      pageTitle: "Submit for Review | Simpler.Grants.gov",
+      pageDescription: "Submit award recommendation for review",
+      header: "Submit for Review",
+      loading: "Loading...",
+      contentCreator: {
+        title: "Submit for Review",
+      },
+      reviewer: {
+        title: "Review Award Recommendation",
+        question:
+          "Do you concur on behalf of the Grants Office that this document meets applicable grants management requirements?",
+        yesConcur: "Yes, approval obtained (attachment required)",
+        noIssues: "No, issues identified, changes needed (attachment required)",
+        hold: "Hold, review in progress",
+      },
+      fmo: {
+        title: "FMO Review",
+        question:
+          "Do you certify the availability of funds to support the recommendation documented in this document?",
+        fundsAvailable: "Yes, funds are available",
+        fundsContingent: "Yes, funds are contingent upon availability by",
+        dateLabel: "Date",
+        noCertification: "No, certification cannot be provided, changes needed",
+        hold: "Hold, review in progress",
+      },
+      reviewComment: {
+        label: "Review comments",
+        description: "Shown on the award recommendation document",
+      },
+      internalComment: {
+        checkboxLabel: "Add internal comments for your team",
+        label: "Internal comments",
+        description: "Only visible in workflow history",
+      },
+      supplementalDocuments: {
+        label: "Supplemental review documents",
+        description: "Choose the documents you'd like to include",
+        uploading: "Uploading document...",
+        uploadSuccess: "Document uploaded successfully",
+        uploadError: "Error uploading document. Please try again.",
+      },
+      attestation: {
+        contentCreator:
+          "I attest that I am providing my recommendation of the recipients identified in this document for award consideration",
+        reviewer:
+          "I attest that I am providing my approval of the recipients identified in this document for award consideration",
+      },
+      buttons: {
+        submit: "Submit review",
+        submitting: "Submitting...",
+        cancel: "Cancel",
+      },
+      errors: {
+        submitFailed: "Failed to submit review. Please try again.",
+        insufficientPrivileges:
+          "You do not have the required privileges to review award recommendations.",
+        invalidReviewerType:
+          "You do not have permission to review at this stage of the workflow.",
+        authFailed:
+          "Failed to authenticate user. Please sign in and try again.",
+        loadingFailed: "Failed to load review form. Please try again.",
+        noWorkflow: "No workflow is associated with this award recommendation.",
+      },
+    },
   },
   CreateAwardRecommendation: {
     pageTitle: "Create recommendation",
@@ -2482,6 +2577,12 @@ export const messages = {
       opportunityTitle: "Opportunity title",
       opportunityTitleDesc:
         "Provide a concise, descriptive name that helps applicants identify the grant's purpose.",
+      tagline: "Tagline",
+      taglineDesc:
+        "A specific one-sentence purpose statement that summarizes the highest-level goal.",
+      purposeStatement: "Purpose statement",
+      purposeStatementDesc:
+        "Provide a one-line statement that helps applicants understand the grant's purpose.",
       agency: "Agency",
       category: "Grant selection method",
       categoryDesc: "Choose the evaluation process used to award these funds.",
@@ -2490,7 +2591,7 @@ export const messages = {
         'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
       assistanceListingNumber: "Assistance listing number",
       assistanceListingNumberDesc:
-        "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
+        "Enter the 5-digit code from SAM.gov (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
     },
   },
@@ -2596,6 +2697,13 @@ export const messages = {
           "Incorrect text format. Please ensure there are no spaces or missing characters.",
       },
     },
+    sectionRequiredForms: {
+      header: "Forms in this package",
+      subHeader: "Select the forms applicants must complete.",
+      selectFormsButton: "Select forms",
+      labelForm: "Item",
+      labelRequirement: "Requirement",
+    },
   },
   FeatureFlagsAdmin: {
     heading: "Refresh your page",
@@ -2640,7 +2748,8 @@ export const messages = {
     statusDisplay: {
       cancel: "Cancel",
       dismiss: "Dismiss",
-      queued: "Queued",
+      processing: "Processing file",
+      starting: "Starting upload",
       uploading: "Uploading...",
       startingScan: "Upload complete. Starting security scan",
       scanning: "Upload complete. Running security scan...",

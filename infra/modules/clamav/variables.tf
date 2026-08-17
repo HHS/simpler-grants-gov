@@ -99,9 +99,15 @@ variable "scanner_provisioned_concurrency" {
 }
 
 variable "scanner_max_file_size_bytes" {
-  description = "Maximum object size the scanner will download to /tmp. Files above this threshold are moved to the failed prefix with an explicit reason rather than failing with a confusing disk-space error. Default is 450 MiB to leave headroom under Lambda's 512 MiB /tmp limit."
+  description = "Maximum object size the scanner will scan."
   type        = number
-  default     = 471859200
+  default     = 2147483648
+}
+
+variable "scanner_ephemeral_storage_size" {
+  description = "Scanner Lambda /tmp size in MB."
+  type        = number
+  default     = 10240
 }
 
 variable "alert_email_subscriptions" {

@@ -5,10 +5,21 @@ locals {
     module.notifications_email_domain[0].domain_identity_arn :
     module.existing_notifications_email_domain[0].domain_identity_arn
   ) : null
-  notifications_environment_variables = local.notifications_config != null ? {
-    AWS_PINPOINT_APP_ID = module.notifications[0].app_id
-    AWS_SES_FROM_EMAIL  = module.notifications[0].from_email
-  } : {}
+  external_ses_email_domains = {
+    "infra-dev"      = "dev.simpler.grants.gov"
+    "infra-staging"  = "staging.simpler.grants.gov"
+    "infra-training" = "training.simpler.grants.gov"
+  }
+  external_ses_email_domain = local.notifications_config == null ? lookup(local.external_ses_email_domains, var.environment_name, null) : null
+
+  notifications_environment_variables = merge(
+    local.notifications_config != null ? {
+      AWS_SES_FROM_EMAIL = module.notifications[0].from_email
+    } : {},
+    local.external_ses_email_domain != null ? {
+      AWS_SES_FROM_EMAIL = "notifications@${local.external_ses_email_domain}"
+    } : {},
+  )
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
   pinpoint_app_id        = local.notifications_config != null ? module.notifications[0].app_id : ""
   ses_configuration_set  = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
@@ -31,6 +42,32 @@ module "existing_notifications_email_domain" {
   source = "../../modules/notifications-email-domain/data"
 
   domain_name = local.network_config.domain_config.hosted_zone
+}
+
+resource "aws_iam_policy" "external_ses_access" {
+  count = local.external_ses_email_domain != null ? 1 : 0
+
+  name        = "${local.service_name}-external-ses-access"
+  description = "Send email through the existing ${local.external_ses_email_domain} SES identity and read the account suppression list"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "SendSESEmail"
+        Effect   = "Allow"
+        Action   = "ses:SendEmail"
+        Resource = "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${local.external_ses_email_domain}"
+      },
+      {
+        # ListSuppressedDestinations is account-wide and takes no resource.
+        Sid      = "ListSuppressedDestinations"
+        Effect   = "Allow"
+        Action   = "ses:ListSuppressedDestinations"
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 # If the app has `enable_notifications` set to true, create a new email notification

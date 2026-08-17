@@ -16,7 +16,7 @@ const { FULL_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
 
 test.beforeEach(async ({ page }) => {
-  const timeout = targetEnv === "staging" ? 180000 : 60000;
+  const timeout = targetEnv !== "local" ? 180000 : 60000;
 
   // Background: Given I open "/newsletter"
   await page.goto("/newsletter", { waitUntil: "domcontentloaded", timeout });

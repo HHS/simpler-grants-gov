@@ -22,6 +22,7 @@ describe("getNextRoutes", () => {
       "/(base)/grantor/award-recommendation/1/risks/[riskId]/edit",
       "/(base)/grantor/award-recommendation/1/risks/add",
       "/(base)/grantor/award-recommendation/1/risks",
+      "/(base)/grantor/award-recommendation/1/submit-for-review",
       "/(base)/grantor/award-recommendation/create",
       "/(base)/grantor/award-recommendation",
       "/(base)/grantor/award-recommendation/select-opportunity",

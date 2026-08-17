@@ -39,10 +39,10 @@ class AgencySearchRequestSchema(Schema):
     )
     query_operator = fields.Enum(
         SearchQueryOperator,
-        load_default=SearchQueryOperator.OR,
+        load_default=SearchQueryOperator.AND,
         metadata={
             "description": "Query operator for combining search conditions",
-            "example": "OR",
+            "example": "AND",
         },
     )
     filters = fields.Nested(AgencySearchFilterV1Schema())

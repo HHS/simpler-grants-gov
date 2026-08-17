@@ -75,7 +75,16 @@ locals {
       "v1/users/login"                      = [{ "method" : "GET" }],
       "v1/users/logout"                     = [{ "method" : "GET" }],
       "v1/users/token"                      = [],
-      "v1/files/{file_id}"                  = [],
+      # ClamAV scanner callback:
+      "v1/files/{file_id}" = [{
+        "method" : "POST",
+        "method_parameters" : {
+          "method.request.path.file_id" = true
+        },
+        "request_parameters" : {
+          "integration.request.path.file_id" : "method.request.path.file_id",
+        }
+      }],
   }][var.enable_api_gateway ? 1 : 0]
 
   third_level_endpoints = [
@@ -584,7 +593,7 @@ resource "aws_api_gateway_method_settings" "api_v1_stage_settings" {
 
 # trivy:ignore:AVD-AWS-0005
 resource "aws_api_gateway_domain_name" "api" {
-  count = var.enable_api_gateway && var.certificate_arn != null ? 1 : 0
+  count = var.enable_api_gateway && var.enable_api_gateway_domain_name && var.certificate_arn != null ? 1 : 0
   # This will become a different variable since it will be the current API domain and cert
   domain_name              = var.domain_name
   regional_certificate_arn = var.certificate_arn
@@ -597,7 +606,7 @@ resource "aws_api_gateway_domain_name" "api" {
 }
 
 resource "aws_api_gateway_base_path_mapping" "api_domain_name_mapping_v1" {
-  count       = var.enable_api_gateway && var.certificate_arn != null ? 1 : 0
+  count       = var.enable_api_gateway && var.enable_api_gateway_domain_name && var.certificate_arn != null ? 1 : 0
   api_id      = aws_api_gateway_rest_api.api[0].id
   domain_name = aws_api_gateway_domain_name.api[0].domain_name
   stage_name  = aws_api_gateway_stage.api_v1_stage[0].stage_name

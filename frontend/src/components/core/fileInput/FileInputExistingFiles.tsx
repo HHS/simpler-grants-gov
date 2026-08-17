@@ -10,10 +10,12 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 export const FileInputExistingFiles = ({
   existingFiles,
   onDelete,
+  disabled = false,
   filesWithDeleteError = [] as string[],
 }: {
   existingFiles?: UploadFileMetadata[];
   onDelete: (fileToDelete: UploadFileMetadata) => void;
+  disabled?: boolean;
   filesWithDeleteError?: string[];
 }) => {
   const t = useTranslations("FileInput.existingFiles");
@@ -25,8 +27,15 @@ export const FileInputExistingFiles = ({
       const hasError = filesWithDeleteError.findIndex(
         (fileWithDeleteError) => fileWithDeleteError === existingFile.id,
       );
-      // depending on how this comes back from the API we may want do something different in terms of date formatting
-      const timestampDisplay = `${t("savedOn")} ${formatDateWithNoPreformattedExpectations(new Date(existingFile.updatedAt))}`;
+      // a file can be listed before its server metadata is available, so the timestamp is
+      // omitted rather than rendered as "Invalid Date"
+      const updatedAtDate = existingFile.updatedAt
+        ? new Date(existingFile.updatedAt)
+        : undefined;
+      const timestampDisplay =
+        updatedAtDate && !Number.isNaN(updatedAtDate.valueOf())
+          ? `${t("savedOn")} ${formatDateWithNoPreformattedExpectations(updatedAtDate)}`
+          : "";
       return (
         <Grid
           key={existingFile.id}
@@ -51,6 +60,7 @@ export const FileInputExistingFiles = ({
             <Button
               type="button"
               unstyled
+              disabled={disabled}
               onClick={() => {
                 void onDelete(existingFile);
               }}
