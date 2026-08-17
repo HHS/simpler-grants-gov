@@ -2762,7 +2762,8 @@ export const messages = {
       missingFileId: "Error: missing file id",
       preUploadError: "Pre upload error",
       infected: "Security scan failed. File removed",
-      fileTooLarge: "This file is too large. The maximum file size is 200 MB.",
+      fileTooLarge:
+        "This file is too large. The maximum file size is {maxFileSize}.",
     },
     deleteModal: {
       titleText: "Delete",
