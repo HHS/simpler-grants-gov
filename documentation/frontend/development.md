@@ -112,19 +112,114 @@ describe('MyComponent', () => {
 
 E2E test filenames end with `.spec.ts` and are found in the `tests/e2e` directory.
 
-To run E2E tests via CLI:
+To run E2E tests via CLI, start from the repository root directory.
 
-- `cd ../api && make remake-backend start` (prerequisite to start the API)
-- `npx playwright install --with-deps` — Downloads playwright browsers required to run tests
-- `npm run test:e2e` — Runs all E2E tests using the playwright config found at `tests/playwright.config.ts`
-- `npm run test:e2e:ui` — Run specific or all E2E tests using Playwright's [UI mode](https://playwright.dev/docs/test-ui-mode), which is useful for debugging full traces of each test
+1. Initialize, seed, and start the local API:
+
+```sh
+cd api
+make remake-backend
+make start
+```
+
+If `make remake-backend` errors run the following:
+```sh
+docker compose run --rm grants-api setup-postgres-db
+make db-migrate
+make setup-api-data
+```
+
+`make remake-backend` recreates the local Docker volumes, applies migrations,
+creates the E2E users and test data, and populates the search indexes. It
+deletes existing local API data. `make start` starts the API at
+`http://localhost:8080`.
+
+2. Build the production frontend. Playwright starts this build with `next start`:
+
+```sh
+cd ../frontend
+npm run build
+```
+
+3. Install the browsers used by the local Playwright projects:
+
+```sh
+npx playwright install --with-deps
+```
+
+4. Verify the API and test discovery:
+
+```sh
+curl --fail http://127.0.0.1:8080/health
+npx playwright test --config ./tests/playwright.config.ts --list
+```
+
+5. Run all E2E tests across the local browser projects:
+
+```sh
+PLAYWRIGHT_WORKERS=1 npm run test:e2e
+```
+
+The local suite currently uses shared seeded users, organizations, and
+opportunities. Keep `PLAYWRIGHT_WORKERS=1` for a reliable full-suite run;
+multiple workers can interfere when tests create or update shared applications
+and opportunities. `PLAYWRIGHT_WORKERS` can be increased only after
+worker-specific test data and sufficient service capacity are available.
+
+For a focused run of one test file from the repository root, use:
+
+```sh
+cd frontend
+npm run test:e2e -- tests/e2e/path/to/test.spec.ts
+```
+
+For an interactive run from the repository root, use:
+
+```sh
+cd frontend
+npm run test:e2e:ui
+```
 
 To run E2E tests using VS Code:
 
 1. Download the VS Code extension described in these [Playwright docs](https://playwright.dev/docs/running-tests#run-tests-in-vs-code)
-2. Follow the [instructions](https://playwright.dev/docs/getting-started-vscode#running-tests) Playwright provides
+2. From the repository root, initialize, seed, and start the local API:
 
-Playwright E2E tests run "local-to-local", requiring both the frontend and the API to be running for the tests to pass - and for the database to be seeded with data.
+  ```sh
+  cd api
+  make remake-backend
+  make start
+  ```
+
+3. Build the frontend and install the Playwright browsers:
+
+  ```sh
+  cd ../frontend
+  npm run build
+  npx playwright install --with-deps
+  ```
+
+4. Set `PLAYWRIGHT_WORKERS=1` in the VS Code terminal environment before
+  running local E2E tests. The tests share seeded users, organizations, and
+  opportunities, so multiple workers can interfere with tests that create or
+  update applications and opportunities.
+
+  ```sh
+  export PLAYWRIGHT_WORKERS=1
+  ```
+
+  The setting can also be added to `frontend/.env.local` if it should apply to
+  every local Playwright run. An explicit `PLAYWRIGHT_WORKERS` value overrides
+  the default in `tests/playwright.config.ts`.
+
+5. Follow the [Playwright VS Code instructions](https://playwright.dev/docs/getting-started-vscode#running-tests).
+
+The Playwright configuration starts the built frontend automatically when a
+test run begins. The API must remain running at `http://127.0.0.1:8080`, and the
+database must remain seeded while tests are running.
+
+Playwright E2E tests run "local-to-local". The API must be running and the
+database must be seeded; 
 
 In CI, the "Frontend Checks" workflow (`.github/workflows/ci-frontend-e2e.yml`) runs Playwright tests, and will include a summary when complete, with an "Artifacts" section where there is an attached "playwright-report". [Playwright docs](https://playwright.dev/docs/ci-intro#html-report) describe how to view the HTML Report in more detail.
 
