@@ -76,21 +76,20 @@ export const fieldDefinitionsSF424Short: FormFillFieldDefinitions = {
     section: "Section 5",
     field: "Web Address",
   },
-  // TODO: MultiSelect widget - SF-424 (long) uses a single combo-box-input for
-  // applicant_type_code, but the Short form's UI schema declares widget: "MultiSelect".
-  // Field shape (testId / optionTestIdPrefix) below is a placeholder guess and needs
-  // confirming against the actual MultiSelect component before this fixture is usable.
-  applicant_type_code__multiselect: {
-    testId: "multi-select-toggle",
+  // MultiSelect widget for applicant_type_code (array, minItems: 1, maxItems: 3)
+  // Renders as a ComboBox with hidden inputs for each selected value
+  // Component ID: applicant_type_code__combobox (derived from field id + "__combobox")
+  applicant_type_code: {
+    testId: "applicant_type_code__combobox",
     printTestId: "applicant_type_code",
-    optionTestIdPrefix: "multi-select-option-",
+    optionTestIdPrefix: "applicant-type-code-option-",
     type: "combo-box-input",
     section: "Section 5",
     field: "Type of Applicant",
   },
   applicant_type_other_specify: {
     dependsOn: {
-      field: "applicant_type_code__multiselect",
+      field: "applicant_type_code",
       value: "X: Other (specify)",
     },
     testId: "applicant_type_other_specify",

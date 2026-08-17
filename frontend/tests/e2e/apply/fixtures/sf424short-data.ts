@@ -25,9 +25,9 @@ export const buildSF424ShortHappyPathTestData = (
     applicant_country: "USA: UNITED STATES",
     applicant_zip_code: "12345",
     applicant_web_address: `https://example${shortSuffix}.org`,
-    // TODO: value shape depends on the MultiSelect widget implementation - see the
-    // applicant_type_code__multiselect TODO in sf424-short-field-definitions.ts.
-    applicant_type_code__multiselect: "C: City or Township Government",
+    // applicant_type_code is an array field (type: array, minItems: 1, maxItems: 3)
+    // Backend schema has MultiSelect widget - test passes array of selected codes
+    applicant_type_code: "C: City or Township Government",
     employer_taxpayer_identification_number: "44-4444444",
     congressional_district_applicant: "00-000",
 
