@@ -26,6 +26,7 @@ export const dropdownHandler: FieldHandler = async (
   if (field.testId) {
     const locator = page.getByTestId(`${field.testId}${data}`);
     await locator.waitFor({ state: "visible", timeout: 5000 });
+    await locator.scrollIntoViewIfNeeded();
     await locator.click();
     return;
   }
@@ -34,7 +35,7 @@ export const dropdownHandler: FieldHandler = async (
       .getByLabel(field.label, { exact: field.labelExact })
       .first();
     await control.waitFor({ state: "visible", timeout: 5000 });
-
+    await control.scrollIntoViewIfNeeded();
     const tagName = await control.evaluate((node) =>
       node.tagName.toLowerCase(),
     );

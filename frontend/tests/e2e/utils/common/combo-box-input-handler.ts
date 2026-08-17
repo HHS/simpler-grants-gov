@@ -26,6 +26,7 @@ export const comboBoxInputHandler: FieldHandler = async (
   try {
     const toggleLocator = page.getByTestId(field.testId);
     await toggleLocator.waitFor({ state: "visible", timeout: 5000 });
+    await toggleLocator.scrollIntoViewIfNeeded();
     await toggleLocator.click();
     const optionPrefix = field.optionTestIdPrefix ?? "combo-box-option-";
     const optionLocator = page.getByTestId(`${optionPrefix}${data}`);
@@ -36,9 +37,12 @@ export const comboBoxInputHandler: FieldHandler = async (
     // Fallback for widgets that do not expose stable test IDs for the toggle/options
     // (e.g., MultiSelect based on USWDS ComboBox).
     const comboByLabel = page
-      .getByRole("combobox", { name: new RegExp(escapeRegex(field.field), "i") })
+      .getByRole("combobox", {
+        name: new RegExp(escapeRegex(field.field), "i"),
+      })
       .first();
     await comboByLabel.waitFor({ state: "visible", timeout: 5000 });
+    await comboByLabel.scrollIntoViewIfNeeded();
     await comboByLabel.click();
     await comboByLabel.fill(data);
     await comboByLabel.press("Enter");

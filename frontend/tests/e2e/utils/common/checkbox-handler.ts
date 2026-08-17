@@ -34,6 +34,7 @@ const applyNestedCheckboxFallback = async (
     if (nestedId) {
       const label = page.locator(`label[for="${nestedId}"]`).first();
       await label.waitFor({ state: "visible", timeout: 5000 });
+      await label.scrollIntoViewIfNeeded();
       await label.click();
     } else if (shouldBeChecked) {
       await nestedCheckbox.check({ timeout: 5000 });
@@ -76,6 +77,7 @@ export const checkboxHandler: FieldHandler = async (
 
   if (locatorCount === 1) {
     await locator.waitFor({ state: "visible", timeout: 5000 });
+    await locator.scrollIntoViewIfNeeded();
   } else {
     if (!field.selectFirstInGroup) {
       throw new Error(
@@ -83,6 +85,7 @@ export const checkboxHandler: FieldHandler = async (
       );
     }
     await locator.first().waitFor({ state: "visible", timeout: 5000 });
+    await locator.first().scrollIntoViewIfNeeded();
   }
 
   /** Sets a locator to the target checked state and verifies the result. */

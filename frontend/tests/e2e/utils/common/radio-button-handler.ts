@@ -24,6 +24,7 @@ async function checkRadioViaLabelFallback(
 
   const label = page.locator(`label[for="${inputId}"]`).first();
   await label.waitFor({ state: "visible", timeout: 5000 });
+  await label.scrollIntoViewIfNeeded();
   await label.click();
 }
 
@@ -45,6 +46,7 @@ export const radioButtonHandler: FieldHandler = async (
 
   const locator = getChoiceLocator(page, field, data);
   await locator.waitFor({ state: "visible", timeout: 5000 });
+  await locator.scrollIntoViewIfNeeded();
 
   if (await locator.isChecked()) {
     return;
