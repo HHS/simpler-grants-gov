@@ -101,8 +101,7 @@ export const SF424_SHORT_OPPORTUNITY_DATA: PrintViewFormData = {
   formKey: "sf424short",
   expectedPrepopulatedFields: {
     funding_opportunity_number: "E2E-SF424SHORT-ORG-IND-01",
-    funding_opportunity_title:
-      "E2E SF-424 Short Organizational ORG IND OT01",
+    funding_opportunity_title: "E2E SF-424 Short Organizational ORG IND OT01",
     assistance_listing_number: "10.960",
     agency_name: "Simpler Grants.gov",
     assistance_listing_program_title: "Technical Agricultural Assistance",
