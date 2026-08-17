@@ -49,12 +49,20 @@ locals {
   # infra-dev's account.
   #
   # Restores flow "down" from more-production-like environments, which is why
-  # infra-staging grants infra-dev and not the reverse.
+  # infra-staging grants the dev-account environments and not the reverse.
+  #
+  # All four targets live in the same AWS account (061664787759), so this
+  # resolves to a single account id and one grant on infra-staging's key covers
+  # every one of them. The list is written out per environment anyway, so the
+  # intent stays readable if any of them later moves to its own account.
   snapshot_restore_targets = {
-    "infra-staging" = ["infra-dev"]
+    "infra-staging" = ["infra-grantee1", "infra-grantee2", "infra-grantor1", "infra-dev"]
   }
 
-  snapshot_share_account_ids = [
+  # distinct() because several target environments can share one AWS account
+  # (all four dev-account environments do), and repeating the same principal in
+  # the key policy statement adds noise without changing its meaning.
+  snapshot_share_account_ids = distinct([
     for env in lookup(local.snapshot_restore_targets, var.environment_name, []) :
     local.account_ids_by_name[module.project_config.network_configs[module.app_config.environment_configs[env].network_name].account_name]
     # Skip targets whose account has no tfbackend file, so a partially
@@ -63,7 +71,7 @@ locals {
       keys(local.account_ids_by_name),
       module.project_config.network_configs[module.app_config.environment_configs[env].network_name].account_name
     )
-  ]
+  ])
 
   account_ids_by_name = data.external.account_ids_by_name.result
 }
