@@ -44,37 +44,8 @@ const SAMPLE_FILE_NAME = "TestZip3543Kb.zip";
 const SAMPLE_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/${SAMPLE_FILE_NAME}`;
 
 // Skip non-Chrome browsers in staging
-test.beforeEach(({ page }, testInfo) => {
+test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
-  page.on("console", (message) => {
-    console.log("PAGE CONSOLE [", message.type(), "]", message.text());
-  });
-  page.on("pageerror", (error) => {
-    console.log("PAGE ERROR:", error);
-  });
-  page.on("request", (request) => {
-    const url = request.url();
-    if (url.includes("/api/file") || url.includes("/api/applications/")) {
-      console.log("PAGE REQUEST:", request.method(), url);
-    }
-  });
-  page.on("requestfailed", (request) => {
-    const url = request.url();
-    if (url.includes("/api/file") || url.includes("/api/applications/")) {
-      console.log(
-        "PAGE REQUEST FAILED:",
-        request.method(),
-        url,
-        request.failure()?.errorText,
-      );
-    }
-  });
-  page.on("response", (response) => {
-    const url = response.url();
-    if (url.includes("/api/file") || url.includes("/api/applications/")) {
-      console.log("PAGE RESPONSE:", response.status(), url);
-    }
-  });
 });
 
 test.describe("File upload interactions - Attachment Form streamed upload endpoint", () => {
@@ -86,12 +57,6 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
       testInfo: TestInfo,
     ) => {
       test.setTimeout(300_000);
-      page.on("console", (message) => {
-        console.log("PAGE CONSOLE:", message.type(), message.text());
-      });
-      page.on("pageerror", (error) => {
-        console.log("PAGE ERROR:", error);
-      });
 
       // Given the applicant has opened the Attachment Form
       await openApplicationFormWithAuth(
