@@ -447,6 +447,8 @@ jobs:
       #             - Run E2E tests for changed spec files
       #           - No
       #             - Run E2E tests
+      #
+      #   Unfortunately Playwright won't let you run both file and grep based filters on which specs to run, within the same invocation
 
       - name: Run All E2E tests (utils updated)
         uses: ./.github/actions/e2e

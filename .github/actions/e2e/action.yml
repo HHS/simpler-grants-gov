@@ -233,15 +233,17 @@ runs:
       shell: bash
 
     - name: Verify Blob Report Directory
+      if: ${{ inputs.spec_files == '' }}
       working-directory: ./frontend
       run: |
         echo "Contents of blob-report directory:"
         ls -R blob-report || echo "blob-report directory not found"
       shell: bash
 
+    # skip the test report for specific file based runs
     - name: Upload Blob Report
+      if: ${{ inputs.spec_files == '' && always() || false }}
       id: upload-blob-report
-      if: always()
       uses: actions/upload-artifact@v7
       with:
         name: blob-report-shard-${{ inputs.target }}-${{ inputs.current_shard }}
