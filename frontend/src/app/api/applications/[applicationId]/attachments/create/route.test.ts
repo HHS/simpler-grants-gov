@@ -43,6 +43,8 @@ const options = { params: Promise.resolve({ applicationId: "app-123" }) };
 const readJson = (response: Response) =>
   response.json() as Promise<{ message?: string; data?: Attachment }>;
 
+const VALID_PENDING_FILE_ID = "11111111-1111-4111-8111-111111111111";
+
 describe("POST request", () => {
   beforeEach(() => {
     getSessionMock.mockReturnValue({ token: "fakeToken" });
@@ -53,7 +55,7 @@ describe("POST request", () => {
     mockCreateApplicationAttachment.mockResolvedValue({ data: attachment });
 
     const response = await createApplicationAttachmentHandler(
-      fakeRequest({ pending_file_id: "pending-file-1" }),
+      fakeRequest({ pending_file_id: VALID_PENDING_FILE_ID }),
       options,
     );
 
@@ -61,7 +63,24 @@ describe("POST request", () => {
     expect((await readJson(response)).data).toEqual(attachment);
     expect(mockCreateApplicationAttachment).toHaveBeenCalledWith(
       "app-123",
-      "pending-file-1",
+      VALID_PENDING_FILE_ID,
+    );
+  });
+
+  it("accepts an uppercase uuid and trims surrounding whitespace", async () => {
+    mockCreateApplicationAttachment.mockResolvedValue({ data: attachment });
+
+    const response = await createApplicationAttachmentHandler(
+      fakeRequest({
+        pending_file_id: `  ${VALID_PENDING_FILE_ID.toUpperCase()}  `,
+      }),
+      options,
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockCreateApplicationAttachment).toHaveBeenCalledWith(
+      "app-123",
+      VALID_PENDING_FILE_ID.toUpperCase(),
     );
   });
 
@@ -69,7 +88,7 @@ describe("POST request", () => {
     getSessionMock.mockReturnValue({ token: "" });
 
     const response = await createApplicationAttachmentHandler(
-      fakeRequest({ pending_file_id: "pending-file-1" }),
+      fakeRequest({ pending_file_id: VALID_PENDING_FILE_ID }),
       options,
     );
 
@@ -89,46 +108,84 @@ describe("POST request", () => {
     expect(mockCreateApplicationAttachment).not.toHaveBeenCalled();
   });
 
-  it("returns 400 when pending_file_id is missing", async () => {
-    const response = await createApplicationAttachmentHandler(
-      fakeRequest({}),
-      options,
-    );
+  describe("pending_file_id validation", () => {
+    const invalidBodies: [string, unknown][] = [
+      ["missing", {}],
+      ["undefined", { pending_file_id: undefined }],
+      ["null", { pending_file_id: null }],
+      ["empty string", { pending_file_id: "" }],
+      ["whitespace only", { pending_file_id: "   " }],
+      ["malformed uuid", { pending_file_id: "not-a-uuid" }],
+      ["uuid with extra characters", { pending_file_id: `${"1".repeat(40)}` }],
+      [
+        "uuid missing a segment",
+        { pending_file_id: "11111111-1111-4111-111111111111" },
+      ],
+      ["number", { pending_file_id: 12345 }],
+      ["boolean", { pending_file_id: true }],
+      ["array", { pending_file_id: [VALID_PENDING_FILE_ID] }],
+      ["object", { pending_file_id: { id: VALID_PENDING_FILE_ID } }],
+      ["body is an array", [{ pending_file_id: VALID_PENDING_FILE_ID }]],
+      ["body is a string", "pending_file_id"],
+      ["body is null", null],
+    ];
 
-    expect(response.status).toBe(400);
-    expect((await readJson(response)).message).toBe("Missing pending_file_id");
-    expect(mockCreateApplicationAttachment).not.toHaveBeenCalled();
+    it.each(invalidBodies)(
+      "returns 400 without calling the API when pending_file_id is %s",
+      async (_label, body) => {
+        const response = await createApplicationAttachmentHandler(
+          fakeRequest(body),
+          options,
+        );
+
+        expect(response.status).toBe(400);
+        expect((await readJson(response)).message).toBe(
+          "Invalid pending_file_id",
+        );
+        expect(mockCreateApplicationAttachment).not.toHaveBeenCalled();
+      },
+    );
   });
 
-  it("returns 500 with the underlying message when the API call fails", async () => {
-    mockCreateApplicationAttachment.mockRejectedValue(
-      new Error("API exploded"),
-    );
+  describe("failure sanitization", () => {
+    it("does not return an internal error message to the browser", async () => {
+      mockCreateApplicationAttachment.mockRejectedValue(
+        new Error("connect ECONNREFUSED 10.0.0.4:8080 while calling /v1/apply"),
+      );
 
-    const response = await createApplicationAttachmentHandler(
-      fakeRequest({ pending_file_id: "pending-file-1" }),
-      options,
-    );
+      const response = await createApplicationAttachmentHandler(
+        fakeRequest({ pending_file_id: VALID_PENDING_FILE_ID }),
+        options,
+      );
 
-    expect(response.status).toBe(500);
-    expect((await readJson(response)).message).toBe(
-      "Error failed to upload attachment: API exploded",
-    );
-  });
+      expect(response.status).toBe(500);
+      const { message } = await readJson(response);
+      expect(message).toBe("Error failed to upload attachment");
+      expect(message).not.toContain("ECONNREFUSED");
+      expect(message).not.toContain("10.0.0.4");
+    });
 
-  it("passes through the status of an API error", async () => {
-    mockCreateApplicationAttachment.mockRejectedValue(
-      new ApiRequestError("Attachment limit exceeded", "APIRequestError", 422),
-    );
+    it.each([[401], [403], [404], [422], [500], [503]])(
+      "preserves upstream status %s while sanitizing the message",
+      async (status) => {
+        mockCreateApplicationAttachment.mockRejectedValue(
+          new ApiRequestError(
+            `upstream detail for ${status}`,
+            "APIRequestError",
+            status,
+          ),
+        );
 
-    const response = await createApplicationAttachmentHandler(
-      fakeRequest({ pending_file_id: "pending-file-1" }),
-      options,
-    );
+        const response = await createApplicationAttachmentHandler(
+          fakeRequest({ pending_file_id: VALID_PENDING_FILE_ID }),
+          options,
+        );
 
-    expect(response.status).toBe(422);
-    expect((await readJson(response)).message).toBe(
-      "Error failed to upload attachment: Attachment limit exceeded",
+        expect(response.status).toBe(status);
+        expect((await readJson(response)).message).toBe(
+          "Error failed to upload attachment",
+        );
+      },
     );
   });
 });

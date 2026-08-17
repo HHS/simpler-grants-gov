@@ -50,10 +50,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md#paid-contributions) to learn more.
 
 #### Bounty Board
 
-| Size | Amount | Name | Status | Age |
-| ---- | ------ | ---- | ------ | --- |
-| L | $400 | [Support sending emails locally](https://github.com/HHS/simpler-grants-gov/issues/10897) | open, unclaimed! | New |
-
 [See a list of all open bounties.](https://github.com/HHS/simpler-grants-gov/issues?q=state%3Aopen%20label%3A%22status%3A%20open%20bounty%22)
 
 ## Community

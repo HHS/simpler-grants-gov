@@ -17,10 +17,12 @@ type SimplerFileInputMockProps = {
   postUploadActionErrorMessage?: string;
   onDelete: (fileId: string) => Promise<unknown>;
   onStart?: () => void;
+  onComplete?: () => void;
   existingFiles?: UploadFileMetadata[];
   disabled?: boolean;
   readOnly?: boolean;
-  labelId: string;
+  describedByIds: string[];
+  formInvalid: boolean;
 };
 
 const mockUseApplicationAttachments = jest.fn<
@@ -35,7 +37,7 @@ jest.mock("src/hooks/ApplicationAttachments", () => ({
 const mockClientFetch = jest.fn();
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
-    clientFetch: (...args: unknown[]) => mockClientFetch(...args) as unknown,
+    clientFetch: mockClientFetch,
   }),
 }));
 
@@ -59,6 +61,10 @@ const getHiddenInput = (container: HTMLElement, name: string) =>
   container.querySelector<HTMLInputElement>(
     `input[type="hidden"][name="${name}"]`,
   );
+
+const incrementAttachmentsProcessing = jest.fn();
+const decrementAttachmentsProcessing = jest.fn();
+const markFormDirty = jest.fn();
 
 describe("ApplicationAttachmentWidget", () => {
   const existingAttachment: Attachment = {
@@ -380,13 +386,15 @@ describe("ApplicationAttachmentWidget", () => {
   });
 
   it("marks the form dirty when an upload starts", () => {
-    const markFormDirty = jest.fn();
-
     render(
       <ApplicationAttachmentWidget
         {...defaultProps}
         formContext={{
-          widgetSupport: { useVirusScanning: true, markFormDirty },
+          widgetSupport: {
+            useSingleAttachmentVirusScanning: true,
+            useMultipleAttachmentVirusScanning: false,
+            markFormDirty,
+          },
         }}
       />,
     );
@@ -396,15 +404,123 @@ describe("ApplicationAttachmentWidget", () => {
     expect(markFormDirty).toHaveBeenCalled();
   });
 
-  it("marks the form dirty when the attachment is deleted", async () => {
-    const markFormDirty = jest.fn();
+  it("increments the attachments uploading counter and marks the form dirty when an upload starts", () => {
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: {
+            useSingleAttachmentVirusScanning: true,
+            markFormDirty,
+            attachmentsUploadingCounter: {
+              incrementAttachmentsProcessing,
+              decrementAttachmentsProcessing,
+            },
+          },
+        }}
+      />,
+    );
+    getSimplerFileInputProps().onStart?.();
+    expect(incrementAttachmentsProcessing).toHaveBeenCalledTimes(1);
+    expect(decrementAttachmentsProcessing).not.toHaveBeenCalled();
+    expect(markFormDirty).toHaveBeenCalled();
+  });
 
+  it("does not increment the attachments uploading counter when markFormDirty throws", () => {
+    const throwingMarkFormDirty = jest.fn(() => {
+      throw new Error("markFormDirty failed");
+    });
+
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: {
+            useSingleAttachmentVirusScanning: true,
+            markFormDirty: throwingMarkFormDirty,
+            attachmentsUploadingCounter: {
+              incrementAttachmentsProcessing,
+              decrementAttachmentsProcessing,
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(() => getSimplerFileInputProps().onStart?.()).toThrow(
+      "markFormDirty failed",
+    );
+    expect(incrementAttachmentsProcessing).not.toHaveBeenCalled();
+  });
+
+  it("decrements the attachments uploading counter when an upload completes", () => {
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: {
+            useSingleAttachmentVirusScanning: true,
+            attachmentsUploadingCounter: {
+              incrementAttachmentsProcessing,
+              decrementAttachmentsProcessing,
+            },
+          },
+        }}
+      />,
+    );
+    getSimplerFileInputProps().onComplete?.();
+    expect(decrementAttachmentsProcessing).toHaveBeenCalledTimes(1);
+    expect(incrementAttachmentsProcessing).not.toHaveBeenCalled();
+  });
+
+  it("increments and decrements the counter once per upload lifecycle", () => {
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: {
+            useSingleAttachmentVirusScanning: true,
+            attachmentsUploadingCounter: {
+              incrementAttachmentsProcessing,
+              decrementAttachmentsProcessing,
+            },
+          },
+        }}
+      />,
+    );
+
+    getSimplerFileInputProps().onStart?.();
+    getSimplerFileInputProps().onComplete?.();
+    expect(incrementAttachmentsProcessing).toHaveBeenCalledTimes(1);
+    expect(decrementAttachmentsProcessing).toHaveBeenCalledTimes(1);
+  });
+
+  it("handles upload start and completion when no uploading counter support is provided", () => {
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        formContext={{
+          widgetSupport: { useSingleAttachmentVirusScanning: true },
+        }}
+      />,
+    );
+    expect(() => {
+      getSimplerFileInputProps().onStart?.();
+      getSimplerFileInputProps().onComplete?.();
+    }).not.toThrow();
+  });
+
+  it("marks the form dirty when the attachment is deleted", async () => {
     render(
       <ApplicationAttachmentWidget
         {...defaultProps}
         value="uuid-1"
         formContext={{
-          widgetSupport: { useVirusScanning: true, markFormDirty },
+          widgetSupport: {
+            useSingleAttachmentVirusScanning: true,
+            useMultipleAttachmentVirusScanning: false,
+            markFormDirty,
+          },
         }}
       />,
     );
@@ -429,7 +545,7 @@ describe("ApplicationAttachmentWidget", () => {
     );
   });
 
-  it("describes the file input by the error message when the field has errors", () => {
+  it("describes the file input by both the label and the error message when the field has errors", () => {
     render(
       <ApplicationAttachmentWidget
         {...defaultProps}
@@ -437,20 +553,33 @@ describe("ApplicationAttachmentWidget", () => {
       />,
     );
 
-    expect(getSimplerFileInputProps().labelId).toEqual(
+    expect(getSimplerFileInputProps().describedByIds).toEqual([
+      "label-for-test-attachment-field-visible",
       "error-for-test-attachment-field-visible",
+    ]);
+  });
+
+  it("marks the file input invalid when the form has validation errors", () => {
+    render(
+      <ApplicationAttachmentWidget
+        {...defaultProps}
+        rawErrors={["This field is required"]}
+      />,
     );
+
+    expect(getSimplerFileInputProps().formInvalid).toBe(true);
   });
 
   it("describes the file input by the field label when there is a title and no error", () => {
     render(<ApplicationAttachmentWidget {...defaultProps} />);
 
-    expect(getSimplerFileInputProps().labelId).toEqual(
+    expect(getSimplerFileInputProps().describedByIds).toEqual([
       "label-for-test-attachment-field-visible",
-    );
+    ]);
+    expect(getSimplerFileInputProps().formInvalid).toBe(false);
   });
 
-  it("falls back to the generic upload label when the schema has no title", () => {
+  it("describes the file input by nothing when the schema has no title", () => {
     render(
       <ApplicationAttachmentWidget
         {...defaultProps}
@@ -458,9 +587,9 @@ describe("ApplicationAttachmentWidget", () => {
       />,
     );
 
-    expect(getSimplerFileInputProps().labelId).toEqual(
-      "app-form-attachment-upload-label",
-    );
+    // no title means DynamicFieldLabel renders no label element, so there is no id to
+    // reference - an id for a missing element would be a dangling aria-describedby
+    expect(getSimplerFileInputProps().describedByIds).toEqual([]);
   });
 
   it("passes disabled and readOnly through to the file input", () => {

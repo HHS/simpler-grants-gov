@@ -90,8 +90,10 @@ export const buildSF424HappyPathTestData = (
     authorized_representative_fax: "3333333333",
     authorized_representative_email: `aor${shortSuffix}@test.com`,
     areas_affected_attachment: SF424_TEST_UPLOAD_FILE,
-    additional_project_title_attachment: SF424_TEST_UPLOAD_FILE,
     additional_congressional_attachment: SF424_TEST_UPLOAD_FILE,
+    // additional_project_title_attachment is omitted: it is SF-424's only
+    // multiple-attachment field, so it renders the virus-scanning input behind the
+    // #11351 rollout gate. Re-enable in #11352.
   } satisfies Partial<Record<keyof typeof fieldDefinitionsSF424, string>>;
 };
 

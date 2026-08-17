@@ -591,6 +591,8 @@ export const messages = {
       returnToApplication: "Return to application",
       saving: "Saving...",
       savingAndRefreshing: "Save and refresh",
+      saveDisabledTooltipMessage:
+        "Save disabled while file upload is processing.",
       lastUpdatedMessage: "This form was last updated on",
       createdMessage: "This form was created on",
     },
@@ -1976,6 +1978,12 @@ export const messages = {
       },
     },
   },
+  CommonWordLimit: {
+    wordsAllowed: "words allowed",
+    wordsLeft: "{num, plural, =1 {1 word left} other {# words left}}",
+    wordsError:
+      "{num, plural, =1 {1 word over limit} other {# words over limit}}",
+  },
   Applications: {
     numApplications: "{num, plural, =1 {1 application} other {# applications}}",
     errorMessage:
@@ -2033,13 +2041,23 @@ export const messages = {
     tableHeadings: {
       agency: "Agency",
       title: "Title",
+      oppNumber: "Opp. Number",
+      fundingInstrumentType: "Funding Instrument Type",
+      lastUpdated: "Last Updated",
       status: "Status",
-      actions: "Actions",
+      actions: "Action",
     },
     actionButtons: {
       edit: "Edit",
       copy: "Copy",
       delete: "Delete",
+    },
+    statusTag: {
+      draft: "Draft",
+      posted: "Open",
+      forecasted: "Forecasted",
+      archived: "Archived",
+      closed: "Closed",
     },
   },
   Organizations: {
@@ -2559,6 +2577,12 @@ export const messages = {
       opportunityTitle: "Opportunity title",
       opportunityTitleDesc:
         "Provide a concise, descriptive name that helps applicants identify the grant's purpose.",
+      tagline: "Tagline",
+      taglineDesc:
+        "A specific one-sentence purpose statement that summarizes the highest-level goal.",
+      purposeStatement: "Purpose statement",
+      purposeStatementDesc:
+        "Provide a one-line statement that helps applicants understand the grant's purpose.",
       agency: "Agency",
       category: "Grant selection method",
       categoryDesc: "Choose the evaluation process used to award these funds.",
@@ -2567,7 +2591,7 @@ export const messages = {
         'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
       assistanceListingNumber: "Assistance listing number",
       assistanceListingNumberDesc:
-        "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
+        "Enter the 5-digit code from SAM.gov (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
     },
   },
@@ -2724,7 +2748,8 @@ export const messages = {
     statusDisplay: {
       cancel: "Cancel",
       dismiss: "Dismiss",
-      queued: "Queued",
+      processing: "Processing file",
+      starting: "Starting upload",
       uploading: "Uploading...",
       startingScan: "Upload complete. Starting security scan",
       scanning: "Upload complete. Running security scan...",

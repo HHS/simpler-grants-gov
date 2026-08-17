@@ -28,10 +28,9 @@ module "infra_staging_config" {
   database_deletion_protection  = false                                             # non-prod experimental environment
   database_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMjA3MTAxMDcwODY2NTUyNTU" # Same entity as staging
 
-  has_incident_management_service = local.has_incident_management_service
-  enable_identity_provider        = local.enable_identity_provider
-  enable_notifications            = false # Enable once an SES domain identity exists for infra-staging
-
+  has_incident_management_service   = local.has_incident_management_service
+  enable_identity_provider          = local.enable_identity_provider
+  enable_notifications              = true
   service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwzMDI2MDE0OTk3ODY3NDMwMjA3"
   service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMzgzNjIwODA5MTQ5MzcxNTc5OA"
   api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058OTc2Mzk2OTQ1"

@@ -69,6 +69,9 @@ module "staging_config" {
 
     # Job lock — only enabled in dev/staging while we validate it
     ENABLE_JOB_LOCK = "true"
+
+    # File upload stream duration
+    FILE_SCAN_RESULTS_MAX_DURATION_SECONDS = 900
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

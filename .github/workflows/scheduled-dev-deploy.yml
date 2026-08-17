@@ -23,7 +23,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "api"
-      environment: "dev"
+      environment: "infra-dev"
       version: "main"
 
   frontend-checks:
@@ -42,7 +42,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "frontend"
-      environment: "dev"
+      environment: "infra-dev"
       version: "main"
 
   analytics-checks:
@@ -62,7 +62,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "analytics"
-      environment: "dev"
+      environment: "infra-dev"
       version: "main"
 
   nofos-checks:
@@ -89,4 +89,3 @@ jobs:
     needs: [api-deploy, frontend-deploy, analytics-deploy, nofos-deploy]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
-

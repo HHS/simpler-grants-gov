@@ -6,7 +6,10 @@ import { ApplicationAttachmentCreateResponse } from "src/types/applicationRespon
 import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { UploadFileMetadata } from "src/types/fileUploadTypes";
-import { mapAttachmentsToFileMetadata } from "src/utils/applyForm/applicationAttachmentUtils";
+import {
+  buildAttachmentDescribedByIds,
+  mapAttachmentsToFileMetadata,
+} from "src/utils/applyForm/applicationAttachmentUtils";
 
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
@@ -31,6 +34,8 @@ const ApplicationAttachmentWidget = ({
   value,
 }: UswdsWidgetProps) => {
   const markFormDirty = formContext?.widgetSupport?.markFormDirty;
+  const attachmentsUploadingCounter =
+    formContext?.widgetSupport?.attachmentsUploadingCounter;
   const t = useTranslations("Application.attachmentUpload");
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   const { clientFetch: createApplicationAttachmentFetcher } =
@@ -91,13 +96,22 @@ const ApplicationAttachmentWidget = ({
     return Promise.resolve(undefined);
   };
 
+  const handleStartAttachmentUpload = () => {
+    markFormDirty?.();
+    attachmentsUploadingCounter?.incrementAttachmentsProcessing();
+  };
+
+  const handleUploadComplete = () => {
+    attachmentsUploadingCounter?.decrementAttachmentsProcessing();
+  };
+
   const visibleInputId = `${id}-visible`;
   const error = rawErrors.length ? true : undefined;
-  const describedby = error
-    ? `error-for-${visibleInputId}`
-    : title
-      ? `label-for-${visibleInputId}`
-      : "app-form-attachment-upload-label";
+  const describedByIds = buildAttachmentDescribedByIds({
+    visibleInputId,
+    hasTitle: Boolean(title),
+    hasError: Boolean(error),
+  });
 
   const existingFiles: UploadFileMetadata[] = attachment
     ? mapAttachmentsToFileMetadata([attachment])
@@ -130,12 +144,14 @@ const ApplicationAttachmentWidget = ({
         postUploadActionProgressMessage={t("uploading")}
         postUploadActionSuccessMessage={t("success")}
         postUploadActionErrorMessage={t("error")}
-        onStart={markFormDirty}
+        onComplete={handleUploadComplete}
+        onStart={handleStartAttachmentUpload}
         onDelete={handleDeleteAttachment}
         disabled={disabled}
         readOnly={readOnly}
         required={required}
-        labelId={describedby}
+        describedByIds={describedByIds}
+        formInvalid={Boolean(error)}
         existingFiles={existingFiles}
       />
     </FormGroup>
