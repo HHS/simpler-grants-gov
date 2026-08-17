@@ -88,6 +88,10 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
       href: "agency-contact",
     },
     {
+      text: t("sectionApplicationInstructions.header"),
+      href: "application-instructions",
+    },
+    {
       text: t("sectionRequiredForms.header"),
       href: "required-forms",
     },

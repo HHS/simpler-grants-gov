@@ -151,6 +151,8 @@ export async function competitionFormAction(
   if (!requiredForms) {
     // PLACEHOLDER to remove lint errors. We will save these objects later.
   }
+  const fileId = formData.get("pending-file-id") as string | null;
+  console.log("In action, fileId: ", fileId);
 
   // 1. Save the form; if there are API errors, display them
   const saveResult = await updateCompetition(formData);

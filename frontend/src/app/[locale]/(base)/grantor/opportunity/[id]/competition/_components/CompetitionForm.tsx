@@ -1,6 +1,7 @@
 "use client";
 
 import { AgencyContact } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/AgencyContact";
+import { ApplicationInstructions } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/ApplicationInstructions";
 import { RequiredForms } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/RequiredForms";
 import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
 import { SubmissionWindow } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionWindow";
@@ -124,6 +125,7 @@ export function CompetitionForm({
               <SubmissionSetUp />
               <SubmissionWindow />
               <AgencyContact />
+              <ApplicationInstructions />
               <RequiredForms
                 alwaysRequiredForms={alwaysRequiredForms}
                 requiredForms={requiredForms}
