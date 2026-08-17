@@ -47,5 +47,7 @@ export const textHandler: FieldHandler = async (
   }
 
   await locator.waitFor({ state: "attached", timeout: 5000 });
+  await locator.scrollIntoViewIfNeeded();
+  await locator.waitFor({ state: "visible", timeout: 5000 });
   await locator.fill(data);
 };
