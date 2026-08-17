@@ -46,7 +46,9 @@ export const textHandler: FieldHandler = async (
     );
   }
 
-  await locator.waitFor({ state: "attached", timeout: 5000 });
+  // Use longer timeout (10s) for field attachment to handle lazy-loaded
+  // fields on mobile where form rendering may be progressive/async.
+  await locator.waitFor({ state: "attached", timeout: 10000 });
   await locator.scrollIntoViewIfNeeded();
   await locator.waitFor({ state: "visible", timeout: 5000 });
   await locator.fill(data);

@@ -25,6 +25,9 @@ export const comboBoxInputHandler: FieldHandler = async (
   }
   try {
     const toggleLocator = page.getByTestId(field.testId);
+    // Use longer timeout (10s) for field attachment to handle lazy-loaded
+    // fields on mobile where form rendering may be progressive/async.
+    await toggleLocator.waitFor({ state: "attached", timeout: 10000 });
     await toggleLocator.waitFor({ state: "visible", timeout: 5000 });
     await toggleLocator.scrollIntoViewIfNeeded();
     await toggleLocator.click();
@@ -41,6 +44,9 @@ export const comboBoxInputHandler: FieldHandler = async (
         name: new RegExp(escapeRegex(field.field), "i"),
       })
       .first();
+    // Use longer timeout (10s) for field attachment to handle lazy-loaded
+    // fields on mobile where form rendering may be progressive/async.
+    await comboByLabel.waitFor({ state: "attached", timeout: 10000 });
     await comboByLabel.waitFor({ state: "visible", timeout: 5000 });
     await comboByLabel.scrollIntoViewIfNeeded();
     await comboByLabel.click();
