@@ -368,12 +368,12 @@ class MetabaseBackupV2:
         id_to_key: dict[int, str],
     ) -> dict[str, Any] | None:
         """Resolve one card's raw API detail into restore-ready fields."""
-        query = self._extract_query(card)
+        raw_query, tags = self._native_query_and_tags(card)
+        query = self._extract_query(raw_query, card.get("id"))
         if query is None:
             return None
 
         query = self._rewrite_references(query, id_to_key)
-        tags = card["dataset_query"]["native"].get("template-tags") or {}
         kept_tags = {
             name: tag for name, tag in tags.items() if tag.get("type") != "card"
         }
@@ -392,16 +392,48 @@ class MetabaseBackupV2:
         }
 
     @staticmethod
-    def _extract_query(card: dict[str, Any]) -> str | None:
-        """Extract, sanity-check, and format a card's native SQL query."""
-        query = card.get("dataset_query", {}).get("native", {}).get("query")
+    def _native_query_and_tags(
+        card: dict[str, Any],
+    ) -> tuple[str | None, dict[str, Any]]:
+        """
+        Extract (query text, template-tags dict) from a card's dataset_query.
+
+        Metabase's card-detail API returns one of two shapes depending on
+        the instance's Metabase version: the classic flat shape
+        (`dataset_query.native.query`, template-tags as a dict keyed by tag
+        name), or the newer "pMBQL" shape (`dataset_query.stages[0].native`,
+        template-tags as a list of tag objects that each already carry their
+        own `name` field). Both are handled here so this doesn't silently
+        break again on the next Metabase upgrade either way.
+        """
+        dataset_query = card.get("dataset_query") or {}
+        stages = dataset_query.get("stages")
+        if isinstance(stages, list) and stages:
+            stage = stages[0]
+            query = stage.get("native")
+            raw_tags = stage.get("template-tags") or []
+            tags = {
+                tag["name"]: tag
+                for tag in raw_tags
+                if isinstance(tag, dict) and "name" in tag
+            }
+            return (query if isinstance(query, str) else None), tags
+
+        native = dataset_query.get("native") or {}
+        query = native.get("query")
+        tags = native.get("template-tags") or {}
+        return (query if isinstance(query, str) else None), tags
+
+    @staticmethod
+    def _extract_query(query: str | None, card_id: int | None) -> str | None:
+        """Sanity-check and format a card's native SQL query."""
         if not query or not isinstance(query, str):
-            logger.warning("No valid query found for card %d", card.get("id"))
+            logger.warning("No valid query found for card %s", card_id)
             return None
         if not any(kw in query.lower() for kw in ("select", "from", "where")):
             logger.warning(
-                "Query for card %d does not contain required SQL keywords",
-                card.get("id"),
+                "Query for card %s does not contain required SQL keywords",
+                card_id,
             )
             return None
         # sqlparse's keyword_case="upper" reformatting can mis-uppercase an

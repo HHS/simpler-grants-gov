@@ -183,13 +183,9 @@ def test_get_card_detail_request_exception_returns_none(
 
 def test_extract_query_valid(backup_instance: MetabaseBackupV2) -> None:
     """Test extracting and formatting a valid query."""
-    card = {
-        "id": 1,
-        "dataset_query": {"native": {"query": "select * from table where id = 1"}},
-    }
     # pylint: disable=protected-access
     # ruff: noqa: SLF001
-    query = backup_instance._extract_query(card)
+    query = backup_instance._extract_query("select * from table where id = 1", 1)
 
     assert query is not None
     assert "SELECT" in query
@@ -199,18 +195,127 @@ def test_extract_query_missing_keywords_returns_none(
     backup_instance: MetabaseBackupV2,
 ) -> None:
     """Test that a query missing select/from/where is rejected."""
-    card = {"id": 1, "dataset_query": {"native": {"query": "not a sql query"}}}
     # pylint: disable=protected-access
     # ruff: noqa: SLF001
-    assert backup_instance._extract_query(card) is None
+    assert backup_instance._extract_query("not a sql query", 1) is None
 
 
 def test_extract_query_missing_returns_none(backup_instance: MetabaseBackupV2) -> None:
     """Test that a card with no query at all is rejected."""
-    card = {"id": 1, "dataset_query": {}}
     # pylint: disable=protected-access
     # ruff: noqa: SLF001
-    assert backup_instance._extract_query(card) is None
+    assert backup_instance._extract_query(None, 1) is None
+
+
+def test_native_query_and_tags_classic_shape(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test extraction from the classic flat dataset_query.native shape."""
+    card = {
+        "dataset_query": {
+            "native": {
+                "query": "select 1",
+                "template-tags": {
+                    "quarter": {"name": "quarter", "type": "dimension"},
+                },
+            },
+        },
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    query, tags = backup_instance._native_query_and_tags(card)
+
+    assert query == "select 1"
+    assert tags == {"quarter": {"name": "quarter", "type": "dimension"}}
+
+
+def test_native_query_and_tags_pmbql_stages_shape(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """
+    Test extraction from the newer pMBQL dataset_query.stages shape.
+
+    Some Metabase versions return template-tags as a list of tag objects
+    (each already carrying its own "name") instead of a dict keyed by tag
+    name -- this is the shape actually returned by a real production
+    instance running a newer Metabase version.
+    """
+    card = {
+        "dataset_query": {
+            "lib/type": "mbql/query",
+            "stages": [
+                {
+                    "lib/type": "mbql.stage/native",
+                    "native": "select 1 where {{quad}}",
+                    "template-tags": [
+                        {
+                            "name": "quad",
+                            "type": "dimension",
+                            "widget-type": "string/=",
+                        },
+                    ],
+                },
+            ],
+            "database": 2,
+        },
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    query, tags = backup_instance._native_query_and_tags(card)
+
+    assert query == "select 1 where {{quad}}"
+    assert tags == {
+        "quad": {"name": "quad", "type": "dimension", "widget-type": "string/="},
+    }
+
+
+def test_native_query_and_tags_missing_stages_returns_none_query(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that an empty/unrecognized dataset_query shape yields no query, not a crash."""
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    query, tags = backup_instance._native_query_and_tags({"dataset_query": {}})
+
+    assert query is None
+    assert tags == {}
+
+
+def test_resolve_card_handles_pmbql_stages_shape(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that _resolve_card succeeds end to end against the pMBQL shape."""
+    card = {
+        "id": 55,
+        "name": "Deliverable Issues Done",
+        "dataset_query": {
+            "stages": [
+                {
+                    "native": "WITH x AS {{#143-ranked-statuses}} SELECT * FROM x "
+                    "WHERE {{deliverable_title}}",
+                    "template-tags": [
+                        {
+                            "name": "#143-ranked-statuses",
+                            "type": "card",
+                            "card-id": 143,
+                        },
+                        {"name": "deliverable_title", "type": "dimension"},
+                    ],
+                },
+            ],
+        },
+        "display": "table",
+        "visualization_settings": {},
+        "parameters": [],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    resolved = backup_instance._resolve_card(card, {143: "Ranked_Statuses"})
+
+    assert resolved is not None
+    assert "#143-ranked-statuses" not in resolved["template_tags"]
+    assert "deliverable_title" in resolved["template_tags"]
+    assert resolved["dependencies"] == {"Ranked_Statuses"}
 
 
 def test_rewrite_references_known_id_becomes_restore_placeholder(
