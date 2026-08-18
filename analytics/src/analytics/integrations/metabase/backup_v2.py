@@ -53,23 +53,6 @@ _TEMPLATE_PLACEHOLDER_PATTERN = re.compile(r"\{\{.*?\}\}")
 class MetabaseBackupV2:
     """Back up Metabase questions and dashboards to local filesystem, in restore format."""
 
-    # `analytics metabase restore` (make mb-restore) creates a fresh,
-    # disposable top-level collection on every run -- a re-import of restore
-    # content, not new content, and never meant to be backed up. Left lying
-    # around across multiple restore runs, their identically-named
-    # sub-collections (Sprint_Metrics, Shared, ...) would otherwise collide
-    # with the one real/standing collection's own sub-collections under this
-    # format's global-uniqueness requirement -- so these are excluded from
-    # backup entirely, however many pile up, rather than requiring them to be
-    # manually cleaned up first. `_is_restore_collection` is the actual
-    # detection logic: this prefix is only a legacy fallback for a collection
-    # created before restore started tagging its own collections via
-    # RESTORE_COLLECTION_DESCRIPTION (see _shared.py) -- a restore run's
-    # --collection-name is a free-form argument, not a fixed convention, so
-    # a name-prefix check alone can't reliably catch every restore-created
-    # collection.
-    IMPORT_COLLECTION_PREFIX = "Import "
-
     def __init__(self, api_url: str, api_key: str, output_dir: str) -> None:
         """
         Initialize the Metabase backup handler.
@@ -152,7 +135,7 @@ class MetabaseBackupV2:
 
     def get_collections(self) -> list[dict[str, Any]]:
         """
-        Get all available collections from Metabase, excluding stale import trees.
+        Get all available collections from Metabase, excluding stale restore collections.
 
         Returns:
             List of collection objects with id, name, and location.
@@ -174,20 +157,30 @@ class MetabaseBackupV2:
             if not (c.get("is_personal") or c.get("is_sample") or c.get("archived"))
         ]
         top_level = [c for c in eligible if c.get("location") == "/"]
-        import_roots = [c for c in top_level if self._is_restore_collection(c)]
-        has_non_import_root = len(import_roots) < len(top_level)
+        # `analytics metabase restore` (make mb-restore) creates a fresh,
+        # disposable top-level collection on every run -- a re-import of
+        # restore content, not new content, and never meant to be backed up.
+        # Left lying around across multiple restore runs, their
+        # identically-named sub-collections (Sprint_Metrics, Shared, ...)
+        # would otherwise collide with the one real/standing collection's
+        # own sub-collections under this format's global-uniqueness
+        # requirement -- so these are excluded from backup entirely, however
+        # many pile up, rather than requiring them to be manually cleaned up
+        # first.
+        restore_roots = [c for c in top_level if self._is_restore_collection(c)]
+        has_non_restore_root = len(restore_roots) < len(top_level)
 
-        # A genuine standing collection makes every "Import ..." tree
+        # A genuine standing collection makes every restore collection
         # redundant scratch -- exclude them all. Otherwise (every top-level
-        # collection happens to be an import, e.g. right after a fresh
+        # collection is itself a restore collection, e.g. right after a fresh
         # install with nothing else restored yet), keep only the most recent
         # one so there's still something to back up, and older ones don't
         # collide with it.
-        if has_non_import_root:
-            excluded_root_ids = {c["id"] for c in import_roots}
-        elif import_roots:
-            newest_id = max(c["id"] for c in import_roots)
-            excluded_root_ids = {c["id"] for c in import_roots if c["id"] != newest_id}
+        if has_non_restore_root:
+            excluded_root_ids = {c["id"] for c in restore_roots}
+        elif restore_roots:
+            newest_id = max(c["id"] for c in restore_roots)
+            excluded_root_ids = {c["id"] for c in restore_roots if c["id"] != newest_id}
         else:
             excluded_root_ids = set()
 
@@ -217,10 +210,6 @@ class MetabaseBackupV2:
     @staticmethod
     def _is_restore_collection(collection: dict[str, Any]) -> bool:
         """Check whether a top-level collection was created by a restore run."""
-        if collection.get("name", "").startswith(
-            MetabaseBackupV2.IMPORT_COLLECTION_PREFIX,
-        ):
-            return True
         return collection.get("description") == RESTORE_COLLECTION_DESCRIPTION
 
     def get_items(self, collection_id: int) -> list[dict[str, Any]]:

@@ -60,12 +60,17 @@ def _log_http_error(exc: HTTPError, context: str) -> None:
 class MetabaseRestore:
     """Publish restore content to Metabase in a new timestamped collection."""
 
+    # Every restore run's collection is named consistently -- not a
+    # caller-supplied value -- so its name alone is a reliable, predictable
+    # signal (on top of RESTORE_COLLECTION_DESCRIPTION) for anything that
+    # needs to recognize a restore-created collection.
+    COLLECTION_NAME = "Dashboard-Restore"
+
     def __init__(
         self,
         api_url: str,
         api_key: str,
         restore_dir: str,
-        collection_name: str,
     ) -> None:
         """
         Initialize the Metabase restore handler.
@@ -74,14 +79,11 @@ class MetabaseRestore:
             api_url: Base URL for the Metabase API.
             api_key: API key for authentication.
             restore_dir: Path to the restore directory (contains level_N/ folders).
-            collection_name: Base name for the new collection; a timestamp
-                is appended to it.
 
         """
         self.api_url = api_url.rstrip("/")
         self.api_key = api_key
         self.restore_dir = Path(restore_dir)
-        self.collection_name = collection_name
         self.headers = {"x-api-key": api_key, "Content-Type": "application/json"}
         self._requests = requests
         self._database_id: int | None = None
@@ -119,7 +121,7 @@ class MetabaseRestore:
             "collection '%s' (id=%d)",
             self._questions_created,
             self._dashboards_created,
-            self.collection_name,
+            self.COLLECTION_NAME,
             parent_id,
         )
         web_url = self._collection_web_url(parent_id)
@@ -145,7 +147,7 @@ class MetabaseRestore:
     def _create_parent_collection(self) -> int:
         """Create the new top-level, timestamped collection."""
         timestamp = datetime.now(UTC).strftime("%Y-%m-%d_%H%M%S")
-        name = f"{self.collection_name} {timestamp}"
+        name = f"{self.COLLECTION_NAME} {timestamp}"
         url = f"{self.api_url}/collection"
         response = self._requests.post(
             url,

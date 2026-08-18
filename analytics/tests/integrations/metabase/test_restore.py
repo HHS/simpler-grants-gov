@@ -23,7 +23,6 @@ def _restore_instance(tmp_path: Path) -> MetabaseRestore:
         api_url="http://metabase.example.com/api",
         api_key="test-key",
         restore_dir=str(tmp_path),
-        collection_name="Import",
     )
     mock_requests = MagicMock()
     # pylint: disable=protected-access
@@ -50,7 +49,7 @@ def test_init(restore_instance: MetabaseRestore) -> None:
     """Test initialization of MetabaseRestore."""
     assert restore_instance.api_url == "http://metabase.example.com/api"
     assert restore_instance.api_key == "test-key"
-    assert restore_instance.collection_name == "Import"
+    assert restore_instance.COLLECTION_NAME == "Dashboard-Restore"
     assert restore_instance.headers == {
         "x-api-key": "test-key",
         "Content-Type": "application/json",
@@ -110,7 +109,7 @@ def test_create_parent_collection(restore_instance: MetabaseRestore) -> None:
     # pylint: disable=protected-access
     # ruff: noqa: SLF001
     _, kwargs = restore_instance._requests.post.call_args
-    assert kwargs["json"]["name"].startswith("Import ")
+    assert kwargs["json"]["name"].startswith("Dashboard-Restore ")
     assert kwargs["json"]["description"] == RESTORE_COLLECTION_DESCRIPTION
 
 

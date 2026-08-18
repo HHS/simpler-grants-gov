@@ -25,9 +25,8 @@ CARD_TAG_PATTERN = re.compile(r"\{\{(#\d+-[a-zA-Z0-9-]+)\}\}")
 VARIABLE_TAG_PATTERN = re.compile(r"\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}")
 
 # Set as every restore-created top-level collection's description, so
-# backup-v2 can recognize and exclude it regardless of the --collection-name
-# a given restore run used -- a collection name alone isn't a reliable
-# signal, since it's a free-form argument, not a fixed convention.
+# backup-v2 can recognize and exclude it regardless of the instance's data,
+# rather than relying on Metabase surfacing this in some other queryable way.
 RESTORE_COLLECTION_DESCRIPTION = (
     "Created by `analytics metabase restore`. Excluded from backup-v2 automatically."
 )

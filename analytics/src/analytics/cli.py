@@ -272,10 +272,6 @@ def restore_metabase(
         str,
         typer.Option(help="Path to the restore directory"),
     ] = "metabase-restore",
-    collection_name: Annotated[
-        str,
-        typer.Option(help="Base name for the new collection; a timestamp is appended"),
-    ] = "Import",
 ) -> None:
     """Publish restore content to Metabase in a new timestamped collection."""
     api_url = os.getenv("MB_API_URL")
@@ -285,5 +281,5 @@ def restore_metabase(
         logger.error("MB_API_URL and MB_API_KEY must be set")
         return
 
-    restore = MetabaseRestore(api_url, api_key, restore_dir, collection_name)
+    restore = MetabaseRestore(api_url, api_key, restore_dir)
     restore.restore()

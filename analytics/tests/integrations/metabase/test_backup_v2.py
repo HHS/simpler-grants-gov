@@ -64,17 +64,27 @@ def test_get_collections_filters_personal_sample_archived(
     assert [c["id"] for c in result] == [1]
 
 
-def test_get_collections_excludes_import_trees(
+def test_get_collections_excludes_restore_collections(
     backup_instance: MetabaseBackupV2,
 ) -> None:
-    """Test that 'Import ...' trees are excluded entirely when a real collection exists."""
+    """Test that restore collections are excluded entirely when a real collection exists."""
     payload = [
         {"id": 1, "name": "Real", "location": "/"},
         {"id": 2, "name": "Sprint_Metrics", "location": "/1/"},
-        {"id": 10, "name": "Import 2026-08-05_040849", "location": "/"},
+        {
+            "id": 10,
+            "name": "Dashboard-Restore 2026-08-05_040849",
+            "location": "/",
+            "description": RESTORE_COLLECTION_DESCRIPTION,
+        },
         {"id": 11, "name": "Sprint_Metrics", "location": "/10/"},
         {"id": 12, "name": "Dashboards", "location": "/10/"},
-        {"id": 20, "name": "Import 2026-08-05_043629", "location": "/"},
+        {
+            "id": 20,
+            "name": "Dashboard-Restore 2026-08-05_043629",
+            "location": "/",
+            "description": RESTORE_COLLECTION_DESCRIPTION,
+        },
         {"id": 21, "name": "Sprint_Metrics", "location": "/20/"},
     ]
     # pylint: disable=protected-access
@@ -86,14 +96,24 @@ def test_get_collections_excludes_import_trees(
     assert [c["id"] for c in result] == [1, 2]
 
 
-def test_get_collections_keeps_newest_import_when_no_real_collection(
+def test_get_collections_keeps_newest_restore_collection_when_no_real_collection(
     backup_instance: MetabaseBackupV2,
 ) -> None:
-    """Test that the newest 'Import ...' tree is kept when it's all that exists."""
+    """Test that the newest restore collection is kept when it's all that exists."""
     payload = [
-        {"id": 10, "name": "Import 2026-08-05_040849", "location": "/"},
+        {
+            "id": 10,
+            "name": "Dashboard-Restore 2026-08-05_040849",
+            "location": "/",
+            "description": RESTORE_COLLECTION_DESCRIPTION,
+        },
         {"id": 11, "name": "Sprint_Metrics", "location": "/10/"},
-        {"id": 20, "name": "Import 2026-08-05_043629", "location": "/"},
+        {
+            "id": 20,
+            "name": "Dashboard-Restore 2026-08-05_043629",
+            "location": "/",
+            "description": RESTORE_COLLECTION_DESCRIPTION,
+        },
         {"id": 21, "name": "Sprint_Metrics", "location": "/20/"},
     ]
     # pylint: disable=protected-access
@@ -105,15 +125,25 @@ def test_get_collections_keeps_newest_import_when_no_real_collection(
     assert [c["id"] for c in result] == [20, 21]
 
 
-def test_get_collections_ignores_builtin_examples_when_choosing_newest_import(
+def test_get_collections_ignores_builtin_examples_when_choosing_newest_restore_collection(
     backup_instance: MetabaseBackupV2,
 ) -> None:
     """Test that Metabase's built-in sample 'Examples' collection doesn't count as a real one."""
     payload = [
         {"id": 2, "name": "Examples", "location": "/", "is_sample": True},
-        {"id": 10, "name": "Import 2026-08-05_040849", "location": "/"},
+        {
+            "id": 10,
+            "name": "Dashboard-Restore 2026-08-05_040849",
+            "location": "/",
+            "description": RESTORE_COLLECTION_DESCRIPTION,
+        },
         {"id": 11, "name": "Sprint_Metrics", "location": "/10/"},
-        {"id": 20, "name": "Import 2026-08-05_043629", "location": "/"},
+        {
+            "id": 20,
+            "name": "Dashboard-Restore 2026-08-05_043629",
+            "location": "/",
+            "description": RESTORE_COLLECTION_DESCRIPTION,
+        },
         {"id": 21, "name": "Sprint_Metrics", "location": "/20/"},
     ]
     # pylint: disable=protected-access
@@ -123,30 +153,6 @@ def test_get_collections_ignores_builtin_examples_when_choosing_newest_import(
     result = backup_instance.get_collections()
 
     assert [c["id"] for c in result] == [20, 21]
-
-
-def test_get_collections_excludes_custom_named_restore_collection(
-    backup_instance: MetabaseBackupV2,
-) -> None:
-    """Test that a restore collection is excluded even with a custom --collection-name."""
-    payload = [
-        {"id": 1, "name": "Real", "location": "/"},
-        {"id": 2, "name": "Sprint_Metrics", "location": "/1/"},
-        {
-            "id": 30,
-            "name": "Dashboard-Restore 2026-08-18_013502",
-            "location": "/",
-            "description": RESTORE_COLLECTION_DESCRIPTION,
-        },
-        {"id": 31, "name": "Sprint_Metrics", "location": "/30/"},
-    ]
-    # pylint: disable=protected-access
-    # ruff: noqa: SLF001
-    backup_instance._requests.get.return_value = _response(payload)
-
-    result = backup_instance.get_collections()
-
-    assert [c["id"] for c in result] == [1, 2]
 
 
 def test_get_items_keeps_cards_and_dashboards(
