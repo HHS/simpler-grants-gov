@@ -304,6 +304,110 @@ def test_create_question_with_template_tags_and_parameters(
     assert payload["parameters"] == metadata["parameters"]
 
 
+def test_create_question_resolves_field_ref_to_target_database_id(
+    restore_instance: MetabaseRestore,
+    tmp_path: Path,
+) -> None:
+    """Test that a dimension tag's field_ref is re-resolved to the target instance's id."""
+    sql_path = tmp_path / "Filtered_Question.sql"
+    sql_path.write_text("SELECT * FROM t WHERE {{quad}}")
+    metadata = {
+        "name": "Filtered Question",
+        "template_tags": {
+            "quad": {
+                "type": "dimension",
+                "name": "quad",
+                "dimension": ["field", 310, {"base-type": "type/Text"}],
+                "field_ref": {"schema": "app", "table": "gh_quad", "column": "name"},
+                "widget-type": "string/=",
+            },
+        },
+    }
+    (tmp_path / "Filtered_Question.json").write_text(json.dumps(metadata))
+
+    metadata_response = MagicMock()
+    metadata_response.json.return_value = {
+        "tables": [
+            {
+                "name": "gh_quad",
+                "schema": "app",
+                "fields": [{"id": 42, "name": "name"}],
+            },
+        ],
+    }
+    card_response = MagicMock()
+    card_response.json.return_value = {"id": 66}
+    card_response.raise_for_status.return_value = None
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    restore_instance._requests.get.return_value = metadata_response
+    restore_instance._requests.post.return_value = card_response
+
+    restore_instance._create_question(sql_path, collection_id=3)
+
+    _, kwargs = restore_instance._requests.post.call_args
+    tags = kwargs["json"]["dataset_query"]["native"]["template-tags"]
+    assert tags["quad"]["dimension"] == ["field", 42, {"base-type": "type/Text"}]
+    assert "field_ref" not in tags["quad"]
+
+
+def test_create_question_raises_when_field_ref_unresolvable(
+    restore_instance: MetabaseRestore,
+    tmp_path: Path,
+) -> None:
+    """Test that an unresolvable field_ref fails fast with a clear message."""
+    sql_path = tmp_path / "Filtered_Question.sql"
+    sql_path.write_text("SELECT * FROM t WHERE {{quad}}")
+    metadata = {
+        "name": "Filtered Question",
+        "template_tags": {
+            "quad": {
+                "type": "dimension",
+                "name": "quad",
+                "dimension": ["field", 310, None],
+                "field_ref": {"schema": "app", "table": "gh_quad", "column": "name"},
+            },
+        },
+    }
+    (tmp_path / "Filtered_Question.json").write_text(json.dumps(metadata))
+
+    metadata_response = MagicMock()
+    metadata_response.json.return_value = {"tables": []}
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    restore_instance._requests.get.return_value = metadata_response
+
+    with pytest.raises(RuntimeError, match=r"app\.gh_quad\.name"):
+        restore_instance._create_question(sql_path, collection_id=3)
+
+    restore_instance._requests.post.assert_not_called()
+
+
+def test_target_field_id_caches_metadata_across_calls(
+    restore_instance: MetabaseRestore,
+) -> None:
+    """Test that the target database's metadata is only fetched once."""
+    response = MagicMock()
+    response.json.return_value = {
+        "tables": [
+            {
+                "name": "gh_quad",
+                "schema": "app",
+                "fields": [{"id": 42, "name": "name"}],
+            },
+        ],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    restore_instance._requests.get.return_value = response
+
+    field_ref = {"schema": "app", "table": "gh_quad", "column": "name"}
+    assert restore_instance._target_field_id(field_ref) == 42
+    assert restore_instance._target_field_id(field_ref) == 42
+
+    restore_instance._requests.get.assert_called_once()
+
+
 def test_create_question_with_restore_reference_adds_card_template_tag(
     restore_instance: MetabaseRestore,
     tmp_path: Path,

@@ -84,6 +84,11 @@ class MetabaseRestore:
         self.headers = {"x-api-key": api_key, "Content-Type": "application/json"}
         self._requests = requests
         self._database_id: int | None = None
+        # Maps (schema, table, column) -> field id on the target database,
+        # fetched at most once, on first use.
+        self._field_id_map: (
+            dict[tuple[str | None, str | None, str | None], int] | None
+        ) = None
         self._subcollection_ids: dict[str, int] = {}
         # Maps a restore question's filename (without extension) to the newly
         # created card's {"id": ..., "name": ...}.
@@ -187,7 +192,10 @@ class MetabaseRestore:
         metadata = self._load_metadata(sql_path)
 
         name = metadata.get("name", key.replace("_", " "))
-        template_tags = dict(metadata.get("template_tags") or {})
+        template_tags = self._resolve_dimension_field_ids(
+            metadata.get("template_tags") or {},
+            sql_path,
+        )
         template_tags.update(self._auto_template_tags(query, template_tags))
         native: dict[str, Any] = {"query": query}
         if template_tags:
@@ -229,6 +237,53 @@ class MetabaseRestore:
         self._card_map[key] = {"id": card["id"], "name": name}
         self._questions_created += 1
         logger.info("Created question '%s' (id=%d) from %s", name, card["id"], sql_path)
+
+    def _resolve_dimension_field_ids(
+        self,
+        template_tags: dict[str, Any],
+        sql_path: Path,
+    ) -> dict[str, Any]:
+        """
+        Re-resolve each dimension tag's field_ref to a real id on the target database.
+
+        A dimension-type tag's captured field id is Metabase-internal to the
+        instance it was backed up from -- `field_ref` (its schema/table/
+        column name) is what's actually portable. A tag with no `field_ref`
+        (older backup, or hand-authored restore content) falls back to its
+        raw captured id unchanged.
+        """
+        resolved_tags = {}
+        for name, raw_tag in template_tags.items():
+            tag = dict(raw_tag)
+            field_ref = tag.pop("field_ref", None)
+            if tag.get("type") == "dimension" and field_ref:
+                field_id = self._target_field_id(field_ref)
+                if field_id is None:
+                    message = (
+                        f"{sql_path}: dimension tag '{name}' references "
+                        f"{field_ref.get('schema')}.{field_ref.get('table')}."
+                        f"{field_ref.get('column')}, which doesn't exist in the "
+                        "target database."
+                    )
+                    raise RuntimeError(message)
+                tag["dimension"] = ["field", field_id, tag["dimension"][2]]
+            resolved_tags[name] = tag
+        return resolved_tags
+
+    def _target_field_id(self, field_ref: dict[str, str]) -> int | None:
+        """Look up (and cache) the target database's field id for a schema/table/column."""
+        if self._field_id_map is None:
+            url = f"{self.api_url}/database/{self._database_id}/metadata"
+            response = self._requests.get(url, headers=self.headers, timeout=30)
+            response.raise_for_status()
+            tables = response.json().get("tables") or []
+            self._field_id_map = {
+                (table.get("schema"), table["name"], field["name"]): field["id"]
+                for table in tables
+                for field in table.get("fields") or []
+            }
+        key = (field_ref.get("schema"), field_ref.get("table"), field_ref.get("column"))
+        return self._field_id_map.get(key)
 
     def _load_metadata(self, sql_path: Path) -> dict[str, Any]:
         """Load the sidecar JSON metadata for a question, if present."""

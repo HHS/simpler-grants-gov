@@ -477,7 +477,7 @@ def test_normalize_dimension_tag_leaves_classic_shape_untouched(
     }
     # pylint: disable=protected-access
     # ruff: noqa: SLF001
-    normalized = backup_instance._normalize_dimension_tag(tag)
+    normalized = backup_instance._normalize_dimension_tag(tag, database_id=None)
 
     assert normalized == tag
 
@@ -489,9 +489,85 @@ def test_normalize_dimension_tag_ignores_non_dimension_tags(
     tag = {"type": "text", "name": "deliverable_title"}
     # pylint: disable=protected-access
     # ruff: noqa: SLF001
-    normalized = backup_instance._normalize_dimension_tag(tag)
+    normalized = backup_instance._normalize_dimension_tag(tag, database_id=None)
 
     assert normalized == tag
+
+
+def test_normalize_dimension_tag_attaches_field_ref_when_resolvable(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a resolvable field id gets a portable field_ref attached."""
+    tag = {
+        "type": "dimension",
+        "name": "quad",
+        "dimension": ["field", 310, None],
+    }
+    response = MagicMock()
+    response.json.return_value = {
+        "tables": [
+            {
+                "name": "gh_quad",
+                "schema": "app",
+                "fields": [{"id": 310, "name": "name"}],
+            },
+        ],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = response
+
+    normalized = backup_instance._normalize_dimension_tag(tag, database_id=2)
+
+    assert normalized["field_ref"] == {
+        "schema": "app",
+        "table": "gh_quad",
+        "column": "name",
+    }
+    backup_instance._requests.get.assert_called_once()
+
+
+def test_normalize_dimension_tag_caches_metadata_across_calls(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that the same database's metadata is only fetched once."""
+    response = MagicMock()
+    response.json.return_value = {
+        "tables": [
+            {
+                "name": "gh_quad",
+                "schema": "app",
+                "fields": [{"id": 310, "name": "name"}],
+            },
+        ],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = response
+
+    tag = {"type": "dimension", "name": "quad", "dimension": ["field", 310, None]}
+    backup_instance._normalize_dimension_tag(tag, database_id=2)
+    backup_instance._normalize_dimension_tag(tag, database_id=2)
+
+    backup_instance._requests.get.assert_called_once()
+
+
+def test_normalize_dimension_tag_warns_when_field_unresolvable(
+    backup_instance: MetabaseBackupV2,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that an id with no matching field logs a warning and skips field_ref."""
+    tag = {"type": "dimension", "name": "quad", "dimension": ["field", 999, None]}
+    response = MagicMock()
+    response.json.return_value = {"tables": []}
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = response
+
+    normalized = backup_instance._normalize_dimension_tag(tag, database_id=2)
+
+    assert "field_ref" not in normalized
+    assert "Could not resolve field id 999" in caplog.text
 
 
 def test_check_collisions_none_when_unique(backup_instance: MetabaseBackupV2) -> None:

@@ -80,6 +80,10 @@ class MetabaseBackupV2:
         self.headers = {"x-api-key": api_key, "Content-Type": "application/json"}
         self._requests = requests
         self.stats = self._init_stats()
+        # Maps a source database's id to its own {field_id: {schema, table,
+        # column}} map, fetched at most once per database actually referenced
+        # by a dimension-type template tag.
+        self._field_ref_cache: dict[int, dict[int, dict[str, str]]] = {}
 
     @staticmethod
     def _init_stats() -> dict[str, int]:
@@ -399,8 +403,9 @@ class MetabaseBackupV2:
             return None
 
         query = self._rewrite_references(query, id_to_key)
+        database_id = card.get("database_id")
         kept_tags = {
-            name: self._normalize_dimension_tag(tag)
+            name: self._normalize_dimension_tag(tag, database_id)
             for name, tag in tags.items()
             if tag.get("type") != "card"
         }
@@ -451,10 +456,13 @@ class MetabaseBackupV2:
         tags = native.get("template-tags") or {}
         return (query if isinstance(query, str) else None), tags
 
-    @staticmethod
-    def _normalize_dimension_tag(tag: dict[str, Any]) -> dict[str, Any]:
+    def _normalize_dimension_tag(
+        self,
+        tag: dict[str, Any],
+        database_id: int | None,
+    ) -> dict[str, Any]:
         """
-        Normalize a dimension-type tag's field reference to the classic shape.
+        Normalize a dimension-type tag's field reference, and attach a portable field_ref.
 
         A `dimension` tag's field reference comes back as `["field", <id>,
         <options>]` (classic) or `["field", <options>, <id>]` (newer pMBQL
@@ -464,6 +472,14 @@ class MetabaseBackupV2:
         ordering is valid inside the flat `native.template-tags` payload this
         format writes on restore; posting the pMBQL ordering back verbatim
         makes card creation fail.
+
+        The field id itself is also Metabase-internal to the instance it was
+        captured from, and isn't guaranteed to mean the same column (or even
+        belong to the same database) on a different instance's own schema
+        sync. A `field_ref` (schema/table/column name) is attached whenever
+        it can be resolved, so `restore` can re-resolve the correct id for
+        whichever instance it's writing to, instead of trusting the raw id
+        across instances.
         """
         if tag.get("type") != "dimension":
             return tag
@@ -472,17 +488,55 @@ class MetabaseBackupV2:
             not isinstance(dimension, list)
             or len(dimension) != _FIELD_REF_LENGTH
             or dimension[0] != "field"
-            or not isinstance(dimension[1], dict)
         ):
             return tag
 
-        options, field_id = dimension[1], dimension[2]
-        classic_options = {
-            key: value for key, value in options.items() if not key.startswith("lib/")
-        }
+        if isinstance(dimension[1], dict):
+            options, field_id = dimension[1], dimension[2]
+            classic_options = {
+                key: value
+                for key, value in options.items()
+                if not key.startswith("lib/")
+            }
+            dimension = ["field", field_id, classic_options or None]
+        else:
+            field_id = dimension[1]
+
         normalized = dict(tag)
-        normalized["dimension"] = ["field", field_id, classic_options or None]
+        normalized["dimension"] = dimension
+
+        if database_id is None:
+            return normalized
+        field_ref = self._field_refs_for_database(database_id).get(field_id)
+        if field_ref is None:
+            logger.warning(
+                "Could not resolve field id %s (dimension tag %r) to a table/column "
+                "name -- restoring to a different instance may not find the same field.",
+                field_id,
+                tag.get("name"),
+            )
+            return normalized
+        normalized["field_ref"] = field_ref
         return normalized
+
+    def _field_refs_for_database(self, database_id: int) -> dict[int, dict[str, str]]:
+        """Fetch (and cache) a database's field-id -> {schema, table, column} map."""
+        if database_id not in self._field_ref_cache:
+            url = f"{self.api_url}/database/{database_id}/metadata"
+            response = self._requests.get(url, headers=self.headers, timeout=30)
+            response.raise_for_status()
+            tables = response.json().get("tables") or []
+            refs = {
+                field["id"]: {
+                    "schema": table.get("schema"),
+                    "table": table["name"],
+                    "column": field["name"],
+                }
+                for table in tables
+                for field in table.get("fields") or []
+            }
+            self._field_ref_cache[database_id] = refs
+        return self._field_ref_cache[database_id]
 
     @staticmethod
     def _extract_query(query: str | None, card_id: int | None) -> str | None:

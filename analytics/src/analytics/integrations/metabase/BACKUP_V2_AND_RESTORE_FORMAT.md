@@ -94,6 +94,7 @@ response shape (`dataset_query.native["template-tags"]` and the top-level
       "type": "dimension",
       "name": "quad",
       "dimension": ["field", 307, null],
+      "field_ref": {"schema": "app", "table": "gh_quad", "column": "name"},
       "widget-type": "string/=",
       "display-name": "Quad",
       "default": ["2026-Q3"],
@@ -113,12 +114,20 @@ response shape (`dataset_query.native["template-tags"]` and the top-level
 }
 ```
 
-**Caveat**: a `dimension`-type template tag's `"dimension": ["field", <id>,
-null]` hardcodes a Metabase-internal field ID from the instance it was
-copied from. That ID is stable when restoring to the *same* Metabase
-instance (the primary use case), but isn't guaranteed to match a different
-instance's schema sync -- if a restored filter question doesn't work on a
-new instance, check whether its field ID actually resolves there.
+**Cross-instance field ids**: a `dimension`-type template tag's `"dimension":
+["field", <id>, null]` hardcodes a Metabase-internal field ID from the
+instance it was copied from -- not guaranteed to mean the same column (or
+even belong to the same database) on a different instance's own schema
+sync. `backup-v2` also captures `field_ref` (the field's schema/table/
+column name, resolved via `GET /api/database/<id>/metadata`), and `restore`
+re-resolves it to whichever id that column actually has on the target
+instance before posting, rather than trusting the source instance's id
+verbatim. A tag with no `field_ref` (an older backup, or hand-authored
+restore content) falls back to using its raw `dimension` id as-is -- fine
+when restoring to the same instance it came from, but not guaranteed
+otherwise. If the referenced column genuinely doesn't exist on the target
+database, `restore` fails fast, naming the missing schema/table/column
+rather than surfacing Metabase's own less legible field-mismatch error.
 Non-dimension tags (plain `text`/`date`/`number` variables, like a raw
 `{{date}}`) don't have this problem since they don't reference a field at
 all. `backup-v2` copies these tags through verbatim; it strips any
@@ -233,7 +242,4 @@ Key points:
   found in any `level_N/` directory when restoring, or referencing a card
   outside the backup's scope when backing up) fails fast, naming the
   dashboard and the missing question.
-- **Known gaps**: multi-series (combo chart) dashcards aren't supported;
-  and the same field-id portability caveat that applies to a question's
-  `dimension`-type template tags also applies transitively to any
-  `card`-sourced dashboard filter's underlying question.
+- **Known gaps**: multi-series (combo chart) dashcards aren't supported.
