@@ -14,10 +14,11 @@ resource "aws_lb" "alb" {
   depends_on      = [aws_s3_bucket_policy.access_logs]
   ip_address_type = "dualstack"
   # adjust name for the mtls alb that's in slot 1
-  name            = count.index == 0 ? var.service_name : format("%s-mtls", var.service_name)
-  idle_timeout    = "120"
-  internal        = false
-  security_groups = [count.index == 0 && local.restrict_alb_ingress ? aws_security_group.alb_restricted[0].id : aws_security_group.alb.id]
+  name         = count.index == 0 ? var.service_name : format("%s-mtls", var.service_name)
+  idle_timeout = "120"
+  internal     = false
+
+  security_groups = [count.index == 0 && local.enable_internal_alb ? aws_security_group.alb_restricted[0].id : aws_security_group.alb.id]
   subnets         = module.network.public_subnet_ids
 
   # Use a separate line to support automated terraform destroy commands
