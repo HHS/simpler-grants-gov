@@ -8,6 +8,8 @@ module "training_config" {
   domain_name                       = "api.training.simpler.grants.gov"
   s3_cdn_domain_name                = "files.training.simpler.grants.gov"
   secondary_domain_names            = ["alb.training.simpler.grants.gov"]
+  scanner_callback_domain_name      = "alb.training.simpler.grants.gov"
+  enable_secure_alb                 = true
   mtls_domain_name                  = "soap.training.simpler.grants.gov"
   enable_https                      = true
   database_engine_version           = "17.7"

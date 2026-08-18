@@ -166,8 +166,20 @@ variable "enable_api_gateway_domain_name" {
   default     = true
 }
 
+variable "enable_api_gateway_vpc_link" {
+  description = "Route API Gateway to the ALB over a private VPC Link instead of the public internet"
+  type        = bool
+  default     = false
+}
+
 variable "enable_load_balancer" {
   description = "Whether to enable a load balancer for the service"
+  type        = bool
+  default     = true
+}
+
+variable "enable_public_alb_ingress" {
+  description = "Allow 0.0.0.0/0 and ::/0 on the primary ALB. Set false once API Gateway reaches it over a VPC Link."
   type        = bool
   default     = true
 }
