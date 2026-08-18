@@ -14,6 +14,7 @@ import {
 import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchemas.zod";
 import { useZodFormValidation } from "src/hooks/useZodValidation";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
+import { normalizeDateString } from "src/utils/dateUtil";
 import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
 import { getOpportunitySummaryValidationData } from "src/utils/validation/opportunitySummaryValidation";
 import { stripCommasFromNumberString } from "tests/e2e/utils/common/number-formatters";
@@ -45,7 +46,6 @@ import {
   CommonWordLimit,
 } from "src/components/core/forms/CommonFormFields";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
-import { normalizeDateString } from "src/utils/dateUtil";
 
 const eligibilityDisplayLabels: Record<string, string> = Object.fromEntries(
   ELIGIBILITY_OPTIONS.map(({ value, label }) => [value, label]),

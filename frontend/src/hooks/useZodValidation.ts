@@ -28,10 +28,7 @@ export function useZodFormValidation({
   const genericTranslations = useTranslations("genericValidationMessages");
   const [frontendErrors, setFrontendErrors] = useState<ValidationErrors>({});
 
-  const validateField = (
-    field: string,
-    form: HTMLFormElement,
-  ): void => {
+  const validateField = (field: string, form: HTMLFormElement): void => {
     if (!isFieldInSchema(schema, field)) {
       return;
     }
@@ -66,10 +63,7 @@ export function useZodFormValidation({
     );
 
     setFrontendErrors((current) => {
-      const fieldsToRefresh = new Set([
-        ...Object.keys(current),
-        field,
-      ]);
+      const fieldsToRefresh = new Set([...Object.keys(current), field]);
 
       const next = { ...current };
 

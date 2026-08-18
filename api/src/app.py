@@ -13,7 +13,9 @@ from flask_cors import CORS
 from grants_shared.api.maintenance_mode import register_maintenance_mode_handler
 from grants_shared.api.response import restructure_error_response
 from grants_shared.api.schemas import response_schema
-from grants_shared.api.schemas.extension.openapi import RelationalValidationOpenAPIPlugin
+from grants_shared.api.schemas.extension.relational_validation_openapi import (
+    RelationalValidationOpenAPIPlugin,
+)
 from grants_shared.auth.api_jwt_auth import initialize_jwt_auth
 from grants_shared.auth.login_gov_jwt_auth import initialize_login_gov_config
 from grants_shared.util.local import error_if_not_local
