@@ -5,6 +5,7 @@
 
 import { type Page } from "@playwright/test";
 
+import { clickAndFill } from "./interaction-utils";
 import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 /** Fills a text input resolved by its accessible label. */
@@ -15,8 +16,7 @@ export const fillTextByLabel = async (
   exact?: boolean,
 ) => {
   const input = page.getByLabel(label, { exact }).first();
-  await input.waitFor({ state: "visible", timeout: 5000 });
-  await input.fill(value);
+  await clickAndFill(input, value);
 };
 
 /** Handles text-type fields using testId or label-based locators. */
@@ -46,6 +46,5 @@ export const textHandler: FieldHandler = async (
     );
   }
 
-  await locator.waitFor({ state: "attached", timeout: 5000 });
-  await locator.fill(data);
+  await clickAndFill(locator, data);
 };

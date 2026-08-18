@@ -129,22 +129,6 @@ export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinitio
       characterLimitValidationMessage: "1 character over limit",
     },
     {
-      label: "Tagline*",
-      type: "text",
-      valueKey: "tagline",
-      required: true,
-      maxLength: 255,
-      characterLimitValidationMessage: "1 character over limit",
-    },
-    {
-      label: "Purpose statement*",
-      type: "text",
-      valueKey: "purposeStatement",
-      required: true,
-      maxLength: 255,
-      characterLimitValidationMessage: "1 character over limit",
-    },
-    {
       label: "Grant selection method*",
       type: "select",
       valueKey: "grantSelectionMethod",
@@ -177,9 +161,8 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
       valueKey: "expectedNumberOfAwards",
       selector: "#expected_number_of_awards",
       required: false,
-      // Un-comment after bug fixed
-      // negativeNumberValidationMessage:
-      //   "Expected number of awards must be greater than or equal to zero.",
+      negativeNumberValidationMessage:
+        "Expected number of awards must be greater than or equal to zero and less than 1,000,000,000,000,000.",
     },
     {
       label: "Estimated total program funding",
@@ -294,35 +277,7 @@ export const ELIGIBILITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
     valueKey: "eligibleApplicantSmallBusinesses",
     selector: "#eligible-business-1",
     required: false,
-  },
-  {
-    label: "Eligible applicants",
-    type: "checkbox",
-    valueKey: "eligibleApplicantOtherNativeAmericanTribalOrganizations",
-    selector: "#eligible-nonprofit-0",
-    required: false,
-  },
-  {
-    label: "Eligible applicants",
-    type: "checkbox",
-    valueKey: "eligibleApplicantIndependentSchoolDistricts",
-    selector: "#eligible-education-0",
-    required: false,
-  },
-  {
-    label: "Eligible applicants",
-    type: "checkbox",
-    valueKey: "eligibleApplicantIndividuals",
-    selector: "#eligible-misc-0",
-    required: false,
-  },
-  {
-    label: "Eligible applicants",
-    type: "checkbox",
-    valueKey: "eligibleApplicantStateGovernments",
-    selector: "#eligible-government-0",
-    required: false,
-  },
+  }
 ];
 
 /** Shard 7: optional additional-info/contact fields with length/email metadata. */
@@ -334,8 +289,8 @@ export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefin
       valueKey: "description",
       selector: "#summary_description",
       required: false,
-      maxLength: 1800,
-      characterLimitValidationMessage: "1 character over limit",
+      maxWords: 500,
+      characterLimitValidationMessage: "1 word over limit",
       exact: true,
     },
     {

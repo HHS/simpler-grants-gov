@@ -81,7 +81,24 @@ test.describe("Opportunity failure path - create opportunity", () => {
       // Given I create a new opportunity.
       await createOpportunity(page, fillData);
 
-      // Shard 2: rerun create flow with the same values and assert duplicate behavior.
+      // Shard 2: validate progressive required-field gating.
+      // When I reset to a fresh create form via UI.
+      await openFreshCreateOpportunityForm(page);
+
+      // Then I verify required-field gating of Save and continue.
+      await fillRequiredFieldsAndAssertButtonState(
+        page,
+        CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
+        fillData,
+        {
+          triggerButtonName: "Save and continue",
+          additionalButtonStates: {
+            Cancel: true,
+          },
+        },
+      );
+
+      // Shard 3: rerun create flow with the same values and assert duplicate behavior.
       // When I start a second create flow with duplicate values.
       await page.goto("/grantor/opportunities");
       await expect(page).toHaveURL(/\/grantor\/opportunities/);
@@ -114,26 +131,10 @@ test.describe("Opportunity failure path - create opportunity", () => {
         Cancel: true,
       });
 
-      // Shard 3: validate progressive required-field gating.
-      // When I reset to a fresh create form via UI.
-      await openFreshCreateOpportunityForm(page);
 
-      // Then I verify required-field gating of Save and continue.
-      await fillRequiredFieldsAndAssertButtonState(
-        page,
-        CREATE_OPPORTUNITY_FIELD_DEFINITIONS,
-        fillData,
-        {
-          triggerButtonName: "Save and continue",
-          additionalButtonStates: {
-            Cancel: true,
-          },
-        },
-      );
 
       // Shard 4: validate character-limit errors with generated over-limit values.
       // When I reset to a fresh create form via UI.
-      await openFreshCreateOpportunityForm(page);
 
       // Then I verify that over-limit values are handled correctly.
       await fillPageFields(

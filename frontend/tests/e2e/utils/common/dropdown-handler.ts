@@ -6,6 +6,7 @@
 import { type Page } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/forms/select-dropdown-utils";
 
+import { clickAndSelectOption, waitForVisibleAndClick } from "./interaction-utils";
 import { escapeRegex } from "./regex-utils";
 import { type FieldHandler, type FillFieldDefinition } from "./types";
 
@@ -20,6 +21,8 @@ export const dropdownHandler: FieldHandler = async (
     );
   }
   if (field.selector) {
+    const dropdown = page.locator(field.selector);
+    await waitForVisibleAndClick(dropdown);
     await selectDropdownByValueOrLabel(page, field.selector, data);
     return;
   }
@@ -39,7 +42,7 @@ export const dropdownHandler: FieldHandler = async (
       node.tagName.toLowerCase(),
     );
     if (tagName === "select") {
-      await control.selectOption({ label: data });
+      await clickAndSelectOption(control, data);
       return;
     }
 

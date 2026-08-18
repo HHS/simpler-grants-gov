@@ -4,6 +4,7 @@
 
 import { type Page } from "@playwright/test";
 
+import { clickAndSelectOption } from "./interaction-utils";
 import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 export const selectOptionByLabel = async (
@@ -13,8 +14,7 @@ export const selectOptionByLabel = async (
   exact?: boolean,
 ) => {
   const select = page.getByLabel(label, { exact }).first();
-  await select.waitFor({ state: "visible", timeout: 5000 });
-  await select.selectOption({ label: optionText });
+  await clickAndSelectOption(select, optionText);
 };
 
 export const selectHandler: FieldHandler = async (

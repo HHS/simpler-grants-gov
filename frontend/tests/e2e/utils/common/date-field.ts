@@ -5,6 +5,7 @@
 
 import { expect, type Page } from "@playwright/test";
 
+import { clickAndFill } from "./interaction-utils";
 import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 /** Fills a date input by label and blurs it to trigger validations. */
@@ -15,8 +16,7 @@ export const fillDateByLabel = async (
   exact?: boolean,
 ) => {
   const input = page.getByLabel(label, { exact }).first();
-  await expect(input).toBeVisible();
-  await input.fill(dateValue);
+  await clickAndFill(input, dateValue);
   await input.press("Tab");
 };
 

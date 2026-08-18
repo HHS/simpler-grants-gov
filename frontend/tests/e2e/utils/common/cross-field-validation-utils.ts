@@ -51,8 +51,22 @@ export async function assertCrossFieldValidationsFromDefinitions(
 
   for (const definition of definitions) {
     for (const field of definition.fieldsToSet) {
-      await page.locator(field.selector).fill(field.invalidValue);
-      await page.locator(field.selector).blur();
+      const fieldLocator = page.locator(field.selector);
+      await fieldLocator.waitFor({ state: "visible", timeout: 5000 });
+      await fieldLocator.click();
+      await fieldLocator.fill(field.invalidValue);
+
+      const clickTarget = page.locator("main").first();
+      if (await clickTarget.count()) {
+        await clickTarget.waitFor({ state: "visible", timeout: 5000 });
+        await clickTarget.click({ position: { x: 10, y: 10 } });
+      } else {
+        const body = page.locator("body").first();
+        await body.waitFor({ state: "visible", timeout: 5000 });
+        await body.click({ position: { x: 10, y: 10 } });
+      }
+
+      await fieldLocator.blur();
     }
 
     for (const triggerButtonName of triggerButtonNames) {

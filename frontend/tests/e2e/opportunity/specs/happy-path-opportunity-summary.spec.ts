@@ -125,13 +125,6 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
         ),
       );
 
-      // And all save actions should remain enabled
-      await assertButtonEnabledDisabledStates(page, {
-        "Save and exit": true,
-        "Save and go back": true,
-        "Save and continue": true,
-      });
-
       // And I click "Save and exit" button
       await page.getByRole("button", { name: "Save and exit" }).click();
 

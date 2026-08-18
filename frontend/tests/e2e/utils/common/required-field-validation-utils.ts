@@ -85,10 +85,24 @@ export async function assertRequiredFieldValidationsFromDefinitions(
     (buttonName) => buttonName.toLowerCase() === "no",
   );
 
+  const clickAway = async (): Promise<void> => {
+    const clickTarget = page.locator("main").first();
+    if (await clickTarget.count()) {
+      await clickTarget.waitFor({ state: "visible", timeout: 5000 });
+      await clickTarget.click({ position: { x: 10, y: 10 } });
+    } else {
+      const body = page.locator("body").first();
+      await body.waitFor({ state: "visible", timeout: 5000 });
+      await body.click({ position: { x: 10, y: 10 } });
+    }
+  };
+
   for (const triggerButtonName of triggerButtonNames) {
     if (!hasNoTriggerSentinel) {
       await page.getByRole("button", { name: triggerButtonName }).click();
     }
+
+    await clickAway();
 
     if (options?.pageUrlPattern) {
       await expect(page).toHaveURL(options.pageUrlPattern);

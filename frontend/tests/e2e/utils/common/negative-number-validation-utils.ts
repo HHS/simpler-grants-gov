@@ -70,6 +70,8 @@ export async function assertNegativeNumberValidationsFromDefinitions(
 
   for (const fieldDefinition of negativeValidationFields) {
     const field = page.locator(fieldDefinition.selector);
+    await field.waitFor({ state: "visible", timeout: 5000 });
+    await field.click();
     await field.fill(negativeValue);
     await field.blur();
 

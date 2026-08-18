@@ -7,6 +7,7 @@ import {
 
 type CharacterLimitValidationDefinition<TValueKey extends string> = {
   valueKey: TValueKey;
+  selector?: string;
   maxLength?: number;
   maxWords?: number;
 } & ValidationMetadata;
@@ -19,10 +20,23 @@ export const getCharacterLimitedFields = <
   definitions: TDefinition[],
 ): TDefinition[] => {
   // A field participates only when maxLength or maxWords is explicitly numeric.
-  return definitions.filter(
-    (field) =>
-      typeof field.maxLength === "number" || typeof field.maxWords === "number",
-  );
+  // If metadata contains duplicate definitions for the same valueKey, count it once.
+  const seen = new Set<string>();
+  return definitions.filter((field) => {
+    if (
+      typeof field.maxLength !== "number" &&
+      typeof field.maxWords !== "number"
+    ) {
+      return false;
+    }
+
+    if (seen.has(field.valueKey)) {
+      return false;
+    }
+
+    seen.add(field.valueKey);
+    return true;
+  });
 };
 
 const getValidationLimitValue = <TValueKey extends string,
@@ -176,6 +190,15 @@ export async function assertCharacterLimitValidationsFromDefinitions<
       buildOverLimitFillData(definitions, fillData),
     ),
   );
+
+  for (const field of getCharacterLimitedFields(definitions)) {
+    if (field.selector) {
+      const locator = page.locator(field.selector).first();
+      await locator.waitFor({ state: "visible", timeout: 5000 });
+      await locator.click();
+      await locator.blur();
+    }
+  }
 
   const triggerButtonNames = options.triggerButtonNames ?? ["Save"];
   for (const triggerButtonName of triggerButtonNames) {

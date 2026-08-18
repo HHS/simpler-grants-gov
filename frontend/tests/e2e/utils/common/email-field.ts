@@ -5,6 +5,7 @@
 
 import { expect, type Page } from "@playwright/test";
 
+import { clickAndFill } from "./interaction-utils";
 import { type FieldHandler, type FillFieldDefinition } from "./types";
 
 /** Routes email-type fields through selector/testId/label targeting. */
@@ -33,10 +34,10 @@ export const emailHandler: FieldHandler = async (
     );
   }
 
-  await locator.waitFor({ state: "attached", timeout: 5000 });
+  await locator.waitFor({ state: "visible", timeout: 5000 });
   if (!field.skipEmailTypeCheck) {
     await expect(locator.first()).toHaveAttribute("type", "email");
   }
-  await locator.fill(data);
+  await clickAndFill(locator, data);
   await locator.press("Tab");
 };
