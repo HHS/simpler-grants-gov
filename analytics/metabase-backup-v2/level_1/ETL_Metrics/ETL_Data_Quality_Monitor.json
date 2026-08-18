@@ -1,0 +1,12 @@
+{
+  "name": "ETL Data Quality - Monitor",
+  "display": "object",
+  "visualization_settings": {
+    "table.pivot_column": "etl_health_status",
+    "column_settings": {
+      "[\"name\",\"etl_health_status\"]": {
+        "column_title": "data validation result"
+      }
+    }
+  }
+}
