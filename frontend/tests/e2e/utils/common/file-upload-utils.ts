@@ -1,20 +1,21 @@
 /**
  * Shared helpers for file upload interaction tests.
  *
- * Reviewer guide (what logic):
+ * Reviewer guide:
  * These helpers cover common upload scenarios for E2E tests:
- * - authenticating and opening the correct application form,
- * - locating the file input,
- * - uploading files,
- * - checking uploaded file status,
- * - deleting files, and
- * - stubbing upload endpoints.
+ * - authenticating and opening the correct application form
+ * - locating the file input
+ * - uploading files
+ * - checking upload status and retry/failure UI
+ * - deleting uploaded files
+ * - stubbing and controlling upload endpoint behavior
  *
  * Common update points:
- * - TEST_UPLOAD_DIR: fixture files used for upload tests
- * - openApplicationFormWithAuth: authenticates, creates an application, and opens the correct form
- * - resolveFileInputLocator: how the file input is found from a field config or test ID
- * - stubStreamingAttachmentUpload: mock file streaming and attachment save
+ * - TEST_UPLOAD_DIR: fixture files used by file upload tests
+ * - openApplicationFormWithAuth: auth, application setup, and form navigation
+ * - resolveFileInputLocator: locate the file input from a field config or test ID
+ * - expectUploadProgressStatusMessage: checks upload progress states
+ * - waitForAttachmentSaveResponse: waits for the attachment save POST response
  */
 
 import path from "path";
@@ -23,6 +24,7 @@ import {
   type BrowserContext,
   type Locator,
   type Page,
+  type Response,
   type Route,
   type TestInfo,
 } from "@playwright/test";
@@ -51,10 +53,16 @@ export async function openApplicationFormWithAuth(
   organizationLabel: string,
   opportunityUrl: string,
 ): Promise<void> {
+  // Detect whether this test is running in a mobile project configuration.
   const isMobile = testInfo.project.name.match(/[Mm]obile/);
+
+  // Authenticate the E2E user and preserve session cookies in the browser context.
   await authenticateE2eUser(page, context, !!isMobile);
+
+  // Create a new application for the current opportunity before opening the form.
   await createApplication(page, opportunityUrl, organizationLabel);
 
+  // Open the target form using the provided matcher and fail if it cannot be found.
   const opened = await openForm(page, formMatcher);
   if (!opened) {
     throw new Error(`Could not find or open form: ${formMatcher}`);
@@ -74,18 +82,43 @@ export function resolveFileInputLocator(
   page: Page,
   target: FileInputTarget,
 ): Locator {
+  // If a test ID string is provided, use the test ID locator.
   if (typeof target === "string") {
     return page.getByTestId(target).first();
   }
+
+  // Prefer a supplied selector when the field definition includes one.
   if (target.selector) {
     return page.locator(target.selector).first();
   }
+
+  // Fallback to testId defined on the field definition.
   if (target.testId) {
     return page.getByTestId(target.testId).first();
   }
+
+  const fieldName =
+    typeof target.field === "string" ? target.field : "unknown field";
   throw new Error(
-    `File field ${target.field} requires a selector or testId to locate the input`,
+    `File field ${fieldName} requires a selector or testId to locate the input`,
   );
+}
+
+/**
+ * Return the nearest file input wrapper for the resolved file input.
+ *
+ * This is used for visibility assertions around the file input drop target.
+ */
+function resolveFileInputWrapperLocator(
+  page: Page,
+  target: FileInputTarget,
+): Locator {
+  // Resolve the actual file input first, then find its parent drop-target wrapper.
+  const fileInput = resolveFileInputLocator(page, target);
+  const wrapper = fileInput.locator(
+    'xpath=ancestor::div[@data-testid="file-input-droptarget"]',
+  );
+  return wrapper.first();
 }
 
 /**
@@ -99,28 +132,24 @@ export async function uploadFile(
   filePath: string | string[],
   fileInputTarget: FileInputTarget = "file-input-input",
 ): Promise<void> {
+  // Find the file input element for the requested upload field.
   const fileInput = resolveFileInputLocator(page, fileInputTarget);
+
+  // Wait until the file input is visible before interacting with it.
   await fileInput.waitFor({ state: "visible", timeout: 30000 });
+
+  // Inspect whether the input supports multiple file selection.
   const acceptsMultiple = await fileInput.evaluate(
     (input: HTMLInputElement) => input.multiple,
   );
+
+  // If multiple files were passed but the input only accepts one, upload only the first.
   if (Array.isArray(filePath) && !acceptsMultiple) {
     await fileInput.setInputFiles(filePath[0]);
     return;
   }
-  await fileInput.setInputFiles(filePath);
-}
 
-/**
- * Upload files by directly selecting a native file input selector.
- */
-export async function uploadFileBySelector(
-  page: Page,
-  selector: string,
-  filePath: string | string[],
-): Promise<void> {
-  const fileInput = page.locator(selector).first();
-  await fileInput.waitFor({ state: "visible", timeout: 30000 });
+  // Otherwise, upload the provided file or files directly.
   await fileInput.setInputFiles(filePath);
 }
 
@@ -160,6 +189,16 @@ export async function expectUploadedFileCount(
   const entryLocator = page
     .locator('[data-testid="file-input-existing-files"]')
     .locator(`text=${fileName}`);
+
+  // If the expected count is zero, assert there are no entries.
+  if (count === 0) {
+    await expect(entryLocator).toHaveCount(0, {
+      timeout: timeoutMs,
+    });
+    return;
+  }
+
+  // If entries already exist, validate the exact count.
   if ((await entryLocator.count()) > 0) {
     await expect(entryLocator).toHaveCount(count, {
       timeout: timeoutMs,
@@ -167,6 +206,7 @@ export async function expectUploadedFileCount(
     return;
   }
 
+  // Fallback to a generic page text search if the entry locator did not return elements yet.
   await expect(page.getByText(fileName)).toHaveCount(count, {
     timeout: timeoutMs,
   });
@@ -236,74 +276,15 @@ export async function failAttachmentUploadRequest(
 }
 
 /**
- * Stub the streaming upload flow and the attachment creation API.
- *
- * This simulates the real upload lifecycle by returning multiple upload
- * progress states before the attachment is created.
- */
-export type StubStreamingAttachmentUploadOptions = {
-  pendingFileId?: string;
-  applicationAttachmentId?: string;
-  fileName: string;
-  delayMs?: number;
-};
-
-export async function stubStreamingAttachmentUpload(
-  page: Page,
-  {
-    pendingFileId = "fake-pending-file-id",
-    applicationAttachmentId = "fake-attachment-id",
-    fileName,
-    delayMs = 1500,
-  }: StubStreamingAttachmentUploadOptions,
-): Promise<void> {
-  await page.route("**/api/file**", async (route) => {
-    const chunks = [
-      JSON.stringify({ status: "queued" }),
-      JSON.stringify({ status: "uploading" }),
-      JSON.stringify({ status: "starting-scan" }),
-      JSON.stringify({ status: "pending" }),
-      JSON.stringify({ status: "scan-complete", pendingFileId }),
-    ];
-
-    const fullBody = Buffer.from(chunks.join(""));
-    await route.fulfill({
-      status: 200,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: fullBody,
-    });
-  });
-
-  await page.route("**/api/applications/**/attachments**", async (route) => {
-    if (delayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-    const attachment = {
-      application_attachment_id: applicationAttachmentId,
-      file_name: fileName,
-      file_size_bytes: 1024,
-      mime_type: "application/pdf",
-      updated_at: new Date().toISOString(),
-      download_path: `/download/${fileName}`,
-    };
-    await route.fulfill({
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        data: attachment,
-      }),
-    });
-  });
-}
-
-/**
  * Assert that the resolved file input is visible.
  */
 export async function assertFileInputVisible(
   page: Page,
   fileInputTarget: FileInputTarget = "file-input-input",
 ): Promise<void> {
-  await expect(resolveFileInputLocator(page, fileInputTarget)).toBeVisible({
+  await expect(
+    resolveFileInputWrapperLocator(page, fileInputTarget),
+  ).toBeVisible({
     timeout: 30000,
   });
 }
@@ -315,23 +296,88 @@ export async function assertFileInputHidden(
   page: Page,
   fileInputTarget: FileInputTarget = "file-input-input",
 ): Promise<void> {
-  await expect(resolveFileInputLocator(page, fileInputTarget)).not.toBeVisible({
+  await expect(
+    resolveFileInputWrapperLocator(page, fileInputTarget),
+  ).not.toBeVisible({
     timeout: 30000,
   });
 }
+
+/**
+ * Wait until a retry/failure control becomes visible after a failed upload.
+ *
+ * The retry control may be the visible file input wrapper, a dismiss button,
+ * a cancel button, or a "choose from folder" prompt.
+ */
+async function assertRetryControlVisible(
+  page: Page,
+  fileInputTarget: FileInputTarget = "file-input-input",
+  timeoutMs = 30000,
+): Promise<void> {
+  const fileInputWrapper = resolveFileInputWrapperLocator(
+    page,
+    fileInputTarget,
+  );
+  const dismissButton = page.getByRole("button", { name: /dismiss/i }).first();
+  const cancelButton = page.getByRole("button", { name: /cancel/i }).first();
+  const chooseFromFolder = page.getByText(/choose from folder/i).first();
+
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (
+      (await fileInputWrapper.count()) > 0 &&
+      (await fileInputWrapper.isVisible())
+    ) {
+      return;
+    }
+
+    if (
+      (await dismissButton.count()) > 0 &&
+      (await dismissButton.isVisible())
+    ) {
+      return;
+    }
+
+    if ((await cancelButton.count()) > 0 && (await cancelButton.isVisible())) {
+      return;
+    }
+
+    if (
+      (await chooseFromFolder.count()) > 0 &&
+      (await chooseFromFolder.isVisible())
+    ) {
+      return;
+    }
+
+    await page.waitForTimeout(250);
+  }
+
+  throw new Error(
+    "Expected a retry control to be visible after upload failure: visible file input wrapper, 'Dismiss' button, 'Cancel' button, or 'choose from folder' text.",
+  );
+}
+
+export type AssertUploadDidNotSaveOptions = {
+  assertInputVisible?: boolean;
+};
 
 export async function assertUploadDidNotSave(
   page: Page,
   fileName: string,
   expectedCount: number,
   fileInputTarget: FileInputTarget = "file-input-input",
+  options: AssertUploadDidNotSaveOptions = {},
 ): Promise<void> {
-  await expect(page.locator(`text=${fileName}`)).toHaveCount(expectedCount, {
+  const entryLocator = page
+    .locator('[data-testid="file-input-existing-files"]')
+    .locator(`text=${fileName}`);
+
+  await expect(entryLocator).toHaveCount(expectedCount, {
     timeout: 60000,
   });
 
-  if (expectedCount === 0) {
-    await assertFileInputVisible(page, fileInputTarget);
+  if (expectedCount === 0 && options.assertInputVisible !== false) {
+    await assertRetryControlVisible(page, fileInputTarget);
   }
 }
 
@@ -367,16 +413,37 @@ export async function expectUploadStatusMessage(
 }
 
 /**
- * Delay the upload request so tests can observe upload progress.
+ * Wait for a standard upload progress status message to appear.
+ *
+ * This checks for the common streamed upload states used by the attachment
+ * form upload flow.
  */
-export async function delayAttachmentUploadRequest(
+export async function expectUploadProgressStatusMessage(
   page: Page,
-  delayMs = 1500,
+  timeoutMs = 30000,
 ): Promise<void> {
-  await page.route("**/api/file*", async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, delayMs));
-    await route.continue();
-  });
+  await expectUploadStatusMessage(
+    page,
+    /(Processing file|Queued|Uploading\.{3}|Upload complete\. Starting security scan|Upload complete\. Running security scan\.{3}|Scan complete)/i,
+    timeoutMs,
+  );
+}
+
+/**
+ * Wait for the attachment save POST response after upload completion.
+ */
+export async function waitForAttachmentSaveResponse(
+  page: Page,
+  timeoutMs = 30000,
+): Promise<Response> {
+  return await page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      response.url().includes("/api/applications/") &&
+      response.url().includes("/attachments") &&
+      response.status() === 200,
+    { timeout: timeoutMs },
+  );
 }
 
 /**
