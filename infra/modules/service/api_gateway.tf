@@ -265,7 +265,7 @@ resource "aws_api_gateway_rest_api" "api" {
 }
 
 resource "aws_apigatewayv2_vpc_link" "api" {
-  count = var.enable_api_gateway && var.enable_api_gateway_vpc_link ? 1 : 0
+  count = var.enable_api_gateway && var.enable_secure_alb ? 1 : 0
 
   name               = "${var.service_name}-vpc-link"
   subnet_ids         = module.network.private_subnet_ids
@@ -273,10 +273,11 @@ resource "aws_apigatewayv2_vpc_link" "api" {
 }
 
 locals {
-  api_gateway_connection_type = var.enable_api_gateway_vpc_link ? "VPC_LINK" : null
-  api_gateway_connection_id   = var.enable_api_gateway_vpc_link ? aws_apigatewayv2_vpc_link.api[0].id : null
+  api_gateway_connection_type = var.enable_secure_alb ? "VPC_LINK" : null
+  api_gateway_connection_id   = var.enable_secure_alb ? aws_apigatewayv2_vpc_link.api[0].id : null
+  # Must be the internal ALB: VPC Link V2 cannot reach an internet-facing one.
   api_gateway_integration_target = (
-    var.enable_api_gateway_vpc_link && var.enable_load_balancer ? aws_lb.alb[0].arn : null
+    local.enable_internal_alb ? aws_lb.internal[0].arn : null
   )
 }
 

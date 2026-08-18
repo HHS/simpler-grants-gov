@@ -21,6 +21,7 @@ module "infra_dev_config" {
   secondary_domain_names       = ["alb.dev.simpler.grants.gov"]
   scanner_callback_domain_name = "alb.dev.simpler.grants.gov"
   enable_https                 = true
+  enable_secure_alb            = true
 
   enable_api_gateway_domain_name = true
 
