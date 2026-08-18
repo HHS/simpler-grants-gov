@@ -1,14 +1,10 @@
 /**
  * @feature Apply - Happy Path - SF-424 Short Application Submission and Print View Workflow
- * @scenario Complete the SF-424 Short Application Submission and Print View workflow for an
- * Organization user
+ * @scenario Complete the SF-424 Short Application Submission and Print View workflow for an <user type> user
  *
- * NOTE: unlike the SF-424 (long) spec, this only covers the Organization applicant scenario.
- * The form is titled "...Short Organizational (SF-424)" and organization_name is
- * unconditionally required by the schema, even though applicant_type_code's enum still lists
- * "P: Individual" as an option. TODO: confirm with product/eng whether this form is ever
- * actually reachable via an Individual-applicant opportunity flow - if so, add an Individual
- * scenario back in, mirroring the SF-424 (long) spec's applicantScenarios loop.
+ * Tests both Organization and Individual applicant scenarios, mirroring the SF-424 (long) spec pattern.
+ * The form is titled "...Short Organizational (SF-424)" in the schema, but both applicant types can
+ * access this form through the E2E-SF424SHORT-ORG-IND-01 opportunity.
  */
 
 import {
@@ -51,23 +47,40 @@ const OPPORTUNITY_NUMBER = "E2E-SF424SHORT-ORG-IND-01";
 
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
+const applicantScenarios = [
+  {
+    testName: `Complete the SF-424 Short Application Submission and Print View workflow for an Organization user`,
+    orgLabel: testOrgLabel,
+  },
+  {
+    testName: `Complete the SF-424 Short Application Submission and Print View workflow for an Individual user`,
+    orgLabel: undefined,
+  },
+] as const;
+
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-test(
-  "Complete the SF-424 Short Application Submission and Print View workflow for an Organization user",
-  { tag: [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION] },
-  async (
-    { page, context }: { page: Page; context: BrowserContext },
-    testInfo: TestInfo,
-  ) => {
-    // --- Login ---
-    // Given the user is logged in
-    const viewportSize = page.viewportSize();
-    const isMobile = viewportSize ? viewportSize.width < 1024 : false;
-    await authenticateE2eUser(page, context, isMobile);
+for (const { testName, orgLabel } of applicantScenarios) {
+  test(
+    testName,
+    { tag: [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION] },
+    async (
+      { page, context }: { page: Page; context: BrowserContext },
+      testInfo: TestInfo,
+    ) => {
+      test.setTimeout(300_000); // 5-min timeout
+
+      const isMobile = testInfo.project.name.match(/[Mm]obile/);
+      const baseSuffix = Date.now();
+
+      // --- Login ---
+      // Given the user is logged in
+      const viewportSize = page.viewportSize();
+      const isMobileViewport = viewportSize ? viewportSize.width < 1024 : false;
+      await authenticateE2eUser(page, context, isMobileViewport || !!isMobile);
 
     // --- Navigate to Opportunity page and start a new application ---
     // And the user launches the URL for an opportunity with an open SF-424 Short competition
@@ -75,78 +88,78 @@ test(
     await createApplication(
       page,
       opportunityConfig.opportunityUrl,
-      testOrgLabel,
-    );
-    const applicationUrl = page.url();
-
-    // --- Fill required forms and collect print URLs ---
-    // For each form on this opportunity: fill it, verify status, then capture the
-    // form URL *before* verifyFormStatusOnApplication navigates away to the app page.
-    const filledForms: FilledFormEntry[] = [];
-    const baseSuffix = Date.now();
-
-    for (const [index, form] of opportunityConfig.forms.entries()) {
-      const testData = buildHappyPathTestData(form, baseSuffix + index);
-
-      await fillForm(testInfo, page, form.formConfig, testData, false);
-
-      // Verify save succeeded while still on the form page
-      await verifyFormStatusAfterSave(page, "complete");
-
-      // Capture the form URL now - verifyFormStatusOnApplication navigates away
-      const formUrl = page.url();
-
-      await verifyFormStatusOnApplication(
-        page,
-        "complete",
-        form.formConfig.formName,
-        applicationUrl,
+        orgLabel,
       );
+      const applicationUrl = page.url();
 
-      filledForms.push({
-        formKey: form.formKey,
-        formName: form.formConfig.formName,
-        testData,
-        printUrl: buildPrintUrl(formUrl),
-        expectedPrepopulatedFields: form.expectedPrepopulatedFields,
-        userEnteredFieldTestIds: form.userEnteredFieldTestIds,
-      });
-    }
+      // --- Fill required forms and collect print URLs ---
+      // For each form on this opportunity: fill it, verify status, then capture the
+      // form URL *before* verifyFormStatusOnApplication navigates away to the app page.
+      const filledForms: FilledFormEntry[] = [];
 
-    // Return to application landing page before submitting
-    await page.goto(applicationUrl);
-    await page.waitForLoadState("domcontentloaded");
+      for (const [index, form] of opportunityConfig.forms.entries()) {
+        const testData = buildHappyPathTestData(form, baseSuffix + index);
 
-    // --- Submit Application ---
-    // When the user clicks "Submit application"
-    // Then the application is submitted successfully
-    await submitApplicationAndVerify(page, "success");
+        await fillForm(testInfo, page, form.formConfig, testData, false);
 
-    // --- Confirmation Page Validation ---
-    await verifySubmissionConfirmation(page);
+        // Verify save succeeded while still on the form page
+        await verifyFormStatusAfterSave(page, "complete");
 
-    // --- Print View Validation (one page per form) ---
-    // NOTE: no attachment-specific print view block here - unlike SF-424 (long), the Short
-    // form has no attachment fields (areas_affected, additional_project_title,
-    // additional_congressional_districts, debt_explanation all live only on the long form).
-    await validateAllPrintViews(page, filledForms);
+        // Capture the form URL now - verifyFormStatusOnApplication navigates away
+        const formUrl = page.url();
 
-    // --- Post-Population Field Validation ---
-    // aor_signature and authorized_representative_date_signed are system post-populated at
-    // submission time (gg_post_population rules: "signature", "current_date") - same pattern
-    // as SF-424B's signature/date_signed check.
-    for (const { printUrl } of filledForms) {
-      await navigateToPrintView(page, printUrl);
+        await verifyFormStatusOnApplication(
+          page,
+          "complete",
+          form.formConfig.formName,
+          applicationUrl,
+        );
 
-      await expect(page.getByTestId("aor_signature")).toBeVisible();
-      await expect(page.getByTestId("aor_signature")).not.toBeEmpty();
+        filledForms.push({
+          formKey: form.formKey,
+          formName: form.formConfig.formName,
+          testData,
+          printUrl: buildPrintUrl(formUrl),
+          expectedPrepopulatedFields: form.expectedPrepopulatedFields,
+          userEnteredFieldTestIds: form.userEnteredFieldTestIds,
+        });
+      }
 
-      await expect(
-        page.getByTestId("authorized_representative_date_signed"),
-      ).toBeVisible();
-      await expect(
-        page.getByTestId("authorized_representative_date_signed"),
-      ).not.toBeEmpty();
-    }
-  },
-);
+      // Return to application landing page before submitting
+      await page.goto(applicationUrl);
+      await page.waitForLoadState("domcontentloaded");
+
+      // --- Submit Application ---
+      // When the user clicks "Submit application"
+      // Then the application is submitted successfully
+      await submitApplicationAndVerify(page, "success");
+
+      // --- Confirmation Page Validation ---
+      await verifySubmissionConfirmation(page);
+
+      // --- Print View Validation (one page per form) ---
+      // NOTE: no attachment-specific print view block here - unlike SF-424 (long), the Short
+      // form has no attachment fields (areas_affected, additional_project_title,
+      // additional_congressional_districts, debt_explanation all live only on the long form).
+      await validateAllPrintViews(page, filledForms);
+
+      // --- Post-Population Field Validation ---
+      // aor_signature and authorized_representative_date_signed are system post-populated at
+      // submission time (gg_post_population rules: "signature", "current_date") - same pattern
+      // as SF-424B's signature/date_signed check.
+      for (const { printUrl } of filledForms) {
+        await navigateToPrintView(page, printUrl);
+
+        await expect(page.getByTestId("aor_signature")).toBeVisible();
+        await expect(page.getByTestId("aor_signature")).not.toBeEmpty();
+
+        await expect(
+          page.getByTestId("authorized_representative_date_signed"),
+        ).toBeVisible();
+        await expect(
+          page.getByTestId("authorized_representative_date_signed"),
+        ).not.toBeEmpty();
+      }
+    },
+  );
+}
