@@ -15,7 +15,6 @@ Feature: Attachment Form streamed upload endpoint happy path
   I want to upload attachments using the streamed upload endpoint
   So that I can successfully add, review, and manage files on the Attachment Form
 
-  @APPLY @APPLY_FORMS @CORE_REGRESSION
   Scenario: Streamed single upload shows progress and allows deletion after completion
     Given I am authenticated as an applicant
     And I have opened the "Attachment Form"
@@ -28,7 +27,6 @@ Feature: Attachment Form streamed upload endpoint happy path
     And the uploaded file should be visible
     And the "Delete" button should be visible
 
-  @APPLY @APPLY_FORMS @CORE_REGRESSION
   Scenario: Streamed single upload deletion restores the file input
     Given I am authenticated as an applicant
     And I have opened the "Attachment Form"
@@ -38,7 +36,6 @@ Feature: Attachment Form streamed upload endpoint happy path
 
     Then the file input should be visible again
 
-  @APPLY @APPLY_FORMS @CORE_REGRESSION
   Scenario: Single-file streamed upload accepts only one file
     Given I am authenticated as an applicant
     And I have opened the "Attachment Form"

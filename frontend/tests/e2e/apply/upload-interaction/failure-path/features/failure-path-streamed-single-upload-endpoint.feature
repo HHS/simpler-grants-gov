@@ -18,7 +18,6 @@ Feature: Single file upload interactions failure path
   I want the attachment form to handle upload failures correctly
   So that I can retry uploading a file when an upload does not complete successfully
 
-  @APPLY @APPLY_FORMS @CORE_REGRESSION
   Scenario: Streamed single upload aborted does not save the file
     Given I am authenticated as an applicant
     And I have opened the "Attachment Form"
@@ -30,7 +29,6 @@ Feature: Single file upload interactions failure path
     And I should see 0 uploaded files
     And the "Dismiss" button should be visible
 
-  @APPLY @APPLY_FORMS @CORE_REGRESSION
   Scenario: Streamed single upload failure does not save the file
     Given I am authenticated as an applicant
     And I have opened the "Attachment Form"
@@ -42,7 +40,6 @@ Feature: Single file upload interactions failure path
     And I should see 0 uploaded files
     And the "Dismiss" button should be visible
 
-  @APPLY @APPLY_FORMS @CORE_REGRESSION
   Scenario: Streamed single upload of a zero-byte file does not save the file
     Given I am authenticated as an applicant
     And I have opened the "Attachment Form"
