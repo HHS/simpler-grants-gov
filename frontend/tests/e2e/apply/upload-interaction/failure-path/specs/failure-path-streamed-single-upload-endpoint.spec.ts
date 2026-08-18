@@ -22,10 +22,10 @@ import {
   abortAttachmentUploadRequest,
   assertUploadDidNotSave,
   expectUploadStatusMessage,
+  failAttachmentUploadRequest,
   openApplicationFormWithAuth,
   TEST_UPLOAD_DIR,
   uploadFile,
-  failAttachmentUploadRequest,
 } from "tests/e2e/utils/common/file-upload-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
@@ -138,7 +138,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       );
     },
   );
-  
+
   test(
     "failed single-file upload of a zero-byte file",
     { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },

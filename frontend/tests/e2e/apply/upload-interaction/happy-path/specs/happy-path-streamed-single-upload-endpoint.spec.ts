@@ -176,7 +176,7 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
 
       // And the uploaded file should be visible
       await expectUploadedFileVisible(page, SAMPLE_FILE_NAME);
-      
+
       // And the "Choose from folder" should be hidden after a file is uploaded
       await assertFileInputHidden(page, fieldDefinitionsAttachment.att1);
     },
