@@ -398,6 +398,8 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+      expectedNumberOfAwardsInput:
+        "Expected number of awards must be greater than or equal to zero and less than 1,000,000,000,000,000.",
       awardMinCurrencyInput:
         "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMaxCurrencyInput:
