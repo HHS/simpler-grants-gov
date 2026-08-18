@@ -24,6 +24,14 @@ CARD_TAG_PATTERN = re.compile(r"\{\{(#\d+-[a-zA-Z0-9-]+)\}\}")
 # Metabase's own plain filter-variable syntax, e.g. {{quad}}.
 VARIABLE_TAG_PATTERN = re.compile(r"\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}")
 
+# Set as every restore-created top-level collection's description, so
+# backup-v2 can recognize and exclude it regardless of the --collection-name
+# a given restore run used -- a collection name alone isn't a reliable
+# signal, since it's a free-form argument, not a fixed convention.
+RESTORE_COLLECTION_DESCRIPTION = (
+    "Created by `analytics metabase restore`. Excluded from backup-v2 automatically."
+)
+
 
 def clean_name(name: str) -> str:
     """Turn a display name into a filesystem-safe key (e.g. for filenames)."""

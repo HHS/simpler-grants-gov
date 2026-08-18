@@ -32,6 +32,7 @@ from sqlparse import format as format_sql
 
 from analytics.integrations.metabase._shared import (
     CARD_TAG_PATTERN,
+    RESTORE_COLLECTION_DESCRIPTION,
     RESTORE_REFERENCE_PATTERN,
     clean_name,
 )
@@ -53,15 +54,20 @@ class MetabaseBackupV2:
     """Back up Metabase questions and dashboards to local filesystem, in restore format."""
 
     # `analytics metabase restore` (make mb-restore) creates a fresh,
-    # disposable top-level collection named with this prefix on every run --
-    # a re-import of the tracked restore template itself, not new content,
-    # and never meant to be backed up. Left lying around across multiple
-    # restore runs, their identically-named sub-collections (Sprint_Metrics,
-    # Shared, ...) would otherwise collide with the one real/standing
-    # collection's own sub-collections under this format's global-uniqueness
-    # requirement -- so these are excluded from backup entirely, however
-    # many pile up, rather than requiring them to be manually cleaned up
-    # first.
+    # disposable top-level collection on every run -- a re-import of restore
+    # content, not new content, and never meant to be backed up. Left lying
+    # around across multiple restore runs, their identically-named
+    # sub-collections (Sprint_Metrics, Shared, ...) would otherwise collide
+    # with the one real/standing collection's own sub-collections under this
+    # format's global-uniqueness requirement -- so these are excluded from
+    # backup entirely, however many pile up, rather than requiring them to be
+    # manually cleaned up first. `_is_restore_collection` is the actual
+    # detection logic: this prefix is only a legacy fallback for a collection
+    # created before restore started tagging its own collections via
+    # RESTORE_COLLECTION_DESCRIPTION (see _shared.py) -- a restore run's
+    # --collection-name is a free-form argument, not a fixed convention, so
+    # a name-prefix check alone can't reliably catch every restore-created
+    # collection.
     IMPORT_COLLECTION_PREFIX = "Import "
 
     def __init__(self, api_url: str, api_key: str, output_dir: str) -> None:
@@ -168,11 +174,7 @@ class MetabaseBackupV2:
             if not (c.get("is_personal") or c.get("is_sample") or c.get("archived"))
         ]
         top_level = [c for c in eligible if c.get("location") == "/"]
-        import_roots = [
-            c
-            for c in top_level
-            if c.get("name", "").startswith(self.IMPORT_COLLECTION_PREFIX)
-        ]
+        import_roots = [c for c in top_level if self._is_restore_collection(c)]
         has_non_import_root = len(import_roots) < len(top_level)
 
         # A genuine standing collection makes every "Import ..." tree
@@ -211,6 +213,15 @@ class MetabaseBackupV2:
             collections.append(collection)
 
         return collections
+
+    @staticmethod
+    def _is_restore_collection(collection: dict[str, Any]) -> bool:
+        """Check whether a top-level collection was created by a restore run."""
+        if collection.get("name", "").startswith(
+            MetabaseBackupV2.IMPORT_COLLECTION_PREFIX,
+        ):
+            return True
+        return collection.get("description") == RESTORE_COLLECTION_DESCRIPTION
 
     def get_items(self, collection_id: int) -> list[dict[str, Any]]:
         """

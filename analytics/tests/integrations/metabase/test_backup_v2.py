@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 import requests
+from analytics.integrations.metabase._shared import RESTORE_COLLECTION_DESCRIPTION
 from analytics.integrations.metabase.backup_v2 import MetabaseBackupV2
 from requests.exceptions import HTTPError, RequestException
 
@@ -122,6 +123,30 @@ def test_get_collections_ignores_builtin_examples_when_choosing_newest_import(
     result = backup_instance.get_collections()
 
     assert [c["id"] for c in result] == [20, 21]
+
+
+def test_get_collections_excludes_custom_named_restore_collection(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a restore collection is excluded even with a custom --collection-name."""
+    payload = [
+        {"id": 1, "name": "Real", "location": "/"},
+        {"id": 2, "name": "Sprint_Metrics", "location": "/1/"},
+        {
+            "id": 30,
+            "name": "Dashboard-Restore 2026-08-18_013502",
+            "location": "/",
+            "description": RESTORE_COLLECTION_DESCRIPTION,
+        },
+        {"id": 31, "name": "Sprint_Metrics", "location": "/30/"},
+    ]
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = _response(payload)
+
+    result = backup_instance.get_collections()
+
+    assert [c["id"] for c in result] == [1, 2]
 
 
 def test_get_items_keeps_cards_and_dashboards(

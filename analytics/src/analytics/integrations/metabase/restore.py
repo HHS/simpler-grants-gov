@@ -35,6 +35,7 @@ from requests.exceptions import HTTPError, RequestException
 
 from analytics.integrations.metabase._shared import (
     CARD_TAG_PATTERN,
+    RESTORE_COLLECTION_DESCRIPTION,
     RESTORE_REFERENCE_PATTERN,
     VARIABLE_TAG_PATTERN,
     build_card_tag,
@@ -149,7 +150,7 @@ class MetabaseRestore:
         response = self._requests.post(
             url,
             headers=self.headers,
-            json={"name": name},
+            json={"name": name, "description": RESTORE_COLLECTION_DESCRIPTION},
             timeout=30,
         )
         response.raise_for_status()

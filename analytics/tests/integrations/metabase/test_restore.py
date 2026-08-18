@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
+from analytics.integrations.metabase._shared import RESTORE_COLLECTION_DESCRIPTION
 from analytics.integrations.metabase.restore import (
     MetabaseRestore,
     _level_sort_key,
@@ -110,6 +111,7 @@ def test_create_parent_collection(restore_instance: MetabaseRestore) -> None:
     # ruff: noqa: SLF001
     _, kwargs = restore_instance._requests.post.call_args
     assert kwargs["json"]["name"].startswith("Import ")
+    assert kwargs["json"]["description"] == RESTORE_COLLECTION_DESCRIPTION
 
 
 def test_get_or_create_subcollection_is_cached(
