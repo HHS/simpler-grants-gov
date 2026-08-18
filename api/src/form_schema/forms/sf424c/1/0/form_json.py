@@ -11,7 +11,7 @@ FORM_JSON_SCHEMA = {
         "budget_information": {
             # Table 1 — Budget Information for Construction Programs
             "type": "object",
-            "required": ["construction"],
+            "required": [],
             "properties": {
                 "administrative_and_legal_expenses": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
@@ -48,7 +48,6 @@ FORM_JSON_SCHEMA = {
                 "construction": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
                     "title": "Construction",
-                    "required": ["total_cost"],
                 },
                 "equipment": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
@@ -566,7 +565,7 @@ FORM_UI_SCHEMA = [
         "name": "Table2",
         "type": "section",
         "label": "Federal Funding",
-        "description": "Federal assistance requested, calculate as follows.",
+        "description": "17. Federal assistance requested, calculate as follows.",
         "children": [
             {
                 "type": "multiField",
@@ -589,7 +588,7 @@ FORM_UI_SCHEMA = [
                             "cells": [
                                 {
                                     "type": "plainText",
-                                    "staticContent": "Total project costs",
+                                    "staticContent": "Total project costs (from line 16c)",
                                 },
                                 {
                                     "type": "readOnly",
