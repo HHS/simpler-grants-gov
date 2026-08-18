@@ -162,7 +162,7 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
       selector: "#expected_number_of_awards",
       required: false,
       negativeNumberValidationMessage:
-        "Expected number of awards must be greater than or equal to zero.",
+        "Expected number of awards must be greater than or equal to zero and less than 1,000,000,000,000,000.",
     },
     {
       label: "Estimated total program funding",

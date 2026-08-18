@@ -171,7 +171,7 @@ export default function OpportunityEditForm({
     setSingleFrontendError("estimated_total_program_funding", null);
     const maxLimit = 1000000000000000;
 
-    //--- min & max values for Award Minimum, Award Minimum, Total Program Funding, and Expected Number of Awards ---
+    //--- min & max values for Award Minimum, Award Maximum, Total Program Funding, and Expected Number of Awards ---
     if (awardMin < 0 || awardMin >= maxLimit) {
       const errMsg = t("validationErrors.awardMinCurrencyInput");
       setSingleFrontendError("award_floor", errMsg);
@@ -187,7 +187,7 @@ export default function OpportunityEditForm({
     if (expectedNumberOfAwards < 0 || expectedNumberOfAwards >= maxLimit) {
       setSingleFrontendError(
         "expected_number_of_awards",
-        t("validationErrors.expectedNumberOfAwaredsInput"),
+        t("validationErrors.expectedNumberOfAwardsInput"),
       );
     }
   };
