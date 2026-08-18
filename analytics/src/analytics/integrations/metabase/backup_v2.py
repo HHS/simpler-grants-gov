@@ -368,6 +368,22 @@ class MetabaseBackupV2:
         id_to_key: dict[int, str],
     ) -> dict[str, Any] | None:
         """Resolve one card's raw API detail into restore-ready fields."""
+        query_type = card.get("query_type")
+        if query_type is not None and query_type != "native":
+            # A question built with Metabase's visual query builder (MBQL)
+            # rather than hand-written SQL -- there's no query text to
+            # capture, and that's expected, not a malformed card. Logged at
+            # info, not warning, and with its own message so it doesn't read
+            # like the same failure as a native question with a genuinely
+            # missing/invalid query.
+            logger.info(
+                "Skipping card %s (%r): not a native SQL question (query_type=%s)",
+                card.get("id"),
+                card.get("name"),
+                query_type,
+            )
+            return None
+
         raw_query, tags = self._native_query_and_tags(card)
         query = self._extract_query(raw_query, card.get("id"))
         if query is None:

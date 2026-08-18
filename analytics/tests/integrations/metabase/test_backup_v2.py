@@ -318,6 +318,52 @@ def test_resolve_card_handles_pmbql_stages_shape(
     assert resolved["dependencies"] == {"Ranked_Statuses"}
 
 
+def test_resolve_card_skips_non_native_question_with_clear_message(
+    backup_instance: MetabaseBackupV2,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that a GUI-built (MBQL) question is skipped with its own clear message."""
+    card = {
+        "id": 916,
+        "name": "Cumulative Users over Time",
+        "query_type": "query",
+        "dataset_query": {
+            "stages": [
+                {"source-table": 67, "aggregation": [], "breakout": []},
+            ],
+        },
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    with caplog.at_level("INFO"):
+        resolved = backup_instance._resolve_card(card, {})
+
+    assert resolved is None
+    assert "not a native SQL question" in caplog.text
+    assert "916" in caplog.text
+    assert "No valid query found" not in caplog.text
+
+
+def test_resolve_card_missing_query_type_still_falls_through(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a card with no query_type field at all still gets extracted normally."""
+    card = {
+        "id": 1,
+        "name": "No Query Type Field",
+        "dataset_query": {"stages": [{"native": "SELECT 1"}]},
+        "display": "table",
+        "visualization_settings": {},
+        "parameters": [],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    resolved = backup_instance._resolve_card(card, {})
+
+    assert resolved is not None
+    assert resolved["query"] == "SELECT 1"
+
+
 def test_rewrite_references_known_id_becomes_restore_placeholder(
     backup_instance: MetabaseBackupV2,
 ) -> None:
