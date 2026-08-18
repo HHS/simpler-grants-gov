@@ -7,7 +7,6 @@ import { ApplicationSubmissionsRequestBody } from "src/types/application/applica
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationAttachmentCreateResponse,
-  ApplicationAttachmentUploadResponse,
   ApplicationDetailApiResponse,
   ApplicationFormDetailApiResponse,
   ApplicationHistoryApiResponse,
@@ -231,35 +230,6 @@ export const handleUpdateApplicationFormIncludeInSubmission = async (
 /**
  * Attachments
  */
-
-export const deleteAttachment = async (
-  applicationId: string,
-  application_attachment_id: string,
-): Promise<ApplicationDetailApiResponse> => {
-  const response = await fetchApplicationWithMethod("DELETE")({
-    subPath: `${applicationId}/attachments/${application_attachment_id}`,
-  });
-
-  return (await response.json()) as ApplicationDetailApiResponse;
-};
-
-export const uploadAttachment = async (
-  applicationId: string,
-  file: FormData,
-): Promise<ApplicationAttachmentUploadResponse> => {
-  const additionalHeaders = {
-    Accept: "application/json",
-  };
-
-  const response = await fetchApplicationWithMethod("POST")({
-    subPath: `${applicationId}/attachments`,
-    additionalHeaders,
-    body: file,
-    addContentType: false,
-  });
-
-  return (await response.json()) as ApplicationAttachmentUploadResponse;
-};
 
 export const createApplicationAttachment = async (
   applicationId: string,
