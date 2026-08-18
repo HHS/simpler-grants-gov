@@ -141,8 +141,12 @@ test(
       await expect(page.getByTestId("aor_signature")).toBeVisible();
       await expect(page.getByTestId("aor_signature")).not.toBeEmpty();
 
-      await expect(page.getByTestId("authorized_representative_date_signed")).toBeVisible();
-      await expect(page.getByTestId("authorized_representative_date_signed")).not.toBeEmpty();
+      await expect(
+        page.getByTestId("authorized_representative_date_signed"),
+      ).toBeVisible();
+      await expect(
+        page.getByTestId("authorized_representative_date_signed"),
+      ).not.toBeEmpty();
     }
   },
 );
