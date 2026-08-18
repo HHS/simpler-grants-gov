@@ -577,7 +577,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
   # Redeploys on any change to this file
   triggers = {
     redeployment = filesha1("${path.module}/api_gateway.tf")
-    vpc_link = coalesce(local.api_gateway_connection_id, "none")
+    vpc_link     = coalesce(local.api_gateway_connection_id, "none")
   }
 
   lifecycle {
