@@ -116,9 +116,15 @@ class MetabaseBackupV2:
             collection_of,
             collection_folder,
         )
+        # Dashboards can only reference cards that were actually captured --
+        # a card skipped above (e.g. a non-native question) has no .sql file
+        # for a dashboard reference to resolve against at restore time, even
+        # though its id is still a legitimate key in the broader id_to_key
+        # map used for in-query cross-references above.
+        written_id_to_key = {card["id"]: key for key, card in resolved_cards.items()}
         self._write_all_dashboards(
             dashboards_summary,
-            id_to_key,
+            written_id_to_key,
             collection_of,
             collection_folder,
         )
@@ -605,7 +611,20 @@ class MetabaseBackupV2:
         if dashboard is None:
             return False
 
-        spec = self._resolve_dashboard(dashboard, id_to_key)
+        try:
+            spec = self._resolve_dashboard(dashboard, id_to_key)
+        except RuntimeError:
+            # A dashcard or filter references a card that isn't in this
+            # backup -- most commonly a non-native question mixed onto an
+            # otherwise-SQL dashboard. That's a real, expected occurrence,
+            # not a reason to abort every other dashboard in the run.
+            logger.warning(
+                "Skipping dashboard %d (%r): references a card outside this backup",
+                dashboard_id,
+                dashboard.get("name"),
+                exc_info=True,
+            )
+            return False
 
         dash_dir = self.output_dir / "dashboards" / folder
         dash_dir.mkdir(parents=True, exist_ok=True)

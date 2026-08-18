@@ -1,6 +1,6 @@
 """Unit tests for Metabase backup functionality."""
 
-# pylint: disable=wrong-import-order
+# pylint: disable=wrong-import-order,too-many-lines
 
 import json
 from pathlib import Path
@@ -702,6 +702,138 @@ def test_resolve_dashcard_unresolved_external_card_raises(
     # ruff: noqa: SLF001
     with pytest.raises(RuntimeError, match="999"):
         backup_instance._resolve_dashcard(dashcard, {}, {}, "Some Dashboard")
+
+
+def test_write_dashboard_skips_unresolvable_reference_without_raising(
+    backup_instance: MetabaseBackupV2,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """
+    Test that a dashboard referencing an uncapturable card is skipped, not fatal.
+
+    This is the real-world case of a dashboard mixing native SQL questions
+    with a GUI-built (non-native) one: the non-native card was never
+    written during _write_all_questions, so its id isn't in id_to_key here
+    -- that one dashboard should be skipped with a clear log message, not
+    crash the rest of the backup run.
+    """
+    dashboard_detail = {
+        "id": 300,
+        "name": "Mixed Dashboard",
+        "tabs": [],
+        "parameters": [],
+        "dashcards": [
+            {
+                "id": 1,
+                "dashboard_tab_id": None,
+                "card_id": 916,
+                "col": 0,
+                "row": 0,
+                "size_x": 6,
+                "size_y": 3,
+            },
+        ],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.return_value = _response(dashboard_detail)
+
+    with caplog.at_level("WARNING"):
+        written = backup_instance._write_dashboard(300, {}, "Dashboards")
+
+    assert written is False
+    assert "Mixed Dashboard" in caplog.text
+    assert "outside this backup" in caplog.text
+
+
+def test_backup_written_id_to_key_excludes_skipped_cards(
+    backup_instance: MetabaseBackupV2,
+    tmp_path: Path,
+) -> None:
+    """
+    Test the full backup() flow when a dashboard mixes a captured and a skipped card.
+
+    The dashboard must be skipped (not written with a dangling reference),
+    while the native question and the rest of the run still succeed.
+    """
+    collections_payload = [
+        {"id": 11, "name": "Deliverable Data", "location": "/"},
+        {"id": 12, "name": "Dashboards", "location": "/"},
+    ]
+    items_by_collection = {
+        11: {
+            "data": [
+                {"id": 101, "name": "My Question", "model": "card"},
+                {"id": 916, "name": "Non-native", "model": "card"},
+            ],
+        },
+        12: {"data": [{"id": 200, "name": "Mixed Dashboard", "model": "dashboard"}]},
+    }
+    card_details = {
+        101: {
+            "id": 101,
+            "name": "My Question",
+            "query_type": "native",
+            "dataset_query": {"native": {"query": "SELECT 1"}},
+            "display": "table",
+            "visualization_settings": {},
+        },
+        916: {"id": 916, "name": "Non-native", "query_type": "query"},
+    }
+    dashboard_detail = {
+        "id": 200,
+        "name": "Mixed Dashboard",
+        "tabs": [],
+        "parameters": [],
+        "dashcards": [
+            {
+                "id": 1,
+                "dashboard_tab_id": None,
+                "card_id": 101,
+                "col": 0,
+                "row": 0,
+                "size_x": 12,
+                "size_y": 4,
+            },
+            {
+                "id": 2,
+                "dashboard_tab_id": None,
+                "card_id": 916,
+                "col": 0,
+                "row": 4,
+                "size_x": 12,
+                "size_y": 4,
+            },
+        ],
+    }
+
+    def fake_get(url: str, **_kwargs: object) -> MagicMock:
+        if url.endswith("/collection/?exclude-other-user-collections=true"):
+            return _response(collections_payload)
+        for collection_id, payload in items_by_collection.items():
+            if url.endswith(f"/collection/{collection_id}/items"):
+                return _response(payload)
+        for card_id, detail in card_details.items():
+            if url.endswith(f"/card/{card_id}"):
+                return _response(detail)
+        if url.endswith("/dashboard/200"):
+            return _response(dashboard_detail)
+        message = f"Unexpected URL: {url}"
+        raise AssertionError(message)
+
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.side_effect = fake_get
+
+    backup_instance.backup()
+
+    assert (tmp_path / "level_0" / "Deliverable_Data" / "My_Question.sql").exists()
+    assert not (
+        tmp_path / "dashboards" / "Dashboards" / "Mixed_Dashboard.json"
+    ).exists()
+    assert backup_instance.stats["questions_processed"] == 1
+    assert backup_instance.stats["dashboards_processed"] == 0
+    assert backup_instance.stats["dashboards_skipped"] == 1
 
 
 def test_resolve_dashboard_parameter_unresolved_external_card_raises(
