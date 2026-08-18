@@ -555,9 +555,6 @@ class OpportunitySummaryBaseRequestSchema(Schema):
         left_field="award_floor",
         operator=RelationalValidationOperator.LESS_THAN_OR_EQUAL,
         right_field="award_ceiling",
-        target_fields=["award_floor", "award_ceiling"],
-        error_type=SchemaValidationError.INVALID,
-        validation_type="numeric_order",
         message="Award floor must be less than or equal to award ceiling",
     )
     def validate_award_values(self, data: dict, **kwargs: dict) -> None:
@@ -568,12 +565,6 @@ class OpportunitySummaryBaseRequestSchema(Schema):
         left_field="award_floor",
         operator=RelationalValidationOperator.LESS_THAN_OR_EQUAL,
         right_field="estimated_total_program_funding",
-        target_fields=[
-            "award_floor",
-            "estimated_total_program_funding",
-        ],
-        error_type=SchemaValidationError.INVALID,
-        validation_type="numeric_order",
         message="Award minimum must be less than or equal to estimated total program funding",
     )
     def validate_award_floor_total_funding(
@@ -587,12 +578,6 @@ class OpportunitySummaryBaseRequestSchema(Schema):
         left_field="award_ceiling",
         operator=RelationalValidationOperator.LESS_THAN_OR_EQUAL,
         right_field="estimated_total_program_funding",
-        target_fields=[
-            "award_ceiling",
-            "estimated_total_program_funding",
-        ],
-        error_type=SchemaValidationError.INVALID,
-        validation_type="numeric_order",
         message="Award maximum must be less than or equal to estimated total program funding",
     )
     def validate_award_ceiling_total_funding(
@@ -606,9 +591,6 @@ class OpportunitySummaryBaseRequestSchema(Schema):
         left_field="post_date",
         operator=RelationalValidationOperator.LESS_THAN_OR_EQUAL,
         right_field="close_date",
-        target_fields=["post_date", "close_date"],
-        error_type=SchemaValidationError.INVALID,
-        validation_type="date_order",
         message="Post date must be less than or equal to close date",
     )
     def validate_dates(self, data: dict, **kwargs: dict) -> None:
@@ -753,9 +735,6 @@ class CompetitionRequestBaseSchema(Schema):
         left_field="opening_date",
         operator=RelationalValidationOperator.LESS_THAN_OR_EQUAL,
         right_field="closing_date",
-        target_fields=["opening_date", "closing_date"],
-        error_type=SchemaValidationError.INVALID,
-        validation_type="date_order",
         message="Closing date must be on or after opening date",
     )
     def validate_dates(self, data: dict, **kwargs: dict) -> None:

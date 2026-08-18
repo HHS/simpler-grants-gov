@@ -62,6 +62,60 @@ function getValidationGuards(leftSchema, rightSchema, left, right) {
   ].filter(Boolean);
 }
 
+function getValidationType(leftField, rightField, leftSchema, rightSchema) {
+  const leftTypes = getSchemaTypes(leftSchema);
+  const rightTypes = getSchemaTypes(rightSchema);
+
+  const bothDates =
+    leftTypes.includes("string") &&
+    rightTypes.includes("string") &&
+    leftSchema?.format === "date" &&
+    rightSchema?.format === "date";
+
+  if (bothDates) {
+    return "date_order";
+  }
+
+  const leftNumeric =
+    leftTypes.includes("integer") || leftTypes.includes("number");
+
+  const rightNumeric =
+    rightTypes.includes("integer") || rightTypes.includes("number");
+
+  if (leftNumeric && rightNumeric) {
+    return "numeric_order";
+  }
+
+  if (leftTypes.includes("string") && rightTypes.includes("string")) {
+    return "string_order";
+  }
+
+  throw new Error(
+    `Unable to determine relational validation type for ` +
+      `${leftField} and ${rightField}`,
+  );
+}
+
+function getTargetValidationType(
+  targetField,
+  leftField,
+  rightField,
+  validationType,
+) {
+  if (targetField === leftField) {
+    return `${rightField}_${validationType}`;
+  }
+
+  if (targetField === rightField) {
+    return `${leftField}_${validationType}`;
+  }
+
+  throw new Error(
+    `Relational validation target field ${targetField} is not ` +
+      `${leftField} or ${rightField}`,
+  );
+}
+
 function buildSuperRefine(validations, properties) {
   const rules = validations
     .map((validation) => {
@@ -69,9 +123,6 @@ function buildSuperRefine(validations, properties) {
         left_field: leftField,
         operator,
         right_field: rightField,
-        target_fields: targetFields,
-        error_type: errorType,
-        validation_type: validationType,
       } = validation;
 
       const comparison = OPERATOR_EXPRESSIONS[operator];
@@ -82,11 +133,25 @@ function buildSuperRefine(validations, properties) {
         );
       }
 
+      const leftSchema = properties[leftField];
+      const rightSchema = properties[rightField];
+
+      if (!leftSchema || !rightSchema) {
+        throw new Error(
+          `Relational validation references missing fields: ` +
+            `${leftField}, ${rightField}`,
+        );
+      }
+
       const left = `data[${JSON.stringify(leftField)}]`;
       const right = `data[${JSON.stringify(rightField)}]`;
 
-      const leftSchema = properties[leftField];
-      const rightSchema = properties[rightField];
+      const validationType = getValidationType(
+        leftField,
+        rightField,
+        leftSchema,
+        rightSchema,
+      );
 
       const guards = getValidationGuards(leftSchema, rightSchema, left, right);
 
@@ -99,22 +164,23 @@ function buildSuperRefine(validations, properties) {
         `!(${validComparison})`,
       ];
 
+      const targetFields = [leftField, rightField];
+
       const issues = targetFields
         .map((field) => {
-          const targetValidationType =
-            getTargetValidationType(
-              field,
-              leftField,
-              rightField,
-              validationType,
-            ) ?? errorType;
+          const targetValidationType = getTargetValidationType(
+            field,
+            leftField,
+            rightField,
+            validationType,
+          );
 
           return `
-                ctx.addIssue({
-                code: zod.ZodIssueCode.custom,
-                path: [${JSON.stringify(field)}],
-                message: ${JSON.stringify(targetValidationType)},
-                });`;
+        ctx.addIssue({
+          code: zod.ZodIssueCode.custom,
+          path: [${JSON.stringify(field)}],
+          message: ${JSON.stringify(targetValidationType)},
+        });`;
         })
         .join("");
 
@@ -128,27 +194,6 @@ function buildSuperRefine(validations, properties) {
 
   return `.superRefine((data, ctx) => {${rules}
   })`;
-}
-
-function getTargetValidationType(
-  targetField,
-  leftField,
-  rightField,
-  validationType,
-) {
-  if (!validationType) {
-    return null;
-  }
-
-  if (targetField === leftField) {
-    return `${rightField}_${validationType}`;
-  }
-
-  if (targetField === rightField) {
-    return `${leftField}_${validationType}`;
-  }
-
-  return validationType;
 }
 
 function findGeneratedSchemaInitializers(sourceText) {

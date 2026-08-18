@@ -13142,44 +13142,18 @@ components:
         left_field: award_ceiling
         operator: less_than_or_equal
         right_field: estimated_total_program_funding
-        target_fields:
-        - award_ceiling
-        - estimated_total_program_funding
-        error_type: invalid
-        validation_type: numeric_order
-        message: Award maximum must be less than or equal to estimated total program
-          funding
       - &id087
         left_field: award_floor
         operator: less_than_or_equal
         right_field: estimated_total_program_funding
-        target_fields:
-        - award_floor
-        - estimated_total_program_funding
-        error_type: invalid
-        validation_type: numeric_order
-        message: Award minimum must be less than or equal to estimated total program
-          funding
       - &id088
         left_field: award_floor
         operator: less_than_or_equal
         right_field: award_ceiling
-        target_fields:
-        - award_floor
-        - award_ceiling
-        error_type: invalid
-        validation_type: numeric_order
-        message: Award floor must be less than or equal to award ceiling
       - &id089
         left_field: post_date
         operator: less_than_or_equal
         right_field: close_date
-        target_fields:
-        - post_date
-        - close_date
-        error_type: invalid
-        validation_type: date_order
-        message: Post date must be less than or equal to close date
     SavedOpportunityNotificationsSelfSchema:
       type: object
       properties:
@@ -13473,12 +13447,6 @@ components:
         left_field: opening_date
         operator: less_than_or_equal
         right_field: closing_date
-        target_fields:
-        - opening_date
-        - closing_date
-        error_type: invalid
-        validation_type: date_order
-        message: Closing date must be on or after opening date
     OrganizationRemoveUserResponseSchema:
       type: object
       properties:
@@ -15326,10 +15294,6 @@ components:
       - message
       - status_code
   securitySchemes:
-    ApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Token
     ApiUserKeyAuth:
       type: apiKey
       in: header
@@ -15338,4 +15302,8 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
+    ApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Token
 

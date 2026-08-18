@@ -102,11 +102,16 @@ class EndpointConfig(PydanticBaseEnvConfig):
 
 
 def create_app() -> APIFlask:
+    spec_plugins = []
+
+    if os.getenv("INCLUDE_RELATIONAL_VALIDATION_METADATA") == "true":
+        spec_plugins.append(RelationalValidationOpenAPIPlugin())
+
     app = APIFlask(
         __name__,
         title=TITLE,
         version=API_OVERALL_VERSION,
-        spec_plugins=[RelationalValidationOpenAPIPlugin()],
+        spec_plugins=spec_plugins,
     )
 
     setup_logging(app)

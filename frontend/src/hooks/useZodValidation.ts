@@ -27,7 +27,11 @@ export function useZodFormValidation({
 }: UseZodFormValidationOptions) {
   const genericTranslations = useTranslations("genericValidationMessages");
   const [frontendErrors, setFrontendErrors] = useState<ValidationErrors>({});
-  const validateField = (field: string, form: HTMLFormElement): void => {
+
+  const validateField = (
+    field: string,
+    form: HTMLFormElement,
+  ): void => {
     if (!isFieldInSchema(schema, field)) {
       return;
     }
@@ -38,10 +42,18 @@ export function useZodFormValidation({
     const result = schema.safeParse(validationData);
 
     if (result.success) {
-      setFrontendErrors((current) => ({
-        ...current,
-        [field]: [],
-      }));
+      setFrontendErrors((current) => {
+        const next = { ...current };
+
+        for (const fieldName of Object.keys(next)) {
+          next[fieldName] = [];
+        }
+
+        next[field] = [];
+
+        return next;
+      });
+
       return;
     }
 
@@ -51,13 +63,22 @@ export function useZodFormValidation({
       schema,
       fieldTranslations,
       genericTranslations,
-      field,
     );
 
-    setFrontendErrors((current) => ({
-      ...current,
-      [field]: validationErrors[field] ?? [],
-    }));
+    setFrontendErrors((current) => {
+      const fieldsToRefresh = new Set([
+        ...Object.keys(current),
+        field,
+      ]);
+
+      const next = { ...current };
+
+      for (const fieldName of fieldsToRefresh) {
+        next[fieldName] = validationErrors[fieldName] ?? [];
+      }
+
+      return next;
+    });
   };
 
   const handleFieldBlur = (event: React.FocusEvent<HTMLFormElement>): void => {

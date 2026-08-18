@@ -45,6 +45,7 @@ import {
   CommonWordLimit,
 } from "src/components/core/forms/CommonFormFields";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
+import { normalizeDateString } from "src/utils/dateUtil";
 
 const eligibilityDisplayLabels: Record<string, string> = Object.fromEntries(
   ELIGIBILITY_OPTIONS.map(({ value, label }) => [value, label]),
@@ -113,6 +114,7 @@ export default function OpportunityEditForm({
   const [fundingCategory, setFundingCategory] = useState(
     initialValues.funding_categories,
   );
+  const [postDate, setPostDate] = useState(initialValues.post_date);
   const [closeDate, setCloseDate] = useState(initialValues.close_date);
   const [selectedEligibility, setSelectedEligibility] = useState<string[]>(
     initialValues.applicant_types,
@@ -128,15 +130,22 @@ export default function OpportunityEditForm({
       serverErrors: formState.validationErrors,
       fieldTranslations: fieldTranslations,
       getValidationData: (formData) =>
-        getOpportunitySummaryValidationData(formData),
+        getOpportunitySummaryValidationData(formData, {
+          post_date: normalizeDateString(postDate) ?? postDate,
+          close_date: closeDate
+            ? (normalizeDateString(closeDate) ?? closeDate)
+            : null,
+        }),
     });
 
   const handleDatePickerBlur = (
     field: keyof OpportunityEditValidationErrors,
   ) => {
-    if (!formRef.current) return;
+    if (!formRef.current) {
+      return;
+    }
 
-    fieldTranslations(field, formRef.current);
+    validateField(field, formRef.current);
   };
 
   // Shared toggle handler for eligibility checkboxes.
@@ -477,6 +486,7 @@ export default function OpportunityEditForm({
                   name="post_date"
                   defaultValue={initialValues.post_date}
                   placeholder="mm/dd/yyyy"
+                  onChange={(value) => setPostDate(value ?? "")}
                   className="width-full"
                   onBlur={() => {
                     if (formRef.current) {
