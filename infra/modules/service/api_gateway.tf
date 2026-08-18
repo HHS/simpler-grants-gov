@@ -264,6 +264,22 @@ resource "aws_api_gateway_rest_api" "api" {
   ]
 }
 
+resource "aws_apigatewayv2_vpc_link" "api" {
+  count = var.enable_api_gateway && var.enable_api_gateway_vpc_link ? 1 : 0
+
+  name               = "${var.service_name}-vpc-link"
+  subnet_ids         = module.network.private_subnet_ids
+  security_group_ids = [aws_security_group.api_gateway_vpc_link[0].id]
+}
+
+locals {
+  api_gateway_connection_type = var.enable_api_gateway_vpc_link ? "VPC_LINK" : null
+  api_gateway_connection_id   = var.enable_api_gateway_vpc_link ? aws_apigatewayv2_vpc_link.api[0].id : null
+  api_gateway_integration_target = (
+    var.enable_api_gateway_vpc_link && var.enable_load_balancer ? aws_lb.alb[0].arn : null
+  )
+}
+
 resource "aws_api_gateway_model" "alpha_applications_model" {
   count = var.enable_api_gateway ? 1 : 0
 
@@ -307,6 +323,10 @@ resource "aws_api_gateway_integration" "root" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
 
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
+
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
@@ -346,6 +366,10 @@ resource "aws_api_gateway_integration" "root_endpoints" {
   resource_id = aws_api_gateway_resource.root_endpoints[each.value.endpoint].id
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
+
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
 
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
@@ -388,6 +412,10 @@ resource "aws_api_gateway_integration" "first_level_endpoints" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
 
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
+
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
@@ -429,6 +457,10 @@ resource "aws_api_gateway_integration" "second_level_endpoints" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
 
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
+
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
@@ -469,6 +501,10 @@ resource "aws_api_gateway_integration" "third_level_endpoints" {
   resource_id = aws_api_gateway_resource.third_level_endpoints[each.value.endpoint].id
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
+
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
 
   passthrough_behavior = "WHEN_NO_MATCH"
   # Use extended timeout for streaming endpoints (up to 15 minutes), otherwise use default 29 seconds
@@ -514,6 +550,10 @@ resource "aws_api_gateway_integration" "fourth_level_endpoints" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
 
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
+
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
@@ -537,6 +577,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
   # Redeploys on any change to this file
   triggers = {
     redeployment = filesha1("${path.module}/api_gateway.tf")
+    vpc_link = coalesce(local.api_gateway_connection_id, "none")
   }
 
   lifecycle {
