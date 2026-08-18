@@ -82,14 +82,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
       const isMobileViewport = viewportSize ? viewportSize.width < 1024 : false;
       await authenticateE2eUser(page, context, isMobileViewport || !!isMobile);
 
-    // --- Navigate to Opportunity page and start a new application ---
-    // And the user launches the URL for an opportunity with an open SF-424 Short competition
-    // When the user clicks "Start Application", selects applicant type and creates the application
-    await createApplication(
-      page,
-      opportunityConfig.opportunityUrl,
-        orgLabel,
-      );
+      // --- Navigate to Opportunity page and start a new application ---
+      // And the user launches the URL for an opportunity with an open SF-424 Short competition
+      // When the user clicks "Start Application", selects applicant type and creates the application
+      await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
       const applicationUrl = page.url();
 
       // --- Fill required forms and collect print URLs ---
