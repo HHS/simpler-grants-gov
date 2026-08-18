@@ -31,7 +31,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
-from requests.exceptions import RequestException
+from requests.exceptions import HTTPError, RequestException
 
 from analytics.integrations.metabase._shared import (
     CARD_TAG_PATTERN,
@@ -43,6 +43,17 @@ from analytics.integrations.metabase._shared import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Truncate a logged error response body to this many characters -- long
+# enough to show Metabase's actual validation message, short enough that a
+# large HTML error page doesn't flood the log.
+_ERROR_BODY_LOG_LIMIT = 2000
+
+
+def _log_http_error(exc: HTTPError, context: str) -> None:
+    """Log an HTTP error's response body, since that's where Metabase puts the actual reason."""
+    body = exc.response.text if exc.response is not None else ""
+    logger.error("%s: %s\n%s", context, exc, body[:_ERROR_BODY_LOG_LIMIT])
 
 
 class MetabaseRestore:
@@ -207,6 +218,9 @@ class MetabaseRestore:
                 timeout=30,
             )
             response.raise_for_status()
+        except HTTPError as exc:
+            _log_http_error(exc, f"Failed to create question from {sql_path}")
+            raise
         except RequestException:
             logger.exception("Failed to create question from %s", sql_path)
             raise
@@ -333,6 +347,9 @@ class MetabaseRestore:
                 timeout=30,
             )
             response.raise_for_status()
+        except HTTPError as exc:
+            _log_http_error(exc, f"Failed to create dashboard from {dash_path}")
+            raise
         except RequestException:
             logger.exception("Failed to create dashboard from %s", dash_path)
             raise
@@ -371,6 +388,9 @@ class MetabaseRestore:
                 timeout=30,
             )
             response.raise_for_status()
+        except HTTPError as exc:
+            _log_http_error(exc, f"Failed to populate dashboard from {dash_path}")
+            raise
         except RequestException:
             logger.exception("Failed to populate dashboard from %s", dash_path)
             raise

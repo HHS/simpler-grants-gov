@@ -40,6 +40,9 @@ logger = logging.getLogger(__name__)
 
 HTTP_FORBIDDEN = 403
 
+# Length of a `["field", <a>, <b>]` reference, classic or pMBQL-shaped alike.
+_FIELD_REF_LENGTH = 3
+
 # Matches any double-curly-brace placeholder -- our own restore reference
 # syntax, Metabase's own resolved card-reference syntax, and plain
 # variable filters alike.
@@ -397,7 +400,9 @@ class MetabaseBackupV2:
 
         query = self._rewrite_references(query, id_to_key)
         kept_tags = {
-            name: tag for name, tag in tags.items() if tag.get("type") != "card"
+            name: self._normalize_dimension_tag(tag)
+            for name, tag in tags.items()
+            if tag.get("type") != "card"
         }
 
         return {
@@ -445,6 +450,39 @@ class MetabaseBackupV2:
         query = native.get("query")
         tags = native.get("template-tags") or {}
         return (query if isinstance(query, str) else None), tags
+
+    @staticmethod
+    def _normalize_dimension_tag(tag: dict[str, Any]) -> dict[str, Any]:
+        """
+        Normalize a dimension-type tag's field reference to the classic shape.
+
+        A `dimension` tag's field reference comes back as `["field", <id>,
+        <options>]` (classic) or `["field", <options>, <id>]` (newer pMBQL
+        shape, with the id and options args swapped) depending on the
+        instance's Metabase version -- the same drift `_native_query_and_tags`
+        handles for the query/tags container itself. Only the classic
+        ordering is valid inside the flat `native.template-tags` payload this
+        format writes on restore; posting the pMBQL ordering back verbatim
+        makes card creation fail.
+        """
+        if tag.get("type") != "dimension":
+            return tag
+        dimension = tag.get("dimension")
+        if (
+            not isinstance(dimension, list)
+            or len(dimension) != _FIELD_REF_LENGTH
+            or dimension[0] != "field"
+            or not isinstance(dimension[1], dict)
+        ):
+            return tag
+
+        options, field_id = dimension[1], dimension[2]
+        classic_options = {
+            key: value for key, value in options.items() if not key.startswith("lib/")
+        }
+        normalized = dict(tag)
+        normalized["dimension"] = ["field", field_id, classic_options or None]
+        return normalized
 
     @staticmethod
     def _extract_query(query: str | None, card_id: int | None) -> str | None:

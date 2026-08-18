@@ -423,6 +423,77 @@ def test_resolve_card_strips_card_type_template_tags(
     assert resolved["dependencies"] == {"Ranked_Statuses"}
 
 
+def test_resolve_card_normalizes_pmbql_dimension_field_shape(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a pMBQL-shaped dimension field ref is rewritten to the classic shape."""
+    card = {
+        "id": 56,
+        "name": "Burndown by Issue",
+        "dataset_query": {
+            "native": {
+                "query": "SELECT * FROM x WHERE {{quad}}",
+                "template-tags": {
+                    "quad": {
+                        "type": "dimension",
+                        "name": "quad",
+                        "dimension": [
+                            "field",
+                            {
+                                "lib/uuid": "b5b4cbe3-0b13-4d20-89a0-7cb6424c7afd",
+                                "base-type": "type/Text",
+                            },
+                            310,
+                        ],
+                        "widget-type": "string/=",
+                    },
+                },
+            },
+        },
+        "display": "table",
+        "visualization_settings": {},
+        "parameters": [],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    resolved = backup_instance._resolve_card(card, {})
+
+    assert resolved is not None
+    assert resolved["template_tags"]["quad"]["dimension"] == [
+        "field",
+        310,
+        {"base-type": "type/Text"},
+    ]
+
+
+def test_normalize_dimension_tag_leaves_classic_shape_untouched(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that an already-classic-shaped dimension tag passes through unchanged."""
+    tag = {
+        "type": "dimension",
+        "name": "quad",
+        "dimension": ["field", 310, None],
+    }
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    normalized = backup_instance._normalize_dimension_tag(tag)
+
+    assert normalized == tag
+
+
+def test_normalize_dimension_tag_ignores_non_dimension_tags(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a non-dimension tag (e.g. a plain text variable) is left as-is."""
+    tag = {"type": "text", "name": "deliverable_title"}
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    normalized = backup_instance._normalize_dimension_tag(tag)
+
+    assert normalized == tag
+
+
 def test_check_collisions_none_when_unique(backup_instance: MetabaseBackupV2) -> None:
     """Test that unique card and collection names raise nothing."""
     cards = [{"id": 1, "name": "A"}, {"id": 2, "name": "B"}]

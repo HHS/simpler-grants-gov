@@ -12,7 +12,7 @@ from analytics.integrations.metabase.restore import (
     MetabaseRestore,
     _level_sort_key,
 )
-from requests.exceptions import RequestException
+from requests.exceptions import HTTPError, RequestException
 
 
 @pytest.fixture(name="restore_instance")
@@ -355,6 +355,31 @@ def test_create_question_error_propagates(
 
     with pytest.raises(RequestException):
         restore_instance._create_question(sql_path, collection_id=3)
+
+
+def test_create_question_http_error_logs_response_body(
+    restore_instance: MetabaseRestore,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that a 500's response body is logged, not just the exception message."""
+    sql_path = tmp_path / "Bad_Question.sql"
+    sql_path.write_text("SELECT 1")
+
+    error_response = MagicMock()
+    error_response.text = '{"message": "Invalid field reference"}'
+    http_error = HTTPError("500 Server Error", response=error_response)
+
+    response = MagicMock()
+    response.raise_for_status.side_effect = http_error
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    restore_instance._requests.post.return_value = response
+
+    with pytest.raises(HTTPError):
+        restore_instance._create_question(sql_path, collection_id=3)
+
+    assert "Invalid field reference" in caplog.text
 
 
 def test_restore_processes_levels_in_order(
