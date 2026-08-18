@@ -743,7 +743,8 @@ def test_write_dashboard_skips_unresolvable_reference_without_raising(
 
     assert written is False
     assert "Mixed Dashboard" in caplog.text
-    assert "outside this backup" in caplog.text
+    assert "card id 916" in caplog.text
+    assert "Traceback" not in caplog.text
 
 
 def test_backup_written_id_to_key_excludes_skipped_cards(

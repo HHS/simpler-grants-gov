@@ -613,16 +613,20 @@ class MetabaseBackupV2:
 
         try:
             spec = self._resolve_dashboard(dashboard, id_to_key)
-        except RuntimeError:
+        except RuntimeError as exc:
             # A dashcard or filter references a card that isn't in this
             # backup -- most commonly a non-native question mixed onto an
             # otherwise-SQL dashboard. That's a real, expected occurrence,
-            # not a reason to abort every other dashboard in the run.
+            # not a reason to abort every other dashboard in the run. The
+            # RuntimeError's own message already names the offending card,
+            # so it's included as plain text rather than a full traceback
+            # (exc_info=True), which reads like an unhandled crash even
+            # though this is a deliberately handled, expected case.
             logger.warning(
-                "Skipping dashboard %d (%r): references a card outside this backup",
+                "Skipping dashboard %d (%r): %s",
                 dashboard_id,
                 dashboard.get("name"),
-                exc_info=True,
+                exc,
             )
             return False
 
