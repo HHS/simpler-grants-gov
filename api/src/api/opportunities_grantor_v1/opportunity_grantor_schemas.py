@@ -2,6 +2,11 @@ from datetime import timedelta
 
 from grants_shared.api.schemas.extension import Schema, fields, validators
 from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
+from grants_shared.api.schemas.extension.schema_validators import (
+    RelationalValidationOperator,
+    relational_validation,
+)
 from grants_shared.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from grants_shared.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
 from grants_shared.pagination.pagination_schema import generate_pagination_schema
@@ -526,7 +531,10 @@ class OpportunitySummaryBaseRequestSchema(Schema):
     agency_email_address = fields.String(
         required=True,
         allow_none=True,
-        validate=validators.Length(max=130),
+        validate=[
+            validators.Length(max=130),
+            validators.Email(),
+        ],
         metadata={
             "description": "The contact email of the agency who owns the opportunity",
             "example": "fake_email@grants.gov",
@@ -543,33 +551,51 @@ class OpportunitySummaryBaseRequestSchema(Schema):
         },
     )
 
-    @validates_schema
+    @relational_validation(
+        left_field="award_floor",
+        operator=RelationalValidationOperator.LESS_THAN_OR_EQUAL,
+        right_field="award_ceiling",
+        message="Award floor must be less than or equal to award ceiling",
+    )
     def validate_award_values(self, data: dict, **kwargs: dict) -> None:
-        """Validate that award floor is less than or equal to award ceiling"""
-        if data.get("award_floor") is not None and data.get("award_ceiling") is not None:
-            if data["award_floor"] > data["award_ceiling"]:
-                raise ValidationError(
-                    [
-                        MarshmallowErrorContainer(
-                            ValidationErrorType.INVALID,
-                            "Award floor must be less than or equal to award ceiling",
-                        )
-                    ]
-                )
+        """Validate that award floor is less than or equal to award ceiling."""
+        pass
 
-    @validates_schema
+    @relational_validation(
+        left_field="award_floor",
+        operator=RelationalValidationOperator.LESS_THAN_OR_EQUAL,
+        right_field="estimated_total_program_funding",
+        message="Award minimum must be less than or equal to estimated total program funding",
+    )
+    def validate_award_floor_total_funding(
+        self,
+        data: dict,
+        **kwargs: dict,
+    ) -> None:
+        pass
+
+    @relational_validation(
+        left_field="award_ceiling",
+        operator=RelationalValidationOperator.LESS_THAN_OR_EQUAL,
+        right_field="estimated_total_program_funding",
+        message="Award maximum must be less than or equal to estimated total program funding",
+    )
+    def validate_award_ceiling_total_funding(
+        self,
+        data: dict,
+        **kwargs: dict,
+    ) -> None:
+        pass
+
+    @relational_validation(
+        left_field="post_date",
+        operator=RelationalValidationOperator.LESS_THAN_OR_EQUAL,
+        right_field="close_date",
+        message="Post date must be less than or equal to close date",
+    )
     def validate_dates(self, data: dict, **kwargs: dict) -> None:
-        """Validate that post date is less than or equal to close date"""
-        if data.get("post_date") is not None and data.get("close_date") is not None:
-            if data["post_date"] > data["close_date"]:
-                raise ValidationError(
-                    [
-                        MarshmallowErrorContainer(
-                            ValidationErrorType.INVALID,
-                            "Post date must be less than or equal to close date",
-                        )
-                    ]
-                )
+        """Validate that post date is less than or equal to close date."""
+        pass
 
     @validates_schema
     def set_archive_date(self, data: dict, **kwargs: dict) -> None:
@@ -705,19 +731,15 @@ class CompetitionRequestBaseSchema(Schema):
         },
     )
 
-    @validates_schema
+    @relational_validation(
+        left_field="opening_date",
+        operator=RelationalValidationOperator.LESS_THAN_OR_EQUAL,
+        right_field="closing_date",
+        message="Closing date must be on or after opening date",
+    )
     def validate_dates(self, data: dict, **kwargs: dict) -> None:
-        opening = data.get("opening_date")
-        closing = data.get("closing_date")
-        if opening and closing and closing < opening:
-            raise ValidationError(
-                [
-                    MarshmallowErrorContainer(
-                        ValidationErrorType.INVALID_DATE_ORDER,
-                        "Closing date must be on or after opening date",
-                    )
-                ]
-            )
+        """Validate that opening date is less than or equal to closing date."""
+        pass
 
 
 class CompetitionCreateRequestSchema(CompetitionRequestBaseSchema):

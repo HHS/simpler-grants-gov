@@ -317,6 +317,9 @@ cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of C
 openapi-spec: ## Generate OpenAPI spec
 	docker compose run --rm -e DB_CHECK_CONNECTION_ON_INIT=false openapi-tools flask --app src.app spec --format yaml --output openapi.generated.yml
 
+openapi-spec-client: ## Generate OpenAPI spec with relational validation metadata for client use
+	docker compose run --rm -e DB_CHECK_CONNECTION_ON_INIT=false -e INCLUDE_RELATIONAL_VALIDATIONS_IN_OPENAPI=true openapi-tools flask --app src.app spec --format yaml --output openapi.generated.yml
+
 openapi-spec-common-grants:
 	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml
 

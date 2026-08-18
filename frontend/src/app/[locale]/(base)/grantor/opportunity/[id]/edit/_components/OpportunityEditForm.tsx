@@ -11,9 +11,13 @@ import {
   ELIGIBILITY_OPTIONS,
   fundingOptions,
 } from "src/constants/opportunity";
+import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchemas.zod";
+import { useZodFormValidation } from "src/hooks/useZodValidation";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
-import { getNumericAmountFromString } from "src/utils/formatCurrencyUtil";
+import { normalizeDateString } from "src/utils/dateUtil";
 import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
+import { getOpportunitySummaryValidationData } from "src/utils/validation/opportunitySummaryValidation";
+import { stripCommasFromNumberString } from "tests/e2e/utils/common/number-formatters";
 
 import { useTranslations } from "next-intl";
 import {
@@ -42,12 +46,6 @@ import {
   CommonWordLimit,
 } from "src/components/core/forms/CommonFormFields";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
-
-function formatNumber(value: string): string {
-  const raw = value.replace(/,/g, "");
-  if (!raw || isNaN(Number(raw))) return value;
-  return Number(raw).toLocaleString("en-US");
-}
 
 const eligibilityDisplayLabels: Record<string, string> = Object.fromEntries(
   ELIGIBILITY_OPTIONS.map(({ value, label }) => [value, label]),
@@ -116,6 +114,7 @@ export default function OpportunityEditForm({
   const [fundingCategory, setFundingCategory] = useState(
     initialValues.funding_categories,
   );
+  const [postDate, setPostDate] = useState(initialValues.post_date);
   const [closeDate, setCloseDate] = useState(initialValues.close_date);
   const [selectedEligibility, setSelectedEligibility] = useState<string[]>(
     initialValues.applicant_types,
@@ -124,62 +123,29 @@ export default function OpportunityEditForm({
     validationErrors: {},
   });
 
-  const validationErrors: OpportunityEditValidationErrors | undefined =
-    formState.validationErrors;
+  const fieldTranslations = useTranslations("OpportunityEdit.validationErrors");
+  const { getFieldError, getFieldErrors, handleFieldBlur, validateField } =
+    useZodFormValidation({
+      schema: OpportunitySummaryCreateRequestV1Schema,
+      serverErrors: formState.validationErrors,
+      fieldTranslations: fieldTranslations,
+      getValidationData: (formData) =>
+        getOpportunitySummaryValidationData(formData, {
+          post_date: normalizeDateString(postDate) ?? postDate,
+          close_date: closeDate
+            ? (normalizeDateString(closeDate) ?? closeDate)
+            : null,
+        }),
+    });
 
-  //--- Validations for Award Minimum, Award Maximum and Total Program Funding ---
-  const [frontendErrors, setFrontendErrors] =
-    useState<OpportunityEditValidationErrors>({});
+  const handleDatePickerBlur = (
+    field: keyof OpportunityEditValidationErrors,
+  ) => {
+    if (!formRef.current) {
+      return;
+    }
 
-  function setSingleFrontendError<
-    K extends keyof OpportunityEditValidationErrors,
-  >(fieldname: K, error: string | null) {
-    if (!error) {
-      // clear the list of errors for this field
-      setFrontendErrors((currentValues) => ({
-        ...currentValues,
-        [fieldname]: [],
-      }));
-    } else {
-      setFrontendErrors((currentValues) => ({
-        ...currentValues,
-        [fieldname]: [error],
-      }));
-    }
-  }
-
-  const singleFieldValidation = (event: React.FocusEvent<HTMLInputElement>) => {
-    const form = event.currentTarget.form;
-    if (!form) return;
-    const formData = new FormData(form);
-    const estTotalFunding = getNumericAmountFromString(
-      formData.get("estimated_total_program_funding") as string | null,
-    );
-    const awardMin = getNumericAmountFromString(
-      formData.get("award_floor") as string | null,
-    );
-    const awardMax = getNumericAmountFromString(
-      formData.get("award_ceiling") as string | null,
-    );
-    // clear old error messages
-    setSingleFrontendError("award_floor", null);
-    setSingleFrontendError("award_ceiling", null);
-    setSingleFrontendError("estimated_total_program_funding", null);
-    const maxLimit = 1000000000000000;
-
-    //--- min & max values for Award Minimum, Award Minimum and Total Program Funding ---
-    if (awardMin < 0 || awardMin >= maxLimit) {
-      const errMsg = t("validationErrors.awardMinCurrencyInput");
-      setSingleFrontendError("award_floor", errMsg);
-    }
-    if (awardMax < 0 || awardMax >= maxLimit) {
-      const errMsg = t("validationErrors.awardMaxCurrencyInput");
-      setSingleFrontendError("award_ceiling", errMsg);
-    }
-    if (estTotalFunding < 0 || estTotalFunding >= maxLimit) {
-      const errMsg = t("validationErrors.totalFundingCurrencyInput");
-      setSingleFrontendError("estimated_total_program_funding", errMsg);
-    }
+    validateField(field, formRef.current);
   };
 
   // Shared toggle handler for eligibility checkboxes.
@@ -188,16 +154,6 @@ export default function OpportunityEditForm({
       ? selectedEligibility.filter((v) => v !== value)
       : [...selectedEligibility, value];
     setSelectedEligibility(next);
-  }
-
-  function getFieldError(
-    fieldName: keyof OpportunityEditValidationErrors,
-  ): string | undefined {
-    let fieldErrors = validationErrors?.[fieldName];
-    if (!fieldErrors) {
-      fieldErrors = frontendErrors?.[fieldName];
-    }
-    return fieldErrors?.join(" ");
   }
 
   useEffect(() => {
@@ -230,6 +186,7 @@ export default function OpportunityEditForm({
         formData.set("submitType", "saveAndExit");
         startTransition(() => formAction(formData));
       }}
+      onBlurCapture={handleFieldBlur}
       noValidate
     >
       <input type="hidden" name="opportunity_id" value={opportunityId} />
@@ -458,10 +415,9 @@ export default function OpportunityEditForm({
                   id="estimated_total_program_funding"
                   name="estimated_total_program_funding"
                   type="text"
-                  defaultValue={formatNumber(
+                  defaultValue={stripCommasFromNumberString(
                     initialValues.estimated_total_program_funding,
                   )}
-                  onBlur={singleFieldValidation}
                   className="width-full"
                 />
               </FormGroup>
@@ -483,8 +439,9 @@ export default function OpportunityEditForm({
                   id="award_floor"
                   name="award_floor"
                   type="text"
-                  defaultValue={formatNumber(initialValues.award_floor)}
-                  onBlur={singleFieldValidation}
+                  defaultValue={stripCommasFromNumberString(
+                    initialValues.award_floor,
+                  )}
                   className="width-full"
                 />
               </FormGroup>
@@ -503,8 +460,9 @@ export default function OpportunityEditForm({
                   id="award_ceiling"
                   name="award_ceiling"
                   type="text"
-                  defaultValue={formatNumber(initialValues.award_ceiling)}
-                  onBlur={singleFieldValidation}
+                  defaultValue={stripCommasFromNumberString(
+                    initialValues.award_ceiling,
+                  )}
                   className="width-full"
                 />
               </FormGroup>
@@ -528,7 +486,13 @@ export default function OpportunityEditForm({
                   name="post_date"
                   defaultValue={initialValues.post_date}
                   placeholder="mm/dd/yyyy"
+                  onChange={(value) => setPostDate(value ?? "")}
                   className="width-full"
+                  onBlur={() => {
+                    if (formRef.current) {
+                      validateField("post_date", formRef.current);
+                    }
+                  }}
                 />
               </FormGroup>
             </div>
@@ -549,6 +513,7 @@ export default function OpportunityEditForm({
                   placeholder="mm/dd/yyyy"
                   onChange={(value) => setCloseDate(value ?? "")}
                   className="width-full"
+                  onBlur={() => handleDatePickerBlur("close_date")}
                 />
               </FormGroup>
             </div>
@@ -667,15 +632,7 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.applicant_eligibility_description}
                 onTextChange={() => {}}
-                rawErrors={
-                  getFieldError("applicant_eligibility_description")
-                    ? [
-                        getFieldError(
-                          "applicant_eligibility_description",
-                        ) as string,
-                      ]
-                    : []
-                }
+                rawErrors={getFieldErrors("applicant_eligibility_description")}
               />
             </div>
           )}
@@ -705,11 +662,7 @@ export default function OpportunityEditForm({
               isRequired={false}
               defaultValue={initialValues.summary_description}
               onTextChange={() => {}}
-              rawErrors={
-                getFieldError("summary_description")
-                  ? [getFieldError("summary_description") as string]
-                  : []
-              }
+              rawErrors={getFieldErrors("summary_description")}
             />
           </div>
 
@@ -724,11 +677,7 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.additional_info_url}
                 onTextChange={() => {}}
-                rawErrors={
-                  getFieldError("additional_info_url")
-                    ? [getFieldError("additional_info_url") as string]
-                    : []
-                }
+                rawErrors={getFieldErrors("additional_info_url")}
               />
             </div>
             <div className="tablet:grid-col-6">
@@ -740,15 +689,7 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.additional_info_url_description}
                 onTextChange={() => {}}
-                rawErrors={
-                  getFieldError("additional_info_url_description")
-                    ? [
-                        getFieldError(
-                          "additional_info_url_description",
-                        ) as string,
-                      ]
-                    : []
-                }
+                rawErrors={getFieldErrors("additional_info_url_description")}
               />
             </div>
           </div>
@@ -763,11 +704,7 @@ export default function OpportunityEditForm({
               isRequired={false}
               defaultValue={initialValues.agency_contact_description}
               onTextChange={() => {}}
-              rawErrors={
-                getFieldError("agency_contact_description")
-                  ? [getFieldError("agency_contact_description") as string]
-                  : []
-              }
+              rawErrors={getFieldErrors("agency_contact_description")}
             />
           </div>
 
@@ -782,11 +719,7 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.agency_email_address}
                 onTextChange={() => {}}
-                rawErrors={
-                  getFieldError("agency_email_address")
-                    ? [getFieldError("agency_email_address") as string]
-                    : []
-                }
+                rawErrors={getFieldErrors("agency_email_address")}
               />
             </div>
             <div className="tablet:grid-col-6">
@@ -798,15 +731,7 @@ export default function OpportunityEditForm({
                 isRequired={false}
                 defaultValue={initialValues.agency_email_address_description}
                 onTextChange={() => {}}
-                rawErrors={
-                  getFieldError("agency_email_address_description")
-                    ? [
-                        getFieldError(
-                          "agency_email_address_description",
-                        ) as string,
-                      ]
-                    : []
-                }
+                rawErrors={getFieldErrors("agency_email_address_description")}
               />
             </div>
           </div>

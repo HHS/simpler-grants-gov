@@ -1,39 +1,30 @@
 "use server";
 
 import { ApiRequestError, parseErrorStatus } from "src/errors";
+import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchemas.zod";
 import {
   createOpportunitySummaryForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
-import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import { OpportunitySummaryUpdateRawData } from "src/types/opportunity/opportunityResponseTypes";
-import { getConfiguredDayJs } from "src/utils/dateUtil";
-import { formDataToObject } from "src/utils/formData/formDataToJson";
-import { z } from "zod";
+import {
+  getOpportunitySummaryValidationData,
+  toOpportunitySummaryRequest,
+} from "src/utils/validation/opportunitySummaryValidation";
+import {
+  mapServerApiValidationErrors,
+  validateZodFormData,
+} from "src/utils/validation/zodServerValidation";
+import type { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
-export type OpportunityEditValidationErrors = {
-  opportunity_title?: string[];
-  category?: string[];
-  summary_description?: string[];
-  post_date?: string[];
-  close_date?: string[];
-  agency_email_address?: string[];
-  agency_email_address_description?: string[];
-  award_floor?: string[];
-  award_ceiling?: string[];
-  funding_instruments?: string[];
-  funding_categories?: string[];
-  expected_number_of_awards?: string[];
-  estimated_total_program_funding?: string[];
-  applicant_types?: string[];
-  applicant_eligibility_description?: string[];
-  additional_info_url?: string[];
-  additional_info_url_description?: string[];
-  agency_contact_description?: string[];
-};
+export type OpportunityEditValidationErrors = Partial<
+  Record<
+    keyof z.input<typeof OpportunitySummaryCreateRequestV1Schema>,
+    string[]
+  >
+>;
 
 export type OpportunityEditActionState = {
   errorMessage?: string;
@@ -42,282 +33,25 @@ export type OpportunityEditActionState = {
   newOpportunitySummaryId?: string;
 };
 
-const editOpportunityFormSchema = {
-  opportunity_id: { type: "string" },
-  opportunity_summary_id: { type: "string" },
-  is_forecast: { type: "boolean" },
-  opportunity_title: { type: "string" },
-  category: { type: "string" },
-  is_cost_sharing: { type: "boolean" },
-  expected_number_of_awards: { type: "number" },
-  estimated_total_program_funding: { type: "number" },
-  award_floor: { type: "number" },
-  award_ceiling: { type: "number" },
-  post_date: { type: "string" },
-  close_date: { type: "string" },
-  close_date_description: { type: "string" },
-  funding_instruments: { type: "string" },
-  funding_categories: { type: "string" },
-  applicant_types: { items: { type: "string" } }, // array
-  summary_description: { type: "string" },
-  additional_info_url: { type: "string" },
-  additional_info_url_description: { type: "string" },
-  agency_contact_description: { type: "string" },
-  agency_email_address: { type: "string" },
-  agency_email_address_description: { type: "string" },
-};
-
-function readStringValue(value: FormDataEntryValue | null): string {
-  return typeof value === "string" ? value : "";
-}
-
-// These fields display comma-formatted (formatNumber() in OpportunityEditForm.tsx) but are
-// never stripped before submit, so the API's integer validation 422s on the raw comma string.
-const CURRENCY_FIELD_NAMES = [
-  "award_floor",
-  "award_ceiling",
-  "estimated_total_program_funding",
-] as const;
-
-function stripCurrencyFormatting(formData: FormData) {
-  for (const fieldName of CURRENCY_FIELD_NAMES) {
-    const rawValue = formData.get(fieldName);
-    if (typeof rawValue === "string") {
-      formData.set(fieldName, rawValue.replace(/[$,\s]/g, ""));
-    }
-  }
-}
-
-const EDIT_FORM_FIELD_NAMES = new Set<keyof OpportunityEditValidationErrors>([
-  "opportunity_title",
-  "category",
-  "summary_description",
-  "post_date",
-  "close_date",
-  "agency_email_address",
-  "agency_email_address_description",
-  "award_floor",
-  "award_ceiling",
-  "funding_instruments",
-  "funding_categories",
-  "expected_number_of_awards",
-  "estimated_total_program_funding",
-  "applicant_types",
-  "applicant_eligibility_description",
-  "additional_info_url",
-  "additional_info_url_description",
-  "agency_contact_description",
-]);
-
-// Maps a 422's errors[] to inline validationErrors by field, with a top-level errorMessage
-// fallback for field-less business-rule errors (which return an empty errors[] and put the
-// real text in the response's top-level message instead).
-function mapApiValidationErrors(
-  response: { errors?: unknown[] | null; message?: string },
-  genericMessage: string,
-): Pick<OpportunityEditActionState, "validationErrors" | "errorMessage"> {
-  const validationErrors: OpportunityEditValidationErrors = {};
-  const unmappedMessages: string[] = [];
-
-  for (const rawError of response.errors ?? []) {
-    const error = rawError as FrontendErrorDetails;
-    const message = error.message ?? genericMessage;
-    const field = error.field as
-      keyof OpportunityEditValidationErrors | undefined;
-
-    if (field && EDIT_FORM_FIELD_NAMES.has(field)) {
-      validationErrors[field] = [...(validationErrors[field] ?? []), message];
-    } else {
-      unmappedMessages.push(message);
-    }
-  }
-
-  const hasFieldErrors = Object.keys(validationErrors).length > 0;
-
-  return {
-    validationErrors: hasFieldErrors ? validationErrors : undefined,
-    errorMessage:
-      unmappedMessages.length > 0
-        ? unmappedMessages.join(" ")
-        : hasFieldErrors
-          ? undefined
-          : response.message || genericMessage,
-  };
-}
-
-async function validateOpportunityEditForm(formData: FormData) {
-  const validationErrors = await getTranslations(
-    "OpportunityEdit.validationErrors",
-  );
-  const reviewOpportunityEditSchema = z
-    .object({
-      opportunity_title: z.string().trim(),
-      category: z.string().trim(),
-      summary_description: z.string().trim(),
-      post_date: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("publishDate") }),
-      close_date: z.string().trim(),
-      agency_email_address: z
-        .string()
-        .trim()
-        .superRefine((value, ctx) => {
-          if (value && !z.string().email().safeParse(value).success) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: validationErrors("contactEmailInvalid"),
-            });
-          }
-        }),
-      agency_email_address_description: z.string().trim(),
-      funding_instruments: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("fundingType") }),
-      funding_categories: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("fundingCategory") }),
-      expected_number_of_awards: z.string().trim(),
-      estimated_total_program_funding: z.string().trim(),
-      award_ceiling: z.string().trim(),
-      award_floor: z.string().trim(),
-      applicant_types: z
-        .array(z.string())
-        .min(1, { message: validationErrors("eligibleApplicants") }),
-      applicant_eligibility_description: z.string().trim(),
-      additional_info_url: z.string().trim(),
-      additional_info_url_description: z.string().trim(),
-      agency_contact_description: z.string().trim(),
-    })
-    .superRefine(({ post_date, close_date }, ctx) => {
-      if (!post_date || !close_date) {
-        return;
-      }
-
-      const dayjs = getConfiguredDayJs();
-      const close = dayjs(close_date, "YYYY-MM-DD", true);
-      const publish = dayjs(post_date, "YYYY-MM-DD", true);
-
-      if (!close.isValid() || !publish.isValid() || close.isBefore(publish)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["closeDate"],
-          message: validationErrors("closeDateOrder"),
-        });
-      }
-    })
-    .superRefine(
-      (
-        { award_floor, award_ceiling, estimated_total_program_funding },
-        ctx,
-      ) => {
-        const min = Number(award_floor.replace(/,/g, ""));
-        const max = Number(award_ceiling.replace(/,/g, ""));
-        const total = Number(estimated_total_program_funding.replace(/,/g, ""));
-        // Award Minimum cannot exceed the Estimated Total Program Funding.
-        if (
-          award_floor &&
-          estimated_total_program_funding &&
-          !isNaN(min) &&
-          !isNaN(total) &&
-          min > total
-        ) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["award_floor"],
-            message: validationErrors("awardMinLessThanTotal"),
-          });
-        }
-        // Award Maximum cannot exceed the Estimated Total Program Funding.
-        if (
-          award_ceiling &&
-          estimated_total_program_funding &&
-          !isNaN(max) &&
-          !isNaN(total) &&
-          max > total
-        ) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["award_ceiling"],
-            message: validationErrors("awardMaxLessThanTotal"),
-          });
-        }
-        // Award Minimum cannot exceed Award Maximum.
-        if (
-          award_floor &&
-          award_ceiling &&
-          !isNaN(min) &&
-          !isNaN(max) &&
-          min > max
-        ) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["award_floor"],
-            message: validationErrors("awardMinLessThanMax"),
-          });
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["award_ceiling"],
-            message: validationErrors("awardMaxGreaterThanMin"),
-          });
-        }
-      },
-    );
-  const applicantTypeKeys = Array.from(
-    formData.keys().filter((key) => key.includes("applicant_types[")),
-  );
-  return reviewOpportunityEditSchema.safeParse({
-    opportunity_title: readStringValue(formData.get("opportunity_title")),
-    category: readStringValue(formData.get("category")),
-    summary_description: readStringValue(formData.get("summary_description")),
-    post_date: readStringValue(formData.get("post_date")),
-    close_date: readStringValue(formData.get("close_date")),
-    agency_email_address: readStringValue(formData.get("agency_email_address")),
-    agency_email_address_description: readStringValue(
-      formData.get("agency_email_address_description"),
-    ),
-    award_floor: readStringValue(formData.get("award_floor")),
-    award_ceiling: readStringValue(formData.get("award_ceiling")),
-    funding_instruments: readStringValue(formData.get("funding_instruments")),
-    funding_categories: readStringValue(formData.get("funding_categories")),
-    expected_number_of_awards: readStringValue(
-      formData.get("expected_number_of_awards"),
-    ),
-    estimated_total_program_funding: readStringValue(
-      formData.get("estimated_total_program_funding"),
-    ),
-    applicant_types: applicantTypeKeys.map(
-      (key) => formData.get(key) as string,
-    ),
-    applicant_eligibility_description: readStringValue(
-      formData.get("applicant_eligibility_description"),
-    ),
-    additional_info_url: readStringValue(formData.get("additional_info_url")),
-    additional_info_url_description: readStringValue(
-      formData.get("additional_info_url_description"),
-    ),
-    agency_contact_description: readStringValue(
-      formData.get("agency_contact_description"),
-    ),
-  });
-}
-
 export async function saveOpportunityEditAction(
   _prevState: OpportunityEditActionState,
   formData: FormData,
 ): Promise<OpportunityEditActionState> {
-  const alerts = await getTranslations("OpportunityEdit.content.alerts");
+  const [alerts, fieldTranslations] = await Promise.all([
+    getTranslations("OpportunityEdit.content.alerts"),
+    getTranslations("OpportunityEdit.validationErrors"),
+  ]);
 
-  stripCurrencyFormatting(formData);
+  const opportunityIdValue = formData.get("opportunity_id");
+  const opportunitySummaryIdValue = formData.get("opportunity_summary_id");
 
-  const opportunityId = readStringValue(formData.get("opportunity_id")).trim();
-  const opportunitySummaryId = readStringValue(
-    formData.get("opportunity_summary_id"),
-  ).trim();
-  const isForecast =
-    readStringValue(formData.get("is_forecast")).trim() === "true";
+  const opportunityId =
+    typeof opportunityIdValue === "string" ? opportunityIdValue.trim() : "";
+
+  const opportunitySummaryId =
+    typeof opportunitySummaryIdValue === "string"
+      ? opportunitySummaryIdValue.trim()
+      : "";
 
   if (!opportunityId) {
     return {
@@ -325,38 +59,35 @@ export async function saveOpportunityEditAction(
     };
   }
 
-  const validatedFields = await validateOpportunityEditForm(formData);
+  const validation = await validateZodFormData({
+    schema: OpportunitySummaryCreateRequestV1Schema,
+    formData,
+    fieldTranslations,
+    getValidationData: getOpportunitySummaryValidationData,
+  });
 
-  if (!validatedFields.success) {
+  if (!validation.success) {
     return {
-      validationErrors: validatedFields.error.flatten().fieldErrors,
+      validationErrors: validation.validationErrors,
     };
   }
 
+  const body = toOpportunitySummaryRequest(validation.data);
+
   try {
     if (!opportunitySummaryId) {
-      const rawBody = {
-        ...formDataToObject<OpportunitySummaryUpdateRawData>(
-          formData,
-          editOpportunityFormSchema,
-          null,
-        ),
-        is_forecast: isForecast,
-      };
-
-      const body = {
-        ...rawBody,
-        funding_categories: [rawBody.funding_categories],
-        funding_instruments: [rawBody.funding_instruments],
-      };
       const createResponse = await createOpportunitySummaryForGrantor({
         opportunityId,
-        body: body,
+        body,
       });
 
       if (createResponse.status_code === 422) {
-        console.error("API side validation errors:", createResponse.errors);
-        return mapApiValidationErrors(createResponse, alerts("genericError"));
+        return mapServerApiValidationErrors(
+          createResponse,
+          OpportunitySummaryCreateRequestV1Schema,
+          fieldTranslations,
+          alerts("genericError"),
+        );
       }
 
       return {
@@ -365,33 +96,21 @@ export async function saveOpportunityEditAction(
       };
     }
 
-    const rawBody = formDataToObject<OpportunitySummaryUpdateRawData>(
-      formData,
-      editOpportunityFormSchema,
-      null,
-    );
-    /*
-      funding_instruments, funding_categories, applicant_types all need to be arrays of strings
-
-      * funding_instruments, funding_categories are not implemented as multiselects, so they just need to be reformatted
-      * applicant_types is handled via hidden inputs for collecting values
-    */
-
-    const body = {
-      ...rawBody,
-      funding_categories: [rawBody.funding_categories],
-      funding_instruments: [rawBody.funding_instruments],
-    };
-
     const response = await updateOpportunitySummaryForGrantor({
       opportunityId,
       opportunitySummaryId,
       body,
     });
+
     if (response.status_code === 422) {
-      console.error("API side validation errors:", response.errors);
-      return mapApiValidationErrors(response, alerts("genericError"));
+      return mapServerApiValidationErrors(
+        response,
+        OpportunitySummaryCreateRequestV1Schema,
+        fieldTranslations,
+        alerts("genericError"),
+      );
     }
+
     return {
       successMessage: alerts("success"),
     };
@@ -422,12 +141,10 @@ export async function saveOpportunityEditAction(
     };
   }
 }
-
 export async function opportunityEditFormAction(
   prevState: OpportunityEditActionState,
   formData: FormData,
 ): Promise<OpportunityEditActionState> {
-  // Save the form first - if there are validation or API errors, display them.
   const saveResult = await saveOpportunityEditAction(prevState, formData);
   const hasValidationErrors =
     saveResult.validationErrors &&
