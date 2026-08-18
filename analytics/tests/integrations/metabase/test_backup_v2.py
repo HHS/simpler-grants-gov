@@ -570,6 +570,45 @@ def test_normalize_dimension_tag_warns_when_field_unresolvable(
     assert "Could not resolve field id 999" in caplog.text
 
 
+def test_normalize_dimension_tag_degrades_gracefully_on_permission_denied(
+    backup_instance: MetabaseBackupV2,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that a 403 fetching schema metadata skips field_ref, not the whole backup."""
+    tag = {"type": "dimension", "name": "quad", "dimension": ["field", 310, None]}
+    error_response = MagicMock()
+    error_response.status_code = 403
+    http_error = HTTPError()
+    http_error.response = error_response
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.side_effect = http_error
+
+    normalized = backup_instance._normalize_dimension_tag(tag, database_id=2)
+
+    assert normalized["dimension"] == ["field", 310, None]
+    assert "field_ref" not in normalized
+    assert "Permission denied (403)" in caplog.text
+
+
+def test_field_refs_for_database_caches_permission_denied(
+    backup_instance: MetabaseBackupV2,
+) -> None:
+    """Test that a 403 is only fetched once, not retried for every dimension tag."""
+    error_response = MagicMock()
+    error_response.status_code = 403
+    http_error = HTTPError()
+    http_error.response = error_response
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.side_effect = http_error
+
+    backup_instance._field_refs_for_database(2)
+    backup_instance._field_refs_for_database(2)
+
+    assert backup_instance._requests.get.call_count == 1
+
+
 def test_check_collisions_none_when_unique(backup_instance: MetabaseBackupV2) -> None:
     """Test that unique card and collection names raise nothing."""
     cards = [{"id": 1, "name": "A"}, {"id": 2, "name": "B"}]

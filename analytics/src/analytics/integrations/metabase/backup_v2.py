@@ -520,11 +520,47 @@ class MetabaseBackupV2:
         return normalized
 
     def _field_refs_for_database(self, database_id: int) -> dict[int, dict[str, str]]:
-        """Fetch (and cache) a database's field-id -> {schema, table, column} map."""
+        """
+        Fetch (and cache) a database's field-id -> {schema, table, column} map.
+
+        This API key may not have permission to browse a database's schema
+        even though it can read/write cards and collections -- that's a
+        missing *enrichment*, not a reason to fail the whole backup, so a
+        permission error here degrades to "no field_ref for this database"
+        the same way `_get_detail` already degrades on a 403.
+        """
         if database_id not in self._field_ref_cache:
             url = f"{self.api_url}/database/{database_id}/metadata"
-            response = self._requests.get(url, headers=self.headers, timeout=30)
-            response.raise_for_status()
+            try:
+                response = self._requests.get(url, headers=self.headers, timeout=30)
+                response.raise_for_status()
+            except HTTPError as exc:
+                if (
+                    exc.response is not None
+                    and exc.response.status_code == HTTP_FORBIDDEN
+                ):
+                    logger.warning(
+                        "Permission denied (403) fetching schema metadata for "
+                        "database %d -- dimension-type template tags will be "
+                        "captured without a field_ref, so restoring them to a "
+                        "different instance may not resolve correctly.",
+                        database_id,
+                    )
+                else:
+                    logger.exception(
+                        "Error fetching schema metadata for database %d",
+                        database_id,
+                    )
+                self._field_ref_cache[database_id] = {}
+                return self._field_ref_cache[database_id]
+            except RequestException:
+                logger.exception(
+                    "Error fetching schema metadata for database %d",
+                    database_id,
+                )
+                self._field_ref_cache[database_id] = {}
+                return self._field_ref_cache[database_id]
+
             tables = response.json().get("tables") or []
             refs = {
                 field["id"]: {
