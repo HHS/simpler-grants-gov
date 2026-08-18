@@ -33,6 +33,24 @@ resource "aws_security_group_rule" "internal_alb_ingress_from_api_gateway_vpc_li
   source_security_group_id = aws_security_group.api_gateway_vpc_link[0].id
 }
 
+# The private hosted zone below points alb.<env> at this ALB for everything inside the VPC, so in-VPC callers (ClamAV scanner, ECS tasks) need ingress
+data "aws_vpc" "internal_alb" {
+  count = local.enable_internal_alb ? 1 : 0
+  id    = module.network.vpc_id
+}
+
+resource "aws_security_group_rule" "internal_alb_ingress_from_vpc" {
+  count = local.enable_internal_alb ? 1 : 0
+
+  security_group_id = aws_security_group.internal_alb[0].id
+  description       = "Allow HTTPS from in-VPC callers"
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = [data.aws_vpc.internal_alb[0].cidr_block]
+}
+
 resource "aws_security_group_rule" "internal_alb_app_egress" {
   count = local.enable_internal_alb ? 1 : 0
 

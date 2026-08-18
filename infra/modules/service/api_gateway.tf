@@ -273,6 +273,12 @@ resource "aws_apigatewayv2_vpc_link" "api" {
 }
 
 locals {
+  # Host header the API echoes into external URLs (login.gov redirect_uri); with the VPC link off, uri is also the routing target so it must stay the ALB host.
+  api_gateway_integration_host = (
+    var.enable_secure_alb ? var.domain_name :
+    length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name
+  )
+
   api_gateway_connection_type = var.enable_secure_alb ? "VPC_LINK" : null
   api_gateway_connection_id   = var.enable_secure_alb ? aws_apigatewayv2_vpc_link.api[0].id : null
   # Must be the internal ALB: VPC Link V2 cannot reach an internet-facing one.
@@ -331,7 +337,7 @@ resource "aws_api_gateway_integration" "root" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/"
+  uri = "https://${local.api_gateway_integration_host}/"
 }
 
 resource "aws_api_gateway_resource" "root_endpoints" {
@@ -375,7 +381,7 @@ resource "aws_api_gateway_integration" "root_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${local.api_gateway_integration_host}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -420,7 +426,7 @@ resource "aws_api_gateway_integration" "first_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${local.api_gateway_integration_host}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -465,7 +471,7 @@ resource "aws_api_gateway_integration" "second_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${local.api_gateway_integration_host}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -513,7 +519,7 @@ resource "aws_api_gateway_integration" "third_level_endpoints" {
   # Enable streaming mode for endpoints that support it
   response_transfer_mode = each.value.enable_streaming ? "STREAM" : null
 
-  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${local.api_gateway_integration_host}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -558,7 +564,7 @@ resource "aws_api_gateway_integration" "fourth_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${local.api_gateway_integration_host}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
