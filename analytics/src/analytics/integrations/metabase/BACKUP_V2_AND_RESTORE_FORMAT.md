@@ -135,6 +135,14 @@ all. `backup-v2` copies these tags through verbatim; it strips any
 those get regenerated fresh when restoring (see below) and carrying stale
 ids forward serves no purpose.
 
+Fetching `field_ref` data requires the backup API key's group to have
+"Manage table metadata" permission for the database in Metabase's own
+permissions grid (Admin -> Permissions -> Data) -- the same permission that
+gates its Data Model editor. Without it, `GET /api/database/<id>/metadata`
+403s; `backup-v2` treats that as a missing enrichment rather than a fatal
+error, logs a warning, and falls back to capturing dimension tags without a
+`field_ref` (same as an older backup).
+
 ### Cross-question references
 
 Real Metabase syntax uses `{{#<id>-<name>}}` to reference another saved
