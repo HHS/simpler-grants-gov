@@ -244,6 +244,7 @@ export const UiJsonSchema: RJSFSchema = {
         label: {
           type: "string",
         },
+        hideLabel: { type: "boolean" },
         minItemsHeading: { type: "string" },
         minItemsHelperText: { type: "string" },
         maxItemsHeading: { type: "string" },
