@@ -89,7 +89,7 @@ export type ValidationMetadata = {
   emailValidationMessage?: string;
   negativeNumberValidationMessage?: string;
   characterLimitValidationMessage?: string;
-  wordLimitValidationMessage?: string;
+  maxWords?: number;
 };
 
 /** Optional duplicate-check pattern for metadata-driven uniqueness assertions. */

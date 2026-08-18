@@ -34,6 +34,8 @@ export const buildOpportunityHappyPathFillData = (
     opportunityTitle: buildTimestampValue("Title", now),
     tagline: "Help fund the next great idea",
     purposeStatement: "Provide funding for innovative projects",
+    tagline: buildTimestampValue("Tagline", now),
+    purposeStatement: buildTimestampValue("Purpose", now),
     grantSelectionMethod: "Discretionary",
     assistanceListingNumber: "00.000",
     fundingType: "Grant",

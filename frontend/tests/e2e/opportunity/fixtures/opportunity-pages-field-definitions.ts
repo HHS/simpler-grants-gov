@@ -97,6 +97,14 @@ export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinitio
         "Opportunity with number\\s*['\"\\u2019]?{{value}}['\"\\u2019]?\\s*already exists",
     },
     {
+      label: "Assistance listing number",
+      type: "text",
+      valueKey: "assistanceListingNumber",
+      required: true,
+      maxLength: 6,
+      characterLimitValidationMessage: "1 character over limit",
+    },
+    {
       label: "Opportunity title",
       type: "textarea",
       valueKey: "opportunityTitle",
@@ -121,18 +129,26 @@ export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinitio
       characterLimitValidationMessage: "1 character over limit",
     },
     {
-      label: "Grant selection method",
+      label: "Tagline*",
+      type: "text",
+      valueKey: "tagline",
+      required: true,
+      maxLength: 255,
+      characterLimitValidationMessage: "1 character over limit",
+    },
+    {
+      label: "Purpose statement*",
+      type: "text",
+      valueKey: "purposeStatement",
+      required: true,
+      maxLength: 255,
+      characterLimitValidationMessage: "1 character over limit",
+    },
+    {
+      label: "Grant selection method*",
       type: "select",
       valueKey: "grantSelectionMethod",
       required: true,
-    },
-    {
-      label: "Assistance listing number",
-      type: "text",
-      valueKey: "assistanceListingNumber",
-      required: true,
-      maxLength: 6,
-      characterLimitValidationMessage: "1 character over limit",
     },
   ];
 
@@ -318,8 +334,8 @@ export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefin
       valueKey: "description",
       selector: "#summary_description",
       required: false,
-      wordLimit: 500,
-      wordLimitValidationMessage: "1 character over limit",
+      maxLength: 1800,
+      characterLimitValidationMessage: "1 character over limit",
       exact: true,
     },
     {

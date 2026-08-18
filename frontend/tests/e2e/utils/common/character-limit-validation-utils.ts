@@ -8,17 +8,35 @@ import {
 type CharacterLimitValidationDefinition<TValueKey extends string> = {
   valueKey: TValueKey;
   maxLength?: number;
+  maxWords?: number;
 } & ValidationMetadata;
 
-/** Returns fields that define a maxLength constraint in metadata. */
+/** Returns fields that define a maxLength or maxWords constraint in metadata. */
 export const getCharacterLimitedFields = <
   TValueKey extends string,
   TDefinition extends CharacterLimitValidationDefinition<TValueKey>,
 >(
   definitions: TDefinition[],
 ): TDefinition[] => {
-  // A field participates only when maxLength is explicitly numeric.
-  return definitions.filter((field) => typeof field.maxLength === "number");
+  // A field participates only when maxLength or maxWords is explicitly numeric.
+  return definitions.filter(
+    (field) =>
+      typeof field.maxLength === "number" || typeof field.maxWords === "number",
+  );
+};
+
+const getValidationLimitValue = <TValueKey extends string,
+  TDefinition extends CharacterLimitValidationDefinition<TValueKey>,
+>(field: TDefinition): number => {
+  return field.maxWords ?? field.maxLength ?? 0;
+};
+
+const buildOverLimitWordValue = (maxWords: number, fillCharacter: string) => {
+  if (maxWords <= 0) {
+    return fillCharacter;
+  }
+
+  return Array(maxWords + 1).fill(fillCharacter).join(" ");
 };
 
 /** Resolves the shared character-limit validation message from field metadata. */
@@ -52,7 +70,7 @@ export const buildOverLimitFillData = <
   definitions: TDefinition[],
   fillData: Record<TValueKey, string>,
 ): Record<TValueKey, string> => {
-  // Start from baseline fill data and override only character-limited fields.
+  // Start from baseline fill data and override only limited fields.
   const overLimitFillData = { ...fillData };
   const characterLimitValidationMessage =
     getCharacterLimitValidationMessage(definitions);
@@ -60,14 +78,44 @@ export const buildOverLimitFillData = <
   const overLimitFillCharacter =
     characterLimitValidationMessage.trim().charAt(0) || "X";
 
-  // For each constrained field, generate a value that is exactly one char over maxLength.
   for (const field of getCharacterLimitedFields(definitions)) {
+    const limitValue = getValidationLimitValue(field);
+
+    if (typeof field.maxWords === "number") {
+      overLimitFillData[field.valueKey] = buildOverLimitWordValue(
+        field.maxWords,
+        overLimitFillCharacter,
+      );
+      continue;
+    }
+
     overLimitFillData[field.valueKey] = overLimitFillCharacter.repeat(
-      (field.maxLength ?? 0) + 1,
+      limitValue + 1,
     );
   }
 
   return overLimitFillData;
+};
+
+const getLocatorForMessage = <
+  TValueKey extends string,
+  TDefinition extends CharacterLimitValidationDefinition<TValueKey>,
+>(
+  page: Page,
+  definitions: TDefinition[],
+  message: string,
+) => {
+  const wordLimitField = definitions.find(
+    (field) =>
+      field.characterLimitValidationMessage === message &&
+      typeof field.maxWords === "number",
+  );
+
+  if (wordLimitField) {
+    return page.getByRole("alert").filter({ hasText: message });
+  }
+
+  return page.getByTestId("characterCountMessage").filter({ hasText: message });
 };
 
 /** Asserts the exact count of visible character-limit validation messages. */
@@ -79,11 +127,21 @@ export const assertCharacterLimitMessageCount = async <
   definitions: TDefinition[],
   expectedCount: number,
 ): Promise<void> => {
-  // Assert occurrences in the field status element only, excluding SR/live-region duplicates.
-  const message = getCharacterLimitValidationMessage(definitions);
-  await expect(
-    page.getByTestId("characterCountMessage").filter({ hasText: message }),
-  ).toHaveCount(expectedCount);
+  const counts = new Map<string, number>();
+  const limitedFields = getCharacterLimitedFields(definitions);
+
+  for (const field of limitedFields) {
+    const message =
+      field.characterLimitValidationMessage ||
+      getCharacterLimitValidationMessage(definitions);
+    counts.set(message, (counts.get(message) ?? 0) + 1);
+  }
+
+  for (const [message, count] of counts.entries()) {
+    await expect(getLocatorForMessage(page, definitions, message)).toHaveCount(
+      count,
+    );
+  }
 };
 
 export type AssertCharacterLimitValidationsOptions<
