@@ -148,6 +148,47 @@ class TestCheckXsdDriftTask(BaseTestClass):
         assert task.metrics[CheckXsdDriftTask.Metrics.XSDS_MISSING] == 0
         assert task.increment.call_count == 1
 
+    @patch("src.task.xsd_drift.check_xsd_drift_task.logger.info")
+    @patch("src.task.xsd_drift.check_xsd_drift_task.requests.post")
+    @patch("src.task.xsd_drift.check_xsd_drift_task.tempfile.TemporaryDirectory")
+    @patch("src.task.xsd_drift.check_xsd_drift_task.XSDFetcher")
+    def test_logs_actionable_drift_summary(
+        self,
+        mock_fetcher_cls,
+        mock_tempdir_cls,
+        mock_post,
+        mock_logger_info,
+        task,
+        tmp_path,
+    ):
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        mock_tempdir_cls.return_value.__enter__.return_value = str(work_dir)
+
+        mock_fetcher = MagicMock()
+        mock_fetcher.fetch_xsd_with_dependencies.side_effect = (
+            self._mock_fetcher_writes_changed_files(work_dir)
+        )
+        mock_fetcher_cls.return_value = mock_fetcher
+
+        mock_post.return_value = MagicMock(status_code=200)
+        mock_post.return_value.raise_for_status = MagicMock()
+
+        task.run_task()
+
+        summary_calls = [
+            c
+            for c in mock_logger_info.call_args_list
+            if c.args and c.args[0] == "XSD drift summary"
+        ]
+        assert summary_calls, "Expected XSD drift summary log call"
+
+        extra = summary_calls[0].kwargs["extra"]
+        assert extra["drifted_schema_count"] == 2
+        assert extra["missing_schema_count"] == 0
+        assert extra["fetch_error_count"] == 0
+        assert extra["drifted_schemas"] == sorted(extra["drifted_schemas"])
+
     @patch("src.task.xsd_drift.check_xsd_drift_task.requests.post")
     @patch("src.task.xsd_drift.check_xsd_drift_task.tempfile.TemporaryDirectory")
     @patch("src.task.xsd_drift.check_xsd_drift_task.XSDFetcher")
