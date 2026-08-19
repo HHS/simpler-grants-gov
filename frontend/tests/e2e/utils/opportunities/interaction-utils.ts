@@ -5,6 +5,18 @@
  * - Wait for the locator to be visible before clicking.
  * - Click before filling or selecting whenever possible.
  * - Keep field interactions stable across tests.
+ *
+ * Using waitForVisibleAndClick() increases test reliability by ensuring that
+ * elements are visible and ready before interaction occurs. This helps make
+ * form interactions more deterministic, particularly for:
+ *
+ * - Frontend validation scenarios
+ * - Validation message rendering
+ * - Field state transitions
+ * - Enable/disable gating behavior
+ *
+ * As a result, tests are less susceptible to timing issues and intermittent
+ * failures caused by UI rendering delays or asynchronous state updates.
  */
 import { type Locator } from "@playwright/test";
 
