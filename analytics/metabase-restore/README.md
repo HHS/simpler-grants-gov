@@ -8,8 +8,7 @@ Each run of the `restore` command creates a new, timestamped collection in
 the target instance. The command never modifies or deletes existing data 
 in the target instance.
 
-See [`analytics/src/analytics/integrations/metabase/BACKUP_V2_AND_RESTORE_FORMAT.md`](../src/analytics/integrations/metabase/BACKUP_V2_AND_RESTORE_FORMAT.md)
-for a description of the dataset format.
+See [`BACKUP_V2_AND_RESTORE_FORMAT.md`](../src/analytics/integrations/metabase/BACKUP_V2_AND_RESTORE_FORMAT.md) for a description of the dataset format.
 
 ## Restore from a Backup Dataset to a target instance
 
