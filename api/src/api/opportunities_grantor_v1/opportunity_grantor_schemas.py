@@ -747,19 +747,27 @@ class CompetitionUpdateResponseSchema(AbstractResponseSchema):
 class CompetitionInstructionUploadRequestV1Schema(Schema):
     """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id/instructions request"""
 
-    file_attachment = fields.File(
+    pending_file_id = fields.UUID(
         required=True,
-        allow_none=False,
-        metadata={"description": "The instruction file to upload"},
+        metadata={"description": "The ID of the pending (virus-scanned) file to attach"},
     )
 
 
 class CompetitionInstructionUploadResponseDataV1Schema(Schema):
     """Data schema for competition instruction upload response"""
 
-    competition_instruction_id = fields.String(
+    competition_instruction_id = fields.UUID(
         required=True,
         metadata={"description": "The created competition instruction ID"},
+    )
+    file_name = fields.String(
+        metadata={"description": "The name of the uploaded instruction file"},
+    )
+    created_at = fields.DateTime(
+        metadata={"description": "Timestamp when the instruction was created"},
+    )
+    updated_at = fields.DateTime(
+        metadata={"description": "Timestamp when the instruction was last updated"},
     )
 
 
