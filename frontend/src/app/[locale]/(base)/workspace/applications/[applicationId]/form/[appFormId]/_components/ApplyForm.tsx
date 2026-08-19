@@ -47,8 +47,6 @@ interface WidgetSupport {
     deletedEntryIndex: number,
   ) => void;
   markFormDirty?: () => void;
-  useSingleAttachmentVirusScanning: boolean;
-  useMultipleAttachmentVirusScanning: boolean;
   attachmentsUploadingCounter?: AttachmentsUploadingCounter;
 }
 
@@ -70,8 +68,6 @@ const ApplyForm = ({
   applicationStatus,
   createdAt,
   updatedAt,
-  useSingleAttachmentVirusScanning = false,
-  useMultipleAttachmentVirusScanning = false,
 }: {
   applicationId: string;
   formId: string;
@@ -81,8 +77,6 @@ const ApplyForm = ({
   validationWarnings:
     FormattedFormValidationWarning[] | FormValidationWarning[] | null;
   attachments: Attachment[];
-  useSingleAttachmentVirusScanning?: boolean; // Temporary for initial integration. Will be removed in #11352
-  useMultipleAttachmentVirusScanning?: boolean; // Temporary for initial integration. Will be removed in #11352
   isBudgetForm?: boolean;
   applicationStatus?: string;
   createdAt?: string;
@@ -206,8 +200,6 @@ const ApplyForm = ({
         deletedEntryIndexesByFieldListPath,
         onFieldListEntryDelete: handleFieldListEntryDelete,
         markFormDirty: handleFormEdited,
-        useSingleAttachmentVirusScanning,
-        useMultipleAttachmentVirusScanning,
         attachmentsUploadingCounter,
       },
     }),
@@ -216,8 +208,6 @@ const ApplyForm = ({
       displayValidationWarnings,
       formObject,
       formSchema,
-      useSingleAttachmentVirusScanning,
-      useMultipleAttachmentVirusScanning,
       attachmentsUploadingCounter,
     ],
   );

@@ -77,6 +77,7 @@ const CURRENCY_FIELD_NAMES = [
   "award_floor",
   "award_ceiling",
   "estimated_total_program_funding",
+  "expected_number_of_awards",
 ] as const;
 
 function stripCurrencyFormatting(formData: FormData) {

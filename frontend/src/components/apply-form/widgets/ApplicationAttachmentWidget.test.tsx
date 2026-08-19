@@ -21,6 +21,7 @@ type SimplerFileInputMockProps = {
   existingFiles?: UploadFileMetadata[];
   disabled?: boolean;
   readOnly?: boolean;
+  required?: boolean;
   describedByIds: string[];
   formInvalid: boolean;
 };
@@ -121,6 +122,65 @@ describe("ApplicationAttachmentWidget", () => {
     render(<ApplicationAttachmentWidget {...defaultProps} />);
 
     expect(screen.queryByText("*")).not.toBeInTheDocument();
+  });
+
+  /*
+    #11352 makes this widget universal, which brings required single-attachment fields
+    (Project_Abstract) onto it for the first time. SimplerFileInput derives native required
+    from `required` plus whether anything is attached, so these assert the widget hands it
+    the right pair - the derivation itself is covered in SimplerFileInput's own suite.
+  */
+  describe("required fields", () => {
+    it("reports required with no attachment when nothing is saved", () => {
+      render(
+        <ApplicationAttachmentWidget
+          {...defaultProps}
+          required={true}
+          value={undefined}
+        />,
+      );
+
+      expect(getSimplerFileInputProps().required).toBe(true);
+      expect(getSimplerFileInputProps().existingFiles).toEqual([]);
+    });
+
+    it("reports required alongside the saved attachment so the field reads as satisfied", () => {
+      render(
+        <ApplicationAttachmentWidget
+          {...defaultProps}
+          required={true}
+          value="uuid-1"
+        />,
+      );
+
+      expect(getSimplerFileInputProps().required).toBe(true);
+      expect(getSimplerFileInputProps().existingFiles).toHaveLength(1);
+      expect(getSimplerFileInputProps().existingFiles?.[0].fileName).toBe(
+        "document1.pdf",
+      );
+    });
+
+    it("does not report required when the field is optional", () => {
+      render(
+        <ApplicationAttachmentWidget {...defaultProps} value={undefined} />,
+      );
+
+      expect(getSimplerFileInputProps().required).toBe(false);
+    });
+
+    it("still submits the saved attachment id for a required field", () => {
+      const { container } = render(
+        <ApplicationAttachmentWidget
+          {...defaultProps}
+          required={true}
+          value="uuid-1"
+        />,
+      );
+
+      expect(getHiddenInput(container, "test-attachment-field")).toHaveValue(
+        "uuid-1",
+      );
+    });
   });
 
   it("renders field errors and marks the form group as errored when rawErrors are present", () => {
@@ -391,8 +451,6 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useSingleAttachmentVirusScanning: true,
-            useMultipleAttachmentVirusScanning: false,
             markFormDirty,
           },
         }}
@@ -410,7 +468,6 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useSingleAttachmentVirusScanning: true,
             markFormDirty,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
@@ -436,7 +493,6 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useSingleAttachmentVirusScanning: true,
             markFormDirty: throwingMarkFormDirty,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
@@ -459,7 +515,6 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useSingleAttachmentVirusScanning: true,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
               decrementAttachmentsProcessing,
@@ -479,7 +534,6 @@ describe("ApplicationAttachmentWidget", () => {
         {...defaultProps}
         formContext={{
           widgetSupport: {
-            useSingleAttachmentVirusScanning: true,
             attachmentsUploadingCounter: {
               incrementAttachmentsProcessing,
               decrementAttachmentsProcessing,
@@ -500,7 +554,7 @@ describe("ApplicationAttachmentWidget", () => {
       <ApplicationAttachmentWidget
         {...defaultProps}
         formContext={{
-          widgetSupport: { useSingleAttachmentVirusScanning: true },
+          widgetSupport: {},
         }}
       />,
     );
@@ -517,8 +571,6 @@ describe("ApplicationAttachmentWidget", () => {
         value="uuid-1"
         formContext={{
           widgetSupport: {
-            useSingleAttachmentVirusScanning: true,
-            useMultipleAttachmentVirusScanning: false,
             markFormDirty,
           },
         }}

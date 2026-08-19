@@ -264,6 +264,29 @@ resource "aws_api_gateway_rest_api" "api" {
   ]
 }
 
+resource "aws_apigatewayv2_vpc_link" "api" {
+  count = var.enable_api_gateway && var.enable_secure_alb ? 1 : 0
+
+  name               = "${var.service_name}-vpc-link"
+  subnet_ids         = module.network.private_subnet_ids
+  security_group_ids = [aws_security_group.api_gateway_vpc_link[0].id]
+}
+
+locals {
+  # Host header the API echoes into external URLs (login.gov redirect_uri); with the VPC link off, uri is also the routing target so it must stay the ALB host.
+  api_gateway_integration_host = (
+    var.enable_secure_alb ? var.domain_name :
+    length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name
+  )
+
+  api_gateway_connection_type = var.enable_secure_alb ? "VPC_LINK" : null
+  api_gateway_connection_id   = var.enable_secure_alb ? aws_apigatewayv2_vpc_link.api[0].id : null
+  # Must be the internal ALB: VPC Link V2 cannot reach an internet-facing one.
+  api_gateway_integration_target = (
+    local.enable_internal_alb ? aws_lb.internal[0].arn : null
+  )
+}
+
 resource "aws_api_gateway_model" "alpha_applications_model" {
   count = var.enable_api_gateway ? 1 : 0
 
@@ -307,10 +330,14 @@ resource "aws_api_gateway_integration" "root" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
 
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
+
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/"
+  uri = "https://${local.api_gateway_integration_host}/"
 }
 
 resource "aws_api_gateway_resource" "root_endpoints" {
@@ -347,10 +374,14 @@ resource "aws_api_gateway_integration" "root_endpoints" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
 
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
+
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${local.api_gateway_integration_host}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -388,10 +419,14 @@ resource "aws_api_gateway_integration" "first_level_endpoints" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
 
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
+
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${local.api_gateway_integration_host}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -429,10 +464,14 @@ resource "aws_api_gateway_integration" "second_level_endpoints" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
 
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
+
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${local.api_gateway_integration_host}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -470,13 +509,17 @@ resource "aws_api_gateway_integration" "third_level_endpoints" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
 
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
+
   passthrough_behavior = "WHEN_NO_MATCH"
   # Use extended timeout for streaming endpoints (up to 15 minutes), otherwise use default 29 seconds
   timeout_milliseconds = each.value.enable_streaming ? 900000 : 29000
   # Enable streaming mode for endpoints that support it
   response_transfer_mode = each.value.enable_streaming ? "STREAM" : null
 
-  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${local.api_gateway_integration_host}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -514,10 +557,14 @@ resource "aws_api_gateway_integration" "fourth_level_endpoints" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   type        = "HTTP_PROXY"
 
+  connection_type    = local.api_gateway_connection_type
+  connection_id      = local.api_gateway_connection_id
+  integration_target = local.api_gateway_integration_target
+
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${local.api_gateway_integration_host}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -537,6 +584,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
   # Redeploys on any change to this file
   triggers = {
     redeployment = filesha1("${path.module}/api_gateway.tf")
+    vpc_link     = coalesce(local.api_gateway_connection_id, "none")
   }
 
   lifecycle {
