@@ -5,7 +5,10 @@ import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-p
 // Uploaded files validated by section locator in print view.
 // These names and paths are shared by attachment upload tests.
 // Filenames are exposed separately from the full path for use in UI assertions.
-export const TEST_UPLOAD_DIR = path.resolve(__dirname, "../../test-upload-files");
+export const TEST_UPLOAD_DIR = path.resolve(
+  __dirname,
+  "../../test-upload-files",
+);
 export const ATTACHMENT_TEST_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
 
 /**

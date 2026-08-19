@@ -12,14 +12,15 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
-  ATTACHMENT_FORM_CONFIG,
-  fieldDefinitionsAttachment,
-} from "tests/e2e/apply/fixtures/attachment-field-definitions";
-import playwrightEnv from "tests/e2e/playwright-env";
-import {
   SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
   SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
 } from "tests/e2e/apply/fixtures/attachment-data";
+import {
+  ATTACHMENT_FORM_CONFIG,
+  fieldDefinitionsAttachment,
+} from "tests/e2e/apply/fixtures/attachment-field-definitions";
+import { OPPORTUNITY_ID_STREAMED_UPLOAD } from "tests/e2e/apply/fixtures/general-apply-fixtures";
+import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import {
@@ -36,13 +37,8 @@ import {
 } from "tests/e2e/utils/common/file-upload-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
-const { testOrgLabel, targetEnv } = playwrightEnv;
-
-const OPPORTUNITY_ID =
-  targetEnv === "staging"
-    ? "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"
-    : "c3c59562-a54f-4203-b0f6-98f2f0383481";
-const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
+const { testOrgLabel } = playwrightEnv;
+const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID_STREAMED_UPLOAD}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
@@ -162,12 +158,19 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
       // And the applicant attempts to upload multiple files to the single-file field
       await uploadFile(
         page,
-        [SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB, SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB],
+        [
+          SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
+          SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
+        ],
         fieldDefinitionsAttachment.att1,
       );
 
       // Then only one uploaded file should be accepted.
-      await expectUploadedFileCount(page, SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB, 1);
+      await expectUploadedFileCount(
+        page,
+        SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
+        1,
+      );
 
       // And the uploaded file should be visible
       await expectUploadedFileVisible(page, SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB);

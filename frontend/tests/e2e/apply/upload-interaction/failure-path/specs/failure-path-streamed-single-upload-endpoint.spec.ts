@@ -12,6 +12,12 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
+  SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
+  SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
+  SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB,
+  SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
+} from "tests/e2e/apply/fixtures/attachment-data";
+import {
   ATTACHMENT_FORM_CONFIG,
   fieldDefinitionsAttachment,
 } from "tests/e2e/apply/fixtures/attachment-field-definitions";
@@ -27,12 +33,6 @@ import {
   openApplicationFormWithAuth,
   uploadFile,
 } from "tests/e2e/utils/common/file-upload-utils";
-import {
-  SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
-  SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
-  SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
-  SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB,
-} from "tests/e2e/apply/fixtures/attachment-data";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
