@@ -504,6 +504,27 @@ describe("validateFormData", () => {
       expect(hasFieldListChildrenError).toBe(true);
     });
 
+    it("should validate fieldList with hideFieldListHeading", () => {
+      const validUiSchema = [
+        {
+          type: "fieldList",
+          label: "Test",
+          name: "test",
+          hideFieldListHeading: true,
+          children: [
+            {
+              type: "field",
+              definition: "/properties/TestField",
+            },
+          ],
+        },
+      ] as unknown as UiSchema;
+
+      const errors = validateUiSchema(validUiSchema);
+
+      expect(errors).toBeFalsy();
+    });
+
     it("should invalidate fieldList with a Table child", () => {
       const invalidUiSchema = [
         {

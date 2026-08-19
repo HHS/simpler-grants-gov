@@ -398,7 +398,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   const {
     id,
     label,
-    hideLabel,
+    hideFieldListHeading,
     description,
     name,
     minItems,
@@ -581,7 +581,11 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
       id={id}
       className="field-list-widget border border-base-lighter radius-md padding-2 margin-y-2"
     >
-      {!hideLabel && label ? <h3>{label}</h3> : null}
+      {label ? (
+        <h3 className={hideFieldListHeading ? "usa-sr-only" : undefined}>
+          {label}
+        </h3>
+      ) : null}
       {description ? <p>{description}</p> : null}
 
       {groupErrors.length > 0 ? (

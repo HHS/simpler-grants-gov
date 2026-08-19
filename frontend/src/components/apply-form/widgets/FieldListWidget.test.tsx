@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 import FieldListWidget from "src/components/apply-form/widgets/FieldListWidget";
+import userEvent from "@testing-library/user-event";
 
 jest.mock("src/components/apply-form/widgets/WidgetRenderers", () => ({
   renderWidget: jest.fn(
@@ -96,6 +96,61 @@ describe("FieldListWidget", () => {
       screen.getByRole("heading", { name: /contacts\s+1/i }),
     ).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
+  });
+
+  it("visually hides the FieldList heading but keeps it accessible", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        hideFieldListHeading={true}
+        minItems={1}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    const fieldListHeading = screen.getByRole("heading", {
+      name: "Contacts",
+      level: 3,
+    });
+
+    // The heading remains in the accessibility tree for screen readers.
+    expect(fieldListHeading).toBeInTheDocument();
+    // USWDS visually hides the heading while keeping it accessible.
+    expect(fieldListHeading).toHaveClass("usa-sr-only");
+    expect(
+      screen.getByRole("heading", { name: /contacts\s+1/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the FieldList heading visible when hideFieldListHeading is false", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        hideFieldListHeading={false}
+        minItems={1}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    const fieldListHeading = screen.getByRole("heading", {
+      name: "Contacts",
+      level: 3,
+    });
+
+    // With hiding disabled, the heading should remain visually available.
+    expect(fieldListHeading).not.toHaveClass("usa-sr-only");
   });
 
   it("renders no entries when minItems is 0", () => {

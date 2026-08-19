@@ -102,7 +102,7 @@ export type DefinitionPath = PropertyPath | PropertyPath[];
  *   The FieldList field name. Used to derive the base field path
  *   (e.g. $.fieldListName) for mapping validation warnings to the list.
  *
- * hideLabel
+ * hideFieldListHeading
  *   Optional display flag for the FieldList heading.
  *   When true, the top FieldList title is hidden, but each entry heading
  *   still uses the `label` value (for example "Key Contact 1").
@@ -148,7 +148,7 @@ export type FieldListWidgetProps = {
     title?: string;
   };
   label: string;
-  hideLabel?: boolean;
+  hideFieldListHeading?: boolean;
   description?: string;
   additionalDescribedById?: string;
   name: string;
@@ -338,7 +338,7 @@ export interface UiSchemaFieldList {
   type: "fieldList";
   label: string;
   // Hide the top FieldList title while still using `label` for per-entry headings.
-  hideLabel?: boolean;
+  hideFieldListHeading?: boolean;
   minItemsHeading?: string;
   minItemsHelperText?: string;
   maxItemsHeading?: string;
