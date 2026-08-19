@@ -148,7 +148,7 @@ class MetabaseBackupV2:
         ]
         top_level = [c for c in eligible if c.get("location") == "/"]
 
-        # Exclude redundant backup collections previously created by 
+        # Exclude redundant backup collections previously created by
         # the `restore` command.
         restore_roots = [c for c in top_level if self._is_restore_collection(c)]
         has_non_restore_root = len(restore_roots) < len(top_level)
