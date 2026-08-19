@@ -65,33 +65,32 @@ WITH RECURSIVE -- 1. Get reporting period dynamically
   (SELECT *
    FROM epic_issue_tree
    UNION ALL SELECT *
-   FROM direct_issues), -- 9. Calculate points opened in the given time period
- opened AS
+   FROM direct_issues), -- 9. Calculate total points scope (points tracked) in the given time period
+ scope AS
   (SELECT h.d_effective AS issue_day,
-          SUM(h.points) AS total_opened
+          SUM(h.points) AS total_scope
    FROM gh_issue_history h
    JOIN combined_issues ci ON h.issue_id = ci.issue_id
    CROSS JOIN reporting_period
    WHERE h.d_effective BETWEEN reporting_period.start_date AND reporting_period.end_date
    GROUP BY h.d_effective
-   ORDER BY h.d_effective), -- 10. Calculate points closed in the given time period
- closed AS
+   ORDER BY h.d_effective), -- 10. Calculate points completed in the given time period
+ completed AS
   (SELECT h.d_effective AS issue_day,
-          SUM(h.points) AS total_closed
+          SUM(h.points) AS total_completed
    FROM gh_issue_history h
    JOIN combined_issues ci ON h.issue_id = ci.issue_id
    CROSS JOIN reporting_period
    WHERE h.is_closed::BOOLEAN = TRUE
      AND h.d_effective BETWEEN reporting_period.start_date AND reporting_period.end_date
    GROUP BY h.d_effective
-   ORDER BY h.d_effective), -- 11. Aggregate points opened and closed by day
+   ORDER BY h.d_effective), -- 11. Aggregate scope and completed work by day (both climb toward total scope)
  totals AS
-  (SELECT COALESCE(o.issue_day, c.issue_day) AS issue_day,
-          COALESCE(o.total_opened, 0) AS total_opened,
-          COALESCE(c.total_closed, 0) AS total_closed,
-          COALESCE(o.total_opened, 0) - COALESCE(c.total_closed, 0) AS total_remaining
-   FROM opened o
-   FULL OUTER JOIN closed c ON o.issue_day = c.issue_day
+  (SELECT COALESCE(s.issue_day, c.issue_day) AS issue_day,
+          COALESCE(s.total_scope, 0) AS total_scope,
+          COALESCE(c.total_completed, 0) AS total_completed
+   FROM scope s
+   FULL OUTER JOIN completed c ON s.issue_day = c.issue_day
    ORDER BY issue_day)
 SELECT *
 FROM totals;

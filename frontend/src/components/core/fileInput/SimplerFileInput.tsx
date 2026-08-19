@@ -1,4 +1,5 @@
 import { noop } from "lodash";
+import { MAX_UPLOAD_FILE_SIZE_BYTES } from "src/constants/fileUploads";
 import {
   PostUploadAction,
   UploadFileMetadata,
@@ -36,6 +37,9 @@ type SimplerFileInputProps = {
   // later successful upload does not clear a form level validation error.
   formInvalid?: boolean;
   multiFile?: boolean;
+  // files larger than this are rejected client side before any request is made.
+  // note that this is a UX guard only
+  maxFileSizeBytes?: number;
 };
 
 export const SimplerFileInput = ({
@@ -56,6 +60,7 @@ export const SimplerFileInput = ({
   required = false,
   formInvalid = false,
   multiFile = false,
+  maxFileSizeBytes = MAX_UPLOAD_FILE_SIZE_BYTES,
 }: SimplerFileInputProps) => {
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
@@ -251,6 +256,7 @@ export const SimplerFileInput = ({
             trackUploadError(uploadId);
           }}
           postUploadAction={postUploadAction}
+          maxFileSizeBytes={maxFileSizeBytes}
         />
       ))}
       <FileInputExistingFiles

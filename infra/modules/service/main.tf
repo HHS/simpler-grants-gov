@@ -121,6 +121,15 @@ resource "aws_ecs_service" "app" {
 
   # add a connection to the mtls target group since these same containers power both
   dynamic "load_balancer" {
+    for_each = local.enable_internal_alb ? [1] : []
+    content {
+      target_group_arn = aws_lb_target_group.internal_tg[0].arn
+      container_name   = var.service_name
+      container_port   = var.container_port
+    }
+  }
+
+  dynamic "load_balancer" {
     for_each = var.enable_mtls_load_balancer ? [1] : []
     content {
       target_group_arn = aws_lb_target_group.mtls_tg[0].arn
