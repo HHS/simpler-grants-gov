@@ -96,7 +96,7 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
   );
 
   test(
-    "deleting the uploaded streamed file restores the file input",
+    "deleting the uploaded streamed file restores the file input on single file inputs",
     { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
     async (
       { page, context }: { page: Page; context: BrowserContext },
