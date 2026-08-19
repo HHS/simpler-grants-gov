@@ -131,8 +131,6 @@ test.describe("Opportunity failure path - create opportunity", () => {
         Cancel: true,
       });
 
-
-
       // Shard 4: validate character-limit errors with generated over-limit values.
       // When I reset to a fresh create form via UI.
 

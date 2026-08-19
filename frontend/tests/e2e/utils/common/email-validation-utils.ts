@@ -8,8 +8,9 @@
  * 4. Restore baseline values after each assertion.
  */
 
-import { expect, Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
+import { clickAndFill, waitForVisibleAndClick } from "./interaction-utils";
 import { resolveTextLocator } from "./text-locator-utils";
 
 export type EmailValidationFieldDefinition = {
@@ -61,18 +62,14 @@ export async function assertEmailValidationsFromDefinitions(
       field = page.locator(kebabSelector);
     }
 
-    await expect(field).toBeVisible();
-    await field.click();
-    await field.fill(invalidEmail);
+    await clickAndFill(field, invalidEmail);
 
     const clickTarget = page.locator("main").first();
     if (await clickTarget.count()) {
-      await clickTarget.waitFor({ state: "visible", timeout: 5000 });
-      await clickTarget.click({ position: { x: 10, y: 10 } });
+      await waitForVisibleAndClick(clickTarget);
     } else {
       const body = page.locator("body").first();
-      await body.waitFor({ state: "visible", timeout: 5000 });
-      await body.click({ position: { x: 10, y: 10 } });
+      await waitForVisibleAndClick(body);
     }
 
     await field.blur();

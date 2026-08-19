@@ -1,11 +1,17 @@
+/**
+ * Shared interaction helpers for Playwright field actions.
+ *
+ * Reviewer guide:
+ * - Wait for the locator to be visible before clicking.
+ * - Click before filling or selecting whenever possible.
+ * - Keep field interactions stable across tests.
+ */
 import { type Locator } from "@playwright/test";
 
 const DEFAULT_WAIT_TIMEOUT = 5000;
 
 /** Waits for a locator to be visible and clicks it. */
-export async function waitForVisibleAndClick(
-  locator: Locator,
-): Promise<void> {
+export async function waitForVisibleAndClick(locator: Locator): Promise<void> {
   await locator.waitFor({ state: "visible", timeout: DEFAULT_WAIT_TIMEOUT });
   await locator.click();
 }

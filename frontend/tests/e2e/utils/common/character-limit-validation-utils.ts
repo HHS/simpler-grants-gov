@@ -39,9 +39,12 @@ export const getCharacterLimitedFields = <
   });
 };
 
-const getValidationLimitValue = <TValueKey extends string,
+const getValidationLimitValue = <
+  TValueKey extends string,
   TDefinition extends CharacterLimitValidationDefinition<TValueKey>,
->(field: TDefinition): number => {
+>(
+  field: TDefinition,
+): number => {
   return field.maxWords ?? field.maxLength ?? 0;
 };
 
@@ -50,7 +53,9 @@ const buildOverLimitWordValue = (maxWords: number, fillCharacter: string) => {
     return fillCharacter;
   }
 
-  return Array(maxWords + 1).fill(fillCharacter).join(" ");
+  return Array(maxWords + 1)
+    .fill(fillCharacter)
+    .join(" ");
 };
 
 /** Resolves the shared character-limit validation message from field metadata. */

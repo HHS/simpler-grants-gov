@@ -277,7 +277,7 @@ export const ELIGIBILITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[] = [
     valueKey: "eligibleApplicantSmallBusinesses",
     selector: "#eligible-business-1",
     required: false,
-  }
+  },
 ];
 
 /** Shard 7: optional additional-info/contact fields with length/email metadata. */
