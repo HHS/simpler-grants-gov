@@ -1,22 +1,4 @@
 
-=== Backup completed at 2026-08-18 00:27:46 ===
-Collections processed: 9
-Items processed: 96
-Folders renamed: 0
-Files updated: 0
-Files renamed: 0
-Errors encountered: 96
-================================
-
-=== Backup completed at 2026-08-18 00:17:51 ===
-Collections processed: 9
-Items processed: 96
-Folders renamed: 0
-Files updated: 0
-Files renamed: 0
-Errors encountered: 96
-================================
-
 === Backup completed at 2026-05-26 20:04:47 ===
 Collections processed: 9
 Items processed: 96
