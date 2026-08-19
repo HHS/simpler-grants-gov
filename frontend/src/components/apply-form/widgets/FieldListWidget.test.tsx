@@ -123,6 +123,7 @@ describe("FieldListWidget", () => {
     expect(fieldListHeading).toBeInTheDocument();
     // USWDS visually hides the heading while keeping it accessible.
     expect(fieldListHeading).toHaveClass("usa-sr-only");
+    // Each repeatable list item keeps its visible numbered heading.
     expect(
       screen.getByRole("heading", { name: /contacts\s+1/i }),
     ).toBeInTheDocument();
