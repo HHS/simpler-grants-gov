@@ -1,8 +1,8 @@
 """
 Metabase backup functionality (v2).
 
-This module reads and persists a copy of the dashboards and queries 
-in a Metabase instance. The backup dataset is stored in a shared 
+This module reads and persists a copy of the dashboards and queries
+in a Metabase instance. The backup dataset is stored in a shared
 format which can be consumed by the inverse capability, `metabase-restore`.
 """
 
