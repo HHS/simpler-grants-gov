@@ -124,25 +124,6 @@ describe("FieldListWidget", () => {
     ).toBeInTheDocument();
   });
 
-  it("provides the FieldList label through the container aria-label", () => {
-    render(
-      <FieldListWidget
-        id="contacts"
-        key="contacts"
-        schema={{ type: "array", title: "Contacts" }}
-        label="Contacts"
-        hideFieldListHeading={true}
-        minItems={1}
-        groupDefinition={baseGroupDefinition}
-        rawErrors={[]}
-        requiredFields={[]}
-        name="contacts"
-      />,
-    );
-
-    expect(screen.getByLabelText("Contacts")).toBeInTheDocument();
-  });
-
   it("keeps the FieldList heading visible when hideFieldListHeading is false", () => {
     render(
       <FieldListWidget
@@ -166,6 +147,25 @@ describe("FieldListWidget", () => {
 
     // With hiding disabled, the heading should remain visually available.
     expect(fieldListHeading).not.toHaveClass("usa-sr-only");
+  });
+
+  it("provides the FieldList label through the container aria-label", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        hideFieldListHeading={true}
+        minItems={1}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.getByLabelText("Contacts")).toBeInTheDocument();
   });
 
   it("renders no entries when minItems is 0", () => {
