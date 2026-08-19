@@ -3,6 +3,7 @@ import {
   FileUploadProcessStatus,
   FileUploadStatus,
 } from "src/types/fileUploadTypes";
+import { formatFileSize } from "src/utils/fileUtils/formatFileSizeUtil";
 
 import { useTranslations } from "next-intl";
 import { Button, Grid } from "@trussworks/react-uswds";
@@ -16,6 +17,7 @@ const errorStatuses = new Map([
   ["starting", "pre-upload-error"],
   ["uploading", "upload-error"],
   ["infected", "infected"],
+  ["too-large", "too-large"],
   ["pending", "scan-error"],
   ["in_progress", "scan-error"],
   ["starting-scan", "scan-error"],
@@ -122,6 +124,7 @@ export const FileInputStatusDisplay = ({
   postUploadActionErrorMessage,
   onCancel,
   onDismiss,
+  maxFileSizeBytes,
 }: {
   fileName: string;
   onCancel: () => void;
@@ -131,6 +134,8 @@ export const FileInputStatusDisplay = ({
   postUploadActionProgressMessage: string;
   postUploadActionSuccessMessage?: string;
   postUploadActionErrorMessage?: string;
+  // only used in the "too-large" message, which can only be reached when a limit is set
+  maxFileSizeBytes?: number;
 }) => {
   const t = useTranslations("FileInput.statusDisplay");
 
@@ -148,6 +153,9 @@ export const FileInputStatusDisplay = ({
     pending: t("startingScan"),
     in_progress: t("scanning"),
     infected: t("infected"),
+    "too-large": t("fileTooLarge", {
+      maxFileSize: maxFileSizeBytes ? formatFileSize(maxFileSizeBytes) : "",
+    }),
     complete: t("scanComplete"),
     "scan-complete": t("scanComplete"),
     "post-upload": postUploadActionProgressMessage,

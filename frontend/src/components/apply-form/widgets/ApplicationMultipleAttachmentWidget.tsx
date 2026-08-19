@@ -28,20 +28,6 @@ import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
-/*
-  Virus-scanning attachment input for form fields that allow multiple files.
-  Uploads and deletions update the form locally and persist when the form is saved.
-
-  Rendered in place of MultipleAttachmentUploadWidget for the forms listed in
-  src/utils/applyForm/virusScanningForms.ts, until that rollout gate is removed in #11352.
-*/
-
-/*
-  Fallback name used when attachment metadata has not loaded yet.
-  Matches the existing attachment widgets, which compare file names against this exact
-  value to decide how to render a row, so it cannot be translated independently of them.
-  Consolidate when the legacy widgets are removed in #11352.
-*/
 const PREVIOUSLY_UPLOADED_FILE_NAME = "(Previously uploaded file)";
 
 const ApplicationMultipleAttachmentWidget = ({

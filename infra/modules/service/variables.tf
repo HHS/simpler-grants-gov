@@ -172,6 +172,14 @@ variable "enable_load_balancer" {
   default     = true
 }
 
+variable "enable_secure_alb" {
+  description = <<EOT
+    Limit ALB traffic to internal vpc only
+  EOT
+  type        = bool
+  default     = false
+}
+
 variable "enable_alb_cdn" {
   description = "Whether to enable an ALB origin CDN for the service. Cannot be enabled at the same time as the S3 CDN."
   type        = bool

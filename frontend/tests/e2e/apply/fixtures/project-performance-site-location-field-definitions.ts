@@ -83,7 +83,8 @@ export const fieldDefinitionsPPSL: FormFillFieldDefinitions = {
   },
   // ********* Additional Locations Attachment (optional) *********
   additional_locations_attachment: {
-    selector: 'input[name="additional_locations_attachment"][type="file"]',
+    selector:
+      'input[name="additional_locations_attachment-visible"][type="file"]',
     type: "file",
     section: "Additional Location(s) Attachment",
     field: "Additional Location(s)",
