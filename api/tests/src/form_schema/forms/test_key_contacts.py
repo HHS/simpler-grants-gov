@@ -242,3 +242,17 @@ def test_key_contacts_v2_0_us_address_requires_state_zip(contact_minimal, key_co
         "$.key_contacts[0].address.zip_code",
     ]
     validate_required(data, EXPECTED_REQUIRED_FIELDS, key_contacts_v2_0)
+
+
+def test_key_contacts_v2_0_ui_schema_hides_field_list_heading(key_contacts_v2_0):
+    section = next(
+        section for section in key_contacts_v2_0.form_ui_schema if section["name"] == "key_contacts"
+    )
+    field_list = next(
+        child
+        for child in section["children"]
+        if child["type"] == "fieldList" and child["name"] == "key_contacts"
+    )
+
+    assert field_list["label"] == "Key Contact"
+    assert field_list["hideFieldListHeading"] is True
