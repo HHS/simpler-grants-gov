@@ -16,6 +16,7 @@
 
 import { expect, Page } from "@playwright/test";
 
+import { waitForVisibleAndClick } from "tests/e2e/utils/opportunities/interaction-utils";
 import { resolveTextLocator } from "./text-locator-utils";
 
 export type NegativeValidationFieldDefinition = {
@@ -70,6 +71,7 @@ export async function assertNegativeNumberValidationsFromDefinitions(
 
   for (const fieldDefinition of negativeValidationFields) {
     const field = page.locator(fieldDefinition.selector);
+    await waitForVisibleAndClick(field);
     await field.fill(negativeValue);
     await field.blur();
 
