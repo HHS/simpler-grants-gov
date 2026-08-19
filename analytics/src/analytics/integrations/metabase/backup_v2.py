@@ -1,19 +1,9 @@
 """
 Metabase backup functionality (v2).
 
-This module backs up every question and dashboard from a Metabase instance
-into the same format `metabase-restore/` uses (`level_N/<Collection>/*.sql` +
-sidecar `.json`, `dashboards/<Collection>/*.json`, name-based
-`{{#restore:<name>}}` cross-references) -- so a backup is directly usable as
-restore content, or a starting point for curating it, instead of being a
-separate, lower-fidelity dump.
-
-Unlike `restore.py` (which reads local files and writes *to* Metabase), this
-module reads *from* Metabase and writes local files.
-
-This is a separate, more capable sibling of the original `backup.py`, which
-only captures question SQL text and stays untouched -- see this module's own
-README for how the two differ and when to use each.
+This module reads and persists a copy of the dashboards and queries 
+in a Metabase instance. The backup dataset is stored in a shared 
+format which can be consumed by the inverse capability, `metabase-restore`.
 """
 
 import hashlib

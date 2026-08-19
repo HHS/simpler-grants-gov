@@ -6,11 +6,9 @@ files, writes to Metabase). The two modules must agree byte-for-byte on
 this format -- anything that differs between them is exactly the kind of
 divergence bug this document exists to prevent.
 
-Unlike the original `backup.py`, which only captures a question's SQL
-text, this format also captures dashboards and the sidecar metadata
+This format also captures dashboards and the sidecar metadata
 (display type, visualization settings, template tags, filter parameters)
-needed to recreate a fully working question or dashboard from scratch --
-not just its query.
+needed to recreate a fully working question or dashboard from scratch.
 
 ## Shared Directory Format
 
@@ -20,14 +18,13 @@ metabase-backup-v2/ (or metabase-restore/)
     Shared/
       Ranked_Statuses.sql
       Ranked_Statuses.json
-  level_1/                     # the default level -- may reference level_0 (or lower)
+  level_1/                     # the default level -- may reference level_0
     Delivery_Metrics/
       Deliverable_Status_History.sql
       Deliverable_Status_History.json
     Quad_Data/
       Current_Quad.sql
       Current_Quad.json
-  level_2/, level_3/, ...      # as deep as actually needed
   dashboards/
     Dashboards/                 # -> Metabase sub-collection name
       Delivery_Metrics.json
@@ -135,13 +132,12 @@ all. `backup-v2` copies these tags through verbatim; it strips any
 those get regenerated fresh when restoring (see below) and carrying stale
 ids forward serves no purpose.
 
-Fetching `field_ref` data requires the backup API key's group to have
-"Manage table metadata" permission for the database in Metabase's own
-permissions grid (Admin -> Permissions -> Data) -- the same permission that
-gates its Data Model editor. Without it, `GET /api/database/<id>/metadata`
-403s; `backup-v2` treats that as a missing enrichment rather than a fatal
-error, logs a warning, and falls back to capturing dimension tags without a
-`field_ref` (same as an older backup).
+Fetching `field_ref` data requires the backup API key to belong to a group 
+with "Manage table metadata" permission in the Metabase permissions 
+grid (Admin -> Permissions -> Data). Without the permission, calls to 
+`GET /api/database/<id>/metadata` will return 403; `backup-v2` treats 
+that as a missing enrichment rather than a fatal error, logs a warning, 
+and falls back to capturing dimension tags without a `field_ref`.
 
 ### Cross-question references
 
