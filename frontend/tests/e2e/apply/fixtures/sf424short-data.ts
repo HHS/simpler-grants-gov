@@ -90,11 +90,7 @@ export const buildSF424ShortHappyPathTestData = (
 /**
  * Contains opportunity metadata, expected prepopulated field values, and the form-specific
  * test data builder. Imported by load-opportunity-config.ts to build the opportunity registry.
- *
- * TODO: this opportunity ID/number is a placeholder - an actual SF-424 Short opportunity
- * needs to be seeded (see the SF424 pattern in build_automatic_opportunities.py) and
- * registered in load-opportunity-config.ts before this fixture can run.
- */
+ **/
 export const SF424_SHORT_OPPORTUNITY_DATA: PrintViewFormData = {
   opportunityId: "425c2ffe-6fbd-4852-ab72-b64467fe3df0",
   opportunityNumber: "E2E-SF424SHORT-ORG-IND-01",

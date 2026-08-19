@@ -46,6 +46,36 @@ export async function navigateToPrintView(
 }
 
 /**
+ * Verifies that a print view page is read-only by checking for no visible enabled editable controls.
+ * This ensures the page is truly in print view mode, not edit mode.
+ *
+ * @param page - The Playwright page object
+ * @param skipCheck - Optional flag to skip the editable control check (for forms with custom table rendering)
+ *
+ * @throws if any visible input or textarea elements are enabled (not disabled/readonly)
+ */
+export async function assertPrintViewIsReadOnly(
+  page: Page,
+  skipCheck: boolean = false,
+): Promise<void> {
+  const printViewWrapper = page.locator(".apply-form-print-preview");
+  await expect(printViewWrapper).toBeVisible();
+
+  if (!skipCheck) {
+    // Check for inputs/textareas that are not disabled and not readonly
+    // This is more robust than checking for count=0 as there may be hidden UI elements on some mobile browsers
+    const visibleEditableInputs = printViewWrapper.locator(
+      "input:visible:not([disabled]):not([readonly])",
+    );
+    const visibleEditableTextareas = printViewWrapper.locator(
+      "textarea:visible:not([disabled]):not([readonly])",
+    );
+    await expect(visibleEditableInputs).toHaveCount(0);
+    await expect(visibleEditableTextareas).toHaveCount(0);
+  }
+}
+
+/**
  * Truncates a suffix to its last 6 digits, keeping dynamic values within
  * field max lengths defined in the form JSON schema.
  * Use this in form builders for fields that have tight character limits.
@@ -196,29 +226,11 @@ export async function validateAllPrintViews(
   } of filledForms) {
     await navigateToPrintView(page, printUrl);
 
-    // Verify print-view wrapper exists (indicates read-only print layout)
-    // The wrapper has class "apply-form-print-preview" which contains the form content
-    const printViewWrapper = page.locator(".apply-form-print-preview");
-    await expect(printViewWrapper).toBeVisible();
-
-    // Verify there are no visible ENABLED editable controls (read-only state verification)
-    // Check for inputs/textareas that are not disabled and not readonly
-    // This is more robust than checking for count=0 as there may be hidden UI elements on some mobile browsers
-    // Skip this check for forms like SF-424A that use custom table rendering with actual input fields
+    // Verify print view is read-only before validating content
     const shouldSkipEditableCheck =
       skipEditableCheckForFormKeys &&
       skipEditableCheckForFormKeys.includes(formKey);
-
-    if (!shouldSkipEditableCheck) {
-      const visibleEditableInputs = printViewWrapper.locator(
-        "input:visible:not([disabled]):not([readonly])",
-      );
-      const visibleEditableTextareas = printViewWrapper.locator(
-        "textarea:visible:not([disabled]):not([readonly])",
-      );
-      await expect(visibleEditableInputs).toHaveCount(0);
-      await expect(visibleEditableTextareas).toHaveCount(0);
-    }
+    await assertPrintViewIsReadOnly(page, shouldSkipEditableCheck);
 
     // Form title heading is visible
     await expect(page.locator("h1")).toContainText(formName);

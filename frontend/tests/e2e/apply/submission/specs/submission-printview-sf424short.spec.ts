@@ -27,6 +27,7 @@ import {
 import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
+  assertPrintViewIsReadOnly,
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
@@ -141,11 +142,15 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
       // --- Post-Population Field Validation ---
       // aor_signature and authorized_representative_date_signed are system post-populated at
-      // submission time (gg_post_population rules: "signature", "current_date") - same pattern
-      // as SF-424B's signature/date_signed check.
+      // submission time (gg_post_population rules: "signature", "current_date")
+      // First verify the print view is read-only (no editable controls), then check values exist.
       for (const { printUrl } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
+        // Verify print view is read-only before checking field values
+        await assertPrintViewIsReadOnly(page);
+
+        // Now verify the post-populated field values exist and are populated
         await expect(page.getByTestId("aor_signature")).toBeVisible();
         await expect(page.getByTestId("aor_signature")).not.toBeEmpty();
 
