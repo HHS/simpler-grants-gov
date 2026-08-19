@@ -1,9 +1,9 @@
 """
 Metabase backup functionality (v2).
 
-This module reads and persists a copy of the dashboards and queries
-in a Metabase instance. The backup dataset is stored in a shared
-format which can be consumed by the inverse capability, `metabase-restore`.
+This module reads and persists a copy of the dashboards, queries, and
+metadata from a Metabase instance. The backup dataset is written to disk
+in a bespoke format which can be consumed by the inverse capability, `metabase-restore`.
 """
 
 import hashlib
@@ -41,7 +41,7 @@ _TEMPLATE_PLACEHOLDER_PATTERN = re.compile(r"\{\{.*?\}\}")
 
 
 class MetabaseBackupV2:
-    """Back up Metabase questions and dashboards to local filesystem, in restore format."""
+    """Back up a Metabase instance to the local filesystem."""
 
     def __init__(self, api_url: str, api_key: str, output_dir: str) -> None:
         """
@@ -50,7 +50,7 @@ class MetabaseBackupV2:
         Args:
             api_url: Base URL for the Metabase API.
             api_key: API key for authentication.
-            output_dir: Directory to write backup files to.
+            output_dir: Directory to write backup files.
 
         """
         self.api_url = api_url.rstrip("/")
@@ -79,7 +79,7 @@ class MetabaseBackupV2:
         }
 
     def backup(self) -> None:
-        """Back up every question and dashboard to local filesystem, in restore format."""
+        """Back up every question and dashboard to local filesystem."""
         self.stats = self._init_stats()
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -125,7 +125,7 @@ class MetabaseBackupV2:
 
     def get_collections(self) -> list[dict[str, Any]]:
         """
-        Get all available collections from Metabase, excluding stale restore collections.
+        Get all available collections from Metabase, excluding restored collections.
 
         Returns:
             List of collection objects with id, name, and location.
@@ -147,25 +147,11 @@ class MetabaseBackupV2:
             if not (c.get("is_personal") or c.get("is_sample") or c.get("archived"))
         ]
         top_level = [c for c in eligible if c.get("location") == "/"]
-        # `analytics metabase restore` (make mb-restore) creates a fresh,
-        # disposable top-level collection on every run -- a re-import of
-        # restore content, not new content, and never meant to be backed up.
-        # Left lying around across multiple restore runs, their
-        # identically-named sub-collections (Sprint_Metrics, Shared, ...)
-        # would otherwise collide with the one real/standing collection's
-        # own sub-collections under this format's global-uniqueness
-        # requirement -- so these are excluded from backup entirely, however
-        # many pile up, rather than requiring them to be manually cleaned up
-        # first.
+
+        # Exclude redundant backup collections previously created by 
+        # the `restore` command.
         restore_roots = [c for c in top_level if self._is_restore_collection(c)]
         has_non_restore_root = len(restore_roots) < len(top_level)
-
-        # A genuine standing collection makes every restore collection
-        # redundant scratch -- exclude them all. Otherwise (every top-level
-        # collection is itself a restore collection, e.g. right after a fresh
-        # install with nothing else restored yet), keep only the most recent
-        # one so there's still something to back up, and older ones don't
-        # collide with it.
         if has_non_restore_root:
             excluded_root_ids = {c["id"] for c in restore_roots}
         elif restore_roots:
