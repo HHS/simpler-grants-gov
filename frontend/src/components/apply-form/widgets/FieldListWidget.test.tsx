@@ -98,7 +98,7 @@ describe("FieldListWidget", () => {
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
-  it("visually hides the FieldList heading but keeps it accessible", () => {
+  it("does not render the FieldList heading when hideFieldListHeading is true", () => {
     render(
       <FieldListWidget
         id="contacts"
@@ -114,19 +114,33 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    const fieldListHeading = screen.getByRole("heading", {
-      name: "Contacts",
-      level: 3,
-    });
-
-    // The heading remains in the accessibility tree for screen readers.
-    expect(fieldListHeading).toBeInTheDocument();
-    // USWDS visually hides the heading while keeping it accessible.
-    expect(fieldListHeading).toHaveClass("usa-sr-only");
+    // The top FieldList heading is omitted when hiding is enabled.
+    expect(
+      screen.queryByRole("heading", { name: "Contacts", level: 3 }),
+    ).not.toBeInTheDocument();
     // Each repeatable list item keeps its visible numbered heading.
     expect(
       screen.getByRole("heading", { name: /contacts\s+1/i }),
     ).toBeInTheDocument();
+  });
+
+  it("provides the FieldList label through the container aria-label", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        hideFieldListHeading={true}
+        minItems={1}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.getByLabelText("Contacts")).toBeInTheDocument();
   });
 
   it("keeps the FieldList heading visible when hideFieldListHeading is false", () => {
