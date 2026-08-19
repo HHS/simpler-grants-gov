@@ -151,6 +151,16 @@ export const assertCharacterLimitMessageCount = async <
     counts.set(message, (counts.get(message) ?? 0) + 1);
   }
 
+  const actualCount = Array.from(counts.values()).reduce(
+    (sum, count) => sum + count,
+    0,
+  );
+  if (actualCount !== expectedCount) {
+    throw new Error(
+      `Expected ${expectedCount} character-limit validation messages, but found ${actualCount}.`,
+    );
+  }
+
   for (const [message, count] of counts.entries()) {
     await expect(getLocatorForMessage(page, definitions, message)).toHaveCount(
       count,

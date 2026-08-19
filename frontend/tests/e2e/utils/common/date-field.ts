@@ -3,7 +3,7 @@
  * Usage: import { dateHandler, fillDateByLabel } from "tests/e2e/utils/common/date-field";
  */
 
-import { expect, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 
 import { clickAndFill } from "./interaction-utils";
 import { type FieldHandler, type FillFieldDefinition } from "./types";
