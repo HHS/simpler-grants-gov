@@ -18,9 +18,6 @@ class XsdDriftConfig(PydanticBaseEnvConfig):
     Uses the existing 'security-hub-slack-webhook' secret from Secrets Manager.
     """
 
-    # Base URL grants.gov XSDs are served from - reused by XSDFetcher
-    grants_gov_schema_base_url: str = "https://apply07.grants.gov/apply/system/schemas"
-
     # Link included on the Slack alert button, pointing at the committed XSDs folder
     github_xsds_folder_url: str = (
         "https://github.com/HHS/simpler-grants-gov/tree/main/api/src/services/xml_generation/xsds"
