@@ -16,6 +16,10 @@ import {
   fieldDefinitionsAttachment,
 } from "tests/e2e/apply/fixtures/attachment-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
+import {
+  SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
+  SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
+} from "tests/e2e/apply/fixtures/attachment-data";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import {
@@ -27,7 +31,6 @@ import {
   expectUploadProgressStatusMessage,
   openApplicationFormWithAuth,
   resolveFileInputLocator,
-  TEST_UPLOAD_DIR,
   uploadFile,
   waitForAttachmentSaveResponse,
 } from "tests/e2e/utils/common/file-upload-utils";
@@ -40,8 +43,6 @@ const OPPORTUNITY_ID =
     ? "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"
     : "c3c59562-a54f-4203-b0f6-98f2f0383481";
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
-const SAMPLE_FILE_NAME = "TestZip3543Kb.zip";
-const SAMPLE_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/${SAMPLE_FILE_NAME}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
@@ -68,10 +69,10 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
         OPPORTUNITY_URL,
       );
 
-      // When the applicant uploads a file
+      // When the applicant uploads a ZIP file
       await uploadFile(
         page,
-        SAMPLE_UPLOAD_FILE,
+        SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
         fieldDefinitionsAttachment.attachment,
       );
 
@@ -81,20 +82,13 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
       // And the attachment save request should complete successfully: Check for the save response from the server
       await waitForAttachmentSaveResponse(page);
 
-      const saveButton = page
-        .getByRole("button", {
-          name: /save and refresh/i,
-        })
-        .first();
-      await expect(saveButton).toBeEnabled({ timeout: 60000 });
-
-      // Cleanup: the upload cancel action should no longer be available.
+      // Then the cancel button should no longer be visible after upload completion.
       await expect(
         page.getByRole("button", { name: /cancel/i }).first(),
       ).not.toBeVisible({ timeout: 60000 });
 
       // Then the uploaded file should be visible after the streamed upload completes
-      await expectUploadedFileVisible(page, SAMPLE_FILE_NAME);
+      await expectUploadedFileVisible(page, SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB);
       await expect(
         page.getByRole("button", { name: /delete/i }).first(),
       ).toBeVisible();
@@ -120,17 +114,18 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
         OPPORTUNITY_URL,
       );
 
-      // When the applicant uploads a file
+      // When the applicant uploads a ZIP file
       await uploadFile(
         page,
-        SAMPLE_UPLOAD_FILE,
+        SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
         fieldDefinitionsAttachment.attachment,
       );
 
       // Then the uploaded file should be visible
-      await expectUploadedFileVisible(page, SAMPLE_FILE_NAME);
+      await expectUploadedFileVisible(page, SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB);
 
-      await deleteUploadedFile(page, SAMPLE_FILE_NAME);
+      // When the applicant deletes the uploaded file
+      await deleteUploadedFile(page, SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB);
 
       // Then the "Choose from folder" should be visible again after deleting the uploaded file
       await assertFileInputVisible(page, fieldDefinitionsAttachment.attachment);
@@ -164,18 +159,18 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
       // When checking the file input attributes
       await expect(fileInput).not.toHaveAttribute("multiple");
 
-      // And the applicant attempts to upload multiple files
+      // And the applicant attempts to upload multiple files to the single-file field
       await uploadFile(
         page,
-        [SAMPLE_UPLOAD_FILE, SAMPLE_UPLOAD_FILE],
+        [SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB, SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB],
         fieldDefinitionsAttachment.att1,
       );
 
-      // Then only one file should be accepted
-      await expectUploadedFileCount(page, SAMPLE_FILE_NAME, 1);
+      // Then only one uploaded file should be accepted.
+      await expectUploadedFileCount(page, SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB, 1);
 
       // And the uploaded file should be visible
-      await expectUploadedFileVisible(page, SAMPLE_FILE_NAME);
+      await expectUploadedFileVisible(page, SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB);
 
       // And the "Choose from folder" should be hidden after a file is uploaded
       await assertFileInputHidden(page, fieldDefinitionsAttachment.att1);

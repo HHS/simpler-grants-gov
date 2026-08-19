@@ -15,6 +15,7 @@ import {
   ATTACHMENT_FORM_CONFIG,
   fieldDefinitionsAttachment,
 } from "tests/e2e/apply/fixtures/attachment-field-definitions";
+import { OPPORTUNITY_ID_STREAMED_UPLOAD } from "tests/e2e/apply/fixtures/general-apply-fixtures";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
@@ -24,20 +25,19 @@ import {
   expectUploadStatusMessage,
   failAttachmentUploadRequest,
   openApplicationFormWithAuth,
-  TEST_UPLOAD_DIR,
   uploadFile,
 } from "tests/e2e/utils/common/file-upload-utils";
+import {
+  SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
+  SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
+  SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
+  SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB,
+} from "tests/e2e/apply/fixtures/attachment-data";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
-const { testOrgLabel, targetEnv } = playwrightEnv;
+const { testOrgLabel } = playwrightEnv;
 
-const OPPORTUNITY_ID =
-  targetEnv === "staging"
-    ? "97ee34df-fd89-400d-b4d4-ac9c5c7f61c1"
-    : "c3c59562-a54f-4203-b0f6-98f2f0383481";
-const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
-const SAMPLE_FILE_NAME = "TestZip3543Kb.zip";
-const SAMPLE_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/${SAMPLE_FILE_NAME}`;
+const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID_STREAMED_UPLOAD}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
@@ -67,14 +67,14 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       // And the upload request is aborted before completion
       await abortAttachmentUploadRequest(page);
 
-      // When the applicant uploads a file
+      // When the applicant uploads a ZIP file
       await uploadFile(
         page,
-        SAMPLE_UPLOAD_FILE,
+        SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
         fieldDefinitionsAttachment.attachment,
       );
 
-      // Then I should see the "Pre upload error" message
+      // Then the pre-upload error message should appear
       await expectUploadStatusMessage(page, "Pre upload error");
 
       // And the dismiss button should be visible
@@ -85,7 +85,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       // And the file should not be saved
       await assertUploadDidNotSave(
         page,
-        SAMPLE_FILE_NAME,
+        SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
         0,
         fieldDefinitionsAttachment.attachment,
       );
@@ -114,14 +114,14 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       // And the upload request is forced to fail
       await failAttachmentUploadRequest(page);
 
-      // When the applicant uploads a file
+      // When the applicant uploads a ZIP file
       await uploadFile(
         page,
-        SAMPLE_UPLOAD_FILE,
+        SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
         fieldDefinitionsAttachment.attachment,
       );
 
-      // Then I should see the "Pre upload error" message
+      // Then the pre-upload error message should appear
       await expectUploadStatusMessage(page, "Pre upload error");
 
       // And the dismiss button should be visible
@@ -132,7 +132,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       // And the file should not be saved
       await assertUploadDidNotSave(
         page,
-        SAMPLE_FILE_NAME,
+        SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
         0,
         fieldDefinitionsAttachment.attachment,
       );
@@ -148,9 +148,6 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
     ) => {
       test.setTimeout(300_000);
 
-      const SAMPLE_FILE_NAME_2 = "TestMSword0Kb.docx";
-      const SAMPLE_UPLOAD_FILE2 = `${TEST_UPLOAD_DIR}/${SAMPLE_FILE_NAME_2}`;
-
       // Given the applicant has opened the Attachment Form
       await openApplicationFormWithAuth(
         page,
@@ -164,11 +161,11 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       // When the applicant uploads a zero-byte file
       await uploadFile(
         page,
-        SAMPLE_UPLOAD_FILE2,
+        SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB,
         fieldDefinitionsAttachment.attachment,
       );
 
-      // Then I should see the "Upload failed" message
+      // Then the upload failure message should appear
       await expectUploadStatusMessage(page, "Upload failed");
 
       // And the dismiss button should be visible
@@ -179,7 +176,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       // And the file should not be saved
       await assertUploadDidNotSave(
         page,
-        SAMPLE_FILE_NAME_2,
+        SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
         0,
         fieldDefinitionsAttachment.attachment,
       );

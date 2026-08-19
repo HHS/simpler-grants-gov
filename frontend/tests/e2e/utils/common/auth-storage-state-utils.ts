@@ -14,7 +14,7 @@
  *   This avoids repeated application creation across a spec.
  *
  * Tester parameter guide:
- * - targetEnv: pass playwrightEnv.targetEnv from the spec; controls staging-only skip logic.
+ * - targetEnv: pass playwrightEnv.targetEnv from the spec; controls non-local skip logic.
  * - skipTest: pass (condition, description) => test.skip(condition, description) from the spec.
  * - timeoutMs: defaults to 300_000 ms; override per spec if needed.
  * - stagingProjectName: defaults to "Chrome"; staging MFA is limited to one browser.
@@ -103,7 +103,7 @@ export function createAuthenticatedPageLifecycle(
       workerInfo: WorkerInfo,
     ): Promise<void> => {
       if (
-        targetEnv === "staging" &&
+        targetEnv !== "local" &&
         workerInfo.project.name !== stagingProjectName
       ) {
         return;

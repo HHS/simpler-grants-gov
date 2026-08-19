@@ -154,12 +154,20 @@ export async function uploadFile(
 }
 
 /**
+ * Normalize any provided file path to just the file name.
+ */
+function normalizeUploadedFileName(fileName: string): string {
+  return fileName.replace(/^.*[\\/]/, "");
+}
+
+/**
  * Return a locator for the uploaded file entry shown in the existing files list.
  */
 function getExistingFileEntryLocator(page: Page, fileName: string): Locator {
+  const normalizedFileName = normalizeUploadedFileName(fileName);
   return page
     .locator('[data-testid="file-input-existing-files"]')
-    .locator(`text=${fileName}`)
+    .locator(`text=${normalizedFileName}`)
     .first();
 }
 
@@ -186,9 +194,10 @@ export async function expectUploadedFileCount(
   count: number,
   timeoutMs = 60000,
 ): Promise<void> {
+  const normalizedFileName = normalizeUploadedFileName(fileName);
   const entryLocator = page
     .locator('[data-testid="file-input-existing-files"]')
-    .locator(`text=${fileName}`);
+    .locator(`text=${normalizedFileName}`);
 
   // If the expected count is zero, assert there are no entries.
   if (count === 0) {
@@ -207,7 +216,7 @@ export async function expectUploadedFileCount(
   }
 
   // Fallback to a generic page text search if the entry locator did not return elements yet.
-  await expect(page.getByText(fileName)).toHaveCount(count, {
+  await expect(page.getByText(normalizedFileName)).toHaveCount(count, {
     timeout: timeoutMs,
   });
 }
@@ -243,10 +252,11 @@ export async function deleteUploadedFile(
   await confirmDeleteButton.click();
 
   if (fileName) {
+    const normalizedFileName = normalizeUploadedFileName(fileName);
     await expect(
       page
         .locator('[data-testid="file-input-existing-files"]')
-        .locator(`text=${fileName}`),
+        .locator(`text=${normalizedFileName}`),
     ).toHaveCount(0, {
       timeout: 60000,
     });

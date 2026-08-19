@@ -10,20 +10,20 @@
 #   - Upload of a zero-byte file fails.
 # - In all failure conditions:
 #   - The selected file should not be saved.
-#   - A retry/failure control should be visible.
+#   - An error dismissal control should be visible.
 # ================================================================================
 
 Feature: Single file upload interactions failure path
   As an applicant
   I want the attachment form to handle upload failures correctly
-  So that I can retry uploading a file when an upload does not complete successfully
+  So that I can dismiss the error and try uploading the file again
 
   Scenario: Streamed single upload aborted does not save the file
     Given I am authenticated as an applicant
     And I have opened the "Attachment Form"
-    And the attachment upload request is aborted before completion
 
-    When I upload a file to the single-file attachment field
+    When the attachment upload request is aborted before completion
+    And I upload a file to the single-file attachment field
 
     Then the uploaded file should not be saved
     And I should see 0 uploaded files

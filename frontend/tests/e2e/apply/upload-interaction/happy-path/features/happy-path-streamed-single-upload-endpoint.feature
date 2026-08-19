@@ -44,4 +44,4 @@ Feature: Attachment Form streamed upload endpoint happy path
     When I attempt to upload multiple files to the single-file attachment field
 
     Then only one uploaded file should be accepted
-    And the file input should remain hidden during the upload
+    And the file input should remain hidden after the upload
