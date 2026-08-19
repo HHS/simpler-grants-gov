@@ -19,7 +19,7 @@ a new collection of dashboards and questions in the target instance.
 4. From `simpler-grants-gov/analytics`, run `make mb-backup-v2`
 5. Review results on command line and in `CHANGELOG.txt`
 
-## Restore from this backup dataset
+## Restore this dataset to a target instance
 
 1. Get an API key for the target instance
 2. Set the environment variables `MB_API_KEY` and `MB_API_URL` for the 
