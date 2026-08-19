@@ -1,26 +1,29 @@
 # metabase-backup-v2/
 
-This directory is intentionally empty until a `backup-v2` run populates it.
-Run `make mb-backup-v2` to back up the target Metabase instance's questions
-*and* dashboards here, in the format described in
+This directory is intentionally empty until populated by the `make mb-backup-v2`
+command. The command will fetch and persist dashboards, queries, and
+visual metadata from a target Metabase instance into the format described in
 [`../src/analytics/integrations/metabase/BACKUP_V2_AND_RESTORE_FORMAT.md`](../src/analytics/integrations/metabase/BACKUP_V2_AND_RESTORE_FORMAT.md).
 
-This is a separate, more capable sibling of
-`analytics/src/analytics/integrations/metabase/sql/` (the original backup,
-question SQL only) -- see that module's own README for how the two differ,
-and for the disaster-recovery purpose both directories serve.
+A fresh backup dataset can be fed directly to the `restore` command to instantiate 
+a new collection of dashboards and questions in the target instance. 
 
-A fresh backup here can be fed directly to `make mb-restore` (via
-`MB_RESTORE_DIR=metabase-backup-v2`) to publish everything it contains into
-a new, timestamped Metabase collection.
-
-## Populating or refreshing this backup
+## Backup a live dataset from a source instance
 
 1. Get an API key with schema-metadata access (see the format doc's
-   cross-instance field id section for why) and set `MB_API_URL`/`MB_API_KEY`
-   for the target instance.
-2. From `simpler-grants-gov/analytics`, run `make mb-backup-v2` and confirm
-   it completes without errors -- a `CHANGELOG.txt` gets written to this
-   directory with the run's stats.
-3. Create a branch, add the `.sql`/`.json`/`CHANGELOG.txt` files, and open a
-   PR.
+   cross-instance field id section for details)
+2. Set the environment variables `MB_API_KEY` and `MB_API_URL` for the 
+   source instance
+3. (Optional) Set `MB_BACKUP_V2_DIR` to write somewhere other than the
+   default `metabase-backup-v2`
+4. From `simpler-grants-gov/analytics`, run `make mb-backup-v2`
+5. Review results on command line and in `CHANGELOG.txt`
+
+## Restore from this backup dataset
+
+1. Get an API key for the target instance
+2. Set the environment variables `MB_API_KEY` and `MB_API_URL` for the 
+   target instance
+3. From `simpler-grants-gov/analytics`, run the command
+   `analytics metabase restore --restore-dir metabase-backup-v2` 
+4. Review results on command line; output will include URL of new collection
