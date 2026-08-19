@@ -43,7 +43,7 @@ import { assertNegativeNumberValidationsFromDefinitions } from "tests/e2e/utils/
 import { assertRequiredFieldValidationsFromDefinitions } from "tests/e2e/utils/common/required-field-validation-utils";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
 
-const { SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION} = VALID_TAGS;
+const { SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
 
 async function setupAndNavigateToOpportunitySummary(page: Page) {
   const fillData = buildOpportunityHappyPathFillData(new Date());
@@ -104,7 +104,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Negative number validation",
-    { tag: [SMOKE,GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();
