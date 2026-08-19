@@ -138,6 +138,17 @@ class CheckXsdDriftTask(Task):
         )
 
         if drifted_schemas or missing_schemas:
+            logger.info(
+                "XSD drift summary",
+                extra={
+                    "drifted_schema_count": len(drifted_schemas),
+                    "missing_schema_count": len(missing_schemas),
+                    "fetch_error_count": len(fetch_errors),
+                    "drifted_schemas": sorted(drifted_schemas.keys()),
+                    "missing_schemas": sorted(missing_schemas.keys()),
+                    "total_checked": schemas_checked,
+                },
+            )
             self._send_slack_alert(
                 drifted_schemas,
                 missing_schemas,
