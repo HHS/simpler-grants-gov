@@ -109,10 +109,6 @@ export async function updateCompetition(
         requestBody,
       );
       competitionId = apiResponse.data.competition_id;
-      return {
-        successMessage: t("success"),
-        newCompetitionId: competitionId,
-      };
     } else {
       apiResponse = await updateCompetitionForGrantor(
         opportunityId,
