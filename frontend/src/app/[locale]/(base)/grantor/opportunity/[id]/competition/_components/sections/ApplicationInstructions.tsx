@@ -53,18 +53,18 @@ export function ApplicationInstructions({
         {t("subHeader")}
       </p>
       <DynamicFieldLabel
-        idFor="simpler-file-upload"
+        idFor="competition-instruction-file"
         title={t("uploadAFile")}
         description={t("multipleFiles")}
       />
       <SimplerFileInput
-        id="simpler-file-upload"
+        id="competition-instruction-file"
         postUploadAction={handlePostFileUpload}
         postUploadActionProgressMessage={t("uploadWidget.uploading")}
         postUploadActionSuccessMessage={t("uploadWidget.success")}
         postUploadActionErrorMessage={t("uploadWidget.error")}
         onDelete={handleDeleteFile}
-        describedByIds={["label-for-simpler-file-upload"]}
+        describedByIds={["label-for-competition-instruction-file"]}
         existingFiles={existingFiles}
       />
     </div>

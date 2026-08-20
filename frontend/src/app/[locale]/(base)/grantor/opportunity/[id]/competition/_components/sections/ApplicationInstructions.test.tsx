@@ -71,7 +71,7 @@ describe("ApplicationInstructions", () => {
       expect(screen.getByText("uploadAFile")).toBeInTheDocument();
       expect(screen.getByText("multipleFiles")).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: "simpler-file-upload" }),
+        screen.getByRole("button", { name: "competition-instruction-file" }),
       ).toBeInTheDocument();
     });
 
@@ -88,7 +88,7 @@ describe("ApplicationInstructions", () => {
       render(<ApplicationInstructions />);
 
       fireEvent.click(
-        screen.getByRole("button", { name: "simpler-file-upload" }),
+        screen.getByRole("button", { name: "competition-instruction-file" }),
       );
 
       expect(screen.getByDisplayValue("file-123")).toHaveAttribute(
@@ -100,7 +100,7 @@ describe("ApplicationInstructions", () => {
     it("clears the pending file ID when the file is deleted", () => {
       render(<ApplicationInstructions />);
       fireEvent.click(
-        screen.getByRole("button", { name: "simpler-file-upload" }),
+        screen.getByRole("button", { name: "competition-instruction-file" }),
       );
 
       fireEvent.click(screen.getByRole("button", { name: "delete-file" }));
