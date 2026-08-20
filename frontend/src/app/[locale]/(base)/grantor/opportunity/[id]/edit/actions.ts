@@ -1,7 +1,7 @@
 "use server";
 
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchemas.zod";
+import { OpportunitySummaryCreateRequestV1Schema } from "src/validation-schemas/apiSchemas.zod";
 import {
   createOpportunitySummaryForGrantor,
   updateOpportunitySummaryForGrantor,

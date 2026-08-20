@@ -24,7 +24,7 @@ export default defineConfig(...vitalsPlugin, [
     // active storybook development
     ignores: [
       "**/public/",
-      "**/generated/**",
+      "**/validation-schemas/**",
       "**/.storybook/",
       "**/.next/",
       "**/storybook-static",

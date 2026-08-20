@@ -11,7 +11,7 @@ import {
   ELIGIBILITY_OPTIONS,
   fundingOptions,
 } from "src/constants/opportunity";
-import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchemas.zod";
+import { OpportunitySummaryCreateRequestV1Schema } from "src/validation-schemas/apiSchemas.zod";
 import { useZodFormValidation } from "src/hooks/useZodValidation";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 import { normalizeDateString } from "src/utils/dateUtil";

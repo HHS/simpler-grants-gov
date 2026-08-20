@@ -3,7 +3,7 @@ const ts = require("typescript");
 const YAML = require("yaml");
 
 const OPENAPI_PATH = "../api/openapi.generated.yml";
-const ZOD_PATH = "src/generated/apiSchemas.zod.ts";
+const ZOD_PATH = "src/validation-schemas/apiSchemas.zod.ts";
 
 const OPERATOR_EXPRESSIONS = {
   less_than: (left, right) => `${left} < ${right}`,

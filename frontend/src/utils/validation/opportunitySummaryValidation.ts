@@ -1,4 +1,4 @@
-import { OpportunitySummaryCreateRequestV1Schema } from "src/generated/apiSchemas.zod";
+import { OpportunitySummaryCreateRequestV1Schema } from "src/validation-schemas/apiSchemas.zod";
 import { OpportunitySummaryCreateRequest } from "src/types/opportunity/opportunityResponseTypes";
 import { z } from "zod";
 

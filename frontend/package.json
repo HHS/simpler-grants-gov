@@ -13,7 +13,7 @@
     "debug": "NODE_OPTIONS='--inspect' next dev",
     "format": "prettier --write '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
     "format-check": "prettier --check '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
-    "generate:zod": "orval --config ./orval.config.ts && node ./scripts/postprocess-zod.js",
+    "generate:zod": "make -C ../api openapi-spec-client && orval --config orval.config.ts && node scripts/postprocess-zod.js",
     "lint": "next typegen && eslint",
     "lint-fix": "next typegen && npm run lint -- --fix",
     "postinstall": "node ./scripts/postinstall.js",

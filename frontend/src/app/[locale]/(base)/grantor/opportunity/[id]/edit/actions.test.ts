@@ -10,6 +10,8 @@ import {
   type OpportunityEditActionState,
 } from "./actions";
 
+// next-intl translators are callable and expose `.has()` for checking translation keys.
+// validation framework checks for specific translation before falling back to generic
 const mockTranslator = Object.assign((key: string) => key, {
   has: () => true,
 });

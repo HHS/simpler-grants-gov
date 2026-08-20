@@ -2,7 +2,7 @@
 .next/
 node_modules/
 storybook-static/
-src/generated/
+src/validation-schemas/
 
 # Ignore USWDS static assets
 public/uswds

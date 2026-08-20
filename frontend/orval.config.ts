@@ -8,7 +8,7 @@ export default defineConfig({
     output: {
       client: "zod",
       mode: "single",
-      target: "./src/generated/apiSchemas.zod.ts",
+      target: "./src/validation-schemas/apiSchemas.zod.ts",
       override: {
         zod: {
           version: 3,
