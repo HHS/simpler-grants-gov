@@ -783,6 +783,12 @@ class DeleteCompetitionInstructionResponseV1Schema(ResponseWithErrorsSchema):
     pass
 
 
+class OpportunityDeleteResponseSchema(ResponseWithErrorsSchema):
+    """Response Schema for Delete Opportunity Endpoint"""
+
+    pass
+
+
 ####################################
 # Opportunity Audit History
 ####################################
