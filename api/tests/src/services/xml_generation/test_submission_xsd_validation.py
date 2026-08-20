@@ -818,6 +818,501 @@ class TestSubmissionXSDValidation:
             "valid"
         ], f"SF-LLL subawardee validation failed: {sflll_validation['error_message']}"
 
+    @pytest.mark.parametrize(
+        "state_review_value,extra_fields,tracking_number",
+        [
+            # Options a and b use lowercase "state" as stored in the DB (form enum value).
+            # The XML transformer normalizes these to capital "State" before writing to XML.
+            (
+                "a. This application was made available to the state under the Executive Order 12372 Process for review on",
+                {"state_review_available_date": "2025-01-10"},
+                99999901,
+            ),
+            (
+                "b. Program is subject to E.O. 12372 but has not been selected by the state for review.",
+                {},
+                99999902,
+            ),
+            (
+                "c. Program is not covered by E.O. 12372.",
+                {},
+                99999903,
+            ),
+        ],
+        ids=["option_a", "option_b", "option_c"],
+    )
+    def test_sf424_state_review_all_options_xsd_validation(
+        self,
+        enable_factory_create,
+        xsd_validator,
+        seed_form_registry,
+        state_review_value,
+        extra_fields,
+        tracking_number,
+    ):
+        """Test that all three state_review enum values produce XSD-valid XML.
+
+        Options a and b contain 'State' (capitalized). A casing bug (lowercase 'state')
+        in the enum definition would cause XSD validation to fail for those two options
+        while option c (which has no 'state') would pass undetected.
+        """
+        agency = AgencyFactory.create()
+        opportunity = OpportunityFactory.create(
+            opportunity_number=f"TEST-OPP-SR-{tracking_number}",
+            opportunity_title="State Review Coverage Test",
+            agency_code=agency.agency_code,
+        )
+        assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity, assistance_listing_number="93.001"
+        )
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            public_competition_id=f"TEST-COMP-SR-{tracking_number}",
+            opening_date=date(2025, 1, 1),
+            closing_date=date(2025, 12, 31),
+            opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
+        )
+        competition_form = CompetitionFormFactory.create(competition=competition, form=SF424_v4_0)
+        application = ApplicationFactory.create(
+            competition=competition, application_name="State Review Coverage Application"
+        )
+        application_response = {
+            "submission_type": "Application",
+            "application_type": "New",
+            "date_received": "2025-01-15",
+            "organization_name": "Test Research University",
+            "employer_taxpayer_identification_number": "123456789",
+            "sam_uei": "TEST12345678",
+            "applicant": {
+                "street1": "123 Main St",
+                "city": "Washington",
+                "state": "DC: District of Columbia",
+                "zip_code": "20001",
+                "country": "USA: UNITED STATES",
+            },
+            "contact_person": {"first_name": "John", "last_name": "Doe"},
+            "phone_number": "555-123-4567",
+            "email": "test@example.org",
+            "applicant_type_code": ["C: City or Township Government"],
+            "agency_name": "Test Agency",
+            "funding_opportunity_number": "TEST-FON-2025-001",
+            "funding_opportunity_title": "Test Funding Opportunity",
+            "project_title": "State Review Coverage Test",
+            "congressional_district_applicant": "DC-00",
+            "congressional_district_program_project": "DC-00",
+            "project_start_date": "2025-01-01",
+            "project_end_date": "2025-12-31",
+            "federal_estimated_funding": "100000.00",
+            "applicant_estimated_funding": "0.00",
+            "state_estimated_funding": "0.00",
+            "local_estimated_funding": "0.00",
+            "other_estimated_funding": "0.00",
+            "program_income_estimated_funding": "0.00",
+            "total_estimated_funding": "100000.00",
+            "state_review": state_review_value,
+            "delinquent_federal_debt": False,
+            "certification_agree": True,
+            "authorized_representative": {"first_name": "John", "last_name": "Doe"},
+            "authorized_representative_title": "Director",
+            "authorized_representative_phone_number": "555-111-2222",
+            "authorized_representative_email": "john.doe@test.org",
+            "aor_signature": "John Doe Signature",
+            "date_signed": "2025-01-15",
+            **extra_fields,
+        }
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response=application_response,
+        )
+
+        application_submission = ApplicationSubmissionFactory.create(
+            application=application,
+            legacy_tracking_number=tracking_number,
+        )
+
+        assembler = SubmissionXMLAssembler(application, application_submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+        assert xml_string is not None
+
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
+
+        sf424_ns = "{http://apply.grants.gov/forms/SF424_4_0-V4.0}"
+        sf424_elements = forms_element.findall(f".//{sf424_ns}SF424_4_0")
+        assert len(sf424_elements) == 1
+
+        sf424_xml = lxml_etree.tostring(sf424_elements[0], encoding="unicode")
+        sf424_xsd_path = self._get_xsd_file_path(
+            xsd_validator, "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd"
+        )
+        result = xsd_validator.validate_xml(sf424_xml, sf424_xsd_path)
+        assert result["valid"], (
+            f"SF-424 XSD validation failed for state_review={state_review_value!r}:\n"
+            f"{result['error_message']}"
+        )
+
+    @pytest.mark.parametrize(
+        "submission_type,tracking_number",
+        [
+            ("Application", 99999910),
+            ("Preapplication", 99999911),
+            ("Changed/Corrected Application", 99999912),
+        ],
+        ids=["application", "preapplication", "changed_corrected"],
+    )
+    def test_sf424_submission_type_all_options_xsd_validation(
+        self,
+        enable_factory_create,
+        xsd_validator,
+        seed_form_registry,
+        submission_type,
+        tracking_number,
+    ):
+        """Test that all three SubmissionType enum values produce XSD-valid XML.
+
+        SubmissionType is a required XSD enum — any value not in the XSD definition
+        will fail validation. This test ensures all options remain in sync with the XSD.
+        """
+        agency = AgencyFactory.create()
+        opportunity = OpportunityFactory.create(
+            opportunity_number=f"TEST-OPP-ST-{tracking_number}",
+            opportunity_title="Submission Type Coverage Test",
+            agency_code=agency.agency_code,
+        )
+        assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity, assistance_listing_number="93.001"
+        )
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            public_competition_id=f"TEST-COMP-ST-{tracking_number}",
+            opening_date=date(2025, 1, 1),
+            closing_date=date(2025, 12, 31),
+            opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
+        )
+        competition_form = CompetitionFormFactory.create(competition=competition, form=SF424_v4_0)
+        application = ApplicationFactory.create(
+            competition=competition, application_name="Submission Type Coverage Application"
+        )
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "submission_type": submission_type,
+                "application_type": "New",
+                "date_received": "2025-01-15",
+                "organization_name": "Test Research University",
+                "employer_taxpayer_identification_number": "123456789",
+                "sam_uei": "TEST12345678",
+                "applicant": {
+                    "street1": "123 Main St",
+                    "city": "Washington",
+                    "state": "DC: District of Columbia",
+                    "zip_code": "20001",
+                    "country": "USA: UNITED STATES",
+                },
+                "contact_person": {"first_name": "John", "last_name": "Doe"},
+                "phone_number": "555-123-4567",
+                "email": "test@example.org",
+                "applicant_type_code": ["C: City or Township Government"],
+                "agency_name": "Test Agency",
+                "funding_opportunity_number": "TEST-FON-2025-001",
+                "funding_opportunity_title": "Test Funding Opportunity",
+                "project_title": "Submission Type Coverage Test",
+                "congressional_district_applicant": "DC-00",
+                "congressional_district_program_project": "DC-00",
+                "project_start_date": "2025-01-01",
+                "project_end_date": "2025-12-31",
+                "federal_estimated_funding": "100000.00",
+                "applicant_estimated_funding": "0.00",
+                "state_estimated_funding": "0.00",
+                "local_estimated_funding": "0.00",
+                "other_estimated_funding": "0.00",
+                "program_income_estimated_funding": "0.00",
+                "total_estimated_funding": "100000.00",
+                "state_review": "c. Program is not covered by E.O. 12372.",
+                "delinquent_federal_debt": False,
+                "certification_agree": True,
+                "authorized_representative": {"first_name": "John", "last_name": "Doe"},
+                "authorized_representative_title": "Director",
+                "authorized_representative_phone_number": "555-111-2222",
+                "authorized_representative_email": "john.doe@test.org",
+                "aor_signature": "John Doe Signature",
+                "date_signed": "2025-01-15",
+            },
+        )
+
+        application_submission = ApplicationSubmissionFactory.create(
+            application=application, legacy_tracking_number=tracking_number
+        )
+        assembler = SubmissionXMLAssembler(application, application_submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+        assert xml_string is not None
+
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
+        sf424_ns = "{http://apply.grants.gov/forms/SF424_4_0-V4.0}"
+        sf424_xml = lxml_etree.tostring(
+            forms_element.findall(f".//{sf424_ns}SF424_4_0")[0], encoding="unicode"
+        )
+        xsd_path = self._get_xsd_file_path(
+            xsd_validator, "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd"
+        )
+        result = xsd_validator.validate_xml(sf424_xml, xsd_path)
+        assert result["valid"], (
+            f"SF-424 XSD validation failed for submission_type={submission_type!r}:\n"
+            f"{result['error_message']}"
+        )
+
+    @pytest.mark.parametrize(
+        "application_type,extra_fields,tracking_number",
+        [
+            ("New", {}, 99999920),
+            ("Continuation", {}, 99999921),
+            ("Revision", {"revision_type": "A: Increase Award"}, 99999922),
+        ],
+        ids=["new", "continuation", "revision"],
+    )
+    def test_sf424_application_type_all_options_xsd_validation(
+        self,
+        enable_factory_create,
+        xsd_validator,
+        seed_form_registry,
+        application_type,
+        extra_fields,
+        tracking_number,
+    ):
+        """Test that all three ApplicationType enum values produce XSD-valid XML.
+
+        ApplicationType is a required XSD enum. Revision additionally exercises the
+        optional RevisionType element.
+        """
+        agency = AgencyFactory.create()
+        opportunity = OpportunityFactory.create(
+            opportunity_number=f"TEST-OPP-AT-{tracking_number}",
+            opportunity_title="Application Type Coverage Test",
+            agency_code=agency.agency_code,
+        )
+        assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity, assistance_listing_number="93.001"
+        )
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            public_competition_id=f"TEST-COMP-AT-{tracking_number}",
+            opening_date=date(2025, 1, 1),
+            closing_date=date(2025, 12, 31),
+            opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
+        )
+        competition_form = CompetitionFormFactory.create(competition=competition, form=SF424_v4_0)
+        application = ApplicationFactory.create(
+            competition=competition, application_name="Application Type Coverage Application"
+        )
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "submission_type": "Application",
+                "application_type": application_type,
+                "date_received": "2025-01-15",
+                "organization_name": "Test Research University",
+                "employer_taxpayer_identification_number": "123456789",
+                "sam_uei": "TEST12345678",
+                "applicant": {
+                    "street1": "123 Main St",
+                    "city": "Washington",
+                    "state": "DC: District of Columbia",
+                    "zip_code": "20001",
+                    "country": "USA: UNITED STATES",
+                },
+                "contact_person": {"first_name": "John", "last_name": "Doe"},
+                "phone_number": "555-123-4567",
+                "email": "test@example.org",
+                "applicant_type_code": ["C: City or Township Government"],
+                "agency_name": "Test Agency",
+                "funding_opportunity_number": "TEST-FON-2025-001",
+                "funding_opportunity_title": "Test Funding Opportunity",
+                "project_title": "Application Type Coverage Test",
+                "congressional_district_applicant": "DC-00",
+                "congressional_district_program_project": "DC-00",
+                "project_start_date": "2025-01-01",
+                "project_end_date": "2025-12-31",
+                "federal_estimated_funding": "100000.00",
+                "applicant_estimated_funding": "0.00",
+                "state_estimated_funding": "0.00",
+                "local_estimated_funding": "0.00",
+                "other_estimated_funding": "0.00",
+                "program_income_estimated_funding": "0.00",
+                "total_estimated_funding": "100000.00",
+                "state_review": "c. Program is not covered by E.O. 12372.",
+                "delinquent_federal_debt": False,
+                "certification_agree": True,
+                "authorized_representative": {"first_name": "John", "last_name": "Doe"},
+                "authorized_representative_title": "Director",
+                "authorized_representative_phone_number": "555-111-2222",
+                "authorized_representative_email": "john.doe@test.org",
+                "aor_signature": "John Doe Signature",
+                "date_signed": "2025-01-15",
+                **extra_fields,
+            },
+        )
+
+        application_submission = ApplicationSubmissionFactory.create(
+            application=application, legacy_tracking_number=tracking_number
+        )
+        assembler = SubmissionXMLAssembler(application, application_submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+        assert xml_string is not None
+
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
+        sf424_ns = "{http://apply.grants.gov/forms/SF424_4_0-V4.0}"
+        sf424_xml = lxml_etree.tostring(
+            forms_element.findall(f".//{sf424_ns}SF424_4_0")[0], encoding="unicode"
+        )
+        xsd_path = self._get_xsd_file_path(
+            xsd_validator, "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd"
+        )
+        result = xsd_validator.validate_xml(sf424_xml, xsd_path)
+        assert result["valid"], (
+            f"SF-424 XSD validation failed for application_type={application_type!r}:\n"
+            f"{result['error_message']}"
+        )
+
+    @pytest.mark.parametrize(
+        "applicant_type_code,extra_fields,tracking_number",
+        [
+            # Option H: stored with lowercase "state" in DB (form enum value).
+            # The XML transformer normalizes to capital "State" before writing to XML.
+            (["H: Public/state Controlled Institution of Higher Education"], {}, 99999930),
+            # Option X: requires applicant_type_other_specify
+            (["X: Other (specify)"], {"applicant_type_other_specify": "Community org"}, 99999931),
+            # Multiple codes (up to 3 allowed by XSD)
+            (
+                ["A: State Government", "B: County Government", "C: City or Township Government"],
+                {},
+                99999932,
+            ),
+        ],
+        ids=["option_H_capitalization", "option_X_with_other_specify", "multiple_codes"],
+    )
+    def test_sf424_applicant_type_code_xsd_validation(
+        self,
+        enable_factory_create,
+        xsd_validator,
+        seed_form_registry,
+        applicant_type_code,
+        extra_fields,
+        tracking_number,
+    ):
+        """Test applicant_type_code values that have known XSD-validation risks.
+
+        Option H previously had a lowercase 'state' (should be 'State') that would
+        cause XSD failure for any applicant selecting that type. Option X exercises
+        the conditional required field. Multiple codes exercises the multi-value path.
+        """
+        agency = AgencyFactory.create()
+        opportunity = OpportunityFactory.create(
+            opportunity_number=f"TEST-OPP-ATC-{tracking_number}",
+            opportunity_title="Applicant Type Code Coverage Test",
+            agency_code=agency.agency_code,
+        )
+        assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity, assistance_listing_number="93.001"
+        )
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            public_competition_id=f"TEST-COMP-ATC-{tracking_number}",
+            opening_date=date(2025, 1, 1),
+            closing_date=date(2025, 12, 31),
+            opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
+        )
+        competition_form = CompetitionFormFactory.create(competition=competition, form=SF424_v4_0)
+        application = ApplicationFactory.create(
+            competition=competition, application_name="Applicant Type Code Coverage Application"
+        )
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "submission_type": "Application",
+                "application_type": "New",
+                "date_received": "2025-01-15",
+                "organization_name": "Test Research University",
+                "employer_taxpayer_identification_number": "123456789",
+                "sam_uei": "TEST12345678",
+                "applicant": {
+                    "street1": "123 Main St",
+                    "city": "Washington",
+                    "state": "DC: District of Columbia",
+                    "zip_code": "20001",
+                    "country": "USA: UNITED STATES",
+                },
+                "contact_person": {"first_name": "John", "last_name": "Doe"},
+                "phone_number": "555-123-4567",
+                "email": "test@example.org",
+                "applicant_type_code": applicant_type_code,
+                "agency_name": "Test Agency",
+                "funding_opportunity_number": "TEST-FON-2025-001",
+                "funding_opportunity_title": "Test Funding Opportunity",
+                "project_title": "Applicant Type Code Coverage Test",
+                "congressional_district_applicant": "DC-00",
+                "congressional_district_program_project": "DC-00",
+                "project_start_date": "2025-01-01",
+                "project_end_date": "2025-12-31",
+                "federal_estimated_funding": "100000.00",
+                "applicant_estimated_funding": "0.00",
+                "state_estimated_funding": "0.00",
+                "local_estimated_funding": "0.00",
+                "other_estimated_funding": "0.00",
+                "program_income_estimated_funding": "0.00",
+                "total_estimated_funding": "100000.00",
+                "state_review": "c. Program is not covered by E.O. 12372.",
+                "delinquent_federal_debt": False,
+                "certification_agree": True,
+                "authorized_representative": {"first_name": "John", "last_name": "Doe"},
+                "authorized_representative_title": "Director",
+                "authorized_representative_phone_number": "555-111-2222",
+                "authorized_representative_email": "john.doe@test.org",
+                "aor_signature": "John Doe Signature",
+                "date_signed": "2025-01-15",
+                **extra_fields,
+            },
+        )
+
+        application_submission = ApplicationSubmissionFactory.create(
+            application=application, legacy_tracking_number=tracking_number
+        )
+        assembler = SubmissionXMLAssembler(application, application_submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+        assert xml_string is not None
+
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
+        sf424_ns = "{http://apply.grants.gov/forms/SF424_4_0-V4.0}"
+        sf424_xml = lxml_etree.tostring(
+            forms_element.findall(f".//{sf424_ns}SF424_4_0")[0], encoding="unicode"
+        )
+        xsd_path = self._get_xsd_file_path(
+            xsd_validator, "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd"
+        )
+        result = xsd_validator.validate_xml(sf424_xml, xsd_path)
+        assert result["valid"], (
+            f"SF-424 XSD validation failed for applicant_type_code={applicant_type_code!r}:\n"
+            f"{result['error_message']}"
+        )
+
     @pytest.fixture
     def sf424_short_application(self, enable_factory_create, seed_form_registry):
         """Create an application with SF-424 Short form and minimal XSD-compliant data."""
@@ -939,4 +1434,131 @@ class TestSubmissionXSDValidation:
             f"SF-424 Short XSD validation failed:\n"
             f"Error: {validation_result['error_message']}\n"
             f"Generated XML:\n{sf424_short_xml[:1000]}"
+        )
+
+    @pytest.mark.parametrize(
+        "applicant_type_code,extra_fields",
+        [
+            # Option H with lowercase "state" — stored value that needs normalization
+            (["H: Public/state Controlled Institution of Higher Education"], {}),
+            # Option C — passes through unchanged
+            (["C: City or Township Government"], {}),
+            # Multiple codes including H
+            (
+                [
+                    "H: Public/state Controlled Institution of Higher Education",
+                    "C: City or Township Government",
+                ],
+                {},
+            ),
+            # Option X requires other_specify
+            (["X: Other (specify)"], {"applicant_type_other_specify": "Other type"}),
+        ],
+    )
+    def test_sf424_short_applicant_type_code_xsd_validation(
+        self,
+        enable_factory_create,
+        seed_form_registry,
+        xsd_validator,
+        applicant_type_code,
+        extra_fields,
+    ):
+        """Test that all applicant_type_code options produce XSD-valid XML for SF-424 Short.
+
+        Uses lowercase stored values for option H to verify the transformer normalizes
+        casing at XML generation time.
+        """
+        agency = AgencyFactory.create()
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        assistance_listing = OpportunityAssistanceListingFactory.create(opportunity=opportunity)
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            opening_date=date(2025, 1, 1),
+            closing_date=date(2025, 12, 31),
+            opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
+        )
+        application = ApplicationFactory.create(competition=competition)
+        competition_form = CompetitionFormFactory.create(
+            competition=competition, form=SF424Short_v3_0
+        )
+
+        _contact = {
+            "name": {"first_name": "Jane", "last_name": "Doe"},
+            "title": "Project Director",
+            "email": "jane.doe@example.org",
+            "phone_number": "555-123-4567",
+            "address": {
+                "street1": "123 Main St",
+                "city": "Washington",
+                "state": "DC: District of Columbia",
+                "zip_code": "20001",
+                "country": "USA: UNITED STATES",
+            },
+        }
+
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "agency_name": "Department of Research",
+                "funding_opportunity_number": "TEST-SF424S-FON-001",
+                "funding_opportunity_title": "SF-424 Short Test Opportunity",
+                "organization_name": "Test Research University",
+                "applicant": {
+                    "street1": "123 Main St",
+                    "city": "Washington",
+                    "state": "DC: District of Columbia",
+                    "zip_code": "20001",
+                    "country": "USA: UNITED STATES",
+                },
+                "applicant_type_code": applicant_type_code,
+                "employer_taxpayer_identification_number": "123456789",
+                "sam_uei": "TEST12345678",
+                "congressional_district_applicant": "DC-001",
+                "project_title": "SF-424 Short Applicant Type Code Test",
+                "project_description": "A test project for XSD validation.",
+                "project_start_date": "2025-01-01",
+                "project_end_date": "2025-12-31",
+                "project_director": _contact,
+                "contact_person": _contact,
+                "application_certification": True,
+                "authorized_representative": {"first_name": "Bob", "last_name": "Smith"},
+                "authorized_representative_title": "Director",
+                "authorized_representative_email": "bob.smith@example.org",
+                "authorized_representative_phone_number": "555-987-6543",
+                "date_received": "2025-01-15",
+                "aor_signature": "bob.smith@example.org",
+                "authorized_representative_date_signed": "2025-01-15",
+                **extra_fields,
+            },
+        )
+
+        application_submission = ApplicationSubmissionFactory.create(
+            application=application,
+            legacy_tracking_number=88888888,
+        )
+
+        assembler = SubmissionXMLAssembler(application, application_submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+        assert xml_string is not None
+
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
+
+        sf424_short_ns = "{http://apply.grants.gov/forms/SF424_Short_3_0-V3.0}"
+        sf424_short_elements = forms_element.findall(f".//{sf424_short_ns}SF424_Short_3_0")
+        assert len(sf424_short_elements) == 1
+
+        sf424_short_xml = lxml_etree.tostring(sf424_short_elements[0], encoding="unicode")
+        xsd_path = self._get_xsd_file_path(
+            xsd_validator,
+            "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
+        )
+        result = xsd_validator.validate_xml(sf424_short_xml, xsd_path)
+        assert result["valid"], (
+            f"SF-424 Short XSD validation failed for applicant_type_code={applicant_type_code!r}:\n"
+            f"{result['error_message']}"
         )

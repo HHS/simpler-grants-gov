@@ -28,6 +28,8 @@ import {
 export type OpportunityFieldValueKey =
   | "opportunityNumber"
   | "opportunityTitle"
+  | "tagline"
+  | "purposeStatement"
   | "grantSelectionMethod"
   | "assistanceListingNumber"
   | "fundingType"
@@ -103,6 +105,22 @@ export const CREATE_OPPORTUNITY_FIELD_DEFINITIONS: OpportunityPageFieldDefinitio
       characterLimitValidationMessage: "1 character over limit",
     },
     {
+      label: "Tagline",
+      type: "textarea",
+      valueKey: "tagline",
+      required: true,
+      maxLength: 255,
+      characterLimitValidationMessage: "1 character over limit",
+    },
+    {
+      label: "Purpose statement",
+      type: "textarea",
+      valueKey: "purposeStatement",
+      required: true,
+      maxLength: 255,
+      characterLimitValidationMessage: "1 character over limit",
+    },
+    {
       label: "Grant selection method",
       type: "select",
       valueKey: "grantSelectionMethod",
@@ -143,9 +161,8 @@ export const FUNDING_DETAILS_FIELD_DEFINITIONS: OpportunityPageFieldDefinition[]
       valueKey: "expectedNumberOfAwards",
       selector: "#expected_number_of_awards",
       required: false,
-      // Un-comment after bug fixed
-      // negativeNumberValidationMessage:
-      //   "Expected number of awards must be greater than or equal to zero.",
+      negativeNumberValidationMessage:
+        "Expected number of awards must be greater than or equal to zero and less than 1,000,000,000,000,000.",
     },
     {
       label: "Estimated total program funding",
@@ -300,8 +317,8 @@ export const ADDITIONAL_INFORMATION_FIELD_DEFINITIONS: OpportunityPageFieldDefin
       valueKey: "description",
       selector: "#summary_description",
       required: false,
-      maxLength: 1800,
-      characterLimitValidationMessage: "1 character over limit",
+      wordLimit: 500,
+      wordLimitValidationMessage: "1 character over limit",
       exact: true,
     },
     {

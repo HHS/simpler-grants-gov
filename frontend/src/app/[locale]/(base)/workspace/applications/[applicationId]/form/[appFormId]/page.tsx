@@ -89,7 +89,6 @@ async function FormPage({ params }: formPageProps) {
     updatedAt,
   } = data;
 
-  const useVirusScanning = formName === "Attachment Form";
   const isBudgetForm =
     formName.includes("SF-424A") || formName.includes("SF-424C");
 
@@ -137,7 +136,6 @@ async function FormPage({ params }: formPageProps) {
           applicationStatus={application_status}
           createdAt={createdAt}
           updatedAt={updatedAt}
-          useVirusScanning={useVirusScanning}
         />
       </GridContainer>
     </>

@@ -172,6 +172,14 @@ variable "enable_load_balancer" {
   default     = true
 }
 
+variable "enable_secure_alb" {
+  description = <<EOT
+    Limit ALB traffic to internal vpc only
+  EOT
+  type        = bool
+  default     = false
+}
+
 variable "enable_alb_cdn" {
   description = "Whether to enable an ALB origin CDN for the service. Cannot be enabled at the same time as the S3 CDN."
   type        = bool
@@ -421,5 +429,11 @@ variable "newrelic_mtls_entity_guid" {
 variable "newrelic_host_entity_guid" {
   type        = string
   description = "New Relic entity GUID for the ECS service, used to correlate container logs with the infrastructure entity in New Relic."
+  default     = null
+}
+
+variable "newrelic_service_name" {
+  type        = string
+  description = "Name reported to New Relic as entity.name/hostname in forwarded logs; defaults to service_name."
   default     = null
 }

@@ -52,6 +52,16 @@ variable "enable_api_gateway_domain_name" {
   default     = true
 }
 
+variable "enable_secure_alb" {
+  type        = bool
+  description = <<EOT
+    API Gateway reaches the ALB over a private VPC Link,
+    and the ALB drops its 0.0.0.0/0 ingress in favour of the VPC Link.
+  EOT
+  default     = false
+}
+
+
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"
@@ -257,6 +267,12 @@ variable "secondary_domain_names" {
   type        = list(string)
   description = "A list of domain names the ALB can also use"
   default     = []
+}
+
+variable "scanner_callback_domain_name" {
+  type        = string
+  description = "Host the ClamAV scanner posts scan results to."
+  default     = null
 }
 
 variable "sqs_visibility_timeout_seconds" {

@@ -62,6 +62,22 @@ class OpportunityCreateRequestSchema(Schema):
             "example": "Research Grant for Climate Innovation",
         },
     )
+    tagline = fields.String(
+        required=True,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "A short tagline for the opportunity",
+            "example": "Accelerating climate innovation",
+        },
+    )
+    purpose_statement = fields.String(
+        required=True,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "A brief statement describing the purpose of the opportunity",
+            "example": "Support research that advances innovative climate technologies.",
+        },
+    )
     agency_id = fields.UUID(
         required=True,
         metadata={
@@ -292,7 +308,7 @@ class OpportunitySummaryBaseRequestSchema(Schema):
     summary_description = fields.String(
         required=True,
         allow_none=True,
-        validate=validators.Length(max=18000),
+        validate=validators.WordLimit(max=500),
         metadata={"description": "Opportunity summary", "example": "This opportunity..."},
     )
 
@@ -631,6 +647,19 @@ class DeleteAttachmentResponseV1Schema(ResponseWithErrorsSchema):
     pass
 
 
+class OpportunityAttachmentCreateFromPendingFileRequestV1Schema(Schema):
+    pending_file_id = fields.UUID(
+        required=True,
+        metadata={"description": "The ID of the pending (virus-scanned) file to attach"},
+    )
+
+
+class OpportunityAttachmentCreateFromPendingFileResponseV1Schema(AbstractResponseSchema):
+    """Response Schema for the temporary pending-file Upload Attachment Endpoint"""
+
+    data = fields.Nested(OpportunityAttachmentV1Schema())
+
+
 class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunityGrantorSchema())
 
@@ -718,19 +747,27 @@ class CompetitionUpdateResponseSchema(AbstractResponseSchema):
 class CompetitionInstructionUploadRequestV1Schema(Schema):
     """Schema for POST /v1/grantors/opportunities/:opportunity_id/competitions/:competition_id/instructions request"""
 
-    file_attachment = fields.File(
+    pending_file_id = fields.UUID(
         required=True,
-        allow_none=False,
-        metadata={"description": "The instruction file to upload"},
+        metadata={"description": "The ID of the pending (virus-scanned) file to attach"},
     )
 
 
 class CompetitionInstructionUploadResponseDataV1Schema(Schema):
     """Data schema for competition instruction upload response"""
 
-    competition_instruction_id = fields.String(
+    competition_instruction_id = fields.UUID(
         required=True,
         metadata={"description": "The created competition instruction ID"},
+    )
+    file_name = fields.String(
+        metadata={"description": "The name of the uploaded instruction file"},
+    )
+    created_at = fields.DateTime(
+        metadata={"description": "Timestamp when the instruction was created"},
+    )
+    updated_at = fields.DateTime(
+        metadata={"description": "Timestamp when the instruction was last updated"},
     )
 
 

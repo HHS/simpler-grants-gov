@@ -15,7 +15,10 @@ export const fillDateByLabel = async (
   exact?: boolean,
 ) => {
   const input = page.getByLabel(label, { exact }).first();
-  await expect(input).toBeVisible();
+  // Use longer timeout (10s) for field attachment to handle lazy-loaded
+  // fields on mobile where form rendering may be progressive/async.
+  await input.waitFor({ state: "attached", timeout: 10000 });
+  await expect(input).toBeVisible({ timeout: 5000 });
   await input.fill(dateValue);
   await input.press("Tab");
 };

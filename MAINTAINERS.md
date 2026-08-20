@@ -25,6 +25,8 @@ This is a list of maintainers for this project. Team members include:
 * [Hao Wang](https://github.com/hao10282025-sudo)
 * [Kenny Krug](https://github.com/kkrug)
 * [Daniel Ghazvini](https://github.com/dghazvini)
+* [Michael Slater](https://github.com/mike-slater)
+* [Shawn VanderJagt](https://github.com/shawnvanderjagt)
 
 ## Content and Design
 

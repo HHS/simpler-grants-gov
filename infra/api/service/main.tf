@@ -258,6 +258,7 @@ module "service" {
   # API Gateway variables
   enable_api_gateway             = true
   enable_api_gateway_domain_name = local.service_config.enable_api_gateway_domain_name
+  enable_secure_alb              = local.service_config.enable_secure_alb
   optional_extra_alb_domains     = toset(lookup(local.service_config, "secondary_domain_names", []))
   optional_extra_alb_certs       = local.service_config.enable_https == true ? [for cert in data.aws_acm_certificate.secondary_certs : cert.arn] : []
 
@@ -304,6 +305,9 @@ module "service" {
     # OpenSearch IAM policy for query operations
     local.search_config != null ? {
       opensearch_query = data.aws_iam_policy.opensearch_query[0].arn,
+    } : {},
+    local.external_ses_email_domain != null ? {
+      external_ses_access = aws_iam_policy.external_ses_access[0].arn,
     } : {}
   )
 

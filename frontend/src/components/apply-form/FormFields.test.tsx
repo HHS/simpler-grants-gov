@@ -7,14 +7,6 @@ import { FormFields } from "src/components/apply-form/FormFields";
 
 const mockMergeAllOf = jest.fn();
 
-// useAttachmentDelete is used in file input widgets, included through the WidgetRenderer import
-// those widgets use the hook to make API calls using a server action so the hook needs to be mocked
-jest.mock("src/hooks/useAttachmentDelete", () => ({
-  useAttachmentDelete: () => ({
-    deleteAttachment: () => {},
-  }),
-}));
-
 jest.mock("json-schema-merge-allof", () => ({
   __esModule: true,
   default: (...args: unknown[]) => mockMergeAllOf(...args) as unknown,

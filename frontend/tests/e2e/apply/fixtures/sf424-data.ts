@@ -90,8 +90,8 @@ export const buildSF424HappyPathTestData = (
     authorized_representative_fax: "3333333333",
     authorized_representative_email: `aor${shortSuffix}@test.com`,
     areas_affected_attachment: SF424_TEST_UPLOAD_FILE,
-    additional_project_title_attachment: SF424_TEST_UPLOAD_FILE,
     additional_congressional_attachment: SF424_TEST_UPLOAD_FILE,
+    additional_project_title_attachment: SF424_TEST_UPLOAD_FILE,
   } satisfies Partial<Record<keyof typeof fieldDefinitionsSF424, string>>;
 };
 
