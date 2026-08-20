@@ -104,8 +104,19 @@ describe("getFormData", () => {
   });
 
   it("returns TopLevelError if ui schema validation fails", async () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {
+      // silence expected error output
+    });
     mockGetSession.mockResolvedValue({ token: "session-token" });
-    mockValidateUISchema.mockReturnValue(["invalid ui schema"]);
+    mockValidateUISchema.mockReturnValue([
+      {
+        instancePath: "/0/children",
+        schemaPath: "#/additionalProperties",
+        keyword: "additionalProperties",
+        params: { additionalProperty: "widgets" },
+        message: "must NOT have additional properties",
+      },
+    ]);
     mockGetApplicationFormDetails.mockResolvedValue({
       status_code: 200,
       data: {
@@ -126,6 +137,81 @@ describe("getFormData", () => {
     });
 
     expect(result).toEqual({ error: "TopLevelError" });
+    // ajv only names the offending key in params, so the summary has to carry it
+    expect(consoleError).toHaveBeenCalledWith(
+      "Error validating form ui schema for form id: form1",
+      '/0/children: must NOT have additional properties {"additionalProperty":"widgets"}',
+    );
+
+    consoleError.mockRestore();
+  });
+
+  it("logs ui schema validation failures under the cap without a suffix", async () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {
+      // silence expected error output
+    });
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockValidateUISchema.mockReturnValue([
+      { instancePath: "", message: "first" },
+      { instancePath: "/1", message: "second" },
+    ]);
+    mockGetApplicationFormDetails.mockResolvedValue({
+      status_code: 200,
+      data: {
+        form: {
+          form_id: "form1",
+          form_name: "Test",
+          form_json_schema: {},
+          form_ui_schema: {},
+        },
+        application_form_id: "form1",
+      },
+      warnings: [],
+    });
+
+    await getFormData({ applicationId: "app1", appFormId: "form1" });
+
+    expect(consoleError).toHaveBeenCalledWith(
+      "Error validating form ui schema for form id: form1",
+      "/: first; /1: second",
+    );
+
+    consoleError.mockRestore();
+  });
+
+  it("logs ui schema validation failures as a single capped summary line", async () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {
+      // silence expected error output
+    });
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockValidateUISchema.mockReturnValue(
+      Array.from({ length: 7 }, (_, index) => ({
+        instancePath: `/${index}`,
+        message: `error ${index}`,
+      })),
+    );
+    mockGetApplicationFormDetails.mockResolvedValue({
+      status_code: 200,
+      data: {
+        form: {
+          form_id: "form1",
+          form_name: "Test",
+          form_json_schema: {},
+          form_ui_schema: {},
+        },
+        application_form_id: "form1",
+      },
+      warnings: [],
+    });
+
+    await getFormData({ applicationId: "app1", appFormId: "form1" });
+
+    expect(consoleError).toHaveBeenCalledWith(
+      "Error validating form ui schema for form id: form1",
+      "/0: error 0; /1: error 1; /2: error 2; /3: error 3; /4: error 4 (+2 more)",
+    );
+
+    consoleError.mockRestore();
   });
 
   it("returns UnauthorizedError when the form-data request is rejected with status 401", async () => {
