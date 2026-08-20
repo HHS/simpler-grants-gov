@@ -23,6 +23,10 @@ type PageProps = {
 
 export const dynamic = "force-dynamic";
 
+// We are temporarily removing the SF-424 Short form, pending implementation of form libraries
+// If any other forms need to be blocked, add them to this array
+const blockedForms = ["cf355a4d-d840-43fd-a78f-729edf41ab4c"];
+
 const ButtonSaveAndExit = () => {
   const t = useTranslations("OpportunityCompetition");
   return (
@@ -41,6 +45,9 @@ const ButtonSaveAndExit = () => {
 async function OpportunityCompetitionPage({ params }: PageProps) {
   const { id, locale } = await params;
   const forms = await getForms();
+  forms.data = forms.data.filter((form) => {
+    return !blockedForms.includes(form.form_id);
+  });
   const t = await getTranslations({
     locale,
     namespace: "OpportunityCompetition",

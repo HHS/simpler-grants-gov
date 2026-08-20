@@ -1,6 +1,10 @@
 /**
- * @feature Apply - Happy Path - SF-424B Application Submission and Print View Workflow
- * @scenario Complete the SF-424B Application Submission and Print View workflow for an <user type> user
+ * @feature Apply - Happy Path - SF-424 Short Application Submission and Print View Workflow
+ * @scenario Complete the SF-424 Short Application Submission and Print View workflow for an <user type> user
+ *
+ * Tests both Organization and Individual applicant scenarios, mirroring the SF-424 (long) spec pattern.
+ * The form is titled "...Short Organizational (SF-424)" in the schema, but both applicant types can
+ * access this form through the E2E-SF424SHORT-ORG-IND-01 opportunity.
  */
 
 import {
@@ -40,17 +44,17 @@ const { testOrgLabel } = playwrightEnv;
 
 // Only the opportunity number is declared here.
 // All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
-// Unified opportunity for both local and staging environments.
-const OPPORTUNITY_NUMBER = "E2E-SF424B-ORG-IND-01";
+const OPPORTUNITY_NUMBER = "E2E-SF424SHORT-ORG-IND-01";
+
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
 const applicantScenarios = [
   {
-    testName: `Complete the SF-424B Application Submission and Print View workflow for an Organization user`,
+    testName: `Complete the SF-424 Short Application Submission and Print View workflow for an Organization user`,
     orgLabel: testOrgLabel,
   },
   {
-    testName: `Complete the SF-424B Application Submission and Print View workflow for an Individual user`,
+    testName: `Complete the SF-424 Short Application Submission and Print View workflow for an Individual user`,
     orgLabel: undefined,
   },
 ] as const;
@@ -75,10 +79,12 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
       // --- Login ---
       // Given the user is logged in
-      await authenticateE2eUser(page, context, !!isMobile);
+      const viewportSize = page.viewportSize();
+      const isMobileViewport = viewportSize ? viewportSize.width < 1024 : false;
+      await authenticateE2eUser(page, context, isMobileViewport || !!isMobile);
 
       // --- Navigate to Opportunity page and start a new application ---
-      // And the user launches the URL for an opportunity with an open SF-424B competition
+      // And the user launches the URL for an opportunity with an open SF-424 Short competition
       // When the user clicks "Start Application", selects applicant type and creates the application
       await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
       const applicationUrl = page.url();
@@ -129,11 +135,15 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one page per form) ---
+      // NOTE: no attachment-specific print view block here - unlike SF-424 (long), the Short
+      // form has no attachment fields (areas_affected, additional_project_title,
+      // additional_congressional_districts, debt_explanation all live only on the long form).
       await validateAllPrintViews(page, filledForms);
 
-      // --- SF-424B Post-Population Field Validation ---
-      // signature and date_signed are system post-populated at submission time
-      // (gg_post_population rules: "signature", "current_date")
+      // --- Post-Population Field Validation ---
+      // aor_signature and authorized_representative_date_signed are system post-populated at
+      // submission time (gg_post_population rules: "signature", "current_date")
+      // First verify the print view is read-only (no editable controls), then check values exist.
       for (const { printUrl } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
@@ -141,11 +151,15 @@ for (const { testName, orgLabel } of applicantScenarios) {
         await assertPrintViewIsReadOnly(page);
 
         // Now verify the post-populated field values exist and are populated
-        await expect(page.getByTestId("signature")).toBeVisible();
-        await expect(page.getByTestId("signature")).not.toBeEmpty();
+        await expect(page.getByTestId("aor_signature")).toBeVisible();
+        await expect(page.getByTestId("aor_signature")).not.toBeEmpty();
 
-        await expect(page.getByTestId("date_signed")).toBeVisible();
-        await expect(page.getByTestId("date_signed")).not.toBeEmpty();
+        await expect(
+          page.getByTestId("authorized_representative_date_signed"),
+        ).toBeVisible();
+        await expect(
+          page.getByTestId("authorized_representative_date_signed"),
+        ).not.toBeEmpty();
       }
     },
   );
