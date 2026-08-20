@@ -1,8 +1,7 @@
-import { OpportunitySummaryCreateRequestV1Schema } from "src/validation-schemas/apiSchemas.zod";
 import { OpportunitySummaryCreateRequest } from "src/types/opportunity/opportunityResponseTypes";
+import { formDataToZodInput } from "src/utils/validation/zodFormData";
+import { OpportunitySummaryCreateRequestV1Schema } from "src/validation-schemas/apiSchemas.zod";
 import { z } from "zod";
-
-import { formDataToZodInput } from "./zodFormData";
 
 const opportunitySummaryFormDataAdapters = {
   applicant_types: (formData: FormData) =>

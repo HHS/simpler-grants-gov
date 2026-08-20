@@ -177,12 +177,12 @@ export function getZodValidationErrors(
  * Maps API validation errors into the same field-error structure used for
  * client-side Zod validation.
  *
+ * Currently supports top-level schema fields. Errors for nested or array
+ * fields are treated as unmapped and surfaced as top-level form errors.
+ *
  * Field errors use the same translation lookup as Zod issues so validation
  * messages remain consistent whether the failure is detected before submit
  * or returned by the API.
- *
- * Errors that cannot be mapped to a field in the current schema remain
- * top-level errors rather than being attached to an unrelated form control.
  */
 export function mapApiValidationErrors(
   response: { errors?: unknown[] | null; message?: string },

@@ -5,18 +5,18 @@ import {
   opportunityEditFormAction,
   type OpportunityEditValidationErrors,
 } from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/actions";
+import { getOpportunitySummaryValidationData } from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/opportunitySummaryValidation";
 import {
   categoryOptions,
   eligbilityValueToGroup,
   ELIGIBILITY_OPTIONS,
   fundingOptions,
 } from "src/constants/opportunity";
-import { OpportunitySummaryCreateRequestV1Schema } from "src/validation-schemas/apiSchemas.zod";
 import { useZodFormValidation } from "src/hooks/useZodValidation";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 import { normalizeDateString } from "src/utils/dateUtil";
 import { OpportunityEditFormValues } from "src/utils/opportunityEditFormConfig";
-import { getOpportunitySummaryValidationData } from "src/utils/validation/opportunitySummaryValidation";
+import { OpportunitySummaryCreateRequestV1Schema } from "src/validation-schemas/apiSchemas.zod";
 import { stripCommasFromNumberString } from "tests/e2e/utils/common/number-formatters";
 
 import { useTranslations } from "next-intl";

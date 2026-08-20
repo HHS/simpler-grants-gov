@@ -1,19 +1,19 @@
 "use server";
 
+import {
+  getOpportunitySummaryValidationData,
+  toOpportunitySummaryRequest,
+} from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/opportunitySummaryValidation";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { OpportunitySummaryCreateRequestV1Schema } from "src/validation-schemas/apiSchemas.zod";
 import {
   createOpportunitySummaryForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import {
-  getOpportunitySummaryValidationData,
-  toOpportunitySummaryRequest,
-} from "src/utils/validation/opportunitySummaryValidation";
-import {
   mapServerApiValidationErrors,
   validateZodFormData,
 } from "src/utils/validation/zodServerValidation";
+import { OpportunitySummaryCreateRequestV1Schema } from "src/validation-schemas/apiSchemas.zod";
 import type { z } from "zod";
 
 import { getTranslations } from "next-intl/server";

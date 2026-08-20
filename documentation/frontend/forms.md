@@ -107,8 +107,56 @@ tbd
 
 [General validation rules for the project are found here](https://navasage.atlassian.net/wiki/x/R4ALwQ).
 
-On a technical level, this means to be sure to handle all 422 errors in an intelligent way, such that the validation errors that come back in the payload with the response are surfaced in the UI.
+Where possible, form validation should use the Zod schemas generated from the API's OpenAPI specification rather than duplicating API validation rules in handwritten frontend schemas.
 
+The intended validation flow is:
+
+1. Validation rules are defined in the backend Marshmallow schema.
+2. The backend schema is represented in OpenAPI.
+3. Zod schemas are generated from OpenAPI.
+4. FormData is normalized into the types expected by the generated Zod schema.
+5. The generated schema is used for client-side field validation and server-action validation.
+6. API `422` responses are mapped through the same translation system so users receive consistent validation messages regardless of where the validation failure was detected.
+
+This means validation rules such as required fields, numeric ranges, string lengths, email formats, and supported relational validations should generally not be reimplemented manually in the frontend.
+
+### FormData validation
+
+`FormData` values do not necessarily have the same types expected by the generated API schema. For example, numeric and boolean form values are represented as strings.
+
+Use the shared Zod/FormData utilities to normalize form values before validation rather than manually converting each field.
+
+Form-specific adapters can be supplied when a field's representation cannot be inferred from its Zod schema, such as checkbox groups or other array-style controls.
+
+### Field validation
+
+Forms may use the shared `useZodFormValidation` hook to provide validation as users move through the form.
+
+The complete schema is validated so that cross-field relationships can be evaluated, but validation state should only be surfaced for fields the user has interacted with. Previously displayed errors are refreshed as related fields change so relational validation errors do not become stale.
+
+The hook provides both `getFieldError()` and `getFieldErrors()`. Use `getFieldError()` for components that expect a single validation message and `getFieldErrors()` for components that support multiple validation messages.
+
+### Validation messages
+
+Validation rules and user-facing validation text are intentionally separate.
+
+Validation failures are mapped to translation keys using the field name and validation type. Lookup follows this order:
+
+1. field-specific validation message
+2. generic validation message
+3. original validation message as a fallback
+
+This allows common messages such as required or invalid values to be reused while still supporting contextual messages for cross-field validations.
+
+### API validation
+
+Client-side validation does not replace backend validation.
+
+Server actions must continue to handle API `422` responses. API validation errors should be mapped through the shared validation utilities so they resolve to the same translated field messages used by client-side validation.
+
+Errors returned by the API that cannot be associated with a field in the current form should be surfaced as top-level form errors.
+
+For implementation details, examples, translation-key conventions, relational validation, and current limitations, see [Schema-driven form validation](./schema-driven-form-validation.md).
 More implementation details TBD
 
 ## In form navigation
