@@ -3,6 +3,7 @@
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import {
   createCompetitionForGrantor,
+  saveCompetitionInstructions,
   updateCompetitionForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
@@ -119,6 +120,18 @@ export async function updateCompetition(
         requestBody,
       );
     }
+
+    // If the record was successfully created or updated,
+    // then save the application instructions file (attachment)
+    const pendingFileId = formData.get("pending-file-id") as string | null;
+    if (pendingFileId) {
+      await saveCompetitionInstructions(
+        opportunityId,
+        competitionId,
+        pendingFileId,
+      );
+    }
+
     return {
       successMessage: t("success"),
     };
@@ -151,8 +164,6 @@ export async function competitionFormAction(
   if (!requiredForms) {
     // PLACEHOLDER to remove lint errors. We will save these objects later.
   }
-  const fileId = formData.get("pending-file-id") as string | null;
-  console.log("In action, fileId: ", fileId);
 
   // 1. Save the form; if there are API errors, display them
   const saveResult = await updateCompetition(formData);

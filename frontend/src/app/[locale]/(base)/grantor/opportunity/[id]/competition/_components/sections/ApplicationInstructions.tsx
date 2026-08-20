@@ -11,26 +11,22 @@ import { useState } from "react";
 import { SimplerFileInput } from "src/components/core/fileInput/SimplerFileInput";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 
-export function getFileMetadata(fileId: string) {
-  // TODO: call a backend API to get this info.
-  // This is a dummy record for testing until the API is created.
-  const fileInfo: UploadFileMetadata = {
-    id: "unique-id-123",
-    fileName: "dummy.txt",
-    fileSize: 2048,
-    updatedAt: "2026-08-17",
-  };
-  return fileInfo;
-}
+type ApplicationInstructionsProps = {
+  existingFiles?: UploadFileMetadata[];
+};
 
-export function ApplicationInstructions() {
+export function ApplicationInstructions({
+  existingFiles = [],
+}: ApplicationInstructionsProps) {
   const t = useTranslations(
     "OpportunityCompetition.sectionApplicationInstructions",
   );
   const [fileId, setFileId] = useState<string>("");
-  const [uploadedFiles, setUploadedFiles] = useState<UploadFileMetadata[]>([]);
 
   const handleDeleteFile = (): Promise<undefined> => {
+    // TODO: once we implement load data on page edit,
+    // then the delete button will appear. Then add a
+    // call to the backend to delete the persisted/perminate file.
     setFileId("");
     return Promise.resolve(undefined);
   };
@@ -38,11 +34,8 @@ export function ApplicationInstructions() {
   const handlePostFileUpload: PostUploadAction = (
     fileId: string,
   ): Promise<undefined> => {
-    console.log("DEBUG: Post upload, fileId: ", fileId);
     if (fileId) {
       setFileId(fileId);
-      const newFile: UploadFileMetadata = getFileMetadata(fileId);
-      setUploadedFiles((prevFiles) => [...prevFiles, newFile]);
     }
     return Promise.resolve(undefined);
   };
@@ -71,12 +64,8 @@ export function ApplicationInstructions() {
         postUploadActionSuccessMessage={t("uploadWidget.success")}
         postUploadActionErrorMessage={t("uploadWidget.error")}
         onDelete={handleDeleteFile}
-        labelId="label-for-simpler-file-upload"
-        existingFiles={uploadedFiles}
-        // onStart={markFormDirty}
-        // disabled={disabled}
-        // readOnly={readOnly}
-        // required={required}
+        describedByIds={["label-for-simpler-file-upload"]}
+        existingFiles={existingFiles}
       />
     </div>
   );
