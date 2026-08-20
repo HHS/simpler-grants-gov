@@ -6,14 +6,7 @@ import {
   UploadFileMetadata,
 } from "src/types/fileUploadTypes";
 
-import {
-  ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, useCallback, useMemo, useRef, useState } from "react";
 import { FileInput, FileInputRef, ModalRef } from "@trussworks/react-uswds";
 
 import { DeleteFileModal } from "./DeleteFileModal";
@@ -181,10 +174,15 @@ export const SimplerFileInput = ({
     if (existingFiles?.length) {
       return true;
     }
-    if (activeUploads.length) {
+    if (activeUploads.length || completedUploads.length) {
       return true;
     }
-  }, [multiFile, existingFiles?.length, activeUploads.length]);
+  }, [
+    multiFile,
+    existingFiles?.length,
+    activeUploads.length,
+    completedUploads.length,
+  ]);
 
   // note the usage of functional state setters in these functions
   // it's necessary to avoid referencing stale closed over state values up the call stack
@@ -251,12 +249,16 @@ export const SimplerFileInput = ({
       />
       {completedUploads.map((completedUploadFilename) => (
         <FileInputStatusDisplay
+          key={completedUploadFilename}
           fileName={completedUploadFilename}
           status="success"
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
           maxFileSizeBytes={maxFileSizeBytes}
+          error={false}
+          onCancel={() => {}}
+          onDismiss={() => {}}
         />
       ))}
       {activeUploads.map(({ uploadId, file }) => (
