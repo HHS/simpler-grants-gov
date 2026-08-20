@@ -41,7 +41,7 @@ from src.services.xml_generation.models import XMLGenerationRequest
 # Application data
 application_data = {
     "submission_type": "Application",
-    "organization_name": "Test University", 
+    "organization_name": "Test University",
     "project_title": "Research Project",
     # ... other fields
 }
@@ -71,6 +71,7 @@ else:
 The service supports two XML formatting modes:
 
 ### Pretty-Print Format (Default)
+
 ### Condensed Format
 
 ## Sample Output
@@ -89,6 +90,7 @@ The service supports two XML formatting modes:
 ## Testing
 
 Comprehensive unit tests cover:
+
 - Basic XML generation functionality
 - Configuration loading from form modules
 - Field mapping transformations
@@ -99,6 +101,7 @@ Comprehensive unit tests cover:
 ### Running Unit Tests
 
 Run all XML generation unit tests:
+
 ```bash
 python -m pytest tests/src/services/xml_generation/
 ```
@@ -108,32 +111,12 @@ python -m pytest tests/src/services/xml_generation/
 To validate generated XML against official Grants.gov XSD schemas:
 
 ```bash
-# Validate all forms
-make validate-xml-generation
-
-# Validate a specific form
-make test-xml-validation form=SF424_4_0
+# Run the XML generation XSD tests
+make test args="tests/src/services/xml_generation/test_submission_xsd_validation.py"
 ```
 
-**Note:** The first run will download XSD files from Grants.gov. Subsequent runs use the downloaded files from `services/xml_generation/xsds/`.
-
-The validation tests:
-1. Generate XML from test data (see `src/services/xml_generation/validation/test_cases.py`)
-2. Download XSD schemas from Grants.gov if not cached
-3. Validate generated XML against the official XSD
-4. Save results to `services/xml_generation/xsds/validation_results.json`
-
-### Validation Test Cases
-
-Test cases are defined in [`validation/test_cases.py`](validation/test_cases.py) and include:
-- **SF-424**: Minimal valid, revision, continuation, multiple applicant types, attachments
-- **SF-424A**: Budget sections, forecasted cash needs, complete examples  
-- **SF-LLL**: Initial filing, material change, subawardee scenarios
-- **EPA-4700-4**: Minimal, complete, construction explanation examples
-- **Attachment Forms**: Single attachment, multiple attachments, all 15 slots
-
-Each test case validates that the generated XML conforms to the official XSD schema requirements.
-
+The XSD files must be present locally. Use `make fetch-xsds` to download and cache
+the official schemas before running validation tests.
 
 ## Configuration
 
@@ -256,6 +239,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **CD-511 Field Mapping Notes:**
+
 - `applicant_name` → `OrganizationName` (XSD uses OrganizationName, form displays "Name of Applicant")
 - `contact_person` → `ContactName` with nested `HumanNameDataType` structure using GlobalLibrary namespace
 - Either `award_number` or `project_name` (or both) should be provided per form validation
@@ -299,6 +283,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **GG_LobbyingForm Field Mapping Notes:**
+
 - `organization_name` → `ApplicantName`
 - `authorized_representative_name` → `AuthorizedRepresentativeName` with nested `HumanNameDataType` structure
 - `authorized_representative_signature` and `submitted_date` are auto-populated during submission
@@ -332,6 +317,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Project Abstract Summary Field Mapping Notes:**
+
 - `funding_opportunity_number` → `FundingOpportunityNumber` (required)
 - `assistance_listing_number` → `CFDANumber` (optional, legacy name for Assistance Listing Number)
 - `applicant_name` → `OrganizationName` (required, called "Applicant Name" in UI)
@@ -368,6 +354,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **EPA Key Contacts Field Mapping Notes:**
+
 - Uses a helper function `_create_contact_person_transform()` to generate the nested structure for each contact
 - All four contacts are optional per XSD
 - Note: XSD has a typo "AdminstrativeContact" (not "Administrative")
@@ -411,6 +398,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Assurance Forms Field Mapping Notes:**
+
 - Uses `compose_object` conditional transform to wrap flat fields into nested `AuthorizedRepresentative` element
 - `signature` → `AuthorizedRepresentative/RepresentativeName`
 - `title` → `AuthorizedRepresentative/RepresentativeTitle`
@@ -501,6 +489,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Attachment Forms Notes:**
+
 - **Multiple attachments** (`type: "multiple"`): Used by Project Narrative, Budget Narrative, and Other Narrative Attachments
 - **Single attachment** (`type: "single"`): Used by Project Abstract with wrapper element `ProjectAbstractAddAttachment`. Generates a simple structure where attachment metadata (FileName, MimeType, etc.) is placed directly within the specified XML element.
 - **Single attachment with nested wrapper** (`type: "single_with_wrapper"`): Generates a nested structure where each attachment slot (e.g., ATT1-ATT15) contains an additional File wrapper element (e.g., `<ATT1><ATT1File>...</ATT1File></ATT1>`) before the attachment metadata.
@@ -569,6 +558,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Supplementary Cover Sheet for NEH Grant Programs Field Mapping Notes:**
+
 - Uses `map_values` transformation to convert human-readable enum values to XSD-required numeric codes for discipline fields
 - `major_field` (Project Director's Major Field): Maps ~150 discipline display values (e.g., "History: U.S. History") to numeric codes (e.g., "4")
 - `organization_type`: Passed through as-is (full "CODE: Description" format, e.g., "1330: University")
@@ -726,7 +716,7 @@ FORM_XML_TRANSFORM_RULES = {
 
 **Performance Site Location Field Mapping Notes:**
 
-- **Namespace split**: `Individual`, `OrganizationName`, `SAMUEI`, `Address`, and `CongressionalDistrictProgramProject` are declared in the form's own `SiteLocationDataType` — they use the default `PerformanceSite_4_0` namespace. The address *sub*-elements (`Street1`, `City`, etc.) are typed via `globLib:AddressDataTypeV3` and use the `globLib` namespace.
+- **Namespace split**: `Individual`, `OrganizationName`, `SAMUEI`, `Address`, and `CongressionalDistrictProgramProject` are declared in the form's own `SiteLocationDataType` — they use the default `PerformanceSite_4_0` namespace. The address _sub_-elements (`Street1`, `City`, etc.) are typed via `globLib:AddressDataTypeV3` and use the `globLib` namespace.
 - **Address element order**: The XSD sequence requires `ZipPostalCode` before `Country`. The transform rules must declare `zip_code` before `country` to match this ordering.
 - **Attachment**: The optional `additional_locations_attachment` field maps to a single `<AttachedFile>` element (type `att:AttachedFileDataType`) as a direct child of the root. Using `single_with_wrapper` with `file_element: ""` creates the outer `<AttachedFile>` wrapper and places `att:FileName`, `att:MimeType`, `att:FileLocation`, and `glob:HashValue` directly inside it — no spurious inner wrapper element.
 - `submitting_as_individual` uses the `boolean_to_yes_no` value transform (outputs `Y: Yes` / `N: No`).
