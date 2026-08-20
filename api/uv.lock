@@ -631,7 +631,7 @@ wheels = [
 
 [[package]]
 name = "grants-shared"
-version = "0.3.1"
+version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apiflask" },
@@ -653,10 +653,11 @@ dependencies = [
     { name = "pytz" },
     { name = "smart-open" },
     { name = "sqlalchemy", extra = ["mypy"] },
+    { name = "tenacity" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8b/35/bee8cf81303cae3d19a5179ea69a3f3d62f0228feee45a8697d09937fa05/grants_shared-0.3.1.tar.gz", hash = "sha256:aae0b306aa1dc4c78834411ea31de5c295d021837080a8c044e59eb758ffe033", size = 72459, upload-time = "2026-08-10T17:27:32.652Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e9/f9/047bdfca250b3ec20017bc2eff2abced2dbdac5e8eb5fe2b62ee59f5e7d3/grants_shared-0.4.0.tar.gz", hash = "sha256:182a20723c5d42376a842527475a42a3527975e0b0d5e8b1ebf619fc1bcb5196", size = 76567, upload-time = "2026-08-20T14:49:05.42Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d8/2c/2ec9b2c57ca735f8bca6b0441f0e571edc8fb5d574352302f970d87bbde5/grants_shared-0.3.1-py3-none-any.whl", hash = "sha256:e6316017a58b00f3af7043b6af030d9d04638d7805865d538aca104cd96927b0", size = 93879, upload-time = "2026-08-10T17:27:31.251Z" },
+    { url = "https://files.pythonhosted.org/packages/35/d9/2bcb0af5f50b36b2c0dba030fb649d1f0543a62371c276b20ae430242d10/grants_shared-0.4.0-py3-none-any.whl", hash = "sha256:7269dc88a98997d9b1328d2f7c363143d182d33520a82f7c7ee20c10c40cf63b", size = 100541, upload-time = "2026-08-20T14:49:03.744Z" },
 ]
 
 [[package]]
@@ -1823,7 +1824,7 @@ requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1,<0.8" },
     { name = "docraptor", specifier = ">=3.0.0,<4" },
     { name = "flask-cors", specifier = ">=6.0.0,<7" },
-    { name = "grants-shared", specifier = "==0.3.1" },
+    { name = "grants-shared", specifier = "==0.4.0" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
     { name = "jinja2", specifier = ">=3.1.5" },
     { name = "jsonpath-ng", specifier = ">=1.7.0,<2" },

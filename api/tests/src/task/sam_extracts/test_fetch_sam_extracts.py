@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, call
 
 import pytest
 from freezegun import freeze_time
+from grants_shared.adapters.sam_gov.client import BaseSamGovClient
+from grants_shared.adapters.sam_gov.models import SamExtractResponse
 
-from src.adapters.sam_gov.client import BaseSamGovClient
-from src.adapters.sam_gov.models import SamExtractResponse
 from src.constants.lookup_constants import SamGovExtractType, SamGovProcessingStatus
 from src.db.models.sam_extract_models import SamExtractFile
 from src.task.sam_extracts.fetch_sam_extracts import (
