@@ -4973,10 +4973,11 @@ paths:
           description: Internal Server Error
       tags:
       - Opportunity v1 - for Grantors
-      summary: Upload an instruction file to a competition
+      summary: Upload an instruction file to a competition from a pending (virus-scanned)
+        file
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/CompetitionInstructionUploadRequestV1Schema'
       security:
@@ -15199,7 +15200,20 @@ components:
       properties:
         competition_instruction_id:
           type: string
+          format: uuid
           description: The created competition instruction ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        file_name:
+          type: string
+          description: The name of the uploaded instruction file
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the instruction was created
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when the instruction was last updated
       required:
       - competition_instruction_id
     CompetitionInstructionUploadResponseV1Schema:
@@ -15223,12 +15237,13 @@ components:
     CompetitionInstructionUploadRequestV1Schema:
       type: object
       properties:
-        file_attachment:
-          description: The instruction file to upload
+        pending_file_id:
           type: string
-          format: binary
+          format: uuid
+          description: The ID of the pending (virus-scanned) file to attach
+          example: 123e4567-e89b-12d3-a456-426614174000
       required:
-      - file_attachment
+      - pending_file_id
     AwardRecommendationRiskDeleteResponseSchema:
       type: object
       properties:
@@ -15294,6 +15309,10 @@ components:
       - message
       - status_code
   securitySchemes:
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
     ApiJwtAuth:
       type: apiKey
       in: header
@@ -15302,8 +15321,4 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
 
