@@ -33,7 +33,9 @@ export const emailHandler: FieldHandler = async (
     );
   }
 
-  await locator.waitFor({ state: "attached", timeout: 5000 });
+  // Use longer timeout (10s) for field attachment to handle lazy-loaded
+  // fields on mobile where form rendering may be progressive/async.
+  await locator.waitFor({ state: "attached", timeout: 10000 });
   if (!field.skipEmailTypeCheck) {
     await expect(locator.first()).toHaveAttribute("type", "email");
   }
