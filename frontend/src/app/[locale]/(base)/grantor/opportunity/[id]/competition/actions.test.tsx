@@ -139,6 +139,26 @@ describe("updateCompetition", () => {
     });
   });
 
+  it("saves application instructions when creating a competition with a pending file ID", async () => {
+    const formData = buildValidFormData({
+      "pending-file-id": "pending-file-789",
+    });
+    formData.delete("competitionId");
+
+    mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
+
+    const result = await updateCompetition(formData);
+
+    expect(mockSaveCompetitionInstructions).toHaveBeenCalledWith(
+      "opp-123",
+      "new-competition-id",
+      "pending-file-789",
+    );
+    expect(result).toEqual({
+      successMessage: "success",
+    });
+  });
+
   it("saves application instructions when a pending file ID exists", async () => {
     const formData = buildValidFormData({
       "pending-file-id": "pending-file-789",
