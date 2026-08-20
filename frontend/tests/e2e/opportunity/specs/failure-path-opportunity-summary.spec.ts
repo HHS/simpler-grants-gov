@@ -43,7 +43,7 @@ import { assertNegativeNumberValidationsFromDefinitions } from "tests/e2e/utils/
 import { assertRequiredFieldValidationsFromDefinitions } from "tests/e2e/utils/common/required-field-validation-utils";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
 
-const { GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
+const { SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
 
 async function setupAndNavigateToOpportunitySummary(page: Page) {
   const fillData = buildOpportunityHappyPathFillData(new Date());
@@ -83,7 +83,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Required-field validation",
-    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();
@@ -108,7 +108,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Negative number validation",
-    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();
@@ -135,7 +135,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Email format validation",
-    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();
@@ -162,7 +162,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Cross-field validation",
-    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();
@@ -188,7 +188,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Character limits validation",
-    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();
