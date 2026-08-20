@@ -97,7 +97,7 @@ describe("updateCompetition", () => {
     });
   });
 
-  it("calls createCompetitionForGrantor when no competitionId and returns new ID", async () => {
+  it("calls createCompetitionForGrantor when no competitionId", async () => {
     const formData = buildValidFormData();
     formData.delete("competitionId");
 
@@ -115,7 +115,6 @@ describe("updateCompetition", () => {
     );
     expect(result).toEqual({
       successMessage: "success",
-      newCompetitionId: "new-competition-id",
     });
   });
 
