@@ -225,8 +225,10 @@ function findGeneratedSchemaInitializers(sourceText) {
   return initializers;
 }
 
-function addRelationalValidations(sourceText) {
-  const relationalSchemas = getRelationalValidations();
+function addRelationalValidations(
+  sourceText,
+  relationalSchemas = getRelationalValidations(),
+) {
   const initializers = findGeneratedSchemaInitializers(sourceText);
 
   const replacements = [];
@@ -265,12 +267,31 @@ function addRelationalValidations(sourceText) {
   return result;
 }
 
-let contents = fs.readFileSync(ZOD_PATH, "utf8");
+function main() {
+  let contents = fs.readFileSync(ZOD_PATH, "utf8");
 
-contents = addRelationalValidations(contents);
+  contents = addRelationalValidations(contents);
 
-if (!contents.startsWith("// @ts-nocheck")) {
-  contents = `// @ts-nocheck\n${contents}`;
+  if (!contents.startsWith("// @ts-nocheck")) {
+    contents = `// @ts-nocheck\n${contents}`;
+  }
+
+  fs.writeFileSync(ZOD_PATH, contents);
 }
 
-fs.writeFileSync(ZOD_PATH, contents);
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  addRelationalValidations,
+  buildSuperRefine,
+  findGeneratedSchemaInitializers,
+  getRelationalValidations,
+  getSchemaTypes,
+  getTargetValidationType,
+  getValidationGuards,
+  getValidationType,
+  getValueGuard,
+  main,
+};
