@@ -25,20 +25,28 @@ type ResolvedTextLocator = {
 const toKebabCase = (value: string): string =>
   value.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
 
+const toSnakeCase = (value: string): string =>
+  value
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .replace(/-+/g, "_")
+    .toLowerCase();
+
 /**
  * Reviewer guide (what logic):
  * 1. Resolve by id with camelCase key first.
  * 2. Resolve by id with kebab-case key second.
- * 3. Resolve by nearest alert within context selector when provided.
- * 4. Resolve by page-level locator when enabled.
- * 5. Resolve by broad alert text match as final fallback.
+ * 3. Resolve by id with snake_case key third.
+ * 4. Resolve by nearest alert within context selector when provided.
+ * 5. Resolve by page-level locator when enabled.
+ * 6. Resolve by broad alert text match as final fallback.
  *
  * Fallback order (most specific to broadest):
  * 1) #{idPrefix}-{camelCaseTargetKey}
  * 2) #{idPrefix}-{kebab-case-target-key}
- * 3) nearest [role='alert'] in the same form group (when contextSelector is provided)
- * 4) page-level fallback locator (only when includePageLevelFallback is true)
- * 5) generic [role='alert'] containing expectedContent
+ * 3) #{idPrefix}-{snake_case_target_key}
+ * 4) nearest [role='alert'] in the same form group (when contextSelector is provided)
+ * 5) page-level fallback locator (only when includePageLevelFallback is true)
+ * 6) generic [role='alert'] containing expectedContent
  *
  * Assertion behavior:
  * - useContainsText=false for id/scoped matches (exact text assertions are expected)
@@ -68,6 +76,13 @@ export async function resolveTextLocator(
   );
   if (await kebabCaseIdLocator.count()) {
     return { locator: kebabCaseIdLocator, useContainsText: false };
+  }
+
+  const snakeCaseIdLocator = options.page.locator(
+    `#${selectorIdPrefix}-${toSnakeCase(options.targetKey)}`,
+  );
+  if (await snakeCaseIdLocator.count()) {
+    return { locator: snakeCaseIdLocator, useContainsText: false };
   }
 
   if (options.contextSelector) {
