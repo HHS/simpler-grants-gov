@@ -96,8 +96,10 @@ select = ["ALL"]
 ignore = [
   "D203",    # no blank line before class
   "D212",    # multi-line summary first line
+  "CPY001",  # Missing copyright at top of file
   "FIX002",  # line contains TODO
   "PLR0913", # Too many arguments to function call
+  "PLR0917", # Too many positional arguments
   "PTH123",  # `open()` should be replaced by `Path.open()`
   "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
   "TD003",   # missing an issue link on TODO
