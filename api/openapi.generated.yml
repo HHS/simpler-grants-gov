@@ -2805,49 +2805,6 @@ paths:
               $ref: '#/components/schemas/LegacyUsersListRequestSchema'
       security:
       - ApiJwtAuth: []
-  /alpha/applications/{application_id}/attachments:
-    post:
-      parameters:
-      - in: path
-        name: application_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApplicationAttachmentCreateResponseSchema1'
-          description: Successful response
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Validation error
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Not found
-      tags:
-      - Application Alpha
-      summary: Create an attachment on an application
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ApplicationAttachmentCreateRequestSchema1'
-      security:
-      - ApiJwtAuth: []
   /alpha/applications/{application_id}/submissions:
     post:
       parameters:
@@ -4719,89 +4676,6 @@ paths:
       tags:
       - Application Alpha
       summary: Fetch an application attachment
-      security:
-      - ApiJwtAuth: []
-    put:
-      parameters:
-      - in: path
-        name: application_id
-        schema:
-          type: string
-        required: true
-      - in: path
-        name: application_attachment_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApplicationAttachmentUpdateResponseSchema'
-          description: Successful response
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Validation error
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Not found
-      tags:
-      - Application Alpha
-      summary: Update an attachment on an application
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ApplicationAttachmentUpdateRequestSchema'
-      security:
-      - ApiJwtAuth: []
-    delete:
-      parameters:
-      - in: path
-        name: application_id
-        schema:
-          type: string
-        required: true
-      - in: path
-        name: application_attachment_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApplicationAttachmentDeleteResponseSchema'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Not found
-      tags:
-      - Application Alpha
-      summary: Delete an application attachment
       security:
       - ApiJwtAuth: []
   /v1/grantors/opportunities/{opportunity_id}/summaries/{opportunity_summary_id}:
@@ -12312,38 +12186,6 @@ components:
           $ref: '#/components/schemas/LegacyUserPaginationSchema'
       required:
       - pagination
-    ApplicationAttachmentCreateSchema:
-      type: object
-      properties:
-        application_attachment_id:
-          type: string
-          format: uuid
-          description: The ID of the uploaded application attachment
-          example: 123e4567-e89b-12d3-a456-426614174000
-    ApplicationAttachmentCreateResponseSchema1:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type:
-          - object
-          $ref: '#/components/schemas/ApplicationAttachmentCreateSchema'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-    ApplicationAttachmentCreateRequestSchema1:
-      type: object
-      properties:
-        file_attachment:
-          description: The file to attach to an application
-          type: string
-          format: binary
-      required:
-      - file_attachment
     ApplicationSubmissionDataSchema:
       type: object
       properties:
@@ -14922,43 +14764,6 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationAttachmentGetSchema'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-    ApplicationAttachmentUpdateResponseSchema:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type:
-          - object
-          $ref: '#/components/schemas/ApplicationAttachmentCreateSchema'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-    ApplicationAttachmentUpdateRequestSchema:
-      type: object
-      properties:
-        file_attachment:
-          description: The file to attach to an application
-          type: string
-          format: binary
-      required:
-      - file_attachment
-    ApplicationAttachmentDeleteResponseSchema:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          example: null
         status_code:
           type: integer
           description: The HTTP status code
