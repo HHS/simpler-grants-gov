@@ -27,10 +27,10 @@ import {
   createMultipleNumberedUploadFiles,
   fileNameOf,
   resolveFieldLocator,
-  uploadMultipleFiles,
-  verifyAttachmentHistoryActivities,
   testCancelFileUpload,
   testDismissUploadStatus,
+  uploadMultipleFiles,
+  verifyAttachmentHistoryActivities,
 } from "tests/e2e/utils/forms/attachment-test-utils";
 import { verifyVirusScanPassedAndUploaded } from "tests/e2e/utils/forms/file-upload-status-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
@@ -158,8 +158,8 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
 
       const additionalProjectTitleLocator = resolveFieldLocator(
         page,
-        additionalProjectTitleField.selector as string | undefined,
-        additionalProjectTitleField.testId as string | undefined,
+        additionalProjectTitleField.selector,
+        additionalProjectTitleField.testId,
       );
 
       const projectTitleSection = page.locator("#form-section-project_title");
@@ -277,10 +277,9 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
       await authenticateE2eUser(page, context, !!isMobile);
 
       await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
-      const applicationUrl = page.url();
-
-      // Create minimal test data - we're only testing attachments, not full form
-      const testData = buildHappyPathTestData(sf424Form, Date.now());
+      // Note: applicationUrl and testData not used in status test, only for form setup
+      const _applicationUrl = page.url();
+      const _testData = buildHappyPathTestData(sf424Form, Date.now());
 
       // Create test files
       const [cancelFile, dismissFile] = createMultipleNumberedUploadFiles(
@@ -301,8 +300,8 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
       // Start upload, cancel before completion, verify file is removed
       const areasAffectedField = resolveFieldLocator(
         page,
-        SF424_FORM_CONFIG.fields.areas_affected_attachment.selector as string | undefined,
-        SF424_FORM_CONFIG.fields.areas_affected_attachment.testId as string | undefined,
+        SF424_FORM_CONFIG.fields.areas_affected_attachment.selector,
+        SF424_FORM_CONFIG.fields.areas_affected_attachment.testId,
       );
 
       const areasAffectedSection = page.locator("#form-section-areas_affected");
@@ -323,10 +322,8 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
       // Upload file to completion, verify success, dismiss status, verify file persists
       const congressionalField = resolveFieldLocator(
         page,
-        SF424_FORM_CONFIG.fields.additional_congressional_attachment
-          .selector as string | undefined,
-        SF424_FORM_CONFIG.fields.additional_congressional_attachment
-          .testId as string | undefined,
+        SF424_FORM_CONFIG.fields.additional_congressional_attachment.selector,
+        SF424_FORM_CONFIG.fields.additional_congressional_attachment.testId,
       );
 
       const congressionalSection = page.locator(

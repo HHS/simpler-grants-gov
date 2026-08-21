@@ -227,10 +227,8 @@ export async function testCancelFileUpload(
     .first();
 
   // Click cancel before upload completes
-  const cancelVisible = await cancelButton
-    .isVisible()
-    .catch(() => false);
-  
+  const cancelVisible = await cancelButton.isVisible().catch(() => false);
+
   if (cancelVisible) {
     await cancelButton.click();
 
@@ -272,19 +270,19 @@ export async function testDismissUploadStatus(
     .getByRole("button", { name: /dismiss/i })
     .first();
 
-  const dismissVisible = await dismissButton
-    .isVisible()
-    .catch(() => false);
-  
+  const dismissVisible = await dismissButton.isVisible().catch(() => false);
+
   if (dismissVisible) {
     await dismissButton.click();
 
     // Verify the status display is cleared/hidden
     // The file should remain in existing files, but status message should be gone
-    await expect(statusDisplay).not.toBeVisible({ timeout: 5_000 }).catch(() => {
-      // It's okay if the status disappears immediately
-    });
-    
+    await expect(statusDisplay)
+      .not.toBeVisible({ timeout: 5_000 })
+      .catch(() => {
+        // It's okay if the status disappears immediately
+      });
+
     // But the file should still be in the existing files list
     await expect(scope.locator(".file-input-existing-files")).toContainText(
       fileName,
