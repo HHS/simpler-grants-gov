@@ -112,7 +112,9 @@ export async function verifyInlineErrors(
   for (const { fieldId, message } of expectedErrors) {
     const normalizedFieldId = normalizeFieldId(fieldId);
     const baseErrorLocator = page.locator(`#error-for-${normalizedFieldId}`);
-    const visibleErrorLocator = page.locator(`#error-for-${normalizedFieldId}-visible`);
+    const visibleErrorLocator = page.locator(
+      `#error-for-${normalizedFieldId}-visible`,
+    );
     const errorLocator = (await baseErrorLocator.count())
       ? baseErrorLocator
       : visibleErrorLocator;
