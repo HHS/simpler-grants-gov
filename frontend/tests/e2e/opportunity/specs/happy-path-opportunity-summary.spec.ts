@@ -110,6 +110,11 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
         ),
       );
 
+      // Ensure select state is committed before submit to avoid flaky same-page re-submit.
+      await expect(
+        page.locator("#funding_categories option:checked").first(),
+      ).toHaveText(fillData.category);
+
       // Fill required Eligibility values.
       await fillPageFields(
         page,
@@ -132,13 +137,18 @@ test.describe("Grantor Opportunity Summary Happy Path", () => {
         "Save and continue": true,
       });
 
-      // And I click "Save and exit" button
-      await page.getByRole("button", { name: "Save and exit" }).click();
+      // Fail fast if required validation is still present before submit.
+      await expect(
+        page.getByRole("alert").filter({ hasText: "Select a funding category." }),
+      ).toHaveCount(0);
 
-      // Then I should return to the "Opportunity Overview" page.
-      await expect(page).toHaveURL(
-        /\/grantor\/opportunity\/([a-z0-9-]+?)\/overview/,
-      );
+      // And I click "Save and exit" button
+      await Promise.all([
+        page.waitForURL(/\/grantor\/opportunity\/([a-z0-9-]+?)\/overview/, {
+          timeout: 15000,
+        }),
+        page.getByRole("button", { name: "Save and exit" }).click(),
+      ]);
 
       // And I should see overview statuses for key sections.
       await assertOverviewSectionStatus(page, {

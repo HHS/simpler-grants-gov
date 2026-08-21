@@ -31,6 +31,15 @@ export const selectHandler: FieldHandler = async (
     );
   }
 
+  // Prefer explicit selector when provided because some pages contain
+  // similarly labeled controls and selector targeting is more deterministic.
+  if (field.selector) {
+    const select = page.locator(field.selector).first();
+    await select.waitFor({ state: "visible", timeout: 5000 });
+    await select.selectOption({ label: data });
+    return;
+  }
+
   const label = field.label ?? field.field;
   await selectOptionByLabel(page, label, data, field.labelExact);
 };
