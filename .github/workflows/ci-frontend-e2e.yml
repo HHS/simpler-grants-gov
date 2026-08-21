@@ -365,12 +365,16 @@ jobs:
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build
 
+      #
+      #   CHECKS FOR CHANGED FILES
+      #
+
       - name: Get list of changed apply form files
         id: changed-apply-form-files
         uses: tj-actions/changed-files@v47.0.6
         with:
           files: |
-            frontend/tests/e2e/apply/forms/**/*.spec.ts
+            frontend/tests/e2e/apply/**/*.spec.ts
             frontend/src/components/applyForm/**
             frontend/src/app/**/workspace/applications/*/**/*.tsx
             api/src/form_schema/forms/**
@@ -390,14 +394,37 @@ jobs:
             api/src/api/opportunities_grantor_v1/**
             api/src/services/opportunities_grantor_v1/**
 
+      - name: Get list of changed core e2e files
+        id: changed-e2e-utils
+        uses: tj-actions/changed-files@v47.0.6
+        with:
+          files: |
+            frontend/tests/playwright.config.ts
+            frontend/tests/e2e/utils/**
+            frontend/tests/e2e/playwright-env.ts
+            frontend/tests/e2e/playwrightUtils.ts
+
+      - name: Get list of changed e2e spec files
+        id: changed-e2e-spec-files
+        uses: tj-actions/changed-files@v47.0.6
+        with:
+          files: |
+            frontend/tests/**/*.spec.ts
+
       - name: Determine test groups to run
         shell: bash
         env:
           APPLY_FORMS_CHANGED: ${{ steps.changed-apply-form-files.outputs.any_changed }}
           OPPORTUNITY_MANAGEMENT_CHANGED: ${{ steps.changed-opportunity-management-files.outputs.any_changed }}
+          E2E_SPECS_CHANGED: ${{ steps.changed-e2e-spec-files.outputs.any_changed }}
+          E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
+
         run: |
           echo "Any apply form files changed? $APPLY_FORMS_CHANGED"
           echo "Any opportunity management files changed? $OPPORTUNITY_MANAGEMENT_CHANGED"
+          echo "Any e2e spec files changed? $E2E_SPECS_CHANGED"
+          echo "Any e2e util files changed? $E2E_UTILS_CHANGED"
+
           if [[ $GITHUB_EVENT_NAME = "pull_request" ]]; then
             test_group_tags="@smoke"
             if [[ $APPLY_FORMS_CHANGED = "true" ]]; then
@@ -413,8 +440,51 @@ jobs:
             echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
           fi
 
+      #
+      #   TEST RUNS
+      #
+      #   Will always run at least one of the following three steps, based on this logic
+      #
+      #   - Any e2e utils have changed?
+      #       - Yes
+      #         - Run All E2E tests (utils updated)
+      #`      - No
+      #         - Any specific spec files to run supplied?
+      #           - Yes
+      #             - Run E2E tests
+      #             - Run E2E tests for changed spec files
+      #           - No
+      #             - Run E2E tests
+      #
+      #   Unfortunately Playwright won't let you run both file and grep based filters on which specs to run, within the same invocation
+
+      - name: Run All E2E tests (utils updated)
+        uses: ./.github/actions/e2e
+        env:
+          E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
+        if: ${{ env.E2E_UTILS_CHANGED == 'true' }}
+        with:
+          version: ${{ github.ref }}
+          target: "local"
+          needs_node_setup: "false"
+          total_shards: ${{ matrix.total_shards }}
+          current_shard: ${{ matrix.shard }}
+          api_logs: ${{ inputs.api_logs && 'true' || 'false' }}
+          playwright_tags: ""
+          # Not a secret: the local API seeds the test-user manager with the
+          # committed LOCAL_TEST_USER_MANAGER_API_KEY default from api/local.env,
+          # so the frontend must send that same literal value.
+          test_user_manager_api_key: "local-manager-key"
+          # shard 2 is the firefox shard
+          do-firefox-install: ${{ matrix.shard == 2 && 'true' || 'false' }}
+          # shard 3 is the webkit shard
+          do-webkit-install: ${{ matrix.shard == 3 && 'true' || 'false' }}
+
       - name: Run E2E tests
         uses: ./.github/actions/e2e
+        env:
+          E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
+        if: ${{ env.E2E_UTILS_CHANGED != 'true' }}
         with:
           version: ${{ github.ref }}
           target: "local"
@@ -423,6 +493,30 @@ jobs:
           current_shard: ${{ matrix.shard }}
           api_logs: ${{ inputs.api_logs && 'true' || 'false' }}
           playwright_tags: ${{ env.test_group_tags }}
+          # Not a secret: the local API seeds the test-user manager with the
+          # committed LOCAL_TEST_USER_MANAGER_API_KEY default from api/local.env,
+          # so the frontend must send that same literal value.
+          test_user_manager_api_key: "local-manager-key"
+          # shard 2 is the firefox shard
+          do-firefox-install: ${{ matrix.shard == 2 && 'true' || 'false' }}
+          # shard 3 is the webkit shard
+          do-webkit-install: ${{ matrix.shard == 3 && 'true' || 'false' }}
+
+      - name: Run E2E tests for changed spec files
+        uses: ./.github/actions/e2e
+        env:
+          E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
+          E2E_SPECS_CHANGED: ${{ steps.changed-e2e-spec-files.outputs.all_changed_files }}
+        if: ${{ env.E2E_SPECS_CHANGED != '' && env.E2E_UTILS_CHANGED != 'true' }}
+        with:
+          version: ${{ github.ref }}
+          target: "local"
+          needs_node_setup: "false"
+          total_shards: ${{ matrix.total_shards }}
+          current_shard: ${{ matrix.shard }}
+          api_logs: ${{ inputs.api_logs && 'true' || 'false' }}
+          playwright_tags: ""
+          spec_files: ${{ env.E2E_SPECS_CHANGED }}
           # Not a secret: the local API seeds the test-user manager with the
           # committed LOCAL_TEST_USER_MANAGER_API_KEY default from api/local.env,
           # so the frontend must send that same literal value.

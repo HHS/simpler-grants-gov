@@ -538,6 +538,18 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     is_loaded_to_version_table: Mapped[bool | None] = mapped_column(index=True)
 
 
+class OpportunityIndexDeleteQueue(ApiSchemaTable, TimestampMixin):
+    """Opportunities that were deleted and still need to be removed from the search index.
+
+    Rows are inserted in the same transaction that deletes the opportunity, so there is
+    deliberately no foreign key to opportunity - the referenced row is gone by commit time.
+    """
+
+    __tablename__ = "opportunity_index_delete_queue"
+
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+
+
 class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "referenced_opportunity"
 

@@ -978,6 +978,15 @@ class OpportunityChangeAuditFactory(BaseFactory):
     is_loaded_to_version_table = False
 
 
+class OpportunityIndexDeleteQueueFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityIndexDeleteQueue
+
+    # No SubFactory - the queue records opportunities that no longer exist, so the
+    # id does not need to resolve to an opportunity row.
+    opportunity_id = Generators.UuidObj
+
+
 class AwardRecommendationFactory(BaseFactory):
     class Meta:
         model = award_recommendation_models.AwardRecommendation
