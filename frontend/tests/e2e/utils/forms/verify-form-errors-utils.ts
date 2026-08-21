@@ -11,6 +11,14 @@ function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
 
+function normalizeFieldId(fieldId: string): string {
+  // Some file inputs render visible widget IDs with a "-visible" suffix,
+  // while the logical field name and hidden input remain the base value.
+  // Normalize both forms so field error matching remains stable across
+  // streamed upload widgets.
+  return fieldId.replace(/-visible$/, "");
+}
+
 /**
  * Verifies error messages appear in the top alert list on the form page after save.
  * Assumes navigation to the form page has already occurred.
@@ -57,7 +65,7 @@ export async function verifyAlertErrors(
       )
     ).sort();
     const expectedFieldIds = expectedErrors
-      .map(({ fieldId }) => fieldId)
+      .map(({ fieldId }) => normalizeFieldId(fieldId))
       .sort();
     expect(actualLinkedFieldIds).toEqual(expectedFieldIds);
   }
@@ -93,14 +101,22 @@ export async function verifyInlineErrors(
     await inlineErrors.evaluateAll((nodes) =>
       nodes.map((n) => n.id.replace(/^error-for-/, "")),
     )
-  ).sort();
+  )
+    .map((id) => normalizeFieldId(id))
+    .sort();
   const expectedInlineFieldIds = expectedErrors
-    .map(({ fieldId }) => fieldId)
+    .map(({ fieldId }) => normalizeFieldId(fieldId))
     .sort();
   expect(actualInlineFieldIds).toEqual(expectedInlineFieldIds);
 
   for (const { fieldId, message } of expectedErrors) {
-    const errorLocator = page.locator(`#error-for-${fieldId}`);
+    const normalizedFieldId = normalizeFieldId(fieldId);
+    const baseErrorLocator = page.locator(`#error-for-${normalizedFieldId}`);
+    const visibleErrorLocator = page.locator(`#error-for-${normalizedFieldId}-visible`);
+    const errorLocator = (await baseErrorLocator.count())
+      ? baseErrorLocator
+      : visibleErrorLocator;
+
     await expect(errorLocator).toBeVisible();
     await expect(errorLocator).toContainText(message);
   }
