@@ -23,7 +23,10 @@ async function checkRadioViaLabelFallback(
   }
 
   const label = page.locator(`label[for="${inputId}"]`).first();
+  // Use longer timeout (10s) for field attachment to handle lazy-loaded labels.
+  await label.waitFor({ state: "attached", timeout: 10000 });
   await label.waitFor({ state: "visible", timeout: 5000 });
+  await label.scrollIntoViewIfNeeded();
   await label.click();
 }
 
@@ -44,7 +47,11 @@ export const radioButtonHandler: FieldHandler = async (
   }
 
   const locator = getChoiceLocator(page, field, data);
+  // Use longer timeout (10s) for field attachment to handle lazy-loaded
+  // fields on mobile where form rendering may be progressive/async.
+  await locator.waitFor({ state: "attached", timeout: 10000 });
   await locator.waitFor({ state: "visible", timeout: 5000 });
+  await locator.scrollIntoViewIfNeeded();
 
   if (await locator.isChecked()) {
     return;

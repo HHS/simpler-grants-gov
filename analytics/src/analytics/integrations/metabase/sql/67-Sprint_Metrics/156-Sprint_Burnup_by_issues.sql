@@ -10,20 +10,20 @@ WITH -- get project_id
    FROM project_data,
         gh_sprint
    WHERE gh_sprint.project_id = project_data.project_id
-     AND {{sprint_name}}), -- calculate issues opened in the sprint identified by sprint_id
- opened AS
+     AND {{sprint_name}}), -- calculate total sprint scope (issues tracked) by day
+ SCOPE AS
   (SELECT gh_issue_history.d_effective AS DAY,
-          count(*) AS total_opened
+          count(*) AS total_scope
    FROM gh_issue_history,
         sprint_data
    WHERE gh_issue_history.sprint_id = sprint_data.sprint_id
      AND (gh_issue_history.d_effective >= sprint_data.sprint_start_date
           AND gh_issue_history.d_effective <= sprint_data.sprint_end_date)
    GROUP BY DAY
-   ORDER BY DAY), -- calculate issues closed in the sprint
- closed AS
+   ORDER BY DAY), -- calculate issues completed in the sprint by day
+ completed AS
   (SELECT gh_issue_history.d_effective AS DAY,
-          count(*) AS total_closed
+          count(*) AS total_completed
    FROM gh_issue_history,
         sprint_data
    WHERE gh_issue_history.sprint_id = sprint_data.sprint_id
@@ -31,15 +31,14 @@ WITH -- get project_id
      AND (gh_issue_history.d_effective >= sprint_data.sprint_start_date
           AND gh_issue_history.d_effective <= sprint_data.sprint_end_date)
    GROUP BY DAY
-   ORDER BY DAY), -- aggregate issues opened and closed by day
+   ORDER BY DAY), -- aggregate scope and completed work by day (both climb toward total scope)
  totals AS
-  (SELECT opened.day AS DAY,
-          opened.total_opened,
-          closed.total_closed,
-          opened.total_opened - closed.total_closed AS total_remaining
-   FROM opened,
-        closed
-   WHERE opened.day = closed.day
+  (SELECT scope.day AS DAY,
+          scope.total_scope,
+          completed.total_completed
+   FROM SCOPE,
+        completed
+   WHERE scope.day = completed.day
    ORDER BY DAY)
 SELECT *
 FROM totals

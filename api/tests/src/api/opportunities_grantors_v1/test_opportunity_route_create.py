@@ -60,26 +60,26 @@ def test_opportunity_create_successful_creation(
         "/v1/grantors/opportunities", json=opportunity_request, headers={"X-SGG-Token": token}
     )
 
-    # Success check
     assert response.status_code == 200
 
-    # Check response data
     response_json = response.get_json()
     assert "data" in response_json
     assert "message" in response_json
     assert response_json["message"] == "Success"
 
-    # Verify opportunity data in response
     opportunity_data = response_json["data"]
     assert "opportunity_id" in opportunity_data  # Should have generated UUID
     assert opportunity_data["opportunity_number"] == opportunity_request["opportunity_number"]
     assert opportunity_data["opportunity_title"] == opportunity_request["opportunity_title"]
+    assert opportunity_data["tagline"] == opportunity_request["tagline"]
+    assert opportunity_data["purpose_statement"] == opportunity_request["purpose_statement"]
     assert opportunity_data["category"] == opportunity_request["category"]
     assert opportunity_data["category_explanation"] == opportunity_request["category_explanation"]
     assert opportunity_data["is_draft"] is True
     assert "created_at" in opportunity_data
     assert "updated_at" in opportunity_data
     assert "opportunity_assistance_listings" in opportunity_data
+
     opportunity_assistance_listings = opportunity_data["opportunity_assistance_listings"][0]
     assert (
         opportunity_assistance_listings["assistance_listing_number"]
@@ -96,6 +96,7 @@ def test_opportunity_create_successful_creation(
         .scalars()
         .all()
     )
+
     assert len(audit_rows) == 1
     assert audit_rows[0].opportunity_audit_event == OpportunityAuditEvent.OPPORTUNITY_CREATED
     assert audit_rows[0].opportunity_data is not None
@@ -189,6 +190,8 @@ def test_opportunity_create_no_aln(client, grantor_auth_data):
             "agency_id": str(agency.agency_id),
             "opportunity_title": "Test Opportunity",
             "opportunity_number": f"TEST-{uuid.uuid4().hex[:3]}",
+            "tagline": "Test tagline",
+            "purpose_statement": "Test purpose statement",
             "category": "discretionary",
             # Missing assistance_listing_number
         },

@@ -1,5 +1,4 @@
 import logging
-from typing import cast
 
 import grants_shared.adapters.db as db
 from apiflask.exceptions import HTTPError
@@ -71,9 +70,7 @@ def confirm_application_delivery(
         db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name
     )
 
-    legacy_tracking_number = cast(
-        str, confirm_application_delivery_request.grants_gov_tracking_number
-    )
+    legacy_tracking_number = confirm_application_delivery_request.grants_gov_tracking_number
 
     submission_extended_dict = get_application_submission_by_legacy_tracking_number_extended(
         db_session, legacy_tracking_number, str(certificate.user_id)

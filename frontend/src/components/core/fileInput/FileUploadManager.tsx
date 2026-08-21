@@ -17,6 +17,7 @@ type FileUploadManagerProps = {
   postUploadActionSuccessMessage?: string;
   postUploadActionErrorMessage?: string;
   fileToUpload: File;
+  maxFileSizeBytes?: number;
 };
 
 export const FileUploadManager = ({
@@ -31,6 +32,7 @@ export const FileUploadManager = ({
   onComplete,
   onUploadError,
   postUploadAction,
+  maxFileSizeBytes,
 }: FileUploadManagerProps) => {
   const {
     uploadError,
@@ -45,6 +47,7 @@ export const FileUploadManager = ({
     onError: onUploadError,
     onComplete: onComplete,
     postUploadAction,
+    maxFileSizeBytes,
   });
 
   // eslint-disable-next-line
@@ -65,6 +68,7 @@ export const FileUploadManager = ({
       postUploadActionProgressMessage={postUploadActionProgressMessage}
       postUploadActionSuccessMessage={postUploadActionSuccessMessage}
       postUploadActionErrorMessage={postUploadActionErrorMessage}
+      maxFileSizeBytes={maxFileSizeBytes}
     />
   );
 };

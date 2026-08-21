@@ -23,6 +23,9 @@ from src.services.opportunities_grantor_v1.get_opportunity_list import (
     get_opportunity_list_for_user,
 )
 from src.services.opportunities_grantor_v1.list_opportunity_audit import list_opportunity_audit
+from src.services.opportunities_grantor_v1.opportunity_attachment_from_pending_file import (
+    create_opportunity_attachment_from_pending_file,
+)
 from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
 from src.services.opportunities_grantor_v1.opportunity_summaries import (
     create_opportunity_summary,
@@ -246,6 +249,44 @@ def opportunity_upload_attachments(
     )
 
 
+@opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/attachments/temporary")
+@opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.OpportunityAttachmentCreateFromPendingFileRequestV1Schema(),
+    location="json",
+)
+@opportunity_grantor_blueprint.output(
+    opportunity_grantor_schemas.OpportunityAttachmentCreateFromPendingFileResponseV1Schema()
+)
+@opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_grantor_blueprint.doc(responses=[200, 401, 403, 404, 422])
+@flask_db.with_db_session()
+def opportunity_upload_attachment_temporary(
+    db_session: db.Session, opportunity_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Create an opportunity attachment from a pending (virus-scanned) file.
+
+    TEMPORARY endpoint (#11891): lives at a separate address from the existing
+    multipart POST /attachments while the frontend migration (#11890) is pending.
+    A follow-up ticket will remove the old multipart endpoint and move this
+    implementation onto the permanent /attachments address.
+    """
+    add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
+    logger.info("POST /v1/grantors/opportunities/:opportunity_id/attachments/temporary")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        attachment = create_opportunity_attachment_from_pending_file(
+            db_session=db_session,
+            user=user,
+            opportunity_id=opportunity_id,
+            pending_file_id=json_data["pending_file_id"],
+        )
+
+    return response.ApiResponse(message="Success", data=attachment)
+
+
 @opportunity_grantor_blueprint.delete(
     "/opportunities/<uuid:opportunity_id>/attachments/<uuid:opportunity_attachment_id>"
 )
@@ -354,7 +395,7 @@ def competition_update(
     "/opportunities/<uuid:opportunity_id>/competitions/<uuid:competition_id>/instructions"
 )
 @opportunity_grantor_blueprint.input(
-    opportunity_grantor_schemas.CompetitionInstructionUploadRequestV1Schema(), location="files"
+    opportunity_grantor_schemas.CompetitionInstructionUploadRequestV1Schema(), location="json"
 )
 @opportunity_grantor_blueprint.output(
     opportunity_grantor_schemas.CompetitionInstructionUploadResponseV1Schema()
@@ -363,9 +404,9 @@ def competition_update(
 @opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
 @flask_db.with_db_session()
 def competition_instruction_upload(
-    db_session: db.Session, opportunity_id: UUID, competition_id: UUID, files_data: dict
+    db_session: db.Session, opportunity_id: UUID, competition_id: UUID, json_data: dict
 ) -> response.ApiResponse:
-    """Upload an instruction file to a competition"""
+    """Upload an instruction file to a competition from a pending (virus-scanned) file"""
     add_extra_data_to_current_request_logs(
         {"opportunity_id": opportunity_id, "competition_id": competition_id}
     )
@@ -377,13 +418,13 @@ def competition_instruction_upload(
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
-        instruction_id = upload_competition_instruction(
-            db_session, user, opportunity_id, competition_id, files_data["file_attachment"]
+        instruction = upload_competition_instruction(
+            db_session, user, opportunity_id, competition_id, json_data["pending_file_id"]
         )
 
     return response.ApiResponse(
         message="Instruction uploaded successfully",
-        data={"competition_instruction_id": instruction_id},
+        data=instruction,
     )
 
 

@@ -444,6 +444,9 @@ class OpportunityFactory(BaseFactory):
     )
 
     is_draft = False  # Because we filter out drafts, just default these to False
+    is_simpler_grants_opportunity = (
+        False  # Default to imported opportunities; set True for SGM-created ones
+    )
 
     revision_number = 0  # We'll want to consider how we handle this when we add history
 
@@ -973,6 +976,15 @@ class OpportunityChangeAuditFactory(BaseFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
     is_loaded_to_search = False
     is_loaded_to_version_table = False
+
+
+class OpportunityIndexDeleteQueueFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityIndexDeleteQueue
+
+    # No SubFactory - the queue records opportunities that no longer exist, so the
+    # id does not need to resolve to an opportunity row.
+    opportunity_id = Generators.UuidObj
 
 
 class AwardRecommendationFactory(BaseFactory):

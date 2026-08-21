@@ -398,6 +398,8 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+      expectedNumberOfAwardsInput:
+        "Expected number of awards must be greater than or equal to zero and less than 1,000,000,000,000,000.",
       awardMinCurrencyInput:
         "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMaxCurrencyInput:
@@ -1978,6 +1980,12 @@ export const messages = {
       },
     },
   },
+  CommonWordLimit: {
+    wordsAllowed: "words allowed",
+    wordsLeft: "{num, plural, =1 {1 word left} other {# words left}}",
+    wordsError:
+      "{num, plural, =1 {1 word over limit} other {# words over limit}}",
+  },
   Applications: {
     numApplications: "{num, plural, =1 {1 application} other {# applications}}",
     errorMessage:
@@ -2035,13 +2043,23 @@ export const messages = {
     tableHeadings: {
       agency: "Agency",
       title: "Title",
+      oppNumber: "Opp. Number",
+      fundingInstrumentType: "Funding Instrument Type",
+      lastUpdated: "Last Updated",
       status: "Status",
-      actions: "Actions",
+      actions: "Action",
     },
     actionButtons: {
       edit: "Edit",
       copy: "Copy",
       delete: "Delete",
+    },
+    statusTag: {
+      draft: "Draft",
+      posted: "Open",
+      forecasted: "Forecasted",
+      archived: "Archived",
+      closed: "Closed",
     },
   },
   Organizations: {
@@ -2561,6 +2579,12 @@ export const messages = {
       opportunityTitle: "Opportunity title",
       opportunityTitleDesc:
         "Provide a concise, descriptive name that helps applicants identify the grant's purpose.",
+      tagline: "Tagline",
+      taglineDesc:
+        "A specific one-sentence purpose statement that summarizes the highest-level goal.",
+      purposeStatement: "Purpose statement",
+      purposeStatementDesc:
+        "Provide a one-line statement that helps applicants understand the grant's purpose.",
       agency: "Agency",
       category: "Grant selection method",
       categoryDesc: "Choose the evaluation process used to award these funds.",
@@ -2569,7 +2593,7 @@ export const messages = {
         'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
       assistanceListingNumber: "Assistance listing number",
       assistanceListingNumberDesc:
-        "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
+        "Enter the 5-digit code from SAM.gov (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
     },
   },
@@ -2675,6 +2699,20 @@ export const messages = {
           "Incorrect text format. Please ensure there are no spaces or missing characters.",
       },
     },
+    sectionApplicationInstructions: {
+      header: "Application instructions",
+      subHeader:
+        "Upload any supporting instructions needed for the application.",
+      uploadAFile: "Upload a file",
+      multipleFiles: "For multiple files, combine them into one zip file.",
+      uploadWidget: {
+        error:
+          "Processing failed due to a system error. Try uploading your file again.",
+        success:
+          "Success: File scan complete. “Save” this form to attach the file.",
+        uploading: "Uploading...",
+      },
+    },
     sectionRequiredForms: {
       header: "Forms in this package",
       subHeader: "Select the forms applicants must complete.",
@@ -2726,7 +2764,8 @@ export const messages = {
     statusDisplay: {
       cancel: "Cancel",
       dismiss: "Dismiss",
-      queued: "Queued",
+      processing: "Processing file",
+      starting: "Starting upload",
       uploading: "Uploading...",
       startingScan: "Upload complete. Starting security scan",
       scanning: "Upload complete. Running security scan...",
@@ -2739,6 +2778,8 @@ export const messages = {
       missingFileId: "Error: missing file id",
       preUploadError: "Pre upload error",
       infected: "Security scan failed. File removed",
+      fileTooLarge:
+        "This file is too large. The maximum file size is {maxFileSize}.",
     },
     deleteModal: {
       titleText: "Delete",

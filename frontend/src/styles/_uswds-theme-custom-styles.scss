@@ -670,13 +670,30 @@ dl {
   &::after {
     content: "$";
     position: absolute;
-    left: 10px;
+    left: 0.625rem;
     bottom: -0.5rem;
     transform: translateY(-50%);
   }
 
   input {
-    padding-left: 25px;
+    padding-left: 1.563rem;
+    margin-top: 0 !important;
+  }
+}
+
+.simpler-percentage-input-wrapper {
+  position: relative;
+  display: inline-block;
+  &::after {
+    content: "%";
+    position: absolute;
+    right: 0.625rem;
+    bottom: -0.5rem;
+    transform: translateY(-50%);
+  }
+
+  input {
+    padding-right: 1.563rem;
     margin-top: 0 !important;
   }
 }
@@ -1682,4 +1699,8 @@ $simpler-switch-transition-easing: ease;
 .usa-button--compact {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.bg-mint-lighter-custom {
+  background-color: color("mint-10");
 }

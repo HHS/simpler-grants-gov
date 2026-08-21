@@ -8,7 +8,7 @@
   "scripts": {
     "all-checks": "npm run lint && npm run ts:check && npm run format-check && npm run test && npm run build",
     "build": "next build",
-    "dev": "NEW_RELIC_ENABLED=false next dev",
+    "dev": "NEW_RELIC_ENABLED=false next dev --webpack",
     "local": "ENVIRONMENT=local NEW_RELIC_ENABLED=false next dev",
     "debug": "NODE_OPTIONS='--inspect' next dev",
     "format": "prettier --write '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
@@ -43,7 +43,6 @@
     "cookies-next": "^6.1.1",
     "dayjs": "^1.11.13",
     "focus-trap-react": "^11",
-    "immutable": "^5.1.5",
     "isomorphic-dompurify": "^2.15.0",
     "jose": "^5.9.6",
     "js-cookie": "^3.0.5",
