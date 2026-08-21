@@ -3,6 +3,7 @@
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import {
   createCompetitionForGrantor,
+  saveCompetitionInstructions,
   updateCompetitionForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
@@ -108,10 +109,6 @@ export async function updateCompetition(
         requestBody,
       );
       competitionId = apiResponse.data.competition_id;
-      return {
-        successMessage: t("success"),
-        newCompetitionId: competitionId,
-      };
     } else {
       apiResponse = await updateCompetitionForGrantor(
         opportunityId,
@@ -119,6 +116,18 @@ export async function updateCompetition(
         requestBody,
       );
     }
+
+    // If the record was successfully created or updated,
+    // then save the application instructions file (attachment)
+    const pendingFileId = formData.get("pending-file-id") as string | null;
+    if (pendingFileId) {
+      await saveCompetitionInstructions(
+        opportunityId,
+        competitionId,
+        pendingFileId,
+      );
+    }
+
     return {
       successMessage: t("success"),
     };
