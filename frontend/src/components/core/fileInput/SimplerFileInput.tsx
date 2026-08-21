@@ -218,7 +218,7 @@ export const SimplerFileInput = ({
       previousUploadErrors.filter((uploadError) => uploadError !== uploadId),
     );
     // we want to show the upload input again after dismissing a single error
-    trackUploadComplete(uploadId);
+    trackUploadCanceled(uploadId);
     if (!multiFile) {
       fileInputRef?.current?.clearFiles();
     }
