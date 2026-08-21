@@ -68,7 +68,6 @@ async function setupAndNavigateToOpportunitySummary(page: Page) {
 }
 
 test.describe("Grantor Opportunity Summary Failure Path", () => {
-
   // One-login-per-spec lifecycle shared across failure-path specs.
   const authenticatedLifecycle = createAuthenticatedPageLifecycle({
     skipTest: (condition, description) => test.skip(condition, description),
