@@ -34,7 +34,9 @@ export type CustomButtonConfig = {
 };
 
 export type HeroButtonConfig =
-  ActionButtonConfig | NavigationButtonConfig | CustomButtonConfig;
+  | ActionButtonConfig
+  | NavigationButtonConfig
+  | CustomButtonConfig;
 
 export type ExternalLinkConfig = {
   label: string;

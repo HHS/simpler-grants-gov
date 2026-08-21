@@ -118,7 +118,8 @@ export const TitleCell: React.FC<{ items: unknown; rowIndex: number }> = ({
   const assistanceListing =
     (
       get(items, `[${rowIndex}].assistance_listing_number`) as
-        string | undefined
+        | string
+        | undefined
     )?.trim() ?? "";
 
   return (

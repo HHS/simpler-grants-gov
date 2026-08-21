@@ -108,7 +108,12 @@ for (const {
           })
           .setInputFiles(testData.att1);
 
-        await verifyVirusScanPassedAndUploaded(page, "sample-upload-kb.pdf");
+        await verifyVirusScanPassedAndUploaded(
+          page,
+          "sample-upload-kb.pdf",
+          page.locator("#form-section-att1"),
+          false,
+        );
 
         // Emulate the browser closing: discard this tab's unsaved client state entirely
         // and open a fresh page from the same authenticated context.

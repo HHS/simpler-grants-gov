@@ -18,8 +18,9 @@ const analyticsUtil = {
 };
 
 beforeAll(async () => {
-  const importedModule =
-    await import("src/components/core/CorrelationIdTracker");
+  const importedModule = await import(
+    "src/components/core/CorrelationIdTracker"
+  );
   CorrelationIdTracker = importedModule.CorrelationIdTracker;
 });
 

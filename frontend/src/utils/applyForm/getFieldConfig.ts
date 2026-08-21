@@ -120,7 +120,8 @@ export const getFieldListRequiredFields = ({
   fieldListName: string;
 }): string[] => {
   const fieldListSchema = formSchema.properties?.[fieldListName] as
-    RJSFSchema | undefined;
+    | RJSFSchema
+    | undefined;
 
   if (!fieldListSchema || fieldListSchema.type !== "array") {
     return [];
@@ -605,7 +606,8 @@ const getFieldListConfig = ({
   });
 
   const fieldListSchema = formSchema.properties?.[uiFieldObject.name] as
-    RJSFSchema | undefined;
+    | RJSFSchema
+    | undefined;
 
   return {
     type: "FieldList",

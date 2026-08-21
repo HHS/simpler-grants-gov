@@ -1,7 +1,10 @@
 import { useTranslations } from "next-intl";
 
 export type AwardDataKeys =
-  "programFunding" | "expectedAwards" | "awardCeiling" | "awardFloor";
+  | "programFunding"
+  | "expectedAwards"
+  | "awardCeiling"
+  | "awardFloor";
 
 type Props = {
   title: AwardDataKeys;

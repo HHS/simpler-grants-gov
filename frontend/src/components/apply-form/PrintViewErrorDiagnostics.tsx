@@ -16,7 +16,10 @@ import { useTranslations } from "next-intl";
  * separate error-boundary handling.
  */
 type PrintViewErrorCategory =
-  "TopLevelError" | "NotFound" | "UnauthorizedError" | "UnknownError";
+  | "TopLevelError"
+  | "NotFound"
+  | "UnauthorizedError"
+  | "UnknownError";
 
 interface PrintViewErrorDiagnosticsProps {
   applicationId: string;
