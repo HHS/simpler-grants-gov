@@ -11,7 +11,6 @@
  * - stubbing and controlling upload endpoint behavior
  *
  * Common update points:
- * - TEST_UPLOAD_DIR: fixture files used by file upload tests
  * - openApplicationFormWithAuth: auth, application setup, and form navigation
  * - resolveFileInputLocator: locate the file input from a field config or test ID
  * - expectUploadProgressStatusMessage: checks upload progress states
@@ -31,13 +30,8 @@ import {
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { type FillFieldDefinition } from "tests/e2e/utils/common/types";
+import { waitForAnyVisible } from "tests/e2e/utils/common/wait-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
-
-// Directory of fixture files used by file upload tests.
-export const TEST_UPLOAD_DIR = path.resolve(
-  __dirname,
-  "../../test-upload-files",
-);
 
 /**
  * Authenticate the test user, create a new application, and open the requested form.
@@ -125,7 +119,8 @@ function resolveFileInputWrapperLocator(
  * Upload one or more files using the resolved file input.
  *
  * If the resolved input does not accept multiple files and an array is
- * provided, only the first file is uploaded to avoid invalid input behavior.
+ * provided, upload the first file only. This avoids invalid input behavior
+ * while preserving the intended single-file input semantics.
  */
 export async function uploadFile(
   page: Page,
@@ -163,12 +158,15 @@ function normalizeUploadedFileName(fileName: string): string {
 /**
  * Return a locator for the uploaded file entry shown in the existing files list.
  */
-function getExistingFileEntryLocator(page: Page, fileName: string): Locator {
+function getExistingFileEntriesLocator(page: Page, fileName: string): Locator {
   const normalizedFileName = normalizeUploadedFileName(fileName);
   return page
     .locator('[data-testid="file-input-existing-files"]')
-    .locator(`text=${normalizedFileName}`)
-    .first();
+    .locator(`text=${normalizedFileName}`);
+}
+
+function getExistingFileEntryLocator(page: Page, fileName: string): Locator {
+  return getExistingFileEntriesLocator(page, fileName).first();
 }
 
 /**
@@ -194,10 +192,7 @@ export async function expectUploadedFileCount(
   count: number,
   timeoutMs = 60000,
 ): Promise<void> {
-  const normalizedFileName = normalizeUploadedFileName(fileName);
-  const entryLocator = page
-    .locator('[data-testid="file-input-existing-files"]')
-    .locator(`text=${normalizedFileName}`);
+  const entryLocator = getExistingFileEntriesLocator(page, fileName);
 
   // If the expected count is zero, assert there are no entries.
   if (count === 0) {
@@ -216,9 +211,12 @@ export async function expectUploadedFileCount(
   }
 
   // Fallback to a generic page text search if the entry locator did not return elements yet.
-  await expect(page.getByText(normalizedFileName)).toHaveCount(count, {
-    timeout: timeoutMs,
-  });
+  await expect(page.getByText(normalizeUploadedFileName(fileName))).toHaveCount(
+    count,
+    {
+      timeout: timeoutMs,
+    },
+  );
 }
 
 /**
@@ -332,43 +330,16 @@ async function assertRetryControlVisible(
   const cancelButton = page.getByRole("button", { name: /cancel/i }).first();
   const chooseFromFolder = page.getByText(/choose from folder/i).first();
 
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if (
-      (await fileInputWrapper.count()) > 0 &&
-      (await fileInputWrapper.isVisible())
-    ) {
-      return;
-    }
-
-    if (
-      (await dismissButton.count()) > 0 &&
-      (await dismissButton.isVisible())
-    ) {
-      return;
-    }
-
-    if ((await cancelButton.count()) > 0 && (await cancelButton.isVisible())) {
-      return;
-    }
-
-    if (
-      (await chooseFromFolder.count()) > 0 &&
-      (await chooseFromFolder.isVisible())
-    ) {
-      return;
-    }
-
-    await page.waitForTimeout(250);
-  }
-
-  throw new Error(
-    "Expected a retry control to be visible after upload failure: visible file input wrapper, 'Dismiss' button, 'Cancel' button, or 'choose from folder' text.",
+  await waitForAnyVisible(
+    page,
+    [fileInputWrapper, dismissButton, cancelButton, chooseFromFolder],
+    timeoutMs,
   );
 }
 
 export type AssertUploadDidNotSaveOptions = {
   assertInputVisible?: boolean;
+  assertErrorMessage?: string | RegExp;
 };
 
 export async function assertUploadDidNotSave(
@@ -382,12 +353,22 @@ export async function assertUploadDidNotSave(
     .locator('[data-testid="file-input-existing-files"]')
     .locator(`text=${fileName}`);
 
+  // First ensure the file is not present in the existing files list.
   await expect(entryLocator).toHaveCount(expectedCount, {
     timeout: 60000,
   });
 
-  if (expectedCount === 0 && options.assertInputVisible !== false) {
+  if (expectedCount !== 0) {
+    return;
+  }
+
+  // For failure cases, optionally assert the retry UI path and/or an error message.
+  if (options.assertInputVisible !== false) {
     await assertRetryControlVisible(page, fileInputTarget);
+  }
+
+  if (options.assertErrorMessage) {
+    await expectUploadStatusMessage(page, options.assertErrorMessage, 60000);
   }
 }
 
@@ -423,10 +404,10 @@ export async function expectUploadStatusMessage(
 }
 
 /**
- * Wait for a standard upload progress status message to appear.
+ * Wait for one of the common upload progress status messages.
  *
- * This checks for the common streamed upload states used by the attachment
- * form upload flow.
+ * This helper validates that the page shows a standard streamed upload
+ * state such as queued, uploading, processing, or upload completion.
  */
 export async function expectUploadProgressStatusMessage(
   page: Page,
@@ -439,18 +420,24 @@ export async function expectUploadProgressStatusMessage(
   );
 }
 
+export type AttachmentSaveUrlPredicate = (url: string) => boolean;
+
 /**
  * Wait for the attachment save POST response after upload completion.
+ *
+ * By default this matches the apply form attachment route, but callers can
+ * override the URL predicate for other upload flows.
  */
 export async function waitForAttachmentSaveResponse(
   page: Page,
   timeoutMs = 30000,
+  urlPredicate: AttachmentSaveUrlPredicate = (url) =>
+    url.includes("/attachments"),
 ): Promise<Response> {
   return await page.waitForResponse(
     (response) =>
       response.request().method() === "POST" &&
-      response.url().includes("/api/applications/") &&
-      response.url().includes("/attachments") &&
+      urlPredicate(response.url()) &&
       response.status() === 200,
     { timeout: timeoutMs },
   );

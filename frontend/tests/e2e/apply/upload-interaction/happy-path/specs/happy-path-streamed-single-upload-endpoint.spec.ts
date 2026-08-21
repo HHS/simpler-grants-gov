@@ -72,7 +72,7 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
         fieldDefinitionsAttachment.attachment,
       );
 
-      // Then the upload progress status should be displayed: "Uploading...", "Processing...", and "Completed" in sequence.
+      // Then a standard upload progress state should be displayed.
       await expectUploadProgressStatusMessage(page);
 
       // And the attachment save request should complete successfully: Check for the save response from the server
@@ -155,7 +155,8 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
       // When checking the file input attributes
       await expect(fileInput).not.toHaveAttribute("multiple");
 
-      // And the applicant attempts to upload multiple files to the single-file field
+      // And the applicant provides multiple files to a single-file field
+      // (the helper will only upload the first file for non-multiple inputs)
       await uploadFile(
         page,
         [

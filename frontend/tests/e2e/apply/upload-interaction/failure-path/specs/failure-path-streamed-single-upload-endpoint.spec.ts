@@ -64,7 +64,8 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         OPPORTUNITY_URL,
       );
 
-      // And the upload request is aborted before completion
+      // And the upload request is aborted as soon as it is routed
+      // (this avoids a flaky in-progress timing window)
       await abortAttachmentUploadRequest(page);
 
       // When the applicant uploads a ZIP file
@@ -111,7 +112,8 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         OPPORTUNITY_URL,
       );
 
-      // And the upload request is forced to fail
+      // And the upload request is forced to fail.
+      // This stubs both the streaming upload endpoint and the attachment save endpoint.
       await failAttachmentUploadRequest(page);
 
       // When the applicant uploads a ZIP file
