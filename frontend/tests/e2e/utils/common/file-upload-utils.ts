@@ -17,7 +17,6 @@
  * - waitForAttachmentSaveResponse: waits for the attachment save POST response
  */
 
-import path from "path";
 import {
   expect,
   type BrowserContext,
