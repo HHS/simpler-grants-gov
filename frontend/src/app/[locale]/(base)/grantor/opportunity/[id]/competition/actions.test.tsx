@@ -2,6 +2,7 @@ import { identity } from "lodash";
 import { ApiRequestError } from "src/errors";
 import {
   createCompetitionForGrantor,
+  saveCompetitionInstructions,
   updateCompetitionForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
@@ -14,6 +15,7 @@ jest.mock("next-intl/server", () => ({
 
 jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
   createCompetitionForGrantor: jest.fn(),
+  saveCompetitionInstructions: jest.fn(),
   updateCompetitionForGrantor: jest.fn(),
 }));
 
@@ -29,6 +31,9 @@ const mockCreateCompetitionForGrantor = jest.mocked(
 );
 const mockUpdateCompetitionForGrantor = jest.mocked(
   updateCompetitionForGrantor,
+);
+const mockSaveCompetitionInstructions = jest.mocked(
+  saveCompetitionInstructions,
 );
 
 const mockRequiredForms: CompetitionFormsSubmitApi = [
@@ -92,7 +97,7 @@ describe("updateCompetition", () => {
     });
   });
 
-  it("calls createCompetitionForGrantor when no competitionId and returns new ID", async () => {
+  it("calls createCompetitionForGrantor when no competitionId", async () => {
     const formData = buildValidFormData();
     formData.delete("competitionId");
 
@@ -110,7 +115,6 @@ describe("updateCompetition", () => {
     );
     expect(result).toEqual({
       successMessage: "success",
-      newCompetitionId: "new-competition-id",
     });
   });
 
@@ -132,6 +136,65 @@ describe("updateCompetition", () => {
     );
     expect(result).toEqual({
       successMessage: "success",
+    });
+  });
+
+  it("saves application instructions when creating a competition with a pending file ID", async () => {
+    const formData = buildValidFormData({
+      "pending-file-id": "pending-file-789",
+    });
+    formData.delete("competitionId");
+
+    mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
+
+    const result = await updateCompetition(formData);
+
+    expect(mockSaveCompetitionInstructions).toHaveBeenCalledWith(
+      "opp-123",
+      "new-competition-id",
+      "pending-file-789",
+    );
+    expect(result).toEqual({
+      successMessage: "success",
+    });
+  });
+
+  it("saves application instructions when a pending file ID exists", async () => {
+    const formData = buildValidFormData({
+      "pending-file-id": "pending-file-789",
+    });
+
+    mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
+
+    const result = await updateCompetition(formData);
+
+    expect(mockSaveCompetitionInstructions).toHaveBeenCalledWith(
+      "opp-123",
+      "compete-456",
+      "pending-file-789",
+    );
+    expect(result).toEqual({
+      successMessage: "success",
+    });
+  });
+
+  it("returns a generic error when saving application instructions fails", async () => {
+    const formData = buildValidFormData({
+      "pending-file-id": "pending-file-789",
+    });
+
+    mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
+    mockSaveCompetitionInstructions.mockRejectedValue(new Error("unexpected"));
+
+    const result = await updateCompetition(formData);
+
+    expect(mockSaveCompetitionInstructions).toHaveBeenCalledWith(
+      "opp-123",
+      "compete-456",
+      "pending-file-789",
+    );
+    expect(result).toEqual({
+      errorMessage: "genericError",
     });
   });
 

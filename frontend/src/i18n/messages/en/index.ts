@@ -2699,6 +2699,20 @@ export const messages = {
           "Incorrect text format. Please ensure there are no spaces or missing characters.",
       },
     },
+    sectionApplicationInstructions: {
+      header: "Application instructions",
+      subHeader:
+        "Upload any supporting instructions needed for the application.",
+      uploadAFile: "Upload a file",
+      multipleFiles: "For multiple files, combine them into one zip file.",
+      uploadWidget: {
+        error:
+          "Processing failed due to a system error. Try uploading your file again.",
+        success:
+          "Success: File scan complete. “Save” this form to attach the file.",
+        uploading: "Uploading...",
+      },
+    },
     sectionRequiredForms: {
       header: "Forms in this package",
       subHeader: "Select the forms applicants must complete.",
