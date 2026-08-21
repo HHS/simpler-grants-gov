@@ -72,8 +72,3 @@ ignore:
   # https://github.com/HHS/simpler-grants-gov/issues/8109
   # Last checked: 09/10/2026
   - vulnerability: CVE-2026-15310
-
-  # dompurify via isomorphic-dompurify
-  # Major version upgrade required, will do after 8/12 release
-  # Last checked: 08/11/2026
-  - vulnerability: GHSA-55q2-fjhq-7xh7
