@@ -118,8 +118,7 @@ const RecommendationFields = ({
           value={recommendationType}
           onChange={(event) => {
             const nextValue = event.target.value as
-              | AwardRecommendationType
-              | "";
+              AwardRecommendationType | "";
             onRecommendationTypeChange(nextValue);
             if (nextValue === "") {
               onHasExceptionChange(false);

@@ -23,9 +23,7 @@ function getRootSchemaFromContext(context: unknown): RJSFSchema | undefined {
 }
 
 type WarningsFromContext =
-  | FormValidationWarning[]
-  | FormattedFormValidationWarning[]
-  | [];
+  FormValidationWarning[] | FormattedFormValidationWarning[] | [];
 
 function coerceFormValidationWarnings(
   input: WarningsFromContext,
@@ -89,11 +87,9 @@ function Budget424aSectionF<
     | undefined;
 
   const directChargesSchema = properties?.direct_charges_explanation as
-    | RJSFSchema
-    | undefined;
+    RJSFSchema | undefined;
   const indirectChargesSchema = properties?.indirect_charges_explanation as
-    | RJSFSchema
-    | undefined;
+    RJSFSchema | undefined;
   const remarksSchema = properties?.remarks as RJSFSchema | undefined;
   const confirmationSchema = properties?.confirmation as RJSFSchema | undefined;
 
@@ -132,8 +128,7 @@ function Budget424aSectionF<
   );
   const remarksValue = getStringOrUndefined(rootValue, "remarks");
   const confirmationValue = get(rootValue, "confirmation") as
-    | boolean
-    | undefined;
+    boolean | undefined;
 
   const updateField = (path: string, next: unknown) => {
     const updated = { ...rootValue };
