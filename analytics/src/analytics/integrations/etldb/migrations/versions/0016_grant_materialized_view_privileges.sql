@@ -1,6 +1,7 @@
--- GRANT ... ON ALL TABLES IN SCHEMA and ALTER DEFAULT PRIVILEGES ... ON TABLES
--- (used elsewhere for these roles) do not cover materialized views in
--- Postgres. Each materialized view needs its own explicit grant.
+-- metabaseuser's Postgres role isn't provisioned by this repo's
+-- infra/modules/database role-manager pipeline (unlike app/migrator), so
+-- nothing in this codebase keeps its grants in sync with schema changes --
+-- newly created objects need an explicit grant here.
 --
 -- metabaseuser only exists in environments where Metabase's infra has
 -- provisioned it (not local/CI), so each grant is conditional on the role
