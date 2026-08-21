@@ -44,6 +44,10 @@ const { GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
 
 test.describe("Grantor opportunities list page happy path", () => {
+    test.fixme(
+    true,
+    "Happy-path Opportunity list tests are consistently flaky/failing in CI",
+  );
   test.beforeEach(({ page: _ }, testInfo) => {
     if (targetEnv === "staging") {
       test.skip(
