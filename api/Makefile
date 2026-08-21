@@ -386,11 +386,11 @@ help: ## Prints the help documentation and info about each command
 # XML Validation Tests
 ##################################################
 
-test-xml-validation: ## Run XML validation tests against XSD schemas (usage: make test-xml-validation form=SF424_4_0)
-	$(PY_RUN_CMD) flask task validate-xml-generation $(if $(form),--form $(form)) $(args)
-
 fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds xsd_dir=../services/xml_generation/xsds/)
 	$(PY_RUN_CMD) flask task fetch-xsds $(if $(cache_dir),--xsd-dir $(xsd_dir)) $(if $(form),--form $(form)) $(args)
+
+check-xsd-drift: ## Check for drift between committed XSDs and live grants.gov copies
+	$(PY_RUN_CMD) flask task check-xsd-drift $(args)
 
 ##################################################
 # Load testing
@@ -427,9 +427,6 @@ validate-simpler-endpoints:
 
 generate-xml: ## Generate XML from JSON (usage: make generate-xml json='{"field": "value"}' form=SF424_4_0)
 	$(PY_RUN_CMD) flask task generate-xml --json '$(json)' --form $(or $(form),SF424_4_0)
-
-validate-xml-generation: ## Run XML generation validation tests
-	$(PY_RUN_CMD) flask task validate-xml-generation
 
 run-xml-validator: ## Run XML validator tool directly
 	$(PY_RUN_CMD) python tool/xml_validator.py
