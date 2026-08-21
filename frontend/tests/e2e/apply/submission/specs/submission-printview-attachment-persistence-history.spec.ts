@@ -108,10 +108,12 @@ for (const {
           })
           .setInputFiles(testData.att1);
 
+        // For attachment form, file elements are at page level (not nested in section)
+        // So we pass page as the scope, not a specific form section
         await verifyVirusScanPassedAndUploaded(
           page,
           "sample-upload-kb.pdf",
-          page.locator("#form-section-att1"),
+          page,
           false,
         );
 
