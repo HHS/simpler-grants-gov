@@ -51,8 +51,3 @@ ignore:
   # Fix only in pre-release Python 3.15 (3.15.0b4); no fix in any GA 3.14.x yet.
   # Last checked: 07/30/2026
   - vulnerability: CVE-2026-0864
-
-  # dompurify via isomorphic-dompurify
-  # Major version upgrade required, will do after 8/12 release
-  # Last checked: 08/11/2026
-  - vulnerability: GHSA-55q2-fjhq-7xh7
