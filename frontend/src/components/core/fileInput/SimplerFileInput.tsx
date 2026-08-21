@@ -65,6 +65,10 @@ export const SimplerFileInput = ({
   maxFileSizeBytes = MAX_UPLOAD_FILE_SIZE_BYTES,
 }: SimplerFileInputProps) => {
   const previousExistingFilesLength = usePrevious(existingFiles?.length);
+  // On multifile inputs we don't really need to track the file input, so we clear it out immediately
+  // on upload start in order to avoid showing the trussworks "files added" state.
+  // On single file input we need to track files added in order to handle cases where multiple uploads
+  // are attempted
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   // a counter rather than a timestamp: files selected in one batch would otherwise share
@@ -149,8 +153,6 @@ export const SimplerFileInput = ({
         setDeletePending(false);
         setFilePendingDeletion(undefined);
         deleteModalRef.current?.toggleModal();
-        // figured we may need to clear delete errors for the file here, but it should
-        // be removed from the dom on successful delete so I don't think it's necessary
         return;
       })
       .catch((e) => {
@@ -191,6 +193,13 @@ export const SimplerFileInput = ({
       ...previousCompletedUploads,
       uploadId,
     ]);
+    setActiveUploads((previousActiveUploads) =>
+      previousActiveUploads.filter(
+        (activeUpload) => activeUpload.uploadId !== uploadId,
+      ),
+    );
+  };
+  const trackUploadCanceled = (uploadId: string) => {
     setActiveUploads((previousActiveUploads) =>
       previousActiveUploads.filter(
         (activeUpload) => activeUpload.uploadId !== uploadId,
@@ -266,7 +275,7 @@ export const SimplerFileInput = ({
           key={uploadId}
           fileToUpload={file}
           onCancel={() => {
-            trackUploadComplete(uploadId);
+            trackUploadCanceled(uploadId);
             if (!multiFile) {
               fileInputRef?.current?.clearFiles();
             }
@@ -277,7 +286,13 @@ export const SimplerFileInput = ({
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
-          onStart={onStart}
+          onStart={() => {
+            // we never want to show the "files added" state of the trussworks input
+            if (multiFile) {
+              fileInputRef?.current?.clearFiles();
+            }
+            onStart();
+          }}
           onUploadSuccess={(postUploadResult: unknown) => {
             trackUploadComplete(uploadId);
             onSuccess(postUploadResult);
