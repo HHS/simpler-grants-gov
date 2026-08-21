@@ -12,6 +12,7 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
+  ATTACHMENT_OPPORTUNITY_DATA,
   SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
   SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
 } from "tests/e2e/apply/fixtures/attachment-data";
@@ -19,7 +20,6 @@ import {
   ATTACHMENT_FORM_CONFIG,
   fieldDefinitionsAttachment,
 } from "tests/e2e/apply/fixtures/attachment-field-definitions";
-import { OPPORTUNITY_ID_STREAMED_UPLOAD } from "tests/e2e/apply/fixtures/general-apply-fixtures";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
@@ -38,7 +38,7 @@ import {
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
-const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID_STREAMED_UPLOAD}`;
+const OPPORTUNITY_URL = `/opportunity/${ATTACHMENT_OPPORTUNITY_DATA.opportunityId}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
