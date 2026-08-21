@@ -21,8 +21,7 @@ export async function InvitedUsersSection({
   const t = await getTranslations("ManageUsers");
 
   const invitedUsersData = invitedUsers.data as
-    | OrganizationPendingInvitation[]
-    | undefined;
+    OrganizationPendingInvitation[] | undefined;
   const invitedUsersError = invitedUsers.error;
 
   if (invitedUsersError || !invitedUsersData) {

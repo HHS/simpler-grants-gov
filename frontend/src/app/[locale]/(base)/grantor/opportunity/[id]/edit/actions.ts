@@ -124,8 +124,7 @@ function mapApiValidationErrors(
     const error = rawError as FrontendErrorDetails;
     const message = error.message ?? genericMessage;
     const field = error.field as
-      | keyof OpportunityEditValidationErrors
-      | undefined;
+      keyof OpportunityEditValidationErrors | undefined;
 
     if (field && EDIT_FORM_FIELD_NAMES.has(field)) {
       validationErrors[field] = [...(validationErrors[field] ?? []), message];
