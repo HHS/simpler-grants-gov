@@ -15,7 +15,6 @@ import {
 } from "@playwright/test";
 import {
   SF424_APPLICANT_SCENARIOS,
-  SF424_OPPORTUNITY_NUMBER,
   SF424_TEST_UPLOAD_FILE,
 } from "tests/e2e/apply/fixtures/sf424-data";
 import {
@@ -58,7 +57,7 @@ import {
 const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 const TAGS = [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION];
 
-const OPPORTUNITY_NUMBER = SF424_OPPORTUNITY_NUMBER;
+const OPPORTUNITY_NUMBER = "E2E-SF424-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 const sf424Form = opportunityConfig.forms[0];
 
