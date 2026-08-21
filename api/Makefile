@@ -392,6 +392,9 @@ test-xml-validation: ## Run XML validation tests against XSD schemas (usage: mak
 fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds xsd_dir=../services/xml_generation/xsds/)
 	$(PY_RUN_CMD) flask task fetch-xsds $(if $(cache_dir),--xsd-dir $(xsd_dir)) $(if $(form),--form $(form)) $(args)
 
+check-xsd-drift: ## Check for drift between committed XSDs and live grants.gov copies
+	$(PY_RUN_CMD) flask task check-xsd-drift $(args)
+
 ##################################################
 # Load testing
 ##################################################
