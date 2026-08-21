@@ -1,9 +1,11 @@
 -- app already has SELECT on these materialized views via the
--- ALTER DEFAULT PRIVILEGES set up in migration 0001. metabaseuser's
--- Postgres role isn't provisioned by this repo's infra/modules/database
--- role-manager pipeline (unlike app/migrator), so nothing in this codebase
--- keeps its grants in sync with schema changes -- it needs an explicit
--- grant here.
+-- ALTER DEFAULT PRIVILEGES set up in migration 0001, scoped to objects
+-- migrator creates. metabaseuser's existing access to this schema instead
+-- traces back to a one-time GRANT ON ALL TABLES IN SCHEMA, run against
+-- whatever tables existed at the time -- there's no standing default-acl
+-- rule covering objects migrator creates, so nothing keeps metabaseuser's
+-- grants in sync going forward. Every migration that adds a new relation
+-- needs its own explicit grant here until that's fixed at the infra level.
 --
 -- metabaseuser only exists in environments where Metabase's infra has
 -- provisioned it (not local/CI), so the grant is conditional on the role
