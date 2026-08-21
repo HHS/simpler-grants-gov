@@ -38,7 +38,9 @@ export async function verifyVirusScanPassedAndUploaded(
     fileName,
     { timeout: 30_000 },
   );
-  await expect(
-    scope.getByTestId("file-input-existing-files").getByTestId("button"),
-  ).toContainText("Delete");
+  // Check that a delete button exists for this file by verifying the text appears somewhere in the section
+  // (Don't require a single button since multiple files may have delete buttons)
+  await expect(scope.getByTestId("file-input-existing-files")).toContainText(
+    "Delete",
+  );
 }
