@@ -22,5 +22,7 @@ module "infra_dev_config" {
   database_max_capacity         = 1
   database_instance_count       = 1
 
-  service_override_extra_environment_variables = {}
+  service_override_extra_environment_variables = {
+    HHS_NOFO_METRICS_ENABLED = "true"
+  }
 }
