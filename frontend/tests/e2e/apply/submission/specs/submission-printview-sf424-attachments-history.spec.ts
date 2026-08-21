@@ -14,9 +14,9 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
+  SF424_APPLICANT_SCENARIOS,
   SF424_OPPORTUNITY_NUMBER,
   SF424_TEST_UPLOAD_FILE,
-  SF424_APPLICANT_SCENARIOS,
 } from "tests/e2e/apply/fixtures/sf424-data";
 import {
   SF424_FORM_CONFIG,

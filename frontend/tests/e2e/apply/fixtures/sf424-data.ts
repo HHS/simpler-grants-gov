@@ -1,8 +1,8 @@
 import path from "path";
 import type { fieldDefinitionsSF424 } from "tests/e2e/apply/fixtures/sf424-field-definitions";
+import playwrightEnv from "tests/e2e/playwright-env";
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
-import playwrightEnv from "tests/e2e/playwright-env";
 
 /**
  * Single source of truth for SF-424 E2E testing constants.
@@ -18,7 +18,10 @@ export const SF424_TEST_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
  * Used to validate workflows across different user types.
  */
 export const SF424_APPLICANT_SCENARIOS = [
-  { scenarioName: "Organization applicant", orgLabel: playwrightEnv.testOrgLabel },
+  {
+    scenarioName: "Organization applicant",
+    orgLabel: playwrightEnv.testOrgLabel,
+  },
   { scenarioName: "Individual applicant", orgLabel: undefined },
 ] as const;
 
