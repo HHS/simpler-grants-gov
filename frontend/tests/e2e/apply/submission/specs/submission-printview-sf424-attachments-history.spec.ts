@@ -6,7 +6,6 @@
  *           applicants.
  */
 
-import path from "path";
 import {
   expect,
   test,
@@ -15,10 +14,14 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
+  SF424_OPPORTUNITY_NUMBER,
+  SF424_TEST_UPLOAD_FILE,
+  SF424_APPLICANT_SCENARIOS,
+} from "tests/e2e/apply/fixtures/sf424-data";
+import {
   SF424_FORM_CONFIG,
   SF424_FORM_MATCHER,
 } from "tests/e2e/apply/fixtures/sf424-field-definitions";
-import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
@@ -55,27 +58,17 @@ import {
 const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 const TAGS = [SMOKE, GRANTEE, APPLY, APPLY_FORMS, CORE_REGRESSION];
 
-const { testOrgLabel } = playwrightEnv;
-
-const OPPORTUNITY_NUMBER = "E2E-SF424-ORG-IND-01";
+const OPPORTUNITY_NUMBER = SF424_OPPORTUNITY_NUMBER;
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 const sf424Form = opportunityConfig.forms[0];
 
-const UPLOAD_SOURCE_FILE = path.join(
-  process.cwd(),
-  "tests/e2e/test-upload-files/sample-upload-kb.pdf",
-);
-
-const applicantScenarios = [
-  { scenarioName: "Organization applicant", orgLabel: testOrgLabel },
-  { scenarioName: "Individual applicant", orgLabel: undefined },
-] as const;
+const UPLOAD_SOURCE_FILE = SF424_TEST_UPLOAD_FILE;
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-for (const { scenarioName, orgLabel } of applicantScenarios) {
+for (const { scenarioName, orgLabel } of SF424_APPLICANT_SCENARIOS) {
   test(
     `${scenarioName} - SF-424 attachment upload, status, and history validation`,
     { tag: TAGS },
