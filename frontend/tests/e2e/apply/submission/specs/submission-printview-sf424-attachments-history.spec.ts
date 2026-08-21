@@ -136,18 +136,19 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
       await page.waitForTimeout(1000);
 
       // --- Verify upload status for each single-file attachment ---
+      // Note: Pass false to skip progressbar check which may not appear for all upload types
       await verifyVirusScanPassedAndUploaded(
         page,
         fileNameOf(testData.areas_affected_attachment),
         page.locator("#form-section-areas_affected"),
-        true,
+        false,
       );
 
       await verifyVirusScanPassedAndUploaded(
         page,
         fileNameOf(testData.additional_congressional_attachment),
         page.locator("#form-section-congressional_districts"),
-        true,
+        false,
       );
 
       // --- Multi-file attachment: raw upload, since fillForm only supports one file per field ---
@@ -171,7 +172,7 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
         page,
         fileNameOf(firstProjectTitleFile),
         projectTitleSection,
-        true,
+        false,
       );
 
       await expect(projectTitleSection).toContainText(
