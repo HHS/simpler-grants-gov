@@ -4,7 +4,9 @@ import { checkUserPrivilege } from "src/services/fetch/fetchers/userFetcher";
 export type GatedResourceTypes = "application" | "organization" | "agency";
 
 export type Privileges =
-  "view_opportunity" | "update_opportunity" | "create_opportunity";
+  | "view_opportunity"
+  | "update_opportunity"
+  | "create_opportunity";
 
 export interface UserPrivilegeRequest {
   resourceId?: string;

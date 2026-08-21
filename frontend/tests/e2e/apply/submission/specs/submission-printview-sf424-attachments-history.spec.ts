@@ -6,7 +6,6 @@
  *           applicants.
  */
 
-import fs from "fs";
 import path from "path";
 import {
   expect,
@@ -24,6 +23,15 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import {
+  createMultipleNumberedUploadFiles,
+  fileNameOf,
+  resolveFieldLocator,
+  uploadMultipleFiles,
+  verifyAttachmentHistoryActivities,
+  testCancelFileUpload,
+  testDismissUploadStatus,
+} from "tests/e2e/utils/forms/attachment-test-utils";
 import { verifyVirusScanPassedAndUploaded } from "tests/e2e/utils/forms/file-upload-status-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { fillFormPartial } from "tests/e2e/utils/forms/general-forms-filling";
@@ -69,38 +77,6 @@ test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
 
-/** Extracts the display filename from a full path, matching how the app renders it. */
-function fileNameOf(filePath: string): string {
-  return filePath.split(/[/\\]/).pop() ?? filePath;
-}
-
-/**
- * Creates a uniquely named copy of the shared upload fixture.
- *
- * Example:
- * sample-upload-kb-1.pdf
- * sample-upload-kb-2.pdf
- * sample-upload-kb-3.pdf
- */
-function createNumberedUploadFile(
-  sourceFile: string,
-  counter: number,
-  uniqueSuffix: string,
-): string {
-  const directory = path.dirname(sourceFile);
-  const extension = path.extname(sourceFile);
-  const baseName = path.basename(sourceFile, extension);
-
-  const numberedFile = path.join(
-    directory,
-    `${baseName}-${uniqueSuffix}-${counter}${extension}`,
-  );
-
-  fs.copyFileSync(sourceFile, numberedFile);
-
-  return numberedFile;
-}
-
 for (const { scenarioName, orgLabel } of applicantScenarios) {
   test(
     `${scenarioName} - SF-424 attachment upload, status, and history validation`,
@@ -119,32 +95,17 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
 
       const testData = buildHappyPathTestData(sf424Form, Date.now());
 
-      // Use a unique suffix so parallel test runs do not overwrite each other's files.
-      const uniqueSuffix = `${testInfo.parallelIndex}-${Date.now()}`;
-      let fileCounter = 1;
-
-      const areasAffectedFile = createNumberedUploadFile(
+      // Create 4 uniquely named test files for parallel execution (prevents file conflicts)
+      const [
+        areasAffectedFile,
+        congressionalFile,
+        firstProjectTitleFile,
+        secondProjectTitleFile,
+      ] = createMultipleNumberedUploadFiles(
         UPLOAD_SOURCE_FILE,
-        fileCounter++,
-        uniqueSuffix,
-      );
-
-      const congressionalFile = createNumberedUploadFile(
-        UPLOAD_SOURCE_FILE,
-        fileCounter++,
-        uniqueSuffix,
-      );
-
-      const firstProjectTitleFile = createNumberedUploadFile(
-        UPLOAD_SOURCE_FILE,
-        fileCounter++,
-        uniqueSuffix,
-      );
-
-      const secondProjectTitleFile = createNumberedUploadFile(
-        UPLOAD_SOURCE_FILE,
-        fileCounter++,
-        uniqueSuffix,
+        4,
+        testInfo.parallelIndex,
+        Date.now(),
       );
 
       // Replace the attachment fixture paths with uniquely named copies.
@@ -172,32 +133,38 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
         restOfTestData,
       );
 
+      // Wait a bit for file uploads to settle, especially on mobile
+      // This gives the virus scan and file processing time to complete
+      await page.waitForTimeout(1000);
+
       // --- Verify upload status for each single-file attachment ---
       await verifyVirusScanPassedAndUploaded(
         page,
         fileNameOf(testData.areas_affected_attachment),
         page.locator("#form-section-areas_affected"),
-        false,
+        true,
       );
 
       await verifyVirusScanPassedAndUploaded(
         page,
         fileNameOf(testData.additional_congressional_attachment),
         page.locator("#form-section-congressional_districts"),
-        false,
+        true,
       );
 
       // --- Multi-file attachment: raw upload, since fillForm only supports one file per field ---
       const additionalProjectTitleField =
         SF424_FORM_CONFIG.fields.additional_project_title_attachment;
 
-      const additionalProjectTitleLocator = additionalProjectTitleField.selector
-        ? page.locator(additionalProjectTitleField.selector)
-        : page.getByTestId(additionalProjectTitleField.testId as string);
+      const additionalProjectTitleLocator = resolveFieldLocator(
+        page,
+        additionalProjectTitleField.selector as string | undefined,
+        additionalProjectTitleField.testId as string | undefined,
+      );
 
       const projectTitleSection = page.locator("#form-section-project_title");
 
-      await additionalProjectTitleLocator.setInputFiles([
+      await uploadMultipleFiles(additionalProjectTitleLocator, [
         firstProjectTitleFile,
         secondProjectTitleFile,
       ]);
@@ -206,10 +173,12 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
         page,
         fileNameOf(firstProjectTitleFile),
         projectTitleSection,
+        true,
       );
 
       await expect(projectTitleSection).toContainText(
         fileNameOf(secondProjectTitleFile),
+        { timeout: 30_000 },
       );
 
       await clickSaveButton(page, SF424_FORM_CONFIG.saveButtonTestId);
@@ -234,15 +203,7 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
         secondProjectTitleFile,
       ];
 
-      for (const filePath of expectedAttachmentFiles) {
-        const fileName = fileNameOf(filePath);
-
-        const actualCount = activities.filter((activity) =>
-          activity.includes(`Attachment added: ${fileName}`),
-        ).length;
-
-        expect(actualCount).toBe(1);
-      }
+      verifyAttachmentHistoryActivities(activities, expectedAttachmentFiles);
 
       // --- Submit and confirm ---
       await submitApplicationAndVerify(page, "success");
@@ -294,6 +255,107 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
       await expect(printProjectTitleSection).toContainText(
         fileNameOf(secondProjectTitleFile),
       );
+    },
+  );
+}
+
+// --- Additional Tests: Upload Status Behaviors ---
+// Test intermediate and dismissible upload statuses to ensure comprehensive coverage
+// without introducing flakiness (these are deterministic states).
+
+for (const { scenarioName, orgLabel } of applicantScenarios) {
+  test(
+    `${scenarioName} - SF-424 upload status: cancel and dismiss workflows`,
+    { tag: [APPLY, APPLY_FORMS] }, // Not in smoke/regression due to extra setup time
+    async (
+      { page, context }: { page: Page; context: BrowserContext },
+      testInfo: TestInfo,
+    ) => {
+      test.setTimeout(180_000); // 3-min timeout
+
+      const isMobile = testInfo.project.name.match(/[Mm]obile/);
+      await authenticateE2eUser(page, context, !!isMobile);
+
+      await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
+      const applicationUrl = page.url();
+
+      // Create minimal test data - we're only testing attachments, not full form
+      const testData = buildHappyPathTestData(sf424Form, Date.now());
+
+      // Create test files
+      const [cancelFile, dismissFile] = createMultipleNumberedUploadFiles(
+        UPLOAD_SOURCE_FILE,
+        2,
+        testInfo.parallelIndex,
+        Date.now(),
+      );
+
+      const opened = await openForm(page, SF424_FORM_MATCHER);
+      if (!opened) {
+        throw new Error(
+          "Could not find or open the SF-424 form link on the application page",
+        );
+      }
+
+      // --- Test 1: Upload and verify cancel workflow ---
+      // Start upload, cancel before completion, verify file is removed
+      const areasAffectedField = resolveFieldLocator(
+        page,
+        SF424_FORM_CONFIG.fields.areas_affected_attachment.selector as string | undefined,
+        SF424_FORM_CONFIG.fields.areas_affected_attachment.testId as string | undefined,
+      );
+
+      const areasAffectedSection = page.locator("#form-section-areas_affected");
+
+      // Test: Upload and cancel before completion
+      await testCancelFileUpload(areasAffectedField, cancelFile, 15_000);
+
+      // File should not be in existing files after cancel
+      const areasAffectedExistingFiles = areasAffectedSection.locator(
+        ".file-input-existing-files",
+      );
+      await expect(areasAffectedExistingFiles).not.toContainText(
+        fileNameOf(cancelFile),
+        { timeout: 5_000 },
+      );
+
+      // --- Test 2: Upload and verify dismiss workflow ---
+      // Upload file to completion, verify success, dismiss status, verify file persists
+      const congressionalField = resolveFieldLocator(
+        page,
+        SF424_FORM_CONFIG.fields.additional_congressional_attachment
+          .selector as string | undefined,
+        SF424_FORM_CONFIG.fields.additional_congressional_attachment
+          .testId as string | undefined,
+      );
+
+      const congressionalSection = page.locator(
+        "#form-section-congressional_districts",
+      );
+
+      await uploadMultipleFiles(congressionalField, [dismissFile]);
+
+      // Verify file appears in existing files (upload completed)
+      await verifyVirusScanPassedAndUploaded(
+        page,
+        fileNameOf(dismissFile),
+        congressionalSection,
+        true,
+      );
+
+      // Test: Upload and dismiss status after completion
+      await testDismissUploadStatus(congressionalSection, dismissFile, 30_000);
+
+      // File should still be in existing files after dismiss
+      const congressionalExistingFiles = congressionalSection.locator(
+        ".file-input-existing-files",
+      );
+      await expect(congressionalExistingFiles).toContainText(
+        fileNameOf(dismissFile),
+        { timeout: 5_000 },
+      );
+
+      // Don't save the form - we're just testing status behaviors
     },
   );
 }

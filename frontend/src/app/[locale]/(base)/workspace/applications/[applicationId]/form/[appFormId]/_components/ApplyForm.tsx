@@ -40,7 +40,8 @@ type Translator = ((
 
 interface WidgetSupport {
   validationWarnings:
-    FormattedFormValidationWarning[] | FormValidationWarning[];
+    | FormattedFormValidationWarning[]
+    | FormValidationWarning[];
   deletedEntryIndexesByFieldListPath: Record<string, number[]>;
   onFieldListEntryDelete: (
     fieldListPath: string,
@@ -75,7 +76,9 @@ const ApplyForm = ({
   savedFormData: object;
   uiSchema: UiSchema;
   validationWarnings:
-    FormattedFormValidationWarning[] | FormValidationWarning[] | null;
+    | FormattedFormValidationWarning[]
+    | FormValidationWarning[]
+    | null;
   attachments: Attachment[];
   isBudgetForm?: boolean;
   applicationStatus?: string;
