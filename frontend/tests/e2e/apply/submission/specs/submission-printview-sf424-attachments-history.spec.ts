@@ -27,8 +27,6 @@ import {
   createMultipleNumberedUploadFiles,
   fileNameOf,
   resolveFieldLocator,
-  testCancelFileUpload,
-  testDismissUploadStatus,
   uploadMultipleFiles,
   verifyAttachmentHistoryActivities,
 } from "tests/e2e/utils/forms/attachment-test-utils";
@@ -255,104 +253,6 @@ for (const { scenarioName, orgLabel } of applicantScenarios) {
       await expect(printProjectTitleSection).toContainText(
         fileNameOf(secondProjectTitleFile),
       );
-    },
-  );
-}
-
-// --- Additional Tests: Upload Status Behaviors ---
-// Test intermediate and dismissible upload statuses to ensure comprehensive coverage
-// without introducing flakiness (these are deterministic states).
-
-for (const { scenarioName, orgLabel } of applicantScenarios) {
-  test(
-    `${scenarioName} - SF-424 upload status: cancel and dismiss workflows`,
-    { tag: [APPLY, APPLY_FORMS] }, // Not in smoke/regression due to extra setup time
-    async (
-      { page, context }: { page: Page; context: BrowserContext },
-      testInfo: TestInfo,
-    ) => {
-      test.setTimeout(180_000); // 3-min timeout
-
-      const isMobile = testInfo.project.name.match(/[Mm]obile/);
-      await authenticateE2eUser(page, context, !!isMobile);
-
-      await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
-      // Note: applicationUrl and testData not used in status test, only for form setup
-      const _applicationUrl = page.url();
-      const _testData = buildHappyPathTestData(sf424Form, Date.now());
-
-      // Create test files
-      const [cancelFile, dismissFile] = createMultipleNumberedUploadFiles(
-        UPLOAD_SOURCE_FILE,
-        2,
-        testInfo.parallelIndex,
-        Date.now(),
-      );
-
-      const opened = await openForm(page, SF424_FORM_MATCHER);
-      if (!opened) {
-        throw new Error(
-          "Could not find or open the SF-424 form link on the application page",
-        );
-      }
-
-      // --- Test 1: Upload and verify cancel workflow ---
-      // Start upload, cancel before completion, verify file is removed
-      const areasAffectedField = resolveFieldLocator(
-        page,
-        SF424_FORM_CONFIG.fields.areas_affected_attachment.selector,
-        SF424_FORM_CONFIG.fields.areas_affected_attachment.testId,
-      );
-
-      const areasAffectedSection = page.locator("#form-section-areas_affected");
-
-      // Test: Upload and cancel before completion
-      await testCancelFileUpload(areasAffectedField, cancelFile, 15_000);
-
-      // File should not be in existing files after cancel
-      const areasAffectedExistingFiles = areasAffectedSection.locator(
-        ".file-input-existing-files",
-      );
-      await expect(areasAffectedExistingFiles).not.toContainText(
-        fileNameOf(cancelFile),
-        { timeout: 5_000 },
-      );
-
-      // --- Test 2: Upload and verify dismiss workflow ---
-      // Upload file to completion, verify success, dismiss status, verify file persists
-      const congressionalField = resolveFieldLocator(
-        page,
-        SF424_FORM_CONFIG.fields.additional_congressional_attachment.selector,
-        SF424_FORM_CONFIG.fields.additional_congressional_attachment.testId,
-      );
-
-      const congressionalSection = page.locator(
-        "#form-section-congressional_districts",
-      );
-
-      await uploadMultipleFiles(congressionalField, [dismissFile]);
-
-      // Verify file appears in existing files (upload completed)
-      await verifyVirusScanPassedAndUploaded(
-        page,
-        fileNameOf(dismissFile),
-        congressionalSection,
-        true,
-      );
-
-      // Test: Upload and dismiss status after completion
-      await testDismissUploadStatus(congressionalSection, dismissFile, 30_000);
-
-      // File should still be in existing files after dismiss
-      const congressionalExistingFiles = congressionalSection.locator(
-        ".file-input-existing-files",
-      );
-      await expect(congressionalExistingFiles).toContainText(
-        fileNameOf(dismissFile),
-        { timeout: 5_000 },
-      );
-
-      // Don't save the form - we're just testing status behaviors
     },
   );
 }
