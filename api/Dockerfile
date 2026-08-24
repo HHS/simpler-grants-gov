@@ -34,13 +34,15 @@ ENV UV_NO_DEV=1
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_CACHE_DIR="/tmp/.cache/uv"
 ENV UV_NO_SYNC=1
+ENV UV_PROJECT_ENVIRONMENT=/api/.venv
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
 RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
+    uv venv /api/.venv && \
     uv sync --locked --no-dev && \
     uv build --wheel && \
-    uv pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
+    uv pip install --no-cache-dir dist/*.whl && \
     uv pip install --no-cache-dir "virtualenv>=20.35.3" && \
     SITE_BASE="/api/.venv/lib/python${PY_MM}/site-packages" && \
     mkdir -p "${SITE_BASE}/src" && \
