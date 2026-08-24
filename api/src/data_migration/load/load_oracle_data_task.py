@@ -48,8 +48,6 @@ TABLES_TO_LOAD = [
     "tcompetition",
     "tinstructions",
     "tcertificates",
-    "vuser_account",
-    "tuser_profile",
 ]
 
 
