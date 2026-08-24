@@ -402,7 +402,7 @@ locals {
       mem              = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
-   check-xsd-drift = {
+    check-xsd-drift = {
       task_command = ["flask", "task", "check-xsd-drift"]
       # Every day at 1am Eastern Time during DST. 2am during non-DST.
       schedule_expression = "cron(0 6 * * ? *)"
