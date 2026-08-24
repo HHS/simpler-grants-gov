@@ -256,6 +256,10 @@ def stream_file_scan_results(
                         "user_id": user_id,
                         "file_scan_status": status,
                         "stream_duration_seconds": elapsed,
+                        # infected files will log file_size_bytes of null
+                        "file_size_bytes": (
+                            file_metadata.file_size_bytes if file_metadata else None
+                        ),
                     },
                 )
                 return

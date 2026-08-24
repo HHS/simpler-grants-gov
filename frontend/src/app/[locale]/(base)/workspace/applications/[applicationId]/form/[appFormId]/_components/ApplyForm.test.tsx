@@ -56,8 +56,6 @@ jest.mock(
   () => ({
     handleFormAction: (...args: [...FormActionArgs]) =>
       mockHandleFormAction(...args),
-    // referenced by useAttachmentDelete within the legacy attachment widget
-    deleteAttachmentAction: jest.fn(),
   }),
 );
 
@@ -644,7 +642,7 @@ describe("ApplyForm", () => {
   });
 
   describe("attachment widget rendering", () => {
-    it("renders the virus scanning attachment widget for a saved attachment when useSingleAttachmentVirusScanning is on", () => {
+    it("renders the virus scanning attachment widget for a saved attachment", () => {
       const { container } = render(
         <ApplyForm
           applicationId="application-123"
@@ -657,7 +655,6 @@ describe("ApplyForm", () => {
           validationWarnings={[]}
           attachments={[savedAttachment]}
           applicationStatus="in_progress"
-          useSingleAttachmentVirusScanning={true}
         />,
       );
 
@@ -686,7 +683,6 @@ describe("ApplyForm", () => {
           validationWarnings={[]}
           attachments={[savedAttachment]}
           applicationStatus="in_progress"
-          useSingleAttachmentVirusScanning={true}
         />,
       );
 
@@ -698,39 +694,6 @@ describe("ApplyForm", () => {
       expect(
         screen.queryByTestId("file-input-existing-files"),
       ).not.toBeInTheDocument();
-    });
-
-    it("renders the legacy attachment widget when useSingleAttachmentVirusScanning is off", () => {
-      const { container } = render(
-        <ApplyForm
-          applicationId="application-123"
-          formId="test"
-          formSchema={attachmentFormSchema}
-          savedFormData={{
-            att1: savedAttachment.application_attachment_id,
-          }}
-          uiSchema={attachmentUiSchema}
-          validationWarnings={[]}
-          attachments={[savedAttachment]}
-          applicationStatus="in_progress"
-          useSingleAttachmentVirusScanning={false}
-        />,
-      );
-
-      // the legacy widget still submits the saved attachment id
-      expect(getHiddenInput(container, "att1")).toHaveValue(
-        savedAttachment.application_attachment_id,
-      );
-
-      // but unmounts its file input once a file exists, and renders the
-      // file name without the existing-files display
-      const fileInputs = screen.getAllByTestId("file-input-input");
-      expect(fileInputs).toHaveLength(1);
-      expect(fileInputs[0]).toHaveAttribute("id", "att2");
-      expect(
-        screen.queryByTestId("file-input-existing-files"),
-      ).not.toBeInTheDocument();
-      expect(screen.getByText("narrative.pdf")).toBeInTheDocument();
     });
   });
 
@@ -746,7 +709,6 @@ describe("ApplyForm", () => {
           validationWarnings={[]}
           attachments={[]}
           applicationStatus="in_progress"
-          useSingleAttachmentVirusScanning={true}
         />,
       );
 

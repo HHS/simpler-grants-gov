@@ -15,55 +15,71 @@ FORM_JSON_SCHEMA = {
             "properties": {
                 "administrative_and_legal_expenses": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Administrative and Legal Expenses",
                 },
                 "land_structures_rights_of_way": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Land, Structures, Rights-of-Way, Appraisals, etc.",
                 },
                 "relocation_expenses": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Relocation Expenses and Payments",
                 },
                 "architectural_engineering_fees": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Architectural and Engineering Fees",
                 },
                 "other_architectural_engineering_fees": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Other Architectural and Engineering Fees",
                 },
                 "project_inspection_fees": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Project Inspection Fees",
                 },
                 "site_work": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Site Work",
                 },
                 "demolition_and_removal": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Demolition and Removal",
                 },
                 "construction": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Construction",
                 },
                 "equipment": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Equipment",
                 },
                 "miscellaneous": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Miscellaneous",
                 },
                 "subtotal_1": {
                     # Row 12 — Subtotal (sum of rows 1–11)
                     "allOf": [{"$ref": "#/$defs/budget_calculated_row"}],
+                    "title": "Subtotal",
                 },
                 "contingencies": {
                     # Row 13
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Contingencies",
                 },
                 "subtotal_2": {
                     # Row 14 — Subtotal (rows 12 + 13)
                     "allOf": [{"$ref": "#/$defs/budget_calculated_row"}],
+                    "title": "Subtotal",
                 },
                 "project_income": {
                     "allOf": [{"$ref": "#/$defs/budget_row"}],
+                    "title": "Project Income",
                 },
                 "total_project_costs": {
                     # Row 16 — Total project costs (row 14 - row 15)
                     "allOf": [{"$ref": "#/$defs/budget_calculated_row"}],
+                    "title": "Total Project Costs",
                 },
             },
         },
@@ -145,12 +161,403 @@ FORM_UI_SCHEMA = [
         "name": "Table1",
         "type": "section",
         "label": "Budget Information for Construction Programs",
+        "description": "NOTE: Certain Federal assistance programs require additional computations to arrive at the Federal share of project costs eligible for participation. If such is the case, you will be notified.",
         "children": [
             {
                 "type": "multiField",
-                "name": "Budget424cTable1",
-                "widget": "Budget424cTable1",
+                "name": "budget_424c_table_1",
+                "widget": "Table",
                 "definition": ["/properties/budget_information"],
+                "children": {
+                    "columns": [
+                        {
+                            "columnHeader": "COST CLASSIFICATION",
+                            "width": 40,
+                        },
+                        {
+                            "columnHeader": "a. Total Cost",
+                            "width": 20,
+                        },
+                        {
+                            "columnHeader": "b. Costs Not Allowable for Participation",
+                            "width": 20,
+                        },
+                        {
+                            "columnHeader": "c. Total Allowable Costs (Columns a - b)",
+                            "width": 20,
+                        },
+                    ],
+                    "rows": [
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "1. Administrative and legal expenses",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/administrative_and_legal_expenses/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/administrative_and_legal_expenses/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/administrative_and_legal_expenses/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "2. Land, structures, rights-of-way, appraisals, etc.",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/land_structures_rights_of_way/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/land_structures_rights_of_way/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/land_structures_rights_of_way/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "3. Relocation expenses and payments",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/relocation_expenses/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/relocation_expenses/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/relocation_expenses/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "4. Architectural and engineering fees",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/architectural_engineering_fees/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/architectural_engineering_fees/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/architectural_engineering_fees/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "5. Other architectural and engineering fees",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/other_architectural_engineering_fees/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/other_architectural_engineering_fees/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/other_architectural_engineering_fees/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "6. Project inspection fees",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/project_inspection_fees/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/project_inspection_fees/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/project_inspection_fees/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "7. Site work",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/site_work/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/site_work/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/site_work/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "8. Demolition and removal",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/demolition_and_removal/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/demolition_and_removal/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/demolition_and_removal/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "9. Construction",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/construction/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/construction/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/construction/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "10. Equipment",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/equipment/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/equipment/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/equipment/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "11. Miscellaneous",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/miscellaneous/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/miscellaneous/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/miscellaneous/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "12. SUBTOTAL (sum of lines 1-11)",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/subtotal_1/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/subtotal_1/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/subtotal_1/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "13. Contingencies",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/contingencies/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/contingencies/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/contingencies/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "14. SUBTOTAL",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/subtotal_2/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/subtotal_2/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/subtotal_2/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "15. Project (program) income",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/project_income/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/project_income/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/project_income/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "16.  TOTAL PROJECT COSTS (subtract 15 from 14)",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/total_project_costs/properties/total_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/total_project_costs/properties/non_allowable_cost",
+                                    "format": "dollar",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/total_project_costs/properties/total_allowable_cost",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                    ],
+                },
             }
         ],
     },
@@ -158,17 +565,70 @@ FORM_UI_SCHEMA = [
         "name": "Table2",
         "type": "section",
         "label": "Federal Funding",
+        "description": "17. Federal assistance requested, calculate as follows.",
         "children": [
             {
                 "type": "multiField",
-                "name": "Budget424cTable2",
-                "widget": "Budget424cTable2",
+                "name": "budget_424c_table_2",
+                "widget": "Table",
                 "definition": ["/properties/federal_funding"],
+                "children": {
+                    "columns": [
+                        {
+                            "columnHeader": "Field",
+                            "width": 60,
+                        },
+                        {
+                            "columnHeader": "Value",
+                            "width": 40,
+                        },
+                    ],
+                    "rows": [
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "Total project costs (from line 16c)",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/total_project_costs",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "Federal percentage share (Consult Federal agency for Federal percentage share.)",
+                                },
+                                {
+                                    "type": "input",
+                                    "definition": "/properties/federal_percentage_share",
+                                    "format": "percentage",
+                                },
+                            ],
+                        },
+                        {
+                            "cells": [
+                                {
+                                    "type": "plainText",
+                                    "staticContent": "Federal funding share",
+                                },
+                                {
+                                    "type": "readOnly",
+                                    "definition": "/properties/federal_funding_share",
+                                    "format": "dollar",
+                                },
+                            ],
+                        },
+                    ],
+                },
             }
         ],
     },
 ]
-
 FORM_RULE_SCHEMA = {
     ##### PRE-POPULATION RULES
     "budget_information": {

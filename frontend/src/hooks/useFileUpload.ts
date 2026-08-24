@@ -16,6 +16,7 @@ type FileUploadCallbacks = {
   onStart?: () => void;
   onComplete?: () => void;
   postUploadAction: PostUploadAction;
+  maxFileSizeBytes?: number;
 };
 
 export const useFileUpload = ({
@@ -24,6 +25,7 @@ export const useFileUpload = ({
   onError = noop,
   onComplete = noop,
   postUploadAction,
+  maxFileSizeBytes,
 }: FileUploadCallbacks) => {
   const { clientFetch } = useClientFetch<Response>("unable to upload file", {
     authGatedRequest: true,
@@ -149,9 +151,19 @@ export const useFileUpload = ({
       }
       alreadyCalled.current = true;
       const fileName = fileToUpload.name || "No Filename!";
-      const uploadAbortController = new AbortController();
-
       setFileName(fileName);
+
+      if (maxFileSizeBytes && fileToUpload.size > maxFileSizeBytes) {
+        setCurrentStatus("too-large");
+        handleError(
+          new Error(
+            `file size of ${fileToUpload.size} bytes exceeds maximum of ${maxFileSizeBytes} bytes`,
+          ),
+        );
+        return;
+      }
+
+      const uploadAbortController = new AbortController();
       setCurrentStatus("processing");
       setUploadController(uploadAbortController);
 
@@ -212,6 +224,7 @@ export const useFileUpload = ({
     [
       clientFetch,
       handleError,
+      maxFileSizeBytes,
       onComplete,
       onSuccess,
       postUploadAction,

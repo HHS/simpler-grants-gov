@@ -9,7 +9,7 @@ FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
-ARG PYTHON_VERSION=3.14.6
+ARG PYTHON_VERSION=3.14.7
 ARG PY_MM=3.14
 ARG PIP_VERSION=26.0
 
@@ -178,11 +178,9 @@ RUN dnf install -y \
       libmount-2.37.4-1.amzn2023.0.5 \
       libsmartcols-2.37.4-1.amzn2023.0.5 \
       libuuid-2.37.4-1.amzn2023.0.5 && \
-    # July ALAS batch: krb5-libs (1939), rust-toolset-srpm-macros (1951),
-    # kernel6.18-headers (ALAS2023-2026-2003), libacl (1986)
+    # July ALAS batch: krb5-libs (1939), kernel6.18-headers (ALAS2023-2026-2003), libacl (1986)
     dnf update -y --releasever=2023.12.20260727 \
       krb5-libs-1.21.3-8.amzn2023.0.1 \
-      rust-toolset-srpm-macros-1.97.0-1.amzn2023.0.1 \
       kernel6.18-headers-6.18.38-76.139.amzn2023 \
       libacl-2.4.0-1.amzn2023.0.1 && \
     # August ALAS batch: gawk (ALAS2023-2026-2035), glib2 (2028), libxml2 (1992),
@@ -197,6 +195,9 @@ RUN dnf install -y \
       rpm-build-libs-4.16.1.3-29.amzn2023.0.7 \
       rpm-sign-libs-4.16.1.3-29.amzn2023.0.7 \
       python3-rpm-4.16.1.3-29.amzn2023.0.7 && \
+    dnf update -y --releasever=2023.12.20260817 \
+      wget-1.21.3-1.amzn2023.0.5 \
+      rust-toolset-srpm-macros-1.97.0-2.amzn2023 && \
     dnf clean all && \
     # Remove the system Python RPMs
     (dnf remove -y python3 python3-libs || rpm -e --nodeps python3 python3-libs || true) && \

@@ -10,9 +10,10 @@ module "infra_staging_config" {
 
   app_environment_name = "staging"
 
-  domain_name            = "api.staging.simpler.grants.gov"
-  secondary_domain_names = ["alb.staging.simpler.grants.gov"]
-  enable_https           = true
+  domain_name                  = "api.staging.simpler.grants.gov"
+  secondary_domain_names       = ["alb.staging.simpler.grants.gov"]
+  scanner_callback_domain_name = "alb.staging.simpler.grants.gov"
+  enable_https                 = true
 
   # Both of these are globally unique per AWS service; staging releases them first (see staging.tf).
   enable_api_gateway_domain_name = true
