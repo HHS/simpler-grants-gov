@@ -42,7 +42,9 @@ test.describe("Opportunity list page access - failure path", () => {
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page }) => {
       // Direct unauthenticated access to the grantor opportunities list.
-      await page.goto("/grantor/opportunities", { waitUntil: "domcontentloaded" });
+      await page.goto("/grantor/opportunities", {
+        waitUntil: "domcontentloaded",
+      });
 
       await expect(
         page.getByRole("heading", { name: "Not signed in" }),
@@ -68,9 +70,7 @@ test.describe("Opportunity list page access - failure path", () => {
         { waitUntil: "domcontentloaded" },
       );
 
-      await expect(
-        page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE),
-      ).toBeVisible();
+      await expect(page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE)).toBeVisible();
     },
   );
 
@@ -84,14 +84,11 @@ test.describe("Opportunity list page access - failure path", () => {
       await authenticateE2eUser(page, context, isMobile, "orgMember");
 
       // This should exercise the invalid agency fallback in the opportunities page.
-      await page.goto(
-        `/grantor/opportunities?agency=${INVALID_AGENCY_ID}`,
-        { waitUntil: "domcontentloaded" },
-      );
+      await page.goto(`/grantor/opportunities?agency=${INVALID_AGENCY_ID}`, {
+        waitUntil: "domcontentloaded",
+      });
 
-      await expect(
-        page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE),
-      ).toBeVisible();
+      await expect(page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE)).toBeVisible();
     },
   );
 });
