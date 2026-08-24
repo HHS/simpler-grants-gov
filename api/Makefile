@@ -425,9 +425,6 @@ validate-simpler-endpoints:
 generate-xml: ## Generate XML from JSON (usage: make generate-xml json='{"field": "value"}' form=SF424_4_0)
 	$(PY_RUN_CMD) flask task generate-xml --json '$(json)' --form $(or $(form),SF424_4_0)
 
-run-xml-validator: ## Run XML validator tool directly
-	$(PY_RUN_CMD) python tool/xml_validator.py
-
 #####################
 # Workflow State Machine
 #####################
