@@ -1,11 +1,13 @@
 """Task to detect drift between committed XSDs and the live grants.gov copies.
 
 
-Runs weekly. Downloads the latest XSDs from grants.gov into a temp directory,
+Runs daily. Downloads the latest XSDs from grants.gov into a temp directory,
 compares them (by content hash) against the copies committed in
-``src/services/xml_generation/xsds``, and posts a Slack alert naming any
-schemas that changed so the team can refresh the committed copies and
-re-run XML validation.
+``src/services/xml_generation/xsds``, and logs an actionable ERROR-level
+alert naming any schemas that changed so the team can refresh the committed
+copies and re-run XML validation. New Relic is configured to watch for that
+log line and notify the team's Slack channel from there - this task does not
+call Slack directly.
 """
 
 import hashlib
@@ -16,7 +18,6 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-import requests
 from grants_shared.adapters import db
 from grants_shared.adapters.db import flask_db
 from grants_shared.task.ecs_background_task import ecs_background_task
@@ -37,31 +38,26 @@ logger = logging.getLogger(__name__)
 COMMITTED_XSD_DIR = Path(__file__).parent.parent.parent / "services" / "xml_generation" / "xsds"
 
 
-# Slack attachment sidebar color for the drift alert (matches the existing
-# Security Hub alert styling on the shared webhook).
-SLACK_ALERT_COLOR = "#E01E5A"
-
-
 @task_blueprint.cli.command(
     "check-xsd-drift", help="Check for drift between committed XSDs and grants.gov"
 )
 @ecs_background_task(JobType.CHECK_XSD_DRIFT)
 @flask_db.with_db_session()
 def run_check_xsd_drift_task(db_session: db.Session) -> None:
-    """Run the weekly XSD drift detection task."""
+    """Run the daily XSD drift detection task."""
     task = CheckXsdDriftTask(db_session)
     task.run()
 
 
 class CheckXsdDriftTask(Task):
-    """Weekly task that detects drift between committed and live grants.gov XSDs."""
+    """Daily task that detects drift between committed and live grants.gov XSDs."""
 
     class Metrics(StrEnum):
         XSDS_CHECKED = "xsds_checked"
         XSDS_DRIFTED = "xsds_drifted"
         XSDS_MISSING = "xsds_missing"
         FETCH_ERRORS = "fetch_errors"
-        SLACK_ALERT_SENT = "slack_alert_sent"
+        DRIFT_ALERT_LOGGED = "drift_alert_logged"
 
     def __init__(
         self,
@@ -137,7 +133,7 @@ class CheckXsdDriftTask(Task):
             }
         )
 
-        if drifted_schemas or missing_schemas:
+        if drifted_schemas or missing_schemas or fetch_errors:
             logger.info(
                 "XSD drift summary",
                 extra={
@@ -146,16 +142,16 @@ class CheckXsdDriftTask(Task):
                     "fetch_error_count": len(fetch_errors),
                     "drifted_schemas": sorted(drifted_schemas.keys()),
                     "missing_schemas": sorted(missing_schemas.keys()),
-                    "total_checked": schemas_checked,
+                    "schemas_checked": schemas_checked,
                 },
             )
-            self._send_slack_alert(
+            self._log_drift_alert(
                 drifted_schemas,
                 missing_schemas,
                 schemas_checked=schemas_checked,
-                fetch_errors=len(fetch_errors),
+                fetch_errors=fetch_errors,
             )
-            self.increment(self.Metrics.SLACK_ALERT_SENT)
+            self.increment(self.Metrics.DRIFT_ALERT_LOGGED)
         else:
             logger.info("No XSD drift detected this week")
 
@@ -178,161 +174,50 @@ class CheckXsdDriftTask(Task):
                 sha256_hash.update(chunk)
         return sha256_hash.hexdigest()
 
-    def _format_slack_message(
+    def _log_drift_alert(
         self,
         drifted_schemas: dict[str, str],
         missing_schemas: dict[str, str],
         schemas_checked: int,
-        fetch_errors: int,
+        fetch_errors: set[str],
     ) -> dict[str, Any]:
-        """Format the XSD drift alert message as a Slack Block Kit payload.
+        """Emit an actionable, ERROR-level log for New Relic to alert on.
+
+        New Relic is configured to watch for this log message on the
+        existing alerting list and notify the team's Slack channel from
+        there, so the changed/missing schema names need to be present in
+        the log line's ``extra`` payload rather than posted to Slack
+        directly from this task.
 
 
         Args:
             drifted_schemas: Mapping of drifted schema filenames to their live URLs
+            missing_schemas: Mapping of schema filenames with no committed copy to their live URLs
             schemas_checked: Total number of committed schemas checked
-            fetch_errors: Number of schemas that failed to fetch
+            fetch_errors: Set of schema URLs that failed to fetch
 
 
         Returns:
-            Slack message payload (``text`` fallback plus rich ``attachments``)
+            The ``extra`` payload that was logged (useful for tests/inspection)
         """
-        schema_links = "\n".join(
-            f"\u2022 <{url}|{name}>" for name, url in sorted(drifted_schemas.items())
-        )
-        missing_links = "\n".join(
-            f"\u2022 <{url}|{name}>" for name, url in sorted(missing_schemas.items())
-        )
-
-        return {
-            "attachments": [
-                {
-                    "color": SLACK_ALERT_COLOR,
-                    "blocks": [
-                        {
-                            "type": "header",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "\u2757 XSD schema drift detected",
-                                "emoji": True,
-                            },
-                        },
-                        *(
-                            [
-                                {
-                                    "type": "section",
-                                    "text": {
-                                        "type": "mrkdwn",
-                                        "text": (
-                                            "The following schemas differ from the live copies "
-                                            "on grants.gov and need to be refreshed in the repo, "
-                                            "followed by a re-run of XML validation:\n"
-                                            f"{schema_links}"
-                                        ),
-                                    },
-                                }
-                            ]
-                            if drifted_schemas
-                            else []
-                        ),
-                        *(
-                            [
-                                {
-                                    "type": "section",
-                                    "text": {
-                                        "type": "mrkdwn",
-                                        "text": (
-                                            "The following schemas are referenced by a form's "
-                                            "xsd_url but have no committed copy in the repo yet:\n"
-                                            f"{missing_links}"
-                                        ),
-                                    },
-                                }
-                            ]
-                            if missing_schemas
-                            else []
-                        ),
-                        {
-                            "type": "section",
-                            "fields": [
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Schemas checked:*\n{schemas_checked}",
-                                },
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Schemas drifted:*\n{len(drifted_schemas)}",
-                                },
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Schemas missing:*\n{len(missing_schemas)}",
-                                },
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Fetch errors:*\n{fetch_errors}",
-                                },
-                            ],
-                        },
-                        {
-                            "type": "actions",
-                            "elements": [
-                                {
-                                    "type": "button",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "View xsds folder on GitHub",
-                                    },
-                                    "url": self.config.github_xsds_folder_url,
-                                }
-                            ],
-                        },
-                        {
-                            "type": "context",
-                            "elements": [
-                                {
-                                    "type": "mrkdwn",
-                                    "text": "Weekly XSD Drift Check",
-                                }
-                            ],
-                        },
-                    ],
-                }
-            ],
+        extra = {
+            "alert_type": "xsd_schema_drift",
+            "drifted_schema_count": len(drifted_schemas),
+            "drifted_schemas": sorted(drifted_schemas.keys()),
+            "drifted_schema_urls": drifted_schemas,
+            "missing_schema_count": len(missing_schemas),
+            "missing_schemas": sorted(missing_schemas.keys()),
+            "missing_schema_urls": missing_schemas,
+            "schemas_checked": schemas_checked,
+            "fetch_error_count": len(fetch_errors),
+            "fetch_error_urls": sorted(fetch_errors),
+            "github_xsds_folder_url": self.config.github_xsds_folder_url,
         }
 
-    def _send_slack_alert(
-        self,
-        drifted_schemas: dict[str, str],
-        missing_schemas: dict[str, str],
-        schemas_checked: int,
-        fetch_errors: int,
-    ) -> None:
-        """Send alert to Slack about detected XSD drift.
-
-
-        Args:
-            drifted_schemas: Mapping of drifted schema filenames to their live URLs
-            schemas_checked: Total number of committed schemas checked
-            fetch_errors: Number of schemas that failed to fetch
-
-
-        Raises:
-            requests.RequestException: If Slack API call fails
-        """
-        payload = self._format_slack_message(
-            drifted_schemas, missing_schemas, schemas_checked, fetch_errors
+        logger.error(
+            "XSD schema drift detected - committed XSDs need to be refreshed and "
+            "XML validation re-run",
+            extra=extra,
         )
 
-        try:
-            logger.info(
-                "Posting XSD drift alert to Slack",
-                extra={"schemas_count": len(drifted_schemas)},
-            )
-            response = requests.post(self.config.slack_webhook_url, json=payload, timeout=10)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            logger.exception(
-                "Failed to post XSD drift alert to Slack",
-                extra={"error": str(e)},
-            )
-            raise
+        return extra
