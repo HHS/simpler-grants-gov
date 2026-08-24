@@ -153,7 +153,7 @@ class CheckXsdDriftTask(Task):
             )
             self.increment(self.Metrics.DRIFT_ALERT_LOGGED)
         else:
-            logger.info("No XSD drift detected this week")
+            logger.info("No XSD drift detected today")
 
     @staticmethod
     def _hash_file(path: Path, chunk_size: int = 8192) -> str:
