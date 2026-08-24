@@ -1,6 +1,6 @@
 # Feature: File Upload Interactions - Failure Path
 # Related spec: e2e/apply/upload-interaction/failure-path/specs/failure-path-streamed-single-upload-endpoint.spec.ts
-# Scenario: Upload error handling for single-file attachment uploads
+# Scenario: Upload error handling for single-file attachment uploads.
 #
 # ============== Notes for reviewer ===============================================
 # - This feature validates failure handling for single-file attachment uploads.
