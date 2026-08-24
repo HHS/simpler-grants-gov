@@ -273,6 +273,48 @@ locals {
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
+    load-user-tables = {
+      # The user tables only need daily freshness, so they load here instead of in the
+      # hourly load-transform cycle.
+      #
+      # Load only. Transform, set-current, and store-version are all opportunity steps that
+      # have no bearing on the user tables, and store-version in particular must stay off:
+      # it writes opportunity_version off the opportunity_change_audit queue, and this job
+      # can overlap the hourly cycle (which runs every hour, with the job lock disabled here),
+      # so it would risk versioning opportunities midway through the hourly transform.
+      task_command = [
+        "flask",
+        "data-migration",
+        "load-transform",
+        "--load",
+        "--no-transform",
+        "--no-set-current",
+        "--no-store-version",
+        "-t",
+        "vuser_account",
+        "-t",
+        "tuser_profile"
+      ]
+      # Every day at 3:45am Eastern Time during DST. 2:45am during non-DST.
+      # Minute 45 is the only minute free of the hourly jobs (0, 15, and 30 are all taken),
+      # and hour 7 is free of the daily jobs. Nothing consumes these staging tables yet, so
+      # the slot is chosen purely to stay clear of the rest of the schedule.
+      schedule_expression = "cron(45 7 * * ? *)"
+      state               = local.load-transform-state[var.environment]
+      cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
+      mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      # This job shares the load-transform job type with the hourly job, so the lock is
+      # disabled to keep the two from blocking each other.
+      environment_vars = concat(
+        try(local.scheduled_jobs_config[var.environment].environment_vars, []),
+        [
+          {
+            Name  = "ENABLE_JOB_LOCK"
+            Value = "false"
+          }
+        ]
+      )
+    }
     load-search-opportunity-data = {
       task_command = ["flask", "load-search-data", "load-opportunity-data"]
       # Every hour at the half hour
