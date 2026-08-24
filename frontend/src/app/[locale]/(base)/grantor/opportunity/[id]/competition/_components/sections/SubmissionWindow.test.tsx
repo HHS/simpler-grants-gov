@@ -42,11 +42,9 @@ describe("SubmissionWindow", () => {
     it("renders Public close date as required", () => {
       render(<SubmissionWindow />);
 
-      const closeDate = screen.getByText("submissionsClose");
-      const requiredIndicator = closeDate.querySelector(
-        ".usa-hint--required",
-      );
+      const requiredIndicator = screen.getByText("*");
       expect(requiredIndicator).toBeInTheDocument();
+      expect(requiredIndicator).toHaveClass("usa-hint--required");
     });
 
     it("does not render expected number of applicants field", () => {
