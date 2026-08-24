@@ -68,13 +68,18 @@ export function SubmissionWindow() {
               step="1"
               className="width-full"
               onKeyDown={(e) => {
-                if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E') {
+                if (
+                  e.key === "." ||
+                  e.key === "," ||
+                  e.key === "e" ||
+                  e.key === "E"
+                ) {
                   e.preventDefault();
                 }
               }}
               onPaste={(e) => {
-                const pastedText = e.clipboardData.getData('text');
-                if (pastedText.includes('.') || pastedText.includes(',')) {
+                const pastedText = e.clipboardData.getData("text");
+                if (pastedText.includes(".") || pastedText.includes(",")) {
                   e.preventDefault();
                 }
               }}
