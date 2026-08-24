@@ -33,7 +33,6 @@ test.describe("Grantor opportunity overview failure path - initial state gating"
     if (targetEnv !== "local") {
       test.skip(
         testInfo.project.name !== "Chrome",
-        "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
       );
     }
   });
