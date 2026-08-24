@@ -14,7 +14,7 @@
  * - targetEnv: pass playwrightEnv.targetEnv from the spec; controls staging-only skip logic.
  * - skipTest: pass (condition, description) => test.skip(condition, description) from the spec.
  * - timeoutMs: defaults to 300 000 ms; override per spec if needed.
- * - stagingProjectName: defaults to "Chrome";
+ * - stagingProjectName: defaults to "Chrome"; staging MFA is limited to one browser.
  * - stagingSkipMessage: override the skip reason text if needed.
  */
 import {
@@ -84,6 +84,9 @@ export function createAuthenticatedPageLifecycle(
 ) {
   const timeoutMs = options.timeoutMs ?? 300_000;
   const stagingProjectName = options.stagingProjectName ?? "Chrome";
+  const stagingSkipMessage =
+    options.stagingSkipMessage ??
+    "Staging MFA login is limited to Chrome to avoid OTP rate-limiting";
 
   let authenticatedStorageState: AuthenticatedStorageState | undefined;
   let context: BrowserContext | undefined;
