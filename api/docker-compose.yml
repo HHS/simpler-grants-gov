@@ -41,10 +41,8 @@ services:
 
   s3mock:
     container_name: s3mock
-    image: adobe/s3mock:5.2.0
+    image: adobe/s3mock:5.1.0
     environment:
-      # 5.2.0+ resolves a relative store root against its own workdir,
-      # which writes inside the container instead of the bind mount below
       - COM_ADOBE_TESTING_S3MOCK_STORE_ROOT=/containers3root
       - COM_ADOBE_TESTING_S3MOCK_STORE_RETAIN_FILES_ON_EXIT=true
       - COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS=local-mock-public-bucket,local-mock-draft-bucket,local-mock-file-scan-bucket
