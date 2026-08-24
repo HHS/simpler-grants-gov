@@ -1,6 +1,6 @@
 # Feature: File upload interactions - Attachment Form streamed upload endpoint
 # Related spec: e2e/apply/upload-interaction/happy-path/specs/happy-path-streamed-single-upload-endpoint.spec.ts
-# Scenario: File upload behavior for Attachment Form using the streamed upload endpoint
+# Scenario: File upload behavior for Attachment Form using the streamed upload endpoint.
 #
 # ============== Notes for reviewer ===============================================
 # - This feature validates happy-path single-file upload behavior for the Attachment Form.
