@@ -115,8 +115,7 @@ To validate generated XML against official Grants.gov XSD schemas:
 make test args="tests/src/services/xml_generation/test_submission_xsd_validation.py"
 ```
 
-The XSD files must be present locally. Use `make fetch-xsds` to download and cache
-the official schemas before running validation tests.
+The XSD files are checked into our repo. You can manually run `make fetch-xsds` to download the official schemas locally if needed.
 
 ## Configuration
 
