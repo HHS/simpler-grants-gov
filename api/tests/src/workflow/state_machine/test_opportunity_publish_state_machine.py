@@ -5,11 +5,13 @@ from freezegun import freeze_time
 from sqlalchemy import select
 
 from src.constants.lookup_constants import OpportunityStatus, WorkflowType
-from src.db.models.opportunity_models import OpportunityVersion
+from src.db.models.opportunity_models import OpportunityChangeAudit, OpportunityVersion
 from src.workflow.handler.event_handler import EventHandler
+from src.workflow.registry.workflow_client_registry import get_workflow_client_registry
 from src.workflow.state_machine.opportunity_publish_state_machine import OpportunityPublishState
 from src.workflow.workflow_errors import InvalidEventError
 from tests.src.db.models.factories import (
+    OpportunityChangeAuditFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
     UserFactory,
@@ -226,3 +228,76 @@ def test_opportunity_publish_state_machine_invalid_events(
 
     search_result = search_client.get(opportunity_index_alias, opportunity.opportunity_id)
     assert search_result is None
+
+
+def _get_change_audit(db_session, opportunity_id):
+    return db_session.scalars(
+        select(OpportunityChangeAudit).where(
+            OpportunityChangeAudit.opportunity_id == opportunity_id
+        )
+    ).one_or_none()
+
+
+def test_opportunity_publish_marks_loaded_to_search(
+    db_session, enable_factory_create, search_client, opportunity_index_alias
+):
+    """A successful publish flags the change-audit record as already loaded to search."""
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create(is_draft=True)
+
+    # In production the DB trigger queues the opportunity for indexing whenever it
+    # changes. The test schema is built from the models without triggers, so we
+    # create the queued change-audit record explicitly.
+    OpportunityChangeAuditFactory.create(opportunity=opportunity, is_loaded_to_search=False)
+
+    sqs_container = build_start_workflow_event(
+        workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
+        user=user,
+        entity=opportunity,
+    )
+
+    with db_session.begin():
+        EventHandler(db_session, sqs_container).process()
+
+    db_session.expire_all()
+    change_audit = _get_change_audit(db_session, opportunity.opportunity_id)
+    assert change_audit.is_loaded_to_search is True
+
+
+def test_opportunity_publish_search_failure_leaves_not_loaded(
+    db_session, enable_factory_create, monkeypatch, search_client, opportunity_index_alias
+):
+    """When the search write fails, the workflow still completes and the opportunity stays queued for indexing."""
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create(is_draft=True)
+
+    # Simulate the DB trigger having queued the opportunity for indexing (the test
+    # schema is built from models without triggers).
+    OpportunityChangeAuditFactory.create(opportunity=opportunity, is_loaded_to_search=False)
+
+    def _raise_on_upsert(*args, **kwargs):
+        raise Exception("simulated bulk_upsert failure")
+
+    monkeypatch.setattr(
+        get_workflow_client_registry().search_client, "bulk_upsert", _raise_on_upsert
+    )
+
+    sqs_container = build_start_workflow_event(
+        workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
+        user=user,
+        entity=opportunity,
+    )
+
+    with db_session.begin():
+        state_machine = EventHandler(db_session, sqs_container).process()
+
+    # The failed search write doesn't error the workflow - it runs to completion
+    assert state_machine.workflow.current_workflow_state == OpportunityPublishState.END
+
+    # The opportunity was never written to the search index
+    assert search_client.get(opportunity_index_alias, opportunity.opportunity_id) is None
+
+    # is_loaded_to_search stays FALSE so the incremental job picks it up later
+    db_session.expire_all()
+    change_audit = _get_change_audit(db_session, opportunity.opportunity_id)
+    assert change_audit.is_loaded_to_search is False
