@@ -1,5 +1,6 @@
 import { identity } from "lodash";
 import { ApiRequestError } from "src/errors";
+import { updateCompetitionForms } from "src/services/fetch/fetchers/competitionFormsFetcher";
 import {
   createCompetitionForGrantor,
   saveCompetitionInstructions,
@@ -19,6 +20,10 @@ jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
   updateCompetitionForGrantor: jest.fn(),
 }));
 
+jest.mock("src/services/fetch/fetchers/competitionFormsFetcher", () => ({
+  updateCompetitionForms: jest.fn,
+}));
+
 const mockRedirect = jest.fn();
 jest.mock("next/navigation", () => ({
   redirect: (url: string): void => {
@@ -35,6 +40,7 @@ const mockUpdateCompetitionForGrantor = jest.mocked(
 const mockSaveCompetitionInstructions = jest.mocked(
   saveCompetitionInstructions,
 );
+const mockUpdateCompetitionForms = jest.mocked(updateCompetitionForms);
 
 const mockRequiredForms: CompetitionFormsSubmitApi = [
   {
@@ -90,7 +96,7 @@ describe("updateCompetition", () => {
     const formData = new FormData();
     formData.set("competitionId", "compete-456");
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "genericError",
@@ -103,7 +109,7 @@ describe("updateCompetition", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(mockCreateCompetitionForGrantor).toHaveBeenCalledWith(
       "opp-123",
@@ -118,12 +124,26 @@ describe("updateCompetition", () => {
     });
   });
 
+  it("updates competition forms with the new competition ID after creating", async () => {
+    const formData = buildValidFormData();
+    formData.delete("competitionId");
+
+    mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
+
+    await updateCompetition(formData, mockRequiredForms);
+
+    expect(mockUpdateCompetitionForms).toHaveBeenCalledWith({
+      competitionId: "new-competition-id",
+      body: { forms: mockRequiredForms },
+    });
+  });
+
   it("calls updateCompetitionForGrantor when competitionId exists", async () => {
     const formData = buildValidFormData();
 
     mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(mockUpdateCompetitionForGrantor).toHaveBeenCalledWith(
       "opp-123",
@@ -139,6 +159,19 @@ describe("updateCompetition", () => {
     });
   });
 
+  it("updates competition forms with the existing competition ID", async () => {
+    const formData = buildValidFormData();
+
+    mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
+
+    await updateCompetition(formData, mockRequiredForms);
+
+    expect(mockUpdateCompetitionForms).toHaveBeenCalledWith({
+      competitionId: "compete-456",
+      body: { forms: mockRequiredForms },
+    });
+  });
+
   it("saves application instructions when creating a competition with a pending file ID", async () => {
     const formData = buildValidFormData({
       "pending-file-id": "pending-file-789",
@@ -147,7 +180,7 @@ describe("updateCompetition", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(mockSaveCompetitionInstructions).toHaveBeenCalledWith(
       "opp-123",
@@ -166,7 +199,7 @@ describe("updateCompetition", () => {
 
     mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(mockSaveCompetitionInstructions).toHaveBeenCalledWith(
       "opp-123",
@@ -186,7 +219,7 @@ describe("updateCompetition", () => {
     mockUpdateCompetitionForGrantor.mockResolvedValue(successfulUpdateResponse);
     mockSaveCompetitionInstructions.mockRejectedValue(new Error("unexpected"));
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(mockSaveCompetitionInstructions).toHaveBeenCalledWith(
       "opp-123",
@@ -205,7 +238,7 @@ describe("updateCompetition", () => {
       new ApiRequestError("unauthenticated", "APIRequestError", 401),
     );
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "unauthenticated",
@@ -219,7 +252,7 @@ describe("updateCompetition", () => {
       new ApiRequestError("forbidden", "APIRequestError", 403),
     );
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "forbidden",
@@ -233,7 +266,7 @@ describe("updateCompetition", () => {
       new ApiRequestError("notFound", "APIRequestError", 404),
     );
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "notFound",
@@ -255,7 +288,7 @@ describe("updateCompetition", () => {
 
     mockUpdateCompetitionForGrantor.mockRejectedValue(apiError);
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "validationErrors",
@@ -268,7 +301,7 @@ describe("updateCompetition", () => {
 
     mockUpdateCompetitionForGrantor.mockRejectedValue(new Error("unexpected"));
 
-    const result = await updateCompetition(formData);
+    const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
       errorMessage: "genericError",
@@ -364,7 +397,7 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    await updateCompetition(formData);
+    await updateCompetition(formData, mockRequiredForms);
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.open_to_applicants).toEqual([
@@ -380,7 +413,7 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    await updateCompetition(formData);
+    await updateCompetition(formData, mockRequiredForms);
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.open_to_applicants).toEqual(["organization"]);
@@ -393,7 +426,7 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    await updateCompetition(formData);
+    await updateCompetition(formData, mockRequiredForms);
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.open_to_applicants).toEqual(["individual"]);
@@ -405,7 +438,7 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    await updateCompetition(formData);
+    await updateCompetition(formData, mockRequiredForms);
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.contact_info).toBe(
@@ -422,7 +455,7 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
-    await updateCompetition(formData);
+    await updateCompetition(formData, mockRequiredForms);
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.competition_title).toBeNull();

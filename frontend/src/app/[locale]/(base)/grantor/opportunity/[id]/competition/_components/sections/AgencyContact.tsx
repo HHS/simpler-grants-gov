@@ -11,8 +11,15 @@ import {
 export function AgencyContact() {
   const t = useTranslations("OpportunityCompetition.sectionAgencyContact");
 
+  const handlePipeKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    if (e.key === "|") {
+      e.preventDefault();
+    }
+  };
+
   //--- Validation for Full Name ---
-  const [nameValue, setNameValue] = useState<string>("");
   const [hasNameError, setHasNameError] = useState<boolean>(false);
   const [nameErrorMsg, setNameErrorMsg] = useState<string[]>([]);
 
@@ -20,8 +27,6 @@ export function AgencyContact() {
   const handleNameInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setNameValue(e.target.value);
-
     if (hasNameError) {
       setHasNameError(false);
       setNameErrorMsg([]);
@@ -46,7 +51,6 @@ export function AgencyContact() {
   };
 
   //--- Validation for Email Address ---
-  const [emailValue, setEmailValue] = useState<string>("");
   const [hasEmailError, setHasEmailError] = useState<boolean>(false);
   const [emailErrorMsg, setEmailErrorMsg] = useState<string[]>([]);
   // Production-grade email layout validation regex
@@ -57,8 +61,6 @@ export function AgencyContact() {
   const handleEmailInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setEmailValue(e.target.value);
-
     if (hasEmailError) {
       setHasEmailError(false);
       setEmailErrorMsg([]);
@@ -184,8 +186,8 @@ export function AgencyContact() {
             fieldMaxLength={255}
             isRequired={true}
             defaultValue=""
-            value={nameValue}
             onTextChange={handleNameInputChange}
+            onKeyDown={handlePipeKeyDown}
             onFieldBlur={handleNameFieldBlur}
             rawErrors={nameErrorMsg}
           />
@@ -200,7 +202,7 @@ export function AgencyContact() {
             fieldId="contact_title"
             fieldMaxLength={255}
             isRequired={false}
-            onTextChange={() => {}}
+            onKeyDown={handlePipeKeyDown}
             defaultValue=""
           />
         </div>
@@ -217,8 +219,8 @@ export function AgencyContact() {
             fieldMaxLength={255}
             isRequired={true}
             defaultValue=""
-            value={emailValue}
             onTextChange={handleEmailInputChange}
+            onKeyDown={handlePipeKeyDown}
             onFieldBlur={handleEmailFieldBlur}
             rawErrors={emailErrorMsg}
           />

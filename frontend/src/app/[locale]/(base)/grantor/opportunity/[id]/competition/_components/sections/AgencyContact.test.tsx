@@ -92,6 +92,28 @@ describe("AgencyContact", () => {
     });
   });
 
+  describe("pipe character keydown handling", () => {
+    it.each([
+      ["full name", /fullname/i],
+      ["title", /persontitle/i],
+      ["email", /emailaddress/i],
+    ])("prevents the pipe character in the %s field", (_, label) => {
+      render(<AgencyContact />);
+
+      const input = screen.getByRole("textbox", { name: label });
+
+      expect(fireEvent.keyDown(input, { key: "|" })).toBe(false);
+    });
+
+    it("allows regular character key presses", () => {
+      render(<AgencyContact />);
+
+      const nameInput = screen.getByRole("textbox", { name: /fullname/i });
+
+      expect(fireEvent.keyDown(nameInput, { key: "A" })).toBe(true);
+    });
+  });
+
   describe("phone number formatting", () => {
     it("formats phone number as (XXX) XXX-XXXX when user types 10 digits", () => {
       render(<AgencyContact />);
