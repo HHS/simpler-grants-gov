@@ -301,3 +301,48 @@ def test_opportunity_publish_search_failure_leaves_not_loaded(
     db_session.expire_all()
     change_audit = _get_change_audit(db_session, opportunity.opportunity_id)
     assert change_audit.is_loaded_to_search is False
+
+
+def test_opportunity_publish_mark_loaded_failure_is_isolated(
+    db_session, enable_factory_create, monkeypatch, caplog, search_client, opportunity_index_alias
+):
+    """A failure while marking the change-audit record is swallowed after a successful write.
+
+    The write already succeeded, so publish completes and the failure is logged as a
+    marking failure - not misattributed as a search-index write failure.
+    """
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create(is_draft=True)
+    OpportunityChangeAuditFactory.create(opportunity=opportunity, is_loaded_to_search=False)
+
+    def _raise_on_select(*args, **kwargs):
+        raise Exception("simulated change-audit lookup failure")
+
+    # `select` is used only inside mark_loaded_to_search in this module
+    monkeypatch.setattr(
+        "src.workflow.state_machine.opportunity_publish_state_machine.select", _raise_on_select
+    )
+
+    sqs_container = build_start_workflow_event(
+        workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
+        user=user,
+        entity=opportunity,
+    )
+
+    with db_session.begin():
+        state_machine = EventHandler(db_session, sqs_container).process()
+
+    # The marking failure doesn't error the workflow
+    assert state_machine.workflow.current_workflow_state == OpportunityPublishState.END
+
+    # The opportunity was still written to the search index before marking failed
+    assert search_client.get(opportunity_index_alias, opportunity.opportunity_id) is not None
+
+    # Logged as a marking failure, not a search-write failure
+    assert "Failed to mark opportunity as loaded to search" in caplog.text
+    assert "Failed to write opportunity to search index" not in caplog.text
+
+    # Marking never took effect
+    db_session.expire_all()
+    change_audit = _get_change_audit(db_session, opportunity.opportunity_id)
+    assert change_audit.is_loaded_to_search is False

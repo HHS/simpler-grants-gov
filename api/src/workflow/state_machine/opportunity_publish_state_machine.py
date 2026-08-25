@@ -236,19 +236,28 @@ class OpportunityPublishStateMachine(BaseStateMachine):
             state_machine_event.increment(self.Metrics.OPP_PUBLISH_ERROR_WRITING_TO_SEARCH_INDEX)
 
     def mark_loaded_to_search(self, log_extra: dict[str, Any]) -> None:
-        """Flag the opportunity's change-audit record as already loaded to search."""
-        change_audit = self.db_session.scalars(
-            select(OpportunityChangeAudit).where(
-                OpportunityChangeAudit.opportunity_id == self.opportunity.opportunity_id
-            )
-        ).one_or_none()
+        """Flag the opportunity's change-audit record as already loaded to search.
 
-        if change_audit is None:
-            logger.info("No change-audit record to mark as loaded to search", extra=log_extra)
-            return
+        This runs only after a successful search write. We catch any error here so a
+        failure to mark the record isn't misattributed as a search-index write
+        failure - the write already succeeded. Worst case the incremental job simply
+        re-indexes the opportunity on its next cycle.
+        """
+        try:
+            change_audit = self.db_session.scalars(
+                select(OpportunityChangeAudit).where(
+                    OpportunityChangeAudit.opportunity_id == self.opportunity.opportunity_id
+                )
+            ).one_or_none()
 
-        change_audit.is_loaded_to_search = True
-        logger.info("Marked opportunity as loaded to search index", extra=log_extra)
+            if change_audit is None:
+                logger.info("No change-audit record to mark as loaded to search", extra=log_extra)
+                return
+
+            change_audit.is_loaded_to_search = True
+            logger.info("Marked opportunity as loaded to search index", extra=log_extra)
+        except Exception:
+            logger.exception("Failed to mark opportunity as loaded to search", extra=log_extra)
 
     @store_opportunity_version.on
     def handle_store_opportunity_version(self, state_machine_event: StateMachineEvent) -> None:
