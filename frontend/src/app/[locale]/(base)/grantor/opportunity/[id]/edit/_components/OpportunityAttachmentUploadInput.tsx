@@ -1,193 +1,126 @@
 "use client";
 
 import { useClientFetch } from "src/hooks/useClientFetch";
+import {
+  FileResultsMetadata,
+  UploadFileMetadata,
+} from "src/types/fileUploadTypes";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
+import { mapOpportunityAttachmentsToFileMetadata } from "src/utils/opportunity/opportunityAttachmentUtils";
 
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
-import {
-  Alert,
-  FileInput,
-  FileInputRef,
-  FormGroup,
-  Label,
-  ModalRef,
-  ModalToggleButton,
-} from "@trussworks/react-uswds";
+import { useCallback, useMemo, useState } from "react";
+import { FormGroup, Label } from "@trussworks/react-uswds";
 
-import { DeleteFileModal } from "src/components/core/fileInput/DeleteFileModal";
-import { USWDSIcon } from "src/components/core/USWDSIcon";
-
-const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
-
-interface UploadedFile {
-  id: string;
-  name: string;
-  deletable: boolean;
-}
+import { SimplerFileInput } from "src/components/core/fileInput/SimplerFileInput";
 
 interface OpportunityAttachmentUploadInputProps {
-  opportunityId: string;
   initialAttachments?: OpportunityAttachment[];
 }
 
+const UPLOAD_INPUT_ID = "opportunity-attachment-upload";
+const UPLOAD_LABEL_ID = `${UPLOAD_INPUT_ID}-label`;
+
 export function OpportunityAttachmentUploadInput({
-  opportunityId,
   initialAttachments = [],
 }: OpportunityAttachmentUploadInputProps) {
   const t = useTranslations("OpportunityEdit.attachments");
 
-  const { clientFetch: uploadFetch } = useClientFetch<{
-    opportunity_attachment_id: string;
-  }>("Error uploading opportunity attachment");
-  const { clientFetch: deleteFetch } = useClientFetch<{
-    message: string;
-  }>("Error deleting opportunity attachment");
+  const { clientFetch: fetchResultsMetadata } = useClientFetch<{
+    file_metadata: FileResultsMetadata;
+  }>("Error fetching uploaded file metadata");
 
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>(
-    initialAttachments.map((attachment) => ({
-      id: attachment.opportunity_attachment_id || crypto.randomUUID(),
-      name: attachment.file_name,
-      deletable: !!attachment.opportunity_attachment_id,
-    })),
+  // scanned this session, not yet a real attachment - nothing is sent to the backend
+  // until Save, per the settled "nothing persists until Save" design for this page.
+  const [heldFiles, setHeldFiles] = useState<UploadFileMetadata[]>([]);
+  // ids of already-saved attachments (from initialAttachments) marked for removal -
+  // the real DELETE call is deferred to the next Save action, same reasoning as above.
+  const [markedForDeletion, setMarkedForDeletion] = useState<Set<string>>(
+    new Set(),
   );
-  const [isUploading, setIsUploading] = useState(false);
-  const [fileToDelete, setFileToDelete] = useState<UploadedFile | null>(null);
-  const [deletePending, setDeletePending] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const fileInputRef = useRef<FileInputRef | null>(null);
-  const deleteModalRef = useRef<ModalRef | null>(null);
+  const existingFileMetadata = useMemo(
+    () => mapOpportunityAttachmentsToFileMetadata(initialAttachments),
+    [initialAttachments],
+  );
 
-  const handleFileChange = async (files: FileList | null): Promise<void> => {
-    if (!files) return;
-    setErrorMessage(null);
-    setIsUploading(true);
+  const visibleFiles = useMemo(
+    () => [
+      ...existingFileMetadata.filter((file) => !markedForDeletion.has(file.id)),
+      ...heldFiles,
+    ],
+    [existingFileMetadata, markedForDeletion, heldFiles],
+  );
 
-    for (const file of Array.from(files)) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        setErrorMessage(t("errorFileTooLarge", { fileName: file.name }));
-        continue;
-      }
+  // does not call any create endpoint - the file is only held locally until Save
+  const handlePostUpload = useCallback(
+    async (pendingFileId: string, signal: AbortSignal) => {
+      const { file_metadata: metadata } = await fetchResultsMetadata(
+        `/api/file/${pendingFileId}/results-metadata`,
+        { method: "GET", signal },
+      );
+      // no server timestamp exists for a held, not-yet-saved file - left blank rather
+      // than fabricated, which FileInputExistingFiles already renders correctly
+      const fileMetadata: UploadFileMetadata = {
+        id: pendingFileId,
+        fileName: metadata.file_name,
+        fileSize: metadata.file_size_bytes,
+        updatedAt: "",
+      };
+      setHeldFiles((previous) =>
+        previous.some((file) => file.id === pendingFileId)
+          ? previous
+          : [...previous, fileMetadata],
+      );
+      return fileMetadata;
+    },
+    [fetchResultsMetadata],
+  );
 
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const data = await uploadFetch(
-          `/api/opportunities/${opportunityId}/attachments`,
-          { method: "POST", body: formData },
+  // neither branch calls a backend endpoint - both are purely local per the settled
+  // "delete deferred to Save" design, for held files and already-saved files alike
+  const handleDelete = useCallback(
+    (fileId: string): Promise<undefined> => {
+      const isHeldFile = heldFiles.some((file) => file.id === fileId);
+      if (isHeldFile) {
+        setHeldFiles((previous) =>
+          previous.filter((file) => file.id !== fileId),
         );
-        setUploadedFiles((prev) => [
-          ...prev,
-          {
-            id: data.opportunity_attachment_id,
-            name: file.name,
-            deletable: true,
-          },
-        ]);
-      } catch (err) {
-        console.error("Attachment upload failed", err);
-        setErrorMessage(t("errorUploadFailed", { fileName: file.name }));
+      } else {
+        setMarkedForDeletion((previous) => new Set(previous).add(fileId));
       }
-    }
-
-    setIsUploading(false);
-    fileInputRef.current?.clearFiles();
-  };
-
-  const confirmDelete = async (): Promise<void> => {
-    if (!fileToDelete) return;
-    setErrorMessage(null);
-    setDeletePending(true);
-
-    try {
-      await deleteFetch(
-        `/api/opportunities/${opportunityId}/attachments/${fileToDelete.id}`,
-        { method: "DELETE" },
-      );
-      setUploadedFiles((prev) => prev.filter((f) => f.id !== fileToDelete.id));
-      setFileToDelete(null);
-    } catch (err) {
-      console.error("Attachment delete failed", err);
-      setErrorMessage(
-        t("errorDeleteFailed", { fileName: fileToDelete?.name ?? "" }),
-      );
-    } finally {
-      setDeletePending(false);
-      deleteModalRef.current?.toggleModal();
-    }
-  };
+      return Promise.resolve(undefined);
+    },
+    [heldFiles],
+  );
 
   return (
     <FormGroup>
-      {errorMessage && (
-        <Alert
-          type="error"
-          headingLevel="h4"
-          heading={t("errorHeading")}
-          className="margin-bottom-2"
-        >
-          {errorMessage}
-        </Alert>
-      )}
-
-      <Label htmlFor="opportunity-attachment-upload">{t("uploadLabel")}</Label>
-      <FileInput
-        id="opportunity-attachment-upload"
-        name="opportunity-attachment-upload"
-        ref={fileInputRef}
-        type="file"
-        multiple
-        disabled={isUploading}
-        onChange={(e) => {
-          // Per-file upload errors are caught inside handleFileChange.
-          // This .catch() covers unexpected synchronous errors (e.g. FormData append failure).
-          handleFileChange(e.currentTarget.files).catch(() =>
-            setErrorMessage(t("errorUploadFailed", { fileName: "" })),
-          );
-        }}
+      <Label htmlFor={UPLOAD_INPUT_ID} id={UPLOAD_LABEL_ID}>
+        {t("uploadLabel")}
+      </Label>
+      {/* carries the held/marked-for-deletion state through to the next Save action,
+          the same way every other field on this page already does */}
+      <input
+        type="hidden"
+        name="held_pending_file_ids"
+        value={JSON.stringify(heldFiles.map((file) => file.id))}
       />
-
-      {uploadedFiles.length > 0 && (
-        <ul className="usa-list usa-list--unstyled margin-top-2">
-          {uploadedFiles.map((file) => (
-            <li
-              key={file.id}
-              className="display-flex flex-align-center padding-y-1 border-bottom border-base-lighter"
-            >
-              <span className="flex-fill font-sans-sm">{file.name}</span>
-              {file.deletable && (
-                <ModalToggleButton
-                  modalRef={deleteModalRef}
-                  opener
-                  className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
-                  onClick={() => setFileToDelete(file)}
-                >
-                  <USWDSIcon
-                    className="usa-icon margin-right-05 margin-left-neg-05"
-                    name="delete"
-                  />
-                  {t("removeButton")}
-                </ModalToggleButton>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <DeleteFileModal
-        deletePending={deletePending}
-        handleDeleteFile={() => {
-          confirmDelete().catch(() =>
-            setErrorMessage(
-              t("errorDeleteFailed", { fileName: fileToDelete?.name ?? "" }),
-            ),
-          );
-        }}
-        modalId="opportunity-attachment-delete-modal"
-        modalRef={deleteModalRef}
-        pendingDeleteName={fileToDelete?.name}
+      <input
+        type="hidden"
+        name="deleted_attachment_ids"
+        value={JSON.stringify(Array.from(markedForDeletion))}
+      />
+      <SimplerFileInput
+        id={UPLOAD_INPUT_ID}
+        multiFile
+        postUploadAction={handlePostUpload}
+        postUploadActionProgressMessage={t("uploading")}
+        postUploadActionSuccessMessage={t("success")}
+        postUploadActionErrorMessage={t("error")}
+        onDelete={handleDelete}
+        describedByIds={[UPLOAD_LABEL_ID]}
+        existingFiles={visibleFiles}
       />
     </FormGroup>
   );
