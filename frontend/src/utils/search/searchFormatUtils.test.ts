@@ -241,7 +241,23 @@ describe("searchToQueryParams", () => {
     expect(queryParams.query).toEqual("something to search for");
 
     const emptyQueryParams = searchToQueryParams({} as SavedSearchQuery);
-    expect(emptyQueryParams).toEqual({ query: "" });
+    expect(emptyQueryParams).toEqual({ query: "", status: "none" });
+  });
+  it("sets the no status param if the saved search has no status filter", () => {
+    const queryParams = searchToQueryParams({
+      ...fakeSavedSearch,
+      filters: { funding_instrument: { one_of: ["grant"] } },
+    });
+
+    expect(queryParams.status).toEqual("none");
+  });
+  it("sets the no status param if the saved search has an empty status filter", () => {
+    const queryParams = searchToQueryParams({
+      ...fakeSavedSearch,
+      filters: { opportunity_status: { one_of: [] } },
+    });
+
+    expect(queryParams.status).toEqual("none");
   });
   it("correctly handles close date ranges", () => {
     const queryParams = searchToQueryParams({
