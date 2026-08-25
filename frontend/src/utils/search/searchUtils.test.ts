@@ -59,6 +59,29 @@ describe("paramsToFormattedQuery", () => {
       ),
     ).toEqual("?key=value,anotherValue&big=small&simpler=grants");
   });
+  it("leaves reserved characters within a value encoded", () => {
+    const query = paramsToFormattedQuery(
+      new URLSearchParams([
+        ["query", "R&D grants"],
+        ["status", "posted"],
+      ]),
+    );
+    expect(query).toEqual("?query=R%26D+grants&status=posted");
+    // decoding the whole string would split the query term into a second param
+    expect(Array.from(new URLSearchParams(query.slice(1)))).toEqual([
+      ["query", "R&D grants"],
+      ["status", "posted"],
+    ]);
+  });
+  it("does not let an encoded hash truncate the query string", () => {
+    const query = paramsToFormattedQuery(
+      new URLSearchParams([
+        ["query", "a#b"],
+        ["status", "posted"],
+      ]),
+    );
+    expect(query).toEqual("?query=a%23b&status=posted");
+  });
 });
 
 describe("paramToDateRange", () => {
@@ -121,6 +144,20 @@ describe("removeInvalidParamValues", () => {
     expect(removeInvalidParamValues("sortby", "not_a_sort")).toEqual(undefined);
     expect(removeInvalidParamValues("closeDate", "999")).toEqual(undefined);
   });
+  it("flattens a repeated param, which arrives as an array", () => {
+    expect(removeInvalidParamValues("status", ["posted", "closed"])).toEqual(
+      "posted,closed",
+    );
+    expect(
+      removeInvalidParamValues("status", ["posted", "not_a_status"]),
+    ).toEqual("posted");
+    expect(removeInvalidParamValues("status", ["not_a_status"])).toEqual(
+      undefined,
+    );
+    expect(
+      removeInvalidParamValues("agency", ["CPSC", "NOT-AN-AGENCY"]),
+    ).toEqual("CPSC,NOT-AN-AGENCY");
+  });
 });
 
 describe("sanitizeSearchParams", () => {
@@ -152,6 +189,23 @@ describe("sanitizeSearchParams", () => {
       assistanceListingNumber: "00.000",
       topLevelAgency: "NOPE",
     });
+  });
+  it("does not throw on a repeated param, which arrives as an array", () => {
+    expect(() =>
+      sanitizeSearchParams({ status: ["posted", "closed"] }),
+    ).not.toThrow();
+  });
+  it("does not redirect for a repeated param whose values are all valid", () => {
+    // reshaping an array into the comma separated form is not a reason to bounce the user,
+    // convertSearchParamsToProperTypes normalizes it either way
+    expect(sanitizeSearchParams({ status: ["posted", "closed"] })).toEqual(
+      null,
+    );
+  });
+  it("removes the invalid values from a repeated param", () => {
+    expect(
+      sanitizeSearchParams({ status: ["posted", "not_a_status"] }),
+    ).toEqual({ status: "posted" });
   });
   it("is idempotent, so that sanitizing cannot loop", () => {
     const sanitized = sanitizeSearchParams({
@@ -234,6 +288,18 @@ describe("convertSearchParamsToProperTypes", () => {
     expect(converted.agency).toEqual(new Set(["MADE-UP"]));
     expect(converted.topLevelAgency).toEqual(new Set(["MADE"]));
     expect(converted.assistanceListingNumber).toEqual(new Set(["00.000"]));
+  });
+  it("handles a repeated param arriving as an array", () => {
+    const converted = convertSearchParamsToProperTypes({
+      status: ["posted", "closed"],
+    });
+    expect(converted.status).toEqual(new Set(["posted", "closed"]));
+  });
+  it("drops the invalid values from a repeated param", () => {
+    const converted = convertSearchParamsToProperTypes({
+      status: ["posted", "not_a_status"],
+    });
+    expect(converted.status).toEqual(new Set(["posted"]));
   });
   it("falls back to page 1 for a non numeric page param", () => {
     expect(convertSearchParamsToProperTypes({ page: "not_a_page" }).page).toBe(

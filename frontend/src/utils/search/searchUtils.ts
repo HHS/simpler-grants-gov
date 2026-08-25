@@ -8,7 +8,6 @@ import {
   sortOptions,
   statusOptions,
 } from "src/constants/searchFilterOptions";
-import { OptionalStringDict } from "src/types/generalTypes";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import { QuerySetParam } from "src/types/search/searchQueryTypes";
 import {
@@ -37,33 +36,38 @@ const validParamValues: { [key: string]: Set<string> } = {
   andOr: new Set(andOrOptions.map(({ value }) => value)),
 };
 
+// A repeated param (?status=posted&status=closed) arrives as a string[] rather than a string,
+// so flatten it to the comma separated form the rest of the search code works with
+const normalizeParamValue = (paramValue: QuerySetParam): string | undefined =>
+  Array.isArray(paramValue) ? paramValue.join(",") : paramValue;
+
 // Strips any values that aren't valid for the given param, returning the comma separated
 // remainder, or undefined if nothing valid is left. Params with no known set of valid
 // values are passed through untouched.
 export const removeInvalidParamValues = (
   paramKey: string,
-  paramValue: string | undefined,
+  paramValue: QuerySetParam,
 ): string | undefined => {
+  const normalizedValue = normalizeParamValue(paramValue);
   const validValues = validParamValues[paramKey];
-  if (!paramValue || !validValues) {
-    return paramValue;
+  if (!normalizedValue || !validValues) {
+    return normalizedValue;
   }
-  const validatedValues = paramValue
+  const validatedValues = normalizedValue
     .split(",")
     .filter((value) => validValues.has(value));
   return validatedValues.length ? validatedValues.join(",") : undefined;
 };
 
-// Builds a copy of the incoming search params with all invalid filter values removed.
-// Returns null when there was nothing to remove, so that callers can skip a needless redirect.
-export const sanitizeSearchParams = (
-  params: OptionalStringDict,
-): { [key: string]: string } | null => {
+// Builds a copy of the incoming search params with every value normalized to a string and all
+// invalid filter values removed, reporting separately whether anything actually had to be removed.
+const validateSearchParams = (params: { [key: string]: QuerySetParam }) => {
   let removedAnyValues = false;
-  const sanitizedParams = Object.entries(params).reduce(
+  const validatedParams = Object.entries(params).reduce(
     (acc, [key, value]) => {
       const validatedValue = removeInvalidParamValues(key, value);
-      if (validatedValue !== value) {
+      // compare against the normalized value so that a repeated param doesn't count as a removal
+      if (validatedValue !== normalizeParamValue(value)) {
         removedAnyValues = true;
       }
       if (validatedValue !== undefined) {
@@ -73,7 +77,16 @@ export const sanitizeSearchParams = (
     },
     {} as { [key: string]: string },
   );
-  return removedAnyValues ? sanitizedParams : null;
+  return { validatedParams, removedAnyValues };
+};
+
+// Returns the search params with all invalid filter values removed, or null when there was
+// nothing to remove, so that callers can skip a needless redirect.
+export const sanitizeSearchParams = (params: {
+  [key: string]: QuerySetParam;
+}): { [key: string]: string } | null => {
+  const { validatedParams, removedAnyValues } = validateSearchParams(params);
+  return removedAnyValues ? validatedParams : null;
 };
 
 // Search params (query string) coming from the request URL into the server
@@ -81,11 +94,12 @@ export const sanitizeSearchParams = (
 // Process all of them so they're just a string (or number for page)
 
 // The above doesn't seem to still be true, should we update? - DWS
-export function convertSearchParamsToProperTypes(
-  params: OptionalStringDict,
-): QueryParamData {
-  // drop any filter values that don't exist so that a bad URL doesn't propagate
-  const validParams = sanitizeSearchParams(params) || params;
+export function convertSearchParamsToProperTypes(params: {
+  [key: string]: QuerySetParam;
+}): QueryParamData {
+  // drop any filter values that don't exist so that a bad URL doesn't propagate, and take the
+  // validated params unconditionally so that repeated params are always flattened to a string
+  const { validatedParams: validParams } = validateSearchParams(params);
   return {
     ...validParams,
     query: validParams.query || "", // Convert empty string to null if needed
@@ -148,12 +162,14 @@ function getSafePage(page: string | undefined) {
 }
 
 // stringifies query params, unencrypts any encrypted commas, and prepends a ?
+// note that only commas are decoded - decoding the whole string would turn an encoded
+// reserved character inside a value (e.g. `&` or `#` in a search term) back into a
+// delimiter, splitting one param into two
 export const paramsToFormattedQuery = (params: URLSearchParams): string => {
   if (!params.size) {
     return "";
   }
-  // return `?${params.toString().replaceAll("%2C", ",")}`;
-  return `?${decodeURIComponent(params.toString())}`;
+  return `?${params.toString().replaceAll("%2C", ",")}`;
 };
 
 export const getAgencyParent = (agencyCode: string) => agencyCode.split("-")[0];
