@@ -12,8 +12,9 @@ export const Default = {
     hideCallToAction: "Show less",
     children: (
       <p>
-        This is the content that gets toggled. It could be anything: text, images, or other components.
+        This is the content that gets toggled. It could be anything: text,
+        images, or other components.
       </p>
-    )
+    ),
   },
 };
