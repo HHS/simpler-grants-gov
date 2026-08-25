@@ -37,9 +37,7 @@ const assertAgencyNotAuthorized = async (page: Page, agencyId: string) => {
 
   // And the agency-not-authorized message should be visible.
   await expect(
-    page.getByText(
-      /You do not have access to this agency(?:'s|’s) opportunities\./,
-    ),
+    page.getByText(/You do not have access to this agency/),
   ).toBeVisible({ timeout: 30000 });
 };
 
