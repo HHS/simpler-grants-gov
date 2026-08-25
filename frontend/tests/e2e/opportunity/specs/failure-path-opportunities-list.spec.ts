@@ -1,7 +1,7 @@
 /**
  * @feature Opportunity list page access - failure path
  * @featureFile e2e/opportunity/features/failure-path-opportunities-list.feature
- * @scenario Unauthenticated access to the Grantor opportunities list page
+ * @scenario Unauthenticated access to the Grantor opportunities list page.
  *
  * Notes for reviewer:
  * 1) Navigates to /grantor/opportunities without authentication.
@@ -28,15 +28,6 @@ const AGENCY_NOT_AUTHORIZED_MESSAGE =
   "You do not have access to this agency's opportunities.";
 
 test.describe("Opportunity list page access - failure path", () => {
-  test.beforeEach(({ page: _ }, testInfo) => {
-    if (targetEnv !== "local") {
-      test.skip(
-        testInfo.project.name !== "Chrome",
-        "Staging auth specs run on Chrome only",
-      );
-    }
-  });
-
   test(
     "Unauthenticated user sees the unauthenticated state when accessing the opportunities list page",
     { tag: [AUTH, CORE_REGRESSION] },
