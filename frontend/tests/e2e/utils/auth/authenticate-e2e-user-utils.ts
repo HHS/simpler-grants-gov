@@ -48,7 +48,7 @@ const fetchE2eSessionToken = async (userId: string): Promise<string> => {
 export async function authenticateE2eUser(
   page: Page,
   context: BrowserContext,
-  isMobile: boolean,
+  _isMobile: boolean,
   testUserKey: TestUserKey = "primaryOrgAdmin",
 ): Promise<void> {
   const userId = getTestUserId(testUserKey);
