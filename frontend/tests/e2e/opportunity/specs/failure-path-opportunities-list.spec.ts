@@ -10,19 +10,14 @@
  */
 
 import { expect, test } from "@playwright/test";
-import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import {
+  VALID_NON_MEMBER_AGENCY_ID,
+  INVALID_AGENCY_ID,
+} from "tests/e2e/opportunity/fixtures/opportunity-test-data";
 
 const { AUTH, CORE_REGRESSION } = VALID_TAGS;
-const { targetEnv } = playwrightEnv;
-
-// A real agency ID that this orgMember test user should not have access to.
-// This covers a valid agency lookup that returns an agency-not-authorized state.
-const VALID_NON_MEMBER_AGENCY_ID = "38c85104-1136-4b86-a440-ad99ab612d3b";
-
-// A syntactically valid but non-existent agency ID, covering the invalid-agency case.
-const INVALID_AGENCY_ID = "00000000-0000-0000-0000-000000000000";
 
 const AGENCY_NOT_AUTHORIZED_MESSAGE =
   "You do not have access to this agency's opportunities.";
