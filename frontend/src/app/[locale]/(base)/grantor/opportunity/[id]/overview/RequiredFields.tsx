@@ -10,6 +10,7 @@ export const summaryRequiredFields = {
 
 export const competitionRequiredFields = {
   open_to_applicants: true,
+  competition_title: true,
   // TBD: more required fields once this page is completed
 };
 
