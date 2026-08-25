@@ -56,6 +56,50 @@ describe("TableCell", () => {
     expect(input).toHaveValue("1250.5");
   });
 
+  it("renders a dollar-formatted input with a visible currency prefix wrapper", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/federal_share",
+          format: "dollar",
+        }}
+        id="dollar-input-cell"
+        value={1234.5}
+      />,
+    );
+
+    const input = screen.getByTestId("dollar-input-cell-input");
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveClass("applyform-table-cell-value");
+    expect(input).toHaveValue("1234.5");
+    expect(screen.getByTestId("dollar-input-cell-dollar-wrapper")).toHaveClass(
+      "simpler-currency-input-wrapper",
+    );
+  });
+
+  it("renders a percentage-formatted input with a visible percentage suffix wrapper", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/effort_percentage",
+          format: "percentage",
+        }}
+        id="percentage-input-cell"
+        value={12.5}
+      />,
+    );
+
+    const input = screen.getByTestId("percentage-input-cell-input");
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveClass("applyform-table-cell-value");
+    expect(input).toHaveValue("12.5");
+    expect(
+      screen.getByTestId("percentage-input-cell-percentage-wrapper"),
+    ).toHaveClass("simpler-percentage-input-wrapper");
+  });
+
   it("updates the input display when the value prop changes", () => {
     const { rerender } = render(
       <TableCell
@@ -340,5 +384,111 @@ describe("TableCell", () => {
     const input = screen.getByTestId("input-cell-default-input");
     expect(input).toHaveAttribute("aria-invalid", "false");
     expect(input).not.toHaveAttribute("aria-describedby");
+  });
+  it("wraps long error text without breaking words mid-way", () => {
+    render(
+      <TableCell
+        cell={{ type: "input", definition: "/properties/federal_share" }}
+        cellErrors={[
+          "This is a very long validation error message that should wrap onto multiple lines",
+        ]}
+        id="input-cell-long-error"
+        value="0"
+      />,
+    );
+
+    const errorContainer = screen.getByTestId(
+      "input-cell-long-error-error-container",
+    );
+
+    expect(errorContainer).toHaveStyle("white-space: normal");
+    expect(errorContainer).not.toHaveStyle("word-break: break-all");
+    expect(errorContainer).not.toHaveStyle("overflow-wrap: anywhere");
+  });
+
+  it("renders validation errors for readOnly cells and exposes a matching id", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "readOnly",
+          definition: "/properties/total_allowable_cost",
+          format: "dollar",
+        }}
+        cellErrors={["Total allowable cost cannot be negative"]}
+        id="total-allowable-cost-cell"
+        name="budget_information--construction--total_allowable_cost"
+        value={-100}
+      />,
+    );
+
+    const readOnlyEl = screen.getByTestId(
+      "total-allowable-cost-cell-read-only",
+    );
+
+    // The error-summary link targets this id, so it must exist on the
+    // read-only span, not just on editable inputs.
+    expect(readOnlyEl).toHaveAttribute(
+      "id",
+      "budget_information--construction--total_allowable_cost",
+    );
+    expect(readOnlyEl).toHaveAttribute("aria-invalid", "true");
+    expect(readOnlyEl).toHaveAttribute(
+      "aria-describedby",
+      "error-for-total-allowable-cost-cell",
+    );
+    expect(readOnlyEl).toHaveClass("usa-input--error");
+
+    expect(
+      screen.getByText("Total allowable cost cannot be negative"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders validation errors for disabled input cells (rendered read-only) and exposes a matching id", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "input",
+          definition: "/properties/total_allowable_cost",
+          format: "dollar",
+        }}
+        cellErrors={["Total allowable cost cannot be negative"]}
+        disabled
+        id="total-allowable-cost-cell"
+        name="budget_information--construction--total_allowable_cost"
+        value={-100}
+      />,
+    );
+
+    const readOnlyEl = screen.getByTestId(
+      "total-allowable-cost-cell-read-only",
+    );
+
+    expect(readOnlyEl).toHaveAttribute(
+      "id",
+      "budget_information--construction--total_allowable_cost",
+    );
+    expect(readOnlyEl).toHaveAttribute("aria-invalid", "true");
+    expect(
+      screen.getByText("Total allowable cost cannot be negative"),
+    ).toBeInTheDocument();
+  });
+
+  it("does not set aria-invalid or an id-based error link on readOnly cells with no errors", () => {
+    render(
+      <TableCell
+        cell={{
+          type: "readOnly",
+          definition: "/properties/total",
+          format: "dollar",
+        }}
+        id="read-only-cell"
+        value={1234.5}
+      />,
+    );
+
+    const readOnlyEl = screen.getByTestId("read-only-cell-read-only");
+    expect(readOnlyEl).toHaveAttribute("aria-invalid", "false");
+    expect(readOnlyEl).not.toHaveAttribute("aria-describedby");
+    expect(readOnlyEl).not.toHaveClass("usa-input--error");
   });
 });

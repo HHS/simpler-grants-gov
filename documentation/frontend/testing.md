@@ -51,6 +51,8 @@ _All_ tests should be assigned exactly _one_ execution tag, and any number of fe
 
 Only defined test groups should be used, and the decision to create a new group should be made by only with approval from the testing and feature teams. [Current groups are defined here](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/tags.ts).
 
+Test assignments for any given test should be determined by the team creating or managing the test.
+
 Current testing cadences are defined as:
 
 | Test group       | Cadence                             | Environment(s) |
@@ -59,6 +61,19 @@ Current testing cadences are defined as:
 | @core-regression | Merge to main, Deploy to production | local, staging |
 | @full-regression | Daily                               | local, staging |
 | @extended        | Weekly                              | local, staging |
+
+#### Conditional test cadences
+
+The table above shows the default test cadences for each group. Teams may expand the list of tag groups run on each cadence depending on any criteria they choose. Most likely, teams will want to define the test groups based on which files have been changed in a PR. For examples of conditional cadences introduced in our system:
+
+| Test group              | Cadence                                                  | Environment(s) |
+| ----------------------- | -------------------------------------------------------- | -------------- |
+| @apply-forms            | All PRs including changes to apply form code             | local          |
+| @opportunity-management | All PRs including changes to opportunity management code | local          |
+
+#### Browser test cadences
+
+We generally run all of our tests against 4 browser configurations (Chromium, Mobile Chromium, Webkit, Firefox). In some cases a test may be skipped in one or more of these browsers. This may be because the browser's implementation of certain behavior makes it very difficult to test (see Webkit's implementation of pasteboards), because of a need to limit traffic for a certain action (see running login tests only in Chrome), or because usage of the browser is low enough that we do not need to test against it all the time (see Firefox). The posture towards browser based testing can be flexible, though we should strive to test against all four browsers as much as possible.
 
 ## Unit testing
 

@@ -1,5 +1,8 @@
 import { Attachment } from "src/types/attachmentTypes";
-import { mapAttachmentsToFileMetadata } from "src/utils/applyForm/applicationAttachmentUtils";
+import {
+  buildAttachmentDescribedByIds,
+  mapAttachmentsToFileMetadata,
+} from "src/utils/applyForm/applicationAttachmentUtils";
 
 describe("mapAttachmentsToFileMetadata", () => {
   const attachment: Attachment = {
@@ -47,5 +50,49 @@ describe("mapAttachmentsToFileMetadata", () => {
 
   it("returns an empty list when there are no attachments", () => {
     expect(mapAttachmentsToFileMetadata([])).toEqual([]);
+  });
+});
+
+describe("buildAttachmentDescribedByIds", () => {
+  it("references only the label when there is a title and no error", () => {
+    expect(
+      buildAttachmentDescribedByIds({
+        visibleInputId: "field-visible",
+        hasTitle: true,
+        hasError: false,
+      }),
+    ).toEqual(["label-for-field-visible"]);
+  });
+
+  it("references both the label and the error when they coexist", () => {
+    expect(
+      buildAttachmentDescribedByIds({
+        visibleInputId: "field-visible",
+        hasTitle: true,
+        hasError: true,
+      }),
+    ).toEqual(["label-for-field-visible", "error-for-field-visible"]);
+  });
+
+  it("references only the error when there is no title", () => {
+    expect(
+      buildAttachmentDescribedByIds({
+        visibleInputId: "field-visible",
+        hasTitle: false,
+        hasError: true,
+      }),
+    ).toEqual(["error-for-field-visible"]);
+  });
+
+  it("returns no ids when nothing describes the input", () => {
+    // a field with no title renders no label element, so referencing one would leave a
+    // dangling aria-describedby
+    expect(
+      buildAttachmentDescribedByIds({
+        visibleInputId: "field-visible",
+        hasTitle: false,
+        hasError: false,
+      }),
+    ).toEqual([]);
   });
 });

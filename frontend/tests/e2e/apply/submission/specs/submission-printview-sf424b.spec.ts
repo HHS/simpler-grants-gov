@@ -23,6 +23,7 @@ import {
 import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
+  assertPrintViewIsReadOnly,
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
@@ -136,6 +137,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
       for (const { printUrl } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
+        // Verify print view is read-only before checking field values
+        await assertPrintViewIsReadOnly(page);
+
+        // Now verify the post-populated field values exist and are populated
         await expect(page.getByTestId("signature")).toBeVisible();
         await expect(page.getByTestId("signature")).not.toBeEmpty();
 

@@ -48,3 +48,11 @@ export type Competition = {
   opportunity_id: number;
   opportunity: BaseOpportunity;
 };
+
+export interface CompetitionInstructionsApiResponse extends APIResponse {
+  data: {
+    competition_instruction_id: string;
+    file_name: string;
+    created_at: string;
+  };
+}
