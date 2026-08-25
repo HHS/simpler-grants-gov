@@ -1,15 +1,16 @@
 /**
  * @feature Opportunity list page access - failure path
  * @featureFile e2e/opportunity/features/failure-path-opportunities-list.feature
- * @scenario Unauthenticated access to the Grantor opportunities list page.
+ * @scenario Grantor opportunities list failure paths
  *
  * Notes for reviewer:
- * 1) Navigates to /grantor/opportunities without authentication.
- * 2) Verifies the unauthenticated error state is displayed.
- * 3) Verifies the sign-in CTA text is visible.
+ * - Tests the failure paths for accessing the grantor opportunities list page.
+ * - Verifies the unauthenticated state for anonymous users.
+ * - Verifies the agency-not-authorized state for authenticated users without access to the requested agency.
+ * - Reuses a helper to assert the agency-not-authorized state for both valid non-member and invalid agency IDs.
  */
 
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import {
   INVALID_AGENCY_ID,
   VALID_NON_MEMBER_AGENCY_ID,
@@ -22,16 +23,39 @@ const { AUTH, CORE_REGRESSION } = VALID_TAGS;
 const AGENCY_NOT_AUTHORIZED_MESSAGE =
   "You do not have access to this agency's opportunities.";
 
+// Shared helper for asserting the agency-not-authorized state on the grantor opportunities page.
+const assertAgencyNotAuthorized = async (
+  page: Page,
+  agencyId: string,
+) => {
+  // Given I navigate to the grantor opportunities list for the requested agency.
+  await page.goto(`/grantor/opportunities?agency=${agencyId}`, {
+    waitUntil: "networkidle",
+  });
+
+  // Then the browser should be on the expected agency URL.
+  await expect(page).toHaveURL(/\/grantor\/opportunities\?agency=/, {
+    timeout: 30000,
+  });
+
+  // And the agency-not-authorized message should be visible.
+  await expect(
+    page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE, { exact: true }),
+  ).toBeVisible({ timeout: 30000 });
+};
+
 test.describe("Opportunity list page access - failure path", () => {
   test(
-    "Unauthenticated user sees the unauthenticated state when accessing the opportunities list page",
+    "Unauthenticated user sees an unauthenticated state when accessing the grantor opportunities list page",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page }) => {
-      // Direct unauthenticated access to the grantor opportunities list.
+      
+      // Given I access the grantor opportunities list without signing in.
       await page.goto("/grantor/opportunities", {
         waitUntil: "domcontentloaded",
       });
 
+      // Then I should see the unauthenticated heading and message.
       await expect(
         page.getByRole("heading", { name: "Not signed in" }),
       ).toBeVisible();
@@ -42,23 +66,16 @@ test.describe("Opportunity list page access - failure path", () => {
   );
 
   test(
-    "Authenticated user without agency access sees an agency not authorized state for a valid agency they do not belong to",
+    "Authenticated user without agency access sees an agency not authorized state for a valid non-member agency ID",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page, context }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
 
-      // Authenticate as an org-member user who should not have grantor access for the test agency.
+      // Given I sign in as an org member and request a non-member agency.
       await authenticateE2eUser(page, context, isMobile, "orgMember");
 
-      // Use a valid agency id that the user is not permitted to view.
-      await page.goto(
-        `/grantor/opportunities?agency=${VALID_NON_MEMBER_AGENCY_ID}`,
-        { waitUntil: "networkidle" },
-      );
-
-      await expect(page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE)).toBeVisible({
-        timeout: 30000,
-      });
+      // Then the agency-not-authorized message should be shown.
+      await assertAgencyNotAuthorized(page, VALID_NON_MEMBER_AGENCY_ID);
     },
   );
 
@@ -68,17 +85,11 @@ test.describe("Opportunity list page access - failure path", () => {
     async ({ page, context }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
 
-      // Authenticate as the same org-member user, then request a bogus agency id.
+      // Given I sign in as the same org member and request an invalid agency.
       await authenticateE2eUser(page, context, isMobile, "orgMember");
 
-      // This should exercise the invalid agency fallback in the opportunities page.
-      await page.goto(`/grantor/opportunities?agency=${INVALID_AGENCY_ID}`, {
-        waitUntil: "networkidle",
-      });
-
-      await expect(page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE)).toBeVisible({
-        timeout: 30000,
-      });
+      // Then the agency-not-authorized message should be shown.
+      await assertAgencyNotAuthorized(page, INVALID_AGENCY_ID);
     },
   );
 });
