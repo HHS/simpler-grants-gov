@@ -10,7 +10,7 @@ log line and notify the team's Slack channel from there - this task does not
 call Slack directly.
 """
 
-import hashlib
+import filecmp
 import logging
 import tempfile
 from enum import StrEnum
@@ -69,6 +69,9 @@ class CheckXsdDriftTask(Task):
         super().__init__(db_session)
         self.config = xsd_drift_config or get_xsd_drift_config()
         self.committed_xsd_dir = committed_xsd_dir or COMMITTED_XSD_DIR
+        if xsd_urls is None:
+            init_form_registry()
+            xsd_urls = set(_build_xml_form_xsd_url_map().values())
         self.xsd_urls = xsd_urls
 
     def run_task(self) -> None:
@@ -78,13 +81,9 @@ class CheckXsdDriftTask(Task):
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             fetcher = XSDFetcher(tmp_dir)
-            xsd_urls = self.xsd_urls
-            if xsd_urls is None:
-                init_form_registry()
-                xsd_urls = set(_build_xml_form_xsd_url_map().values())
 
             downloaded_urls: set[str] = set()
-            for source_url in sorted(xsd_urls):
+            for source_url in sorted(self.xsd_urls):
                 result = fetcher.fetch_xsd_with_dependencies(source_url)
                 downloaded_urls.update(result["fetched"])
                 downloaded_urls.update(result["stored"])
@@ -119,7 +118,7 @@ class CheckXsdDriftTask(Task):
                     continue
 
                 schemas_checked += 1
-                if self._hash_file(fetched_path) != self._hash_file(committed_path):
+                if not filecmp.cmp(fetched_path, committed_path, shallow=False):
                     logger.info("Detected XSD drift", extra={"schema": filename})
                     drifted_schemas[filename] = downloaded_url
 
@@ -154,25 +153,6 @@ class CheckXsdDriftTask(Task):
             self.increment(self.Metrics.DRIFT_ALERT_LOGGED)
         else:
             logger.info("No XSD drift detected today")
-
-    @staticmethod
-    def _hash_file(path: Path, chunk_size: int = 8192) -> str:
-        """Calculate SHA256 hash of file with streaming for large files.
-
-
-        Args:
-            path: Path to file to hash
-            chunk_size: Size of chunks to read (default 8KB)
-
-
-        Returns:
-            Hexadecimal hash string
-        """
-        sha256_hash = hashlib.sha256()
-        with open(path, "rb") as f:
-            for chunk in iter(lambda: f.read(chunk_size), b""):
-                sha256_hash.update(chunk)
-        return sha256_hash.hexdigest()
 
     def _log_drift_alert(
         self,
