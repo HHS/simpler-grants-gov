@@ -21,7 +21,7 @@ jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/competitionFormsFetcher", () => ({
-  updateCompetitionForms: jest.fn,
+  updateCompetitionForms: jest.fn(),
 }));
 
 const mockRedirect = jest.fn();
@@ -442,7 +442,7 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
 
     const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
     expect(requestBody.contact_info).toBe(
-      "John Doe, Manager, john@example.com, 555-0100",
+      "John Doe | Manager | john@example.com | 555-0100",
     );
   });
 
