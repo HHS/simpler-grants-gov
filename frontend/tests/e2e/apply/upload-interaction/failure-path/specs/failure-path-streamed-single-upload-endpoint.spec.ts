@@ -24,7 +24,6 @@ import {
 } from "tests/e2e/apply/fixtures/attachment-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import {
   abortAttachmentUploadRequest,
   assertUploadDidNotSave,
