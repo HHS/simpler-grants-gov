@@ -40,11 +40,6 @@ const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${ATTACHMENT_OPPORTUNITY_DATA.opportunityId}`;
 
-// Skip non-Chrome browsers in staging
-test.beforeEach(({ page: _ }, testInfo) => {
-  skipNonChromeOnStaging(testInfo);
-});
-
 test.describe("File upload interactions - Attachment Form streamed upload endpoint", () => {
   test(
     "streamed single-file upload shows progress statuses and allows deletion after completion",

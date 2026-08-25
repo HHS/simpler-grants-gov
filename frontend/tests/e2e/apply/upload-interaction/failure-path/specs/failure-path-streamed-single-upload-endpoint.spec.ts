@@ -39,11 +39,6 @@ const { testOrgLabel } = playwrightEnv;
 
 const OPPORTUNITY_URL = `/opportunity/${ATTACHMENT_OPPORTUNITY_DATA.opportunityId}`;
 
-// Skip non-Chrome browsers in staging
-test.beforeEach(({ page: _ }, testInfo) => {
-  skipNonChromeOnStaging(testInfo);
-});
-
 test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
   test(
     "aborted upload does not save the file",
