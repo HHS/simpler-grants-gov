@@ -41,13 +41,14 @@ from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
+from src.search.backend.load_agencies_to_index import AGENCY_INDEX_ANALYSIS, AGENCY_INDEX_MAPPINGS
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
     init_workflow_client_registry,
 )
 from src.workflow.workflow_background_task import _init_newrelic_app
 from tests.lib import db_testing
-from tests.lib.auth_test_utils import mock_oauth_endpoint
+from tests.lib.auth_test_utils import mock_oauth_endpoint, mock_oauth_logout_endpoint
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     InternalUserRoleFactory,
@@ -141,6 +142,9 @@ def set_env_var_defaults(monkeypatch_session):
 
     # Stops the local file-scan watcher from spawning a thread per app fixture.
     monkeypatch_session.setenv("ENABLE_LOCAL_FILE_SCANNER", "FALSE")
+
+    # Disable local email client in favor of mocks
+    monkeypatch_session.setenv("ENABLE_LOCAL_EMAIL_CAPTURE", "FALSE")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -331,7 +335,7 @@ def agency_index(search_client, monkeypatch_session):
     index_name = f"test-agency-index-{uuid.uuid4().int}"
 
     search_client.create_index(
-        index_name, mappings={"properties": {"opportunity_statuses": {"type": "keyword"}}}
+        index_name, analysis=AGENCY_INDEX_ANALYSIS, mappings=AGENCY_INDEX_MAPPINGS
     )
 
     try:
@@ -423,14 +427,21 @@ def app(
     # Override the OAuth endpoint path before creating the app which loads the config at startup
     monkeypatch_session.setenv(
         "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
-    )
+    )  # setup in mock_oauth_endpoint
+    monkeypatch_session.setenv(
+        "LOGIN_GOV_LOGOUT_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-logout"
+    )  # setup in mock_oauth_logout_endpoint below
     monkeypatch_session.setenv(
         "LOGIN_FINAL_DESTINATION", "http://localhost:8080/v1/users/login/result"
     )
+    monkeypatch_session.setenv(
+        "LOGOUT_FINAL_DESTINATION", "http://localhost:8080/test-endpoint/oauth-logout-result"
+    )  # setup in mock_oauth_logout_endpoint below
     app = app_entry.create_app()
 
     # Add endpoints and mocks for handling the external OAuth logic
     mock_oauth_endpoint(app, monkeypatch_session, private_rsa_key, mock_oauth_client)
+    mock_oauth_logout_endpoint(app)
 
     return app
 

@@ -133,6 +133,30 @@ def sync_data(
     m = f"issue row(s) processed: {len(issue_map)}"
     logger.info(m)
 
+    # refresh deliverable/epic summary views used by burndown queries --
+    # see migration 0015; keeps them no more than one sync cycle stale
+    refresh_materialized_views(db)
+
+
+def refresh_materialized_views(db: EtlDb) -> None:
+    """
+    Refresh the deliverable/epic summary views used by burndown queries.
+
+    CONCURRENTLY avoids locking out readers while the refresh runs, at the cost of
+    requiring a unique index on each view (see migration 0015). Order matters:
+    mv_deliverable_daily_burndown reads from mv_latest_epic_deliverable_map, so the
+    latter must be refreshed first or the former would recompute against a stale
+    epic-to-deliverable mapping.
+    """
+    cursor = db.connection()
+    for view in (
+        "mv_deliverables_per_quad",
+        "mv_latest_epic_deliverable_map",
+        "mv_deliverable_daily_burndown",
+    ):
+        cursor.execute(text(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view}"))
+    db.commit(cursor)
+
 
 def sync_deliverables(
     db: EtlDb,

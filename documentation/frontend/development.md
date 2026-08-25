@@ -12,8 +12,8 @@ Running a local server requires the version of Node specified in [the .nvmrc fil
 
 This project supports the use of NVM for node version management, so it is suggested you install and use NVM. More information can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
 
-* **For Mac** - Run `npm install && npm run local` to install and start the application.
-* **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx next dev` afterwards to start the application.
+- **For Mac** - Run `npm install && npm run local` to install and start the application.
+- **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx next dev` afterwards to start the application.
 
 Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
 
@@ -25,13 +25,13 @@ npx next telemetry disable
 
 Create a local environment file in the frontend directory to hold your frontend application overrides. This allows you to make specializations to your local setup without the danger of committing any secrets to GitHub.
 
-`.env.local.example` is provided in the frontend directory for a comprehensive list of all environment variables used in frontend as well as where they are referenced. It contains all default values for a quick setup as well as a starting point to configure the development environment. 
+`.env.local.example` is provided in the frontend directory for a comprehensive list of all environment variables used in frontend as well as where they are referenced. It contains all default values for a quick setup as well as a starting point to configure the development environment.
 
 On Mac, run `cp frontend/.env.local.example frontend/.env.local`
 
 On Windows, run `cp .env.local.example .env.local` in PowerShell.
 
-`.env.local.example` is tracked and sensitive information **SHOULD NOT** be enteredin the file itself. 
+`.env.local.example` is tracked and sensitive information **SHOULD NOT** be enteredin the file itself.
 
 For more information about environments, take a look at [environments.md](./environments.md).
 
@@ -53,34 +53,30 @@ The Next.js frontend application is exported for production using [next build](h
 
 ## Docker
 
+**Note**: If you are running Docker locally for the first time, you need to run the API locally through Docker as well, in order to create the required `api_grants_backend` network.
+
+**Note**: In order for a dockerized frontend to communicate properly with a dockerized API, you'll need to set API host url(s) to use `host.docker.internal` rather than `localhost`. Ex. set `API_URL=http://host.docker.internal:8080` in your .env.local
+
 ### 🏗️ Development version
 
-Alternatively, you can run the application in a Docker container.
-
-**Note**: If you are running docker locally for the first time, you need to run the API locally through Docker as well, in order to create the required `api_grants_backend` network.
+Using the steps below you can run the `dev` target in the [Dockerfile](../../frontend/Dockerfile), which spins up a NextJS dev server within Docker. This is suitable for most local development work, though in almost all cases it will be easier to run the application outside of Docker.
 
 From the `/frontend` directory:
 
 1. Run the local development server
    ```bash
-   make dev
+   make build-dev dev
    ```
 1. Navigate to [localhost:3000](http://localhost:3000) to view the application
 
-- If installing new packages locally with npm and using `make dev` with docker to run locally, you may need to run `make build` first to bring the new packages into the container
-
 ### 🚀 Production version
 
-The `make dev` command runs the `docker-compose.yml` which runs the `dev` target in the [Dockerfile](../../frontend/Dockerfile). To run a production version in docker, run `docker compose up -d -f docker-compose-realease.yml` which targest the `release` stage in the docker build. This runs the production version, while still creating a network connection to the local API.
+Since the deployed grants application runs a production NextJS build within a Docker container, it will periodically be necessary to simulate this situation locally in order to test as closely as possible to a deployed version of the app, or debug issues found only in the deployed application.
 
-### Testing Release Target Locally
+To run a production version in Docker, from the `/frontend` directory:
 
-To test the release target locally, run:
-
-- `make release-build OPTS="--tag [IMAGE_NAME]"` or
-- `docker buildx build --target release --tag [IMAGE_NAME]` for a faster build on OSX
-
-to build a local image. To view the site at `localhost:3000`, run: `docker run -e "HOSTNAME=0.0.0.0" -p 3000:3000 [IMAGE_NAME]`.
+1. run `make build-prod run-prod`
+1. Navigate to [localhost:3000](http://localhost:3000) to view the application
 
 ## 🎯 Testing
 
@@ -118,17 +114,114 @@ E2E test filenames end with `.spec.ts` and are found in the `tests/e2e` director
 
 To run E2E tests via CLI:
 
-- `cd ../api && make remake-backend start` (prerequisite to start the API)
-- `npx playwright install --with-deps` — Downloads playwright browsers required to run tests
-- `npm run test:e2e` — Runs all E2E tests using the playwright config found at `tests/playwright.config.ts`
-- `npm run test:e2e:ui` — Run specific or all E2E tests using Playwright's [UI mode](https://playwright.dev/docs/test-ui-mode), which is useful for debugging full traces of each test
+Starting from the root directory. 
+
+1. Initialize, seed, and start the local API:
+
+```sh
+cd api
+make remake-backend // this is not necessary if the API is already seeded and running
+make start
+```
+
+If `make remake-backend` errors run the following:
+```sh
+docker compose run --rm grants-api setup-postgres-db
+make db-migrate
+make setup-api-data
+```
+
+`make remake-backend` recreates the local Docker volumes, applies migrations,
+creates the E2E users and test data, and populates the search indexes. It
+deletes existing local API data. `make start` starts the API at
+`http://localhost:8080`.
+
+2. Build the production frontend. Playwright starts this build with `next start`:
+
+```sh
+cd ../frontend
+npm run build
+```
+
+3. Install the browsers used by the local Playwright projects:
+
+```sh
+npx playwright install --with-deps
+```
+
+4. Verify the API and test discovery:
+
+```sh
+curl --fail http://127.0.0.1:8080/health
+npx playwright test --config ./tests/playwright.config.ts --list
+```
+
+5. Run all E2E tests across the local browser projects:
+
+```sh
+PLAYWRIGHT_WORKERS=1 npm run test:e2e
+```
+
+The local suite currently uses shared seeded users, organizations, and
+opportunities. Keep `PLAYWRIGHT_WORKERS=1` for a reliable full-suite run;
+multiple workers can interfere when tests create or update shared applications
+and opportunities. `PLAYWRIGHT_WORKERS` can be increased only after
+worker-specific test data and sufficient service capacity are available.
+
+For a focused run of one test file from the repository root, use:
+
+```sh
+cd frontend
+npm run test:e2e -- tests/e2e/path/to/test.spec.ts
+```
+
+For an interactive run from the repository root, use:
+
+```sh
+cd frontend
+npm run test:e2e:ui
+```
 
 To run E2E tests using VS Code:
 
 1. Download the VS Code extension described in these [Playwright docs](https://playwright.dev/docs/running-tests#run-tests-in-vs-code)
-2. Follow the [instructions](https://playwright.dev/docs/getting-started-vscode#running-tests) Playwright provides
+2. From the repository root, initialize, seed, and start the local API:
 
-Playwright E2E tests run "local-to-local", requiring both the frontend and the API to be running for the tests to pass - and for the database to be seeded with data.
+  ```sh
+  cd api
+  make remake-backend
+  make start
+  ```
+
+3. Build the frontend and install the Playwright browsers:
+
+  ```sh
+  cd ../frontend
+  npm run build
+  npx playwright install --with-deps
+  ```
+
+4. Set `PLAYWRIGHT_WORKERS=1` in the VS Code terminal environment before
+  running local E2E tests. The tests share seeded users, organizations, and
+  opportunities, so multiple workers can interfere with tests that create or
+  update applications and opportunities.
+
+  ```sh
+  export PLAYWRIGHT_WORKERS=1
+  ```
+
+  The setting can also be added to `frontend/.env.local` if it should apply to
+  every local Playwright run. An explicit `PLAYWRIGHT_WORKERS` value overrides
+  the default in `tests/playwright.config.ts`.
+
+5. Follow the [Playwright VS Code instructions](https://playwright.dev/docs/getting-started-vscode#running-tests).
+
+The Playwright configuration starts the built frontend automatically when a
+test run begins. The API must remain running at `http://127.0.0.1:8080`, and the
+database must remain seeded while tests are running.
+
+Playwright E2E tests run "local-to-local". The API must be running and the
+database must be seeded; 
 
 In CI, the "Frontend Checks" workflow (`.github/workflows/ci-frontend-e2e.yml`) runs Playwright tests, and will include a summary when complete, with an "Artifacts" section where there is an attached "playwright-report". [Playwright docs](https://playwright.dev/docs/ci-intro#html-report) describe how to view the HTML Report in more detail.
 
@@ -248,6 +341,11 @@ Some functionality will not work locally without supplying the application envir
   - `MAILCHIMP_API_KEY`
   - `MAILCHIMP_API_URL_PREFIX`
   - `MAILCHIMP_LIST_ID`
+
+Note that for New Relic to work locally, you will need to:
+
+- run your server with build and start, using the `start:nr` command
+- set the environment variables directly in your environment. Due to timing issues, New Relic will not properly bootstrap itself when reading environment variable values from a .env file. Ex `NEW_RELIC_APP_NAME=xxxx NEW_RELIC_LICENSE_KEY=xxxx npm run build && npm run start:nr`
 
 If you need to access this functionality locally, contact an engineer on the team to get access to the necessary secrets.
 

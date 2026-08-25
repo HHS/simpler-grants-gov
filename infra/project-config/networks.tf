@@ -109,5 +109,145 @@ locals {
         certificate_configs = {}
       }
     }
+    # ---------------------------------------------------------------------------
+    # infra-dev environment (AWS account 061664787759, the "dev" account)
+    #
+    # infra-dev is a dev-like environment made up of TWO VPCs: the primary
+    # "infra-dev-simpler-grants" VPC and the "infra-dev-grants-management" VPC
+    # below. Existing environments are unchanged and still have a single VPC each.
+    # The api and frontend services run in the "infra-dev-simpler-grants" VPC
+    # (same service set as the existing dev environment). The
+    # "infra-dev-grants-management" VPC holds a separate stub ECS service (see
+    # infra/sgm/service).
+    #
+    # NOTE: these keys are the VPC/network names; the *environment* is still
+    # "infra-dev" (that's the app-config environment + service/database state key).
+    # ---------------------------------------------------------------------------
+    infra-dev-simpler-grants = {
+      account_name                 = "dev" # AWS account 061664787759 (see infra/accounts/dev.061664787759.s3.tfbackend)
+      database_subnet_group_name   = "infra-dev-simpler-grants"
+      vpc_name                     = "infra-dev-simpler-grants"
+      second_octet                 = 4               # The second octet of the VPC CIDR block (10.4.0.0/20)
+      grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
+
+      dms_transit_gateway_id = "tgw-03ae893b3141f907a" # reach the Oracle CIDR via the transit gateway instead of the VPC peering
+
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
+    # Second VPC for the infra-dev environment. Holds only the stub ECS service
+    # (infra/sgm/service); the api/frontend run in the "infra-dev-simpler-grants"
+    # VPC above. No app-config environment maps to this network, so it comes up as
+    # a bare VPC (no NAT gateways / DB), which is why the stub runs in the public
+    # subnets.
+    infra-dev-grants-management = {
+      account_name                 = "dev" # AWS account 061664787759 (see infra/accounts/dev.061664787759.s3.tfbackend)
+      database_subnet_group_name   = "infra-dev-grants-management"
+      vpc_name                     = "infra-dev-grants-management"
+      second_octet                 = 5               # The second octet of the VPC CIDR block (10.5.0.0/20)
+      grants_gov_oracle_cidr_block = "10.220.0.0/16" # Unused while enable_dms = false, but still read by the api/database layer
+      enable_dms                   = false           # does not peer with the Grants.gov Oracle DMS network
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
+    # ---------------------------------------------------------------------------
+    # infra-staging environment (AWS account 317380566348, the "staging" account)
+    #
+    # ---------------------------------------------------------------------------
+    infra-staging = {
+      account_name                 = "staging" # AWS account 317380566348 (see infra/accounts/staging.317380566348.s3.tfbackend)
+      database_subnet_group_name   = "infra-staging"
+      vpc_name                     = "infra-staging"
+      second_octet                 = 6               # The second octet of the VPC CIDR block (10.6.0.0/20)
+      grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
+      enable_dms                   = true            # peers with the Grants.gov Oracle DMS network, mirroring staging
+
+      dms_transit_gateway_id = "tgw-03ae893b3141f907a" # reach the Oracle CIDR via the transit gateway instead of the VPC peering
+
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
+
+    infra-training = {
+      account_name                 = "training" # AWS account 049145893907 (see infra/accounts/training.049145893907.s3.tfbackend)
+      database_subnet_group_name   = "infra-training"
+      vpc_name                     = "infra-training"
+      second_octet                 = 7               # The second octet of the VPC CIDR block (10.7.0.0/20)
+      grants_gov_oracle_cidr_block = "10.207.0.0/16" # MicroHealth managed CIDR block where the training origin Oracle database for Grants.gov is located
+
+      enable_dms = true
+
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
+
+    # ---------------------------------------------------------------------------
+    # infra-grantee1 / infra-grantee2 / infra-grantor1
+    #
+    # Team environments in the "dev" AWS account (061664787759) -- the same account
+    # that hosts infra-dev. Each mirrors its counterpart in the shared account 1:1:
+    #   grantee1 -> infra-grantee1
+    #   grantee2 -> infra-grantee2
+    #   grantor1 -> infra-grantor1
+    #
+    # ---------------------------------------------------------------------------
+    infra-grantee1 = {
+      account_name                 = "dev" # AWS account 061664787759 (see infra/accounts/dev.061664787759.s3.tfbackend)
+      database_subnet_group_name   = "infra-grantee1"
+      vpc_name                     = "infra-grantee1"
+      second_octet                 = 33              # The second octet of the VPC CIDR block (10.33.0.0/20)
+      grants_gov_oracle_cidr_block = "10.207.0.0/16" # Unused while enable_dms = false, but still read by the api/database layer
+      enable_dms                   = false           # does not peer with the Grants.gov Oracle DMS network
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
+    infra-grantee2 = {
+      account_name                 = "dev" # AWS account 061664787759 (see infra/accounts/dev.061664787759.s3.tfbackend)
+      database_subnet_group_name   = "infra-grantee2"
+      vpc_name                     = "infra-grantee2"
+      second_octet                 = 34              # The second octet of the VPC CIDR block (10.34.0.0/20)
+      grants_gov_oracle_cidr_block = "10.207.0.0/16" # Unused while enable_dms = false, but still read by the api/database layer
+      enable_dms                   = false           # does not peer with the Grants.gov Oracle DMS network
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
+    infra-grantor1 = {
+      account_name                 = "dev" # AWS account 061664787759 (see infra/accounts/dev.061664787759.s3.tfbackend)
+      database_subnet_group_name   = "infra-grantor1"
+      vpc_name                     = "infra-grantor1"
+      second_octet                 = 35              # The second octet of the VPC CIDR block (10.35.0.0/20)
+      grants_gov_oracle_cidr_block = "10.207.0.0/16" # Unused while enable_dms = false, but still read by the api/database layer
+      enable_dms                   = false           # does not peer with the Grants.gov Oracle DMS network
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once a Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
   }
 }

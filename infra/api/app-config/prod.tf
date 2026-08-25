@@ -7,6 +7,8 @@ module "prod_config" {
   network_name                      = "prod"
   domain_name                       = "api.simpler.grants.gov"
   secondary_domain_names            = ["alb.simpler.grants.gov"]
+  scanner_callback_domain_name      = "alb.simpler.grants.gov"
+  enable_secure_alb                 = false
   enable_https                      = true
   s3_cdn_domain_name                = "files.simpler.grants.gov"
   mtls_domain_name                  = "soap.simpler.grants.gov"
@@ -74,10 +76,11 @@ module "prod_config" {
     LOAD_AGENCY_SEARCH_REPLICA_COUNT = 2
 
     # Login.gov OAuth
-    LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"
-    LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
-    LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
-    LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
+    LOGIN_GOV_ENDPOINT        = "https://secure.login.gov/"
+    LOGIN_GOV_JWK_ENDPOINT    = "https://secure.login.gov/api/openid_connect/certs"
+    LOGIN_GOV_AUTH_ENDPOINT   = "https://secure.login.gov/openid_connect/authorize"
+    LOGIN_GOV_TOKEN_ENDPOINT  = "https://secure.login.gov/api/openid_connect/token"
+    LOGIN_GOV_LOGOUT_ENDPOINT = "https://secure.login.gov/openid_connect/logout"
 
 
     # CommonGrants Protocol
@@ -99,6 +102,9 @@ module "prod_config" {
     FRONTEND_URL             = "https://simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
     PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
+
+    # Virus scanning endpoints
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
   }
   instance_cpu    = 2048
   instance_memory = 4096

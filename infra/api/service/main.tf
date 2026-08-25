@@ -1,7 +1,9 @@
 data "aws_vpc" "network" {
   filter {
-    name   = "tag:Name"
-    values = [module.project_config.network_configs[var.environment_name].vpc_name]
+    name = "tag:Name"
+    # Resolve the VPC by the environment's network_name so the environment name
+    # and its VPC/network name may differ (e.g. infra-dev -> infra-dev-simpler-grants).
+    values = [local.network_config.vpc_name]
   }
 }
 
@@ -94,6 +96,8 @@ terraform {
 
 provider "aws" {
   region = local.service_config.region
+  # Refuse to operate against the wrong account (covers plan/apply/destroy).
+  allowed_account_ids = [module.expected_account.account_id]
   default_tags {
     tags = local.tags
   }
@@ -105,6 +109,37 @@ module "project_config" {
 
 module "app_config" {
   source = "../app-config"
+}
+
+# Resolve the account this environment must deploy to (used by the provider's
+# allowed_account_ids below and by the guard), then short-circuit plan/apply if
+# the active AWS credentials are for a different account.
+module "expected_account" {
+  source       = "../../modules/account-id-by-name"
+  account_name = local.network_config.account_name
+  accounts_dir = "${path.module}/../../accounts"
+}
+
+module "account_guard" {
+  source              = "../../modules/aws-account-guard"
+  expected_account_id = module.expected_account.account_id
+  context             = "the ${var.environment_name} api service"
+}
+
+# Resolve the container image repository (ECR) to the AWS account that owns THIS
+# environment's network, rather than the globally-shared build-repository
+# account. For every existing environment the network account IS the shared
+# account, so this is a no-op. It lets a self-contained environment in a separate
+# AWS account (infra-dev in the "dev" account) pull from an ECR in its own
+# account instead of cross-account.
+data "external" "account_ids_by_name" {
+  program = ["${path.module}/../../../bin/account-ids-by-name"]
+}
+
+locals {
+  image_repository_account_id = data.external.account_ids_by_name.result[local.network_config.account_name]
+  image_repository_url        = "${local.image_repository_account_id}.dkr.ecr.${local.build_repository_config.region}.amazonaws.com/${local.build_repository_config.name}"
+  image_repository_arn        = "arn:aws:ecr:${local.build_repository_config.region}:${local.image_repository_account_id}:repository/${local.build_repository_config.name}"
 }
 
 data "aws_rds_cluster" "db_cluster" {
@@ -177,8 +212,10 @@ module "service" {
   service_name     = local.service_config.service_name
   environment_name = var.environment_name
 
-  image_repository_arn = local.build_repository_config.repository_arn
-  image_repository_url = local.build_repository_config.repository_url
+  app_environment_name = local.service_config.app_environment_name
+
+  image_repository_arn = local.image_repository_arn
+  image_repository_url = local.image_repository_url
 
   image_tag = local.image_tag
 
@@ -212,15 +249,18 @@ module "service" {
 
   file_upload_jobs     = local.service_config.file_upload_jobs
   enable_s3_cdn        = true
+  enable_cdn_alias     = local.service_config.enable_cdn_alias
   s3_cdn_bucket_name   = "public-files"
   scheduled_jobs       = local.environment_config.scheduled_jobs
   s3_buckets           = local.environment_config.s3_buckets
   enable_drafts_bucket = true
 
   # API Gateway variables
-  enable_api_gateway         = true
-  optional_extra_alb_domains = toset(lookup(local.service_config, "secondary_domain_names", []))
-  optional_extra_alb_certs   = local.service_config.enable_https == true ? [for cert in data.aws_acm_certificate.secondary_certs : cert.arn] : []
+  enable_api_gateway             = true
+  enable_api_gateway_domain_name = local.service_config.enable_api_gateway_domain_name
+  enable_secure_alb              = local.service_config.enable_secure_alb
+  optional_extra_alb_domains     = toset(lookup(local.service_config, "secondary_domain_names", []))
+  optional_extra_alb_certs       = local.service_config.enable_https == true ? [for cert in data.aws_acm_certificate.secondary_certs : cert.arn] : []
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
@@ -265,6 +305,9 @@ module "service" {
     # OpenSearch IAM policy for query operations
     local.search_config != null ? {
       opensearch_query = data.aws_iam_policy.opensearch_query[0].arn,
+    } : {},
+    local.external_ses_email_domain != null ? {
+      external_ses_access = aws_iam_policy.external_ses_access[0].arn,
     } : {}
   )
 

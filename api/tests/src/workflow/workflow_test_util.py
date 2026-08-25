@@ -9,6 +9,7 @@ from typing import Any
 from grants_shared.adapters import db
 
 from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType
+from src.db.models.award_recommendation_models import AwardRecommendation
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
 from src.db.models.workflow_models import WorkflowApproval
@@ -53,6 +54,9 @@ def build_start_workflow_event(
     if isinstance(entity, Opportunity):
         entity_type = WorkflowEntityType.OPPORTUNITY
         entity_id = entity.opportunity_id
+    elif isinstance(entity, AwardRecommendation):
+        entity_type = WorkflowEntityType.AWARD_RECOMMENDATION
+        entity_id = entity.award_recommendation_id
     else:
         raise NotImplementedError(
             f"Haven't yet configured this function for entity type {type(entity)}"

@@ -102,6 +102,11 @@ export type DefinitionPath = PropertyPath | PropertyPath[];
  *   The FieldList field name. Used to derive the base field path
  *   (e.g. $.fieldListName) for mapping validation warnings to the list.
  *
+ * hideFieldListHeading
+ *   Optional display flag for the FieldList heading.
+ *   When true, the top FieldList title is hidden, but each entry heading
+ *   still uses the `label` value (for example "Key Contact 1").
+ *
  * additionalDescribedById
  *   Optional accessibility identifier used to associate widgets rendered
  *   inside a FieldList entry with that entry's heading. This allows
@@ -143,6 +148,7 @@ export type FieldListWidgetProps = {
     title?: string;
   };
   label: string;
+  hideFieldListHeading?: boolean;
   description?: string;
   additionalDescribedById?: string;
   name: string;
@@ -207,6 +213,9 @@ export type FieldListGroupItem = {
 
 export type UiSchemaTableCellType = "input" | "readOnly" | "plainText";
 
+export type UiSchemaTableNumberFormat =
+  "integer" | "decimal" | "currency" | "dollar" | "percentage";
+
 export type UiSchemaTableColumn = {
   columnHeader: string;
 
@@ -217,28 +226,38 @@ export type UiSchemaTableColumn = {
   width?: number;
 };
 
-export type UiSchemaTableCell =
+export type TableWidgetCellConfig =
   | {
       type: "input" | "readOnly";
       definition: PropertyPath;
+
+      /**
+       * Optional display format for numeric values.
+       *
+       * Input cells should continue to use an editable numeric representation
+       * while read-only cells use this value for display formatting.
+       */
+      format?: UiSchemaTableNumberFormat;
       staticContent?: undefined;
     }
   | {
       type: "plainText";
       staticContent: string;
       definition?: undefined;
+      format?: undefined;
     };
 
 export type UiSchemaTableRow = {
   /**
    * Cells rendered in the same order as the configured table columns.
-   *
-   * Each row must contain one cell for every configured column.
    */
-  cells: UiSchemaTableCell[];
+  cells: TableWidgetCellConfig[];
 };
 
 export type UiSchemaTableChildren = {
+  /**
+   * Includes each configured column for the table rows.
+   */
   columns: UiSchemaTableColumn[];
   rows: UiSchemaTableRow[];
 };
@@ -256,6 +275,7 @@ type UiSchemaBasicField = {
   type: "field" | "null";
   widget?: WidgetTypes;
   name?: string;
+  printDescription?: boolean;
 } & (
   | {
       definition: DefinitionPath;
@@ -317,6 +337,8 @@ export interface UiSchemaSection {
 export interface UiSchemaFieldList {
   type: "fieldList";
   label: string;
+  // Hide the top FieldList title while still using `label` for per-entry headings.
+  hideFieldListHeading?: boolean;
   minItemsHeading?: string;
   minItemsHelperText?: string;
   maxItemsHeading?: string;
@@ -333,6 +355,11 @@ export type UiSchema = UiSchemaNode[];
 
 export type TextTypes =
   "text" | "email" | "number" | "password" | "search" | "tel" | "url";
+
+export type AttachmentsUploadingCounter = {
+  incrementAttachmentsProcessing: () => void;
+  decrementAttachmentsProcessing: () => void;
+};
 
 // extends the WidgetProps type from rjsf for USWDS and this project implementation
 // see https://github.com/rjsf-team/react-jsonschema-form/blob/7395afcdee6aaea128d943dd17e126c4ed301e58/packages/utils/src/types.ts#L898
@@ -394,6 +421,7 @@ export interface UswdsWidgetProps<
         deletedEntryIndex: number,
       ) => void;
       markFormDirty?: () => void;
+      attachmentsUploadingCounter?: AttachmentsUploadingCounter;
     };
   };
 }

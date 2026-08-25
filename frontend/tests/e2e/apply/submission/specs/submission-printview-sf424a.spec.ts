@@ -4,7 +4,6 @@
  */
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
@@ -14,6 +13,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   verifyFormStatusAfterSave,
@@ -24,17 +24,17 @@ import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-pri
 import {
   buildHappyPathTestData,
   buildPrintUrl,
-  navigateToPrintView,
+  validateAllPrintViews,
   validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
-import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
-
-// TODO: Uncomment when bug #11223 is fixed (row totals and grand total)
-// import { validateSF424ARowTotals } from "tests/e2e/utils/forms/validate-form-totals-utils";
+import {
+  submitApplicationAndVerify,
+  verifySubmissionConfirmation,
+} from "tests/e2e/utils/submission/submit-application-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 
-const { testOrgLabel, targetEnv } = playwrightEnv;
+const { testOrgLabel } = playwrightEnv;
 
 // Only the opportunity number is declared here.
 // All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
@@ -55,12 +55,7 @@ const applicantScenarios = [
 
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
-  if (targetEnv === "staging") {
-    test.skip(
-      testInfo.project.name !== "Chrome",
-      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-    );
-  }
+  skipNonChromeOnStaging(testInfo);
 });
 
 for (const { testName, orgLabel } of applicantScenarios) {
@@ -92,22 +87,14 @@ for (const { testName, orgLabel } of applicantScenarios) {
       const filledForms: FilledFormEntry[] = [];
 
       for (const [index, form] of opportunityConfig.forms.entries()) {
-        const testData = buildHappyPathTestData(
-          form.buildTestData,
-          baseSuffix + index,
-          form.formConfig,
-        );
+        const testData = buildHappyPathTestData(form, baseSuffix + index);
 
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
         // Verify save succeeded while still on the form page
         await verifyFormStatusAfterSave(page, "complete");
 
-        // Verify SF-424A row totals are calculated after save
-        // TODO: Uncomment when bug #11223 is fixed (row totals not being calculated)
-        // if (form.formKey === "sf424a") {
-        //   await validateSF424ARowTotals(page);
-        // }
+        // SF-424A row totals are not calculated after save as they are manually entered - Ref !11223
 
         // Capture the form URL now - verifyFormStatusOnApplication navigates away
         const formUrl = page.url();
@@ -138,79 +125,24 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // Then the application is submitted successfully
       await submitApplicationAndVerify(page, "success");
 
-      // Verify SF-424A row totals persist after submission (before print view)
-      // Navigate to each SF-424A form's print view to validate totals survived submission
-      // TODO: Uncomment when bug #11223 is fixed (row totals not being calculated)
-      // for (const { formKey, printUrl } of filledForms) {
-      //   if (formKey === "sf424a") {
-      //     await navigateToPrintView(page, printUrl);
-      //     await validateSF424ARowTotals(page);
-      //     // Navigate back to confirmation page for next form
-      //     await page.goBack();
-      //     await page.waitForLoadState("domcontentloaded");
-      //   }
-      // }
-
       // Return to application/confirmation page
       await page.goto(applicationUrl);
       await page.waitForLoadState("domcontentloaded");
 
       // --- Confirmation Page Validation ---
-      await expect(
-        page.getByRole("heading", {
-          name: /your application has been submitted/i,
-        }),
-      ).toBeVisible();
-
-      await expect(page.getByTestId("summary-box")).toContainText(
-        "Your application has been submitted",
-      );
+      await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one page per form) ---
-      for (const {
-        formKey,
-        testData,
-        printUrl,
-        expectedPrepopulatedFields,
-        userEnteredFieldTestIds,
-        formName,
-      } of filledForms) {
-        await navigateToPrintView(page, printUrl);
+      // Skip editable input check for SF-424A as it uses custom table rendering with visible inputs
+      await validateAllPrintViews(page, filledForms, ["sf424a"]);
 
-        // Form title heading is visible
-        await expect(page.locator("h1")).toContainText(formName);
-
-        // Pre-populated fields (API-injected from opportunity record)
-        for (const [testId, expectedValue] of Object.entries(
-          expectedPrepopulatedFields,
-        )) {
-          await expect(page.getByTestId(testId)).toBeVisible();
-          await expect(page.getByTestId(testId)).toContainText(expectedValue);
-        }
-
-        // User-entered fields - testIds derived from formConfig.fields (printTestId ?? testId)
-        // Skip fields not present in testData (e.g. conditional fields that weren't filled)
-        for (const [dataKey, testId] of Object.entries(
-          userEnteredFieldTestIds,
-        )) {
-          if (testData[dataKey] === undefined) continue;
-          await validatePrintViewField(page, testId, testData[dataKey]);
-        }
-
+      // --- SF-424A Form-Specific Validation ---
+      for (const { formKey } of filledForms) {
         // SF-424A validation - strict computed totals checks with activity-specific expectations
         // Test data uses unique values per activity (01, 02, 03, 04)
         // requirement. Totals are still deterministic and calculated per activity index.
         if (formKey === "sf424a") {
           // Section A - Budget Summary
-
-          /**  Due to bug #11223, the following validations are SKIPPED:
-          // - Row totals (sum of columns C-F for each activity)
-          // - Grand total (sum of all row totals)
-          // See: https://github.com/HHS/simpler-grants-gov/issues/11223
-
-          // Validate column totals (sum across all activities for columns C-F)
-             validateSF424ARowTotals(page);
-          */
 
           // Helper to format numeric activity value to two decimal places
           const toTwoDecimals = (num: number): string => num.toFixed(2);
@@ -225,18 +157,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
             const totalId = `total_budget_summary--${col}`;
             await validatePrintViewField(page, totalId, sectionATotalColumns);
           }
-          /**  TODO: Uncomment when bug #11223 is fixed (row totals and grand total)
-           // Section A - Grand total (Column G: sum of row totals = 40.00)
-           // See: https://github.com/HHS/simpler-grants-gov/issues/11223
-
-           const sectionAGrandTotal = toTwoDecimals(4 + 8 + 12 + 16); // row totals per activity
-
-           await validatePrintViewField(
-             page,
-             "total_budget_summary--total_amount",
-             sectionAGrandTotal,
-           );
-          */
 
           // Section B - Budget Categories totals
           // Individual category row totals (Column 5: sum of 1-4)

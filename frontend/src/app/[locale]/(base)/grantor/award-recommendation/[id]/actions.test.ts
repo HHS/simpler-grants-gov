@@ -3,10 +3,10 @@ import { identity } from "lodash";
 import {
   saveAwardRecommendation,
   saveAwardRecommendationSubmissionDetails,
-  submitAwardRecommendationForReview,
 } from "./actions";
 
 const mockUpdateAwardRecommendationSubmissionDetails = jest.fn();
+const mockUpdateAwardRecommendation = jest.fn();
 const mockRedirect = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
@@ -14,6 +14,8 @@ jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
     ...args: unknown[]
   ): Promise<unknown> =>
     mockUpdateAwardRecommendationSubmissionDetails(...args) as Promise<unknown>,
+  updateAwardRecommendation: (...args: unknown[]): Promise<unknown> =>
+    mockUpdateAwardRecommendation(...args) as Promise<unknown>,
 }));
 
 jest.mock("next/navigation", () => ({
@@ -34,20 +36,41 @@ describe("Award Recommendation Actions", () => {
   });
 
   describe("saveAwardRecommendation", () => {
-    it("returns success", async () => {
-      const result = await saveAwardRecommendation(new FormData());
+    const buildFormData = () => {
+      const formData = new FormData();
+      formData.append("award_recommendation_id", "ar-id-123");
+      formData.append("award_selection_method", "merit_review_ranking_only");
+      formData.append("additional_info", "More info");
+      formData.append("funding_strategy", "Fund top applicants");
+      formData.append("selection_method_detail", "Panel review");
+      formData.append("other_key_information", "");
+      return formData;
+    };
 
+    it("parses form data, calls the fetcher, and returns success", async () => {
+      mockUpdateAwardRecommendation.mockResolvedValue({});
+
+      const result = await saveAwardRecommendation({}, buildFormData());
+
+      expect(mockUpdateAwardRecommendation).toHaveBeenCalledWith("ar-id-123", {
+        award_selection_method: "merit_review_ranking_only",
+        additional_info: "More info",
+        funding_strategy: "Fund top applicants",
+        selection_method_detail: "Panel review",
+        other_key_information: null,
+      });
       expect(result.success).toBe(true);
       expect(result.errorMessage).toBeUndefined();
     });
-  });
 
-  describe("submitAwardRecommendationForReview", () => {
-    it("returns success", async () => {
-      const result = await submitAwardRecommendationForReview(new FormData());
+    it("returns an error message when the fetcher throws", async () => {
+      jest.spyOn(console, "error").mockImplementation(() => {});
+      mockUpdateAwardRecommendation.mockRejectedValue(new Error("Boom"));
 
-      expect(result.success).toBe(true);
-      expect(result.errorMessage).toBeUndefined();
+      const result = await saveAwardRecommendation({}, buildFormData());
+
+      expect(result.success).toBeUndefined();
+      expect(result.errorMessage).toBe("Boom");
     });
   });
 

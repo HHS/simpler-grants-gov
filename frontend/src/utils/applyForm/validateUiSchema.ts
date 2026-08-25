@@ -1,5 +1,5 @@
 import { RJSFSchema } from "@rjsf/utils";
-import Ajv from "ajv";
+import Ajv, { ValidateFunction } from "ajv";
 import addFormats from "ajv-formats";
 
 // JSON Schema for the UiSchema, accepts a "field", "fieldList", "multiField", or "section"
@@ -71,6 +71,7 @@ export const UiJsonSchema: RJSFSchema = {
           ],
         },
         attachmentType: { type: "string" },
+        printDescription: { type: "boolean" },
       },
       required: ["type"],
       anyOf: [
@@ -243,6 +244,7 @@ export const UiJsonSchema: RJSFSchema = {
         label: {
           type: "string",
         },
+        hideFieldListHeading: { type: "boolean" },
         minItemsHeading: { type: "string" },
         minItemsHelperText: { type: "string" },
         maxItemsHeading: { type: "string" },
@@ -266,7 +268,10 @@ export const UiJsonSchema: RJSFSchema = {
                     $ref: "#/$defs/multiField",
                   },
                   {
+                    // the sibling multiField ref already requires an object, so
+                    // declaring the type here only satisfies ajv's strictTypes check
                     not: {
+                      type: "object",
                       properties: {
                         widget: {
                           const: "Table",
@@ -350,6 +355,10 @@ export const UiJsonSchema: RJSFSchema = {
         staticContent: {
           type: "string",
         },
+        format: {
+          type: "string",
+          enum: ["integer", "decimal", "currency", "dollar", "percentage"],
+        },
       },
       required: ["type"],
       allOf: [
@@ -379,7 +388,14 @@ export const UiJsonSchema: RJSFSchema = {
           then: {
             required: ["staticContent"],
             not: {
-              required: ["definition"],
+              anyOf: [
+                {
+                  required: ["definition"],
+                },
+                {
+                  required: ["format"],
+                },
+              ],
             },
           },
         },
@@ -389,14 +405,32 @@ export const UiJsonSchema: RJSFSchema = {
   },
 };
 
+const buildAjv = () => {
+  const ajv = new Ajv({ allErrors: true, coerceTypes: true });
+  addFormats(ajv);
+
+  return ajv;
+};
+
+/*
+  Compiling a schema is codegen plus eval, and the ui schema is validated on every
+  application form request, so the validator for it is built once per process. Reading
+  `errors` straight after the synchronous call keeps this safe to share across requests.
+*/
+let uiSchemaValidator: ValidateFunction | undefined;
+
 export const validateUiSchema = (data: object) => {
-  return validateJsonBySchema(data, UiJsonSchema);
+  uiSchemaValidator = uiSchemaValidator ?? buildAjv().compile(UiJsonSchema);
+
+  if (uiSchemaValidator(data)) {
+    return false;
+  } else {
+    return uiSchemaValidator.errors;
+  }
 };
 
 export const validateJsonBySchema = (json: object, schema: RJSFSchema) => {
-  const ajv = new Ajv({ allErrors: true, coerceTypes: true });
-  addFormats(ajv);
-  const validate = ajv.compile(schema);
+  const validate = buildAjv().compile(schema);
 
   if (validate(json)) {
     return false;

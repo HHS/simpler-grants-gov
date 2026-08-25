@@ -21,6 +21,12 @@ variable "environment_name" {
   default     = ""
 }
 
+variable "app_environment_name" {
+  type        = string
+  description = "Value of the container's ENVIRONMENT variable; defaults to environment_name"
+  default     = null
+}
+
 variable "hostname" {
   type        = string
   description = "The hostname to override the default AWS configuration"
@@ -152,10 +158,26 @@ variable "enable_api_gateway" {
   default     = false
 }
 
+variable "enable_api_gateway_domain_name" {
+  description = <<EOT
+    temp for environment migrations
+  EOT
+  type        = bool
+  default     = true
+}
+
 variable "enable_load_balancer" {
   description = "Whether to enable a load balancer for the service"
   type        = bool
   default     = true
+}
+
+variable "enable_secure_alb" {
+  description = <<EOT
+    Limit ALB traffic to internal vpc only
+  EOT
+  type        = bool
+  default     = false
 }
 
 variable "enable_alb_cdn" {
@@ -168,6 +190,14 @@ variable "enable_s3_cdn" {
   description = "Whether to enable a S3 origin CDN for the service. Cannot be enabled at the same time as the ALB CDN."
   type        = bool
   default     = false
+}
+
+variable "enable_cdn_alias" {
+  description = <<EOT
+    temp for environment migrations
+  EOT
+  type        = bool
+  default     = true
 }
 
 variable "s3_cdn_bucket_name" {
@@ -402,3 +432,8 @@ variable "newrelic_host_entity_guid" {
   default     = null
 }
 
+variable "newrelic_service_name" {
+  type        = string
+  description = "Name reported to New Relic as entity.name/hostname in forwarded logs; defaults to service_name."
+  default     = null
+}

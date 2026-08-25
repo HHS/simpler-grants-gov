@@ -34,7 +34,7 @@ export function SubmissionSetUp() {
         </div>
         <div className="tablet:grid-col">
           <CommonTextInput
-            fieldId="competition-title"
+            fieldId="competition_title"
             labelText={t("competitionTitle")}
             description={t("competitionTitleHint")}
             isRequired={false}
@@ -44,7 +44,7 @@ export function SubmissionSetUp() {
         </div>
       </div>
       <CommonSelectInput
-        fieldId="who-can-apply"
+        fieldId="open_to_applicants"
         labelText={t("whoCanApply")}
         description={t("whoCanApplyHint")}
         isRequired={true}
@@ -55,28 +55,6 @@ export function SubmissionSetUp() {
         }}
         selectClassName="width-full maxw-none"
       />
-      <div className="grid-row grid-gap-2">
-        <div className="tablet:grid-col">
-          <CommonTextInput
-            fieldId="expected-number-of-applicants"
-            labelText={t("expectedNumberOfApplicants")}
-            description={t("expectedNumberOfApplicantsHint")}
-            isRequired={false}
-            fieldMaxLength={255}
-            onTextChange={() => {}}
-          />
-        </div>
-        <div className="tablet:grid-col">
-          <CommonTextInput
-            fieldId="expected-application-size"
-            labelText={t("expectedApplicationSize")}
-            description={t("expectedApplicationSizeHint")}
-            isRequired={false}
-            fieldMaxLength={255}
-            onTextChange={() => {}}
-          />
-        </div>
-      </div>
     </div>
   );
 }

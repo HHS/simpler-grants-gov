@@ -16,6 +16,10 @@ on:
         type: choice
         options:
           - staging
+          - grantee1
+          - grantee2
+          - grantor1
+          - grantor2
       playwright_tags:
         description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         type: string
@@ -39,10 +43,21 @@ jobs:
   e2e-tests-deployed:
     runs-on: ubuntu-22.04
     steps:
+      - name: Set target environment
+        run: |
+          if [[ -z "${{ inputs.target }}" ]]; then
+            echo "defaulted_target=staging" >> "$GITHUB_ENV";
+          else
+            echo "defaulted_target=${{ inputs.target }}" >> "$GITHUB_ENV";
+          fi
+      - name: Check target environment
+        run: |
+          if [[ "${{ env.defaulted_target }}" != "staging" && "${{ env.defaulted_target }}" != "grantee1" && "${{ env.defaulted_target }}" != "grantee2" && "${{ env.defaulted_target }}" != "grantor1" && "${{ env.defaulted_target }}" != "grantor2" ]]; then
+            echo "Unsupported target environment"
+            exit 1
+          fi
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Set target
-        run: if [[ -z "${{ inputs.target }}" ]]; then echo "defaulted_target=staging" >> "$GITHUB_ENV"; else echo "defaulted_target=${{ inputs.target }}" >> "$GITHUB_ENV"; fi
       - name: Determine test groups to run
         shell: bash
         run: |
@@ -63,9 +78,6 @@ jobs:
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
-          staging_test_user_api_key: ${{ secrets.STAGING_TEST_USER_API_KEY }}
-          staging_test_user_manager_api_key: ${{ secrets.STAGING_TEST_USER_MANAGER_API_KEY }}
-          staging_test_user_id: ${{ secrets.STAGING_TEST_USER_ID }}
           staging_client_session_secret: ${{ secrets.STAGING_CLIENT_SESSION_SECRET }}
           test_user_manager_api_key: ${{ secrets.STAGING_TEST_USER_MANAGER_API_KEY }}
           do-chrome-install: "true"
@@ -77,7 +89,7 @@ jobs:
     secrets: inherit
     with:
       run_id: ${{ github.run_id }}
-      target: ${{ inputs.target || 'staging' }}
+      target: ${{ inputs.target }}
   send-slack-notification:
     if: failure()
     needs: [create-report]

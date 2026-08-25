@@ -3,10 +3,23 @@ output "public_endpoint" {
   value       = var.enable_load_balancer ? "http://${aws_lb.alb[0].dns_name}" : null
 }
 
-# output "cdn_endpoint" {
-#   description = "The CDN endpoint for the service."
-#   value       = var.enable_cdn ? aws_cloudfront_distribution.cdn[0].domain_name : null
-# }
+output "cdn_endpoint" {
+  description = <<EOT
+    The CloudFront distribution's own *.cloudfront.net domain name, i.e. the value a DNS
+    record for the CDN's alias has to point at. Null when the service has no CDN.
+  EOT
+  value       = local.enable_cdn ? aws_cloudfront_distribution.cdn[0].domain_name : null
+}
+
+output "cdn_distribution_id" {
+  description = "The CloudFront distribution's ID, which is what CloudFront API errors name. Null when the service has no CDN."
+  value       = local.enable_cdn ? aws_cloudfront_distribution.cdn[0].id : null
+}
+
+output "cdn_aliases" {
+  description = "The alternate domain names attached to the CloudFront distribution, empty when it only serves its default name."
+  value       = local.enable_cdn ? aws_cloudfront_distribution.cdn[0].aliases : []
+}
 
 output "cluster_name" {
   value = aws_ecs_cluster.cluster.name
@@ -18,7 +31,7 @@ output "load_balancer_arn_suffix" {
 }
 
 output "application_log_group" {
-  value = local.log_group_name
+  value = aws_cloudwatch_log_group.service_logs.name
 }
 
 output "application_log_stream_prefix" {

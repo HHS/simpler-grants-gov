@@ -81,7 +81,7 @@ A mock Oauth2 server is defined and managed in the API's [docker-compose.yml](..
 
 Most configuration options are managed by environment variables.
 
-Environment variables for local development are stored in the [local.env](../../api/local.env) file. This file is automatically loaded when running. If running within Docker, this file is specified as an `env_file` in the [docker-compose](../../docker-compose.yml) file, and loaded [by a script](../../backend/grants_shared/src/grants_shared/util/local.py) automatically when running most other components outside the container.
+Environment variables for local development are stored in the [local.env](../../api/local.env) file. This file is automatically loaded when running. If running within Docker, this file is specified as an `env_file` in the [docker-compose](../../docker-compose.yml) file, and loaded [by a script](https://github.com/HHS/grants-shared/blob/main/backend/grants_shared/src/grants_shared/util/local.py) automatically when running most other components outside the container.
 
 Any environment variables specified directly in the [docker-compose](../../docker-compose.yml) file will take precedent over those specified in the [local.env](../../api/local.env) file.
 
@@ -195,6 +195,23 @@ Individual services can be run through Docker, which can be useful in concert wi
    * Run `make init-sqsmock`
 * **Mock OAuth server**
    * Run `make init-mock-oauth2`
+* **Mailpit (local email)**
+   * `make init` starts Mailpit with the other API dependencies
+   * To start it separately from `api/`, run `make init-mailpit`
+   * Open [http://localhost:8025](http://localhost:8025) to inspect captured messages
+
+#### Local Email
+
+Local development captures email in [Mailpit](https://mailpit.axllent.org/) instead of
+sending it to real recipients. This includes organization invitations, workflow approval
+messages, and scheduled notifications. Run `make run-email-notifications` after seeding
+suitable local data to generate scheduled messages.
+
+`local.env` uses the Docker service name `mailpit` for SMTP. When running API commands
+outside Docker, set `LOCAL_EMAIL_SMTP_HOST=localhost` in `override.env`. No SMTP relay
+or forwarding is configured, and the application only permits this SMTP path when
+`ENVIRONMENT=local` and local AWS mode are active. To temporarily use the in-memory
+email mock instead, set `ENABLE_LOCAL_EMAIL_CAPTURE=FALSE` in `override.env`.
 
 #### S3 Mock
 

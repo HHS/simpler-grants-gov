@@ -2,8 +2,10 @@ data "aws_caller_identity" "current" {}
 
 data "aws_vpc" "network" {
   filter {
-    name   = "tag:Name"
-    values = [module.project_config.network_configs[var.environment_name].vpc_name]
+    name = "tag:Name"
+    # Resolve the VPC by the environment's network_name so the environment name
+    # and its VPC/network name may differ (e.g. infra-dev -> infra-dev-simpler-grants).
+    values = [local.network_config.vpc_name]
   }
 }
 
@@ -35,6 +37,49 @@ locals {
   environment_config = module.app_config.environment_configs[var.environment_name]
   database_config    = local.environment_config.database_config
   network_config     = module.project_config.network_configs[local.environment_config.network_name]
+
+  # Which environments may be seeded from THIS environment's snapshots, used by
+  # .github/workflows/restore-db-cross-env.yml.
+  #
+  # Only needed where source and target live in different AWS accounts. The
+  # legacy environments (dev, staging, grantee*, grantor*) all share one account,
+  # so restores between them need no cross-account grant and they are absent
+  # here. The infra-* environments each have their own account, so seeding
+  # infra-dev from infra-staging requires infra-staging's KMS key to name
+  # infra-dev's account.
+  #
+  # Restores flow "down" from more-production-like environments, which is why
+  # infra-staging grants the dev-account environments and not the reverse.
+  #
+  # All four targets live in the same AWS account (061664787759), so this
+  # resolves to a single account id and one grant on infra-staging's key covers
+  # every one of them. The list is written out per environment anyway, so the
+  # intent stays readable if any of them later moves to its own account.
+  snapshot_restore_targets = {
+    "infra-staging" = ["infra-grantee1", "infra-grantee2", "infra-grantor1", "infra-dev"]
+  }
+
+  # distinct() because several target environments can share one AWS account
+  # (all four dev-account environments do), and repeating the same principal in
+  # the key policy statement adds noise without changing its meaning.
+  snapshot_share_account_ids = distinct([
+    for env in lookup(local.snapshot_restore_targets, var.environment_name, []) :
+    local.account_ids_by_name[module.project_config.network_configs[module.app_config.environment_configs[env].network_name].account_name]
+    # Skip targets whose account has no tfbackend file, so a partially
+    # bootstrapped project still plans.
+    if contains(
+      keys(local.account_ids_by_name),
+      module.project_config.network_configs[module.app_config.environment_configs[env].network_name].account_name
+    )
+  ])
+
+  account_ids_by_name = data.external.account_ids_by_name.result
+}
+
+# Resolves account name -> account id from the infra/accounts/*.s3.tfbackend
+# filenames, the same source of truth the rest of the project uses.
+data "external" "account_ids_by_name" {
+  program = ["${path.module}/../../../bin/account-ids-by-name"]
 }
 
 terraform {
@@ -54,6 +99,8 @@ terraform {
 
 provider "aws" {
   region = local.database_config.region
+  # Refuse to operate against the wrong account (covers plan/apply/destroy).
+  allowed_account_ids = [module.expected_account.account_id]
   default_tags {
     tags = local.tags
   }
@@ -65,6 +112,21 @@ module "project_config" {
 
 module "app_config" {
   source = "../app-config"
+}
+
+# Resolve the account this environment must deploy to (used by the provider's
+# allowed_account_ids below and by the guard), then short-circuit plan/apply if
+# the active AWS credentials are for a different account.
+module "expected_account" {
+  source       = "../../modules/account-id-by-name"
+  account_name = local.network_config.account_name
+  accounts_dir = "${path.module}/../../accounts"
+}
+
+module "account_guard" {
+  source              = "../../modules/aws-account-guard"
+  expected_account_id = module.expected_account.account_id
+  context             = "the ${var.environment_name} api database"
 }
 
 data "aws_security_groups" "aws_services" {
@@ -98,10 +160,13 @@ module "database" {
   vpc_id                         = data.aws_vpc.network.id
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
-  database_subnet_group_name     = var.environment_name
-  environment_name               = var.environment_name
-  grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
-  newrelic_entity_guid           = local.database_config.newrelic_entity_guid
-  deletion_protection            = local.database_config.deletion_protection
-  snapshot_identifier            = var.database_snapshot_id
+  # The DB subnet group is created by the networks layer under the network's name,
+  # so reference it by network_name (not environment_name).
+  database_subnet_group_name   = local.environment_config.network_name
+  environment_name             = var.environment_name
+  grants_gov_oracle_cidr_block = local.network_config.grants_gov_oracle_cidr_block
+  newrelic_entity_guid         = local.database_config.newrelic_entity_guid
+  deletion_protection          = local.database_config.deletion_protection
+  snapshot_identifier          = var.database_snapshot_id
+  snapshot_share_account_ids   = local.snapshot_share_account_ids
 }

@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { saveAwardRecommendationSubmissionDetails } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/actions";
-import AwardRecommendationSubmissionEditHero from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/AwardRecommendationSubmissionEditHero";
-import { RecommendationDetailsSection } from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationDetailsSection";
+import RecommendationSubmissionEditForm from "src/app/[locale]/(base)/grantor/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/_components/RecommendationSubmissionEditForm";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
@@ -13,7 +12,10 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { Alert, GridContainer } from "@trussworks/react-uswds";
+import { Suspense } from "react";
+import { Alert } from "@trussworks/react-uswds";
+
+import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
 
 export async function generateMetadata({
   params,
@@ -110,37 +112,65 @@ async function AwardRecommendationSubmissionEditPageContent({
     applicationSubmission.application_submission_number || "";
   const applicationId = applicationSubmission.application?.application_id ?? "";
 
+  const editPageHref = `/grantor/award-recommendation/${awardRecommendationId}/edit`;
+  const editTitle = t("submissionEdit.editTitle", {
+    applicationSubmissionNumber,
+  });
+
+  const heroButtons = [
+    {
+      type: "navigation" as const,
+      label: t("heroButtons.cancel"),
+      href: editPageHref,
+      outline: true,
+    },
+    {
+      type: "action" as const,
+      label: t("heroButtons.save"),
+      formAction: saveAwardRecommendationSubmissionDetails,
+    },
+  ];
+
+  const externalLink = {
+    label: t("submissionEdit.viewOriginalApplication"),
+    sublabel: applicationSubmissionNumber,
+    href: `/workspace/applications/${applicationId}`,
+  };
+
   return (
-    <form action={saveAwardRecommendationSubmissionDetails}>
-      <AwardRecommendationSubmissionEditHero
-        awardRecommendationId={awardRecommendationId}
-        awardRecommendationBreadcrumbTitle={`${t("heroTitle")}: ${awardRecommendationNumber}`}
-        applicationSubmissionNumber={applicationSubmissionNumber}
-        applicationId={applicationId}
-        awardRecsLabel={t("awardRecs")}
-        editTitle={t("submissionEdit.editTitle", {
-          applicationSubmissionNumber,
-        })}
-        viewOriginalApplicationLabel={t(
-          "submissionEdit.viewOriginalApplication",
-        )}
-        cancelLabel={t("heroButtons.cancel")}
-        saveLabel={t("heroButtons.save")}
-      />
-      <GridContainer>
-        <input
-          type="hidden"
-          name="award_recommendation_id"
-          value={awardRecommendationId}
-        />
-        <input
-          type="hidden"
-          name="award_recommendation_application_submission_id"
-          value={applicationSubmissionId}
-        />
-        <RecommendationDetailsSection submission={submission} />
-      </GridContainer>
-    </form>
+    <RecommendationSubmissionEditForm
+      action={saveAwardRecommendationSubmissionDetails}
+      awardRecommendationId={awardRecommendationId}
+      applicationSubmissionId={applicationSubmissionId}
+      submission={submission}
+      hero={
+        <Suspense
+          fallback={
+            <span data-testid="award-recommendation-hero-fallback"></span>
+          }
+        >
+          <AwardRecommendationHero
+            heading={editTitle}
+            showDateAndStatus={false}
+            buttons={heroButtons}
+            externalLink={externalLink}
+            additionalBreadcrumbs={[
+              {
+                title: t("awardRecs"),
+                path: "/",
+              },
+              {
+                title: `${t("heroTitle")}: ${awardRecommendationNumber}`,
+                path: editPageHref,
+              },
+              {
+                title: editTitle,
+              },
+            ]}
+          />
+        </Suspense>
+      }
+    />
   );
 }
 

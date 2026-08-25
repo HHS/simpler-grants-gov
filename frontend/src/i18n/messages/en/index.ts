@@ -76,6 +76,10 @@ export const messages = {
       watch: "Watch recordings of past Big Demos",
       watchLinks: [
         {
+          text: "June 30, 2026",
+          link: "https://youtu.be/AeHXvMamcnc?si=3dikqd4MU7zNZ5-q",
+        },
+        {
           text: "January 29, 2026",
           link: "https://youtu.be/LBIqOTKOFf0?si=O0Ec4PaNuAByeHA9",
         },
@@ -320,8 +324,6 @@ export const messages = {
         "Define who is eligible to apply for these funds. Select all applicable applicant types and provide any specific requirements or restrictions regarding organizational status or geographic location.",
       additionalInformationIntro:
         "Use this section to provide supplementary context, such as a summary of the program's goals, agency-specific links, and contact information for programmatic or technical inquiries.",
-      draftOnlyWarning:
-        "Only draft opportunities should be editable from this page.",
       notAvailable: "Not available",
       fundingTypeHint:
         "Select the legal relationship between the agency and the recipient",
@@ -396,6 +398,8 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+      expectedNumberOfAwardsInput:
+        "Expected number of awards must be greater than or equal to zero and less than 1,000,000,000,000,000.",
       awardMinCurrencyInput:
         "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMaxCurrencyInput:
@@ -540,6 +544,13 @@ export const messages = {
       uploadBy: "Upload by",
       uploadDate: "Upload date",
     },
+    attachmentUpload: {
+      error:
+        "Processing failed due to a system error. Try uploading your file again.",
+      success:
+        "Success: File scan complete. “Save” this form to attach the file.",
+      uploading: "Uploading...",
+    },
     historyTable: {
       applicationHistory: "Application History",
       timestamp: "Timestamp",
@@ -582,6 +593,8 @@ export const messages = {
       returnToApplication: "Return to application",
       saving: "Saving...",
       savingAndRefreshing: "Save and refresh",
+      saveDisabledTooltipMessage:
+        "Save disabled while file upload is processing.",
       lastUpdatedMessage: "This form was last updated on",
       createdMessage: "This form was created on",
     },
@@ -898,6 +911,21 @@ export const messages = {
     description:
       "You must sign in with your government employee ID. Make sure you've set up your Personal Identity Verification (PIV) or Common Access Card (CAC) as a two-factor authentication method.",
     button: "Sign in using PIV/CAC",
+  },
+  FormSelectModal: {
+    title: "Form Library",
+    heading: "Select Forms",
+    selectAll: "Select all",
+    buttons: {
+      cancel: "Cancel",
+      save: "Save",
+    },
+    requiredStates: {
+      required: "Required",
+      conditional: "Conditionally Required",
+      auto: "Auto added",
+      always: "Always required",
+    },
   },
   Footer: {
     agencyName: "Grants.gov",
@@ -1952,6 +1980,12 @@ export const messages = {
       },
     },
   },
+  CommonWordLimit: {
+    wordsAllowed: "words allowed",
+    wordsLeft: "{num, plural, =1 {1 word left} other {# words left}}",
+    wordsError:
+      "{num, plural, =1 {1 word over limit} other {# words over limit}}",
+  },
   Applications: {
     numApplications: "{num, plural, =1 {1 application} other {# applications}}",
     errorMessage:
@@ -2009,13 +2043,23 @@ export const messages = {
     tableHeadings: {
       agency: "Agency",
       title: "Title",
+      oppNumber: "Opp. Number",
+      fundingInstrumentType: "Funding Instrument Type",
+      lastUpdated: "Last Updated",
       status: "Status",
-      actions: "Actions",
+      actions: "Action",
     },
     actionButtons: {
       edit: "Edit",
       copy: "Copy",
       delete: "Delete",
+    },
+    statusTag: {
+      draft: "Draft",
+      posted: "Open",
+      forecasted: "Forecasted",
+      archived: "Archived",
+      closed: "Closed",
     },
   },
   Organizations: {
@@ -2084,6 +2128,10 @@ export const messages = {
       submitForReview: "Submit for review",
       backToEdit: "Back to Edit",
       backToSubmissions: "Back to submissions",
+    },
+    save: {
+      success: "Your changes have been saved.",
+      error: "We encountered an error saving your changes. Please try again.",
     },
     submissionEdit: {
       editTitle: "Edit {applicationSubmissionNumber}",
@@ -2201,6 +2249,7 @@ export const messages = {
         recommendedWithoutFunding: "Recommended but not funded",
         notRecommended: "Not recommended",
       },
+      selectOnePlaceholder: "Select one",
       hasExceptionLabel: "Contains exceptions to selection method",
       commentsLabel: "Recommendation comments",
       commentsDescription:
@@ -2215,6 +2264,10 @@ export const messages = {
       amountRequestedLabel: "Amount Requested",
       amountRecommendedLabel: "Amount Recommended",
       totalLabel: "Total",
+      validationErrorHeading: "There is a problem with your recommendation",
+      recommendationRequired: "Select your recommendation",
+      exceptionDetailRequired: "Enter a reason for this exception",
+      amountRecommendedRequired: "Enter an amount recommended",
     },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
@@ -2350,6 +2403,71 @@ export const messages = {
       showingRange: "Showing {start}-{end} of {total}",
       editButton: "Edit",
     },
+    reviewForm: {
+      pageTitle: "Submit for Review | Simpler.Grants.gov",
+      pageDescription: "Submit award recommendation for review",
+      header: "Submit for Review",
+      loading: "Loading...",
+      contentCreator: {
+        title: "Submit for Review",
+      },
+      reviewer: {
+        title: "Review Award Recommendation",
+        question:
+          "Do you concur on behalf of the Grants Office that this document meets applicable grants management requirements?",
+        yesConcur: "Yes, approval obtained (attachment required)",
+        noIssues: "No, issues identified, changes needed (attachment required)",
+        hold: "Hold, review in progress",
+      },
+      fmo: {
+        title: "FMO Review",
+        question:
+          "Do you certify the availability of funds to support the recommendation documented in this document?",
+        fundsAvailable: "Yes, funds are available",
+        fundsContingent: "Yes, funds are contingent upon availability by",
+        dateLabel: "Date",
+        noCertification: "No, certification cannot be provided, changes needed",
+        hold: "Hold, review in progress",
+      },
+      reviewComment: {
+        label: "Review comments",
+        description: "Shown on the award recommendation document",
+      },
+      internalComment: {
+        checkboxLabel: "Add internal comments for your team",
+        label: "Internal comments",
+        description: "Only visible in workflow history",
+      },
+      supplementalDocuments: {
+        label: "Supplemental review documents",
+        description: "Choose the documents you'd like to include",
+        uploading: "Uploading document...",
+        uploadSuccess: "Document uploaded successfully",
+        uploadError: "Error uploading document. Please try again.",
+      },
+      attestation: {
+        contentCreator:
+          "I attest that I am providing my recommendation of the recipients identified in this document for award consideration",
+        reviewer:
+          "I attest that I am providing my approval of the recipients identified in this document for award consideration",
+      },
+      buttons: {
+        submit: "Submit review",
+        submitting: "Submitting...",
+        cancel: "Cancel",
+      },
+      errors: {
+        submitFailed: "Failed to submit review. Please try again.",
+        insufficientPrivileges:
+          "You do not have the required privileges to review award recommendations.",
+        invalidReviewerType:
+          "You do not have permission to review at this stage of the workflow.",
+        authFailed:
+          "Failed to authenticate user. Please sign in and try again.",
+        loadingFailed: "Failed to load review form. Please try again.",
+        noWorkflow: "No workflow is associated with this award recommendation.",
+      },
+    },
   },
   CreateAwardRecommendation: {
     pageTitle: "Create recommendation",
@@ -2461,6 +2579,12 @@ export const messages = {
       opportunityTitle: "Opportunity title",
       opportunityTitleDesc:
         "Provide a concise, descriptive name that helps applicants identify the grant's purpose.",
+      tagline: "Tagline",
+      taglineDesc:
+        "A specific one-sentence purpose statement that summarizes the highest-level goal.",
+      purposeStatement: "Purpose statement",
+      purposeStatementDesc:
+        "Provide a one-line statement that helps applicants understand the grant's purpose.",
       agency: "Agency",
       category: "Grant selection method",
       categoryDesc: "Choose the evaluation process used to award these funds.",
@@ -2469,7 +2593,7 @@ export const messages = {
         'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
       assistanceListingNumber: "Assistance listing number",
       assistanceListingNumberDesc:
-        "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
+        "Enter the 5-digit code from SAM.gov (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
     },
   },
@@ -2505,9 +2629,21 @@ export const messages = {
     applicationRequirementsSubheader:
       "What applicants must submit, how they'll be scored, and the format rules.",
     button: {
-      back: "Back",
+      processing: "Processing...",
+      back: "Save and go back",
       saveAndExit: "Save and exit",
       saveAndContinue: "Save and continue",
+    },
+    alerts: {
+      success: "Saved successfully",
+      successBody: "Your changes have been saved.",
+      genericError: "Unable to save competition updates.",
+      unauthenticated: "You must be signed in to update this competition.",
+      forbidden: "You do not have permission to update this competition.",
+      notFound: "This competition could not be found.",
+      networkError: "A network error occurred.",
+      validationErrors: "Errors Found",
+      validationErrorBody: "Please correct the following errors:",
     },
     sectionSubmissionSetUp: {
       header: "Submission set-up",
@@ -2523,27 +2659,21 @@ export const messages = {
       whoCanApplyOrganizationsOnly: "Organizations only",
       whoCanApplyIndividualsOnly: "Individuals only",
       whoCanApplyBoth: "Both organizations and individuals",
-      expectedNumberOfApplicants: "Expected number of applicants",
-      expectedNumberOfApplicantsHint: "A best estimate to plan for capacity",
-      expectedApplicationSize: "Expected application size",
-      expectedApplicationSizeHint:
-        "Approximate file size of a typical submission",
     },
-    sectionOpenAndCloseDates: {
-      header: "Open and close dates",
-      howDoesThisClose: "How does this opportunity close?",
-      howDoesThisCloseHint:
-        "Most federal opportunities have a single hard deadline. Choose another option only when the program runs differently.",
-      openDate: "Open date",
-      openDateHint: "First day to start applying.",
-      closeDate: "Close date",
-      closeDateHint: "Final deadline for all applications",
-      hardDeadline: "Hard deadline",
-      hardDeadlineHint: "All applications must be in by the close date.",
-      rollingDeadline: "Rolling deadline",
-      rollingDeadlineHint: "Applications are reviewed in cycles.",
-      continuousReview: "Continuous review",
-      continuousReviewHint: "No close date, open until further notice",
+    sectionSubmissionWindow: {
+      header: "Submission window",
+      subHeader: "When applicants can submit through this package.",
+      submissionsOpen: "Submissions open",
+      submissionsOpenHint:
+        "First day applicants can submit. Defaults to publish date.",
+      submissionsClose: "Submissions close",
+      submissionsCloseHint:
+        "Final deadline for all applications. Defaults to the close date.",
+      howManyApplications: "How many applications do you expect?",
+      howManyApplicationsHint:
+        "We use it to plan capacity for your competition. You can change it later.",
+      expectedNumberOfApplicants: "Expected number of applicants",
+      expectedNumberOfApplicantsHint: "A best estimate is fine.",
     },
     sectionApplicationChecklist: {
       header: "Application checklist",
@@ -2568,6 +2698,27 @@ export const messages = {
         invalidEmail:
           "Incorrect text format. Please ensure there are no spaces or missing characters.",
       },
+    },
+    sectionApplicationInstructions: {
+      header: "Application instructions",
+      subHeader:
+        "Upload any supporting instructions needed for the application.",
+      uploadAFile: "Upload a file",
+      multipleFiles: "For multiple files, combine them into one zip file.",
+      uploadWidget: {
+        error:
+          "Processing failed due to a system error. Try uploading your file again.",
+        success:
+          "Success: File scan complete. “Save” this form to attach the file.",
+        uploading: "Uploading...",
+      },
+    },
+    sectionRequiredForms: {
+      header: "Forms in this package",
+      subHeader: "Select the forms applicants must complete.",
+      selectFormsButton: "Select forms",
+      labelForm: "Item",
+      labelRequirement: "Requirement",
     },
   },
   FeatureFlagsAdmin: {
@@ -2613,7 +2764,8 @@ export const messages = {
     statusDisplay: {
       cancel: "Cancel",
       dismiss: "Dismiss",
-      queued: "Queued",
+      processing: "Processing file",
+      starting: "Starting upload",
       uploading: "Uploading...",
       startingScan: "Upload complete. Starting security scan",
       scanning: "Upload complete. Running security scan...",
@@ -2626,6 +2778,8 @@ export const messages = {
       missingFileId: "Error: missing file id",
       preUploadError: "Pre upload error",
       infected: "Security scan failed. File removed",
+      fileTooLarge:
+        "This file is too large. The maximum file size is {maxFileSize}.",
     },
     deleteModal: {
       titleText: "Delete",
@@ -2637,6 +2791,26 @@ export const messages = {
       deleteFilesCta: "Delete files",
       deleting: "Deleting...",
     },
+  },
+  PrintViewErrorDiagnostics: {
+    heading: "PDF rendering failed",
+    description:
+      "This document is an error diagnostic page. The application form PDF could not be generated because the print page could not load or prepare the form data.",
+    supportInstructions:
+      "Please contact the support team and include the diagnostic details below.",
+    supportCenterHeading: "Grants.gov Support Center",
+    supportAvailability:
+      "We are available 24 hours a day 7 days a week excluding federal holidays.",
+    supportEmail: "support@grants.gov",
+    supportUnitedStatesPhone: "1-800-518-4726 (U.S.)",
+    supportInternationalPhone: "1-606-545-5035 (International)",
+    diagnosticDetailsHeading: "Diagnostic details",
+    applicationIdLabel: "Application ID",
+    applicationFormIdLabel: "Application form ID",
+    errorCategoryLabel: "Error category",
+    internalTokenHeaderPresentLabel: "Internal token header present",
+    yes: "Yes",
+    no: "No",
   },
   ProgressChecker: {
     notStarted: "Not started",

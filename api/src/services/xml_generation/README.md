@@ -41,7 +41,7 @@ from src.services.xml_generation.models import XMLGenerationRequest
 # Application data
 application_data = {
     "submission_type": "Application",
-    "organization_name": "Test University", 
+    "organization_name": "Test University",
     "project_title": "Research Project",
     # ... other fields
 }
@@ -71,6 +71,7 @@ else:
 The service supports two XML formatting modes:
 
 ### Pretty-Print Format (Default)
+
 ### Condensed Format
 
 ## Sample Output
@@ -89,6 +90,7 @@ The service supports two XML formatting modes:
 ## Testing
 
 Comprehensive unit tests cover:
+
 - Basic XML generation functionality
 - Configuration loading from form modules
 - Field mapping transformations
@@ -99,6 +101,7 @@ Comprehensive unit tests cover:
 ### Running Unit Tests
 
 Run all XML generation unit tests:
+
 ```bash
 python -m pytest tests/src/services/xml_generation/
 ```
@@ -108,32 +111,11 @@ python -m pytest tests/src/services/xml_generation/
 To validate generated XML against official Grants.gov XSD schemas:
 
 ```bash
-# Validate all forms
-make validate-xml-generation
-
-# Validate a specific form
-make test-xml-validation form=SF424_4_0
+# Run the XML generation XSD tests
+make test args="tests/src/services/xml_generation/test_submission_xsd_validation.py"
 ```
 
-**Note:** The first run will download XSD files from Grants.gov. Subsequent runs use the downloaded files from `services/xml_generation/xsds/`.
-
-The validation tests:
-1. Generate XML from test data (see `src/services/xml_generation/validation/test_cases.py`)
-2. Download XSD schemas from Grants.gov if not cached
-3. Validate generated XML against the official XSD
-4. Save results to `services/xml_generation/xsds/validation_results.json`
-
-### Validation Test Cases
-
-Test cases are defined in [`validation/test_cases.py`](validation/test_cases.py) and include:
-- **SF-424**: Minimal valid, revision, continuation, multiple applicant types, attachments
-- **SF-424A**: Budget sections, forecasted cash needs, complete examples  
-- **SF-LLL**: Initial filing, material change, subawardee scenarios
-- **EPA-4700-4**: Minimal, complete, construction explanation examples
-- **Attachment Forms**: Single attachment, multiple attachments, all 15 slots
-
-Each test case validates that the generated XML conforms to the official XSD schema requirements.
-
+The XSD files are checked into our repo. You can manually run `make fetch-xsds` to download the official schemas locally if needed.
 
 ## Configuration
 
@@ -161,6 +143,60 @@ FORM_XML_TRANSFORM_RULES = {
     # ... 35+ additional field mappings
 }
 ```
+
+### Example: SF-424 Short (v3.0)
+
+The SF-424 Short form uses `ContactPersonDataTypeV3` from GlobalLibrary for both the Project Director (Section 7) and the Primary Contact (Section 8):
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for SF-424 Short",
+        "form_name": "SF424_Short_3_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SF424_Short_3_0-V3.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd",
+        "xml_structure": {"root_element": "SF424_Short_3_0", "version": "3.0"},
+    },
+    "agency_name": {"xml_transform": {"target": "AgencyName"}},
+    "applicant_type_code_mapping": {
+        "xml_transform": {
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "one_to_many",
+                "source_field": "applicant_type_code",
+                "target_pattern": "ApplicantTypeCode{index}",
+                "max_count": 3,
+            },
+        }
+    },
+    "project_director": _contact_person_group_xml("ProjectDirectorGroup"),
+    "same_as_project_director": {
+        "xml_transform": {
+            "target": "SameAsProjectDirector",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "contact_person": _contact_person_group_xml("ContactPersonGroup"),
+    # ... additional fields
+}
+```
+
+**SF-424 Short Field Mapping Notes:**
+
+- **ContactPersonDataTypeV3**: Both `project_director` (Section 7) and `contact_person` (Section 8) use the same nested structure (`ContactPersonGroup`/`ProjectDirectorGroup`) with Name, Title, Address, Phone, Fax, and Email sub-elements typed in the `globLib` namespace.
+- **Helper function**: `_contact_person_group_xml(target)` generates the nested `ContactPersonDataTypeV3` structure, accepting the XML target element name as a parameter. The base dict uses a `PLACEHOLDER` sentinel that the helper overwrites with the real target.
+- **Applicant type code — one-to-many**: `applicant_type_code` (a list of up to 3 values) maps to separate indexed elements `ApplicantTypeCode1`, `ApplicantTypeCode2`, `ApplicantTypeCode3` via the `one_to_many` conditional transform.
+- **Boolean fields**: `same_as_project_director` and `application_certification` use `boolean_to_yes_no` (True → `Y: Yes`, False → `N: No`).
+- **Section 8 always required — intentional difference from legacy**: `contact_person` (Section 8) is always required regardless of the `same_as_project_director` checkbox.
+  - _Legacy_: `ContactPersonGroup` is optional in the XSD (`minOccurs="0"`), and the .dat makes Section 8 conditionally optional when the applicant checks "Same as Project Director".
+  - _Simpler_: `contact_person` is listed unconditionally in `FORM_JSON_SCHEMA["required"]`. Checking the box does not auto-populate, hide, disable, or clear Section 8, and does not change validation. The checkbox is informational only — its sole effect is the `SameAsProjectDirector` element in the XML.
+  - _Why_: per epic [#10796](https://github.com/HHS/simpler-grants-gov/issues/10796), "Section 8 will not auto-populate with Section 7 information upon checking the box of 'Same as Project Director'. Instead, we will inform the user to fill out the information with the same information that was in Section 7 if the box is checked." Because the applicant always fills in Section 8, it is always required. This is a Product-approved divergence, not an oversight; the conditional validation that originally shipped in #10817 was intentionally removed in #10820 to match the epic. Locked in by `test_sf424_short_v3_0_contact_person_always_required`.
+- **`date_received`** uses `null_handling: include_null` so an empty element is always emitted in the XML output.
+- Post-population rules auto-fill `date_received`, `aor_signature`, and `authorized_representative_date_signed` on submission.
+- XSD reference: https://apply07.grants.gov/apply/forms/schemas/SF424_Short_3_0-V3.0.xsd
 
 ### Example: CD-511 (Certification Regarding Lobbying)
 
@@ -202,6 +238,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **CD-511 Field Mapping Notes:**
+
 - `applicant_name` → `OrganizationName` (XSD uses OrganizationName, form displays "Name of Applicant")
 - `contact_person` → `ContactName` with nested `HumanNameDataType` structure using GlobalLibrary namespace
 - Either `award_number` or `project_name` (or both) should be provided per form validation
@@ -245,6 +282,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **GG_LobbyingForm Field Mapping Notes:**
+
 - `organization_name` → `ApplicantName`
 - `authorized_representative_name` → `AuthorizedRepresentativeName` with nested `HumanNameDataType` structure
 - `authorized_representative_signature` and `submitted_date` are auto-populated during submission
@@ -278,6 +316,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Project Abstract Summary Field Mapping Notes:**
+
 - `funding_opportunity_number` → `FundingOpportunityNumber` (required)
 - `assistance_listing_number` → `CFDANumber` (optional, legacy name for Assistance Listing Number)
 - `applicant_name` → `OrganizationName` (required, called "Applicant Name" in UI)
@@ -314,6 +353,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **EPA Key Contacts Field Mapping Notes:**
+
 - Uses a helper function `_create_contact_person_transform()` to generate the nested structure for each contact
 - All four contacts are optional per XSD
 - Note: XSD has a typo "AdminstrativeContact" (not "Administrative")
@@ -357,6 +397,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Assurance Forms Field Mapping Notes:**
+
 - Uses `compose_object` conditional transform to wrap flat fields into nested `AuthorizedRepresentative` element
 - `signature` → `AuthorizedRepresentative/RepresentativeName`
 - `title` → `AuthorizedRepresentative/RepresentativeTitle`
@@ -447,6 +488,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Attachment Forms Notes:**
+
 - **Multiple attachments** (`type: "multiple"`): Used by Project Narrative, Budget Narrative, and Other Narrative Attachments
 - **Single attachment** (`type: "single"`): Used by Project Abstract with wrapper element `ProjectAbstractAddAttachment`. Generates a simple structure where attachment metadata (FileName, MimeType, etc.) is placed directly within the specified XML element.
 - **Single attachment with nested wrapper** (`type: "single_with_wrapper"`): Generates a nested structure where each attachment slot (e.g., ATT1-ATT15) contains an additional File wrapper element (e.g., `<ATT1><ATT1File>...</ATT1File></ATT1>`) before the attachment metadata.
@@ -515,6 +557,7 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Supplementary Cover Sheet for NEH Grant Programs Field Mapping Notes:**
+
 - Uses `map_values` transformation to convert human-readable enum values to XSD-required numeric codes for discipline fields
 - `major_field` (Project Director's Major Field): Maps ~150 discipline display values (e.g., "History: U.S. History") to numeric codes (e.g., "4")
 - `organization_type`: Passed through as-is (full "CODE: Description" format, e.g., "1330: University")
@@ -528,8 +571,10 @@ FORM_XML_TRANSFORM_RULES = {
 The following forms currently have XML generation support:
 
 - **SF-424 (v4.0)**: Application for Federal Assistance
+- **SF-424 Short (v3.0)**: Application for Federal Domestic Assistance - Short Organizational
 - **SF-424A (v1.0)**: Budget Information - Non-Construction Programs
 - **SF-424B (v1.1)**: Assurances for Non-Construction Programs
+- **SF-424C (v2.0)**: Budget Information for Construction Programs (16-row budget table with required subtotals)
 - **SF-424D (v1.1)**: Assurances for Construction Programs
 - **SF-LLL (v2.0)**: Disclosure of Lobbying Activities
 - **CD-511 (v1.1)**: Certification Regarding Lobbying
@@ -542,6 +587,91 @@ The following forms currently have XML generation support:
 - **Project Abstract (v1.2)**: Project abstract file attachment
 - **Supplementary Cover Sheet for NEH Grant Programs (v3.0)**: NEH-specific supplementary cover sheet
 - **Project/Performance Site Location(s) (v4.0)**: Primary and additional project performance site locations with optional attachment
+- **Key Contacts (v2.0)**: Key contact persons form
+
+### Example: Key Contacts (v2.0)
+
+The Key Contacts form maps a list of 1–4 project contacts (`RoleOnProject[]`), each containing name, address, and contact details split across two namespaces:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for Key Contacts form",
+        "form_name": "Key_Contacts_2_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0",
+            "Key_Contacts_2_0": "http://apply.grants.gov/forms/Key_Contacts_2_0-V2.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Key_Contacts_2_0-V2.0.xsd",
+        "xml_structure": {
+            "root_element": "Key_Contacts_2_0",
+            "root_namespace_prefix": "Key_Contacts_2_0",
+            "root_attributes": {"FormVersion": "2.0"},
+        },
+    },
+    "applicant_organization_name": {"xml_transform": {"target": "ApplicantOrganizationName"}},
+    "key_contacts": {
+        "xml_transform": {"target": "RoleOnProject", "type": "array"},
+        "items": _key_contact_xml_fields(),
+    },
+}
+```
+
+**Key Contacts Field Mapping Notes:**
+
+- **Array transform**: `key_contacts` emits one `<RoleOnProject>` element per contact. The XSD requires at least 1 and allows at most 4 (`minOccurs=1, maxOccurs=4`).
+- **Dual namespace**: Outer contact elements (`ContactProjectRole`, `ContactName`, `ContactAddress`, `ContactPhone`, etc.) use the default form namespace. Name sub-fields (`PrefixName`, `FirstName`, `MiddleName`, `LastName`, `SuffixName`) and address sub-fields (`Street1`, `Street2`, `City`, `County`, `State`, `Province`, `ZipPostalCode`, `Country`) are typed via `globLib` (`HumanNameDataType` and `AddressDataTypeV3`) and use the `globLib` namespace.
+- **Province field**: Always included in the address mapping (shown unconditionally on this form, unlike other forms where it is conditional on non-US country selection).
+- **`codes` namespace**: Declared in the config because the XSD references `UniversalCodes-V2.0` for enum validation (e.g., state/country codes), even though no field mapping explicitly sets `"namespace": "codes"`.
+- **Helper function**: `_key_contact_xml_fields()` returns the per-contact field mapping dict, shared between all array items.
+- XSD reference: https://apply07.grants.gov/apply/forms/schemas/Key_Contacts_2_0-V2.0.xsd
+
+### Example: SF-424C (v2.0)
+
+The SF-424C form maps a 16-row construction budget table (`budget_information`) into a `ProjectCosts` wrapper, with federal funding fields placed at the root level:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "form_name": "SF424C_2_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SF424C_2_0-V2.0",
+            "SF424C_2_0": "http://apply.grants.gov/forms/SF424C_2_0-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424C_2_0-V2.0.xsd",
+        "xml_structure": {
+            "root_element": "SF424C_2_0",
+            "root_namespace_prefix": "SF424C_2_0",
+            "root_attributes": {"programType": "Construction", "FormVersion": "2.0"},
+        },
+    },
+    "budget_information": {
+        "xml_transform": {"target": "ProjectCosts", "type": "nested_object"},
+        "construction": {"xml_transform": {"target": "ConstructionCost"}},
+        "subtotal_1": {"xml_transform": {"target": "CostSubtotalBeforeContingencies"}},
+        # ... other rows
+    },
+    "federal_funding": {
+        # fields flatten to root — no wrapper element emitted
+        "federal_percentage_share": {"xml_transform": {"target": "FederalFundingPercentageShareValue"}},
+        "federal_funding_share": {"xml_transform": {"target": "FederalFundingShareValue"}},
+    },
+}
+```
+
+**SF-424C Field Mapping Notes:**
+
+- **Budget wrapper**: All budget rows nest inside a single `<ProjectCosts>` element via `type: "nested_object"`. If no budget rows are present, `ProjectCosts` is omitted entirely.
+- **Required subtotals**: `CostSubtotalBeforeContingencies` (row 12, mapped from `subtotal_1`) and `CostSubtotalAfterContingencies` (row 14, mapped from `subtotal_2`) have no `minOccurs="0"` in the XSD — they are **required** whenever `ProjectCosts` is present. Any input with budget rows must include both subtotals.
+- **Two cost types**: Regular rows use `CostAmountGroup` (decimal up to 9,999,999,999.99); subtotal/total rows use `CostTotalGroup` (decimal up to 999,999,999,999.99). The XSD enforces different precision limits for each.
+- **Federal funding at root**: `federal_funding.*` fields map directly to root-level elements (`FederalFundingPercentageShareValue`, `FederalFundingShareValue`) — there is no `<FederalFunding>` wrapper in the XSD.
+- **`programType` attribute**: Fixed to `"Construction"` and declared `use="required"` in the XSD. Set via `root_attributes`.
+- XSD reference: https://apply07.grants.gov/apply/forms/schemas/SF424C_2_0-V2.0.xsd
 
 ### Example: Project/Performance Site Location(s) (v4.0)
 
@@ -585,7 +715,7 @@ FORM_XML_TRANSFORM_RULES = {
 
 **Performance Site Location Field Mapping Notes:**
 
-- **Namespace split**: `Individual`, `OrganizationName`, `SAMUEI`, `Address`, and `CongressionalDistrictProgramProject` are declared in the form's own `SiteLocationDataType` — they use the default `PerformanceSite_4_0` namespace. The address *sub*-elements (`Street1`, `City`, etc.) are typed via `globLib:AddressDataTypeV3` and use the `globLib` namespace.
+- **Namespace split**: `Individual`, `OrganizationName`, `SAMUEI`, `Address`, and `CongressionalDistrictProgramProject` are declared in the form's own `SiteLocationDataType` — they use the default `PerformanceSite_4_0` namespace. The address _sub_-elements (`Street1`, `City`, etc.) are typed via `globLib:AddressDataTypeV3` and use the `globLib` namespace.
 - **Address element order**: The XSD sequence requires `ZipPostalCode` before `Country`. The transform rules must declare `zip_code` before `country` to match this ordering.
 - **Attachment**: The optional `additional_locations_attachment` field maps to a single `<AttachedFile>` element (type `att:AttachedFileDataType`) as a direct child of the root. Using `single_with_wrapper` with `file_element: ""` creates the outer `<AttachedFile>` wrapper and places `att:FileName`, `att:MimeType`, `att:FileLocation`, and `glob:HashValue` directly inside it — no spurious inner wrapper element.
 - `submitting_as_individual` uses the `boolean_to_yes_no` value transform (outputs `Y: Yes` / `N: No`).

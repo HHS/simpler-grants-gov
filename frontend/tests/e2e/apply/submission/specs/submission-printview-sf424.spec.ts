@@ -4,7 +4,6 @@
  */
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
@@ -14,6 +13,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   verifyFormStatusAfterSave,
@@ -25,14 +25,17 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
+  validateAllPrintViews,
   validateAttachmentPrintViewSection,
-  validatePrintViewField,
 } from "tests/e2e/utils/submission/print-view-utils";
-import { submitApplicationAndVerify } from "tests/e2e/utils/submission/submit-application-utils";
+import {
+  submitApplicationAndVerify,
+  verifySubmissionConfirmation,
+} from "tests/e2e/utils/submission/submit-application-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 
-const { testOrgLabel, targetEnv } = playwrightEnv;
+const { testOrgLabel } = playwrightEnv;
 
 // Only the opportunity number is declared here.
 // All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
@@ -53,12 +56,7 @@ const applicantScenarios = [
 
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
-  if (targetEnv === "staging") {
-    test.skip(
-      testInfo.project.name !== "Chrome",
-      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-    );
-  }
+  skipNonChromeOnStaging(testInfo);
 });
 
 for (const { testName, orgLabel } of applicantScenarios) {
@@ -90,11 +88,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
       const filledForms: FilledFormEntry[] = [];
 
       for (const [index, form] of opportunityConfig.forms.entries()) {
-        const testData = buildHappyPathTestData(
-          form.buildTestData,
-          baseSuffix + index,
-          form.formConfig,
-        );
+        const testData = buildHappyPathTestData(form, baseSuffix + index);
 
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
@@ -131,48 +125,17 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await submitApplicationAndVerify(page, "success");
 
       // --- Confirmation Page Validation ---
-      await expect(
-        page.getByRole("heading", {
-          name: /your application has been submitted/i,
-        }),
-      ).toBeVisible();
-
-      await expect(page.getByTestId("summary-box")).toContainText(
-        "Your application has been submitted",
-      );
+      await verifySubmissionConfirmation(page);
 
       // --- Print View Validation (one page per form) ---
-      for (const {
-        formKey,
-        testData,
-        printUrl,
-        expectedPrepopulatedFields,
-        userEnteredFieldTestIds,
-        formName,
-      } of filledForms) {
-        await navigateToPrintView(page, printUrl);
+      await validateAllPrintViews(page, filledForms);
 
-        // Form title heading is visible
-        await expect(page.locator("h1")).toContainText(formName);
-
-        // Pre-populated fields (API-injected from opportunity record)
-        for (const [testId, expectedValue] of Object.entries(
-          expectedPrepopulatedFields,
-        )) {
-          await expect(page.getByTestId(testId)).toBeVisible();
-          await expect(page.getByTestId(testId)).toContainText(expectedValue);
-        }
-
-        // User-entered fields - uses formConfig.fields (printTestId ?? testId)
-        for (const [dataKey, testId] of Object.entries(
-          userEnteredFieldTestIds,
-        )) {
-          if (testData[dataKey] === undefined) continue;
-          await validatePrintViewField(page, testId, testData[dataKey]);
-        }
-
-        // SF-424 attachments - filenames are in the section, not testId elements, so use the section locator
+      // --- SF-424 Attachment-Specific Validation ---
+      for (const { formKey, testData, printUrl } of filledForms) {
+        // SF-424 attachments - filenames are in the section, not testId elements
         if (formKey === "sf424") {
+          await navigateToPrintView(page, printUrl);
+
           const sf424AttachmentSections = [
             {
               fieldKey: "areas_affected_attachment",

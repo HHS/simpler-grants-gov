@@ -6,7 +6,8 @@ import {
 
 import { JSX } from "react";
 
-import AttachmentWidget from "./AttachmentUploadWidget";
+import ApplicationAttachmentWidget from "./ApplicationAttachmentWidget";
+import ApplicationMultipleAttachmentWidget from "./ApplicationMultipleAttachmentWidget";
 import Budget424aSectionA from "./budget/Budget424aSectionA";
 import Budget424aSectionB from "./budget/Budget424aSectionB";
 import Budget424aSectionC from "./budget/Budget424aSectionC";
@@ -15,13 +16,12 @@ import Budget424aSectionE from "./budget/Budget424aSectionE";
 import Budget424aSectionF from "./budget/Budget424aSectionF";
 import CheckboxWidget from "./CheckboxWidget";
 import FieldListWidget from "./FieldListWidget";
-import AttachmentArrayWidget from "./MultipleAttachmentUploadWidget";
 import MultiSelect from "./MultiSelectWidget";
 import PrintAttachmentWidget from "./PrintAttachmentWidget";
 import PrintWidget from "./PrintWidget";
 import RadioWidget from "./RadioWidget";
 import SelectWidget from "./SelectWidget";
-import TableWidget from "./TableWidget";
+import TableWidget from "./TableWidget/TableWidget";
 import TextAreaWidget from "./TextAreaWidget";
 import TextWidget from "./TextWidget";
 
@@ -37,9 +37,10 @@ export const widgetComponents: Record<
   Print: (widgetProps: UswdsWidgetProps) => PrintWidget(widgetProps),
   PrintAttachment: (widgetProps: UswdsWidgetProps) =>
     PrintAttachmentWidget(widgetProps),
-  Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
+  Attachment: (widgetProps: UswdsWidgetProps) =>
+    ApplicationAttachmentWidget(widgetProps),
   AttachmentArray: (widgetProps: UswdsWidgetProps) =>
-    AttachmentArrayWidget(widgetProps),
+    ApplicationMultipleAttachmentWidget(widgetProps),
   Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionA(widgetProps),
   Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>

@@ -49,6 +49,7 @@ export interface FillFieldDefinition {
    * test data builders to ensure generated values stay within field limits.
    */
   maxLength?: number;
+  wordLimit?: number;
   dependsOn?: {
     field: string;
     value: string | boolean;
@@ -59,6 +60,11 @@ export interface FillFieldDefinition {
    * truthy data instead of throwing an ambiguity error.
    */
   selectFirstInGroup?: boolean;
+  /**
+   * Skip strict `type="email"` assertions in the shared email handler for
+   * known UI inputs that intentionally do not render as native email inputs.
+   */
+  skipEmailTypeCheck?: boolean;
 }
 
 /** Value primitives accepted by metadata-driven fill helpers. */
@@ -79,9 +85,11 @@ export type MetadataPageFieldDefinition<TValueKey extends string = string> =
 /** Validation messages commonly reused across feature metadata definitions. */
 export type ValidationMetadata = {
   requiredFieldMessage?: string;
+  inlineErrorSelector?: string;
   emailValidationMessage?: string;
   negativeNumberValidationMessage?: string;
   characterLimitValidationMessage?: string;
+  wordLimitValidationMessage?: string;
 };
 
 /** Optional duplicate-check pattern for metadata-driven uniqueness assertions. */

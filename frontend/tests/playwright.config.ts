@@ -9,10 +9,10 @@ const { baseUrl, targetEnv, webServerEnv, isCi, totalShards, currentShard } =
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  timeout: targetEnv === "local" ? 75000 : 120000,
+  timeout: targetEnv !== "local" ? 120000 : 75000,
   testDir: "./e2e",
   /* Run tests in files in parallel */
-  fullyParallel: targetEnv !== "staging",
+  fullyParallel: targetEnv === "local",
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!isCi,
   /* Retry on CI only */
@@ -33,7 +33,7 @@ export default defineConfig({
     screenshot: "on",
     video: "on-first-retry",
     launchOptions:
-      targetEnv === "staging"
+      targetEnv !== "local"
         ? {
             args: ["--disable-dev-shm-usage"],
           }
@@ -48,7 +48,7 @@ export default defineConfig({
   },
   /* Configure projects for major browsers */
   projects:
-    targetEnv === "staging"
+    targetEnv !== "local"
       ? [
           {
             name: "Chrome",
@@ -98,13 +98,13 @@ export default defineConfig({
 
   //  Only start the local dev server when running in the local environment.
   webServer:
-    targetEnv === "local"
-      ? {
+    targetEnv !== "local"
+      ? undefined
+      : {
           command: "npm run start",
           url: baseUrl,
           reuseExistingServer: !isCi,
           env: webServerEnv,
           timeout: 120_000, // default is only 60s and can be too short for cold starts in CI causing webkit failures
-        }
-      : undefined,
+        },
 });

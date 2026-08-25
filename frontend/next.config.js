@@ -1,7 +1,7 @@
 // @ts-check
 
 const withNextIntl = require("next-intl/plugin")();
-const nrExternals = require("@newrelic/next/load-externals");
+const nrExternals = require("newrelic/load-externals");
 
 /**
  * Configure the base path for the app. Useful if you're deploying to a subdirectory (like GitHub Pages).
@@ -23,7 +23,7 @@ const cspHeader = `
     base-uri 'self';
     media-src 'self';
     style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com/;
-    script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/;
+    script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/ https://dap.digitalgov.gov/;
     form-action 'self';
     frame-ancestors 'none';
     upgrade-insecure-requests;

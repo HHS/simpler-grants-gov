@@ -130,7 +130,7 @@ class EventType(fields.String):
             metadata={
                 "description": "Type of event (e.g., a single date, a date range, or a custom event)"
             },
-            **kwargs
+            **kwargs,
         )
 
 
@@ -251,7 +251,7 @@ class OppStatusOptions(fields.String):
         super().__init__(
             validate=validate.OneOf(["forecasted", "open", "custom", "closed"]),
             metadata={"description": "The status of the opportunity"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -431,7 +431,7 @@ class EquivalenceOperator(fields.String):
         super().__init__(
             validate=validate.OneOf(["eq", "neq"]),
             metadata={"description": "The operator to apply to the filter"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -444,7 +444,7 @@ class ComparisonOperator(fields.String):
             metadata={
                 "description": "Operators that filter a field based on a comparison to a value"
             },
-            **kwargs
+            **kwargs,
         )
 
 
@@ -455,7 +455,7 @@ class ArrayOperator(fields.String):
         super().__init__(
             validate=validate.OneOf(["in", "notIn"]),
             metadata={"description": "Operators that filter a field based on an array of values"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -466,7 +466,7 @@ class StringOperator(fields.String):
         super().__init__(
             validate=validate.OneOf(["like", "notLike"]),
             metadata={"description": "Operators that filter a field based on a string value"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -477,7 +477,7 @@ class RangeOperator(fields.String):
         super().__init__(
             validate=validate.OneOf(["between", "outside"]),
             metadata={"description": "Operators that filter a field based on a range of values"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -732,8 +732,41 @@ class OppFilters(Schema):
     customFilters = fields.Dict(
         allow_none=True,
         metadata={
-            "description": "Additional custom filters to apply to the search",
-            "example": {},
+            "description": (
+                "Grants.gov-specific filters. Each entry is a `{operator, value}` "
+                "object. Supported keys:\n\n"
+                '- `agency` — operator `"in"`, value: array of agency codes '
+                '(e.g. `["USAID"]`)\n'
+                '- `applicantType` — operator `"in"`, value: array of '
+                "CommonGrants applicant-type values: `individual`, "
+                "`organization`, `government_state`, `government_county`, "
+                "`government_municipal`, `government_special_district`, "
+                "`government_tribal`, `organization_tribal_other`, "
+                "`school_district_independent`, `higher_education_public`, "
+                "`higher_education_private`, `non_profit_with_501c3`, "
+                "`nonprofit_without_501c3`, `for_profit_small_business`, "
+                "`for_profit_not_small_business`, `unrestricted`, `custom`\n"
+                '- `fundingInstrument` — operator `"in"`, value: array of '
+                'funding instrument values (e.g. `["grant"]`)\n'
+                '- `costSharing` — operator `"eq"`, value: boolean (also '
+                'accepts the strings `"true"`/`"false"`)\n\n'
+                "Each entry must parse as an `{operator, value}` object; an "
+                "entry that does not (a non-object value, or a missing "
+                "`operator`/`value` key) is rejected with a 422 validation "
+                "error. Well-formed entries with an unsupported key, operator, "
+                "or value are skipped and reported in `filterInfo.errors`, and "
+                "the search still runs with the valid filters applied. "
+                "`agency` and `fundingInstrument` values are "
+                "forwarded to the search unvalidated — an unrecognized value "
+                "matches no opportunities rather than producing an error — and "
+                "an empty array applies no filter for that key."
+            ),
+            "example": {
+                "agency": {"operator": "in", "value": ["USAID"]},
+                "applicantType": {"operator": "in", "value": ["government_state"]},
+                "fundingInstrument": {"operator": "in", "value": ["grant"]},
+                "costSharing": {"operator": "eq", "value": True},
+            },
         },
     )
 
@@ -802,7 +835,7 @@ class SortOrder(fields.String):
         super().__init__(
             validate=validate.OneOf(["asc", "desc"]),
             metadata={"description": "Sort order enumeration"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -858,7 +891,7 @@ class OppSortBy(fields.String):
                 ]
             ),
             metadata={"description": "The field to sort by"},
-            **kwargs
+            **kwargs,
         )
 
 

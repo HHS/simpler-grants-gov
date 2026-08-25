@@ -17,8 +17,11 @@ on:
         type: choice
         options:
           - dev
+          - infra-dev
           - staging
+          - infra-staging
           - training
+          - infra-training
           - grantee1
           - prod
       image_tag:
@@ -34,7 +37,8 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]') }}
+        # Selecting dev or staging deploys the infra-dev / infra-staging environment
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment) || github.ref_name == 'main' && '["infra-staging"]' || '["infra-dev"]') }}
     permissions:
       contents: read
       id-token: write

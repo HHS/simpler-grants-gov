@@ -8,6 +8,8 @@ module "training_config" {
   domain_name                       = "api.training.simpler.grants.gov"
   s3_cdn_domain_name                = "files.training.simpler.grants.gov"
   secondary_domain_names            = ["alb.training.simpler.grants.gov"]
+  scanner_callback_domain_name      = "alb.training.simpler.grants.gov"
+  enable_secure_alb                 = true
   mtls_domain_name                  = "soap.training.simpler.grants.gov"
   enable_https                      = true
   database_engine_version           = "17.7"
@@ -58,6 +60,9 @@ module "training_config" {
     # Workflow
     WORKFLOW_SERVICE_INTERNAL_USER_ID = "00bcaf8e-dd04-4fd1-9fb3-ea872a93178d"
     ENABLE_WORKFLOW_ENDPOINTS         = 1
+
+    # Virus scanning endpoints
+    ENABLE_FILE_UPLOAD_ENDPOINTS = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

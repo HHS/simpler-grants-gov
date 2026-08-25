@@ -17,7 +17,26 @@ locals {
       "--set-current",
       "--store-version"
     ],
+    "infra-dev" = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
     staging = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
+    # Mirrors staging.
+    "infra-staging" = [
       "flask",
       "data-migration",
       "load-transform",
@@ -35,7 +54,27 @@ locals {
       "--set-current",
       "--store-version"
     ],
+    # Mirrors training.
+    "infra-training" = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
     grantee1 = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
+    # Mirrors grantee1.
+    "infra-grantee1" = [
       "flask",
       "data-migration",
       "load-transform",
@@ -53,7 +92,27 @@ locals {
       "--set-current",
       "--store-version"
     ],
+    # Mirrors grantee2.
+    "infra-grantee2" = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
     grantor1 = [
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
+    # Mirrors grantor1.
+    "infra-grantor1" = [
       "flask",
       "data-migration",
       "load-transform",
@@ -88,6 +147,11 @@ locals {
       ]
       */
     }
+
+    "infra-training" = {
+      cpu = 1024
+      mem = 4096
+    }
     prod = {
       cpu = 1024
       mem = 4096
@@ -95,67 +159,109 @@ locals {
   }
   sam-extract-args = {
     # In dev/staging we don't fetch extracts, but generate our own
-    dev      = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
-    staging  = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
-    training = ["flask", "task", "sam-extracts"]
-    grantee1 = ["flask", "task", "sam-extracts"]
-    grantee2 = ["flask", "task", "sam-extracts"]
-    grantor1 = ["flask", "task", "sam-extracts"]
-    prod     = ["flask", "task", "sam-extracts"]
+    dev              = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    "infra-dev"      = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    staging          = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    "infra-staging"  = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    training         = ["flask", "task", "sam-extracts"]
+    "infra-training" = ["flask", "task", "sam-extracts"]
+    grantee1         = ["flask", "task", "sam-extracts"]
+    "infra-grantee1" = ["flask", "task", "sam-extracts"]
+    grantee2         = ["flask", "task", "sam-extracts"]
+    "infra-grantee2" = ["flask", "task", "sam-extracts"]
+    grantor1         = ["flask", "task", "sam-extracts"]
+    "infra-grantor1" = ["flask", "task", "sam-extracts"]
+    prod             = ["flask", "task", "sam-extracts"]
   }
   setup-lower-env-agencies-state = {
-    dev      = "ENABLED"
-    staging  = "ENABLED"
-    training = "DISABLED"
-    grantee1 = "DISABLED"
-    grantee2 = "DISABLED"
-    grantor1 = "DISABLED"
-    prod     = "DISABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "DISABLED"
+    "infra-training" = "DISABLED"
+    grantee1         = "DISABLED"
+    "infra-grantee1" = "DISABLED"
+    grantee2         = "DISABLED"
+    "infra-grantee2" = "DISABLED"
+    grantor1         = "DISABLED"
+    "infra-grantor1" = "DISABLED"
+    prod             = "DISABLED"
   }
   build-automatic-opportunities-state = {
-    dev      = "ENABLED"
-    staging  = "ENABLED"
-    training = "ENABLED"
-    grantee1 = "DISABLED"
-    grantee2 = "DISABLED"
-    grantor1 = "DISABLED"
-    prod     = "DISABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
+    grantee1         = "DISABLED"
+    "infra-grantee1" = "DISABLED"
+    grantee2         = "DISABLED"
+    "infra-grantee2" = "DISABLED"
+    grantor1         = "DISABLED"
+    "infra-grantor1" = "DISABLED"
+    prod             = "DISABLED"
   }
   load-transform-state = {
-    dev      = "ENABLED"
-    staging  = "ENABLED"
-    training = "ENABLED"
-    grantee1 = "ENABLED"
-    grantee2 = "ENABLED"
-    grantor1 = "ENABLED"
-    prod     = "ENABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
+    grantee1         = "ENABLED"
+    "infra-grantee1" = "ENABLED"
+    grantee2         = "ENABLED"
+    "infra-grantee2" = "ENABLED"
+    grantor1         = "ENABLED"
+    "infra-grantor1" = "ENABLED"
+    prod             = "ENABLED"
   }
   sam-extracts-state = {
-    dev      = "ENABLED"
-    staging  = "ENABLED"
-    training = "ENABLED"
-    grantee1 = "ENABLED"
-    grantee2 = "ENABLED"
-    grantor1 = "ENABLED"
-    prod     = "ENABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
+    grantee1         = "ENABLED"
+    "infra-grantee1" = "ENABLED"
+    grantee2         = "ENABLED"
+    "infra-grantee2" = "ENABLED"
+    grantor1         = "ENABLED"
+    "infra-grantor1" = "ENABLED"
+    prod             = "ENABLED"
   }
   create-analytics-db-csvs-state = {
-    dev      = "ENABLED"
-    staging  = "ENABLED"
-    training = "ENABLED"
-    grantee1 = "ENABLED"
-    grantee2 = "ENABLED"
-    grantor1 = "ENABLED"
-    prod     = "ENABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
+    grantee1         = "ENABLED"
+    "infra-grantee1" = "ENABLED"
+    grantee2         = "ENABLED"
+    "infra-grantee2" = "ENABLED"
+    grantor1         = "ENABLED"
+    "infra-grantor1" = "ENABLED"
+    prod             = "ENABLED"
   }
   email-notification-opportunity-state = {
-    dev      = "ENABLED"
-    staging  = "ENABLED"
-    training = "ENABLED"
-    grantee1 = "DISABLED"
-    grantee2 = "DISABLED"
-    grantor1 = "DISABLED"
-    prod     = "ENABLED"
+    dev              = "ENABLED"
+    "infra-dev"      = "ENABLED"
+    staging          = "ENABLED"
+    "infra-staging"  = "ENABLED"
+    training         = "ENABLED"
+    "infra-training" = "ENABLED"
+    grantee1         = "DISABLED"
+    "infra-grantee1" = "DISABLED"
+    grantee2         = "DISABLED"
+    "infra-grantee2" = "DISABLED"
+    grantor1         = "DISABLED"
+    "infra-grantor1" = "DISABLED"
+    prod             = "ENABLED"
   }
   scheduled_jobs = {
     load-transform = {
@@ -166,6 +272,48 @@ locals {
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
+    }
+    load-user-tables = {
+      # The user tables only need daily freshness, so they load here instead of in the
+      # hourly load-transform cycle.
+      #
+      # Load only. Transform, set-current, and store-version are all opportunity steps that
+      # have no bearing on the user tables, and store-version in particular must stay off:
+      # it writes opportunity_version off the opportunity_change_audit queue, and this job
+      # can overlap the hourly cycle (which runs every hour, with the job lock disabled here),
+      # so it would risk versioning opportunities midway through the hourly transform.
+      task_command = [
+        "flask",
+        "data-migration",
+        "load-transform",
+        "--load",
+        "--no-transform",
+        "--no-set-current",
+        "--no-store-version",
+        "-t",
+        "vuser_account",
+        "-t",
+        "tuser_profile"
+      ]
+      # Every day at 3:45am Eastern Time during DST. 2:45am during non-DST.
+      # Minute 45 is the only minute free of the hourly jobs (0, 15, and 30 are all taken),
+      # and hour 7 is free of the daily jobs. Nothing consumes these staging tables yet, so
+      # the slot is chosen purely to stay clear of the rest of the schedule.
+      schedule_expression = "cron(45 7 * * ? *)"
+      state               = local.load-transform-state[var.environment]
+      cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
+      mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      # This job shares the load-transform job type with the hourly job, so the lock is
+      # disabled to keep the two from blocking each other.
+      environment_vars = concat(
+        try(local.scheduled_jobs_config[var.environment].environment_vars, []),
+        [
+          {
+            Name  = "ENABLE_JOB_LOCK"
+            Value = "false"
+          }
+        ]
+      )
     }
     load-search-opportunity-data = {
       task_command = ["flask", "load-search-data", "load-opportunity-data"]

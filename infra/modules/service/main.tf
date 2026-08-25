@@ -37,7 +37,8 @@ locals {
     { name : "AWS_DEFAULT_REGION", value : data.aws_region.current.name },
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "GENERAL_S3_BUCKET_URL", value : aws_s3_bucket.general_purpose.bucket_regional_domain_name },
-    { name : "ENVIRONMENT", value : var.environment_name },
+    # Not coalesce(): environment_name defaults to "", which coalesce rejects.
+    { name : "ENVIRONMENT", value : var.app_environment_name != null ? var.app_environment_name : var.environment_name },
     { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
     # TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
     # { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
@@ -119,6 +120,15 @@ resource "aws_ecs_service" "app" {
   }
 
   # add a connection to the mtls target group since these same containers power both
+  dynamic "load_balancer" {
+    for_each = local.enable_internal_alb ? [1] : []
+    content {
+      target_group_arn = aws_lb_target_group.internal_tg[0].arn
+      container_name   = var.service_name
+      container_port   = var.container_port
+    }
+  }
+
   dynamic "load_balancer" {
     for_each = var.enable_mtls_load_balancer ? [1] : []
     content {

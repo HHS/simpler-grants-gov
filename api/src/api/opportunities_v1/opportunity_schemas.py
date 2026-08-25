@@ -242,6 +242,21 @@ class OpportunityV1Schema(Schema):
             "example": "Research into conservation techniques",
         },
     )
+    tagline = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "A short tagline for the opportunity",
+            "example": "Accelerating climate innovation",
+        },
+    )
+
+    purpose_statement = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "A brief statement describing the purpose of the opportunity",
+            "example": "Support research that advances innovative climate technologies.",
+        },
+    )
     # TODO - we'll want to remove this field in the future
     # but need to make sure the frontend is not using it
     agency = fields.String(

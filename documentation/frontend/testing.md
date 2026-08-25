@@ -4,25 +4,42 @@
 
 E2E tests are run using Playwright. See [development.md](/DEVELOPMENT.md) for more general info!
 
+### Running against deployed environments
+
+Playwright tests can be directed at any deployed environment by adjusting environment variables set in your `.env.local` file. For example, when running against staging:
+
+```
+PLAYWRIGHT_TARGET_ENV=staging
+PLAYWRIGHT_BASE_URL=https://staging.simpler.grants.gov
+PLAYWRIGHT_API_URL=https://api.staging.simpler.grants.gov
+TEST_USER_EMAIL=<from 1password>
+TEST_USER_PASSWORD=<from 1password>
+TEST_USER_MFA_KEY=<from 1password>
+SESSION_SECRET=<from 1password>
+TEST_USER_MANAGER_API_KEY=<from 1password>
+```
+
+Note that tests will still run without having secret env vars set, but tests involving login will fail.
+
+The correct values for secrets can be found in 1Password, AWS SSM, or ask a team member.
+
 ### Spoofing logins
 
 There are situations where we want to be able to test a "logged in" experience without having to script the test through the full login flow. In order to support this we have built a system to spoof the user login by placing a session cookie into the browser context. This system works by creating a client side cookie on the browser context within Playwright that will function the same as the session cookie produced as the output of the real login process.
 
-The system is defined in [Login Utils](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/utils/auth/login-utils.ts)
+Both local and staging use the same mechanism: Playwright fetches a session token for a seeded test user from the staging-only internal endpoint `POST /v1/internal/e2e-token`, then encodes it into a spoofed client session cookie. The request is authorized by a "test user manager" API key, and the target test user is chosen per test via a readable key (see [test-users.ts](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/utils/auth/test-users.ts)). Seeded test users have no login credentials, so if spoofing fails the test fails — there is no fallback to a real Login.gov login.
+
+The system is defined in [Login Utils](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/utils/auth/login-utils.ts) and [Authenticate E2E User Utils](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/utils/auth/authenticate-e2e-user-utils.ts).
 
 #### Local setup
 
-Local spoofed logins depend on an auth token for a test user that is generated each time the local database is seeded. During seed a file is created containing the key, which you can then reference in the Playwright process. Steps to implement:
+- run `make db-seed-local` in the /api directory. This creates the seeded test users (flagged so their tokens can be fetched via the e2e-token endpoint) and the test-user-manager account.
+- set `SESSION_SECRET` and `TEST_USER_MANAGER_API_KEY` in your frontend `.env.local`. `TEST_USER_MANAGER_API_KEY` must match `LOCAL_TEST_USER_MANAGER_API_KEY` in `api/local.env` (default: `local-manager-key`).
+- that's it! Running e2e tests using spoofing should now work.
 
-- run `make db-seed-local` in the /api directory. This will create the necessary DB records for the spoofed user and spit out an API auth token in a file at /api/e2e_token.tmp.
-- copy the token variable declaration from the e2e_token.tmp file into the `E2E_USER_AUTH_TOKEN` env var declaration in your frontend .env.local file
-- that's it! Running e2e tests using spoofing should now work. [This process is encapsulated in our CI process here](https://github.com/HHS/simpler-grants-gov/blob/c5f29978c45d658329f2466d652da743d83d6a73/.github/workflows/ci-frontend-e2e.yml#L97).
+#### Switching between local and deployed environments
 
-#### Staging setup
-
-Since staging tests run on a deployed server that does not expose a testing token directly, to spoof a login is a bit more involved, but only requires proper env vars to be set in order to work. A test user is set up in staging that can be spoofed. In order to obtain a session token for this user, Playwright needs to request it from a staging-only internal endpoint.
-
-To run spoofed logins (locally or in CI), SESSION_SECRET and STAGING_TEST_USER_API_KEY env vars must be correctly set in .env.local. Values for these env vars can be found 1password, AWS SSM, or ask a team member.
+Whether running against a local or deployed environment, Playwright reads the **same** env var, `TEST_USER_MANAGER_API_KEY` — only its value differs (the local `make db-seed-local` default `local-manager-key` vs. the key for the deployed environment). So to switch targets on your machine, change `PLAYWRIGHT_TARGET_ENV` and swap the `TEST_USER_MANAGER_API_KEY` (and `SESSION_SECRET`) value to match. In CI this is handled automatically: the local workflow passes `local-manager-key` and the deployed workflow injects the key for the deployed environment, both into `TEST_USER_MANAGER_API_KEY`.
 
 ### Test groups
 
@@ -34,6 +51,8 @@ _All_ tests should be assigned exactly _one_ execution tag, and any number of fe
 
 Only defined test groups should be used, and the decision to create a new group should be made by only with approval from the testing and feature teams. [Current groups are defined here](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/tags.ts).
 
+Test assignments for any given test should be determined by the team creating or managing the test.
+
 Current testing cadences are defined as:
 
 | Test group       | Cadence                             | Environment(s) |
@@ -42,6 +61,19 @@ Current testing cadences are defined as:
 | @core-regression | Merge to main, Deploy to production | local, staging |
 | @full-regression | Daily                               | local, staging |
 | @extended        | Weekly                              | local, staging |
+
+#### Conditional test cadences
+
+The table above shows the default test cadences for each group. Teams may expand the list of tag groups run on each cadence depending on any criteria they choose. Most likely, teams will want to define the test groups based on which files have been changed in a PR. For examples of conditional cadences introduced in our system:
+
+| Test group              | Cadence                                                  | Environment(s) |
+| ----------------------- | -------------------------------------------------------- | -------------- |
+| @apply-forms            | All PRs including changes to apply form code             | local          |
+| @opportunity-management | All PRs including changes to opportunity management code | local          |
+
+#### Browser test cadences
+
+We generally run all of our tests against 4 browser configurations (Chromium, Mobile Chromium, Webkit, Firefox). In some cases a test may be skipped in one or more of these browsers. This may be because the browser's implementation of certain behavior makes it very difficult to test (see Webkit's implementation of pasteboards), because of a need to limit traffic for a certain action (see running login tests only in Chrome), or because usage of the browser is low enough that we do not need to test against it all the time (see Firefox). The posture towards browser based testing can be flexible, though we should strive to test against all four browsers as much as possible.
 
 ## Unit testing
 
@@ -103,13 +135,12 @@ The easiest thing to do in these cases is to:
 - [example usage](https://github.com/HHS/simpler-grants-gov/blob/f92baefc1b8409f12057240d98fa68d20946593b/frontend/tests/components/organization/manage-users/ActiveUsersSection.test.tsx#L44)
 
 ```tsx
-    const component = await ActiveUsersSection({
-      organizationId: "org-123",
-      activeUsers,
-      roles,
-    });
-    render(component);
-
+const component = await ActiveUsersSection({
+  organizationId: "org-123",
+  activeUsers,
+  roles,
+});
+render(component);
 ```
 
 #### Route tests

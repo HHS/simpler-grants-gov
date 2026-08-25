@@ -6,6 +6,7 @@ output "search_config" {
     engine_version          = var.search_engine_version
     volume_size             = var.search_data_volume_size
     availability_zone_count = var.search_availability_zone_count
+    sso_admin_role_name     = var.search_sso_admin_role_name
   } : null
 }
 
@@ -29,10 +30,15 @@ output "service_config" {
     instance_cpu                    = var.instance_cpu
     instance_memory                 = var.instance_memory
     service_name                    = "${local.prefix}${var.app_name}-${var.environment}"
+    app_environment_name            = coalesce(var.app_environment_name, var.environment)
     domain_name                     = var.domain_name
     secondary_domain_names          = var.secondary_domain_names
+    scanner_callback_domain_name    = var.scanner_callback_domain_name
     s3_cdn_domain_name              = var.s3_cdn_domain_name
+    enable_cdn_alias                = var.enable_cdn_alias
     mtls_domain_name                = var.mtls_domain_name
+    enable_api_gateway_domain_name  = var.enable_api_gateway_domain_name
+    enable_secure_alb               = var.enable_secure_alb
     enable_https                    = var.enable_https
     region                          = var.default_region
     cpu                             = var.instance_cpu

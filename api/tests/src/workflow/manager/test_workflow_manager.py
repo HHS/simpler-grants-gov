@@ -155,7 +155,6 @@ def test_workflow_sqs_messages_process_batch_success(workflow_sqs_queue, app):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     process_workflow_context = ProcessWorkflowEventContext(
@@ -226,7 +225,6 @@ def test_workflow_sqs_messages_process_batch_retryable(workflow_sqs_queue, app):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state="not-a-valid-state",
-        has_opportunity=True,
     )
 
     process_workflow_context = ProcessWorkflowEventContext(
@@ -292,7 +290,6 @@ def test_workflow_sqs_messages_process_batch_mix_cases(workflow_sqs_queue, app, 
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     process_workflow_context = ProcessWorkflowEventContext(
@@ -319,7 +316,6 @@ def test_workflow_sqs_messages_process_batch_mix_cases(workflow_sqs_queue, app, 
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state="not-a-valid-state",
-        has_opportunity=True,
     )
 
     process_workflow_context = ProcessWorkflowEventContext(
@@ -347,7 +343,6 @@ def test_workflow_sqs_messages_process_batch_mix_cases(workflow_sqs_queue, app, 
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     process_workflow_context = ProcessWorkflowEventContext(
@@ -393,7 +388,6 @@ def test_process_sqs_event_success(app, db_session):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -431,7 +425,6 @@ def test_process_sqs_event_retryable_error(app):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state="not-a-valid-state",
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -457,7 +450,6 @@ def test_process_sqs_event_non_retryable_error(app, db_session):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -498,7 +490,6 @@ def test_process_sqs_event_general_error(mock_event_handler_preprocess, app):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        has_opportunity=True,
     )
 
     sqs_container = build_process_workflow_event(
@@ -543,8 +534,9 @@ def test_process_batch_runs_events_concurrently(workflow_sqs_queue, app, valid_m
     config = WorkflowManagerConfig(workflow_cycle_duration=0, workflow_maximum_batch_count=1)
     workflow_manager = WorkflowManager(config=config)
 
-    with app.app_context(), patch(
-        "src.workflow.manager.workflow_manager.handle_event", fake_handle_event
+    with (
+        app.app_context(),
+        patch("src.workflow.manager.workflow_manager.handle_event", fake_handle_event),
     ):
         messages_to_delete, messages_to_keep = workflow_manager.process_batch()
 
@@ -573,8 +565,9 @@ def test_process_batch_event_timeout_keeps_message(workflow_sqs_queue, app, vali
     )
     workflow_manager = WorkflowManager(config=config)
 
-    with app.app_context(), patch(
-        "src.workflow.manager.workflow_manager.handle_event", slow_handle_event
+    with (
+        app.app_context(),
+        patch("src.workflow.manager.workflow_manager.handle_event", slow_handle_event),
     ):
         messages_to_delete, messages_to_keep = workflow_manager.process_batch()
 

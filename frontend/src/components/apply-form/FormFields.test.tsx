@@ -1,18 +1,11 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
 import { UiSchema } from "src/types/applyForm/types";
+import { addPrintWidgetToFields } from "src/utils/applyForm/applyFormUtils";
 
 import { FormFields } from "src/components/apply-form/FormFields";
 
 const mockMergeAllOf = jest.fn();
-
-// useAttachmentDelete is used in file input widgets, included through the WidgetRenderer import
-// those widgets use the hook to make API calls using a server action so the hook needs to be mocked
-jest.mock("src/hooks/useAttachmentDelete", () => ({
-  useAttachmentDelete: () => ({
-    deleteAttachment: () => {},
-  }),
-}));
 
 jest.mock("json-schema-merge-allof", () => ({
   __esModule: true,
@@ -20,6 +13,75 @@ jest.mock("json-schema-merge-allof", () => ({
 }));
 
 describe("buildFormTreeRecursive", () => {
+  it("prints the SF-424 Short certification description without printing unrelated descriptions", () => {
+    const certificationDescription =
+      "** The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions. By signing this application, I certify (1) to the statements contained in the list of certifications and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fraudulent statements or claims may subject me to criminal, civil, or administrative penalties. (U.S. Code, Title 18, Section 1001)";
+    const unrelatedDescription = "Editable-form guidance only.";
+    const schema: RJSFSchema = {
+      type: "object",
+      properties: {
+        application_certification: {
+          type: "boolean",
+          title: "** I Agree",
+          description: certificationDescription,
+        },
+        authorized_representative_title: {
+          type: "string",
+          title: "Title",
+          description: unrelatedDescription,
+        },
+      },
+    };
+    const uiSchema: UiSchema = [
+      {
+        type: "section",
+        name: "authorized_representative",
+        label: "9. Authorized Representative",
+        children: [
+          {
+            type: "field",
+            definition: "/properties/application_certification",
+            printDescription: true,
+          },
+          {
+            type: "field",
+            definition: "/properties/authorized_representative_title",
+          },
+        ],
+      },
+    ];
+
+    render(
+      <FormFields
+        errors={null}
+        formData={{
+          application_certification: true,
+          authorized_representative_title: "Director",
+        }}
+        schema={schema}
+        uiSchema={addPrintWidgetToFields(uiSchema)}
+      />,
+    );
+
+    const agreementTitle = screen.getByText("** I Agree");
+    const description = screen.getByText(certificationDescription);
+    const savedValue = screen.getByText("Yes");
+
+    expect(screen.getAllByText(certificationDescription)).toHaveLength(1);
+    expect(description).toHaveTextContent(
+      /^\*\* The list of certifications.*By signing this application/,
+    );
+    expect(screen.queryByText(unrelatedDescription)).not.toBeInTheDocument();
+    expect(
+      agreementTitle.compareDocumentPosition(description) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      description.compareDocumentPosition(savedValue) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("should build a tree for a simple schema", () => {
     const schema: RJSFSchema = {
       type: "object",
@@ -235,7 +297,7 @@ describe("buildFormTreeRecursive", () => {
                   cells: [
                     {
                       type: "plainText",
-                      staticContent: "First Row",
+                      staticContent: "Item 1",
                     },
                     {
                       type: "input",
@@ -280,8 +342,6 @@ describe("buildFormTreeRecursive", () => {
     expect(
       screen.getByRole("columnheader", { name: "Item" }),
     ).toBeInTheDocument();
-
-    expect(screen.getByText("First Row")).toBeInTheDocument();
   });
 
   describe("FormFields formContext forwarding", () => {

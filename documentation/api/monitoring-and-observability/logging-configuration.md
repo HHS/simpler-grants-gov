@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes how logging is configured in the application. The logging functionality is defined in the [grants_shared.logs](../../../backend/grants_shared/src/grants_shared/logs) package and leverages Python's built-in [logging](https://docs.python.org/3/library/logging.html) framework.
+This document describes how logging is configured in the application. The logging functionality is defined in the [grants_shared.logs](https://github.com/HHS/grants-shared/tree/main/backend/grants_shared/src/grants_shared/logs) package and leverages Python's built-in [logging](https://docs.python.org/3/library/logging.html) framework.
 
 ## Usage
 Our logging approach uses a context manager to start up and tear down logging. This is mostly done to prevent tests from
@@ -66,7 +66,7 @@ We have two separate ways of formatting the logs which are controlled by the `LO
 
 ## Logging Extra Data in a Request
 
-The [grants_shared.logs.flask_logger](../../../backend/grants_shared/src/grants_shared/logs/flask_logger.py) module adds logging functionality to Flask applications. It automatically adds useful data from the Flask request object to logs, logs the start and end of requests, and provides a mechanism for developers to dynamically add extra data to all subsequent logs for the current request.
+The [grants_shared.logs.flask_logger](https://github.com/HHS/grants-shared/blob/main/backend/grants_shared/src/grants_shared/logs/flask_logger.py) module adds logging functionality to Flask applications. It automatically adds useful data from the Flask request object to logs, logs the start and end of requests, and provides a mechanism for developers to dynamically add extra data to all subsequent logs for the current request.
 
 For example, if you would like to add the `opportunity_id` to every log message during the lifecycle of a request, then you can do:
 ```py
@@ -98,7 +98,7 @@ the code, or
 ## Automatic request log details
 
 Several fields are automatically attached to every log message of a request regardless
-of what you configure in the [flask_logger](../../../backend/grants_shared/src/grants_shared/logs/flask_logger.py). This includes:
+of what you configure in the [flask_logger](https://github.com/HHS/grants-shared/blob/main/backend/grants_shared/src/grants_shared/logs/flask_logger.py). This includes:
 * Request ID
 * Request method (eg. `POST` or `PATCH`)
 * Request path
@@ -114,11 +114,11 @@ Additionally when a request ends, the following will always be logged:
 
 ## PII Masking
 
-The [grants_shared.logs.pii](../../../backend/grants_shared/src/grants_shared/logs/pii.py) module defines a filter that applies to all logs that automatically masks data fields that look like social security numbers.
+The [grants_shared.logs.pii](https://github.com/HHS/grants-shared/blob/main/backend/grants_shared/src/grants_shared/logs/pii.py) module defines a filter that applies to all logs that automatically masks data fields that look like social security numbers.
 
 ## Audit Logging
 
-We have configured [audit logging](../../../backend/grants_shared/src/grants_shared/logs/audit.py) which logs
+We have configured [audit logging](https://github.com/HHS/grants-shared/blob/main/backend/grants_shared/src/grants_shared/logs/audit.py) which logs
 various events related to the process making network, file system and
 subprocess calls. This is largely done in the event we need to debug an
 issue or to detect if a library we are relying on is potentially doing

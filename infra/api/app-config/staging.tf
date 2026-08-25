@@ -1,3 +1,4 @@
+
 module "staging_config" {
   source                            = "./env-config"
   project_name                      = local.project_name
@@ -7,7 +8,7 @@ module "staging_config" {
   network_name                      = "staging"
   domain_name                       = "api.staging.simpler.grants.gov"
   secondary_domain_names            = ["alb.staging.simpler.grants.gov"]
-  s3_cdn_domain_name                = "files.staging.simpler.grants.gov"
+  enable_api_gateway_domain_name    = false
   mtls_domain_name                  = "soap.staging.simpler.grants.gov"
   enable_https                      = true
   has_database                      = local.has_database
@@ -68,6 +69,9 @@ module "staging_config" {
 
     # Job lock — only enabled in dev/staging while we validate it
     ENABLE_JOB_LOCK = "true"
+
+    # File upload stream duration
+    FILE_SCAN_RESULTS_MAX_DURATION_SECONDS = 900
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

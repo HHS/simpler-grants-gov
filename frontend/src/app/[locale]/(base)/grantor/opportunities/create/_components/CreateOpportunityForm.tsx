@@ -35,6 +35,8 @@ export function CreateOpportunityForm({
   const [selectedAgencyId, setAgencyId] = useState<string>(defaultAgencyId);
   const [opportunityNumber, setOppNbr] = useState<string>("");
   const [opportunityTitle, setOppTitle] = useState<string>("");
+  const [tagline, setTagline] = useState<string>("");
+  const [purposeStatement, setPurposeStatement] = useState<string>("");
   const [selectedCategoryId, setCategory] = useState<string>("");
   const [categoryExplanation, setExplain] = useState<string>("");
   const [assistanceListingNumber, setAssistanceListingNumber] =
@@ -87,6 +89,8 @@ export function CreateOpportunityForm({
       const allReqFieldsFilled =
         opportunityNumber.trim() !== "" &&
         opportunityTitle.trim() !== "" &&
+        tagline.trim() !== "" &&
+        purposeStatement.trim() !== "" &&
         assistanceListingNumber.trim() !== "" &&
         selectedAgencyId.trim() !== "" &&
         ((selectedCategoryId.trim() !== "" &&
@@ -98,6 +102,8 @@ export function CreateOpportunityForm({
     [
       opportunityNumber,
       opportunityTitle,
+      tagline,
+      purposeStatement,
       selectedAgencyId,
       selectedCategoryId,
       categoryExplanation,
@@ -111,6 +117,14 @@ export function CreateOpportunityForm({
   };
   const onOppTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setOppTitle(e.target.value);
+  };
+  const onTaglineChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTagline(e.target.value);
+  };
+  const onPurposeStatementChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setPurposeStatement(e.target.value);
   };
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setAgencyId(e.target.value);
@@ -143,16 +157,35 @@ export function CreateOpportunityForm({
         className="flex-1 margin-top-2 simpler-apply-form"
       >
         <div data-testid="formGroup" className="width-full">
-          {/* Opportunity Number */}
-          <CommonCharacterCount
-            labelText={t("CreateOpportunityForm.opportunityNumber")}
-            description={t("CreateOpportunityForm.opportunityNumberDesc")}
-            fieldId="opportunityNumber"
-            fieldMaxLength={40}
-            isRequired={true}
-            onTextChange={onOppNbrChange}
-            defaultValue={response?.data?.opportunity_number || ""}
-          />
+          <div className="grid-row grid-gap">
+            {/* Opportunity Number */}
+            <div className="tablet:grid-col-6">
+              <CommonCharacterCount
+                labelText={t("CreateOpportunityForm.opportunityNumber")}
+                description={t("CreateOpportunityForm.opportunityNumberDesc")}
+                fieldId="opportunityNumber"
+                fieldMaxLength={40}
+                isRequired={true}
+                onTextChange={onOppNbrChange}
+                defaultValue={response?.data?.opportunity_number || ""}
+              />
+            </div>
+
+            {/* Assistance Listing Number (ALN) placed to the right */}
+            <div className="tablet:grid-col-6">
+              <CommonCharacterCount
+                labelText={t("CreateOpportunityForm.assistanceListingNumber")}
+                description={t(
+                  "CreateOpportunityForm.assistanceListingNumberDesc",
+                )}
+                fieldId="assistanceListingNumber"
+                fieldMaxLength={6}
+                isRequired={true}
+                onTextChange={onAlnChange}
+                defaultValue={response?.data?.assistance_listing_number || ""}
+              />
+            </div>
+          </div>
 
           {/* Opportunity Title */}
           <CommonCharacterCount
@@ -164,6 +197,28 @@ export function CreateOpportunityForm({
             isRequired={true}
             onTextChange={onOppTitleChange}
             defaultValue={response?.data?.opportunity_title || ""}
+          />
+
+          {/* Tagline */}
+          <CommonCharacterCount
+            labelText={t("CreateOpportunityForm.tagline")}
+            description={t("CreateOpportunityForm.taglineDesc")}
+            fieldId="tagline"
+            fieldMaxLength={255}
+            isRequired={true}
+            onTextChange={onTaglineChange}
+            defaultValue={response?.data?.tagline || ""}
+          />
+
+          {/* Purpose Statement */}
+          <CommonCharacterCount
+            labelText={t("CreateOpportunityForm.purposeStatement")}
+            description={t("CreateOpportunityForm.purposeStatementDesc")}
+            fieldId="purposeStatement"
+            fieldMaxLength={255}
+            isRequired={true}
+            onTextChange={onPurposeStatementChange}
+            defaultValue={response?.data?.purpose_statement || ""}
           />
 
           {/* Agency */}
@@ -202,16 +257,7 @@ export function CreateOpportunityForm({
             />
           )}
 
-          {/* Assistance Listing Number (ALN) */}
-          <CommonCharacterCount
-            labelText={t("CreateOpportunityForm.assistanceListingNumber")}
-            description={t("CreateOpportunityForm.assistanceListingNumberDesc")}
-            fieldId="assistanceListingNumber"
-            fieldMaxLength={6}
-            isRequired={true}
-            onTextChange={onAlnChange}
-            defaultValue={response?.data?.assistance_listing_number || ""}
-          />
+          {/* ALN moved above to align with Opportunity Number */}
         </div>
 
         <div className="display-flex flex-left margin-top-5">

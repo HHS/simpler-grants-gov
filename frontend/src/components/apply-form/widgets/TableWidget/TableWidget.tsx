@@ -1,0 +1,486 @@
+import { get, set } from "lodash";
+import {
+  FormValidationWarning,
+  UswdsWidgetProps,
+  type UiSchemaTableColumn,
+  type UiSchemaTableMultiField,
+  type UiSchemaTableRow,
+} from "src/types/applyForm/types";
+import {
+  getFieldNameForHtml,
+  jsonSchemaPointerToPath,
+} from "src/utils/applyForm/applyFormUtils";
+import { formatTableCellValue } from "src/utils/applyForm/formatTableCellValue";
+
+import { useCallback, useMemo } from "react";
+import { Table } from "@trussworks/react-uswds";
+
+import TableCell from "./TableCell";
+
+function getJsonSchemaValuePath(
+  definition: string | undefined,
+): string | undefined {
+  if (!definition) return undefined;
+
+  const jsonPath = jsonSchemaPointerToPath(definition);
+  return jsonPath.startsWith("$.") ? jsonPath.slice(2) : jsonPath;
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Extract a form value for a given JSON Schema property path.
+ * @param definition - JSON Schema property path (e.g., "/properties/federal_share")
+ * @param value - The form object containing field values
+ * @returns The form value, or undefined if not found or invalid
+ */
+function getRenderValue(
+  definition: string | undefined,
+  value: unknown,
+): string | number | undefined {
+  const valuePath = getJsonSchemaValuePath(definition);
+
+  if (!valuePath || !isObjectRecord(value)) {
+    return undefined;
+  }
+
+  const renderValue = get(value, valuePath);
+  return typeof renderValue === "string" || typeof renderValue === "number"
+    ? renderValue
+    : undefined;
+}
+
+const PRINT_TEXT_COLUMN_UNIT = 8;
+// Floor so no column collapses to an unusable sliver in print.
+const PRINT_MIN_COLUMN_WIDTH_PERCENT = 6;
+
+/**
+ * Determine whether a column is a "text" column (i.e. every populated cell
+ * in that column is plainText). Text columns can wrap, so they're sized
+ * differently from numeric input/readOnly columns, which must stay on one
+ * line when printed.
+ */
+function isPlainTextColumn(
+  rows: UiSchemaTableRow[],
+  colIndex: number,
+): boolean {
+  const cell = rows
+    .map((row) => row.cells[colIndex])
+    .find((candidate) => candidate !== undefined);
+  return !cell || cell.type === "plainText";
+}
+
+/**
+ * Find the longest formatted value in a numeric (input/readOnly) column,
+ * across all rows — including computed subtotal/total rows, whose values
+ * can run a digit or two longer than any single input row.
+ */
+function getMaxFormattedLength(
+  rows: UiSchemaTableRow[],
+  colIndex: number,
+  value: unknown,
+): number {
+  let maxLen = 0;
+  rows.forEach((row) => {
+    const cell = row.cells[colIndex];
+    if (!cell || cell.type === "plainText") return;
+    const renderValue = getRenderValue(cell.definition, value);
+    const formatted = formatTableCellValue(renderValue, cell.format);
+    if (formatted.length > maxLen) {
+      maxLen = formatted.length;
+    }
+  });
+  return maxLen;
+}
+
+/**
+ * Compute print-only column widths (as percentages summing to 100) based on
+ * the actual content each column needs to display. Numeric columns get width
+ * proportional to their longest formatted value, with a safety buffer that
+ * scales with length (subtotal/total rows tend to be a digit or two longer
+ * than regular rows, and need enough breathing room not to overflow).
+ * plainText columns get a fixed, smaller allotment since text can wrap.
+ */
+function computePrintColumnWidths(
+  columns: UiSchemaTableColumn[],
+  rows: UiSchemaTableRow[],
+  value: unknown,
+): number[] {
+  const units = columns.map((_, colIndex) => {
+    if (isPlainTextColumn(rows, colIndex)) {
+      return PRINT_TEXT_COLUMN_UNIT;
+    }
+    const maxLen = getMaxFormattedLength(rows, colIndex, value);
+    const buffer = Math.max(2, Math.ceil(maxLen * 0.15));
+    return maxLen + buffer;
+  });
+
+  const total = units.reduce((sum, unit) => sum + unit, 0) || 1;
+  const rawPercentages = units.map((unit) => (unit / total) * 100);
+
+  // Enforce a minimum width so no column collapses, then renormalize to 100%.
+  const clamped = rawPercentages.map((pct) =>
+    Math.max(pct, PRINT_MIN_COLUMN_WIDTH_PERCENT),
+  );
+  const clampedTotal = clamped.reduce((sum, pct) => sum + pct, 0);
+
+  return clamped.map((pct) => (pct / clampedTotal) * 100);
+}
+
+/**
+ * TableWidget renders a data table with support for multiple cell types.
+ *
+ * This widget integrates with JSON Schema form rendering to display tabular data
+ * with the following cell types:
+ * - `plainText`: Static text content (category names, labels, etc.)
+ * - `input`: Editable numeric input fields for form data
+ * - `readOnly`: Calculated/computed values that cannot be edited
+ *
+ * Features:
+ * - Responsive table layout with responsive USWDS Table component
+ * - Automatic form value binding and updates
+ * - Validation for numeric input cells (decimal numbers with optional signs)
+ * - Number formatting support (integer, decimal, currency, dollar, percentage)
+ * - Disabled state management (locks all input cells when form is locked)
+ * - Accessibility: proper table semantics, ARIA labels, captions
+ *
+ * The widget automatically:
+ * - Binds input cell values from the form data based on JSON Schema properties
+ * - Updates form data when input cells change
+ * - Formats read-only values according to the specified format
+ * - Handles form locked state by disabling all input cells
+ *
+ * @example
+ * // Table widget configuration in UI schema
+ * {
+ *   type: "multiField",
+ *   name: "budget_table",
+ *   widget: "Table",
+ *   definition: [
+ *     "/properties/federal_share",
+ *     "/properties/non_federal_share",
+ *     "/properties/total"
+ *   ],
+ *   children: {
+ *     columns: [
+ *       { columnHeader: "Budget Category", width: 30 },
+ *       { columnHeader: "Federal Share", width: 23 },
+ *       { columnHeader: "Non-Federal Share", width: 23 },
+ *       { columnHeader: "Total", width: 24 }
+ *     ],
+ *     rows: [
+ *       {
+ *         cells: [
+ *           { type: "plainText", staticContent: "Administrative" },
+ *           {
+ *             type: "input",
+ *             definition: "/properties/federal_share",
+ *             format: "dollar"
+ *           },
+ *           {
+ *             type: "readOnly",
+ *             definition: "/properties/non_federal_share",
+ *             format: "dollar"
+ *           },
+ *           {
+ *             type: "readOnly",
+ *             definition: "/properties/total",
+ *             format: "dollar"
+ *           }
+ *         ]
+ *       }
+ *     ]
+ *   }
+ * }
+ */
+function TableWidget({
+  disabled,
+  isFormLocked,
+  label,
+  onChange,
+  rawErrors = [],
+  uiSchemaField,
+  value,
+}: UswdsWidgetProps) {
+  /**
+   * Handle changes to input cells and update the form value.
+   * @param definition - JSON Schema property path for the cell
+   * @param nextValue - The new value entered by the user
+   */
+  const handleCellChange = useCallback(
+    (definition: string, nextValue: string) => {
+      const valuePath = getJsonSchemaValuePath(definition);
+
+      if (!valuePath) {
+        return;
+      }
+
+      const currentValue = isObjectRecord(value) ? value : {};
+
+      const nextFormValue = set({ ...currentValue }, valuePath, nextValue);
+
+      onChange?.(nextFormValue);
+    },
+    [onChange, value],
+  );
+  // ensure hooks are called unconditionally; default to empty arrays
+  const columns: UiSchemaTableColumn[] =
+    (uiSchemaField as UiSchemaTableMultiField | undefined)?.children?.columns ??
+    [];
+  const rows: UiSchemaTableRow[] =
+    (uiSchemaField as UiSchemaTableMultiField | undefined)?.children?.rows ??
+    [];
+
+  // Only used by the print stylesheet below — does not affect on-screen widths.
+  const printColumnWidths = useMemo(
+    () => computePrintColumnWidths(columns, rows, value),
+    [columns, rows, value],
+  );
+
+  const cellChangeHandlers = useMemo(
+    () =>
+      rows.reduce(
+        (handlers, row) => {
+          row.cells.forEach((cell) => {
+            if (cell.type === "input" && cell.definition) {
+              handlers[cell.definition] = (nextValue: string) =>
+                handleCellChange(cell.definition, nextValue);
+            }
+          });
+
+          return handlers;
+        },
+        {} as Record<string, (nextValue: string) => void>,
+      ),
+    [handleCellChange, rows],
+  );
+
+  let rootFieldName: string | undefined;
+  let rootFromDefinition = false;
+
+  if (
+    Array.isArray(uiSchemaField?.definition) &&
+    uiSchemaField.definition.length === 1
+  ) {
+    const def = uiSchemaField.definition[0];
+    const listMatch = def.match(
+      /^\/properties\/([^/]+)\/items\/properties\/.+$/,
+    );
+    if (listMatch) {
+      rootFieldName = listMatch[1];
+      rootFromDefinition = true;
+    } else {
+      rootFieldName = getFieldNameForHtml({ definition: def });
+      rootFromDefinition = true;
+    }
+  } else if (uiSchemaField?.name) {
+    rootFieldName = uiSchemaField.name;
+  } else if (typeof uiSchemaField?.definition === "string") {
+    rootFieldName = getFieldNameForHtml({
+      definition: uiSchemaField.definition,
+    });
+  } else {
+    rootFieldName = undefined;
+  }
+
+  const buildCellName = (
+    cellDefinition: string | undefined,
+    rowIndex?: number,
+  ): string | undefined => {
+    if (!cellDefinition) return undefined;
+
+    // Handle field-list child definitions: /properties/<list>/items/properties/<child>
+    const listMatch = cellDefinition.match(
+      /^\/properties\/([^/]+)\/items\/properties\/(.+)$/,
+    );
+    if (listMatch) {
+      const [, listName, childPath] = listMatch;
+      const childParts = childPath
+        .split(/\/(?:properties\/)?/)
+        .filter(Boolean)
+        .map((p) => p.replace(/\\/g, ""));
+      const childHtml = childParts.join("--");
+      const indexPart = typeof rowIndex === "number" ? `[${rowIndex}]` : `[0]`;
+      return `${listName}${indexPart}--${childHtml}`;
+    }
+
+    // Non-list child: build a field name from the cell definition.
+    const childHtml = getFieldNameForHtml({ definition: cellDefinition });
+    if (!childHtml) return undefined;
+
+    if (!rootFieldName) return childHtml;
+
+    if (rootFromDefinition) {
+      return `${rootFieldName}--${childHtml}`;
+    }
+
+    return typeof rowIndex === "number"
+      ? `${rootFieldName}[${rowIndex}]--${childHtml}`
+      : `${rootFieldName}--${childHtml}`;
+  };
+
+  /**
+   * Get validation errors for a specific cell based on its HTML form name.
+   * Matches the cell's Name against the error field paths.
+   * @param cellName - The HTML form name of the cell input
+   * @returns An array of error messages for the cell, or an empty array if none
+   */
+  const allCellNames = rows
+    .flatMap((row, rowIndex) =>
+      row.cells.map((cell) => buildCellName(cell.definition, rowIndex)),
+    )
+    .filter((name): name is string => Boolean(name));
+
+  const duplicateBaseNames = allCellNames.reduce<Record<string, number>>(
+    (counts, name) => {
+      const base = name.split("--").slice(-1)[0];
+      counts[base] = (counts[base] ?? 0) + 1;
+      return counts;
+    },
+    {},
+  );
+
+  const getCellErrors = (cellName: string | undefined): string[] => {
+    if (!cellName) return [];
+
+    const exactMatches = (rawErrors as FormValidationWarning[])
+      .filter((error) => error.field === cellName)
+      .map((error) => String(error.message));
+
+    if (exactMatches.length > 0) {
+      return exactMatches;
+    }
+
+    const baseName = cellName.split("--").slice(-1)[0];
+    if (duplicateBaseNames[baseName] > 1) {
+      return [];
+    }
+
+    return (rawErrors as FormValidationWarning[])
+      .filter((error) => error.field === baseName)
+      .map((error) => String(error.message));
+  };
+
+  if (
+    uiSchemaField?.type !== "multiField" ||
+    uiSchemaField.widget !== "Table"
+  ) {
+    return null;
+  }
+  const expectedCellCount = columns.length;
+  const isInteractionDisabled = disabled || isFormLocked;
+  // Validate that each row has the correct number of cells.
+  rows.forEach((row, rowIndex) => {
+    if (!Array.isArray(row.cells)) {
+      throw new Error(
+        `Table row ${rowIndex + 1} must contain exactly ${expectedCellCount} cells.`,
+      );
+    }
+
+    if (row.cells.length !== expectedCellCount) {
+      throw new Error(
+        `Table row ${rowIndex + 1} must contain exactly ${expectedCellCount} cells.`,
+      );
+    }
+  });
+
+  return (
+    <>
+      <Table
+        bordered
+        fullWidth
+        scrollable
+        className="applyform-budget-table"
+        data-testid="table"
+        data-table-name={uiSchemaField.name}
+        data-table-column-count={columns.length}
+        data-table-row-count={rows.length}
+        caption={
+          <span className="usa-sr-only">{label ?? uiSchemaField.name}</span>
+        }
+      >
+        <colgroup>
+          {columns.map((column, index) => (
+            <col
+              key={column.columnHeader}
+              style={
+                {
+                  "--applyform-print-col-width": `${printColumnWidths[index]}%`,
+                } as React.CSSProperties
+              }
+            />
+          ))}
+        </colgroup>
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th
+                key={column.columnHeader}
+                scope="col"
+                style={column.width ? { width: `${column.width}%` } : undefined}
+              >
+                {column.columnHeader}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => {
+            const rowLabel =
+              row.cells[0]?.type === "plainText"
+                ? row.cells[0].staticContent
+                : undefined;
+
+            return (
+              <tr key={`table-row-${rowIndex}`}>
+                {row.cells.map((cell, cellIndex) => {
+                  const cellId = `${uiSchemaField.name}-${rowIndex}-${cellIndex}`;
+
+                  return (
+                    <td
+                      key={`table-row-${rowIndex}-cell-${cellIndex}`}
+                      data-table-cell-type={cell.type}
+                    >
+                      <TableCell
+                        cell={cell}
+                        cellErrors={getCellErrors(
+                          buildCellName(cell.definition, rowIndex),
+                        )}
+                        disabled={
+                          cell.type === "input" ? isInteractionDisabled : false
+                        }
+                        id={cellId}
+                        name={buildCellName(cell.definition, rowIndex)}
+                        ariaLabel={
+                          cell.type === "input"
+                            ? [rowLabel, columns[cellIndex]?.columnHeader]
+                                .filter(Boolean)
+                                .join(", ")
+                            : undefined
+                        }
+                        onChange={
+                          cell.type === "input" && cell.definition
+                            ? cellChangeHandlers[cell.definition]
+                            : undefined
+                        }
+                        value={
+                          cell.type === "plainText"
+                            ? undefined
+                            : getRenderValue(cell.definition, value)
+                        }
+                      />
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </Table>
+    </>
+  );
+}
+
+export default TableWidget;

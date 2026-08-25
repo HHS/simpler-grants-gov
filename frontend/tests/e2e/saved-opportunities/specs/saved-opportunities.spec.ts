@@ -3,6 +3,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav, waitForURLChange } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { ensureOpportunityIsSaved } from "tests/e2e/utils/saved-opportunities/save-opportunity-utils";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
@@ -33,12 +34,7 @@ const CARD_FIELD_LABELS = [
 test.describe("Saved Opportunities", () => {
   // Skip non-Chrome browsers in staging
   test.beforeEach(({ page: _ }, testInfo) => {
-    if (targetEnv === "staging") {
-      test.skip(
-        testInfo.project.name !== "Chrome",
-        "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-      );
-    }
+    skipNonChromeOnStaging(testInfo);
   });
 
   /**
@@ -91,7 +87,7 @@ test.describe("Saved Opportunities", () => {
       await waitForURLChange(page, (url) => !!url.match(/saved-opportunities/));
 
       // And the page title should be "Saved opportunities | Simpler.Grants.gov"
-      const timeout = targetEnv === "staging" ? 30000 : 5000;
+      const timeout = targetEnv !== "local" ? 30000 : 5000;
       await expect(page).toHaveTitle(
         "Saved opportunities | Simpler.Grants.gov",
         { timeout },

@@ -107,10 +107,8 @@ export interface ApplicationHistory {
   created_at: string;
 }
 
-export interface ApplicationAttachmentUploadResponse extends APIResponse {
-  data: {
-    application_attachment_id: string;
-  };
+export interface ApplicationAttachmentCreateResponse extends APIResponse {
+  data: Attachment;
 }
 
 export interface ApplicationStartApiResponse extends APIResponse {

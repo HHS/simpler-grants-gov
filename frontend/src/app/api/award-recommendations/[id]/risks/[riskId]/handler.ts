@@ -4,7 +4,7 @@ import { deleteAwardRecommendationRisk } from "src/services/fetch/fetchers/award
 import { NextRequest } from "next/server";
 
 export async function deleteRiskForAwardRecommendation(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string; riskId: string }> },
 ) {
   const { id, riskId } = await params;

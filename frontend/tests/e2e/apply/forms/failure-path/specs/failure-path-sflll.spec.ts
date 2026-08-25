@@ -18,6 +18,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
+import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import {
@@ -32,19 +33,14 @@ const { testOrgLabel, targetEnv } = playwrightEnv;
 // Staging: 39cf0a5c-5fed-40b4-8f46-5374101ae419
 // Local:   c3c59562-a54f-4203-b0f6-98f2f0383481
 const OPPORTUNITY_ID =
-  targetEnv === "staging"
+  targetEnv !== "local"
     ? "39cf0a5c-5fed-40b4-8f46-5374101ae419"
     : "c3c59562-a54f-4203-b0f6-98f2f0383481";
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
-  if (targetEnv === "staging") {
-    test.skip(
-      testInfo.project.name !== "Chrome",
-      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
-    );
-  }
+  skipNonChromeOnStaging(testInfo);
 });
 
 test(

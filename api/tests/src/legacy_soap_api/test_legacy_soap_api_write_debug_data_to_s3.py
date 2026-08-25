@@ -1,13 +1,18 @@
 import json
 import logging
+import uuid
 
 import boto3
+import flask
 from grants_shared.util import file_util
 
 from src.legacy_soap_api import legacy_soap_api_config as soap_api_config
 from src.legacy_soap_api.legacy_soap_api_config import GRANTOR_SOAP_ACTION_PATH
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
-from src.legacy_soap_api.legacy_soap_api_utils import write_debug_data_to_s3
+from src.legacy_soap_api.legacy_soap_api_utils import (
+    get_internal_request_id,
+    write_debug_data_to_s3,
+)
 from tests.lib.data_factories import create_soap_request
 
 NSMAP = {
@@ -58,9 +63,14 @@ SOAP_LEGACY_RESPONSE_PAYLOAD = (
 
 
 def test_write_debug_data_to_s3(
-    caplog, db_session, enable_factory_create, monkeypatch, mock_s3_bucket, s3_config, mock_s3
+    app,
+    db_session,
+    enable_factory_create,
+    monkeypatch,
+    mock_s3_bucket,
+    s3_config,
 ) -> None:
-    caplog.set_level(logging.INFO)
+    test_uuid = uuid.uuid4()
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     soap_legacy_response = SOAPResponse(
@@ -69,21 +79,20 @@ def test_write_debug_data_to_s3(
     soap_request = create_soap_request(
         SOAP_PAYLOAD, operation_name="GetSubmissionListExpandedRequest"
     )
-    write_debug_data_to_s3(soap_request, soap_legacy_response)
-    record = next(
-        r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
-    )
+    with app.test_request_context("/"):
+        flask.g.internal_request_id = test_uuid
+        write_debug_data_to_s3(soap_request, soap_legacy_response)
     request_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/request.txt"
     )
     response_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/response.txt"
     )
     response_headers_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response_headers.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/response_headers.txt"
     )
     request_headers_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request_headers.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/request_headers.txt"
     )
     assert request_contents.replace("\n", "") == SOAP_PAYLOAD.decode().replace("\n", "")
     assert response_contents.replace("\r", "") == SOAP_LEGACY_RESPONSE_PAYLOAD.decode().replace(
@@ -98,24 +107,83 @@ def test_write_debug_data_to_s3(
     )
 
 
-def test_write_debug_data_to_s3_handles_a_null_soap_request(
-    caplog, db_session, enable_factory_create, monkeypatch, mock_s3_bucket, s3_config, mock_s3
+def test_write_debug_data_to_s3_does_not_write_get_application_zip_response(
+    app,
+    caplog,
+    db_session,
+    enable_factory_create,
+    monkeypatch,
+    mock_s3_bucket,
+    s3_config,
 ) -> None:
+    test_uuid = uuid.uuid4()
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
+    caplog.set_level(logging.INFO)
+    soap_legacy_response = SOAPResponse(
+        data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={"xyz": "abc"}
+    )
+    soap_request = create_soap_request(SOAP_PAYLOAD, operation_name="GetApplicationZipRequest")
+    with app.test_request_context("/"):
+        flask.g.internal_request_id = test_uuid
+        write_debug_data_to_s3(soap_request, soap_legacy_response)
+    request_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/request.txt"
+    )
+    response_headers_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/response_headers.txt"
+    )
+    request_headers_contents = file_util.read_file(
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/request_headers.txt"
+    )
+    assert request_contents.replace("\n", "") == SOAP_PAYLOAD.decode().replace("\n", "")
+    assert not file_util.file_exists(
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/response.txt"
+    )
+    record = next(
+        r
+        for r in caplog.records
+        if r.message == "soap_client: response is not currently being logged to s3"
+    )
+    assert record
+    assert response_headers_contents.replace("\r", "") == json.dumps({"xyz": "abc"})
+    assert request_headers_contents.replace("\r", "") == json.dumps(
+        {
+            "X-Gg-S2S-Uri": "https://google.com/xyz",
+            "Soapaction": f"{GRANTOR_SOAP_ACTION_PATH}/GetApplicationZip",
+        }
+    )
+
+
+def test_write_debug_data_to_s3_handles_a_null_soap_request(
+    app,
+    caplog,
+    db_session,
+    enable_factory_create,
+    monkeypatch,
+    mock_s3_bucket,
+    s3_config,
+    mock_s3,
+) -> None:
+    test_uuid = uuid.uuid4()
     caplog.set_level(logging.INFO)
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("SAVE_SOAP_MESSAGES_TO_S3", "true")
     soap_legacy_response = SOAPResponse(
         data=SOAP_LEGACY_RESPONSE_PAYLOAD, status_code=200, headers={}
     )
-    write_debug_data_to_s3(None, soap_legacy_response)
+    with app.test_request_context("/"):
+        flask.g.internal_request_id = test_uuid
+        write_debug_data_to_s3(None, soap_legacy_response)
     record = next(
         r for r in caplog.records if r.message == "soap_client: debug info uploaded to s3"
     )
+    assert record
     assert not file_util.file_exists(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/request.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/request.txt"
     )
     response_contents = file_util.read_file(
-        f"s3://local-mock-draft-bucket/soap-debug/{record.debug_identifier}/response.txt"
+        f"s3://local-mock-draft-bucket/soap-debug/{test_uuid}/response.txt"
     )
     assert response_contents.replace("\r", "") == SOAP_LEGACY_RESPONSE_PAYLOAD.decode().replace(
         "\r", ""
@@ -156,6 +224,7 @@ def test_write_debug_data_to_s3_runs_on_any_endpoint(
         create_soap_request(SOAP_PAYLOAD, operation_name="GetSubmissionListRequest"),
         soap_legacy_response,
     )
+    # Note: Response will not be written for GetApplicationZip
     write_debug_data_to_s3(
         create_soap_request(SOAP_PAYLOAD, operation_name="GetApplicationZipRequest"),
         soap_legacy_response,
@@ -175,4 +244,17 @@ def test_write_debug_data_to_s3_runs_on_any_endpoint(
         create_soap_request(SOAP_PAYLOAD, operation_name="Y"), soap_legacy_response
     )
     objects = s3_client.list_objects_v2(Bucket="local-mock-draft-bucket")
-    assert len(objects.get("Contents")) == 28
+    assert len(objects.get("Contents")) == 27
+
+
+def test_get_internal_request_id_returns_flask_internal_request_id_if_in_context(app):
+    with app.test_request_context("/"):
+        TEST_UUID = "aaaaaaaa-0000-1111-2222-bbbbbbbbbbbb"
+        flask.g.internal_request_id = TEST_UUID
+        # The internal id is consistent and not recalculated after every call if in context
+        result_1 = get_internal_request_id()
+        assert result_1 == TEST_UUID
+        result_2 = get_internal_request_id()
+        assert result_2 == TEST_UUID
+    result_3 = get_internal_request_id()
+    assert result_3 != TEST_UUID

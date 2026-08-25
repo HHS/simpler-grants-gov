@@ -60,20 +60,14 @@ inputs:
   do-webkit-install:
     description: "install webkit for playwright"
     default: "false"
-  staging_test_user_api_key:
-    description: "test user API key used in spoofing staging user logins"
-    default: ""
-  staging_test_user_manager_api_key:
-    description: "manager API key used to request auth tokens for test users via POST /v1/internal/e2e-token"
-    default: ""
-  staging_test_user_id:
-    description: "UUID of the staging test user whose token will be requested for login spoofing"
-    default: ""
   staging_client_session_secret:
     description: "encode key for client side JWTs, used in spoofing staging user logins"
     default: ""
   test_user_manager_api_key:
     description: "manager API key for the new multi-user test system, used to request auth tokens for test users via POST /v1/internal/e2e-token"
+    default: ""
+  spec_files:
+    description: "paths to specific spec files to run, will separately, but in addition to any supplied `playwright_tags`"
     default: ""
 
 outputs:
@@ -89,7 +83,7 @@ runs:
       env:
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
       run: |
-        if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" ]]; then echo "invalid e2e test target provided" && exit 1; fi
+        if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" && $PLAYWRIGHT_TARGET_ENV != "grantor1" && $PLAYWRIGHT_TARGET_ENV != "grantor2" && $PLAYWRIGHT_TARGET_ENV != "grantee1" && $PLAYWRIGHT_TARGET_ENV != "grantee2" ]]; then echo "invalid e2e test target provided" && exit 1; fi
 
     - name: Check out code
       uses: actions/checkout@v6
@@ -136,21 +130,61 @@ runs:
       run: |
         npx playwright install --with-deps webkit
 
-    - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
-      if: ${{ inputs.playwright_tags == '' }}
+    - name: Set target urls for environment
+      shell: bash
+      run: |
+        if [[ ${{ inputs.target }} = "staging" ]]; then
+          echo "base_url=https://staging.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.staging.simpler.grants.gov" >> "$GITHUB_ENV"
+        elif [[ ${{ inputs.target }} = "grantor1" ]]; then
+          echo "base_url=https://grantor1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.grantor1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+        elif [[ ${{ inputs.target }} = "grantor2" ]]; then
+          echo "base_url=https://grantor2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.grantor2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+        elif [[ ${{ inputs.target }} = "grantee1" ]]; then
+          echo "base_url=https://grantee1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.grantee1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+        elif [[ ${{ inputs.target }} = "grantee2" ]]; then
+          echo "base_url=https://grantee2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.grantee2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+        fi
+
+    - name: Run specified e2e tests
+      if: ${{ inputs.spec_files != '' }}
       working-directory: ./frontend
       env:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
+        PLAYWRIGHT_API_URL: ${{ env.api_url }}
         PLAYWRIGHT_WORKERS: ${{ inputs.workers }}
         STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
-        STAGING_TEST_USER_API_KEY: ${{ inputs.staging_test_user_api_key }}
-        STAGING_TEST_USER_MANAGER_API_KEY: ${{ inputs.staging_test_user_manager_api_key }}
-        STAGING_TEST_USER_ID: ${{ inputs.staging_test_user_id }}
+        SESSION_SECRET_OVERRIDE: ${{ inputs.staging_client_session_secret }}
+        TEST_USER_MANAGER_API_KEY: ${{ inputs.test_user_manager_api_key }}
+
+      run: |
+        npm run test:e2e -- ${{ inputs.spec_files }}
+      shell: bash
+
+    - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
+      if: ${{ inputs.playwright_tags == '' && inputs.spec_files == '' }}
+      working-directory: ./frontend
+      env:
+        CI: true
+        TOTAL_SHARDS: ${{ inputs.total_shards }}
+        CURRENT_SHARD: ${{ inputs.current_shard }}
+        PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
+        PLAYWRIGHT_API_URL: ${{ env.api_url }}
+        PLAYWRIGHT_WORKERS: ${{ inputs.workers }}
+        STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
+        STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
+        STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
         SESSION_SECRET_OVERRIDE: ${{ inputs.staging_client_session_secret }}
         TEST_USER_MANAGER_API_KEY: ${{ inputs.test_user_manager_api_key }}
 
@@ -159,20 +193,19 @@ runs:
       shell: bash
 
     - name: Run e2e tests for ${{ inputs.playwright_tags }} (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
-      if: ${{ inputs.playwright_tags != '' }}
+      if: ${{ inputs.playwright_tags != '' && inputs.spec_files == '' }}
       working-directory: ./frontend
       env:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
+        PLAYWRIGHT_API_URL: ${{ env.api_url }}
         PLAYWRIGHT_WORKERS: ${{ inputs.workers }}
         STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
-        STAGING_TEST_USER_API_KEY: ${{ inputs.staging_test_user_api_key }}
-        STAGING_TEST_USER_MANAGER_API_KEY: ${{ inputs.staging_test_user_manager_api_key }}
-        STAGING_TEST_USER_ID: ${{ inputs.staging_test_user_id }}
         SESSION_SECRET_OVERRIDE: ${{ inputs.staging_client_session_secret }}
         TEST_USER_MANAGER_API_KEY: ${{ inputs.test_user_manager_api_key }}
 
@@ -200,15 +233,17 @@ runs:
       shell: bash
 
     - name: Verify Blob Report Directory
+      if: ${{ inputs.spec_files == '' }}
       working-directory: ./frontend
       run: |
         echo "Contents of blob-report directory:"
         ls -R blob-report || echo "blob-report directory not found"
       shell: bash
 
+    # skip the test report for specific file based runs
     - name: Upload Blob Report
+      if: ${{ inputs.spec_files == '' && always() || false }}
       id: upload-blob-report
-      if: always()
       uses: actions/upload-artifact@v7
       with:
         name: blob-report-shard-${{ inputs.target }}-${{ inputs.current_shard }}
