@@ -21,7 +21,6 @@ from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_agencies_and_users import _build_agencies_and_users
 from tests.lib.seed_award_recommendations import _build_award_recommendations
 from tests.lib.seed_data_utils import CompetitionContainer
-from tests.lib.seed_e2e import _build_users_and_tokens
 from tests.lib.seed_orgs_and_users import _build_organizations_and_users, create_internal_users
 
 
@@ -835,8 +834,6 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
         create_internal_users(db_session)
         _build_organizations_and_users(db_session, competition_container)
         _build_agencies_and_users(db_session)
-    if seed_config.seed_e2e:
-        _build_users_and_tokens(db_session)
     if seed_config.seed_award_recommendations:
         _build_award_recommendations(db_session, seed_config.seed_award_recommendation_workflows)
     db_session.commit()
