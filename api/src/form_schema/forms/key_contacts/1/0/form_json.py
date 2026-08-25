@@ -77,7 +77,6 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "label": "Key Contacts",
         "name": "key_contacts",
-        "description": "Enter between 1 and 4 key contacts and their role on the project.",
         "children": [
             # Applicant Organization Name is the first field and is not part of the FieldList.
             {
@@ -88,6 +87,7 @@ FORM_UI_SCHEMA = [
                 "type": "fieldList",
                 "name": "key_contacts",
                 "label": "Key Contact",
+                "hideFieldListHeading": True,
                 "description": "You may enter up to four (4) Key Contacts. At least 1 (one) contact person is required. Additional contacts are optional.",
                 "children": [
                     {

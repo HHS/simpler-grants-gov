@@ -1,5 +1,4 @@
 import logging
-from typing import cast
 
 import grants_shared.adapters.db as db
 
@@ -123,7 +122,7 @@ def update_application_info(
         db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name
     )
 
-    legacy_tracking_number = cast(str, update_application_info_request.grants_gov_tracking_number)
+    legacy_tracking_number = update_application_info_request.grants_gov_tracking_number
 
     application_submission = get_application_submission_by_legacy_tracking_number(
         db_session, legacy_tracking_number

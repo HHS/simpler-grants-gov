@@ -1,6 +1,7 @@
 "use client";
 
 import { AgencyContact } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/AgencyContact";
+import { ApplicationInstructions } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/ApplicationInstructions";
 import { RequiredForms } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/RequiredForms";
 import { SubmissionSetUp } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionSetUp";
 import { SubmissionWindow } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/SubmissionWindow";
@@ -10,6 +11,7 @@ import {
 } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/actions";
 import { FormType } from "src/types/allFormsResponseTypes";
 import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
+import { UploadFileMetadata } from "src/types/fileUploadTypes";
 
 import { useTranslations } from "next-intl";
 import React, { useRef, useState } from "react";
@@ -38,6 +40,9 @@ export function CompetitionForm({
   forms,
 }: CompetitionFormProps) {
   const t = useTranslations("OpportunityCompetition");
+
+  // TODO: load on edit of an existing competition
+  const existingFiles: UploadFileMetadata[] = [];
 
   // ===== Required Forms =====
   const formModalRef = useRef<ModalRef | null>(null);
@@ -124,6 +129,7 @@ export function CompetitionForm({
               <SubmissionSetUp />
               <SubmissionWindow />
               <AgencyContact />
+              <ApplicationInstructions existingFiles={existingFiles} />
               <RequiredForms
                 alwaysRequiredForms={alwaysRequiredForms}
                 requiredForms={requiredForms}
