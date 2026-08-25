@@ -16,6 +16,7 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import { verifyVirusScanPassedAndUploaded } from "tests/e2e/utils/forms/file-upload-status-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   verifyFormStatusAfterSave,
@@ -60,19 +61,6 @@ const applicantScenarios = [
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
 });
-
-async function verifyVirusScanPassedAndUploaded(page: Page, fileName: string) {
-  await expect(
-    page.getByRole("progressbar", { name: "Loading!" }),
-  ).toBeVisible();
-  await expect(page.getByTestId("file-input-existing-files")).toContainText(
-    fileName,
-    { timeout: 30_000 },
-  );
-  await expect(
-    page.getByTestId("file-input-existing-files").getByTestId("button"),
-  ).toContainText("Delete");
-}
 
 for (const {
   scenarioName,
@@ -120,7 +108,14 @@ for (const {
           })
           .setInputFiles(testData.att1);
 
-        await verifyVirusScanPassedAndUploaded(page, "sample-upload-kb.pdf");
+        // For attachment form, file elements are at page level (not nested in section)
+        // So we pass page as the scope, not a specific form section
+        await verifyVirusScanPassedAndUploaded(
+          page,
+          "sample-upload-kb.pdf",
+          page,
+          false,
+        );
 
         // Emulate the browser closing: discard this tab's unsaved client state entirely
         // and open a fresh page from the same authenticated context.
