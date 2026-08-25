@@ -24,10 +24,7 @@ const AGENCY_NOT_AUTHORIZED_MESSAGE =
   "You do not have access to this agency's opportunities.";
 
 // Shared helper for asserting the agency-not-authorized state on the grantor opportunities page.
-const assertAgencyNotAuthorized = async (
-  page: Page,
-  agencyId: string,
-) => {
+const assertAgencyNotAuthorized = async (page: Page, agencyId: string) => {
   // Given I navigate to the grantor opportunities list for the requested agency.
   await page.goto(`/grantor/opportunities?agency=${agencyId}`, {
     waitUntil: "networkidle",
@@ -49,7 +46,6 @@ test.describe("Opportunity list page access - failure path", () => {
     "Unauthenticated user sees an unauthenticated state when accessing the grantor opportunities list page",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page }) => {
-      
       // Given I access the grantor opportunities list without signing in.
       await page.goto("/grantor/opportunities", {
         waitUntil: "domcontentloaded",
