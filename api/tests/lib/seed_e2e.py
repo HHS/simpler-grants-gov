@@ -88,15 +88,15 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
 
     # Primary test user. Reuses the seeded one_org_user id so the spoofed E2E session always has
     # organization membership in local/CI runs.
-    primary_user = (
+    (
         UserBuilder(uuid.UUID("f15c7491-7ebc-4f4f-8de6-3ac0594d9c63"), db_session, "user for e2e")
         .with_e2e_test_user()
         .with_api_key("e2e-test-key")
         # Grantor role so the Create Opportunity link shows and opportunity
         # creation E2E tests can create and publish opportunities.
         .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
+        .build()
     )
-    primary_user.build()
 
     # Secondary test user with organization membership, mirroring the staging test user.
     (
