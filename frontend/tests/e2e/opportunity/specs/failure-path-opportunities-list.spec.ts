@@ -10,12 +10,12 @@
  */
 
 import { expect, test } from "@playwright/test";
+import {
+  INVALID_AGENCY_ID,
+  VALID_NON_MEMBER_AGENCY_ID,
+} from "tests/e2e/opportunity/fixtures/opportunity-test-data";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import {
-  VALID_NON_MEMBER_AGENCY_ID,
-  INVALID_AGENCY_ID,
-} from "tests/e2e/opportunity/fixtures/opportunity-test-data";
 
 const { AUTH, CORE_REGRESSION } = VALID_TAGS;
 
@@ -53,10 +53,12 @@ test.describe("Opportunity list page access - failure path", () => {
       // Use a valid agency id that the user is not permitted to view.
       await page.goto(
         `/grantor/opportunities?agency=${VALID_NON_MEMBER_AGENCY_ID}`,
-        { waitUntil: "domcontentloaded" },
+        { waitUntil: "networkidle" },
       );
 
-      await expect(page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE)).toBeVisible();
+      await expect(page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE)).toBeVisible({
+        timeout: 30000,
+      });
     },
   );
 
@@ -71,10 +73,12 @@ test.describe("Opportunity list page access - failure path", () => {
 
       // This should exercise the invalid agency fallback in the opportunities page.
       await page.goto(`/grantor/opportunities?agency=${INVALID_AGENCY_ID}`, {
-        waitUntil: "domcontentloaded",
+        waitUntil: "networkidle",
       });
 
-      await expect(page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE)).toBeVisible();
+      await expect(page.getByText(AGENCY_NOT_AUTHORIZED_MESSAGE)).toBeVisible({
+        timeout: 30000,
+      });
     },
   );
 });

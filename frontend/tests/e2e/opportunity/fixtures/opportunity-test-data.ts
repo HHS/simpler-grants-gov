@@ -9,5 +9,4 @@ export const VALID_NON_MEMBER_AGENCY_ID =
 
 // A syntactically valid, non-existent agency ID used to verify the
 // opportunities page handles invalid agency lookup fallback behavior.
-export const INVALID_AGENCY_ID =
-  "00000000-0000-0000-0000-000000000000";
+export const INVALID_AGENCY_ID = "00000000-0000-0000-0000-000000000000";
