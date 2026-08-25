@@ -44,3 +44,39 @@ export async function verifyVirusScanPassedAndUploaded(
     "Delete",
   );
 }
+
+/**
+ * Verifies that a file upload fails the virus scan and is removed.
+ *
+ * Optionally verifies the upload progress indicator, confirms the failed
+ * security scan message is displayed, and verifies the file does not appear
+ * in the existing-files list.
+ *
+ * @param page Playwright Page object
+ * @param fileName The uploaded file's display name (e.g. "sample-upload-kb.pdf")
+ * @param scope Optional container to scope the check to (page or section locator)
+ * @param expectProgressIndicator Whether to also assert the transient scan indicator appeared
+ */
+export async function verifyVirusScanFailedAndRemoved(
+  page: Page,
+  fileName: string,
+  scope: Page | Locator = page,
+  expectProgressIndicator = true,
+): Promise<void> {
+  if (expectProgressIndicator) {
+    await expect(
+      page.getByRole("progressbar", { name: "Loading!" }),
+    ).toBeVisible();
+  }
+
+  const uploadStatus = scope.getByTestId("file-upload-status-display");
+
+  await expect(uploadStatus).toContainText(fileName);
+  await expect(uploadStatus).toContainText(
+    "Security scan failed. File removed",
+  );
+
+  await expect(
+    scope.getByTestId("file-input-existing-files"),
+  ).not.toContainText(fileName);
+}
