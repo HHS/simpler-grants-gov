@@ -72,8 +72,12 @@ export async function verifyVirusScanFailedAndRemoved(
   const uploadStatus = scope.getByTestId("file-upload-status-display");
 
   await expect(uploadStatus).toContainText(fileName);
+  // Extended timeout for virus scan status because the local file scanner
+  // has a pre-process delay (1 second) and DynamoDB poll interval (3 seconds)
+  // which can exceed the default 5 second Playwright timeout
   await expect(uploadStatus).toContainText(
     "Security scan failed. File removed",
+    { timeout: 30_000 },
   );
 
   await expect(
