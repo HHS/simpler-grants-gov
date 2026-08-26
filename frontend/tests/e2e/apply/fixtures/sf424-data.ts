@@ -1,11 +1,24 @@
 import path from "path";
 import type { fieldDefinitionsSF424 } from "tests/e2e/apply/fixtures/sf424-field-definitions";
+import playwrightEnv from "tests/e2e/playwright-env";
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
 
 // Uploaded files validated by section locator in print view.
 const TEST_UPLOAD_DIR = path.resolve(__dirname, "../../test-upload-files");
-const SF424_TEST_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
+export const SF424_TEST_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
+
+/**
+ * Applicant scenarios for SF-424 dual-applicant testing (Organization + Individual).
+ * Used to validate workflows across different user types.
+ */
+export const SF424_APPLICANT_SCENARIOS = [
+  {
+    scenarioName: "Organization applicant",
+    orgLabel: playwrightEnv.testOrgLabel,
+  },
+  { scenarioName: "Individual applicant", orgLabel: undefined },
+] as const;
 
 /**
  * Happy-path test data builder for the SF-424 form.
