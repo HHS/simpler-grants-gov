@@ -7,8 +7,10 @@ import playwrightEnv, { SupportedEnvs } from "tests/e2e/playwright-env";
 
   Each seeded user is flagged in the API seed (with_e2e_test_user grants the
   READ_TEST_USER_TOKEN privilege) so its session token can be fetched via
-  POST /v1/internal/e2e-token. To add a test user: seed it with a static id in
-  api/tests/lib/seed_e2e.py, then add a matching entry here.
+  POST /v1/internal/e2e-token. This file exposes the logical test-user keys
+  that correspond to seeded identities prepared before the E2E tests run.
+  To add a test user: seed it with a static id in api/tests/lib/seed_e2e.py,
+  then add a matching entry here.
 */
 
 export type TestUserKey =
