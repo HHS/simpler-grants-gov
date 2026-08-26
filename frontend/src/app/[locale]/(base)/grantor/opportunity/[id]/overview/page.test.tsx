@@ -90,7 +90,13 @@ function buildCompetitionFixture(
 ): DeepPartial<[Competition]> | null {
   if (status === "notStarted") return null;
   if (status === "inProgress") return [{ competition_id: "comp-1" }];
-  return [{ competition_id: "comp-1", open_to_applicants: ["individual"] }];
+  return [
+    {
+      competition_id: "comp-1",
+      open_to_applicants: ["individual"],
+      competition_title: "comp-1",
+    },
+  ];
 }
 
 const baseOpportunityData: DeepPartial<GrantorOpportunityDetail> = {
