@@ -95,32 +95,30 @@ class CheckXsdDriftTask(Task):
                         )
                         fetch_errors.add(err["url"])
 
-            schemas_checked = 0
-            for downloaded_url in sorted(downloaded_urls):
-                filename = Path(urlparse(downloaded_url).path).name
-                fetched_path = Path(tmp_dir) / filename
-                committed_path = self.committed_xsd_dir / filename
-                if not fetched_path.exists():
-                    logger.warning(
-                        "Fetched XSD file not found in temp directory",
-                        extra={"schema_filename": filename, "path": str(fetched_path)},
-                    )
-                    fetch_errors.add(downloaded_url)
-                    continue
+            # Map filenames back to their source URLs so we can log the live
+            # URL alongside each drifted/missing schema below.
+            url_by_filename = {Path(urlparse(url).path).name: url for url in downloaded_urls}
 
-                if not committed_path.exists():
-                    logger.warning(
-                        "Downloaded XSD has no committed counterpart",
-                        extra={"url": downloaded_url, "schema_filename": filename},
-                    )
-                    schemas_checked += 1
-                    missing_schemas[filename] = downloaded_url
-                    continue
+            comparison = filecmp.dircmp(tmp_dir, self.committed_xsd_dir, shallow=False)
 
-                schemas_checked += 1
-                if not filecmp.cmp(fetched_path, committed_path, shallow=False):
-                    logger.info("Detected XSD drift", extra={"schema": filename})
-                    drifted_schemas[filename] = downloaded_url
+            for filename in sorted(comparison.left_only):
+                url = url_by_filename.get(filename)
+                if url is None:
+                    continue
+                logger.warning(
+                    "Downloaded XSD has no committed counterpart",
+                    extra={"url": url, "schema_filename": filename},
+                )
+                missing_schemas[filename] = url
+
+            for filename in sorted(comparison.diff_files):
+                url = url_by_filename.get(filename)
+                if url is None:
+                    continue
+                logger.info("Detected XSD drift", extra={"schema": filename})
+                drifted_schemas[filename] = url
+
+            schemas_checked = len(comparison.left_only) + len(comparison.common_files)
 
             self.set_metrics({self.Metrics.XSDS_CHECKED: schemas_checked})
 
