@@ -1,9 +1,7 @@
 import logging
-import os
 import uuid
 
 import grants_shared.adapters.db as db
-from grants_shared.util.file_util import write_to_file
 from pydantic import Field
 
 from src.constants.static_role_values import (
@@ -27,8 +25,6 @@ logger = logging.getLogger(__name__)
 #   POST /v1/internal/e2e-token.
 # * seed a "manager" user whose API key the e2e orchestrator uses to call
 #   POST /v1/internal/e2e-token (mirrors the staging manager-key flow)
-# * write the primary test user's token into the e2e_token.tmp file (where it can be retrieved by
-#   CI processes for frontend / e2e use)
 #
 # To add a new test user, add another UserBuilder(...).with_e2e_test_user()... block below with a
 # static user id.
@@ -66,12 +62,6 @@ class _SeedE2EConfig(PydanticBaseEnvConfig):
     local_test_user_manager_api_key: str = Field(alias="LOCAL_TEST_USER_MANAGER_API_KEY")
 
 
-def _write_token_to_file(token: str) -> None:
-    path_to_tmp_token_file = os.path.join(os.path.dirname(__file__), "..", "..", "e2e_token.tmp")
-    token_declaration = 'E2E_USER_AUTH_TOKEN="' + token + '"'
-    write_to_file(path_to_tmp_token_file, token_declaration)
-
-
 def _build_users_and_tokens(db_session: db.Session) -> None:
     config = _SeedE2EConfig()
 
@@ -102,19 +92,15 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
 
     # Primary test user. Reuses the seeded one_org_user id so the spoofed E2E session always has
     # organization membership in local/CI runs.
-    primary_user = (
+    (
         UserBuilder(uuid.UUID("f15c7491-7ebc-4f4f-8de6-3ac0594d9c63"), db_session, "user for e2e")
         .with_e2e_test_user()
-        .with_jwt_auth()
         .with_api_key("e2e-test-key")
         # Grantor role so the Create Opportunity link shows and opportunity
         # creation E2E tests can create and publish opportunities.
         .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
+        .build()
     )
-    primary_user.build()
-    # Temporary: the frontend / CI still reads the token from this file. This write goes away once
-    # the frontend migrates to fetching tokens via POST /v1/internal/e2e-token.
-    _write_token_to_file(primary_user.jwt_token)
 
     # Secondary test user with organization membership, mirroring the staging test user.
     # Add agency membership so local invalid-agency failure path can be exercised.
