@@ -1,6 +1,6 @@
 # @featureArea Authentication
 # @specFile e2e/organizations/specs/failure-path-organization-detail-access.spec.ts
-# @debugNote Failure-path tests for organization detail page access. Covers a signed-in org admin from another organization receiving a 403 and seeing the Unauthorized message, and a signed-out user seeing the not-signed-in flow.
+# @debugNote Failure-path tests for organization detail page access. Covers a signed-in org admin from another organization receiving a 403 and seeing the Unauthorized message, and a signed-out user seeing the not-signed-in flow
 
 Feature: Organization detail page access - failure path
   As a user who is not authorized for an organization
