@@ -56,8 +56,6 @@ E2E_ORGANIZATION_ID = uuid.UUID("e5f6a7b8-c9d0-4e5f-8a0b-1c2d3e4f5061")
 
 # Static id for the secondary E2E test user, a member of the E2E test organization.
 E2E_ORG_MEMBER_USER_ID = uuid.UUID("a7b8c9d0-e1f2-4a3b-8c4d-5e6f7a8b9c0d")
-# Static id for the local no-agency E2E test user.
-E2E_NO_AGENCY_USER_ID = uuid.UUID("c0ffee00-1234-4e56-89ab-cdef01234567")
 
 
 class _SeedE2EConfig(PydanticBaseEnvConfig):
@@ -115,20 +113,10 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
     _write_token_to_file(primary_user.jwt_token)
 
     # Secondary test user with organization membership, mirroring the staging test user.
-    # Add agency membership so local invalid-agency failure path can be exercised.
     (
         UserBuilder(E2E_ORG_MEMBER_USER_ID, db_session, "e2e org member test user")
         .with_e2e_test_user()
         .with_organization(e2e_organization, roles=[ORG_MEMBER])
-        .with_agency(e2e_agency, roles=[OPPORTUNITY_PUBLISHER])
-        .build()
-    )
-
-    # Dedicated local user with no agency membership, used to verify the no-agency
-    # failure path on the grantor opportunities page.
-    (
-        UserBuilder(E2E_NO_AGENCY_USER_ID, db_session, "e2e no-agency test user")
-        .with_e2e_test_user()
         .build()
     )
 
