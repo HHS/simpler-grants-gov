@@ -20,15 +20,29 @@ export function SubmissionSetUp() {
       </h2>
       <p className="font-body-md text-base-dark margin-top-0">
         {t("subHeader")}
-      </p>
-      <CommonTextInput
-        fieldId="competition_title"
-        labelText={t("competitionTitle")}
-        description={t("competitionTitleHint")}
-        isRequired={true}
-        fieldMaxLength={255}
-        onTextChange={() => {}}
-      />
+      </p>{" "}
+      <div className="grid-row grid-gap-2">
+        <div className="tablet:grid-col">
+          <CommonTextInput
+            fieldId="competition-id"
+            labelText={t("competitionId")}
+            description={t("competitionIdHint")}
+            isRequired={false}
+            fieldMaxLength={255}
+            onTextChange={() => {}}
+          />
+        </div>
+        <div className="tablet:grid-col">
+          <CommonTextInput
+            fieldId="competition_title"
+            labelText={t("competitionTitle")}
+            description={t("competitionTitleHint")}
+            isRequired={true}
+            fieldMaxLength={255}
+            onTextChange={() => {}}
+          />
+        </div>
+      </div>
       <CommonSelectInput
         fieldId="open_to_applicants"
         labelText={t("whoCanApply")}
