@@ -6,6 +6,7 @@
  * Notes for reviewer:
  * - Tests the failure paths for accessing the grantor opportunities list page.
  * - Verifies the unauthenticated state for anonymous users.
+ * - Verifies the no-agency state for authenticated users with zero agency associations.
  * - Verifies the agency-not-authorized state for authenticated users without access to the requested agency.
  * - Reuses a helper to assert the agency-not-authorized state for both valid non-member and invalid agency IDs.
  */
@@ -62,13 +63,34 @@ test.describe("Opportunity list page access - failure path", () => {
   );
 
   test(
-    "Authenticated user without agency access sees an agency not authorized state for a valid non-member agency ID",
+    "Authenticated user with no agencies sees the no-agency state",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page, context }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
 
-      // Given I sign in as an org member and request a non-member agency.
-      await authenticateE2eUser(page, context, isMobile, "orgMember");
+      // Given I sign in as a user with no agency associations.
+      await authenticateE2eUser(page, context, isMobile, "noAgencyUser");
+
+      // When I navigate to the grantor opportunities list.
+      await page.goto("/grantor/opportunities", {
+        waitUntil: "networkidle",
+      });
+
+      // Then I should see the no-agency message.
+      await expect(
+        page.getByText("You are not associated with any agencies."),
+      ).toBeVisible({ timeout: 30000 });
+    },
+  );
+
+  test(
+    "Authenticated org member with agencies but not in the requested agency sees an unauthorized agency state for a valid non-member agency ID",
+    { tag: [AUTH, CORE_REGRESSION] },
+    async ({ page, context }, { project }) => {
+      const isMobile = !!project.name.match(/[Mm]obile/);
+
+      // Given I sign in as an org member with an agency association and request a non-member agency.
+      await authenticateE2eUser(page, context, isMobile, "orgMemberWithAgency");
 
       // Then the agency-not-authorized message should be shown.
       await assertAgencyNotAuthorized(page, VALID_NON_MEMBER_AGENCY_ID);
@@ -76,13 +98,13 @@ test.describe("Opportunity list page access - failure path", () => {
   );
 
   test(
-    "Authenticated user without agency access sees an agency not authorized state for an invalid agency ID",
+    "Authenticated org member with agencies but not in the requested agency sees an unauthorized agency state for an invalid agency ID",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page, context }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
 
-      // Given I sign in as the same org member and request an invalid agency.
-      await authenticateE2eUser(page, context, isMobile, "orgMember");
+      // Given I sign in as the same org member with an agency association and request an invalid agency.
+      await authenticateE2eUser(page, context, isMobile, "orgMemberWithAgency");
 
       // Then the agency-not-authorized message should be shown.
       await assertAgencyNotAuthorized(page, INVALID_AGENCY_ID);
