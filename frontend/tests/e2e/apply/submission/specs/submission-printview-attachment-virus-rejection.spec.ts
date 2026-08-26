@@ -4,7 +4,14 @@
  * upload persists correctly through save, application history, submission, and print view.
  */
 
-import { expect, test, type TestInfo } from "@playwright/test";
+import {
+  expect,
+  test,
+  type Browser,
+  type BrowserContext,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -35,16 +42,16 @@ const { testOrgLabel } = playwrightEnv;
 
 // Same opportunity/form as submission-printview-attachment-persistence-history.spec.ts
 const OPPORTUNITY_NUMBER = "E2E-ATT-ORG-IND-01";
-
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 const attachmentForm = opportunityConfig.forms[0];
-
 const INFECTED_FIXTURE_PATH =
   "tests/e2e/test-upload-files/scenario-infected.pdf";
+
 const INFECTED_FILE_NAME = "scenario-infected.pdf";
 
 const VALID_FIXTURE_PATH =
   "tests/e2e/test-upload-files/SF424_4_0-V4.0-Instructions_0.pdf";
+
 const VALID_FILE_NAME = "SF424_4_0-V4.0-Instructions_0.pdf";
 
 test.beforeEach(({ page: _ }, testInfo) => {
@@ -56,6 +63,7 @@ const applicantScenarios = [
     applicantType: "Organization",
     orgLabel: testOrgLabel,
   },
+
   {
     applicantType: "Individual",
     orgLabel: undefined,
@@ -65,26 +73,39 @@ const applicantScenarios = [
 for (const { applicantType, orgLabel } of applicantScenarios) {
   test.describe
     .serial(`Attachment form - virus scan failure and recovery - ${applicantType}`, () => {
+    // Declared at describe-scope (not test fixtures) so the SAME authenticated
+    // page/context created in beforeAll carries through to the test below.
+    // Previously these were closed at the end of beforeAll and the test used
+    // Playwright's fixture-provided { page, context } instead — a fresh,
+    // unauthenticated context — which is why goto(applicationUrl) timed out
+    // waiting for application-form-link (redirected to an unauthenticated view).
+
+    let browser: Browser;
+    let context: BrowserContext;
+    let page: Page;
     let applicationUrl: string;
 
-    test.beforeAll(async ({ browser }, testInfo: TestInfo) => {
-      const context = await browser.newContext();
-      const page = await context.newPage();
+    test.beforeAll(async ({ browser: b }, testInfo: TestInfo) => {
+      browser = b;
+      context = await browser.newContext();
+      page = await context.newPage();
       const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
       await authenticateE2eUser(page, context, !!isMobile);
 
       await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
-
       applicationUrl = page.url();
+    });
 
+    test.afterAll(async () => {
       await context.close();
     });
 
     test(
       `${applicantType}: infected upload is rejected and removed, valid upload persists`,
       { tag: TAGS },
-      async ({ page, context }) => {
+
+      async () => {
         test.setTimeout(120_000);
 
         // Step 1: Open the application attachment form.
@@ -96,6 +117,7 @@ for (const { applicantType, orgLabel } of applicantScenarios) {
 
         // Step 2: Upload an infected file and verify that the virus scan
         // fails and the file is removed.
+
         await page
           .getByRole("button", {
             name: attachmentField,
@@ -113,6 +135,7 @@ for (const { applicantType, orgLabel } of applicantScenarios) {
         await dismissButton.click();
 
         // Step 3: Upload a valid file into the same attachment field.
+
         await page
           .getByRole("button", {
             name: attachmentField,
@@ -128,7 +151,9 @@ for (const { applicantType, orgLabel } of applicantScenarios) {
         );
 
         // Step 4: Save the form and verify it completes successfully.
+
         await page.getByTestId("apply-form-save").click();
+
         await verifyFormStatusAfterSave(page, "complete");
 
         const formUrl = page.url();
@@ -138,8 +163,11 @@ for (const { applicantType, orgLabel } of applicantScenarios) {
         ).toBeVisible();
 
         // Step 5: Verify Application History contains the valid attachment
+
         // and does not contain the rejected infected attachment.
+
         await page.goto(applicationUrl);
+
         await page.waitForLoadState("domcontentloaded");
 
         const activities = await getApplicationHistoryActivities(page);
@@ -169,7 +197,9 @@ for (const { applicantType, orgLabel } of applicantScenarios) {
         }
 
         // Step 6: Submit the application and verify the confirmation page.
+
         await submitApplicationAndVerify(page, "success");
+
         await verifySubmissionConfirmation(page);
 
         const postSubmitActivities =
@@ -184,7 +214,9 @@ for (const { applicantType, orgLabel } of applicantScenarios) {
         ).toBe(true);
 
         // Step 7: Verify print view contains only the valid persisted
+
         // attachment.
+
         const printUrl = buildPrintUrl(formUrl);
 
         const filledForms: FilledFormEntry[] = [
@@ -221,11 +253,12 @@ for (const { applicantType, orgLabel } of applicantScenarios) {
         );
 
         // Print view is a static snapshot and should not contain live
-        // interactive elements or broken links.
-        await expect(page.getByRole("button")).toHaveCount(0);
-        await expect(page.locator('[href*="undefined"]')).toHaveCount(0);
 
-        await context.close();
+        // interactive elements or broken links.
+
+        await expect(page.getByRole("button")).toHaveCount(0);
+
+        await expect(page.locator('[href*="undefined"]')).toHaveCount(0);
       },
     );
   });
