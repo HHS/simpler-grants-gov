@@ -111,6 +111,17 @@ for (const { applicantType, orgLabel } of applicantScenarios) {
         // Step 1: Open the application attachment form.
         await page.goto(applicationUrl);
         await page.waitForLoadState("domcontentloaded");
+
+        // Wait for the application forms table to be visible, which contains the form link
+        await expect(
+          page.locator(".simpler-application-forms-table").first(),
+        ).toBeVisible({ timeout: 30000 });
+
+        // Explicitly wait for the form link to be clickable before clicking
+        await page
+          .getByTestId("application-form-link")
+          .waitFor({ state: "visible", timeout: 15000 });
+
         await page.getByTestId("application-form-link").click();
 
         const attachmentField = attachmentForm.formConfig.fields.att1.field;

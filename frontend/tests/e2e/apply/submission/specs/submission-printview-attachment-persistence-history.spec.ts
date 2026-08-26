@@ -98,6 +98,16 @@ for (const {
       async () => {
         test.setTimeout(120_000);
 
+        // Wait for the application forms table to be visible before clicking form link
+        await expect(
+          page.locator(".simpler-application-forms-table").first(),
+        ).toBeVisible({ timeout: 30000 });
+
+        // Explicitly wait for the form link to be clickable before clicking
+        await page
+          .getByTestId("application-form-link")
+          .waitFor({ state: "visible", timeout: 15000 });
+
         await page.getByTestId("application-form-link").click();
         formUrl = page.url();
 
@@ -125,6 +135,11 @@ for (const {
 
         await page.goto(applicationUrl);
         await page.waitForLoadState("domcontentloaded");
+
+        // Wait for the application page content to be fully rendered
+        await expect(page.getByRole("heading", { name: /Forms/ })).toBeVisible({
+          timeout: 20000,
+        });
 
         const activities = await getApplicationHistoryActivities(page);
         expect(activities.some((a) => a.includes("Attachment added"))).toBe(
@@ -179,6 +194,12 @@ for (const {
 
         await page.goto(applicationUrl);
         await page.waitForLoadState("domcontentloaded");
+
+        // Wait for the application page to be fully loaded before proceeding
+        await expect(
+          page.locator(".simpler-application-forms-table").first(),
+        ).toBeVisible({ timeout: 30000 });
+
         await submitApplicationAndVerify(page, "success");
         await verifySubmissionConfirmation(page);
 
