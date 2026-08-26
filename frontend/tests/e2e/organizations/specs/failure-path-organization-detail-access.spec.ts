@@ -4,7 +4,9 @@
  * @scenario Failure path organization detail page access
  *
  * Dedicated failure-path tests for HHS/simpler-grants-gov#11814.
- * The non-org user path exercises the detail fetch 403 and the unauthorized message state.
+ * The org admin from another organization path exercises the org detail fetch 403 path
+ * and the Unauthorized message. The signed-out path verifies the not-signed-in message
+ * and the sign-in call to action.
  */
 
 import { expect, test } from "@playwright/test";
@@ -30,19 +32,20 @@ test.describe("Organization detail page access - failure path", () => {
   });
 
   /**
-   * @scenario Non-org user cannot access another organization's detail page
+   * @scenario Org admin from another organization cannot access the organization detail page
    */
   test(
-    "Non-org user cannot access another organization's detail page",
+    "Org admin from another organization cannot access the organization detail page",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page, context }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
 
-      // Given the user is logged in as a non-org test user
+      // Given the user is logged in as an org admin for a different organization
       await authenticateE2eUser(page, context, isMobile, "primaryOrgAdmin");
 
-      // When the user navigates to an organization page they do not belong to
-      // This should exercise the detail fetch 403 path and render the unauthorized message.
+      // When the user navigates to another organization's detail page
+      // This exercises the organization detail fetch 403 path and should show the
+      // Unauthorized message.
       await page.goto(
         `/workspace/organizations/${getTestOrgId("e2eTestOrg")}`,
         { waitUntil: "domcontentloaded" },
@@ -64,18 +67,18 @@ test.describe("Organization detail page access - failure path", () => {
   );
 
   /**
-   * @scenario Non-org user cannot access another organization's detail page after reload
+   * @scenario Org admin from another organization still cannot access the organization detail page after reload
    */
   test(
-    "Non-org user still cannot access another organization's detail page after reload",
+    "Org admin from another organization still cannot access the organization detail page after reload",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page, context }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
 
-      // Given the user is logged in as a non-org test user
+      // Given the user is logged in as an org admin for a different organization
       await authenticateE2eUser(page, context, isMobile, "primaryOrgAdmin");
 
-      // When the user navigates to an organization page they do not belong to
+      // When the user navigates to another organization's detail page
       await page.goto(
         `/workspace/organizations/${getTestOrgId("e2eTestOrg")}`,
         { waitUntil: "domcontentloaded" },
@@ -100,21 +103,17 @@ test.describe("Organization detail page access - failure path", () => {
   );
 
   /**
-   * @scenario Unauthenticated user cannot access another organization's detail page
+   * @scenario Signed-out user cannot access an organization's detail page
    */
   test(
-    "Unauthenticated user cannot access another organization's detail page",
+    "Signed-out user cannot access an organization's detail page",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page }) => {
-      // Given the user is not authenticated
-      await page.goto("/", { waitUntil: "domcontentloaded" });
-      await page.context().clearCookies();
-      await page.evaluate(() => {
-        window.sessionStorage.clear();
-        window.localStorage.clear();
-      });
+      // Given the user is signed out
+      // Default test context starts signed out. This scenario does not call
+      // authenticateE2eUser(), so no authenticated session is present.
 
-      // When the user navigates to an organization page directly
+      // When the user navigates directly to an organization's detail page
       await page.goto(
         `/workspace/organizations/${getTestOrgId("e2eTestOrg")}`,
         { waitUntil: "domcontentloaded" },
