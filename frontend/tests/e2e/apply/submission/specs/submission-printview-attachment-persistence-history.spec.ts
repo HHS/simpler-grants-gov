@@ -112,6 +112,12 @@ for (const {
 
         // Wait for form page to load after navigation
         await page.waitForLoadState("domcontentloaded");
+
+        // Wait for the form container to be visible, indicating form has fully rendered
+        await page
+          .locator(".simpler-apply-form")
+          .waitFor({ state: "visible", timeout: 20000 });
+
         formUrl = page.url();
 
         // Wait for the attachment upload button to be visible and interactive

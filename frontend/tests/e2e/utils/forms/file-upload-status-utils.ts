@@ -52,6 +52,10 @@ export async function verifyVirusScanPassedAndUploaded(
  * security scan message is displayed, and verifies the file does not appear
  * in the existing-files list.
  *
+ * Note: The file-input-existing-files container only renders when files exist.
+ * If the file was removed due to virus scan failure, the container may not be
+ * present or may be empty, which is also a valid success state.
+ *
  * @param page Playwright Page object
  * @param fileName The uploaded file's display name (e.g. "sample-upload-kb.pdf")
  * @param scope Optional container to scope the check to (page or section locator)
@@ -71,18 +75,30 @@ export async function verifyVirusScanFailedAndRemoved(
 
   const uploadStatus = scope.getByTestId("file-upload-status-display");
 
-  await expect(uploadStatus).toContainText(fileName);
+  // First, verify the filename appears in the status message
+  await expect(uploadStatus).toContainText(fileName, { timeout: 5_000 });
+
   // Extended timeout for virus scan status because the local file scanner
   // has a pre-process delay (1 second) and DynamoDB poll interval (3 seconds)
-  // which can exceed the default 5 second Playwright timeout
+  // Backend must process the file and update the status message
   await expect(uploadStatus).toContainText(
     "Security scan failed. File removed",
     { timeout: 30_000 },
   );
 
-  // Extended timeout for verifying file is removed from existing files list
-  // Gives time for the form to fully render and for the file list to update
-  await expect(
-    scope.getByTestId("file-input-existing-files"),
-  ).not.toContainText(fileName, { timeout: 30_000 });
+  // Verify file is not in the existing files list.
+  // Note: The file-input-existing-files container only renders when there are files.
+  // If no files exist (because the infected file was removed), the check will pass
+  // because the element doesn't exist (no files = file not in list).
+  const existingFilesLocator = scope.getByTestId("file-input-existing-files");
+  const existingFilesCount = await existingFilesLocator.count();
+
+  if (existingFilesCount > 0) {
+    // Container exists, verify file is not in it
+    await expect(existingFilesLocator).not.toContainText(fileName, {
+      timeout: 5_000,
+    });
+  }
+  // If container doesn't exist (existingFilesCount === 0), that means no files
+  // are present, so the infected file is definitely not there - test passes.
 }
