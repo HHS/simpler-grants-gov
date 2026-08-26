@@ -82,6 +82,9 @@ describe("GET /api/file/:pendingFileId/results-metadata (getFileResultsMetadata)
       new ReadableStream({
         start(controller) {
           controller.enqueue(encode({ data: { file_metadata: null } }));
+          // closes after the one not-yet-terminal chunk - simulates the fresh stream
+          // exhausting its own read-until-done window without ever completing
+          controller.close();
         },
       }),
     );
@@ -92,6 +95,29 @@ describe("GET /api/file/:pendingFileId/results-metadata (getFileResultsMetadata)
     );
 
     expect(response.status).toEqual(409);
+  });
+
+  it("keeps reading past non-terminal chunks until file_metadata appears", async () => {
+    const fileMetadata = { file_name: "budget.pdf", file_size_bytes: 4096 };
+    mockFetchFileScanStatus.mockResolvedValue(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(encode({ data: { file_metadata: null } }));
+          controller.enqueue(encode({ data: { file_metadata: null } }));
+          controller.enqueue(encode({ data: { file_metadata: fileMetadata } }));
+        },
+      }),
+    );
+
+    const response = await getFileResultsMetadata(
+      fakeRequest,
+      buildParams("pending-1"),
+    );
+
+    expect(response.status).toEqual(200);
+    expect((await response.json()) as unknown).toEqual({
+      file_metadata: fileMetadata,
+    });
   });
 
   it("returns 404 when the stream produces no chunk at all", async () => {
@@ -121,4 +147,31 @@ describe("GET /api/file/:pendingFileId/results-metadata (getFileResultsMetadata)
 
     expect(response.status).toEqual(500);
   });
+
+  it(
+    "still cancels the reader when a chunk fails to parse mid-loop " +
+      "(regression: parsing now happens inside the read loop, before cancel() " +
+      "runs - a throw there must not skip cleanup of the long-poll connection)",
+    async () => {
+      const cancel = jest.fn().mockResolvedValue(undefined);
+      mockFetchFileScanStatus.mockResolvedValue(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode("not valid json"));
+          },
+          cancel,
+        }),
+      );
+
+      const response = await getFileResultsMetadata(
+        fakeRequest,
+        buildParams("pending-1"),
+      );
+
+      expect(response.status).toEqual(500);
+      // give the non-blocking `void reader.cancel().catch(...)` microtask a tick to run
+      await Promise.resolve();
+      expect(cancel).toHaveBeenCalledTimes(1);
+    },
+  );
 });

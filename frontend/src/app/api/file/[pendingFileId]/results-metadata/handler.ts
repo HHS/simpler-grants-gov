@@ -10,10 +10,13 @@ type FileScanResultChunk = {
   };
 };
 
-// Reads a single chunk from the existing file-scan-results stream and returns its
-// file_metadata as a plain JSON response, rather than re-streaming it. Callers only use
-// this once scanning has already completed (confirmed via a prior successful upload), so
-// the first chunk is expected to already carry the completed file_metadata.
+// Reads through the existing file-scan-results stream and returns its file_metadata as a
+// plain JSON response, rather than re-streaming it. /results is a long-poll connection
+// that keeps delivering updated chunks for up to ~60s until the scan reaches a terminal
+// status - a single read can land on a not-yet-terminal chunk (e.g. a slow-scanning file
+// that outlasted the *previous* stream's own 60s budget before this route was even
+// called), so this loops through the same fresh 60s window rather than assuming the
+// first chunk is already the terminal one.
 export const getFileResultsMetadata = async (
   _request: NextRequest,
   { params }: { params: Promise<{ pendingFileId: string }> },
@@ -22,32 +25,52 @@ export const getFileResultsMetadata = async (
     const { pendingFileId } = await params;
     const scanStatusStream = await fetchFileScanStatus(pendingFileId);
     const reader = scanStatusStream.getReader();
-    const { value } = await reader.read();
-    // Don't block on cancellation: /results is a long-poll connection the backend can
-    // keep open for further updates, and canceling it can hang waiting for that
-    // connection to actually close. We already have what we need from the first chunk,
-    // so let this settle in the background instead of blocking the response on it.
-    void reader.cancel().catch(() => {});
 
-    if (!value) {
+    let sawAnyChunk = false;
+    let fileMetadata: FileResultsMetadata | null = null;
+
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (value) {
+          sawAnyChunk = true;
+          const payload = JSON.parse(
+            new TextDecoder().decode(value),
+          ) as FileScanResultChunk;
+          if (payload.data.file_metadata) {
+            fileMetadata = payload.data.file_metadata;
+            break;
+          }
+        }
+        if (done) {
+          break;
+        }
+      }
+    } finally {
+      // Don't block on cancellation: /results is a long-poll connection the backend can
+      // keep open for further updates, and canceling it can hang waiting for that
+      // connection to actually close. We already have what we need (or have exhausted
+      // the stream, or hit a parse error), so let this settle in the background instead
+      // of blocking the response - and run it in a finally so a malformed chunk that
+      // throws mid-loop still gets the connection torn down instead of leaking it.
+      void reader.cancel().catch(() => {});
+    }
+
+    if (!sawAnyChunk) {
       return Response.json(
         { message: "No file scan result available" },
         { status: 404 },
       );
     }
 
-    const payload = JSON.parse(
-      new TextDecoder().decode(value),
-    ) as FileScanResultChunk;
-
-    if (!payload.data.file_metadata) {
+    if (!fileMetadata) {
       return Response.json(
         { message: "File scan not yet complete" },
         { status: 409 },
       );
     }
 
-    return Response.json({ file_metadata: payload.data.file_metadata });
+    return Response.json({ file_metadata: fileMetadata });
   } catch (e) {
     const { status, message } = readError(e as Error, 500);
     return Response.json(
