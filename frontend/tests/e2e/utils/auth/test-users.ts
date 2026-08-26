@@ -11,7 +11,8 @@ import playwrightEnv, { SupportedEnvs } from "tests/e2e/playwright-env";
   api/tests/lib/seed_e2e.py, then add a matching entry here.
 */
 
-export type TestUserKey = "primaryOrgAdmin" | "orgMember" | "orgMemberWithAgency" | "noAgencyUser";
+export type TestUserKey =
+  "primaryOrgAdmin" | "orgMember" | "orgMemberWithAgency" | "noAgencyUser";
 // Organization ids used to build org-scoped URLs (e.g. the org detail page).
 export type TestOrgKey = "e2eTestOrg";
 
