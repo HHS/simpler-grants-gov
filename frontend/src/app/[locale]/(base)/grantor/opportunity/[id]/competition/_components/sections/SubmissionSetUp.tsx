@@ -20,7 +20,7 @@ export function SubmissionSetUp() {
       </h2>
       <p className="font-body-md text-base-dark margin-top-0">
         {t("subHeader")}
-      </p>{" "}
+      </p>
       <div className="grid-row grid-gap-2">
         <div className="tablet:grid-col">
           <CommonTextInput
