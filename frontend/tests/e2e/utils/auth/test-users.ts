@@ -11,7 +11,8 @@ import playwrightEnv, { SupportedEnvs } from "tests/e2e/playwright-env";
   api/tests/lib/seed_e2e.py, then add a matching entry here.
 */
 
-export type TestUserKey = "primaryOrgAdmin" | "orgMember";
+export type TestUserKey =
+  "primaryOrgAdmin" | "orgMember" | "orgMemberWithAgency" | "noAgencyUser";
 // Organization ids used to build org-scoped URLs (e.g. the org detail page).
 export type TestOrgKey = "e2eTestOrg";
 
@@ -27,6 +28,10 @@ const LOCAL_TEST_USER_IDS: Record<TestUserKey, string> = {
   // but NOT MANAGE_ORG_MEMBERS. Used to assert a non-default (org-member) user
   // can log in and view their organization's detail page.
   orgMember: "a7b8c9d0-e1f2-4a3b-8c4d-5e6f7a8b9c0d",
+  // Local alias for the same seeded org member with agency access.
+  orgMemberWithAgency: "a7b8c9d0-e1f2-4a3b-8c4d-5e6f7a8b9c0d",
+  // Authenticated user with no agency associations for the no-agency branch.
+  noAgencyUser: "c0ffee00-1234-4e56-89ab-cdef01234567",
 };
 
 // Staging ids reference users provisioned directly in staging (not by the repo
@@ -38,6 +43,10 @@ const STAGING_TEST_USER_IDS: Record<TestUserKey, string> = {
   primaryOrgAdmin: "c850d239-43bb-4ccd-9746-977ac7978b79",
   // Member of "E2E Test Organization" (see STAGING_TEST_ORG_IDS.e2eTestOrg).
   orgMember: "ba856cd5-e047-436e-9b6b-f53b4cc534cc",
+  // Staging alias for the same seeded org member with agency access.
+  orgMemberWithAgency: "ba856cd5-e047-436e-9b6b-f53b4cc534cc",
+  // Staging user with no agency membership for the no-agency branch.
+  noAgencyUser: "deadbeef-4321-4e56-89ab-cdef01234567",
 };
 
 const LOCAL_TEST_ORG_IDS: Record<TestOrgKey, string> = {
