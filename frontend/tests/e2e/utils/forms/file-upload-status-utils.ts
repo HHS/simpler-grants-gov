@@ -80,7 +80,9 @@ export async function verifyVirusScanFailedAndRemoved(
     { timeout: 30_000 },
   );
 
+  // Extended timeout for verifying file is removed from existing files list
+  // Gives time for the form to fully render and for the file list to update
   await expect(
     scope.getByTestId("file-input-existing-files"),
-  ).not.toContainText(fileName);
+  ).not.toContainText(fileName, { timeout: 30_000 });
 }

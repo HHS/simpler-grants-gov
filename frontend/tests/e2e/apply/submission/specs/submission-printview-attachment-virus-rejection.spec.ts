@@ -124,7 +124,18 @@ for (const { applicantType, orgLabel } of applicantScenarios) {
 
         await page.getByTestId("application-form-link").click();
 
+        // Wait for form page to load after navigation
+        await page.waitForLoadState("domcontentloaded");
+
         const attachmentField = attachmentForm.formConfig.fields.att1.field;
+
+        // Wait for the attachment upload button to be visible and interactive
+        await page
+          .getByRole("button", {
+            name: attachmentField,
+            exact: true,
+          })
+          .waitFor({ state: "visible", timeout: 15000 });
 
         // Step 2: Upload an infected file and verify that the virus scan
         // fails and the file is removed.

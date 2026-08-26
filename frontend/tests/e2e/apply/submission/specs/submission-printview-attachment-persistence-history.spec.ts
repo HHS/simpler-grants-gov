@@ -109,7 +109,18 @@ for (const {
           .waitFor({ state: "visible", timeout: 15000 });
 
         await page.getByTestId("application-form-link").click();
+
+        // Wait for form page to load after navigation
+        await page.waitForLoadState("domcontentloaded");
         formUrl = page.url();
+
+        // Wait for the attachment upload button to be visible and interactive
+        await page
+          .getByRole("button", {
+            name: attachmentForm.formConfig.fields.att1.field,
+            exact: true,
+          })
+          .waitFor({ state: "visible", timeout: 15000 });
 
         await page
           .getByRole("button", {
