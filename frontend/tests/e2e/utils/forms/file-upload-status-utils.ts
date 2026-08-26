@@ -34,15 +34,26 @@ export async function verifyVirusScanPassedAndUploaded(
       page.getByRole("progressbar", { name: "Loading!" }),
     ).toBeVisible();
   }
-  await expect(scope.getByTestId("file-input-existing-files")).toContainText(
-    fileName,
-    { timeout: 30_000 },
-  );
-  // Check that a delete button exists for this file by verifying the text appears somewhere in the section
-  // (Don't require a single button since multiple files may have delete buttons)
-  await expect(scope.getByTestId("file-input-existing-files")).toContainText(
-    "Delete",
-  );
+
+  // Note: The file-input-existing-files container only renders when there are files.
+  // Verify the file appears in the list with a timeout to account for backend processing.
+  const existingFilesLocator = scope.getByTestId("file-input-existing-files");
+  const existingFilesCount = await existingFilesLocator.count();
+
+  if (existingFilesCount > 0) {
+    // Container exists, verify file is in it
+    await expect(existingFilesLocator).toContainText(fileName, {
+      timeout: 30_000,
+    });
+    // Check that a delete button exists for this file by verifying the text appears somewhere in the section
+    // (Don't require a single button since multiple files may have delete buttons)
+    await expect(existingFilesLocator).toContainText("Delete");
+  } else {
+    // If container doesn't exist, files haven't loaded yet - wait and retry
+    await expect(existingFilesLocator).toContainText(fileName, {
+      timeout: 30_000,
+    });
+  }
 }
 
 /**

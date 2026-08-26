@@ -49,10 +49,9 @@ const INFECTED_FIXTURE_PATH =
 
 const INFECTED_FILE_NAME = "scenario-infected.pdf";
 
-const VALID_FIXTURE_PATH =
-  "tests/e2e/test-upload-files/SF424_4_0-V4.0-Instructions_0.pdf";
+const VALID_FIXTURE_PATH = "tests/e2e/test-upload-files/sample-upload-kb.pdf";
 
-const VALID_FILE_NAME = "SF424_4_0-V4.0-Instructions_0.pdf";
+const VALID_FILE_NAME = "sample-upload-kb.pdf";
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
