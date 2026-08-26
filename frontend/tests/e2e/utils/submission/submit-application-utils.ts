@@ -75,20 +75,14 @@ async function clickSubmitAndWaitForOutcome(
   // Race between getting response and detecting outcome in DOM.
   // In Chrome, response arrives quickly. In WebKit, DOM outcome may appear first.
   // Either way, we detect successful submission.
-  let submitResponse: Response | undefined;
-  try {
-    submitResponse = await Promise.race([
-      submitResponsePromise,
-      // Fallback: detect submission outcome via DOM changes instead
-      Promise.race([
-        successHeading.waitFor({ state: "visible", timeout: 120000 }),
-        validationHeading.waitFor({ state: "visible", timeout: 120000 }),
-      ]).then(() => undefined), // Return undefined if DOM outcome detected first
-    ]);
-  } catch (e) {
-    // If both response and DOM outcome detection fail, this is a real error
-    throw e;
-  }
+  const submitResponse = await Promise.race([
+    submitResponsePromise,
+    // Fallback: detect submission outcome via DOM changes instead
+    Promise.race([
+      successHeading.waitFor({ state: "visible", timeout: 120000 }),
+      validationHeading.waitFor({ state: "visible", timeout: 120000 }),
+    ]).then(() => undefined), // Return undefined if DOM outcome detected first
+  ]);
 
   // Verify response status if we got a response
   if (submitResponse && submitResponse.status() !== 200) {
