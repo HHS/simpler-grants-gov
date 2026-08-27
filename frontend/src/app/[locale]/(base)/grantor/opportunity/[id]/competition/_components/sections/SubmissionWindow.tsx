@@ -8,11 +8,13 @@ import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 type SubmissionWindowProps = {
   openingDate?: string | null;
   closingDate?: string | null;
+  gracePeriod?: number | null;
 };
 
 export function SubmissionWindow({
   openingDate,
   closingDate,
+  gracePeriod,
 }: SubmissionWindowProps) {
   const t = useTranslations("OpportunityCompetition.sectionSubmissionWindow");
 
@@ -77,6 +79,7 @@ export function SubmissionWindow({
               min="0"
               step="1"
               className="width-full"
+              defaultValue={gracePeriod ?? undefined}
               onKeyDown={(e) => {
                 if (
                   e.key === "." ||

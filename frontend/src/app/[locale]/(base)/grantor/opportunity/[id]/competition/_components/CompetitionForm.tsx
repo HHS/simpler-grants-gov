@@ -141,6 +141,7 @@ export function CompetitionForm({
               <SubmissionWindow
                 openingDate={competition?.opening_date}
                 closingDate={competition?.closing_date}
+                gracePeriod={competition?.grace_period}
               />
               <AgencyContact contactInfo={competition?.contact_info} />
               <ApplicationInstructions existingFiles={existingFiles} />

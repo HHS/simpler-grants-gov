@@ -37,6 +37,44 @@ describe("AgencyContact", () => {
       expect(screen.getByText("emailAddress")).toBeInTheDocument();
       expect(screen.getByText("phoneNumber")).toBeInTheDocument();
     });
+
+    it("populates form fields from contactInfo", () => {
+      render(
+        <AgencyContact contactInfo="John Doe | Manager | john@example.com | 555-0100" />,
+      );
+
+      expect(screen.getByRole("textbox", { name: /fullname/i })).toHaveValue(
+        "John Doe",
+      );
+      expect(screen.getByRole("textbox", { name: /persontitle/i })).toHaveValue(
+        "Manager",
+      );
+      expect(
+        screen.getByRole("textbox", { name: /emailaddress/i }),
+      ).toHaveValue("john@example.com");
+      expect(screen.getByRole("textbox", { name: /phonenumber/i })).toHaveValue(
+        "555-0100",
+      );
+    });
+
+    it("leaves the optional title empty when contactInfo has three values", () => {
+      render(
+        <AgencyContact contactInfo="John Doe | john@example.com | 555-0100" />,
+      );
+
+      expect(screen.getByRole("textbox", { name: /fullname/i })).toHaveValue(
+        "John Doe",
+      );
+      expect(screen.getByRole("textbox", { name: /persontitle/i })).toHaveValue(
+        "",
+      );
+      expect(
+        screen.getByRole("textbox", { name: /emailaddress/i }),
+      ).toHaveValue("john@example.com");
+      expect(screen.getByRole("textbox", { name: /phonenumber/i })).toHaveValue(
+        "555-0100",
+      );
+    });
   });
 
   describe("email validation", () => {
