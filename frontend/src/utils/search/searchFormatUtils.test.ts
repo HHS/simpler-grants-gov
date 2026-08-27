@@ -1,3 +1,4 @@
+import { OptionalStringDict } from "src/types/generalTypes";
 import {
   SavedSearchQuery,
   SearchFetcherActionType,
@@ -9,6 +10,7 @@ import {
   paginationToSortby,
   searchToQueryParams,
 } from "src/utils/search/searchFormatUtils";
+import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 import {
   fakeSavedSearch,
   searchFetcherParams,
@@ -317,5 +319,59 @@ describe("paginationToSortBy", () => {
         { order_by: "agency_name", sort_direction: "ascending" },
       ]),
     ).toEqual({ sortby: "agencyAsc" });
+  });
+});
+
+// exercises the full saved search seam: search page query params are converted and stored on save,
+// then converted back to query params and re-read by the search page when the search is reopened
+describe("saved search round trip", () => {
+  const saveAndReopen = (searchPageParams: OptionalStringDict) => {
+    const stored = formatSearchRequestBody(
+      convertSearchParamsToProperTypes(searchPageParams),
+    );
+    const reopenedParams = searchToQueryParams(stored as SavedSearchQuery);
+    return convertSearchParamsToProperTypes(reopenedParams);
+  };
+
+  it("does not reapply default statuses to a search saved with all statuses deselected", () => {
+    const stored = formatSearchRequestBody(
+      convertSearchParamsToProperTypes({ status: "none", query: "research" }),
+    );
+    // the deselected state is stored as the absence of a status filter
+    expect(stored.filters?.opportunity_status).toBeUndefined();
+
+    const reopened = saveAndReopen({ status: "none", query: "research" });
+    expect(reopened.status).toEqual(new Set());
+    expect(reopened.query).toEqual("research");
+  });
+
+  it("retains default statuses for a search saved without touching the status filter", () => {
+    const reopened = saveAndReopen({ query: "research" });
+    expect(reopened.status).toEqual(new Set(["forecasted", "posted"]));
+  });
+
+  it("retains an explicitly selected subset of statuses", () => {
+    const reopened = saveAndReopen({ status: "closed" });
+    expect(reopened.status).toEqual(new Set(["closed"]));
+  });
+
+  it("retains non status filters and sort order", () => {
+    const reopened = saveAndReopen({
+      status: "none",
+      fundingInstrument: "grant,cooperative_agreement",
+      agency: "DOC-EDA",
+      closeDate: "30",
+      costSharing: "true",
+      sortby: "opportunityTitleAsc",
+    });
+
+    expect(reopened.status).toEqual(new Set());
+    expect(reopened.fundingInstrument).toEqual(
+      new Set(["grant", "cooperative_agreement"]),
+    );
+    expect(reopened.agency).toEqual(new Set(["DOC-EDA"]));
+    expect(reopened.closeDate).toEqual(new Set(["30"]));
+    expect(reopened.costSharing).toEqual(new Set(["true"]));
+    expect(reopened.sortby).toEqual("opportunityTitleAsc");
   });
 });
