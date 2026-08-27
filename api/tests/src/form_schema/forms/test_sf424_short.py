@@ -241,6 +241,8 @@ def test_sf424_short_v3_0_form_title_and_ui_section_order(sf424_short_v3_0):
 
 def test_sf424_short_v3_0_ui_fields_are_in_expected_sections(sf424_short_v3_0):
     actual_section_fields = {
+        # "text" nodes (e.g. the certification statement/note) have no "definition",
+        # so skip them here and only compare the schema-backed field pointers.
         section["name"]: [
             child["definition"] for child in section["children"] if "definition" in child
         ]
