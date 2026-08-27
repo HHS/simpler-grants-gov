@@ -2649,8 +2649,9 @@ export const messages = {
       header: "Submission set-up",
       subHeader:
         "A competition is one apply-window inside an opportunity. Most opportunities have only one.",
-      competitionId: "Competition ID",
-      competitionIdHint: "An ID if this opportunity has multiple competitions.",
+      publicCompetitionId: "Competition ID",
+      publicCompetitionIdHint:
+        "An ID if this opportunity has multiple competitions.",
       competitionTitle: "Competition title",
       competitionTitleHint: "Shown to applicants. Plain language is best.",
       whoCanApply: "Who can apply?",

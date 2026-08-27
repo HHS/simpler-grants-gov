@@ -8,11 +8,25 @@ import {
   CommonTextInput,
 } from "src/components/core/forms/CommonFormFields";
 
-export function AgencyContact() {
+type AgencyContactProps = {
+  contactInfo?: string | null;
+};
+
+export function AgencyContact({ contactInfo }: AgencyContactProps) {
   const t = useTranslations("OpportunityCompetition.sectionAgencyContact");
+  const contactValues = contactInfo?.split(", ") ?? [];
+  const [
+    contactName = "",
+    contactTitle = "",
+    contactEmail = "",
+    contactPhone = "",
+  ] =
+    contactValues.length === 3
+      ? [contactValues[0], "", contactValues[1], contactValues[2]]
+      : contactValues;
 
   //--- Validation for Full Name ---
-  const [nameValue, setNameValue] = useState<string>("");
+  const [nameValue, setNameValue] = useState<string>(contactName);
   const [hasNameError, setHasNameError] = useState<boolean>(false);
   const [nameErrorMsg, setNameErrorMsg] = useState<string[]>([]);
 
@@ -46,7 +60,7 @@ export function AgencyContact() {
   };
 
   //--- Validation for Email Address ---
-  const [emailValue, setEmailValue] = useState<string>("");
+  const [emailValue, setEmailValue] = useState<string>(contactEmail);
   const [hasEmailError, setHasEmailError] = useState<boolean>(false);
   const [emailErrorMsg, setEmailErrorMsg] = useState<string[]>([]);
   // Production-grade email layout validation regex
@@ -89,7 +103,7 @@ export function AgencyContact() {
   };
 
   //--- Validation & Special formatting for Phone Number ---
-  const [phone, setPhoneValue] = useState<string>("");
+  const [phone, setPhoneValue] = useState<string>(contactPhone);
   const [hasPhoneError, setHasPhoneError] = useState<boolean>(false);
   const [phoneErrorMsg, setPhoneErrorMsg] = useState<string[]>([]);
 
@@ -201,7 +215,7 @@ export function AgencyContact() {
             fieldMaxLength={255}
             isRequired={false}
             onTextChange={() => {}}
-            defaultValue=""
+            defaultValue={contactTitle}
           />
         </div>
       </div>
