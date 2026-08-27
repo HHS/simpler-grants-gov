@@ -71,221 +71,239 @@ const applicantScenarios = [
 
 for (const { applicantType, orgLabel } of applicantScenarios) {
   test.describe
-    .serial(`Attachment form - virus scan failure and recovery - ${applicantType}`, () => {
-    // Declared at describe-scope (not test fixtures) so the SAME authenticated
-    // page/context created in beforeAll carries through to the test below.
-    // Previously these were closed at the end of beforeAll and the test used
-    // Playwright's fixture-provided { page, context } instead — a fresh,
-    // unauthenticated context — which is why goto(applicationUrl) timed out
-    // waiting for application-form-link (redirected to an unauthenticated view).
+    .skip(!playwrightEnv.hasInfectedFileScanner)
+    .serial(
+      `Attachment form - virus scan failure and recovery - ${applicantType}`,
+      () => {
+        // SKIPPED unless E2E_INFECTED_FILE_SCANNER env var is set or running locally.
+        // This test requires a virus scanner (local mock or staged) to validate the
+        // infected file rejection workflow.
 
-    let browser: Browser;
-    let context: BrowserContext;
-    let page: Page;
-    let applicationUrl: string;
+        // Declared at describe-scope (not test fixtures) so the SAME authenticated
+        // page/context created in beforeAll carries through to the test below.
+        // Previously these were closed at the end of beforeAll and the test used
+        // Playwright's fixture-provided { page, context } instead — a fresh,
+        // unauthenticated context — which is why goto(applicationUrl) timed out
+        // waiting for application-form-link (redirected to an unauthenticated view).
 
-    test.beforeAll(async ({ browser: b }, testInfo: TestInfo) => {
-      browser = b;
-      context = await browser.newContext();
-      page = await context.newPage();
-      const isMobile = testInfo.project.name.match(/[Mm]obile/);
+        let browser: Browser;
+        let context: BrowserContext;
+        let page: Page;
+        let applicationUrl: string;
 
-      await authenticateE2eUser(page, context, !!isMobile);
+        test.beforeAll(async ({ browser: b }, testInfo: TestInfo) => {
+          browser = b;
+          context = await browser.newContext();
+          page = await context.newPage();
+          const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-      await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
-      applicationUrl = page.url();
-    });
+          await authenticateE2eUser(page, context, !!isMobile);
 
-    test.afterAll(async () => {
-      await context.close();
-    });
+          await createApplication(
+            page,
+            opportunityConfig.opportunityUrl,
+            orgLabel,
+          );
+          applicationUrl = page.url();
+        });
 
-    test(
-      `${applicantType}: infected upload is rejected and removed, valid upload persists`,
-      { tag: TAGS },
+        test.afterAll(async () => {
+          await context.close();
+        });
 
-      async () => {
-        test.setTimeout(120_000);
+        test(
+          `${applicantType}: infected upload is rejected and removed, valid upload persists`,
+          { tag: TAGS },
 
-        // Step 1: Open the application attachment form.
-        await page.goto(applicationUrl);
-        await page.waitForLoadState("domcontentloaded");
+          async () => {
+            test.setTimeout(120_000);
 
-        // Wait for the application forms table to be visible, which contains the form link
-        await expect(
-          page.locator(".simpler-application-forms-table").first(),
-        ).toBeVisible({ timeout: 30000 });
+            // Step 1: Open the application attachment form.
+            await page.goto(applicationUrl);
+            await page.waitForLoadState("domcontentloaded");
 
-        // Explicitly wait for the form link to be clickable before clicking
-        await page
-          .getByTestId("application-form-link")
-          .waitFor({ state: "visible", timeout: 15000 });
+            // Wait for the application forms table to be visible, which contains the form link
+            await expect(
+              page.locator(".simpler-application-forms-table").first(),
+            ).toBeVisible({ timeout: 30000 });
 
-        await page.getByTestId("application-form-link").click();
+            // Explicitly wait for the form link to be clickable before clicking
+            await page
+              .getByTestId("application-form-link")
+              .waitFor({ state: "visible", timeout: 15000 });
 
-        // Wait for form page to load after navigation
-        await page.waitForLoadState("domcontentloaded");
+            await page.getByTestId("application-form-link").click();
 
-        // Wait for the form container to be visible, indicating form has fully rendered
-        await page
-          .locator(".simpler-apply-form")
-          .waitFor({ state: "visible", timeout: 20000 });
+            // Wait for form page to load after navigation
+            await page.waitForLoadState("domcontentloaded");
 
-        const attachmentField = attachmentForm.formConfig.fields.att1.field;
+            // Wait for the form container to be visible, indicating form has fully rendered
+            await page
+              .locator(".simpler-apply-form")
+              .waitFor({ state: "visible", timeout: 20000 });
 
-        // Wait for the attachment upload button to be visible and interactive
-        await page
-          .getByRole("button", {
-            name: attachmentField,
-            exact: true,
-          })
-          .waitFor({ state: "visible", timeout: 15000 });
+            const attachmentField = attachmentForm.formConfig.fields.att1.field;
 
-        // Step 2: Upload an infected file and verify that the virus scan
-        // fails and the file is removed.
+            // Wait for the attachment upload button to be visible and interactive
+            await page
+              .getByRole("button", {
+                name: attachmentField,
+                exact: true,
+              })
+              .waitFor({ state: "visible", timeout: 15000 });
 
-        await page
-          .getByRole("button", {
-            name: attachmentField,
-            exact: true,
-          })
-          .setInputFiles(INFECTED_FIXTURE_PATH);
+            // Step 2: Upload an infected file and verify that the virus scan
+            // fails and the file is removed.
 
-        await verifyVirusScanFailedAndRemoved(page, INFECTED_FILE_NAME, page);
+            await page
+              .getByRole("button", {
+                name: attachmentField,
+                exact: true,
+              })
+              .setInputFiles(INFECTED_FIXTURE_PATH);
 
-        const dismissButton = page
-          .locator("div")
-          .filter({ hasText: /^Dismiss$/ });
+            await verifyVirusScanFailedAndRemoved(
+              page,
+              INFECTED_FILE_NAME,
+              page,
+            );
 
-        await expect(dismissButton).toBeVisible();
-        await dismissButton.click();
+            const dismissButton = page
+              .locator("div")
+              .filter({ hasText: /^Dismiss$/ });
 
-        // Step 3: Upload a valid file into the same attachment field.
+            await expect(dismissButton).toBeVisible();
+            await dismissButton.click();
 
-        await page
-          .getByRole("button", {
-            name: attachmentField,
-            exact: true,
-          })
-          .setInputFiles(VALID_FIXTURE_PATH);
+            // Step 3: Upload a valid file into the same attachment field.
 
-        await verifyVirusScanPassedAndUploaded(
-          page,
-          VALID_FILE_NAME,
-          page,
-          false,
-        );
+            await page
+              .getByRole("button", {
+                name: attachmentField,
+                exact: true,
+              })
+              .setInputFiles(VALID_FIXTURE_PATH);
 
-        // Step 4: Save the form and verify it completes successfully.
+            await verifyVirusScanPassedAndUploaded(
+              page,
+              VALID_FILE_NAME,
+              page,
+              false,
+            );
 
-        await page.getByTestId("apply-form-save").click();
+            // Step 4: Save the form and verify it completes successfully.
 
-        await verifyFormStatusAfterSave(page, "complete");
+            await page.getByTestId("apply-form-save").click();
 
-        const formUrl = page.url();
+            await verifyFormStatusAfterSave(page, "complete");
 
-        await expect(
-          page.getByText("Form was saved", { exact: false }),
-        ).toBeVisible();
+            const formUrl = page.url();
 
-        // Step 5: Verify Application History contains the valid attachment
+            await expect(
+              page.getByText("Form was saved", { exact: false }),
+            ).toBeVisible();
 
-        // and does not contain the rejected infected attachment.
+            // Step 5: Verify Application History contains the valid attachment
 
-        await page.goto(applicationUrl);
+            // and does not contain the rejected infected attachment.
 
-        await page.waitForLoadState("domcontentloaded");
+            await page.goto(applicationUrl);
 
-        const activities = await getApplicationHistoryActivities(page);
+            await page.waitForLoadState("domcontentloaded");
 
-        expect(
-          activities.some((activity) =>
-            activity.includes(`Attachment added: ${VALID_FILE_NAME}`),
-          ),
-        ).toBe(true);
+            const activities = await getApplicationHistoryActivities(page);
 
-        expect(
-          activities.some((activity) => activity.includes(INFECTED_FILE_NAME)),
-        ).toBe(false);
+            expect(
+              activities.some((activity) =>
+                activity.includes(`Attachment added: ${VALID_FILE_NAME}`),
+              ),
+            ).toBe(true);
 
-        expect(
-          activities.some((activity) =>
-            activity.includes("Application created"),
-          ),
-        ).toBe(true);
+            expect(
+              activities.some((activity) =>
+                activity.includes(INFECTED_FILE_NAME),
+              ),
+            ).toBe(false);
 
-        if (applicantType === "Organization") {
-          expect(
-            activities.some((activity) =>
-              activity.includes("Organization Added"),
-            ),
-          ).toBe(true);
-        }
+            expect(
+              activities.some((activity) =>
+                activity.includes("Application created"),
+              ),
+            ).toBe(true);
 
-        // Step 6: Submit the application and verify the confirmation page.
+            if (applicantType === "Organization") {
+              expect(
+                activities.some((activity) =>
+                  activity.includes("Organization Added"),
+                ),
+              ).toBe(true);
+            }
 
-        await submitApplicationAndVerify(page, "success");
+            // Step 6: Submit the application and verify the confirmation page.
 
-        await verifySubmissionConfirmation(page);
+            await submitApplicationAndVerify(page, "success");
 
-        const postSubmitActivities =
-          await getApplicationHistoryActivities(page);
+            await verifySubmissionConfirmation(page);
 
-        expect(postSubmitActivities[0]).toContain("Application submitted");
+            const postSubmitActivities =
+              await getApplicationHistoryActivities(page);
 
-        expect(
-          postSubmitActivities.some((activity) =>
-            activity.includes(`Attachment added: ${VALID_FILE_NAME}`),
-          ),
-        ).toBe(true);
+            expect(postSubmitActivities[0]).toContain("Application submitted");
 
-        // Step 7: Verify print view contains only the valid persisted
+            expect(
+              postSubmitActivities.some((activity) =>
+                activity.includes(`Attachment added: ${VALID_FILE_NAME}`),
+              ),
+            ).toBe(true);
 
-        // attachment.
+            // Step 7: Verify print view contains only the valid persisted
 
-        const printUrl = buildPrintUrl(formUrl);
+            // attachment.
 
-        const filledForms: FilledFormEntry[] = [
-          {
-            formKey: attachmentForm.formKey,
-            formName: attachmentForm.formConfig.formName,
-            testData: {
-              att1: VALID_FILE_NAME,
-            },
-            printUrl,
-            expectedPrepopulatedFields:
-              attachmentForm.expectedPrepopulatedFields,
-            userEnteredFieldTestIds: attachmentForm.userEnteredFieldTestIds,
+            const printUrl = buildPrintUrl(formUrl);
+
+            const filledForms: FilledFormEntry[] = [
+              {
+                formKey: attachmentForm.formKey,
+                formName: attachmentForm.formConfig.formName,
+                testData: {
+                  att1: VALID_FILE_NAME,
+                },
+                printUrl,
+                expectedPrepopulatedFields:
+                  attachmentForm.expectedPrepopulatedFields,
+                userEnteredFieldTestIds: attachmentForm.userEnteredFieldTestIds,
+              },
+            ];
+
+            await validateAllPrintViews(page, filledForms);
+
+            await expect(
+              page.getByRole("heading", {
+                name: "1) Attachment 1",
+                exact: true,
+              }),
+            ).toBeVisible();
+
+            await validateAttachmentPrintViewSection(
+              page,
+              "form-section-attachment1",
+              VALID_FILE_NAME,
+            );
+
+            await expect(
+              page.locator("#form-section-attachment1"),
+            ).toContainText(VALID_FILE_NAME);
+
+            // Print view is a static snapshot and should not contain live
+
+            // interactive elements or broken links.
+
+            await expect(page.getByRole("button")).toHaveCount(0);
+
+            await expect(page.locator('[href*="undefined"]')).toHaveCount(0);
           },
-        ];
-
-        await validateAllPrintViews(page, filledForms);
-
-        await expect(
-          page.getByRole("heading", {
-            name: "1) Attachment 1",
-            exact: true,
-          }),
-        ).toBeVisible();
-
-        await validateAttachmentPrintViewSection(
-          page,
-          "form-section-attachment1",
-          VALID_FILE_NAME,
         );
-
-        await expect(page.locator("#form-section-attachment1")).toContainText(
-          VALID_FILE_NAME,
-        );
-
-        // Print view is a static snapshot and should not contain live
-
-        // interactive elements or broken links.
-
-        await expect(page.getByRole("button")).toHaveCount(0);
-
-        await expect(page.locator('[href*="undefined"]')).toHaveCount(0);
       },
     );
-  });
 }
