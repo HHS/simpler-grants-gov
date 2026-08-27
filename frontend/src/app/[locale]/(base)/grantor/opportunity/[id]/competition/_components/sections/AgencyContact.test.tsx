@@ -90,6 +90,29 @@ describe("AgencyContact", () => {
       expect(screen.queryByText("error.requiredEmail")).not.toBeInTheDocument();
       expect(screen.queryByText("error.invalidEmail")).not.toBeInTheDocument();
     });
+
+    it("accepts a period in the email local part", () => {
+      render(<AgencyContact />);
+
+      const emailInput = screen.getByRole("textbox", { name: /emailaddress/i });
+      fireEvent.change(emailInput, { target: { value: "john.doe@gmail.com" } });
+      fireEvent.blur(emailInput);
+
+      expect(screen.queryByText("error.requiredEmail")).not.toBeInTheDocument();
+      expect(screen.queryByText("error.invalidEmail")).not.toBeInTheDocument();
+    });
+
+    it("rejects invalid period placement in the email local part", () => {
+      render(<AgencyContact />);
+
+      const emailInput = screen.getByRole("textbox", { name: /emailaddress/i });
+      fireEvent.change(emailInput, {
+        target: { value: "john..doe@gmail.com" },
+      });
+      fireEvent.blur(emailInput);
+
+      expect(screen.getByText("error.invalidEmail")).toBeInTheDocument();
+    });
   });
 
   describe("pipe character keydown handling", () => {

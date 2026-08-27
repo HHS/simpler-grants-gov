@@ -19,6 +19,23 @@ export function AgencyContact() {
     }
   };
 
+  const handlePipePaste = (
+    e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const pastedText = e.clipboardData.getData("text");
+    const sanitizedText = pastedText.replace(/\|/g, "");
+
+    if (pastedText === sanitizedText) return;
+
+    e.preventDefault();
+    const target = e.currentTarget;
+    const selectionStart = target.selectionStart ?? target.value.length;
+    const selectionEnd = target.selectionEnd ?? selectionStart;
+
+    target.setRangeText(sanitizedText, selectionStart, selectionEnd, "end");
+    target.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+
   //--- Validation for Full Name ---
   const [hasNameError, setHasNameError] = useState<boolean>(false);
   const [nameErrorMsg, setNameErrorMsg] = useState<string[]>([]);
@@ -55,7 +72,7 @@ export function AgencyContact() {
   const [emailErrorMsg, setEmailErrorMsg] = useState<string[]>([]);
   // Production-grade email layout validation regex
   const EMAIL_REGEX =
-    /^(?!\.)(?!.*\.\.)([a-z0-9_'+-]*)[a-z0-9_+-]@([a-z0-9][a-z0-9-]*\.)+[a-z]{2,}$/i;
+    /^[a-z0-9_'+-]+(?:\.[a-z0-9_'+-]+)*@([a-z0-9][a-z0-9-]*\.)+[a-z]{2,}$/i;
 
   // Proactively clear error states as the user types
   const handleEmailInputChange = (
@@ -188,6 +205,7 @@ export function AgencyContact() {
             defaultValue=""
             onTextChange={handleNameInputChange}
             onKeyDown={handlePipeKeyDown}
+            onPaste={handlePipePaste}
             onFieldBlur={handleNameFieldBlur}
             rawErrors={nameErrorMsg}
           />
@@ -203,6 +221,7 @@ export function AgencyContact() {
             fieldMaxLength={255}
             isRequired={false}
             onKeyDown={handlePipeKeyDown}
+            onPaste={handlePipePaste}
             defaultValue=""
           />
         </div>
@@ -221,6 +240,7 @@ export function AgencyContact() {
             defaultValue=""
             onTextChange={handleEmailInputChange}
             onKeyDown={handlePipeKeyDown}
+            onPaste={handlePipePaste}
             onFieldBlur={handleEmailFieldBlur}
             rawErrors={emailErrorMsg}
           />

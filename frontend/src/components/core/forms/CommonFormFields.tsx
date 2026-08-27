@@ -131,6 +131,7 @@ export const CommonCharacterCount = ({
   value,
   onTextChange,
   onKeyDown = () => {},
+  onPaste = () => {},
   onFieldBlur = () => {},
   rawErrors = [],
   disabled = false,
@@ -147,6 +148,9 @@ export const CommonCharacterCount = ({
   onTextChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onKeyDown?: (
     e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
+  onPaste?: (
+    e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
   onFieldBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   rawErrors?: string[];
@@ -171,6 +175,7 @@ export const CommonCharacterCount = ({
           {...valueProps}
           {...(onTextChange && { onChange: onTextChange })}
           onKeyDown={onKeyDown}
+          onPaste={onPaste}
           onBlur={onFieldBlur}
           isTextArea={isTextArea}
           aria-describedby={`label-for-${fieldId}`}

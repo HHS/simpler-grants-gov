@@ -72,6 +72,7 @@ function buildValidFormData(overrides?: Record<string, string>) {
   formData.set("competition_title", "Test Competition");
   formData.set("opening_date", "2026-06-01");
   formData.set("closing_date", "2026-07-01");
+  formData.set("public_competition_id", "PUBLIC-COMP-789");
   formData.set("open_to_applicants", "both");
   formData.set("contact_name", "John Doe");
   formData.set("contact_title", "Manager");
@@ -117,6 +118,7 @@ describe("updateCompetition", () => {
         competition_title: "Test Competition",
         opening_date: "2026-06-01",
         closing_date: "2026-07-01",
+        public_competition_id: "PUBLIC-COMP-789",
       }),
     );
     expect(result).toEqual({
@@ -152,6 +154,7 @@ describe("updateCompetition", () => {
         competition_title: "Test Competition",
         opening_date: "2026-06-01",
         closing_date: "2026-07-01",
+        public_competition_id: "PUBLIC-COMP-789",
       }),
     );
     expect(result).toEqual({
@@ -406,6 +409,18 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
     ]);
   });
 
+  it("includes the public competition ID in the request body", async () => {
+    const formData = buildValidFormData();
+    formData.delete("competitionId");
+
+    mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
+
+    await updateCompetition(formData, mockRequiredForms);
+
+    const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
+    expect(requestBody.public_competition_id).toBe("PUBLIC-COMP-789");
+  });
+
   it("builds correct request body for 'organizations_only' applicant type", async () => {
     const formData = buildValidFormData();
     formData.delete("competitionId");
@@ -452,6 +467,7 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
     formData.set("competition_title", "");
     formData.set("opening_date", "");
     formData.set("closing_date", "");
+    formData.set("public_competition_id", "");
 
     mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
 
@@ -461,5 +477,6 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
     expect(requestBody.competition_title).toBeNull();
     expect(requestBody.opening_date).toBeNull();
     expect(requestBody.closing_date).toBeNull();
+    expect(requestBody.public_competition_id).toBeNull();
   });
 });
