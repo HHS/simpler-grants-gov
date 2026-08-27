@@ -319,6 +319,82 @@ describe("agenciesToNestedFilterOptions", () => {
       },
     ]);
   });
+
+  it("surfaces an agency with a dashed code but no parent as a top level option", () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    const result = agenciesToNestedFilterOptions([
+      {
+        agency_code: "DOCNIST",
+        agency_name: "National Institute of Standards and Technology",
+        top_level_agency: null,
+        agency_id: 1,
+      },
+      {
+        agency_code: "AR-TEST",
+        agency_name: "Award Recommendation Test Agency",
+        top_level_agency: null,
+        agency_id: 2,
+      },
+    ]);
+
+    expect(result).toEqual([
+      {
+        id: "DOCNIST",
+        label: "National Institute of Standards and Technology",
+        value: "DOCNIST",
+      },
+      {
+        id: "AR-TEST",
+        label: "Award Recommendation Test Agency",
+        value: "AR-TEST",
+      },
+    ]);
+    expect(consoleError).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
+  });
+
+  it("skips and logs an agency whose referenced parent is missing from the list", () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    const result = agenciesToNestedFilterOptions([
+      {
+        agency_code: "DOCNIST",
+        agency_name: "National Institute of Standards and Technology",
+        top_level_agency: null,
+        agency_id: 1,
+      },
+      {
+        agency_code: "NOPE-SUB",
+        agency_name: "Orphaned by a missing parent",
+        top_level_agency: {
+          agency_code: "NOPE",
+          agency_name: "Never added to the list",
+          top_level_agency: null,
+          agency_id: 3,
+        },
+        agency_id: 2,
+      },
+    ]);
+
+    expect(result).toEqual([
+      {
+        id: "DOCNIST",
+        label: "National Institute of Standards and Technology",
+        value: "DOCNIST",
+      },
+    ]);
+    expect(consoleError).toHaveBeenCalledWith(
+      "Parent agency NOPE referenced by NOPE-SUB not found in filter options",
+    );
+
+    consoleError.mockRestore();
+  });
 });
 
 describe("flattenAgencies", () => {
