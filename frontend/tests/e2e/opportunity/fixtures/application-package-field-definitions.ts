@@ -90,6 +90,7 @@ export const APPLICATION_PACKAGE_SUBMISSION_WINDOW_FIELD_DEFINITIONS: Applicatio
       required: true,
     },
     {
+      selector: "#extension_period",
       label: "Extension period",
       type: "text",
       valueKey: "extensionPeriod",
