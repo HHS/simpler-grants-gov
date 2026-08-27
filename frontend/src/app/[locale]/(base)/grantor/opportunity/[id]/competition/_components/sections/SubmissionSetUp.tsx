@@ -37,7 +37,7 @@ export function SubmissionSetUp() {
             fieldId="competition_title"
             labelText={t("competitionTitle")}
             description={t("competitionTitleHint")}
-            isRequired={false}
+            isRequired={true}
             fieldMaxLength={255}
             onTextChange={() => {}}
           />

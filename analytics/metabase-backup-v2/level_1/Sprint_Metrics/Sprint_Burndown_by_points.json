@@ -1,0 +1,127 @@
+{
+  "name": "Sprint Burndown by points",
+  "display": "area",
+  "visualization_settings": {
+    "graph.dimensions": [
+      "day"
+    ],
+    "table.cell_column": "total_closed",
+    "table.pivot_column": "total_opened",
+    "series_settings": {
+      "total_remaining": {
+        "color": "#509EE3",
+        "line.marker_enabled": false
+      }
+    },
+    "column_settings": {
+      "[\"name\",\"day\"]": {
+        "date_abbreviate": true
+      }
+    },
+    "graph.metrics": [
+      "total_remaining"
+    ]
+  },
+  "template_tags": {
+    "sprint_name": {
+      "widget-type": "string/=",
+      "default": null,
+      "name": "sprint_name",
+      "type": "dimension",
+      "id": "3a63ce6a-96bf-417a-b165-f81ee11dd13e",
+      "dimension": [
+        "field",
+        318,
+        {
+          "base-type": "type/Text",
+          "effective-type": "type/Text"
+        }
+      ],
+      "display-name": "Sprint Name",
+      "options": null,
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_sprint",
+        "column": "name"
+      }
+    },
+    "ghid": {
+      "widget-type": "string/=",
+      "default": null,
+      "name": "ghid",
+      "type": "dimension",
+      "id": "a1ceb784-2804-456b-96cd-1d6b81f79b81",
+      "dimension": [
+        "field",
+        302,
+        {
+          "base-type": "type/Integer",
+          "effective-type": "type/Integer"
+        }
+      ],
+      "display-name": "Project",
+      "options": null,
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_project",
+        "column": "ghid"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "slug": "sprint_name",
+      "name": "Sprint Name",
+      "type": "string/=",
+      "values_source_type": "card",
+      "id": "3a63ce6a-96bf-417a-b165-f81ee11dd13e",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "sprint_name"
+        ]
+      ],
+      "values_source_config": {
+        "card_id": 152,
+        "value_field": [
+          "field",
+          "sprint_name",
+          {
+            "base-type": "type/Text"
+          }
+        ]
+      },
+      "required": true
+    },
+    {
+      "slug": "ghid",
+      "name": "Project",
+      "type": "string/=",
+      "values_source_type": "static-list",
+      "id": "a1ceb784-2804-456b-96cd-1d6b81f79b81",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "ghid"
+        ]
+      ],
+      "values_source_config": {
+        "values": [
+          [
+            "17",
+            "Product & Delivery"
+          ],
+          [
+            "13",
+            "Simpler.Grants.gov"
+          ]
+        ]
+      },
+      "required": true
+    }
+  ]
+}
