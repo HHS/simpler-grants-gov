@@ -86,7 +86,7 @@ async function clickSubmitAndWaitForOutcome(
   // After DOM outcome or response, ensure we have the response to validate status
   const submitResponse = await Promise.race([
     submitResponsePromise,
-    new Promise<never>((_, reject) =>
+    new Promise<never>((_resolve, reject) =>
       setTimeout(
         () =>
           reject(new Error("Failed to get /submit response for validation")),
