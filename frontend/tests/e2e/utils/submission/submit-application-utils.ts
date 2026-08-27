@@ -56,19 +56,16 @@ async function clickSubmitAndWaitForOutcome(
     name: /your application could not be submitted/i,
   });
 
-  // WebKit may have different network timing than Chrome. Set explicit timeout
-  // on waitForResponse so it fails fast with a clear error instead of test timeout.
-  const submitResponsePromise = page.waitForResponse(
-    (response) => {
-      const url = response.url();
-      return (
-        response.request().method() === "POST" &&
-        url.includes("/api/applications/") &&
-        url.includes("/submit")
-      );
-    },
-    { timeout: 60000 },
-  );
+  // Set up response listener. Don't timeout here - let the race logic handle timing.
+  // This allows the listener to keep waiting even if DOM outcome appears first (WebKit scenario).
+  const submitResponsePromise = page.waitForResponse((response) => {
+    const url = response.url();
+    return (
+      response.request().method() === "POST" &&
+      url.includes("/api/applications/") &&
+      url.includes("/submit")
+    );
+  });
 
   await submitAppButton.click();
 
@@ -78,19 +75,21 @@ async function clickSubmitAndWaitForOutcome(
     validationHeading.waitFor({ state: "visible", timeout: 120000 }),
   ]);
 
-  // WebKit may have different network timing than Chrome. Race between response and DOM outcome
-  // so we don't wait forever. In Chrome, response arrives quickly. In WebKit, DOM outcome may
-  // appear first. However, we still validate the response status regardless of which wins the race.
+  // Race: move forward when EITHER response arrives OR DOM outcome appears.
+  // Chrome: response arrives first, we proceed immediately
+  // WebKit: DOM may appear first, we still proceed and get response later
   await Promise.race([submitResponsePromise, domOutcomePromise]);
 
-  // After DOM outcome or response, ensure we have the response to validate status
+  // Now get the response to validate status. By this point, either:
+  // - Response arrived (Chrome): just await it
+  // - DOM outcome arrived (WebKit): wait for response with reasonable timeout
   const submitResponse = await Promise.race([
     submitResponsePromise,
     new Promise<never>((_resolve, reject) =>
       setTimeout(
         () =>
           reject(new Error("Failed to get /submit response for validation")),
-        10000,
+        30000,
       ),
     ),
   ]);
