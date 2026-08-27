@@ -105,7 +105,7 @@ class CheckXsdDriftTask(Task):
                 url = url_by_filename.get(filename)
                 if url is None:
                     continue
-                logger.warning(
+                logger.info(
                     "Downloaded XSD has no committed counterpart",
                     extra={"url": url, "schema_filename": filename},
                 )
