@@ -2,6 +2,7 @@ import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes"
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import {
   agenciesToNestedFilterOptions,
+  agenciesToSortedAndNestedFilterOptions,
   agencyToFilterOption,
   flattenAgencies,
   floatTopLevelAgencies,
@@ -191,6 +192,10 @@ describe("getAgencyDisplayName", () => {
 });
 
 describe("agenciesToNestedFilterOptions", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("converts a simple list of top level agencies to filter options", () => {
     expect(agenciesToNestedFilterOptions(fakeAgencyResponseData)).toEqual([
       {
@@ -353,8 +358,6 @@ describe("agenciesToNestedFilterOptions", () => {
       },
     ]);
     expect(consoleError).not.toHaveBeenCalled();
-
-    consoleError.mockRestore();
   });
 
   it("skips and logs an agency whose referenced parent is missing from the list", () => {
@@ -392,8 +395,67 @@ describe("agenciesToNestedFilterOptions", () => {
     expect(consoleError).toHaveBeenCalledWith(
       "Parent agency NOPE referenced by NOPE-SUB not found in filter options",
     );
+  });
+});
 
-    consoleError.mockRestore();
+describe("agenciesToSortedAndNestedFilterOptions", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("floats, nests and sorts a list containing a parentless dashed agency", () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    // deliberately ordered with the sub agency ahead of its parent so that the
+    // float step has something to do
+    const result = agenciesToSortedAndNestedFilterOptions([
+      {
+        agency_code: "MOCKTRASH-TRASH",
+        agency_name: "More TRASH",
+        top_level_agency: {
+          agency_code: "MOCKTRASH",
+          agency_name: "Mational TRASH",
+          top_level_agency: null,
+          agency_id: 2,
+        },
+        agency_id: 1,
+      },
+      {
+        agency_code: "AR-TEST",
+        agency_name: "Award Recommendation Test Agency",
+        top_level_agency: null,
+        agency_id: 3,
+      },
+      {
+        agency_code: "MOCKTRASH",
+        agency_name: "Mational TRASH",
+        top_level_agency: null,
+        agency_id: 2,
+      },
+    ]);
+
+    expect(result).toEqual([
+      {
+        id: "AR-TEST",
+        label: "Award Recommendation Test Agency",
+        value: "AR-TEST",
+      },
+      {
+        id: "MOCKTRASH",
+        label: "Mational TRASH",
+        value: "MOCKTRASH",
+        children: [
+          {
+            id: "MOCKTRASH-TRASH",
+            label: "More TRASH",
+            value: "MOCKTRASH-TRASH",
+          },
+        ],
+      },
+    ]);
+    expect(consoleError).not.toHaveBeenCalled();
   });
 });
 
