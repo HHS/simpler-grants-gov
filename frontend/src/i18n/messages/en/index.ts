@@ -2664,17 +2664,12 @@ export const messages = {
     sectionSubmissionWindow: {
       header: "Submission window",
       subHeader: "When applicants can submit through this package.",
-      submissionsOpen: "Submissions open",
-      submissionsOpenHint:
-        "First day applicants can submit. Defaults to publish date.",
-      submissionsClose: "Submissions close",
-      submissionsCloseHint:
-        "Final deadline for all applications. Defaults to the close date.",
-      howManyApplications: "How many applications do you expect?",
-      howManyApplicationsHint:
-        "We use it to plan capacity for your competition. You can change it later.",
-      expectedNumberOfApplicants: "Expected number of applicants",
-      expectedNumberOfApplicantsHint: "A best estimate is fine.",
+      submissionsOpen: "Open date",
+      submissionsOpenHint: "First day applicants can apply",
+      submissionsClose: "Public close date",
+      submissionsCloseHint: "Deadline listed on Grants.gov",
+      extensionPeriod: "Extension period",
+      extensionPeriodHint: "Number of days accepted past public close date",
     },
     sectionApplicationChecklist: {
       header: "Application checklist",
