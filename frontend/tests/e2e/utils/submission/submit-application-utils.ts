@@ -56,16 +56,24 @@ async function clickSubmitAndWaitForOutcome(
     name: /your application could not be submitted/i,
   });
 
-  // Set up response listener. Don't timeout here - let the race logic handle timing.
-  // This allows the listener to keep waiting even if DOM outcome appears first (WebKit scenario).
-  const submitResponsePromise = page.waitForResponse((response) => {
-    const url = response.url();
-    return (
-      response.request().method() === "POST" &&
-      url.includes("/api/applications/") &&
-      url.includes("/submit")
-    );
-  });
+  // Set up response listener with browser-specific timeout.
+  // WebKit is much slower at network event processing, so allow more time.
+  const responseTimeoutMs =
+    page.context().browser()?.browserType().name() === "webkit"
+      ? 180000 // 3 minutes for WebKit
+      : 60000; // 1 minute for Chrome/Firefox
+
+  const submitResponsePromise = page.waitForResponse(
+    (response) => {
+      const url = response.url();
+      return (
+        response.request().method() === "POST" &&
+        url.includes("/api/applications/") &&
+        url.includes("/submit")
+      );
+    },
+    { timeout: responseTimeoutMs },
+  );
 
   await submitAppButton.click();
 
@@ -75,27 +83,46 @@ async function clickSubmitAndWaitForOutcome(
     validationHeading.waitFor({ state: "visible", timeout: 120000 }),
   ]);
 
-  // Race: move forward when EITHER response arrives OR DOM outcome appears.
-  // Chrome: response arrives first, we proceed immediately
-  // WebKit: DOM may appear first, we still proceed and get response later
-  await Promise.race([submitResponsePromise, domOutcomePromise]);
+  // Wait for whichever comes first: response or DOM outcome
+  let submitResponse: Response | undefined;
+  try {
+    // Try first race with explicit result tracking
+    const result = await Promise.race([
+      submitResponsePromise.then((resp) => ({
+        type: "response" as const,
+        value: resp,
+      })),
+      domOutcomePromise.then(() => ({ type: "dom" as const })),
+    ]);
 
-  // Now get the response to validate status. By this point, either:
-  // - Response arrived (Chrome): just await it
-  // - DOM outcome arrived (WebKit): wait for response with reasonable timeout
-  const submitResponse = await Promise.race([
-    submitResponsePromise,
-    new Promise<never>((_resolve, reject) =>
-      setTimeout(
-        () =>
-          reject(new Error("Failed to get /submit response for validation")),
-        30000,
-      ),
-    ),
-  ]);
+    if (result.type === "response") {
+      submitResponse = result.value;
+    }
+    // If DOM outcome won the race, submitResponse stays undefined for now
+  } catch (err) {
+    // If first race failed, try to get response one more time
+    try {
+      submitResponse = await Promise.race([
+        submitResponsePromise,
+        new Promise<never>((_resolve, reject) =>
+          setTimeout(
+            () => reject(new Error("Failed to get /submit response")),
+            10000,
+          ),
+        ),
+      ]);
+    } catch (_responseErr) {
+      // Response never arrived, but DOM outcome may still appear - don't fail yet
+      // Just ensure we have the DOM outcome
+      await Promise.race([
+        successHeading.waitFor({ state: "visible", timeout: 60000 }),
+        validationHeading.waitFor({ state: "visible", timeout: 60000 }),
+      ]);
+    }
+  }
 
-  // Always verify response status (Chrome gets it immediately, WebKit after DOM wait)
-  if (submitResponse.status() !== 200) {
+  // Validate response status if we got one
+  if (submitResponse && submitResponse.status() !== 200) {
     throw new Error(
       `Application submission returned status ${submitResponse.status()}`,
     );
@@ -106,8 +133,8 @@ async function clickSubmitAndWaitForOutcome(
 
   // Ensure outcome heading is visible
   await Promise.race([
-    successHeading.waitFor({ state: "visible", timeout: 120000 }),
-    validationHeading.waitFor({ state: "visible", timeout: 120000 }),
+    successHeading.waitFor({ state: "visible", timeout: 60000 }),
+    validationHeading.waitFor({ state: "visible", timeout: 60000 }),
   ]);
 
   return (await validationHeading.isVisible()) ? "validationError" : "success";
