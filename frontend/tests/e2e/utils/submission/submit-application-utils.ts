@@ -102,7 +102,7 @@ async function clickSubmitAndWaitForOutcome(
       submitResponse = result.value;
     }
     // If DOM outcome won the race, submitResponse stays undefined for now
-  } catch (err) {
+  } catch (_err) {
     // If first race failed, try to get response one more time
     try {
       submitResponse = await Promise.race<Response>([
