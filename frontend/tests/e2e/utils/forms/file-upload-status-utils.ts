@@ -39,8 +39,28 @@ export async function verifyVirusScanPassedAndUploaded(
   // Verify the file appears in the list with a timeout to account for backend processing.
   const existingFilesLocator = scope.getByTestId("file-input-existing-files");
 
-  // Wait for the element to become attached/visible, indicating files have loaded
-  await existingFilesLocator.waitFor({ state: "attached", timeout: 30_000 });
+  // Wait for the element to become attached/visible, indicating files have loaded.
+  // Use a longer timeout to account for backend file processing + DOM rendering in CI.
+  // Backend local scanner has 1s pre-process + 3s poll = ~4s minimum, plus rendering.
+  // Mobile Chrome is significantly slower due to emulation constraints, so allow up to 90s.
+  // Desktop browsers typically need 60s, but mobile emulation can be 2-3x slower.
+  try {
+    await existingFilesLocator.waitFor({ state: "attached", timeout: 90_000 });
+  } catch (_err) {
+    // Element didn't attach - this might mean no files were persisted, or backend is extremely slow.
+    // Log a warning but continue to verify the file state
+    console.warn(
+      `file-input-existing-files did not attach within 90s for file: ${fileName}`,
+    );
+    // Try once more with a very short timeout to see current state
+    const count = await existingFilesLocator.count();
+    if (count === 0) {
+      throw new Error(
+        `File "${fileName}" was not persisted: file-input-existing-files element never rendered`,
+      );
+    }
+    // Element exists now, continue with assertions
+  }
 
   // Now verify the file is in the container
   await expect(existingFilesLocator).toContainText(fileName, {
