@@ -40,8 +40,15 @@ jest.mock(
 jest.mock(
   "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/CompetitionForm",
   () => ({
-    CompetitionForm: ({ competitionId }: { competitionId: string }) => (
-      <div data-testid="competition-form" data-competition-id={competitionId} />
+    CompetitionForm: ({
+      competition,
+    }: {
+      competition?: { competition_id?: string };
+    }) => (
+      <div
+        data-testid="competition-form"
+        data-competition-id={competition?.competition_id ?? ""}
+      />
     ),
   }),
 );
