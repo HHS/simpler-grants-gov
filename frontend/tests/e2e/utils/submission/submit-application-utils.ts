@@ -1,4 +1,4 @@
-import { expect, Page } from "@playwright/test";
+import { expect, Page, Response } from "@playwright/test";
 import { UUID_REGEX } from "tests/e2e/utils/common/regex-utils";
 
 export type SubmitOutcome = "success" | "validationError";
@@ -87,7 +87,10 @@ async function clickSubmitAndWaitForOutcome(
   let submitResponse: Response | undefined;
   try {
     // Try first race with explicit result tracking
-    const result = await Promise.race([
+    const result = await Promise.race<{
+      type: "response" | "dom";
+      value?: Response;
+    }>([
       submitResponsePromise.then((resp) => ({
         type: "response" as const,
         value: resp,
@@ -102,7 +105,7 @@ async function clickSubmitAndWaitForOutcome(
   } catch (err) {
     // If first race failed, try to get response one more time
     try {
-      submitResponse = await Promise.race([
+      submitResponse = await Promise.race<Response>([
         submitResponsePromise,
         new Promise<never>((_resolve, reject) =>
           setTimeout(
