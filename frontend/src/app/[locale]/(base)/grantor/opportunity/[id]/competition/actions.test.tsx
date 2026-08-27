@@ -461,6 +461,18 @@ describe("buildRequestBody (tested indirectly via updateCompetition)", () => {
     );
   });
 
+  it("converts grace_period to a number when provided", async () => {
+    const formData = buildValidFormData({ grace_period: "30" });
+    formData.delete("competitionId");
+
+    mockCreateCompetitionForGrantor.mockResolvedValue(successfulCreateResponse);
+
+    await updateCompetition(formData, mockRequiredForms);
+
+    const requestBody = mockCreateCompetitionForGrantor.mock.calls[0][1];
+    expect(requestBody.grace_period).toBe(30);
+  });
+
   it("handles empty field values by returning null", async () => {
     const formData = buildValidFormData();
     formData.delete("competitionId");

@@ -66,6 +66,10 @@ function buildRequestBody(formData: FormData) {
     competition_title: getFieldValue(formData, "competition_title"),
     opening_date: getFieldValue(formData, "opening_date"),
     closing_date: getFieldValue(formData, "closing_date"),
+    grace_period: (() => {
+      const gracePeriod = getFieldValue(formData, "grace_period");
+      return gracePeriod === null ? null : Number(gracePeriod);
+    })(),
     public_competition_id: getFieldValue(formData, "public_competition_id"),
     contact_info: contactInfo,
     open_to_applicants: openToApplicants,

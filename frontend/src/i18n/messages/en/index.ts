@@ -2667,8 +2667,8 @@ export const messages = {
       submissionsOpenHint: "First day applicants can apply",
       submissionsClose: "Public close date",
       submissionsCloseHint: "Deadline listed on Grants.gov",
-      extensionPeriod: "Extension period",
-      extensionPeriodHint: "Number of days accepted past public close date",
+      gracePeriod: "Extension period",
+      gracePeriodHint: "Number of days accepted past public close date",
     },
     sectionApplicationChecklist: {
       header: "Application checklist",

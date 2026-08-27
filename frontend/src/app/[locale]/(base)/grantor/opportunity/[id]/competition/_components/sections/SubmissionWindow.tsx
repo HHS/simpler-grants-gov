@@ -56,13 +56,13 @@ export function SubmissionWindow() {
         <div className="tablet:grid-col-6">
           <FormGroup>
             <DynamicFieldLabel
-              idFor="extension_period"
-              title={t("extensionPeriod")}
-              description={t("extensionPeriodHint")}
+              idFor="grace_period"
+              title={t("gracePeriod")}
+              description={t("gracePeriodHint")}
             />
             <TextInput
-              id="extension_period"
-              name="extension_period"
+              id="grace_period"
+              name="grace_period"
               type="number"
               min="0"
               step="1"
