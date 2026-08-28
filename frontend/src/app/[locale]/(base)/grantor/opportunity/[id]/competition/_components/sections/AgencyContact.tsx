@@ -26,7 +26,6 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
       : contactValues;
 
   //--- Validation for Full Name ---
-  const [nameValue, setNameValue] = useState<string>(contactName);
   const [hasNameError, setHasNameError] = useState<boolean>(false);
   const [nameErrorMsg, setNameErrorMsg] = useState<string[]>([]);
 
@@ -34,8 +33,6 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
   const handleNameInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setNameValue(e.target.value);
-
     if (hasNameError) {
       setHasNameError(false);
       setNameErrorMsg([]);
@@ -60,7 +57,6 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
   };
 
   //--- Validation for Email Address ---
-  const [emailValue, setEmailValue] = useState<string>(contactEmail);
   const [hasEmailError, setHasEmailError] = useState<boolean>(false);
   const [emailErrorMsg, setEmailErrorMsg] = useState<string[]>([]);
   // Production-grade email layout validation regex
@@ -71,8 +67,6 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
   const handleEmailInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setEmailValue(e.target.value);
-
     if (hasEmailError) {
       setHasEmailError(false);
       setEmailErrorMsg([]);
@@ -197,8 +191,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
             fieldId="contact_name"
             fieldMaxLength={255}
             isRequired={true}
-            defaultValue=""
-            value={nameValue}
+            defaultValue={contactName}
             onTextChange={handleNameInputChange}
             onFieldBlur={handleNameFieldBlur}
             rawErrors={nameErrorMsg}
@@ -230,8 +223,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
             fieldId="contact_email"
             fieldMaxLength={255}
             isRequired={true}
-            defaultValue=""
-            value={emailValue}
+            defaultValue={contactEmail}
             onTextChange={handleEmailInputChange}
             onFieldBlur={handleEmailFieldBlur}
             rawErrors={emailErrorMsg}
