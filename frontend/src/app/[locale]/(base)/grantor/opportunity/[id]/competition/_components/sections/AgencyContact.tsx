@@ -31,7 +31,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
 
   // Proactively clear error states as the user types
   const handleNameInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    _e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     if (hasNameError) {
       setHasNameError(false);
@@ -65,7 +65,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
 
   // Proactively clear error states as the user types
   const handleEmailInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    _e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     if (hasEmailError) {
       setHasEmailError(false);
