@@ -40,8 +40,8 @@ export const logger = pino(pinoConfig);
 
 export const logRequest = (
   request: NextRequest,
-  response?: NextResponse,
-  correlationId: string | null = null,
+  response: NextResponse,
+  correlationId: string | null,
 ) => {
   // note that we can't use lodash in middleware, so some of this is being done extra manually
   const { url, method, headers } = request;

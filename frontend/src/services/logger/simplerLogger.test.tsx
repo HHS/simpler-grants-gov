@@ -39,6 +39,7 @@ describe("logRequest", () => {
       new NextResponse(null, {
         status: 200,
       }),
+      null,
     );
     expect(infoMock).not.toHaveBeenCalled();
   });
@@ -57,6 +58,7 @@ describe("logRequest", () => {
       new NextResponse(null, {
         status: 200,
       }),
+      null,
     );
     expect(infoMock).toHaveBeenCalledTimes(1);
     expect(infoMock).toHaveBeenCalledWith({
@@ -88,6 +90,7 @@ describe("logRequest", () => {
         status: 200,
         headers: new Headers({ "cache-control": "no-store" }),
       }),
+      null,
     );
     expect(infoMock).toHaveBeenCalledTimes(1);
     expect(infoMock).toHaveBeenCalledWith({

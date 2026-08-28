@@ -42,17 +42,19 @@ New Relic does not collect search params on URLs by default for security reasons
 
 Since non-admin users will only be able to consume metrics via dashboards, it is important for any important information to be surfaced in dashboards.
 
-Dashboards are authored and maintained in the New Relic UI. This repository contains no dashboard-as-code: the only New Relic Terraform in `infra/` is the AWS cloud integration link in `infra/accounts/monitoring.tf`. Adding or changing a dashboard is therefore a manual step in [one.newrelic.com](https://one.newrelic.com/), and the queries backing our dashboards are documented here so they can be recreated.
+This repository does not define New Relic dashboard resources - there is no dashboard-as-code. Dashboards are created and maintained manually in the New Relic UI at [one.newrelic.com](https://one.newrelic.com/), so the queries behind them are documented here in order to be reproducible.
 
 #### Correlation ID and request URLs
 
-Frontend request logs and anonymous session logs both carry a `correlation_id` attribute, so a single anonymous visitor's path through the site can be reconstructed from New Relic Logs. Health check requests to `/api/health` are deliberately excluded from correlation ID handling, so they never appear in these results.
+Frontend request logs and anonymous session logs both carry a `correlation_id` attribute, so a single anonymous visitor's path through the site can be reconstructed from New Relic Logs.
+
+Requests to `/api/health` do not participate in correlation ID handling: they neither generate nor refresh the correlation ID cookie, and they never emit `anonymous_session_started`. The existing sampling of health request logs is unchanged, so a portion of them still reaches New Relic - but with no `correlation_id`, which keeps them out of the correlation-ID-based queries below.
 
 Attributes available on the frontend request log: `correlation_id`, `url`, `method`, `statusCode`, `userAgent`, `acceptLanguage`, `awsTraceId`, `cacheControl`, `hasSessionCookie`.
 
 Attributes available on the `anonymous_session_started` event: `correlation_id`, `reason` (`missing` or `invalid`), `url` (the URL the session started on), `referer` (`null` when the request carried no `Referer` header).
 
-Suggested widgets for a "Correlation ID" dashboard:
+Suggested widgets for a "Correlation ID" dashboard. These queries have not yet been run against the live New Relic account - treat them as starting points to validate and adjust when the dashboard is actually built:
 
 ```sql
 -- Pages visited by a single correlation id, in order

@@ -7,7 +7,6 @@ import {
   CORRELATION_ID_COOKIE,
   CORRELATION_ID_MAX_AGE_SECONDS,
   getRequestCorrelationId,
-  HEALTH_CHECK_PATHNAME,
   isValidCorrelationId,
 } from "src/services/correlationId/correlationIdMiddleware";
 
@@ -158,7 +157,7 @@ describe("applyCorrelationId", () => {
 
   it("skips correlation id handling entirely for health checks", () => {
     const request = buildRequest({
-      url: `http://anywhere.com${HEALTH_CHECK_PATHNAME}`,
+      url: "http://anywhere.com/api/health",
     });
     const result = applyCorrelationId(request, NextResponse.next());
 
@@ -170,7 +169,7 @@ describe("applyCorrelationId", () => {
   it("does not refresh an existing cookie for health checks", () => {
     const request = buildRequest({
       cookieValue: VALID_UUID,
-      url: `http://anywhere.com${HEALTH_CHECK_PATHNAME}`,
+      url: "http://anywhere.com/api/health",
     });
     const result = applyCorrelationId(request, NextResponse.next());
 
