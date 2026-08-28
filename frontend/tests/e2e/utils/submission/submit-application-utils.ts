@@ -68,6 +68,7 @@ async function clickSubmitAndWaitForOutcome(
   const domOutcomeTimeoutMs = isWebKit ? 180000 : (isFirefox ? 180000 : 120000);
 
   // Set up response listener BEFORE clicking - in WebKit, timing is critical
+  // We use this for logging only, not to determine outcome
   const submitResponsePromise = page
     .waitForResponse(
       (response) => {
@@ -82,34 +83,29 @@ async function clickSubmitAndWaitForOutcome(
     )
     .then((response) => {
       console.warn(`Submit response received: ${response.status()}`);
-      return response;
     })
     .catch((_e) => {
       console.warn("Submit response timeout - proceeding to check DOM outcome");
-      return undefined;
     });
 
   // Set up DOM outcome listeners BEFORE clicking to catch fast renders
-  const domOutcomePromise = Promise.race([
+  const domOutcomePromise = Promise.race<"success" | "validationError">([
     successHeading
       .waitFor({ state: "visible", timeout: domOutcomeTimeoutMs })
-      .then(() => "success"),
+      .then(() => "success" as const),
     validationHeading
       .waitFor({ state: "visible", timeout: domOutcomeTimeoutMs })
-      .then(() => "validationError"),
+      .then(() => "validationError" as const),
   ]);
 
   // Click submit
   await submitAppButton.click();
 
-  // Wait for either response or DOM outcome, whichever comes first
-  // For WebKit, the DOM outcome is the real signal since response might not arrive
-  let outcome: "success" | "validationError" | undefined;
+  // Wait for DOM outcome - this is the real signal
+  // Response promise fires in parallel for logging, but doesn't block outcome detection
+  let outcome: "success" | "validationError";
   try {
-    outcome = await Promise.race<"success" | "validationError" | undefined>([
-      submitResponsePromise.then(() => undefined), // Response doesn't determine outcome
-      domOutcomePromise, // DOM outcome determines outcome
-    ]);
+    outcome = await domOutcomePromise;
   } catch (_e) {
     // Timeout occurred - debug what's actually on the page
     const currentUrl = page.url();
@@ -129,10 +125,6 @@ async function clickSubmitAndWaitForOutcome(
     throw new Error(
       `Failed to detect application submission outcome after 5 minutes. Current URL: ${currentUrl}`,
     );
-  }
-
-  if (!outcome) {
-    throw new Error("Submission outcome could not be determined");
   }
 
   return outcome;
