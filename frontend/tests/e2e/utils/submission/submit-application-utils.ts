@@ -64,8 +64,8 @@ async function clickSubmitAndWaitForOutcome(
 
   // Set timeouts based on browser characteristics
   // For WebKit, use shorter timeout to fail faster if page isn't responding
-  const responseTimeoutMs = isWebKit ? 30000 : (isFirefox ? 60000 : 20000);
-  const domOutcomeTimeoutMs = isWebKit ? 180000 : (isFirefox ? 180000 : 120000);
+  const responseTimeoutMs = isWebKit ? 30000 : isFirefox ? 60000 : 20000;
+  const domOutcomeTimeoutMs = isWebKit ? 180000 : isFirefox ? 180000 : 120000;
 
   // Set up response listener BEFORE clicking - in WebKit, timing is critical
   const submitResponsePromise = page
