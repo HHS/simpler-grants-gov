@@ -3,6 +3,7 @@
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import {
   createCompetitionForGrantor,
+  deleteCompetitionInstructions,
   saveCompetitionInstructions,
   updateCompetitionForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
@@ -187,4 +188,17 @@ export async function competitionFormAction(
   } else {
     redirect(routeTo);
   }
+}
+
+// Wrap the server-side function so that the client component can call it.
+export async function deleteCompetitionInstructionAction(
+  opportunityId: string,
+  competitionId: string,
+  competitionInstructionId: string,
+) {
+  return deleteCompetitionInstructions(
+    opportunityId,
+    competitionId,
+    competitionInstructionId,
+  );
 }

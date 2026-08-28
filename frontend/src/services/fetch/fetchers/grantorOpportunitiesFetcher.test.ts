@@ -2,6 +2,7 @@ import { ApiRequestError } from "src/errors";
 import {
   createCompetitionForGrantor,
   createOpportunity,
+  deleteCompetitionInstructions,
   saveCompetitionInstructions,
   searchOpportunitiesByAgency,
   updateCompetitionForGrantor,
@@ -339,6 +340,47 @@ describe("saveCompetitionInstructions", () => {
 
     await expect(
       saveCompetitionInstructions("opp-123", "compete-321", "pending-file-456"),
+    ).rejects.toThrow("Network failure");
+  });
+});
+
+describe("deleteCompetitionInstructions", () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it("calls fetchGrantorOpportunityWithMethod with DELETE, the correct subPath, and returns the parsed JSON response", async () => {
+    const responseBody = {
+      message: "Instruction deleted successfully",
+      status_code: 200,
+    };
+    mockFetcher.mockResolvedValue({
+      json: () => Promise.resolve(responseBody),
+    });
+
+    const result = await deleteCompetitionInstructions(
+      "opp-123",
+      "compete-321",
+      "instruction-123",
+    );
+
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorOpportunityWithMethod).toHaveBeenCalledWith(
+      "DELETE",
+    );
+    expect(mockFetcher).toHaveBeenCalledWith({
+      subPath: "opp-123/competitions/compete-321/instructions/instruction-123",
+    });
+    expect(result).toEqual(responseBody);
+  });
+
+  it("propagates request errors", async () => {
+    mockFetcher.mockRejectedValue(new Error("Network failure"));
+
+    await expect(
+      deleteCompetitionInstructions(
+        "opp-123",
+        "compete-321",
+        "instruction-123",
+      ),
     ).rejects.toThrow("Network failure");
   });
 });

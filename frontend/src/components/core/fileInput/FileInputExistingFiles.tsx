@@ -20,7 +20,7 @@ export const FileInputExistingFiles = ({
 }) => {
   const t = useTranslations("FileInput.existingFiles");
   if (existingFiles && existingFiles.length) {
-    const existingFilesList = existingFiles.map((existingFile) => {
+    const existingFilesList = existingFiles.map((existingFile, index) => {
       const fileSizeDisplay = existingFile.fileSize
         ? `${formatFileSize(existingFile.fileSize)} | `
         : "";
@@ -37,43 +37,50 @@ export const FileInputExistingFiles = ({
           ? `${t("savedOn")} ${formatDateWithNoPreformattedExpectations(updatedAtDate)}`
           : "";
       return (
-        <Grid
-          key={existingFile.id}
-          gap
-          row
+        <div
+          key={`${existingFile.id}-${index}`}
           className="bg-base-lightest padding-2 margin-top-2"
         >
-          <Grid col={"auto"}>
-            <USWDSIcon
-              name="file_present"
-              className="usa-icon--size-6 text-middle text-primary-dark"
-            />
-          </Grid>
-          <Grid col={"fill"}>
-            <div className="text-bold">{existingFile.fileName}</div>
-            <div>
-              {fileSizeDisplay}
-              {timestampDisplay}
-            </div>
-          </Grid>
-          <Grid col={"auto"} className="display-flex">
-            <Button
-              type="button"
-              unstyled
-              disabled={disabled}
-              onClick={() => {
-                void onDelete(existingFile);
-              }}
+          {hasError > -1 ? (
+            <Grid
+              row
+              className="text-error-dark text-bold margin-bottom-2 margin-left-1"
             >
+              {t("deleteError")}
+            </Grid>
+          ) : null}
+          <Grid gap row>
+            <Grid col={"auto"}>
               <USWDSIcon
-                className="usa-icon margin-right-05 margin-left-neg-05 usa-icon--size-3"
-                name="delete"
+                name="file_present"
+                className="usa-icon--size-6 text-middle text-primary-dark"
               />
-              {t("delete")}
-            </Button>
+            </Grid>
+            <Grid col={"fill"}>
+              <div className="text-bold">{existingFile.fileName}</div>
+              <div>
+                {fileSizeDisplay}
+                {timestampDisplay}
+              </div>
+            </Grid>
+            <Grid col={"auto"} className="display-flex">
+              <Button
+                type="button"
+                unstyled
+                disabled={disabled}
+                onClick={() => {
+                  void onDelete(existingFile);
+                }}
+              >
+                <USWDSIcon
+                  className="usa-icon margin-right-05 margin-left-neg-05 usa-icon--size-3"
+                  name="delete"
+                />
+                {t("delete")}
+              </Button>
+            </Grid>
           </Grid>
-          {hasError > -1 ? <div>{t("deleteError")}</div> : null}
-        </Grid>
+        </div>
       );
     });
     return (

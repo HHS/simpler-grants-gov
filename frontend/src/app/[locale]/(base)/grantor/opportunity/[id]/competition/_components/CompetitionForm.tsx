@@ -47,7 +47,7 @@ export function CompetitionForm({
   const _competitionId: string = competition?.competition_id || "";
   const existingFiles: UploadFileMetadata[] =
     competition?.competition_instructions.map((instruction) => ({
-      id: instruction.file_name,
+      id: instruction.competition_instruction_id,
       fileName: instruction.file_name,
       updatedAt: instruction.updated_at,
       downloadUrl: instruction.download_path,
@@ -144,7 +144,11 @@ export function CompetitionForm({
                 gracePeriod={competition?.grace_period}
               />
               <AgencyContact contactInfo={competition?.contact_info} />
-              <ApplicationInstructions existingFiles={existingFiles} />
+              <ApplicationInstructions
+                opportunityId={_opportunityId}
+                competitionId={_competitionId}
+                existingFiles={existingFiles}
+              />
               <RequiredForms
                 alwaysRequiredForms={alwaysRequiredForms}
                 requiredForms={requiredForms}

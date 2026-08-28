@@ -154,4 +154,23 @@ describe("FileInputExistingFiles", () => {
     expect(screen.getByText("file name 1")).toBeInTheDocument();
     expect(screen.getByText("1 | savedOn 1995")).toBeInTheDocument();
   });
+  it("displays deletion errors above the file row in red bold text", () => {
+    const fileOne = generateFile(testDateOne, 1);
+    render(
+      <FileInputExistingFiles
+        existingFiles={[fileOne]}
+        onDelete={jest.fn()}
+        filesWithDeleteError={[fileOne.id]}
+      />,
+    );
+
+    const errorMessage = screen.getByText("deleteError");
+    const fileName = screen.getByText("file name 1");
+
+    expect(errorMessage).toHaveClass("text-error-dark", "text-bold");
+    expect(
+      errorMessage.compareDocumentPosition(fileName) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
 });
