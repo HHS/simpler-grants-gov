@@ -25,6 +25,8 @@ def opportunity(
     grantor_auth_data,
     opportunity_number="TEST-2026-123",
     opportunity_title="Test Opportunity for GET",
+    tagline="Test tagline for GET",
+    purpose_statement="Test purpose statement for GET",
 ):
     """Create a test opportunity"""
     user, agency, _, _ = grantor_auth_data
@@ -34,6 +36,8 @@ def opportunity(
         agency_code=agency.agency_code,
         opportunity_number=opportunity_number,
         opportunity_title=opportunity_title,
+        tagline=tagline,
+        purpose_statement=purpose_statement,
     )
 
     opportunity.agency_record = agency
@@ -72,6 +76,8 @@ def test_get_opportunity_success(client, db_session, grantor_auth_data, opportun
     assert response_data["opportunity_id"] == str(opportunity.opportunity_id)
     assert response_data["opportunity_number"] == opportunity.opportunity_number
     assert response_data["opportunity_title"] == opportunity.opportunity_title
+    assert response_data["tagline"] == opportunity.tagline
+    assert response_data["purpose_statement"] == opportunity.purpose_statement
     assert response_data["agency_code"] == opportunity.agency_code
     assert response_data["category"] == opportunity.category.value
 

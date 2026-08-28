@@ -88,7 +88,7 @@ export const CommonTextArea = ({
   fieldId: string;
   isRequired: boolean;
   fieldMaxLength: number;
-  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onTextChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   defaultValue?: string;
   rawErrors?: string[];
 }) => {
@@ -106,7 +106,7 @@ export const CommonTextArea = ({
         <Textarea
           name={fieldId}
           id={fieldId}
-          onChange={onTextChange}
+          {...(onTextChange && { onChange: onTextChange })}
           maxLength={fieldMaxLength}
           style={{ maxWidth: "550px" }}
           defaultValue={defaultValue}
@@ -130,6 +130,8 @@ export const CommonCharacterCount = ({
   defaultValue = "",
   value,
   onTextChange,
+  onKeyDown = () => {},
+  onPaste = () => {},
   onFieldBlur = () => {},
   rawErrors = [],
   disabled = false,
@@ -143,7 +145,13 @@ export const CommonCharacterCount = ({
   fieldMaxLength: number;
   defaultValue?: string;
   value?: string;
-  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onTextChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onKeyDown?: (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
+  onPaste?: (
+    e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
   onFieldBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   rawErrors?: string[];
   disabled?: boolean;
@@ -165,7 +173,9 @@ export const CommonCharacterCount = ({
           name={fieldId}
           maxLength={fieldMaxLength}
           {...valueProps}
-          onChange={onTextChange}
+          {...(onTextChange && { onChange: onTextChange })}
+          onKeyDown={onKeyDown}
+          onPaste={onPaste}
           onBlur={onFieldBlur}
           isTextArea={isTextArea}
           aria-describedby={`label-for-${fieldId}`}
