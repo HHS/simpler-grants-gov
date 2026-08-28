@@ -674,6 +674,23 @@ class CompetitionRequestBaseSchema(Schema):
             "example": "Proposal for Advanced Research",
         },
     )
+    public_competition_id = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "The public-facing identifier of the competition",
+            "example": "ABC-123-456",
+        },
+    )
+    grace_period = fields.Integer(
+        required=False,
+        allow_none=True,
+        validate=validators.Range(min=0),
+        metadata={
+            "description": "The number of days after the closing date that applications are still accepted",
+            "example": 5,
+        },
+    )
     opening_date = fields.Date(
         required=True,
         allow_none=True,

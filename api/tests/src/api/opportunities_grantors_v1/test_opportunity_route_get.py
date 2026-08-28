@@ -86,16 +86,28 @@ def test_get_opportunity_with_competition_and_forms(
 
     from tests.src.db.models.factories import CompetitionFactory
 
-    CompetitionFactory.create(opportunity=opportunity)
+    competition = CompetitionFactory.create(
+        opportunity=opportunity,
+        public_competition_id="ABC-123-456",
+        grace_period=5,
+        with_instruction=True,
+    )
 
     response = client.get(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}",
         headers={"X-SGG-Token": token},
     )
 
-    assert response.status_code == 200
+    assert reysponse.status_code == 200
     response_data = response.get_json()["data"]
     assert len(response_data["competitions"]) == 1
+    competition_data = response_data["competitions"][0]
+    assert competition_data["public_competition_id"] == competition.public_competition_id
+    assert competition_data["grace_period"] == competition.grace_period
+    assert len(competition_data["competition_instructions"]) == 1
+    assert competition_data["competition_instructions"][0]["competition_instruction_id"] == str(
+        competition.competition_instructions[0].competition_instruction_id
+    )
 
 
 def test_get_opportunity_with_invalid_jwt_token(client, opportunity):
