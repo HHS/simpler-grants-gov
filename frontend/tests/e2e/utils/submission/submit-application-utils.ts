@@ -86,7 +86,9 @@ async function clickSubmitAndWaitForOutcome(
     await submitResponsePromise;
   } catch (_e) {
     // Response timeout is OK - we'll check DOM outcome instead
-    console.warn("Submit response timeout (expected for slow browsers like WebKit)");
+    console.warn(
+      "Submit response timeout (expected for slow browsers like WebKit)",
+    );
   }
 
   // Wait for page to settle after submission
