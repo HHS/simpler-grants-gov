@@ -106,11 +106,11 @@ async function clickSubmitAndWaitForOutcome(
   // For WebKit, the DOM outcome is the real signal since response might not arrive
   let outcome: "success" | "validationError" | undefined;
   try {
-    outcome = await Promise.race([
+    outcome = await Promise.race<"success" | "validationError" | undefined>([
       submitResponsePromise.then(() => undefined), // Response doesn't determine outcome
       domOutcomePromise, // DOM outcome determines outcome
     ]);
-  } catch (e) {
+  } catch (_e) {
     // Timeout occurred - debug what's actually on the page
     const currentUrl = page.url();
     const bodyText = await page.textContent("body");
