@@ -63,69 +63,65 @@ async function clickSubmitAndWaitForOutcome(
   const isFirefox = browserType === "firefox";
 
   // Set timeouts based on browser characteristics
-  const domOutcomeTimeoutMs = isWebKit ? 180000 : isFirefox ? 180000 : 120000;
+  // For WebKit, use shorter timeout to fail faster if page isn't responding
+  const responseTimeoutMs = isWebKit ? 30000 : (isFirefox ? 60000 : 20000);
+  const domOutcomeTimeoutMs = isWebKit ? 180000 : (isFirefox ? 180000 : 120000);
 
-  // Click submit and immediately set up listeners
-  const submitResponsePromise = page.waitForResponse(
-    (response) => {
-      const url = response.url();
-      return (
-        response.request().method() === "POST" &&
-        url.includes("/api/applications/") &&
-        url.includes("/submit")
-      );
-    },
-    { timeout: domOutcomeTimeoutMs },
-  );
+  // Set up response listener BEFORE clicking - in WebKit, timing is critical
+  const submitResponsePromise = page
+    .waitForResponse(
+      (response) => {
+        const url = response.url();
+        return (
+          response.request().method() === "POST" &&
+          url.includes("/api/applications/") &&
+          url.includes("/submit")
+        );
+      },
+      { timeout: responseTimeoutMs },
+    )
+    .then((response) => {
+      console.warn(`Submit response received: ${response.status()}`);
+      return response;
+    })
+    .catch((_e) => {
+      console.warn("Submit response timeout - proceeding to check DOM outcome");
+      return undefined;
+    });
 
-  await submitAppButton.click();
-
-  // Wait for response - this indicates the backend processed the submission
-  // Don't fail if response times out; the page load state is the signal we care about
-  try {
-    await submitResponsePromise;
-  } catch (_e) {
-    // Response timeout is OK - we'll check DOM outcome instead
-    console.warn(
-      "Submit response timeout (expected for slow browsers like WebKit)",
-    );
-  }
-
-  // Wait for page to settle after submission
-  try {
-    await page.waitForLoadState("domcontentloaded", { timeout: 30000 });
-  } catch (_e) {
-    console.warn("Page load state timeout - page may be navigating or closed");
-  }
-
-  // Give the page a moment to render the outcome
-  try {
-    await page.waitForTimeout(2000);
-  } catch (_e) {
-    console.warn("Timeout wait interrupted - page may have closed");
-  }
-
-  // Now wait for the actual outcome heading to appear
+  // Set up DOM outcome listeners BEFORE clicking to catch fast renders
   const domOutcomePromise = Promise.race([
-    successHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
-    validationHeading.waitFor({
-      state: "visible",
-      timeout: domOutcomeTimeoutMs,
-    }),
+    successHeading
+      .waitFor({ state: "visible", timeout: domOutcomeTimeoutMs })
+      .then(() => "success"),
+    validationHeading
+      .waitFor({ state: "visible", timeout: domOutcomeTimeoutMs })
+      .then(() => "validationError"),
   ]);
 
+  // Click submit
+  await submitAppButton.click();
+
+  // Wait for either response or DOM outcome, whichever comes first
+  // For WebKit, the DOM outcome is the real signal since response might not arrive
+  let outcome: "success" | "validationError" | undefined;
   try {
-    await domOutcomePromise;
+    outcome = await Promise.race([
+      submitResponsePromise.then(() => undefined), // Response doesn't determine outcome
+      domOutcomePromise, // DOM outcome determines outcome
+    ]);
   } catch (e) {
-    console.error("Failed to detect submission outcome heading", e);
-    // Take a screenshot for debugging
-    await page.screenshot({ path: `submission-failure-${Date.now()}.png` });
+    console.error("Neither response nor DOM outcome detected", e);
     throw new Error(
-      "Submission outcome heading (success or validation) did not appear within timeout",
+      "Failed to detect application submission outcome after 5 minutes",
     );
   }
 
-  return (await validationHeading.isVisible()) ? "validationError" : "success";
+  if (!outcome) {
+    throw new Error("Submission outcome could not be determined");
+  }
+
+  return outcome;
 }
 
 /**
