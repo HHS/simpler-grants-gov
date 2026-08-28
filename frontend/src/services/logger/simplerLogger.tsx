@@ -38,7 +38,11 @@ const pinoConfig =
 
 export const logger = pino(pinoConfig);
 
-export const logRequest = (request: NextRequest, response?: NextResponse) => {
+export const logRequest = (
+  request: NextRequest,
+  response?: NextResponse,
+  correlationId: string | null = null,
+) => {
   // note that we can't use lodash in middleware, so some of this is being done extra manually
   const { url, method, headers } = request;
 
@@ -60,6 +64,7 @@ export const logRequest = (request: NextRequest, response?: NextResponse) => {
         statusCode: response?.status,
         cacheControl: response?.headers?.get("cache-control"),
         hasSessionCookie: request.cookies.get("session") !== undefined,
+        correlation_id: correlationId,
       });
     }
   }
