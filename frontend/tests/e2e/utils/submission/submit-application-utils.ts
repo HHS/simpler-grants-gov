@@ -82,26 +82,25 @@ async function clickSubmitAndWaitForOutcome(
 
   // Wait for response - this indicates the backend processed the submission
   // Don't fail if response times out; the page load state is the signal we care about
-  let submitResponse;
   try {
-    submitResponse = await submitResponsePromise;
-  } catch (e) {
+    await submitResponsePromise;
+  } catch (_e) {
     // Response timeout is OK - we'll check DOM outcome instead
-    console.log("Submit response timeout (expected for slow browsers like WebKit)");
+    console.warn("Submit response timeout (expected for slow browsers like WebKit)");
   }
 
   // Wait for page to settle after submission
   try {
     await page.waitForLoadState("domcontentloaded", { timeout: 30000 });
-  } catch (e) {
-    console.log("Page load state timeout - page may be navigating or closed");
+  } catch (_e) {
+    console.warn("Page load state timeout - page may be navigating or closed");
   }
 
   // Give the page a moment to render the outcome
   try {
     await page.waitForTimeout(2000);
-  } catch (e) {
-    console.log("Timeout wait interrupted - page may have closed");
+  } catch (_e) {
+    console.warn("Timeout wait interrupted - page may have closed");
   }
 
   // Now wait for the actual outcome heading to appear
