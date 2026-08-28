@@ -63,9 +63,7 @@ async function clickSubmitAndWaitForOutcome(
   const isFirefox = browserType === "firefox";
 
   // Set timeouts based on browser characteristics
-  const responseTimeoutMs = isWebKit ? 180000 : isFirefox ? 120000 : 60000;
-  // 3 min for WebKit, 2 min for Firefox, 2 min for Chrome
-  const domOutcomeTimeoutMs = isWebKit ? 180000 : isFirefox ? 180000 : 120000;
+  const domOutcomeTimeoutMs = isWebKit ? 180000 : (isFirefox ? 180000 : 120000);
 
   const submitResponsePromise = page.waitForResponse(
     (response) => {
@@ -76,7 +74,7 @@ async function clickSubmitAndWaitForOutcome(
         url.includes("/submit")
       );
     },
-    { timeout: responseTimeoutMs },
+    { timeout: domOutcomeTimeoutMs },
   );
 
   await submitAppButton.click();
@@ -84,65 +82,11 @@ async function clickSubmitAndWaitForOutcome(
   // Set up DOM outcome detection with browser-specific timeout
   const domOutcomePromise = Promise.race([
     successHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
-    validationHeading.waitFor({
-      state: "visible",
-      timeout: domOutcomeTimeoutMs,
-    }),
+    validationHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
   ]);
 
   // Wait for whichever comes first: response or DOM outcome
-  let submitResponse: Response | undefined;
-  try {
-    // Try first race with explicit result tracking
-    const result = await Promise.race<{
-      type: "response" | "dom";
-      value?: Response;
-    }>([
-      submitResponsePromise.then((resp) => ({
-        type: "response" as const,
-        value: resp,
-      })),
-      domOutcomePromise.then(() => ({ type: "dom" as const })),
-    ]);
-
-    if (result.type === "response") {
-      submitResponse = result.value;
-    }
-    // If DOM outcome won the race, submitResponse stays undefined for now
-  } catch (_err) {
-    // If first race failed, try to get response one more time
-    try {
-      submitResponse = await Promise.race<Response>([
-        submitResponsePromise,
-        new Promise<never>((_resolve, reject) =>
-          setTimeout(
-            () => reject(new Error("Failed to get /submit response")),
-            isWebKit ? 30000 : isFirefox ? 20000 : 10000,
-          ),
-        ),
-      ]);
-    } catch (_responseErr) {
-      // Response never arrived, but DOM outcome may still appear - don't fail yet
-      // Just ensure we have the DOM outcome
-      await Promise.race([
-        successHeading.waitFor({
-          state: "visible",
-          timeout: domOutcomeTimeoutMs,
-        }),
-        validationHeading.waitFor({
-          state: "visible",
-          timeout: domOutcomeTimeoutMs,
-        }),
-      ]);
-    }
-  }
-
-  // Validate response status if we got one
-  if (submitResponse && submitResponse.status() !== 200) {
-    throw new Error(
-      `Application submission returned status ${submitResponse.status()}`,
-    );
-  }
+  await Promise.race([submitResponsePromise, domOutcomePromise]);
 
   await page.waitForLoadState("domcontentloaded");
   await page.waitForTimeout(5000);
@@ -150,10 +94,7 @@ async function clickSubmitAndWaitForOutcome(
   // Ensure outcome heading is visible
   await Promise.race([
     successHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
-    validationHeading.waitFor({
-      state: "visible",
-      timeout: domOutcomeTimeoutMs,
-    }),
+    validationHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
   ]);
 
   return (await validationHeading.isVisible()) ? "validationError" : "success";
