@@ -38,6 +38,11 @@ const pinoConfig =
 
 export const logger = pino(pinoConfig);
 
+// health checks are high volume and low signal. logRequest keeps a 10% sample of them so we
+// can still confirm they're running, logResponse drops them entirely to avoid double logging
+const isHealthCheck = (url: string | null) =>
+  url !== null && url.endsWith("/health");
+
 export const logRequest = (request: NextRequest, response?: NextResponse) => {
   // note that we can't use lodash in middleware, so some of this is being done extra manually
   const { url, method, headers } = request;
@@ -50,7 +55,7 @@ export const logRequest = (request: NextRequest, response?: NextResponse) => {
     headers.get("sec-fetch-dest") === "empty";
 
   if (!isPrefetch) {
-    if (!url.endsWith("/health") || Math.random() * 10 <= 1) {
+    if (!isHealthCheck(url) || Math.random() * 10 <= 1) {
       logger.info({
         url,
         method,
@@ -68,9 +73,15 @@ export const logRequest = (request: NextRequest, response?: NextResponse) => {
 export const logResponse = (response: Response) => {
   // resonse url is undefined, work around with manually set header
   const { status, headers } = response;
+  const url = headers.get("simpler-request-for");
+
+  if (isHealthCheck(url)) {
+    return;
+  }
+
   logger.info({
     status,
-    url: headers.get("simpler-request-for"),
+    url,
     awsTraceId: headers.get("X-Amz-Cf-Id"),
   });
 };

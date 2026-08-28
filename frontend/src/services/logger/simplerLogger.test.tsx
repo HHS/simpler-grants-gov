@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { logRequest } from "src/services/logger/simplerLogger";
+import { logRequest, logResponse } from "src/services/logger/simplerLogger";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -20,6 +20,8 @@ jest.mock("pino", () => ({
 describe("logRequest", () => {
   afterEach(() => {
     jest.resetAllMocks();
+    // the health check sampling tests spy on Math.random, put it back
+    jest.restoreAllMocks();
   });
   it("does not call logger if the request meets criteria for being a prefetch", () => {
     logRequest(
@@ -92,6 +94,74 @@ describe("logRequest", () => {
       statusCode: 200,
       cacheControl: "no-store",
       hasSessionCookie: false,
+    });
+  });
+  it("does not call logger for health checks outside of the ten percent sample", () => {
+    jest.spyOn(Math, "random").mockReturnValue(0.5);
+    logRequest(
+      new NextRequest("http://anywhere.com/api/health"),
+      new NextResponse(null, {
+        status: 200,
+      }),
+    );
+    expect(infoMock).not.toHaveBeenCalled();
+  });
+  it("calls logger for health checks inside of the ten percent sample", () => {
+    jest.spyOn(Math, "random").mockReturnValue(0.05);
+    logRequest(
+      new NextRequest("http://anywhere.com/api/health"),
+      new NextResponse(null, {
+        status: 200,
+      }),
+    );
+    expect(infoMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("logResponse", () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+  it("does not call logger for health check responses", () => {
+    logResponse(
+      new Response(null, {
+        status: 200,
+        headers: new Headers({
+          "simpler-request-for": "http://anywhere.com/api/health",
+          "X-Amz-Cf-Id": "a trace id",
+        }),
+      }),
+    );
+    expect(infoMock).not.toHaveBeenCalled();
+  });
+  it("calls logger for other api route responses", () => {
+    logResponse(
+      new Response(null, {
+        status: 200,
+        headers: new Headers({
+          "simpler-request-for": "http://anywhere.com/api/user",
+          "X-Amz-Cf-Id": "a trace id",
+        }),
+      }),
+    );
+    expect(infoMock).toHaveBeenCalledTimes(1);
+    expect(infoMock).toHaveBeenCalledWith({
+      status: 200,
+      url: "http://anywhere.com/api/user",
+      awsTraceId: "a trace id",
+    });
+  });
+  it("calls logger when the request url header is missing", () => {
+    logResponse(
+      new Response(null, {
+        status: 500,
+      }),
+    );
+    expect(infoMock).toHaveBeenCalledTimes(1);
+    expect(infoMock).toHaveBeenCalledWith({
+      status: 500,
+      url: null,
+      awsTraceId: null,
     });
   });
 });
