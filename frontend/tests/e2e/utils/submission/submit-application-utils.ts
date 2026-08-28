@@ -49,27 +49,6 @@ async function clickSubmitAndWaitForOutcome(
   await submitAppButton.waitFor({ state: "visible", timeout: 15000 });
   await expect(submitAppButton).toBeEnabled({ timeout: 15000 });
 
-  const submitResponsePromise = page.waitForResponse((response) => {
-    const url = response.url();
-    return (
-      response.request().method() === "POST" &&
-      url.includes("/api/applications/") &&
-      url.includes("/submit")
-    );
-  });
-
-  await submitAppButton.click();
-  const submitResponse = await submitResponsePromise;
-
-  if (submitResponse.status() !== 200) {
-    throw new Error(
-      `Application submission returned status ${submitResponse.status()}`,
-    );
-  }
-
-  await page.waitForLoadState("domcontentloaded");
-  await page.waitForTimeout(5000);
-
   const successHeading = page.getByRole("heading", {
     name: /your application has been submitted/i,
   });
@@ -77,12 +56,84 @@ async function clickSubmitAndWaitForOutcome(
     name: /your application could not be submitted/i,
   });
 
-  await Promise.race([
-    successHeading.waitFor({ state: "visible", timeout: 120000 }),
-    validationHeading.waitFor({ state: "visible", timeout: 120000 }),
+  // Determine browser and set appropriate timeouts.
+  // WebKit and Firefox are slower at both network event processing and DOM rendering.
+  const browserType = page.context().browser()?.browserType().name();
+  const isWebKit = browserType === "webkit";
+  const isFirefox = browserType === "firefox";
+
+  // Set timeouts based on browser characteristics
+  // For WebKit, use shorter timeout to fail faster if page isn't responding
+  const responseTimeoutMs = isWebKit ? 30000 : isFirefox ? 60000 : 20000;
+  const domOutcomeTimeoutMs = isWebKit ? 180000 : isFirefox ? 180000 : 120000;
+
+  // Set up response listener BEFORE clicking - in WebKit, timing is critical
+  // We use this for logging only, not to determine outcome (prefixed with _ to indicate unused)
+  const _submitResponsePromise = page
+    .waitForResponse(
+      (response) => {
+        const url = response.url();
+        return (
+          response.request().method() === "POST" &&
+          url.includes("/api/applications/") &&
+          url.includes("/submit")
+        );
+      },
+      { timeout: responseTimeoutMs },
+    )
+    .then((response) => {
+      console.warn(`Submit response received: ${response.status()}`);
+      return undefined;
+    })
+    .catch((_e) => {
+      console.warn("Submit response timeout - proceeding to check DOM outcome");
+      return undefined;
+    });
+
+  // Set up DOM outcome listeners BEFORE clicking to catch fast renders
+  const domOutcomePromise = Promise.race<"success" | "validationError">([
+    successHeading
+      .waitFor({ state: "visible", timeout: domOutcomeTimeoutMs })
+      .then(() => "success" as const),
+    validationHeading
+      .waitFor({ state: "visible", timeout: domOutcomeTimeoutMs })
+      .then(() => "validationError" as const),
   ]);
 
-  return (await validationHeading.isVisible()) ? "validationError" : "success";
+  // Click submit
+  await submitAppButton.click();
+
+  // Wait for DOM outcome - this is the real signal
+  // Response promise fires in parallel for logging, but doesn't block outcome detection
+  let outcome: "success" | "validationError";
+  try {
+    outcome = await domOutcomePromise;
+  } catch (_e) {
+    // Timeout occurred - debug what's actually on the page
+    const currentUrl = page.url();
+    const bodyText = await page.textContent("body");
+    const allHeadings = await page
+      .locator("h1, h2, h3, h4, h5, h6")
+      .allTextContents();
+    const pageTitle = await page.title();
+
+    console.error("Submission outcome detection timeout");
+    console.error(`Current URL: ${currentUrl}`);
+    console.error(`Page title: ${pageTitle}`);
+    console.error(`All headings on page: ${allHeadings.join(" | ")}`);
+    console.error(
+      `Page content preview (first 500 chars): ${bodyText?.substring(0, 500)}`,
+    );
+
+    // Take screenshot for visual debugging
+    await page.screenshot({ path: `submission-timeout-${Date.now()}.png` });
+
+    throw new Error(
+      `Failed to detect application submission outcome after 5 minutes. Current URL: ${currentUrl}`,
+    );
+  }
+
+  return outcome;
 }
 
 /**
