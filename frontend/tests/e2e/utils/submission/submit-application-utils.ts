@@ -64,8 +64,8 @@ async function clickSubmitAndWaitForOutcome(
 
   // Set timeouts based on browser characteristics
   // For WebKit, use shorter timeout to fail faster if page isn't responding
-  const responseTimeoutMs = isWebKit ? 30000 : isFirefox ? 60000 : 20000;
-  const domOutcomeTimeoutMs = isWebKit ? 180000 : isFirefox ? 180000 : 120000;
+  const responseTimeoutMs = isWebKit ? 30000 : (isFirefox ? 60000 : 20000);
+  const domOutcomeTimeoutMs = isWebKit ? 180000 : (isFirefox ? 180000 : 120000);
 
   // Set up response listener BEFORE clicking - in WebKit, timing is critical
   const submitResponsePromise = page
@@ -111,9 +111,23 @@ async function clickSubmitAndWaitForOutcome(
       domOutcomePromise, // DOM outcome determines outcome
     ]);
   } catch (e) {
-    console.error("Neither response nor DOM outcome detected", e);
+    // Timeout occurred - debug what's actually on the page
+    const currentUrl = page.url();
+    const bodyText = await page.textContent("body");
+    const allHeadings = await page.locator("h1, h2, h3, h4, h5, h6").allTextContents();
+    const pageTitle = await page.title();
+    
+    console.error("Submission outcome detection timeout");
+    console.error(`Current URL: ${currentUrl}`);
+    console.error(`Page title: ${pageTitle}`);
+    console.error(`All headings on page: ${allHeadings.join(" | ")}`);
+    console.error(`Page content preview (first 500 chars): ${bodyText?.substring(0, 500)}`);
+    
+    // Take screenshot for visual debugging
+    await page.screenshot({ path: `submission-timeout-${Date.now()}.png` });
+    
     throw new Error(
-      "Failed to detect application submission outcome after 5 minutes",
+      `Failed to detect application submission outcome after 5 minutes. Current URL: ${currentUrl}`,
     );
   }
 
