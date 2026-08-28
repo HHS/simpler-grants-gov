@@ -63,29 +63,36 @@ async function clickSubmitAndWaitForOutcome(
   const isFirefox = browserType === "firefox";
 
   // Set timeouts based on browser characteristics
-  const domOutcomeTimeoutMs = isWebKit ? 180000 : (isFirefox ? 180000 : 120000);
+  const domOutcomeTimeoutMs = isWebKit ? 180000 : isFirefox ? 180000 : 120000;
 
-  const submitResponsePromise = page.waitForResponse(
-    (response) => {
-      const url = response.url();
-      return (
-        response.request().method() === "POST" &&
-        url.includes("/api/applications/") &&
-        url.includes("/submit")
-      );
-    },
-    { timeout: domOutcomeTimeoutMs },
-  );
+  // Make the response promise optional - if it times out (especially WebKit),
+  // it won't crash the race logic; we'll rely on DOM outcome detection instead.
+  const submitResponsePromise = page
+    .waitForResponse(
+      (response) => {
+        const url = response.url();
+        return (
+          response.request().method() === "POST" &&
+          url.includes("/api/applications/") &&
+          url.includes("/submit")
+        );
+      },
+      { timeout: domOutcomeTimeoutMs },
+    )
+    .catch(() => undefined); // Timeout is ok - DOM outcome is primary signal
 
   await submitAppButton.click();
 
   // Set up DOM outcome detection with browser-specific timeout
   const domOutcomePromise = Promise.race([
     successHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
-    validationHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
+    validationHeading.waitFor({
+      state: "visible",
+      timeout: domOutcomeTimeoutMs,
+    }),
   ]);
 
-  // Wait for whichever comes first: response or DOM outcome
+  // Wait for DOM outcome (response is optional and won't crash the race)
   await Promise.race([submitResponsePromise, domOutcomePromise]);
 
   await page.waitForLoadState("domcontentloaded");
@@ -94,7 +101,10 @@ async function clickSubmitAndWaitForOutcome(
   // Ensure outcome heading is visible
   await Promise.race([
     successHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
-    validationHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
+    validationHeading.waitFor({
+      state: "visible",
+      timeout: domOutcomeTimeoutMs,
+    }),
   ]);
 
   return (await validationHeading.isVisible()) ? "validationError" : "success";
