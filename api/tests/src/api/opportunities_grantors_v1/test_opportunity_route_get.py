@@ -98,7 +98,7 @@ def test_get_opportunity_with_competition_and_forms(
         headers={"X-SGG-Token": token},
     )
 
-    assert reysponse.status_code == 200
+    assert response.status_code == 200
     response_data = response.get_json()["data"]
     assert len(response_data["competitions"]) == 1
     competition_data = response_data["competitions"][0]
