@@ -65,25 +65,46 @@ async function clickSubmitAndWaitForOutcome(
   // Set timeouts based on browser characteristics
   const domOutcomeTimeoutMs = isWebKit ? 180000 : isFirefox ? 180000 : 120000;
 
-  // Make the response promise optional - if it times out (especially WebKit),
-  // it won't crash the race logic; we'll rely on DOM outcome detection instead.
-  const submitResponsePromise = page
-    .waitForResponse(
-      (response) => {
-        const url = response.url();
-        return (
-          response.request().method() === "POST" &&
-          url.includes("/api/applications/") &&
-          url.includes("/submit")
-        );
-      },
-      { timeout: domOutcomeTimeoutMs },
-    )
-    .catch(() => undefined); // Timeout is ok - DOM outcome is primary signal
+  // Click submit and immediately set up listeners
+  const submitResponsePromise = page.waitForResponse(
+    (response) => {
+      const url = response.url();
+      return (
+        response.request().method() === "POST" &&
+        url.includes("/api/applications/") &&
+        url.includes("/submit")
+      );
+    },
+    { timeout: domOutcomeTimeoutMs },
+  );
 
   await submitAppButton.click();
 
-  // Set up DOM outcome detection with browser-specific timeout
+  // Wait for response - this indicates the backend processed the submission
+  // Don't fail if response times out; the page load state is the signal we care about
+  let submitResponse;
+  try {
+    submitResponse = await submitResponsePromise;
+  } catch (e) {
+    // Response timeout is OK - we'll check DOM outcome instead
+    console.log("Submit response timeout (expected for slow browsers like WebKit)");
+  }
+
+  // Wait for page to settle after submission
+  try {
+    await page.waitForLoadState("domcontentloaded", { timeout: 30000 });
+  } catch (e) {
+    console.log("Page load state timeout - page may be navigating or closed");
+  }
+
+  // Give the page a moment to render the outcome
+  try {
+    await page.waitForTimeout(2000);
+  } catch (e) {
+    console.log("Timeout wait interrupted - page may have closed");
+  }
+
+  // Now wait for the actual outcome heading to appear
   const domOutcomePromise = Promise.race([
     successHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
     validationHeading.waitFor({
@@ -92,20 +113,16 @@ async function clickSubmitAndWaitForOutcome(
     }),
   ]);
 
-  // Wait for DOM outcome (response is optional and won't crash the race)
-  await Promise.race([submitResponsePromise, domOutcomePromise]);
-
-  await page.waitForLoadState("domcontentloaded");
-  await page.waitForTimeout(5000);
-
-  // Ensure outcome heading is visible
-  await Promise.race([
-    successHeading.waitFor({ state: "visible", timeout: domOutcomeTimeoutMs }),
-    validationHeading.waitFor({
-      state: "visible",
-      timeout: domOutcomeTimeoutMs,
-    }),
-  ]);
+  try {
+    await domOutcomePromise;
+  } catch (e) {
+    console.error("Failed to detect submission outcome heading", e);
+    // Take a screenshot for debugging
+    await page.screenshot({ path: `submission-failure-${Date.now()}.png` });
+    throw new Error(
+      "Submission outcome heading (success or validation) did not appear within timeout",
+    );
+  }
 
   return (await validationHeading.isVisible()) ? "validationError" : "success";
 }
