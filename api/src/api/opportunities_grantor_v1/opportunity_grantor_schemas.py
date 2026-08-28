@@ -239,6 +239,8 @@ class OpportunityGetResponseSchema(AbstractResponseSchema):
       "data": {
         "opportunity_number": "ABC-2026-001",
         "opportunity_title": "Research Grant for Climate Innovation",
+        "tagline": "Accelerating climate innovation",
+        "purpose_statement": "Support research that advances innovative climate technologies.",
         "agency_id": "550e8400-e29b-41d4-a716-446655440000",
         "category": "discretionary",
         "category_explanation": "Competitive research grant",

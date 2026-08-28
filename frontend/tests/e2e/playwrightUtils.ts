@@ -15,11 +15,18 @@ export async function waitForURLChange(
   timeout = 60000, // query params get set after a debounce period)
 ) {
   const endTime = Date.now() + timeout;
+  let consecutiveMatches = 0;
+  const requiredConsecutiveMatches = 2; // URL must match twice in a row to be considered stable
 
   while (Date.now() < endTime) {
     const changeComplete = changeCheck(page.url());
     if (changeComplete) {
-      return;
+      consecutiveMatches++;
+      if (consecutiveMatches >= requiredConsecutiveMatches) {
+        return;
+      }
+    } else {
+      consecutiveMatches = 0;
     }
 
     await page.waitForTimeout(500);
