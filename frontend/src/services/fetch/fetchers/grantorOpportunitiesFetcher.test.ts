@@ -246,6 +246,20 @@ describe("createCompetitionForGrantor", () => {
     });
     expect(result).toEqual({ data: { competition_id: "new-competition-id" } });
   });
+
+  it("includes public_competition_id in the request body", async () => {
+    const competitionWithPublicId: CompetitionSaveRequest = {
+      ...competitionData,
+      public_competition_id: "PUBLIC-COMP-789",
+    };
+
+    await createCompetitionForGrantor("opp-123", competitionWithPublicId);
+
+    expect(mockFetcher).toHaveBeenCalledWith({
+      subPath: "opp-123/competitions",
+      body: competitionWithPublicId,
+    });
+  });
 });
 
 describe("updateCompetitionForGrantor", () => {
