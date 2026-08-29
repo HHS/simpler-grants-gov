@@ -415,12 +415,12 @@ export const messages = {
         "Award maximum cannot be less than Award minimum.",
     },
     attachments: {
-      removeButton: "Remove",
       uploadLabel: "Upload files",
-      errorHeading: "Upload error",
-      errorUploadFailed: "Failed to upload {fileName}.",
-      errorDeleteFailed: "Failed to delete {fileName}.",
-      errorFileTooLarge: "{fileName} exceeds the 2GB file size limit.",
+      uploading: "Uploading...",
+      success:
+        "Success: File scan complete. Save this form to attach the file.",
+      error:
+        "Processing failed due to a system error. Try uploading your file again.",
     },
   },
   Application: {
