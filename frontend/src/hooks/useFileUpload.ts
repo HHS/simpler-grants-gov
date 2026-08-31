@@ -153,6 +153,12 @@ export const useFileUpload = ({
       const fileName = fileToUpload.name || "No Filename!";
       setFileName(fileName);
 
+      if (fileToUpload.size === 0) {
+        setCurrentStatus("processing");
+        handleError(new Error("file size of 0 bytes is not allowed"));
+        return;
+      }
+
       if (maxFileSizeBytes && fileToUpload.size > maxFileSizeBytes) {
         setCurrentStatus("too-large");
         handleError(
