@@ -324,7 +324,9 @@ async function waitForUploadRetryControlsVisible(
   timeoutMs = 30000,
 ): Promise<void> {
   if (locators.length === 0) {
-    throw new Error("waitForUploadRetryControlsVisible requires at least one locator");
+    throw new Error(
+      "waitForUploadRetryControlsVisible requires at least one locator",
+    );
   }
 
   try {
