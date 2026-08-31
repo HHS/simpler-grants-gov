@@ -320,7 +320,6 @@ export async function assertFileInputHidden(
  * alternative resolves immediately and we only fail after the timeout.
  */
 async function waitForUploadRetryControlsVisible(
-  page: Page,
   locators: Locator[],
   timeoutMs = 30000,
 ): Promise<void> {
@@ -361,7 +360,6 @@ async function assertRetryControlVisible(
   const chooseFromFolder = page.getByText(/choose from folder/i).first();
 
   await waitForUploadRetryControlsVisible(
-    page,
     [fileInputWrapper, dismissButton, cancelButton, chooseFromFolder],
     timeoutMs,
   );
