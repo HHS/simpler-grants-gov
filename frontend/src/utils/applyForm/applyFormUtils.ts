@@ -643,7 +643,6 @@ export const shapeFormData = <T extends object>(
   formData: FormData,
   formSchema: RJSFSchema,
 ): T => {
-
   const structuredFormData = formDataToObject(
     formData,
     condenseFormSchemaProperties(formSchema),
