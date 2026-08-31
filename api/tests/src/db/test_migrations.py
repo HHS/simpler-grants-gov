@@ -1,14 +1,21 @@
 import logging
 import uuid
+from unittest.mock import Mock
 
 import alembic.command as command
 import grants_shared.adapters.db as db
 import pytest
+import sqlalchemy
 from alembic.script import ScriptDirectory
 from alembic.script.revision import MultipleHeads
 from alembic.util.exc import CommandError
 
-from src.db.migrations.run import alembic_cfg
+from src.db.migrations.run import (
+    alembic_cfg,
+    collapse_sql,
+    enable_query_error_logging,
+    log_migration_sql_error,
+)
 from tests.lib import db_testing
 
 
@@ -76,3 +83,66 @@ def test_db_init_with_migrations(empty_schema):
     # Verify the DB session works after initializing the migrations
     db_session = empty_schema.get_session()
     db_session.close()
+
+
+@pytest.fixture
+def query_error_logging():
+    """Register the migration error logging listener, and clean it up afterwards.
+
+    The listener attaches to the Engine class itself, so it'd otherwise
+    stay registered for every test that runs after this one.
+    """
+    enable_query_error_logging()
+    yield
+    sqlalchemy.event.remove(sqlalchemy.engine.Engine, "handle_error", log_migration_sql_error)
+
+
+@pytest.mark.parametrize(
+    "statement,expected",
+    [
+        ("SELECT 1", "SELECT 1"),
+        (
+            "CREATE TABLE api.example (\n\texample_id UUID NOT NULL, \n\tname TEXT\n)\n\n",
+            "CREATE TABLE api.example ( example_id UUID NOT NULL, name TEXT )",
+        ),
+    ],
+)
+def test_collapse_sql(statement, expected):
+    assert collapse_sql(statement) == expected
+
+
+def test_successful_migration_sql_not_logged(
+    empty_schema, query_error_logging, caplog: pytest.LogCaptureFixture
+):
+    caplog.set_level(logging.DEBUG)
+
+    db_session = empty_schema.get_session()
+    db_session.execute(sqlalchemy.text("CREATE TABLE example (\n\texample_id INT\n)"))
+    db_session.close()
+
+    assert not [record for record in caplog.records if hasattr(record, "migrate.sql")]
+
+
+def test_failing_migration_sql_logged_at_error(
+    empty_schema, query_error_logging, caplog: pytest.LogCaptureFixture
+):
+    caplog.set_level(logging.INFO)
+
+    db_session = empty_schema.get_session()
+    with pytest.raises(sqlalchemy.exc.ProgrammingError):
+        db_session.execute(sqlalchemy.text("CREATE TABLE example (\n\tbad_column NOT_A_TYPE\n)"))
+    db_session.close()
+
+    error_records = [record for record in caplog.records if record.levelno == logging.ERROR]
+    assert [getattr(record, "migrate.sql") for record in error_records] == [
+        "CREATE TABLE example ( bad_column NOT_A_TYPE )"
+    ]
+
+
+def test_failing_connection_without_statement_not_logged(caplog: pytest.LogCaptureFixture):
+    """Errors that aren't tied to a statement (eg. failing to connect) have nothing to log."""
+    caplog.set_level(logging.INFO)
+
+    log_migration_sql_error(Mock(spec=sqlalchemy.ExceptionContext, statement=None))
+
+    assert not caplog.records

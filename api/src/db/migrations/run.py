@@ -3,8 +3,6 @@
 # running on the production docker image from any directory.
 import logging
 import os
-import time
-from typing import Any
 
 import alembic.command as command
 import alembic.script as script
@@ -34,7 +32,7 @@ init_general_logging(logging.root, "migrations", "simpler-grants")
 
 @ecs_background_task(JobType.MIGRATE_UP)
 def up(revision: str = "head") -> None:
-    enable_query_logging()
+    enable_query_error_logging()
     command.upgrade(alembic_cfg, revision)
     # Sync lookup values like enums or other static data
     sync_lookup_values()
@@ -42,48 +40,35 @@ def up(revision: str = "head") -> None:
 
 @ecs_background_task(JobType.MIGRATE_DOWN)
 def down(revision: str = "-1") -> None:
-    enable_query_logging()
+    enable_query_error_logging()
     command.downgrade(alembic_cfg, revision)
 
 
 @ecs_background_task(JobType.MIGRATE_DOWNALL)
 def downall(revision: str = "base") -> None:
-    enable_query_logging()
+    enable_query_error_logging()
     command.downgrade(alembic_cfg, revision)
 
 
-def enable_query_logging() -> None:
-    """Log each migration query as it happens along with timing.
+def collapse_sql(statement: str) -> str:
+    """Collapse a multi-line SQL statement onto a single line."""
+    return " ".join(statement.split())
 
-    Based on the example at https://docs.sqlalchemy.org/en/20/faq/performance.html#query-profiling
-    """
 
-    @sqlalchemy.event.listens_for(sqlalchemy.engine.Engine, "before_cursor_execute", retval=True)
-    def before_execute(
-        conn: sqlalchemy.Connection,
-        _cursor: Any,
-        statement: str,
-        _parameters: Any,
-        _context: Any,
-        _executemany: bool,
-    ) -> tuple[str, Any]:
-        conn.info.setdefault("query_start_time", []).append(time.monotonic())
-        logger.info("Running migration SQL", extra={"migrate.sql": statement.strip()})
-        return statement, _parameters
+def log_migration_sql_error(exception_context: sqlalchemy.ExceptionContext) -> None:
+    # Errors raised outside of executing a statement (eg. connecting to the DB)
+    # don't have a statement attached to them
+    if exception_context.statement is None:
+        return
 
-    @sqlalchemy.event.listens_for(sqlalchemy.engine.Engine, "after_cursor_execute")
-    def after_execute(
-        conn: sqlalchemy.Connection,
-        _cursor: Any,
-        statement: str,
-        _parameters: Any,
-        _context: Any,
-        _executemany: bool,
-    ) -> None:
-        total = int(1000 * (time.monotonic() - conn.info["query_start_time"].pop(-1)))
-        logger.info(
-            "Ran migration SQL", extra={"migrate.sql": statement.strip(), "migrate.time_ms": total}
-        )
+    logger.error(
+        "Migration SQL failed", extra={"migrate.sql": collapse_sql(exception_context.statement)}
+    )
+
+
+def enable_query_error_logging() -> None:
+    """Log the SQL of any migration statement that fails."""
+    sqlalchemy.event.listen(sqlalchemy.engine.Engine, "handle_error", log_migration_sql_error)
 
 
 def have_all_migrations_run(db_engine: sqlalchemy.engine.Engine) -> None:
