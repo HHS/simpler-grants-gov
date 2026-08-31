@@ -99,11 +99,11 @@ export const buildSF424CHappyPathTestData = (
 /**
  * Opportunity metadata used by load-opportunity-config.ts.
  *
- * Replace the UUID below with the UUID of the actual SF-424C E2E opportunity
- * if the opportunity has already been created in the test environment.
+ * This UUID matches the E2E-SF424C opportunity seeded in
+ * api/src/task/opportunities/build_automatic_opportunities.py.
  */
 export const SF424C_OPPORTUNITY_DATA: PrintViewFormData = {
-  opportunityId: "7b8c8d0f-4e2b-4f0a-9c1d-2e3f4a5b6c7d",
+  opportunityId: "a4c8e1f2-3b6d-4e91-8a2c-7f5b9d3e6a18",
   opportunityNumber: "E2E-SF424C-ORG-IND-01",
   formKey: "sf424c",
   expectedPrepopulatedFields: {},
