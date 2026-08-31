@@ -195,9 +195,6 @@ function Budget424aSectionA<
               rowSpan={2}
             >
               Total
-              <div className="text-normal text-no-wrap text-italic">
-                (sum of C-F)
-              </div>
             </td>
           </tr>
           <tr>
@@ -384,9 +381,6 @@ function Budget424aSectionA<
                 <div className="display-flex flex-align-end">
                   <span className="margin-right-1">=</span>
                   <div>
-                    <div className="text-normal text-no-wrap text-italic font-sans-2xs">
-                      Sum of row {row + 1}
-                    </div>
                     <CurrencyInput
                       id={`activity_line_items[${row}]--budget_summary--total_amount`}
                       rawErrors={getErrorsA({
@@ -406,17 +400,12 @@ function Budget424aSectionA<
             <td className="padding-05 text-bold" colSpan={2}>
               <div className="display-flex">
                 <span className="margin-right-5">5.</span>
-                <div>
-                  Total
-                  <div className="text-normal text-no-wrap text-italic">
-                    (sum of 1-4)
-                  </div>
-                </div>
+                <div>Total</div>
               </div>
             </td>
 
             <td className="padding-05">
-              <HelperText hasHorizontalLine>Sum of column C</HelperText>
+              <HelperText hasHorizontalLine />
               <CurrencyInput
                 disabled
                 id={
@@ -432,7 +421,7 @@ function Budget424aSectionA<
             </td>
 
             <td className="padding-05">
-              <HelperText hasHorizontalLine>Sum of column D</HelperText>
+              <HelperText hasHorizontalLine />
               <CurrencyInput
                 disabled
                 id={
@@ -448,7 +437,7 @@ function Budget424aSectionA<
             </td>
 
             <td className="padding-05">
-              <HelperText hasHorizontalLine>Sum of column E</HelperText>
+              <HelperText hasHorizontalLine />
               <CurrencyInput
                 disabled
                 id={"total_budget_summary--federal_new_or_revised_amount"}
@@ -462,7 +451,7 @@ function Budget424aSectionA<
             </td>
 
             <td className="padding-05">
-              <HelperText hasHorizontalLine>Sum of column F</HelperText>
+              <HelperText hasHorizontalLine />
               <CurrencyInput
                 disabled
                 id={"total_budget_summary--non_federal_new_or_revised_amount"}
@@ -476,7 +465,7 @@ function Budget424aSectionA<
             </td>
 
             <td className="padding-05">
-              <HelperText hasHorizontalLine>Sum of column G</HelperText>
+              <HelperText hasHorizontalLine />
               <CurrencyInput
                 disabled
                 id={"total_budget_summary--total_amount"}
