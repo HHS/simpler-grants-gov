@@ -81,32 +81,19 @@ for (const { testName, orgLabel } of applicantScenarios) {
       const isMobile = testInfo.project.name.match(/[Mm]obile/);
       const baseSuffix = Date.now();
 
-      // -----------------------------------------------------------------------
       // Login
-      // -----------------------------------------------------------------------
-
       await authenticateE2eUser(page, context, !!isMobile);
 
-      // -----------------------------------------------------------------------
       // Create application
-      // -----------------------------------------------------------------------
-
       await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
 
       const applicationUrl = page.url();
 
-      // -----------------------------------------------------------------------
       // Fill SF-424C
-      // -----------------------------------------------------------------------
-
       const filledForms: FilledFormEntry[] = [];
 
       for (const [index, form] of opportunityConfig.forms.entries()) {
-        const testData = buildHappyPathTestData(
-          form.buildTestData,
-          baseSuffix + index,
-          form.formConfig,
-        );
+        const testData = buildHappyPathTestData(form, baseSuffix + index);
 
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
@@ -221,9 +208,9 @@ for (const { testName, orgLabel } of applicantScenarios) {
       const expectedSubtotal2NonAllowable = 7_800;
       const expectedSubtotal2Allowable = 70_200;
 
-      const expectedProjectIncomeTotalCost = 1_000;
-      const expectedProjectIncomeNonAllowable = 100;
-      const expectedProjectIncomeAllowable = 900;
+      const _expectedProjectIncomeTotalCost = 1_000;
+      const _expectedProjectIncomeNonAllowable = 100;
+      const _expectedProjectIncomeAllowable = 900;
 
       const expectedTotalProjectCost = 77_000;
       const expectedTotalProjectCostNonAllowable = 7_700;
