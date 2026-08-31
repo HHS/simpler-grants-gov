@@ -24,7 +24,7 @@ const SERVER_ACTION_KEY_PREFIX = "$ACTION";
   needs it, so none of them has a schema definition
 */
 const NON_SCHEMA_FORM_DATA_KEYS = new Set([
-  // which submit button was clicked, read in the opportunity edit and competition actions
+  // which submit button was clicked on the opportunity edit form, read by its action
   "submitType",
   // the apply form's submit button
   "apply-form-button",
@@ -36,7 +36,7 @@ const NON_SCHEMA_FORM_DATA_KEYS = new Set([
 ]);
 
 /*
-  Identifies keys that should not be looked up against a form schema
+  Identifies control input names that should not be looked up against a form schema
 */
 export const isNonSchemaFormDataKey = (key: string): boolean =>
   NON_SCHEMA_FORM_DATA_KEYS.has(key) ||

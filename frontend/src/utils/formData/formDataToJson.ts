@@ -111,12 +111,14 @@ export function formDataToObject<T = NestedObject>(
   const entries = formData.entries();
 
   for (const [key, value] of entries) {
-    const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
     // UI only control inputs carry no schema backed value, so they are skipped rather than
-    // looked up (which would report a type mismatch) and rather than shaped into the output
-    if (isNonSchemaFormDataKey(currentKey)) {
+    // looked up (which would report a type mismatch) and rather than shaped into the output.
+    // Checked against the input's own name rather than the parentKey prefixed path, since
+    // whether something is a control input is a property of the input, not of where it sits
+    if (isNonSchemaFormDataKey(key)) {
       continue;
     }
+    const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
     const chunks = currentKey.split(delimiter);
     const fieldType = getFieldType(
       currentKey,
