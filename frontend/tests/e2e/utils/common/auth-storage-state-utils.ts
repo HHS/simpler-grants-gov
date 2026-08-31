@@ -126,7 +126,7 @@ export function createAuthenticatedPageLifecycle(
     ): Promise<void> => {
       testInfo.setTimeout(timeoutMs);
 
-      if (targetEnv === "staging") {
+      if (targetEnv !== "local") {
         options.skipTest?.(
           testInfo.project.name !== stagingProjectName,
           stagingSkipMessage,
