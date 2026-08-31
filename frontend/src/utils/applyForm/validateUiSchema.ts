@@ -20,6 +20,9 @@ export const UiJsonSchema: RJSFSchema = {
       {
         $ref: "#/$defs/section",
       },
+      {
+        $ref: "#/$defs/text",
+      },
     ],
   },
   $defs: {
