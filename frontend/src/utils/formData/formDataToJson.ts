@@ -5,6 +5,7 @@ import {
   FORM_DATA_NESTING_DELIMITER,
   getByPointer,
   getFieldPathFromHtml,
+  isNonSchemaFormDataKey,
 } from "src/utils/formData/formDataUtils";
 
 // like, this is basically anything lol - DWS
@@ -83,7 +84,12 @@ const getFieldType = (
     type?: string;
   };
   if (!formFieldDefinition?.type) {
-    console.error("Undefined field type shaping form data", currentKey);
+    // control inputs are filtered out before we get here, so this is a schema backed field
+    // whose value we are about to guess the type of
+    console.error(
+      "Undefined field type shaping form data - guessing string, submitted value may be the wrong type",
+      { formDataKey: currentKey, schemaPath: fullPath },
+    );
     return "string"; // I mean, like, we may as well take our best guess and cross our fingers
   }
   return formFieldDefinition?.type;
@@ -106,6 +112,11 @@ export function formDataToObject<T = NestedObject>(
 
   for (const [key, value] of entries) {
     const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
+    // UI only control inputs carry no schema backed value, so they are skipped rather than
+    // looked up (which would report a type mismatch) and rather than shaped into the output
+    if (isNonSchemaFormDataKey(currentKey)) {
+      continue;
+    }
     const chunks = currentKey.split(delimiter);
     const fieldType = getFieldType(
       currentKey,

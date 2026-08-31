@@ -166,6 +166,48 @@ describe("formDataToObject", () => {
     // @ts-ignore
     expect(result).toEqual({ whatever: null });
   });
+  it("skips UI only control inputs rather than shaping or reporting them", () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {
+      // noop
+    });
+    const formData = new FormData();
+    formData.append("attachments", "an-attachment-id");
+    formData.append("attachments-visible", new File([], ""));
+    formData.append("submitType", "saveAndExit");
+    formData.append("opportunity-attachment-upload", new File([], ""));
+    formData.append("held_pending_file_ids", '["pending-1"]');
+    formData.append("deleted_attachment_ids", "[]");
+    formData.append("$ACTION_KEY", "whatever");
+
+    const formSchema = {
+      attachments: { type: "string" },
+    };
+
+    const result = formDataToObject(formData, formSchema, undefined);
+
+    expect(result).toEqual({ attachments: "an-attachment-id" });
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+  it("reports a schema backed field with no resolvable type", () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {
+      // noop
+    });
+    const formData = new FormData();
+    formData.append("typoed_field_name", "a value");
+
+    const formSchema = {
+      correct_field_name: { type: "string" },
+    };
+
+    formDataToObject(formData, formSchema, undefined);
+
+    expect(consoleError).toHaveBeenCalledWith(expect.any(String), {
+      formDataKey: "typoed_field_name",
+      schemaPath: "/typoed_field_name",
+    });
+    consoleError.mockRestore();
+  });
   it("defaults to undefined for empty values when specified", () => {
     const formData = new FormData();
     formData.append("whatever", "");
