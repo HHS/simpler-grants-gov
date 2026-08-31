@@ -1,6 +1,5 @@
 import logging
 import uuid
-from unittest.mock import Mock
 
 import alembic.command as command
 import grants_shared.adapters.db as db
@@ -12,8 +11,8 @@ from alembic.util.exc import CommandError
 
 from src.db.migrations.run import (
     alembic_cfg,
-    collapse_sql,
     enable_query_error_logging,
+    escape_sql_newlines,
     log_migration_sql_error,
 )
 from tests.lib import db_testing
@@ -103,12 +102,27 @@ def query_error_logging():
         ("SELECT 1", "SELECT 1"),
         (
             "CREATE TABLE api.example (\n\texample_id UUID NOT NULL, \n\tname TEXT\n)\n\n",
-            "CREATE TABLE api.example ( example_id UUID NOT NULL, name TEXT )",
+            "CREATE TABLE api.example (\\n\texample_id UUID NOT NULL, \\n\tname TEXT\\n)",
+        ),
+        (
+            "CREATE FUNCTION api.f() RETURNS TRIGGER AS $$\n"
+            "BEGIN\n"
+            "    -- Determine the opportunity_id\n"
+            "    RETURN NEW;\n"
+            "END;\n"
+            "$$ LANGUAGE plpgsql;",
+            "CREATE FUNCTION api.f() RETURNS TRIGGER AS $$\\nBEGIN\\n"
+            "    -- Determine the opportunity_id\\n    RETURN NEW;\\nEND;\\n$$ LANGUAGE plpgsql;",
         ),
     ],
 )
-def test_collapse_sql(statement, expected):
-    assert collapse_sql(statement) == expected
+def test_escape_sql_newlines(statement, expected):
+    escaped = escape_sql_newlines(statement)
+
+    assert escaped == expected
+    assert "\n" not in escaped
+    # The escaped form has to survive a round trip back into runnable SQL
+    assert escaped.replace("\\n", "\n") == statement.strip()
 
 
 def test_successful_migration_sql_not_logged(
@@ -135,14 +149,21 @@ def test_failing_migration_sql_logged_at_error(
 
     error_records = [record for record in caplog.records if record.levelno == logging.ERROR]
     assert [getattr(record, "migrate.sql") for record in error_records] == [
-        "CREATE TABLE example ( bad_column NOT_A_TYPE )"
+        "CREATE TABLE example (\\n\tbad_column NOT_A_TYPE\\n)"
     ]
 
 
-def test_failing_connection_without_statement_not_logged(caplog: pytest.LogCaptureFixture):
+def test_failing_connection_without_statement_not_logged(
+    query_error_logging, caplog: pytest.LogCaptureFixture
+):
     """Errors that aren't tied to a statement (eg. failing to connect) have nothing to log."""
     caplog.set_level(logging.INFO)
 
-    log_migration_sql_error(Mock(spec=sqlalchemy.ExceptionContext, statement=None))
+    # Nothing listens on port 1, so this fails to connect without ever sending a statement
+    engine = sqlalchemy.create_engine(
+        "postgresql+psycopg://app@localhost:1/nope", connect_args={"connect_timeout": 2}
+    )
+    with pytest.raises(sqlalchemy.exc.OperationalError):
+        engine.connect()
 
-    assert not caplog.records
+    assert not [record for record in caplog.records if hasattr(record, "migrate.sql")]

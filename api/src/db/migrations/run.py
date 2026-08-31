@@ -50,9 +50,9 @@ def downall(revision: str = "base") -> None:
     command.downgrade(alembic_cfg, revision)
 
 
-def collapse_sql(statement: str) -> str:
-    """Collapse a multi-line SQL statement onto a single line."""
-    return " ".join(statement.split())
+def escape_sql_newlines(statement: str) -> str:
+    """Escape the newlines in a SQL statement so it logs as a single line."""
+    return "\\n".join(statement.strip().splitlines())
 
 
 def log_migration_sql_error(exception_context: sqlalchemy.ExceptionContext) -> None:
@@ -62,7 +62,8 @@ def log_migration_sql_error(exception_context: sqlalchemy.ExceptionContext) -> N
         return
 
     logger.error(
-        "Migration SQL failed", extra={"migrate.sql": collapse_sql(exception_context.statement)}
+        "Migration SQL failed",
+        extra={"migrate.sql": escape_sql_newlines(exception_context.statement)},
     )
 
 
