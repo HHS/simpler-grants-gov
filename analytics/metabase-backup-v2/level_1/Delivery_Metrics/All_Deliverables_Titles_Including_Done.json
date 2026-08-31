@@ -1,0 +1,40 @@
+{
+  "name": "All Deliverables - Titles Including Done",
+  "display": "table",
+  "visualization_settings": {
+    "table.pivot_column": "deliverable_id",
+    "table.cell_column": "d_effective",
+    "table.columns": [
+      {
+        "name": "deliverable_id",
+        "enabled": false
+      },
+      {
+        "name": "title",
+        "enabled": true
+      },
+      {
+        "name": "ghid",
+        "enabled": false
+      },
+      {
+        "name": "url",
+        "enabled": true
+      }
+    ],
+    "column_settings": {
+      "[\"name\",\"title\"]": {
+        "column_title": "Deliverable",
+        "view_as": "link",
+        "link_text": "{{title}}",
+        "link_url": "{{url}}"
+      },
+      "[\"name\",\"url\"]": {
+        "view_as": "link",
+        "column_title": "Link",
+        "link_text": "{{ghid}}",
+        "link_url": "{{url}}"
+      }
+    }
+  }
+}

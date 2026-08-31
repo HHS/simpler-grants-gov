@@ -24,7 +24,7 @@ export function SubmissionSetUp() {
       <div className="grid-row grid-gap-2">
         <div className="tablet:grid-col">
           <CommonTextInput
-            fieldId="competition-id"
+            fieldId="public_competition_id"
             labelText={t("competitionId")}
             description={t("competitionIdHint")}
             isRequired={false}
@@ -37,7 +37,7 @@ export function SubmissionSetUp() {
             fieldId="competition_title"
             labelText={t("competitionTitle")}
             description={t("competitionTitleHint")}
-            isRequired={false}
+            isRequired={true}
             fieldMaxLength={255}
             onTextChange={() => {}}
           />

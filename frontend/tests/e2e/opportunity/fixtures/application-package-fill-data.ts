@@ -35,7 +35,7 @@ export const buildApplicationPackageHappyPathFillData = (
     whoCanApply: "Organizations only",
     submissionsOpen: toDateInputValue(now),
     submissionsClose: toDateInputValue(addDays(now, 30)),
-    expectedNumberOfApplicants: "25",
+    extensionPeriod: "5",
     fullName: "Test Full Name",
     title: "Program Manager",
     emailAddress: "test@example.com",

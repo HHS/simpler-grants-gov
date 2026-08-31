@@ -1,9 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { DatePicker, FormGroup } from "@trussworks/react-uswds";
+import { DatePicker, FormGroup, TextInput } from "@trussworks/react-uswds";
 
-import { CommonTextInput } from "src/components/core/forms/CommonFormFields";
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 
 export function SubmissionWindow() {
@@ -53,21 +52,40 @@ export function SubmissionWindow() {
           </FormGroup>
         </div>
       </div>
-      <div className="margin-top-3">
-        <p className="font-body-md text-bold margin-bottom-0">
-          {t("howManyApplications")}
-        </p>
-        <p className="font-body-md text-base-dark margin-top-1">
-          {t("howManyApplicationsHint")}
-        </p>
-        <CommonTextInput
-          fieldId="expected-number-of-applicants"
-          labelText={t("expectedNumberOfApplicants")}
-          description={t("expectedNumberOfApplicantsHint")}
-          isRequired={true}
-          fieldMaxLength={255}
-          onTextChange={() => {}}
-        />
+      <div className="grid-row grid-gap-lg margin-top-3">
+        <div className="tablet:grid-col-6">
+          <FormGroup>
+            <DynamicFieldLabel
+              idFor="grace_period"
+              title={t("gracePeriod")}
+              description={t("gracePeriodHint")}
+            />
+            <TextInput
+              id="grace_period"
+              name="grace_period"
+              type="number"
+              min="0"
+              step="1"
+              className="width-full"
+              onKeyDown={(e) => {
+                if (
+                  e.key === "." ||
+                  e.key === "," ||
+                  e.key === "e" ||
+                  e.key === "E"
+                ) {
+                  e.preventDefault();
+                }
+              }}
+              onPaste={(e) => {
+                const pastedText = e.clipboardData.getData("text");
+                if (pastedText.includes(".") || pastedText.includes(",")) {
+                  e.preventDefault();
+                }
+              }}
+            />
+          </FormGroup>
+        </div>
       </div>
     </div>
   );
