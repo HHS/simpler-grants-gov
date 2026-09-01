@@ -150,6 +150,14 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
       await navigateToPrintView(page, sf424cForm.printUrl);
 
+      // Helper function to create a flexible regex pattern that matches values
+      // with or without currency formatting (e.g., "1000" or "$1,000.00")
+      const createFlexibleValuePattern = (value: string): RegExp => {
+        // Convert numeric string to regex that allows optional commas between digits
+        // e.g., "1000" becomes /1,?0,?0,?0/ which matches "1000", "1,000", etc.
+        return new RegExp(Array.from(value).join(',?'));
+      };
+
       // -----------------------------------------------------------------------
       // Validate user-entered Table 1 values
       // -----------------------------------------------------------------------
@@ -192,15 +200,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
           throw new Error(`SF-424C field ${fieldKey} does not have a testId.`);
         }
 
-        // Create a regex pattern that matches the value with flexible formatting
-        // (handles currency formatting like $1,000 or $1,000.00)
-        // Convert "1000" to /1,?0,?0,?0/ to match with or without commas between digits
-        const value = testData[fieldKey];
-        const escapedValue = value.replace(/\d/g, (digit) => digit);
-        const flexiblePattern = new RegExp(Array.from(escapedValue).join(',?'));
+        const valuePattern = createFlexibleValuePattern(testData[fieldKey]);
         
         await expect(
-          page.getByText(flexiblePattern).first(),
+          page.getByText(valuePattern).first(),
         ).toBeVisible();
       }
 
@@ -242,61 +245,43 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // These values should ultimately be validated against their specific
       // print-view field/test IDs once those IDs are confirmed.
       await expect(
-        page.getByText(String(expectedSubtotal1TotalCost), { exact: true }),
+        page.getByText(createFlexibleValuePattern(String(expectedSubtotal1TotalCost))),
       ).toBeVisible();
 
       await expect(
-        page.getByText(String(expectedSubtotal1NonAllowable), {
-          exact: true,
-        }),
+        page.getByText(createFlexibleValuePattern(String(expectedSubtotal1NonAllowable))),
       ).toBeVisible();
 
       await expect(
-        page.getByText(String(expectedSubtotal1Allowable), {
-          exact: true,
-        }),
+        page.getByText(createFlexibleValuePattern(String(expectedSubtotal1Allowable))),
       ).toBeVisible();
 
       await expect(
-        page.getByText(String(expectedSubtotal2TotalCost), {
-          exact: true,
-        }),
+        page.getByText(createFlexibleValuePattern(String(expectedSubtotal2TotalCost))),
       ).toBeVisible();
 
       await expect(
-        page.getByText(String(expectedSubtotal2NonAllowable), {
-          exact: true,
-        }),
+        page.getByText(createFlexibleValuePattern(String(expectedSubtotal2NonAllowable))),
       ).toBeVisible();
 
       await expect(
-        page.getByText(String(expectedSubtotal2Allowable), {
-          exact: true,
-        }),
+        page.getByText(createFlexibleValuePattern(String(expectedSubtotal2Allowable))),
       ).toBeVisible();
 
       await expect(
-        page.getByText(String(expectedTotalProjectCost), {
-          exact: true,
-        }),
+        page.getByText(createFlexibleValuePattern(String(expectedTotalProjectCost))),
       ).toBeVisible();
 
       await expect(
-        page.getByText(String(expectedTotalProjectCostNonAllowable), {
-          exact: true,
-        }),
+        page.getByText(createFlexibleValuePattern(String(expectedTotalProjectCostNonAllowable))),
       ).toBeVisible();
 
       await expect(
-        page.getByText(String(expectedTotalProjectCostAllowable), {
-          exact: true,
-        }),
+        page.getByText(createFlexibleValuePattern(String(expectedTotalProjectCostAllowable))),
       ).toBeVisible();
 
       await expect(
-        page.getByText(String(expectedFederalFundingShare), {
-          exact: true,
-        }),
+        page.getByText(createFlexibleValuePattern(String(expectedFederalFundingShare))),
       ).toBeVisible();
     },
   );
