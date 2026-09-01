@@ -10,10 +10,7 @@ import {
   competitionFormAction,
 } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/actions";
 import { FormType } from "src/types/allFormsResponseTypes";
-import {
-  Competition,
-  CompetitionFormsSubmitApi,
-} from "src/types/competitionsResponseTypes";
+import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
 import { UploadFileMetadata } from "src/types/fileUploadTypes";
 
 import { useTranslations } from "next-intl";
@@ -33,38 +30,34 @@ const alwaysRequiredForms: Record<string, boolean> = {
 };
 type CompetitionFormProps = {
   opportunityId: string;
-  competition?: Competition;
+  competitionId: string;
   forms: FormType[];
 };
 
 export function CompetitionForm({
   opportunityId: _opportunityId,
-  competition,
+  competitionId: _competitionId,
   forms,
 }: CompetitionFormProps) {
   const t = useTranslations("OpportunityCompetition");
 
-  const _competitionId: string = competition?.competition_id || "";
-  const existingFiles: UploadFileMetadata[] =
-    competition?.competition_instructions.map((instruction) => ({
-      id: instruction.file_name,
-      fileName: instruction.file_name,
-      updatedAt: instruction.updated_at,
-      downloadUrl: instruction.download_path,
-    })) ?? [];
+  // TODO: load on edit of an existing competition
+  const existingFiles: UploadFileMetadata[] = [];
 
   // ===== Required Forms =====
   const formModalRef = useRef<ModalRef | null>(null);
   const [requiredForms, setRequiredForms] = useState<CompetitionFormsSubmitApi>(
-    competition?.competition_forms?.map(({ form, is_required }) => ({
-      form_id: form.form_id,
-      is_required,
-    })) ??
-      Object.entries(alwaysRequiredForms).map(([formId, isRequired]) => ({
+    [],
+  );
+  if (requiredForms.length == 0) {
+    Object.entries(alwaysRequiredForms).forEach(([formId, isRequired]) => {
+      const form = {
         form_id: formId,
         is_required: isRequired,
-      })),
-  );
+      };
+      requiredForms.push(form);
+    });
+  }
 
   // ===== Server side action to save data =====
   const [formState, setFormState] = useState<CompetitionActionState | null>(
@@ -133,17 +126,9 @@ export function CompetitionForm({
               <p className="font-body-lg text-base-dark margin-top-0">
                 {t("applicationRequirementsSubheader")}
               </p>
-              <SubmissionSetUp
-                publicCompetitionId={competition?.public_competition_id}
-                competitionTitle={competition?.competition_title}
-                openToApplicants={competition?.open_to_applicants}
-              />
-              <SubmissionWindow
-                openingDate={competition?.opening_date}
-                closingDate={competition?.closing_date}
-                gracePeriod={competition?.grace_period}
-              />
-              <AgencyContact contactInfo={competition?.contact_info} />
+              <SubmissionSetUp />
+              <SubmissionWindow />
+              <AgencyContact />
               <ApplicationInstructions existingFiles={existingFiles} />
               <RequiredForms
                 alwaysRequiredForms={alwaysRequiredForms}

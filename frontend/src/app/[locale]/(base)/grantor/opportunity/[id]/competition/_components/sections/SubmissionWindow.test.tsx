@@ -230,23 +230,6 @@ describe("SubmissionWindow", () => {
       const dateInputs = screen.getAllByPlaceholderText("mm/dd/yyyy");
       expect(dateInputs.length).toBeGreaterThanOrEqual(2);
     });
-
-    it("populates form fields from the provided values", () => {
-      render(
-        <SubmissionWindow
-          openingDate="2026-06-01"
-          closingDate="2026-07-01"
-          gracePeriod={30}
-        />,
-      );
-
-      const dateInputs = screen.getAllByTestId("date-picker-external-input");
-      expect(dateInputs[0]).toHaveValue("06/01/2026");
-      expect(dateInputs[1]).toHaveValue("07/01/2026");
-      expect(
-        screen.getByRole("spinbutton", { name: /graceperiod/i }),
-      ).toHaveValue(30);
-    });
   });
 
   describe("accessibility", () => {

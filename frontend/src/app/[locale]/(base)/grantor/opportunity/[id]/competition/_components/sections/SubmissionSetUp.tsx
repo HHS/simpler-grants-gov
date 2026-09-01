@@ -1,7 +1,5 @@
 "use client";
 
-import { ApplicantTypes } from "src/types/competitionsResponseTypes";
-
 import { useTranslations } from "next-intl";
 
 import {
@@ -9,26 +7,8 @@ import {
   CommonTextInput,
 } from "src/components/core/forms/CommonFormFields";
 
-type SubmissionSetUpProps = {
-  publicCompetitionId?: string | null;
-  competitionTitle?: string | null;
-  openToApplicants?: ApplicantTypes[];
-};
-
-export function SubmissionSetUp({
-  publicCompetitionId,
-  competitionTitle,
-  openToApplicants = [],
-}: SubmissionSetUpProps) {
+export function SubmissionSetUp() {
   const t = useTranslations("OpportunityCompetition.sectionSubmissionSetUp");
-  const applicantSelection =
-    openToApplicants.length === 2
-      ? "both"
-      : openToApplicants[0] === "organization"
-        ? "organizations_only"
-        : openToApplicants[0] === "individual"
-          ? "individuals_only"
-          : "";
 
   return (
     <div
@@ -45,12 +25,11 @@ export function SubmissionSetUp({
         <div className="tablet:grid-col">
           <CommonTextInput
             fieldId="public_competition_id"
-            labelText={t("publicCompetitionId")}
-            description={t("publicCompetitionIdHint")}
+            labelText={t("competitionId")}
+            description={t("competitionIdHint")}
             isRequired={false}
             fieldMaxLength={255}
             onTextChange={() => {}}
-            defaultValue={publicCompetitionId ?? ""}
           />
         </div>
         <div className="tablet:grid-col">
@@ -61,7 +40,6 @@ export function SubmissionSetUp({
             isRequired={true}
             fieldMaxLength={255}
             onTextChange={() => {}}
-            defaultValue={competitionTitle ?? ""}
           />
         </div>
       </div>
@@ -70,7 +48,6 @@ export function SubmissionSetUp({
         labelText={t("whoCanApply")}
         description={t("whoCanApplyHint")}
         isRequired={true}
-        defaultSelection={applicantSelection}
         listKeyValuePairs={{
           organizations_only: t("whoCanApplyOrganizationsOnly"),
           individuals_only: t("whoCanApplyIndividualsOnly"),

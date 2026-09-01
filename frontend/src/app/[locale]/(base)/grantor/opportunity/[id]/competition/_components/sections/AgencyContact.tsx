@@ -8,24 +8,9 @@ import {
   CommonTextInput,
 } from "src/components/core/forms/CommonFormFields";
 
-type AgencyContactProps = {
-  contactInfo?: string | null;
-};
-
-export function AgencyContact({ contactInfo }: AgencyContactProps) {
+export function AgencyContact() {
   const t = useTranslations("OpportunityCompetition.sectionAgencyContact");
-  const contactValues = contactInfo?.split(" | ") ?? [];
-  const [
-    contactName = "",
-    contactTitle = "",
-    contactEmail = "",
-    contactPhone = "",
-  ] =
-    contactValues.length === 3
-      ? [contactValues[0], "", contactValues[1], contactValues[2]]
-      : contactValues;
 
-  //--- Block pipe character in input as it's used as the delimitor (until data separation)
   const handlePipeKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -123,7 +108,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
   };
 
   //--- Validation & Special formatting for Phone Number ---
-  const [phone, setPhoneValue] = useState<string>(contactPhone);
+  const [phone, setPhoneValue] = useState<string>("");
   const [hasPhoneError, setHasPhoneError] = useState<boolean>(false);
   const [phoneErrorMsg, setPhoneErrorMsg] = useState<string[]>([]);
 
@@ -217,7 +202,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
             fieldId="contact_name"
             fieldMaxLength={255}
             isRequired={true}
-            defaultValue={contactName}
+            defaultValue=""
             onTextChange={handleNameInputChange}
             onKeyDown={handlePipeKeyDown}
             onPaste={handlePipePaste}
@@ -235,10 +220,9 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
             fieldId="contact_title"
             fieldMaxLength={255}
             isRequired={false}
-            onTextChange={() => {}}
             onKeyDown={handlePipeKeyDown}
             onPaste={handlePipePaste}
-            defaultValue={contactTitle}
+            defaultValue=""
           />
         </div>
       </div>
@@ -253,7 +237,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
             fieldId="contact_email"
             fieldMaxLength={255}
             isRequired={true}
-            defaultValue={contactEmail}
+            defaultValue=""
             onTextChange={handleEmailInputChange}
             onKeyDown={handlePipeKeyDown}
             onPaste={handlePipePaste}

@@ -43,15 +43,12 @@ export type Competition = {
   competition_instructions: CompetitionInstructions[];
   competition_title: string;
   contact_info: string | null;
-  expected_application_count: number | null;
-  grace_period: number | null;
   is_open: boolean;
   open_to_applicants: ApplicantTypes[];
   opening_date: string;
   opportunity_assistance_listings: OpportunityAssistanceListing[];
   opportunity_id: number;
   opportunity: BaseOpportunity;
-  public_competition_id?: string | null;
 };
 
 export interface CompetitionInstructionsApiResponse extends APIResponse {
