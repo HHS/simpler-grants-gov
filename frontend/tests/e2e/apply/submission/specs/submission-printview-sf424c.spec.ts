@@ -157,7 +157,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         // e.g., "1000" becomes /\$?1,?0{3}(\.\d{2})?/ which matches "$1000", "$1,000", "$1,000.00"
         const digits = Array.from(value);
         // Join digits with optional comma separator
-        const digitPattern = digits.join(',?');
+        const digitPattern = digits.join(",?");
         // Add optional currency and decimal formatting
         return new RegExp(`\\$?${digitPattern}(\\.\\d{2})?`);
       };
@@ -207,7 +207,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         // In print view, fields are rendered as read-only text, not input elements
         // Use improved regex pattern that includes currency formatting to avoid matching multiple values
         const valuePattern = createFlexibleValuePattern(testData[fieldKey]);
-        
+
         await expect(page.getByText(valuePattern)).toBeVisible();
       }
 
@@ -249,43 +249,65 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // These values should ultimately be validated against their specific
       // print-view field/test IDs once those IDs are confirmed.
       await expect(
-        page.getByText(createFlexibleValuePattern(String(expectedSubtotal1TotalCost))),
+        page.getByText(
+          createFlexibleValuePattern(String(expectedSubtotal1TotalCost)),
+        ),
       ).toBeVisible();
 
       await expect(
-        page.getByText(createFlexibleValuePattern(String(expectedSubtotal1NonAllowable))),
+        page.getByText(
+          createFlexibleValuePattern(String(expectedSubtotal1NonAllowable)),
+        ),
       ).toBeVisible();
 
       await expect(
-        page.getByText(createFlexibleValuePattern(String(expectedSubtotal1Allowable))),
+        page.getByText(
+          createFlexibleValuePattern(String(expectedSubtotal1Allowable)),
+        ),
       ).toBeVisible();
 
       await expect(
-        page.getByText(createFlexibleValuePattern(String(expectedSubtotal2TotalCost))),
+        page.getByText(
+          createFlexibleValuePattern(String(expectedSubtotal2TotalCost)),
+        ),
       ).toBeVisible();
 
       await expect(
-        page.getByText(createFlexibleValuePattern(String(expectedSubtotal2NonAllowable))),
+        page.getByText(
+          createFlexibleValuePattern(String(expectedSubtotal2NonAllowable)),
+        ),
       ).toBeVisible();
 
       await expect(
-        page.getByText(createFlexibleValuePattern(String(expectedSubtotal2Allowable))),
+        page.getByText(
+          createFlexibleValuePattern(String(expectedSubtotal2Allowable)),
+        ),
       ).toBeVisible();
 
       await expect(
-        page.getByText(createFlexibleValuePattern(String(expectedTotalProjectCost))),
+        page.getByText(
+          createFlexibleValuePattern(String(expectedTotalProjectCost)),
+        ),
       ).toBeVisible();
 
       await expect(
-        page.getByText(createFlexibleValuePattern(String(expectedTotalProjectCostNonAllowable))),
+        page.getByText(
+          createFlexibleValuePattern(
+            String(expectedTotalProjectCostNonAllowable),
+          ),
+        ),
       ).toBeVisible();
 
       await expect(
-        page.getByText(createFlexibleValuePattern(String(expectedTotalProjectCostAllowable))),
+        page.getByText(
+          createFlexibleValuePattern(String(expectedTotalProjectCostAllowable)),
+        ),
       ).toBeVisible();
 
       await expect(
-        page.getByText(createFlexibleValuePattern(String(expectedFederalFundingShare))),
+        page.getByText(
+          createFlexibleValuePattern(String(expectedFederalFundingShare)),
+        ),
       ).toBeVisible();
     },
   );
