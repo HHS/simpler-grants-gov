@@ -204,11 +204,12 @@ for (const { testName, orgLabel } of applicantScenarios) {
           throw new Error(`SF-424C field ${fieldKey} does not have a testId.`);
         }
 
-        // In print view, fields are rendered as read-only text, not input elements
-        // Use improved regex pattern that includes currency formatting to avoid matching multiple values
+        // In print view, the testId has a "-read-only" suffix (e.g., budget_424c_table_1-0-1-read-only)
+        // This is the most reliable way to locate the specific field value in print view
+        const printTestId = field.testId.replace("-input", "-read-only");
         const valuePattern = createFlexibleValuePattern(testData[fieldKey]);
 
-        await expect(page.getByText(valuePattern)).toBeVisible();
+        await expect(page.getByTestId(printTestId)).toContainText(valuePattern);
       }
 
       // -----------------------------------------------------------------------
