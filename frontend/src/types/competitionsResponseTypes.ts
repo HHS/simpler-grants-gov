@@ -26,6 +26,8 @@ export type CompetitionSaveRequest = {
   opening_date: string | null;
   closing_date: string | null;
   contact_info: string | null;
+  grace_period?: number | null;
+  public_competition_id?: string | null;
   open_to_applicants: ApplicantTypes[];
 };
 
