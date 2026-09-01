@@ -66,7 +66,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       await uploadFile(
         page,
         SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
-        fieldDefinitionsAttachment.attachment,
+        fieldDefinitionsAttachment.att1,
       );
 
       // Then the pre-upload error message should appear
@@ -114,7 +114,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       await uploadFile(
         page,
         SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
-        fieldDefinitionsAttachment.attachment,
+        fieldDefinitionsAttachment.att1,
       );
 
       // Then the pre-upload error message should appear
@@ -154,11 +154,19 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         OPPORTUNITY_URL,
       );
 
+      // Scroll the upload field into view so screenshots capture the file upload state.
+      await page
+        .getByRole("button", {
+          name: fieldDefinitionsAttachment.att1.field,
+          exact: true,
+        })
+        .scrollIntoViewIfNeeded();
+
       // When the applicant uploads a zero-byte file
       await uploadFile(
         page,
         SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB,
-        fieldDefinitionsAttachment.attachment,
+        fieldDefinitionsAttachment.att1,
       );
 
       // Then the upload failure message should appear
@@ -174,7 +182,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         page,
         SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
         0,
-        fieldDefinitionsAttachment.attachment,
+        fieldDefinitionsAttachment.att1,
       );
     },
   );
