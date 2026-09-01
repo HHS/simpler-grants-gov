@@ -250,11 +250,31 @@ export const fieldDefinitionsSF424C: FormFillFieldDefinitions = {
   // Table 2 - Federal Funding
   // ---------------------------------------------------------------------------
 
+  // ---------------------------------------------------------------------------
+  // Table 2 - Federal Funding
+  // ---------------------------------------------------------------------------
+
   "federal_funding--federal_percentage_share": {
     testId: "budget_424c_table_2-1-1-input",
     type: "text",
     section: "Table 2",
     field: "Federal Percentage Share",
+  },
+
+  // Note: federal_funding--total_project_costs and federal_funding--federal_funding_share
+  // are read-only calculated fields, not user-entered, but are defined here for print view validation
+  "federal_funding--total_project_costs": {
+    testId: "budget_424c_table_2-0-1-input",
+    type: "text",
+    section: "Table 2",
+    field: "Total Project Costs",
+  },
+
+  "federal_funding--federal_funding_share": {
+    testId: "budget_424c_table_2-2-1-input",
+    type: "text",
+    section: "Table 2",
+    field: "Federal Funding Share",
   },
 };
 
