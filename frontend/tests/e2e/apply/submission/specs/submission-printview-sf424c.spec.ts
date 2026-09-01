@@ -192,13 +192,15 @@ for (const { testName, orgLabel } of applicantScenarios) {
           throw new Error(`SF-424C field ${fieldKey} does not have a testId.`);
         }
 
-        // The exact print-view validation helper should be used here once the
-        // SF-424C print testIds are confirmed from the rendered form.
-        //
-        // The important assertion is that every persisted user-entered value
-        // appears in the corresponding print-view field.
+        // Create a regex pattern that matches the value with flexible formatting
+        // (handles currency formatting like $1,000 or $1,000.00)
+        // Convert "1000" to /1,?0,?0,?0/ to match with or without commas between digits
+        const value = testData[fieldKey];
+        const escapedValue = value.replace(/\d/g, (digit) => digit);
+        const flexiblePattern = new RegExp(Array.from(escapedValue).join(',?'));
+        
         await expect(
-          page.getByText(testData[fieldKey], { exact: true }).first(),
+          page.getByText(flexiblePattern).first(),
         ).toBeVisible();
       }
 
