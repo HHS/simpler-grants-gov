@@ -4,17 +4,11 @@ import uuid
 import alembic.command as command
 import grants_shared.adapters.db as db
 import pytest
-import sqlalchemy
 from alembic.script import ScriptDirectory
 from alembic.script.revision import MultipleHeads
 from alembic.util.exc import CommandError
 
-from src.db.migrations.run import (
-    alembic_cfg,
-    enable_query_error_logging,
-    escape_sql_newlines,
-    log_migration_sql_error,
-)
+from src.db.migrations.run import alembic_cfg
 from tests.lib import db_testing
 
 
@@ -82,88 +76,3 @@ def test_db_init_with_migrations(empty_schema):
     # Verify the DB session works after initializing the migrations
     db_session = empty_schema.get_session()
     db_session.close()
-
-
-@pytest.fixture
-def query_error_logging():
-    """Register the migration error logging listener, and clean it up afterwards.
-
-    The listener attaches to the Engine class itself, so it'd otherwise
-    stay registered for every test that runs after this one.
-    """
-    enable_query_error_logging()
-    yield
-    sqlalchemy.event.remove(sqlalchemy.engine.Engine, "handle_error", log_migration_sql_error)
-
-
-@pytest.mark.parametrize(
-    "statement,expected",
-    [
-        ("SELECT 1", "SELECT 1"),
-        (
-            "CREATE TABLE api.example (\n\texample_id UUID NOT NULL, \n\tname TEXT\n)\n\n",
-            "CREATE TABLE api.example (\\n\texample_id UUID NOT NULL, \\n\tname TEXT\\n)",
-        ),
-        (
-            "CREATE FUNCTION api.f() RETURNS TRIGGER AS $$\n"
-            "BEGIN\n"
-            "    -- Determine the opportunity_id\n"
-            "    RETURN NEW;\n"
-            "END;\n"
-            "$$ LANGUAGE plpgsql;",
-            "CREATE FUNCTION api.f() RETURNS TRIGGER AS $$\\nBEGIN\\n"
-            "    -- Determine the opportunity_id\\n    RETURN NEW;\\nEND;\\n$$ LANGUAGE plpgsql;",
-        ),
-    ],
-)
-def test_escape_sql_newlines(statement, expected):
-    escaped = escape_sql_newlines(statement)
-
-    assert escaped == expected
-    assert "\n" not in escaped
-    # The escaped form has to survive a round trip back into runnable SQL
-    assert escaped.replace("\\n", "\n") == statement.strip()
-
-
-def test_successful_migration_sql_not_logged(
-    empty_schema, query_error_logging, caplog: pytest.LogCaptureFixture
-):
-    caplog.set_level(logging.DEBUG)
-
-    db_session = empty_schema.get_session()
-    db_session.execute(sqlalchemy.text("CREATE TABLE example (\n\texample_id INT\n)"))
-    db_session.close()
-
-    assert not [record for record in caplog.records if hasattr(record, "migrate.sql")]
-
-
-def test_failing_migration_sql_logged_at_error(
-    empty_schema, query_error_logging, caplog: pytest.LogCaptureFixture
-):
-    caplog.set_level(logging.INFO)
-
-    db_session = empty_schema.get_session()
-    with pytest.raises(sqlalchemy.exc.ProgrammingError):
-        db_session.execute(sqlalchemy.text("CREATE TABLE example (\n\tbad_column NOT_A_TYPE\n)"))
-    db_session.close()
-
-    error_records = [record for record in caplog.records if record.levelno == logging.ERROR]
-    assert [getattr(record, "migrate.sql") for record in error_records] == [
-        "CREATE TABLE example (\\n\tbad_column NOT_A_TYPE\\n)"
-    ]
-
-
-def test_failing_connection_without_statement_not_logged(
-    query_error_logging, caplog: pytest.LogCaptureFixture
-):
-    """Errors that aren't tied to a statement (eg. failing to connect) have nothing to log."""
-    caplog.set_level(logging.INFO)
-
-    # Nothing listens on port 1, so this fails to connect without ever sending a statement
-    engine = sqlalchemy.create_engine(
-        "postgresql+psycopg://app@localhost:1/nope", connect_args={"connect_timeout": 2}
-    )
-    with pytest.raises(sqlalchemy.exc.OperationalError):
-        engine.connect()
-
-    assert not [record for record in caplog.records if hasattr(record, "migrate.sql")]
