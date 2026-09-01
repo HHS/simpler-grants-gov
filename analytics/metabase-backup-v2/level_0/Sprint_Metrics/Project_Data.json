@@ -1,8 +1,0 @@
-{
-  "name": "Project Data",
-  "display": "table",
-  "visualization_settings": {
-    "table.pivot_column": "name",
-    "table.cell_column": "ghid"
-  }
-}

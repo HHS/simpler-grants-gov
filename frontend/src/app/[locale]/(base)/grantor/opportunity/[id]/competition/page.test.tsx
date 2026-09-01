@@ -60,6 +60,11 @@ jest.mock("src/services/fetch/fetchers/allFormsFetcher", () => ({
   getForms: (...args: unknown[]) => mockAllForms(...args) as unknown,
 }));
 
+jest.mock("src/services/fetch/fetchers/competitionFormsFetcher", () => ({
+  updateCompetitionForms: (...args: unknown[]) =>
+    mockAllForms(...args) as unknown,
+}));
+
 const baseOpportunityData: DeepPartial<GrantorOpportunityDetail> = {
   opportunity_id: "opp-abc-123",
   opportunity_title: "Test Opportunity",

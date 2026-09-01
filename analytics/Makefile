@@ -188,20 +188,3 @@ mb-backup:
 	@echo "====================================================="
 	$(PY_RUN_CMD) analytics metabase backup
 	@echo "====================================================="
-
-# mb-backup-v2/mb-restore are a separate, more capable pair alongside
-# mb-backup above: mb-backup-v2 also captures dashboards and sidecar
-# metadata (display type, viz settings, template tags), and mb-restore
-# publishes that same format back to a Metabase instance in a new,
-# disposable collection -- never modifying anything already there.
-mb-backup-v2:
-	@echo "=> Backing up Metabase questions and dashboards to disk"
-	@echo "====================================================="
-	$(PY_RUN_CMD) analytics metabase backup-v2
-	@echo "====================================================="
-
-mb-restore:
-	@echo "=> Publishing restore content to Metabase"
-	@echo "====================================================="
-	$(PY_RUN_CMD) analytics metabase restore
-	@echo "====================================================="

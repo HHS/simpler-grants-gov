@@ -8,7 +8,7 @@ export async function updateCompetitionForms({
   body,
 }: {
   competitionId: string;
-  body: { forms: CompetitionFormsSubmitApi };
+  body: { forms: CompetitionFormsSubmitApi[] };
 }): Promise<CompetitionFormsApiResponse> {
   const response = await fetchCompetitionForms({
     subPath: `${competitionId}/forms`,

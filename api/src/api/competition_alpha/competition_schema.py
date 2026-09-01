@@ -7,9 +7,6 @@ from src.constants.lookup_constants import CompetitionOpenToApplicant
 
 
 class CompetitionInstructionAlphaSchema(Schema):
-    competition_instruction_id = fields.UUID(
-        metadata={"description": "The competition instruction ID"}
-    )
     file_name = fields.String(
         metadata={
             "description": "The name of the instruction file",
@@ -59,13 +56,6 @@ class CompetitionAlphaSchema(Schema):
         metadata={"description": "List of instruction files associated with this competition"},
     )
 
-    public_competition_id = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The public-facing identifier of the competition",
-            "example": "ABC-123-456",
-        },
-    )
     competition_title = fields.String(
         allow_none=True,
         metadata={
@@ -83,13 +73,6 @@ class CompetitionAlphaSchema(Schema):
         allow_none=True,
         metadata={
             "description": "The closing date of the competition, the last day applications are accepted"
-        },
-    )
-    grace_period = fields.Integer(
-        allow_none=True,
-        metadata={
-            "description": "The number of days after the closing date that applications are still accepted",
-            "example": 5,
         },
     )
     contact_info = fields.String(

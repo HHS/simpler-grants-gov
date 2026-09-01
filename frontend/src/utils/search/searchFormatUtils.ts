@@ -1,5 +1,4 @@
 import { pickBy } from "lodash";
-import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { OptionalStringDict } from "src/types/generalTypes";
 import {
   ValidSearchQueryParamData,
@@ -264,16 +263,9 @@ export const searchToQueryParams = (
         )
       : {};
 
-  // default status values are written into a saved search when it's created, so a saved search
-  // without a status filter means the user deselected every status. Set the "no status" param
-  // explicitly, otherwise the search page would apply the status defaults on load
-  const filtersWithStatus = filters.status
-    ? filters
-    : { ...filters, status: SEARCH_NO_STATUS_VALUE };
-
   const sortby = paginationToSortby(searchRecord?.pagination?.sort_order || []);
   const withQueryAndSort = {
-    ...filtersWithStatus,
+    ...filters,
     query: searchRecord.query || "",
     ...sortby,
   };

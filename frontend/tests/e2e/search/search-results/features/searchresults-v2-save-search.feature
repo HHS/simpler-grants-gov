@@ -155,16 +155,6 @@ Scenario: Saved search dropdown consistently reflects the applied selection
   When I reselect "<secondSavedSearch>"
   Then the dropdown should show "<secondSavedSearch>" as selected
 
-# --- reported as issue 11710 ---
-Scenario: Saved search with all statuses deselected does not reapply the default statuses
-  Given I am logged in
-  And I have deselected the "Open" and "Forecasted" status filters
-  When I save the search
-  And I reopen the saved search
-  Then the "Open" and "Forecasted" filter pills should not be displayed
-  And no status filter checkboxes should be selected
-  And the results should match the search that was saved
-
 # --- reported and awaiting confirmation on expected behavior ---
 # --- Per reviewer comment this may belong in Search feature instead of Save Search --- 
 # --- Commented out for future discussion ---

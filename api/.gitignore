@@ -43,5 +43,6 @@ soap-api.env
 *.key
 *.pub
 *.pem
+e2e_token.tmp
 
 locals3root

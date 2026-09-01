@@ -43,11 +43,3 @@ export type FileUploadStatusUpdate = {
   error?: string;
   pendingFileId?: string;
 };
-
-// shape of the "file_metadata" object nested in the API's file-scan-results stream,
-// null until the scan status is "complete"
-export type FileResultsMetadata = {
-  file_name: string;
-  file_size_bytes: number;
-  download_path?: string;
-};

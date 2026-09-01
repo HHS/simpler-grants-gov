@@ -837,6 +837,7 @@ export default function OpportunityEditForm({
           </p>
         </div>
         <OpportunityAttachmentUploadInput
+          opportunityId={opportunityId}
           initialAttachments={initialAttachments}
         />
       </section>

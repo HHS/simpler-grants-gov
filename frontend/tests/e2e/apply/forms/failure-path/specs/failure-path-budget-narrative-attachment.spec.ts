@@ -74,13 +74,6 @@ test(
       );
     }
 
-    // Wait for form content to be fully rendered and interactive
-    // Check for form heading to ensure the form is ready
-    await page
-      .getByText(BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER, { exact: false })
-      .first()
-      .waitFor({ state: "visible", timeout: 15000 });
-
     // When the user attempts to save with no file uploaded for required attachment fields
     await saveForm(page, true); // expect validation errors
 

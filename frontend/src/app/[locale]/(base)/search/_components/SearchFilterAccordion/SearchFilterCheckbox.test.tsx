@@ -50,31 +50,4 @@ describe("SearchFilterCheckbox", () => {
       expect(mockUpdateCheckedOption).toHaveBeenCalledWith(option.value, true);
     });
   });
-
-  it("unchecks when the value is removed from the query, such as clearing filters", () => {
-    const { rerender } = render(
-      <SearchFilterCheckbox
-        facetCounts={{}}
-        option={option}
-        updateCheckedOption={mockUpdateCheckedOption}
-        accordionTitle={"Test Accordion"}
-        query={new Set([option.value])}
-      />,
-    );
-
-    const checkbox = screen.getByRole("checkbox");
-    expect(checkbox).toBeChecked();
-
-    rerender(
-      <SearchFilterCheckbox
-        facetCounts={{}}
-        option={option}
-        updateCheckedOption={mockUpdateCheckedOption}
-        accordionTitle={"Test Accordion"}
-        query={new Set()}
-      />,
-    );
-
-    expect(checkbox).not.toBeChecked();
-  });
 });

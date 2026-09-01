@@ -30,7 +30,6 @@ api/src/form_schema/forms/
 ├── budget_narrative_attachment.py   # Budget Narrative Attachments + XML transformation rules
 ├── other_narrative_attachment.py    # Other Narrative Attachments + XML transformation rules
 └── project_abstract.py        # Project Abstract + XML transformation rules
-
 ```
 
 ## Usage
@@ -39,11 +38,10 @@ api/src/form_schema/forms/
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.models import XMLGenerationRequest
 
-
 # Application data
 application_data = {
     "submission_type": "Application",
-    "organization_name": "Test University",
+    "organization_name": "Test University", 
     "project_title": "Research Project",
     # ... other fields
 }
@@ -73,7 +71,6 @@ else:
 The service supports two XML formatting modes:
 
 ### Pretty-Print Format (Default)
-
 ### Condensed Format
 
 ## Sample Output
@@ -92,177 +89,51 @@ The service supports two XML formatting modes:
 ## Testing
 
 Comprehensive unit tests cover:
-
 - Basic XML generation functionality
 - Configuration loading from form modules
 - Field mapping transformations
 - Error handling for missing data
 - XML namespace handling
-- Snapshot regression testing against known-good XML fixtures
-- XSD schema validation against the committed Grants.gov schemas
+- XSD schema validation
 
-### Testing Standard for New Forms
+### Running Unit Tests
 
-Every new form must include all three of the following before it is considered
-complete. These are not optional extras — a form's XML generation support is
-not "done" until all three exist and pass:
-
-1. **Known-good XML fixture**: Create representative input data that exercises
-   the required fields and important optional or nested fields. Keep the data
-   deterministic (fixed dates, fixed IDs, no randomness) so the generated XML
-   is reproducible across runs and machines.
-2. **Snapshot equality test**: Generate XML from the fixture and assert the
-   complete output exactly matches a checked-in snapshot under
-   `tests/src/services/xml_generation/snapshots/`. This protects element
-   order, namespaces, attributes, omission of empty fields, and transformed
-   values in one assertion. See [Snapshot fixtures](#snapshot-fixtures) below.
-3. **XSD validation test**: Validate the generated XML against the form's
-   committed XSD using `XSDValidator`. This confirms the output remains
-   compatible with the Grants.gov contract. See
-   [XSD validation](#xsd-validation) below.
-
-See [`test_sf424_short_xml_generation.py`](../../../tests/src/services/xml_generation/test_sf424_short_xml_generation.py)
-for a complete, working example of all three: fixture data, a snapshot
-equality test, and form-level XSD validation tests. Shared sample cases are
-also covered by
-[`test_xml_validation_cases.py`](../../../tests/src/services/xml_generation/test_xml_validation_cases.py).
-
-### Snapshot fixtures
-
-Snapshot tests pin the complete generated XML for a form against a checked-in
-file, so any unintended change to element order, namespaces, attributes, or
-field values fails the test rather than slipping through review unnoticed.
-
-**Location**
-
-- Snapshot files live in `tests/src/services/xml_generation/snapshots/`, with
-  one checked-in file for each form covered by snapshot testing (e.g.
-  `sf424_short_3_0.xml`, `key_contacts_2_0.xml`, `sf424c_2_0.xml`).
-- Each form's test module points at its own snapshot with a module-level
-  path constant, e.g.:
-
-```python
-_SNAPSHOT_PATH = Path(__file__).parent / "snapshots" / "sf424_short_3_0.xml"
-```
-
-- The fixture data that produces the snapshot (e.g. `_SNAPSHOT_DATA`) should
-  live next to the test, in the same module, so the input and its expected
-  output are reviewed together.
-
-**Regeneration**
-
-- If the snapshot file does not exist yet, the test creates it on first run
-  and skips (rather than failing), so a brand-new form's baseline can be
-  captured with a single test run:
-
-```python
-def test_full_xml_matches_snapshot(self):
-   xml_data = _generate(_SNAPSHOT_DATA)
-
-
-   if not _SNAPSHOT_PATH.exists():
-       _SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
-       _SNAPSHOT_PATH.write_text(xml_data)
-       pytest.skip("Snapshot created — re-run to validate")
-
-
-   assert xml_data == _SNAPSHOT_PATH.read_text()
-```
-
-- To regenerate an existing snapshot from scratch, delete the file under
-  `snapshots/` and re-run the test — it will recreate it the same way.
-
-**Update workflow**
-
-- The snapshot is a reviewed artifact, not an automatically accepted output.
-  Never regenerate a snapshot to make a failing test pass without first
-  understanding _why_ the XML changed.
-- Workflow for an intentional XML change (e.g. adding a field mapping,
-  changing a transform):
-
-1.  Make the code change.
-2.  Run the affected form's tests and let the snapshot test fail.
-3.  Review the diff between the old snapshot (in git history) and the new
-    generated XML — confirm every difference is expected.
-4.  Delete the stale snapshot file (or let the test recreate it) and commit
-    the updated snapshot in the **same** change as the code change, so the
-    PR diff shows both together.
-
-- Do not regenerate snapshots to hide an unexpected or unexplained change —
-  if the diff doesn't match what you intended to change, treat it as a bug.
-
-### XSD validation
-
-Form-level XSD validation confirms that generated XML for a single form
-actually conforms to the Grants.gov schema contract for that form.
-
-**Pattern**
-
-1. Generate the XML (either directly via `XMLGenerationService`, or the full
-   submission via `SubmissionXMLAssembler` when testing the assembled
-   submission).
-2. Extract just the target form's element from the output (e.g. the single
-   `<SF424_Short_3_0>` element) if validating from a full submission XML.
-3. Load the form's XSD with `XSDValidator` and call `validate_xml(...)`.
-4. Assert `result["valid"]` is `True`, including the validator's error
-   message in the assertion so failures are diagnosable without re-running.
-
-```python
-from src.services.xml_generation.validation.xsd_validator import XSDValidator
-
-
-@pytest.fixture
-def xsd_validator():
-    xsd_cache_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
-    return XSDValidator(xsd_cache_dir)
-
-
-def test_minimal_valid_validates_against_xsd(self, xsd_validator):
-   xml_string = _generate(_MINIMAL_DATA)
-   result = xsd_validator.validate_xml(xml_string, xsd_validator.xsd_dir / "SF424_Short_3_0-V3.0.xsd")
-   assert result["valid"], f"XSD validation failed:\n{result['error_message']}"
-```
-
-At minimum, cover a **minimal valid** case (only required fields) and a
-**full/complete** case (using the same fixture as the snapshot test) so both
-the required-fields floor and the fully-populated ceiling are validated
-against the schema.
-
-**Committed schemas and validator**
-
-- Committed XSDs live in `src/services/xml_generation/xsds/`. Form-level unit
-  tests validate against these committed files — never against a live
-  network fetch — so CI is repeatable and doesn't depend on Grants.gov being
-  reachable.
-- `XSDValidator` (in
-  [`src/services/xml_generation/validation/xsd_validator.py`](validation/xsd_validator.py))
-  wraps schema loading and validation and returns a `{"valid": bool,
-"error_message": str | None}` result.
-- If the XSD cache is missing locally, download it with:
-
-```bash
-make fetch-xsds
-```
-
-- Refresh committed XSDs deliberately when Grants.gov publishes a schema
-  change — don't let them drift silently. Review the resulting XML and
-  snapshot changes together in the same change as the XSD refresh.
-
-### Running Validation
-
-XML generation validation is now covered by the pytest suite and committed XSDs.
-
+Run all XML generation unit tests:
 ```bash
 python -m pytest tests/src/services/xml_generation/
 ```
 
-These tests cover:
+### Running XSD Validation Tests
 
-1. XML generation behavior
-2. Snapshot regression checks for exact XML output
-3. XSD validation against the committed Grants.gov schemas
+To validate generated XML against official Grants.gov XSD schemas:
 
-NOTE: The committed XSDs live in src/services/xml_generation/xsds/. Refresh them deliberately when Grants.gov publishes schema updates.
+```bash
+# Validate all forms
+make validate-xml-generation
+
+# Validate a specific form
+make test-xml-validation form=SF424_4_0
+```
+
+**Note:** The first run will download XSD files from Grants.gov. Subsequent runs use the downloaded files from `services/xml_generation/xsds/`.
+
+The validation tests:
+1. Generate XML from test data (see `src/services/xml_generation/validation/test_cases.py`)
+2. Download XSD schemas from Grants.gov if not cached
+3. Validate generated XML against the official XSD
+4. Save results to `services/xml_generation/xsds/validation_results.json`
+
+### Validation Test Cases
+
+Test cases are defined in [`validation/test_cases.py`](validation/test_cases.py) and include:
+- **SF-424**: Minimal valid, revision, continuation, multiple applicant types, attachments
+- **SF-424A**: Budget sections, forecasted cash needs, complete examples  
+- **SF-LLL**: Initial filing, material change, subawardee scenarios
+- **EPA-4700-4**: Minimal, complete, construction explanation examples
+- **Attachment Forms**: Single attachment, multiple attachments, all 15 slots
+
+Each test case validates that the generated XML conforms to the official XSD schema requirements.
+
 
 ## Configuration
 
@@ -385,7 +256,6 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **CD-511 Field Mapping Notes:**
-
 - `applicant_name` → `OrganizationName` (XSD uses OrganizationName, form displays "Name of Applicant")
 - `contact_person` → `ContactName` with nested `HumanNameDataType` structure using GlobalLibrary namespace
 - Either `award_number` or `project_name` (or both) should be provided per form validation
@@ -429,7 +299,6 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **GG_LobbyingForm Field Mapping Notes:**
-
 - `organization_name` → `ApplicantName`
 - `authorized_representative_name` → `AuthorizedRepresentativeName` with nested `HumanNameDataType` structure
 - `authorized_representative_signature` and `submitted_date` are auto-populated during submission
@@ -463,7 +332,6 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Project Abstract Summary Field Mapping Notes:**
-
 - `funding_opportunity_number` → `FundingOpportunityNumber` (required)
 - `assistance_listing_number` → `CFDANumber` (optional, legacy name for Assistance Listing Number)
 - `applicant_name` → `OrganizationName` (required, called "Applicant Name" in UI)
@@ -500,7 +368,6 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **EPA Key Contacts Field Mapping Notes:**
-
 - Uses a helper function `_create_contact_person_transform()` to generate the nested structure for each contact
 - All four contacts are optional per XSD
 - Note: XSD has a typo "AdminstrativeContact" (not "Administrative")
@@ -544,7 +411,6 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Assurance Forms Field Mapping Notes:**
-
 - Uses `compose_object` conditional transform to wrap flat fields into nested `AuthorizedRepresentative` element
 - `signature` → `AuthorizedRepresentative/RepresentativeName`
 - `title` → `AuthorizedRepresentative/RepresentativeTitle`
@@ -635,7 +501,6 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Attachment Forms Notes:**
-
 - **Multiple attachments** (`type: "multiple"`): Used by Project Narrative, Budget Narrative, and Other Narrative Attachments
 - **Single attachment** (`type: "single"`): Used by Project Abstract with wrapper element `ProjectAbstractAddAttachment`. Generates a simple structure where attachment metadata (FileName, MimeType, etc.) is placed directly within the specified XML element.
 - **Single attachment with nested wrapper** (`type: "single_with_wrapper"`): Generates a nested structure where each attachment slot (e.g., ATT1-ATT15) contains an additional File wrapper element (e.g., `<ATT1><ATT1File>...</ATT1File></ATT1>`) before the attachment metadata.
@@ -704,7 +569,6 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Supplementary Cover Sheet for NEH Grant Programs Field Mapping Notes:**
-
 - Uses `map_values` transformation to convert human-readable enum values to XSD-required numeric codes for discipline fields
 - `major_field` (Project Director's Major Field): Maps ~150 discipline display values (e.g., "History: U.S. History") to numeric codes (e.g., "4")
 - `organization_type`: Passed through as-is (full "CODE: Description" format, e.g., "1330: University")
@@ -862,7 +726,7 @@ FORM_XML_TRANSFORM_RULES = {
 
 **Performance Site Location Field Mapping Notes:**
 
-- **Namespace split**: `Individual`, `OrganizationName`, `SAMUEI`, `Address`, and `CongressionalDistrictProgramProject` are declared in the form's own `SiteLocationDataType` — they use the default `PerformanceSite_4_0` namespace. The address _sub_-elements (`Street1`, `City`, etc.) are typed via `globLib:AddressDataTypeV3` and use the `globLib` namespace.
+- **Namespace split**: `Individual`, `OrganizationName`, `SAMUEI`, `Address`, and `CongressionalDistrictProgramProject` are declared in the form's own `SiteLocationDataType` — they use the default `PerformanceSite_4_0` namespace. The address *sub*-elements (`Street1`, `City`, etc.) are typed via `globLib:AddressDataTypeV3` and use the `globLib` namespace.
 - **Address element order**: The XSD sequence requires `ZipPostalCode` before `Country`. The transform rules must declare `zip_code` before `country` to match this ordering.
 - **Attachment**: The optional `additional_locations_attachment` field maps to a single `<AttachedFile>` element (type `att:AttachedFileDataType`) as a direct child of the root. Using `single_with_wrapper` with `file_element: ""` creates the outer `<AttachedFile>` wrapper and places `att:FileName`, `att:MimeType`, `att:FileLocation`, and `glob:HashValue` directly inside it — no spurious inner wrapper element.
 - `submitting_as_individual` uses the `boolean_to_yes_no` value transform (outputs `Y: Yes` / `N: No`).
@@ -883,13 +747,9 @@ To add XML generation support for a new form:
 
 3. **Set json_to_xml_schema on the Form**: In the form's Python module, set `json_to_xml_schema=FORM_XML_TRANSFORM_RULES` on the Form object. The config is automatically loaded for any form that has this field set.
 
-4. **Add Tests**: Create test cases in `tests/src/services/xml_generation/`.
-   Per the [Testing Standard for New Forms](#testing-standard-for-new-forms),
-   a new form is not complete until all three of the following exist and pass:
-   - **A known-good XML fixture** — deterministic, representative input data covering required fields plus important optional/nested fields.
-   - **A snapshot equality test** — generated XML compared exactly against a checked-in file in `tests/src/services/xml_generation/snapshots/` (see [Snapshot fixtures](#snapshot-fixtures)).
-   - **An XSD validation test** — generated XML validated against the form's committed schema using `XSDValidator` (see [XSD validation](#xsd-validation)).
-
-   Also test configuration loading and any noteworthy transformation behavior specific to the new form.
+4. **Add Tests**: Create test cases in `tests/src/services/xml_generation/`
+   - Test configuration loading
+   - Test XML generation with sample data
+   - Verify XML structure matches XSD requirements
 
 5. **Update Documentation**: Document any special transformation logic or noteworthy details in this README

@@ -1,4 +1,3 @@
-import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import {
   FilterOption,
   HardcodedFrontendFilterNames,
@@ -30,10 +29,6 @@ const toSavedSearchFilterDisplayValues = (
     (acc, [key, paramDisplay]) => {
       const value = backendFilterValues[key as ValidSearchQueryParam];
       if (!value || key === "page") {
-        return acc;
-      }
-      // "no status" means the user deselected every status, which has no display value
-      if (key === "status" && value === SEARCH_NO_STATUS_VALUE) {
         return acc;
       }
       let displayValue = "";

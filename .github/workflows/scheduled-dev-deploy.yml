@@ -81,7 +81,7 @@ jobs:
     needs: [nofos-checks, nofos-vulnerability-scans]
     uses: ./.github/workflows/deploy-nofos.yml
     with:
-      environment: "infra-dev"
+      environment: "dev"
       version: "main"
 
   send-slack-notification:

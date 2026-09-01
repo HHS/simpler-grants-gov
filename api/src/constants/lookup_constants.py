@@ -499,4 +499,3 @@ class JobType(StrEnum):
     SAM_EXTRACTS = "sam-extracts"
     LOAD_AGENCY_DATA_OPENSEARCH = "load-agency-data-opensearch"
     EXPORT_OPPORTUNITY_DATA = "export-opportunity-data"
-    CHECK_XSD_DRIFT = "check-xsd-drift"

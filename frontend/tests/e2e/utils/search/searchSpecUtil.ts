@@ -179,9 +179,6 @@ export async function toggleCheckboxGroup(
     await toggleCheckbox(page, checkboxID);
     await page.waitForTimeout(500);
   }
-  // Additional wait after all checkboxes toggled to allow filter state to propagate
-  // and React's debounce to fire before URL checks happen
-  await page.waitForTimeout(300);
 }
 
 export async function expectCheckboxesChecked(

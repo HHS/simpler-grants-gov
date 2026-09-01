@@ -5,10 +5,6 @@ import {
   createOpportunitySummaryForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
-import {
-  createOpportunityAttachment,
-  deleteOpportunityAttachment,
-} from "src/services/fetch/fetchers/opportunityAttachmentFetcher";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { OpportunitySummaryUpdateRawData } from "src/types/opportunity/opportunityResponseTypes";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
@@ -73,62 +69,6 @@ const editOpportunityFormSchema = {
 
 function readStringValue(value: FormDataEntryValue | null): string {
   return typeof value === "string" ? value : "";
-}
-
-// held_pending_file_ids / deleted_attachment_ids are both JSON-stringified string arrays
-function parseIdList(value: FormDataEntryValue | null): string[] {
-  if (typeof value !== "string" || !value.trim()) {
-    return [];
-  }
-  try {
-    const parsed: unknown = JSON.parse(value);
-    return Array.isArray(parsed)
-      ? parsed.filter((item): item is string => typeof item === "string")
-      : [];
-  } catch {
-    return [];
-  }
-}
-
-// Attachments follow their own persistence model ("nothing persists until Save"), so
-// creates/deletes are only ever sent to the backend as part of a successful Save - one
-// call per held/marked-for-deletion id, regardless of which of the 3 submit types fired.
-// A 422 from either endpoint has no form field of its own to attach to, so it always
-// surfaces as a top-level errorMessage rather than an inline validationErrors entry -
-// stops at the first failure rather than silently continuing through the rest of the list.
-async function processAttachmentChanges(
-  opportunityId: string,
-  formData: FormData,
-  genericMessage: string,
-): Promise<Pick<OpportunityEditActionState, "errorMessage"> | undefined> {
-  const heldPendingFileIds = parseIdList(formData.get("held_pending_file_ids"));
-  const deletedAttachmentIds = parseIdList(
-    formData.get("deleted_attachment_ids"),
-  );
-
-  for (const pendingFileId of heldPendingFileIds) {
-    const response = await createOpportunityAttachment(
-      opportunityId,
-      pendingFileId,
-    );
-    if (response.status_code === 422) {
-      console.error("API side validation errors:", response.errors);
-      const { errorMessage } = mapApiValidationErrors(response, genericMessage);
-      return { errorMessage: errorMessage ?? genericMessage };
-    }
-  }
-  for (const attachmentId of deletedAttachmentIds) {
-    const response = await deleteOpportunityAttachment(
-      opportunityId,
-      attachmentId,
-    );
-    if (response.status_code === 422) {
-      console.error("API side validation errors:", response.errors);
-      const { errorMessage } = mapApiValidationErrors(response, genericMessage);
-      return { errorMessage: errorMessage ?? genericMessage };
-    }
-  }
-  return undefined;
 }
 
 // These fields display comma-formatted (formatNumber() in OpportunityEditForm.tsx) but are
@@ -204,28 +144,6 @@ function mapApiValidationErrors(
           ? undefined
           : response.message || genericMessage,
   };
-}
-
-// Shared by the outer catch and the create-path's local catch (see below) so a thrown
-// error is mapped identically either way - the only difference is whether the caller
-// still has a newOpportunitySummaryId to merge back in.
-function mapThrownError(
-  error: unknown,
-  alerts: (key: string) => string,
-): Pick<OpportunityEditActionState, "errorMessage"> {
-  const status =
-    error instanceof ApiRequestError ? parseErrorStatus(error) : null;
-
-  if (status === 401) {
-    return { errorMessage: alerts("unauthenticated") };
-  }
-  if (status === 403) {
-    return { errorMessage: alerts("forbidden") };
-  }
-  if (status === 404) {
-    return { errorMessage: alerts("notFound") };
-  }
-  return { errorMessage: alerts("genericError") };
 }
 
 async function validateOpportunityEditForm(formData: FormData) {
@@ -442,28 +360,6 @@ export async function saveOpportunityEditAction(
         return mapApiValidationErrors(createResponse, alerts("genericError"));
       }
 
-      // caught locally (rather than by the outer catch below) because the summary itself
-      // was already created successfully - the frontend still needs its id so a retry
-      // after this error updates it instead of creating a duplicate, whether the failure
-      // came back as a 422 response or was thrown (401/403/404/network/500)
-      let attachmentError:
-        Pick<OpportunityEditActionState, "errorMessage"> | undefined;
-      try {
-        attachmentError = await processAttachmentChanges(
-          opportunityId,
-          formData,
-          alerts("genericError"),
-        );
-      } catch (error) {
-        attachmentError = mapThrownError(error, alerts);
-      }
-      if (attachmentError) {
-        return {
-          ...attachmentError,
-          newOpportunitySummaryId: createResponse.data.opportunity_summary_id,
-        };
-      }
-
       return {
         successMessage: alerts("success"),
         newOpportunitySummaryId: createResponse.data.opportunity_summary_id,
@@ -497,21 +393,34 @@ export async function saveOpportunityEditAction(
       console.error("API side validation errors:", response.errors);
       return mapApiValidationErrors(response, alerts("genericError"));
     }
-
-    const attachmentError = await processAttachmentChanges(
-      opportunityId,
-      formData,
-      alerts("genericError"),
-    );
-    if (attachmentError) {
-      return attachmentError;
-    }
-
     return {
       successMessage: alerts("success"),
     };
   } catch (error) {
-    return mapThrownError(error, alerts);
+    const status =
+      error instanceof ApiRequestError ? parseErrorStatus(error) : null;
+
+    if (status === 401) {
+      return {
+        errorMessage: alerts("unauthenticated"),
+      };
+    }
+
+    if (status === 403) {
+      return {
+        errorMessage: alerts("forbidden"),
+      };
+    }
+
+    if (status === 404) {
+      return {
+        errorMessage: alerts("notFound"),
+      };
+    }
+
+    return {
+      errorMessage: alerts("genericError"),
+    };
   }
 }
 

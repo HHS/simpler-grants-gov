@@ -1,6 +1,5 @@
 import { noop } from "lodash";
 import { MAX_UPLOAD_FILE_SIZE_BYTES } from "src/constants/fileUploads";
-import { usePrevious } from "src/hooks/usePrevious";
 import {
   PostUploadAction,
   UploadFileMetadata,
@@ -11,7 +10,6 @@ import { FileInput, FileInputRef, ModalRef } from "@trussworks/react-uswds";
 
 import { DeleteFileModal } from "./DeleteFileModal";
 import { FileInputExistingFiles } from "./FileInputExistingFiles";
-import { FileInputStatusDisplay } from "./FileInputStatusDisplay";
 import { FileUploadManager } from "./FileUploadManager";
 
 type SimplerFileInputProps = {
@@ -64,11 +62,6 @@ export const SimplerFileInput = ({
   multiFile = false,
   maxFileSizeBytes = MAX_UPLOAD_FILE_SIZE_BYTES,
 }: SimplerFileInputProps) => {
-  const previousExistingFilesLength = usePrevious(existingFiles?.length);
-  // On multifile inputs we don't really need to track the file input, so we clear it out immediately
-  // on upload start in order to avoid showing the trussworks "files added" state.
-  // On single file input we need to track files added in order to handle cases where multiple uploads
-  // are attempted
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   // a counter rather than a timestamp: files selected in one batch would otherwise share
@@ -89,8 +82,6 @@ export const SimplerFileInput = ({
   const [activeUploads, setActiveUploads] = useState<
     { uploadId: string; file: File }[]
   >([]);
-
-  const [completedUploads, setCompletedUploads] = useState<string[]>([]);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
 
   const toUploadMetadata = (files: File[]) => {
@@ -153,6 +144,8 @@ export const SimplerFileInput = ({
         setDeletePending(false);
         setFilePendingDeletion(undefined);
         deleteModalRef.current?.toggleModal();
+        // figured we may need to clear delete errors for the file here, but it should
+        // be removed from the dom on successful delete so I don't think it's necessary
         return;
       })
       .catch((e) => {
@@ -176,30 +169,14 @@ export const SimplerFileInput = ({
     if (existingFiles?.length) {
       return true;
     }
-    if (activeUploads.length || completedUploads.length) {
+    if (activeUploads.length) {
       return true;
     }
-  }, [
-    multiFile,
-    existingFiles?.length,
-    activeUploads.length,
-    completedUploads.length,
-  ]);
+  }, [multiFile, existingFiles?.length, activeUploads.length]);
 
   // note the usage of functional state setters in these functions
   // it's necessary to avoid referencing stale closed over state values up the call stack
   const trackUploadComplete = (uploadId: string) => {
-    setCompletedUploads((previousCompletedUploads) => [
-      ...previousCompletedUploads,
-      uploadId,
-    ]);
-    setActiveUploads((previousActiveUploads) =>
-      previousActiveUploads.filter(
-        (activeUpload) => activeUpload.uploadId !== uploadId,
-      ),
-    );
-  };
-  const trackUploadCanceled = (uploadId: string) => {
     setActiveUploads((previousActiveUploads) =>
       previousActiveUploads.filter(
         (activeUpload) => activeUpload.uploadId !== uploadId,
@@ -218,7 +195,7 @@ export const SimplerFileInput = ({
       previousUploadErrors.filter((uploadError) => uploadError !== uploadId),
     );
     // we want to show the upload input again after dismissing a single error
-    trackUploadCanceled(uploadId);
+    trackUploadComplete(uploadId);
     if (!multiFile) {
       fileInputRef?.current?.clearFiles();
     }
@@ -231,13 +208,6 @@ export const SimplerFileInput = ({
   // chooser is hidden by then, so the browser's message would be unreachable. The label
   // and form schema validation still convey that the field is required.
   const nativeRequired = required && !existingFiles?.length;
-
-  if (
-    (previousExistingFilesLength || 0) !== existingFiles?.length &&
-    completedUploads.length
-  ) {
-    setCompletedUploads([]);
-  }
 
   return (
     <>
@@ -256,26 +226,12 @@ export const SimplerFileInput = ({
         multiple={multiFile}
         changeSelectedFileText="Add file"
       />
-      {completedUploads.map((completedUploadFilename) => (
-        <FileInputStatusDisplay
-          key={completedUploadFilename}
-          fileName={completedUploadFilename}
-          status="success"
-          postUploadActionProgressMessage={postUploadActionProgressMessage}
-          postUploadActionSuccessMessage={postUploadActionSuccessMessage}
-          postUploadActionErrorMessage={postUploadActionErrorMessage}
-          maxFileSizeBytes={maxFileSizeBytes}
-          error={false}
-          onCancel={() => {}}
-          onDismiss={() => {}}
-        />
-      ))}
       {activeUploads.map(({ uploadId, file }) => (
         <FileUploadManager
           key={uploadId}
           fileToUpload={file}
           onCancel={() => {
-            trackUploadCanceled(uploadId);
+            trackUploadComplete(uploadId);
             if (!multiFile) {
               fileInputRef?.current?.clearFiles();
             }
@@ -286,13 +242,7 @@ export const SimplerFileInput = ({
           postUploadActionProgressMessage={postUploadActionProgressMessage}
           postUploadActionSuccessMessage={postUploadActionSuccessMessage}
           postUploadActionErrorMessage={postUploadActionErrorMessage}
-          onStart={() => {
-            // we never want to show the "files added" state of the trussworks input
-            if (multiFile) {
-              fileInputRef?.current?.clearFiles();
-            }
-            onStart();
-          }}
+          onStart={onStart}
           onUploadSuccess={(postUploadResult: unknown) => {
             trackUploadComplete(uploadId);
             onSuccess(postUploadResult);

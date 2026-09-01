@@ -14,6 +14,7 @@
 
 import { type BrowserContext, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
+import { openMobileNav } from "tests/e2e/playwrightUtils";
 import { createSpoofedSessionCookie } from "tests/e2e/utils/auth/login-utils";
 import {
   getTestUserId,
@@ -48,7 +49,7 @@ const fetchE2eSessionToken = async (userId: string): Promise<string> => {
 export async function authenticateE2eUser(
   page: Page,
   context: BrowserContext,
-  _isMobile: boolean,
+  isMobile: boolean,
   testUserKey: TestUserKey = "primaryOrgAdmin",
 ): Promise<void> {
   const userId = getTestUserId(testUserKey);
@@ -62,4 +63,8 @@ export async function authenticateE2eUser(
   await page.waitForTimeout(1000);
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(2000);
+
+  if (isMobile) {
+    await openMobileNav(page);
+  }
 }

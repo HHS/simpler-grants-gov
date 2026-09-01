@@ -98,35 +98,8 @@ for (const {
       async () => {
         test.setTimeout(120_000);
 
-        // Wait for the application forms table to be visible before clicking form link
-        await expect(
-          page.locator(".simpler-application-forms-table").first(),
-        ).toBeVisible({ timeout: 30000 });
-
-        // Explicitly wait for the form link to be clickable before clicking
-        await page
-          .getByTestId("application-form-link")
-          .waitFor({ state: "visible", timeout: 15000 });
-
         await page.getByTestId("application-form-link").click();
-
-        // Wait for form page to load after navigation
-        await page.waitForLoadState("domcontentloaded");
-
-        // Wait for the form container to be visible, indicating form has fully rendered
-        await page
-          .locator(".simpler-apply-form")
-          .waitFor({ state: "visible", timeout: 20000 });
-
         formUrl = page.url();
-
-        // Wait for the attachment upload button to be visible and interactive
-        await page
-          .getByRole("button", {
-            name: attachmentForm.formConfig.fields.att1.field,
-            exact: true,
-          })
-          .waitFor({ state: "visible", timeout: 15000 });
 
         await page
           .getByRole("button", {
@@ -152,11 +125,6 @@ for (const {
 
         await page.goto(applicationUrl);
         await page.waitForLoadState("domcontentloaded");
-
-        // Wait for the application page content to be fully rendered
-        await expect(page.getByRole("heading", { name: /Forms/ })).toBeVisible({
-          timeout: 20000,
-        });
 
         const activities = await getApplicationHistoryActivities(page);
         expect(activities.some((a) => a.includes("Attachment added"))).toBe(
@@ -211,12 +179,6 @@ for (const {
 
         await page.goto(applicationUrl);
         await page.waitForLoadState("domcontentloaded");
-
-        // Wait for the application page to be fully loaded before proceeding
-        await expect(
-          page.locator(".simpler-application-forms-table").first(),
-        ).toBeVisible({ timeout: 30000 });
-
         await submitApplicationAndVerify(page, "success");
         await verifySubmissionConfirmation(page);
 

@@ -239,8 +239,7 @@ describe("SimplerFileInput", () => {
         ).toHaveTextContent("post upload action in progress"),
       );
     });
-    // note that this asserts that the success message is shown at the time that the
-    // callback runs, a separate test asserts that it remains shown after the callback runs
+
     it("displays complete status after successful post-upload", async () => {
       const trigger = createAdvanceStreamTrigger();
       clientFetchMock.mockResolvedValue(
@@ -662,7 +661,6 @@ describe("SimplerFileInput", () => {
         }),
       );
       trigger.advance();
-
       // note that the uploading status will never show up in the UI in this case
       // await waitFor(async () =>
       //   expect(
@@ -675,108 +673,6 @@ describe("SimplerFileInput", () => {
           await screen.findByTestId("file-upload-status-display"),
         ).toHaveTextContent("startingScan"),
       );
-    });
-    it("shows success status for completed files", async () => {
-      const trigger = createAdvanceStreamTrigger();
-      clientFetchMock.mockResolvedValue(
-        new Response(
-          makeAdvanceableTestStreamForTrigger(
-            [JSON.stringify({ status: "whatever", pendingFileId: "1" })],
-            trigger,
-          ),
-        ),
-      );
-
-      render(
-        <SimplerFileInput
-          onDelete={() => Promise.resolve()}
-          onSuccess={() => {}}
-          postUploadAction={() => Promise.resolve(undefined)}
-          postUploadActionProgressMessage="post upload action in progress"
-          postUploadActionSuccessMessage="post upload action success"
-          postUploadActionErrorMessage="post upload action error"
-          id="file-input-test"
-          describedByIds={["file-input-label"]}
-        />,
-      );
-      const input = await screen.findByTestId("file-input-input");
-      await userEvent.upload(
-        input,
-        new File(["test content"], "test.txt", {
-          type: "text/plain",
-        }),
-      );
-      trigger.advance();
-
-      // honestly I'm not sure why this works but, doing the assertion the normal way doesn't
-      await screen
-        .findByTestId("file-upload-status-display")
-        .then((display) => {
-          // eslint-disable-next-line jest/no-conditional-expect
-          return expect(display).toHaveTextContent(
-            "post upload action success",
-          );
-        })
-        .catch(() => {});
-    });
-    it("clears completed files when existing files are added", async () => {
-      const trigger = createAdvanceStreamTrigger();
-      clientFetchMock.mockResolvedValue(
-        new Response(
-          makeAdvanceableTestStreamForTrigger(
-            [JSON.stringify({ status: "whatever", pendingFileId: "1" })],
-            trigger,
-          ),
-        ),
-      );
-
-      const { rerender } = render(
-        <SimplerFileInput
-          onDelete={() => Promise.resolve()}
-          onSuccess={() => {}}
-          postUploadAction={() => Promise.resolve(undefined)}
-          postUploadActionProgressMessage="post upload action in progress"
-          postUploadActionSuccessMessage="post upload action success"
-          postUploadActionErrorMessage="post upload action error"
-          id="file-input-test"
-          describedByIds={["file-input-label"]}
-        />,
-      );
-      const input = await screen.findByTestId("file-input-input");
-      await userEvent.upload(
-        input,
-        new File(["test content"], "test.txt", {
-          type: "text/plain",
-        }),
-      );
-      trigger.advance();
-
-      await screen
-        .findByTestId("file-upload-status-display")
-        .then((display) => {
-          // eslint-disable-next-line jest/no-conditional-expect
-          return expect(display).toHaveTextContent(
-            "post upload action success",
-          );
-        })
-        .catch(() => {});
-
-      rerender(
-        <SimplerFileInput
-          onDelete={() => Promise.resolve()}
-          onSuccess={() => {}}
-          postUploadAction={() => Promise.resolve(undefined)}
-          postUploadActionProgressMessage="post upload action in progress"
-          postUploadActionSuccessMessage="post upload action success"
-          postUploadActionErrorMessage="post upload action error"
-          id="file-input-test"
-          describedByIds={["file-input-label"]}
-          existingFiles={[fakeExistingFile]}
-        />,
-      );
-      expect(
-        screen.queryByTestId("file-upload-status-display"),
-      ).not.toBeInTheDocument();
     });
   });
   describe("Callbacks", () => {

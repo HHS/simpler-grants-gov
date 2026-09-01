@@ -1,9 +1,8 @@
 import { expect, Page } from "@playwright/test";
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 
-// 60s accommodates both staging (slow under load) and Mobile Chrome in CI (slow rendering),
-// plus additional time for backend form save/validation response which can be delayed
-const SAVE_TIMEOUT = 60000;
+// 30s accommodates both staging (slow under load) and Mobile Chrome in CI (slow rendering).
+const SAVE_TIMEOUT = 30000;
 
 /**
  * Waits for the save button to be visible and clicks it.

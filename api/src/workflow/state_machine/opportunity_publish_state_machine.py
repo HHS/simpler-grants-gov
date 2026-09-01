@@ -4,13 +4,12 @@ from typing import Any, cast
 
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 from opensearchpy import ConnectionTimeout, TransportError
-from sqlalchemy import select
 from statemachine import Event
 from statemachine.states import States
 
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import OpportunityStatus, WorkflowEntityType, WorkflowType
-from src.db.models.opportunity_models import CurrentOpportunitySummary, OpportunityChangeAudit
+from src.db.models.opportunity_models import CurrentOpportunitySummary
 from src.search.search_config import SearchConfig
 from src.services.current_opportunity.determine_current_opportunity_summary import (
     determine_current_and_status,
@@ -217,11 +216,6 @@ class OpportunityPublishStateMachine(BaseStateMachine):
             )
             state_machine_event.increment(self.Metrics.OPP_PUBLISH_WRITTEN_TO_SEARCH_INDEX)
 
-            # Mark the opportunity as already synced to the search index so the
-            # incremental search job doesn't redundantly re-index this freshly
-            # published opportunity on its next cycle.
-            self.mark_loaded_to_search(log_extra)
-
         except TransportError, ConnectionTimeout:
             # These are pretty generic network blips that
             # we have retries for when loading elsewhere.
@@ -234,30 +228,6 @@ class OpportunityPublishStateMachine(BaseStateMachine):
         except Exception:
             logger.exception("Failed to write opportunity to search index", extra=log_extra)
             state_machine_event.increment(self.Metrics.OPP_PUBLISH_ERROR_WRITING_TO_SEARCH_INDEX)
-
-    def mark_loaded_to_search(self, log_extra: dict[str, Any]) -> None:
-        """Flag the opportunity's change-audit record as already loaded to search.
-
-        This runs only after a successful search write. We catch any error here so a
-        failure to mark the record isn't misattributed as a search-index write
-        failure - the write already succeeded. Worst case the incremental job simply
-        re-indexes the opportunity on its next cycle.
-        """
-        try:
-            change_audit = self.db_session.scalars(
-                select(OpportunityChangeAudit).where(
-                    OpportunityChangeAudit.opportunity_id == self.opportunity.opportunity_id
-                )
-            ).one_or_none()
-
-            if change_audit is None:
-                logger.info("No change-audit record to mark as loaded to search", extra=log_extra)
-                return
-
-            change_audit.is_loaded_to_search = True
-            logger.info("Marked opportunity as loaded to search index", extra=log_extra)
-        except Exception:
-            logger.exception("Failed to mark opportunity as loaded to search", extra=log_extra)
 
     @store_opportunity_version.on
     def handle_store_opportunity_version(self, state_machine_event: StateMachineEvent) -> None:

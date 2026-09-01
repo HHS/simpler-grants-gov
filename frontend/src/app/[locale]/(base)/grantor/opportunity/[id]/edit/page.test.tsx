@@ -70,11 +70,6 @@ jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
     mockGetOpportunityForGrantor(arg) as Promise<GrantorOpportunityDetail[]>,
 }));
 
-jest.mock("src/services/fetch/fetchers/opportunityAttachmentFetcher", () => ({
-  createOpportunityAttachment: jest.fn(),
-  deleteOpportunityAttachment: jest.fn(),
-}));
-
 const pageParams = new Promise<{ id: string; locale: string }>((resolve) => {
   resolve({ id: "opportunity-123", locale: "en" });
 });

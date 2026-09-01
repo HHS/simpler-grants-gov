@@ -12,6 +12,6 @@ export interface OpportunityAttachmentListResponse extends APIResponse {
   data: OpportunityAttachment[];
 }
 
-export interface OpportunityAttachmentCreateResponse extends APIResponse {
-  data: OpportunityAttachment;
+export interface OpportunityAttachmentUploadResponse extends APIResponse {
+  data: { opportunity_attachment_id: string };
 }

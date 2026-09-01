@@ -16,8 +16,6 @@ from tests.src.db.models.factories import OpportunityFactory
 
 def create_competition_request(
     competition_title="Proposal for Advanced Research",
-    public_competition_id="ABC-123-456",
-    grace_period=5,
     opening_date=None,
     closing_date=None,
     contact_info="Bob Smith\nFakeMail@fake.com",
@@ -38,8 +36,6 @@ def create_competition_request(
 
     return {
         "competition_title": competition_title,
-        "public_competition_id": public_competition_id,
-        "grace_period": grace_period,
         "opening_date": opening_date,
         "closing_date": closing_date,
         "contact_info": contact_info,
@@ -93,8 +89,6 @@ def test_competition_create_successful_creation(
     competition_data = response_json["data"]
     assert competition_data["opportunity_id"] == str(opportunity.opportunity_id)
     assert competition_data["competition_title"] == competition_request["competition_title"]
-    assert competition_data["public_competition_id"] == competition_request["public_competition_id"]
-    assert competition_data["grace_period"] == competition_request["grace_period"]
     assert competition_data["opening_date"] == competition_request["opening_date"]
     assert competition_data["closing_date"] == competition_request["closing_date"]
     assert competition_data["contact_info"] == competition_request["contact_info"]
@@ -119,49 +113,6 @@ def test_competition_create_successful_creation(
     assert len(audit_rows) == 1
     assert audit_rows[0].opportunity_audit_event == OpportunityAuditEvent.COMPETITION_CREATED
     assert audit_rows[0].competition is not None
-
-
-def test_competition_create_without_optional_fields(
-    client, grantor_auth_data, opportunity_for_competition
-):
-    """Test competition creation without the optional public_competition_id and grace_period fields"""
-    _, _, token, _ = grantor_auth_data
-    opportunity = opportunity_for_competition
-
-    competition_request = create_competition_request()
-    del competition_request["public_competition_id"]
-    del competition_request["grace_period"]
-
-    response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
-        json=competition_request,
-        headers={"X-SGG-Token": token},
-    )
-
-    assert response.status_code == 200
-    competition_data = response.get_json()["data"]
-    assert competition_data["public_competition_id"] is None
-    assert competition_data["grace_period"] is None
-
-
-def test_competition_create_negative_grace_period(
-    client, grantor_auth_data, opportunity_for_competition
-):
-    """Test competition creation with a negative grace_period"""
-    _, _, token, _ = grantor_auth_data
-    opportunity = opportunity_for_competition
-
-    competition_request = create_competition_request(grace_period=-1)
-
-    response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
-        json=competition_request,
-        headers={"X-SGG-Token": token},
-    )
-
-    assert response.status_code == 422
-    response_json = response.get_json()
-    assert response_json["message"] == "Validation error"
 
 
 def test_competition_create_with_invalid_jwt_token(client, opportunity_for_competition):
