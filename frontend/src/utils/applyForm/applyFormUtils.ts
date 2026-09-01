@@ -643,6 +643,13 @@ export const shapeFormData = <T extends object>(
   formData: FormData,
   formSchema: RJSFSchema,
 ): T => {
+  formData.delete("$ACTION_REF_1");
+  formData.delete("$ACTION_1:0");
+  formData.delete("$ACTION_1:1");
+  formData.delete("$ACTION_REF_1");
+  formData.delete("$ACTION_KEY");
+  formData.delete("apply-form-button");
+
   const structuredFormData = formDataToObject(
     formData,
     condenseFormSchemaProperties(formSchema),
