@@ -132,7 +132,13 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // Print view
       // -----------------------------------------------------------------------
 
-      await validateAllPrintViews(page, filledForms);
+      // SF-424C has custom validation logic below, so skip it in validateAllPrintViews
+      const nonSF424CFormsForValidation = filledForms.filter(
+        (form) => form.formKey !== "sf424c",
+      );
+      if (nonSF424CFormsForValidation.length > 0) {
+        await validateAllPrintViews(page, nonSF424CFormsForValidation);
+      }
 
       const sf424cForm = filledForms.find(
         ({ formKey }) => formKey === "sf424c",
