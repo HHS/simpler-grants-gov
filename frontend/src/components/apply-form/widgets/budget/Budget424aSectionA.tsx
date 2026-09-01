@@ -1,24 +1,23 @@
 "use client";
 
+import { BaseActivityItem, MoneyString } from "./budgetTypes";
+import { CurrencyInput, DataCell, HelperText } from "./budgetUiComponents";
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/types/applyForm/types";
-
 import React, { JSX } from "react";
-import { Table } from "@trussworks/react-uswds";
-
-import TextWidget from "src/components/apply-form/widgets/TextWidget";
-import { ACTIVITY_ITEMS } from "./budgetConstants";
-import { getErrorsForSection } from "./budgetErrors";
 import {
   activityTitleSchema,
   assistanceListingNumberSchema,
 } from "./budgetSchemas";
-import { BaseActivityItem, MoneyString } from "./budgetTypes";
-import { CurrencyInput, DataCell, HelperText } from "./budgetUiComponents";
 import { asMoney, isRecord } from "./budgetValueGuards";
+
+import { ACTIVITY_ITEMS } from "./budgetConstants";
+import { Table } from "@trussworks/react-uswds";
+import TextWidget from "src/components/apply-form/widgets/TextWidget";
+import { getErrorsForSection } from "./budgetErrors";
 
 interface BudgetSummary {
   federal_estimated_unobligated_amount?: MoneyString;
@@ -380,7 +379,7 @@ function Budget424aSectionA<
               <DataCell>
                 <div className="display-flex flex-align-end">
                   <span className="margin-right-1">=</span>
-                  <div>
+                  <div className="margin-top-3 padding-top-0">
                     <CurrencyInput
                       id={`activity_line_items[${row}]--budget_summary--total_amount`}
                       rawErrors={getErrorsA({
