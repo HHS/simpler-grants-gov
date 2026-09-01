@@ -162,9 +162,6 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         })
         .scrollIntoViewIfNeeded();
 
-      // And the upload request is forced to fail.
-      await failAttachmentUploadRequest(page);
-
       // When the applicant uploads a zero-byte file
       await uploadFile(
         page,
