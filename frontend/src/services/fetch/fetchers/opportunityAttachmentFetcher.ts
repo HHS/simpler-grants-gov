@@ -21,7 +21,7 @@ export const createOpportunityAttachment = async (
   pendingFileId: string,
 ): Promise<OpportunityAttachmentCreateResponse> => {
   const response = await fetchGrantorOpportunityWithMethod("POST")({
-    subPath: `${opportunityId}/attachments`,
+    subPath: `${opportunityId}/attachments/temporary`,
     body: { pending_file_id: pendingFileId },
     // want to allow responses with failed validations through so we can properly handle displaying validation errors
     allowedErrorStatuses: [422],

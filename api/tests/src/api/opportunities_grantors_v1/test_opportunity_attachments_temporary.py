@@ -45,7 +45,7 @@ def make_pending_file(
     )
 
 
-ROUTE = "/v1/grantors/opportunities/{opportunity_id}/attachments"
+ROUTE = "/v1/grantors/opportunities/{opportunity_id}/attachments/temporary"
 
 
 def test_create_from_pending_file_200(

@@ -32,7 +32,10 @@ from src.services.opportunities_grantor_v1.opportunity_summaries import (
     update_opportunity_summary,
 )
 from src.services.opportunities_grantor_v1.opportunity_update import update_opportunity
-from src.services.opportunities_grantor_v1.opportunity_upload import delete_opportunity_attachment
+from src.services.opportunities_grantor_v1.opportunity_upload import (
+    delete_opportunity_attachment,
+    upload_opportunity_attachment,
+)
 from src.services.opportunities_grantor_v1.publish_opportunity import publish_opportunity
 
 logger = logging.getLogger(__name__)
@@ -215,6 +218,39 @@ def opportunity_summary_update(
 
 @opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/attachments")
 @opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.OpportunityUploadAttachmentRequestV1Schema(), location="files"
+)
+@opportunity_grantor_blueprint.output(
+    opportunity_grantor_schemas.OpportunityUploadAttachmentResponseV1Schema()
+)
+@opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
+@flask_db.with_db_session()
+def opportunity_upload_attachments(
+    db_session: db.Session, opportunity_id: UUID, files_data: dict
+) -> response.ApiResponse:
+    """Upload an attachment to an opportunity"""
+    add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
+    logger.info("POST /v1/grantors/opportunities/:opportunity_id/attachments")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        file_description = files_data.get("file_description", "")
+
+        attachment_id = upload_opportunity_attachment(
+            db_session, user, opportunity_id, files_data["file_attachment"], file_description
+        )
+
+    return response.ApiResponse(
+        message="Attachment uploaded successfully",
+        data={"opportunity_attachment_id": attachment_id, "file_description": file_description},
+    )
+
+
+@opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/attachments/temporary")
+@opportunity_grantor_blueprint.input(
     opportunity_grantor_schemas.OpportunityAttachmentCreateFromPendingFileRequestV1Schema(),
     location="json",
 )
@@ -224,12 +260,18 @@ def opportunity_summary_update(
 @opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @opportunity_grantor_blueprint.doc(responses=[200, 401, 403, 404, 422])
 @flask_db.with_db_session()
-def opportunity_attachment_create(
+def opportunity_upload_attachment_temporary(
     db_session: db.Session, opportunity_id: UUID, json_data: dict
 ) -> response.ApiResponse:
-    """Create an opportunity attachment from a pending (virus-scanned) file"""
+    """Create an opportunity attachment from a pending (virus-scanned) file.
+
+    TEMPORARY endpoint (#11891): lives at a separate address from the existing
+    multipart POST /attachments while the frontend migration (#11890) is pending.
+    A follow-up ticket will remove the old multipart endpoint and move this
+    implementation onto the permanent /attachments address.
+    """
     add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
-    logger.info("POST /v1/grantors/opportunities/:opportunity_id/attachments")
+    logger.info("POST /v1/grantors/opportunities/:opportunity_id/attachments/temporary")
 
     with db_session.begin():
         user = jwt_or_api_user_key_multi_auth.get_user()

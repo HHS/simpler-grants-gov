@@ -2,9 +2,11 @@ import logging
 import uuid
 
 import grants_shared.adapters.db as db
+from grants_shared.adapters.aws import S3Config
 from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.util import file_util
 from sqlalchemy import select
+from werkzeug.datastructures import FileStorage
 
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
@@ -14,8 +16,81 @@ from src.services.opportunities_grantor_v1.get_opportunity import get_opportunit
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
 )
+from src.services.opportunity_attachments.attachment_util import (
+    adjust_legacy_file_name,
+    get_s3_attachment_path,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def upload_opportunity_attachment(
+    db_session: db.Session,
+    user: User,
+    opportunity_id: uuid.UUID,
+    file_data: FileStorage,
+    file_description: str = "",
+) -> str:
+    """Upload an attachment to an opportunity"""
+    # Get the opportunity and verify it exists
+    opportunity = get_opportunity_for_grantors(db_session, user, opportunity_id)
+
+    # Check if user has permission to update opportunities for this agency
+    verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
+
+    # Verify opportunity was created in Simpler Grants
+    validate_opportunity_created_in_simpler_grants(opportunity)
+
+    attachment_id = uuid.uuid4()
+
+    # Extract file metadata
+    if not file_data.filename:
+        raise_flask_error(422, "File must have a filename")
+
+    file_name = adjust_legacy_file_name(file_data.filename)
+    mime_type = file_data.mimetype or "application/octet-stream"
+
+    # Create S3 path for the file
+    s3_config = S3Config()
+    file_path = get_s3_attachment_path(
+        file_name=file_name,
+        opportunity_attachment_id=attachment_id,
+        opportunity=opportunity,
+        s3_config=s3_config,
+    )
+
+    # Write the file to S3
+    with file_util.open_stream(file_path, "wb", content_type=mime_type) as f:
+        file_data.save(f)
+
+    # Get the file size from S3
+    file_size_bytes = file_util.get_file_length_bytes(file_path)
+
+    attachment = OpportunityAttachment(
+        attachment_id=attachment_id,
+        opportunity_id=opportunity_id,
+        file_location=file_path,
+        mime_type=mime_type,
+        file_name=file_name,
+        file_description=file_description,
+        file_size_bytes=file_size_bytes,
+        legacy_attachment_id=None,
+    )
+
+    db_session.add(attachment)
+
+    logger.info(
+        "Added attachment to opportunity",
+        extra={
+            "opportunity_id": opportunity_id,
+            "attachment_id": attachment_id,
+            "file_size": file_size_bytes,
+            "file_name": file_name,
+            "file_description": file_description,
+        },
+    )
+
+    return str(attachment_id)
 
 
 def delete_opportunity_attachment(
