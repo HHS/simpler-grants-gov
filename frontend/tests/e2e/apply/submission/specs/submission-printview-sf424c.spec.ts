@@ -252,7 +252,6 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // Row 1: Federal percentage share (user-entered) = 90%
       // Row 2: Federal funding share (read-only, calculated) = $6,300
       const expectedTotalProjectCostsTable2 = 7_000;
-      const expectedFederalPercentageShare = 90; // User entered value
 
       // Calculated fields use -read-only testIds in print view.
       // These are mapped by their table/row/column position.
