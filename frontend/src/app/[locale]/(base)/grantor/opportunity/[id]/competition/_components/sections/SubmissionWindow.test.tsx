@@ -244,7 +244,7 @@ describe("SubmissionWindow", () => {
       expect(dateInputs[0]).toHaveValue("06/01/2026");
       expect(dateInputs[1]).toHaveValue("07/01/2026");
       expect(
-        screen.getByRole("spinbutton", { name: /extensionperiod/i }),
+        screen.getByRole("spinbutton", { name: /graceperiod/i }),
       ).toHaveValue(30);
     });
   });

@@ -25,6 +25,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
       ? [contactValues[0], "", contactValues[1], contactValues[2]]
       : contactValues;
 
+  //--- Block pipe character in input as it's used as the delimitor (until data separation)
   const handlePipeKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -218,7 +219,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
             fieldId="contact_name"
             fieldMaxLength={255}
             isRequired={true}
-            defaultValue=""
+            defaultValue={contactName}
             onTextChange={handleNameInputChange}
             onKeyDown={handlePipeKeyDown}
             onPaste={handlePipePaste}
@@ -254,7 +255,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
             fieldId="contact_email"
             fieldMaxLength={255}
             isRequired={true}
-            defaultValue=""
+            defaultValue={contactEmail}
             onTextChange={handleEmailInputChange}
             onKeyDown={handlePipeKeyDown}
             onPaste={handlePipePaste}
