@@ -27,68 +27,69 @@ export const buildSF424CHappyPathTestData = (
 
   return {
     // -------------------------------------------------------------------------
-    // Table 1 - Rows 1-11
+    // Table 1 - Rows 0-10 (user-entered budget items)
+    // Each row: Total Cost = 1000, Non-allowable Cost = 1000
     // -------------------------------------------------------------------------
 
     "budget_information--administrative_and_legal_expenses--total_cost": "1000",
     "budget_information--administrative_and_legal_expenses--non_allowable_cost":
-      "100",
+      "1000",
 
-    "budget_information--land_structures_rights_of_way--total_cost": "2000",
+    "budget_information--land_structures_rights_of_way--total_cost": "1000",
     "budget_information--land_structures_rights_of_way--non_allowable_cost":
-      "200",
+      "1000",
 
-    "budget_information--relocation_expenses--total_cost": "3000",
-    "budget_information--relocation_expenses--non_allowable_cost": "300",
+    "budget_information--relocation_expenses--total_cost": "1000",
+    "budget_information--relocation_expenses--non_allowable_cost": "1000",
 
-    "budget_information--architectural_engineering_fees--total_cost": "4000",
+    "budget_information--architectural_engineering_fees--total_cost": "1000",
     "budget_information--architectural_engineering_fees--non_allowable_cost":
-      "400",
+      "1000",
 
     "budget_information--other_architectural_engineering_fees--total_cost":
-      "5000",
+      "1000",
     "budget_information--other_architectural_engineering_fees--non_allowable_cost":
-      "500",
+      "1000",
 
-    "budget_information--project_inspection_fees--total_cost": "6000",
-    "budget_information--project_inspection_fees--non_allowable_cost": "600",
+    "budget_information--project_inspection_fees--total_cost": "1000",
+    "budget_information--project_inspection_fees--non_allowable_cost": "1000",
 
-    "budget_information--site_work--total_cost": "7000",
-    "budget_information--site_work--non_allowable_cost": "700",
+    "budget_information--site_work--total_cost": "1000",
+    "budget_information--site_work--non_allowable_cost": "1000",
 
-    "budget_information--demolition_and_removal--total_cost": "8000",
-    "budget_information--demolition_and_removal--non_allowable_cost": "800",
+    "budget_information--demolition_and_removal--total_cost": "1000",
+    "budget_information--demolition_and_removal--non_allowable_cost": "1000",
 
-    "budget_information--construction--total_cost": "9000",
-    "budget_information--construction--non_allowable_cost": "900",
+    "budget_information--construction--total_cost": "1000",
+    "budget_information--construction--non_allowable_cost": "1000",
 
-    "budget_information--equipment--total_cost": "10000",
+    "budget_information--equipment--total_cost": "1000",
     "budget_information--equipment--non_allowable_cost": "1000",
 
-    "budget_information--miscellaneous--total_cost": "11000",
-    "budget_information--miscellaneous--non_allowable_cost": "1100",
+    "budget_information--miscellaneous--total_cost": "1000",
+    "budget_information--miscellaneous--non_allowable_cost": "1000",
 
     // -------------------------------------------------------------------------
-    // Table 1 - Row 13
+    // Table 1 - Row 12: Contingencies (user-entered)
     // -------------------------------------------------------------------------
 
-    "budget_information--contingencies--total_cost": "12000",
-    "budget_information--contingencies--non_allowable_cost": "1200",
+    "budget_information--contingencies--total_cost": "1000",
+    "budget_information--contingencies--non_allowable_cost": "1000",
 
     // -------------------------------------------------------------------------
-    // Table 1 - Row 15
+    // Table 1 - Row 14: Project Income (user-entered)
     // -------------------------------------------------------------------------
 
-    "budget_information--project_income--total_cost": "1000",
-    "budget_information--project_income--non_allowable_cost": "100",
+    "budget_information--project_income--total_cost": "5000",
+    "budget_information--project_income--non_allowable_cost": "5000",
 
     // -------------------------------------------------------------------------
-    // Table 2
+    // Table 2: Federal Funding
     // -------------------------------------------------------------------------
 
-    // Use a simple percentage so the expected federal funding share is easy
-    // to calculate independently.
-    "federal_funding--federal_percentage_share": "50",
+    // Use 90% so the expected federal funding share is easy to calculate
+    // independently.
+    "federal_funding--federal_percentage_share": "90",
 
     // Keep the suffix available for future expansion if additional
     // environment-specific or applicant-specific values are introduced.
