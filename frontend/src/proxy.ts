@@ -5,10 +5,7 @@
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
 import { defaultLocale, locales } from "src/i18n/config";
-import {
-  applyCorrelationId,
-  getRequestCorrelationId,
-} from "src/services/correlationId/correlationIdMiddleware";
+import { applyCorrelationId } from "src/services/correlationId/correlationIdMiddleware";
 import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
 
 import createIntlMiddleware from "next-intl/middleware";
@@ -88,11 +85,7 @@ export default function proxy(request: NextRequest): NextResponse {
 
   if (isACdnTestRequest(request)) {
     const testResponse = applyCorrelationId(request, handleCdnTest(request));
-    logRequest(
-      request,
-      testResponse,
-      getRequestCorrelationId(request, testResponse),
-    );
+    logRequest(request, testResponse);
     return testResponse;
   }
 
@@ -103,9 +96,6 @@ export default function proxy(request: NextRequest): NextResponse {
       ? featureFlagsManager.middleware(request, NextResponse.next())
       : featureFlagsManager.middleware(request, i18nMiddleware(request)),
   );
-  // read once from the response, which carries a newly generated id on a
-  // visitor's first request, before it is copied onto any derived response
-  const correlationId = getRequestCorrelationId(request, response);
 
   // Check for site-wide maintenance mode.
   // Pass searchParams so query param overrides (e.g. ?_ff=maintenanceMode:false)
@@ -128,7 +118,7 @@ export default function proxy(request: NextRequest): NextResponse {
     response.headers.getSetCookie().forEach((cookie) => {
       maintenanceResponse.headers.append("Set-Cookie", cookie);
     });
-    logRequest(request, maintenanceResponse, correlationId);
+    logRequest(request, maintenanceResponse);
     return maintenanceResponse;
   }
 
@@ -160,7 +150,7 @@ export default function proxy(request: NextRequest): NextResponse {
     response.headers.set("Cache-Control", cacheControl.join(", "));
   }
 
-  logRequest(request, response, correlationId);
+  logRequest(request, response);
 
   return response;
 }
