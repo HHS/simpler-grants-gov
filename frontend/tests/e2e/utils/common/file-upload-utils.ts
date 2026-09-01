@@ -29,6 +29,7 @@ import {
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { type FillFieldDefinition } from "tests/e2e/utils/common/types";
+import { waitForAnyVisible } from "tests/e2e/utils/common/wait-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 
 /**
@@ -310,39 +311,6 @@ export async function assertFileInputHidden(
 }
 
 /**
- * Wait until any of the upload retry/failure control locators becomes visible.
- *
- * The retry state may be represented by the file input wrapper, a dismiss
- * button, a cancel button, or a choose-from-folder prompt.
- *
- * Implementation uses `Promise.any` over multiple
- * `locator.waitFor({ state: "visible" })` calls so the first visible
- * alternative resolves immediately and we only fail after the timeout.
- */
-async function waitForUploadRetryControlsVisible(
-  locators: Locator[],
-  timeoutMs = 30000,
-): Promise<void> {
-  if (locators.length === 0) {
-    throw new Error(
-      "waitForUploadRetryControlsVisible requires at least one locator",
-    );
-  }
-
-  try {
-    await Promise.any(
-      locators.map((locator) =>
-        locator.waitFor({ state: "visible", timeout: timeoutMs }),
-      ),
-    );
-  } catch {
-    throw new Error(
-      "Expected at least one of the provided locators to become visible within the timeout.",
-    );
-  }
-}
-
-/**
  * Wait until a retry/failure control becomes visible after a failed upload.
  *
  * The retry control may be the visible file input wrapper, a dismiss button,
@@ -361,7 +329,8 @@ async function assertRetryControlVisible(
   const cancelButton = page.getByRole("button", { name: /cancel/i }).first();
   const chooseFromFolder = page.getByText(/choose from folder/i).first();
 
-  await waitForUploadRetryControlsVisible(
+  await waitForAnyVisible(
+    page,
     [fileInputWrapper, dismissButton, cancelButton, chooseFromFolder],
     timeoutMs,
   );
@@ -414,11 +383,24 @@ const matchesText = (text: string, message: string | RegExp) => {
     : message.test(text);
 };
 
+  // Temporary E2E-only fallback: some upload failures surface infected copy
+  // instead of the generic failure text. Keep this opt-in per spec.
+const INFECTED_UPLOAD_FALLBACK_TEXT =
+  /Security scan failed\. File removed|Virus scan failed|infected/i;
+
+type UploadStatusMessageOptions = {
+  allowInfectedFallback?: boolean;
+};
+
 export async function expectUploadStatusMessage(
   page: Page,
   message: string | RegExp,
   timeoutMs = 30000,
+  options: UploadStatusMessageOptions = {},
 ): Promise<void> {
+  // Temporary E2E-only fallback: some upload failures surface infected copy
+  // instead of the generic failure text. Keep this opt-in per spec.
+  const { allowInfectedFallback = false } = options;
   const statusDisplay = page.getByTestId("file-upload-status-display").first();
   if ((await statusDisplay.count()) > 0) {
     await expect(statusDisplay).toBeVisible({ timeout: timeoutMs });
@@ -426,11 +408,27 @@ export async function expectUploadStatusMessage(
     if (matchesText(statusText, message)) {
       return;
     }
+    if (
+      allowInfectedFallback &&
+      matchesText(statusText, INFECTED_UPLOAD_FALLBACK_TEXT)
+    ) {
+      return;
+    }
   }
 
-  await expect(page.getByText(message)).toBeVisible({
-    timeout: timeoutMs,
-  });
+  try {
+    await expect(page.getByText(message)).toBeVisible({
+      timeout: timeoutMs,
+    });
+  } catch (originalError) {
+    if (!allowInfectedFallback) {
+      throw originalError;
+    }
+
+    await expect(page.getByText(INFECTED_UPLOAD_FALLBACK_TEXT)).toBeVisible({
+      timeout: timeoutMs,
+    });
+  }
 }
 
 /**
@@ -476,13 +474,9 @@ export async function waitForAttachmentSaveResponse(
 /**
  * Abort upload-related requests to simulate a cancel before the attachment is saved.
  *
- * The attachment flow is fast enough that the file stream upload and the
- * attachment creation request can both happen before the UI has time to
- * reflect a cancelled upload. Aborting both routes makes the cancel test
- * more reliable for these fast upload/scanning flows.
- *
- * In the future we may be able to slow down the scan locally instead of
- * aborting both requests, but this is the most stable approach for CI.
+ * This aborts both the streaming file upload request and the subsequent
+ * attachment creation request, which is more reliable for fast uploads.
+ * It ensures a cancelled upload does not leave behind a partially saved attachment.
  */
 export async function abortAttachmentUploadRequest(
   page: Page,
