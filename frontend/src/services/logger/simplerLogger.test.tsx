@@ -2,6 +2,12 @@
  * @jest-environment node
  */
 
+import {
+  applyCorrelationId,
+  CORRELATION_ID_COOKIE,
+  getRequestCorrelationId,
+  isValidCorrelationId,
+} from "src/services/correlationId/correlationIdMiddleware";
 import { logRequest, logResponse } from "src/services/logger/simplerLogger";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -64,6 +70,7 @@ describe("logRequest", () => {
       statusCode: 200,
       cacheControl: null,
       hasSessionCookie: false,
+      correlation_id: null,
     });
   });
   it("logs correct header values", () => {
@@ -94,27 +101,92 @@ describe("logRequest", () => {
       statusCode: 200,
       cacheControl: "no-store",
       hasSessionCookie: false,
+      correlation_id: null,
     });
   });
+
+  it("logs the resolved external URL rather than the container URL", () => {
+    logRequest(
+      new NextRequest("https://0.0.0.0:8000/search?query=test", {
+        headers: new Headers({ host: "grantee2.teams.simpler.grants.gov" }),
+      }),
+      new NextResponse(null, { status: 200 }),
+    );
+
+    expect(infoMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: "https://grantee2.teams.simpler.grants.gov/search?query=test",
+      }),
+    );
+  });
+
   it("does not call logger for health checks outside of the ten percent sample", () => {
     jest.spyOn(Math, "random").mockReturnValue(0.5);
     logRequest(
       new NextRequest("http://anywhere.com/api/health"),
-      new NextResponse(null, {
-        status: 200,
-      }),
+      new NextResponse(null, { status: 200 }),
     );
+
     expect(infoMock).not.toHaveBeenCalled();
   });
+
   it("calls logger for health checks inside of the ten percent sample", () => {
     jest.spyOn(Math, "random").mockReturnValue(0.05);
     logRequest(
       new NextRequest("http://anywhere.com/api/health"),
-      new NextResponse(null, {
-        status: 200,
-      }),
+      new NextResponse(null, { status: 200 }),
     );
+
     expect(infoMock).toHaveBeenCalledTimes(1);
+  });
+
+  describe("correlation_id", () => {
+    const buildRequest = (correlationIdCookie?: string): NextRequest =>
+      new NextRequest(
+        "http://anywhere.com/search",
+        correlationIdCookie === undefined
+          ? undefined
+          : {
+              headers: new Headers({
+                cookie: `${CORRELATION_ID_COOKIE}=${correlationIdCookie}`,
+              }),
+            },
+      );
+
+    const logAsProxyDoes = (request: NextRequest): void => {
+      const response = applyCorrelationId(request, NextResponse.next());
+      logRequest(request, response, getRequestCorrelationId(request, response));
+    };
+
+    it("logs the correlation id already carried by the request", () => {
+      const existingCorrelationId = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+      logAsProxyDoes(buildRequest(existingCorrelationId));
+
+      expect(infoMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: "http://anywhere.com/search",
+          correlation_id: existingCorrelationId,
+        }),
+      );
+    });
+
+    it("logs the newly generated correlation id when the request has none", () => {
+      logAsProxyDoes(buildRequest());
+
+      const sessionStartedLog = infoMock.mock.calls
+        .map(([log]: [Record<string, unknown>]) => log)
+        .find((log) => log.event === "anonymous_session_started");
+      const generatedCorrelationId =
+        sessionStartedLog?.correlation_id as string;
+
+      expect(isValidCorrelationId(generatedCorrelationId)).toBe(true);
+      expect(infoMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: "http://anywhere.com/search",
+          correlation_id: generatedCorrelationId,
+        }),
+      );
+    });
   });
 });
 
