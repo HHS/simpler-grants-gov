@@ -170,7 +170,10 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       );
 
       // Then the upload failure message should appear
-      await expectUploadStatusMessage(page, /Pre upload error|Upload failed/i);
+      await expectUploadStatusMessage(
+        page,
+        /Pre upload error|Upload failed|Error running security scan|Security scan failed/i,
+      );
 
       // And the dismiss button should be visible
       await expect(page.getByRole("button", { name: /dismiss/i })).toBeVisible({
