@@ -11,17 +11,39 @@ import {
 export function AgencyContact() {
   const t = useTranslations("OpportunityCompetition.sectionAgencyContact");
 
+  const handlePipeKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    if (e.key === "|") {
+      e.preventDefault();
+    }
+  };
+
+  const handlePipePaste = (
+    e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const pastedText = e.clipboardData.getData("text");
+    const sanitizedText = pastedText.replace(/\|/g, "");
+
+    if (pastedText === sanitizedText) return;
+
+    e.preventDefault();
+    const target = e.currentTarget;
+    const selectionStart = target.selectionStart ?? target.value.length;
+    const selectionEnd = target.selectionEnd ?? selectionStart;
+
+    target.setRangeText(sanitizedText, selectionStart, selectionEnd, "end");
+    target.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+
   //--- Validation for Full Name ---
-  const [nameValue, setNameValue] = useState<string>("");
   const [hasNameError, setHasNameError] = useState<boolean>(false);
   const [nameErrorMsg, setNameErrorMsg] = useState<string[]>([]);
 
   // Proactively clear error states as the user types
   const handleNameInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    _e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setNameValue(e.target.value);
-
     if (hasNameError) {
       setHasNameError(false);
       setNameErrorMsg([]);
@@ -46,19 +68,16 @@ export function AgencyContact() {
   };
 
   //--- Validation for Email Address ---
-  const [emailValue, setEmailValue] = useState<string>("");
   const [hasEmailError, setHasEmailError] = useState<boolean>(false);
   const [emailErrorMsg, setEmailErrorMsg] = useState<string[]>([]);
   // Production-grade email layout validation regex
   const EMAIL_REGEX =
-    /^(?!\.)(?!.*\.\.)([a-z0-9_'+-]*)[a-z0-9_+-]@([a-z0-9][a-z0-9-]*\.)+[a-z]{2,}$/i;
+    /^[a-z0-9_'+-]+(?:\.[a-z0-9_'+-]+)*@([a-z0-9][a-z0-9-]*\.)+[a-z]{2,}$/i;
 
   // Proactively clear error states as the user types
   const handleEmailInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    _e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setEmailValue(e.target.value);
-
     if (hasEmailError) {
       setHasEmailError(false);
       setEmailErrorMsg([]);
@@ -184,8 +203,9 @@ export function AgencyContact() {
             fieldMaxLength={255}
             isRequired={true}
             defaultValue=""
-            value={nameValue}
             onTextChange={handleNameInputChange}
+            onKeyDown={handlePipeKeyDown}
+            onPaste={handlePipePaste}
             onFieldBlur={handleNameFieldBlur}
             rawErrors={nameErrorMsg}
           />
@@ -200,7 +220,8 @@ export function AgencyContact() {
             fieldId="contact_title"
             fieldMaxLength={255}
             isRequired={false}
-            onTextChange={() => {}}
+            onKeyDown={handlePipeKeyDown}
+            onPaste={handlePipePaste}
             defaultValue=""
           />
         </div>
@@ -217,8 +238,9 @@ export function AgencyContact() {
             fieldMaxLength={255}
             isRequired={true}
             defaultValue=""
-            value={emailValue}
             onTextChange={handleEmailInputChange}
+            onKeyDown={handlePipeKeyDown}
+            onPaste={handlePipePaste}
             onFieldBlur={handleEmailFieldBlur}
             rawErrors={emailErrorMsg}
           />
