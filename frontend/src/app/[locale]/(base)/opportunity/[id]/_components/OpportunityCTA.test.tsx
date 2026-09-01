@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import OpportunityCTA, { OpportunityContentBox } from "./OpportunityCTA";
 
@@ -19,6 +19,35 @@ describe("OpportunityCTA", () => {
       "href",
       "https://test.grants.gov/search-results-detail/1",
     );
+  });
+
+  it("sends a user event beacon when the link is clicked", async () => {
+    const sendBeaconMock = jest.fn();
+    Object.defineProperty(navigator, "sendBeacon", {
+      value: sendBeaconMock,
+      writable: true,
+    });
+
+    render(<OpportunityCTA legacyId={1} />);
+
+    fireEvent.click(screen.getByRole("link"));
+
+    expect(sendBeaconMock).toHaveBeenCalledTimes(1);
+    const [url, blob] = sendBeaconMock.mock.calls[0] as [string, Blob];
+    expect(url).toBe("/api/events");
+    const blobText = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("failed to read blob"));
+      reader.readAsText(blob);
+    });
+    expect(JSON.parse(blobText)).toEqual({
+      name: "click_legacy_opportunity_link",
+      properties: {
+        legacyOpportunityURL: "https://test.grants.gov/search-results-detail/1",
+        legacyOpportunityId: 1,
+      },
+    });
   });
 });
 
