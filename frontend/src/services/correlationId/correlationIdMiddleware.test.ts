@@ -28,10 +28,12 @@ const buildRequest = ({
   cookieValue,
   url = "http://anywhere.com/",
   referer,
+  host,
 }: {
   cookieValue?: string;
   url?: string;
   referer?: string;
+  host?: string;
 } = {}): NextRequest => {
   const headers = new Headers();
   if (cookieValue !== undefined) {
@@ -39,6 +41,9 @@ const buildRequest = ({
   }
   if (referer !== undefined) {
     headers.set("referer", referer);
+  }
+  if (host !== undefined) {
+    headers.set("host", host);
   }
   return new NextRequest(url, { headers });
 };
@@ -175,6 +180,23 @@ describe("applyCorrelationId", () => {
 
     expect(result.headers.get("set-cookie")).toBeNull();
     expect(infoMock).not.toHaveBeenCalled();
+  });
+
+  it("logs the resolved external URL rather than the container URL", () => {
+    const request = buildRequest({
+      url: "https://0.0.0.0:8000/search?query=test",
+      host: "grantee2.teams.simpler.grants.gov",
+      referer: "https://www.google.com/",
+    });
+    const result = applyCorrelationId(request, NextResponse.next());
+
+    expect(infoMock).toHaveBeenCalledWith({
+      event: "anonymous_session_started",
+      correlation_id: getCIDCookie(result),
+      reason: "missing",
+      url: "https://grantee2.teams.simpler.grants.gov/search?query=test",
+      referer: "https://www.google.com/",
+    });
   });
 
   it("still applies correlation id handling to other api routes", () => {

@@ -13,6 +13,7 @@
 
 import { environment } from "src/constants/environments";
 import { logger } from "src/services/logger/simplerLogger";
+import { resolveExternalRequestUrl } from "src/utils/middlewareSafeUtils";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -77,7 +78,7 @@ export const applyCorrelationId = (
     logAnonymousSessionStarted(
       correlationId,
       existing === undefined ? "missing" : "invalid",
-      request.url,
+      resolveExternalRequestUrl(request),
       request.headers.get("referer"),
     );
   }

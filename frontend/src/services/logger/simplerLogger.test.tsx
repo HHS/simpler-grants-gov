@@ -103,6 +103,21 @@ describe("logRequest", () => {
     });
   });
 
+  it("logs the resolved external URL rather than the container URL", () => {
+    logRequest(
+      new NextRequest("https://0.0.0.0:8000/search?query=test", {
+        headers: new Headers({ host: "grantee2.teams.simpler.grants.gov" }),
+      }),
+      new NextResponse(null, { status: 200 }),
+    );
+
+    expect(infoMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: "https://grantee2.teams.simpler.grants.gov/search?query=test",
+      }),
+    );
+  });
+
   describe("correlation_id", () => {
     const buildRequest = (correlationIdCookie?: string): NextRequest =>
       new NextRequest(

@@ -11,6 +11,7 @@
 
 import pino from "pino";
 import { environment } from "src/constants/environments";
+import { resolveExternalRequestUrl } from "src/utils/middlewareSafeUtils";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -56,7 +57,7 @@ export const logRequest = (
   if (!isPrefetch) {
     if (!url.endsWith("/health") || Math.random() * 10 <= 1) {
       logger.info({
-        url,
+        url: resolveExternalRequestUrl(request),
         method,
         userAgent: headers.get("user-agent"),
         acceptLanguage: headers.get("accept-language"),
