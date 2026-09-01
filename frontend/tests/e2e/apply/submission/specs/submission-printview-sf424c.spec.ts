@@ -157,7 +157,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         // e.g., "1000" becomes /\$?1,?0{3}(\.\d{2})?/ which matches "$1000", "$1,000", "$1,000.00"
         const digits = Array.from(value);
         // Join digits with optional comma separator
-        const digitPattern = digits.join(',?');
+        const digitPattern = digits.join(",?");
         // Add optional currency and decimal formatting
         return new RegExp(`\\$?${digitPattern}(\\.\\d{2})?`);
       };
@@ -208,7 +208,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         // This is the most reliable way to locate the specific field value in print view
         const printTestId = field.testId.replace("-input", "-read-only");
         const valuePattern = createFlexibleValuePattern(testData[fieldKey]);
-        
+
         await expect(page.getByTestId(printTestId)).toContainText(valuePattern);
       }
 
@@ -250,19 +250,51 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // Calculated fields use -read-only testIds in print view.
       // These are mapped by their table/row/column position.
       const calculatedFieldsMap = {
-        subtotal1_total: { testId: "budget_424c_table_1-11-1-read-only", value: expectedSubtotal1TotalCost },
-        subtotal1_non_allowable: { testId: "budget_424c_table_1-11-2-read-only", value: expectedSubtotal1NonAllowable },
-        subtotal1_allowable: { testId: "budget_424c_table_1-11-3-read-only", value: expectedSubtotal1Allowable },
-        subtotal2_total: { testId: "budget_424c_table_1-13-1-read-only", value: expectedSubtotal2TotalCost },
-        subtotal2_non_allowable: { testId: "budget_424c_table_1-13-2-read-only", value: expectedSubtotal2NonAllowable },
-        subtotal2_allowable: { testId: "budget_424c_table_1-13-3-read-only", value: expectedSubtotal2Allowable },
-        total_project_cost: { testId: "budget_424c_table_1-15-1-read-only", value: expectedTotalProjectCost },
-        total_project_cost_non_allowable: { testId: "budget_424c_table_1-15-2-read-only", value: expectedTotalProjectCostNonAllowable },
-        total_project_cost_allowable: { testId: "budget_424c_table_1-15-3-read-only", value: expectedTotalProjectCostAllowable },
-        federal_funding_share: { testId: "budget_424c_table_2-1-1-read-only", value: expectedFederalFundingShare },
+        subtotal1_total: {
+          testId: "budget_424c_table_1-11-1-read-only",
+          value: expectedSubtotal1TotalCost,
+        },
+        subtotal1_non_allowable: {
+          testId: "budget_424c_table_1-11-2-read-only",
+          value: expectedSubtotal1NonAllowable,
+        },
+        subtotal1_allowable: {
+          testId: "budget_424c_table_1-11-3-read-only",
+          value: expectedSubtotal1Allowable,
+        },
+        subtotal2_total: {
+          testId: "budget_424c_table_1-13-1-read-only",
+          value: expectedSubtotal2TotalCost,
+        },
+        subtotal2_non_allowable: {
+          testId: "budget_424c_table_1-13-2-read-only",
+          value: expectedSubtotal2NonAllowable,
+        },
+        subtotal2_allowable: {
+          testId: "budget_424c_table_1-13-3-read-only",
+          value: expectedSubtotal2Allowable,
+        },
+        total_project_cost: {
+          testId: "budget_424c_table_1-15-1-read-only",
+          value: expectedTotalProjectCost,
+        },
+        total_project_cost_non_allowable: {
+          testId: "budget_424c_table_1-15-2-read-only",
+          value: expectedTotalProjectCostNonAllowable,
+        },
+        total_project_cost_allowable: {
+          testId: "budget_424c_table_1-15-3-read-only",
+          value: expectedTotalProjectCostAllowable,
+        },
+        federal_funding_share: {
+          testId: "budget_424c_table_2-1-1-read-only",
+          value: expectedFederalFundingShare,
+        },
       };
 
-      for (const [_fieldName, { testId, value }] of Object.entries(calculatedFieldsMap)) {
+      for (const [_fieldName, { testId, value }] of Object.entries(
+        calculatedFieldsMap,
+      )) {
         const valuePattern = createFlexibleValuePattern(String(value));
         await expect(page.getByTestId(testId)).toContainText(valuePattern);
       }
