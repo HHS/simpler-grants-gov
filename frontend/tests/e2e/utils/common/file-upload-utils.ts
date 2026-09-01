@@ -29,6 +29,7 @@ import {
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { type FillFieldDefinition } from "tests/e2e/utils/common/types";
+import { waitForAnyVisible } from "tests/e2e/utils/common/wait-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 
 /**
@@ -327,25 +328,11 @@ async function assertRetryControlVisible(
   const dismissButton = page.getByRole("button", { name: /dismiss/i }).first();
   const cancelButton = page.getByRole("button", { name: /cancel/i }).first();
   const chooseFromFolder = page.getByText(/choose from folder/i).first();
-  const controls = [
-    fileInputWrapper,
-    dismissButton,
-    cancelButton,
-    chooseFromFolder,
-  ];
-  const deadline = Date.now() + timeoutMs;
 
-  while (Date.now() < deadline) {
-    for (const control of controls) {
-      if ((await control.count()) > 0 && (await control.isVisible())) {
-        return;
-      }
-    }
-    await page.waitForTimeout(250);
-  }
-
-  throw new Error(
-    "Expected retry/failure upload control to become visible within the timeout.",
+  await waitForAnyVisible(
+    page,
+    [fileInputWrapper, dismissButton, cancelButton, chooseFromFolder],
+    timeoutMs,
   );
 }
 
