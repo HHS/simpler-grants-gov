@@ -200,23 +200,36 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // Validate calculated values
       // -----------------------------------------------------------------------
 
-      const expectedSubtotal1TotalCost = 66_000;
-      const expectedSubtotal1NonAllowable = 6_600;
-      const expectedSubtotal1Allowable = 59_400;
+      // Subtotal 1 (Rows 0-10): 11 items × 1000 total = 11,000
+      // Rows 0-10 non-allowable: 11 items × 100 = 1,100
+      // Rows 0-10 allowable: 11,000 - 1,100 = 9,900
+      const expectedSubtotal1TotalCost = 11_000;
+      const expectedSubtotal1NonAllowable = 1_100;
+      const expectedSubtotal1Allowable = 9_900;
 
-      const expectedSubtotal2TotalCost = 78_000;
-      const expectedSubtotal2NonAllowable = 7_800;
-      const expectedSubtotal2Allowable = 70_200;
+      // Subtotal 2 (Rows 0-12): Subtotal 1 + Contingencies (1000/100)
+      // Total: 11,000 + 1,000 = 12,000
+      // Non-allowable: 1,100 + 100 = 1,200
+      // Allowable: 9,900 + 900 = 10,800
+      const expectedSubtotal2TotalCost = 12_000;
+      const expectedSubtotal2NonAllowable = 1_200;
+      const expectedSubtotal2Allowable = 10_800;
 
-      const _expectedProjectIncomeTotalCost = 1_000;
-      const _expectedProjectIncomeNonAllowable = 100;
-      const _expectedProjectIncomeAllowable = 900;
+      // Project Income (Row 14): 5000 total, 500 non-allowable
+      const _expectedProjectIncomeTotalCost = 5_000;
+      const _expectedProjectIncomeNonAllowable = 500;
+      const _expectedProjectIncomeAllowable = 4_500;
 
-      const expectedTotalProjectCost = 77_000;
-      const expectedTotalProjectCostNonAllowable = 7_700;
-      const expectedTotalProjectCostAllowable = 69_300;
+      // Total Project Cost = Subtotal 2 - Project Income
+      // Total: 12,000 - 5,000 = 7,000
+      // Non-allowable: 1,200 - 500 = 700
+      // Allowable: 10,800 - 4,500 = 6,300
+      const expectedTotalProjectCost = 7_000;
+      const expectedTotalProjectCostNonAllowable = 700;
+      const expectedTotalProjectCostAllowable = 6_300;
 
-      const expectedFederalFundingShare = 34_650;
+      // Federal Funding Share = Total Project Cost × 90% = 7,000 × 0.9 = 6,300
+      const expectedFederalFundingShare = 6_300;
 
       // These values should ultimately be validated against their specific
       // print-view field/test IDs once those IDs are confirmed.

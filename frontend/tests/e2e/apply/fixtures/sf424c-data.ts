@@ -28,60 +28,60 @@ export const buildSF424CHappyPathTestData = (
   return {
     // -------------------------------------------------------------------------
     // Table 1 - Rows 0-10 (user-entered budget items)
-    // Each row: Total Cost = 1000, Non-allowable Cost = 1000
+    // Each row: Total Cost = 1000, Non-allowable Cost = 100 (10%)
     // -------------------------------------------------------------------------
 
     "budget_information--administrative_and_legal_expenses--total_cost": "1000",
     "budget_information--administrative_and_legal_expenses--non_allowable_cost":
-      "1000",
+      "100",
 
     "budget_information--land_structures_rights_of_way--total_cost": "1000",
     "budget_information--land_structures_rights_of_way--non_allowable_cost":
-      "1000",
+      "100",
 
     "budget_information--relocation_expenses--total_cost": "1000",
-    "budget_information--relocation_expenses--non_allowable_cost": "1000",
+    "budget_information--relocation_expenses--non_allowable_cost": "100",
 
     "budget_information--architectural_engineering_fees--total_cost": "1000",
     "budget_information--architectural_engineering_fees--non_allowable_cost":
-      "1000",
+      "100",
 
     "budget_information--other_architectural_engineering_fees--total_cost":
       "1000",
     "budget_information--other_architectural_engineering_fees--non_allowable_cost":
-      "1000",
+      "100",
 
     "budget_information--project_inspection_fees--total_cost": "1000",
-    "budget_information--project_inspection_fees--non_allowable_cost": "1000",
+    "budget_information--project_inspection_fees--non_allowable_cost": "100",
 
     "budget_information--site_work--total_cost": "1000",
-    "budget_information--site_work--non_allowable_cost": "1000",
+    "budget_information--site_work--non_allowable_cost": "100",
 
     "budget_information--demolition_and_removal--total_cost": "1000",
-    "budget_information--demolition_and_removal--non_allowable_cost": "1000",
+    "budget_information--demolition_and_removal--non_allowable_cost": "100",
 
     "budget_information--construction--total_cost": "1000",
-    "budget_information--construction--non_allowable_cost": "1000",
+    "budget_information--construction--non_allowable_cost": "100",
 
     "budget_information--equipment--total_cost": "1000",
-    "budget_information--equipment--non_allowable_cost": "1000",
+    "budget_information--equipment--non_allowable_cost": "100",
 
     "budget_information--miscellaneous--total_cost": "1000",
-    "budget_information--miscellaneous--non_allowable_cost": "1000",
+    "budget_information--miscellaneous--non_allowable_cost": "100",
 
     // -------------------------------------------------------------------------
     // Table 1 - Row 12: Contingencies (user-entered)
     // -------------------------------------------------------------------------
 
     "budget_information--contingencies--total_cost": "1000",
-    "budget_information--contingencies--non_allowable_cost": "1000",
+    "budget_information--contingencies--non_allowable_cost": "100",
 
     // -------------------------------------------------------------------------
     // Table 1 - Row 14: Project Income (user-entered)
     // -------------------------------------------------------------------------
 
     "budget_information--project_income--total_cost": "5000",
-    "budget_information--project_income--non_allowable_cost": "5000",
+    "budget_information--project_income--non_allowable_cost": "500",
 
     // -------------------------------------------------------------------------
     // Table 2: Federal Funding
