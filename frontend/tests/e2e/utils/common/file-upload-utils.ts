@@ -383,24 +383,11 @@ const matchesText = (text: string, message: string | RegExp) => {
     : message.test(text);
 };
 
-  // Temporary E2E-only fallback: some upload failures surface infected copy
-  // instead of the generic failure text. Keep this opt-in per spec.
-const INFECTED_UPLOAD_FALLBACK_TEXT =
-  /Security scan failed\. File removed|Virus scan failed|infected/i;
-
-type UploadStatusMessageOptions = {
-  allowInfectedFallback?: boolean;
-};
-
 export async function expectUploadStatusMessage(
   page: Page,
   message: string | RegExp,
   timeoutMs = 30000,
-  options: UploadStatusMessageOptions = {},
 ): Promise<void> {
-  // Temporary E2E-only fallback: some upload failures surface infected copy
-  // instead of the generic failure text. Keep this opt-in per spec.
-  const { allowInfectedFallback = false } = options;
   const statusDisplay = page.getByTestId("file-upload-status-display").first();
   if ((await statusDisplay.count()) > 0) {
     await expect(statusDisplay).toBeVisible({ timeout: timeoutMs });
@@ -408,27 +395,11 @@ export async function expectUploadStatusMessage(
     if (matchesText(statusText, message)) {
       return;
     }
-    if (
-      allowInfectedFallback &&
-      matchesText(statusText, INFECTED_UPLOAD_FALLBACK_TEXT)
-    ) {
-      return;
-    }
   }
 
-  try {
-    await expect(page.getByText(message)).toBeVisible({
-      timeout: timeoutMs,
-    });
-  } catch (originalError) {
-    if (!allowInfectedFallback) {
-      throw originalError;
-    }
-
-    await expect(page.getByText(INFECTED_UPLOAD_FALLBACK_TEXT)).toBeVisible({
-      timeout: timeoutMs,
-    });
-  }
+  await expect(page.getByText(message)).toBeVisible({
+    timeout: timeoutMs,
+  });
 }
 
 /**
