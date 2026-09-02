@@ -123,17 +123,24 @@ for (const { testName, orgLabel } of applicantScenarios) {
         throw new Error("SF-424C form was not found in the filled forms.");
       }
 
-      await navigateToPrintView(page, sf424cForm.printUrl);
+      const validatedSF424CForm = sf424cForm as NonNullable<typeof sf424cForm>;
+
+      await navigateToPrintView(page, validatedSF424CForm.printUrl);
 
       // Validate print view structure and read-only state
       await assertPrintViewIsReadOnly(page);
 
       // Form title is visible in h1 heading
-      await expect(page.locator("h1")).toContainText(sf424cForm.formName);
+      await expect(page.locator("h1")).toContainText(
+        validatedSF424CForm.formName,
+      );
 
       // Validate user-entered Table 1 values
 
-      await validateSF424CTable1UserEnteredFields(page, sf424cForm.testData);
+      await validateSF424CTable1UserEnteredFields(
+        page,
+        validatedSF424CForm.testData,
+      );
 
       // Validate calculated values
 
@@ -142,7 +149,9 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // Validate federal percentage share (Row 1 in Table 2) - special handling for percentage
       // The user entered value displays as a percentage in print view
       const federalPercentage = parseInt(
-        sf424cForm.testData["federal_funding--federal_percentage_share"],
+        validatedSF424CForm.testData[
+          "federal_funding--federal_percentage_share"
+        ],
         10,
       );
       await validateSF424CFederalPercentageShare(page, federalPercentage);
