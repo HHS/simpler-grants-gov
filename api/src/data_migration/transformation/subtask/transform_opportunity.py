@@ -13,7 +13,11 @@ from src.data_migration.transformation.subtask.abstract_transform_subtask import
 )
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition
-from src.db.models.opportunity_models import Opportunity, OpportunityAttachment, OpportunityIndexDeleteQueue
+from src.db.models.opportunity_models import (
+    Opportunity,
+    OpportunityAttachment,
+    OpportunityIndexDeleteQueue,
+)
 from src.db.models.staging.opportunity import Topportunity
 from src.services.competition_alpha.competition_instruction_util import (
     get_s3_competition_instruction_path,
@@ -78,9 +82,7 @@ class TransformOpportunity(AbstractTransformSubTask):
             # so either both commit or neither does.
             if target_opportunity is not None:
                 self.db_session.add(
-                    OpportunityIndexDeleteQueue(
-                        opportunity_id=target_opportunity.opportunity_id
-                    )
+                    OpportunityIndexDeleteQueue(opportunity_id=target_opportunity.opportunity_id)
                 )
 
             self._handle_delete(
