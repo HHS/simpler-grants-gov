@@ -176,6 +176,7 @@ export async function expectUploadedFileVisible(
   timeoutMs = 60000,
 ): Promise<void> {
   const entryLocator = getExistingFileEntryLocator(page, fileName);
+  await entryLocator.scrollIntoViewIfNeeded();
   await expect(entryLocator).toBeVisible({
     timeout: timeoutMs,
   });
@@ -421,6 +422,7 @@ export async function expectUploadStatusMessage(
 ): Promise<void> {
   const statusDisplay = page.getByTestId("file-upload-status-display").first();
   if ((await statusDisplay.count()) > 0) {
+    await statusDisplay.scrollIntoViewIfNeeded();
     await expect(statusDisplay).toBeVisible({ timeout: timeoutMs });
     const statusText = await statusDisplay.innerText();
     if (matchesText(statusText, message)) {
@@ -428,9 +430,42 @@ export async function expectUploadStatusMessage(
     }
   }
 
-  await expect(page.getByText(message)).toBeVisible({
+  const fallbackStatusMessage = page.getByText(message).first();
+  await fallbackStatusMessage.scrollIntoViewIfNeeded();
+  await expect(fallbackStatusMessage).toBeVisible({
     timeout: timeoutMs,
   });
+}
+
+/**
+ * Escape literal text for use in a RegExp pattern.
+ */
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Scroll a named upload control into view and assert it is visible.
+ *
+ * Failure-path upload flows can render status controls below the viewport,
+ * so this helper ensures visibility checks are not viewport-dependent.
+ */
+export async function expectUploadActionControlVisible(
+  page: Page,
+  controlName: string | RegExp,
+  timeoutMs = 30000,
+): Promise<void> {
+  const controlPattern =
+    typeof controlName === "string"
+      ? new RegExp(`^${escapeRegExp(controlName)}$`, "i")
+      : controlName;
+  const uploadControl = page
+    .getByRole("button", { name: controlPattern })
+    .or(page.getByRole("link", { name: controlPattern }))
+    .first();
+
+  await uploadControl.scrollIntoViewIfNeeded();
+  await expect(uploadControl).toBeVisible({ timeout: timeoutMs });
 }
 
 /**
