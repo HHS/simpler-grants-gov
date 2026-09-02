@@ -9,12 +9,14 @@ type SubmissionWindowProps = {
   openingDate?: string | null;
   closingDate?: string | null;
   gracePeriod?: number | null;
+  readOnly?: boolean;
 };
 
 export function SubmissionWindow({
   openingDate,
   closingDate,
   gracePeriod,
+  readOnly = false,
 }: SubmissionWindowProps) {
   const t = useTranslations("OpportunityCompetition.sectionSubmissionWindow");
 
@@ -39,6 +41,7 @@ export function SubmissionWindow({
             />
             <DatePicker
               id="opening_date"
+              disabled={readOnly}
               name="opening_date"
               defaultValue={openingDate ?? ""}
               placeholder="mm/dd/yyyy"
@@ -56,6 +59,7 @@ export function SubmissionWindow({
             />
             <DatePicker
               id="closing_date"
+              disabled={readOnly}
               name="closing_date"
               defaultValue={closingDate ?? ""}
               placeholder="mm/dd/yyyy"
@@ -74,6 +78,7 @@ export function SubmissionWindow({
             />
             <TextInput
               id="grace_period"
+              disabled={readOnly}
               name="grace_period"
               type="number"
               min="0"
