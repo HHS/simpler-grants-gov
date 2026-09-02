@@ -261,16 +261,8 @@ export const SF424C_CALCULATED_FIELDS_MAP = {
   },
 } as const;
 
-/**
- * List of all user-entered Table 1 field keys to validate in print view.
- * Derived directly from SF424C_FORM_CONFIG.fields; this list is just for reference.
- *
- * In tests, prefer deriving this list from field definitions to avoid duplication:
- * const table1Fields = Object.keys(SF424C_FORM_CONFIG.fields).filter(key =>
- *   key.includes("budget_information") && !key.includes("contingencies") && !key.includes("project_income")
- * );
- */
-export const SF424C_TABLE_1_USER_ENTERED_FIELDS = [
+// Table 1 user-entered fields list for validation
+const SF424C_TABLE_1_USER_ENTERED_FIELDS = [
   "budget_information--administrative_and_legal_expenses--total_cost",
   "budget_information--administrative_and_legal_expenses--non_allowable_cost",
   "budget_information--land_structures_rights_of_way--total_cost",

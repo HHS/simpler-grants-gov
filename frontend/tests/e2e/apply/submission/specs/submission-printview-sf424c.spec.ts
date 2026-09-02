@@ -14,6 +14,7 @@
  */
 
 import {
+  expect,
   test,
   type BrowserContext,
   type Page,
@@ -41,7 +42,6 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
-  validateAllPrintViews,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
   submitApplicationAndVerify,
@@ -122,16 +122,8 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await verifySubmissionConfirmation(page);
 
       // -----------------------------------------------------------------------
-      // Print view
+      // Print view - SF-424C validation
       // -----------------------------------------------------------------------
-
-      // SF-424C has custom validation logic below, so skip it in validateAllPrintViews
-      const nonSF424CFormsForValidation = filledForms.filter(
-        (form) => form.formKey !== "sf424c",
-      );
-      if (nonSF424CFormsForValidation.length > 0) {
-        await validateAllPrintViews(page, nonSF424CFormsForValidation);
-      }
 
       const sf424cForm = filledForms.find(
         ({ formKey }) => formKey === "sf424c",
@@ -156,8 +148,12 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await validateSF424CCalculatedFields(page);
 
       // Validate federal percentage share (Row 1 in Table 2) - special handling for percentage
-      // The user entered 90, which displays as "90.00%" or "90%"
-      await validateSF424CFederalPercentageShare(page);
+      // The user entered value displays as a percentage in print view
+      const federalPercentage = parseInt(
+        sf424cForm.testData["federal_funding--federal_percentage_share"],
+        10,
+      );
+      await validateSF424CFederalPercentageShare(page, federalPercentage);
     },
   );
 }
