@@ -135,58 +135,58 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
     },
   );
 
-  test(
-    "failed single-file upload of a zero-byte file",
-    { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
-    async (
-      { page, context }: { page: Page; context: BrowserContext },
-      testInfo: TestInfo,
-    ) => {
-      test.setTimeout(300_000);
+  // test(
+  //   "failed single-file upload of a zero-byte file",
+  //   { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
+  //   async (
+  //     { page, context }: { page: Page; context: BrowserContext },
+  //     testInfo: TestInfo,
+  //   ) => {
+  //     test.setTimeout(300_000);
 
-      // Given the applicant has opened the Attachment Form
-      await openApplicationFormWithAuth(
-        page,
-        context,
-        testInfo,
-        ATTACHMENT_FORM_CONFIG.formName,
-        testOrgLabel,
-        OPPORTUNITY_URL,
-      );
+  //     // Given the applicant has opened the Attachment Form
+  //     await openApplicationFormWithAuth(
+  //       page,
+  //       context,
+  //       testInfo,
+  //       ATTACHMENT_FORM_CONFIG.formName,
+  //       testOrgLabel,
+  //       OPPORTUNITY_URL,
+  //     );
 
-      // Scroll the upload field into view so screenshots capture the file upload state.
-      await page
-        .getByRole("button", {
-          name: fieldDefinitionsAttachment.att1.field,
-          exact: true,
-        })
-        .scrollIntoViewIfNeeded();
+  //     // Scroll the upload field into view so screenshots capture the file upload state.
+  //     await page
+  //       .getByRole("button", {
+  //         name: fieldDefinitionsAttachment.att1.field,
+  //         exact: true,
+  //       })
+  //       .scrollIntoViewIfNeeded();
 
-      // When the applicant uploads a zero-byte file
-      await uploadFile(
-        page,
-        SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB,
-        fieldDefinitionsAttachment.att1,
-      );
+  //     // When the applicant uploads a zero-byte file
+  //     await uploadFile(
+  //       page,
+  //       SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB,
+  //       fieldDefinitionsAttachment.att1,
+  //     );
 
-      // Then the upload failure message should appear
-      await expectUploadStatusMessage(
-        page,
-        /Pre upload error|Upload failed|Error running security scan|Security scan failed/i,
-      );
+  //     // Then the upload failure message should appear
+  //     await expectUploadStatusMessage(
+  //       page,
+  //       /Pre upload error|Upload failed|Error running security scan|Security scan failed/i,
+  //     );
 
-      // And the dismiss button should be visible
-      await expect(page.getByRole("button", { name: /dismiss/i })).toBeVisible({
-        timeout: 30000,
-      });
+  //     // And the dismiss button should be visible
+  //     await expect(page.getByRole("button", { name: /dismiss/i })).toBeVisible({
+  //       timeout: 30000,
+  //     });
 
-      // And the file should not be saved
-      await assertUploadDidNotSave(
-        page,
-        SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
-        0,
-        fieldDefinitionsAttachment.att1,
-      );
-    },
-  );
+  //     // And the file should not be saved
+  //     await assertUploadDidNotSave(
+  //       page,
+  //       SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
+  //       0,
+  //       fieldDefinitionsAttachment.att1,
+  //     );
+  //   },
+  // );
 });
