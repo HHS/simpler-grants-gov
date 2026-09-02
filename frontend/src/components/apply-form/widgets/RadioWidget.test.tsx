@@ -58,9 +58,9 @@ describe("RadioWidget", () => {
 
   it("exposes a focusable element with the field's id so error summary links can jump to it", () => {
     render(<RadioWidget {...WidgetProps} />);
-    const anchorTarget = document.getElementById(WidgetProps.id);
+    const anchorTarget = screen.getByTestId(WidgetProps.id);
     expect(anchorTarget).toBeInTheDocument();
-    anchorTarget?.focus();
+    anchorTarget.focus();
     expect(anchorTarget).toHaveFocus();
   });
 });

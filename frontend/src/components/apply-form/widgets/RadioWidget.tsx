@@ -1,17 +1,16 @@
 "use client";
 
 import {
-  enumOptionsIsSelected,
   EnumOptionsType,
   FormContextType,
-  optionId,
   RJSFSchema,
   StrictRJSFSchema,
+  enumOptionsIsSelected,
+  optionId,
 } from "@rjsf/utils";
-import { TextTypes, UswdsWidgetProps } from "src/types/applyForm/types";
-
-import React, { FocusEvent, useCallback, useMemo } from "react";
 import { FormGroup, Radio } from "@trussworks/react-uswds";
+import React, { FocusEvent, useCallback, useMemo } from "react";
+import { TextTypes, UswdsWidgetProps } from "src/types/applyForm/types";
 
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
@@ -135,7 +134,7 @@ export default function RadioWidget<
   return (
     // id/tabIndex here give the error summary link a real anchor target, since
     // individual radio inputs are only addressable via their indexed ids (e.g. `${id}-0`)
-    <div id={id} tabIndex={-1}>
+    <div id={id} tabIndex={-1} data-testid={id}>
       <FormGroup error={error} key={`form-group__radio--${id}`}>
         <DynamicFieldLabel
           idFor={id}
