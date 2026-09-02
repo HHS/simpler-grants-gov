@@ -54,7 +54,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
     failureDebugArtifacts = createFailureDebugArtifactsCollector(page);
   });
 
-  test.afterEach(async (_fixtureContext, testInfo) => {
+  test.afterEach(async ({ page: _page }, testInfo) => {
     // Attach diagnostics only when the test fails unexpectedly.
     await failureDebugArtifacts.attachOnFailure(testInfo);
   });
