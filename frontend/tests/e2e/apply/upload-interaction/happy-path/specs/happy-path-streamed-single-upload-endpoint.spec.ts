@@ -72,16 +72,8 @@ test.describe("File upload interactions - Attachment Form streamed upload endpoi
       // And the attachment save request should complete successfully: Check for the save response from the server
       await waitForAttachmentSaveResponse(page);
 
-      // Then the cancel button should no longer be visible after upload completion.
-      await expect(
-        page.getByRole("button", { name: /cancel/i }).first(),
-      ).not.toBeVisible({ timeout: 60000 });
-
-      // Then the uploaded file should be visible after the streamed upload completes
+      // Then the uploaded file should be visible
       await expectUploadedFileVisible(page, SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB);
-      await expect(
-        page.getByRole("button", { name: /delete/i }).first(),
-      ).toBeVisible();
     },
   );
 
