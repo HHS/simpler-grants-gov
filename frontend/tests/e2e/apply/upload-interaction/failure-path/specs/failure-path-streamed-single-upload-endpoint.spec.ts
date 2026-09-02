@@ -5,7 +5,6 @@
  */
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
@@ -13,7 +12,9 @@ import {
 } from "@playwright/test";
 import {
   ATTACHMENT_OPPORTUNITY_DATA,
+  SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
   SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
+  SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB,
   SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
 } from "tests/e2e/apply/fixtures/attachment-data";
 import {
@@ -40,16 +41,20 @@ const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 
 const OPPORTUNITY_URL = `/opportunity/${ATTACHMENT_OPPORTUNITY_DATA.opportunityId}`;
+const TEST_ORG_LABEL = String(testOrgLabel);
+type UploadFieldTarget = NonNullable<Parameters<typeof uploadFile>[2]>;
+const ATTACHMENT_FIELD =
+  fieldDefinitionsAttachment.attachment as UploadFieldTarget;
 
 test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
   let failureDebugArtifacts: FailureDebugArtifactsCollector;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(({ page }) => {
     // Start collecting browser/network diagnostics for this individual test run.
     failureDebugArtifacts = createFailureDebugArtifactsCollector(page);
   });
 
-  test.afterEach(async ({ page }, testInfo) => {
+  test.afterEach(async (_fixtureContext, testInfo) => {
     // Attach diagnostics only when the test fails unexpectedly.
     await failureDebugArtifacts.attachOnFailure(testInfo);
   });
@@ -69,7 +74,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         context,
         testInfo,
         ATTACHMENT_FORM_CONFIG.formName,
-        testOrgLabel,
+        TEST_ORG_LABEL,
         OPPORTUNITY_URL,
       );
 
@@ -77,7 +82,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       await uploadFile(
         page,
         SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB,
-        fieldDefinitionsAttachment.attachment,
+        ATTACHMENT_FIELD,
       );
 
       // Then the upload failure message should appear
@@ -91,11 +96,11 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         page,
         SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
         0,
-        fieldDefinitionsAttachment.attachment,
+        ATTACHMENT_FIELD,
       );
     },
   );
-  
+
   test(
     "aborted upload does not save the file",
     { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
@@ -111,7 +116,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         context,
         testInfo,
         ATTACHMENT_FORM_CONFIG.formName,
-        testOrgLabel,
+        TEST_ORG_LABEL,
         OPPORTUNITY_URL,
       );
 
@@ -123,7 +128,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       await uploadFile(
         page,
         SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
-        fieldDefinitionsAttachment.attachment,
+        ATTACHMENT_FIELD,
       );
 
       // Then the pre-upload error message should appear
@@ -137,7 +142,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         page,
         SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
         0,
-        fieldDefinitionsAttachment.attachment,
+        ATTACHMENT_FIELD,
       );
     },
   );
@@ -157,7 +162,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         context,
         testInfo,
         ATTACHMENT_FORM_CONFIG.formName,
-        testOrgLabel,
+        TEST_ORG_LABEL,
         OPPORTUNITY_URL,
       );
 
@@ -169,7 +174,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
       await uploadFile(
         page,
         SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
-        fieldDefinitionsAttachment.attachment,
+        ATTACHMENT_FIELD,
       );
 
       // Then the pre-upload error message should appear
@@ -183,7 +188,7 @@ test.describe("Failure path - Attachment Form streamed upload endpoint", () => {
         page,
         SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
         0,
-        fieldDefinitionsAttachment.attachment,
+        ATTACHMENT_FIELD,
       );
     },
   );
