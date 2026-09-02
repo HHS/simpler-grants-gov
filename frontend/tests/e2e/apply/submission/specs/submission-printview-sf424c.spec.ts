@@ -1,19 +1,10 @@
 /**
  * @feature Apply - Happy Path - SF-424C Application Submission and Print View Workflow
  * @scenario Complete the SF-424C Application Submission and Print View workflow for an <user type> user
- *
- * Validates:
- * - all user-editable SF-424C budget fields can be populated
- * - calculated allowable costs are generated correctly
- * - subtotal calculations are correct
- * - total project costs are correct
- * - federal funding share is calculated from the federal percentage
- * - the saved form is complete
- * - the submitted application succeeds
- * - the SF-424C print view contains the persisted and calculated values
- */
+ **/
 
 import {
+  expect,
   test,
   type BrowserContext,
   type Page,
@@ -38,6 +29,7 @@ import {
 import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
+  assertPrintViewIsReadOnly,
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
@@ -110,9 +102,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         });
       }
 
-      // -----------------------------------------------------------------------
-      // Submit
-      // -----------------------------------------------------------------------
+      // Submit application and verify submission confirmation
 
       await page.goto(applicationUrl);
       await page.waitForLoadState("domcontentloaded");
@@ -120,9 +110,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await submitApplicationAndVerify(page, "success");
       await verifySubmissionConfirmation(page);
 
-      // -----------------------------------------------------------------------
       // Print view - SF-424C validation
-      // -----------------------------------------------------------------------
 
       const sf424cForm = filledForms.find(
         ({ formKey }) => formKey === "sf424c",
@@ -134,15 +122,17 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
       await navigateToPrintView(page, sf424cForm.printUrl);
 
-      // -----------------------------------------------------------------------
+      // Validate print view structure and read-only state
+      await assertPrintViewIsReadOnly(page);
+
+      // Form title is visible in h1 heading
+      await expect(page.locator("h1")).toContainText(sf424cForm.formName);
+
       // Validate user-entered Table 1 values
-      // -----------------------------------------------------------------------
 
       await validateSF424CTable1UserEnteredFields(page, sf424cForm.testData);
 
-      // -----------------------------------------------------------------------
       // Validate calculated values
-      // -----------------------------------------------------------------------
 
       await validateSF424CCalculatedFields(page);
 

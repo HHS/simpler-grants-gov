@@ -13,7 +13,8 @@
  * This is useful for print views that may format currency differently across browsers
  * or CSS frameworks.
  *
- * Pattern is anchored with word boundaries to avoid partial matches.
+ * Pattern uses word boundaries and negative lookbehind to avoid partial matches.
+ * Only allows ".00" as a decimal suffix to prevent matching different cent amounts.
  *
  * @param value - A numeric string to convert to a flexible pattern
  * @returns A RegExp that matches the value in various currency formats
@@ -30,9 +31,11 @@ export function createFlexibleValuePattern(value: string): RegExp {
   // This allows matching "6300" or "6,300" (commas are optional)
   const digitPattern = digits.join(",?");
 
-  // Add optional currency prefix ($), decimal places (.00), and word boundaries
-  // Final pattern: \b\$?6,?3,?0,?0(\.\d{2})?\b
-  // Matches: "$6300", "$6,300", "$6,300.00", "6300", "6300.00", etc.
-  // Word boundaries prevent partial matches (e.g., "190%" won't match pattern for "90")
-  return new RegExp(`\\b\\$?${digitPattern}(\\.\\d{2})?\\b`);
+  // Use negative lookbehind (?<![,\d]) to prevent matching when digits or commas precede the pattern
+  // This prevents "700" from matching the "700" in "1,700.00" (comma + digit before)
+  // Only allow ".00" (not arbitrary decimals) to prevent "1000" from matching "$1000.50"
+  // Final pattern: (?<![,\d])\b\$?6,?3,?0,?0(?:\.00)?\b
+  // Matches: "$6300", "$6,300", "$6,300.00", "6300", etc.
+  // Does NOT match: "16300" (part of larger number), "$6300.50" (wrong decimal), "1,700.00" for pattern "700"
+  return new RegExp(`(?<![,\\d])\\b\\$?${digitPattern}(?:\\.00)?\\b`);
 }

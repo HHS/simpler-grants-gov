@@ -194,15 +194,7 @@ export const SF424C_TABLE_2_EXPECTED = {
  *
  * Test IDs use the "-read-only" suffix (e.g., budget_424c_table_1-11-1-read-only)
  * which uniquely identifies the field in print view.
- *
- * Usage in tests:
- * ```ts
- * for (const [fieldName, { testId, value }] of Object.entries(SF424C_CALCULATED_FIELDS_MAP)) {
- *   const valuePattern = createFlexibleValuePattern(String(value));
- *   await expect(page.getByTestId(testId).first()).toContainText(valuePattern);
- * }
- * ```
- */
+ **/
 export const SF424C_CALCULATED_FIELDS_MAP = {
   subtotal1_total: {
     testId: "budget_424c_table_1-11-1-read-only",
@@ -260,36 +252,6 @@ export const SF424C_CALCULATED_FIELDS_MAP = {
     label: "Table 2 - Federal Funding Share",
   },
 } as const;
-
-// Table 1 user-entered fields list for validation
-const SF424C_TABLE_1_USER_ENTERED_FIELDS = [
-  "budget_information--administrative_and_legal_expenses--total_cost",
-  "budget_information--administrative_and_legal_expenses--non_allowable_cost",
-  "budget_information--land_structures_rights_of_way--total_cost",
-  "budget_information--land_structures_rights_of_way--non_allowable_cost",
-  "budget_information--relocation_expenses--total_cost",
-  "budget_information--relocation_expenses--non_allowable_cost",
-  "budget_information--architectural_engineering_fees--total_cost",
-  "budget_information--architectural_engineering_fees--non_allowable_cost",
-  "budget_information--other_architectural_engineering_fees--total_cost",
-  "budget_information--other_architectural_engineering_fees--non_allowable_cost",
-  "budget_information--project_inspection_fees--total_cost",
-  "budget_information--project_inspection_fees--non_allowable_cost",
-  "budget_information--site_work--total_cost",
-  "budget_information--site_work--non_allowable_cost",
-  "budget_information--demolition_and_removal--total_cost",
-  "budget_information--demolition_and_removal--non_allowable_cost",
-  "budget_information--construction--total_cost",
-  "budget_information--construction--non_allowable_cost",
-  "budget_information--equipment--total_cost",
-  "budget_information--equipment--non_allowable_cost",
-  "budget_information--miscellaneous--total_cost",
-  "budget_information--miscellaneous--non_allowable_cost",
-  "budget_information--contingencies--total_cost",
-  "budget_information--contingencies--non_allowable_cost",
-  "budget_information--project_income--total_cost",
-  "budget_information--project_income--non_allowable_cost",
-] as const;
 
 /** * Applicant scenarios for SF-424C print view tests.
  * Includes both Organization and Individual user test cases.
@@ -351,7 +313,12 @@ export async function validateSF424CTable1UserEnteredFields(
   page: Page,
   testData: Record<string, string>,
 ): Promise<void> {
-  for (const fieldKey of SF424C_TABLE_1_USER_ENTERED_FIELDS) {
+  // Derive field keys from fieldDefinitionsSF424C to prevent drift
+  const fieldKeys = Object.keys(SF424C_FORM_CONFIG.fields).filter(
+    (fieldKey) => testData[fieldKey] !== undefined,
+  );
+
+  for (const fieldKey of fieldKeys) {
     const field = SF424C_FORM_CONFIG.fields[fieldKey];
 
     if (!field?.testId) {
@@ -400,20 +367,22 @@ export async function validateSF424CCalculatedFields(
  * The user enters "90" but it displays with percent formatting in print view.
  *
  * @param page - The Playwright page object
- * @param expectedPercentage - The expected percentage value (default: 90 from fixture)
+ * @param expectedPercentage - The expected percentage value to validate
  *
  * @throws if the field is not found or doesn't match expected percentage format
  *
  * @example
  * // Validates that the field contains "90%" or "90.00%"
- * await validateSF424CFederalPercentageShare(page);
+ * await validateSF424CFederalPercentageShare(page, 90);
  */
 export async function validateSF424CFederalPercentageShare(
   page: Page,
-  expectedPercentage: number = SF424C_TABLE_2_EXPECTED.federalPercentageShare,
+  expectedPercentage: number,
 ): Promise<void> {
-  // Match percentage with optional decimal places: "90", "90%", "90.00%"
-  const percentagePattern = new RegExp(`${expectedPercentage}(?:\\.00)?%`);
+  // Use word boundary \b to prevent matching "90" in "890%" or "190%"
+  // Only allow ".00" as decimal to prevent matching different cent amounts
+  // Matches: "90", "90%", "90.00%" but NOT "190%", "890%", "90.50%"
+  const percentagePattern = new RegExp(`\\b${expectedPercentage}(?:\.00)?%`);
   await expect(
     page.getByTestId("budget_424c_table_2-1-1-read-only").first(),
   ).toContainText(percentagePattern);
