@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteCompetitionInstructionAction } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/actions";
+import { useClientFetch } from "src/hooks/useClientFetch";
 import {
   PostUploadAction,
   UploadFileMetadata,
@@ -26,6 +26,10 @@ export function ApplicationInstructions({
   const t = useTranslations(
     "OpportunityCompetition.sectionApplicationInstructions",
   );
+  const { clientFetch } = useClientFetch<Response>(
+    "Error deleting competition instruction",
+    { jsonResponse: false },
+  );
 
   // --- Upload a file ---
   // Currently, only a single instruction file is allowed.
@@ -48,16 +52,15 @@ export function ApplicationInstructions({
   const [files, setFiles] = useState<UploadFileMetadata[]>(existingFiles);
   const handleDeleteFile = async (fileId: string): Promise<undefined> => {
     if (files.length > 0 && fileId) {
-      await deleteCompetitionInstructionAction(
-        opportunityId,
-        competitionId,
-        fileId,
+      await clientFetch(
+        `/api/opportunities/${opportunityId}/competitions/${competitionId}/instructions/${fileId}`,
+        { method: "DELETE" },
       );
       setFiles((currentFiles) =>
         currentFiles.filter((file) => file.id !== fileId),
       );
     }
-    return Promise.resolve(undefined);
+    return undefined;
   };
 
   return (

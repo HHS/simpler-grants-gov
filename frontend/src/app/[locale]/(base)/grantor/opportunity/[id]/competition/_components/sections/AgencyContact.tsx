@@ -52,7 +52,6 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
   };
 
   //--- Validation for Full Name ---
-  const [nameValue, setNameValue] = useState<string>(contactName);
   const [hasNameError, setHasNameError] = useState<boolean>(false);
   const [nameErrorMsg, setNameErrorMsg] = useState<string[]>([]);
 
@@ -84,7 +83,6 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
   };
 
   //--- Validation for Email Address ---
-  const [emailValue, setEmailValue] = useState<string>(contactEmail);
   const [hasEmailError, setHasEmailError] = useState<boolean>(false);
   const [emailErrorMsg, setEmailErrorMsg] = useState<string[]>([]);
   // Production-grade email layout validation regex

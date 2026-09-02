@@ -8,26 +8,13 @@ import {
 import { ApplicationInstructions } from "./ApplicationInstructions";
 
 const mockSimplerFileInput = jest.fn();
-const mockDeleteCompetitionInstructionAction = jest.fn<
-  Promise<unknown>,
-  [string, string, string]
->();
+const mockClientFetch = jest.fn<Promise<unknown>, [string, RequestInit?]>();
 
-jest.mock(
-  "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/actions",
-  () => ({
-    deleteCompetitionInstructionAction: (
-      opportunityId: string,
-      competitionId: string,
-      instructionId: string,
-    ): Promise<unknown> =>
-      mockDeleteCompetitionInstructionAction(
-        opportunityId,
-        competitionId,
-        instructionId,
-      ),
-  }),
-);
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: jest.fn(() => ({
+    clientFetch: mockClientFetch,
+  })),
+}));
 
 const applicationInstructionsProps = {
   opportunityId: "opp-123",
@@ -151,7 +138,7 @@ describe("ApplicationInstructions", () => {
           updatedAt: "2026-08-20T00:00:00Z",
         },
       ];
-      mockDeleteCompetitionInstructionAction.mockResolvedValue({});
+      mockClientFetch.mockResolvedValue({});
 
       render(
         <ApplicationInstructions
@@ -162,10 +149,9 @@ describe("ApplicationInstructions", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "delete-file" }));
 
-      expect(mockDeleteCompetitionInstructionAction).toHaveBeenCalledWith(
-        "opp-123",
-        "competition-123",
-        "instruction-123",
+      expect(mockClientFetch).toHaveBeenCalledWith(
+        `/api/opportunities/opp-123/competitions/competition-123/instructions/instruction-123`,
+        { method: "DELETE" },
       );
       await waitFor(() => {
         expect(mockSimplerFileInput).toHaveBeenLastCalledWith(
@@ -184,7 +170,7 @@ describe("ApplicationInstructions", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "delete-file" }));
 
-      expect(mockDeleteCompetitionInstructionAction).not.toHaveBeenCalled();
+      expect(mockClientFetch).not.toHaveBeenCalled();
     });
   });
 
