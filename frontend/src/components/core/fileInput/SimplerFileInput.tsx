@@ -190,10 +190,10 @@ export const SimplerFileInput = ({
 
   // note the usage of functional state setters in these functions
   // it's necessary to avoid referencing stale closed over state values up the call stack
-  const trackUploadComplete = (uploadId: string) => {
+  const trackUploadComplete = (uploadId: string, fileName: string) => {
     setCompletedUploads((previousCompletedUploads) => [
       ...previousCompletedUploads,
-      uploadId,
+      fileName,
     ]);
     setActiveUploads((previousActiveUploads) =>
       previousActiveUploads.filter(
@@ -296,7 +296,7 @@ export const SimplerFileInput = ({
             onStart();
           }}
           onUploadSuccess={(postUploadResult: unknown) => {
-            trackUploadComplete(uploadId);
+            trackUploadComplete(uploadId, file.name);
             onSuccess(postUploadResult);
             if (!multiFile) {
               fileInputRef?.current?.clearFiles();
