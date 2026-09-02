@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 from grants_shared.util import datetime_util, file_util
-from sqlalchemy import update
+from sqlalchemy import select, update
 
 import src.data_migration.transformation.transform_constants as transform_constants
 from src.data_migration.transformation.subtask.transform_opportunity import (
@@ -10,7 +10,7 @@ from src.data_migration.transformation.subtask.transform_opportunity import (
     TransformOpportunityAgencyConnection,
 )
 from src.db.models import staging
-from src.db.models.opportunity_models import Opportunity
+from src.db.models.opportunity_models import Opportunity, OpportunityIndexDeleteQueue
 from src.services.competition_alpha.competition_instruction_util import (
     get_s3_competition_instruction_path,
 )
@@ -372,6 +372,60 @@ def validate_agency_connection(db_session, opportunity, expected_agency):
         assert opportunity.agency_id == expected_agency.agency_id
     else:
         assert opportunity.agency_id is None
+
+
+class TestTransformOpportunityDeleteQueue(BaseTransformTestClass):
+    """Verify that deleting an opportunity inserts it into the search index delete queue."""
+
+    @pytest.fixture
+    def transform_opportunity(self, transform_oracle_data_task, s3_config):
+        return TransformOpportunity(transform_oracle_data_task, s3_config)
+
+    def test_delete_queues_opportunity_for_search_removal(
+        self, db_session, enable_factory_create, transform_opportunity
+    ):
+        """When an opportunity is deleted, its ID is added to the delete queue in the same transaction."""
+        source = setup_opportunity(create_existing=True, is_delete=True)
+
+        # Resolve the target that will be deleted
+        target = db_session.scalar(
+            select(Opportunity).where(Opportunity.legacy_opportunity_id == source.opportunity_id)
+        )
+        assert target is not None
+        opportunity_id = target.opportunity_id
+
+        db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
+        transform_opportunity.run_subtask()
+
+        # Opportunity is gone from DB
+        validate_opportunity(db_session, source, expect_in_db=False)
+
+        # Its ID is in the delete queue for the search index
+        queue_record = db_session.scalars(
+            select(OpportunityIndexDeleteQueue).where(
+                OpportunityIndexDeleteQueue.opportunity_id == opportunity_id
+            )
+        ).one_or_none()
+        assert queue_record is not None
+
+    def test_delete_missing_target_does_not_queue(
+        self, db_session, enable_factory_create, transform_opportunity
+    ):
+        """If there is no existing DB row to delete, nothing is added to the queue."""
+        # OpportunityIndexDeleteQueue has no FK to opportunity so truncate_opportunities
+        # does not cascade-delete it. Clear it explicitly before asserting.
+        from sqlalchemy import delete as sa_delete
+        db_session.execute(sa_delete(OpportunityIndexDeleteQueue))
+        db_session.commit()
+
+        setup_opportunity(create_existing=False, is_delete=True)
+
+        db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
+        transform_opportunity.run_subtask()
+
+        # No queue records should exist (nothing was deleted)
+        count = db_session.scalars(select(OpportunityIndexDeleteQueue)).all()
+        assert len(count) == 0
 
 
 class TestTransformOpportunityAgencyConnection(BaseTransformTestClass):

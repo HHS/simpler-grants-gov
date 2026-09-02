@@ -60,15 +60,16 @@ class LoadOpportunitiesToIndex(Task):
         self.config = config
         self.do_full_refresh = full_refresh
 
-        # Default to the alias; full_refresh() sets this to a new timestamped index
-        # before writing so that incremental writes always land on the live alias.
-        self.index_name = self.config.alias_name
+        if full_refresh:
+            current_timestamp = get_now_us_eastern_datetime().strftime("%Y-%m-%d_%H-%M-%S")
+            self.index_name = f"{self.config.index_prefix}-{current_timestamp}"
+        else:
+            self.index_name = self.config.alias_name
+
+        self.set_metrics({"index_name": self.index_name})
         self.start_time = utcnow()
 
     def run_task(self) -> None:
-        # NOTE: incremental_refresh requires the search alias to already exist.
-        # A full_refresh must have run at least once before incremental can be used.
-        # incremental_refresh() enforces this with an explicit alias_exists check.
         if self.do_full_refresh:
             logger.info("Running full refresh")
             self.full_refresh()
@@ -79,13 +80,6 @@ class LoadOpportunitiesToIndex(Task):
         self._emit_doc_count()
 
     def full_refresh(self) -> None:
-        # Override self.index_name with a fresh timestamped index for this run.
-        # load_records() uses self.index_name, so it writes to the new index;
-        # incremental_refresh() leaves self.index_name as the alias by default.
-        current_timestamp = get_now_us_eastern_datetime().strftime("%Y-%m-%d_%H-%M-%S")
-        self.index_name = f"{self.config.index_prefix}-{current_timestamp}"
-        self.set_metrics({"index_name": self.index_name})
-
         # create the index
         self.search_client.create_index(
             self.index_name,
@@ -247,9 +241,6 @@ class LoadOpportunitiesToIndex(Task):
         refresh: bool = False,
     ) -> set[uuid.UUID]:
         """Upsert a batch of opportunities into the search index.
-
-        Writes to self.index_name — the alias by default (incremental), or the
-        new timestamped index set by full_refresh() before it starts loading.
 
         Returns the set of opportunity IDs that were processed (indexed or skipped as
         test agencies). Callers use the returned IDs to mark change-audit records as
