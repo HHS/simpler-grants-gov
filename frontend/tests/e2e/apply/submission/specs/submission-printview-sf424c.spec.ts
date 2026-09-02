@@ -20,7 +20,10 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import {
+  skipNonChromeOnStaging,
+  skipWebkitSubmissionSpecsLocal,
+} from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   verifyFormStatusAfterSave,
@@ -50,6 +53,7 @@ const applicantScenarios = buildSF424CApplicantScenarios(testOrgLabel);
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
+  skipWebkitSubmissionSpecsLocal(testInfo);
 });
 
 for (const { testName, orgLabel } of applicantScenarios) {

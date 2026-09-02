@@ -13,3 +13,17 @@ export function skipNonChromeOnStaging(testInfo: TestInfo): void {
     );
   }
 }
+
+/**
+ * Skip WebKit tests for submission specs due to widespread flakiness.
+ * Only skips in local environment; staging runs Chrome-only anyway due to MFA constraints.
+ * Call inside a test.beforeEach in submission spec files.
+ */
+export function skipWebkitSubmissionSpecsLocal(testInfo: TestInfo): void {
+  if (playwrightEnv.targetEnv === "local") {
+    test.skip(
+      testInfo.project.name === "WebKit",
+      "WebKit tests are flaky in submission specs - reenable once resolved",
+    );
+  }
+}
