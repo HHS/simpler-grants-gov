@@ -4,7 +4,6 @@
  **/
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
