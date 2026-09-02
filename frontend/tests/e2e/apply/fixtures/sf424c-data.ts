@@ -348,12 +348,18 @@ export async function validateSF424CTable1UserEnteredFields(
 export async function validateSF424CCalculatedFields(
   page: Page,
 ): Promise<void> {
-  for (const [_fieldName, fieldData] of Object.entries(
-    SF424C_CALCULATED_FIELDS_MAP,
-  )) {
-    // Cast the entry to remove `any` type from Object.entries on `as const` object
-    const { testId, value } =
-      fieldData as (typeof SF424C_CALCULATED_FIELDS_MAP)[keyof typeof SF424C_CALCULATED_FIELDS_MAP];
+  const fieldEntries = Object.entries(SF424C_CALCULATED_FIELDS_MAP) as Array<
+    [
+      string,
+      {
+        testId: string;
+        value: number;
+      },
+    ]
+  >;
+
+  for (const [, field] of fieldEntries) {
+    const { testId, value } = field;
     const valuePattern = createFlexibleValuePattern(String(value));
     await expect(page.getByTestId(testId).first()).toContainText(valuePattern);
   }

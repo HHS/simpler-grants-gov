@@ -116,15 +116,17 @@ for (const { testName, orgLabel } of applicantScenarios) {
       // Print view - SF-424C validation
 
       const sf424cForm = filledForms.find(
-        ({ formKey }) => formKey === "sf424c",
+        (form): form is FilledFormEntry => form.formKey === "sf424c",
       );
 
       if (!sf424cForm) {
         throw new Error("SF-424C form was not found in the filled forms.");
       }
 
-      // TypeScript properly narrows sf424cForm to FilledFormEntry after guard
-      const { printUrl, formName } = sf424cForm;
+      const printUrl = sf424cForm.printUrl;
+      const formName = sf424cForm.formName;
+      const formTitle =
+        typeof formName === "string" ? formName : formName.source;
       const testData: Record<string, string> = sf424cForm.testData;
 
       await navigateToPrintView(page, printUrl);
@@ -133,7 +135,12 @@ for (const { testName, orgLabel } of applicantScenarios) {
       await assertPrintViewIsReadOnly(page);
 
       // Form title is visible in h1 heading
-      await expect(page.locator("h1")).toContainText(formName);
+      const pageHeading = await page.locator("h1").textContent();
+      if (!pageHeading || !pageHeading.includes(formTitle)) {
+        throw new Error(
+          `Expected page heading to include "${formTitle}", got: "${pageHeading ?? ""}"`,
+        );
+      }
 
       // Validate user-entered Table 1 values
 
