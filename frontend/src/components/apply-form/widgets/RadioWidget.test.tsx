@@ -55,4 +55,12 @@ describe("RadioWidget", () => {
     expect(screen.getByLabelText("Option 2")).toBeDisabled();
     expect(screen.getByLabelText("Option 3")).toBeDisabled();
   });
+
+  it("exposes a focusable element with the field's id so error summary links can jump to it", () => {
+    render(<RadioWidget {...WidgetProps} />);
+    const anchorTarget = document.getElementById(WidgetProps.id);
+    expect(anchorTarget).toBeInTheDocument();
+    anchorTarget?.focus();
+    expect(anchorTarget).toHaveFocus();
+  });
 });
