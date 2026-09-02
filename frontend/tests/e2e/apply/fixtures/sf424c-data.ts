@@ -376,9 +376,10 @@ export async function validateSF424CFederalPercentageShare(
   expectedPercentage: number,
 ): Promise<void> {
   // Use word boundary \b to prevent matching "90" in "890%" or "190%"
-  // Only allow ".00" as decimal to prevent matching different cent amounts
-  // Matches: "90", "90%", "90.00%" but NOT "190%", "890%", "90.50%"
-  const percentagePattern = new RegExp(`\\b${expectedPercentage}(?:\.00)?%`);
+  // Use negative lookahead (?![.\d]) to prevent matching if followed by period or digit
+  const percentagePattern = new RegExp(
+    `\\b${expectedPercentage}(?:\\.00)?(?![.\\d])%`,
+  );
   await expect(
     page.getByTestId("budget_424c_table_2-1-1-read-only").first(),
   ).toContainText(percentagePattern);

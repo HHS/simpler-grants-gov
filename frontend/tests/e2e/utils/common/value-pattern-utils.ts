@@ -32,10 +32,12 @@ export function createFlexibleValuePattern(value: string): RegExp {
   const digitPattern = digits.join(",?");
 
   // Use negative lookbehind (?<![,\d]) to prevent matching when digits or commas precede the pattern
-  // This prevents "700" from matching the "700" in "1,700.00" (comma + digit before)
-  // Only allow ".00" (not arbitrary decimals) to prevent "1000" from matching "$1000.50"
-  // Final pattern: (?<![,\d])\b\$?6,?3,?0,?0(?:\.00)?\b
+  // This prevents "700" from matching the "700" in "1,700.00"
+  // Use negative lookahead (?![.\d]) to prevent matching if followed by a period or digit
+  // This prevents "$6300" from matching inside "$6300.50" (even though ".00" is optional)
+  // Only allow ".00" as decimal suffix - other decimals will fail the lookahead
+  // Final pattern: (?<![,\d])\b\$?6,?3,?0,?0(?:\.00)?(?![.\d])\b
   // Matches: "$6300", "$6,300", "$6,300.00", "6300", etc.
-  // Does NOT match: "16300" (part of larger number), "$6300.50" (wrong decimal), "1,700.00" for pattern "700"
-  return new RegExp(`(?<![,\\d])\\b\\$?${digitPattern}(?:\\.00)?\\b`);
+  // Does NOT match: "16300" (part of larger number), "$6300.50" (lookahead fails on "."), "1,700.00" for pattern "700"
+  return new RegExp(`(?<![,\\d])\\b\\$?${digitPattern}(?:\\.00)?(?![.\\d])\\b`);
 }
