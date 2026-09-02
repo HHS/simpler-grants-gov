@@ -304,11 +304,7 @@ export function buildSF424CApplicantScenarios(
  * @param testData - The test data record from buildHappyPathTestData()
  *
  * @throws if any field is not found, missing a testId, or value doesn't match
- *
- * @example
- * const testData = sf424cForm.testData;
- * await validateSF424CTable1UserEnteredFields(page, testData);
- */
+ **/
 export async function validateSF424CTable1UserEnteredFields(
   page: Page,
   testData: Record<string, string>,
