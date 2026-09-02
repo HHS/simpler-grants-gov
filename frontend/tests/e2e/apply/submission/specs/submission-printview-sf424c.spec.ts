@@ -123,7 +123,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         throw new Error("SF-424C form was not found in the filled forms.");
       }
 
-      const { printUrl, formName, testData } = sf424cForm;
+      const { printUrl, formName, testData }: FilledFormEntry = sf424cForm;
 
       await navigateToPrintView(page, printUrl);
 

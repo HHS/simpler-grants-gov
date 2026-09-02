@@ -348,9 +348,14 @@ export async function validateSF424CTable1UserEnteredFields(
 export async function validateSF424CCalculatedFields(
   page: Page,
 ): Promise<void> {
-  for (const [_fieldName, { testId, value }] of Object.entries(
+  for (const [_fieldName, entry] of Object.entries(
     SF424C_CALCULATED_FIELDS_MAP,
   )) {
+    const { testId, value } = entry as {
+      testId: string;
+      value: number;
+      label: string;
+    };
     const valuePattern = createFlexibleValuePattern(String(value));
     await expect(page.getByTestId(testId).first()).toContainText(valuePattern);
   }
