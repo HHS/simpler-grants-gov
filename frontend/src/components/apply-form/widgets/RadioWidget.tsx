@@ -1,16 +1,17 @@
 "use client";
 
 import {
+  enumOptionsIsSelected,
   EnumOptionsType,
   FormContextType,
+  optionId,
   RJSFSchema,
   StrictRJSFSchema,
-  enumOptionsIsSelected,
-  optionId,
 } from "@rjsf/utils";
-import { FormGroup, Radio } from "@trussworks/react-uswds";
-import React, { FocusEvent, useCallback, useMemo } from "react";
 import { TextTypes, UswdsWidgetProps } from "src/types/applyForm/types";
+
+import React, { FocusEvent, useCallback, useMemo } from "react";
+import { FormGroup, Radio } from "@trussworks/react-uswds";
 
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
