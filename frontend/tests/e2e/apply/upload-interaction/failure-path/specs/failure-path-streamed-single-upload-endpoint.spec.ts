@@ -13,9 +13,7 @@ import {
 } from "@playwright/test";
 import {
   ATTACHMENT_OPPORTUNITY_DATA,
-  SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
   SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
-  SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB,
   SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB,
 } from "tests/e2e/apply/fixtures/attachment-data";
 import {
