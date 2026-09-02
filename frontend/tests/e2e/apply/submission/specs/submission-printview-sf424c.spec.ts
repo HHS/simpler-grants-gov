@@ -123,9 +123,8 @@ for (const { testName, orgLabel } of applicantScenarios) {
         throw new Error("SF-424C form was not found in the filled forms.");
       }
 
-      // Explicitly type the destructured properties to avoid `any` typing
-      const printUrl: string = sf424cForm.printUrl;
-      const formName: string | RegExp = sf424cForm.formName;
+      // TypeScript properly narrows sf424cForm to FilledFormEntry after guard
+      const { printUrl, formName } = sf424cForm;
       const testData: Record<string, string> = sf424cForm.testData;
 
       await navigateToPrintView(page, printUrl);

@@ -58,14 +58,25 @@ async function clickSubmitAndWaitForOutcome(
 
   // Determine browser and set appropriate timeouts.
   // WebKit and Firefox are slower at both network event processing and DOM rendering.
+  // Mobile Chrome also benefits from longer timeouts due to slower rendering on smaller viewports.
   const browserType = page.context().browser()?.browserType().name();
   const isWebKit = browserType === "webkit";
   const isFirefox = browserType === "firefox";
+  // Detect mobile by viewport width (mobile viewports are typically < 500px)
+  const viewportSize = page.viewportSize();
+  const isMobileChrome =
+    browserType === "chromium" && viewportSize && viewportSize.width < 500;
 
   // Set timeouts based on browser characteristics
   // WebKit requires significantly longer timeouts due to slower rendering and network event processing
-  const responseTimeoutMs = isWebKit ? 60000 : isFirefox ? 60000 : 20000;
-  const domOutcomeTimeoutMs = isWebKit ? 300000 : isFirefox ? 180000 : 120000;
+  // Mobile Chrome also needs longer timeouts than desktop Chrome
+  const responseTimeoutMs =
+    isWebKit || isFirefox ? 60000 : isMobileChrome ? 30000 : 20000;
+  const domOutcomeTimeoutMs = isWebKit
+    ? 300000
+    : isFirefox || isMobileChrome
+      ? 180000
+      : 120000;
 
   // Set up response listener BEFORE clicking - in WebKit, timing is critical
   // We use this for logging only, not to determine outcome (prefixed with _ to indicate unused)
