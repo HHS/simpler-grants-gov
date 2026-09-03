@@ -1,0 +1,59 @@
+{
+  "name": "ETL Issue - Count Issue Type %",
+  "display": "pie",
+  "visualization_settings": {
+    "pie.slice_threshold": 1,
+    "pie.percent_visibility": "both",
+    "pie.dimension": [
+      "issue_type"
+    ],
+    "pie.show_labels": false,
+    "pie.rows": [
+      {
+        "key": "Task",
+        "name": "Task",
+        "originalName": "Task",
+        "color": "#509EE3",
+        "defaultColor": false,
+        "enabled": true,
+        "hidden": false,
+        "isOther": false
+      },
+      {
+        "key": "None",
+        "name": "None",
+        "originalName": "None",
+        "color": "#EF8C8C",
+        "defaultColor": false,
+        "enabled": true,
+        "hidden": false,
+        "isOther": false
+      },
+      {
+        "key": "Bug",
+        "name": "Bug",
+        "originalName": "Bug",
+        "color": "#F9D45C",
+        "defaultColor": true,
+        "enabled": true,
+        "hidden": false,
+        "isOther": true
+      },
+      {
+        "key": "Enhancement",
+        "name": "Enhancement",
+        "originalName": "Enhancement",
+        "color": "#98D9D9",
+        "defaultColor": true,
+        "enabled": true,
+        "hidden": false,
+        "isOther": true
+      }
+    ],
+    "pie.metric": "issue_percentage",
+    "pie.show_legend": true,
+    "pie.decimal_places": 0,
+    "pie.show_total": true,
+    "version": 2
+  }
+}

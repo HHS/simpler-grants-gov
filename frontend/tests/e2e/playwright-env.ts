@@ -80,6 +80,10 @@ const playwrightEnv = {
   // e2e composite action (local uses the committed local-manager-key; staging
   // injects its own secret value).
   testUserManagerApiKey: process.env.TEST_USER_MANAGER_API_KEY || "",
+  // Flag indicating if the E2E environment has a virus scanner for infected file testing.
+  // Enabled by default in all environments as the scan currently works in both local and Staging env;
+  // can be explicitly disabled via E2E_INFECTED_FILE_SCANNER=false.
+  hasInfectedFileScanner: process.env.E2E_INFECTED_FILE_SCANNER !== "false",
 };
 
 export default playwrightEnv;

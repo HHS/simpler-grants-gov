@@ -531,7 +531,10 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     )
 
     opportunity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
+        UUID,
+        ForeignKey(Opportunity.opportunity_id, ondelete="CASCADE"),
+        primary_key=True,
+        index=True,
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
     is_loaded_to_search: Mapped[bool | None]

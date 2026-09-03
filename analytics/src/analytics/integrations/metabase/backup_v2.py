@@ -251,11 +251,13 @@ class MetabaseBackupV2:
     def _inventory(
         self,
         collections: list[dict[str, Any]],
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[int, int]]:
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[tuple[str, int], int]]:
         """Walk every collection's items, splitting into cards vs. dashboards."""
         cards_summary = []
         dashboards_summary = []
-        collection_of: dict[int, int] = {}
+        # Keyed by (model, id) rather than bare id -- cards and dashboards are
+        # separate id sequences in Metabase and can share a numeric id.
+        collection_of: dict[tuple[str, int], int] = {}
 
         for collection in collections:
             items = self.get_items(collection["id"])
@@ -266,7 +268,7 @@ class MetabaseBackupV2:
                 collection["name"],
             )
             for item in items:
-                collection_of[item["id"]] = collection["id"]
+                collection_of[(item["model"], item["id"])] = collection["id"]
                 if item["model"] == "card":
                     cards_summary.append(item)
                 else:
@@ -652,12 +654,12 @@ class MetabaseBackupV2:
         self,
         resolved_cards: dict[str, dict[str, Any]],
         levels: dict[str, int],
-        collection_of: dict[int, int],
+        collection_of: dict[tuple[str, int], int],
         collection_folder: dict[int, str],
     ) -> None:
         """Write every resolved card's .sql + sidecar .json to level_N/<Collection>/."""
         for key, card in resolved_cards.items():
-            folder = collection_folder[collection_of[card["id"]]]
+            folder = collection_folder[collection_of[("card", card["id"])]]
             self._write_question(card, levels[key], folder)
         self.stats["questions_processed"] = len(resolved_cards)
 
@@ -691,13 +693,13 @@ class MetabaseBackupV2:
         self,
         dashboards_summary: list[dict[str, Any]],
         id_to_key: dict[int, str],
-        collection_of: dict[int, int],
+        collection_of: dict[tuple[str, int], int],
         collection_folder: dict[int, str],
     ) -> None:
         """Fetch and write every dashboard to dashboards/<Collection>/."""
         processed = 0
         for item in dashboards_summary:
-            folder = collection_folder[collection_of[item["id"]]]
+            folder = collection_folder[collection_of[(item["model"], item["id"])]]
             if self._write_dashboard(item["id"], id_to_key, folder):
                 processed += 1
             else:
