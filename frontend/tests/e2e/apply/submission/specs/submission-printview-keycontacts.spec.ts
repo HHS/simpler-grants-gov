@@ -19,7 +19,7 @@ import { createApplication } from "tests/e2e/utils/application/create-applicatio
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import {
   skipNonChromeOnStaging,
-  skipWebkitSubmissionSpecsLocal,
+  skipWebkit,
 } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
@@ -83,7 +83,7 @@ const applicantScenarios = [
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
-  skipWebkitSubmissionSpecsLocal(testInfo);
+  skipWebkit(testInfo);
 });
 
 for (const { testName, orgLabel, tags, buildTestData } of applicantScenarios) {

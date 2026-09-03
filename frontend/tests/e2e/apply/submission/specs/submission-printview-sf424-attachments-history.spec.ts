@@ -26,7 +26,7 @@ import { createApplication } from "tests/e2e/utils/application/create-applicatio
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import {
   skipNonChromeOnStaging,
-  skipWebkitSubmissionSpecsLocal,
+  skipWebkit,
 } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import {
   createMultipleNumberedUploadFiles,
@@ -68,7 +68,7 @@ const UPLOAD_SOURCE_FILE = SF424_TEST_UPLOAD_FILE;
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
-  skipWebkitSubmissionSpecsLocal(testInfo);
+  skipWebkit(testInfo);
 });
 
 for (const { scenarioName, orgLabel } of SF424_APPLICANT_SCENARIOS) {

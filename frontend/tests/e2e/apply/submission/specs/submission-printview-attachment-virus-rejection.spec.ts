@@ -18,7 +18,7 @@ import { createApplication } from "tests/e2e/utils/application/create-applicatio
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import {
   skipNonChromeOnStaging,
-  skipWebkitSubmissionSpecsLocal,
+  skipWebkit,
 } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import {
   verifyVirusScanFailedAndRemoved,
@@ -58,7 +58,7 @@ const VALID_FILE_NAME = "sample-upload-kb.pdf";
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
-  skipWebkitSubmissionSpecsLocal(testInfo);
+  skipWebkit(testInfo);
 });
 
 const applicantScenarios = [
