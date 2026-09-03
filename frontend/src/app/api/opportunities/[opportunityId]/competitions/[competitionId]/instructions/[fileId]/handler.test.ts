@@ -1,23 +1,21 @@
 import { NotFoundError } from "src/errors";
-import { getSession } from "src/services/auth/session";
-import { deleteCompetitionInstructions } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import * as sessionModule from "src/services/auth/session";
+import * as grantorOpportunitiesFetcherModule from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 
 import { NextRequest, NextResponse } from "next/server";
 
 import { DELETE } from "./handler";
 
-jest.mock("src/services/auth/session", () => ({
-  getSession: jest.fn(),
-}));
+jest.mock("src/services/auth/session");
+jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher");
 
-jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
-  deleteCompetitionInstructions: jest.fn(),
+jest.mock("src/services/auth/sessionUtils", () => ({
+  decrypt: jest.fn(),
+  encrypt: jest.fn(),
+  CLIENT_JWT_ENCRYPTION_ALGORITHM: "HS256",
+  API_JWT_ENCRYPTION_ALGORITHM: "RS256",
+  newExpirationDate: () => new Date(0),
 }));
-
-const mockGetSession = jest.mocked(getSession);
-const mockDeleteCompetitionInstructions = jest.mocked(
-  deleteCompetitionInstructions,
-);
 
 const mockSession = {
   user_id: "test-user-id",
@@ -56,8 +54,10 @@ describe("DELETE competition instruction handler", () => {
       },
     );
 
-    mockGetSession.mockResolvedValue(mockSession);
-    mockDeleteCompetitionInstructions.mockResolvedValue({
+    (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
+    (
+      grantorOpportunitiesFetcherModule.deleteCompetitionInstructions as jest.Mock
+    ).mockResolvedValue({
       data: {},
       status_code: 200,
       message: "Instruction deleted",
@@ -75,8 +75,10 @@ describe("DELETE competition instruction handler", () => {
         message: "Instruction deleted",
       },
     });
-    expect(mockGetSession).toHaveBeenCalledTimes(1);
-    expect(mockDeleteCompetitionInstructions).toHaveBeenCalledWith(
+    expect(sessionModule.getSession).toHaveBeenCalledTimes(1);
+    expect(
+      grantorOpportunitiesFetcherModule.deleteCompetitionInstructions,
+    ).toHaveBeenCalledWith(
       "opportunity-123",
       "competition-123",
       "instruction-123",
@@ -115,13 +117,15 @@ describe("DELETE competition instruction handler", () => {
 
       expect(response.status).toBe(400);
       expect(await response.json()).toEqual({ error });
-      expect(mockGetSession).not.toHaveBeenCalled();
-      expect(mockDeleteCompetitionInstructions).not.toHaveBeenCalled();
+      expect(sessionModule.getSession).not.toHaveBeenCalled();
+      expect(
+        grantorOpportunitiesFetcherModule.deleteCompetitionInstructions,
+      ).not.toHaveBeenCalled();
     },
   );
 
   it("returns 401 when the user is not authenticated", async () => {
-    mockGetSession.mockResolvedValueOnce(null);
+    (sessionModule.getSession as jest.Mock).mockResolvedValueOnce(null);
 
     const response = await DELETE({} as NextRequest, buildContext());
 
@@ -129,13 +133,15 @@ describe("DELETE competition instruction handler", () => {
     expect(await response.json()).toEqual({
       error: "Not logged in, cannot delete competition instructions file",
     });
-    expect(mockDeleteCompetitionInstructions).not.toHaveBeenCalled();
+    expect(
+      grantorOpportunitiesFetcherModule.deleteCompetitionInstructions,
+    ).not.toHaveBeenCalled();
   });
 
   it("returns the backend error status when deletion fails", async () => {
-    mockDeleteCompetitionInstructions.mockRejectedValueOnce(
-      new NotFoundError("Instruction file not found"),
-    );
+    (
+      grantorOpportunitiesFetcherModule.deleteCompetitionInstructions as jest.Mock
+    ).mockRejectedValueOnce(new NotFoundError("Instruction file not found"));
 
     const response = await DELETE({} as NextRequest, buildContext());
 
@@ -146,9 +152,9 @@ describe("DELETE competition instruction handler", () => {
   });
 
   it("returns 500 for unexpected errors", async () => {
-    mockDeleteCompetitionInstructions.mockRejectedValueOnce(
-      new Error("Network error"),
-    );
+    (
+      grantorOpportunitiesFetcherModule.deleteCompetitionInstructions as jest.Mock
+    ).mockRejectedValueOnce(new Error("Network error"));
 
     const response = await DELETE({} as NextRequest, buildContext());
 

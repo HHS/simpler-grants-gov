@@ -27,7 +27,7 @@ export function ApplicationInstructions({
     "OpportunityCompetition.sectionApplicationInstructions",
   );
   const { clientFetch } = useClientFetch<Response>(
-    "Error deleting competition instruction",
+    "Error deleting the application instructions file",
     { jsonResponse: false },
   );
 
@@ -58,6 +58,10 @@ export function ApplicationInstructions({
       );
       setFiles((currentFiles) =>
         currentFiles.filter((file) => file.id !== fileId),
+      );
+    } else {
+      console.error(
+        "Error deleting the application instructions file: No file to delete",
       );
     }
     return undefined;

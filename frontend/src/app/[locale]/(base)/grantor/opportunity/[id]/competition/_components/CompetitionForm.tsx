@@ -38,13 +38,13 @@ type CompetitionFormProps = {
 };
 
 export function CompetitionForm({
-  opportunityId: _opportunityId,
+  opportunityId,
   competition,
   forms,
 }: CompetitionFormProps) {
   const t = useTranslations("OpportunityCompetition");
 
-  const _competitionId: string = competition?.competition_id || "";
+  const competitionId: string = competition?.competition_id || "";
   const existingFiles: UploadFileMetadata[] =
     competition?.competition_instructions.map((instruction) => ({
       id: instruction.competition_instruction_id,
@@ -97,8 +97,8 @@ export function CompetitionForm({
   // ===== Render the form =====
   return (
     <form id="opportunity-competition-form" onSubmit={handleSubmit}>
-      <input type="hidden" name="opportunityId" value={_opportunityId} />
-      <input type="hidden" name="competitionId" value={_competitionId} />
+      <input type="hidden" name="opportunityId" value={opportunityId} />
+      <input type="hidden" name="competitionId" value={competitionId} />
 
       {formState?.errorMessage ? (
         <div className="margin-top-2">
@@ -145,8 +145,8 @@ export function CompetitionForm({
               />
               <AgencyContact contactInfo={competition?.contact_info} />
               <ApplicationInstructions
-                opportunityId={_opportunityId}
-                competitionId={_competitionId}
+                opportunityId={opportunityId}
+                competitionId={competitionId}
                 existingFiles={existingFiles}
               />
               <RequiredForms
