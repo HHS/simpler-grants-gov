@@ -59,6 +59,14 @@ describe("CommonTextInput", () => {
     fireEvent.change(element, { target: { value: "Hello World" } });
     expect(textValue).toBe("Hello World");
   });
+
+  it("renders the element as disabled when disabled=true", () => {
+    render(<CommonTextInput {...commonInputProps} disabled={true} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeDisabled();
+  });
 });
 
 // --- Test Common Textarea ---
@@ -101,6 +109,14 @@ describe("CommonTextArea", () => {
     // Simulate a change event and test if our variable changed
     fireEvent.change(element, { target: { value: "Hello World 2" } });
     expect(bigTextValue).toBe("Hello World 2");
+  });
+
+  it("renders the element as disabled when disabled=true", () => {
+    render(<CommonTextArea {...commonTextAreaProps} disabled={true} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeDisabled();
   });
 });
 
@@ -309,6 +325,14 @@ describe("CommonWordLimit", () => {
     const charCountText = screen.getByText("wordsError");
     expect(charCountText).toBeInTheDocument();
   });
+
+  it("renders the element as disabled when disabled=true", () => {
+    render(<CommonWordLimit {...commonWordLimitProps} disabled={true} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeDisabled();
+  });
 });
 
 // --- Test Common Select ---
@@ -382,5 +406,13 @@ describe("CommonSelectInput", () => {
     });
     expect(newSelectedOption).toBeInTheDocument();
     expect(selectedValue).toBe("123-ABC");
+  });
+
+  it("renders the select as disabled when disabled=true", () => {
+    render(<CommonSelectInput {...commonSelectProps} disabled={true} />);
+    const element = screen.getByRole("combobox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeDisabled();
   });
 });

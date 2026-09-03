@@ -31,9 +31,11 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
 jest.mock(
   "src/components/grantor-opportunities/OpportunityDetailsHeader",
   () => ({
-    OpportunityDetailsHeader: () => (
-      <div data-testid="opportunity-details-header" />
-    ),
+    OpportunityDetailsHeader: ({
+      children,
+    }: {
+      children?: React.ReactNode;
+    }) => <div data-testid="opportunity-details-header">{children}</div>,
   }),
 );
 
@@ -42,12 +44,15 @@ jest.mock(
   () => ({
     CompetitionForm: ({
       competition,
+      readOnly,
     }: {
       competition?: { competition_id?: string };
+      readOnly?: boolean;
     }) => (
       <div
         data-testid="competition-form"
         data-competition-id={competition?.competition_id ?? ""}
+        data-read-only={String(Boolean(readOnly))}
       />
     ),
   }),
@@ -70,6 +75,7 @@ jest.mock("src/services/fetch/fetchers/allFormsFetcher", () => ({
 const baseOpportunityData: DeepPartial<GrantorOpportunityDetail> = {
   opportunity_id: "opp-abc-123",
   opportunity_title: "Test Opportunity",
+  is_draft: true,
   competitions: null,
 };
 
@@ -81,7 +87,7 @@ describe("OpportunityCompetitionPage", () => {
   describe("when opportunity has no existing competition", () => {
     beforeEach(() => {
       mockGetOpportunityForGrantor.mockResolvedValue({
-        data: { ...baseOpportunityData, competitions: null },
+        data: { ...baseOpportunityData, competitions: null, is_draft: true },
       });
       mockCreateCompetitionForGrantor.mockResolvedValue({
         data: { competition_id: "new-competition-id" },
@@ -133,6 +139,7 @@ describe("OpportunityCompetitionPage", () => {
       mockGetOpportunityForGrantor.mockResolvedValue({
         data: {
           ...baseOpportunityData,
+          is_draft: true,
           competitions: [{ competition_id: "existing-competition-id" }],
         },
       });
@@ -158,6 +165,63 @@ describe("OpportunityCompetitionPage", () => {
       const results = await waitFor(() => axe(container));
 
       expect(results).toHaveNoViolations();
+    });
+  });
+
+  describe("readOnly handling", () => {
+    beforeEach(() => {
+      mockAllForms.mockResolvedValue({
+        data: [
+          {
+            current_version: {
+              legacy_form_version: "2.1",
+              major_version: 4,
+              minor_version: 0,
+            },
+            form_id: "123e4567-e89b-12d3-a456-426614174000",
+            name: "Application for Federal Assistance",
+            short_name: "SF-424",
+          },
+        ],
+      });
+    });
+
+    it("passes readOnly=false to CompetitionForm while the opportunity is draft", async () => {
+      mockGetOpportunityForGrantor.mockResolvedValue({
+        data: { ...baseOpportunityData, is_draft: true, competitions: null },
+      });
+
+      const component = await OpportunityCompetitionPage({
+        params: pageParams,
+      });
+      render(component);
+
+      expect(
+        screen.getByRole("button", { name: "button.saveAndExit" }),
+      ).toBeEnabled();
+      expect(screen.getByTestId("competition-form")).toHaveAttribute(
+        "data-read-only",
+        "false",
+      );
+    });
+
+    it("passes readOnly=true to CompetitionForm when the opportunity is not a draft", async () => {
+      mockGetOpportunityForGrantor.mockResolvedValue({
+        data: { ...baseOpportunityData, is_draft: false, competitions: null },
+      });
+
+      const component = await OpportunityCompetitionPage({
+        params: pageParams,
+      });
+      render(component);
+
+      expect(
+        screen.getByRole("button", { name: "button.saveAndExit" }),
+      ).toBeDisabled();
+      expect(screen.getByTestId("competition-form")).toHaveAttribute(
+        "data-read-only",
+        "true",
+      );
     });
   });
 

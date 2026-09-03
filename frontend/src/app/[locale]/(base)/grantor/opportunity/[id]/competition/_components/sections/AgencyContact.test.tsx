@@ -38,6 +38,21 @@ describe("AgencyContact", () => {
       expect(screen.getByText("phoneNumber")).toBeInTheDocument();
     });
 
+    it("disables all form fields when readOnly is true", () => {
+      render(<AgencyContact readOnly />);
+
+      expect(screen.getByRole("textbox", { name: /fullname/i })).toBeDisabled();
+      expect(
+        screen.getByRole("textbox", { name: /persontitle/i }),
+      ).toBeDisabled();
+      expect(
+        screen.getByRole("textbox", { name: /emailaddress/i }),
+      ).toBeDisabled();
+      expect(
+        screen.getByRole("textbox", { name: /phonenumber/i }),
+      ).toBeDisabled();
+    });
+
     it("populates form fields from contactInfo", () => {
       render(
         <AgencyContact contactInfo="John Doe | Manager | john@example.com | 555-0100" />,
