@@ -398,6 +398,8 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+      expectedNumberOfAwardsInput:
+        "Expected number of awards must be greater than or equal to zero and less than 1,000,000,000,000,000.",
       awardMinCurrencyInput:
         "Award minimum must be greater than or equal to zero and less than $1,000,000,000,000,000.",
       awardMaxCurrencyInput:
@@ -413,12 +415,12 @@ export const messages = {
         "Award maximum cannot be less than Award minimum.",
     },
     attachments: {
-      removeButton: "Remove",
       uploadLabel: "Upload files",
-      errorHeading: "Upload error",
-      errorUploadFailed: "Failed to upload {fileName}.",
-      errorDeleteFailed: "Failed to delete {fileName}.",
-      errorFileTooLarge: "{fileName} exceeds the 2GB file size limit.",
+      uploading: "Uploading...",
+      success:
+        "Success: File scan complete. Save this form to attach the file.",
+      error:
+        "Processing failed due to a system error. Try uploading your file again.",
     },
   },
   Application: {
@@ -1978,6 +1980,12 @@ export const messages = {
       },
     },
   },
+  CommonWordLimit: {
+    wordsAllowed: "words allowed",
+    wordsLeft: "{num, plural, =1 {1 word left} other {# words left}}",
+    wordsError:
+      "{num, plural, =1 {1 word over limit} other {# words over limit}}",
+  },
   Applications: {
     numApplications: "{num, plural, =1 {1 application} other {# applications}}",
     errorMessage:
@@ -2641,8 +2649,9 @@ export const messages = {
       header: "Submission set-up",
       subHeader:
         "A competition is one apply-window inside an opportunity. Most opportunities have only one.",
-      competitionId: "Competition ID",
-      competitionIdHint: "An ID if this opportunity has multiple competitions.",
+      publicCompetitionId: "Competition ID",
+      publicCompetitionIdHint:
+        "An ID if this opportunity has multiple competitions.",
       competitionTitle: "Competition title",
       competitionTitleHint: "Shown to applicants. Plain language is best.",
       whoCanApply: "Who can apply?",
@@ -2655,17 +2664,12 @@ export const messages = {
     sectionSubmissionWindow: {
       header: "Submission window",
       subHeader: "When applicants can submit through this package.",
-      submissionsOpen: "Submissions open",
-      submissionsOpenHint:
-        "First day applicants can submit. Defaults to publish date.",
-      submissionsClose: "Submissions close",
-      submissionsCloseHint:
-        "Final deadline for all applications. Defaults to the close date.",
-      howManyApplications: "How many applications do you expect?",
-      howManyApplicationsHint:
-        "We use it to plan capacity for your competition. You can change it later.",
-      expectedNumberOfApplicants: "Expected number of applicants",
-      expectedNumberOfApplicantsHint: "A best estimate is fine.",
+      submissionsOpen: "Open date",
+      submissionsOpenHint: "First day applicants can apply",
+      submissionsClose: "Public close date",
+      submissionsCloseHint: "Deadline listed on Grants.gov",
+      gracePeriod: "Extension period",
+      gracePeriodHint: "Number of days accepted past public close date",
     },
     sectionApplicationChecklist: {
       header: "Application checklist",
@@ -2689,6 +2693,20 @@ export const messages = {
         requiredEmail: "Email address is required.",
         invalidEmail:
           "Incorrect text format. Please ensure there are no spaces or missing characters.",
+      },
+    },
+    sectionApplicationInstructions: {
+      header: "Application instructions",
+      subHeader:
+        "Upload any supporting instructions needed for the application.",
+      uploadAFile: "Upload a file",
+      multipleFiles: "For multiple files, combine them into one zip file.",
+      uploadWidget: {
+        error:
+          "Processing failed due to a system error. Try uploading your file again.",
+        success:
+          "Success: File scan complete. “Save” this form to attach the file.",
+        uploading: "Uploading...",
       },
     },
     sectionRequiredForms: {
@@ -2742,7 +2760,8 @@ export const messages = {
     statusDisplay: {
       cancel: "Cancel",
       dismiss: "Dismiss",
-      queued: "Queued",
+      processing: "Processing file",
+      starting: "Starting upload",
       uploading: "Uploading...",
       startingScan: "Upload complete. Starting security scan",
       scanning: "Upload complete. Running security scan...",
@@ -2755,6 +2774,8 @@ export const messages = {
       missingFileId: "Error: missing file id",
       preUploadError: "Pre upload error",
       infected: "Security scan failed. File removed",
+      fileTooLarge:
+        "This file is too large. The maximum file size is {maxFileSize}.",
     },
     deleteModal: {
       titleText: "Delete",

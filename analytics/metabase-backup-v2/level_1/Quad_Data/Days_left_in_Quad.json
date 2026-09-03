@@ -1,0 +1,33 @@
+{
+  "name": "Days left in Quad",
+  "display": "scalar",
+  "visualization_settings": {},
+  "template_tags": {
+    "date": {
+      "widget-type": null,
+      "type": "date",
+      "name": "date",
+      "id": "03b3bcdc-3547-4337-a3d0-7def62f85930",
+      "display-name": "Date",
+      "default": "2024-12-18",
+      "required": true
+    }
+  },
+  "parameters": [
+    {
+      "id": "03b3bcdc-3547-4337-a3d0-7def62f85930",
+      "type": "date/single",
+      "target": [
+        "variable",
+        [
+          "template-tag",
+          "date"
+        ]
+      ],
+      "name": "Date",
+      "slug": "date",
+      "default": "2024-12-18",
+      "required": true
+    }
+  ]
+}

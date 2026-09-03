@@ -6,6 +6,7 @@ import {
 } from "src/services/fetch/fetchers/fetchers";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import {
+  CompetitionInstructionsApiResponse,
   CompetitionSaveApiResponse,
   CompetitionSaveRequest,
 } from "src/types/competitionsResponseTypes";
@@ -141,4 +142,16 @@ export async function updateCompetitionForGrantor(
     body: data,
   });
   return (await response.json()) as CompetitionSaveApiResponse;
+}
+
+export async function saveCompetitionInstructions(
+  opportunityId: string,
+  competitionId: string,
+  pendingFileId: string,
+): Promise<CompetitionInstructionsApiResponse> {
+  const response = await fetchGrantorOpportunityWithMethod("POST")({
+    subPath: `${opportunityId}/competitions/${competitionId}/instructions`,
+    body: { pending_file_id: pendingFileId },
+  });
+  return (await response.json()) as CompetitionInstructionsApiResponse;
 }

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from grants_shared.db.models.base import TimestampMixin
 from grants_shared.util.file_util import presign_or_s3_cdnify_url
-from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy import BigInteger, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -518,12 +518,39 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
 class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_change_audit"
 
+    # Partial index so the incremental search sync only scans records still queued for
+    # indexing. The predicate covers NULL as well as FALSE because the queue trigger
+    # inserts new rows without setting is_loaded_to_search.
+    __table_args__ = (
+        Index(
+            "opportunity_change_audit_is_loaded_to_search_idx",
+            "is_loaded_to_search",
+            postgresql_where="is_loaded_to_search IS NOT TRUE",
+        ),
+        ApiSchemaTable.__table_args__,
+    )
+
     opportunity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
+        UUID,
+        ForeignKey(Opportunity.opportunity_id, ondelete="CASCADE"),
+        primary_key=True,
+        index=True,
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
     is_loaded_to_search: Mapped[bool | None]
     is_loaded_to_version_table: Mapped[bool | None] = mapped_column(index=True)
+
+
+class OpportunityIndexDeleteQueue(ApiSchemaTable, TimestampMixin):
+    """Opportunities that were deleted and still need to be removed from the search index.
+
+    Rows are inserted in the same transaction that deletes the opportunity, so there is
+    deliberately no foreign key to opportunity - the referenced row is gone by commit time.
+    """
+
+    __tablename__ = "opportunity_index_delete_queue"
+
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
 
 
 class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):

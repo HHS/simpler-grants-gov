@@ -7,14 +7,6 @@ import { FormFields } from "src/components/apply-form/FormFields";
 
 const mockMergeAllOf = jest.fn();
 
-// useAttachmentDelete is used in file input widgets, included through the WidgetRenderer import
-// those widgets use the hook to make API calls using a server action so the hook needs to be mocked
-jest.mock("src/hooks/useAttachmentDelete", () => ({
-  useAttachmentDelete: () => ({
-    deleteAttachment: () => {},
-  }),
-}));
-
 jest.mock("json-schema-merge-allof", () => ({
   __esModule: true,
   default: (...args: unknown[]) => mockMergeAllOf(...args) as unknown,
@@ -256,6 +248,104 @@ describe("buildFormTreeRecursive", () => {
 
     expect(screen.getByTestId("section--field1")).toBeInTheDocument();
     expect(screen.getByTestId("section--field2")).toBeInTheDocument();
+  });
+
+  it("should render a top-level text node as static text", () => {
+    const schema: RJSFSchema = {
+      type: "object",
+      properties: {
+        name: { type: "string", title: "Name" },
+      },
+    };
+
+    const uiSchema: UiSchema = [
+      {
+        type: "text",
+        name: "intro",
+        content: "Please fill out the fields below.",
+      },
+      { type: "field", definition: "/properties/name" },
+    ];
+
+    render(
+      <FormFields
+        errors={null}
+        formData={{ name: "John" }}
+        schema={schema}
+        uiSchema={uiSchema}
+      />,
+    );
+
+    expect(
+      screen.getByText("Please fill out the fields below."),
+    ).toBeInTheDocument();
+  });
+
+  it("should render a section's text node exactly once, in place among the sections other children", () => {
+    const schema: RJSFSchema = {
+      type: "object",
+      properties: {
+        application_certification: { type: "boolean", title: "** I Agree" },
+        authorized_representative_title: { type: "string", title: "Title" },
+      },
+    };
+
+    const uiSchema: UiSchema = [
+      {
+        type: "section",
+        name: "authorized_representative",
+        label: "9. Authorized Representative",
+        children: [
+          {
+            type: "field",
+            definition: "/properties/application_certification",
+          },
+          {
+            type: "text",
+            name: "application_certification_note",
+            content: "This is a footnote about the certification.",
+          },
+          {
+            type: "field",
+            definition: "/properties/authorized_representative_title",
+          },
+        ],
+      },
+    ];
+
+    render(
+      <FormFields
+        errors={null}
+        formData={{ application_certification: true }}
+        schema={schema}
+        uiSchema={uiSchema}
+      />,
+    );
+
+    // Only rendered once - not duplicated outside the section as well.
+    expect(
+      screen.getAllByText("This is a footnote about the certification."),
+    ).toHaveLength(1);
+
+    const fieldSet = screen.getByTestId("fieldset");
+    const checkbox = screen.getByRole("checkbox", { name: "** I Agree" });
+    const note = screen.getByText(
+      "This is a footnote about the certification.",
+    );
+    const titleInput = screen.getByTestId("authorized_representative_title");
+
+    // The footnote renders inside the section, after the checkbox and before
+    // the following field.
+    expect(fieldSet).toContainElement(note);
+    // The footnote should appear after the checkbox
+    expect(
+      checkbox.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    // The footnote should appear before the following field
+    expect(
+      note.compareDocumentPosition(titleInput) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("should render a Table multiField widget inside a section", () => {

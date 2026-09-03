@@ -37,6 +37,44 @@ describe("AgencyContact", () => {
       expect(screen.getByText("emailAddress")).toBeInTheDocument();
       expect(screen.getByText("phoneNumber")).toBeInTheDocument();
     });
+
+    it("populates form fields from contactInfo", () => {
+      render(
+        <AgencyContact contactInfo="John Doe | Manager | john@example.com | 555-0100" />,
+      );
+
+      expect(screen.getByRole("textbox", { name: /fullname/i })).toHaveValue(
+        "John Doe",
+      );
+      expect(screen.getByRole("textbox", { name: /persontitle/i })).toHaveValue(
+        "Manager",
+      );
+      expect(
+        screen.getByRole("textbox", { name: /emailaddress/i }),
+      ).toHaveValue("john@example.com");
+      expect(screen.getByRole("textbox", { name: /phonenumber/i })).toHaveValue(
+        "555-0100",
+      );
+    });
+
+    it("leaves the optional title empty when contactInfo has three values", () => {
+      render(
+        <AgencyContact contactInfo="John Doe | john@example.com | 555-0100" />,
+      );
+
+      expect(screen.getByRole("textbox", { name: /fullname/i })).toHaveValue(
+        "John Doe",
+      );
+      expect(screen.getByRole("textbox", { name: /persontitle/i })).toHaveValue(
+        "",
+      );
+      expect(
+        screen.getByRole("textbox", { name: /emailaddress/i }),
+      ).toHaveValue("john@example.com");
+      expect(screen.getByRole("textbox", { name: /phonenumber/i })).toHaveValue(
+        "555-0100",
+      );
+    });
   });
 
   describe("email validation", () => {
@@ -89,6 +127,51 @@ describe("AgencyContact", () => {
       fireEvent.blur(emailInput);
       expect(screen.queryByText("error.requiredEmail")).not.toBeInTheDocument();
       expect(screen.queryByText("error.invalidEmail")).not.toBeInTheDocument();
+    });
+
+    it("accepts a period in the email local part", () => {
+      render(<AgencyContact />);
+
+      const emailInput = screen.getByRole("textbox", { name: /emailaddress/i });
+      fireEvent.change(emailInput, { target: { value: "john.doe@gmail.com" } });
+      fireEvent.blur(emailInput);
+
+      expect(screen.queryByText("error.requiredEmail")).not.toBeInTheDocument();
+      expect(screen.queryByText("error.invalidEmail")).not.toBeInTheDocument();
+    });
+
+    it("rejects invalid period placement in the email local part", () => {
+      render(<AgencyContact />);
+
+      const emailInput = screen.getByRole("textbox", { name: /emailaddress/i });
+      fireEvent.change(emailInput, {
+        target: { value: "john..doe@gmail.com" },
+      });
+      fireEvent.blur(emailInput);
+
+      expect(screen.getByText("error.invalidEmail")).toBeInTheDocument();
+    });
+  });
+
+  describe("pipe character keydown handling", () => {
+    it.each([
+      ["full name", /fullname/i],
+      ["title", /persontitle/i],
+      ["email", /emailaddress/i],
+    ])("prevents the pipe character in the %s field", (_, label) => {
+      render(<AgencyContact />);
+
+      const input = screen.getByRole("textbox", { name: label });
+
+      expect(fireEvent.keyDown(input, { key: "|" })).toBe(false);
+    });
+
+    it("allows regular character key presses", () => {
+      render(<AgencyContact />);
+
+      const nameInput = screen.getByRole("textbox", { name: /fullname/i });
+
+      expect(fireEvent.keyDown(nameInput, { key: "A" })).toBe(true);
     });
   });
 

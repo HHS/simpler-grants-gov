@@ -7,6 +7,7 @@ import {
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getForms } from "src/services/fetch/fetchers/allFormsFetcher";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -22,6 +23,10 @@ type PageProps = {
 };
 
 export const dynamic = "force-dynamic";
+
+// We are temporarily removing the SF-424 Short form, pending implementation of form libraries
+// If any other forms need to be blocked, add them to this array
+const blockedForms = ["cf355a4d-d840-43fd-a78f-729edf41ab4c"];
 
 const ButtonSaveAndExit = () => {
   const t = useTranslations("OpportunityCompetition");
@@ -41,6 +46,9 @@ const ButtonSaveAndExit = () => {
 async function OpportunityCompetitionPage({ params }: PageProps) {
   const { id, locale } = await params;
   const forms = await getForms();
+  forms.data = forms.data.filter((form) => {
+    return !blockedForms.includes(form.form_id);
+  });
   const t = await getTranslations({
     locale,
     namespace: "OpportunityCompetition",
@@ -65,9 +73,9 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
   }
 
   // NOTE: Currently we are only supporting a single competition
-  let competitionId: string = "";
-  if (opportunityData.competitions?.[0]?.competition_id) {
-    competitionId = opportunityData.competitions[0].competition_id;
+  let competition: Competition | undefined = undefined;
+  if (opportunityData.competitions?.[0]) {
+    competition = opportunityData.competitions[0];
   }
 
   const navigationItems = [
@@ -86,6 +94,10 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
     {
       text: t("sectionAgencyContact.header"),
       href: "agency-contact",
+    },
+    {
+      text: t("sectionApplicationInstructions.header"),
+      href: "application-instructions",
     },
     {
       text: t("sectionRequiredForms.header"),
@@ -118,7 +130,7 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
           <section className="order-2 width-full maxw-tablet-xl padding-top-4">
             <CompetitionForm
               opportunityId={id}
-              competitionId={competitionId}
+              competition={competition}
               forms={forms.data}
             />
           </section>

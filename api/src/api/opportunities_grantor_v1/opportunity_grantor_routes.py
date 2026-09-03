@@ -23,16 +23,16 @@ from src.services.opportunities_grantor_v1.get_opportunity_list import (
     get_opportunity_list_for_user,
 )
 from src.services.opportunities_grantor_v1.list_opportunity_audit import list_opportunity_audit
+from src.services.opportunities_grantor_v1.opportunity_attachment_from_pending_file import (
+    create_opportunity_attachment_from_pending_file,
+)
 from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
 from src.services.opportunities_grantor_v1.opportunity_summaries import (
     create_opportunity_summary,
     update_opportunity_summary,
 )
 from src.services.opportunities_grantor_v1.opportunity_update import update_opportunity
-from src.services.opportunities_grantor_v1.opportunity_upload import (
-    delete_opportunity_attachment,
-    upload_opportunity_attachment,
-)
+from src.services.opportunities_grantor_v1.opportunity_upload import delete_opportunity_attachment
 from src.services.opportunities_grantor_v1.publish_opportunity import publish_opportunity
 
 logger = logging.getLogger(__name__)
@@ -215,18 +215,19 @@ def opportunity_summary_update(
 
 @opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/attachments")
 @opportunity_grantor_blueprint.input(
-    opportunity_grantor_schemas.OpportunityUploadAttachmentRequestV1Schema(), location="files"
+    opportunity_grantor_schemas.OpportunityAttachmentCreateFromPendingFileRequestV1Schema(),
+    location="json",
 )
 @opportunity_grantor_blueprint.output(
-    opportunity_grantor_schemas.OpportunityUploadAttachmentResponseV1Schema()
+    opportunity_grantor_schemas.OpportunityAttachmentCreateFromPendingFileResponseV1Schema()
 )
 @opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
-@opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
+@opportunity_grantor_blueprint.doc(responses=[200, 401, 403, 404, 422])
 @flask_db.with_db_session()
-def opportunity_upload_attachments(
-    db_session: db.Session, opportunity_id: UUID, files_data: dict
+def opportunity_attachment_create(
+    db_session: db.Session, opportunity_id: UUID, json_data: dict
 ) -> response.ApiResponse:
-    """Upload an attachment to an opportunity"""
+    """Create an opportunity attachment from a pending (virus-scanned) file"""
     add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
     logger.info("POST /v1/grantors/opportunities/:opportunity_id/attachments")
 
@@ -234,16 +235,14 @@ def opportunity_upload_attachments(
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
-        file_description = files_data.get("file_description", "")
-
-        attachment_id = upload_opportunity_attachment(
-            db_session, user, opportunity_id, files_data["file_attachment"], file_description
+        attachment = create_opportunity_attachment_from_pending_file(
+            db_session=db_session,
+            user=user,
+            opportunity_id=opportunity_id,
+            pending_file_id=json_data["pending_file_id"],
         )
 
-    return response.ApiResponse(
-        message="Attachment uploaded successfully",
-        data={"opportunity_attachment_id": attachment_id, "file_description": file_description},
-    )
+    return response.ApiResponse(message="Success", data=attachment)
 
 
 @opportunity_grantor_blueprint.delete(
@@ -354,7 +353,7 @@ def competition_update(
     "/opportunities/<uuid:opportunity_id>/competitions/<uuid:competition_id>/instructions"
 )
 @opportunity_grantor_blueprint.input(
-    opportunity_grantor_schemas.CompetitionInstructionUploadRequestV1Schema(), location="files"
+    opportunity_grantor_schemas.CompetitionInstructionUploadRequestV1Schema(), location="json"
 )
 @opportunity_grantor_blueprint.output(
     opportunity_grantor_schemas.CompetitionInstructionUploadResponseV1Schema()
@@ -363,9 +362,9 @@ def competition_update(
 @opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
 @flask_db.with_db_session()
 def competition_instruction_upload(
-    db_session: db.Session, opportunity_id: UUID, competition_id: UUID, files_data: dict
+    db_session: db.Session, opportunity_id: UUID, competition_id: UUID, json_data: dict
 ) -> response.ApiResponse:
-    """Upload an instruction file to a competition"""
+    """Upload an instruction file to a competition from a pending (virus-scanned) file"""
     add_extra_data_to_current_request_logs(
         {"opportunity_id": opportunity_id, "competition_id": competition_id}
     )
@@ -377,13 +376,13 @@ def competition_instruction_upload(
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
-        instruction_id = upload_competition_instruction(
-            db_session, user, opportunity_id, competition_id, files_data["file_attachment"]
+        instruction = upload_competition_instruction(
+            db_session, user, opportunity_id, competition_id, json_data["pending_file_id"]
         )
 
     return response.ApiResponse(
         message="Instruction uploaded successfully",
-        data={"competition_instruction_id": instruction_id},
+        data=instruction,
     )
 
 

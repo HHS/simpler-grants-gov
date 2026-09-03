@@ -1,0 +1,87 @@
+{
+  "name": "Deliverable - Burnup Points",
+  "display": "area",
+  "visualization_settings": {
+    "graph.dimensions": [
+      "issue_day"
+    ],
+    "series_settings": {
+      "total_scope": {
+        "color": "#88BF4D"
+      },
+      "total_closed": {
+        "color": "#A989C5",
+        "line.marker_enabled": false
+      },
+      "total_remaining": {
+        "line.marker_enabled": false,
+        "color": "#88BF4D"
+      },
+      "total_completed": {
+        "color": "#A989C5"
+      }
+    },
+    "graph.x_axis.scale": "timeseries",
+    "column_settings": {
+      "[\"name\",\"issue_day\"]": {
+        "date_abbreviate": true
+      }
+    },
+    "graph.metrics": [
+      "total_scope",
+      "total_completed"
+    ]
+  },
+  "template_tags": {
+    "deliverable_title": {
+      "id": "dbcb297e-e7e8-4b8c-bcb4-4f2d0f2126c2",
+      "display-name": "Deliverable Title",
+      "dimension": [
+        "field",
+        246,
+        {
+          "base-type": "type/Text",
+          "effective-type": "type/Text"
+        }
+      ],
+      "widget-type": "string/=",
+      "type": "dimension",
+      "name": "deliverable_title",
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_deliverable",
+        "column": "title"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "slug": "deliverable_title",
+      "values_query_type": "list",
+      "name": "Deliverable Title",
+      "isMultiSelect": true,
+      "type": "string/=",
+      "values_source_type": "card",
+      "id": "dbcb297e-e7e8-4b8c-bcb4-4f2d0f2126c2",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "deliverable_title"
+        ]
+      ],
+      "values_source_config": {
+        "card_id": 205,
+        "value_field": [
+          "field",
+          "title",
+          {
+            "base-type": "type/Text"
+          }
+        ]
+      },
+      "required": true
+    }
+  ]
+}
