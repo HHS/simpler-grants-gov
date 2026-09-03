@@ -102,7 +102,7 @@ class LoadOpportunitiesToIndex(Task):
         self.search_client.cleanup_old_indices(self.config.index_prefix, [self.index_name])
 
     def incremental_refresh(self) -> None:
-        """Re-index only opportunities whose change-audit record is not yet loaded.
+        """Re-index only opportunities that have changed since the last run.
 
         Raises RuntimeError if the search alias does not exist yet — a full refresh
         must run first to create the index and wire up the alias.

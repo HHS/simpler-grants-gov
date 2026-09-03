@@ -78,8 +78,7 @@ class TransformOpportunity(AbstractTransformSubTask):
 
         if source_opportunity.is_deleted:
             # Queue the opportunity for removal from the search index before the DB row
-            # is deleted. Both writes are in the same SQLAlchemy session (same transaction)
-            # so either both commit or neither does.
+            # is deleted.
             if target_opportunity is not None:
                 self.db_session.add(
                     OpportunityIndexDeleteQueue(opportunity_id=target_opportunity.opportunity_id)

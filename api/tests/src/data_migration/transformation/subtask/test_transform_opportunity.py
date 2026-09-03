@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 from grants_shared.util import datetime_util, file_util
+from sqlalchemy import delete as sa_delete
 from sqlalchemy import select, update
 
 import src.data_migration.transformation.transform_constants as transform_constants
@@ -393,8 +394,10 @@ class TestTransformOpportunityDeleteQueue(BaseTransformTestClass):
         )
         assert target is not None
         opportunity_id = target.opportunity_id
+        # The SELECT above auto-begins a transaction. Commit it so run_subtask
+        # can open its own via `with db_session.begin()`.
+        db_session.commit()
 
-        db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
         transform_opportunity.run_subtask()
 
         # Opportunity is gone from DB
@@ -414,13 +417,11 @@ class TestTransformOpportunityDeleteQueue(BaseTransformTestClass):
         """If there is no existing DB row to delete, nothing is added to the queue."""
         # OpportunityIndexDeleteQueue has no FK to opportunity so truncate_opportunities
         # does not cascade-delete it. Clear it explicitly before asserting.
-        from sqlalchemy import delete as sa_delete
         db_session.execute(sa_delete(OpportunityIndexDeleteQueue))
         db_session.commit()
 
         setup_opportunity(create_existing=False, is_delete=True)
 
-        db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
         transform_opportunity.run_subtask()
 
         # No queue records should exist (nothing was deleted)
