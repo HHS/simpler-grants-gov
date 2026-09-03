@@ -1,6 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { ApplyFormMessage } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyFormMessage";
+import { FormattedFormValidationWarning } from "src/types/applyForm/types";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import RadioWidget from "src/components/apply-form/widgets/RadioWidget";
+
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+}));
 
 const WidgetProps = {
   id: "test",
@@ -56,11 +64,38 @@ describe("RadioWidget", () => {
     expect(screen.getByLabelText("Option 3")).toBeDisabled();
   });
 
-  it("exposes a focusable element with the field's id so error summary links can jump to it", () => {
-    render(<RadioWidget {...WidgetProps} />);
-    const anchorTarget = screen.getByTestId(WidgetProps.id);
-    expect(anchorTarget).toBeInTheDocument();
-    anchorTarget.focus();
-    expect(anchorTarget).toHaveFocus();
+  it("focuses the radio group when an error summary link for its field is clicked", async () => {
+    const user = userEvent.setup();
+
+    const warnings: FormattedFormValidationWarning[] = [
+      {
+        field: `$.${WidgetProps.id}`,
+        message: `'${WidgetProps.id}' is a required property`,
+        formatted: "Choose an option is required",
+        type: "required",
+        value: null,
+        htmlField: WidgetProps.id,
+        definition: `/properties/${WidgetProps.id}`,
+      },
+    ];
+
+    render(
+      <>
+        <ApplyFormMessage
+          error={false}
+          validationWarnings={warnings}
+          saved={true}
+        />
+        <RadioWidget {...WidgetProps} />
+      </>,
+    );
+
+    const link = screen.getByRole("link", {
+      name: "Choose an option is required",
+    });
+
+    await user.click(link);
+
+    expect(screen.getByTestId(WidgetProps.id)).toHaveFocus();
   });
 });

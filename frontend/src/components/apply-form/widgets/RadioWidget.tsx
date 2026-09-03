@@ -135,7 +135,14 @@ export default function RadioWidget<
   return (
     // id/tabIndex here give the error summary link a real anchor target, since
     // individual radio inputs are only addressable via their indexed ids (e.g. `${id}-0`)
-    <div id={id} tabIndex={-1} data-testid={id}>
+    <div
+      id={id}
+      tabIndex={-1}
+      data-testid={id}
+      role="radiogroup"
+      aria-labelledby={title ? `label-for-${id}` : undefined}
+      aria-describedby={error ? `error-for-${id}` : undefined}
+    >
       <FormGroup error={error} key={`form-group__radio--${id}`}>
         <DynamicFieldLabel
           idFor={id}
