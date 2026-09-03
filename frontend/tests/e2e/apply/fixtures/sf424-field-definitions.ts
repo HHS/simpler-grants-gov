@@ -223,14 +223,18 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Applicant Type Other Specify",
   },
   agency_name: {
-    testId: "agency_name",
+    // Display-only field: read-only and pre-populated by system
+    // No testId/selector - this field cannot be filled by users
+    printTestId: "agency_name",
     type: "text",
     maxLength: 60, // FORM_JSON_SCHEMA.properties.agency_name
     section: "Section 11",
     field: "Agency Name",
   },
   assistance_listing_program_title: {
-    testId: "assistance_listing_program_title",
+    // Display-only field: read-only and pre-populated by system
+    // No testId/selector - this field cannot be filled by users
+    printTestId: "assistance_listing_program_title",
     type: "text",
     maxLength: 120, // FORM_JSON_SCHEMA.properties.assistance_listing_program_title
     section: "Section 12",
