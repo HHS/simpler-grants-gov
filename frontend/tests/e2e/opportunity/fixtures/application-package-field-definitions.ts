@@ -29,7 +29,7 @@ export type ApplicationPackageFieldValueKey =
   | "whoCanApply"
   | "submissionsOpen"
   | "submissionsClose"
-  | "expectedNumberOfApplicants"
+  | "extensionPeriod"
   | "fullName"
   | "title"
   | "emailAddress"
@@ -78,24 +78,23 @@ export const APPLICATION_PACKAGE_SUBMISSION_SETUP_FIELD_DEFINITIONS: Application
 export const APPLICATION_PACKAGE_SUBMISSION_WINDOW_FIELD_DEFINITIONS: ApplicationPackagePageFieldDefinition[] =
   [
     {
-      label: "Submissions open",
+      label: "Open date",
       type: "date",
       valueKey: "submissionsOpen",
       required: false,
     },
     {
-      label: "Submissions close",
+      label: "Public close date",
       type: "date",
       valueKey: "submissionsClose",
       required: true,
     },
     {
-      label: "Expected number of applicants",
+      selector: "#grace_period",
+      label: "Extension period",
       type: "text",
-      valueKey: "expectedNumberOfApplicants",
-      required: true,
-      maxLength: 255,
-      characterLimitValidationMessage: "1 character over limit",
+      valueKey: "extensionPeriod",
+      required: false,
     },
   ];
 
