@@ -3,6 +3,7 @@ import uuid
 
 import grants_shared.adapters.db as db
 import grants_shared.util.file_util as file_util
+from grants_shared.adapters.aws import S3Config
 from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import func, select
 
@@ -11,9 +12,6 @@ from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege, SubmissionIssue
 from src.db.models.competition_models import ApplicationAttachment
 from src.db.models.user_models import User
-from src.services.applications.create_application_attachment import (
-    build_s3_application_attachment_path,
-)
 from src.services.applications.get_application import get_application
 from src.services.files.pending_file_handling_domain_specific import (
     fetch_and_validate_scan_complete_file,
@@ -102,3 +100,20 @@ def create_application_attachment_from_pending_file(
     move_pending_file_to_destination(pending_file, s3_file_location)
 
     return application_attachment
+
+
+def build_s3_application_attachment_path(
+    file_name: str, application_id: uuid.UUID, application_attachment_id: uuid.UUID
+) -> str:
+    # We store files on the draft (non-public) s3 bucket, they are never public.
+    s3_config = S3Config()
+    base_path = s3_config.draft_files_bucket_path
+
+    return file_util.join(
+        base_path,
+        "applications",
+        str(application_id),
+        "attachments",
+        str(application_attachment_id),
+        file_name,
+    )

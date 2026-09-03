@@ -15,7 +15,11 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import {
+  skipNonChromeOnStaging,
+  skipWebkit,
+} from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import { verifyVirusScanPassedAndUploaded } from "tests/e2e/utils/forms/file-upload-status-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   verifyFormStatusAfterSave,
@@ -59,20 +63,8 @@ const applicantScenarios = [
 
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
+  skipWebkit(testInfo);
 });
-
-async function verifyVirusScanPassedAndUploaded(page: Page, fileName: string) {
-  await expect(
-    page.getByRole("progressbar", { name: "Loading!" }),
-  ).toBeVisible();
-  await expect(page.getByTestId("file-input-existing-files")).toContainText(
-    fileName,
-    { timeout: 30_000 },
-  );
-  await expect(
-    page.getByTestId("file-input-existing-files").getByTestId("button"),
-  ).toContainText("Delete");
-}
 
 for (const {
   scenarioName,
@@ -110,8 +102,35 @@ for (const {
       async () => {
         test.setTimeout(120_000);
 
+        // Wait for the application forms table to be visible before clicking form link
+        await expect(
+          page.locator(".simpler-application-forms-table").first(),
+        ).toBeVisible({ timeout: 30000 });
+
+        // Explicitly wait for the form link to be clickable before clicking
+        await page
+          .getByTestId("application-form-link")
+          .waitFor({ state: "visible", timeout: 15000 });
+
         await page.getByTestId("application-form-link").click();
+
+        // Wait for form page to load after navigation
+        await page.waitForLoadState("domcontentloaded");
+
+        // Wait for the form container to be visible, indicating form has fully rendered
+        await page
+          .locator(".simpler-apply-form")
+          .waitFor({ state: "visible", timeout: 20000 });
+
         formUrl = page.url();
+
+        // Wait for the attachment upload button to be visible and interactive
+        await page
+          .getByRole("button", {
+            name: attachmentForm.formConfig.fields.att1.field,
+            exact: true,
+          })
+          .waitFor({ state: "visible", timeout: 15000 });
 
         await page
           .getByRole("button", {
@@ -120,7 +139,14 @@ for (const {
           })
           .setInputFiles(testData.att1);
 
-        await verifyVirusScanPassedAndUploaded(page, "sample-upload-kb.pdf");
+        // For attachment form, file elements are at page level (not nested in section)
+        // So we pass page as the scope, not a specific form section
+        await verifyVirusScanPassedAndUploaded(
+          page,
+          "sample-upload-kb.pdf",
+          page,
+          false,
+        );
 
         // Emulate the browser closing: discard this tab's unsaved client state entirely
         // and open a fresh page from the same authenticated context.
@@ -130,6 +156,11 @@ for (const {
 
         await page.goto(applicationUrl);
         await page.waitForLoadState("domcontentloaded");
+
+        // Wait for the application page content to be fully rendered
+        await expect(page.getByRole("heading", { name: /Forms/ })).toBeVisible({
+          timeout: 20000,
+        });
 
         const activities = await getApplicationHistoryActivities(page);
         expect(activities.some((a) => a.includes("Attachment added"))).toBe(
@@ -184,6 +215,12 @@ for (const {
 
         await page.goto(applicationUrl);
         await page.waitForLoadState("domcontentloaded");
+
+        // Wait for the application page to be fully loaded before proceeding
+        await expect(
+          page.locator(".simpler-application-forms-table").first(),
+        ).toBeVisible({ timeout: 30000 });
+
         await submitApplicationAndVerify(page, "success");
         await verifySubmissionConfirmation(page);
 

@@ -102,6 +102,11 @@ export type DefinitionPath = PropertyPath | PropertyPath[];
  *   The FieldList field name. Used to derive the base field path
  *   (e.g. $.fieldListName) for mapping validation warnings to the list.
  *
+ * hideFieldListHeading
+ *   Optional display flag for the FieldList heading.
+ *   When true, the top FieldList title is hidden, but each entry heading
+ *   still uses the `label` value (for example "Key Contact 1").
+ *
  * additionalDescribedById
  *   Optional accessibility identifier used to associate widgets rendered
  *   inside a FieldList entry with that entry's heading. This allows
@@ -143,6 +148,7 @@ export type FieldListWidgetProps = {
     title?: string;
   };
   label: string;
+  hideFieldListHeading?: boolean;
   description?: string;
   additionalDescribedById?: string;
   name: string;
@@ -315,6 +321,17 @@ export type UiSchemaTableMultiField = {
 export type UiSchemaField =
   UiSchemaBasicField | UiSchemaMultiField | UiSchemaTableMultiField;
 
+/**
+ * A standalone paragraph of static text rendered inline between other section
+ * children (e.g. a footnote that must appear after a specific field rather
+ * than as a description.
+ */
+export interface UiSchemaText {
+  type: "text";
+  name: string;
+  content: string;
+}
+
 export interface UiSchemaSection {
   type: "section";
   label: string;
@@ -331,6 +348,8 @@ export interface UiSchemaSection {
 export interface UiSchemaFieldList {
   type: "fieldList";
   label: string;
+  // Hide the top FieldList title while still using `label` for per-entry headings.
+  hideFieldListHeading?: boolean;
   minItemsHeading?: string;
   minItemsHelperText?: string;
   maxItemsHeading?: string;
@@ -341,7 +360,8 @@ export interface UiSchemaFieldList {
   children: Exclude<UiSchemaField, UiSchemaTableMultiField>[];
 }
 
-export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;
+export type UiSchemaNode =
+  UiSchemaField | UiSchemaSection | UiSchemaFieldList | UiSchemaText;
 
 export type UiSchema = UiSchemaNode[];
 

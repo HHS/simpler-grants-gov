@@ -398,6 +398,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   const {
     id,
     label,
+    hideFieldListHeading,
     description,
     name,
     minItems,
@@ -578,9 +579,10 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   return (
     <div
       id={id}
+      aria-label={label || undefined}
       className="field-list-widget border border-base-lighter radius-md padding-2 margin-y-2"
     >
-      {label ? <h3>{label}</h3> : null}
+      {!hideFieldListHeading && label ? <h3>{label}</h3> : null}
       {description ? <p>{description}</p> : null}
 
       {groupErrors.length > 0 ? (
