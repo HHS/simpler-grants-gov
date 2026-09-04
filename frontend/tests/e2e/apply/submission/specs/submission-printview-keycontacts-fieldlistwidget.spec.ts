@@ -136,16 +136,21 @@ test.describe("Key Contacts FieldList", () => {
         );
 
         /*
-         * Wait for form to fully hydrate before attempting to click add button.
-         * On mobile, additional rendering time may be needed for new elements to appear.
+         * Save the first entry. The "Add" button may only appear after
+         * the first entry is saved on some form implementations.
          */
-        await page.waitForLoadState("networkidle");
+        await clickSaveButton(
+          page,
+          keyContactsForm.formConfig.saveButtonTestId,
+        );
 
         /*
-         * Now add a second Key Contact entry via the add button.
+         * Wait for save to complete, then look for the "Add key contact" button.
          * On mobile, the button may be below the fold after filling the first entry,
          * so scroll it into view before clicking.
          */
+        await page.waitForLoadState("networkidle");
+
         const addButton = page.getByRole("button", {
           name: /add.*key contact/i,
         });
