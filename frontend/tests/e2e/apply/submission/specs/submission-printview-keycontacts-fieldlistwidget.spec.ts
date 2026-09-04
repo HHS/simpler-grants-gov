@@ -17,10 +17,9 @@ import {
   skipNonChromeOnStaging,
   skipWebkit,
 } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
-import {
-  fillForm,
-  fillFormPartial,
-} from "tests/e2e/utils/forms/general-forms-filling";
+import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
+import { fillFormPartial } from "tests/e2e/utils/forms/general-forms-filling";
+import { clickSaveButton } from "tests/e2e/utils/forms/save-form-utils";
 import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
@@ -104,20 +103,36 @@ test.describe("Key Contacts FieldList", () => {
         const applicantOrganizationName = `FieldList Organization ${suffix}`;
 
         /*
-         * Use fillForm to navigate to the Key Contacts form and fill the first entry.
-         * Combine both entries' field data - fillForm will fill available fields.
+         * Navigate to the Key Contacts form using openForm.
          */
+        const formMatcher = /key contacts/i;
+        const opened = await openForm(page, formMatcher);
+        if (!opened) {
+          throw new Error("Could not open Key Contacts form");
+        }
+
+        /*
+         * Wait for the form to be ready, then fill the first entry.
+         */
+        await page
+          .getByText(formMatcher)
+          .first()
+          .waitFor({ state: "visible", timeout: 35000 });
+        await page
+          .locator("form, fieldset")
+          .first()
+          .waitFor({ state: "attached", timeout: 15000 });
+
         const initialTestData = {
           applicant_organization_name: applicantOrganizationName,
           ...firstEntry,
         };
 
-        await fillForm(
+        await fillFormPartial(
           testInfo,
           page,
-          keyContactsForm.formConfig,
+          keyContactsForm.formConfig.fields,
           initialTestData,
-          false,
         );
 
         /*
@@ -141,7 +156,10 @@ test.describe("Key Contacts FieldList", () => {
         /*
          * Save the form.
          */
-        await page.getByRole("button", { name: /save/i }).click();
+        await clickSaveButton(
+          page,
+          keyContactsForm.formConfig.saveButtonTestId,
+        );
 
         /*
          * Verify the form is complete after saving.
@@ -158,7 +176,19 @@ test.describe("Key Contacts FieldList", () => {
         /*
          * Re-open the form to verify persistence.
          */
-        await fillForm(testInfo, page, keyContactsForm.formConfig, {}, false);
+        const reopened = await openForm(page, formMatcher);
+        if (!reopened) {
+          throw new Error("Could not re-open Key Contacts form");
+        }
+
+        await page
+          .getByText(formMatcher)
+          .first()
+          .waitFor({ state: "visible", timeout: 35000 });
+        await page
+          .locator("form, fieldset")
+          .first()
+          .waitFor({ state: "attached", timeout: 15000 });
 
         await expect(
           page.getByTestId("key_contacts[1]--project_role"),
@@ -167,13 +197,15 @@ test.describe("Key Contacts FieldList", () => {
          * Verify values from the first FieldList entry persisted.
          */
         for (const [fieldId, value] of Object.entries(firstEntry)) {
-          await expect(page.getByTestId(fieldId)).toHaveValue(value);
+          const stringValue = String(value);
+          await expect(page.getByTestId(fieldId)).toHaveValue(stringValue);
         }
         /*
          * Verify values from the second FieldList entry persisted.
          */
         for (const [fieldId, value] of Object.entries(secondEntry)) {
-          await expect(page.getByTestId(fieldId)).toHaveValue(value);
+          const stringValue = String(value);
+          await expect(page.getByTestId(fieldId)).toHaveValue(stringValue);
         }
         /*
          * Capture the print-view URL before leaving the form.
