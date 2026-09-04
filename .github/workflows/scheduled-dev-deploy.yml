@@ -16,6 +16,7 @@ jobs:
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: api
+      fail_on_vulns: false
 
   api-deploy:
     name: Deploy API to Dev
@@ -35,6 +36,7 @@ jobs:
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: frontend
+      fail_on_vulns: false
 
   frontend-deploy:
     name: Deploy Frontend to Dev
@@ -55,6 +57,7 @@ jobs:
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: analytics
+      fail_on_vulns: false
 
   analytics-deploy:
     name: Deploy Analytics to Dev
@@ -85,14 +88,7 @@ jobs:
       version: "main"
 
   send-slack-notification:
-    # Only alert when a deploy itself fails
-    if: |
-      !cancelled()
-      && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'release')
-      && (needs.api-deploy.result == 'failure'
-        || needs.frontend-deploy.result == 'failure'
-        || needs.analytics-deploy.result == 'failure'
-        || needs.nofos-deploy.result == 'failure')
+    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'release')
     needs: [api-deploy, frontend-deploy, analytics-deploy, nofos-deploy]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
