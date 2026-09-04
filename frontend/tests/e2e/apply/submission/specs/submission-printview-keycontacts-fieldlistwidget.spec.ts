@@ -179,9 +179,16 @@ test.describe("Key Contacts FieldList", () => {
         );
 
         /*
+         * Wait for save to complete before checking form status.
+         */
+        await page.waitForLoadState("networkidle");
+
+        /*
          * Verify the form is complete after saving.
          */
-        await expect(page.getByText(/complete/i).first()).toBeVisible();
+        await expect(page.getByText(/complete/i).first()).toBeVisible({
+          timeout: 10000,
+        });
 
         /*
          * Navigate away from the form and return to verify that both
