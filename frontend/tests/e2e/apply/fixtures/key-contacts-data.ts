@@ -1,15 +1,6 @@
-import {
-  fieldDefinitionsKeyContacts,
-  type fieldDefinitionsKeyContacts,
-} from "tests/e2e/apply/fixtures/key-contacts-field-definitions";
-import type {
-  PrintViewFormData,
-  PrintViewFormData,
-} from "tests/e2e/utils/submission/opportunity-print-view.types";
-import {
-  toHappyPathSuffix,
-  toHappyPathSuffix,
-} from "tests/e2e/utils/submission/print-view-utils";
+import type { fieldDefinitionsKeyContacts } from "tests/e2e/apply/fixtures/key-contacts-field-definitions";
+import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
+import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
 
 /**
  * Required-fields-only happy-path test data for the Key Contacts form.

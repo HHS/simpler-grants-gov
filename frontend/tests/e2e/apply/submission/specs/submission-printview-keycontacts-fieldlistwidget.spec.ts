@@ -18,7 +18,6 @@ import {
   skipWebkit,
 } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import {
-  fillField,
   fillForm,
   fillFormPartial,
 } from "tests/e2e/utils/forms/general-forms-filling";
