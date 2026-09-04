@@ -137,11 +137,17 @@ test.describe("Key Contacts FieldList", () => {
 
         /*
          * Now add a second Key Contact entry via the add button.
+         * On mobile, scroll to ensure the button is visible before clicking.
          */
-        await page.getByRole("button", { name: /add.*key contact/i }).click();
+        const addButton = page.getByRole("button", {
+          name: /add.*key contact/i,
+        });
+        await addButton.waitFor({ state: "visible", timeout: 30000 });
+        await addButton.scrollIntoViewIfNeeded();
+        await addButton.click();
         await expect(
           page.getByTestId("key_contacts[1]--project_role"),
-        ).toBeVisible();
+        ).toBeVisible({ timeout: 30000 });
 
         /*
          * Fill the second FieldList entry using fillFormPartial.
