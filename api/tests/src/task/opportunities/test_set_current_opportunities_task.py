@@ -3,11 +3,14 @@ from datetime import date, timedelta
 
 import pytest
 from grants_shared.util.datetime_util import get_now_us_eastern_date
-
 from sqlalchemy import select
 
 from src.constants.lookup_constants import OpportunityStatus
-from src.db.models.opportunity_models import Opportunity, OpportunityIndexDeleteQueue, OpportunitySummary
+from src.db.models.opportunity_models import (
+    Opportunity,
+    OpportunityIndexDeleteQueue,
+    OpportunitySummary,
+)
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (

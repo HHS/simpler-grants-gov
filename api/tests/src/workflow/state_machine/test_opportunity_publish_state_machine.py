@@ -5,7 +5,11 @@ from freezegun import freeze_time
 from sqlalchemy import select
 
 from src.constants.lookup_constants import OpportunityStatus, WorkflowType
-from src.db.models.opportunity_models import OpportunityChangeAudit, OpportunityIndexDeleteQueue, OpportunityVersion
+from src.db.models.opportunity_models import (
+    OpportunityChangeAudit,
+    OpportunityIndexDeleteQueue,
+    OpportunityVersion,
+)
 from src.workflow.handler.event_handler import EventHandler
 from src.workflow.registry.workflow_client_registry import get_workflow_client_registry
 from src.workflow.state_machine.opportunity_publish_state_machine import OpportunityPublishState
