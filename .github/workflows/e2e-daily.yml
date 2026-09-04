@@ -4,7 +4,7 @@ on:
     # Run every day at (6/7am Eastern) before the start of the workday
     - cron: "0 11 * * *"
 
-workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   daily-e2e-tests-deployed:
