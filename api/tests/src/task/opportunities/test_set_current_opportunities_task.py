@@ -4,8 +4,10 @@ from datetime import date, timedelta
 import pytest
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 
+from sqlalchemy import select
+
 from src.constants.lookup_constants import OpportunityStatus
-from src.db.models.opportunity_models import Opportunity, OpportunitySummary
+from src.db.models.opportunity_models import Opportunity, OpportunityIndexDeleteQueue, OpportunitySummary
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
@@ -465,6 +467,89 @@ class TestSetCurrentOpportunitiesTaskRun(BaseTestClass):
         assert metrics[set_current_opportunities_task.Metrics.OPPORTUNITY_COUNT] == 5
         assert metrics[set_current_opportunities_task.Metrics.UNMODIFIED_OPPORTUNITY_COUNT] == 2
         assert metrics[set_current_opportunities_task.Metrics.MODIFIED_OPPORTUNITY_COUNT] == 3
+
+
+class TestDeleteQueueInsertion(BaseTestClass):
+    """Verify SetCurrentOpportunitiesTask queues opportunities for search removal
+    when their current_opportunity_summary is dropped."""
+
+    @pytest.fixture(scope="class", autouse=True)
+    def shared_setup(self, truncate_opportunities, enable_factory_create):
+        pass
+
+    @pytest.fixture
+    def set_current_opportunities_task(self, db_session):
+        return SetCurrentOpportunitiesTask(db_session, CURRENT_DATE)
+
+    def test_becomes_draft_queues_for_search_removal(
+        self, set_current_opportunities_task, db_session
+    ):
+        """Opportunity reverts to draft → current summary dropped → queued for index removal."""
+        container = OpportunityContainer(is_draft=True).with_summary(
+            is_forecast=False,
+            post_date=YESTERDAY,
+            close_date=NEXT_MONTH,
+            archive_date=NEXT_YEAR,
+            is_already_current=True,
+            is_expected_current=False,
+        )
+
+        set_current_opportunities_task._process_opportunity(container.opportunity)
+        db_session.commit()
+
+        entry = db_session.scalar(
+            select(OpportunityIndexDeleteQueue).where(
+                OpportunityIndexDeleteQueue.opportunity_id == container.opportunity.opportunity_id
+            )
+        )
+        assert entry is not None
+
+    def test_post_date_moved_to_future_queues_for_search_removal(
+        self, set_current_opportunities_task, db_session
+    ):
+        """Post date moves to the future → can_summary_be_public() False → current summary
+        dropped → queued for index removal."""
+        container = OpportunityContainer().with_summary(
+            is_forecast=False,
+            post_date=TOMORROW,
+            close_date=NEXT_MONTH,
+            archive_date=NEXT_YEAR,
+            is_already_current=True,
+            is_expected_current=False,
+        )
+
+        set_current_opportunities_task._process_opportunity(container.opportunity)
+        db_session.commit()
+
+        entry = db_session.scalar(
+            select(OpportunityIndexDeleteQueue).where(
+                OpportunityIndexDeleteQueue.opportunity_id == container.opportunity.opportunity_id
+            )
+        )
+        assert entry is not None
+
+    def test_no_existing_current_summary_does_not_queue(
+        self, set_current_opportunities_task, db_session
+    ):
+        """If there was never a current_opportunity_summary, nothing is added to the delete queue."""
+        container = OpportunityContainer(is_draft=True).with_summary(
+            is_forecast=False,
+            post_date=YESTERDAY,
+            close_date=NEXT_MONTH,
+            archive_date=NEXT_YEAR,
+            is_expected_current=False,
+            # no is_already_current — opportunity was never in the index
+        )
+
+        set_current_opportunities_task._process_opportunity(container.opportunity)
+        db_session.commit()
+
+        entry = db_session.scalar(
+            select(OpportunityIndexDeleteQueue).where(
+                OpportunityIndexDeleteQueue.opportunity_id == container.opportunity.opportunity_id
+            )
+        )
+        assert entry is None
 
 
 def test_via_cli(cli_runner, db_session, enable_factory_create):

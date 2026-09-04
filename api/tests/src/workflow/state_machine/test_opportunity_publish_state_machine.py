@@ -5,12 +5,13 @@ from freezegun import freeze_time
 from sqlalchemy import select
 
 from src.constants.lookup_constants import OpportunityStatus, WorkflowType
-from src.db.models.opportunity_models import OpportunityChangeAudit, OpportunityVersion
+from src.db.models.opportunity_models import OpportunityChangeAudit, OpportunityIndexDeleteQueue, OpportunityVersion
 from src.workflow.handler.event_handler import EventHandler
 from src.workflow.registry.workflow_client_registry import get_workflow_client_registry
 from src.workflow.state_machine.opportunity_publish_state_machine import OpportunityPublishState
 from src.workflow.workflow_errors import InvalidEventError
 from tests.src.db.models.factories import (
+    CurrentOpportunitySummaryFactory,
     OpportunityChangeAuditFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
@@ -301,6 +302,56 @@ def test_opportunity_publish_search_failure_leaves_not_loaded(
     db_session.expire_all()
     change_audit = _get_change_audit(db_session, opportunity.opportunity_id)
     assert change_audit.is_loaded_to_search is False
+
+
+@freeze_time("2026-03-25 12:00:00", tz_offset=0)
+def test_opportunity_publish_queues_for_search_removal_when_summary_dropped(
+    db_session, enable_factory_create, search_client, opportunity_index_alias
+):
+    """When the publish state machine drops an existing current_opportunity_summary
+    (e.g. post_date is in the future), it queues the opportunity for index removal.
+
+    Covers the case where an opportunity was previously searchable but its summary
+    can no longer be made public — e.g. post_date was moved to a future date before
+    the publish workflow re-runs.
+    """
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create(is_draft=True, no_current_summary=True)
+
+    # Create a summary with a future post_date — can_summary_be_public() will return False
+    summary = OpportunitySummaryFactory.create(
+        opportunity=opportunity,
+        post_date=date(2026, 4, 1),
+        close_date=date(2026, 6, 1),
+        archive_date=date(2027, 1, 1),
+        is_forecast=False,
+    )
+
+    # Simulate a stale current_opportunity_summary (opportunity was previously in search)
+    CurrentOpportunitySummaryFactory.create(opportunity=opportunity, opportunity_summary=summary)
+
+    sqs_container = build_start_workflow_event(
+        workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
+        user=user,
+        entity=opportunity,
+    )
+
+    with db_session.begin():
+        EventHandler(db_session, sqs_container).process()
+
+    db_session.expire_all()
+    db_session.refresh(opportunity)
+
+    # Post date is in the future → no current summary after publish
+    assert opportunity.current_opportunity_summary is None
+
+    # Opportunity should be queued for removal from the search index
+    entry = db_session.scalar(
+        select(OpportunityIndexDeleteQueue).where(
+            OpportunityIndexDeleteQueue.opportunity_id == opportunity.opportunity_id
+        )
+    )
+    assert entry is not None
 
 
 def test_opportunity_publish_mark_loaded_failure_is_isolated(
