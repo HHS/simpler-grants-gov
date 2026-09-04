@@ -20,6 +20,7 @@ import {
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { fillFormPartial } from "tests/e2e/utils/forms/general-forms-filling";
 import { clickSaveButton } from "tests/e2e/utils/forms/save-form-utils";
+import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
@@ -179,16 +180,9 @@ test.describe("Key Contacts FieldList", () => {
         );
 
         /*
-         * Wait for save to complete before checking form status.
-         */
-        await page.waitForLoadState("networkidle");
-
-        /*
          * Verify the form is complete after saving.
          */
-        await expect(page.getByText(/complete/i).first()).toBeVisible({
-          timeout: 10000,
-        });
+        await verifyFormStatusAfterSave(page, "complete");
 
         /*
          * Navigate away from the form and return to verify that both
