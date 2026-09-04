@@ -48,34 +48,6 @@ export const buildKeyContactsRequiredFieldsHappyPathTestData = (
 };
 
 /**
- * Required-fields-only happy-path test data for the Key Contacts form.
- *
- * By default this populates the first FieldList entry:
- * key_contacts[0]
- *
- * The index can be provided when the test needs to populate another
- * FieldList entry.
- */
-export const buildKeyContactsRequiredFieldsHappyPathTestData = (
-  suffix: number,
-  index = 0,
-): Record<string, string> => {
-  const shortSuffix = toHappyPathSuffix(suffix);
-  return {
-    applicant_organization_name: `Org ${shortSuffix}`,
-    [`key_contacts[${index}]--project_role`]: `Role ${shortSuffix}`,
-    [`key_contacts[${index}]--name--first_name`]: `First${shortSuffix}`,
-    [`key_contacts[${index}]--name--last_name`]: `Last${shortSuffix}`,
-    [`key_contacts[${index}]--address--street1`]: `${shortSuffix} Main St`,
-    [`key_contacts[${index}]--address--city`]: `City ${shortSuffix}`,
-    [`key_contacts[${index}]--address--state`]: "AL: Alabama",
-    [`key_contacts[${index}]--address--country`]: "USA: UNITED STATES",
-    [`key_contacts[${index}]--address--zip_code`]: "123456789",
-    [`key_contacts[${index}]--phone`]: "8888888888",
-    [`key_contacts[${index}]--email`]: `contact${shortSuffix}@example.com`,
-  } satisfies Partial<Record<keyof typeof fieldDefinitionsKeyContacts, string>>;
-};
-/**
  * Optional-field test data for the Key Contacts form.
  *
  * By default this populates the first FieldList entry:
