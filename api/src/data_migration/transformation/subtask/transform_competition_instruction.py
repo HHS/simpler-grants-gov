@@ -175,7 +175,10 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
             # there's no real FK from tinstructions.comp_id to tcompetition. When the competition
             # doesn't exist we flag the instruction as orphaned (mirroring transform_competition)
             # rather than erroring, so transformed_at is still set and we don't re-error forever.
-            self.increment(transform_constants.Metrics.TOTAL_RECORDS_ORPHANED)
+            self.increment(
+                transform_constants.Metrics.TOTAL_RECORDS_ORPHANED,
+                prefix=transform_constants.COMPETITION_INSTRUCTION,
+            )
             logger.info(
                 "Competition instruction is orphaned and does not connect to any competition",
                 extra=extra,
