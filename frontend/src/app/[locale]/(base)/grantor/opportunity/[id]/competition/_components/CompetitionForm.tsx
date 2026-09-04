@@ -38,16 +38,16 @@ type CompetitionFormProps = {
 };
 
 export function CompetitionForm({
-  opportunityId: _opportunityId,
+  opportunityId,
   competition,
   forms,
 }: CompetitionFormProps) {
   const t = useTranslations("OpportunityCompetition");
 
-  const _competitionId: string = competition?.competition_id || "";
+  const competitionId: string = competition?.competition_id || "";
   const existingFiles: UploadFileMetadata[] =
     competition?.competition_instructions.map((instruction) => ({
-      id: instruction.file_name,
+      id: instruction.competition_instruction_id,
       fileName: instruction.file_name,
       updatedAt: instruction.updated_at,
       downloadUrl: instruction.download_path,
@@ -97,8 +97,8 @@ export function CompetitionForm({
   // ===== Render the form =====
   return (
     <form id="opportunity-competition-form" onSubmit={handleSubmit}>
-      <input type="hidden" name="opportunityId" value={_opportunityId} />
-      <input type="hidden" name="competitionId" value={_competitionId} />
+      <input type="hidden" name="opportunityId" value={opportunityId} />
+      <input type="hidden" name="competitionId" value={competitionId} />
 
       {formState?.errorMessage ? (
         <div className="margin-top-2">
@@ -144,7 +144,11 @@ export function CompetitionForm({
                 gracePeriod={competition?.grace_period}
               />
               <AgencyContact contactInfo={competition?.contact_info} />
-              <ApplicationInstructions existingFiles={existingFiles} />
+              <ApplicationInstructions
+                opportunityId={opportunityId}
+                competitionId={competitionId}
+                existingFiles={existingFiles}
+              />
               <RequiredForms
                 alwaysRequiredForms={alwaysRequiredForms}
                 requiredForms={requiredForms}

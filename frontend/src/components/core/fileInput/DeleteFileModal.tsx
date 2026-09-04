@@ -19,6 +19,7 @@ interface Props {
   modalId: string;
   modalRef: RefObject<ModalRef | null>;
   pendingDeleteName: string | undefined;
+  confirmationMessage?: string;
 }
 
 export const DeleteFileModal = ({
@@ -27,8 +28,10 @@ export const DeleteFileModal = ({
   modalId,
   modalRef,
   pendingDeleteName,
+  confirmationMessage,
 }: Props) => {
   const t = useTranslations("FileInput.deleteModal");
+  const descriptionText = confirmationMessage ?? t("descriptionText");
   return (
     <SimplerModal
       modalId={modalId}
@@ -40,7 +43,7 @@ export const DeleteFileModal = ({
       }
       className="text-wrap"
     >
-      <p className="font-sans-2xs margin-y-4">{t("descriptionText")}</p>
+      <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
       <ModalFooter>
         <ButtonGroup>
           <Button
