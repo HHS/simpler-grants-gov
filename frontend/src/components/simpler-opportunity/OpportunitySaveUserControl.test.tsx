@@ -7,6 +7,7 @@ import { createRef } from "react";
 import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
 
 let mockUser = {};
+let mockIsSSR = false;
 
 const clientFetchMock = jest.fn();
 const getUser = () => mockUser;
@@ -29,6 +30,10 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
   }),
 }));
 
+jest.mock("src/hooks/useIsSSR", () => ({
+  useIsSSR: () => mockIsSSR,
+}));
+
 jest.mock("src/services/auth/LoginModalProvider", () => ({
   useLoginModal: () => ({
     loginModalRef: createRef(),
@@ -44,6 +49,7 @@ describe("OpportunitySaveUserControl", () => {
   afterEach(() => {
     jest.resetAllMocks();
     mockUser = {};
+    mockIsSSR = false;
   });
   it("is a function", () => {
     expect(typeof OpportunitySaveUserControl).toBe("function");
@@ -98,19 +104,68 @@ describe("OpportunitySaveUserControl", () => {
     expect(unsaveButtons).toHaveLength(1);
   });
 
-  it("adds an accessible name to the logged-out icon save control", async () => {
-    render(
-      <OpportunitySaveUserControl
-        opportunitySaved={false}
-        type="icon"
-        opportunityId="saved-id"
-      />,
-    );
+  describe("accessible name when logged out (icon type)", () => {
+    it("has an aria-label after hydration (isSSR = false)", () => {
+      mockUser = {};
+      mockIsSSR = false;
 
-    const signInButton = await screen.findByRole("button", {
-      name: "Save opportunity",
+      render(
+        <OpportunitySaveUserControl
+          opportunitySaved={false}
+          type="icon"
+          opportunityId="opp-123"
+        />,
+      );
+
+      const button = screen.getByRole("button", { name: "Save opportunity" });
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveAttribute("aria-label", "Save opportunity");
+
+      // make sure there isn't a second, unlabeled button rendered
+      expect(screen.getAllByRole("button")).toHaveLength(1);
     });
 
-    expect(signInButton).toBeInTheDocument();
+    it("has an aria-label during SSR fallback render (isSSR = true)", () => {
+      mockUser = {};
+      mockIsSSR = true;
+
+      render(
+        <OpportunitySaveUserControl
+          opportunitySaved={false}
+          type="icon"
+          opportunityId="opp-123"
+        />,
+      );
+
+      const signInButton = screen.getByRole("button", {
+        name: "Save opportunity",
+      });
+      expect(signInButton).toBeInTheDocument();
+      expect(signInButton).toHaveAttribute("aria-label", "Save opportunity");
+
+      expect(screen.getAllByRole("button")).toHaveLength(1);
+    });
+
+    it("does not render an unlabeled icon-only button in any logged-out state", () => {
+      mockUser = {};
+
+      [true, false].forEach((ssrState) => {
+        mockIsSSR = ssrState;
+        const { unmount } = render(
+          <OpportunitySaveUserControl
+            opportunitySaved={false}
+            type="icon"
+            opportunityId="opp-123"
+          />,
+        );
+
+        const buttons = screen.getAllByRole("button");
+        buttons.forEach((button) => {
+          expect(button).toHaveAccessibleName();
+        });
+
+        unmount();
+      });
+    });
   });
 });

@@ -102,9 +102,18 @@ export const OpportunitySaveUserControl = ({
             onClick={userSavedOppCallback}
             loading={loading}
             saved={displayAsSaved}
+            aria-label={
+              displayAsSaved ? "Saved opportunity" : "Save opportunity"
+            }
           />
         ) : isSSR ? (
-          <SaveIcon saved={false} />
+          <button
+            type="button"
+            className="usa-button--unstyled"
+            aria-label="Save opportunity"
+          >
+            <SaveIcon saved={false} />
+          </button>
         ) : (
           <ModalToggleButton
             id={`save-search-result-${opportunityId}`}
