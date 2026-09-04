@@ -13,6 +13,7 @@ from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
+    OpportunityIndexDeleteQueue,
     OpportunitySummary,
 )
 from src.services.current_opportunity.determine_current_opportunity_summary import (
@@ -126,6 +127,9 @@ class SetCurrentOpportunitiesTask(Task):
         if current_summary is None:
             # We determined the opportunity should not have a current and need to delete it
             if opportunity.current_opportunity_summary is not None:
+                self.db_session.add(
+                    OpportunityIndexDeleteQueue(opportunity_id=opportunity.opportunity_id)
+                )
                 self.db_session.delete(opportunity.current_opportunity_summary)
                 self.increment(self.Metrics.DELETED_CURRENT_OPPORTUNITY_COUNT)
 
