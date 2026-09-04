@@ -21,7 +21,7 @@ export function skipNonChromeOnStaging(testInfo: TestInfo): void {
  */
 export function skipWebkit(testInfo: TestInfo): void {
   test.skip(
-    testInfo.project.name === "WebKit",
-    "WebKit tests are flaky in CI - reenable once resolved",
+    testInfo.project.name === "Webkit",
+    "Webkit tests are flaky in CI - reenable once resolved",
   );
 }
