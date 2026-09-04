@@ -124,6 +124,14 @@ test.describe("Key Contacts FieldList", () => {
           .first()
           .waitFor({ state: "attached", timeout: 15000 });
 
+        /*
+         * Wait for the form to be fully stable before filling.
+         */
+        await page.evaluate(() =>
+          new Promise((resolve) => setTimeout(resolve, 500)),
+        );
+        await page.waitForLoadState("networkidle");
+
         const initialTestData = {
           applicant_organization_name: applicantOrganizationName,
           ...firstEntry,
@@ -160,12 +168,24 @@ test.describe("Key Contacts FieldList", () => {
 
         /*
          * After adding the entry, wait for the form to finish rendering all
-         * new fields before attempting to fill them.
+         * new fields before attempting to fill them. The form may still be
+         * updating (re-rendering, layout calculations, etc.) even after
+         * networkidle, so we use multiple stability checks.
          */
         await page.waitForLoadState("networkidle");
         await expect(
           page.getByTestId("key_contacts[1]--project_role"),
         ).toBeVisible({ timeout: 30000 });
+
+        /*
+         * Wait for the form to be fully stable before filling.
+         * Add a small delay and another networkidle wait to catch any
+         * remaining React state updates or layout calculations.
+         */
+        await page.evaluate(() =>
+          new Promise((resolve) => setTimeout(resolve, 500)),
+        );
+        await page.waitForLoadState("networkidle");
 
         /*
          * Fill the second FieldList entry using fillFormPartial.
@@ -213,6 +233,14 @@ test.describe("Key Contacts FieldList", () => {
           .locator("form, fieldset")
           .first()
           .waitFor({ state: "attached", timeout: 15000 });
+
+        /*
+         * Wait for the form to be fully stable before checking persistence.
+         */
+        await page.evaluate(() =>
+          new Promise((resolve) => setTimeout(resolve, 500)),
+        );
+        await page.waitForLoadState("networkidle");
 
         await expect(
           page.getByTestId("key_contacts[1]--project_role"),
