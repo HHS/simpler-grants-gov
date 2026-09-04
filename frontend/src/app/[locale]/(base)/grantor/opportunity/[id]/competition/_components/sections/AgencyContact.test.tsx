@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { axe } from "jest-axe";
 import { AgencyContact } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/AgencyContact";
 
 jest.mock("next/navigation", () => ({
@@ -274,6 +275,15 @@ describe("AgencyContact", () => {
         // fireEvent returns true if preventDefault() was NOT called
         expect(event).toBe(true);
       });
+    });
+  });
+
+  describe("accessibility", () => {
+    it("passes accessibility scan when rendered", async () => {
+      const { container } = render(<AgencyContact />);
+
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
     });
   });
 });

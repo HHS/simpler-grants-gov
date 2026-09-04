@@ -30,6 +30,13 @@ const commonInputProps = {
   onTextChange: onOppNbrChange,
 };
 describe("CommonTextInput", () => {
+  it("has no accessibility violations", async () => {
+    const { container } = render(<CommonTextInput {...commonInputProps} />);
+    const results = await axe(container);
+
+    expect(results).toHaveNoViolations();
+  });
+
   it("Renders the element with maxLength", () => {
     render(<CommonTextInput {...commonInputProps} />);
     const element = screen.getByRole("textbox", {
@@ -81,6 +88,13 @@ const commonTextAreaProps = {
   onTextChange: onTextAreaChange,
 };
 describe("CommonTextArea", () => {
+  it("has no accessibility violations", async () => {
+    const { container } = render(<CommonTextArea {...commonTextAreaProps} />);
+    const results = await axe(container);
+
+    expect(results).toHaveNoViolations();
+  });
+
   it("Renders the element with maxLength", () => {
     commonTextAreaProps.defaultValue = ""; // clear the text from reused props
     render(<CommonTextArea {...commonTextAreaProps} />);
@@ -351,6 +365,13 @@ const commonSelectProps = {
   onSelectionChange: onSelectChange,
 };
 describe("CommonSelectInput", () => {
+  it("has no accessibility violations", async () => {
+    const { container } = render(<CommonSelectInput {...commonSelectProps} />);
+    const results = await axe(container);
+
+    expect(results).toHaveNoViolations();
+  });
+
   it("Renders the element with a list of options", () => {
     render(<CommonSelectInput {...commonSelectProps} />);
     expect(
