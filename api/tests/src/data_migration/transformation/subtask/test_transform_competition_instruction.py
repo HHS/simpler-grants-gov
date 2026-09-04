@@ -220,6 +220,8 @@ class TestTransformCompetitionInstruction(BaseTransformTestClass):
             [(orphaned_case, None, None)]
         )
 
+        db_session.commit()
+
         # The orphaned record is flagged and gets transformed_at set so it isn't re-fetched
         db_session.refresh(orphaned_case)
         assert orphaned_case.transformed_at is not None
