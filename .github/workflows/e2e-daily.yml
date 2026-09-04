@@ -5,6 +5,11 @@ on:
     - cron: "0 11 * * *"
 
   workflow_dispatch:
+    inputs:
+      playwright_tags:
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
+        required: false
+        type: string
 
 jobs:
   daily-e2e-tests-deployed:
