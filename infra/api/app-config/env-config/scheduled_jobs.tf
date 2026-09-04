@@ -316,9 +316,10 @@ locals {
       )
     }
     load-search-opportunity-data = {
-      task_command = ["flask", "load-search-data", "load-opportunity-data"]
-      # Every hour at the half hour
-      schedule_expression = "cron(30 * * * ? *)"
+      task_command = ["flask", "load-search-data", "load-opportunity-data", "--full-refresh"]
+      # Once a day at 00:30, after the agency data hourly job at 00:00.
+      # Incremental sync now runs every load-transform cycle
+      schedule_expression = "cron(30 0 * * ? *)"
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
