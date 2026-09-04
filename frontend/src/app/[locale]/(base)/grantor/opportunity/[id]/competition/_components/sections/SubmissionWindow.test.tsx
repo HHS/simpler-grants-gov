@@ -35,8 +35,8 @@ describe("SubmissionWindow", () => {
     it("renders Extension period field with correct label and help text", () => {
       render(<SubmissionWindow />);
 
-      expect(screen.getByText("extensionPeriod")).toBeInTheDocument();
-      expect(screen.getByText("extensionPeriodHint")).toBeInTheDocument();
+      expect(screen.getByText("gracePeriod")).toBeInTheDocument();
+      expect(screen.getByText("gracePeriodHint")).toBeInTheDocument();
     });
 
     it("renders Public close date as required", () => {
@@ -64,7 +64,7 @@ describe("SubmissionWindow", () => {
       render(<SubmissionWindow />);
 
       const extensionInput = screen.getByRole("spinbutton", {
-        name: /extensionperiod/i,
+        name: /graceperiod/i,
       });
       expect(extensionInput).toBeInTheDocument();
       expect(extensionInput).toHaveAttribute("type", "number");
@@ -74,7 +74,7 @@ describe("SubmissionWindow", () => {
       render(<SubmissionWindow />);
 
       const extensionInput = screen.getByRole("spinbutton", {
-        name: /extensionperiod/i,
+        name: /graceperiod/i,
       });
       expect(extensionInput).toHaveAttribute("min", "0");
     });
@@ -83,7 +83,7 @@ describe("SubmissionWindow", () => {
       render(<SubmissionWindow />);
 
       const extensionInput = screen.getByRole("spinbutton", {
-        name: /extensionperiod/i,
+        name: /graceperiod/i,
       });
       expect(extensionInput).toHaveAttribute("step", "1");
     });
@@ -92,7 +92,7 @@ describe("SubmissionWindow", () => {
       render(<SubmissionWindow />);
 
       const extensionInput = screen.getByRole("spinbutton", {
-        name: /extensionperiod/i,
+        name: /graceperiod/i,
       });
 
       const event = fireEvent.keyDown(extensionInput, {
@@ -108,7 +108,7 @@ describe("SubmissionWindow", () => {
       render(<SubmissionWindow />);
 
       const extensionInput = screen.getByRole("spinbutton", {
-        name: /extensionperiod/i,
+        name: /graceperiod/i,
       });
 
       const event = fireEvent.keyDown(extensionInput, {
@@ -123,7 +123,7 @@ describe("SubmissionWindow", () => {
       render(<SubmissionWindow />);
 
       const extensionInput = screen.getByRole("spinbutton", {
-        name: /extensionperiod/i,
+        name: /graceperiod/i,
       });
 
       const eventLowerE = fireEvent.keyDown(extensionInput, {
@@ -143,7 +143,7 @@ describe("SubmissionWindow", () => {
       render(<SubmissionWindow />);
 
       const extensionInput = screen.getByRole("spinbutton", {
-        name: /extensionperiod/i,
+        name: /graceperiod/i,
       });
 
       const event = fireEvent.keyDown(extensionInput, {
@@ -158,7 +158,7 @@ describe("SubmissionWindow", () => {
       render(<SubmissionWindow />);
 
       const extensionInput = screen.getByRole("spinbutton", {
-        name: /extensionperiod/i,
+        name: /graceperiod/i,
       });
 
       const pasteEvent = fireEvent.paste(extensionInput, {
@@ -175,7 +175,7 @@ describe("SubmissionWindow", () => {
       render(<SubmissionWindow />);
 
       const extensionInput = screen.getByRole("spinbutton", {
-        name: /extensionperiod/i,
+        name: /graceperiod/i,
       });
 
       const pasteEvent = fireEvent.paste(extensionInput, {
@@ -191,7 +191,7 @@ describe("SubmissionWindow", () => {
       render(<SubmissionWindow />);
 
       const extensionInput = screen.getByRole("spinbutton", {
-        name: /extensionperiod/i,
+        name: /graceperiod/i,
       });
 
       const pasteEvent = fireEvent.paste(extensionInput, {
@@ -229,6 +229,23 @@ describe("SubmissionWindow", () => {
 
       const dateInputs = screen.getAllByPlaceholderText("mm/dd/yyyy");
       expect(dateInputs.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it("populates form fields from the provided values", () => {
+      render(
+        <SubmissionWindow
+          openingDate="2026-06-01"
+          closingDate="2026-07-01"
+          gracePeriod={30}
+        />,
+      );
+
+      const dateInputs = screen.getAllByTestId("date-picker-external-input");
+      expect(dateInputs[0]).toHaveValue("06/01/2026");
+      expect(dateInputs[1]).toHaveValue("07/01/2026");
+      expect(
+        screen.getByRole("spinbutton", { name: /graceperiod/i }),
+      ).toHaveValue(30);
     });
   });
 

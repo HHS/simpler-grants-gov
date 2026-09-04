@@ -5,7 +5,17 @@ import { DatePicker, FormGroup, TextInput } from "@trussworks/react-uswds";
 
 import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 
-export function SubmissionWindow() {
+type SubmissionWindowProps = {
+  openingDate?: string | null;
+  closingDate?: string | null;
+  gracePeriod?: number | null;
+};
+
+export function SubmissionWindow({
+  openingDate,
+  closingDate,
+  gracePeriod,
+}: SubmissionWindowProps) {
   const t = useTranslations("OpportunityCompetition.sectionSubmissionWindow");
 
   return (
@@ -30,6 +40,7 @@ export function SubmissionWindow() {
             <DatePicker
               id="opening_date"
               name="opening_date"
+              defaultValue={openingDate ?? ""}
               placeholder="mm/dd/yyyy"
               className="width-full"
             />
@@ -46,6 +57,7 @@ export function SubmissionWindow() {
             <DatePicker
               id="closing_date"
               name="closing_date"
+              defaultValue={closingDate ?? ""}
               placeholder="mm/dd/yyyy"
               className="width-full"
             />
@@ -56,17 +68,18 @@ export function SubmissionWindow() {
         <div className="tablet:grid-col-6">
           <FormGroup>
             <DynamicFieldLabel
-              idFor="extension_period"
-              title={t("extensionPeriod")}
-              description={t("extensionPeriodHint")}
+              idFor="grace_period"
+              title={t("gracePeriod")}
+              description={t("gracePeriodHint")}
             />
             <TextInput
-              id="extension_period"
-              name="extension_period"
+              id="grace_period"
+              name="grace_period"
               type="number"
               min="0"
               step="1"
               className="width-full"
+              defaultValue={gracePeriod ?? undefined}
               onKeyDown={(e) => {
                 if (
                   e.key === "." ||

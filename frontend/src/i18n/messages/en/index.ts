@@ -415,12 +415,12 @@ export const messages = {
         "Award maximum cannot be less than Award minimum.",
     },
     attachments: {
-      removeButton: "Remove",
       uploadLabel: "Upload files",
-      errorHeading: "Upload error",
-      errorUploadFailed: "Failed to upload {fileName}.",
-      errorDeleteFailed: "Failed to delete {fileName}.",
-      errorFileTooLarge: "{fileName} exceeds the 2GB file size limit.",
+      uploading: "Uploading...",
+      success:
+        "Success: File scan complete. Save this form to attach the file.",
+      error:
+        "Processing failed due to a system error. Try uploading your file again.",
     },
   },
   Application: {
@@ -2649,8 +2649,9 @@ export const messages = {
       header: "Submission set-up",
       subHeader:
         "A competition is one apply-window inside an opportunity. Most opportunities have only one.",
-      competitionId: "Competition ID",
-      competitionIdHint: "An ID if this opportunity has multiple competitions.",
+      publicCompetitionId: "Competition ID",
+      publicCompetitionIdHint:
+        "An ID if this opportunity has multiple competitions.",
       competitionTitle: "Competition title",
       competitionTitleHint: "Shown to applicants. Plain language is best.",
       whoCanApply: "Who can apply?",
@@ -2667,8 +2668,8 @@ export const messages = {
       submissionsOpenHint: "First day applicants can apply",
       submissionsClose: "Public close date",
       submissionsCloseHint: "Deadline listed on Grants.gov",
-      extensionPeriod: "Extension period",
-      extensionPeriodHint: "Number of days accepted past public close date",
+      gracePeriod: "Extension period",
+      gracePeriodHint: "Number of days accepted past public close date",
     },
     sectionApplicationChecklist: {
       header: "Application checklist",
