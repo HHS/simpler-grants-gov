@@ -136,14 +136,21 @@ test.describe("Key Contacts FieldList", () => {
         );
 
         /*
+         * Wait for form to fully hydrate before attempting to click add button.
+         * On mobile, additional rendering time may be needed for new elements to appear.
+         */
+        await page.waitForLoadState("networkidle");
+
+        /*
          * Now add a second Key Contact entry via the add button.
-         * On mobile, scroll to ensure the button is visible before clicking.
+         * On mobile, the button may be below the fold after filling the first entry,
+         * so scroll it into view before clicking.
          */
         const addButton = page.getByRole("button", {
           name: /add.*key contact/i,
         });
-        await addButton.waitFor({ state: "visible", timeout: 30000 });
         await addButton.scrollIntoViewIfNeeded();
+        await addButton.waitFor({ state: "visible", timeout: 30000 });
         await addButton.click();
         await expect(
           page.getByTestId("key_contacts[1]--project_role"),
