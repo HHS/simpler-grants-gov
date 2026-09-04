@@ -613,34 +613,10 @@ class OpportunitySummaryUpdateResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunitySummaryDetailSchema())
 
 
-class OpportunityUploadAttachmentRequestV1Schema(Schema):
-    file_attachment = fields.File(
-        required=True,
-        allow_none=False,
-        metadata={"description": "The file attachment to upload"},
-    )
-    file_description = fields.String(
-        required=False,
-        allow_none=True,
-        metadata={"description": "Description of the file attachment"},
-    )
-
-
-class OpportunityAttachmentResponseV1Schema(Schema):
-    opportunity_attachment_id = fields.String(required=True)
-    file_description = fields.String(required=False, allow_none=True)
-
-
 class ResponseWithErrorsSchema(Schema):
     message = fields.String(required=True)
     status_code = fields.Integer(required=True, dump_default=200)
     errors = fields.List(fields.String(), required=False)
-
-
-class OpportunityUploadAttachmentResponseV1Schema(ResponseWithErrorsSchema):
-    """Response Schema for Upload Attachments Endpoint"""
-
-    data = fields.Nested(OpportunityAttachmentResponseV1Schema())
 
 
 class DeleteAttachmentResponseV1Schema(ResponseWithErrorsSchema):
@@ -657,7 +633,7 @@ class OpportunityAttachmentCreateFromPendingFileRequestV1Schema(Schema):
 
 
 class OpportunityAttachmentCreateFromPendingFileResponseV1Schema(AbstractResponseSchema):
-    """Response Schema for the temporary pending-file Upload Attachment Endpoint"""
+    """Response Schema for the Create Opportunity Attachment Endpoint"""
 
     data = fields.Nested(OpportunityAttachmentV1Schema())
 
@@ -674,6 +650,23 @@ class CompetitionRequestBaseSchema(Schema):
         metadata={
             "description": "The title of the competition",
             "example": "Proposal for Advanced Research",
+        },
+    )
+    public_competition_id = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "The public-facing identifier of the competition",
+            "example": "ABC-123-456",
+        },
+    )
+    grace_period = fields.Integer(
+        required=False,
+        allow_none=True,
+        validate=validators.Range(min=0),
+        metadata={
+            "description": "The number of days after the closing date that applications are still accepted",
+            "example": 5,
         },
     )
     opening_date = fields.Date(

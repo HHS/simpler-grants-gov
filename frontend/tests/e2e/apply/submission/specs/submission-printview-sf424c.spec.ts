@@ -1,15 +1,20 @@
 /**
- * @feature Apply - Happy Path - SF-424B Application Submission and Print View Workflow
- * @scenario Complete the SF-424B Application Submission and Print View workflow for an <user type> user
- */
+ * @feature Apply - Happy Path - SF-424C Application Submission and Print View Workflow
+ * @scenario Complete the SF-424C Application Submission and Print View workflow for an <user type> user
+ **/
 
 import {
-  expect,
   test,
   type BrowserContext,
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import {
+  buildSF424CApplicantScenarios,
+  validateSF424CCalculatedFields,
+  validateSF424CFederalPercentageShare,
+  validateSF424CTable1UserEnteredFields,
+} from "tests/e2e/apply/fixtures/sf424c-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -30,7 +35,6 @@ import {
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
-  validateAllPrintViews,
 } from "tests/e2e/utils/submission/print-view-utils";
 import {
   submitApplicationAndVerify,
@@ -41,24 +45,11 @@ const { APPLY, APPLY_FORMS, CORE_REGRESSION, SMOKE, GRANTEE } = VALID_TAGS;
 
 const { testOrgLabel } = playwrightEnv;
 
-// Only the opportunity number is declared here.
-// All opportunity/form details are resolved from the per-form data files via load-opportunity-config.ts.
-// Unified opportunity for both local and staging environments.
-const OPPORTUNITY_NUMBER = "E2E-SF424B-ORG-IND-01";
+const OPPORTUNITY_NUMBER = "E2E-SF424C-ORG-IND-01";
 const opportunityConfig = loadOpportunityConfig(OPPORTUNITY_NUMBER);
 
-const applicantScenarios = [
-  {
-    testName: `Complete the SF-424B Application Submission and Print View workflow for an Organization user`,
-    orgLabel: testOrgLabel,
-  },
-  {
-    testName: `Complete the SF-424B Application Submission and Print View workflow for an Individual user`,
-    orgLabel: undefined,
-  },
-] as const;
+const applicantScenarios = buildSF424CApplicantScenarios(testOrgLabel);
 
-// Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
   skipWebkit(testInfo);
@@ -72,24 +63,20 @@ for (const { testName, orgLabel } of applicantScenarios) {
       { page, context }: { page: Page; context: BrowserContext },
       testInfo: TestInfo,
     ) => {
-      test.setTimeout(300_000); // 5-min timeout
+      test.setTimeout(300_000);
 
       const isMobile = testInfo.project.name.match(/[Mm]obile/);
       const baseSuffix = Date.now();
 
-      // --- Login ---
-      // Given the user is logged in
+      // Login
       await authenticateE2eUser(page, context, !!isMobile);
 
-      // --- Navigate to Opportunity page and start a new application ---
-      // And the user launches the URL for an opportunity with an open SF-424B competition
-      // When the user clicks "Start Application", selects applicant type and creates the application
+      // Create application
       await createApplication(page, opportunityConfig.opportunityUrl, orgLabel);
+
       const applicationUrl = page.url();
 
-      // --- Fill required forms and collect print URLs ---
-      // For each form on this opportunity: fill it, verify status, then capture the
-      // form URL *before* verifyFormStatusOnApplication navigates away to the app page.
+      // Fill SF-424C
       const filledForms: FilledFormEntry[] = [];
 
       for (const [index, form] of opportunityConfig.forms.entries()) {
@@ -97,10 +84,8 @@ for (const { testName, orgLabel } of applicantScenarios) {
 
         await fillForm(testInfo, page, form.formConfig, testData, false);
 
-        // Verify save succeeded while still on the form page
         await verifyFormStatusAfterSave(page, "complete");
 
-        // Capture the form URL now - verifyFormStatusOnApplication navigates away
         const formUrl = page.url();
 
         await verifyFormStatusOnApplication(
@@ -120,37 +105,58 @@ for (const { testName, orgLabel } of applicantScenarios) {
         });
       }
 
-      // Return to application landing page before submitting
+      // Submit application and verify submission confirmation
+
       await page.goto(applicationUrl);
       await page.waitForLoadState("domcontentloaded");
 
-      // --- Submit Application ---
-      // When the user clicks "Submit application"
-      // Then the application is submitted successfully
       await submitApplicationAndVerify(page, "success");
-
-      // --- Confirmation Page Validation ---
       await verifySubmissionConfirmation(page);
 
-      // --- Print View Validation (one page per form) ---
-      await validateAllPrintViews(page, filledForms);
+      // Print view - SF-424C validation
 
-      // --- SF-424B Post-Population Field Validation ---
-      // signature and date_signed are system post-populated at submission time
-      // (gg_post_population rules: "signature", "current_date")
-      for (const { printUrl } of filledForms) {
-        await navigateToPrintView(page, printUrl);
+      const sf424cForm = filledForms.find(
+        (form): form is FilledFormEntry => form.formKey === "sf424c",
+      );
 
-        // Verify print view is read-only before checking field values
-        await assertPrintViewIsReadOnly(page);
-
-        // Now verify the post-populated field values exist and are populated
-        await expect(page.getByTestId("signature")).toBeVisible();
-        await expect(page.getByTestId("signature")).not.toBeEmpty();
-
-        await expect(page.getByTestId("date_signed")).toBeVisible();
-        await expect(page.getByTestId("date_signed")).not.toBeEmpty();
+      if (!sf424cForm) {
+        throw new Error("SF-424C form was not found in the filled forms.");
       }
+
+      const printUrl = sf424cForm.printUrl;
+      const formName = sf424cForm.formName;
+      const formTitle =
+        typeof formName === "string" ? formName : formName.source;
+      const testData: Record<string, string> = sf424cForm.testData;
+
+      await navigateToPrintView(page, printUrl);
+
+      // Validate print view structure and read-only state
+      await assertPrintViewIsReadOnly(page);
+
+      // Form title is visible in h1 heading
+      const pageHeading = await page.locator("h1").textContent();
+      if (!pageHeading || !pageHeading.includes(formTitle)) {
+        throw new Error(
+          `Expected page heading to include "${formTitle}", got: "${pageHeading ?? ""}"`,
+        );
+      }
+
+      // Validate user-entered Table 1 values
+
+      await validateSF424CTable1UserEnteredFields(page, testData);
+
+      // Validate calculated values
+
+      await validateSF424CCalculatedFields(page);
+
+      // Validate federal percentage share (Row 1 in Table 2) - special handling for percentage
+      // The user entered value displays as a percentage in print view
+      const federalPercentage = parseInt(
+        testData["federal_funding--federal_percentage_share"],
+        10,
+      );
+      await validateSF424CFederalPercentageShare(page, federalPercentage);
     },
   );
 }

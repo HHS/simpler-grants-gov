@@ -18,6 +18,9 @@ interface OpportunityAttachmentUploadInputProps {
   initialAttachments?: OpportunityAttachment[];
 }
 
+// this name, along with the two hidden inputs below, is registered as a non schema form data
+// key (see isNonSchemaFormDataKey) - all three are read by name at save time and none belongs
+// in the opportunity summary body, so renaming one means updating that list too
 const UPLOAD_INPUT_ID = "opportunity-attachment-upload";
 const UPLOAD_LABEL_ID = `${UPLOAD_INPUT_ID}-label`;
 
