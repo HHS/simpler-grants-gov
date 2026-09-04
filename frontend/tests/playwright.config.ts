@@ -44,9 +44,11 @@ const mobileChromeProject = {
   },
 };
 
-/* Every project available for the current target. Deployed targets are limited to
-   the chromium engine because staging MFA login is rate limited outside of Chrome
-   (see e2e/utils/auth/skip-non-chrome-staging-utils.ts). */
+/* Every project available for the current target. Deployed targets have only ever
+   defined the two chromium projects — note that most specs additionally gate
+   themselves to Chrome on a deployed target (see
+   e2e/utils/auth/skip-non-chrome-staging-utils.ts), so adding Firefox or Webkit
+   here would not exercise the authenticated flows until that gate is narrowed. */
 const availableProjects =
   targetEnv !== "local"
     ? [chromeProject, mobileChromeProject]

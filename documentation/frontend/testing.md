@@ -73,7 +73,7 @@ The table above shows the default test cadences for each group. Teams may expand
 
 #### Browser test cadences
 
-Locally targeted runs have 4 browser configurations available (Chromium, Mobile Chromium, Webkit, Firefox). Deployed targets only have the two chromium ones, because staging MFA login is rate limited outside of Chrome. Which of the available browsers a given run actually uses depends on the cadence:
+Locally targeted runs have 4 browser configurations available (Chromium, Mobile Chromium, Webkit, Firefox). Deployed targets have only the two chromium ones — they have never defined Firefox or Webkit projects, since the deployed target was split out of the local one. Which of the available browsers a given run actually uses depends on the cadence:
 
 | Cadence        | Browsers                                   |
 | -------------- | ------------------------------------------ |
