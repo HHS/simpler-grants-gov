@@ -6,6 +6,10 @@ description: Composite action to run Playwright against specified environment
 # based on the do-chrome-install, do-firefox-install, and do-webkit-install inputs.
 # Only the browsers needed for the current test shard are installed, improving CI efficiency.
 # Chrome is cached outside this job, and will be available even if not instructed to install.
+#
+# `playwright_projects` narrows which browsers the run actually exercises (e.g. PR
+# runs pass "Chrome"). Keep it in sync with the do-*-install inputs: requesting a
+# project whose browser was never installed will fail at launch.
 # ---
 
 inputs:
@@ -68,6 +72,9 @@ inputs:
     default: ""
   spec_files:
     description: "paths to specific spec files to run, will separately, but in addition to any supplied `playwright_tags`"
+    default: ""
+  playwright_projects:
+    description: "comma separated list of Playwright project (browser) names to run (e.g. Chrome). Leave blank to run every project defined for the target"
     default: ""
 
 outputs:
@@ -157,6 +164,7 @@ runs:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
+        PLAYWRIGHT_PROJECTS: ${{ inputs.playwright_projects }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
         PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
         PLAYWRIGHT_API_URL: ${{ env.api_url }}
@@ -178,6 +186,7 @@ runs:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
+        PLAYWRIGHT_PROJECTS: ${{ inputs.playwright_projects }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
         PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
         PLAYWRIGHT_API_URL: ${{ env.api_url }}
@@ -199,6 +208,7 @@ runs:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
+        PLAYWRIGHT_PROJECTS: ${{ inputs.playwright_projects }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
         PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
         PLAYWRIGHT_API_URL: ${{ env.api_url }}

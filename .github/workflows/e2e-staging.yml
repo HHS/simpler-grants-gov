@@ -42,6 +42,16 @@ concurrency:
 jobs:
   e2e-tests-deployed:
     runs-on: ubuntu-22.04
+    # Shard across runners rather than raising the per-runner worker count: the
+    # deployed suite keeps workers at 1 (see the workers input below) because
+    # every test authenticates as one of a handful of static shared test users,
+    # so in-process parallelism is the riskier way to add concurrency.
+    strategy:
+      # A scheduled regression run wants results for every shard, not an early exit.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+        total_shards: [4]
     steps:
       - name: Set target environment
         run: |
@@ -71,8 +81,8 @@ jobs:
         with:
           version: ${{ inputs.version || github.ref }}
           target: ${{ env.defaulted_target }}
-          total_shards: 1
-          current_shard: 1
+          total_shards: ${{ matrix.total_shards }}
+          current_shard: ${{ matrix.shard }}
           workers: 1
           playwright_tags: ${{ env.test_group_tags }}
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
