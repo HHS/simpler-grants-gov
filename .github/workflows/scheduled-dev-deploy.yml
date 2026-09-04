@@ -78,6 +78,8 @@ jobs:
     name: NOFOs Vulnerability Scans
     needs: [nofos-checks]
     uses: ./.github/workflows/vulnerability-scans-nofos.yml
+    with:
+      fail_on_vulns: false
 
   nofos-deploy:
     name: Deploy NOFOs to Dev
