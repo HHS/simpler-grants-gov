@@ -157,6 +157,12 @@ test.describe("Key Contacts FieldList", () => {
         await addButton.scrollIntoViewIfNeeded();
         await addButton.waitFor({ state: "visible", timeout: 30000 });
         await addButton.click();
+
+        /*
+         * After adding the entry, wait for the form to finish rendering all
+         * new fields before attempting to fill them.
+         */
+        await page.waitForLoadState("networkidle");
         await expect(
           page.getByTestId("key_contacts[1]--project_role"),
         ).toBeVisible({ timeout: 30000 });
@@ -213,15 +219,23 @@ test.describe("Key Contacts FieldList", () => {
         ).toBeVisible();
         /*
          * Verify values from the first FieldList entry persisted.
+         * Skip applicant_organization_name as it's a form-level field, not a FieldList entry.
          */
         for (const [fieldId, value] of Object.entries(firstEntry)) {
+          if (fieldId === "applicant_organization_name") {
+            continue;
+          }
           const stringValue = String(value);
           await expect(page.getByTestId(fieldId)).toHaveValue(stringValue);
         }
         /*
          * Verify values from the second FieldList entry persisted.
+         * Skip applicant_organization_name as it's a form-level field, not a FieldList entry.
          */
         for (const [fieldId, value] of Object.entries(secondEntry)) {
+          if (fieldId === "applicant_organization_name") {
+            continue;
+          }
           const stringValue = String(value);
           await expect(page.getByTestId(fieldId)).toHaveValue(stringValue);
         }
