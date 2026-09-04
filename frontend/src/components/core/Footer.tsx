@@ -30,7 +30,7 @@ const Footer = () => {
       data-testid="footer"
       size="medium"
       returnToTop={
-        <GridContainer className="usa-footer__return-to-top margin-top-5">
+        <GridContainer className="usa-footer__return-to-top margin-top-5 text-right">
           <a href="#main-content">{t("returnToTop")}</a>
         </GridContainer>
       }
