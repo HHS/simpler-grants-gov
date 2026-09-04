@@ -1,6 +1,15 @@
-import type { fieldDefinitionsKeyContacts } from "tests/e2e/apply/fixtures/key-contacts-field-definitions";
-import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
-import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
+import {
+  fieldDefinitionsKeyContacts,
+  type fieldDefinitionsKeyContacts,
+} from "tests/e2e/apply/fixtures/key-contacts-field-definitions";
+import type {
+  PrintViewFormData,
+  PrintViewFormData,
+} from "tests/e2e/utils/submission/opportunity-print-view.types";
+import {
+  toHappyPathSuffix,
+  toHappyPathSuffix,
+} from "tests/e2e/utils/submission/print-view-utils";
 
 /**
  * Required-fields-only happy-path test data for the Key Contacts form.
@@ -19,53 +28,94 @@ import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
  */
 export const buildKeyContactsRequiredFieldsHappyPathTestData = (
   suffix: number,
+  index = 0,
 ): Record<string, string> => {
   const shortSuffix = toHappyPathSuffix(suffix);
 
   return {
     applicant_organization_name: `Org ${shortSuffix}`,
-    "key_contacts[0]--project_role": `Role ${shortSuffix}`,
-    "key_contacts[0]--name--first_name": `First${shortSuffix}`,
-    "key_contacts[0]--name--last_name": `Last${shortSuffix}`,
-    "key_contacts[0]--address--street1": `${shortSuffix} Main St`,
-    "key_contacts[0]--address--city": `City ${shortSuffix}`,
-    "key_contacts[0]--address--state": "AL: Alabama", // conditionally required: country is USA
-    "key_contacts[0]--address--country": "USA: UNITED STATES",
-    "key_contacts[0]--address--zip_code": "123456789", // 9 digits - required min when country is US
-    "key_contacts[0]--phone": "8888888888",
-    "key_contacts[0]--email": `contact${shortSuffix}@example.com`,
+    [`key_contacts[${index}]--project_role`]: `Role ${shortSuffix}`,
+    [`key_contacts[${index}]--name--first_name`]: `First${shortSuffix}`,
+    [`key_contacts[${index}]--name--last_name`]: `Last${shortSuffix}`,
+    [`key_contacts[${index}]--address--street1`]: `${shortSuffix} Main St`,
+    [`key_contacts[${index}]--address--city`]: `City ${shortSuffix}`,
+    [`key_contacts[${index}]--address--state`]: "AL: Alabama",
+    [`key_contacts[${index}]--address--country`]: "USA: UNITED STATES",
+    [`key_contacts[${index}]--address--zip_code`]: "123456789",
+    [`key_contacts[${index}]--phone`]: "8888888888",
+    [`key_contacts[${index}]--email`]: `contact${shortSuffix}@example.com`,
   } satisfies Partial<Record<keyof typeof fieldDefinitionsKeyContacts, string>>;
 };
 
 /**
- * Complete happy-path test data for the Key Contacts form: all required
- * AND optional fields for the first Key Contact entry (key_contacts[0]).
- * minItems is 1, so a single filled entry satisfies validation; additional
- * entries (up to 4) are skipped, matching the PPSL precedent of filling
- * only the primary/first instance of a repeatable group.
+ * Required-fields-only happy-path test data for the Key Contacts form.
+ *
+ * By default this populates the first FieldList entry:
+ * key_contacts[0]
+ *
+ * The index can be provided when the test needs to populate another
+ * FieldList entry.
+ */
+export const buildKeyContactsRequiredFieldsHappyPathTestData = (
+  suffix: number,
+  index = 0,
+): Record<string, string> => {
+  const shortSuffix = toHappyPathSuffix(suffix);
+  return {
+    applicant_organization_name: `Org ${shortSuffix}`,
+    [`key_contacts[${index}]--project_role`]: `Role ${shortSuffix}`,
+    [`key_contacts[${index}]--name--first_name`]: `First${shortSuffix}`,
+    [`key_contacts[${index}]--name--last_name`]: `Last${shortSuffix}`,
+    [`key_contacts[${index}]--address--street1`]: `${shortSuffix} Main St`,
+    [`key_contacts[${index}]--address--city`]: `City ${shortSuffix}`,
+    [`key_contacts[${index}]--address--state`]: "AL: Alabama",
+    [`key_contacts[${index}]--address--country`]: "USA: UNITED STATES",
+    [`key_contacts[${index}]--address--zip_code`]: "123456789",
+    [`key_contacts[${index}]--phone`]: "8888888888",
+    [`key_contacts[${index}]--email`]: `contact${shortSuffix}@example.com`,
+  } satisfies Partial<Record<keyof typeof fieldDefinitionsKeyContacts, string>>;
+};
+/**
+ * Optional-field test data for the Key Contacts form.
+ *
+ * By default this populates the first FieldList entry:
+ * key_contacts[0]
+ *
+ * The index can be provided when the test needs to populate another
+ * FieldList entry.
+ */
+export const buildKeyContactsOptionalFieldsHappyPathTestData = (
+  suffix: number,
+  index = 0,
+): Record<string, string> => {
+  const shortSuffix = toHappyPathSuffix(suffix);
+  return {
+    [`key_contacts[${index}]--name--prefix`]: `P${shortSuffix}`,
+    [`key_contacts[${index}]--name--middle_name`]: `Mid${shortSuffix}`,
+    [`key_contacts[${index}]--name--suffix`]: `S${shortSuffix}`,
+    [`key_contacts[${index}]--title`]: `Title ${shortSuffix}`,
+    [`key_contacts[${index}]--organizational_affiliation`]: `Affiliation ${shortSuffix}`,
+    [`key_contacts[${index}]--address--street2`]: `Suite ${shortSuffix}`,
+    [`key_contacts[${index}]--address--county`]: `County ${shortSuffix}`,
+    [`key_contacts[${index}]--fax`]: "8888888888",
+  } satisfies Partial<Record<keyof typeof fieldDefinitionsKeyContacts, string>>;
+};
+/**
+ * Complete happy-path test data for the Key Contacts form.
+ *
+ * Combines the required and optional fields for the first
+ * FieldList entry (key_contacts[0]).
  */
 export const buildKeyContactsHappyPathTestData = (
   suffix: number,
 ): Record<string, string> => {
-  const shortSuffix = toHappyPathSuffix(suffix);
-  const required = buildKeyContactsRequiredFieldsHappyPathTestData(suffix);
-
   return {
-    ...required,
-    "key_contacts[0]--name--prefix": `P${shortSuffix}`,
-    "key_contacts[0]--name--middle_name": `Mid${shortSuffix}`,
-    "key_contacts[0]--name--suffix": `S${shortSuffix}`,
-    "key_contacts[0]--title": `Title ${shortSuffix}`,
-    "key_contacts[0]--organizational_affiliation": `Affiliation ${shortSuffix}`,
-    "key_contacts[0]--address--street2": `Suite ${shortSuffix}`,
-    "key_contacts[0]--address--county": `County ${shortSuffix}`,
-    "key_contacts[0]--fax": "8888888888",
-  } satisfies Partial<Record<keyof typeof fieldDefinitionsKeyContacts, string>>;
+    ...buildKeyContactsRequiredFieldsHappyPathTestData(suffix),
+    ...buildKeyContactsOptionalFieldsHappyPathTestData(suffix),
+  };
 };
-
 /**
- * Contains opportunity metadata and the form-specific test data builder.
- * Imported by load-opportunity-config.ts to build the opportunity registry.
+ * Opportunity configuration used by the Key Contacts E2E tests.
  */
 export const KEY_CONTACTS_OPPORTUNITY_DATA: PrintViewFormData = {
   opportunityId: "3f6a8c2e-9d41-4b7a-8e15-6a2f9c4d7b31",
