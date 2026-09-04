@@ -145,14 +145,13 @@ test.describe("Key Contacts FieldList", () => {
         );
 
         /*
-         * Wait for save to complete, then look for the "Add key contact" button.
-         * On mobile, the button may be below the fold after filling the first entry,
-         * so scroll it into view before clicking.
+         * Wait for save to complete, then look for the "Add another entry" button.
+         * This button is rendered by FieldListWidget to add additional entries.
          */
         await page.waitForLoadState("networkidle");
 
         const addButton = page.getByRole("button", {
-          name: /add.*key contact/i,
+          name: /add another entry/i,
         });
         await addButton.scrollIntoViewIfNeeded();
         await addButton.waitFor({ state: "visible", timeout: 30000 });
