@@ -14,6 +14,8 @@ import { SF424A_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424a-data";
 import { SF424A_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424a-field-definitions";
 import { SF424B_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424b-data";
 import { SF424B_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424b-field-definitions";
+import { SF424C_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424c-data";
+import { SF424C_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424c-field-definitions";
 import { SF424_SHORT_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sf424short-data";
 import { SF424_SHORT_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424short-field-definitions";
 import { SFLLL_OPPORTUNITY_DATA } from "tests/e2e/apply/fixtures/sfLLL-data";
@@ -42,6 +44,7 @@ const PRINT_VIEW_FORM_DATA: PrintViewFormData[] = [
   SF424_SHORT_OPPORTUNITY_DATA,
   SF424A_OPPORTUNITY_DATA,
   SF424B_OPPORTUNITY_DATA,
+  SF424C_OPPORTUNITY_DATA,
   SFLLL_OPPORTUNITY_DATA,
   SUPP_COVER_SHEET_NEH_OPPORTUNITY_DATA,
 ];
@@ -60,6 +63,7 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
   sf424short: SF424_SHORT_FORM_CONFIG,
   sf424a: SF424A_FORM_CONFIG,
   sf424b: SF424B_FORM_CONFIG,
+  sf424c: SF424C_FORM_CONFIG,
   sfLLL: SFLLL_FORM_CONFIG,
   suppCoverSheetNEH: SUPP_COVER_SHEET_NEH_FORM_CONFIG,
 };

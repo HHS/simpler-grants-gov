@@ -1054,6 +1054,68 @@ def test_backup_written_id_to_key_excludes_skipped_cards(
     assert backup_instance.stats["dashboards_skipped"] == 1
 
 
+def test_backup_resolves_card_and_dashboard_sharing_same_id_to_own_collections(
+    backup_instance: MetabaseBackupV2,
+    tmp_path: Path,
+) -> None:
+    """
+    Test that a card and a dashboard with the same numeric id each land in their own folder.
+
+    Card ids and dashboard ids are separate sequences in Metabase, so a
+    card and a dashboard can share a numeric id while living in different
+    collections.
+    """
+    collections_payload = [
+        {"id": 10, "name": "Card Home", "location": "/"},
+        {"id": 20, "name": "Dashboard Home", "location": "/"},
+    ]
+    items_by_collection = {
+        10: {"data": [{"id": 135, "name": "Colliding Card", "model": "card"}]},
+        20: {
+            "data": [{"id": 135, "name": "Colliding Dashboard", "model": "dashboard"}],
+        },
+    }
+    card_detail = {
+        "id": 135,
+        "name": "Colliding Card",
+        "query_type": "native",
+        "dataset_query": {"native": {"query": "SELECT 1"}},
+        "display": "table",
+        "visualization_settings": {},
+    }
+    dashboard_detail = {
+        "id": 135,
+        "name": "Colliding Dashboard",
+        "tabs": [],
+        "parameters": [],
+        "dashcards": [],
+    }
+
+    def fake_get(url: str, **_kwargs: object) -> MagicMock:
+        if url.endswith("/collection/?exclude-other-user-collections=true"):
+            return _response(collections_payload)
+        for collection_id, payload in items_by_collection.items():
+            if url.endswith(f"/collection/{collection_id}/items"):
+                return _response(payload)
+        if url.endswith("/card/135"):
+            return _response(card_detail)
+        if url.endswith("/dashboard/135"):
+            return _response(dashboard_detail)
+        message = f"Unexpected URL: {url}"
+        raise AssertionError(message)
+
+    # pylint: disable=protected-access
+    # ruff: noqa: SLF001
+    backup_instance._requests.get.side_effect = fake_get
+
+    backup_instance.backup()
+
+    assert (tmp_path / "level_0" / "Card_Home" / "Colliding_Card.sql").exists()
+    assert (
+        tmp_path / "dashboards" / "Dashboard_Home" / "Colliding_Dashboard.json"
+    ).exists()
+
+
 def test_resolve_dashboard_parameter_unresolved_external_card_raises(
     backup_instance: MetabaseBackupV2,
 ) -> None:

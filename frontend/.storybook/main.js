@@ -85,6 +85,7 @@ const config = {
               "./node_modules/@uswds",
               "./node_modules/@uswds/uswds/packages",
             ],
+            quietDeps: true,
           },
         },
       },
