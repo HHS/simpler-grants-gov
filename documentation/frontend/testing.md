@@ -89,12 +89,21 @@ In some cases an individual test may be skipped in one or more browsers. This ma
 
 #### How CI parallelizes runs
 
-Both e2e workflows split the suite across a matrix of 4 shards, one runner each, and merge the blob reports afterwards. The two workflows get their concurrency from different places:
+Both e2e workflows split the suite across a matrix of shards, one runner each, and merge the blob reports afterwards. The two workflows get their concurrency from different places:
 
-- **[ci-frontend-e2e.yml](https://github.com/HHS/simpler-grants-gov/blob/main/.github/workflows/ci-frontend-e2e.yml)** (local target) stands up its own API and frontend per shard, so each shard is isolated and runs with the default 10 workers.
-- **[e2e-staging.yml](https://github.com/HHS/simpler-grants-gov/blob/main/.github/workflows/e2e-staging.yml)** (deployed target) points all 4 shards at one shared environment, so it pins `workers: 1`. Every test on a deployed target authenticates as one of a handful of static shared test users, so adding concurrency by sharding across runners — where Playwright keeps same-file tests together — is safer than in-process parallelism. If you see cross-test interference on a deployed run, suspect two shards mutating the same test user's state before you suspect a real regression.
+- **[ci-frontend-e2e.yml](https://github.com/HHS/simpler-grants-gov/blob/main/.github/workflows/ci-frontend-e2e.yml)** (local target) uses 4 shards and stands up its own API and frontend per shard, so each shard is isolated and runs with the default 10 workers.
+- **[e2e-staging.yml](https://github.com/HHS/simpler-grants-gov/blob/main/.github/workflows/e2e-staging.yml)** (deployed target) points every shard at one shared environment, so it pins `workers: 1`. Every test on a deployed target authenticates as one of a handful of static shared test users, so adding concurrency by sharding across runners — where Playwright keeps same-file tests together — is safer than in-process parallelism. If you see cross-test interference on a deployed run, suspect two shards mutating the same test user's state before you suspect a real regression.
 
-Raising the shard count is a matter of editing both `matrix.shard` and `matrix.total_shards` in the workflow; they must agree, since they become Playwright's `--shard=current/total`.
+Raising the shard count means editing both `shard` and `total_shards` in the workflow's matrix; they must agree, since they become Playwright's `--shard=current/total`.
+
+##### Why the deployed target shards each project separately
+
+Playwright balances shards by collected test count, which is a poor proxy for duration in this suite — the `apply/` flows take 60–90s each while most other tests take a few seconds. Two consequences shape the deployed matrix:
+
+1. On a deployed target, most spec files skip everything but Chrome. Those Mobile chrome tests are still collected, so a matrix shared between both projects hands entire runners work that skips in seconds while the Chrome shards carry the whole suite.
+2. `testDir` is walked alphabetically, so `apply/` always sorts first and its slow flows always land on the lowest-numbered shards.
+
+Because Playwright names its blob report after the shard number alone, two projects both running "shard 1" would each write `report-1.zip` and clobber each other when the report job merges them into one directory. The `shard_label` input on the e2e composite action gives each matrix entry a unique name for both the blob file and the artifact; it defaults to the shard number, so single-project runs need not set it.
 
 ## Unit testing
 

@@ -76,6 +76,9 @@ inputs:
   playwright_projects:
     description: "comma separated list of Playwright project (browser) names to run (e.g. Chrome). Leave blank to run every project defined for the target"
     default: ""
+  shard_label:
+    description: "unique name for this shard's blob report, used when a run shards more than one project and shard numbers would otherwise collide (e.g. chrome-1). Defaults to current_shard"
+    default: ""
 
 outputs:
   artifact-id:
@@ -157,6 +160,21 @@ runs:
           echo "api_url=https://api.grantee2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
         fi
 
+    # Playwright names its blob report after the shard number alone, so a run that
+    # shards two projects would have both projects write report-1.zip and collide
+    # once the report job merges them into one directory. shard_label
+    # gives each matrix entry its own name for both the file and the artifact.
+    - name: Name this shard's blob report
+      shell: bash
+      env:
+        SHARD_LABEL: ${{ inputs.shard_label }}
+        CURRENT_SHARD: ${{ inputs.current_shard }}
+        TARGET: ${{ inputs.target }}
+      run: |
+        label="${SHARD_LABEL:-$CURRENT_SHARD}"
+        echo "blob_output_name=report-${label}.zip" >> "$GITHUB_ENV"
+        echo "blob_report_name=blob-report-shard-${TARGET}-${label}" >> "$GITHUB_ENV"
+
     - name: Run specified e2e tests
       if: ${{ inputs.spec_files != '' }}
       working-directory: ./frontend
@@ -165,6 +183,7 @@ runs:
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_PROJECTS: ${{ inputs.playwright_projects }}
+        PLAYWRIGHT_BLOB_OUTPUT_NAME: ${{ env.blob_output_name }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
         PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
         PLAYWRIGHT_API_URL: ${{ env.api_url }}
@@ -187,6 +206,7 @@ runs:
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_PROJECTS: ${{ inputs.playwright_projects }}
+        PLAYWRIGHT_BLOB_OUTPUT_NAME: ${{ env.blob_output_name }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
         PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
         PLAYWRIGHT_API_URL: ${{ env.api_url }}
@@ -209,6 +229,7 @@ runs:
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_PROJECTS: ${{ inputs.playwright_projects }}
+        PLAYWRIGHT_BLOB_OUTPUT_NAME: ${{ env.blob_output_name }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
         PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
         PLAYWRIGHT_API_URL: ${{ env.api_url }}
@@ -256,6 +277,6 @@ runs:
       id: upload-blob-report
       uses: actions/upload-artifact@v7
       with:
-        name: blob-report-shard-${{ inputs.target }}-${{ inputs.current_shard }}
+        name: ${{ env.blob_report_name }}
         path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
         retention-days: 1

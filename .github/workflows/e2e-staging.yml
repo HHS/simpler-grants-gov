@@ -41,17 +41,36 @@ concurrency:
   cancel-in-progress: true
 jobs:
   e2e-tests-deployed:
+    name: E2E ${{ matrix.projects }} ${{ matrix.shard }}/${{ matrix.total_shards }}
     runs-on: ubuntu-22.04
     # Shard across runners rather than raising the per-runner worker count: the
     # deployed suite keeps workers at 1 (see the workers input below) because
     # every test authenticates as one of a handful of static shared test users,
     # so in-process parallelism is the riskier way to add concurrency.
+    #
+    # Each project gets its own shard count instead of sharing one matrix. On a
+    # deployed target, most spec files skip everything but Chrome (see
+    # utils/auth/skip-non-chrome-staging-utils.ts), so most Mobile chrome tests
+    # skip at runtime — but Playwright balances shards by collected test count,
+    # which means a shared matrix hands whole runners work that evaporates in
+    # seconds while the Chrome shards carry everything.
     strategy:
       # A scheduled regression run wants results for every shard, not an early exit.
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
-        total_shards: [4]
+        include:
+          - { projects: "Chrome", shard: 1, total_shards: 6, label: chrome-1 }
+          - { projects: "Chrome", shard: 2, total_shards: 6, label: chrome-2 }
+          - { projects: "Chrome", shard: 3, total_shards: 6, label: chrome-3 }
+          - { projects: "Chrome", shard: 4, total_shards: 6, label: chrome-4 }
+          - { projects: "Chrome", shard: 5, total_shards: 6, label: chrome-5 }
+          - { projects: "Chrome", shard: 6, total_shards: 6, label: chrome-6 }
+          - {
+              projects: "Mobile chrome",
+              shard: 1,
+              total_shards: 1,
+              label: mobile-1,
+            }
     steps:
       - name: Set target environment
         run: |
@@ -83,6 +102,8 @@ jobs:
           target: ${{ env.defaulted_target }}
           total_shards: ${{ matrix.total_shards }}
           current_shard: ${{ matrix.shard }}
+          playwright_projects: ${{ matrix.projects }}
+          shard_label: ${{ matrix.label }}
           workers: 1
           playwright_tags: ${{ env.test_group_tags }}
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
