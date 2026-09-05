@@ -231,7 +231,10 @@ test.describe("Key Contacts FieldList", () => {
          * The second entry may be in the DOM but not yet fully rendered by React.
          * Wait for multiple render cycles and then try multiple locator strategies.
          */
-        let firstSecondEntryField = null;
+        let firstSecondEntryField: ReturnType<
+          typeof waitForFieldToRender
+        > | null = null;
+        let lastError: Error | null = null;
         for (let attempt = 0; attempt < 3; attempt++) {
           try {
             await page.waitForLoadState("networkidle");
@@ -243,8 +246,12 @@ test.describe("Key Contacts FieldList", () => {
               10000,
             );
             break;
-          } catch {
-            if (attempt === 2) throw;
+          } catch (error) {
+            lastError =
+              error instanceof Error ? error : new Error(String(error));
+            if (attempt === 2 && lastError) {
+              throw lastError;
+            }
           }
         }
 
@@ -354,7 +361,9 @@ test.describe("Key Contacts FieldList", () => {
          * Verify values from the first FieldList entry persisted.
          * Skip applicant_organization_name as it's a form-level field, not a FieldList entry.
          */
-        for (const [fieldId, value] of Object.entries(firstEntryFieldListData)) {
+        for (const [fieldId, value] of Object.entries(
+          firstEntryFieldListData,
+        )) {
           if (fieldId === "applicant_organization_name") {
             continue;
           }
@@ -365,7 +374,9 @@ test.describe("Key Contacts FieldList", () => {
          * Verify values from the second FieldList entry persisted.
          * Skip applicant_organization_name as it's a form-level field, not a FieldList entry.
          */
-        for (const [fieldId, value] of Object.entries(secondEntryFieldListData)) {
+        for (const [fieldId, value] of Object.entries(
+          secondEntryFieldListData,
+        )) {
           if (fieldId === "applicant_organization_name") {
             continue;
           }
