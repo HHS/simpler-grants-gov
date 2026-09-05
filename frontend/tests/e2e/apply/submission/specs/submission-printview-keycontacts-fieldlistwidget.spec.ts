@@ -85,9 +85,9 @@ test.describe("Key Contacts FieldList", () => {
           throw new Error("Key Contacts form configuration was not found");
         }
 
-        const getFieldLocator = (fieldId: string): ReturnType<
-          typeof page.locator
-        > => {
+        const getFieldLocator = (
+          fieldId: string,
+        ): ReturnType<typeof page.locator> => {
           const fieldDef = keyContactsForm.formConfig.fields[fieldId];
           if (fieldDef?.selector) {
             return page.locator(fieldDef.selector);
@@ -107,9 +107,11 @@ test.describe("Key Contacts FieldList", () => {
           const testIdLocator = page.getByTestId(fieldDef?.testId ?? fieldId);
           const nameLocator = page.locator(`[name="${fieldId}"]`);
 
-          const candidateLocators: Array<
-            ReturnType<typeof page.locator>
-          > = [selectorLocator, testIdLocator, nameLocator].filter(
+          const candidateLocators: Array<ReturnType<typeof page.locator>> = [
+            selectorLocator,
+            testIdLocator,
+            nameLocator,
+          ].filter(
             (locator): locator is ReturnType<typeof page.locator> =>
               locator !== null,
           );
@@ -242,7 +244,8 @@ test.describe("Key Contacts FieldList", () => {
             );
             break;
           } catch (error) {
-            lastError = error instanceof Error ? error : new Error(String(error));
+            lastError =
+              error instanceof Error ? error : new Error(String(error));
             if (attempt === 2 && lastError) {
               throw lastError;
             }
@@ -355,7 +358,9 @@ test.describe("Key Contacts FieldList", () => {
          * Verify values from the first FieldList entry persisted.
          * Skip applicant_organization_name as it's a form-level field, not a FieldList entry.
          */
-        for (const [fieldId, value] of Object.entries(firstEntryFieldListData)) {
+        for (const [fieldId, value] of Object.entries(
+          firstEntryFieldListData,
+        )) {
           if (fieldId === "applicant_organization_name") {
             continue;
           }
@@ -366,7 +371,9 @@ test.describe("Key Contacts FieldList", () => {
          * Verify values from the second FieldList entry persisted.
          * Skip applicant_organization_name as it's a form-level field, not a FieldList entry.
          */
-        for (const [fieldId, value] of Object.entries(secondEntryFieldListData)) {
+        for (const [fieldId, value] of Object.entries(
+          secondEntryFieldListData,
+        )) {
           if (fieldId === "applicant_organization_name") {
             continue;
           }
