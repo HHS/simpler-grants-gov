@@ -41,7 +41,7 @@ services:
 
   s3mock:
     container_name: s3mock
-    image: adobe/s3mock:5.1.0
+    image: adobe/s3mock:5.2.0
     environment:
       - COM_ADOBE_TESTING_S3MOCK_STORE_ROOT=/containers3root
       - COM_ADOBE_TESTING_S3MOCK_STORE_RETAIN_FILES_ON_EXIT=true
@@ -142,7 +142,7 @@ services:
       - default
 
   mailpit:
-    image: axllent/mailpit:v1.30.4
+    image: axllent/mailpit:v1.31.1
     container_name: mailpit
     environment:
       # Keep the local inbox self-contained and avoid background version-check traffic.
