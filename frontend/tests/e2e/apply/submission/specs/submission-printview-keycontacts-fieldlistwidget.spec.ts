@@ -85,7 +85,9 @@ test.describe("Key Contacts FieldList", () => {
           throw new Error("Key Contacts form configuration was not found");
         }
 
-        const getFieldLocator = (fieldId: string) => {
+        const getFieldLocator = (
+          fieldId: string,
+        ): ReturnType<typeof page.locator> => {
           const fieldDef = keyContactsForm.formConfig.fields[fieldId];
           if (fieldDef?.selector) {
             return page.locator(fieldDef.selector);
@@ -97,13 +99,22 @@ test.describe("Key Contacts FieldList", () => {
         const waitForFieldToRender = async (
           fieldId: string,
           timeout = 30000,
-        ) => {
+        ): Promise<ReturnType<typeof page.locator>> => {
           const fieldDef = keyContactsForm.formConfig.fields[fieldId];
-          const candidateLocators = [
-            fieldDef?.selector ? page.locator(fieldDef.selector) : null,
-            page.getByTestId(fieldDef?.testId ?? fieldId),
-            page.locator(`[name="${fieldId}"]`),
-          ].filter(Boolean) as ReturnType<Page["locator"]>[];
+          const selectorLocator = fieldDef?.selector
+            ? page.locator(fieldDef.selector)
+            : null;
+          const testIdLocator = page.getByTestId(fieldDef?.testId ?? fieldId);
+          const nameLocator = page.locator(`[name="${fieldId}"]`);
+
+          const candidateLocators: Array<ReturnType<typeof page.locator>> = [
+            selectorLocator,
+            testIdLocator,
+            nameLocator,
+          ].filter(
+            (locator): locator is ReturnType<typeof page.locator> =>
+              locator !== null,
+          );
 
           for (const locator of candidateLocators) {
             try {
@@ -231,9 +242,8 @@ test.describe("Key Contacts FieldList", () => {
          * The second entry may be in the DOM but not yet fully rendered by React.
          * Wait for multiple render cycles and then try multiple locator strategies.
          */
-        let firstSecondEntryField: ReturnType<
-          typeof waitForFieldToRender
-        > | null = null;
+        let firstSecondEntryField: ReturnType<typeof page.locator> | null =
+          null;
         let lastError: Error | null = null;
         for (let attempt = 0; attempt < 3; attempt++) {
           try {
@@ -266,7 +276,7 @@ test.describe("Key Contacts FieldList", () => {
             timeout: 10000,
           });
         } catch {
-          await firstSecondEntryField.evaluate((element) =>
+          await firstSecondEntryField.evaluate((element: Element) =>
             element.scrollIntoView({
               behavior: "instant",
               block: "center",
