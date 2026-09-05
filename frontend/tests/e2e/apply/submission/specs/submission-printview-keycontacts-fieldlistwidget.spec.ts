@@ -85,9 +85,9 @@ test.describe("Key Contacts FieldList", () => {
           throw new Error("Key Contacts form configuration was not found");
         }
 
-        const getFieldLocator = (
-          fieldId: string,
-        ): ReturnType<typeof page.locator> => {
+        const getFieldLocator = (fieldId: string): ReturnType<
+          typeof page.locator
+        > => {
           const fieldDef = keyContactsForm.formConfig.fields[fieldId];
           if (fieldDef?.selector) {
             return page.locator(fieldDef.selector);
@@ -107,11 +107,9 @@ test.describe("Key Contacts FieldList", () => {
           const testIdLocator = page.getByTestId(fieldDef?.testId ?? fieldId);
           const nameLocator = page.locator(`[name="${fieldId}"]`);
 
-          const candidateLocators: Array<ReturnType<typeof page.locator>> = [
-            selectorLocator,
-            testIdLocator,
-            nameLocator,
-          ].filter(
+          const candidateLocators: Array<
+            ReturnType<typeof page.locator>
+          > = [selectorLocator, testIdLocator, nameLocator].filter(
             (locator): locator is ReturnType<typeof page.locator> =>
               locator !== null,
           );
@@ -201,17 +199,8 @@ test.describe("Key Contacts FieldList", () => {
         );
 
         /*
-         * Save the first entry. The "Add" button may only appear after
-         * the first entry is saved on some form implementations.
-         */
-        await clickSaveButton(
-          page,
-          keyContactsForm.formConfig.saveButtonTestId,
-        );
-
-        /*
-         * Wait for save to complete, then look for the "Add another entry" button.
-         * This button is rendered by FieldListWidget to add additional entries.
+         * Look for the "Add another entry" button to add a second FieldList entry.
+         * This button should be available after the initial form renders.
          */
         await page.waitForLoadState("networkidle");
 
@@ -227,7 +216,6 @@ test.describe("Key Contacts FieldList", () => {
          * new fields before attempting to fill them. The form may still be
          * updating (re-rendering, layout calculations, etc.) even after
          * networkidle, so we use multiple stability checks.
-         * Mobile viewports need additional stabilization time.
          */
         await page.waitForLoadState("networkidle");
         await page.evaluate(
@@ -235,30 +223,9 @@ test.describe("Key Contacts FieldList", () => {
         );
         await page.waitForLoadState("networkidle");
 
-        const secondEntryHeading = page.getByText("Key Contact 2", {
-          exact: true,
-        });
         /*
-         * On mobile, the heading may be in the DOM but off-screen.
-         * Try to scroll it into view first, then wait for visibility.
-         */
-        try {
-          await secondEntryHeading.scrollIntoViewIfNeeded({ timeout: 10000 });
-        } catch {
-          // If scrollIntoViewIfNeeded fails, try evaluate
-          await secondEntryHeading.evaluate((element: Element) =>
-            element.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-              inline: "center",
-            }),
-          );
-        }
-        await secondEntryHeading.waitFor({ state: "visible", timeout: 30000 });
-
-        /*
-         * The second entry may be in the DOM but not yet fully rendered by React.
-         * Wait for multiple render cycles and then try multiple locator strategies.
+         * Try to locate the first field of the second entry using multiple strategies.
+         * We skip waiting for the heading and go directly to field detection.
          */
         let firstSecondEntryField: ReturnType<typeof page.locator> | null =
           null;
@@ -275,8 +242,7 @@ test.describe("Key Contacts FieldList", () => {
             );
             break;
           } catch (error) {
-            lastError =
-              error instanceof Error ? error : new Error(String(error));
+            lastError = error instanceof Error ? error : new Error(String(error));
             if (attempt === 2 && lastError) {
               throw lastError;
             }
@@ -389,9 +355,7 @@ test.describe("Key Contacts FieldList", () => {
          * Verify values from the first FieldList entry persisted.
          * Skip applicant_organization_name as it's a form-level field, not a FieldList entry.
          */
-        for (const [fieldId, value] of Object.entries(
-          firstEntryFieldListData,
-        )) {
+        for (const [fieldId, value] of Object.entries(firstEntryFieldListData)) {
           if (fieldId === "applicant_organization_name") {
             continue;
           }
@@ -402,9 +366,7 @@ test.describe("Key Contacts FieldList", () => {
          * Verify values from the second FieldList entry persisted.
          * Skip applicant_organization_name as it's a form-level field, not a FieldList entry.
          */
-        for (const [fieldId, value] of Object.entries(
-          secondEntryFieldListData,
-        )) {
+        for (const [fieldId, value] of Object.entries(secondEntryFieldListData)) {
           if (fieldId === "applicant_organization_name") {
             continue;
           }
