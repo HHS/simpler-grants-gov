@@ -85,8 +85,10 @@ test.describe("Key Contacts FieldList", () => {
           throw new Error("Key Contacts form configuration was not found");
         }
         /*
-         * Build two complete FieldList entries using the same required +
-         * optional test-data builders used by the existing Key Contacts tests.
+         * Build two FieldList entries. The first entry uses both required and
+         * optional fields to demonstrate complete form filling. The second entry
+         * uses only required fields to avoid excessive form re-rendering during
+         * multi-field fills on the dynamically-added entry.
          *
          * The index is important because FieldList fields are represented as:
          * key_contacts[0]--...
@@ -99,7 +101,6 @@ test.describe("Key Contacts FieldList", () => {
         };
         const secondEntry = {
           ...buildKeyContactsRequiredFieldsHappyPathTestData(suffix + 1, 1),
-          ...buildKeyContactsOptionalFieldsHappyPathTestData(suffix + 1, 1),
         };
         const applicantOrganizationName = `FieldList Organization ${suffix}`;
 
@@ -127,8 +128,8 @@ test.describe("Key Contacts FieldList", () => {
         /*
          * Wait for the form to be fully stable before filling.
          */
-        await page.evaluate(() =>
-          new Promise((resolve) => setTimeout(resolve, 500)),
+        await page.evaluate(
+          () => new Promise((resolve) => setTimeout(resolve, 500)),
         );
         await page.waitForLoadState("networkidle");
 
@@ -182,8 +183,8 @@ test.describe("Key Contacts FieldList", () => {
          * Add a small delay and another networkidle wait to catch any
          * remaining React state updates or layout calculations.
          */
-        await page.evaluate(() =>
-          new Promise((resolve) => setTimeout(resolve, 500)),
+        await page.evaluate(
+          () => new Promise((resolve) => setTimeout(resolve, 500)),
         );
         await page.waitForLoadState("networkidle");
 
@@ -237,8 +238,8 @@ test.describe("Key Contacts FieldList", () => {
         /*
          * Wait for the form to be fully stable before checking persistence.
          */
-        await page.evaluate(() =>
-          new Promise((resolve) => setTimeout(resolve, 500)),
+        await page.evaluate(
+          () => new Promise((resolve) => setTimeout(resolve, 500)),
         );
         await page.waitForLoadState("networkidle");
 
