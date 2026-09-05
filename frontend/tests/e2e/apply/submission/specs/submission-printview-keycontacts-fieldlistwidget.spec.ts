@@ -158,6 +158,11 @@ test.describe("Key Contacts FieldList", () => {
             ([key]) => key !== "applicant_organization_name",
           ),
         ) as Record<string, string>;
+        const firstEntryPrintData = Object.fromEntries(
+          Object.entries(firstEntry).filter(
+            ([key]) => key !== "applicant_organization_name",
+          ),
+        ) as Record<string, string>;
 
         /*
          * Navigate to the Key Contacts form using openForm.
@@ -293,6 +298,11 @@ test.describe("Key Contacts FieldList", () => {
             ([key]) => key !== "applicant_organization_name",
           ),
         ) as Record<string, string>;
+        const secondEntryPrintData = Object.fromEntries(
+          Object.entries(secondEntry).filter(
+            ([key]) => key !== "applicant_organization_name",
+          ),
+        ) as Record<string, string>;
 
         /*
          * Fill the second dynamic entry through the same form metadata as the
@@ -401,8 +411,8 @@ test.describe("Key Contacts FieldList", () => {
          * Combine both FieldList entries along with the organization name.
          */
         const testData = {
-          ...firstEntry,
-          ...secondEntry,
+          ...firstEntryPrintData,
+          ...secondEntryPrintData,
           applicant_organization_name: applicantOrganizationName,
         };
 
@@ -430,12 +440,12 @@ test.describe("Key Contacts FieldList", () => {
          * the acceptance criteria require the print-view values to match the
          * values entered in the application.
          */
-        for (const [, value] of Object.entries(firstEntry)) {
+        for (const [, value] of Object.entries(firstEntryPrintData)) {
           await expect(
             page.getByText(value, { exact: true }).first(),
           ).toBeVisible();
         }
-        for (const [, value] of Object.entries(secondEntry)) {
+        for (const [, value] of Object.entries(secondEntryPrintData)) {
           await expect(
             page.getByText(value, { exact: true }).first(),
           ).toBeVisible();
