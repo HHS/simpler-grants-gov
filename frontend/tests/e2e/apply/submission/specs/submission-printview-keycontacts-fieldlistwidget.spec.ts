@@ -84,6 +84,40 @@ test.describe("Key Contacts FieldList", () => {
         if (!keyContactsForm) {
           throw new Error("Key Contacts form configuration was not found");
         }
+
+        const getFieldLocator = (fieldId: string) => {
+          const fieldDef = keyContactsForm.formConfig.fields[fieldId];
+          if (fieldDef?.selector) {
+            return page.locator(fieldDef.selector);
+          }
+
+          return page.getByTestId(fieldDef?.testId ?? fieldId);
+        };
+
+        const waitForFieldToRender = async (
+          fieldId: string,
+          timeout = 30000,
+        ) => {
+          const fieldDef = keyContactsForm.formConfig.fields[fieldId];
+          const candidateLocators = [
+            fieldDef?.selector ? page.locator(fieldDef.selector) : null,
+            page.getByTestId(fieldDef?.testId ?? fieldId),
+            page.locator(`[name="${fieldId}"]`),
+          ].filter(Boolean) as ReturnType<Page["locator"]>[];
+
+          for (const locator of candidateLocators) {
+            try {
+              await locator.waitFor({ state: "attached", timeout });
+              return locator;
+            } catch {
+              // Try the next locator strategy.
+            }
+          }
+
+          throw new Error(
+            `Field ${fieldId} did not render within ${timeout}ms`,
+          );
+        };
         /*
          * Build two FieldList entries. The first entry uses both required and
          * optional fields to demonstrate complete form filling. The second entry
@@ -180,13 +214,10 @@ test.describe("Key Contacts FieldList", () => {
         });
         await secondEntryHeading.waitFor({ state: "visible", timeout: 30000 });
 
-        const firstSecondEntryField = page.getByTestId(
+        const firstSecondEntryField = await waitForFieldToRender(
           "key_contacts[1]--project_role",
+          30000,
         );
-        await firstSecondEntryField.waitFor({
-          state: "attached",
-          timeout: 15000,
-        });
 
         try {
           await firstSecondEntryField.scrollIntoViewIfNeeded({
@@ -278,7 +309,7 @@ test.describe("Key Contacts FieldList", () => {
         await page.waitForLoadState("networkidle");
 
         await expect(
-          page.getByTestId("key_contacts[1]--project_role"),
+          getFieldLocator("key_contacts[1]--project_role"),
         ).toBeVisible();
         /*
          * Verify values from the first FieldList entry persisted.
@@ -289,7 +320,7 @@ test.describe("Key Contacts FieldList", () => {
             continue;
           }
           const stringValue = String(value);
-          await expect(page.getByTestId(fieldId)).toHaveValue(stringValue);
+          await expect(getFieldLocator(fieldId)).toHaveValue(stringValue);
         }
         /*
          * Verify values from the second FieldList entry persisted.
@@ -300,7 +331,7 @@ test.describe("Key Contacts FieldList", () => {
             continue;
           }
           const stringValue = String(value);
-          await expect(page.getByTestId(fieldId)).toHaveValue(stringValue);
+          await expect(getFieldLocator(fieldId)).toHaveValue(stringValue);
         }
         /*
          * Capture the print-view URL before leaving the form.
