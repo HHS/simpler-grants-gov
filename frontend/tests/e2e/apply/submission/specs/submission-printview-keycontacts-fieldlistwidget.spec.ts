@@ -227,15 +227,33 @@ test.describe("Key Contacts FieldList", () => {
          * new fields before attempting to fill them. The form may still be
          * updating (re-rendering, layout calculations, etc.) even after
          * networkidle, so we use multiple stability checks.
+         * Mobile viewports need additional stabilization time.
          */
         await page.waitForLoadState("networkidle");
         await page.evaluate(
-          () => new Promise((resolve) => setTimeout(resolve, 1000)),
+          () => new Promise((resolve) => setTimeout(resolve, 1500)),
         );
+        await page.waitForLoadState("networkidle");
 
         const secondEntryHeading = page.getByText("Key Contact 2", {
           exact: true,
         });
+        /*
+         * On mobile, the heading may be in the DOM but off-screen.
+         * Try to scroll it into view first, then wait for visibility.
+         */
+        try {
+          await secondEntryHeading.scrollIntoViewIfNeeded({ timeout: 10000 });
+        } catch {
+          // If scrollIntoViewIfNeeded fails, try evaluate
+          await secondEntryHeading.evaluate((element: Element) =>
+            element.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "center",
+            }),
+          );
+        }
         await secondEntryHeading.waitFor({ state: "visible", timeout: 30000 });
 
         /*
