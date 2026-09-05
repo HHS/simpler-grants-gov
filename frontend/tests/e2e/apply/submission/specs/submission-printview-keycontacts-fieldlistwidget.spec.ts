@@ -174,9 +174,16 @@ test.describe("Key Contacts FieldList", () => {
          * networkidle, so we use multiple stability checks.
          */
         await page.waitForLoadState("networkidle");
-        await expect(
-          page.getByTestId("key_contacts[1]--project_role"),
-        ).toBeVisible({ timeout: 30000 });
+
+        /*
+         * On mobile, new FieldList entries may be rendered below the fold.
+         * Scroll to the first field of the new entry to bring it into view.
+         */
+        const firstSecondEntryField = page.getByTestId(
+          "key_contacts[1]--project_role",
+        );
+        await firstSecondEntryField.scrollIntoViewIfNeeded({ timeout: 10000 });
+        await expect(firstSecondEntryField).toBeVisible({ timeout: 15000 });
 
         /*
          * Wait for the form to be fully stable before filling.

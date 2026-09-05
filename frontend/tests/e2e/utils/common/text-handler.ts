@@ -49,7 +49,23 @@ export const textHandler: FieldHandler = async (
   // Use longer timeout (10s) for field attachment to handle lazy-loaded
   // fields on mobile where form rendering may be progressive/async.
   await locator.waitFor({ state: "attached", timeout: 10000 });
-  await locator.scrollIntoViewIfNeeded();
+
+  // On mobile, scrollIntoViewIfNeeded can stall indefinitely for fields that are
+  // already rendered but below the fold or in a progressive layout. Give it a
+  // bounded timeout and then fall back to a direct DOM scroll so the test can
+  // continue without hanging the whole suite.
+  try {
+    await locator.scrollIntoViewIfNeeded({ timeout: 10000 });
+  } catch {
+    await locator.evaluate((element) => {
+      element.scrollIntoView({
+        behavior: "instant",
+        block: "center",
+        inline: "center",
+      });
+    });
+  }
+
   await locator.waitFor({ state: "visible", timeout: 5000 });
   await locator.fill(data);
 };
