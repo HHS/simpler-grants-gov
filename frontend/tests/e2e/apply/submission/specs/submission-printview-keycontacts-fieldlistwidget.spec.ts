@@ -175,14 +175,33 @@ test.describe("Key Contacts FieldList", () => {
          */
         await page.waitForLoadState("networkidle");
 
-        /*
-         * On mobile, new FieldList entries may be rendered below the fold.
-         * Scroll to the first field of the new entry to bring it into view.
-         */
+        const secondEntryHeading = page.getByText("Key Contact 2", {
+          exact: true,
+        });
+        await secondEntryHeading.waitFor({ state: "visible", timeout: 30000 });
+
         const firstSecondEntryField = page.getByTestId(
           "key_contacts[1]--project_role",
         );
-        await firstSecondEntryField.scrollIntoViewIfNeeded({ timeout: 10000 });
+        await firstSecondEntryField.waitFor({
+          state: "attached",
+          timeout: 15000,
+        });
+
+        try {
+          await firstSecondEntryField.scrollIntoViewIfNeeded({
+            timeout: 10000,
+          });
+        } catch {
+          await firstSecondEntryField.evaluate((element) =>
+            element.scrollIntoView({
+              behavior: "instant",
+              block: "center",
+              inline: "center",
+            }),
+          );
+        }
+
         await expect(firstSecondEntryField).toBeVisible({ timeout: 15000 });
 
         /*
@@ -196,14 +215,61 @@ test.describe("Key Contacts FieldList", () => {
         await page.waitForLoadState("networkidle");
 
         /*
-         * Fill the second FieldList entry using fillFormPartial.
+         * Fill the second FieldList entry directly, instead of the generic
+         * partial-fill loop, to avoid the dynamic widget re-render churn that
+         * can happen on mobile when many fields are filled via the shared
+         * handlers at once.
          */
-        await fillFormPartial(
-          testInfo,
-          page,
-          keyContactsForm.formConfig.fields,
-          secondEntry,
-        );
+        const requiredFields = [
+          [
+            "key_contacts[1]--project_role",
+            secondEntry["key_contacts[1]--project_role"],
+          ],
+          [
+            "key_contacts[1]--name--first_name",
+            secondEntry["key_contacts[1]--name--first_name"],
+          ],
+          [
+            "key_contacts[1]--name--last_name",
+            secondEntry["key_contacts[1]--name--last_name"],
+          ],
+          [
+            "key_contacts[1]--address--street1",
+            secondEntry["key_contacts[1]--address--street1"],
+          ],
+          [
+            "key_contacts[1]--address--city",
+            secondEntry["key_contacts[1]--address--city"],
+          ],
+          [
+            "key_contacts[1]--address--country",
+            secondEntry["key_contacts[1]--address--country"],
+          ],
+          [
+            "key_contacts[1]--address--zip_code",
+            secondEntry["key_contacts[1]--address--zip_code"],
+          ],
+          ["key_contacts[1]--phone", secondEntry["key_contacts[1]--phone"]],
+          ["key_contacts[1]--email", secondEntry["key_contacts[1]--email"]],
+        ] as const;
+
+        for (const [testId, value] of requiredFields) {
+          const input = page.getByTestId(testId);
+          await input.waitFor({ state: "attached", timeout: 15000 });
+          try {
+            await input.scrollIntoViewIfNeeded({ timeout: 10000 });
+          } catch {
+            await input.evaluate((element) =>
+              element.scrollIntoView({
+                behavior: "instant",
+                block: "center",
+                inline: "center",
+              }),
+            );
+          }
+          await input.waitFor({ state: "visible", timeout: 15000 });
+          await input.fill(String(value));
+        }
 
         /*
          * Save the form.
