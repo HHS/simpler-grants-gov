@@ -139,6 +139,16 @@ test.describe("Key Contacts FieldList", () => {
         const applicantOrganizationName = `FieldList Organization ${suffix}`;
 
         /*
+         * Extract only the FieldList entry fields (key_contacts[index]--*),
+         * excluding the form-level applicant_organization_name.
+         */
+        const firstEntryFieldListData = Object.fromEntries(
+          Object.entries(firstEntry).filter(
+            ([key]) => key !== "applicant_organization_name",
+          ),
+        ) as Record<string, string>;
+
+        /*
          * Navigate to the Key Contacts form using openForm.
          */
         const formMatcher = /key contacts/i;
@@ -169,7 +179,7 @@ test.describe("Key Contacts FieldList", () => {
 
         const initialTestData = {
           applicant_organization_name: applicantOrganizationName,
-          ...firstEntry,
+          ...firstEntryFieldListData,
         };
 
         await fillFormPartial(
@@ -208,16 +218,41 @@ test.describe("Key Contacts FieldList", () => {
          * networkidle, so we use multiple stability checks.
          */
         await page.waitForLoadState("networkidle");
+        await page.evaluate(
+          () => new Promise((resolve) => setTimeout(resolve, 1000)),
+        );
 
         const secondEntryHeading = page.getByText("Key Contact 2", {
           exact: true,
         });
         await secondEntryHeading.waitFor({ state: "visible", timeout: 30000 });
 
-        const firstSecondEntryField = await waitForFieldToRender(
-          "key_contacts[1]--project_role",
-          30000,
-        );
+        /*
+         * The second entry may be in the DOM but not yet fully rendered by React.
+         * Wait for multiple render cycles and then try multiple locator strategies.
+         */
+        let firstSecondEntryField = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            await page.waitForLoadState("networkidle");
+            await page.evaluate(
+              () => new Promise((resolve) => setTimeout(resolve, 500)),
+            );
+            firstSecondEntryField = await waitForFieldToRender(
+              "key_contacts[1]--project_role",
+              10000,
+            );
+            break;
+          } catch {
+            if (attempt === 2) throw;
+          }
+        }
+
+        if (!firstSecondEntryField) {
+          throw new Error(
+            "Could not locate key_contacts[1]--project_role after 3 attempts",
+          );
+        }
 
         try {
           await firstSecondEntryField.scrollIntoViewIfNeeded({
@@ -246,21 +281,25 @@ test.describe("Key Contacts FieldList", () => {
         await page.waitForLoadState("networkidle");
 
         /*
+         * Extract only the FieldList entry fields (key_contacts[index]--*),
+         * excluding the form-level applicant_organization_name.
+         */
+        const secondEntryFieldListData = Object.fromEntries(
+          Object.entries(secondEntry).filter(
+            ([key]) => key !== "applicant_organization_name",
+          ),
+        ) as Record<string, string>;
+
+        /*
          * Fill the second dynamic entry through the same form metadata as the
          * first entry so selector-backed fields (like country/state) are handled
          * with the correct handlers instead of being treated as raw text inputs.
          */
-        const secondEntryData = Object.fromEntries(
-          Object.entries(secondEntry).filter(
-            ([fieldKey]) => fieldKey in keyContactsForm.formConfig.fields,
-          ),
-        ) as Record<string, string>;
-
         await fillFormPartial(
           testInfo,
           page,
           keyContactsForm.formConfig.fields,
-          secondEntryData,
+          secondEntryFieldListData,
         );
 
         /*
@@ -315,7 +354,7 @@ test.describe("Key Contacts FieldList", () => {
          * Verify values from the first FieldList entry persisted.
          * Skip applicant_organization_name as it's a form-level field, not a FieldList entry.
          */
-        for (const [fieldId, value] of Object.entries(firstEntry)) {
+        for (const [fieldId, value] of Object.entries(firstEntryFieldListData)) {
           if (fieldId === "applicant_organization_name") {
             continue;
           }
@@ -326,7 +365,7 @@ test.describe("Key Contacts FieldList", () => {
          * Verify values from the second FieldList entry persisted.
          * Skip applicant_organization_name as it's a form-level field, not a FieldList entry.
          */
-        for (const [fieldId, value] of Object.entries(secondEntry)) {
+        for (const [fieldId, value] of Object.entries(secondEntryFieldListData)) {
           if (fieldId === "applicant_organization_name") {
             continue;
           }
