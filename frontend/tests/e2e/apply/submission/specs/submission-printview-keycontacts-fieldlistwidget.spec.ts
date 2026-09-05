@@ -215,61 +215,22 @@ test.describe("Key Contacts FieldList", () => {
         await page.waitForLoadState("networkidle");
 
         /*
-         * Fill the second FieldList entry directly, instead of the generic
-         * partial-fill loop, to avoid the dynamic widget re-render churn that
-         * can happen on mobile when many fields are filled via the shared
-         * handlers at once.
+         * Fill the second dynamic entry through the same form metadata as the
+         * first entry so selector-backed fields (like country/state) are handled
+         * with the correct handlers instead of being treated as raw text inputs.
          */
-        const requiredFields = [
-          [
-            "key_contacts[1]--project_role",
-            secondEntry["key_contacts[1]--project_role"],
-          ],
-          [
-            "key_contacts[1]--name--first_name",
-            secondEntry["key_contacts[1]--name--first_name"],
-          ],
-          [
-            "key_contacts[1]--name--last_name",
-            secondEntry["key_contacts[1]--name--last_name"],
-          ],
-          [
-            "key_contacts[1]--address--street1",
-            secondEntry["key_contacts[1]--address--street1"],
-          ],
-          [
-            "key_contacts[1]--address--city",
-            secondEntry["key_contacts[1]--address--city"],
-          ],
-          [
-            "key_contacts[1]--address--country",
-            secondEntry["key_contacts[1]--address--country"],
-          ],
-          [
-            "key_contacts[1]--address--zip_code",
-            secondEntry["key_contacts[1]--address--zip_code"],
-          ],
-          ["key_contacts[1]--phone", secondEntry["key_contacts[1]--phone"]],
-          ["key_contacts[1]--email", secondEntry["key_contacts[1]--email"]],
-        ] as const;
+        const secondEntryData = Object.fromEntries(
+          Object.entries(secondEntry).filter(
+            ([fieldKey]) => fieldKey in keyContactsForm.formConfig.fields,
+          ),
+        ) as Record<string, string>;
 
-        for (const [testId, value] of requiredFields) {
-          const input = page.getByTestId(testId);
-          await input.waitFor({ state: "attached", timeout: 15000 });
-          try {
-            await input.scrollIntoViewIfNeeded({ timeout: 10000 });
-          } catch {
-            await input.evaluate((element) =>
-              element.scrollIntoView({
-                behavior: "instant",
-                block: "center",
-                inline: "center",
-              }),
-            );
-          }
-          await input.waitFor({ state: "visible", timeout: 15000 });
-          await input.fill(String(value));
-        }
+        await fillFormPartial(
+          testInfo,
+          page,
+          keyContactsForm.formConfig.fields,
+          secondEntryData,
+        );
 
         /*
          * Save the form.
