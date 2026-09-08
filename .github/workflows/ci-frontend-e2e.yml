@@ -108,6 +108,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
+          repository: ${{ github.event.repository.full_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -174,6 +177,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
+          repository: ${{ github.event.repository.full_name }}
 
       - name: Restore API Docker image cached
         id: restore-docker-image-cached
@@ -229,6 +235,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
+          repository: ${{ github.event.repository.full_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -491,7 +500,7 @@ jobs:
           E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
         if: ${{ env.E2E_UTILS_CHANGED == 'true' }}
         with:
-          version: ${{ inputs.version || github.ref }}
+          version: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
           target: "local"
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}
@@ -516,7 +525,7 @@ jobs:
           E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
         if: ${{ env.E2E_UTILS_CHANGED != 'true' }}
         with:
-          version: ${{ inputs.version || github.ref }}
+          version: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
           target: "local"
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}
@@ -542,7 +551,7 @@ jobs:
           E2E_SPECS_CHANGED: ${{ steps.changed-e2e-spec-files.outputs.all_changed_files }}
         if: ${{ env.E2E_SPECS_CHANGED != '' && env.E2E_UTILS_CHANGED != 'true' }}
         with:
-          version: ${{ inputs.version || github.ref }}
+          version: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
           target: "local"
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}
