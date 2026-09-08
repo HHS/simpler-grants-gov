@@ -446,6 +446,18 @@ jobs:
             echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
           fi
 
+      # PRs run Chrome only.
+      # Cross-browser coverage still runs on push to main and in the daily/weekly
+      # scheduled runs, which leave playwright_projects blank to get every project.
+      - name: Determine browsers to run
+        shell: bash
+        run: |
+          if [[ $GITHUB_EVENT_NAME = "pull_request" ]]; then
+            echo "playwright_projects=Chrome" >> "$GITHUB_ENV"
+          else
+            echo "playwright_projects=" >> "$GITHUB_ENV"
+          fi
+
       #
       #   TEST RUNS
       #
@@ -481,10 +493,13 @@ jobs:
           # committed LOCAL_TEST_USER_MANAGER_API_KEY default from api/local.env,
           # so the frontend must send that same literal value.
           test_user_manager_api_key: "local-manager-key"
+          playwright_projects: ${{ env.playwright_projects }}
+          # Only install the non-Chrome browsers when the run isn't narrowed to a
+          # project list (i.e. everything except PRs).
           # shard 2 is the firefox shard
-          do-firefox-install: ${{ matrix.shard == 2 && 'true' || 'false' }}
+          do-firefox-install: ${{ env.playwright_projects == '' && matrix.shard == 2 && 'true' || 'false' }}
           # shard 3 is the webkit shard
-          do-webkit-install: ${{ matrix.shard == 3 && 'true' || 'false' }}
+          do-webkit-install: ${{ env.playwright_projects == '' && matrix.shard == 3 && 'true' || 'false' }}
 
       - name: Run E2E tests
         uses: ./.github/actions/e2e
@@ -503,10 +518,13 @@ jobs:
           # committed LOCAL_TEST_USER_MANAGER_API_KEY default from api/local.env,
           # so the frontend must send that same literal value.
           test_user_manager_api_key: "local-manager-key"
+          playwright_projects: ${{ env.playwright_projects }}
+          # Only install the non-Chrome browsers when the run isn't narrowed to a
+          # project list (i.e. everything except PRs).
           # shard 2 is the firefox shard
-          do-firefox-install: ${{ matrix.shard == 2 && 'true' || 'false' }}
+          do-firefox-install: ${{ env.playwright_projects == '' && matrix.shard == 2 && 'true' || 'false' }}
           # shard 3 is the webkit shard
-          do-webkit-install: ${{ matrix.shard == 3 && 'true' || 'false' }}
+          do-webkit-install: ${{ env.playwright_projects == '' && matrix.shard == 3 && 'true' || 'false' }}
 
       - name: Run E2E tests for changed spec files
         uses: ./.github/actions/e2e
@@ -527,10 +545,13 @@ jobs:
           # committed LOCAL_TEST_USER_MANAGER_API_KEY default from api/local.env,
           # so the frontend must send that same literal value.
           test_user_manager_api_key: "local-manager-key"
+          playwright_projects: ${{ env.playwright_projects }}
+          # Only install the non-Chrome browsers when the run isn't narrowed to a
+          # project list (i.e. everything except PRs).
           # shard 2 is the firefox shard
-          do-firefox-install: ${{ matrix.shard == 2 && 'true' || 'false' }}
+          do-firefox-install: ${{ env.playwright_projects == '' && matrix.shard == 2 && 'true' || 'false' }}
           # shard 3 is the webkit shard
-          do-webkit-install: ${{ matrix.shard == 3 && 'true' || 'false' }}
+          do-webkit-install: ${{ env.playwright_projects == '' && matrix.shard == 3 && 'true' || 'false' }}
 
   create-report:
     name: Create Merged Test Report
