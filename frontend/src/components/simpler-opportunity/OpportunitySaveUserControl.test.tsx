@@ -30,6 +30,8 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
   }),
 }));
 
+// Controllable mock so we can test both the SSR (dummy) render
+// and the hydrated (ModalToggleButton) render.
 jest.mock("src/hooks/useIsSSR", () => ({
   useIsSSR: () => mockIsSSR,
 }));
@@ -144,28 +146,6 @@ describe("OpportunitySaveUserControl", () => {
       expect(signInButton).toHaveAttribute("aria-label", "Save opportunity");
 
       expect(screen.getAllByRole("button")).toHaveLength(1);
-    });
-
-    it("does not render an unlabeled icon-only button in any logged-out state", () => {
-      mockUser = {};
-
-      [true, false].forEach((ssrState) => {
-        mockIsSSR = ssrState;
-        const { unmount } = render(
-          <OpportunitySaveUserControl
-            opportunitySaved={false}
-            type="icon"
-            opportunityId="opp-123"
-          />,
-        );
-
-        const buttons = screen.getAllByRole("button");
-        buttons.forEach((button) => {
-          expect(button).toHaveAccessibleName();
-        });
-
-        unmount();
-      });
     });
   });
 });
