@@ -15,8 +15,13 @@ on:
         type: string
   workflow_call:
     inputs:
+      version:
+        description: "git reference for testing code to run (e.g., a branch, tag, or commit SHA)"
+        required: false
+        type: string
       api_logs:
         description: "print api logs on failure?"
+        required: false
         default: false
         type: boolean
       playwright_tags:
@@ -482,7 +487,7 @@ jobs:
           E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
         if: ${{ env.E2E_UTILS_CHANGED == 'true' }}
         with:
-          version: ${{ github.ref }}
+          version: ${{ inputs.version || github.ref }}
           target: "local"
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}
@@ -507,7 +512,7 @@ jobs:
           E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
         if: ${{ env.E2E_UTILS_CHANGED != 'true' }}
         with:
-          version: ${{ github.ref }}
+          version: ${{ inputs.version || github.ref }}
           target: "local"
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}
@@ -533,7 +538,7 @@ jobs:
           E2E_SPECS_CHANGED: ${{ steps.changed-e2e-spec-files.outputs.all_changed_files }}
         if: ${{ env.E2E_SPECS_CHANGED != '' && env.E2E_UTILS_CHANGED != 'true' }}
         with:
-          version: ${{ github.ref }}
+          version: ${{ inputs.version || github.ref }}
           target: "local"
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}

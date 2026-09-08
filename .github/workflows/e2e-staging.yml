@@ -22,6 +22,7 @@ on:
           - grantor2
       playwright_tags:
         description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
+        required: false
         type: string
   workflow_call:
     inputs:
@@ -31,10 +32,12 @@ on:
         type: string
       target:
         description: "application environment to run tests against (dev / prod TK)"
+        required: false
         default: "staging"
         type: string
       playwright_tags:
         description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
+        required: false
         type: string
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.target || 'staging' }}-${{ github.ref }}
