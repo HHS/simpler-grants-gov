@@ -5,6 +5,10 @@ on:
       - "main"
   workflow_dispatch:
     inputs:
+      version:
+        description: "git reference for testing code to run (e.g., a branch, tag, or commit SHA)"
+        required: false
+        type: string
       api_logs:
         description: "print api logs on failure?"
         default: false
@@ -59,13 +63,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          ref: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
           repository: ${{ github.event.repository.full_name }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-api-commit-hash
         env:
-          CLEAN_REF: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          CLEAN_REF: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
         run: |
           cd ..
           COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
@@ -81,13 +85,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          ref: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
           repository: ${{ github.event.repository.full_name }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-frontend-commit-hash
         env:
-          CLEAN_REF: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          CLEAN_REF: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
         run: |
           cd ..
           COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
