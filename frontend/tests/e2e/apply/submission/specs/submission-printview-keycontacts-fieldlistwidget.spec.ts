@@ -430,15 +430,11 @@ test.describe("Key Contacts FieldList", () => {
         ];
 
         /*
-         * Keep the existing print-view validation as a broad regression check.
+         * Print-view validation as a broad regression check.
          */
         await validateAllPrintViews(page, filledForms);
         /*
          * Explicitly verify values from both FieldList entries.
-         *
-         * This is intentionally separate from validateAllPrintViews() because
-         * the acceptance criteria require the print-view values to match the
-         * values entered in the application.
          */
         for (const [, value] of Object.entries(firstEntryPrintData)) {
           await expect(
