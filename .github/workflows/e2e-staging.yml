@@ -1,8 +1,5 @@
 name: E2E Tests (Deployed Target)
 on:
-  push:
-    branches:
-      - "main"
   workflow_dispatch:
     inputs:
       version:
@@ -40,7 +37,7 @@ on:
         required: false
         type: string
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.target || 'staging' }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ inputs.target || 'staging' }}-${{ inputs.version || github.ref }}
   cancel-in-progress: true
 jobs:
   e2e-tests-deployed:
@@ -90,14 +87,13 @@ jobs:
           fi
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version || github.ref }}
       - name: Determine test groups to run
         shell: bash
         run: |
-          if [[ $GITHUB_EVENT_NAME = "push" ]]; then
-            echo "test_group_tags=@smoke|@core-regression" >> "$GITHUB_ENV"
-          else
-            echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
-          fi
+          echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
+
       - name: Run E2E tests
         uses: ./.github/actions/e2e
         with:
