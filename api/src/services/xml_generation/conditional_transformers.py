@@ -118,6 +118,13 @@ def _apply_compose_object_transform(
         if value is not None:
             result[target_field] = value
 
+    # Some composed elements also need XML attributes pulled from root-level source
+    # fields (e.g. an attribute like ReportEntityType that lives alongside, rather than
+    # inside, the fields being composed into this element). Each entry in "attributes"
+    # maps an XML attribute name to a dotted source path; only attributes whose source
+    # value actually resolves to something are included. This is generic compose_object
+    # behavior, not specific to any one form - any form config that sets "attributes"
+    # on a compose_object rule will get this behavior.
     attributes = transform_config.get("attributes", {})
     if attributes:
         result["__attributes"] = {

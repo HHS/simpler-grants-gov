@@ -708,7 +708,7 @@ FORM_XML_TRANSFORM_RULES = {
     },
     # Federal program name wrapper (contains program name and CFDA number)
     "federal_program_wrapper": {
-        "enabled": False,
+        "disabled": True,
         "xml_transform": {
             "target": "FederalProgramName",
             "type": "nested_object",

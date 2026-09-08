@@ -95,7 +95,7 @@ class RecursiveXMLTransformer:
             if key.startswith("_"):
                 continue
             # Skip disabled rules
-            if isinstance(rule_config, dict) and rule_config.get("enabled") is False:
+            if isinstance(rule_config, dict) and rule_config.get("disabled") is True:
                 continue
 
             # Process XML transformation rules
@@ -135,10 +135,25 @@ class RecursiveXMLTransformer:
         transform_type = transform_rule.get("type", "simple")
         source_value = get_nested_value(source_data, current_path)
 
-        # Some XML wrappers are synthetic and have no matching source object.
-        # Let their child mappings read from the root payload.
+        # Some XML wrappers are synthetic and have no matching source object at
+        # all (e.g. SF-LLL's MaterialChangeSupplement isn't a literal field in
+        # the payload) - let their child mappings read from the root payload.
+        # But if the key *does* exist in the source data and was simply set to
+        # None explicitly (a real, non-synthetic wrapper the caller left
+        # empty), leave source_value as None instead of substituting the root
+        # payload - otherwise object_value.get(child_key) below could
+        # accidentally pick up unrelated sibling fields that happen to share
+        # a name with one of this wrapper's child keys.
         if transform_type == "nested_object" and source_value is None:
-            source_value = source_data
+            parent_path = current_path[:-1]
+            parent_source = (
+                get_nested_value(source_data, parent_path) if parent_path else source_data
+            )
+            key_exists_but_none = (
+                isinstance(parent_source, dict) and current_path[-1] in parent_source
+            )
+            if not key_exists_but_none:
+                source_value = source_data
 
         # Handle None values based on configuration
         processed_source_value = self._handle_none_values(
@@ -344,6 +359,12 @@ class RecursiveXMLTransformer:
                 return None
 
             object_value = source_value.copy()
+            # Some nested objects (e.g. SF-LLL's IndividualsPerformingServices) don't carry
+            # their own entity_type field, but the XML attribute still needs to reflect the
+            # type of the entity one level up (e.g. reporting_entity.entity_type). Walk up the
+            # path to find the nearest ancestor object that does define entity_type and inherit
+            # it here. This is a generic mechanism (not SFLLL-specific), but it's a no-op for
+            # any other form type whose nested objects already define entity_type themselves.
             if "entity_type" not in object_value and len(path) >= 2:
                 parent_source: Any = self.root_source_data
                 for segment in path[:-1]:
@@ -371,7 +392,7 @@ class RecursiveXMLTransformer:
                     # attr_source_path can be a simple field name, a dotted path, or a static/literal value
                     if "." in attr_source_path:
                         # It's a dotted path - not supported yet for parent attributes
-                        # For now, just get from current source_value
+                        # For now, just get from current object_value
                         path_parts = attr_source_path.split(".")
                         if path_parts[0] in object_value:
                             attributes[attr_name] = object_value[path_parts[0]]
