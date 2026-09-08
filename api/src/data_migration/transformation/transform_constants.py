@@ -20,6 +20,7 @@ ORPHANED_CFDA = "orphaned_cfda"
 ORPHANED_HISTORICAL_RECORD = "orphaned_historical_record"
 ORPHANED_DELETE_RECORD = "orphaned_delete_record"
 ORPHANED_COMPETITION = "orphaned_competition"
+ORPHANED_COMPETITION_INSTRUCTION = "orphaned_competition_instruction"
 
 OPPORTUNITY = "opportunity"
 ASSISTANCE_LISTING = "assistance_listing"
