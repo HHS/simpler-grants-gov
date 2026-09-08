@@ -102,9 +102,6 @@ export const OpportunitySaveUserControl = ({
             onClick={userSavedOppCallback}
             loading={loading}
             saved={displayAsSaved}
-            aria-label={
-              displayAsSaved ? "Saved opportunity" : "Save opportunity"
-            }
           />
         ) : isSSR ? (
           <button
