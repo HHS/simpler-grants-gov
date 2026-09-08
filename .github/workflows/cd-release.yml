@@ -133,12 +133,11 @@ jobs:
       app_name: "frontend"
       environment: ${{ inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment || 'prod' }}
       version: ${{ inputs.version || github.ref }}
-
-  
+      
   e2e-test-staging:
     name: E2E Staging (on Deploy)
     needs: [deploy-frontend]
-    if: ${{ !cancelled() && (inputs.environment == 'prod' || github.event_name == 'release') }}
+    if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
     uses: ./.github/workflows/e2e-staging.yml
     secrets: inherit
     with:

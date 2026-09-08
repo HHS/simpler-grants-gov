@@ -88,7 +88,7 @@ jobs:
   e2e-test-staging:
     name: E2E Staging (post-deploy)
     needs: [deploy]
-    if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     uses: ./.github/workflows/e2e-staging.yml
     secrets: inherit
     with:
