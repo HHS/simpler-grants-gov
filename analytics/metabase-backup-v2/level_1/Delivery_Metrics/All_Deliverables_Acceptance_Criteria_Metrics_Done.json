@@ -1,0 +1,82 @@
+{
+  "name": "All Deliverables - Acceptance Criteria+Metrics Done",
+  "display": "row",
+  "visualization_settings": {
+    "graph.show_goal": false,
+    "graph.y_axis.title_text": "total",
+    "graph.show_values": true,
+    "table.cell_column": "total_issues",
+    "graph.goal_label": "100%",
+    "graph.series_order_dimension": null,
+    "graph.x_axis.title_text": "deliverable",
+    "graph.goal_value": 100,
+    "graph.metrics": [
+      "done_indicators",
+      "open_indicators"
+    ],
+    "graph.label_value_formatting": "compact",
+    "graph.series_order": null,
+    "table.pivot_column": "issues_with_points",
+    "column_settings": {},
+    "series_settings": {
+      "done_indicators": {
+        "title": "done ",
+        "color": "#69C8C8"
+      },
+      "open_indicators": {
+        "title": "not done",
+        "color": "#C7EAEA"
+      }
+    },
+    "graph.y_axis.auto_range": true,
+    "graph.dimensions": [
+      "deliverable_title"
+    ],
+    "stackable.stack_type": "stacked"
+  },
+  "template_tags": {
+    "quad": {
+      "widget-type": "string/=",
+      "default": [
+        "Quad 3"
+      ],
+      "name": "quad",
+      "type": "dimension",
+      "id": "ad4b53aa-9fe3-44c6-bb29-eb0a41b4b32c",
+      "dimension": [
+        "field",
+        310,
+        {
+          "base-type": "type/Text",
+          "effective-type": "type/Text"
+        }
+      ],
+      "display-name": "Quad",
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_quad",
+        "column": "name"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "id": "ad4b53aa-9fe3-44c6-bb29-eb0a41b4b32c",
+      "type": "string/=",
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "quad"
+        ]
+      ],
+      "name": "Quad",
+      "slug": "quad",
+      "default": [
+        "Quad 3"
+      ],
+      "required": true
+    }
+  ]
+}

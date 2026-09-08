@@ -11,6 +11,7 @@
 
 import pino from "pino";
 import { environment } from "src/constants/environments";
+import { resolveExternalRequestUrl } from "src/utils/middlewareSafeUtils";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -38,7 +39,11 @@ const pinoConfig =
 
 export const logger = pino(pinoConfig);
 
-export const logRequest = (request: NextRequest, response?: NextResponse) => {
+export const logRequest = (
+  request: NextRequest,
+  response?: NextResponse,
+  correlationId: string | null = null,
+) => {
   // note that we can't use lodash in middleware, so some of this is being done extra manually
   const { url, method, headers } = request;
 
@@ -52,7 +57,7 @@ export const logRequest = (request: NextRequest, response?: NextResponse) => {
   if (!isPrefetch) {
     if (!url.endsWith("/health") || Math.random() * 10 <= 1) {
       logger.info({
-        url,
+        url: resolveExternalRequestUrl(request),
         method,
         userAgent: headers.get("user-agent"),
         acceptLanguage: headers.get("accept-language"),
@@ -60,6 +65,7 @@ export const logRequest = (request: NextRequest, response?: NextResponse) => {
         statusCode: response?.status,
         cacheControl: response?.headers?.get("cache-control"),
         hasSessionCookie: request.cookies.get("session") !== undefined,
+        correlation_id: correlationId,
       });
     }
   }

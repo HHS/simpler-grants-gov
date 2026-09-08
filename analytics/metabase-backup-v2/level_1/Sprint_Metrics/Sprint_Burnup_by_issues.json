@@ -1,0 +1,139 @@
+{
+  "name": "Sprint Burnup by issues",
+  "display": "area",
+  "visualization_settings": {
+    "series_settings": {
+      "total_scope": {
+        "color": "#88BF4D",
+        "line.marker_enabled": false
+      },
+      "total_completed": {
+        "color": "#A989C5",
+        "line.marker_enabled": false
+      }
+    },
+    "graph.dimensions": [
+      "day"
+    ],
+    "graph.x_axis.scale": "timeseries",
+    "stackable.stack_type": null,
+    "graph.y_axis.auto_split": false,
+    "column_settings": {
+      "[\"name\",\"day\"]": {
+        "date_abbreviate": true
+      }
+    },
+    "graph.metrics": [
+      "total_completed",
+      "total_scope"
+    ]
+  },
+  "template_tags": {
+    "sprint_name": {
+      "widget-type": "string/=",
+      "default": null,
+      "name": "sprint_name",
+      "type": "dimension",
+      "id": "9392efee-5590-430c-9031-3aaed414641a",
+      "dimension": [
+        "field",
+        318,
+        {
+          "base-type": "type/Text",
+          "effective-type": "type/Text"
+        }
+      ],
+      "display-name": "Sprint Name",
+      "options": null,
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_sprint",
+        "column": "name"
+      }
+    },
+    "ghid": {
+      "widget-type": "string/=",
+      "default": null,
+      "name": "ghid",
+      "type": "dimension",
+      "id": "cc52d7aa-8456-4f68-88c1-a677621f668d",
+      "dimension": [
+        "field",
+        302,
+        {
+          "base-type": "type/Integer",
+          "effective-type": "type/Integer"
+        }
+      ],
+      "display-name": "Project",
+      "options": null,
+      "required": true,
+      "field_ref": {
+        "schema": "app",
+        "table": "gh_project",
+        "column": "ghid"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "slug": "sprint_name",
+      "default": null,
+      "name": "Sprint Name",
+      "isMultiSelect": true,
+      "type": "string/=",
+      "values_source_type": "card",
+      "id": "9392efee-5590-430c-9031-3aaed414641a",
+      "options": null,
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "sprint_name"
+        ]
+      ],
+      "values_source_config": {
+        "card_id": 152,
+        "value_field": [
+          "field",
+          "sprint_name",
+          {
+            "base-type": "type/Text"
+          }
+        ]
+      },
+      "required": true
+    },
+    {
+      "slug": "ghid",
+      "default": null,
+      "name": "Project",
+      "isMultiSelect": true,
+      "type": "string/=",
+      "values_source_type": "static-list",
+      "id": "cc52d7aa-8456-4f68-88c1-a677621f668d",
+      "options": null,
+      "target": [
+        "dimension",
+        [
+          "template-tag",
+          "ghid"
+        ]
+      ],
+      "values_source_config": {
+        "values": [
+          [
+            "17",
+            "Product & Delivery"
+          ],
+          [
+            "13",
+            "Simpler.Grants.gov"
+          ]
+        ]
+      },
+      "required": true
+    }
+  ]
+}

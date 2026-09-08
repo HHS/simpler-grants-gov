@@ -7,6 +7,7 @@ import {
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getForms } from "src/services/fetch/fetchers/allFormsFetcher";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -72,9 +73,9 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
   }
 
   // NOTE: Currently we are only supporting a single competition
-  let competitionId: string = "";
-  if (opportunityData.competitions?.[0]?.competition_id) {
-    competitionId = opportunityData.competitions[0].competition_id;
+  let competition: Competition | undefined = undefined;
+  if (opportunityData.competitions?.[0]) {
+    competition = opportunityData.competitions[0];
   }
 
   const navigationItems = [
@@ -129,7 +130,7 @@ async function OpportunityCompetitionPage({ params }: PageProps) {
           <section className="order-2 width-full maxw-tablet-xl padding-top-4">
             <CompetitionForm
               opportunityId={id}
-              competitionId={competitionId}
+              competition={competition}
               forms={forms.data}
             />
           </section>

@@ -20,9 +20,25 @@ export const UiJsonSchema: RJSFSchema = {
       {
         $ref: "#/$defs/section",
       },
+      {
+        $ref: "#/$defs/text",
+      },
     ],
   },
   $defs: {
+    text: {
+      type: "object",
+      properties: {
+        type: {
+          type: "string",
+          enum: ["text"],
+        },
+        name: { type: "string" },
+        content: { type: "string" },
+      },
+      required: ["type", "name", "content"],
+      additionalProperties: false,
+    },
     field: {
       type: "object",
       properties: {
@@ -226,6 +242,9 @@ export const UiJsonSchema: RJSFSchema = {
               },
               {
                 $ref: "#/$defs/section",
+              },
+              {
+                $ref: "#/$defs/text",
               },
             ],
           },

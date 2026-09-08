@@ -561,7 +561,7 @@ FORM_UI_SCHEMA = [
         "children": [
             {"type": "field", "definition": "/properties/organization_name"},
             {"type": "field", "definition": "/properties/employer_taxpayer_identification_number"},
-            {"type": "field", "definition": "/properties/sam_uei"},
+            {"type": "null", "definition": "/properties/sam_uei"},
             {"type": "field", "definition": "/properties/applicant/properties/street1"},
             {"type": "field", "definition": "/properties/applicant/properties/street2"},
             {"type": "field", "definition": "/properties/applicant/properties/city"},
@@ -616,15 +616,15 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "name": "federal_agency",
         "label": "10. Name of Federal Agency",
-        "children": [{"type": "field", "definition": "/properties/agency_name"}],
+        "children": [{"type": "null", "definition": "/properties/agency_name"}],
     },
     {
         "type": "section",
         "name": "assistance_listing",
         "label": "11. Assistance Listing Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/assistance_listing_number"},
-            {"type": "field", "definition": "/properties/assistance_listing_program_title"},
+            {"type": "null", "definition": "/properties/assistance_listing_number"},
+            {"type": "null", "definition": "/properties/assistance_listing_program_title"},
         ],
     },
     {
@@ -632,8 +632,8 @@ FORM_UI_SCHEMA = [
         "name": "funding_opportunity",
         "label": "12. Funding Opportunity Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/funding_opportunity_number"},
-            {"type": "field", "definition": "/properties/funding_opportunity_title"},
+            {"type": "null", "definition": "/properties/funding_opportunity_number"},
+            {"type": "null", "definition": "/properties/funding_opportunity_title"},
         ],
     },
     {
@@ -641,8 +641,8 @@ FORM_UI_SCHEMA = [
         "name": "competition_identification",
         "label": "13. Competition Identification Number/Title",
         "children": [
-            {"type": "field", "definition": "/properties/competition_identification_number"},
-            {"type": "field", "definition": "/properties/competition_identification_title"},
+            {"type": "null", "definition": "/properties/competition_identification_number"},
+            {"type": "null", "definition": "/properties/competition_identification_title"},
         ],
     },
     {

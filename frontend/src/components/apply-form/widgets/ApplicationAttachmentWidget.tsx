@@ -10,6 +10,7 @@ import {
   buildAttachmentDescribedByIds,
   mapAttachmentsToFileMetadata,
 } from "src/utils/applyForm/applicationAttachmentUtils";
+import { VISIBLE_FILE_INPUT_SUFFIX } from "src/utils/formData/formDataUtils";
 
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
@@ -105,7 +106,7 @@ const ApplicationAttachmentWidget = ({
     attachmentsUploadingCounter?.decrementAttachmentsProcessing();
   };
 
-  const visibleInputId = `${id}-visible`;
+  const visibleInputId = `${id}${VISIBLE_FILE_INPUT_SUFFIX}`;
   const error = rawErrors.length ? true : undefined;
   const describedByIds = buildAttachmentDescribedByIds({
     visibleInputId,
