@@ -4,6 +4,17 @@ on:
     # Run every day at (6/7am Eastern) before the start of the workday
     - cron: "0 11 * * *"
 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "git reference for testing code to run (e.g., a branch, tag, or commit SHA)"
+        required: false
+        type: string
+      playwright_tags:
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
+        required: false
+        type: string
+
 jobs:
   daily-e2e-tests-deployed:
     name: Daily E2E tests (staging)
@@ -11,7 +22,7 @@ jobs:
     if: always()
     secrets: inherit
     with:
-      version: main
+      version: ${{ inputs.version || github.ref }}
       target: staging
       playwright_tags: "@smoke|@core-regression|@full-regression"
   daily-e2e-tests-local:
@@ -20,6 +31,7 @@ jobs:
     if: always()
     secrets: inherit
     with:
+      version: ${{ inputs.version || github.ref }}
       playwright_tags: "@smoke|@core-regression|@full-regression"
   send-slack-notification:
     if: failure()

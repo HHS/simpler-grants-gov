@@ -97,24 +97,13 @@ jobs:
     with:
       app_name: analytics
 
-  # trigger runs of local and staging core regression e2e tests
-  # but do not wait, or block any deployments based on results
+  # Local E2Es can run independently and do not need to wait for deployment.
   e2e-test-local:
     name: E2E Local (on Deploy)
     if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
     uses: ./.github/workflows/ci-frontend-e2e.yml
     secrets: inherit
     with:
-      playwright_tags: "@smoke|@core-regression"
-
-  e2e-test-staging:
-    name: E2E Staging (on Deploy)
-    if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
-    uses: ./.github/workflows/e2e-staging.yml
-    secrets: inherit
-    with:
-      version: main
-      target: staging
       playwright_tags: "@smoke|@core-regression"
 
   # =====================================================
@@ -144,6 +133,17 @@ jobs:
       app_name: "frontend"
       environment: ${{ inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment || 'prod' }}
       version: ${{ inputs.version || github.ref }}
+      
+  e2e-test-staging:
+    name: E2E Staging (on Deploy)
+    needs: [deploy-frontend]
+    if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
+    uses: ./.github/workflows/e2e-staging.yml
+    secrets: inherit
+    with:
+      version: ${{ inputs.version || github.ref }}
+      target: staging
+      playwright_tags: "@smoke|@core-regression"
 
   # 3. Deploy Analytics after API completes successfully
   deploy-analytics:

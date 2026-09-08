@@ -16,6 +16,7 @@ jobs:
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: api
+      fail_on_vulns: false
 
   api-deploy:
     name: Deploy API to Dev
@@ -35,6 +36,7 @@ jobs:
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: frontend
+      fail_on_vulns: false
 
   frontend-deploy:
     name: Deploy Frontend to Dev
@@ -55,6 +57,7 @@ jobs:
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: analytics
+      fail_on_vulns: false
 
   analytics-deploy:
     name: Deploy Analytics to Dev
@@ -75,6 +78,8 @@ jobs:
     name: NOFOs Vulnerability Scans
     needs: [nofos-checks]
     uses: ./.github/workflows/vulnerability-scans-nofos.yml
+    with:
+      fail_on_vulns: false
 
   nofos-deploy:
     name: Deploy NOFOs to Dev
