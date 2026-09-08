@@ -3,8 +3,13 @@ import type { ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/attachment
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 
 // Uploaded files validated by section locator in print view.
-const TEST_UPLOAD_DIR = path.resolve(__dirname, "../../test-upload-files");
-const ATTACHMENT_TEST_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
+// These names and paths are shared by attachment upload tests.
+// Filenames are exposed separately from the full path for use in UI assertions.
+export const TEST_UPLOAD_DIR = path.resolve(
+  __dirname,
+  "../../test-upload-files",
+);
+export const ATTACHMENT_TEST_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
 
 /**
  * Happy-path test data builder for the Attachment Form.
@@ -32,3 +37,15 @@ export const ATTACHMENT_OPPORTUNITY_DATA: PrintViewFormData = {
   expectedPrepopulatedFields: {},
   buildTestData: buildAttachmentHappyPathTestData,
 };
+
+export const SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB = "TestZip3543Kb.zip";
+export const SAMPLE_UPLOAD_FILE_PATH_ZIP_3543KB = path.join(
+  TEST_UPLOAD_DIR,
+  SAMPLE_UPLOAD_FILE_NAME_ZIP_3543KB,
+);
+
+export const SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB = "TestMSword0Kb.docx";
+export const SAMPLE_UPLOAD_FILE_PATH_MSWORD_0KB = path.join(
+  TEST_UPLOAD_DIR,
+  SAMPLE_UPLOAD_FILE_NAME_MSWORD_0KB,
+);
