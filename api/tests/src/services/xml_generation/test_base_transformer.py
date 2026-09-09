@@ -73,6 +73,21 @@ class TestRecursiveXMLTransformer:
         assert result["OrganizationName"] == "Test University"
         assert "MissingField" not in result
 
+    def test_transform_includes_disabled_rule_values(self):
+        """Test disabled UI rules are still included in generated XML data."""
+        transform_config = {
+            "prepopulated_field": {
+                "disabled": True,
+                "xml_transform": {"target": "PrepopulatedField"},
+            }
+        }
+
+        transformer = RecursiveXMLTransformer(transform_config)
+
+        result = transformer.transform({"prepopulated_field": "Provided value"})
+
+        assert result["PrepopulatedField"] == "Provided value"
+
     def test_transform_with_none_values(self):
         """Test transformation handles None values correctly."""
         transform_config = {

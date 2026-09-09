@@ -94,10 +94,6 @@ class RecursiveXMLTransformer:
             # Skip metadata keys
             if key.startswith("_"):
                 continue
-            # Skip disabled rules
-            if isinstance(rule_config, dict) and rule_config.get("disabled") is True:
-                continue
-
             # Process XML transformation rules
             if isinstance(rule_config, dict) and "xml_transform" in rule_config:
                 self._process_xml_transform_rule(source_data, key, rule_config, path, result)

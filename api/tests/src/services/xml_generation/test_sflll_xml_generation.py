@@ -306,10 +306,10 @@ class TestSFLLLXMLGeneration:
         assert material_change.get(f"{sflll_ns}ReportType") == "MaterialChange"
         assert self._sflll_element(root, "FederalActionNumber").text == "ACTION-ALL-001"
         assert self._sflll_element(root, "AwardAmount").text == "10000.00"
-        # federal_program_wrapper is disabled (see form_json.py), so FederalProgramName
-        # and CFDANumber are intentionally not generated even when the source data is present.
-        assert self._sflll_element(root, "FederalProgramName") is None
-        assert self._sflll_element(root, "CFDANumber") is None
+        program_wrapper = self._sflll_element(root, "FederalProgramName")
+        assert program_wrapper is not None
+        assert program_wrapper.find(f"{sflll_ns}FederalProgramName").text == "Research Program"
+        assert program_wrapper.find(f"{sflll_ns}CFDANumber").text == "93.001"
         tier = self._sflll_element(root, "Tier")
         assert tier.find(f"{sflll_ns}TierValue").text == "5"
         assert tier.get(f"{sflll_ns}ReportEntityType") == "Prime"
@@ -601,11 +601,10 @@ class TestSFLLLXMLGeneration:
         telephone = root.find(f".//{sflll_ns}Telephone")
         assert telephone is None, "Telephone field should not be present when not provided"
 
-    def test_sflll_optional_federal_program_name_excluded_disabled_wrapper(
+    def test_sflll_optional_federal_program_name_included_when_present(
         self, sflll_application, db_session
     ):
-        """federal_program_wrapper is disabled (see form_json.py), so FederalProgramName
-        should not be included in the XML even when federal_program_name is present."""
+        """Prepopulated federal program name is included when present."""
         response = sflll_application.application_forms[0].application_response
         response["federal_program_name"] = "Community Development Block Grant Program"
 
@@ -622,15 +621,15 @@ class TestSFLLLXMLGeneration:
 
         sflll_ns = "{http://apply.grants.gov/forms/SFLLL_2_0-V2.0}"
         program_wrapper = root.find(f".//{sflll_ns}FederalProgramName")
-        assert (
-            program_wrapper is None
-        ), "FederalProgramName should not be present (wrapper disabled)"
+        assert program_wrapper is not None
+        program_name = program_wrapper.find(f"{sflll_ns}FederalProgramName")
+        assert program_name is not None
+        assert program_name.text == "Community Development Block Grant Program"
 
-    def test_sflll_optional_assistance_listing_number_excluded_disabled_wrapper(
+    def test_sflll_optional_assistance_listing_number_included_when_present(
         self, sflll_application, db_session
     ):
-        """federal_program_wrapper is disabled (see form_json.py), so CFDANumber should
-        not be included in the XML even when assistance_listing_number is present."""
+        """Prepopulated assistance listing number is included when present."""
         response = sflll_application.application_forms[0].application_response
         response["assistance_listing_number"] = "14.218"
 
@@ -647,7 +646,8 @@ class TestSFLLLXMLGeneration:
 
         sflll_ns = "{http://apply.grants.gov/forms/SFLLL_2_0-V2.0}"
         listing = root.find(f".//{sflll_ns}CFDANumber")
-        assert listing is None, "CFDANumber should not be present (wrapper disabled)"
+        assert listing is not None
+        assert listing.text == "14.218"
 
     def test_sflll_optional_address_fields_street2_is_included_when_present(
         self, sflll_application, db_session
