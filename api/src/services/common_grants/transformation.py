@@ -335,6 +335,9 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
             "summary_description": v1_opportunity.summary.summary_description,
             "post_date": v1_opportunity.summary.post_date,
             "close_date": v1_opportunity.summary.close_date,
+            "close_date_description": getattr(
+                v1_opportunity.summary, "close_date_description", None
+            ),
             "estimated_total_program_funding": v1_opportunity.summary.estimated_total_program_funding,
             "award_ceiling": v1_opportunity.summary.award_ceiling,
             "award_floor": v1_opportunity.summary.award_floor,
@@ -390,6 +393,11 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
         post_date = summary.get("post_date") if isinstance(summary, dict) else summary.post_date
         close_date = summary.get("close_date") if isinstance(summary, dict) else summary.close_date
         # TODO: summary.close_date is not the correct value! deadlines are stored in competitions
+        close_date_description = (
+            summary.get("close_date_description")
+            if isinstance(summary, dict)
+            else getattr(summary, "close_date_description", None)
+        )
         timeline = OppTimeline(
             postDate=(
                 SingleDateEvent(
@@ -404,7 +412,7 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
                 SingleDateEvent(
                     name="Application Deadline",
                     date=_transform_date_to_cg(close_date),
-                    description="Deadline for submitting applications",
+                    description=close_date_description or "Deadline for submitting applications",
                 )
                 if close_date
                 else None

@@ -1580,3 +1580,33 @@ def test_build_custom_filters_applies_valid_filter_when_other_key_invalid():
     )
     assert applied == {"agency": {"one_of": ["USAID"]}}
     assert errors == ["customFilters.bogus: unsupported filter"]
+
+
+class TestPreserveDroppedSummaryFields:
+    """RED tests for HHS/simpler-grants-gov#11641: close-date description
+    dropped by the CommonGrants transformation."""
+
+    def _opp_data(self, **summary_extra) -> dict:
+        payload = _opp_data_with_info_url("https://example.com/info", "More info")
+        payload["summary"].update(summary_extra)
+        return payload
+
+    def test_close_date_description_preserved(self):
+        """#11641: native close-date description wins over the generic text."""
+        from src.services.common_grants.transformation import transform_search_result_to_cg
+
+        result = transform_search_result_to_cg(
+            self._opp_data(close_date_description="Portal closes at 5pm ET, apply early")
+        )
+        assert result is not None
+        assert result.key_dates.close_date is not None
+        assert result.key_dates.close_date.description == "Portal closes at 5pm ET, apply early"
+
+    def test_close_date_description_falls_back_to_generic(self):
+        """#11641: generic description remains when no native one exists."""
+        from src.services.common_grants.transformation import transform_search_result_to_cg
+
+        result = transform_search_result_to_cg(self._opp_data())
+        assert result is not None
+        assert result.key_dates.close_date is not None
+        assert result.key_dates.close_date.description == "Deadline for submitting applications"
