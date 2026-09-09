@@ -19,7 +19,7 @@ RUN npm ci --no-audit \
 FROM base AS dev
 WORKDIR /frontend
 
-COPY tsconfig.json .
+COPY tsconfig.json tsconfig.build.json ./
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
@@ -39,7 +39,7 @@ CMD ["npm", "run", "dev"]
 FROM base AS builder
 WORKDIR /frontend
 
-COPY tsconfig.json .
+COPY tsconfig.json tsconfig.build.json ./
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
