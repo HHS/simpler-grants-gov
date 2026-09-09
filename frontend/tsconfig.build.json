@@ -4,9 +4,6 @@
     "node_modules",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "**/__mocks__/**",
-    "stories/**",
-    "tests/**",
-    ".storybook/**"
+    "**/__mocks__/**"
   ]
 }
