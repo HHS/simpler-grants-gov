@@ -358,6 +358,53 @@ def test_opportunity_publish_queues_for_search_removal_when_summary_dropped(
     assert entry is not None
 
 
+@freeze_time("2026-03-25 12:00:00", tz_offset=0)
+def test_opportunity_publish_clears_stale_delete_queue_entry(
+    db_session, enable_factory_create, search_client, opportunity_index_alias
+):
+    """When a second publish succeeds (post_date fixed), any stale delete queue entry
+    from a prior publish that queued the opportunity for removal is cleared."""
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create(is_draft=True, no_current_summary=True)
+
+    # Create a summary with a valid post_date
+    OpportunitySummaryFactory.create(
+        opportunity=opportunity,
+        post_date=date(2026, 3, 15),  # past date — indexable
+        close_date=date(2026, 6, 1),
+        archive_date=date(2027, 1, 1),
+        is_forecast=False,
+    )
+
+    # Simulate a stale delete queue entry from a prior publish that queued removal
+    from src.db.models.opportunity_models import OpportunityIndexDeleteQueue
+
+    with db_session.begin():
+        db_session.add(OpportunityIndexDeleteQueue(opportunity_id=opportunity.opportunity_id))
+
+    sqs_container = build_start_workflow_event(
+        workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
+        user=user,
+        entity=opportunity,
+    )
+
+    with db_session.begin():
+        EventHandler(db_session, sqs_container).process()
+
+    db_session.expire_all()
+
+    # Opportunity is indexable — stale delete queue entry should be cleared
+    entry = db_session.scalar(
+        select(OpportunityIndexDeleteQueue).where(
+            OpportunityIndexDeleteQueue.opportunity_id == opportunity.opportunity_id
+        )
+    )
+    assert entry is None
+
+    # And the opportunity should be in the search index
+    assert search_client.get(opportunity_index_alias, opportunity.opportunity_id) is not None
+
+
 def test_opportunity_publish_mark_loaded_failure_is_isolated(
     db_session, enable_factory_create, monkeypatch, caplog, search_client, opportunity_index_alias
 ):

@@ -6,7 +6,7 @@ from typing import Any, cast
 import grants_shared.adapters.db as db
 import grants_shared.adapters.db.flask_db as flask_db
 from grants_shared.util.datetime_util import get_now_us_eastern_date
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 
 from src.constants.lookup_constants import OpportunityStatus
@@ -127,6 +127,7 @@ class SetCurrentOpportunitiesTask(Task):
         if current_summary is None:
             # We determined the opportunity should not have a current and need to delete it
             if opportunity.current_opportunity_summary is not None:
+                logger.info("Queuing opportunity for search index removal", extra=log_extra)
                 self.db_session.add(
                     OpportunityIndexDeleteQueue(opportunity_id=opportunity.opportunity_id)
                 )
@@ -143,6 +144,16 @@ class SetCurrentOpportunitiesTask(Task):
                 opportunity=opportunity
             )
             self.increment(self.Metrics.NEW_CURRENT_OPPORTUNITY_COUNT)
+            # Clear any stale delete queue entry — the opportunity is indexable again
+            # (e.g. post_date was moved back to the past after a prior run queued it for removal)
+            logger.info(
+                "Clearing stale search index delete queue entry for opportunity", extra=log_extra
+            )
+            self.db_session.execute(
+                delete(OpportunityIndexDeleteQueue).where(
+                    OpportunityIndexDeleteQueue.opportunity_id == opportunity.opportunity_id
+                )
+            )
         else:
             self.increment(self.Metrics.UPDATED_CURRENT_OPPORTUNITY_COUNT)
 

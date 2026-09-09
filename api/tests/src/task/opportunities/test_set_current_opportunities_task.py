@@ -554,6 +554,47 @@ class TestDeleteQueueInsertion(BaseTestClass):
         )
         assert entry is None
 
+    def test_stale_delete_queue_cleared_when_opportunity_becomes_indexable(
+        self, set_current_opportunities_task, db_session
+    ):
+        """If an opportunity was queued for deletion but then becomes indexable again
+        (e.g. post_date moved back to the past), the stale delete queue entry is cleared."""
+        # Start with a future post_date — opportunity gets queued for removal
+        container = OpportunityContainer().with_summary(
+            is_forecast=False,
+            post_date=TOMORROW,
+            close_date=NEXT_MONTH,
+            archive_date=NEXT_YEAR,
+            is_already_current=True,
+            is_expected_current=False,
+        )
+        set_current_opportunities_task._process_opportunity(container.opportunity)
+        db_session.commit()
+
+        # Confirm the delete queue entry was added
+        entry = db_session.scalar(
+            select(OpportunityIndexDeleteQueue).where(
+                OpportunityIndexDeleteQueue.opportunity_id == container.opportunity.opportunity_id
+            )
+        )
+        assert entry is not None
+
+        # Move post_date to the past — opportunity is indexable again
+        summary = container.opportunity.all_opportunity_summaries[0]
+        summary.post_date = YESTERDAY
+        db_session.flush()
+
+        set_current_opportunities_task._process_opportunity(container.opportunity)
+        db_session.commit()
+
+        # Stale delete queue entry should be cleared
+        entry = db_session.scalar(
+            select(OpportunityIndexDeleteQueue).where(
+                OpportunityIndexDeleteQueue.opportunity_id == container.opportunity.opportunity_id
+            )
+        )
+        assert entry is None
+
 
 def test_via_cli(cli_runner, db_session, enable_factory_create):
     # Simple test that just verifies that we can invoke the script via the CLI

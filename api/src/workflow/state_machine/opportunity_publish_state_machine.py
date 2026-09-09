@@ -4,7 +4,7 @@ from typing import Any, cast
 
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 from opensearchpy import ConnectionTimeout, TransportError
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from statemachine import Event
 from statemachine.states import States
 
@@ -169,6 +169,7 @@ class OpportunityPublishStateMachine(BaseStateMachine):
                 # Queue the opportunity for removal from the search index.
                 # Covers cases where the opportunity was previously searchable
                 # (e.g. is_draft flipped back, or post_date moved to the future).
+                logger.info("Queuing opportunity for search index removal", extra=log_extra)
                 self.db_session.add(
                     OpportunityIndexDeleteQueue(opportunity_id=self.opportunity.opportunity_id)
                 )
@@ -182,6 +183,16 @@ class OpportunityPublishStateMachine(BaseStateMachine):
             logger.info("Creating new current opportunity summary", extra=log_extra)
             self.opportunity.current_opportunity_summary = CurrentOpportunitySummary(
                 opportunity=self.opportunity
+            )
+            # Clear any stale delete queue entry — the opportunity is indexable again
+            # (e.g. a prior publish queued it for removal but post_date has since been fixed)
+            logger.info(
+                "Clearing stale search index delete queue entry for opportunity", extra=log_extra
+            )
+            self.db_session.execute(
+                delete(OpportunityIndexDeleteQueue).where(
+                    OpportunityIndexDeleteQueue.opportunity_id == self.opportunity.opportunity_id
+                )
             )
         else:
             logger.info("Updating current opportunity summary", extra=log_extra)
