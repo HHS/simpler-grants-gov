@@ -9,9 +9,8 @@
  *
  * Uses @zip.js/zip.js (an existing project dependency, already used for zip
  * handling in src/utils/opportunity/zipUtils.ts) rather than adding a new
- * zip library. Verification here is XML-only: GrantApplication.xml is plain
- * text and needs no extra dependency to check that entered form data made it
- * into the submission. PDF entries are left unzipped along with everything
+ * zip library. Verification here is XML-only: GrantApplication.xml. 
+ * PDF entries are left unzipped along with everything
  * else in ZipContents.files if a caller wants to look at them, but this
  * module doesn't parse or assert on PDF content.
  */
