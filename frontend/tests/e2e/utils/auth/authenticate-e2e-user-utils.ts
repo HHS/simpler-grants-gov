@@ -53,7 +53,23 @@ export async function authenticateE2eUser(
 ): Promise<void> {
   const userId = getTestUserId(testUserKey);
   const token = await fetchE2eSessionToken(userId);
+
+  console.log("E2E token parts:", token.split(".").length);
+  console.log("E2E token header:", token.split(".")[0]);
+  console.log("E2E token payload:", token.split(".")[1]);
+
   await createSpoofedSessionCookie(context, token);
+
+  console.log("Session cookie:", await context.cookies(playwrightEnv.baseUrl));
+
+  console.log("Session cookie created");
+
+  const sessionResponse = await page.request.get(
+    `${playwrightEnv.baseUrl}/api/auth/session`,
+  );
+
+  console.log("Auth session status:", sessionResponse.status());
+  console.log("Auth session body:", await sessionResponse.text());
 
   // Give the spoofed session cookie a moment to settle before navigating, then
   // let the page hydrate the authenticated state after load. Mobile needs longer

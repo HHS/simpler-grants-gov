@@ -66,9 +66,7 @@ export const buildKeyContactsOptionalFieldsHappyPathTestData = (
 /**
  * Complete happy-path test data for the Key Contacts form.
  *
- * Combines the required and optional fields for the first
- * FieldList entry (key_contacts[0]). Does NOT include the form-level
- * applicant_organization_name field, which must be added separately.
+ * Combines the required and optional fields for the first FieldList entry (key_contacts[0]).
  */
 export const buildKeyContactsHappyPathTestData = (
   suffix: number,

@@ -1,3 +1,8 @@
+/**
+ * @feature Apply - Key Contacts FieldList - Add, Fill, Persist, and Print View Workflow
+ * @scenario Complete the Key Contacts Application Submission with multiple fieldlist widget
+ * entries and Print View workflow for an <user type> user
+ */
 import {
   expect,
   test,
@@ -130,10 +135,7 @@ test.describe("Key Contacts FieldList", () => {
           );
         };
         /*
-         * Build two FieldList entries. The first entry uses both required and
-         * optional fields to demonstrate complete form filling. The second entry
-         * uses only required fields to avoid excessive form re-rendering during
-         * multi-field fills on the dynamically-added entry.
+         * Build two FieldList entries.
          *
          * The index is important because FieldList fields are represented as:
          * key_contacts[0]--...
@@ -150,15 +152,9 @@ test.describe("Key Contacts FieldList", () => {
         const applicantOrganizationName = `FieldList Organization ${suffix}`;
 
         /*
-         * Extract only the FieldList entry fields (key_contacts[index]--*),
-         * excluding the form-level applicant_organization_name.
+         * Extract only the FieldList entry fields (key_contacts[index]--*).
          */
         const firstEntryFieldListData = Object.fromEntries(
-          Object.entries(firstEntry).filter(
-            ([key]) => key !== "applicant_organization_name",
-          ),
-        ) as Record<string, string>;
-        const firstEntryPrintData = Object.fromEntries(
           Object.entries(firstEntry).filter(
             ([key]) => key !== "applicant_organization_name",
           ),
@@ -290,15 +286,9 @@ test.describe("Key Contacts FieldList", () => {
         await page.waitForLoadState("networkidle");
 
         /*
-         * Extract only the FieldList entry fields (key_contacts[index]--*),
-         * excluding the form-level applicant_organization_name.
+         * Extract only the FieldList entry fields (key_contacts[index]--*).
          */
         const secondEntryFieldListData = Object.fromEntries(
-          Object.entries(secondEntry).filter(
-            ([key]) => key !== "applicant_organization_name",
-          ),
-        ) as Record<string, string>;
-        const secondEntryPrintData = Object.fromEntries(
           Object.entries(secondEntry).filter(
             ([key]) => key !== "applicant_organization_name",
           ),
@@ -411,8 +401,8 @@ test.describe("Key Contacts FieldList", () => {
          * Combine both FieldList entries along with the organization name.
          */
         const testData = {
-          ...firstEntryPrintData,
-          ...secondEntryPrintData,
+          ...firstEntryFieldListData,
+          ...secondEntryFieldListData,
           applicant_organization_name: applicantOrganizationName,
         };
 
@@ -436,12 +426,12 @@ test.describe("Key Contacts FieldList", () => {
         /*
          * Explicitly verify values from both FieldList entries.
          */
-        for (const [, value] of Object.entries(firstEntryPrintData)) {
+        for (const [, value] of Object.entries(firstEntryFieldListData)) {
           await expect(
             page.getByText(value, { exact: true }).first(),
           ).toBeVisible();
         }
-        for (const [, value] of Object.entries(secondEntryPrintData)) {
+        for (const [, value] of Object.entries(secondEntryFieldListData)) {
           await expect(
             page.getByText(value, { exact: true }).first(),
           ).toBeVisible();
