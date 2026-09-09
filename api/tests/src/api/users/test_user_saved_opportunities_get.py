@@ -940,3 +940,65 @@ def test_user_saved_opps_enriched_with_accessible_orgs_only(
     accessible_org = opp_map[str(no_access_org_opp.opportunity_id)]
     assert "saved_to_organizations" in accessible_org
     assert accessible_org["saved_to_organizations"] == []
+
+
+def test_user_saved_opps_all_mode_hides_inaccessible_orgs(
+    client, db_session, enable_factory_create
+):
+    """In all-saved mode (no organization filter), saved opportunities must not
+    be enriched with organizations the caller cannot access.
+
+    Regression test: the enrichment query was unfiltered in this mode, so any
+    user who saved an opportunity also learned the identity of every unrelated
+    organization that saved the same opportunity.
+    """
+    # Plain user with no organization memberships at all
+    outsider = UserFactory.create()
+    outsider_token, _ = create_jwt_for_user(outsider, db_session)
+
+    # An unrelated organization saves an opportunity
+    _, other_org, _ = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+    org_saved = OrganizationSavedOpportunityFactory.create(organization=other_org)
+
+    # The outsider saves the very same opportunity
+    UserSavedOpportunityFactory.create(user=outsider, opportunity=org_saved.opportunity)
+
+    response = client.post(
+        f"/v1/users/{outsider.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": outsider_token},
+        json={"pagination": {"page_size": 10, "page_offset": 1}},
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+    assert len(data) == 1
+    assert data[0]["opportunity_id"] == str(org_saved.opportunity_id)
+    assert data[0]["saved_to_organizations"] == []
+
+
+def test_user_saved_opps_specific_org_mode_hides_other_orgs(
+    client, db_session, enable_factory_create
+):
+    """When filtering by specific organization(s), enrichment must only include
+    the requested organizations, not every organization that saved the opp."""
+    user, org_allowed, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+    _, other_org, _ = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+
+    opportunity = OpportunityFactory.create(opportunity_title="Shared opportunity")
+    OrganizationSavedOpportunityFactory.create(organization=org_allowed, opportunity=opportunity)
+    OrganizationSavedOpportunityFactory.create(organization=other_org, opportunity=opportunity)
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={
+            "filters": {"organization_ids": {"one_of": [str(org_allowed.organization_id)]}},
+            "pagination": {"page_size": 10, "page_offset": 1},
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+    assert len(data) == 1
+    org_ids = {org["organization_id"] for org in data[0]["saved_to_organizations"]}
+    assert org_ids == {str(org_allowed.organization_id)}
