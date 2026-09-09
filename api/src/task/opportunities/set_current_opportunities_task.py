@@ -6,7 +6,7 @@ from typing import Any, cast
 import grants_shared.adapters.db as db
 import grants_shared.adapters.db.flask_db as flask_db
 from grants_shared.util.datetime_util import get_now_us_eastern_date
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.constants.lookup_constants import OpportunityStatus
@@ -138,22 +138,24 @@ class SetCurrentOpportunitiesTask(Task):
             # safely return here as there isn't anything else to update
             return
 
-        # If the current opportunity summary doesn't already exist, create it first
         if opportunity.current_opportunity_summary is None:
+            # Clear any stale delete queue entry before creating the new summary.
+            # no_autoflush prevents get() from triggering a premature flush of other
+            # pending ORM objects in the session.
+            with self.db_session.no_autoflush:
+                stale_delete_entry = self.db_session.get(
+                    OpportunityIndexDeleteQueue, opportunity.opportunity_id
+                )
+            if stale_delete_entry is not None:
+                logger.info(
+                    "Clearing stale search index delete queue entry for opportunity",
+                    extra=log_extra,
+                )
+                self.db_session.delete(stale_delete_entry)
             opportunity.current_opportunity_summary = CurrentOpportunitySummary(
                 opportunity=opportunity
             )
             self.increment(self.Metrics.NEW_CURRENT_OPPORTUNITY_COUNT)
-            # Clear any stale delete queue entry — the opportunity is indexable again
-            # (e.g. post_date was moved back to the past after a prior run queued it for removal)
-            logger.info(
-                "Clearing stale search index delete queue entry for opportunity", extra=log_extra
-            )
-            self.db_session.execute(
-                delete(OpportunityIndexDeleteQueue).where(
-                    OpportunityIndexDeleteQueue.opportunity_id == opportunity.opportunity_id
-                )
-            )
         else:
             self.increment(self.Metrics.UPDATED_CURRENT_OPPORTUNITY_COUNT)
 

@@ -570,6 +570,7 @@ class TestDeleteQueueInsertion(BaseTestClass):
         )
         set_current_opportunities_task._process_opportunity(container.opportunity)
         db_session.commit()
+        db_session.refresh(container.opportunity)
 
         # Confirm the delete queue entry was added
         entry = db_session.scalar(
