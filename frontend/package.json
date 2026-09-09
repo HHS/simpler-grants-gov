@@ -29,7 +29,7 @@
     "ts:check": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@next/third-parties": "^16.2.11",
+    "@next/third-parties": "^16.3.3",
     "@opentelemetry/api": "^1.8.0",
     "@rjsf/utils": "^5.24.8",
     "@trussworks/react-uswds": "^11",
@@ -50,7 +50,7 @@
     "json-schema-merge-allof": "^0.8.1",
     "lodash": "^4.18.1",
     "newrelic": "^14.3.2",
-    "next": "^16.2.11",
+    "next": "^16.3.3",
     "next-intl": "^4.8.1",
     "next-navigation-guard": "^0.2.0",
     "pino": "^9.6.0",
@@ -87,7 +87,7 @@
     "@typescript-eslint/parser": "^8",
     "dotenv": "^17.2.2",
     "eslint": "^9.39.0",
-    "eslint-config-next": "^16.2.11",
+    "eslint-config-next": "^16.3.3",
     "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-jest": "^28",
     "eslint-plugin-jest-dom": "^5.0.1",
@@ -117,7 +117,7 @@
       "next": "^16.0.0"
     },
     "ws": "^8.21.0",
-    "sharp": "^0.35.0",
+    "sharp": "^0.35.4",
     "postcss": "8.5.23"
   },
   "devEngines": {

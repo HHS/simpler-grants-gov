@@ -1,8 +1,5 @@
 name: E2E Tests (Deployed Target)
 on:
-  push:
-    branches:
-      - "main"
   workflow_dispatch:
     inputs:
       version:
@@ -22,6 +19,7 @@ on:
           - grantor2
       playwright_tags:
         description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
+        required: false
         type: string
   workflow_call:
     inputs:
@@ -31,13 +29,15 @@ on:
         type: string
       target:
         description: "application environment to run tests against (dev / prod TK)"
+        required: false
         default: "staging"
         type: string
       playwright_tags:
         description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
+        required: false
         type: string
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.target || 'staging' }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ inputs.target || 'staging' }}-${{ inputs.version || github.ref }}
   cancel-in-progress: true
 jobs:
   e2e-tests-deployed:
@@ -87,14 +87,13 @@ jobs:
           fi
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version || github.ref }}
       - name: Determine test groups to run
         shell: bash
         run: |
-          if [[ $GITHUB_EVENT_NAME = "push" ]]; then
-            echo "test_group_tags=@smoke|@core-regression" >> "$GITHUB_ENV"
-          else
-            echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
-          fi
+          echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
+
       - name: Run E2E tests
         uses: ./.github/actions/e2e
         with:

@@ -26,8 +26,8 @@ To claim and receive payment for a bounty in the Simpler Grants Funded Open Sour
 
 1. Payment is issued through Tremendous to the email address on your verified GitHub account. You are responsible for providing correct payment details.  
 2. Payment is released only after your pull request has been merged, all program checks have passed, and any required tax documentation has been provided.  
-3. If your cumulative calendar-year payments from the program will reach or exceed $600, you must provide a completed IRS Form W-9 before the payment that would cross the threshold is released. Payments are paused pending W-9 receipt.  
-4. Bounty Program Administrator issues IRS Form 1099-NEC at calendar year end for any contributor who received $600 or more in the year.  
+3. If your cumulative calendar-year payments from the program will reach or exceed $2,000, you must provide a completed IRS Form W-9 before the payment that would cross the threshold is released. Payments are paused pending W-9 receipt.  
+4. Bounty Program Administrator issues IRS Form 1099-NEC at calendar year end for any contributor who received $2,000 or more in the year.  
 5. Bounty Program Administrator does not make payments to third parties on your behalf (LLCs, family members, etc.). Payment is made to the individual who submitted the contribution, under the name and tax ID provided.
 
 ## 1.4 Conduct
@@ -65,4 +65,4 @@ To claim and receive payment for a bounty in the Simpler Grants Funded Open Sour
 
 To claim a bounty, post a comment on the issue with the following text before your /claim comment:
 
-I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former Bounty Program Administrator or HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.
+I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former Bounty Program Administrator or HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $2,000.

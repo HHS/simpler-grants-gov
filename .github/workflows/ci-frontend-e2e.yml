@@ -5,6 +5,10 @@ on:
       - "main"
   workflow_dispatch:
     inputs:
+      version:
+        description: "git reference for testing code to run (e.g., a branch, tag, or commit SHA)"
+        required: false
+        type: string
       api_logs:
         description: "print api logs on failure?"
         default: false
@@ -15,8 +19,13 @@ on:
         type: string
   workflow_call:
     inputs:
+      version:
+        description: "git reference for testing code to run (e.g., a branch, tag, or commit SHA)"
+        required: false
+        type: string
       api_logs:
         description: "print api logs on failure?"
+        required: false
         default: false
         type: boolean
       playwright_tags:
@@ -54,13 +63,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          ref: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
           repository: ${{ github.event.repository.full_name }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-api-commit-hash
         env:
-          CLEAN_REF: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          CLEAN_REF: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
         run: |
           cd ..
           COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
@@ -76,13 +85,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          ref: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
           repository: ${{ github.event.repository.full_name }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-frontend-commit-hash
         env:
-          CLEAN_REF: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          CLEAN_REF: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
         run: |
           cd ..
           COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
@@ -99,6 +108,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
+          repository: ${{ github.event.repository.full_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -165,6 +177,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
+          repository: ${{ github.event.repository.full_name }}
 
       - name: Restore API Docker image cached
         id: restore-docker-image-cached
@@ -220,6 +235,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
+          repository: ${{ github.event.repository.full_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -466,7 +484,7 @@ jobs:
       #   - Any e2e utils have changed?
       #       - Yes
       #         - Run All E2E tests (utils updated)
-      #`      - No
+      #       - No
       #         - Any specific spec files to run supplied?
       #           - Yes
       #             - Run E2E tests
@@ -482,7 +500,7 @@ jobs:
           E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
         if: ${{ env.E2E_UTILS_CHANGED == 'true' }}
         with:
-          version: ${{ github.ref }}
+          version: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
           target: "local"
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}
@@ -507,7 +525,7 @@ jobs:
           E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
         if: ${{ env.E2E_UTILS_CHANGED != 'true' }}
         with:
-          version: ${{ github.ref }}
+          version: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
           target: "local"
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}
@@ -533,7 +551,7 @@ jobs:
           E2E_SPECS_CHANGED: ${{ steps.changed-e2e-spec-files.outputs.all_changed_files }}
         if: ${{ env.E2E_SPECS_CHANGED != '' && env.E2E_UTILS_CHANGED != 'true' }}
         with:
-          version: ${{ github.ref }}
+          version: ${{ inputs.version || github.event.pull_request.head.sha || github.head_ref || github.ref }}
           target: "local"
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}
