@@ -192,15 +192,8 @@ const nextConfig = {
     ],
   },
   experimental: {
-    // Do not enable `experimental.testProxy` here. It makes Next install the
-    // @mswjs/interceptors ClientRequest interceptor, which wraps the socket for
-    // every outbound request. Because `output: "standalone"` bakes this config
-    // into `server.js` at build time, that wrapper ships to deployed
-    // environments, where on Next >=16.3.3 it can begin a second write on an
-    // in-flight TLS socket and trip the uncatchable Node assertion
-    // `!current_write_` in TLSWrap::DoWrite, aborting the server process.
-    // Nothing here uses `next/experimental/testmode` — Playwright drives a real
-    // server via `baseUrl` (see tests/playwright.config.ts).
+    // Do not enable `testProxy`: its @mswjs/interceptors socket wrapper is baked into standalone `server.js` and aborts
+    // deployed servers on next >=16.3.3 (`!current_write_` in TLSWrap::DoWrite).
     proxyClientMaxBodySize: "2000mb",
     serverActions: {
       bodySizeLimit: "2000mb",
