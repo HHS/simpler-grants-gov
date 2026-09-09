@@ -174,6 +174,11 @@ const nextConfig = {
     nrExternals(config);
     return config;
   },
+  // The Docker builder stage copies only `src`, so type-check the app without
+  // test files that import fixtures from `stories/` and `tests/`
+  typescript: {
+    tsconfigPath: "tsconfig.build.json",
+  },
   eslint: {
     dirs: [
       "src",
