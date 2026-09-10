@@ -307,6 +307,90 @@ def test_sf424a_v1_0_empty_line_item(full_valid_json_v1_0, sf424a_v1_0):
         assert validation_issue.field in EXPECTED_REQUIRED_FIELDS
 
 
+def test_sf424a_v1_0_row_1_always_required(sf424a_v1_0):
+    """Row 1 activity_title is required even when only later rows hold data."""
+    data = {
+        "activity_line_items": [
+            {},
+            {"activity_title": "Line2", "budget_summary": {"total_amount": "5.00"}},
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "required"
+    assert validation_issues[0].field == "$.activity_line_items[0].activity_title"
+
+
+def test_sf424a_v1_0_empty_rows_2_4_not_required(sf424a_v1_0):
+    """Rows 2-4 without any data do not require activity_title."""
+    data = {
+        "activity_line_items": [{"activity_title": "Line1"}, {}, {}, {}],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+    assert len(validation_issues) == 0
+
+
+def test_sf424a_v1_0_row_required_when_section_a_data_entered(sf424a_v1_0):
+    """Row 3 Section A data with an empty Column A errors as required (ticket example)."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {},
+            {"budget_summary": {"federal_new_or_revised_amount": "10.00"}},
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "required"
+    assert validation_issues[0].field == "$.activity_line_items[2].activity_title"
+
+    # Providing the title clears the error
+    data["activity_line_items"][2]["activity_title"] = "Line3"
+    assert len(validate_json_schema_for_form(data, sf424a_v1_0)) == 0
+
+
+def test_sf424a_v1_0_row_required_when_section_b_data_entered(sf424a_v1_0):
+    """Row 3 Section B user-entered data with an empty Column A errors as required."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {},
+            {
+                "budget_categories": {
+                    "personnel_amount": "5.00",
+                    "total_direct_charge_amount": "5.00",
+                    "total_amount": "5.00",
+                }
+            },
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "required"
+    assert validation_issues[0].field == "$.activity_line_items[2].activity_title"
+
+
+def test_sf424a_v1_0_row_not_required_with_only_autopopulated_totals(sf424a_v1_0):
+    """Auto-populated Section B totals alone do not make activity_title required."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {"budget_categories": {"total_direct_charge_amount": "0.00", "total_amount": "0.00"}},
+            {"budget_categories": {"total_direct_charge_amount": "0.00", "total_amount": "0.00"}},
+        ],
+        "confirmation": True,
+    }
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
+    assert len(validation_issues) == 0
+
+
 def test_sf424a_v1_0_no_line_items(full_valid_json_v1_0, sf424a_v1_0):
     data = full_valid_json_v1_0
     data["activity_line_items"] = []
@@ -582,6 +666,32 @@ def test_sf424a_v_1_0_auto_summation_full_data(
         },
         "confirmation": True,
     }
+
+
+def test_sf424a_v_1_0_conditional_required_end_to_end(enable_factory_create, sf424a_v1_0):
+    """Through pre-population, empty rows stay optional and Section A data forces Column A."""
+    data = {
+        "activity_line_items": [
+            {"activity_title": "Line1"},
+            {},
+            {"budget_summary": {"federal_new_or_revised_amount": "10.00"}},
+            {},
+        ],
+        "confirmation": True,
+    }
+    app = setup_application_for_form_validation(
+        data,
+        json_schema=sf424a_v1_0.form_json_schema,
+        rule_schema=sf424a_v1_0.form_rule_schema,
+    )
+
+    validation_issues = validate_application_form(app, ApplicationAction.MODIFY)
+
+    # Pre-population injects budget_categories totals into every row, but only row 3
+    # (which has Section A data and no Column A value) is flagged as required.
+    required_issues = [i for i in validation_issues if i.type == "required"]
+    assert len(required_issues) == 1
+    assert required_issues[0].field == "$.activity_line_items[2].activity_title"
 
 
 def test_sf424a_v_1_0_total_budget_summary_sums_column_g(enable_factory_create, sf424a_v1_0):
