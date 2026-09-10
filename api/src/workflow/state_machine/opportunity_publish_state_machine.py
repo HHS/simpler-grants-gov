@@ -10,7 +10,11 @@ from statemachine.states import States
 
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import OpportunityStatus, WorkflowEntityType, WorkflowType
-from src.db.models.opportunity_models import CurrentOpportunitySummary, OpportunityChangeAudit
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    OpportunityChangeAudit,
+    OpportunityIndexDeleteQueue,
+)
 from src.search.search_config import SearchConfig
 from src.services.current_opportunity.determine_current_opportunity_summary import (
     determine_current_and_status,
@@ -162,13 +166,32 @@ class OpportunityPublishStateMachine(BaseStateMachine):
             if self.opportunity.current_opportunity_summary is not None:
                 logger.info("Removing existing current opportunity summary", extra=log_extra)
                 self.db_session.delete(self.opportunity.current_opportunity_summary)
+                # Queue the opportunity for removal from the search index.
+                # Covers cases where the opportunity was previously searchable
+                # (e.g. is_draft flipped back, or post_date moved to the future).
+                logger.info("Queuing opportunity for search index removal", extra=log_extra)
+                self.db_session.add(
+                    OpportunityIndexDeleteQueue(opportunity_id=self.opportunity.opportunity_id)
+                )
 
             # Whether or not we needed to delete a record or if it was already null
             # we can safely return here as there isn't anything to do
             return
 
-        # If the current opportunity summary doesn't already exist, create it first
         if self.opportunity.current_opportunity_summary is None:
+            # Clear any stale delete queue entry before creating the new summary.
+            # no_autoflush prevents get() from triggering a premature flush of other
+            # pending ORM objects in the session.
+            with self.db_session.no_autoflush:
+                stale_delete_entry = self.db_session.get(
+                    OpportunityIndexDeleteQueue, self.opportunity.opportunity_id
+                )
+            if stale_delete_entry is not None:
+                logger.info(
+                    "Clearing stale search index delete queue entry for opportunity",
+                    extra=log_extra,
+                )
+                self.db_session.delete(stale_delete_entry)
             logger.info("Creating new current opportunity summary", extra=log_extra)
             self.opportunity.current_opportunity_summary = CurrentOpportunitySummary(
                 opportunity=self.opportunity
