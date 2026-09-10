@@ -13,6 +13,7 @@ from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
+    OpportunityIndexDeleteQueue,
     OpportunitySummary,
 )
 from src.services.current_opportunity.determine_current_opportunity_summary import (
@@ -126,6 +127,10 @@ class SetCurrentOpportunitiesTask(Task):
         if current_summary is None:
             # We determined the opportunity should not have a current and need to delete it
             if opportunity.current_opportunity_summary is not None:
+                logger.info("Queuing opportunity for search index removal", extra=log_extra)
+                self.db_session.add(
+                    OpportunityIndexDeleteQueue(opportunity_id=opportunity.opportunity_id)
+                )
                 self.db_session.delete(opportunity.current_opportunity_summary)
                 self.increment(self.Metrics.DELETED_CURRENT_OPPORTUNITY_COUNT)
 
@@ -133,8 +138,20 @@ class SetCurrentOpportunitiesTask(Task):
             # safely return here as there isn't anything else to update
             return
 
-        # If the current opportunity summary doesn't already exist, create it first
         if opportunity.current_opportunity_summary is None:
+            # Clear any stale delete queue entry before creating the new summary.
+            # no_autoflush prevents get() from triggering a premature flush of other
+            # pending ORM objects in the session.
+            with self.db_session.no_autoflush:
+                stale_delete_entry = self.db_session.get(
+                    OpportunityIndexDeleteQueue, opportunity.opportunity_id
+                )
+            if stale_delete_entry is not None:
+                logger.info(
+                    "Clearing stale search index delete queue entry for opportunity",
+                    extra=log_extra,
+                )
+                self.db_session.delete(stale_delete_entry)
             opportunity.current_opportunity_summary = CurrentOpportunitySummary(
                 opportunity=opportunity
             )
