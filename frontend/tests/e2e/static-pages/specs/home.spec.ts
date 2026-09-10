@@ -23,7 +23,7 @@ const { targetEnv } = playwrightEnv;
 
 // Background: the user navigates to the home page "/"
 test.beforeEach(async ({ page }) => {
-  const timeout = targetEnv === "staging" ? 180000 : 60000;
+  const timeout = targetEnv !== "local" ? 180000 : 60000;
   await page.goto("/", { waitUntil: "domcontentloaded", timeout });
 });
 

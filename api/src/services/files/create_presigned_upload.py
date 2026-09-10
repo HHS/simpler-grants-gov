@@ -1,3 +1,4 @@
+import abc
 import logging
 import uuid
 from dataclasses import dataclass
@@ -10,6 +11,7 @@ from grants_shared.adapters.aws import S3Config
 from grants_shared.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
 from grants_shared.api.response import ValidationErrorDetail
 from grants_shared.api.route_utils import raise_flask_error
+from grants_shared.db.models.auth_base_models import BaseUser
 from grants_shared.util import datetime_util
 from pydantic import Field
 from sqlalchemy import func, select
@@ -37,16 +39,113 @@ class PresignedUploadResult:
     body: dict[str, Any]
 
 
-def _count_recent_pending_files(
-    db_session: db.Session, user_id: uuid.UUID, window_hours: int
-) -> int:
-    cutoff = datetime_util.utcnow() - timedelta(hours=window_hours)
-    stmt = (
-        select(func.count())
-        .select_from(PendingFile)
-        .where(PendingFile.user_id == user_id, PendingFile.created_at >= cutoff)
-    )
-    return db_session.execute(stmt).scalar_one()
+class BasePresignFileUploadService[USER: BaseUser](abc.ABC, metaclass=abc.ABCMeta):
+    """
+    Base class for setting up a presigned URL to work with our file upload approach.
+
+    This handles:
+    * Validating anything about the user before they upload the file.
+    * Creating a pending record in the DB.
+    * Create a presigned URL with metadata expected.
+    * Create a record in DynamoDB about the pending file.
+    """
+
+    def __init__(
+        self,
+        db_session: db.Session,
+        s3_config: S3Config | None = None,
+        dynamodb_client: DynamoDBClient | None = None,
+        dynamodb_config: DynamoDBConfig | None = None,
+        config: PresignedUploadConfig | None = None,
+    ):
+        self.db_session = db_session
+        if s3_config is None:
+            s3_config = S3Config()
+        self.s3_config = s3_config
+
+        if dynamodb_client is None:
+            dynamodb_client = DynamoDBClient()
+        self.dynamodb_client = dynamodb_client
+
+        if dynamodb_config is None:
+            dynamodb_config = DynamoDBConfig()
+        self.dynamodb_config = dynamodb_config
+
+        if config is None:
+            config = PresignedUploadConfig()
+        self.config = config
+
+    def create_presigned_upload(
+        self, user: USER, file_name: str, mime_type: str
+    ) -> PresignedUploadResult:
+
+        # Verify that the user can presign the URL
+        self.validate_user_can_presign(user)
+        user_id = user.get_user_id()
+
+        # secure_filename makes the file safe for path operations and strips
+        # non-ascii characters before we hand it to s3.
+        secure_file_name = file_util.get_secure_file_name(file_name)
+
+        pending_file_id = uuid.uuid4()
+        s3_file_location = _build_s3_file_location(
+            self.s3_config, pending_file_id, secure_file_name
+        )
+
+        self.create_pending_file_in_db(
+            pending_file_id=pending_file_id,
+            user=user,
+            file_name=file_name,
+            s3_file_location=s3_file_location,
+            mime_type=mime_type,
+        )
+
+        presigned = file_util.pre_sign_upload(
+            file_path=s3_file_location,
+            content_type=mime_type,
+            metadata={
+                "file-id": str(pending_file_id),
+                "user-id": str(user_id),
+            },
+            s3_config=self.s3_config,
+        )
+
+        _write_scan_record(
+            dynamodb_client=self.dynamodb_client,
+            dynamodb_config=self.dynamodb_config,
+            pending_file_id=pending_file_id,
+            user_id=user.get_user_id(),
+        )
+
+        logger.info(
+            "Created presigned upload for pending file",
+            extra={
+                "pending_file_id": pending_file_id,
+                "user_id": user_id,
+                "file_scan_status": FileScanStatus.PENDING,
+            },
+        )
+
+        return PresignedUploadResult(
+            pending_file_id=pending_file_id,
+            url=presigned["url"],
+            body=presigned["fields"],
+        )
+
+    @abc.abstractmethod
+    def validate_user_can_presign(self, user: USER) -> None:
+        pass
+
+    @abc.abstractmethod
+    def create_pending_file_in_db(
+        self,
+        pending_file_id: uuid.UUID,
+        user: USER,
+        file_name: str,
+        s3_file_location: str,
+        mime_type: str,
+    ) -> None:
+        pass
 
 
 def _build_s3_file_location(s3_config: S3Config, pending_file_id: uuid.UUID, file_name: str) -> str:
@@ -74,102 +173,68 @@ def _write_scan_record(
     )
 
 
-def create_presigned_upload(
-    db_session: db.Session,
-    user: User,
-    request_data: dict,
-    s3_config: S3Config | None = None,
-    dynamodb_client: DynamoDBClient | None = None,
-    dynamodb_config: DynamoDBConfig | None = None,
-    config: PresignedUploadConfig | None = None,
-) -> PresignedUploadResult:
-    if s3_config is None:
-        s3_config = S3Config()
-    if dynamodb_client is None:
-        dynamodb_client = DynamoDBClient()
-    if dynamodb_config is None:
-        dynamodb_config = DynamoDBConfig()
-    if config is None:
-        config = PresignedUploadConfig()
+# Everything under here will stay in Simpler, everything above will go to grant-shared.
 
-    file_name = request_data["file_name"]
-    mime_type = request_data["mime_type"]
 
-    recent_count = _count_recent_pending_files(
-        db_session, user.user_id, config.pending_file_upload_rate_window_hours
-    )
-    if recent_count >= config.pending_file_upload_rate_limit:
-        logger.info(
-            "User exceeded pending file upload rate limit",
-            extra={
-                "user_id": user.user_id,
-                "recent_pending_file_count": recent_count,
-                "pending_file_upload_rate_limit": config.pending_file_upload_rate_limit,
-                "pending_file_upload_rate_window_hours": (
-                    config.pending_file_upload_rate_window_hours
-                ),
-            },
+class SimplerPresignFileUploadService(BasePresignFileUploadService[User]):
+
+    def validate_user_can_presign(self, user: User) -> None:
+        recent_count = _count_recent_pending_files(
+            self.db_session, user.user_id, self.config.pending_file_upload_rate_window_hours
         )
-        raise_flask_error(
-            429,
-            message="Too many pending file uploads",
-            validation_issues=[
-                ValidationErrorDetail(
-                    type=ValidationErrorType.PENDING_FILE_UPLOAD_LIMIT_EXCEEDED,
-                    message=(
-                        f"User has uploaded more than "
-                        f"{config.pending_file_upload_rate_limit} files in the past "
-                        f"{config.pending_file_upload_rate_window_hours} hour(s)"
+        if recent_count >= self.config.pending_file_upload_rate_limit:
+            logger.info(
+                "User exceeded pending file upload rate limit",
+                extra={
+                    "user_id": user.user_id,
+                    "recent_pending_file_count": recent_count,
+                    "pending_file_upload_rate_limit": self.config.pending_file_upload_rate_limit,
+                    "pending_file_upload_rate_window_hours": (
+                        self.config.pending_file_upload_rate_window_hours
                     ),
-                )
-            ],
+                },
+            )
+            raise_flask_error(
+                429,
+                message="Too many pending file uploads",
+                validation_issues=[
+                    ValidationErrorDetail(
+                        type=ValidationErrorType.PENDING_FILE_UPLOAD_LIMIT_EXCEEDED,
+                        message=(
+                            f"User has uploaded more than "
+                            f"{self.config.pending_file_upload_rate_limit} files in the past "
+                            f"{self.config.pending_file_upload_rate_window_hours} hour(s)"
+                        ),
+                    )
+                ],
+            )
+
+    def create_pending_file_in_db(
+        self,
+        pending_file_id: uuid.UUID,
+        user: User,
+        file_name: str,
+        s3_file_location: str,
+        mime_type: str,
+    ) -> None:
+        pending_file = PendingFile(
+            pending_file_id=pending_file_id,
+            user=user,
+            file_name=file_name,
+            file_location=s3_file_location,
+            mime_type=mime_type,
+            file_scan_status=FileScanStatus.PENDING,
         )
+        self.db_session.add(pending_file)
 
-    # secure_filename makes the file safe for path operations and strips
-    # non-ascii characters before we hand it to s3.
-    secure_file_name = file_util.get_secure_file_name(file_name)
 
-    pending_file_id = uuid.uuid4()
-    s3_file_location = _build_s3_file_location(s3_config, pending_file_id, secure_file_name)
-
-    pending_file = PendingFile(
-        pending_file_id=pending_file_id,
-        user=user,
-        file_name=file_name,
-        file_location=s3_file_location,
-        mime_type=mime_type,
-        file_scan_status=FileScanStatus.PENDING,
+def _count_recent_pending_files(
+    db_session: db.Session, user_id: uuid.UUID, window_hours: int
+) -> int:
+    cutoff = datetime_util.utcnow() - timedelta(hours=window_hours)
+    stmt = (
+        select(func.count())
+        .select_from(PendingFile)
+        .where(PendingFile.user_id == user_id, PendingFile.created_at >= cutoff)
     )
-    db_session.add(pending_file)
-
-    presigned = file_util.pre_sign_upload(
-        file_path=s3_file_location,
-        content_type=mime_type,
-        metadata={
-            "file-id": str(pending_file_id),
-            "user-id": str(user.user_id),
-        },
-        s3_config=s3_config,
-    )
-
-    _write_scan_record(
-        dynamodb_client=dynamodb_client,
-        dynamodb_config=dynamodb_config,
-        pending_file_id=pending_file_id,
-        user_id=user.user_id,
-    )
-
-    logger.info(
-        "Created presigned upload for pending file",
-        extra={
-            "pending_file_id": pending_file_id,
-            "user_id": user.user_id,
-            "file_scan_status": FileScanStatus.PENDING,
-        },
-    )
-
-    return PresignedUploadResult(
-        pending_file_id=pending_file_id,
-        url=presigned["url"],
-        body=presigned["fields"],
-    )
+    return db_session.execute(stmt).scalar_one()

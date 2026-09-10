@@ -473,10 +473,48 @@ describe("TableWidget", () => {
 
     expect(screen.getByTestId("table")).toBeInTheDocument();
 
-    // Verify error messages are rendered for input fields
-    // (Note: The second cell is read-only so it won't show errors)
+    // Verify error messages are rendered for both the editable input cell
+    // and the readOnly (calculated) cell.
     expect(screen.getByText("First value error")).toBeInTheDocument();
+    expect(screen.getByText("Second value error")).toBeInTheDocument();
     expect(screen.queryByText("Should not appear")).not.toBeInTheDocument();
+  });
+
+  it("renders validation errors on readOnly cells with a resolvable id for the error-summary link", () => {
+    const rawErrors = [
+      {
+        field: "second_value",
+        message: "Total allowable cost cannot be negative",
+        type: "custom",
+        value: null,
+      },
+    ];
+
+    render(
+      <TableWidget
+        {...props}
+        schema={{}}
+        rawErrors={rawErrors}
+        value={{ first_value: 100, second_value: -50 }}
+        options={{}}
+      />,
+    );
+
+    expect(
+      screen.getByText("Total allowable cost cannot be negative"),
+    ).toBeInTheDocument();
+
+    const readOnlyCell = screen.getByTestId("summary_table_test-0-2-read-only");
+
+    // The error-summary anchor at the top of the form links to
+    // `#<cellName>`, so the readOnly cell must expose that same id for
+    // getElementById()/the fragment link to resolve.
+    expect(readOnlyCell).toHaveAttribute(
+      "id",
+      "summary_table_test[0]--second_value",
+    );
+    expect(readOnlyCell).toHaveAttribute("aria-invalid", "true");
+    expect(readOnlyCell).toHaveClass("usa-input--error");
   });
 
   it("does not apply base-name fallback when multiple cells share the same suffix", () => {

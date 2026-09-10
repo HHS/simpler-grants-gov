@@ -8,12 +8,13 @@ import { Attachment } from "src/types/attachmentTypes";
 
 // Mock FormFields component
 jest.mock("src/components/apply-form/FormFields", () => ({
-  FormFields: ({ formData, schema, uiSchema, errors }: any) => (
+  FormFields: ({ formData, schema, uiSchema, errors, isFormLocked }: any) => (
     <div data-testid="form-fields">
       <div data-testid="form-data">{JSON.stringify(formData)}</div>
       <div data-testid="schema">{JSON.stringify(schema)}</div>
       <div data-testid="ui-schema">{JSON.stringify(uiSchema)}</div>
       <div data-testid="errors">{JSON.stringify(errors)}</div>
+      <div data-testid="is-form-locked">{JSON.stringify(isFormLocked)}</div>
     </div>
   ),
 }));
@@ -103,6 +104,12 @@ describe("PrintForm", () => {
     expect(errorsElement).toHaveTextContent("null");
   });
 
+  it("always locks the form so Table/multiField inputs render read-only in print", () => {
+    render(<PrintForm {...defaultProps} />);
+
+    const isFormLockedElement = screen.getByTestId("is-form-locked");
+    expect(isFormLockedElement).toHaveTextContent("true");
+  });
   it("provides empty array when attachments is undefined", () => {
     const props = {
       ...defaultProps,

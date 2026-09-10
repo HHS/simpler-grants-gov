@@ -1,6 +1,7 @@
 import {
   getByPointer,
   getFieldPathFromHtml,
+  isNonSchemaFormDataKey,
 } from "src/utils/formData/formDataUtils";
 
 jest.mock("json-pointer", () => ({
@@ -15,6 +16,34 @@ describe("getFieldPathFromHtml", () => {
   });
   it("honors alternate html side delimiters", () => {
     expect(getFieldPathFromHtml("foo.bar", ".")).toBe("/foo/bar");
+  });
+});
+
+describe("isNonSchemaFormDataKey", () => {
+  it.each([
+    "att1-visible",
+    "attachments-visible",
+    "budget--attachments-visible",
+    "submitType",
+    "apply-form-button",
+    "opportunity-attachment-upload",
+    "held_pending_file_ids",
+    "deleted_attachment_ids",
+    "$ACTION_REF_1",
+    "$ACTION_1:0",
+    "$ACTION_KEY",
+  ])("identifies control input %s", (key) => {
+    expect(isNonSchemaFormDataKey(key)).toBe(true);
+  });
+
+  it.each([
+    "attachments",
+    "att1",
+    "budget--attachments",
+    "opportunity_title",
+    "visible",
+  ])("does not claim schema backed field %s", (key) => {
+    expect(isNonSchemaFormDataKey(key)).toBe(false);
   });
 });
 

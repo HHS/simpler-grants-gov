@@ -78,7 +78,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     );
     expect(response.status).toEqual(400);
   });
-  it("calls fetchFileUploadDetails with uploaded file, and streams 'queued' status", async () => {
+  it("calls fetchFileUploadDetails with uploaded file, and streams 'starting' status", async () => {
     const testFile = new File(["file contents"], "file.txt", {
       type: "application/octet-stream",
     });
@@ -97,7 +97,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
       response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
 
     const firstChunk = await reader?.read();
-    expect(firstChunk?.value).toEqual('{"status":"queued"}');
+    expect(firstChunk?.value).toEqual('{"status":"starting"}');
 
     expect(mockFetchFileUploadDetails).toHaveBeenCalledTimes(1);
     expect(mockFetchFileUploadDetails).toHaveBeenCalledWith(
@@ -105,7 +105,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
       testFile.type,
     );
   });
-  it("sets queued status while fetching s3 details", async () => {
+  it("sets starting status while fetching s3 details", async () => {
     const testFile = new File(["file contents"], "file.txt");
     const testFormData = new FormData();
     testFormData.append("file_attachment", testFile);
@@ -122,7 +122,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
       response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
 
     const firstChunk = await reader?.read();
-    expect(firstChunk?.value).toEqual('{"status":"queued"}');
+    expect(firstChunk?.value).toEqual('{"status":"starting"}');
   });
   it("calls uploadFileToS3 with returned data from fetchFileUploadDetails and file, and streams 'uploading' status", async () => {
     const testFile = new File(["file contents"], "file.txt");
@@ -197,7 +197,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     const reader =
       response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
 
-    // advance through queued, uploading, and starting-scan states
+    // advance through starting, uploading, and starting-scan states
     await reader?.read();
     await reader?.read();
     await reader?.read();
@@ -242,7 +242,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     const reader =
       response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
 
-    // advance through queued, uploading, and starting-scan states
+    // advance through starting, uploading, and starting-scan states
     await reader?.read();
     await reader?.read();
     await reader?.read();
@@ -347,7 +347,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     const reader =
       response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
 
-    // advance through queued, uploading, and starting-scan states
+    // advance through starting, uploading, and starting-scan states
     await reader?.read();
     await reader?.read();
     await reader?.read();
@@ -379,7 +379,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     const reader =
       response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
 
-    // advance through queued, uploading, and starting-scan states
+    // advance through starting, uploading, and starting-scan states
     await reader?.read();
     await reader?.read();
     await reader?.read();
@@ -418,7 +418,7 @@ describe("POST request handler /api/file (handleFileUpload)", () => {
     const reader =
       response.body?.getReader() as ReadableStreamDefaultReader<FileUploadStatusUpdate>;
 
-    // advance through queued, uploading, and starting-scan states
+    // advance through starting, uploading, and starting-scan states
     await reader?.read();
     await reader?.read();
     await reader?.read();

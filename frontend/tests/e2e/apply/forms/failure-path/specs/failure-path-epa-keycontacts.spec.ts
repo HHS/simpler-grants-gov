@@ -16,6 +16,7 @@ import {
   fieldDefinitionsEPAKeyContacts,
 } from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
 import { epaKeyContactsFailurePathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
+import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -30,15 +31,8 @@ import {
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
-const { testOrgLabel, targetEnv } = playwrightEnv;
+const { testOrgLabel } = playwrightEnv;
 
-// Environment-specific opportunity IDs
-// Staging: 39cf0a5c-5fed-40b4-8f46-5374101ae419
-// Local:   c3c59562-a54f-4203-b0f6-98f2f0383481
-const OPPORTUNITY_ID =
-  targetEnv === "staging"
-    ? "39cf0a5c-5fed-40b4-8f46-5374101ae419"
-    : "c3c59562-a54f-4203-b0f6-98f2f0383481";
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 // Skip non-Chrome browsers in staging

@@ -310,7 +310,8 @@ export const ReviewSubmissionForm: React.FC<ReviewSubmissionFormProps> = ({
         </p>
         <SimplerFileInput
           id="supplemental_documents"
-          labelId="supplemental_documents"
+          // the label above is already associated by htmlFor; supplies input accessible name
+          describedByIds={[]}
           postUploadAction={postUploadAction}
           postUploadActionProgressMessage={t("supplementalDocuments.uploading")}
           postUploadActionSuccessMessage={t(

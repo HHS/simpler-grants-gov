@@ -21,6 +21,11 @@ ECS_SERVICE_NAME = os.environ.get("ECS_SERVICE_NAME", "")
 ECS_CLUSTER_NAME = os.environ.get("ECS_CLUSTER_NAME", "")
 NR_ENTITY_GUID = os.environ.get("NR_ENTITY_GUID", "")
 
+# New Relic reporting name. Differs from ECS_SERVICE_NAME when an environment stands in
+# for another (e.g. infra-staging reports as frontend-staging so it lands on the same
+# entity as the environment it replaces). The aws.ecs.* attributes stay truthful.
+NR_ENTITY_NAME = os.environ.get("NR_ENTITY_NAME", "") or ECS_SERVICE_NAME
+
 # Max log entries per New Relic Logs API request
 BATCH_SIZE = 1000
 
@@ -240,8 +245,8 @@ def handler(event, context):
         "aws.region": AWS_REGION,
         "aws.ecs.serviceName": ECS_SERVICE_NAME,
         "aws.ecs.clusterName": ECS_CLUSTER_NAME,
-        "hostname": ECS_SERVICE_NAME,
-        "entity.name": ECS_SERVICE_NAME,
+        "hostname": NR_ENTITY_NAME,
+        "entity.name": NR_ENTITY_NAME,
         "entity.type": "AWSECSSERVICE",
         "provider": "EcsService",
     }

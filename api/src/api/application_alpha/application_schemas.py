@@ -322,24 +322,6 @@ class ApplicationGetResponseSchema(AbstractResponseSchema, WarningMixinSchema):
     data = fields.Nested(ApplicationGetResponseDataSchema())
 
 
-class ApplicationAttachmentCreateSchema(Schema):
-    application_attachment_id = fields.UUID(
-        metadata={"description": "The ID of the uploaded application attachment"}
-    )
-
-
-class ApplicationAttachmentCreateResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(ApplicationAttachmentCreateSchema())
-
-
-class ApplicationAttachmentCreateRequestSchema(Schema):
-    file_attachment = fields.File(
-        required=True,
-        allow_none=False,
-        metadata={"description": "The file to attach to an application"},
-    )
-
-
 class ApplicationAttachmentGetSchema(FileResponseSchema):
     application_attachment_id = fields.UUID(
         metadata={"description": "The ID of the uploaded application attachment"}
@@ -362,22 +344,6 @@ class ApplicationAttachmentGetSchema(FileResponseSchema):
 
 class ApplicationAttachmentGetResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationAttachmentGetSchema())
-
-
-class ApplicationAttachmentDeleteResponseSchema(AbstractResponseSchema):
-    data = fields.MixinField(metadata={"example": None})
-
-
-class ApplicationAttachmentUpdateRequestSchema(Schema):
-    file_attachment = fields.File(
-        required=True,
-        allow_none=False,
-        metadata={"description": "The file to attach to an application"},
-    )
-
-
-class ApplicationAttachmentUpdateResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(ApplicationAttachmentCreateSchema())
 
 
 class ApplicationFormInclusionUpdateRequestSchema(Schema):

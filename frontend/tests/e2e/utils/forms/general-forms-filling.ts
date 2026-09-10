@@ -111,6 +111,14 @@ export async function fillForm(
       .getByText(formReadyMatcher)
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
+
+    // Wait for form body/fieldset to be present in DOM before filling fields.
+    // This ensures all fields are rendered, especially on mobile where
+    // form rendering may be async or progressive. Use a longer timeout
+    // for mobile form hydration.
+    const formBody = page.locator("form, fieldset").first();
+    await formBody.waitFor({ state: "attached", timeout: 15000 });
+
     for (const [fieldIdentifier, fieldConfig] of Object.entries(fields)) {
       // Fill fields:
       const dataForField = data[fieldIdentifier];

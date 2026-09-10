@@ -3,7 +3,6 @@ from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.user_models import SuppressedEmail, UserNotificationLog
 from src.task.notifications.config import EmailNotificationConfig
@@ -18,8 +17,7 @@ class TestOrgSavedOpportunityNotification:
     notification_config: EmailNotificationConfig
 
     @pytest.fixture
-    def configuration(self, monkeypatch):
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+    def configuration(self):
         self.notification_config = EmailNotificationConfig()
         self.notification_config.reset_emails_without_sending = False
 
@@ -54,6 +52,8 @@ class TestOrgSavedOpportunityNotification:
         user_with_email,
         org_with_user,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that email is sent when org has unprocessed saved opportunity."""
         opportunity = factories.OpportunityFactory.create()
@@ -62,7 +62,6 @@ class TestOrgSavedOpportunityNotification:
             opportunity=opportunity,
         )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
@@ -81,9 +80,10 @@ class TestOrgSavedOpportunityNotification:
         assert notification_logs[0].notification_sent is True
         assert notification_logs[0].user_id == user_with_email.user_id
 
-        # Verify email was sent via Pinpoint
-        mock_responses = _get_mock_responses()
-        assert len(mock_responses) == 1
+        # Verify email was sent via SES
+        emails = get_sent_emails()
+        assert len(emails) == 1
+        assert emails[0].destinations["ToAddresses"] == ["test@example.com"]
 
     def test_no_email_sent_on_second_run(
         self,
@@ -92,6 +92,8 @@ class TestOrgSavedOpportunityNotification:
         user_with_email,
         org_with_user,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that no email is sent on second run (notification_processed_at is already set)."""
         opportunity = factories.OpportunityFactory.create()
@@ -100,19 +102,17 @@ class TestOrgSavedOpportunityNotification:
             opportunity=opportunity,
         )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
         # Verify email sent on first run
-        assert len(_get_mock_responses()) == 1
+        assert len(get_sent_emails()) == 1
 
-        _clear_mock_responses()
         # Run again - no new email should be sent
         task2 = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task2.run()
 
-        assert len(_get_mock_responses()) == 0
+        assert len(get_sent_emails()) == 1
 
     def test_new_opportunity_triggers_new_email(
         self,
@@ -121,6 +121,8 @@ class TestOrgSavedOpportunityNotification:
         user_with_email,
         org_with_user,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that adding a new saved opportunity to an org triggers a new email."""
         opportunity1 = factories.OpportunityFactory.create()
@@ -129,10 +131,9 @@ class TestOrgSavedOpportunityNotification:
             opportunity=opportunity1,
         )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
-        assert len(_get_mock_responses()) == 1
+        assert len(get_sent_emails()) == 1
 
         # Add a new opportunity to the org
         opportunity2 = factories.OpportunityFactory.create()
@@ -141,10 +142,9 @@ class TestOrgSavedOpportunityNotification:
             opportunity=opportunity2,
         )
 
-        _clear_mock_responses()
         task2 = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task2.run()
-        assert len(_get_mock_responses()) == 1
+        assert len(get_sent_emails()) == 2
 
     def test_user_without_org_notifications_enabled_receives_no_email(
         self,
@@ -152,6 +152,8 @@ class TestOrgSavedOpportunityNotification:
         enable_factory_create,
         user_with_email,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that user without org notifications enabled does not receive email."""
         org = factories.OrganizationFactory.create()
@@ -169,12 +171,11 @@ class TestOrgSavedOpportunityNotification:
             opportunity=opportunity,
         )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
-        mock_responses = _get_mock_responses()
-        assert len(mock_responses) == 0
+        emails = get_sent_emails()
+        assert len(emails) == 0
 
     def test_user_with_no_notification_row_receives_no_email(
         self,
@@ -182,6 +183,8 @@ class TestOrgSavedOpportunityNotification:
         enable_factory_create,
         user_with_email,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that user with no org notification row (default=False) receives no email."""
         org = factories.OrganizationFactory.create()
@@ -194,11 +197,10 @@ class TestOrgSavedOpportunityNotification:
             opportunity=opportunity,
         )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
-        assert len(_get_mock_responses()) == 0
+        assert len(get_sent_emails()) == 0
 
     def test_suppressed_email_user_receives_no_email(
         self,
@@ -207,6 +209,8 @@ class TestOrgSavedOpportunityNotification:
         user_with_email,
         org_with_user,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that users with suppressed emails do not receive notifications."""
         factories.SuppressedEmailFactory.create(email="test@example.com")
@@ -217,11 +221,10 @@ class TestOrgSavedOpportunityNotification:
             opportunity=opportunity,
         )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
-        assert len(_get_mock_responses()) == 0
+        assert len(get_sent_emails()) == 0
 
     def test_multiple_opportunities_in_one_org_single_email(
         self,
@@ -230,6 +233,8 @@ class TestOrgSavedOpportunityNotification:
         user_with_email,
         org_with_user,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that multiple new opportunities in one org result in a single email."""
         for _ in range(3):
@@ -239,12 +244,11 @@ class TestOrgSavedOpportunityNotification:
                 opportunity=opp,
             )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
-        mock_responses = _get_mock_responses()
-        assert len(mock_responses) == 1
+        emails = get_sent_emails()
+        assert len(emails) == 1
 
         notification_logs = (
             db_session.execute(
@@ -264,6 +268,8 @@ class TestOrgSavedOpportunityNotification:
         enable_factory_create,
         user_with_email,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that a user in multiple orgs with new opportunities gets one email per org."""
         org1 = factories.OrganizationFactory.create()
@@ -284,13 +290,12 @@ class TestOrgSavedOpportunityNotification:
         factories.OrganizationSavedOpportunityFactory.create(organization=org1, opportunity=opp1)
         factories.OrganizationSavedOpportunityFactory.create(organization=org2, opportunity=opp2)
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
         # One user in two orgs -> two emails, one per org
-        mock_responses = _get_mock_responses()
-        assert len(mock_responses) == 2
+        emails = get_sent_emails()
+        assert len(emails) == 2
 
     def test_one_user_notified_other_not_in_same_org(
         self,
@@ -298,6 +303,8 @@ class TestOrgSavedOpportunityNotification:
         enable_factory_create,
         user_with_email,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that one user with notifications enabled gets email; another without does not."""
         # Second user without notification
@@ -322,12 +329,11 @@ class TestOrgSavedOpportunityNotification:
             organization=org, opportunity=opportunity
         )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
-        mock_responses = _get_mock_responses()
-        assert len(mock_responses) == 1
+        emails = get_sent_emails()
+        assert len(emails) == 1
 
         notification_logs = (
             db_session.execute(
@@ -349,6 +355,8 @@ class TestOrgSavedOpportunityNotification:
         user_with_email,
         org_with_user,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that no email is sent when there are no unprocessed opportunities."""
         opportunity = factories.OpportunityFactory.create()
@@ -360,11 +368,10 @@ class TestOrgSavedOpportunityNotification:
         org_saved_opp.notification_processed_at = datetime_util.utcnow()
         db_session.flush()
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
-        assert len(_get_mock_responses()) == 0
+        assert len(get_sent_emails()) == 0
 
     def test_truncation_more_than_max_opportunities(
         self,
@@ -373,6 +380,8 @@ class TestOrgSavedOpportunityNotification:
         user_with_email,
         org_with_user,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that opportunities beyond MAX_OPPORTUNITIES_DISPLAYED are truncated in the email."""
         # Create 7 opportunities (more than MAX_OPPORTUNITIES_DISPLAYED = 5)
@@ -383,17 +392,13 @@ class TestOrgSavedOpportunityNotification:
                 opportunity=opp,
             )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
-        mock_responses = _get_mock_responses()
-        assert len(mock_responses) == 1
+        emails = get_sent_emails()
+        assert len(emails) == 1
 
-        request, _ = mock_responses[0]
-        email_html = request["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-            "SimpleEmail"
-        ]["HtmlPart"]["Data"]
+        email_html = emails[0].body
 
         # Should show "+ 2 more opportunities" for the 2 truncated items
         assert "+ 2 more opportunities" in email_html
@@ -405,6 +410,8 @@ class TestOrgSavedOpportunityNotification:
         user_with_email,
         org_with_user,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that the email HTML contains the opportunity title and link."""
         opportunity = factories.OpportunityFactory.create(
@@ -415,17 +422,13 @@ class TestOrgSavedOpportunityNotification:
             opportunity=opportunity,
         )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
-        mock_responses = _get_mock_responses()
-        assert len(mock_responses) == 1
+        emails = get_sent_emails()
+        assert len(emails) == 1
 
-        request, _ = mock_responses[0]
-        email_html = request["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-            "SimpleEmail"
-        ]["HtmlPart"]["Data"]
+        email_html = emails[0].body
 
         assert "Test Grant Opportunity" in email_html
         assert f"/opportunity/{opportunity.opportunity_id}" in email_html
@@ -438,6 +441,7 @@ class TestOrgSavedOpportunityNotification:
         user_with_email,
         org_with_user,
         configuration,
+        ses_client,
     ):
         """Test that notification_processed_at is set on org saved opportunities after task runs."""
         opportunity = factories.OpportunityFactory.create()
@@ -446,7 +450,6 @@ class TestOrgSavedOpportunityNotification:
             opportunity=opportunity,
         )
 
-        _clear_mock_responses()
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 

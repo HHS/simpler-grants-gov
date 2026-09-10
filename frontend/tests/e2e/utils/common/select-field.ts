@@ -13,6 +13,9 @@ export const selectOptionByLabel = async (
   exact?: boolean,
 ) => {
   const select = page.getByLabel(label, { exact }).first();
+  // Use longer timeout (10s) for field attachment to handle lazy-loaded
+  // fields on mobile where form rendering may be progressive/async.
+  await select.waitFor({ state: "attached", timeout: 10000 });
   await select.waitFor({ state: "visible", timeout: 5000 });
   await select.selectOption({ label: optionText });
 };

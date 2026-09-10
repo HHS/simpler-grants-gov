@@ -4,6 +4,7 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaFieldList,
+  UiSchemaText,
 } from "src/types/applyForm/types";
 import {
   getRequiredProperties,
@@ -69,6 +70,21 @@ const isRenderableFieldNode = (
   );
 };
 
+/**
+ * `text` nodes are static text rendered inline between other section
+ * children (e.g. a footnote after a specific field), rather than an
+ * actual form field.
+ *
+ * Handled directly here instead of through the widget pipeline because
+ * there's no schema field or data value behind it - just text to display.
+ * Wrapped in a usa-form-group so spacing matches the surrounding fields.
+ */
+const renderTextNode = (node: UiSchemaText): JSX.Element => (
+  <div key={node.name} className="usa-form-group">
+    <p className="margin-y-0">{node.content}</p>
+  </div>
+);
+
 /*
   Runs through the UI Schema to produce a rendered array of field widgets and sections
 */
@@ -123,6 +139,14 @@ export const FormFields = ({
           name: node.name,
           description: node.description,
         });
+      } else if (node.type === "text") {
+        // A section's children get walked through twice: once right here in this
+        // forEach, and again below in the `sectionFields` map that actually
+        // builds the section. Only render here if there's no parent section,
+        // otherwise this text node would be shown twice.
+        if (!parent) {
+          renderedFields = [...renderedFields, renderTextNode(node)];
+        }
       } else if (!isRenderableFieldNode(node)) {
         throw new Error("child field missing definition and schema");
       } else if (!parent) {
@@ -191,7 +215,12 @@ export const FormFields = ({
     // iteration above) and wrapped in a section here.
     if (parent) {
       const sectionFields = uiSchema.map((node) => {
-        // assume that any child fields of a section are defined fields, no support for sub sections
+        // `text` nodes are static text, not a defined field; render them inline as-is.
+        if (node.type === "text") {
+          return renderTextNode(node);
+        }
+
+        // assume that any other child fields of a section are defined fields, no support for sub sections
         if (!isRenderableFieldNode(node)) {
           throw new Error("section child is not a defined field");
         }

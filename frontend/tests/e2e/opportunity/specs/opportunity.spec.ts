@@ -32,6 +32,10 @@ const testOpportunityIdMap: {
 } = {
   staging: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
   local: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
+  grantee1: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
+  grantee2: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
+  grantor1: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
+  grantor2: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
 };
 
 // either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity

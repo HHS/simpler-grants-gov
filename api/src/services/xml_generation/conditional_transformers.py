@@ -9,6 +9,8 @@ from typing import Any
 
 from grants_shared.util.dict_util import get_nested_value
 
+from .value_transformers import apply_value_transformation
+
 logger = logging.getLogger(__name__)
 
 
@@ -492,6 +494,7 @@ def apply_conditional_transform(
         source_field = transform_config.get("source_field")
         target_pattern = transform_config.get("target_pattern")
         max_count = transform_config.get("max_count", 10)
+        item_value_transform = transform_config.get("item_value_transform")
 
         if source_field and target_pattern:
             # Validate source_field is a string
@@ -506,11 +509,15 @@ def apply_conditional_transform(
                 result = {}
                 for i, value in enumerate(source_values[:max_count]):  # Limit to max_count
                     target_field = target_pattern.format(index=i + 1)  # 1-based indexing
+                    if item_value_transform:
+                        value = apply_value_transformation(value, item_value_transform)
                     result[target_field] = value
                 return result
             elif source_values is not None:
                 # Single value - put it in the first position
                 target_field = target_pattern.format(index=1)
+                if item_value_transform:
+                    source_values = apply_value_transformation(source_values, item_value_transform)
                 return {target_field: source_values}
 
         return None

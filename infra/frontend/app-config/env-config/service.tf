@@ -1,6 +1,7 @@
 locals {
   service_config = {
     service_name                  = "${var.app_name}-${var.environment}"
+    app_environment_name          = local.app_environment_name
     region                        = var.default_region
     cpu                           = var.service_cpu
     memory                        = var.service_memory
@@ -10,6 +11,7 @@ locals {
     newrelic_entity_guid          = var.service_newrelic_entity_guid
     newrelic_host_entity_guid     = var.service_host_newrelic_entity_guid
     domain_name                   = var.domain_name
+    enable_cdn_alias              = var.enable_cdn_alias
     instance_scaling_max_capacity = var.instance_scaling_max_capacity
     instance_scaling_min_capacity = var.instance_scaling_min_capacity
     instance_cpu                  = var.instance_cpu

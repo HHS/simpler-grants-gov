@@ -15,11 +15,18 @@ export async function waitForURLChange(
   timeout = 60000, // query params get set after a debounce period)
 ) {
   const endTime = Date.now() + timeout;
+  let consecutiveMatches = 0;
+  const requiredConsecutiveMatches = 2; // URL must match twice in a row to be considered stable
 
   while (Date.now() < endTime) {
     const changeComplete = changeCheck(page.url());
     if (changeComplete) {
-      return;
+      consecutiveMatches++;
+      if (consecutiveMatches >= requiredConsecutiveMatches) {
+        return;
+      }
+    } else {
+      consecutiveMatches = 0;
     }
 
     await page.waitForTimeout(500);
@@ -48,7 +55,7 @@ export async function waitForURLContainsQueryParamValue(
   timeoutOverride?: number,
 ) {
   // Use longer timeout for staging environment due to slower response times
-  const timeout = timeoutOverride ?? (targetEnv === "staging" ? 300000 : 60000);
+  const timeout = timeoutOverride ?? (targetEnv !== "local" ? 300000 : 60000);
 
   const changeCheck = (pageUrl: string): boolean => {
     const url = new URL(pageUrl);
@@ -91,7 +98,7 @@ export async function waitForURLContainsQueryParamValues(
   queryParamValues: string[],
   timeoutOverride?: number,
 ) {
-  const timeout = timeoutOverride ?? (targetEnv === "staging" ? 300000 : 60000);
+  const timeout = timeoutOverride ?? (targetEnv !== "local" ? 300000 : 60000);
 
   const expectedSorted = [...queryParamValues].sort();
 
@@ -185,7 +192,7 @@ export const openMobileNav = async (page: Page) => {
   const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
   const nav = page.locator(".usa-nav");
   const overlay = page.locator(".usa-overlay");
-  const timeout = targetEnv === "staging" ? 120000 : 10000;
+  const timeout = targetEnv !== "local" ? 120000 : 10000;
 
   // If the nav is already open (e.g. left open by authenticateE2eUser), skip
   // clicking the hamburger button — clicking it again would close the nav and
@@ -198,7 +205,7 @@ export const openMobileNav = async (page: Page) => {
     await menuOpener.click();
 
     // Wait for animation to complete on slow staging environment
-    if (targetEnv === "staging") {
+    if (targetEnv !== "local") {
       await page.waitForTimeout(5000);
     }
 

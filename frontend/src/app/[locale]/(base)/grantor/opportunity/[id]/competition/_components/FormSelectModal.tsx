@@ -20,10 +20,6 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 const checkboxStyle: CSSProperties = { width: 20, height: 20 };
 
-const alwaysRequiredForms: Record<string, boolean> = {
-  "1623b310-85be-496a-b84b-34bdee22a68a": true, // SF 424. As we start to support other form families, this will be replaced with a more complex function
-};
-
 const resetTableForms = (
   forms: FormType[],
   selectedForms: Record<string, boolean>,
@@ -38,24 +34,26 @@ const resetTableForms = (
     };
   });
 };
-const resetSelectedForms = (competitionForms: CompetitionFormsSubmitApi) => {
-  const formHolder: Record<string, boolean> = { ...alwaysRequiredForms };
-  competitionForms.forEach((form) => {
+const resetSelectedForms = (_requiredForms: CompetitionFormsSubmitApi) => {
+  const formHolder: Record<string, boolean> = {};
+  _requiredForms.forEach((form) => {
     formHolder[form.form_id] = form.is_required;
   });
   return formHolder;
 };
 
 export const FormSelectModal = ({
-  competitionForms,
+  alwaysRequiredForms,
+  requiredForms,
   forms,
   formModalRef,
-  submitCompetitionForms,
+  submitRequiredForms,
 }: {
-  competitionForms: CompetitionFormsSubmitApi;
+  alwaysRequiredForms: Record<string, boolean>;
+  requiredForms: CompetitionFormsSubmitApi;
   forms: FormType[];
   formModalRef: RefObject<ModalRef | null>;
-  submitCompetitionForms: (forms: CompetitionFormsSubmitApi) => void;
+  submitRequiredForms: (forms: CompetitionFormsSubmitApi) => void;
 }) => {
   const toggleSelectAll = () => {
     if (Object.keys(selectedForms).length >= forms.length - 1) {
@@ -75,14 +73,14 @@ export const FormSelectModal = ({
     }
   };
   const [selectedForms, setSelectedForms] = useState<Record<string, boolean>>(
-    resetSelectedForms(competitionForms),
+    resetSelectedForms(requiredForms),
   );
   const [tableForms, setTableForms] = useState(
     resetTableForms(forms, selectedForms),
   );
   const t = useTranslations("FormSelectModal");
   const handleSubmit = () => {
-    submitCompetitionForms(
+    submitRequiredForms(
       Object.keys(selectedForms).map((key) => {
         return { form_id: key, is_required: selectedForms[key] };
       }),
@@ -92,7 +90,7 @@ export const FormSelectModal = ({
   };
 
   const handleCleanup = () => {
-    const clearedSelectedForms = resetSelectedForms(competitionForms);
+    const clearedSelectedForms = resetSelectedForms(requiredForms);
     const clearedTableForms = resetTableForms(forms, clearedSelectedForms);
     setSelectedForms(clearedSelectedForms);
     setTableForms(clearedTableForms);

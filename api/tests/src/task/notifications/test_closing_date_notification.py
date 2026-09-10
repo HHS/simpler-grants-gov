@@ -5,7 +5,6 @@ from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
     SuppressedEmail,
@@ -29,8 +28,7 @@ class TestClosingDateNotification:
         self.notification_config.reset_emails_without_sending = False
 
     @pytest.fixture
-    def user_with_email(self, db_session, user, monkeypatch):
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+    def user_with_email(self, db_session, user):
         factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
         return user
 
@@ -50,6 +48,8 @@ class TestClosingDateNotification:
         user_with_email,
         search_client,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that notifications are sent for opportunities closing in two weeks"""
         two_weeks_from_now = datetime_util.get_now_us_eastern_date() + timedelta(days=14)
@@ -107,8 +107,6 @@ class TestClosingDateNotification:
             user=user_with_email, opportunity=opportunity_within_window
         )
 
-        _clear_mock_responses()
-
         # Run the notification task
         task = EmailNotificationTask(db_session, search_client, self.notification_config)
         task.run()
@@ -143,9 +141,10 @@ class TestClosingDateNotification:
             user_with_email.user_id
         }
 
-        # Verify email was sent via Pinpoint
-        mock_responses = _get_mock_responses()
-        assert len(mock_responses) == 1
+        # Verify email was sent via SES
+        emails = get_sent_emails()
+        assert len(emails) == 1
+        assert emails[0].destinations["ToAddresses"] == ["test@example.com"]
 
     def test_closing_date_notification_not_sent_twice(
         self,
@@ -154,6 +153,8 @@ class TestClosingDateNotification:
         user_with_email,
         search_client,
         configuration,
+        ses_client,
+        get_sent_emails,
     ):
         """Test that closing date notifications aren't sent multiple times for the same opportunity"""
         two_weeks_from_now = datetime_util.get_now_us_eastern_date() + timedelta(days=14)
@@ -168,8 +169,6 @@ class TestClosingDateNotification:
         )
 
         factories.UserSavedOpportunityFactory.create(user=user_with_email, opportunity=opportunity)
-
-        _clear_mock_responses()
 
         # Run the notification task
         task = EmailNotificationTask(db_session, search_client, self.notification_config)
@@ -200,16 +199,15 @@ class TestClosingDateNotification:
             .all()
         )
 
-        _clear_mock_responses()
         assert len(notification_opportunity_logs) == 1
+        assert len(get_sent_emails()) == 1
 
         # Run the notification task
         task_again = EmailNotificationTask(db_session, search_client, self.notification_config)
         task_again.run()
 
-        # Verify no emails were sent
-        mock_responses = _get_mock_responses()
-        assert len(mock_responses) == 0
+        # Verify no additional emails were sent
+        assert len(get_sent_emails()) == 1
 
     def test_post_notification_log_creation(
         self,

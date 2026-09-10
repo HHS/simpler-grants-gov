@@ -1,13 +1,16 @@
 "use server";
 
 import { ApiRequestError, parseErrorStatus } from "src/errors";
+import { updateCompetitionForms } from "src/services/fetch/fetchers/competitionFormsFetcher";
 import {
   createCompetitionForGrantor,
+  saveCompetitionInstructions,
   updateCompetitionForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import {
   ApplicantTypes,
+  CompetitionFormsSubmitApi,
   CompetitionSaveRequest,
 } from "src/types/competitionsResponseTypes";
 
@@ -56,13 +59,18 @@ function buildRequestBody(formData: FormData) {
   const contactInfo = contactFields
     .map((field) => formData.get(field) as string)
     .filter(Boolean) // Removes null, undefined, or empty values
-    .join(", ");
+    .join(" | ");
 
   // Build the request body which should match the CompetitionSaveRequest
   const requestBody: CompetitionSaveRequest = {
     competition_title: getFieldValue(formData, "competition_title"),
     opening_date: getFieldValue(formData, "opening_date"),
     closing_date: getFieldValue(formData, "closing_date"),
+    grace_period: (() => {
+      const gracePeriod = getFieldValue(formData, "grace_period");
+      return gracePeriod === null ? null : Number(gracePeriod);
+    })(),
+    public_competition_id: getFieldValue(formData, "public_competition_id"),
     contact_info: contactInfo,
     open_to_applicants: openToApplicants,
   };
@@ -88,6 +96,7 @@ function formatValidationErrors(error: unknown) {
 
 export async function updateCompetition(
   formData: FormData,
+  requiredForms: CompetitionFormsSubmitApi,
 ): Promise<CompetitionActionState> {
   const t = await getTranslations("OpportunityCompetition.alerts");
   const opportunityId = formData.get("opportunityId") as string | null;
@@ -107,10 +116,6 @@ export async function updateCompetition(
         requestBody,
       );
       competitionId = apiResponse.data.competition_id;
-      return {
-        successMessage: t("success"),
-        newCompetitionId: competitionId,
-      };
     } else {
       apiResponse = await updateCompetitionForGrantor(
         opportunityId,
@@ -118,6 +123,25 @@ export async function updateCompetition(
         requestBody,
       );
     }
+
+    // If the record was successfully created or updated,
+    // then save the application instructions file (attachment)
+    const pendingFileId = formData.get("pending-file-id") as string | null;
+    if (pendingFileId) {
+      await saveCompetitionInstructions(
+        opportunityId,
+        competitionId,
+        pendingFileId,
+      );
+    }
+
+    if (requiredForms) {
+      await updateCompetitionForms({
+        competitionId,
+        body: { forms: requiredForms },
+      });
+    }
+
     return {
       successMessage: t("success"),
     };
@@ -144,10 +168,11 @@ export async function updateCompetition(
 
 export async function competitionFormAction(
   submitType: string,
+  requiredForms: CompetitionFormsSubmitApi,
   formData: FormData,
 ): Promise<CompetitionActionState> {
   // 1. Save the form; if there are API errors, display them
-  const saveResult = await updateCompetition(formData);
+  const saveResult = await updateCompetition(formData, requiredForms);
   if (saveResult.errorMessage) {
     return saveResult;
   }

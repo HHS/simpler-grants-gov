@@ -18,6 +18,8 @@ def create_opportunity_request(
     opportunity_title="Research Grant for Climate Innovation",
     category=OpportunityCategory.DISCRETIONARY,
     category_explanation="Competitive research grant",
+    tagline: str = "Test opportunity tagline",
+    purpose_statement: str = "Test opportunity purpose statement",
 ):
     """Create a valid opportunity creation request.
 
@@ -38,6 +40,8 @@ def create_opportunity_request(
     request = {
         "opportunity_number": opportunity_number,
         "opportunity_title": opportunity_title,
+        "tagline": tagline,
+        "purpose_statement": purpose_statement,
         "agency_id": str(agency_id),
         "category": category,
         "category_explanation": category_explanation,

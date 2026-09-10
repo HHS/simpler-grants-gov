@@ -51,6 +51,8 @@ _All_ tests should be assigned exactly _one_ execution tag, and any number of fe
 
 Only defined test groups should be used, and the decision to create a new group should be made by only with approval from the testing and feature teams. [Current groups are defined here](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/tags.ts).
 
+Test assignments for any given test should be determined by the team creating or managing the test.
+
 Current testing cadences are defined as:
 
 | Test group       | Cadence                             | Environment(s) |
@@ -59,6 +61,49 @@ Current testing cadences are defined as:
 | @core-regression | Merge to main, Deploy to production | local, staging |
 | @full-regression | Daily                               | local, staging |
 | @extended        | Weekly                              | local, staging |
+
+#### Conditional test cadences
+
+The table above shows the default test cadences for each group. Teams may expand the list of tag groups run on each cadence depending on any criteria they choose. Most likely, teams will want to define the test groups based on which files have been changed in a PR. For examples of conditional cadences introduced in our system:
+
+| Test group              | Cadence                                                  | Environment(s) |
+| ----------------------- | -------------------------------------------------------- | -------------- |
+| @apply-forms            | All PRs including changes to apply form code             | local          |
+| @opportunity-management | All PRs including changes to opportunity management code | local          |
+
+#### Browser test cadences
+
+Locally targeted runs have 4 browser configurations available (Chromium, Mobile Chromium, Webkit, Firefox). Deployed targets have only the two chromium ones — they have never defined Firefox or Webkit projects, since the deployed target was split out of the local one. Which of the available browsers a given run actually uses depends on the cadence:
+
+| Cadence        | Browsers                                   |
+| -------------- | ------------------------------------------ |
+| All PRs        | Chromium only                              |
+| Merge to main  | All 4 (local), Chromium + Mobile (staging) |
+| Daily / weekly | All 4 (local), Chromium + Mobile (staging) |
+
+PRs are limited to Chromium so that the smoke suite stays fast — running the same specs across all 4 configurations quadruples the test count for a signal that cross-browser breakage rarely shows up in. Cross-browser coverage still runs on every merge to main and on the daily and weekly schedules, so a Firefox- or Webkit-only regression is caught before release rather than on the PR that introduced it.
+
+A run's browser set is selected with the `playwright_projects` input on the [e2e composite action](https://github.com/HHS/simpler-grants-gov/blob/main/.github/actions/e2e/action.yml), which becomes the `PLAYWRIGHT_PROJECTS` env var that `playwright.config.ts` filters projects on. Leave it blank to run every project defined for the target. When narrowing to a non-Chrome browser, make sure the matching `do-*-install` input is also set, or the run will fail trying to launch a browser that was never installed.
+
+In some cases an individual test may be skipped in one or more browsers. This may be because the browser's implementation of certain behavior makes it very difficult to test (see Webkit's implementation of pasteboards), or because of a need to limit traffic for a certain action (see running login tests only in Chrome). The posture towards browser based testing can be flexible.
+
+#### How CI parallelizes runs
+
+Both e2e workflows split the suite across a matrix of shards, one runner each, and merge the blob reports afterwards. The two workflows get their concurrency from different places:
+
+- **[ci-frontend-e2e.yml](https://github.com/HHS/simpler-grants-gov/blob/main/.github/workflows/ci-frontend-e2e.yml)** (local target) uses 4 shards and stands up its own API and frontend per shard, so each shard is isolated and runs with the default 10 workers.
+- **[e2e-staging.yml](https://github.com/HHS/simpler-grants-gov/blob/main/.github/workflows/e2e-staging.yml)** (deployed target) points every shard at one shared environment, so it pins `workers: 1`. Every test on a deployed target authenticates as one of a handful of static shared test users, so adding concurrency by sharding across runners — where Playwright keeps same-file tests together — is safer than in-process parallelism. If you see cross-test interference on a deployed run, suspect two shards mutating the same test user's state before you suspect a real regression.
+
+Raising the shard count means editing both `shard` and `total_shards` in the workflow's matrix; they must agree, since they become Playwright's `--shard=current/total`.
+
+##### Why the deployed target shards each project separately
+
+Playwright balances shards by collected test count, which is a poor proxy for duration in this suite — the `apply/` flows take 60–90s each while most other tests take a few seconds. Two consequences shape the deployed matrix:
+
+1. On a deployed target, most spec files skip everything but Chrome. Those Mobile chrome tests are still collected, so a matrix shared between both projects hands entire runners work that skips in seconds while the Chrome shards carry the whole suite.
+2. `testDir` is walked alphabetically, so `apply/` always sorts first and its slow flows always land on the lowest-numbered shards.
+
+Because Playwright names its blob report after the shard number alone, two projects both running "shard 1" would each write `report-1.zip` and clobber each other when the report job merges them into one directory. The `shard_label` input on the e2e composite action gives each matrix entry a unique name for both the blob file and the artifact; it defaults to the shard number, so single-project runs need not set it.
 
 ## Unit testing
 

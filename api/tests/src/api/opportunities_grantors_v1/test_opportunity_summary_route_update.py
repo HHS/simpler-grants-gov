@@ -304,7 +304,7 @@ def test_opportunity_summary_update_schema_validation(
 
     # Create request with invalid field values
     invalid_request = {
-        "summary_description": "a" * 20000,  # Exceeds max length of 18000
+        "summary_description": "a " * 1000,  # Exceeds max length of 500 words
         "is_cost_sharing": True,
         "post_date": "2026-03-10",
         "close_date": "2027-03-10",

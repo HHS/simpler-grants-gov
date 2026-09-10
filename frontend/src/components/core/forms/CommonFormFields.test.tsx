@@ -7,6 +7,7 @@ import {
   CommonSelectInput,
   CommonTextArea,
   CommonTextInput,
+  CommonWordLimit,
 } from "./CommonFormFields";
 
 const dynamicFieldLabelProps = {
@@ -174,6 +175,20 @@ describe("CommonCharacterCount", () => {
     const charCountText = screen.getByText("10 characters over limit");
     expect(charCountText).toBeInTheDocument();
   });
+  it("renders and handles input without an onTextChange callback", () => {
+    const { onTextChange: _, ...propsWithoutCallback } =
+      commonCharacterCountProps;
+
+    render(<CommonCharacterCount {...propsWithoutCallback} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+
+    expect(() =>
+      fireEvent.change(element, { target: { value: "Optional callback" } }),
+    ).not.toThrow();
+    expect(element).toHaveValue("Optional callback");
+  });
   it("renders the input as disabled when disabled=true", () => {
     render(
       <CommonCharacterCount
@@ -233,6 +248,66 @@ describe("CommonCharacterCount", () => {
       name: "Label for Something",
     });
     expect(element).toHaveAttribute("type", "url");
+  });
+});
+
+// --- Test Common WordLimit ---
+const mockOnChangeWordLimit = jest.fn();
+const overLimit = "a ".repeat(50);
+const commonWordLimitProps = {
+  ...dynamicFieldLabelProps,
+  fieldMaxLength: 40,
+  defaultValue: "",
+  onTextChange: mockOnChangeWordLimit,
+  isTextArea: false,
+};
+describe("CommonWordLimit", () => {
+  it("has no accessibility violations", async () => {
+    const { container } = render(
+      <CommonWordLimit {...commonWordLimitProps} defaultValue="" />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it("Renders the element with maxLength", () => {
+    render(<CommonWordLimit {...commonWordLimitProps} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeInTheDocument();
+    expect(element).toHaveValue("");
+    const charCountText = screen.getByText("40 wordsAllowed");
+    expect(charCountText).toBeInTheDocument();
+  });
+  it("Renders the element with a default value", () => {
+    commonWordLimitProps.defaultValue = "Prefilled text 2";
+    render(<CommonWordLimit {...commonWordLimitProps} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeInTheDocument();
+    expect(element).toHaveValue("Prefilled text 2");
+    const charCountText = screen.getByText("wordsLeft");
+    expect(charCountText).toBeInTheDocument();
+    expect(element instanceof HTMLInputElement).not.toBe(true);
+    expect(element instanceof HTMLTextAreaElement).toBe(true);
+  });
+  it("Renders the element and handle onChange", () => {
+    render(<CommonWordLimit {...commonWordLimitProps} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeInTheDocument();
+    // Simulate a change event and test if our variable changed
+    fireEvent.change(element, {
+      target: { value: overLimit },
+    });
+    expect(mockOnChangeWordLimit).toHaveBeenCalledTimes(1);
+    expect(mockOnChangeWordLimit).toHaveBeenCalledWith(expect.any(Object));
+    // Validate the character count message
+    const charCountText = screen.getByText("wordsError");
+    expect(charCountText).toBeInTheDocument();
   });
 });
 

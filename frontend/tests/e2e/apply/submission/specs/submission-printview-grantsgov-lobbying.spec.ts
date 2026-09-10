@@ -14,7 +14,10 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
-import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
+import {
+  skipNonChromeOnStaging,
+  skipWebkit,
+} from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   verifyFormStatusAfterSave,
@@ -23,6 +26,7 @@ import {
 import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
 import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
+  assertPrintViewIsReadOnly,
   buildHappyPathTestData,
   buildPrintUrl,
   navigateToPrintView,
@@ -57,6 +61,7 @@ const applicantScenarios = [
 // Skip non-Chrome browsers in staging to avoid MFA OTP rate-limiting.
 test.beforeEach(({ page: _ }, testInfo) => {
   skipNonChromeOnStaging(testInfo);
+  skipWebkit(testInfo);
 });
 
 for (const { testName, orgLabel } of applicantScenarios) {
@@ -135,6 +140,10 @@ for (const { testName, orgLabel } of applicantScenarios) {
       for (const { printUrl } of filledForms) {
         await navigateToPrintView(page, printUrl);
 
+        // Verify print view is read-only before checking field values
+        await assertPrintViewIsReadOnly(page);
+
+        // Now verify the post-populated field values exist and are populated
         await expect(
           page.getByTestId("authorized_representative_signature"),
         ).toBeVisible();

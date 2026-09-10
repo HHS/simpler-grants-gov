@@ -4,6 +4,7 @@ import typing
 import jsonschema
 from grants_shared.api.response import ValidationErrorDetail
 
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,33 @@ def _required(
             )
 
 
+def _required_with_title(
+    validator: jsonschema.Draft202012Validator,
+    required: typing.Any,
+    instance: typing.Any,
+    schema: typing.Any,
+) -> typing.Generator[jsonschema.ValidationError]:
+    """Same as `_required`, but table-row forms use this instead so a missing
+    field can be reported with its row's `title` for context (e.g. "Construction
+    Total Cost is required"). Kept as a separate validator - used only
+    for forms that opt in - so it can't change required-message behavior for
+    every other form.
+    """
+
+    if not validator.is_type(instance, "object"):
+        return
+
+    for field_name in required:
+        if field_name not in instance:
+            title = schema.get("title")
+            message = (
+                f"{title} {field_name.replace('_', ' ').title()} is required"
+                if title
+                else f"{field_name!r} is a required property"
+            )
+            yield jsonschema.ValidationError(message, path=[field_name])
+
+
 def _maxItems(
     validator: jsonschema.Draft202012Validator, mI: typing.Any, instance: typing.Any, _: typing.Any
 ) -> typing.Generator[jsonschema.ValidationError]:
@@ -54,8 +82,26 @@ OUR_VALIDATOR = jsonschema.validators.extend(
     },
 )
 
+TABLE_VALIDATOR = jsonschema.validators.extend(
+    validator=jsonschema.Draft202012Validator,
+    validators={
+        "required": _required_with_title,
+        "maxItems": _maxItems,
+    },
+)
 
-def _get_validator(json_schema: dict) -> jsonschema.Draft202012Validator:
+FORM_TYPES_USING_TABLE_VALIDATOR = {FormType.SF424C}
+
+
+def _get_validator_class(form: Form | None) -> type[jsonschema.Draft202012Validator]:
+    if form is not None and form.form_type in FORM_TYPES_USING_TABLE_VALIDATOR:
+        return TABLE_VALIDATOR
+    return OUR_VALIDATOR
+
+
+def _get_validator(
+    json_schema: dict, validator_class: type[jsonschema.Draft202012Validator] = OUR_VALIDATOR
+) -> jsonschema.Draft202012Validator:
     """Get a validator for your json schema
 
     See: https://python-jsonschema.readthedocs.io/en/stable/
@@ -72,21 +118,25 @@ def _get_validator(json_schema: dict) -> jsonschema.Draft202012Validator:
     # Validate that the schema passed in is actually valid
     # as an invalid schema can produce unknown results
     try:
-        OUR_VALIDATOR.check_schema(json_schema)
+        validator_class.check_schema(json_schema)
     except jsonschema.exceptions.SchemaError:
         logger.exception("Invalid json schema found, cannot validate")
         raise
 
-    validator = OUR_VALIDATOR(
+    validator = validator_class(
         json_schema, format_checker=jsonschema.Draft202012Validator.FORMAT_CHECKER
     )
 
     return validator
 
 
-def validate_json_schema(data: dict, json_schema: dict) -> list[ValidationErrorDetail]:
+def validate_json_schema(
+    data: dict,
+    json_schema: dict,
+    validator_class: type[jsonschema.Draft202012Validator] = OUR_VALIDATOR,
+) -> list[ValidationErrorDetail]:
     """Validate data against a given json schema"""
-    validator = _get_validator(json_schema)
+    validator = _get_validator(json_schema, validator_class)
 
     validation_issues = []
 
@@ -100,4 +150,4 @@ def validate_json_schema(data: dict, json_schema: dict) -> list[ValidationErrorD
 
 def validate_json_schema_for_form(data: dict, form: Form) -> list[ValidationErrorDetail]:
     """Validate data against json schema from a given form"""
-    return validate_json_schema(data, form.form_json_schema)
+    return validate_json_schema(data, form.form_json_schema, _get_validator_class(form))

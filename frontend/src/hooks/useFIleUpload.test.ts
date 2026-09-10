@@ -108,6 +108,52 @@ describe("useFileUpload", () => {
     expect(clientFetchMock.mock.calls[0][1].body).toBeInstanceOf(FormData);
     expect(clientFetchMock.mock.calls[0][1].signal).toBe("signal");
   });
+  it("rejects files larger than maxFileSizeBytes without attempting an upload", () => {
+    const onStartMock = jest.fn();
+    const onErrorMock = jest.fn();
+    const onCompleteMock = jest.fn();
+    const { result } = renderHook(() =>
+      useFileUpload({
+        onStart: onStartMock,
+        onSuccess: noop,
+        onError: onErrorMock,
+        onComplete: onCompleteMock,
+        postUploadAction: jest.fn(),
+        maxFileSizeBytes: fakeFile.size - 1,
+      }),
+    );
+    act(() => {
+      result.current.uploadFile(fakeFile);
+    });
+    expect(result.current.currentStatus).toEqual("too-large");
+    expect(result.current.fileName).toEqual(fakeFile.name);
+    expect(result.current.uploadError).toBeDefined();
+    expect(onErrorMock).toHaveBeenCalled();
+    expect(onStartMock).not.toHaveBeenCalled();
+    expect(onCompleteMock).not.toHaveBeenCalled();
+    expect(clientFetchMock).not.toHaveBeenCalled();
+  });
+  it("uploads files exactly at maxFileSizeBytes", async () => {
+    fakeAbortController.mockImplementation(() => ({
+      signal: "signal",
+    }));
+    const { result } = renderHook(() =>
+      useFileUpload({
+        onStart: noop,
+        onSuccess: noop,
+        onError: noop,
+        onComplete: noop,
+        postUploadAction: jest.fn(() => Promise.resolve("return value")),
+        maxFileSizeBytes: fakeFile.size,
+      }),
+    );
+    act(() => {
+      result.current.uploadFile(fakeFile);
+    });
+    await waitFor(() => {
+      expect(clientFetchMock).toHaveBeenCalled();
+    });
+  });
   it("only allows calling uploadFile once per hook instance", async () => {
     const onSuccessMock = jest.fn();
     const trigger = createAdvanceStreamTrigger();
@@ -174,7 +220,7 @@ describe("useFileUpload", () => {
     act(() => {
       result.current.uploadFile(fakeFile);
     });
-    expect(result.current.currentStatus).toEqual("queued");
+    expect(result.current.currentStatus).toEqual("processing");
     // having a hard time managing state changes in this test, since
     // the state updates multiple times without any user action.
     // As a result, the state jumps directly from queued to success.

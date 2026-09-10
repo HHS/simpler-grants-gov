@@ -20,7 +20,7 @@ jest.mock("src/hooks/useFileUpload", () => ({
 describe("FileUploadManager", () => {
   beforeEach(() => {
     mockUseFileUpload.mockImplementation(() => ({
-      currentStatus: "queued",
+      currentStatus: "processing",
       uploadFile: mockUploadFile,
       handleCancel: mockHandleCancel,
       dismissError: mockDismissError,
@@ -83,7 +83,7 @@ describe("FileUploadManager", () => {
   });
   it("calls both hook based and SimplerFileInput callbacks on dismiss", async () => {
     mockUseFileUpload.mockImplementation(() => ({
-      currentStatus: "queued",
+      currentStatus: "processing",
       uploadFile: mockUploadFile,
       handleCancel: mockHandleCancel,
       dismissError: mockDismissError,

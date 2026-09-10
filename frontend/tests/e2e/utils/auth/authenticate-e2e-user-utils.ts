@@ -14,14 +14,13 @@
 
 import { type BrowserContext, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
-import { openMobileNav } from "tests/e2e/playwrightUtils";
 import { createSpoofedSessionCookie } from "tests/e2e/utils/auth/login-utils";
 import {
   getTestUserId,
   type TestUserKey,
 } from "tests/e2e/utils/auth/test-users";
 
-const { baseUrl, targetEnv, apiUrl, testUserManagerApiKey } = playwrightEnv;
+const { baseUrl, apiUrl, testUserManagerApiKey } = playwrightEnv;
 
 // Fetches a server-side session token for a test user by calling the internal
 // e2e-token endpoint with the manager API key and the target user id.
@@ -52,23 +51,16 @@ export async function authenticateE2eUser(
   isMobile: boolean,
   testUserKey: TestUserKey = "primaryOrgAdmin",
 ): Promise<void> {
-  if (targetEnv !== "local" && targetEnv !== "staging") {
-    throw new Error(`Unsupported env ${targetEnv}`);
-  }
-
   const userId = getTestUserId(testUserKey);
   const token = await fetchE2eSessionToken(userId);
   await createSpoofedSessionCookie(context, token);
 
   // Give the spoofed session cookie a moment to settle before navigating, then
-  // let the page hydrate the authenticated state after load. These waits are
-  // carried over from the previous local flow to avoid a race where the nav
-  // renders before the client resolves the session.
-  await page.waitForTimeout(1000);
+  // let the page hydrate the authenticated state after load. Mobile needs longer
+  // waits due to slower rendering and session establishment on smaller viewports.
+  const preNavWait = isMobile ? 2000 : 1000;
+  const postNavWait = isMobile ? 4000 : 2000;
+  await page.waitForTimeout(preNavWait);
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
-
-  if (isMobile) {
-    await openMobileNav(page);
-  }
+  await page.waitForTimeout(postNavWait);
 }

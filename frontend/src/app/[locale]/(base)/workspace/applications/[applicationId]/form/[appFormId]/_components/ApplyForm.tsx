@@ -2,10 +2,10 @@
 
 import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
-import { useFormStatus } from "react-dom";
 import { handleFormAction } from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/actions";
 import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 import {
+  AttachmentsUploadingCounter,
   FormattedFormValidationWarning,
   FormValidationWarning,
   UiSchema,
@@ -20,12 +20,12 @@ import {
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
-import { useRouter } from "next/navigation";
 import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
-import { Alert, Button, ButtonGroup, FormGroup } from "@trussworks/react-uswds";
+import { Alert, FormGroup } from "@trussworks/react-uswds";
 
 import { FormFields } from "src/components/apply-form/FormFields";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
+import ApplyFormActionButtons from "./ApplyFormActionButtons";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 
 type Translator = ((
@@ -47,7 +47,7 @@ interface WidgetSupport {
     deletedEntryIndex: number,
   ) => void;
   markFormDirty?: () => void;
-  useVirusScanning: boolean;
+  attachmentsUploadingCounter?: AttachmentsUploadingCounter;
 }
 
 interface ApplyFormFormContext {
@@ -55,53 +55,6 @@ interface ApplyFormFormContext {
   rootFormData: unknown;
   widgetSupport: WidgetSupport;
 }
-
-const FormActionButtons = ({
-  applicationId,
-  onSaveClick,
-  returnToApplicationText,
-  savingText,
-  savingAndRefreshingText,
-}: {
-  applicationId: string;
-  onSaveClick: () => void;
-  returnToApplicationText: string;
-  savingText: string;
-  savingAndRefreshingText: string;
-}) => {
-  const { pending } = useFormStatus();
-  const router = useRouter();
-
-  const handleReturnToApplication = () => {
-    router.push(`/workspace/applications/${applicationId}`);
-  };
-  return (
-    <ButtonGroup
-      className="apply-form__action-buttons display-flex flex-align-center flex-justify"
-      style={{ gap: "24px" }}
-    >
-      <Button
-        data-testid="apply-form-save"
-        type="submit"
-        name="apply-form-button"
-        className="margin-top-05 flex-1"
-        value="save"
-        onClick={onSaveClick}
-      >
-        {pending ? savingText : savingAndRefreshingText}
-      </Button>
-      <Button
-        type="button"
-        outline
-        className="margin-top-0 flex-1"
-        data-testid="apply-form-return"
-        onClick={handleReturnToApplication}
-      >
-        {returnToApplicationText}
-      </Button>
-    </ButtonGroup>
-  );
-};
 
 const ApplyForm = ({
   applicationId,
@@ -115,7 +68,6 @@ const ApplyForm = ({
   applicationStatus,
   createdAt,
   updatedAt,
-  useVirusScanning = false,
 }: {
   applicationId: string;
   formId: string;
@@ -125,7 +77,6 @@ const ApplyForm = ({
   validationWarnings:
     FormattedFormValidationWarning[] | FormValidationWarning[] | null;
   attachments: Attachment[];
-  useVirusScanning?: boolean; // Temporary for initial integration. Will be removed in #11352
   isBudgetForm?: boolean;
   applicationStatus?: string;
   createdAt?: string;
@@ -169,6 +120,7 @@ const ApplyForm = ({
     deletedEntryIndexesByFieldListPath,
     setDeletedEntryIndexesByFieldListPath,
   ] = useState<Record<string, number[]>>({});
+  const [attachmentsUploading, setAttachmentsUploading] = useState<number>(0);
 
   useNavigationGuard({
     enabled: formChanged || attachmentsChanged,
@@ -227,6 +179,18 @@ const ApplyForm = ({
     }, validationWarnings);
   }, [validationWarnings, deletedEntryIndexesByFieldListPath]);
 
+  const attachmentsUploadingCounter: AttachmentsUploadingCounter = useMemo(
+    () => ({
+      incrementAttachmentsProcessing: () =>
+        setAttachmentsUploading((prevState) => prevState + 1),
+      decrementAttachmentsProcessing: () =>
+        setAttachmentsUploading((prevState) =>
+          prevState === 0 ? prevState : prevState - 1,
+        ),
+    }),
+    [],
+  );
+
   const formContextValue = useMemo<ApplyFormFormContext>(
     () => ({
       rootSchema: formSchema,
@@ -236,7 +200,7 @@ const ApplyForm = ({
         deletedEntryIndexesByFieldListPath,
         onFieldListEntryDelete: handleFieldListEntryDelete,
         markFormDirty: handleFormEdited,
-        useVirusScanning,
+        attachmentsUploadingCounter,
       },
     }),
     [
@@ -244,7 +208,7 @@ const ApplyForm = ({
       displayValidationWarnings,
       formObject,
       formSchema,
-      useVirusScanning,
+      attachmentsUploadingCounter,
     ],
   );
 
@@ -283,7 +247,7 @@ const ApplyForm = ({
           )}
         </div>
         {!isFormLocked && (
-          <FormActionButtons
+          <ApplyFormActionButtons
             applicationId={applicationId}
             onSaveClick={() => {
               setFormChanged(false);
@@ -292,6 +256,8 @@ const ApplyForm = ({
             returnToApplicationText={translate("returnToApplication")}
             savingText={translate("saving")}
             savingAndRefreshingText={translate("savingAndRefreshing")}
+            disableSaveButton={attachmentsUploading !== 0}
+            saveDisabledTooltipText={translate("saveDisabledTooltipMessage")}
           />
         )}
       </div>

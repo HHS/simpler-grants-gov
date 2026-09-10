@@ -1,5 +1,6 @@
 import { expect, Page } from "@playwright/test";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
+import { assertApplicationHistoryVisible } from "tests/e2e/utils/submission/application-history-utils";
 
 /**
  * Expected application history entries in display order (index 0 = most recent).
@@ -33,12 +34,7 @@ export async function verifyPostSubmission(
   );
 
   // Verify Application History section is visible
-  await expect(
-    page.getByRole("heading", { name: "Application History" }),
-  ).toBeVisible();
-  await expect(page.locator("#main-content")).toContainText(
-    "Application History",
-  );
+  await assertApplicationHistoryVisible(page);
 
   // Verify each history entry in order (index 0 = most recent)
   for (let i = 0; i < expectedHistoryEntries.length; i++) {

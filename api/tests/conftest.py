@@ -41,6 +41,7 @@ from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.registry.form_template_registry import FormTemplateKey, form_template_registry
+from src.search.backend.load_agencies_to_index import AGENCY_INDEX_ANALYSIS, AGENCY_INDEX_MAPPINGS
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
     init_workflow_client_registry,
@@ -334,7 +335,7 @@ def agency_index(search_client, monkeypatch_session):
     index_name = f"test-agency-index-{uuid.uuid4().int}"
 
     search_client.create_index(
-        index_name, mappings={"properties": {"opportunity_statuses": {"type": "keyword"}}}
+        index_name, analysis=AGENCY_INDEX_ANALYSIS, mappings=AGENCY_INDEX_MAPPINGS
     )
 
     try:

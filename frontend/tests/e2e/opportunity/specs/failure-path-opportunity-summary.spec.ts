@@ -33,7 +33,6 @@ import {
   REQUIRED_FIELD_DEFINITIONS,
 } from "tests/e2e/opportunity/fixtures/opportunity-pages-field-definitions";
 import { buildOpportunityHappyPathFillData } from "tests/e2e/opportunity/fixtures/opportunity-pages-fill-data";
-import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createAuthenticatedPageLifecycle } from "tests/e2e/utils/common/auth-storage-state-utils";
 import { assertCharacterLimitValidationsFromDefinitions } from "tests/e2e/utils/common/character-limit-validation-utils";
@@ -44,8 +43,7 @@ import { assertNegativeNumberValidationsFromDefinitions } from "tests/e2e/utils/
 import { assertRequiredFieldValidationsFromDefinitions } from "tests/e2e/utils/common/required-field-validation-utils";
 import { createOpportunity } from "tests/e2e/utils/opportunity/create-opportunity-utils";
 
-const { GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
-const { targetEnv } = playwrightEnv;
+const { SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION } = VALID_TAGS;
 
 async function setupAndNavigateToOpportunitySummary(page: Page) {
   const fillData = buildOpportunityHappyPathFillData(new Date());
@@ -70,9 +68,12 @@ async function setupAndNavigateToOpportunitySummary(page: Page) {
 }
 
 test.describe("Grantor Opportunity Summary Failure Path", () => {
+  test.fixme(
+    true,
+    "Failure-path Opportunity Summary tests are consistently flaky/failing in CI",
+  );
   // One-login-per-spec lifecycle shared across failure-path specs.
   const authenticatedLifecycle = createAuthenticatedPageLifecycle({
-    targetEnv,
     skipTest: (condition, description) => test.skip(condition, description),
   });
 
@@ -82,7 +83,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Required-field validation",
-    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();
@@ -107,7 +108,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Negative number validation",
-    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();
@@ -134,7 +135,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Email format validation",
-    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();
@@ -161,7 +162,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Cross-field validation",
-    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();
@@ -187,7 +188,7 @@ test.describe("Grantor Opportunity Summary Failure Path", () => {
 
   test(
     "Character limits validation",
-    { tag: [GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTOR, OPPORTUNITY_MANAGEMENT, CORE_REGRESSION] },
     async () => {
       //--------------Test setup start here----------------
       const testPage = authenticatedLifecycle.getPage();

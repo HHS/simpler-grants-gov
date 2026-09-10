@@ -6,7 +6,6 @@ import pytest
 from grants_shared.adapters import db
 
 import tests.src.db.models.factories as factories
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -215,7 +214,6 @@ TOPAZ_STATUS = build_opp_and_version(
 class TestOpportunityNotification:
     @pytest.fixture
     def set_env_var_for_email_notification_config(self, monkeypatch):
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://testhost:3000")
 
     @pytest.fixture(autouse=True)
@@ -246,6 +244,8 @@ class TestOpportunityNotification:
         caplog,
         set_env_var_for_email_notification_config,
         notification_task,
+        ses_client,
+        get_sent_emails,
     ):
         caplog.set_level(logging.INFO)
 
@@ -308,8 +308,6 @@ class TestOpportunityNotification:
             opportunity=opp_3, created_at=opp_3.created_at + timedelta(minutes=80)
         )
 
-        _clear_mock_responses()
-
         results = notification_task._get_latest_opportunity_versions()
 
         # assert that only the latest version is picked up for each user_saved_opportunity
@@ -341,6 +339,12 @@ class TestOpportunityNotification:
         )
         assert len(notification_logs) == 2
         assert {n.user_id for n in notification_logs} == {user.user_id, user_2.user_id}
+
+        # Verify both emails were sent via SES
+        # EmailNotificationTask runs every notification type, so assert on the
+        # recipients rather than the total number of messages SES received.
+        recipients = {email.destinations["ToAddresses"][0] for email in get_sent_emails()}
+        assert {user.email, user_2.email} <= recipients
 
         # Verify the log contains the correct metrics
         log_records = [

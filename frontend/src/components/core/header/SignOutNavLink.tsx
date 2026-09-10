@@ -1,7 +1,6 @@
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
@@ -19,7 +18,7 @@ export const SignOutNavLink = ({ onClick }: { onClick: () => void }) => {
   }, [logoutLocalUser, router, onClick]);
 
   return (
-    <Link
+    <a
       href="#"
       onClick={(e) => {
         e.preventDefault();
@@ -27,6 +26,6 @@ export const SignOutNavLink = ({ onClick }: { onClick: () => void }) => {
       }}
     >
       {t("logout")}
-    </Link>
+    </a>
   );
 };

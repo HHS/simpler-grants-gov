@@ -1,3 +1,4 @@
+import { timeZone } from "src/i18n/config";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -43,6 +44,7 @@ export function OpportunityDetailsHeader({
         month: "2-digit",
         day: "2-digit",
         year: "numeric",
+        timeZone,
       })
     : "";
 

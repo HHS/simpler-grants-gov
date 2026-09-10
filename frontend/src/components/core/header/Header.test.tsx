@@ -2,7 +2,6 @@
 
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Response } from "node-fetch";
 import { applicationTestUserId } from "src/constants/auth";
 import { fakeTestUser } from "src/utils/testing/fixtures";
 import * as userUtils from "src/utils/userUtils";

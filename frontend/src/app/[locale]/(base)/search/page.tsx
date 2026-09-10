@@ -11,6 +11,7 @@ import { SearchDrawerFilters } from "src/app/[locale]/(base)/search/_components/
 import { SearchDrawerHeading } from "src/app/[locale]/(base)/search/_components/SearchDrawerHeading";
 import SearchResults from "src/app/[locale]/(base)/search/_components/SearchResults";
 import { environment } from "src/constants/environments";
+import { defaultLocale } from "src/i18n/config";
 import { getSession } from "src/services/auth/session";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { getSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
@@ -19,10 +20,15 @@ import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE } from "src/utils/opportunity/savedOpportunitiesUtils";
-import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
+import {
+  convertSearchParamsToProperTypes,
+  paramsToFormattedQuery,
+  sanitizeSearchParams,
+} from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { redirect, RedirectType } from "next/navigation";
 import { Suspense, use } from "react";
 
 import { DrawerUnit } from "src/components/core/drawer/DrawerUnit";
@@ -47,6 +53,19 @@ function Search({ searchParams, params }: SearchPageProps) {
   const resolvedSearchParams = use(searchParams);
   setRequestLocale(locale);
   const t = useTranslations("Search");
+
+  // A URL carrying filter values that don't exist would error out the
+  // search and leave behind unlabeled filters the user can't clear.
+  // Drop the bad values and put the URL back in sync before rendering anything.
+  const sanitizedSearchParams = sanitizeSearchParams(resolvedSearchParams);
+  if (sanitizedSearchParams) {
+    const searchPath =
+      locale === defaultLocale ? "/search" : `/${locale}/search`;
+    redirect(
+      `${searchPath}${paramsToFormattedQuery(new URLSearchParams(sanitizedSearchParams))}`,
+      RedirectType.replace,
+    );
+  }
 
   const convertedSearchParams =
     convertSearchParamsToProperTypes(resolvedSearchParams);

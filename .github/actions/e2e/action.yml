@@ -6,6 +6,10 @@ description: Composite action to run Playwright against specified environment
 # based on the do-chrome-install, do-firefox-install, and do-webkit-install inputs.
 # Only the browsers needed for the current test shard are installed, improving CI efficiency.
 # Chrome is cached outside this job, and will be available even if not instructed to install.
+#
+# `playwright_projects` narrows which browsers the run actually exercises (e.g. PR
+# runs pass "Chrome"). Keep it in sync with the do-*-install inputs: requesting a
+# project whose browser was never installed will fail at launch.
 # ---
 
 inputs:
@@ -66,6 +70,15 @@ inputs:
   test_user_manager_api_key:
     description: "manager API key for the new multi-user test system, used to request auth tokens for test users via POST /v1/internal/e2e-token"
     default: ""
+  spec_files:
+    description: "paths to specific spec files to run, will separately, but in addition to any supplied `playwright_tags`"
+    default: ""
+  playwright_projects:
+    description: "comma separated list of Playwright project (browser) names to run (e.g. Chrome). Leave blank to run every project defined for the target"
+    default: ""
+  shard_label:
+    description: "unique name for this shard's blob report, used when a run shards more than one project and shard numbers would otherwise collide (e.g. chrome-1). Defaults to current_shard"
+    default: ""
 
 outputs:
   artifact-id:
@@ -80,7 +93,7 @@ runs:
       env:
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
       run: |
-        if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" ]]; then echo "invalid e2e test target provided" && exit 1; fi
+        if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" && $PLAYWRIGHT_TARGET_ENV != "grantor1" && $PLAYWRIGHT_TARGET_ENV != "grantor2" && $PLAYWRIGHT_TARGET_ENV != "grantee1" && $PLAYWRIGHT_TARGET_ENV != "grantee2" ]]; then echo "invalid e2e test target provided" && exit 1; fi
 
     - name: Check out code
       uses: actions/checkout@v6
@@ -133,14 +146,67 @@ runs:
         if [[ ${{ inputs.target }} = "staging" ]]; then
           echo "base_url=https://staging.simpler.grants.gov" >> "$GITHUB_ENV"
           echo "api_url=https://api.staging.simpler.grants.gov" >> "$GITHUB_ENV"
+        elif [[ ${{ inputs.target }} = "grantor1" ]]; then
+          echo "base_url=https://grantor1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.grantor1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+        elif [[ ${{ inputs.target }} = "grantor2" ]]; then
+          echo "base_url=https://grantor2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.grantor2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+        elif [[ ${{ inputs.target }} = "grantee1" ]]; then
+          echo "base_url=https://grantee1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.grantee1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+        elif [[ ${{ inputs.target }} = "grantee2" ]]; then
+          echo "base_url=https://grantee2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.grantee2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
         fi
-    - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
-      if: ${{ inputs.playwright_tags == '' }}
+
+    # Playwright names its blob report after the shard number alone, so a run that
+    # shards two projects would have both projects write report-1.zip and collide
+    # once the report job merges them into one directory. shard_label
+    # gives each matrix entry its own name for both the file and the artifact.
+    - name: Name this shard's blob report
+      shell: bash
+      env:
+        SHARD_LABEL: ${{ inputs.shard_label }}
+        CURRENT_SHARD: ${{ inputs.current_shard }}
+        TARGET: ${{ inputs.target }}
+      run: |
+        label="${SHARD_LABEL:-$CURRENT_SHARD}"
+        echo "blob_output_name=report-${label}.zip" >> "$GITHUB_ENV"
+        echo "blob_report_name=blob-report-shard-${TARGET}-${label}" >> "$GITHUB_ENV"
+
+    - name: Run specified e2e tests
+      if: ${{ inputs.spec_files != '' }}
       working-directory: ./frontend
       env:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
+        PLAYWRIGHT_PROJECTS: ${{ inputs.playwright_projects }}
+        PLAYWRIGHT_BLOB_OUTPUT_NAME: ${{ env.blob_output_name }}
+        PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
+        PLAYWRIGHT_API_URL: ${{ env.api_url }}
+        PLAYWRIGHT_WORKERS: ${{ inputs.workers }}
+        STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
+        STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
+        STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
+        SESSION_SECRET_OVERRIDE: ${{ inputs.staging_client_session_secret }}
+        TEST_USER_MANAGER_API_KEY: ${{ inputs.test_user_manager_api_key }}
+
+      run: |
+        npm run test:e2e -- ${{ inputs.spec_files }}
+      shell: bash
+
+    - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
+      if: ${{ inputs.playwright_tags == '' && inputs.spec_files == '' }}
+      working-directory: ./frontend
+      env:
+        CI: true
+        TOTAL_SHARDS: ${{ inputs.total_shards }}
+        CURRENT_SHARD: ${{ inputs.current_shard }}
+        PLAYWRIGHT_PROJECTS: ${{ inputs.playwright_projects }}
+        PLAYWRIGHT_BLOB_OUTPUT_NAME: ${{ env.blob_output_name }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
         PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
         PLAYWRIGHT_API_URL: ${{ env.api_url }}
@@ -156,12 +222,14 @@ runs:
       shell: bash
 
     - name: Run e2e tests for ${{ inputs.playwright_tags }} (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
-      if: ${{ inputs.playwright_tags != '' }}
+      if: ${{ inputs.playwright_tags != '' && inputs.spec_files == '' }}
       working-directory: ./frontend
       env:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
+        PLAYWRIGHT_PROJECTS: ${{ inputs.playwright_projects }}
+        PLAYWRIGHT_BLOB_OUTPUT_NAME: ${{ env.blob_output_name }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
         PLAYWRIGHT_BASE_URL: ${{ env.base_url }}
         PLAYWRIGHT_API_URL: ${{ env.api_url }}
@@ -196,17 +264,19 @@ runs:
       shell: bash
 
     - name: Verify Blob Report Directory
+      if: ${{ inputs.spec_files == '' }}
       working-directory: ./frontend
       run: |
         echo "Contents of blob-report directory:"
         ls -R blob-report || echo "blob-report directory not found"
       shell: bash
 
+    # skip the test report for specific file based runs
     - name: Upload Blob Report
+      if: ${{ inputs.spec_files == '' && always() || false }}
       id: upload-blob-report
-      if: always()
       uses: actions/upload-artifact@v7
       with:
-        name: blob-report-shard-${{ inputs.target }}-${{ inputs.current_shard }}
+        name: ${{ env.blob_report_name }}
         path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
         retention-days: 1

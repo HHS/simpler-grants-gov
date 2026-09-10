@@ -1,11 +1,24 @@
 import path from "path";
 import type { fieldDefinitionsSF424 } from "tests/e2e/apply/fixtures/sf424-field-definitions";
+import playwrightEnv from "tests/e2e/playwright-env";
 import type { PrintViewFormData } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import { toHappyPathSuffix } from "tests/e2e/utils/submission/print-view-utils";
 
 // Uploaded files validated by section locator in print view.
 const TEST_UPLOAD_DIR = path.resolve(__dirname, "../../test-upload-files");
-const SF424_TEST_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
+export const SF424_TEST_UPLOAD_FILE = `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`;
+
+/**
+ * Applicant scenarios for SF-424 dual-applicant testing (Organization + Individual).
+ * Used to validate workflows across different user types.
+ */
+export const SF424_APPLICANT_SCENARIOS = [
+  {
+    scenarioName: "Organization applicant",
+    orgLabel: playwrightEnv.testOrgLabel,
+  },
+  { scenarioName: "Individual applicant", orgLabel: undefined },
+] as const;
 
 /**
  * Happy-path test data builder for the SF-424 form.
@@ -54,9 +67,11 @@ export const buildSF424HappyPathTestData = (
     // Section 9 – Applicant Type (printTestId: "applicant_type_code")
     applicant_type_code__combobox: "C: City or Township Government",
     applicant_type_other_specify: `ApplicantOther${shortSuffix}`,
-    // Section 11–12 – Agency / Assistance Listing
-    agency_name: `Agency ${shortSuffix}`,
-    assistance_listing_program_title: `Program Title ${shortSuffix}`,
+    // Section 11–12 – Agency / Assistance Listing (pre-populated by system, not user-entered)
+    // NOT included: agency_name, assistance_listing_program_title, funding_opportunity_number,
+    // funding_opportunity_title, assistance_listing_number, competition_identification_number,
+    // competition_identification_title, and sam_uei are all read-only and populated by
+    // pre-population rules. The form will auto-fill these after submission creates the application.
     // Section 15 – Project Title
     project_title: `Project ${shortSuffix}`,
     // Section 16 – Congressional Districts
@@ -90,8 +105,8 @@ export const buildSF424HappyPathTestData = (
     authorized_representative_fax: "3333333333",
     authorized_representative_email: `aor${shortSuffix}@test.com`,
     areas_affected_attachment: SF424_TEST_UPLOAD_FILE,
-    additional_project_title_attachment: SF424_TEST_UPLOAD_FILE,
     additional_congressional_attachment: SF424_TEST_UPLOAD_FILE,
+    additional_project_title_attachment: SF424_TEST_UPLOAD_FILE,
   } satisfies Partial<Record<keyof typeof fieldDefinitionsSF424, string>>;
 };
 

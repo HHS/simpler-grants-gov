@@ -39,7 +39,7 @@ const { targetEnv } = playwrightEnv;
 
 test.describe("Grantor opportunity overview happy path - initial state", () => {
   test.beforeEach(({ page: _ }, testInfo) => {
-    if (targetEnv === "staging") {
+    if (targetEnv !== "local") {
       test.skip(
         testInfo.project.name !== "Chrome",
         "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
@@ -88,7 +88,7 @@ test.describe("Grantor opportunity overview happy path - initial state", () => {
         "Additional information": "Not started",
         "Attachments": "Not started",
         "Application requirements": "Not started",
-        "Forms": "Not started",        
+        "Forms": "Not started",
         */
       });
 

@@ -10,6 +10,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
 import { PROJECT_NARRATIVE_ATTACHMENT_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-narrative-attachment-field-definitions";
 import { projectNarrativeAttachmentHappyPathTestData } from "tests/e2e/apply/fixtures/project-narrative-attachment-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
@@ -21,15 +22,7 @@ import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
-const { testOrgLabel, targetEnv } = playwrightEnv;
-
-// Environment-specific opportunity IDs
-// Staging: 39df8091-6e99-4b0f-9db7-1f3aca9cb6e5
-// Local:   c3c59562-a54f-4203-b0f6-98f2f0383481
-const OPPORTUNITY_ID =
-  targetEnv === "staging"
-    ? "39df8091-6e99-4b0f-9db7-1f3aca9cb6e5"
-    : "c3c59562-a54f-4203-b0f6-98f2f0383481";
+const { testOrgLabel } = playwrightEnv;
 
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 

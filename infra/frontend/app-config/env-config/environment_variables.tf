@@ -1,4 +1,6 @@
 locals {
+  app_environment_name = coalesce(var.app_environment_name, var.environment)
+
   # Map from environment variable name to environment variable value
   # This is a map rather than a list so that variables can be easily
   # overridden per environment using terraform's `merge` function
@@ -8,9 +10,9 @@ locals {
     # see https://github.com/newrelic/node-newrelic?tab=readme-ov-file#setup
     NODE_OPTIONS = "-r newrelic"
     # expose the current AWS Env to the FE Next Node Server at Runtime
-    ENVIRONMENT = var.environment
+    ENVIRONMENT = local.app_environment_name
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#labels
-    NEW_RELIC_LABELS = "app_name:${var.app_name};environment:${var.environment};service_name:${var.app_name}-${var.environment};serviceName:${var.app_name}-${var.environment};service.name:${var.app_name}-${var.environment};entity.name:${var.app_name}-${var.environment}"
+    NEW_RELIC_LABELS = "app_name:${var.app_name};environment:${local.app_environment_name};service_name:${var.app_name}-${local.app_environment_name};serviceName:${var.app_name}-${local.app_environment_name};service.name:${var.app_name}-${local.app_environment_name};entity.name:${var.app_name}-${local.app_environment_name}"
     # https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#logging_config
     NEW_RELIC_LOG_ENABLED = "true"
     NEW_RELIC_LOG         = "stderr"

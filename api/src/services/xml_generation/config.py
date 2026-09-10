@@ -17,6 +17,24 @@ def _build_xml_form_map() -> dict[str, dict[str, Any]]:
     return xml_form_map
 
 
+def _build_xml_form_xsd_url_map() -> dict[str, str]:
+    """Build a map of form names (uppercase) to their configured XSD schema URL.
+
+    Reuses `_build_xml_form_map` so the form registry is only read in one
+    place. Forms without an ``xsd_url`` configured (e.g. no XML transform
+    config yet) are omitted.
+    """
+    xsd_urls: dict[str, str] = {}
+    for form_name, transform_config in _build_xml_form_map().items():
+        xml_config = (transform_config or {}).get("_xml_config", {})
+        xsd_url = xml_config.get("xsd_url")
+        if xsd_url:
+            xsd_urls[form_name] = xsd_url
+        else:
+            logger.debug(f"No xsd_url configured for form: {form_name}")
+    return xsd_urls
+
+
 def load_xml_transform_config(form_name: str) -> dict[str, Any]:
     """Load XML transformation rules for a given form."""
     try:

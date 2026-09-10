@@ -14,35 +14,35 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
             "prefix": {
                 "type": "string",
                 "title": "Prefix",
-                "description": "Enter the Prefix.",
+                "description": "Enter the prefix.",
                 "minLength": 1,
                 "maxLength": 10,
             },
             "first_name": {
                 "type": "string",
                 "title": "First Name",
-                "description": "Enter the First Name.",
+                "description": "Enter the first name.",
                 "minLength": 1,
                 "maxLength": 35,
             },
             "middle_name": {
                 "type": "string",
                 "title": "Middle Name",
-                "description": "Enter the Middle Name.",
+                "description": "Enter the middle name.",
                 "minLength": 1,
                 "maxLength": 25,
             },
             "last_name": {
                 "type": "string",
                 "title": "Last Name",
-                "description": "Enter the Last Name.",
+                "description": "Enter the last name.",
                 "minLength": 1,
                 "maxLength": 60,
             },
             "suffix": {
                 "type": "string",
                 "title": "Suffix",
-                "description": "Enter the Suffix.",
+                "description": "Enter the suffix.",
                 "minLength": 1,
                 "maxLength": 10,
             },
@@ -68,18 +68,18 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
         # Negative values are not allowed; use budget_monetary_amount if negatives are needed.
         "type": "string",
         # Pattern: any number of digits with an optional decimal point and exactly 2 decimal digits.
-        "pattern": r"^\d*([.]\d{2})?$",
+        "pattern": r"^\d{1,10}([.]\d{2})?$",
         "minLength": 1,
-        "maxLength": 14,
+        "maxLength": 13,
     },
     "budget_monetary_total_non_negative": {
         # Represents a non-negative monetary amount for computed subtotal/total cells (e.g. SF424C).
         # Identical constraints to budget_monetary_amount_non_negative but named separately so
         # form schemas can distinguish user-input cells from computed output cells.
         "type": "string",
-        "pattern": r"^\d*([.]\d{2})?$",
+        "pattern": r"^\d{1,12}([.]\d{2})?$",
         "minLength": 1,
-        "maxLength": 14,
+        "maxLength": 15,
     },
     "percentage": {
         # Represents a whole-number percentage. A value of 5 means 5%, not 0.05.

@@ -5,7 +5,7 @@ import { openMobileNav } from "tests/e2e/playwrightUtils";
 
 // Error if env missing and running against staging
 if (
-  playwrightEnv.targetEnv === "staging" &&
+  playwrightEnv.targetEnv !== "local" &&
   (!playwrightEnv.testUserEmail ||
     !playwrightEnv.testUserPassword ||
     !playwrightEnv.testUserAuthKey)
@@ -14,7 +14,7 @@ if (
 }
 
 // --- Timeouts ---
-const TIMEOUT_HOME = playwrightEnv.targetEnv === "staging" ? 180000 : 60000;
+const TIMEOUT_HOME = playwrightEnv.targetEnv !== "local" ? 180000 : 60000;
 const TIMEOUT_MFA = 120000;
 
 // TOTP codes are valid for 30s windows. If we're within this many seconds

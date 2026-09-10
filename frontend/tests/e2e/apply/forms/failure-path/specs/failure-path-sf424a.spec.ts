@@ -10,15 +10,12 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { OPPORTUNITY_ID } from "tests/e2e/apply/fixtures/general-apply-fixtures";
 import {
   SF424A_ALERT_ERRORS,
   SF424A_FORM_MATCHER,
   SF424A_REQUIRED_FIELD_ERRORS,
 } from "tests/e2e/apply/fixtures/sf424a-field-definitions";
-import {
-  testdata_local_environment,
-  testdata_staging_environment,
-} from "tests/e2e/opportunity-id-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { createApplication } from "tests/e2e/utils/application/create-application-utils";
@@ -33,11 +30,7 @@ import {
 
 const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 
-const { testOrgLabel, targetEnv } = playwrightEnv;
-const OPPORTUNITY_ID =
-  targetEnv === "staging"
-    ? testdata_staging_environment.opportunityID
-    : testdata_local_environment.opportunityID;
+const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 // Skip non-Chrome browsers in staging

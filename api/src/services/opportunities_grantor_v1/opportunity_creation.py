@@ -23,6 +23,8 @@ class OpportunityCreateRequest(BaseModel):
     agency_id: uuid.UUID
     opportunity_number: str
     opportunity_title: str
+    tagline: str
+    purpose_statement: str
     category: OpportunityCategory
     category_explanation: str | None = None
     assistance_listing_number: str
@@ -48,6 +50,8 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
         opportunity_id=uuid.uuid4(),
         opportunity_number=request.opportunity_number,
         opportunity_title=request.opportunity_title,
+        tagline=request.tagline,
+        purpose_statement=request.purpose_statement,
         agency_id=agency.agency_id,
         agency_code=agency.agency_code,
         category=request.category,

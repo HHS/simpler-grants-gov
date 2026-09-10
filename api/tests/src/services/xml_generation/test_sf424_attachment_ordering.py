@@ -10,20 +10,18 @@ Each attachment must instead be wrapped in a form-namespace element and appear i
 correct position in the SF-424 element sequence.
 """
 
-from pathlib import Path
-
 import pytest
 from lxml import etree as lxml_etree
 
 from src.form_schema.forms import init_form_registry
 from src.services.xml_generation.config import _build_xml_form_map
-from src.services.xml_generation.validation.test_cases import get_all_test_cases
-from src.services.xml_generation.validation.test_runner import ValidationTestRunner
+from src.services.xml_generation.models import XMLGenerationRequest
+from src.services.xml_generation.service import XMLGenerationService
+from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
+from tests.src.services.xml_generation.test_xml_validation_cases import VALID_APPLICATION
 
 SF424_NS = "http://apply.grants.gov/forms/SF424_4_0-V4.0"
 ATT_NS = "http://apply.grants.gov/system/Attachments-V1.0"
-
-XSD_DIR = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
 
 # Attachment field -> (element that must precede it, element that must follow it) in the
 # SF-424 root sequence, per SF424_4_0-V4.0.xsd.
@@ -42,20 +40,46 @@ _ATTACHMENT_SEQUENCE = {
 def all_attachments_root() -> lxml_etree._Element:
     """Generate the SF-424 XML for the case exercising every attachment field."""
     init_form_registry()
-    runner = ValidationTestRunner(xsd_dir=XSD_DIR, xml_form_map=_build_xml_form_map())
-    test_case = next(
-        tc for tc in get_all_test_cases() if tc["name"] == "sf424_with_all_attachment_types"
+    application_data = {
+        **VALID_APPLICATION,
+        "additional_congressional_districts": "44444444-4444-4444-4444-444444444444",
+        "areas_affected": "55555555-5555-5555-5555-555555555555",
+        "delinquent_federal_debt": True,
+        "debt_explanation": "66666666-6666-6666-6666-666666666666",
+        "additional_project_title": [
+            "77777777-7777-7777-7777-777777777777",
+            "88888888-8888-8888-8888-888888888888",
+            "99999999-9999-9999-9999-999999999999",
+        ],
+    }
+    attachment_mapping = {
+        attachment_id: AttachmentInfo(
+            filename=filename,
+            mime_type="application/pdf",
+            file_location=f"./attachments/{filename}",
+            hash_value="YQ==",
+            hash_algorithm="SHA-1",
+        )
+        for attachment_id, filename in {
+            "44444444-4444-4444-4444-444444444444": "additional_districts.pdf",
+            "55555555-5555-5555-5555-555555555555": "geographic_areas.pdf",
+            "66666666-6666-6666-6666-666666666666": "debt_explanation.pdf",
+            "77777777-7777-7777-7777-777777777777": "project_overview.pdf",
+            "88888888-8888-8888-8888-888888888888": "project_budget.pdf",
+            "99999999-9999-9999-9999-999999999999": "project_partners.pdf",
+        }.items()
+    }
+    response = XMLGenerationService().generate_xml(
+        XMLGenerationRequest(
+            application_data=application_data,
+            transform_config=_build_xml_form_map()["SF424_4_0"],
+            pretty_print=True,
+            attachment_mapping=attachment_mapping,
+        )
     )
-    result = runner.run_validation_test(
-        test_name=test_case["name"],
-        json_input=test_case["json_input"],
-        xsd_url_or_path=test_case["xsd_url"],
-        form_name=test_case.get("short_form_name", test_case.get("form_name", "SF424_4_0")),
-        pretty_print=test_case.get("pretty_print", True),
-        attachment_mapping=test_case.get("attachment_mapping"),
-    )
-    assert result["xml_content"], result["error_message"]
-    return lxml_etree.fromstring(result["xml_content"].encode("utf-8"))
+    assert response.success, response.error_message
+    assert response.xml_data is not None
+    return lxml_etree.fromstring(response.xml_data.encode("utf-8"))
 
 
 def _child_local_names(root: lxml_etree._Element) -> list[str]:

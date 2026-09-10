@@ -37,6 +37,8 @@ describe("create opportunity form action", () => {
     createFormData.append("agencyId", "ABC-123-EFG-456");
     createFormData.append("opportunityNumber", "MY-TEST-001");
     createFormData.append("opportunityTitle", "Test Opportunity 001");
+    createFormData.append("tagline", "Test Tagline 001");
+    createFormData.append("purposeStatement", "Test Purpose Statement 001");
     createFormData.append("category", "discretionary");
     createFormData.append("assistanceListingNumber", "12.345");
 
@@ -45,6 +47,8 @@ describe("create opportunity form action", () => {
       agency_id: "ABC-123-EFG-456",
       opportunity_number: "MY-TEST-001",
       opportunity_title: "Test Opportunity 001",
+      tagline: "Test Tagline 001",
+      purpose_statement: "Test Purpose Statement 001",
       category: "discretionary",
       category_explanation: null,
       assistance_listing_number: "12.345",
@@ -60,6 +64,8 @@ describe("create opportunity form action", () => {
     createFormData.append("agencyId", "ABC-123-EFG-456");
     createFormData.append("opportunityNumber", "MY-TEST-001");
     createFormData.append("opportunityTitle", "Test Opportunity 001");
+    createFormData.append("tagline", "Test Tagline 001");
+    createFormData.append("purposeStatement", "Test Purpose Statement 001");
     createFormData.append("category", "other");
     createFormData.append("categoryExplanation", "Some explanation");
     createFormData.append("assistanceListingNumber", "12.345");
@@ -69,6 +75,8 @@ describe("create opportunity form action", () => {
       agency_id: "ABC-123-EFG-456",
       opportunity_number: "MY-TEST-001",
       opportunity_title: "Test Opportunity 001",
+      tagline: "Test Tagline 001",
+      purpose_statement: "Test Purpose Statement 001",
       category: "other",
       category_explanation: "Some explanation",
       assistance_listing_number: "12.345",

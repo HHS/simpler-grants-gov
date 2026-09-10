@@ -4,6 +4,9 @@ import pytest
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
+from src.legacy_soap_api.grantors.schemas.grants_gov_tracking_number_schema import (
+    INVALID_TRACKING_NUMBER_ERR,
+)
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
 from src.legacy_soap_api.legacy_soap_api_client import SimplerGrantorsS2SClient
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
@@ -125,7 +128,7 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
         result = grantors_schemas.GetApplicationZipRequest(**soap_request_dict)
         assert result.grants_gov_tracking_number == GRANTS_GOV_TRACKING_NUMBER
 
-    def test_get_pydantic_error_if_request_xml_does_not_have_tracking_number(self, db_session):
+    def test_get_error_if_request_xml_does_not_have_tracking_number(self, db_session):
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -148,10 +151,10 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
         soap_request_dict = client.get_soap_request_dict()
         with pytest.raises(SOAPFaultException) as exc_info:
             grantors_schemas.GetApplicationZipRequest(**soap_request_dict)
-        assert exc_info.value.message == "GrantsGovTrackingNumber is a required value."
+        assert exc_info.value.message == INVALID_TRACKING_NUMBER_ERR
         assert (
             exc_info.value.fault.faultstring
-            == "Failed to validate request. cvc-complex-type.2.4.b: The content of element is not complete. One of {https://apply.grants.gov/system/GrantsCommonElements-V1.0:GrantsGovTrackingNumber} is expected."
+            == "Failed to validate request. cvc-pattern-valid: Value is not facet-valid with respect to pattern 'GRANT[0-9]{8}' for type 'GrantsGovTrackingNumberType'."
         )
 
     def test_get_application_zip_request_schema_handles_a_dict_for_the_grants_gov_tracking_number(

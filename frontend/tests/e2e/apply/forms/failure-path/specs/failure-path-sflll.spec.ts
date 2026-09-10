@@ -33,7 +33,7 @@ const { testOrgLabel, targetEnv } = playwrightEnv;
 // Staging: 39cf0a5c-5fed-40b4-8f46-5374101ae419
 // Local:   c3c59562-a54f-4203-b0f6-98f2f0383481
 const OPPORTUNITY_ID =
-  targetEnv === "staging"
+  targetEnv !== "local"
     ? "39cf0a5c-5fed-40b4-8f46-5374101ae419"
     : "c3c59562-a54f-4203-b0f6-98f2f0383481";
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;

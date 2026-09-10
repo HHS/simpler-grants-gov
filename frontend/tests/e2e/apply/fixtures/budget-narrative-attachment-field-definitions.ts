@@ -21,10 +21,11 @@ export const BUDGET_NARRATIVE_ATTACHMENT_FORM_CONFIG = {
   fields: fieldDefinitionsBudgetNarrativeAttachment,
 } as const;
 
-// Required field validation errors for Budget Narrative Attachment form
+// Errors anchor to the visible file chooser (`attachments-visible`), not the hidden value
+// input, so the alert link focuses the control the user acts on.
 export const BUDGET_NARRATIVE_ATTACHMENT_REQUIRED_FIELD_ERRORS: FieldError[] = [
   {
-    fieldId: "attachments",
+    fieldId: "attachments-visible",
     message: "Budget Narrative Files is required",
   },
 ];

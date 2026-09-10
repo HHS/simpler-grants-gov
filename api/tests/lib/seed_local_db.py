@@ -122,6 +122,56 @@ def _build_opportunities(
     # create a few Assistance Listing records
     factories.AssistanceListingFactory.create_batch(size=5)
 
+    # Create SGM opportunities with various statuses for testing status badges
+    # These opportunities have is_simpler_grants_opportunity=True to distinguish them from Grants.gov ones
+    # Available status badges: Draft (is_draft=True), Open/Posted, Forecasted, Closed, Archived
+    # Note: Both SGM and Grants.gov opportunities show their actual status
+    logger.info("Creating SGM opportunities with various statuses")
+
+    # Draft SGM opportunities
+    factories.OpportunityFactory.create_batch(
+        size=3,
+        is_simpler_grants_opportunity=True,
+        is_draft=True,
+        agency_code="USAID-ETH",
+    )
+
+    # Posted SGM opportunities
+    factories.OpportunityFactory.create_batch(
+        size=2,
+        is_simpler_grants_opportunity=True,
+        is_draft=False,
+        is_posted_summary=True,
+        agency_code="USAID-ETH",
+    )
+
+    # Forecasted SGM opportunities
+    factories.OpportunityFactory.create_batch(
+        size=2,
+        is_simpler_grants_opportunity=True,
+        is_draft=False,
+        is_forecasted_summary=True,
+        agency_code="USAID-SAF",
+    )
+
+    # Closed SGM opportunities
+    factories.OpportunityFactory.create_batch(
+        size=2,
+        is_simpler_grants_opportunity=True,
+        is_draft=False,
+        is_closed_summary=True,
+        agency_code="USAID-SAF",
+    )
+
+    # Archived SGM opportunities
+    factories.OpportunityFactory.create_batch(
+        size=2,
+        is_simpler_grants_opportunity=True,
+        is_draft=False,
+        is_archived_non_forecast_summary=True,
+        agency_code="USAID-ETH",
+    )
+
     logger.info("Finished creating opportunities")
 
 
@@ -592,6 +642,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "f0a1b2c3-d4e5-6789-0abc-def123456789",
         ),
         (
+            "SF424_Short_3_0",
+            "E2E-SF424SHORT",
+            "SF-424 Short Organizational",
+            "425c2ffe-6fbd-4852-ab72-b64467fe3df0",
+            "e5a3d7f1-9c26-4b84-9a15-6d3f827a1b4e",
+        ),
+        (
             "SF424A",
             "E2E-SF424A",
             "Budget Information for Non-Construction Programs (SF-424A)",
@@ -604,6 +661,13 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             "Assurances for Non-Construction Programs (SF-424B)",
             "dbd8b2c4-0d6b-48b6-9427-32ee7795f4d6",
             "15d10405-d81b-4b8e-ae56-8ac1bd4c5560",
+        ),
+        (
+            "SF424C",
+            "E2E-SF424C",
+            "Budget Information for Construction Programs (SF-424C)",
+            "a4c8e1f2-3b6d-4e91-8a2c-7f5b9d3e6a18",
+            "d9f2b6e4-1c8a-4b73-9e6f-2a5d8c4b7f19",
         ),
         (
             "SF424D",
