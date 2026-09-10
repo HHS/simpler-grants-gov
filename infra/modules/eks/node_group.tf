@@ -6,6 +6,7 @@
 # controller and other cluster-critical add-ons; application workloads should
 # land on Karpenter-provisioned nodes.
 resource "aws_launch_template" "node" {
+  # checkov:skip=CKV_AWS_341:A hop limit of 2 is required on EKS nodes. Pods reach IMDS through the container network, which costs an extra hop, so a limit of 1 breaks IRSA — the mechanism ArgoCD (#11127) and Karpenter (#11128) authenticate with. IMDSv2 is still enforced below.
   name_prefix = "${var.cluster_name}-node-"
 
   vpc_security_group_ids = [aws_security_group.node.id]

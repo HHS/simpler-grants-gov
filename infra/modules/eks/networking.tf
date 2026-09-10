@@ -65,6 +65,7 @@ resource "aws_vpc_security_group_ingress_rule" "node_from_node" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "node_from_cluster" {
+  # checkov:skip=CKV_AWS_25:Source is the control plane security group, not 0.0.0.0/0. The check fires only because the ephemeral port range needed for kubelet and webhooks (1025-65535) happens to contain 3389.
   security_group_id            = aws_security_group.node.id
   description                  = "Kubelet and webhooks from the control plane"
   referenced_security_group_id = aws_security_group.cluster.id
@@ -91,6 +92,7 @@ resource "aws_vpc_security_group_egress_rule" "node_to_cluster" {
 # VPC endpoints. Nodes run arbitrary workloads whose destinations are not known
 # in advance, so tightening this means enumerating what the workloads need —
 # worth revisiting once the evaluation settles what actually runs here.
+# trivy:ignore:AVD-AWS-0104
 resource "aws_vpc_security_group_egress_rule" "node_to_internet" {
   security_group_id = aws_security_group.node.id
   description       = "Outbound internet for image pulls and AWS APIs"
