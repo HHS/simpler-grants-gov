@@ -16,7 +16,7 @@ export function Pill({
         <Button
           unstyled
           type="button"
-          aria-label={`Remove ${label} pill`}
+          aria-label={`Remove filter, ${label} `}
           className="display-flex flex-align-center margin-left-1"
           onClick={() => {
             onClose();

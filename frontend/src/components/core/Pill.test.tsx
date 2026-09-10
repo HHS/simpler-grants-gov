@@ -11,7 +11,7 @@ describe("Pill", () => {
   it("calls onClose", async () => {
     const closeSpy = jest.fn();
     render(<Pill label="any sort of label" onClose={closeSpy} />);
-    const closeIcon = screen.getByLabelText("Remove any sort of label pill");
+    const closeIcon = screen.getByLabelText("Remove filter, any sort of label");
     await userEvent.click(closeIcon);
     expect(closeSpy).toHaveBeenCalled();
   });
