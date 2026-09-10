@@ -11,8 +11,20 @@ describe("Pill", () => {
   it("calls onClose", async () => {
     const closeSpy = jest.fn();
     render(<Pill label="any sort of label" onClose={closeSpy} />);
-    const closeIcon = screen.getByLabelText("Remove filter, any sort of label");
+    const closeIcon = screen.getByLabelText("Remove any sort of label pill");
     await userEvent.click(closeIcon);
     expect(closeSpy).toHaveBeenCalled();
+  });
+  it("uses labelPrefix in the accessible name when provided", () => {
+    render(
+      <Pill
+        label="Cost sharing: No"
+        labelPrefix="filter"
+        onClose={() => undefined}
+      />,
+    );
+    expect(
+      screen.getByLabelText("Remove filter,Cost sharing: No"),
+    ).toBeInTheDocument();
   });
 });

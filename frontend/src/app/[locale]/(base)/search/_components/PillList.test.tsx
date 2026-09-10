@@ -30,7 +30,7 @@ describe("PillList", () => {
     expect(firstLabel).toBeInTheDocument();
 
     const firstButton = screen.getByRole("button", {
-      name: "Remove filter, whatever",
+      name: "Remove filter,whatever",
     });
     expect(firstButton).toBeInTheDocument();
 
@@ -44,7 +44,7 @@ describe("PillList", () => {
     expect(secondLabel).toBeInTheDocument();
 
     const secondButton = screen.getByRole("button", {
-      name: "Remove filter, another",
+      name: "Remove filter,another",
     });
     expect(secondButton).toBeInTheDocument();
 
