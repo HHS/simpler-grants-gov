@@ -208,6 +208,32 @@ class TestTransformCompetitionInstruction(BaseTransformTestClass):
         metrics = transform_competition_instruction.metrics
         assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 1
 
+    def test_transform_competition_instruction_orphaned_competition(
+        self, db_session, enable_factory_create, s3_config, transform_competition_instruction
+    ):
+        """An instruction whose competition doesn't exist is flagged orphaned, not errored."""
+        orphaned_case = StagingTinstructionsFactory.create(
+            competition=None, comp_id=900001, extension="pdf"
+        )
+
+        transform_competition_instruction.process_competition_instruction_group(
+            [(orphaned_case, None, None)]
+        )
+
+        db_session.commit()
+
+        # The orphaned record is flagged and gets transformed_at set so it isn't re-fetched
+        db_session.refresh(orphaned_case)
+        assert orphaned_case.transformed_at is not None
+        assert (
+            orphaned_case.transformation_notes
+            == transform_constants.ORPHANED_COMPETITION_INSTRUCTION
+        )
+
+        metrics = transform_competition_instruction.metrics
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_ORPHANED] == 1
+        assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
+
 
 @pytest.mark.parametrize(
     "extension,legacy_package_id,expected_filename",
