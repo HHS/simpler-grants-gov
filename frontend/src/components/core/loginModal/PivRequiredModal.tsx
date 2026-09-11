@@ -26,9 +26,10 @@ export const PivRequiredModal = () => {
         SessionStorage.removeItem("showPivError");
       }}
       titleText={t("title")}
+      descriptionId="piv-required-modal-description"
       className="text-wrap"
     >
-      <p>{t("description")}</p>
+      <p id="piv-required-modal-description">{t("description")}</p>
       <div className="margin-top-3">
         <LoginLink
           className="usa-button"

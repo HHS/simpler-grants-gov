@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   createContext,
   PropsWithChildren,
@@ -34,12 +35,20 @@ export const useLoginModal = () => {
 
 export function LoginModalProvider({ children }: PropsWithChildren) {
   const loginModalRef = useRef<ModalRef | null>(null);
+  const t = useTranslations("HeaderLoginModal");
 
-  const [helpText, setHelpText] = useState<string>("");
-  const [titleText, setTitleText] = useState<string>("");
-  const [descriptionText, setDescriptionText] = useState<string>("");
-  const [buttonText, setButtonText] = useState<string>("");
-  const [closeText, setCloseText] = useState<string>("");
+  // The modal is mounted on every page so consumers can toggle it through the ref,
+  // which means it is present in the DOM before any consumer sets its copy. Default
+  // to the generic sign in wording rather than empty strings, otherwise the closed
+  // modal renders an unlabeled link, an unlabeled button, and a heading id that
+  // nothing points at.
+  const [helpText, setHelpText] = useState<string>(t("help"));
+  const [titleText, setTitleText] = useState<string>(t("title"));
+  const [descriptionText, setDescriptionText] = useState<string>(
+    t("description"),
+  );
+  const [buttonText, setButtonText] = useState<string>(t("button"));
+  const [closeText, setCloseText] = useState<string>(t("close"));
 
   const contextValue = useMemo(
     () => ({
