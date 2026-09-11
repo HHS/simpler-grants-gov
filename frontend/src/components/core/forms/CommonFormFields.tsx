@@ -23,6 +23,7 @@ export const CommonTextInput = ({
   fieldId,
   isRequired,
   fieldMaxLength,
+  disabled = false,
   onTextChange,
   onKeyDown = () => {},
   onFieldBlur = () => {},
@@ -35,6 +36,7 @@ export const CommonTextInput = ({
   fieldId: string;
   isRequired: boolean;
   fieldMaxLength: number;
+  disabled?: boolean;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onFieldBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -56,6 +58,7 @@ export const CommonTextInput = ({
         {error && <FieldErrors fieldName={fieldId} rawErrors={rawErrors} />}
         <TextInput
           type="text"
+          disabled={disabled}
           name={fieldId}
           id={fieldId}
           onChange={onTextChange}
@@ -79,6 +82,7 @@ export const CommonTextArea = ({
   fieldId,
   isRequired,
   fieldMaxLength,
+  disabled = false,
   onTextChange,
   defaultValue = "",
   rawErrors = [],
@@ -88,6 +92,7 @@ export const CommonTextArea = ({
   fieldId: string;
   isRequired: boolean;
   fieldMaxLength: number;
+  disabled?: boolean;
   onTextChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   defaultValue?: string;
   rawErrors?: string[];
@@ -106,6 +111,7 @@ export const CommonTextArea = ({
         <Textarea
           name={fieldId}
           id={fieldId}
+          disabled={disabled}
           {...(onTextChange && { onChange: onTextChange })}
           maxLength={fieldMaxLength}
           style={{ maxWidth: "550px" }}
@@ -201,6 +207,7 @@ export const CommonSelectInput = ({
   onSelectionChange,
   rawErrors = [],
   selectClassName = "maxw-mobile-lg",
+  disabled = false,
 }: {
   labelText: string;
   description: string;
@@ -212,6 +219,7 @@ export const CommonSelectInput = ({
   onSelectionChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   rawErrors?: string[];
   selectClassName?: string;
+  disabled?: boolean;
 }) => {
   const error = rawErrors.length ? true : undefined;
   const [selectedValue, setSelectedValue] = useState<string>(
@@ -237,6 +245,7 @@ export const CommonSelectInput = ({
         <Select
           id={fieldId}
           name={fieldId}
+          disabled={disabled}
           onChange={handleChange}
           value={selectedValue}
           className={selectClassName}
@@ -270,6 +279,7 @@ export const CommonWordLimit = ({
   onTextChange,
   defaultValue = "",
   rawErrors = [],
+  disabled = false,
 }: {
   labelText: string;
   description: string;
@@ -279,6 +289,7 @@ export const CommonWordLimit = ({
   onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   defaultValue?: string;
   rawErrors?: string[];
+  disabled?: boolean;
 }) => {
   const t = useTranslations("CommonWordLimit");
   const error = rawErrors.length ? true : undefined;
@@ -298,6 +309,7 @@ export const CommonWordLimit = ({
         <Textarea
           name={fieldId}
           id={fieldId}
+          disabled={disabled}
           error={wordCount > fieldMaxLength}
           aria-describedby={`label-for-${fieldId}`}
           onChange={(event) => {
