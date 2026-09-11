@@ -21,6 +21,7 @@ type SimplerFileInputProps = {
   postUploadActionProgressMessage: string;
   postUploadActionSuccessMessage?: string;
   postUploadActionErrorMessage?: string;
+  deleteActionConfirmationMessage?: string;
   onDelete: (fileId: string) => Promise<unknown>; // what should the delete callback return? do we need to dynamically type this?
   onError?: (err: Error) => void;
   onSuccess?: (postUploadResult: unknown) => void;
@@ -49,6 +50,7 @@ export const SimplerFileInput = ({
   postUploadActionProgressMessage,
   postUploadActionSuccessMessage,
   postUploadActionErrorMessage,
+  deleteActionConfirmationMessage,
   id,
   describedByIds,
   existingFiles,
@@ -328,6 +330,7 @@ export const SimplerFileInput = ({
           modalId={`${id}-delete-file-modal`}
           modalRef={deleteModalRef}
           pendingDeleteName={filePendingDeletion?.fileName}
+          confirmationMessage={deleteActionConfirmationMessage}
         />
       )}
     </>

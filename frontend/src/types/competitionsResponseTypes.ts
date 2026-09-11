@@ -6,6 +6,7 @@ import {
 } from "./opportunity/opportunityResponseTypes";
 
 export interface CompetitionInstructions {
+  competition_instruction_id: string;
   created_at: string;
   download_path: string;
   file_name: string;

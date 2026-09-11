@@ -2707,6 +2707,8 @@ export const messages = {
         success:
           "Success: File scan complete. “Save” this form to attach the file.",
         uploading: "Uploading...",
+        deleteConfirmation:
+          "Are you sure you want to delete this Application Instructions file?",
       },
     },
     sectionRequiredForms: {
