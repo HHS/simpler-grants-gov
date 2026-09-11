@@ -12,10 +12,8 @@ variable "kubernetes_version" {
 variable "node_instance_types" {
   type        = list(string)
   description = <<EOT
-    Instance types for the bootstrap node group. Only has to carry
-    cluster-critical add-ons (CoreDNS, and the Karpenter controller once
-    #11128 lands) — application workloads are expected to run on
-    Karpenter-provisioned nodes.
+    Instance types for the bootstrap node group. Carries only cluster-critical
+    add-ons; application workloads run on Karpenter-provisioned nodes (#11128).
   EOT
   default     = ["t4g.medium"]
 }
@@ -40,15 +38,8 @@ variable "node_max_size" {
 variable "sso_admin_role_name" {
   type        = string
   description = <<EOT
-    Name of the AWS IAM Identity Center (SSO) reserved role granted cluster-admin
-    through an EKS access entry. The reserved-SSO role suffix
-    (AWSReservedSSO_<PermissionSet>_<suffix>) is generated per AWS account, so an
-    environment in a different account must override this with that account's own
-    role — see search_sso_admin_role_name in infra/api/app-config for the same
-    pattern and the per-account values already recorded there.
-
-    Set to null to grant only the CI/CD role, which leaves the cluster reachable
-    by automation but by no human operator.
+    SSO reserved role granted cluster-admin via an EKS access entry. The suffix is
+    per-account; null grants only the CI/CD role, leaving no human access.
   EOT
 
   # infra-dev's account (061664787759), matching infra/api/app-config/infra-dev.tf.
