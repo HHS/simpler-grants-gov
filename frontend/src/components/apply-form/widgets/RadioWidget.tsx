@@ -133,53 +133,64 @@ export default function RadioWidget<
   );
 
   return (
-    <FormGroup error={error} key={`form-group__radio--${id}`}>
-      <DynamicFieldLabel
-        idFor={id}
-        title={title}
-        required={required}
-        description={description}
-        labelType={labelType}
-      />
-      {error && (
-        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
-      )}
-      {enumOptions.map((option, index) => {
-        const currentForCompare = normalizeForCompare(option.value, value);
-        const checked = enumOptionsIsSelected<S>(
-          option.value,
-          currentForCompare,
-        );
+    // id/tabIndex here give the error summary link a real anchor target, since
+    // individual radio inputs are only addressable via their indexed ids (e.g. `${id}-0`)
+    <div
+      id={id}
+      tabIndex={-1}
+      data-testid={id}
+      role="radiogroup"
+      aria-labelledby={title ? `label-for-${id}` : undefined}
+      aria-describedby={error ? `error-for-${id}` : undefined}
+    >
+      <FormGroup error={error} key={`form-group__radio--${id}`}>
+        <DynamicFieldLabel
+          idFor={id}
+          title={title}
+          required={required}
+          description={description}
+          labelType={labelType}
+        />
+        {error && (
+          <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
+        )}
+        {enumOptions.map((option, index) => {
+          const currentForCompare = normalizeForCompare(option.value, value);
+          const checked = enumOptionsIsSelected<S>(
+            option.value,
+            currentForCompare,
+          );
 
-        const itemDisabled =
-          Array.isArray(enumDisabled) &&
-          enumDisabled.indexOf(option.value as TextTypes) !== -1;
+          const itemDisabled =
+            Array.isArray(enumDisabled) &&
+            enumDisabled.indexOf(option.value as TextTypes) !== -1;
 
-        const handleChange = () => {
-          const raw = String(option.value);
-          const toEmit = coerceFromString<S>(raw, enumOptions) as T;
-          onChange(toEmit);
-        };
+          const handleChange = () => {
+            const raw = String(option.value);
+            const toEmit = coerceFromString<S>(raw, enumOptions) as T;
+            onChange(toEmit);
+          };
 
-        return (
-          <Radio
-            label={option.label}
-            id={optionId(id, index)}
-            key={optionId(id, index)}
-            name={id}
-            required={required}
-            disabled={disabled || itemDisabled || readOnly}
-            autoFocus={autofocus && index === 0}
-            aria-describedby={describedby}
-            checked={updateOnInput ? checked : undefined}
-            defaultChecked={updateOnInput ? undefined : checked}
-            defaultValue={updateOnInput ? undefined : String(option.value)}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            onFocus={handleFocus}
-          />
-        );
-      })}
-    </FormGroup>
+          return (
+            <Radio
+              label={option.label}
+              id={optionId(id, index)}
+              key={optionId(id, index)}
+              name={id}
+              required={required}
+              disabled={disabled || itemDisabled || readOnly}
+              autoFocus={autofocus && index === 0}
+              aria-describedby={describedby}
+              checked={updateOnInput ? checked : undefined}
+              defaultChecked={updateOnInput ? undefined : checked}
+              defaultValue={updateOnInput ? undefined : String(option.value)}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              onFocus={handleFocus}
+            />
+          );
+        })}
+      </FormGroup>
+    </div>
   );
 }
