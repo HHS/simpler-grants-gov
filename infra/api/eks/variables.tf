@@ -51,9 +51,7 @@ variable "sso_admin_role_name" {
     by automation but by no human operator.
   EOT
 
-  # infra-dev's account (061664787759). Matches the value already used for the
-  # same account in infra/api/app-config/infra-dev.tf. Only infra-dev has an EKS
-  # layer today; revisit this default rather than inheriting it blindly if the
-  # layer is extended to an environment in another account.
+  # infra-dev's account (061664787759), matching infra/api/app-config/infra-dev.tf.
+  # Override rather than inherit if this layer reaches another account.
   default = "AWSReservedSSO_AdministratorAccess_73856a8074e1d297"
 }
