@@ -41,8 +41,19 @@ variable "sso_admin_role_name" {
   type        = string
   description = <<EOT
     Name of the AWS IAM Identity Center (SSO) reserved role granted cluster-admin
-    through an EKS access entry. The reserved-SSO role suffix differs per account,
-    so this is set per environment. Null means only the CI/CD role gets access.
+    through an EKS access entry. The reserved-SSO role suffix
+    (AWSReservedSSO_<PermissionSet>_<suffix>) is generated per AWS account, so an
+    environment in a different account must override this with that account's own
+    role — see search_sso_admin_role_name in infra/api/app-config for the same
+    pattern and the per-account values already recorded there.
+
+    Set to null to grant only the CI/CD role, which leaves the cluster reachable
+    by automation but by no human operator.
   EOT
-  default     = null
+
+  # infra-dev's account (061664787759). Matches the value already used for the
+  # same account in infra/api/app-config/infra-dev.tf. Only infra-dev has an EKS
+  # layer today; revisit this default rather than inheriting it blindly if the
+  # layer is extended to an environment in another account.
+  default = "AWSReservedSSO_AdministratorAccess_73856a8074e1d297"
 }
