@@ -45,6 +45,7 @@ export function SimplerModal({
   className,
   modalId,
   titleText,
+  descriptionId,
   children,
   onKeyDown,
   onClose,
@@ -52,6 +53,12 @@ export function SimplerModal({
   modalRef: RefObject<ModalRef | null>;
   titleText?: string;
   modalId: string;
+  // Id of the element within `children` that describes the modal. Screen readers
+  // read this in full when focus enters the dialog, so point it at a short summary,
+  // never at a whole form or filter tree. Pass it only when that element renders in
+  // the state being shown - an `aria-describedby` naming a missing id is a broken
+  // ARIA reference, so states with no description should leave it undefined.
+  descriptionId?: string;
   className?: string;
   children: ReactNode;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
@@ -114,8 +121,14 @@ export function SimplerModal({
       // through `onClose` by this wrapper.
       forceAction={false}
       className={className}
+      // Every consumer supplies a `${modalId}-heading` element, either through
+      // `titleText` below or by rendering its own heading within `children`.
       aria-labelledby={`${modalId}-heading`}
-      aria-describedby={`${modalId}-description`}
+      // Omitted rather than defaulted: pointing this at a generated wrapper would
+      // make the modal's entire body its accessible description, which screen
+      // readers read out in full on open. Truss logs a console error when it is
+      // absent - that noise is preferable to a paragraphs-long announcement.
+      aria-describedby={descriptionId}
       style={{ margin: 0 }}
       id={modalId}
       // On the server, `renderToPortal` must be false to avoid SSR errors.

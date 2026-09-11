@@ -34,12 +34,14 @@ export const LoginModal = ({
       modalId={modalId}
       modalRef={modalRef}
       titleText={titleText}
+      descriptionId={`${modalId}-description`}
       className="text-wrap"
     >
       <LoginModalBody
         buttonText={buttonText}
         closeText={closeText}
         descriptionText={descriptionText}
+        descriptionId={`${modalId}-description`}
         helpText={helpText}
         modalRef={modalRef}
       />
@@ -51,19 +53,23 @@ export const LoginModalBody = ({
   buttonText,
   closeText,
   descriptionText,
+  descriptionId,
   helpText,
   modalRef,
 }: {
   buttonText: string;
   closeText: string;
   descriptionText: string;
+  descriptionId?: string;
   helpText: string;
   modalRef: RefObject<ModalRef | null>;
 }) => {
   return (
     <>
       <p>{helpText}</p>
-      <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
+      <p id={descriptionId} className="font-sans-2xs margin-y-4">
+        {descriptionText}
+      </p>
       <ModalFooter>
         <ButtonGroup>
           <LoginLink className="usa-button">
