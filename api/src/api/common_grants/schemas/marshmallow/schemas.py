@@ -17,6 +17,7 @@ from src.api.common_grants.schemas.marshmallow.custom_fields import (
     attachments,
     contactInfo,
     costSharing,
+    federalFundingInstruments,
     federalFundingSource,
     federalOpportunityNumber,
     fiscalYear,
@@ -347,6 +348,7 @@ class OpportunityCustomFields(Schema):
     agency = fields.Nested(agency, allow_none=True)
     attachments = fields.Nested(attachments, allow_none=True)
     federalFundingSource = fields.Nested(federalFundingSource, allow_none=True)
+    federalFundingInstruments = fields.Nested(federalFundingInstruments, allow_none=True)
     fiscalYear = fields.Nested(fiscalYear, allow_none=True)
     costSharing = fields.Nested(costSharing, allow_none=True)
     additionalInfo = fields.Nested(additionalInfo, allow_none=True)
