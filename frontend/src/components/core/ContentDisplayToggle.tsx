@@ -9,16 +9,6 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type ContentDisplayToggleTypes = "default" | "centered";
 
-/*
- * ContentDisplayToggle
- *
- * Toggles display of child content
- *
- * @param {string} breakpoint - used to:
- *  - add a class to toggled content to always display it at viewport sizes above the specified breakpoint
- *  - add a class to toggled button to hide it at viewport sizes above the specified breakpoint
- *  @param {boolean} positionButtonBelowContent - defines whether toggle button will appear below or above child content
- */
 export default function ContentDisplayToggle({
   hideCallToAction,
   showCallToAction,
@@ -26,6 +16,7 @@ export default function ContentDisplayToggle({
   showContentByDefault = false,
   positionButtonBelowContent = true,
   type = "default",
+  onToggle,
   children,
 }: {
   hideCallToAction: string;
@@ -34,10 +25,17 @@ export default function ContentDisplayToggle({
   showContentByDefault?: boolean;
   type?: ContentDisplayToggleTypes;
   positionButtonBelowContent?: boolean;
+  onToggle?: (visible: boolean) => void;
   children: React.ReactNode;
 }) {
   const [toggledContentVisible, setToggledContentVisible] =
     useState<boolean>(showContentByDefault);
+
+  const handleToggle = () => {
+    const next = !toggledContentVisible;
+    setToggledContentVisible(next);
+    onToggle?.(next);
+  };
 
   const iconName = toggledContentVisible ? "arrow_drop_up" : "arrow_drop_down";
 
@@ -67,9 +65,7 @@ export default function ContentDisplayToggle({
       >
         <button
           type="button"
-          onClick={() => {
-            setToggledContentVisible(!toggledContentVisible);
-          }}
+          onClick={handleToggle}
           aria-pressed={toggledContentVisible}
           className="usa-button usa-button--unstyled text-no-underline"
         >
