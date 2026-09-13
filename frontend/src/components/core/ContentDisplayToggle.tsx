@@ -9,6 +9,16 @@ import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type ContentDisplayToggleTypes = "default" | "centered";
 
+/*
+ * ContentDisplayToggle
+ *
+ * Toggles display of child content
+ *
+ * @param {string} breakpoint - used to:
+ *  - add a class to toggled content to always display it at viewport sizes above the specified breakpoint
+ *  - add a class to toggled button to hide it at viewport sizes above the specified breakpoint
+ *  @param {boolean} positionButtonBelowContent - defines whether toggle button will appear below or above child content
+ */
 export default function ContentDisplayToggle({
   hideCallToAction,
   showCallToAction,
