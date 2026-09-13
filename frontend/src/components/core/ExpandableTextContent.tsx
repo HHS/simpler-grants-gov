@@ -50,7 +50,7 @@ export const ExpandableTextContent = ({
     <>
       <div
         dangerouslySetInnerHTML={{
-          __html: isExpanded ? purifiedSummary : preSplit + "…",
+          __html: isExpanded ? purifiedSummary : preSplit + "...",
         }}
       />
       <ContentDisplayToggle
