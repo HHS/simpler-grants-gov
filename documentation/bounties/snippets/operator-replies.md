@@ -70,7 +70,7 @@ Any claim you already have in progress continues to its normal resolution. After
 ```markdown
 Thanks @handle! Before I can record your claim, I need your [**Terms of Service acknowledgment**](https://github.com/HHS/simpler-grants-gov/blob/main/documentation/bounties/paid-contributor-TOS.md). Please post the text below as a comment, *then* comment `/claim` again:
 
-> I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.
+> I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $2,000.
 
 Heads up: for tiebreaker purposes your claim timestamp is set to the time of a **complete** acknowledgment, not the `/claim` comment.
 ```
@@ -201,7 +201,7 @@ Thank you for contributing to Simpler Grants.
 ## W-9 request email
 
 > Triggered when a pending payment will push the contributor's calendar-year
-> cumulative program payments to **$600 or more** (SOP Part 5.3, Rule 15). Payment
+> cumulative program payments to **$2,000 or more** (SOP Part 5.3, Rule 15). Payment
 > is held until the W-9 is received; forfeited to the program reserve if not
 > returned within 14 days. **Private email.** Governance: OS Associate.
 
@@ -212,7 +212,7 @@ Hi <name>,
 
 Congratulations on your merged contribution to #NNN — the $AMOUNT bounty is approved and ready to pay.
 
-One more step: with this payment, your total bounty payments from the program this calendar year will reach or exceed $600. US tax rules require us to collect an IRS Form W-9 before releasing a payment that crosses that threshold. (At year end, the Bounty Prgroam Administrator issues a Form 1099-NEC to any contributor paid $600 or more.)
+One more step: with this payment, your total bounty payments from the program this calendar year will reach or exceed $2,000. US tax rules require us to collect an IRS Form W-9 before releasing a payment that crosses that threshold. (At year end, the Bounty Prgroam Administrator issues a Form 1099-NEC to any contributor paid $2,000 or more.)
 
 Please complete and return a W-9 by <date — 14 days out>:
 - Blank form and instructions: https://www.irs.gov/forms-pubs/about-form-w-9
@@ -245,7 +245,7 @@ Verification (complete before submitting):
 - [ ] PR merged; two maintainer approvals + acceptance-criteria PASS comment on file
 - [ ] Identity / eligibility verified (citizenship, no HHS relationship, 18+)
 - [ ] OFAC SDN screen clear (date + initials in tracker)
-- [ ] W-9 on file if YTD cumulative ≥ $600, otherwise N/A
+- [ ] W-9 on file if YTD cumulative ≥ $2,000, otherwise N/A
 - [ ] Budget tracker reservation status = posted; sufficient envelope remaining
 
 Attach the issue URL in the Tremendous internal note. After Tremendous confirms

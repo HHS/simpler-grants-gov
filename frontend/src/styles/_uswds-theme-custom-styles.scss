@@ -715,6 +715,13 @@ dl {
   aside {
     max-height: calc(100vh - 2rem);
   }
+
+  // USWDS adds its own margin-top to checkbox labels on top of the .usa-form-group
+  // margin-top, making the gap before a checkbox larger than the gap before any other
+  // field. Zero it out so checkbox spacing matches the rest of the form.
+  .usa-checkbox__label {
+    margin-top: 0;
+  }
 }
 
 .simpler-application-forms-table {

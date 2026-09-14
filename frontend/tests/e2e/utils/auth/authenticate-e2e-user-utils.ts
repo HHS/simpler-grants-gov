@@ -48,7 +48,7 @@ const fetchE2eSessionToken = async (userId: string): Promise<string> => {
 export async function authenticateE2eUser(
   page: Page,
   context: BrowserContext,
-  _isMobile: boolean,
+  isMobile: boolean,
   testUserKey: TestUserKey = "primaryOrgAdmin",
 ): Promise<void> {
   const userId = getTestUserId(testUserKey);
@@ -56,10 +56,11 @@ export async function authenticateE2eUser(
   await createSpoofedSessionCookie(context, token);
 
   // Give the spoofed session cookie a moment to settle before navigating, then
-  // let the page hydrate the authenticated state after load. These waits are
-  // carried over from the previous local flow to avoid a race where the nav
-  // renders before the client resolves the session.
-  await page.waitForTimeout(1000);
+  // let the page hydrate the authenticated state after load. Mobile needs longer
+  // waits due to slower rendering and session establishment on smaller viewports.
+  const preNavWait = isMobile ? 2000 : 1000;
+  const postNavWait = isMobile ? 4000 : 2000;
+  await page.waitForTimeout(preNavWait);
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(postNavWait);
 }

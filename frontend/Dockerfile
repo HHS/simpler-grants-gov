@@ -19,7 +19,7 @@ RUN npm ci --no-audit \
 FROM base AS dev
 WORKDIR /frontend
 
-COPY tsconfig.json .
+COPY tsconfig.json tsconfig.build.json ./
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
@@ -39,7 +39,7 @@ CMD ["npm", "run", "dev"]
 FROM base AS builder
 WORKDIR /frontend
 
-COPY tsconfig.json .
+COPY tsconfig.json tsconfig.build.json ./
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
@@ -65,6 +65,7 @@ RUN apt-get update \
   libc6=2.36-9+deb12u14 \
   libgcrypt20=1.10.1-3+deb12u1 \
   libgnutls30=3.7.9-2+deb12u7 \
+  libpcre2-8-0=10.42-1+deb12u1 \
   libsystemd0=252.39-1~deb12u2 \
   libudev1=252.39-1~deb12u2 \
   libcap2=1:2.66-4+deb12u3+b1 \

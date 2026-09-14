@@ -116,7 +116,8 @@ Sharing how you or your organization have used the Simpler Grants project is an 
 ## Community Members
 The following members of the Simpler Grants community have made significant open source contributions.
 
-* Jack [jackvansickle1](https://github.com/jackvansickle1), who created the features needed for testing email functionality locally, including the [follow-through to work through developer feedback to get these features merged](https://github.com/HHS/simpler-grants-gov/pull/11516).
+* Richard [@RichardGabelman](https://github.com/RichardGabelman), working on frontend issues [large](https://github.com/HHS/simpler-grants-gov/pull/11977) and [small](https://github.com/HHS/simpler-grants-gov/pull/12176).
+* Jack [@jackvansickle1](https://github.com/jackvansickle1), who created the features needed for testing email functionality locally, including the [follow-through to work through developer feedback to get these features merged](https://github.com/HHS/simpler-grants-gov/pull/11516).
 * Sayed ([@MozamilS](https://github.com/MozamilS)) for work on display filters, including multiple review cycles with our team,  
 * Matt ([@mvanhorn](https://github.com/mvanhorn)) for identifying a UI issue and updating testing to go with the update,  
 * Arpit ( [Arpitjain099](https://github.com/arpitjain099) ) for contributions to a significant bug fix to [redirect grantor opportunities when a search returns empty data due to query page number parameters](https://github.com/HHS/simpler-grants-gov/pull/10980)

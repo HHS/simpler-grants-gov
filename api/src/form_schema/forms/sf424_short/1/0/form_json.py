@@ -101,17 +101,17 @@ FORM_JSON_SCHEMA = {
                 "phone_number": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
                     "title": "Telephone Number",
-                    "description": "Enter the daytime Telephone Number.",
+                    "description": "Enter the daytime telephone number.",
                 },
                 "fax": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
                     "title": "Fax Number",
-                    "description": "Enter the Fax Number.",
+                    "description": "Enter the fax number.",
                 },
                 "email": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
                     "title": "Email",
-                    "description": "Enter a valid email Address.",
+                    "description": "Enter a valid email address.",
                 },
             },
         },
@@ -259,7 +259,8 @@ FORM_JSON_SCHEMA = {
         "application_certification": {
             "type": "boolean",
             "title": "** I Agree",
-            "description": "** The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions. By signing this application, I certify (1) to the statements contained in the list of certifications and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fraudulent statements or claims may subject me to criminal, civil, or administrative penalties. (U.S. Code, Title 18, Section 1001)",
+            # The certification statement renders as its own paragraph below the checkbox
+            # via the "text" node in FORM_UI_SCHEMA, not as this field's own hint text.
         },
         "authorized_representative": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
@@ -276,17 +277,17 @@ FORM_JSON_SCHEMA = {
         "authorized_representative_email": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
             "title": "Email",
-            "description": "Enter a valid email Address.",
+            "description": "Enter a valid email address.",
         },
         "authorized_representative_phone_number": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
             "title": "Telephone Number",
-            "description": "Enter the daytime Telephone Number.",
+            "description": "Enter the daytime telephone number.",
         },
         "authorized_representative_fax": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
             "title": "Fax Number",
-            "description": "Enter the Fax Number.",
+            "description": "Enter the fax number.",
         },
         "aor_signature": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("signature")}],
@@ -420,9 +421,18 @@ FORM_UI_SCHEMA = [
         "label": "9. Authorized Representative",
         "children": [
             {
+                "type": "text",
+                "name": "application_certification_statement",
+                "content": "* By signing this application, I certify (1) to the statements contained in the list of certifications and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fraudulent statements or claims may subject me to criminal, civil, or administrative penalties. (U.S. Code, Title 18, Section 1001)",
+            },
+            {
                 "type": "field",
                 "definition": "/properties/application_certification",
-                "printDescription": True,
+            },
+            {
+                "type": "text",
+                "name": "application_certification_note",
+                "content": "** The list of certifications and assurances, or an internet site where you may obtain this list, is contained in the announcement or agency specific instructions.",
             },
             {
                 "type": "field",

@@ -1,7 +1,7 @@
 import SearchResultsListItem from "src/app/[locale]/(base)/workspace/saved-opportunities/_components/SearchResultsListItem";
 
 const meta = {
-  title: "Components/Search/SearchListItem",
+  title: "Components/Search/SearchResultsListItem",
   component: SearchResultsListItem,
   args: {
     saved: true,

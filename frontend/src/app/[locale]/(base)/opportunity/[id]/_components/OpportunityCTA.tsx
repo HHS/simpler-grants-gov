@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
 import { Button } from "@trussworks/react-uswds";
 
+import LegacyLink from "src/components/core/LegacyLink";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 export const OpportunityContentBox = ({
@@ -24,21 +25,27 @@ export const OpportunityContentBox = ({
 const OpportunityCTA = ({ legacyId }: { legacyId: number }) => {
   const t = useTranslations("OpportunityListing.cta");
   const legacyOpportunityURL = `${environment.LEGACY_HOST}/search-results-detail/${legacyId}`;
+  const clickEvent = {
+    name: "click_legacy_opportunity_link",
+    properties: {
+      legacyOpportunityURL,
+      legacyOpportunityId: legacyId,
+    },
+  };
 
   const content = (
     <>
       <span>{t("applyContent")}</span>
-      <a
+      <LegacyLink
         href={legacyOpportunityURL}
-        target="_blank"
-        rel="noopener noreferrer"
+        userEvent={clickEvent}
         className="display-block"
       >
         <Button type="button" outline={true} className="margin-top-2">
           <span>{t("buttonContent")}</span>
           <USWDSIcon name="launch" className="usa-icon--size-4 text-middle" />
         </Button>
-      </a>
+      </LegacyLink>
     </>
   );
 

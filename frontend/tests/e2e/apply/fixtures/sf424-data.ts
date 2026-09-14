@@ -67,9 +67,11 @@ export const buildSF424HappyPathTestData = (
     // Section 9 – Applicant Type (printTestId: "applicant_type_code")
     applicant_type_code__combobox: "C: City or Township Government",
     applicant_type_other_specify: `ApplicantOther${shortSuffix}`,
-    // Section 11–12 – Agency / Assistance Listing
-    agency_name: `Agency ${shortSuffix}`,
-    assistance_listing_program_title: `Program Title ${shortSuffix}`,
+    // Section 11–12 – Agency / Assistance Listing (pre-populated by system, not user-entered)
+    // NOT included: agency_name, assistance_listing_program_title, funding_opportunity_number,
+    // funding_opportunity_title, assistance_listing_number, competition_identification_number,
+    // competition_identification_title, and sam_uei are all read-only and populated by
+    // pre-population rules. The form will auto-fill these after submission creates the application.
     // Section 15 – Project Title
     project_title: `Project ${shortSuffix}`,
     // Section 16 – Congressional Districts

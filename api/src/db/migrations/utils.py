@@ -17,7 +17,7 @@ def setup_opportunity_search_index_queue_trigger_function(
     for table in tables:
         op.execute(f"""
             CREATE OR REPLACE TRIGGER {table}_queue_trigger
-            AFTER INSERT OR UPDATE ON api.{table}
+            AFTER INSERT OR UPDATE OR DELETE ON api.{table}
             FOR EACH ROW EXECUTE FUNCTION api.update_opportunity_search_queue();
         """)
 

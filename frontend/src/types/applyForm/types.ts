@@ -321,6 +321,17 @@ export type UiSchemaTableMultiField = {
 export type UiSchemaField =
   UiSchemaBasicField | UiSchemaMultiField | UiSchemaTableMultiField;
 
+/**
+ * A standalone paragraph of static text rendered inline between other section
+ * children (e.g. a footnote that must appear after a specific field rather
+ * than as a description.
+ */
+export interface UiSchemaText {
+  type: "text";
+  name: string;
+  content: string;
+}
+
 export interface UiSchemaSection {
   type: "section";
   label: string;
@@ -349,7 +360,8 @@ export interface UiSchemaFieldList {
   children: Exclude<UiSchemaField, UiSchemaTableMultiField>[];
 }
 
-export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;
+export type UiSchemaNode =
+  UiSchemaField | UiSchemaSection | UiSchemaFieldList | UiSchemaText;
 
 export type UiSchema = UiSchemaNode[];
 

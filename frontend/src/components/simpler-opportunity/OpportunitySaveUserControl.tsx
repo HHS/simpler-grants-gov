@@ -104,13 +104,20 @@ export const OpportunitySaveUserControl = ({
             saved={displayAsSaved}
           />
         ) : isSSR ? (
-          <SaveIcon saved={false} />
+          <button
+            type="button"
+            className="usa-button--unstyled"
+            aria-label="Save opportunity"
+          >
+            <SaveIcon saved={false} />
+          </button>
         ) : (
           <ModalToggleButton
             id={`save-search-result-${opportunityId}`}
             modalRef={loginModalRef}
             opener
             className="usa-button--unstyled"
+            aria-label="Save opportunity"
             onClick={() => {
               setHelpText(t("saveloginModal.help"));
               setButtonText(t("saveloginModal.button"));
