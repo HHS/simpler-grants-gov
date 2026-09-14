@@ -97,7 +97,7 @@ CLI commands are of the form `<task group> <task name> <any other params>`. So i
 
 ### In AWS
 
-1. Ensure your [SSO login](../documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) is fresh
+1. Ensure your [SSO login](../documentation/infra/set-up-infrastructure-tools.md#aws-authentication) is fresh
 2. Setup your terraform environment
 
    ```bash
