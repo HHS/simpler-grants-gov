@@ -56,11 +56,10 @@ describe("DeleteSavedSearchModal", () => {
       </>,
     );
 
-    const ids = screen.getAllByRole("dialog", { hidden: true }).map((d) => d.id);
-    expect(ids).toEqual([
-      "delete-save-search-1",
-      "delete-save-search-2",
-    ]);
+    const ids = screen
+      .getAllByRole("dialog", { hidden: true })
+      .map((d) => d.id);
+    expect(ids).toEqual(["delete-save-search-1", "delete-save-search-2"]);
     expect(new Set(ids).size).toBe(ids.length);
   });
   it("displays a working modal toggle button", async () => {

@@ -2,12 +2,12 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { noop } from "lodash";
+import { LoginModalProvider } from "src/services/auth/LoginModalProvider";
 
 import { createRef } from "react";
 
 import { PivRequiredModal } from "src/components/core/loginModal/PivRequiredModal";
 import { SimplerModal } from "src/components/core/SimplerModal";
-import { LoginModalProvider } from "src/services/auth/LoginModalProvider";
 
 const mockUseIsSSR = jest.fn();
 const createPortalSpy = jest.fn();
