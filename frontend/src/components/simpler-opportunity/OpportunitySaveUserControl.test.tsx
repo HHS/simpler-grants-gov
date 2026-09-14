@@ -7,6 +7,7 @@ import { createRef } from "react";
 import { OpportunitySaveUserControl } from "src/components/simpler-opportunity/OpportunitySaveUserControl";
 
 let mockUser = {};
+let mockIsSSR = false;
 
 const clientFetchMock = jest.fn();
 const getUser = () => mockUser;
@@ -29,6 +30,12 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
   }),
 }));
 
+// Controllable mock so we can test both the SSR (dummy) render
+// and the hydrated (ModalToggleButton) render.
+jest.mock("src/hooks/useIsSSR", () => ({
+  useIsSSR: () => mockIsSSR,
+}));
+
 jest.mock("src/services/auth/LoginModalProvider", () => ({
   useLoginModal: () => ({
     loginModalRef: createRef(),
@@ -44,6 +51,7 @@ describe("OpportunitySaveUserControl", () => {
   afterEach(() => {
     jest.resetAllMocks();
     mockUser = {};
+    mockIsSSR = false;
   });
   it("is a function", () => {
     expect(typeof OpportunitySaveUserControl).toBe("function");
@@ -96,5 +104,48 @@ describe("OpportunitySaveUserControl", () => {
     );
     expect(saveButtons).toHaveLength(0);
     expect(unsaveButtons).toHaveLength(1);
+  });
+
+  describe("accessible name when logged out (icon type)", () => {
+    it("has an aria-label after hydration (isSSR = false)", () => {
+      mockUser = {};
+      mockIsSSR = false;
+
+      render(
+        <OpportunitySaveUserControl
+          opportunitySaved={false}
+          type="icon"
+          opportunityId="opp-123"
+        />,
+      );
+
+      const button = screen.getByRole("button", { name: "Save opportunity" });
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveAttribute("aria-label", "Save opportunity");
+
+      // make sure there isn't a second, unlabeled button rendered
+      expect(screen.getAllByRole("button")).toHaveLength(1);
+    });
+
+    it("has an aria-label during SSR fallback render (isSSR = true)", () => {
+      mockUser = {};
+      mockIsSSR = true;
+
+      render(
+        <OpportunitySaveUserControl
+          opportunitySaved={false}
+          type="icon"
+          opportunityId="opp-123"
+        />,
+      );
+
+      const signInButton = screen.getByRole("button", {
+        name: "Save opportunity",
+      });
+      expect(signInButton).toBeInTheDocument();
+      expect(signInButton).toHaveAttribute("aria-label", "Save opportunity");
+
+      expect(screen.getAllByRole("button")).toHaveLength(1);
+    });
   });
 });
