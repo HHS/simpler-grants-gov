@@ -1,5 +1,6 @@
 "use client";
 
+import { postUserEvent } from "src/services/event/postUserEvent";
 import { UserEvent } from "src/types/userEventTypes";
 
 type LegacyLinkProps = {
@@ -20,10 +21,7 @@ const LegacyLink = ({
   className = "",
 }: LegacyLinkProps) => {
   const handleClick = () => {
-    const blob = new Blob([JSON.stringify(userEvent)], {
-      type: "application/json",
-    });
-    navigator.sendBeacon("/api/events", blob);
+    postUserEvent(userEvent);
   };
 
   return (
