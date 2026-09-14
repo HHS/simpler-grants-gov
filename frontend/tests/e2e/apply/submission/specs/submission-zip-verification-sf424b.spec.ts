@@ -1,8 +1,8 @@
 /**
  * @feature Apply - Submission zip content verification
- * @scenario Open a pre-submitted SF-424B application, check for the submission zip
- * to become available, then verify the zip contains a valid SF424B.pdf and a
- * GrantApplication.xml whose content matches the data that was filled in.
+ * @scenario Open a pre-submitted application with SF-424B, check for the 
+ * submission zip to become available, then verify the GrantApplication.xml 
+ * in that contains the expected SF424B form data.
  */
 
 import {
@@ -35,7 +35,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 test(
-  "Submission zip contains SF424B PDF and XML with correct form data",
+  "Downloaded Submission ZIP contains XML with expected SF424B form data",
   { tag: [APPLY, GRANTEE, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
@@ -53,12 +53,7 @@ test(
     const contents = await downloadAndUnzipSubmission(page);
 
     // --- Verify GrantApplication.xml contains the entered field values ---
-    // Element names AND prefix confirmed against SF-424B's own _xml_config in
-    // api/src/form_schema/forms/sf424b/1/0/form_json.py, which explicitly sets
-    // "root_namespace_prefix": "SF424B" - every element in this form's body carries
-    // that prefix, e.g. <SF424B:ApplicantOrganizationName>...</SF424B:ApplicantOrganizationName>.
-    // (Cross-checked against a real generated SF-424 GrantApplication.xml sample, which
-    // confirmed the same convention: prefix = the form's short_form_name/root_namespace_prefix.)
+    // SF424B element names and namespace prefix are based on the form's _xml_config.
     //   title                  -> SF424B:RepresentativeTitle (via authorized_representative_wrapper)
     //   applicant_organization -> SF424B:ApplicantOrganizationName
     assertXmlContains(contents, [
