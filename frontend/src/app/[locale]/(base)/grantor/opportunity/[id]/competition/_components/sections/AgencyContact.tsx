@@ -236,9 +236,9 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
             fieldMaxLength={255}
             isRequired={false}
             onTextChange={() => {}}
+            defaultValue={contactTitle}
             onKeyDown={handlePipeKeyDown}
             onPaste={handlePipePaste}
-            defaultValue={contactTitle}
           />
         </div>
       </div>

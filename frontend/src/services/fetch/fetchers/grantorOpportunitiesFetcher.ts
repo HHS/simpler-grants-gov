@@ -4,7 +4,7 @@ import {
   fetchGrantorAgenciesWithMethod,
   fetchGrantorOpportunityWithMethod,
 } from "src/services/fetch/fetchers/fetchers";
-import { PaginationInfo } from "src/types/apiResponseTypes";
+import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 import {
   CompetitionInstructionsApiResponse,
   CompetitionSaveApiResponse,
@@ -154,4 +154,15 @@ export async function saveCompetitionInstructions(
     body: { pending_file_id: pendingFileId },
   });
   return (await response.json()) as CompetitionInstructionsApiResponse;
+}
+
+export async function deleteCompetitionInstructions(
+  opportunityId: string,
+  competitionId: string,
+  competitionInstructionId: string,
+): Promise<APIResponse> {
+  const response = await fetchGrantorOpportunityWithMethod("DELETE")({
+    subPath: `${opportunityId}/competitions/${competitionId}/instructions/${competitionInstructionId}`,
+  });
+  return (await response.json()) as APIResponse;
 }
