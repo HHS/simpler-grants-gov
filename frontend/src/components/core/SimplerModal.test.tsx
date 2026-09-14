@@ -5,7 +5,9 @@ import { noop } from "lodash";
 
 import { createRef } from "react";
 
+import { PivRequiredModal } from "src/components/core/loginModal/PivRequiredModal";
 import { SimplerModal } from "src/components/core/SimplerModal";
+import { LoginModalProvider } from "src/services/auth/LoginModalProvider";
 
 const mockUseIsSSR = jest.fn();
 const createPortalSpy = jest.fn();
@@ -211,6 +213,36 @@ describe("SimplerModal", () => {
       // eslint-disable-next-line testing-library/no-node-access
       const withId = document.querySelectorAll('[id="modal-id-description"]');
       expect(withId).toHaveLength(1);
+    });
+
+    // Layout renders the login modal and the PIV modal on every page, so the
+    // realistic failure is two modals colliding rather than one misbehaving.
+    it("keeps ids unique and references paired when modals render together", () => {
+      render(
+        <>
+          <LoginModalProvider />
+          <PivRequiredModal />
+        </>,
+      );
+
+      // eslint-disable-next-line testing-library/no-node-access
+      const ids = Array.from(document.querySelectorAll("[id]")).map(
+        (element) => element.id,
+      );
+      expect(ids.length).toBeGreaterThan(0);
+      expect(new Set(ids).size).toBe(ids.length);
+
+      // Each dialog must resolve to its own copy, not the other modal's.
+      // Sorted by id: "piv-required-modal" then "simpler-login-modal".
+      const [pivDialog, loginDialog] = screen
+        .getAllByRole("dialog", { hidden: true })
+        .sort((a, b) => a.id.localeCompare(b.id));
+      expect(pivDialog.id).toBe("piv-required-modal");
+      expect(loginDialog.id).toBe("simpler-login-modal");
+      expect(loginDialog).toHaveAccessibleName("title");
+      expect(loginDialog).toHaveAccessibleDescription("description");
+      expect(pivDialog).toHaveAccessibleName("title");
+      expect(pivDialog).toHaveAccessibleDescription("description");
     });
 
     it("describes the dialog with only the element named by descriptionId", () => {

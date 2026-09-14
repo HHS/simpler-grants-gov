@@ -35,6 +35,34 @@ describe("DeleteSavedSearchModal", () => {
     clientFetchMock.mockReset();
     jest.clearAllTimers();
   });
+
+  // One of these renders per saved search row. The modal id used to be the
+  // literal "save-search", so every row shared an id and each row's opener
+  // pointed aria-controls at the first row's dialog.
+  // https://github.com/HHS/simpler-grants-gov/issues/11493
+  it("gives each row's dialog an id scoped to its saved search", () => {
+    render(
+      <>
+        <DeleteSavedSearchModal
+          queryName="first query"
+          savedSearchId="1"
+          deleteText="delete"
+        />
+        <DeleteSavedSearchModal
+          queryName="second query"
+          savedSearchId="2"
+          deleteText="delete"
+        />
+      </>,
+    );
+
+    const ids = screen.getAllByRole("dialog", { hidden: true }).map((d) => d.id);
+    expect(ids).toEqual([
+      "delete-save-search-1",
+      "delete-save-search-2",
+    ]);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
   it("displays a working modal toggle button", async () => {
     const { rerender } = render(
       <DeleteSavedSearchModal

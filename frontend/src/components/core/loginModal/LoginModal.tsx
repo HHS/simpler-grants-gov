@@ -29,19 +29,22 @@ export const LoginModal = ({
   closeText: string;
   modalId: string;
 }) => {
+  // Derived once so the aria-describedby and the element it names cannot drift.
+  const descriptionId = `${modalId}-description`;
+
   return (
     <SimplerModal
       modalId={modalId}
       modalRef={modalRef}
       titleText={titleText}
-      descriptionId={`${modalId}-description`}
+      descriptionId={descriptionId}
       className="text-wrap"
     >
       <LoginModalBody
         buttonText={buttonText}
         closeText={closeText}
         descriptionText={descriptionText}
-        descriptionId={`${modalId}-description`}
+        descriptionId={descriptionId}
         helpText={helpText}
         modalRef={modalRef}
       />
