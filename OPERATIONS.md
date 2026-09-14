@@ -101,11 +101,16 @@ which need the `<service_name>-opensearch-write` role:
 
 ```bash
 export AWS_PROFILE=staging
+account_id=$(aws sts get-caller-identity --query Account --output text)
+
 ./bin/run-command \
-  --task-role-arn arn:aws:iam::317380566348:role/api-infra-staging-opensearch-write \
+  --task-role-arn "arn:aws:iam::${account_id}:role/api-infra-staging-opensearch-write" \
   api infra-staging \
   '["flask", "load-search-data", "load-opportunity-data", "--no-full-refresh"]'
 ```
+
+Deriving `account_id` from the active profile rather than hardcoding it means a wrong `AWS_PROFILE`
+produces an ARN that fails loudly instead of quietly pointing at another account.
 
 Two gotchas:
 
