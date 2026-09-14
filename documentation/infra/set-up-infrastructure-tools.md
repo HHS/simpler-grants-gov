@@ -85,12 +85,11 @@ Configure one shared SSO session plus one profile per account you need. Either e
 
 #### Option A: edit `~/.aws/config` directly
 
-This is usually quicker than answering the interactive prompts four times. Ask the infra team for the
-project's AWS access portal (SSO start) URL.
+This is usually quicker than answering the interactive prompts four times.
 
 ```ini
 [sso-session grants-sso]
-sso_start_url = <AWS access portal URL — ask the infra team>
+sso_start_url = https://grants-sso.awsapps.com/start
 sso_region = us-east-1
 sso_registration_scopes = sso:account:access
 
@@ -125,8 +124,9 @@ Two things to watch:
   `default_region` in [`infra/project-config/main.tf`](../../infra/project-config/main.tf).
 - The `sso_role_name` is not the same in every account. The per-environment accounts grant
   `AdministratorAccess`; the shared `simpler-grants-gov` account grants `AWSAdministratorAccess`.
-  If a profile fails with a "role not found" error, open the AWS access portal in a browser and use
-  the exact role name listed for that account.
+  If a profile fails with a "role not found" error, open the
+  [AWS access portal](https://grants-sso.awsapps.com/start) in a browser and use the exact role name
+  listed for that account.
 
 #### Option B: interactive
 
@@ -137,7 +137,7 @@ aws configure sso --profile staging
 Answer the prompts with:
 
 - **SSO session name**: `grants-sso`
-- **SSO start URL**: the project's AWS access portal URL
+- **SSO start URL**: `https://grants-sso.awsapps.com/start`
 - **SSO region**: `us-east-1`
 - **SSO registration scopes**: `sso:account:access`
 - **CLI default client Region**: `us-east-1`
