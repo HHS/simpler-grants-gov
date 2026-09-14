@@ -1,7 +1,7 @@
 /**
  * @feature Apply - Submission zip content verification
- * @scenario Open a pre-submitted application with SF-424B, check for the 
- * submission zip to become available, then verify the GrantApplication.xml 
+ * @scenario Open a pre-submitted application with SF-424B, check for the
+ * submission zip to become available, then verify the GrantApplication.xml
  * in that contains the expected SF424B form data.
  */
 
