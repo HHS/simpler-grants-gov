@@ -261,10 +261,12 @@ def get_saved_opportunities(
     if org_ids_param is None:
         logger.info("All saved opportunities requested")
         org_ids_to_use = _get_accessible_org_ids(user, user.organization_users)
+        org_ids_filter = org_ids_to_use
     elif org_ids_param:
         logger.info("Organization saved opportunities requested")
         _check_access(db_session, user, org_ids_param)
         org_ids_to_use = org_ids_param
+        org_ids_filter = org_ids_to_use
         include_user_saved_opps = False
     else:
         logger.info("User saved opportunities requested")
