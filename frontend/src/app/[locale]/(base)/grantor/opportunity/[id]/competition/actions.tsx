@@ -124,6 +124,13 @@ export async function updateCompetition(
       );
     }
 
+    if (apiResponse.status_code === 422) {
+      return {
+        errorMessage: t("validationErrors"),
+        validationErrors: formatValidationErrors(apiResponse.errors),
+      };
+    }
+
     // If the record was successfully created or updated,
     // then save the application instructions file (attachment)
     const pendingFileId = formData.get("pending-file-id") as string | null;
@@ -155,11 +162,11 @@ export async function updateCompetition(
         return { errorMessage: t("forbidden") };
       case 404:
         return { errorMessage: t("notFound") };
-      case 422:
-        return {
-          errorMessage: t("validationErrors"),
-          validationErrors: formatValidationErrors(error),
-        };
+      // case 422:
+      //   return {
+      //     errorMessage: t("validationErrors"),
+      //     validationErrors: formatValidationErrors(error),
+      //   };
       default:
         return { errorMessage: t("genericError") };
     }

@@ -123,39 +123,38 @@ describe("useSearchParamUpdater", () => {
 
   // UNCOMMENT ME AFTER MERGING https://github.com/HHS/simpler-grants-gov/pull/5380
 
-  // describe("removeQueryParamValue", () => {
-  //   it("does not call push if there is no value to update and no default value to use", () => {
-  //     mockSearchParams = new URLSearchParams("");
-  //     const { result } = renderHook(() => useSearchParamUpdater());
-  //     result.current.removeQueryParamValue("agency", "DOC");
-  //     expect(routerPush).not.toHaveBeenCalled();
-  //   });
-  //   it("calls push to remove value set in defaults if no param is present in URL", () => {
-  //     mockSearchParams = new URLSearchParams("");
-  //     const { result } = renderHook(() => useSearchParamUpdater());
-  //     result.current.removeQueryParamValue("status", "forecasted");
-  //     expect(routerPush).toHaveBeenCalledWith("/test?status=posted", {
-  //       scroll: false,
-  //     });
-  //   });
-  //   it("calls push to reset to defaults if removing value would result in empty query and defaults available", () => {
-  //     mockSearchParams = new URLSearchParams("/test?status=close");
-  //     const { result } = renderHook(() => useSearchParamUpdater());
-  //     result.current.removeQueryParamValue("status", "closed");
-  //     expect(routerPush).toHaveBeenCalledWith(
-  //       "/test?status=posted,forecasted",
-  //       { scroll: false },
-  //     );
-  //   });
-  //   it("calls push to remove specified query param value", () => {
-  //     mockSearchParams = new URLSearchParams("/test?agency=any,somethingElse");
-  //     const { result } = renderHook(() => useSearchParamUpdater());
-  //     result.current.removeQueryParamValue("agency", "any");
-  //     expect(routerPush).toHaveBeenCalledWith("/test?agency=somethingElse", {
-  //       scroll: false,
-  //     });
-  //   });
-  // });
+  describe("removeQueryParamValue", () => {
+    it("does not call push if there is no value to update and no default value to use", () => {
+      mockSearchParams = new URLSearchParams("");
+      const { result } = renderHook(() => useSearchParamUpdater());
+      result.current.removeQueryParamValue("agency", "DOC");
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+    it("calls push to remove value set in defaults if no param is present in URL", () => {
+      mockSearchParams = new URLSearchParams("");
+      const { result } = renderHook(() => useSearchParamUpdater());
+      result.current.removeQueryParamValue("status", "forecasted");
+      expect(mockPush).toHaveBeenCalledWith("/test?status=posted", {
+        scroll: false,
+      });
+    });
+    // it("calls push to reset to defaults if removing value would result in empty query and defaults available", () => {
+    //   mockSearchParams = new URLSearchParams("/test?status=close");
+    //   const { result } = renderHook(() => useSearchParamUpdater());
+    //   result.current.removeQueryParamValue("status", "closed");
+    //   expect(mockPush).toHaveBeenCalledWith("/test?status=posted,forecasted", {
+    //     scroll: false,
+    //   });
+    // });
+    // it("calls push to remove specified query param value", () => {
+    //   mockSearchParams = new URLSearchParams("/test?agency=any,somethingElse");
+    //   const { result } = renderHook(() => useSearchParamUpdater());
+    //   result.current.removeQueryParamValue("agency", "any");
+    //   expect(mockPush).toHaveBeenCalledWith("/test?agency=somethingElse", {
+    //     scroll: false,
+    //   });
+    // });
+  });
   describe("setQueryParam", () => {
     it("sets a query param", () => {
       mockSearchParams = new URLSearchParams("keepMe=cool&removeMe=uncool");
