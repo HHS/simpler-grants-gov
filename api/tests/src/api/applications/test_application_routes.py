@@ -153,6 +153,40 @@ def test_application_start_logging_enhancement(
     assert found_metadata, "Application metadata should be added to logs for New Relic dashboards"
 
 
+def test_application_start_audit_log_includes_application_id(
+    client, enable_factory_create, db_session, user, user_auth_token, caplog
+):
+    """The application_created audit log from the start endpoint carries the new application_id
+
+    This is the join key for the Apply funnel dashboards - it previously logged as null
+    because the audit record's foreign keys are not populated until flush.
+    """
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    caplog.set_level(logging.INFO)
+
+    response = client.post(
+        "/alpha/applications/start",
+        json={"competition_id": str(competition.competition_id)},
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    application_id = response.json["data"]["application_id"]
+
+    created_records = [
+        record
+        for record in caplog.records
+        if record.message == "Added application audit event"
+        and record.application_audit_event == ApplicationAuditEvent.APPLICATION_CREATED
+    ]
+    assert len(created_records) == 1
+    assert str(created_records[0].application_id) == application_id
+    assert created_records[0].user_id == user.user_id
+
+
 def test_application_start_null_opening_date(
     client, enable_factory_create, db_session, user, user_auth_token
 ):

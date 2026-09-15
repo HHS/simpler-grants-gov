@@ -1,7 +1,9 @@
+import logging
+
 import apiflask.exceptions
 import pytest
 
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from src.constants.static_role_values import APPLICATION_OWNER
 from src.db.models.user_models import ApplicationUserRole
 from src.services.applications.create_application import create_application
@@ -13,6 +15,31 @@ from tests.src.db.models.factories import (
     RoleFactory,
     UserFactory,
 )
+
+
+def test_create_application_audit_log_includes_application_id(
+    db_session, enable_factory_create, caplog
+):
+    """The application_created audit log carries the new application's ID, not null"""
+    caplog.set_level(logging.INFO)
+    user = UserFactory.create()
+    competition = CompetitionFactory.create()
+
+    application = create_application(
+        db_session=db_session,
+        user=user,
+        json_data={"competition_id": competition.competition_id},
+    )
+
+    created_records = [
+        record
+        for record in caplog.records
+        if record.message == "Added application audit event"
+        and record.application_audit_event == ApplicationAuditEvent.APPLICATION_CREATED
+    ]
+    assert len(created_records) == 1
+    assert created_records[0].application_id == application.application_id
+    assert created_records[0].user_id == user.user_id
 
 
 def test_create_application_assigns_owner_role_individual_application(
