@@ -53,3 +53,17 @@ variable "sso_admin_role_name" {
   # Override rather than inherit if this layer reaches another account.
   default = "AWSReservedSSO_AdministratorAccess_73856a8074e1d297"
 }
+
+variable "endpoint_public_access" {
+  # Terraform's helm/kubernetes providers must reach the API at plan time, which
+  # nothing outside the VPC can do while the endpoint is private-only (#11127).
+  type    = bool
+  default = false
+}
+
+variable "public_access_cidrs" {
+  # No default on purpose: these are environment-specific egress ranges, and a
+  # guessed value either locks out operators or opens the endpoint too widely.
+  type    = list(string)
+  default = []
+}

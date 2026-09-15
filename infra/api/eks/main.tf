@@ -111,6 +111,9 @@ module "eks" {
   vpc_id     = data.aws_vpc.network.id
   subnet_ids = data.aws_subnets.private.ids
 
+  endpoint_public_access = var.endpoint_public_access
+  public_access_cidrs    = var.public_access_cidrs
+
   node_instance_types = var.node_instance_types
   node_ami_type       = var.node_ami_type
   node_desired_size   = var.node_desired_size
