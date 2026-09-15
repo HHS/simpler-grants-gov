@@ -38,7 +38,12 @@ export const attachmentsToZipEntries = (
   }
   // skip attachments whose download url could not be resolved rather than breaking the whole zip
   const entries = attachments
-    .filter((attachment) => !!attachment.download_path)
+    .filter(
+      (
+        attachment,
+      ): attachment is OpportunityDocument & { download_path: string } =>
+        !!attachment.download_path,
+    )
     .reduce(
       (acc, attachment) => {
         const { zipEntries, claimedFilenames } = acc;
