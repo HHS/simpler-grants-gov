@@ -45,3 +45,15 @@ export const SF424B_OPPORTUNITY_DATA: PrintViewFormData = {
   expectedPrepopulatedFields: {},
   buildTestData: buildSF424BHappyPathTestData,
 };
+
+/**
+ * Fixed test data used specifically for submission ZIP/XML verification.
+ * These values are intentionally stable so the generated GrantApplication.xml
+ * can be verified against known values.
+ */
+export const SF424B_ZIP_EXPECTED_DATA = {
+  representative_name: "simpler-grants-e2e-tester@navapbc.com",
+  title: "ZIP TEST 001",
+  applicant_organization: "ZIP TEST ORG 001",
+  SubmittedDate: "2026-09-09",
+} as const;
