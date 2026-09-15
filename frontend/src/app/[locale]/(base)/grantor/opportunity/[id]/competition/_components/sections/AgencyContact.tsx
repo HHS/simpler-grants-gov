@@ -10,9 +10,13 @@ import {
 
 type AgencyContactProps = {
   contactInfo?: string | null;
+  readOnly?: boolean;
 };
 
-export function AgencyContact({ contactInfo }: AgencyContactProps) {
+export function AgencyContact({
+  contactInfo,
+  readOnly = false,
+}: AgencyContactProps) {
   const t = useTranslations("OpportunityCompetition.sectionAgencyContact");
   const contactValues = contactInfo?.split(" | ") ?? [];
   const [
@@ -212,6 +216,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
         <div className="tablet:grid-col">
           <CommonCharacterCount
             isTextArea={false}
+            disabled={readOnly}
             labelText={t("fullName")}
             description=""
             fieldId="contact_name"
@@ -230,6 +235,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
         <div className="tablet:grid-col">
           <CommonCharacterCount
             isTextArea={false}
+            disabled={readOnly}
             labelText={t("personTitle")}
             description=""
             fieldId="contact_title"
@@ -248,6 +254,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
         <div className="tablet:grid-col">
           <CommonCharacterCount
             isTextArea={false}
+            disabled={readOnly}
             labelText={t("emailAddress")}
             description={t("emailAddressHint")}
             fieldId="contact_email"
@@ -265,6 +272,7 @@ export function AgencyContact({ contactInfo }: AgencyContactProps) {
         {/* Phone number */}
         <div className="tablet:grid-col">
           <CommonTextInput
+            disabled={readOnly}
             fieldId="contact_phone"
             labelText={t("phoneNumber")}
             description={t("phoneNumberHint")}
