@@ -58,11 +58,24 @@ resource "aws_eks_cluster" "main" {
   version  = var.kubernetes_version
   role_arn = aws_iam_role.cluster.arn
 
+  # EKS defaults publicAccessCidrs to 0.0.0.0/0, so enabling public access with
+  # an empty list would quietly open the endpoint to the internet.
+  lifecycle {
+    precondition {
+      condition     = !var.endpoint_public_access || length(var.public_access_cidrs) > 0
+      error_message = "endpoint_public_access requires a non-empty public_access_cidrs."
+    }
+  }
+
   vpc_config {
     subnet_ids              = var.subnet_ids
     security_group_ids      = [aws_security_group.cluster.id]
     endpoint_private_access = true
     endpoint_public_access  = var.endpoint_public_access
+
+    # Only meaningful when endpoint_public_access is true; EKS rejects a
+    # non-default value when public access is off.
+    public_access_cidrs = var.endpoint_public_access ? var.public_access_cidrs : null
   }
 
   # API_AND_CONFIG_MAP rather than API so that access entries manage
