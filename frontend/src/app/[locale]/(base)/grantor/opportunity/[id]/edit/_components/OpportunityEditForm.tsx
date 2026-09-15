@@ -124,12 +124,26 @@ export default function OpportunityEditForm({
     validationErrors: {},
   });
 
-  const validationErrors: OpportunityEditValidationErrors | undefined =
-    formState.validationErrors;
-
   //--- Validations for Award Minimum, Award Maximum and Total Program Funding ---
   const [frontendErrors, setFrontendErrors] =
     useState<OpportunityEditValidationErrors>({});
+
+  useEffect(() => {
+    if (formState.newOpportunitySummaryId) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCurrentSummaryId(formState.newOpportunitySummaryId);
+    }
+  }, [formState.newOpportunitySummaryId]);
+
+  useEffect(() => {
+    if (Object.keys(formState.validationErrors || {}).length) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, [formState.validationErrors]);
 
   function setSingleFrontendError<
     K extends keyof OpportunityEditValidationErrors,
@@ -203,20 +217,12 @@ export default function OpportunityEditForm({
   function getFieldError(
     fieldName: keyof OpportunityEditValidationErrors,
   ): string | undefined {
-    let fieldErrors = validationErrors?.[fieldName];
+    let fieldErrors = formState.validationErrors?.[fieldName];
     if (!fieldErrors) {
       fieldErrors = frontendErrors?.[fieldName];
     }
     return fieldErrors?.join(" ");
   }
-
-  useEffect(() => {
-    if (formState.newOpportunitySummaryId) {
-      // TODO #9633
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCurrentSummaryId(formState.newOpportunitySummaryId);
-    }
-  }, [formState.newOpportunitySummaryId]);
 
   const eligibilityGroups = ELIGIBILITY_OPTIONS.reduce(
     (acc, { label, value }) => {

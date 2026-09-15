@@ -17,7 +17,7 @@ import {
 import { UploadFileMetadata } from "src/types/fileUploadTypes";
 
 import { useTranslations } from "next-intl";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Button,
@@ -67,10 +67,17 @@ export function CompetitionForm({
   );
 
   // ===== Server side action to save data =====
-  const [formState, setFormState] = useState<CompetitionActionState | null>(
-    null,
-  );
+  const [formState, setFormState] = useState<CompetitionActionState>({});
   const [isPending, setIsPending] = useState(false);
+
+  useEffect(() => {
+    if (Object.keys(formState.validationErrors || {}).length) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, [formState.validationErrors]);
 
   const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -100,7 +107,7 @@ export function CompetitionForm({
       <input type="hidden" name="opportunityId" value={_opportunityId} />
       <input type="hidden" name="competitionId" value={_competitionId} />
 
-      {formState?.errorMessage ? (
+      {formState.errorMessage ? (
         <div className="margin-top-2">
           <Alert
             type="error"
@@ -110,7 +117,7 @@ export function CompetitionForm({
             <span className="display-block margin-top-1 margin-bottom-1">
               {t("alerts.validationErrorBody")}
             </span>
-            {formState?.validationErrors?.map((error, index) => (
+            {formState.validationErrors?.map((error, index) => (
               <span key={index} className="display-block">
                 {error}
               </span>
