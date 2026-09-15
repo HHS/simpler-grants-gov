@@ -51,6 +51,10 @@ resource "aws_eks_node_group" "bootstrap" {
   subnet_ids      = var.subnet_ids
   instance_types  = var.node_instance_types
 
+  # Must match the architecture of var.node_instance_types. EKS defaults to
+  # AL2023_x86_64_STANDARD, which the API rejects against ARM instance types.
+  ami_type = var.node_ami_type
+
   scaling_config {
     desired_size = var.node_desired_size
     min_size     = var.node_min_size

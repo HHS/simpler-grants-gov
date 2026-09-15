@@ -18,6 +18,13 @@ variable "node_instance_types" {
   default     = ["t4g.medium"]
 }
 
+variable "node_ami_type" {
+  # Must match node_instance_types' architecture; t4g is Graviton (ARM).
+  # EKS otherwise defaults to x86_64 and the API rejects the mismatch.
+  type    = string
+  default = "AL2023_ARM_64_STANDARD"
+}
+
 variable "node_desired_size" {
   type        = number
   description = "Desired size of the bootstrap node group. Two nodes so the add-ons survive losing one."

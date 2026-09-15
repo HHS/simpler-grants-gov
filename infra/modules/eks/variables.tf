@@ -61,3 +61,8 @@ variable "cluster_admin_role_arns" {
   type        = list(string)
   default     = []
 }
+
+variable "node_ami_type" {
+  description = "EKS AMI type. Must match the architecture of node_instance_types (ARM_64 for Graviton, x86_64 otherwise)."
+  type        = string
+}

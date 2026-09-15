@@ -112,6 +112,7 @@ module "eks" {
   subnet_ids = data.aws_subnets.private.ids
 
   node_instance_types = var.node_instance_types
+  node_ami_type       = var.node_ami_type
   node_desired_size   = var.node_desired_size
   node_min_size       = var.node_min_size
   node_max_size       = var.node_max_size
