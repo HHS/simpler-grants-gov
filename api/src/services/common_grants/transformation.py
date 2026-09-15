@@ -336,8 +336,12 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
             "post_date": v1_opportunity.summary.post_date,
             "close_date": v1_opportunity.summary.close_date,
             "estimated_total_program_funding": v1_opportunity.summary.estimated_total_program_funding,
+            "expected_number_of_awards": getattr(
+                v1_opportunity.summary, "expected_number_of_awards", None
+            ),
             "award_ceiling": v1_opportunity.summary.award_ceiling,
             "award_floor": v1_opportunity.summary.award_floor,
+            "funding_instruments": list(getattr(v1_opportunity.summary, "funding_instruments", [])),
             "additional_info_url": v1_opportunity.summary.additional_info_url,
             "additional_info_url_description": v1_opportunity.summary.additional_info_url_description,
             "agency_contact_description": v1_opportunity.summary.agency_contact_description,
@@ -442,6 +446,7 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
                 totalAmountAvailable=total_amount_money,
                 maxAwardAmount=max_award_money,
                 minAwardAmount=min_award_money,
+                estimatedAwardCount=summary.get("expected_number_of_awards"),
             ),
             source=validate_url(
                 summary.get("additional_info_url"),
@@ -591,6 +596,21 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
         )
         if field:
             custom_fields["federalFundingSource"] = field
+
+    if summary:
+        funding_instruments = summary.get("funding_instruments")
+        if funding_instruments:
+            field = validate_custom_field(
+                CustomField,
+                opportunity_id=opportunity_id,
+                name="federalFundingInstruments",
+                fieldType="array",
+                schema="https://commongrants.org/custom-fields/federalFundingInstruments/",
+                value=funding_instruments,
+                description="Federal funding instruments available for this opportunity",
+            )
+            if field:
+                custom_fields["federalFundingInstruments"] = field
 
     agency = opp_data.get("agency_code")
     if agency is not None:
