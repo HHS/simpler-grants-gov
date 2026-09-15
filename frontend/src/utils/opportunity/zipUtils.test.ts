@@ -99,4 +99,20 @@ describe("attachmentsToZipEntries", () => {
       ["exec.bat", expect.any(FakeHttpReader)],
     ]);
   });
+  it("skips attachments with an unresolvable download_path instead of breaking the whole zip", () => {
+    expect(
+      attachmentsToZipEntries([
+        {
+          file_name: "good.txt",
+          download_path: "/good.txt",
+          updated_at: "today",
+        },
+        {
+          file_name: "unavailable.txt",
+          download_path: null,
+          updated_at: "today",
+        },
+      ]),
+    ).toEqual([["good.txt", expect.any(FakeHttpReader)]]);
+  });
 });

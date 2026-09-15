@@ -36,28 +36,31 @@ export const attachmentsToZipEntries = (
   if (!attachments || !attachments.length) {
     return [];
   }
-  const entries = attachments.reduce(
-    (acc, attachment) => {
-      const { zipEntries, claimedFilenames } = acc;
-      const zipFilename = deduplicateFilename(
-        attachment.file_name,
-        claimedFilenames,
-      );
-      claimedFilenames[attachment.file_name] = claimedFilenames[
-        attachment.file_name
-      ]
-        ? claimedFilenames[attachment.file_name] + 1
-        : 1;
-      zipEntries.push([
-        zipFilename,
-        new zip.HttpReader(attachment.download_path),
-      ]);
-      return { zipEntries, claimedFilenames };
-    },
-    { zipEntries: [], claimedFilenames: {} } as {
-      zipEntries: ZipEntry[];
-      claimedFilenames: { [key: string]: number };
-    },
-  );
+  // skip attachments whose download url could not be resolved rather than breaking the whole zip
+  const entries = attachments
+    .filter((attachment) => !!attachment.download_path)
+    .reduce(
+      (acc, attachment) => {
+        const { zipEntries, claimedFilenames } = acc;
+        const zipFilename = deduplicateFilename(
+          attachment.file_name,
+          claimedFilenames,
+        );
+        claimedFilenames[attachment.file_name] = claimedFilenames[
+          attachment.file_name
+        ]
+          ? claimedFilenames[attachment.file_name] + 1
+          : 1;
+        zipEntries.push([
+          zipFilename,
+          new zip.HttpReader(attachment.download_path),
+        ]);
+        return { zipEntries, claimedFilenames };
+      },
+      { zipEntries: [], claimedFilenames: {} } as {
+        zipEntries: ZipEntry[];
+        claimedFilenames: { [key: string]: number };
+      },
+    );
   return entries.zipEntries;
 };
