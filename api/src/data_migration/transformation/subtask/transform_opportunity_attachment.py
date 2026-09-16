@@ -1,3 +1,4 @@
+import ctypes
 import logging
 import uuid
 from collections.abc import Sequence
@@ -17,6 +18,15 @@ from src.task.task import Task
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+# Force large allocations (attachment blobs up to ~90MB) through mmap so they're
+# actually returned to the OS on free - glibc's default dynamic threshold otherwise
+# permanently grows the heap after the first big free, OOMing this task over time.
+try:
+    _MALLOC_MMAP_THRESHOLD = -3
+    ctypes.CDLL(None).mallopt(ctypes.c_int(_MALLOC_MMAP_THRESHOLD), ctypes.c_int(1024 * 1024))
+except OSError, AttributeError:
+    pass
 
 
 class TransformOpportunityAttachmentConfig(PydanticBaseEnvConfig):
