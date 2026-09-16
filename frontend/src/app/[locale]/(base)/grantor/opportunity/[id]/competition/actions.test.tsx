@@ -6,7 +6,10 @@ import {
   saveCompetitionInstructions,
   updateCompetitionForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
-import { CompetitionFormsSubmitApi } from "src/types/competitionsResponseTypes";
+import {
+  CompetitionFormsSubmitApi,
+  CompetitionSaveApiResponse,
+} from "src/types/competitionsResponseTypes";
 
 import { competitionFormAction, updateCompetition } from "./actions";
 
@@ -279,23 +282,24 @@ describe("updateCompetition", () => {
   it("maps 422 to validationErrors with formatted error message", async () => {
     const formData = buildValidFormData();
 
-    const apiError = new ApiRequestError(
-      "Validation error",
-      "ValidationError",
-      422,
-      {
-        field: "open_to_applicants",
-        message: "Shorter than minimum length 1.",
-      },
-    );
+    const mockResponse = {
+      status_code: 422,
+      errors: [
+        {
+          field: "open_to_applicants",
+          message: "Shorter than minimum length 1.",
+        },
+      ],
+    } as CompetitionSaveApiResponse;
 
-    mockUpdateCompetitionForGrantor.mockRejectedValue(apiError);
+    mockUpdateCompetitionForGrantor.mockResolvedValue(mockResponse);
 
     const result = await updateCompetition(formData, mockRequiredForms);
 
     expect(result).toEqual({
-      errorMessage: "validationErrors",
-      validationErrors: ["open_to_applicants: Shorter than minimum length 1."],
+      validationErrors: {
+        open_to_applicants: ["Shorter than minimum length 1."],
+      },
     });
   });
 

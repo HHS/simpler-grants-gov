@@ -160,11 +160,6 @@ export async function updateCompetition(
         return { errorMessage: t("forbidden") };
       case 404:
         return { errorMessage: t("notFound") };
-      // case 422:
-      //   return {
-      //     errorMessage: t("validationErrors"),
-      //     validationErrors: formatValidationErrors(error),
-      //   };
       default:
         return { errorMessage: t("genericError") };
     }

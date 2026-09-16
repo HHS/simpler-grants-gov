@@ -2,12 +2,10 @@ import { RJSFSchema } from "@rjsf/utils";
 import { APIResponse } from "src/types/apiResponseTypes";
 import { UiSchema } from "src/types/applyForm/types";
 
-import { iso8601Date, RegexMatchedString } from "./generalTypes";
-
 export type FormInstruction = {
   // created_at: RegexMatchedString<typeof iso8601Date>;
   // updated_at: RegexMatchedString<typeof iso8601Date>;
-  created_at: string;
+  created_at: string; // simplified these types since I'm not sure this regex thing is actually working correctly
   updated_at: string;
   download_path: string;
   file_name: string;
