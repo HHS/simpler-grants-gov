@@ -1,4 +1,5 @@
 import { JSONSchema7 } from "json-schema";
+import { FormType } from "src/types/allFormsResponseTypes";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
@@ -11,6 +12,8 @@ import {
   AwardRecommendationStatus,
   AwardRecommendationSubmission,
 } from "src/types/awardRecommendationTypes";
+import { Competition } from "src/types/competitionsResponseTypes";
+import { FormDetail, FormInstruction } from "src/types/formResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -908,4 +911,72 @@ export const fakeValidationError: FormattedFormValidationWarning = {
   message: "'field_one' is a required property",
   type: "required",
   value: null,
+};
+
+export const fakeFormInstruction: FormInstruction = {
+  created_at: "1999-11-11",
+  download_path: "a download path",
+  file_name: "a file name",
+  updated_at: "1999-11-11",
+};
+
+export const fakeForm: FormDetail = {
+  form_instruction: fakeFormInstruction,
+  form_name: "fake form",
+  form_ui_schema: [],
+  form_id: "123e4567-e89b-12d3-a456-426614174000",
+  form_json_schema: {
+    properties: {
+      ApplicationNumber: {
+        maxLength: 120,
+        minLength: 1,
+        title: "Application number",
+        type: "number",
+      },
+      Date: {
+        format: "date",
+        title: "Date of application ",
+        type: "string",
+      },
+      Description: {
+        maxLength: 15,
+        minLength: 0,
+        title: "Description for application",
+        type: "string",
+      },
+      Title: {
+        maxLength: 60,
+        minLength: 1,
+        title: "Title",
+        type: "string",
+      },
+    },
+    title: "Test form for testing",
+    type: "object",
+  },
+};
+
+export const fakeCompetitionWithOpportunity: Competition = {
+  ...fakeCompetition,
+  opportunity_id: 1,
+  open_to_applicants: [],
+  competition_forms: [
+    {
+      form: fakeForm,
+      is_required: true,
+    },
+  ],
+  expected_application_count: 1,
+  grace_period: 0,
+  opportunity: mockOpportunity,
+};
+export const fakeFormType: FormType = {
+  form_id: "1",
+  name: "form name",
+  short_name: "really short form name",
+  current_version: {
+    legacy_form_version: "1",
+    major_version: 1,
+    minor_version: 1,
+  },
 };

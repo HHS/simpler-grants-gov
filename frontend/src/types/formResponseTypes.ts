@@ -5,10 +5,12 @@ import { UiSchema } from "src/types/applyForm/types";
 import { iso8601Date, RegexMatchedString } from "./generalTypes";
 
 export type FormInstruction = {
-  created_at: RegexMatchedString<typeof iso8601Date>;
+  // created_at: RegexMatchedString<typeof iso8601Date>;
+  // updated_at: RegexMatchedString<typeof iso8601Date>;
+  created_at: string;
+  updated_at: string;
   download_path: string;
   file_name: string;
-  updated_at: RegexMatchedString<typeof iso8601Date>;
 };
 
 export interface FormDetail {
