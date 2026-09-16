@@ -22,7 +22,6 @@ export default function RouteFocusManager({
     const mainContentElement = document.getElementById("main-content");
 
     if (mainContentElement instanceof HTMLElement) {
-      // mainContentElement.focus();
       mainContentElement.focus({ preventScroll: true });
     }
   }, [pathname]);
