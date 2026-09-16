@@ -67,3 +67,9 @@ variable "public_access_cidrs" {
   type    = list(string)
   default = []
 }
+
+variable "enable_karpenter" {
+  # AWS-side prerequisites only (#11128); the Helm install is a separate step.
+  type    = bool
+  default = false
+}
