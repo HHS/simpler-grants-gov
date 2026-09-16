@@ -51,9 +51,21 @@ export const SF424B_OPPORTUNITY_DATA: PrintViewFormData = {
  * These values are intentionally stable so the generated GrantApplication.xml
  * can be verified against known values.
  */
-export const SF424B_ZIP_EXPECTED_DATA = {
-  representative_name: "simpler-grants-e2e-tester@navapbc.com",
-  title: "ZIP TEST 001",
-  applicant_organization: "ZIP TEST ORG 001",
-  SubmittedDate: "2026-09-09",
+export const SF424B_ZIP_ALL_FIELDS_DATA = {
+  representative_name: {
+    element: "SF424B:RepresentativeName",
+    value: "simpler-grants-e2e-tester@navapbc.com",
+  },
+  title: {
+    element: "SF424B:RepresentativeTitle",
+    value: "ZIP TEST 001",
+  },
+  applicant_organization: {
+    element: "SF424B:ApplicantOrganizationName",
+    value: "ZIP TEST ORG 001",
+  },
+  SubmittedDate: {
+    element: "SF424B:SubmittedDate",
+    value: "2026-09-09",
+  },
 } as const;

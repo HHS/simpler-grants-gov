@@ -11,14 +11,13 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import { SF424B_ZIP_EXPECTED_DATA } from "tests/e2e/apply/fixtures/sf424b-data";
+import { SF424B_ZIP_ALL_FIELDS_DATA } from "tests/e2e/apply/fixtures/sf424b-data";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import {
-  assertXmlContains,
+  assertXmlContainsFields,
   downloadAndUnzipSubmission,
-  waitForSubmissionZipReady,
 } from "tests/e2e/utils/submission/submission-zip-utils";
 
 const { APPLY, CORE_REGRESSION, GRANTEE } = VALID_TAGS;
@@ -49,18 +48,12 @@ test(
     await page.waitForLoadState("domcontentloaded");
 
     // --- Check if the zip is downloadable, then download and unzip it ---
-    await waitForSubmissionZipReady(page, APPLICATION_URL);
     const contents = await downloadAndUnzipSubmission(page);
 
     // --- Verify GrantApplication.xml contains the entered field values ---
     // SF424B element names and namespace prefix are based on the form's _xml_config.
     //   title                  -> SF424B:RepresentativeTitle (via authorized_representative_wrapper)
     //   applicant_organization -> SF424B:ApplicantOrganizationName
-    assertXmlContains(contents, [
-      `<SF424B:RepresentativeName>${SF424B_ZIP_EXPECTED_DATA.representative_name}</SF424B:RepresentativeName>`,
-      `<SF424B:RepresentativeTitle>${SF424B_ZIP_EXPECTED_DATA.title}</SF424B:RepresentativeTitle>`,
-      `<SF424B:ApplicantOrganizationName>${SF424B_ZIP_EXPECTED_DATA.applicant_organization}</SF424B:ApplicantOrganizationName>`,
-      `<SF424B:SubmittedDate>${SF424B_ZIP_EXPECTED_DATA.SubmittedDate}</SF424B:SubmittedDate>`,
-    ]);
+    assertXmlContainsFields(contents, SF424B_ZIP_ALL_FIELDS_DATA);
   },
 );

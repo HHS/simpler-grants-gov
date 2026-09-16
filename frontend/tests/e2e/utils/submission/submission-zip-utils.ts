@@ -41,42 +41,14 @@ export interface ZipContents {
 /**
  * Waits for the application submission zip to become downloadable.
  *
- * The download button only renders once `application_status` reaches
- * ACCEPTED (see InformationCard.tsx's ApplicationSubmissionDownload). Right
- * after submitting, status is SUBMITTED and a different element renders
- * instead (`application-submission-download-message`, a "preparing your
- * download" message) - there is no button to wait on yet. That transition
- * happens via an async backend job with no client-side polling, so this
- * reloads the page on an interval rather than relying on Playwright's
- * default auto-retry, which only re-checks the already-loaded DOM.
+ * Reloads the application page at a regular interval until the submission
+ * download button is available or the timeout is reached.
  *
  * @param page Playwright Page object, already on the application page
- * @param applicationUrl The application page URL to reload while polling
- * @param options.timeoutMs Overall time budget before giving up (default 3 min)
- * @param options.pollIntervalMs Time between reloads (default 10s)
  */
-export async function waitForSubmissionZipReady(
-  page: Page,
-  applicationUrl: string,
-  options: { timeoutMs?: number; pollIntervalMs?: number } = {},
-): Promise<void> {
-  const { timeoutMs = 180_000, pollIntervalMs = 10_000 } = options;
+export async function waitForSubmissionZipReady(page: Page): Promise<void> {
   const downloadButton = page.getByTestId("application-submission-download");
-
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if (await downloadButton.isVisible().catch(() => false)) {
-      await expect(downloadButton).toBeEnabled({ timeout: 10_000 });
-      return;
-    }
-    await page.waitForTimeout(pollIntervalMs);
-    await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
-  }
-
-  throw new Error(
-    `Submission zip was not ready (application-submission-download button never appeared) ` +
-      `within ${timeoutMs}ms. The application may still be SUBMITTED rather than ACCEPTED.`,
-  );
+  await expect(downloadButton).toBeEnabled({ timeout: 10_000 });
 }
 
 // ---------------------------------------------------------------------------
@@ -84,19 +56,18 @@ export async function waitForSubmissionZipReady(
 // ---------------------------------------------------------------------------
 
 /**
- * Clicks the (already-visible, already-enabled) submission download button,
+ * Waits for the submission zip to be ready, clicks the download button,
  * waits for the browser download event, saves the file to a temp path,
  * unzips it in memory via @zip.js/zip.js, and returns a map of
  * file name → bytes for every entry in the zip.
- *
- * Call `waitForSubmissionZipReady` first - this does not wait for the
- * button to appear, only for the download it triggers.
  *
  * @param page Playwright Page object
  */
 export async function downloadAndUnzipSubmission(
   page: Page,
 ): Promise<ZipContents> {
+  await waitForSubmissionZipReady(page);
+
   const downloadButton = page.getByTestId("application-submission-download");
 
   const downloadPromise = page.waitForEvent("download");
@@ -145,11 +116,12 @@ export async function downloadAndUnzipSubmission(
  * @param contents ZipContents returned by downloadAndUnzipSubmission
  * @param expectedStrings Strings that must appear in the XML text
  */
-export function assertXmlContains(
+export function assertXmlContainsFields(
   contents: ZipContents,
-  expectedStrings: string[],
+  expectedFields: Record<string, { element: string; value: string }>,
 ): void {
   const xmlBytes = contents.files.get("GrantApplication.xml");
+
   if (!xmlBytes) {
     const available = [...contents.files.keys()].join(", ");
     throw new Error(
@@ -159,10 +131,10 @@ export function assertXmlContains(
 
   const xmlText = Buffer.from(xmlBytes).toString("utf-8");
 
-  for (const expected of expectedStrings) {
+  for (const { element, value } of Object.values(expectedFields)) {
     expect(
       xmlText,
-      `Expected GrantApplication.xml to contain: "${expected}"`,
-    ).toContain(expected);
+      `Expected GrantApplication.xml to contain <${element}>${value}</${element}>`,
+    ).toContain(`<${element}>${value}</${element}>`);
   }
 }
