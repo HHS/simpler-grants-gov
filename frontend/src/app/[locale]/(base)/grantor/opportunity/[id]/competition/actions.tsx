@@ -7,12 +7,12 @@ import {
   saveCompetitionInstructions,
   updateCompetitionForGrantor,
 } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
-import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import {
   ApplicantTypes,
   CompetitionFormsSubmitApi,
   CompetitionSaveRequest,
 } from "src/types/competitionsResponseTypes";
+import { mapApiValidationErrors } from "src/utils/validationUtils";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
@@ -20,9 +20,19 @@ import { redirect } from "next/navigation";
 export type CompetitionActionState = {
   errorMessage?: string;
   successMessage?: string;
-  validationErrors?: string[];
+  validationErrors?: { [field: string]: string[] };
   newCompetitionId?: string;
 };
+
+const COMPETITION_FORM_FIELDS = [
+  "competition_title",
+  "opening_date",
+  "closing_date",
+  "grace_period",
+  "public_competition_id",
+  "contact_info",
+  "open_to_applicants",
+] as const;
 
 // Make sure to return null in cases of empty string
 function getFieldValue(formData: FormData, fieldName: string) {
@@ -77,23 +87,6 @@ function buildRequestBody(formData: FormData) {
   return requestBody;
 }
 
-export interface FrontendErrorCause {
-  // The details area actually under the cause
-  details: FrontendErrorDetails;
-}
-
-function formatValidationErrors(error: unknown) {
-  const formatedErrors: string[] = [];
-  if (error instanceof ApiRequestError) {
-    const cause = error.cause as FrontendErrorCause;
-    const details = cause.details;
-    // NOTE: currently this only returning one error at a time (no list)
-    const errorMessage = details.field + ": " + details.message;
-    return [errorMessage];
-  }
-  return formatedErrors;
-}
-
 export async function updateCompetition(
   formData: FormData,
   requiredForms: CompetitionFormsSubmitApi,
@@ -125,9 +118,14 @@ export async function updateCompetition(
     }
 
     if (apiResponse.status_code === 422) {
+      const { validationErrors, errorMessage } = mapApiValidationErrors(
+        apiResponse,
+        t("validationErrors"),
+        COMPETITION_FORM_FIELDS,
+      );
       return {
-        errorMessage: t("validationErrors"),
-        validationErrors: formatValidationErrors(apiResponse.errors),
+        errorMessage,
+        validationErrors,
       };
     }
 
@@ -180,7 +178,11 @@ export async function competitionFormAction(
 ): Promise<CompetitionActionState> {
   // 1. Save the form; if there are API errors, display them
   const saveResult = await updateCompetition(formData, requiredForms);
-  if (saveResult.errorMessage) {
+  if (
+    saveResult.errorMessage ||
+    (saveResult.validationErrors &&
+      Object.keys(saveResult.validationErrors).length)
+  ) {
     return saveResult;
   }
 

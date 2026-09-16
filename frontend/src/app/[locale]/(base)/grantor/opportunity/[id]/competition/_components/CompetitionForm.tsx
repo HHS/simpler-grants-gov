@@ -71,7 +71,10 @@ export function CompetitionForm({
   const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
-    if (Object.keys(formState.validationErrors || {}).length) {
+    if (
+      formState.validationErrors &&
+      Object.keys(formState.validationErrors).length
+    ) {
       window.scrollTo({
         top: 0,
         behavior: "smooth",
@@ -110,15 +113,29 @@ export function CompetitionForm({
       {formState.errorMessage ? (
         <div className="margin-top-2">
           <Alert
-            type="error"
+            type="warning"
             heading={formState.errorMessage}
+            headingLevel="h3"
+            validation
+          />
+        </div>
+      ) : null}
+
+      {formState.validationErrors &&
+      Object.keys(formState.validationErrors).length > 0 ? (
+        <div className="margin-top-2">
+          <Alert
+            type="error"
+            heading={t("alerts.validationErrors")}
             headingLevel="h3"
           >
             <span className="display-block margin-top-1 margin-bottom-1">
               {t("alerts.validationErrorBody")}
             </span>
-            {formState.validationErrors?.map((error, index) => (
-              <span key={index} className="display-block">
+            {Array.from(
+              new Set(Object.values(formState.validationErrors).flat()),
+            ).map((error, i) => (
+              <span key={i} className="display-block">
                 {error}
               </span>
             ))}
