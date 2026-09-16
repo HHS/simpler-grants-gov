@@ -36,36 +36,35 @@ export const attachmentsToZipEntries = (
   if (!attachments || !attachments.length) {
     return [];
   }
-  // skip attachments whose download url could not be resolved rather than breaking the whole zip
-  const entries = attachments
-    .filter(
-      (
-        attachment,
-      ): attachment is OpportunityDocument & { download_path: string } =>
-        !!attachment.download_path,
-    )
-    .reduce(
-      (acc, attachment) => {
-        const { zipEntries, claimedFilenames } = acc;
-        const zipFilename = deduplicateFilename(
-          attachment.file_name,
-          claimedFilenames,
+  // A zip missing a file would misrepresent what was actually submitted/published,
+  // so refuse to build it at all rather than silently omitting the broken attachment.
+  const entries = attachments.reduce(
+    (acc, attachment) => {
+      if (!attachment.download_path) {
+        throw new Error(
+          `Attachment "${attachment.file_name}" has no resolvable download_path`,
         );
-        claimedFilenames[attachment.file_name] = claimedFilenames[
-          attachment.file_name
-        ]
-          ? claimedFilenames[attachment.file_name] + 1
-          : 1;
-        zipEntries.push([
-          zipFilename,
-          new zip.HttpReader(attachment.download_path),
-        ]);
-        return { zipEntries, claimedFilenames };
-      },
-      { zipEntries: [], claimedFilenames: {} } as {
-        zipEntries: ZipEntry[];
-        claimedFilenames: { [key: string]: number };
-      },
-    );
+      }
+      const { zipEntries, claimedFilenames } = acc;
+      const zipFilename = deduplicateFilename(
+        attachment.file_name,
+        claimedFilenames,
+      );
+      claimedFilenames[attachment.file_name] = claimedFilenames[
+        attachment.file_name
+      ]
+        ? claimedFilenames[attachment.file_name] + 1
+        : 1;
+      zipEntries.push([
+        zipFilename,
+        new zip.HttpReader(attachment.download_path),
+      ]);
+      return { zipEntries, claimedFilenames };
+    },
+    { zipEntries: [], claimedFilenames: {} } as {
+      zipEntries: ZipEntry[];
+      claimedFilenames: { [key: string]: number };
+    },
+  );
   return entries.zipEntries;
 };
