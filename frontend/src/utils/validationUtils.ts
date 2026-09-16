@@ -34,6 +34,6 @@ export function mapApiValidationErrors(
         ? unmappedMessages.join(" ")
         : hasFieldErrors
           ? undefined
-          : response.message || genericMessage,
+          : response.message, // note that this used to fall back to a generic message, but that resulted in showing an error when there was none
   };
 }
