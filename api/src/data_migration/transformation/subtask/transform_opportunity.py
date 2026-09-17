@@ -73,6 +73,7 @@ class TransformOpportunity(AbstractTransformSubTask):
         logger.info("Processing opportunity", extra=extra)
 
         if source_opportunity.is_deleted:
+            logger.info("Queuing opportunity for search index removal", extra=extra)
             self._handle_delete(
                 source_opportunity,
                 target_opportunity,
