@@ -80,7 +80,6 @@ module "dev_config" {
     # Workflow
     WORKFLOW_SERVICE_INTERNAL_USER_ID = "5711f79c-2445-47c7-bbcb-c8caa293ffad"
 
-    # Job lock — only enabled in dev/staging while we validate it
     ENABLE_JOB_LOCK = "true"
   }
   # Enables ECS Exec access for debugging or jump access.

@@ -105,6 +105,9 @@ module "prod_config" {
 
     # Virus scanning endpoints
     ENABLE_FILE_UPLOAD_ENDPOINTS = 1
+
+    # Job lock — enabled in prod alongside incremental search sync wired into load-transform
+    ENABLE_JOB_LOCK = "true"
   }
   instance_cpu    = 2048
   instance_memory = 4096

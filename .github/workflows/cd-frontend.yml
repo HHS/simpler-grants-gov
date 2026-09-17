@@ -85,8 +85,20 @@ jobs:
       environment: ${{ matrix.envs }}
       version: ${{ inputs.version || github.ref }}
 
+  e2e-test-staging:
+    name: E2E Staging (post-deploy)
+    needs: [deploy]
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    uses: ./.github/workflows/e2e-staging.yml
+    secrets: inherit
+    with:
+      version: ${{ inputs.version || github.ref }}
+      target: staging
+      playwright_tags: "@smoke|@core-regression"
+
   send-slack-notification:
     if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
-    needs: [frontend-checks, vulnerability-scans, deploy]
+    needs: [frontend-checks, vulnerability-scans, deploy, e2e-test-staging]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
+    

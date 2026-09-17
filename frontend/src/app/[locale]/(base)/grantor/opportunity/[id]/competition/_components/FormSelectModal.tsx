@@ -18,6 +18,9 @@ import {
 import { SimplerModal } from "src/components/core/SimplerModal";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
 
+const MODAL_ID = "form-select-modal";
+const DESCRIPTION_ID = `${MODAL_ID}-description`;
+
 const checkboxStyle: CSSProperties = { width: 20, height: 20 };
 
 const resetTableForms = (
@@ -102,13 +105,16 @@ export const FormSelectModal = ({
   };
   return (
     <SimplerModal
-      modalId={"piv-required-modal"}
+      modalId={MODAL_ID}
       modalRef={formModalRef}
       titleText={t("title")}
+      descriptionId={DESCRIPTION_ID}
       onClose={handleCleanup}
       className="text-wrap maxw-tablet-lg"
     >
-      <div className="form-modal-header">{t("heading")}</div>
+      <div id={DESCRIPTION_ID} className="form-modal-header">
+        {t("heading")}
+      </div>
       <div style={{ padding: 0, overflowY: "scroll", height: "60vh" }}>
         <GridContainer>
           <Grid row className="form-modal-select-all">
