@@ -13,7 +13,11 @@ from src.data_migration.transformation.subtask.abstract_transform_subtask import
 )
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition
-from src.db.models.opportunity_models import Opportunity, OpportunityAttachment
+from src.db.models.opportunity_models import (
+    Opportunity,
+    OpportunityAttachment,
+    OpportunityIndexDeleteQueue,
+)
 from src.db.models.staging.opportunity import Topportunity
 from src.services.competition_alpha.competition_instruction_util import (
     get_s3_competition_instruction_path,
@@ -73,7 +77,14 @@ class TransformOpportunity(AbstractTransformSubTask):
         logger.info("Processing opportunity", extra=extra)
 
         if source_opportunity.is_deleted:
-            logger.info("Queuing opportunity for search index removal", extra=extra)
+            # Queue the opportunity for removal from the search index before the DB row
+            # is deleted.
+            if target_opportunity is not None:
+                logger.info("Queuing opportunity for search index removal", extra=extra)
+                self.db_session.add(
+                    OpportunityIndexDeleteQueue(opportunity_id=target_opportunity.opportunity_id)
+                )
+
             self._handle_delete(
                 source_opportunity,
                 target_opportunity,

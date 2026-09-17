@@ -57,66 +57,151 @@ brew install lychee
 
 ## AWS Authentication
 
-In order for Terraform to authenticate with your accounts you will need to configure your aws credentials using the AWS CLI or manually create your config and credentials file. If you need to manage multiple credentials or create named profiles for use with different environments you can add the `--profile` option.
+This project uses AWS IAM Identity Center (SSO) for local access. Each environment lives in a
+specific AWS account, so you need one named profile per account, and the correct profile must be
+active before you run any AWS CLI, Terraform, or `bin/` command.
 
-There are multiple ways to authenticate, but we recommend creating a separate profile for your project in your AWS credentials file, and setting your local environment variable `AWS_PROFILE` to the profile name. We recommend using [direnv](https://direnv.net/) to manage local environment variables.
-**Credentials should be located in ~/.aws/credentials** (Linux & Mac) or **%USERPROFILE%\.aws\credentials** (Windows)
+### Which account is my environment in?
 
-### Examples
+| Environment | Account name | Profile |
+| --- | --- | --- |
+| `infra-dev`, `infra-grantee1`, `infra-grantee2`, `infra-grantor1` | `dev` | `dev` |
+| `infra-staging` | `staging` | `staging` |
+| `infra-training` | `training` | `training` |
+| `prod`, `shared`, `grantee1`, `grantee2`, `grantor1` | `simpler-grants-gov` | `prod` |
 
-```bash
-$ aws configure
-AWS Access Key ID [None]: <Your AWS Access Key ID>
-AWS Secret Access Key [None]: <Your AWS Secret Access Key>
-Default region name [None]: us-east-2
-Default output format [None]: json
+The source of truth for this mapping is `account_names_by_environment` in
+[`infra/api/app-config/main.tf`](../../infra/api/app-config/main.tf).
+
+You'll need each account's numeric ID to configure its profile. Sign in to the
+[AWS access portal](https://grants-sso.awsapps.com/start) — it lists every account you have access
+to, with its ID, right on the landing page. In the repo, the same IDs appear in the
+`infra/accounts/<account_name>.<account_id>.s3.tfbackend` filenames.
+
+Profiles are named after the **account**, not the environment — one profile serves every environment
+in that account. Note that the environment prefix `infra-` is what tells you an environment lives in
+its own account.
+
+### One-time set up
+
+Configure one shared SSO session plus one profile per account you need. Either edit
+`~/.aws/config` directly, or use the interactive `aws configure sso`.
+
+#### Option A: edit `~/.aws/config` directly
+
+This is usually quicker than answering the interactive prompts four times. Replace each
+`<... account ID>` placeholder with the numeric ID shown for that account in the
+[AWS access portal](https://grants-sso.awsapps.com/start).
+
+```ini
+[sso-session grants-sso]
+sso_start_url = https://grants-sso.awsapps.com/start
+sso_region = us-east-1
+sso_registration_scopes = sso:account:access
+
+[profile dev]
+sso_session = grants-sso
+sso_account_id = <dev account ID>
+sso_role_name = AdministratorAccess
+region = us-east-1
+
+[profile staging]
+sso_session = grants-sso
+sso_account_id = <staging account ID>
+sso_role_name = AdministratorAccess
+region = us-east-1
+
+[profile training]
+sso_session = grants-sso
+sso_account_id = <training account ID>
+sso_role_name = AdministratorAccess
+region = us-east-1
+
+[profile prod]
+sso_session = grants-sso
+sso_account_id = <simpler-grants-gov account ID>
+sso_role_name = AWSAdministratorAccess
+region = us-east-1
 ```
 
-**Using the above command will create a [default] profile.**
+Two things to watch:
+
+- `region` must be `us-east-1` for every profile — that is the project's
+  `default_region` in [`infra/project-config/main.tf`](../../infra/project-config/main.tf).
+- The `sso_role_name` is not the same in every account. The per-environment accounts grant
+  `AdministratorAccess`; the shared `simpler-grants-gov` account grants `AWSAdministratorAccess`.
+  If a profile fails with a "role not found" error, open the
+  [AWS access portal](https://grants-sso.awsapps.com/start) in a browser and use the exact role name
+  listed for that account.
+
+#### Option B: interactive
 
 ```bash
-$ aws configure --profile dev
-AWS Access Key ID [None]: <Your AWS Access Key ID>
-AWS Secret Access Key [None]: <Your AWS Secret Access Key>
-Default region name [None]: us-east-2
-Default output format [None]: json
+aws configure sso --profile staging
 ```
 
-**Using the above command will create a [dev] profile.**
+Answer the prompts with:
 
-Once you're done, verify access by running the following command to print out information about the AWS IAM user you authenticated as.
+- **SSO session name**: `grants-sso`
+- **SSO start URL**: `https://grants-sso.awsapps.com/start`
+- **SSO region**: `us-east-1`
+- **SSO registration scopes**: `sso:account:access`
+- **CLI default client Region**: `us-east-1`
+
+then pick the account and role from the browser list. Repeat for `--profile dev`,
+`--profile training`, and `--profile prod`. After the first run the `grants-sso` session is reused,
+so later runs only ask which account and role to use.
+
+### Ongoing use
 
 ```bash
+# Log in once per session. This covers every profile on the grants-sso session.
+aws sso login --sso-session grants-sso
+
+# Point your shell at the account holding the environment you're working in.
+export AWS_PROFILE=staging
+
+# Confirm you are where you think you are before running anything that writes.
 aws sts get-caller-identity
 ```
 
-### Recommended AWS Profile Set Up
+`aws sts get-caller-identity` should report the ID of the account you meant to be in. SSO credentials
+expire after a few hours; re-run `aws sso login --sso-session grants-sso` when you get an
+expired-token error.
 
-#### Create a profile named grants (one-time set up)
+If you switch accounts often, [direnv](https://direnv.net/) can set `AWS_PROFILE` per directory so
+you don't have to remember.
 
-```bash
-$ aws configure --profile grants
-AWS Access Key ID [None]: <Your AWS Access Key ID>
-AWS Secret Access Key [None]: <Your AWS Secret Access Key>
-Default region name [None]: us-east-2
-Default output format [None]: json
+### Getting the profile wrong
+
+`AWS_PROFILE` must be **exported**, not just assigned. The Make targets and `bin/` scripts shell out
+to `aws` and `terraform` as child processes, and those only inherit exported variables. A bare
+`AWS_PROFILE=staging` on its own line sets a shell-local variable that child processes never see.
+
+The environment-scoped Terraform root modules (`networks`, `<app>/service`, `<app>/database`) refuse
+to run against the wrong account — see
+[Account safety guards](../../infra/README.md#-account-safety-guards). A wrong profile there
+fails fast with:
+
+```
+Wrong AWS account: the active credentials belong to account <X>, but <...> must be deployed to account <Y>
 ```
 
-#### Utilize it for AWS work (ongoing)
+Export the right profile and retry.
 
-Execute this before running any AWS CLI or Terraform commands
-
-```bash
-AWS_PROFILE=grants
-aws sso login
-```
+**The `bin/` scripts have no such guard.** `bin/run-command`, `bin/run-database-migrations`, and
+friends pass no `--profile` and never check the account — they use whatever credentials are ambient.
+With the wrong profile exported they will happily act on the wrong environment, or fail with
+`Unable to locate credentials` if none is set. Run `aws sts get-caller-identity` first.
 
 ### References
 
 - [Configuration basics][1]
 - [Named profiles for the AWS CLI][2]
 - [Configuration and credential file settings][3]
+- [Configuring IAM Identity Center authentication][4]
 
 [1]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html
 [2]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html
 [3]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
+[4]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html

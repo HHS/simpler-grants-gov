@@ -272,14 +272,17 @@ locals {
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
+      # load-transform now syncs to OpenSearch (incremental) after SetCurrentOpportunitiesTask,
+      # which requires write access beyond the default app_service role's read-only query policy.
+      role_override = "opensearch-write"
     }
     load-user-tables = {
       # The user tables only need daily freshness, so they load here instead of in the
       # hourly load-transform cycle.
       #
-      # Load only. Transform, set-current, and store-version are all opportunity steps that
-      # have no bearing on the user tables, and store-version in particular must stay off:
-      # it writes opportunity_version off the opportunity_change_audit queue, and this job
+      # Load only. Transform, set-current, store-version, and sync-to-index are all opportunity
+      # steps that have no bearing on the user tables, and store-version in particular must stay
+      # off: it writes opportunity_version off the opportunity_change_audit queue, and this job
       # can overlap the hourly cycle (which runs every hour, with the job lock disabled here),
       # so it would risk versioning opportunities midway through the hourly transform.
       task_command = [
@@ -290,6 +293,7 @@ locals {
         "--no-transform",
         "--no-set-current",
         "--no-store-version",
+        "--no-sync-to-index",
         "-t",
         "vuser_account",
         "-t",

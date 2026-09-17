@@ -1,3 +1,4 @@
+import logging
 import uuid
 import zipfile
 from decimal import Decimal
@@ -87,7 +88,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         )
         return CreateApplicationSubmissionTask(db_session, pdf_generation_config=pdf_config)
 
-    def test_run_task(self, db_session, create_submission_task):
+    def test_run_task(self, db_session, create_submission_task, caplog):
         main_form = Form(
             form_id=uuid.uuid4(),
             form_name="Main Test Form",
@@ -194,6 +195,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             with_forms=True, application_status=ApplicationStatus.ACCEPTED
         )
 
+        caplog.set_level(logging.INFO)
         create_submission_task.run()
 
         # Validate the submission without attachments
@@ -220,6 +222,17 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             application_without_attachments.application_audits[0].user_id
             == application_without_attachments.submitted_by
         )
+
+        # Every audit event log must carry a real application_id - it is the join key
+        # for the Apply funnel dashboards, and the record is not flushed when we log
+        audit_log_records = [
+            record for record in caplog.records if record.message == "Added application audit event"
+        ]
+        assert audit_log_records
+        assert all(record.application_id is not None for record in audit_log_records)
+        assert application_without_attachments.application_id in {
+            record.application_id for record in audit_log_records
+        }
 
         # Validate the submission with attachments.
         # All attachments are orphaned (not referenced in any form response via attachment_fields),
