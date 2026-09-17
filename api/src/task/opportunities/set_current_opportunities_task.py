@@ -62,6 +62,8 @@ class SetCurrentOpportunitiesTask(Task):
         with self.db_session.begin():
             self._process_opportunities()
 
+    EXPIRE_BATCH_SIZE = 5000
+
     def _process_opportunities(self) -> None:
         # This selectinload significantly improves performance as it tells SQLAlchemy
         # to fetch all summaries+current opportunity summaries rather than lazy loading
@@ -75,11 +77,17 @@ class SetCurrentOpportunitiesTask(Task):
                 # rather than everything all at once.
                 # https://docs.sqlalchemy.org/en/20/orm/queryguide/api.html#fetching-large-result-sets-with-yield-per
             )
-            .execution_options(yield_per=5000)
+            .execution_options(yield_per=self.EXPIRE_BATCH_SIZE)
         )
 
-        for opportunity in opportunities:
+        for i, opportunity in enumerate(opportunities, start=1):
             self._process_opportunity(opportunity)
+
+            if i % self.EXPIRE_BATCH_SIZE == 0:
+                self.db_session.flush()
+                # Frees each opportunity's loaded attribute/relationship data for GC -
+                # the session's identity map would otherwise keep it all reachable.
+                self.db_session.expire_all()
 
     def _process_opportunity(self, opportunity: Opportunity) -> None:
         self.increment(self.Metrics.OPPORTUNITY_COUNT)
