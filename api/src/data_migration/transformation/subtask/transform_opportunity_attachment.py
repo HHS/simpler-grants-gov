@@ -5,6 +5,7 @@ from collections.abc import Sequence
 
 from grants_shared.adapters.aws import S3Config
 from grants_shared.util import file_util
+from sqlalchemy.orm import defer
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -57,16 +58,19 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
 
     def transform_records(self) -> None:
 
-        # Fetch staging attachment / our attachment / opportunity groups
+        # Fetch staging attachment / our attachment / opportunity groups.
+        # file_lob (the actual attachment content, up to ~90MB) is deferred so the
+        # batch query doesn't load every row's blob at once - a batch full of large
+        # attachments would otherwise need all of them in memory simultaneously. It
+        # gets lazy-loaded one at a time as each attachment is processed instead.
         records = self.fetch_with_opportunity(
             TsynopsisAttachment,
             OpportunityAttachment,
             [TsynopsisAttachment.syn_att_id == OpportunityAttachment.legacy_attachment_id],
-            # We load opportunity attachments into memory, so need to process very small batches
-            # to avoid running out of memory.
             batch_size=self.attachment_config.transform_opportunity_attachment_batch_size,
             limit=self.attachment_config.transform_opportunity_attachment_batch_size,
             order_by=TsynopsisAttachment.created_at.desc(),
+            load_options=[defer(TsynopsisAttachment.file_lob)],
         )
 
         records_processed = self.process_opportunity_attachment_group(records)
@@ -162,8 +166,14 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
                 source_attachment, target_attachment, opportunity, self.s3_config
             )
 
-            # Write the file to s3
-            write_file(source_attachment, transformed_opportunity_attachment)
+            try:
+                # Write the file to s3
+                write_file(source_attachment, transformed_opportunity_attachment)
+            finally:
+                # file_lob is deferred (see fetch above) and lazy-loaded by the write
+                # above - expire it now rather than leaving it resident for the rest
+                # of the batch, even if the write raised.
+                self.db_session.expire(source_attachment, ["file_lob"])
 
             # If this was an update, and the file name changed
             # Cleanup the old file from s3.
