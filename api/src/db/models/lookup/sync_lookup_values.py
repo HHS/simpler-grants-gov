@@ -29,7 +29,6 @@ def sync_lookup_values(db_client: PostgresDBClient | None = None) -> None:
         for table, lookup_config in sync_values.items():
             _sync_lookup_for_table(table, lookup_config.get_lookups(), db_session)
 
-
     with db_client.get_session() as db_session, db_session.begin():
         _sync_roles(db_session)
 
