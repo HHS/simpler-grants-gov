@@ -31,6 +31,7 @@ import { expect, Page, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import {
   expectURLQueryParamValue,
+  expectURLQueryParamValues,
   waitForURLContainsQueryParamValue,
   waitForURLContainsQueryParamValues,
 } from "tests/e2e/playwrightUtils";
@@ -47,6 +48,7 @@ import {
   getSearchInput,
   selectSortBy,
   toggleCheckbox,
+  toggleFilterDrawer,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/searchSpecUtil";
 
@@ -106,8 +108,15 @@ test.describe("Saved search - restores state on reopen", () => {
       await ensureFilterDrawerOpen(page);
       await ensureAccordionExpanded(page, "Opportunity status");
       await toggleCheckbox(page, "status-closed");
-      await waitForURLContainsQueryParamValues(page, "status", ["closed"]);
+      await waitForURLContainsQueryParamValues(page, "status", [
+        "closed",
+        "forecasted",
+        "posted",
+      ]);
       await waitForSearchResultsInitialLoad(page);
+
+      // Close the drawer so it stops intercepting clicks on the results below it
+      await toggleFilterDrawer(page);
 
       // Apply a sort order
       await selectSortBy(page, sortValue, isMobile, testInfo.project.name);
@@ -115,7 +124,8 @@ test.describe("Saved search - restores state on reopen", () => {
 
       // Capture the result count for this criteria set, to confirm re-running
       // the saved search later shows matching results
-      const expectedResultCount = await getNumberOfOpportunitySearchResults(page);
+      const expectedResultCount =
+        await getNumberOfOpportunitySearchResults(page);
 
       // Navigate to page 2, to prove that pagination is NOT part of what gets
       // saved/restored (saving from page 2, reopening should land on page 1)
@@ -155,9 +165,7 @@ test.describe("Saved search - restores state on reopen", () => {
       await expect(page.getByText("Query successfully saved")).toBeVisible({
         timeout: 30000,
       });
-      const workspaceLink = page.locator(
-        'a[href="/workspace/saved-search-queries"]',
-      );
+      const workspaceLink = page.getByRole("link", { name: "Workspace" });
       await expect(workspaceLink).toBeVisible();
 
       /**
@@ -189,7 +197,11 @@ test.describe("Saved search - restores state on reopen", () => {
       /**
        * And filters should be restored
        */
-      expectURLQueryParamValue(page, "status", "closed");
+      expectURLQueryParamValues(page, "status", [
+        "closed",
+        "forecasted",
+        "posted",
+      ]);
       await ensureFilterDrawerOpen(page);
       await ensureAccordionExpanded(page, "Opportunity status");
       await expectCheckboxesChecked(page, statusFilter);
@@ -224,4 +236,3 @@ test.describe("Saved search - restores state on reopen", () => {
     },
   );
 });
-
