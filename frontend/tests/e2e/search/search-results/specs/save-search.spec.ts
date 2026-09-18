@@ -52,7 +52,7 @@ import {
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/searchSpecUtil";
 
-const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
+const { SMOKE,GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
 
 const { baseUrl, targetEnv } = playwrightEnv;
 const GOTO_TIMEOUT = targetEnv !== "local" ? 300000 : 60000;
@@ -83,7 +83,7 @@ const goToSearch = async (page: Page) => {
 test.describe("Saved search - restores state on reopen", () => {
   test(
     "reopening a saved search restores query, filters, sort order, and resets pagination",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    { tag: [SMOKE, GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page, context }, testInfo) => {
       test.setTimeout(300_000);
       const isMobile = !!testInfo.project.name.match(/[Mm]obile/);
