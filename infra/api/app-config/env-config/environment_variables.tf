@@ -77,6 +77,13 @@ locals {
       secret_store_name = "/api/${var.environment}/api-jwt-public-key"
     }
 
+    # HMAC key used to hash user API keys before storage. Set by hand, once per
+    # environment - rotating it invalidates every hash already stored.
+    API_KEY_PEPPER = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/api-key-pepper"
+    }
+
     LOGIN_FINAL_DESTINATION = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/frontend-login-redirect-url"
