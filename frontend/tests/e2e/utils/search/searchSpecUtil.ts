@@ -339,9 +339,7 @@ export async function clickLastPaginationPage(page: Page) {
 }
 
 /**
- * Clicks a pagination page number only if it exists (result set is large enough
- * to have that many pages). Otherwise logs a warning and no-ops. Useful for tests
- * that want to exercise pagination without depending on a fixed result-set size.
+ * Clicks the specified pagination page when available; otherwise no-ops.
  */
 export async function clickPaginationPageIfPresent(
   page: Page,

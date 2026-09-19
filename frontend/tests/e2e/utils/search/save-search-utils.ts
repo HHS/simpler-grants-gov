@@ -11,15 +11,8 @@ const { targetEnv } = playwrightEnv;
 const GOTO_TIMEOUT = targetEnv !== "local" ? 300000 : 60000;
 
 /**
- * Opens the "Save search" modal, names and saves the current search, and waits
- * for the confirmation modal to appear. Returns the confirmation modal's
- * "Workspace" link so callers can decide when/whether to follow it.
- *
- * Note: the confirmation modal's "Workspace" link and the header nav's
- * "Saved search queries" link both point at the same href, so this is
- * intentionally scoped by accessible role+name rather than href to avoid a
- * Playwright strict-mode violation (two elements resolved for the same
- * `a[href="..."]` selector).
+ * Saves the current search and waits for the confirmation modal.
+ * Returns the modal's Workspace link for the caller to follow.
  */
 export async function saveCurrentSearch(
   page: Page,
@@ -62,12 +55,7 @@ export async function navigateToSavedSearches(
 }
 
 /**
- * Re-runs a saved search from the Saved Search Queries workspace list. In the
- * current UI, the saved search's name is itself the "Run" affordance - there
- * is no separate "Run" button (see SavedSearchesList.tsx). Does not assert
- * that the link is visible/present first - callers that need to verify the
- * saved search is listed (e.g. for an AC around that) should assert on the
- * locator separately before calling this.
+ * Re-runs a saved search from the Saved Search Queries workspace.
  */
 export async function runSavedSearch(
   page: Page,

@@ -1,32 +1,6 @@
 /**
- * @featureArea Search
- * @feature Save Search Button – Search Results Table
- * @featureFile e2e/search/search-results/features/searchresults-v2-save-search.feature
+ * @feature Save Search Button - Search Results Table
  * @scenario Saved search restores query, filters, sort order, and resets pagination
- *
- * Notes for reviewer (what happens in this test):
- * 1) Authenticates a seeded test user (spoofed session, same mechanism as other
- *    authenticated specs in this suite).
- * 2) On the Search page, applies a keyword, a status filter, and a sort order, then
- *    navigates to page 2 of the results.
- * 3) Saves the search with a unique name via the "Save" modal.
- * 4) Follows the confirmation modal's "Workspace" link and confirms the new saved
- *    search is listed (AC: newly saved search is listed in workspace).
- * 5) Clicks the saved search to reopen/re-run it (the workspace list item's name is
- *    itself the "Run" affordance - see SavedSearchesList.tsx, there is no separate
- *    "Run" button in the current UI) and asserts:
- *    - the search query is restored
- *    - the status filter is restored
- *    - the sort order is restored
- *    - pagination resets to page 1, even though the search was saved from page 2
- *    - the result count matches the originally saved search (AC: matching results)
- *
- * Tester parameter guide:
- * - Search helpers (fill/sort/filter/pagination/saved-search) are in
- *   tests/e2e/utils/search/searchSpecUtil.ts
- * - URL query param assertions are in tests/e2e/playwrightUtils.ts
- * - Test user is authenticated via tests/e2e/utils/auth/authenticate-e2e-user-utils.ts
- * - Navigation retry-on-transient-network-error is in tests/e2e/utils/common/lifecycle-utils.ts
  */
 
 import { expect, test } from "@playwright/test";
