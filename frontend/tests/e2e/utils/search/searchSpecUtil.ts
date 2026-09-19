@@ -338,6 +338,37 @@ export async function clickLastPaginationPage(page: Page) {
   }
 }
 
+/**
+ * Clicks a pagination page number only if it exists (result set is large enough
+ * to have that many pages). Otherwise logs a warning and no-ops. Useful for tests
+ * that want to exercise pagination without depending on a fixed result-set size.
+ */
+export async function clickPaginationPageIfPresent(
+  page: Page,
+  pageNumber: number,
+  callerLabel?: string,
+): Promise<boolean> {
+  const paginationButton = page.locator(
+    `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
+  );
+  const isPresent = await paginationButton
+    .first()
+    .isVisible()
+    .catch(() => false);
+
+  if (isPresent) {
+    await clickPaginationPageNumber(page, pageNumber);
+    return true;
+  }
+
+  // eslint-disable-next-line no-console
+  console.warn(
+    `${callerLabel ?? "clickPaginationPageIfPresent"}: only one page of results ` +
+      `for this criteria set; skipping navigation to page ${pageNumber}`,
+  );
+  return false;
+}
+
 export async function getFirstSearchResultTitle(page: Page) {
   const firstResultSelector = page.locator(
     ".simpler-responsive-table tr:first-child a",
