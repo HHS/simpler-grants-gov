@@ -16,8 +16,8 @@ module "infra_training_config" {
   enable_https           = true
 
   enable_api_gateway_domain_name = true
-  s3_cdn_domain_name = "files.training.simpler.grants.gov"
-  enable_cdn_alias   = true
+  s3_cdn_domain_name             = "files.training.simpler.grants.gov"
+  enable_cdn_alias               = true
 
   # SOAP (mTLS) endpoint. Requires enable_https, which gates the ALB's 443 listener.
   mtls_domain_name = "soap.training.simpler.grants.gov"
