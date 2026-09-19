@@ -13,9 +13,7 @@ module "infra_training_config" {
   secondary_domain_names = ["alb.training.simpler.grants.gov"]
   enable_https           = true
 
-  # api.training.simpler.grants.gov is still training's API Gateway custom domain name, and
-  # those are globally unique, so claiming it here fails with "domain name already exists".
-  enable_api_gateway_domain_name = false
+  enable_api_gateway_domain_name = true
   # s3_cdn_domain_name = "files.training.simpler.grants.gov" # Set once a hosted zone/ACM cert exists in 049145893907
 
   # SOAP (mTLS) endpoint. Requires enable_https, which gates the ALB's 443 listener.
