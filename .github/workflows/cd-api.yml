@@ -78,8 +78,8 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        # Selecting dev or staging deploys the infra-dev / infra-staging environment
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment) || github.ref_name == 'main' && '["infra-staging"]' || '["infra-dev"]')  }}
+        # Selecting dev, staging or training deploys the infra-dev / infra-staging / infra-training environment
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment == 'dev' && 'infra-dev' || inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || inputs.environment) || github.ref_name == 'main' && '["infra-staging"]' || '["infra-dev"]')  }}
     with:
       app_name: "api"
       environment: ${{ matrix.envs }}
