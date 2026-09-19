@@ -88,18 +88,14 @@ test.describe("Saved search - restores state on reopen", () => {
       await selectSortBy(page, sortValue, isMobile, testInfo.project.name);
       await waitForURLContainsQueryParamValue(page, "sortby", sortValue);
 
-      // Capture the result count for this criteria set, to confirm re-running
-      // the saved search later shows matching results
+      // Capture the result count to verify the saved search returns matching results.
       const expectedResultCount =
         await getNumberOfOpportunitySearchResults(page);
 
-      // Navigate to page 2, to prove that pagination is NOT part of what gets
-      // saved/restored (saving from page 2, reopening should land on page 1).
-      // No-ops with a warning if this criteria set doesn't have a second page.
+      // Start on page 2 to verify pagination resets when the saved search is reopened.
       await clickPaginationPageIfPresent(page, 2, "save-search.spec");
 
-      // Open the "Save" modal, save with a unique name, and get the
-      // confirmation modal's "Workspace" link
+      // Save the search and get the confirmation modal's Workspace link.
       const workspaceLink = await saveCurrentSearch(page, savedSearchName);
 
       /**
@@ -107,8 +103,7 @@ test.describe("Saved search - restores state on reopen", () => {
        */
       await navigateToSavedSearches(page, workspaceLink);
 
-      // And I should see the saved search listed in the workspace
-      // (AC: newly saved search is listed in workspace)
+      // Verify the saved search is listed in the workspace.
       const savedSearchListLink = page.getByRole("link", {
         name: savedSearchName,
         exact: true,
