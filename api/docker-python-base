@@ -151,8 +151,6 @@ RUN dnf install -y \
       libcap-2.73-1.amzn2023.0.7 \
       lz4-libs-1.9.4-1.amzn2023.0.3 \
       binutils-2.41-50.amzn2023.0.5 \
-      curl-minimal-8.17.0-1.amzn2023.0.3 \
-      libcurl-minimal-8.17.0-1.amzn2023.0.3 \
       glibc-2.34-231.amzn2023.0.4 \
       glibc-common-2.34-231.amzn2023.0.4 \
       glibc-devel-2.34-231.amzn2023.0.4 \
@@ -165,7 +163,6 @@ RUN dnf install -y \
     dnf update -y --releasever=2023.12.20260706 \
       sqlite-3.40.0-1.amzn2023.0.8 \
       sqlite-libs-3.40.0-1.amzn2023.0.8 \
-      expat-2.6.3-1.amzn2023.0.6 \
       gnupg2-minimal-2.3.7-1.amzn2023.0.9 \
       libblkid-2.37.4-1.amzn2023.0.5 \
       libmount-2.37.4-1.amzn2023.0.5 \
@@ -190,12 +187,14 @@ RUN dnf install -y \
     dnf update -y --releasever=2023.12.20260817 \
       wget-1.21.3-1.amzn2023.0.5 \
       rust-toolset-srpm-macros-1.97.0-2.amzn2023 && \
-    # September ALAS batch: openssl suite (ALAS2023-2026-2088), python3-pip-wheel (2092), kernel6.18-headers (2106)
-    dnf update -y --releasever=2023.12.20260831 \
-      openssl-3.5.7-2.amzn2023.0.2 \
-      openssl-libs-3.5.7-2.amzn2023.0.2 \
-      openssl-devel-3.5.7-2.amzn2023.0.2 \
-      openssl-fips-provider-latest-3.5.7-2.amzn2023.0.2 \
+    dnf update -y --releasever=2023.12.20260914 \
+      openssl-3.5.8-1.amzn2023.0.1 \
+      openssl-libs-3.5.8-1.amzn2023.0.1 \
+      openssl-devel-3.5.8-1.amzn2023.0.1 \
+      openssl-fips-provider-latest-3.5.8-1.amzn2023.0.1 \
+      curl-minimal-8.21.0-5.amzn2023.0.1 \
+      libcurl-minimal-8.21.0-5.amzn2023.0.1 \
+      expat-2.8.3-1.amzn2023.0.1 \
       python3-pip-wheel-21.3.1-2.amzn2023.0.21 \
       kernel6.18-headers-6.18.44-99.149.amzn2023 && \
     dnf clean all && \

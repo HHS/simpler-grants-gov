@@ -19,9 +19,22 @@ variable "subnet_ids" {
 }
 
 variable "endpoint_public_access" {
-  description = "Whether the Kubernetes API server is reachable from the public internet. Kept false so access stays in-VPC."
+  description = "Whether the Kubernetes API server is reachable from the public internet. Defaults false; requires public_access_cidrs when enabled."
   type        = bool
   default     = false
+}
+
+variable "public_access_cidrs" {
+  description = "CIDRs allowed to reach the public API endpoint. Ignored unless endpoint_public_access is true."
+  type        = list(string)
+  default     = []
+
+  validation {
+    # An open endpoint is never the intent here: authentication is IAM, but an
+    # unrestricted endpoint exposes the API surface to the whole internet.
+    condition     = !contains(var.public_access_cidrs, "0.0.0.0/0")
+    error_message = "public_access_cidrs must not include 0.0.0.0/0. List specific office, VPN, or runner egress ranges."
+  }
 }
 
 variable "node_instance_types" {
@@ -60,4 +73,9 @@ variable "cluster_admin_role_arns" {
   description = "IAM role ARNs granted cluster-admin via EKS access entries. Typically the SSO administrator role and the CI/CD deploy role."
   type        = list(string)
   default     = []
+}
+
+variable "node_ami_type" {
+  description = "EKS AMI type. Must match the architecture of node_instance_types (ARM_64 for Graviton, x86_64 otherwise)."
+  type        = string
 }

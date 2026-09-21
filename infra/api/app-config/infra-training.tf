@@ -9,11 +9,18 @@ module "infra_training_config" {
   environment    = "infra-training"
   network_name   = "infra-training"
 
+  app_environment_name = "training"
+
   domain_name            = "api.training.simpler.grants.gov"
   secondary_domain_names = ["alb.training.simpler.grants.gov"]
-  enable_https           = false
-  # s3_cdn_domain_name = "files.training.simpler.grants.gov" # Set once a hosted zone/ACM cert exists in 049145893907
-  # mtls_domain_name   = "soap.training.simpler.grants.gov"  # Set once a hosted zone/ACM cert exists in 049145893907
+  enable_https           = true
+
+  enable_api_gateway_domain_name = true
+  s3_cdn_domain_name             = "files.training.simpler.grants.gov"
+  enable_cdn_alias               = true
+
+  # SOAP (mTLS) endpoint. Requires enable_https, which gates the ALB's 443 listener.
+  mtls_domain_name = "soap.training.simpler.grants.gov"
 
   has_database                  = local.has_database
   database_enable_http_endpoint = true
@@ -41,14 +48,14 @@ module "infra_training_config" {
   has_search            = true
   search_engine_version = "OpenSearch_2.15"
 
-  # The reserved-SSO role suffix (AWSReservedSSO_<PermissionSet>_<suffix>) is generated
-  # per AWS account, so the env-config default (which matches the shared account) does not
-  # exist in 049145893907. null falls back to the account root principal; replace with this
-  # account's own AWSReservedSSO_* role name once IAM Identity Center is wired up.
-  search_sso_admin_role_name = null
+  # This account's own reserved-SSO suffix; must not be null -- the role-mappings lambda
+  # puts it in all_access backend_roles and OpenSearch rejects a null array element.
+  search_sso_admin_role_name = "AWSReservedSSO_AdministratorAccess_43bdcb088d20dc60"
 
   service_override_extra_environment_variables = {
     SAM_GOV_BASE_URL = "https://api.sam.gov"
+
+    LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-training-simpler-grants-gov"
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"

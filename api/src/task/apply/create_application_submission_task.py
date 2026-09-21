@@ -309,7 +309,7 @@ class CreateApplicationSubmissionTask(Task):
             "application_id": submission.application.application_id,
             "competition_id": submission.application.competition_id,
         }
-        logger.info("Processing application forms for application submission")
+        logger.info("Processing application forms for application submission", extra=log_extra)
         for application_form in submission.application.application_forms:
             app_form_log_extra = log_extra | {
                 "application_form_id": application_form.application_form_id

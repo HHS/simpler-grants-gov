@@ -94,7 +94,6 @@ class RecursiveXMLTransformer:
             # Skip metadata keys
             if key.startswith("_"):
                 continue
-
             # Process XML transformation rules
             if isinstance(rule_config, dict) and "xml_transform" in rule_config:
                 self._process_xml_transform_rule(source_data, key, rule_config, path, result)
@@ -131,6 +130,26 @@ class RecursiveXMLTransformer:
         # Get the source value from the input data
         transform_type = transform_rule.get("type", "simple")
         source_value = get_nested_value(source_data, current_path)
+
+        # Some XML wrappers are synthetic and have no matching source object at
+        # all (e.g. SF-LLL's MaterialChangeSupplement isn't a literal field in
+        # the payload) - let their child mappings read from the root payload.
+        # But if the key *does* exist in the source data and was simply set to
+        # None explicitly (a real, non-synthetic wrapper the caller left
+        # empty), leave source_value as None instead of substituting the root
+        # payload - otherwise object_value.get(child_key) below could
+        # accidentally pick up unrelated sibling fields that happen to share
+        # a name with one of this wrapper's child keys.
+        if transform_type == "nested_object" and source_value is None:
+            parent_path = current_path[:-1]
+            parent_source = (
+                get_nested_value(source_data, parent_path) if parent_path else source_data
+            )
+            key_exists_but_none = (
+                isinstance(parent_source, dict) and current_path[-1] in parent_source
+            )
+            if not key_exists_but_none:
+                source_value = source_data
 
         # Handle None values based on configuration
         processed_source_value = self._handle_none_values(
@@ -303,9 +322,17 @@ class RecursiveXMLTransformer:
                     and isinstance(conditional_result, dict)
                     and "target" in conditional_result
                 ):
-                    # Handle conditional structure - extract and process nested fields
+                    # Some conditional structures are synthetic (for example,
+                    # SF-LLL MaterialChangeSupplement is not a literal source field,
+                    # but a root-level condition based on report_type). In those cases,
+                    # the structure should be built from the real form payload rather than
+                    # the missing synthetic field value (which is None at this path).
+                    source_for_structure = source_value
+                    if not isinstance(source_for_structure, dict):
+                        source_for_structure = self.root_source_data
+
                     return self._process_conditional_structure(
-                        conditional_result, source_value, path
+                        conditional_result, source_for_structure, path
                     )
 
                 # Check if this is a field_grouping result
@@ -327,6 +354,24 @@ class RecursiveXMLTransformer:
             if not isinstance(source_value, dict):
                 return None
 
+            object_value = source_value.copy()
+            # Some nested objects (e.g. SF-LLL's IndividualsPerformingServices) don't carry
+            # their own entity_type field, but the XML attribute still needs to reflect the
+            # type of the entity one level up (e.g. reporting_entity.entity_type). Walk up the
+            # path to find the nearest ancestor object that does define entity_type and inherit
+            # it here. This is a generic mechanism (not SFLLL-specific), but it's a no-op for
+            # any other form type whose nested objects already define entity_type themselves.
+            if "entity_type" not in object_value and len(path) >= 2:
+                parent_source: Any = self.root_source_data
+                for segment in path[:-1]:
+                    if isinstance(parent_source, dict):
+                        parent_source = parent_source.get(segment)
+                    else:
+                        parent_source = None
+                        break
+                if isinstance(parent_source, dict) and parent_source.get("entity_type"):
+                    object_value["entity_type"] = parent_source["entity_type"]
+
             nested_result = {}
 
             # Embed the namespace so the service can resolve the wrapper element's namespace
@@ -343,16 +388,16 @@ class RecursiveXMLTransformer:
                     # attr_source_path can be a simple field name, a dotted path, or a static/literal value
                     if "." in attr_source_path:
                         # It's a dotted path - not supported yet for parent attributes
-                        # For now, just get from current source_value
+                        # For now, just get from current object_value
                         path_parts = attr_source_path.split(".")
-                        if path_parts[0] in source_value:
-                            attributes[attr_name] = source_value[path_parts[0]]
+                        if path_parts[0] in object_value:
+                            attributes[attr_name] = object_value[path_parts[0]]
                     elif (
-                        attr_source_path in source_value
-                        and source_value[attr_source_path] is not None
+                        attr_source_path in object_value
+                        and object_value[attr_source_path] is not None
                     ):
                         # It's a field name in source data - use its value
-                        attributes[attr_name] = source_value[attr_source_path]
+                        attributes[attr_name] = object_value[attr_source_path]
                     else:
                         # Not a field in source data - treat as static/literal value
                         attributes[attr_name] = attr_source_path
@@ -368,8 +413,15 @@ class RecursiveXMLTransformer:
                 for child_key, child_config in nested_fields.items():
                     if isinstance(child_config, dict) and "xml_transform" in child_config:
                         child_transform = child_config["xml_transform"]
-                        if child_key in source_value and source_value[child_key] is not None:
-                            child_value = source_value[child_key]
+                        child_value = object_value.get(child_key)
+                        source_path = child_transform.get("source_path")
+                        if child_value is None and source_path:
+                            child_value = get_nested_value(
+                                self.root_source_data, source_path.split(".")
+                            )
+                        if "static_value" in child_transform:
+                            child_value = child_transform["static_value"]
+                        if child_value is not None:
 
                             # Recursively process nested transformations
                             transformed_child = self._apply_transform_rule(
@@ -385,8 +437,15 @@ class RecursiveXMLTransformer:
                         continue
                     if isinstance(child_config, dict) and "xml_transform" in child_config:
                         child_transform = child_config["xml_transform"]
-                        if child_key in source_value and source_value[child_key] is not None:
-                            child_value = source_value[child_key]
+                        child_value = object_value.get(child_key)
+                        source_path = child_transform.get("source_path")
+                        if child_value is None and source_path:
+                            child_value = get_nested_value(
+                                self.root_source_data, source_path.split(".")
+                            )
+                        if "static_value" in child_transform:
+                            child_value = child_transform["static_value"]
+                        if child_value is not None:
 
                             # Recursively process nested transformations
                             transformed_child = self._apply_transform_rule(
@@ -532,6 +591,18 @@ class RecursiveXMLTransformer:
 
         nested_result = {}
         nested_fields = structure_config.get("nested_fields", {})
+
+        if not nested_fields and "source_fields" in structure_config:
+            nested_fields = {
+                field_name: {"xml_transform": {"target": target_name}}
+                for field_name, target_name in structure_config["source_fields"].items()
+            }
+
+        if structure_config.get("namespace"):
+            nested_result["__namespace__"] = structure_config["namespace"]
+
+        if structure_config.get("attributes"):
+            nested_result["__attributes"] = structure_config["attributes"]
 
         # Process each nested field according to its configuration
         for field_key, field_config in nested_fields.items():

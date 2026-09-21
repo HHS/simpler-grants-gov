@@ -337,7 +337,7 @@ h6 {
 
 // Events
 
-#main-content:has(div:last-child.bg-base-lightest) + footer.usa-footer {
+#main-content:has(div:last-child.footer-blend-lightest) + footer.usa-footer {
   background-color: color($theme-color-base-lightest);
 }
 

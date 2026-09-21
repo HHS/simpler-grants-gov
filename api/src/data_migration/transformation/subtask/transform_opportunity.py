@@ -80,6 +80,7 @@ class TransformOpportunity(AbstractTransformSubTask):
             # Queue the opportunity for removal from the search index before the DB row
             # is deleted.
             if target_opportunity is not None:
+                logger.info("Queuing opportunity for search index removal", extra=extra)
                 self.db_session.add(
                     OpportunityIndexDeleteQueue(opportunity_id=target_opportunity.opportunity_id)
                 )

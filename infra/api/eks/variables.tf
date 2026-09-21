@@ -18,6 +18,13 @@ variable "node_instance_types" {
   default     = ["t4g.medium"]
 }
 
+variable "node_ami_type" {
+  # Must match node_instance_types' architecture; t4g is Graviton (ARM).
+  # EKS otherwise defaults to x86_64 and the API rejects the mismatch.
+  type    = string
+  default = "AL2023_ARM_64_STANDARD"
+}
+
 variable "node_desired_size" {
   type        = number
   description = "Desired size of the bootstrap node group. Two nodes so the add-ons survive losing one."
@@ -45,4 +52,18 @@ variable "sso_admin_role_name" {
   # infra-dev's account (061664787759), matching infra/api/app-config/infra-dev.tf.
   # Override rather than inherit if this layer reaches another account.
   default = "AWSReservedSSO_AdministratorAccess_73856a8074e1d297"
+}
+
+variable "endpoint_public_access" {
+  # Terraform's helm/kubernetes providers must reach the API at plan time, which
+  # nothing outside the VPC can do while the endpoint is private-only (#11127).
+  type    = bool
+  default = false
+}
+
+variable "public_access_cidrs" {
+  # No default on purpose: these are environment-specific egress ranges, and a
+  # guessed value either locks out operators or opens the endpoint too widely.
+  type    = list(string)
+  default = []
 }
