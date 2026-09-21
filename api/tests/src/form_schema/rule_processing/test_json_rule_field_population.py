@@ -49,6 +49,27 @@ from tests.src.form_schema.rule_processing.conftest import setup_context
             },
             "My program title",
         ),
+        # The competition's own opportunity_assistance_listing can be null (eg. legacy
+        # migrated data) while the opportunity itself has exactly one listing - we fall
+        # back to that listing in that case.
+        (
+            {"rule": "assistance_listing_number"},
+            {
+                "has_assistance_listing_number": True,
+                "assistance_listing_number": "00.123",
+                "link_assistance_listing_to_competition": False,
+            },
+            "00.123",
+        ),
+        (
+            {"rule": "assistance_listing_program_title"},
+            {
+                "has_assistance_listing_number": True,
+                "assistance_listing_program_title": "My program title",
+                "link_assistance_listing_to_competition": False,
+            },
+            "My program title",
+        ),
         ({"rule": "public_competition_id"}, {"public_competition_id": "ABC123456"}, "ABC123456"),
         (
             {"rule": "competition_title"},
@@ -74,6 +95,24 @@ def test_handle_field_population_pre_population(
     [
         ({"rule": "assistance_listing_number"}, {"has_assistance_listing_number": False}),
         ({"rule": "assistance_listing_program_title"}, {"has_assistance_listing_number": False}),
+        # Competition isn't linked to a listing, and the opportunity has more than
+        # one, so which one to fall back to is ambiguous - stay null rather than guess.
+        (
+            {"rule": "assistance_listing_number"},
+            {
+                "has_assistance_listing_number": True,
+                "link_assistance_listing_to_competition": False,
+                "extra_opportunity_assistance_listing_count": 1,
+            },
+        ),
+        (
+            {"rule": "assistance_listing_program_title"},
+            {
+                "has_assistance_listing_number": True,
+                "link_assistance_listing_to_competition": False,
+                "extra_opportunity_assistance_listing_count": 1,
+            },
+        ),
         ({"rule": "public_competition_id"}, {"public_competition_id": None}),
         ({"rule": "competition_title"}, {"competition_title": None}),
     ],

@@ -6,6 +6,7 @@ from typing import Any
 from grants_shared.util.datetime_util import get_now_us_eastern_date
 from grants_shared.util.decimal_util import ZERO_DECIMAL, convert_monetary_field, quantize_decimal
 
+from src.db.models.opportunity_models import OpportunityAssistanceListing
 from src.form_schema.rule_processing.json_rule_context import JsonRule, JsonRuleContext
 from src.form_schema.rule_processing.json_rule_util import get_field_values, populate_nested_value
 
@@ -94,28 +95,53 @@ def get_uei(context: JsonRuleContext, json_rule: JsonRule) -> str:
     return organization.sam_gov_entity.uei
 
 
-def get_assistance_listing_number(context: JsonRuleContext, json_rule: JsonRule) -> str | None:
-    """Get the assistance listing number attached to the competition"""
+def _get_competition_assistance_listing(
+    context: JsonRuleContext,
+) -> OpportunityAssistanceListing | None:
+    """Get the assistance listing to use for pre-population.
+
+    Competitions migrated from the legacy system can have a null
+    opportunity_assistance_listing even though their opportunity has a
+    listing - this happens when the specific CFDA record linking the
+    competition to the listing had no program title in the legacy system,
+    so it was never transformed into an OpportunityAssistanceListing (see
+    transform_competition.py). In that case, fall back to the opportunity's
+    listing when it's unambiguous (exactly one).
+    """
     competition = context.application_form.application.competition
 
+    if competition.opportunity_assistance_listing is not None:
+        return competition.opportunity_assistance_listing
+
+    opportunity_assistance_listings = context.opportunity.opportunity_assistance_listings
+    if len(opportunity_assistance_listings) == 1:
+        return opportunity_assistance_listings[0]
+
+    return None
+
+
+def get_assistance_listing_number(context: JsonRuleContext, json_rule: JsonRule) -> str | None:
+    """Get the assistance listing number attached to the competition"""
+    assistance_listing = _get_competition_assistance_listing(context)
+
     # These can be null, not every competition has an assistance listing number attached
-    if competition.opportunity_assistance_listing is None:
+    if assistance_listing is None:
         return None
 
-    return competition.opportunity_assistance_listing.assistance_listing_number
+    return assistance_listing.assistance_listing_number
 
 
 def get_assistance_listing_program_title(
     context: JsonRuleContext, json_rule: JsonRule
 ) -> str | None:
     """Get the assistance listing program title attached to the competition"""
-    competition = context.application_form.application.competition
+    assistance_listing = _get_competition_assistance_listing(context)
 
     # These can be null, not every competition has an assistance listing number attached
-    if competition.opportunity_assistance_listing is None:
+    if assistance_listing is None:
         return None
 
-    return competition.opportunity_assistance_listing.program_title
+    return assistance_listing.program_title
 
 
 def get_public_competition_id(context: JsonRuleContext, json_rule: JsonRule) -> str | None:
