@@ -1,6 +1,6 @@
-import grants_shared.util.file_util as file_util
 import pytest
 
+import src.util.file_util as file_util
 from src.util.file_util import safe_presign_or_s3_cdnify_url
 
 
