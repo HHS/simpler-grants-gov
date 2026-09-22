@@ -27,7 +27,7 @@ from src.db.models.lookup_models import (
     LkOpportunityCategory,
     LkOpportunityStatus,
 )
-from src.util.file_util import presign_or_s3_cdnify_url
+from src.util.file_util import safe_presign_or_s3_cdnify_url
 
 if TYPE_CHECKING:
     from src.db.models.award_recommendation_models import AwardRecommendation
@@ -511,7 +511,7 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     @property
     def download_path(self) -> str | None:
         if self.file_location:
-            return presign_or_s3_cdnify_url(self.file_location)
+            return safe_presign_or_s3_cdnify_url(self.file_location)
         return None
 
 

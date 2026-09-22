@@ -533,6 +533,37 @@ def test_get_opportunity_returns_cdn_urls_JWT(
     assert "s3://" not in attachment["download_path"]
 
 
+def test_get_opportunity_attachment_download_path_bucket_mismatch(
+    client,
+    monkeypatch_session,
+    enable_factory_create,
+    db_session,
+    other_mock_s3_bucket,
+    user_api_key_id,
+):
+    """A file_location whose bucket doesn't match PUBLIC_FILES_BUCKET (e.g. after
+    an S3 bucket rename/migration) must never surface as a raw s3:// URL"""
+    monkeypatch_session.setattr(file_util, "_s3_config", None)
+    monkeypatch_session.setenv("CDN_URL", "https://cdn.example.com")
+
+    opportunity = OpportunityFactory.create(opportunity_attachments=[])
+    file_loc = f"s3://{other_mock_s3_bucket}/test_file_1.txt"
+    OpportunityAttachmentFactory.create(
+        file_location=file_loc, opportunity=opportunity, file_contents="Hello, world"
+    )
+
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-API-Key": user_api_key_id}
+    )
+
+    assert resp.status_code == 200
+    response_data = resp.get_json()["data"]
+    attachment = response_data["attachments"][0]
+
+    assert attachment["download_path"] is None
+    assert "s3://" not in str(attachment["download_path"])
+
+
 def test_get_opportunity_with_competitions_200(
     client, enable_factory_create, db_session, user_api_key_id
 ):
