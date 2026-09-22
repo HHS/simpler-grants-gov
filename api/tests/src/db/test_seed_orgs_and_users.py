@@ -19,7 +19,7 @@ from tests.src.db.models.factories import (
 )
 
 
-def test_application_created_audit_event_when_application_is_created(
+def test_application_created_audit_event_when_add_application_is_called(
     db_session, enable_factory_create, caplog
 ):
     app_owner = UserFactory.create()
@@ -37,7 +37,7 @@ def test_application_created_audit_event_when_application_is_created(
     assert application.application_status == ApplicationStatus.IN_PROGRESS
 
 
-def test_user_added_audit_event_when_user_is_added_as_owner_to_application(
+def test_user_added_audit_event_when_user_is_added_as_owner_to_application_when_add_application_called(
     db_session, enable_factory_create, caplog
 ):
     app_owner = UserFactory.create()
@@ -67,7 +67,7 @@ def test_user_added_audit_event_when_user_is_added_as_owner_to_application(
     assert APPLICATION_OWNER.role_id in [x.role_id for x in application_user.application_user_roles]
 
 
-def test_organization_added_audit_event_when_organization_is_added_to_application(
+def test_organization_added_audit_event_when_organization_is_added_to_application_when_add_application_called(
     db_session, enable_factory_create, caplog
 ):
     organization = OrganizationFactory.create()
@@ -90,7 +90,9 @@ def test_organization_added_audit_event_when_organization_is_added_to_applicatio
     assert ApplicationAuditEvent.ORGANIZATION_ADDED in events
 
 
-def test_application_status_can_be_set_to_submitted(db_session, enable_factory_create, caplog):
+def test_application_status_can_be_set_to_submitted_when_add_application_called(
+    db_session, enable_factory_create, caplog
+):
     organization = OrganizationFactory.create()
     OrganizationUserRoleFactory.create(
         organization_user=OrganizationUserFactory.create(organization=organization),
@@ -114,7 +116,9 @@ def test_application_status_can_be_set_to_submitted(db_session, enable_factory_c
     assert application.application_status == ApplicationStatus.SUBMITTED
 
 
-def test_application_status_can_be_set_to_accepted(db_session, enable_factory_create, caplog):
+def test_application_status_can_be_set_to_accepted_when_add_application_called(
+    db_session, enable_factory_create, caplog
+):
     organization = OrganizationFactory.create()
     OrganizationUserRoleFactory.create(
         organization_user=OrganizationUserFactory.create(organization=organization),
