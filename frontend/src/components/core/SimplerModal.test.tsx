@@ -1,10 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { noop } from "lodash";
 import { LoginModalProvider } from "src/services/auth/LoginModalProvider";
 
 import { createRef } from "react";
+import { ModalRef } from "@trussworks/react-uswds";
 
 import { PivRequiredModal } from "src/components/core/loginModal/PivRequiredModal";
 import { SimplerModal } from "src/components/core/SimplerModal";
@@ -119,6 +120,69 @@ describe("SimplerModal", () => {
 
     expect(onCloseMock).toHaveBeenCalled();
   });
+  it("calls onOpen once when the modal becomes visible", async () => {
+    const onOpenMock = jest.fn();
+    const modalRef = createRef<ModalRef>();
+    render(
+      <SimplerModal
+        modalRef={modalRef}
+        titleText="title text"
+        modalId="modal-id"
+        onOpen={onOpenMock}
+      >
+        <div id="modal-id-description">content</div>
+      </SimplerModal>,
+    );
+
+    expect(onOpenMock).not.toHaveBeenCalled();
+
+    act(() => {
+      modalRef.current?.toggleModal(undefined, true);
+    });
+
+    await waitFor(() => {
+      expect(onOpenMock).toHaveBeenCalledTimes(1);
+    });
+
+    act(() => {
+      modalRef.current?.toggleModal(undefined, false);
+    });
+
+    // Wait for the close to be observed before reopening, so the two
+    // transitions land as separate mutation records rather than
+    // coalescing into a single "still visible" observation.
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toHaveClass("is-hidden");
+    });
+
+    act(() => {
+      modalRef.current?.toggleModal(undefined, true);
+    });
+
+    await waitFor(() => {
+      expect(onOpenMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it("does not call onOpen when the modal is not given one", () => {
+    const modalRef = createRef<ModalRef>();
+    render(
+      <SimplerModal
+        modalRef={modalRef}
+        titleText="title text"
+        modalId="modal-id"
+      >
+        <div id="modal-id-description">content</div>
+      </SimplerModal>,
+    );
+
+    expect(() => {
+      act(() => {
+        modalRef.current?.toggleModal(undefined, true);
+      });
+    }).not.toThrow();
+  });
+
   it("runs onKeydown function on key down", async () => {
     const user = userEvent.setup();
     const keyHandlerMock = jest.fn();
