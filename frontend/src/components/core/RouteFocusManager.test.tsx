@@ -15,6 +15,10 @@ describe("RouteFocusManager", () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("does not move focus on initial render", () => {
     mockUsePathname.mockReturnValue("/example-route");
 
@@ -59,6 +63,35 @@ describe("RouteFocusManager", () => {
     );
 
     expect(main).toHaveFocus();
+  });
+
+  it("moves focus without scrolling the page", () => {
+    mockUsePathname.mockReturnValue("/first-route");
+
+    const { rerender } = render(
+      <RouteFocusManager>
+        <main id="main-content" tabIndex={-1}>
+          Page content (first route)
+        </main>
+      </RouteFocusManager>,
+    );
+
+    const focusSpy = jest.spyOn(screen.getByRole("main"), "focus");
+
+    mockUsePathname.mockReturnValue("/second-route");
+
+    rerender(
+      <RouteFocusManager>
+        <main id="main-content" tabIndex={-1}>
+          New page content (second route)
+        </main>
+      </RouteFocusManager>,
+    );
+
+    // main is taller than the viewport, so focusing it without preventScroll
+    // makes the browser scroll it into view, pulling the header and the
+    // maintenance banner off the top of the page on every navigation
+    expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
   });
 
   it("does not throw if main content is missing", () => {
