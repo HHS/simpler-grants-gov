@@ -528,14 +528,12 @@ def _add_application(
         "competition": competition,
         "application_status": application_status,
         "application_name": application_name,
-        # TODO
         "competition_id": competition.competition_id,
     }
 
     if isinstance(app_owner, Organization):
         app_params["organization"] = app_owner
         app_type = "organization"
-        # TODO
         app_params["organization_id"] = app_owner.organization_id
     else:
         app_type = "individual"
@@ -561,8 +559,7 @@ def _add_application(
         app_params["application_id"] = static_application_id
 
     logger.info(f"Creating an {app_type} application '{application_name}'")
-    # TODO
-    # application = factories.ApplicationFactory.create(**app_params)
+
     if isinstance(app_owner, User):
         user = app_owner
     else:
@@ -574,50 +571,8 @@ def _add_application(
         user,
         json_data=app_params,
     )
-
-    # To mimic how start-application behaves, only add an application
-    # owner user if it's not an organization. In the future we can
-    # make this function also let you add users to the app, but not using that much yet.
-    # if isinstance(app_owner, User):
-    #     factories.ApplicationUserFactory(application=application, user=app_owner, as_owner=True)
-
-    #     # TODO
-    #     add_audit_event(
-    #         db_session=db_session,
-    #         application=application,
-    #         user=app_owner,
-    #         audit_event=ApplicationAuditEvent.APPLICATION_CREATED
-    #     )
-    #     add_audit_event(
-    #         db_session=db_session,
-    #         application=application,
-    #         user=app_owner,
-    #         audit_event=ApplicationAuditEvent.USER_ADDED
-    #     )
-    # # TODO
-    # else:
-    #     add_audit_event(
-    #         db_session=db_session,
-    #         application=application,
-    #         user=app_owner.organization_users[0].user,
-    #         audit_event=ApplicationAuditEvent.APPLICATION_CREATED
-    #     )
-    #     add_audit_event(
-    #         db_session=db_session,
-    #         application=application,
-    #         user=app_owner.organization_users[0].user,
-    #         audit_event=ApplicationAuditEvent.ORGANIZATION_ADDED
-    #     )
-
-    # This bit is mostly copied from the start application endpoint
-    # and at least sets up the application forms with prepopulation run
-    # TODO
-    # for competition_form in competition.competition_forms:
-    #     application_form = factories.ApplicationFormFactory.create(
-    #         application=application, competition_form=competition_form, application_response={}
-    #     )
-
-    #     validate_application_form(application_form, ApplicationAction.START)
+    application.application_status = application_status
+    db_session.add(application)
 
     # If submitted, also at least fill out the post-population values
     if application_status in (ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED):
