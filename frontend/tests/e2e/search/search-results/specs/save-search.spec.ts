@@ -39,7 +39,7 @@ const { SMOKE, GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
 const { baseUrl, targetEnv } = playwrightEnv;
 const GOTO_TIMEOUT = targetEnv !== "local" ? 300000 : 60000;
 
-const searchTerm = "education";
+const searchTerm = "grants";
 const sortValue = "awardCeilingDesc";
 const statusFilter = { "status-closed": "closed" };
 const savedSearchName = `E2E Save Search Restore ${Date.now()}`;
