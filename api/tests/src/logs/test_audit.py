@@ -53,12 +53,12 @@ test_audit_hook_data = [
     ),
     pytest.param(
         os.rename,
-        ("/tmp/oldname", "/tmp/newname"),
+        ("/tmp/oldname", "/tmp/newname"),  # nosec B108
         [
             {
                 "msg": "os.rename",
-                "audit.args.src": "/tmp/oldname",
-                "audit.args.dst": "/tmp/newname",
+                "audit.args.src": "/tmp/oldname",  # nosec B108
+                "audit.args.dst": "/tmp/newname",  # nosec B108
             }
         ],
         id="os.rename",
@@ -95,31 +95,32 @@ test_audit_hook_data = [
     ),
     pytest.param(
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect,
-        (("www.python.org", 80),),
-        [{"msg": "socket.connect", "audit.args.address": ("www.python.org", 80)}],
+        (("127.0.0.1", 1),),
+        [{"msg": "socket.connect", "audit.args.address": ("127.0.0.1", 1)}],
         id="socket.connect",
     ),
     pytest.param(
         socket.getaddrinfo,
-        ("www.python.org", 80),
-        [{"msg": "socket.getaddrinfo", "audit.args.host": "www.python.org", "audit.args.port": 80}],
+        ("127.0.0.1", 80),
+        [{"msg": "socket.getaddrinfo", "audit.args.host": "127.0.0.1", "audit.args.port": 80}],
         id="socket.getaddrinfo",
     ),
     pytest.param(
         urllib.request.urlopen,
-        ("https://www.python.org",),
+        ("http://127.0.0.1:1",),
         # urllib.request.urlopen calls socket.getaddrinfo and socket.connect under the hood,
-        # both of which trigger audit log entries
+        # both of which trigger audit log entries. The connection is refused, but not
+        # before those events fire, which is all this asserts.
         [
             {
                 "msg": "urllib.Request",
-                "audit.args.url": "https://www.python.org",
+                "audit.args.url": "http://127.0.0.1:1",
                 "audit.args.method": "GET",
             },
             {
                 "msg": "socket.getaddrinfo",
-                "audit.args.host": "www.python.org",
-                "audit.args.port": 443,
+                "audit.args.host": "127.0.0.1",
+                "audit.args.port": 1,
             },
             {
                 "msg": "socket.connect",
@@ -185,11 +186,11 @@ def test_do_not_log_request_data(
     caplog: pytest.LogCaptureFixture,
 ):
     data = urllib.parse.urlencode({"foo": "SENSITIVE-DATA"}).encode()
-    req = urllib.request.Request("https://www.python.org", data=data)
+    req = urllib.request.Request("http://127.0.0.1:1", data=data)
     req.add_header("X-Bar", "SENSITIVE-DATA")
     try:
-        urllib.request.urlopen(req)
-    except urllib.error.HTTPError:
+        urllib.request.urlopen(req)  # nosec B310
+    except urllib.error.URLError:
         pass
 
     for record in caplog.records:

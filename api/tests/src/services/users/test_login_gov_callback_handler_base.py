@@ -11,14 +11,14 @@ from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGo
 from src.adapters.oauth.oauth_client_models import OauthTokenResponse
 from src.auth.jwt import ApiJwtConfig, JwtAuth
 from src.services.users.login_gov_callback_handler_base import LoginGovDataContainer
-from tests.src.db.models.factories import SharedLinkExternalUserFactory, SharedLoginGovStateFactory
-from tests.src.db_test_models.auth_handler import AuthHandler
-from tests.src.db_test_models.db_test_models import (
+from tests.lib.db_test_models.auth_handler import AuthHandler
+from tests.lib.db_test_models.db_test_models import (
     SharedLinkExternalUser,
     SharedLoginGovState,
     SharedUserTokenSession,
 )
-from tests.src.db_test_models.login_gov_callback_handler import LoginGovCallbackHandler
+from tests.lib.db_test_models.login_gov_callback_handler import LoginGovCallbackHandler
+from tests.src.db.models.factories import SharedLinkExternalUserFactory, SharedLoginGovStateFactory
 
 # These match the values on the login_gov_config fixture in conftest.py
 DEFAULT_ISSUER = "http://localhost:3000"

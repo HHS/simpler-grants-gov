@@ -22,7 +22,7 @@ from src.api.schemas.response_schema import (
     WarningMixinSchema,
 )
 from src.util.dict_util import flatten_dict
-from tests.src.api.schemas.schema_validation_utils import (
+from tests.lib.schema_validation_utils import (
     FieldTestSchema,
     get_expected_validation_errors,
     get_invalid_field_test_schema_req,

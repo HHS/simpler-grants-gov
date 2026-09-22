@@ -4,7 +4,7 @@ import pytest
 from marshmallow import ValidationError
 
 from src.api.schemas.extension import fields
-from tests.src.api.schemas.schema_validation_utils import (
+from tests.lib.schema_validation_utils import (
     DummySchema,
     EnumA,
     EnumB,

@@ -5,14 +5,14 @@ from sqlalchemy import select, text
 
 from src.constants.schema import Schemas
 from src.db.models.lookup.lookup_column import LookupColumn
-from tests.src.db.models.factories import ExampleTableFactory, FriendTableFactory
-from tests.src.db_test_models.db_test_models import (
+from tests.lib.db_test_models.db_test_models import (
     ExampleTable,
     ExampleType,
     FriendTable,
     FriendType,
     LkExampleType,
 )
+from tests.src.db.models.factories import ExampleTableFactory, FriendTableFactory
 
 
 @pytest.mark.parametrize(

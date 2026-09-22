@@ -2,7 +2,7 @@ import pytest
 
 from src.api.schemas.extension import Schema, SchemaValidationError, fields
 from src.pagination.pagination_schema import generate_pagination_schema
-from tests.src.api.schemas.schema_validation_utils import validate_expected_errors
+from tests.lib.schema_validation_utils import validate_expected_errors
 
 
 class ExampleSchema(Schema):

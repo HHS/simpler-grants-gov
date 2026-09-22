@@ -3,13 +3,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.pagination.paginator import Paginator
-from tests.src.db.models.factories import ExampleTableFactory
-from tests.src.db_test_models.db_test_models import (
+from tests.lib.db_test_models.db_test_models import (
     ExampleTable,
     ExampleType,
     FriendTable,
     LinkFriendType,
 )
+from tests.src.db.models.factories import ExampleTableFactory
 
 DEFAULT_EXAMPLE_PARAMS = {
     "description": "opportunity of a lifetime",

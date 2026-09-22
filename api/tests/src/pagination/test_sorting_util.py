@@ -3,7 +3,7 @@ from sqlalchemy import select
 
 from src.pagination.pagination_models import SortDirection, SortOrderParams
 from src.pagination.sorting_util import apply_sorting
-from tests.src.db_test_models.db_test_models import ExampleTable
+from tests.lib.db_test_models.db_test_models import ExampleTable
 
 
 def validate_order_by(stmt, expected_sql: str):

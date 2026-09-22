@@ -10,9 +10,9 @@ from sqlalchemy import select
 from src.adapters import db
 from src.auth.api_key_handler_base import MAX_KEY_GENERATION_RETRIES, KeyGenerationError
 from src.util import datetime_util
+from tests.lib.db_test_models.auth_handler import SharedApiKeyHandler
+from tests.lib.db_test_models.db_test_models import SharedUserApiKey
 from tests.src.db.models.factories import SharedUserApiKeyFactory, SharedUserFactory
-from tests.src.db_test_models.auth_handler import SharedApiKeyHandler
-from tests.src.db_test_models.db_test_models import SharedUserApiKey
 
 
 def test_create_api_key_success(enable_factory_create, db_session: db.Session, caplog):

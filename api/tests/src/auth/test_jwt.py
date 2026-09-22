@@ -14,9 +14,9 @@ from src.api.route_utils import raise_flask_error
 from src.api.schemas.response_schema import ErrorResponseSchema
 from src.auth.auth_errors import JwtValidationError
 from src.auth.jwt import ApiJwtConfig, JwtAuth, refresh_token_expiration
+from tests.lib.db_test_models.auth_handler import AuthHandler
+from tests.lib.db_test_models.db_test_models import SharedUserTokenSession
 from tests.src.db.models.factories import SharedLinkExternalUserFactory, SharedUserFactory
-from tests.src.db_test_models.auth_handler import AuthHandler
-from tests.src.db_test_models.db_test_models import SharedUserTokenSession
 
 
 @pytest.fixture

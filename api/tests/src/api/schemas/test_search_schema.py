@@ -10,7 +10,7 @@ from src.api.schemas.search_schema import (
     StrSearchSchemaBuilder,
     UuidSearchSchemaBuilder,
 )
-from tests.src.api.schemas.schema_validation_utils import validate_expected_errors
+from tests.lib.schema_validation_utils import validate_expected_errors
 
 
 class MyEnum(StrEnum):

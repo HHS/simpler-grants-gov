@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 
 from src.auth.api_key_handler_base import AbstractApiKeyHandler
 from src.auth.auth_handler_base import AbstractAuthHandler
-from tests.src.db_test_models.db_test_models import (
+from tests.lib.db_test_models.db_test_models import (
     SharedLinkExternalUser,
     SharedLoginGovState,
     SharedUser,

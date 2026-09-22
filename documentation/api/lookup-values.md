@@ -115,7 +115,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.db.models.base import TimestampMixin
 from src.db.models.lookup_models import LkExample
 from src.db.models.base import Base
-from src.adapters.db.lookup.lookup_column import LookupColumn
+from src.db.models.lookup.lookup_column import LookupColumn
 from src.constants.lookup_constants import Example
 
 class ExampleTable(Base, TimestampMixin):

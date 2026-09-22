@@ -35,7 +35,7 @@ import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
 import src.db.models.workflow_models as workflow_models
 import src.util.datetime_util as datetime_util
-import tests.src.db_test_models.db_test_models as db_test_models
+import tests.lib.db_test_models.db_test_models as db_test_models
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
@@ -3534,7 +3534,7 @@ class JobLockFactory(BaseFactory):
 ####################################
 # Test-only model factories
 #
-# Factories for the synthetic models in tests/src/db_test_models, which exist to
+# Factories for the synthetic models in tests/lib/db_test_models, which exist to
 # exercise the generic DB, lookup, and auth base classes without coupling those
 # tests to the real application tables.
 ####################################

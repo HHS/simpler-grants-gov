@@ -272,11 +272,6 @@ markers = [
   "audit: mark a test as a security audit log test, to be run isolated from other tests",
 ]
 
-[tool.bandit]
-# The audit logging tests deliberately exercise operations bandit flags (temp
-# file paths, urlopen) in order to assert the audit hook reports them.
-exclude_dirs = ["./tests/src/logs/test_audit.py"]
-
 [tool.coverage.run]
 omit = [
   # app_config only runs via the gunicorn script which doens't happen locally

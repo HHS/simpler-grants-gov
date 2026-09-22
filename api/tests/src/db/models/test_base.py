@@ -1,6 +1,6 @@
 import uuid
 
-from tests.src.db_test_models.db_test_models import ExampleTable, ExampleType, FriendTable
+from tests.lib.db_test_models.db_test_models import ExampleTable, ExampleType, FriendTable
 
 
 def test_get_table_name():

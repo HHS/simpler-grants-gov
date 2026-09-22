@@ -58,7 +58,7 @@ from tests.src.db.models.factories import (
 
 # Import the test-only models so they're attached to the metadata and get
 # created alongside the real tables in the db_client fixture below.
-import tests.src.db_test_models.db_test_models  # ruff: ignore[unused-import] isort:skip
+import tests.lib.db_test_models.db_test_models  # ruff: ignore[unused-import] isort:skip
 
 logger = logging.getLogger(__name__)
 
