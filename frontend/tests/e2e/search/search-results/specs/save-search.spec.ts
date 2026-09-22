@@ -28,6 +28,7 @@ import {
   getNumberOfOpportunitySearchResults,
   getSearchInput,
   selectSortBy,
+  toggleFilterDrawer,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/searchSpecUtil";
 
@@ -72,9 +73,19 @@ test.describe("Saved search - restores state on reopen", () => {
       // Note: No status filter applied - using default all statuses to maximize result count
       // and ensure pagination works for the reset-on-reopen test
 
+      // On mobile, sort is accessed via the filter drawer, so open it first
+      if (isMobile) {
+        await ensureFilterDrawerOpen(page);
+      }
+
       // Apply a sort order
       await selectSortBy(page, sortValue, isMobile, testInfo.project.name);
       await waitForURLContainsQueryParamValue(page, "sortby", sortValue);
+
+      // Close the drawer on mobile so it stops intercepting clicks on the results below it
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
 
       // Capture the result count to verify the saved search returns matching results.
       const expectedResultCount =
@@ -138,7 +149,13 @@ test.describe("Saved search - restores state on reopen", () => {
        * And sort order should be restored
        */
       expectURLQueryParamValue(page, "sortby", sortValue);
+      if (isMobile) {
+        await ensureFilterDrawerOpen(page);
+      }
       await expectSortBy(page, sortValue, isMobile);
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
 
       /**
        * And pagination should reset to page 1
