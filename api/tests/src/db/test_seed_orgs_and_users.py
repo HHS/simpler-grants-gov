@@ -3,20 +3,13 @@ from unittest.mock import patch
 
 from sqlalchemy import select
 
-from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus, Privilege
+from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
 from src.constants.static_role_values import APPLICATION_OWNER
 from src.db.models.competition_models import ApplicationSubmission
 from src.db.models.user_models import ApplicationUser
 from src.services.applications.application_validation import ApplicationAction
 from tests.lib.seed_orgs_and_users import _add_application
-from tests.src.db.models.factories import (
-    CompetitionFactory,
-    OrganizationFactory,
-    OrganizationUserFactory,
-    OrganizationUserRoleFactory,
-    RoleFactory,
-    UserFactory,
-)
+from tests.src.db.models.factories import CompetitionFactory, OrganizationFactory, UserFactory
 
 
 def test_application_created_audit_event_when_add_application_is_called(
@@ -71,10 +64,6 @@ def test_organization_added_audit_event_when_organization_is_added_to_applicatio
     db_session, enable_factory_create, caplog
 ):
     organization = OrganizationFactory.create()
-    OrganizationUserRoleFactory.create(
-        organization_user=OrganizationUserFactory.create(organization=organization),
-        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
-    )
     app_owner = organization
     competition = CompetitionFactory.create()
     application = _add_application(
@@ -94,10 +83,6 @@ def test_application_status_can_be_set_to_submitted_when_add_application_called(
     db_session, enable_factory_create, caplog
 ):
     organization = OrganizationFactory.create()
-    OrganizationUserRoleFactory.create(
-        organization_user=OrganizationUserFactory.create(organization=organization),
-        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
-    )
     app_owner = organization
     competition = CompetitionFactory.create()
     # If the application is in SUBMITTED status then the forms will be validated
@@ -120,10 +105,6 @@ def test_application_status_can_be_set_to_accepted_when_add_application_called(
     db_session, enable_factory_create, caplog
 ):
     organization = OrganizationFactory.create()
-    OrganizationUserRoleFactory.create(
-        organization_user=OrganizationUserFactory.create(organization=organization),
-        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
-    )
     app_owner = organization
     competition = CompetitionFactory.create()
     mock_uuid = uuid.uuid4()
