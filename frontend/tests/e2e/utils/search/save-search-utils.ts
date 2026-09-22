@@ -45,10 +45,9 @@ export async function saveCurrentSearch(
  */
 export async function navigateToSavedSearches(
   page: Page,
-  workspaceLink?: Locator,
+  workspaceLink: Locator,
 ): Promise<void> {
-  const link = workspaceLink ?? page.getByRole("link", { name: "Workspace" });
-  await link.click();
+  await workspaceLink.click();
   await page.waitForURL(/\/workspace\/saved-search-queries/, {
     timeout: GOTO_TIMEOUT,
   });

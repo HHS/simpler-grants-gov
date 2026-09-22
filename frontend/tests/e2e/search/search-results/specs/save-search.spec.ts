@@ -93,7 +93,17 @@ test.describe("Saved search - restores state on reopen", () => {
         await getNumberOfOpportunitySearchResults(page);
 
       // Start on page 2 to verify pagination resets when the saved search is reopened.
-      await clickPaginationPageIfPresent(page, 2, "save-search.spec");
+      const wentToPage2 = await clickPaginationPageIfPresent(
+        page,
+        2,
+        "save-search.spec",
+      );
+      expect(
+        wentToPage2,
+        "Expected more than one page of results for this criteria set, " +
+          "to actually exercise pagination-reset-on-reopen. Adjust " +
+          "searchTerm/statusFilter or seed data so page 2 exists.",
+      ).toBe(true);
 
       // Save the search and get the confirmation modal's Workspace link.
       const workspaceLink = await saveCurrentSearch(page, savedSearchName);
