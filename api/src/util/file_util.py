@@ -315,16 +315,17 @@ def convert_public_s3_to_cdn_url(file_path: str, cdn_url: str, s3_config: S3Conf
     if not is_s3_path(file_path):
         raise ValueError(f"Expected s3:// path, got: {file_path}")
 
-    if s3_config.public_files_bucket_path not in file_path:
+    bucket_path = s3_config.public_files_bucket_path.rstrip("/")
+    if not file_path.startswith(f"{bucket_path}/"):
         # e.g. after an S3 bucket rename/migration, file_path's bucket no longer
-        # matches what's configured, so a straight str.replace() would silently
-        # return file_path unchanged instead of a real CDN url.
+        # matches what's configured. Checking the full prefix (not just a substring)
+        # avoids a similarly-named bucket silently matching.
         raise ValueError(
             f"file_path {file_path!r} does not match the configured "
             f"public bucket {s3_config.public_files_bucket_path!r}"
         )
 
-    return file_path.replace(s3_config.public_files_bucket_path, cdn_url)
+    return f"{cdn_url.rstrip('/')}{file_path[len(bucket_path):]}"
 
 
 def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None = None) -> str:
