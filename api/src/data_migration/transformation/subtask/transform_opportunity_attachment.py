@@ -3,12 +3,11 @@ import logging
 import uuid
 from collections.abc import Sequence
 
-from grants_shared.adapters.aws import S3Config
-from grants_shared.util import file_util
 from sqlalchemy.orm import defer
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
+from src.adapters.aws import S3Config
 from src.data_migration.transformation.subtask.abstract_transform_subtask import (
     AbstractTransformSubTask,
 )
@@ -16,6 +15,7 @@ from src.db.models.opportunity_models import Opportunity, OpportunityAttachment
 from src.db.models.staging.attachment import TsynopsisAttachment
 from src.services.opportunity_attachments import attachment_util
 from src.task.task import Task
+from src.util import file_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)

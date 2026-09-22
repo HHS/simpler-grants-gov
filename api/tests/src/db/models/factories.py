@@ -16,14 +16,11 @@ from datetime import datetime, timedelta, timezone
 import factory
 import factory.fuzzy
 import faker
-import grants_shared.adapters.db as db
-import grants_shared.util.datetime_util as datetime_util
 from faker.providers import BaseProvider
-from grants_shared.db.models.lookup.lookup_registry import LookupRegistry
-from grants_shared.util import file_util
 from sqlalchemy import func, select
 from sqlalchemy.orm import scoped_session
 
+import src.adapters.db as db
 import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models
@@ -37,6 +34,8 @@ import src.db.models.staging as staging
 import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
 import src.db.models.workflow_models as workflow_models
+import src.util.datetime_util as datetime_util
+import tests.src.db_test_models.db_test_models as db_test_models
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
@@ -85,8 +84,10 @@ from src.constants.static_role_values import (
 )
 from src.db.models import agency_models
 from src.db.models.agency_models import Agency
+from src.db.models.lookup.lookup_registry import LookupRegistry
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.form_schema.forms import SF424_v4_0, init_form_registry
+from src.util import file_util
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -3528,3 +3529,88 @@ class JobLockFactory(BaseFactory):
         lambda: fake.date_time_between(start_date="now", end_date="+1d", tzinfo=timezone.utc)
     )
     locked_by = Generators.UuidObj
+
+
+####################################
+# Test-only model factories
+#
+# Factories for the synthetic models in tests/src/db_test_models, which exist to
+# exercise the generic DB, lookup, and auth base classes without coupling those
+# tests to the real application tables.
+####################################
+
+
+class ExampleTableFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.ExampleTable
+
+    example_id = Generators.UuidObj
+
+    description = factory.Faker("paragraph", nb_sentences=1)
+    my_count = factory.Faker("random_int", min=1, max=10)
+
+    friends = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.FriendTableFactory",
+        factory_related_name="example",
+        size=lambda: random.randint(1, 3),
+    )
+
+
+class FriendTableFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.FriendTable
+
+    friend_id = Generators.UuidObj
+
+    example = factory.SubFactory(ExampleTableFactory)
+    example_id = factory.LazyAttribute(lambda f: f.example.example_id)
+
+    friend_types = factory.Faker(
+        "random_elements",
+        length=random.randint(1, 3),
+        elements=[f for f in db_test_models.FriendType],
+        unique=True,
+    )
+
+
+class SharedUserFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.SharedUser
+
+    shared_user_id = Generators.UuidObj
+
+
+class SharedLinkExternalUserFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.SharedLinkExternalUser
+
+    link_external_user_id = Generators.UuidObj
+    external_user_id = Generators.UuidObj
+    shared_user = factory.SubFactory(SharedUserFactory)
+    shared_user_id = factory.LazyAttribute(lambda s: s.shared_user.shared_user_id)
+    email = factory.Faker("email")
+
+
+class SharedLoginGovStateFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.SharedLoginGovState
+
+    shared_login_gov_state_id = Generators.UuidObj
+    nonce = Generators.UuidObj
+
+
+class SharedUserApiKeyFactory(BaseFactory):
+    class Meta:
+        model = db_test_models.SharedUserApiKey
+
+    shared_api_key_id = Generators.UuidObj
+
+    shared_user = factory.SubFactory(SharedUserFactory)
+    shared_user_id = factory.LazyAttribute(lambda k: k.shared_user.shared_user_id)
+
+    key_name = factory.Faker("sentence", nb_words=3)
+    key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+
+    last_used = factory.Faker("date_time_between", start_date="-30d", end_date="now")
+
+    is_active = True

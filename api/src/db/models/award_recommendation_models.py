@@ -4,9 +4,6 @@ import uuid
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from grants_shared.db.models.base import TimestampMixin
-from grants_shared.util.file_util import pre_sign_file_location
 from sqlalchemy import ForeignKey, Numeric, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, foreign, mapped_column, relationship
@@ -23,6 +20,8 @@ from src.constants.lookup_constants import (
     WorkflowType,
 )
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.base import TimestampMixin
+from src.db.models.lookup.lookup_column import LookupColumn
 from src.db.models.lookup_models import (
     LkAwardRecommendationAttachmentType,
     LkAwardRecommendationAuditEvent,
@@ -33,6 +32,7 @@ from src.db.models.lookup_models import (
     LkAwardSelectionMethod,
 )
 from src.db.models.user_models import User
+from src.util.file_util import pre_sign_file_location
 
 if TYPE_CHECKING:
     from src.db.models.competition_models import ApplicationSubmission

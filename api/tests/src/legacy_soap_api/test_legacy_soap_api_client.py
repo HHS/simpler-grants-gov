@@ -9,7 +9,6 @@ import pytest
 import pytz
 import requests
 from botocore.exceptions import ClientError
-from grants_shared.util.datetime_util import make_timezone_aware, parse_grants_gov_date
 from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
@@ -35,6 +34,7 @@ from src.legacy_soap_api.legacy_soap_api_config import (
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
+from src.util.datetime_util import make_timezone_aware, parse_grants_gov_date
 from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
@@ -751,7 +751,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
-        with patch("grants_shared.util.file_util.smart_open.open") as mock_smart_open:
+        with patch("src.util.file_util.smart_open.open") as mock_smart_open:
             mock_smart_open.side_effect = ClientError(
                 {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}},
                 "GetObject",

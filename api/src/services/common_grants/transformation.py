@@ -3,7 +3,6 @@
 import logging
 from datetime import date, datetime
 
-import grants_shared.util.datetime_util as datetime_util
 from common_grants_sdk.schemas.pydantic import (
     CustomField,
     DefaultFilter,
@@ -21,9 +20,9 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SingleDateEvent,
 )
-from grants_shared.api.response import ValidationErrorDetail
 from pydantic import ValidationError
 
+import src.util.datetime_util as datetime_util
 from src.api.common_grants.schemas.pydantic.custom_fields import (
     AdditionalInfoField,
     AgencyField,
@@ -38,6 +37,7 @@ from src.api.common_grants.schemas.pydantic.custom_fields import (
     FiscalYearField,
     LegacySerialIdField,
 )
+from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.services.common_grants.url_utils import validate_url_compatible

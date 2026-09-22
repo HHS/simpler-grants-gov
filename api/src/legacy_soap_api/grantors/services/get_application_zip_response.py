@@ -1,9 +1,8 @@
 import logging
 
-import grants_shared.adapters.db as db
 from botocore.exceptions import ClientError
-from grants_shared.util import file_util
 
+import src.adapters.db as db
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.grantors.fault_messages import MissingGrantsGovTrackingNumber
 from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, verify_certificate_access
@@ -15,6 +14,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     SOAPFaultException,
     get_application_submission_by_legacy_tracking_number,
 )
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
