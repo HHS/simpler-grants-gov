@@ -9,7 +9,6 @@ import {
   expectURLQueryParamValue,
   expectURLQueryParamValues,
   waitForURLContainsQueryParamValue,
-  waitForURLContainsQueryParamValues,
 } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
@@ -29,8 +28,6 @@ import {
   getNumberOfOpportunitySearchResults,
   getSearchInput,
   selectSortBy,
-  toggleCheckbox,
-  toggleFilterDrawer,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/searchSpecUtil";
 
