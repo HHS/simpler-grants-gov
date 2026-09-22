@@ -15,4 +15,6 @@ class ApiKeyConfig(PydanticBaseEnvConfig):
     re-derived once the plaintext key is gone.
     """
 
-    pepper: str = Field(alias="API_KEY_PEPPER")
+    # min_length rejects a blank or truncated value, which a bare str would
+    # accept - the pepper is hand-created per environment
+    pepper: str = Field(alias="API_KEY_PEPPER", min_length=32, repr=False)

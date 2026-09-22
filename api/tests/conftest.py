@@ -146,6 +146,11 @@ def set_env_var_defaults(monkeypatch_session):
     # Disable local email client in favor of mocks
     monkeypatch_session.setenv("ENABLE_LOCAL_EMAIL_CAPTURE", "FALSE")
 
+    # API keys are hashed with this pepper, so it has to be the same value for
+    # every test. A developer override would leave factory-built keys hashed
+    # with one pepper and looked up with another.
+    monkeypatch_session.setenv("API_KEY_PEPPER", "unit-test-api-key-pepper-not-a-secret")
+
 
 @pytest.fixture(scope="session", autouse=True)
 def init_new_relic_app():
