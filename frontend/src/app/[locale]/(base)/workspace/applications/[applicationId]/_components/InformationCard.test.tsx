@@ -521,3 +521,113 @@ describe("InformationCard - Download submission button visibility and content", 
     ).not.toBeInTheDocument();
   });
 });
+
+describe("InformationCard - Apply interaction events", () => {
+  const readBlobAsText = (blob: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("failed to read blob"));
+      reader.readAsText(blob);
+    });
+
+  let sendBeaconMock: jest.Mock;
+
+  beforeEach(() => {
+    sendBeaconMock = jest.fn();
+    Object.defineProperty(navigator, "sendBeacon", {
+      value: sendBeaconMock,
+      writable: true,
+    });
+  });
+
+  const baseProps = {
+    applicationSubmitHandler: jest.fn(),
+    applicationSubmitted: false,
+    opportunityName: "Test Opportunity",
+    submissionLoading: false,
+    instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
+  };
+
+  const eventDetails = {
+    application_id: "app-1",
+    competition: {
+      opportunity: { opportunity_id: "opp-1" },
+    } as unknown as Competition,
+  };
+
+  it("sends click_transfer_ownership with applicationId and opportunityId", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails({
+          ...eventDetails,
+          organization: null,
+          application_status: ApplicationStatus.IN_PROGRESS,
+          competition: {
+            ...eventDetails.competition,
+            open_to_applicants: ["organization"],
+          },
+        })}
+      />,
+    );
+
+    await user.click(screen.getByTestId("transfer-ownership-open"));
+
+    expect(sendBeaconMock).toHaveBeenCalledTimes(1);
+    const [url, blob] = sendBeaconMock.mock.calls[0] as [string, Blob];
+    expect(url).toBe("/api/events");
+    expect(JSON.parse(await readBlobAsText(blob))).toEqual({
+      name: "click_transfer_ownership",
+      properties: { applicationId: "app-1", opportunityId: "opp-1" },
+    });
+  });
+
+  it("sends click_download_application_instructions with applicationId and opportunityId", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails(eventDetails)}
+      />,
+    );
+
+    await user.click(screen.getByTestId("application-instructions-download"));
+
+    expect(sendBeaconMock).toHaveBeenCalledTimes(1);
+    const [url, blob] = sendBeaconMock.mock.calls[0] as [string, Blob];
+    expect(url).toBe("/api/events");
+    expect(JSON.parse(await readBlobAsText(blob))).toEqual({
+      name: "click_download_application_instructions",
+      properties: { applicationId: "app-1", opportunityId: "opp-1" },
+    });
+  });
+
+  it("sends click_download_application_submission_zip with applicationId and opportunityId", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails({
+          ...eventDetails,
+          application_status: ApplicationStatus.ACCEPTED,
+        })}
+      />,
+    );
+
+    await user.click(screen.getByTestId("application-submission-download"));
+
+    expect(sendBeaconMock).toHaveBeenCalledTimes(1);
+    const [url, blob] = sendBeaconMock.mock.calls[0] as [string, Blob];
+    expect(url).toBe("/api/events");
+    expect(JSON.parse(await readBlobAsText(blob))).toEqual({
+      name: "click_download_application_submission_zip",
+      properties: { applicationId: "app-1", opportunityId: "opp-1" },
+    });
+  });
+});

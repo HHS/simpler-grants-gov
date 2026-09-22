@@ -1,4 +1,5 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { postUserEvent } from "src/services/event/postUserEvent";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
 import { UserOrganization } from "src/types/userTypes";
 
@@ -26,6 +27,7 @@ import {
 } from "./StartApplicationInputs";
 
 export const StartApplicationModal = ({
+  opportunityId,
   opportunityTitle,
   modalRef,
   applicantTypes,
@@ -35,6 +37,7 @@ export const StartApplicationModal = ({
   organizationsError,
   competitionId,
 }: {
+  opportunityId: string;
   opportunityTitle: string;
   modalRef: RefObject<ModalRef | null>;
   applicantTypes: ApplicantTypes[];
@@ -137,6 +140,13 @@ export const StartApplicationModal = ({
     setSelectedOrganization("");
   }, []);
 
+  const onOpen = useCallback(() => {
+    postUserEvent({
+      name: "view_start_application_modal",
+      properties: { competitionId, opportunityId },
+    });
+  }, [competitionId, opportunityId]);
+
   const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSavedApplicationName(e.target.value);
   }, []);
@@ -157,6 +167,7 @@ export const StartApplicationModal = ({
         if (e.key === "Enter") handleSubmit();
       }}
       onClose={onClose}
+      onOpen={onOpen}
     >
       {organizationsError ? (
         <Alert

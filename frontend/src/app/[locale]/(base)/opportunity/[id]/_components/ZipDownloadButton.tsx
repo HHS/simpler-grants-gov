@@ -1,5 +1,6 @@
 "use client";
 
+import { postUserEvent } from "src/services/event/postUserEvent";
 import { downloadAttachmentsZip } from "src/utils/opportunity/zipDownloadUtils";
 
 import { useTranslations } from "next-intl";
@@ -16,7 +17,13 @@ const ZipDownloadButton = ({ opportunityId }: ZipDownloadProps) => {
 
   return (
     <Button
-      onClick={() => downloadAttachmentsZip(opportunityId)}
+      onClick={() => {
+        postUserEvent({
+          name: "click_download_opportunity_documents_zip",
+          properties: { opportunityId },
+        });
+        downloadAttachmentsZip(opportunityId);
+      }}
       outline
       type="button"
       id={`opportunity-document-button-${opportunityId}`}

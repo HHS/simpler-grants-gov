@@ -2,6 +2,7 @@
 
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
+import { postUserEvent } from "src/services/event/postUserEvent";
 import {
   ApplicantTypes,
   Competition,
@@ -19,11 +20,13 @@ import { StartApplicationModal } from "./StartApplicationModal";
 
 type StartApplicationModalControlProps = {
   competitionId: string;
+  opportunityId: string;
   opportunityTitle: string;
 };
 
 export const StartApplicationModalControl = ({
   competitionId,
+  opportunityId,
   opportunityTitle,
 }: StartApplicationModalControlProps) => {
   const modalRef = useRef<ModalRef>(null);
@@ -107,6 +110,12 @@ export const StartApplicationModalControl = ({
         opener
         disabled={organizationsLoading || competitionsLoading}
         className="usa-button"
+        onClick={() =>
+          postUserEvent({
+            name: "click_start_application",
+            properties: { competitionId, opportunityId },
+          })
+        }
       >
         {organizationsLoading || competitionsLoading ? (
           <>
@@ -122,6 +131,7 @@ export const StartApplicationModalControl = ({
       {token ? (
         <StartApplicationModal
           token={token}
+          opportunityId={opportunityId}
           opportunityTitle={opportunityTitle}
           modalRef={modalRef}
           applicantTypes={competitionApplicantTypes}

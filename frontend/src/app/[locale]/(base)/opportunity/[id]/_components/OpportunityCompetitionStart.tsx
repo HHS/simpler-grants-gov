@@ -6,9 +6,11 @@ import { Competition } from "src/types/competitionsResponseTypes";
 
 export const OpportunityCompetitionStart = ({
   competitions,
+  opportunityId,
   opportunityTitle,
 }: {
   competitions: [Competition];
+  opportunityId: string;
   opportunityTitle: string;
 }) => {
   const { checkFeatureFlag } = useFeatureFlags();
@@ -20,6 +22,7 @@ export const OpportunityCompetitionStart = ({
     return (
       <>
         <StartApplicationModalControl
+          opportunityId={opportunityId}
           opportunityTitle={opportunityTitle}
           competitionId={openCompetitions[0].competition_id}
         />
