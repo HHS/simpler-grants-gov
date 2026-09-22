@@ -104,6 +104,12 @@ test.describe("Saved search - restores state on reopen", () => {
           "searchTerm/statusFilter or seed data so page 2 exists.",
       ).toBe(true);
 
+      // On mobile, scroll to top of page to ensure save button is accessible
+      if (isMobile) {
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.waitForTimeout(300);
+      }
+
       // Save the search and get the confirmation modal's Workspace link.
       const workspaceLink = await saveCurrentSearch(page, savedSearchName);
 
