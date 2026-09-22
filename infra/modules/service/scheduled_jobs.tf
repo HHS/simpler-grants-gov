@@ -38,6 +38,34 @@ locals {
       aws_iam_role.app_service.arn
     )
   }
+
+  # Fargate occasionally has no capacity in the availability zone ECS selects,
+  # which surfaces as ECS.AmazonECSException before the container starts. AWS
+  # labels these retriable ("Please try again later or in a different
+  # availability zone"), and because no application code has run yet there is
+  # nothing to undo, so retrying is safe regardless of whether the job itself
+  # is idempotent.
+  #
+  # States.TaskFailed is deliberately excluded: Step Functions raises it when
+  # the container exits non-zero, which means the job's own logic failed.
+  # Retrying that would re-run a broken job and delay the alert.
+  ecs_run_task_retry = [
+    {
+      "ErrorEquals" : ["ECS.AmazonECSException", "ECS.ServerException"],
+      "IntervalSeconds" : 60,
+      "MaxAttempts" : 3,
+      "BackoffRate" : 2.0,
+      "JitterStrategy" : "FULL"
+    }
+  ]
+
+  ecs_run_task_catch = [
+    {
+      "ErrorEquals" : ["States.ALL"],
+      "ResultPath" : "$.error",
+      "Next" : "JobFailed"
+    }
+  ]
 }
 
 resource "aws_sfn_state_machine" "scheduled_jobs" {
@@ -84,7 +112,18 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
             ]
           }
         },
+        "Retry" : local.ecs_run_task_retry,
+        "Catch" : local.ecs_run_task_catch,
         "End" : true
+      },
+      # Terminal failure state. Its only purpose is to put the job identity and
+      # the underlying ECS error into the execution's failure Cause, so the
+      # alert names what went wrong instead of requiring someone to pull the
+      # execution history by hand.
+      "JobFailed" : {
+        "Type" : "Fail",
+        "Error" : "ScheduledJobFailed",
+        "CausePath" : "States.Format('Scheduled job {} ({}) failed in {}. Command: {}. Underlying error: {} - {}', '${each.key}', '${var.service_name}', '${var.environment_name}', '${join(" ", each.value.task_command)}', $.error.Error, $.error.Cause)"
       }
     }
   })

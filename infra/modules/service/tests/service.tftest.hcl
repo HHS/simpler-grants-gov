@@ -154,3 +154,29 @@ run "task_definition_family_matches_service_name" {
     error_message = "Task definition family must match service_name"
   }
 }
+
+run "ecs_run_task_retries_capacity_errors_but_not_task_failures" {
+  command = plan
+
+  assert {
+    condition     = contains(local.ecs_run_task_retry[0].ErrorEquals, "ECS.AmazonECSException")
+    error_message = "Must retry ECS.AmazonECSException so transient Fargate capacity errors do not fail the run"
+  }
+
+  # States.TaskFailed means the container exited non-zero, i.e. the job's own
+  # logic failed. Retrying it would re-run a broken job and delay the alert.
+  assert {
+    condition     = !contains(local.ecs_run_task_retry[0].ErrorEquals, "States.TaskFailed")
+    error_message = "Must not retry States.TaskFailed (application errors)"
+  }
+
+  assert {
+    condition     = local.ecs_run_task_catch[0].Next == "JobFailed"
+    error_message = "Failures must be caught and routed to the JobFailed state"
+  }
+
+  assert {
+    condition     = local.ecs_run_task_catch[0].ResultPath == "$.error"
+    error_message = "Caught error must be placed at $.error so JobFailed can format it into the cause"
+  }
+}
