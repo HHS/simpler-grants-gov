@@ -554,6 +554,7 @@ def _add_application(
             )
             handle_static_application_forms(existing_static_app, competition)
             return existing_static_app
+        app_params["application_id"] = static_application_id
 
     logger.info(f"Creating an {app_type} application '{application_name}'")
 
@@ -563,13 +564,7 @@ def _add_application(
         user = factories.InternalUserRoleFactory(
             role=factories.RoleFactory.create(privileges=[Privilege.START_APPLICATION])
         ).user
-    application = create_application(
-        db_session,
-        user,
-        json_data=app_params,
-    )
-    if static_application_id:
-        application.application_id = static_application_id
+    application = create_application(db_session, user, json_data=app_params)
     application.application_status = application_status
     db_session.add(application)
 
