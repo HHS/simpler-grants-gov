@@ -1,9 +1,10 @@
 import boto3
 import botocore.client
 import botocore.config
-from grants_shared.adapters.aws import get_aws_config, get_boto_session
-from grants_shared.util.env_config import PydanticBaseEnvConfig
 from pydantic import Field
+
+from src.adapters.aws import get_aws_config, get_boto_session
+from src.util.env_config import PydanticBaseEnvConfig
 
 
 class S3Config(PydanticBaseEnvConfig):

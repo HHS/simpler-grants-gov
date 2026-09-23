@@ -437,3 +437,9 @@ variable "newrelic_service_name" {
   description = "Name reported to New Relic as entity.name/hostname in forwarded logs; defaults to service_name."
   default     = null
 }
+
+variable "enable_processor_service" {
+  description = "Whether to create the task role for the always-on notification queue processor service"
+  type        = bool
+  default     = false
+}

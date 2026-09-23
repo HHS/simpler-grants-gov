@@ -6,8 +6,7 @@ including setting up data and validation.
 import uuid
 from typing import Any
 
-from grants_shared.adapters import db
-
+from src.adapters import db
 from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType
 from src.db.models.award_recommendation_models import AwardRecommendation
 from src.db.models.opportunity_models import Opportunity

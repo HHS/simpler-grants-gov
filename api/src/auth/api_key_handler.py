@@ -1,5 +1,4 @@
-from grants_shared.auth.api_key_handler import AbstractApiKeyHandler
-
+from src.auth.api_key_handler_base import AbstractApiKeyHandler
 from src.auth.auth_handler import AuthHandler
 from src.db.models.user_models import UserApiKey
 

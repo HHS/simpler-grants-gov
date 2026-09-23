@@ -46,7 +46,6 @@ dependencies = [
     "urllib3>=2.7.0,<3",
     "python-statemachine>=3.0.0,<4",
     "beautifulsoup4>=4.14.3,<5",
-    "grants-shared==0.3.1",
 ]
 
 [project.scripts]
@@ -270,6 +269,7 @@ filterwarnings = [
 markers = [
   "xml_validation: mark a test as an XML generation/validation test, to be run isolated from other tests",
   "sf424: mark a test as SF-424 form specific",
+  "audit: mark a test as a security audit log test, to be run isolated from other tests",
 ]
 
 [tool.coverage.run]
@@ -278,6 +278,8 @@ omit = [
   "src/app_config.py",
   # Migrations aren't run in tests
   "src/db/migrations/**",
+  # Decodelog is only used for formatting logs locally
+  "src/logs/decodelog.py",
 ]
 
 [tool.coverage.report]

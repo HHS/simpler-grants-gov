@@ -121,7 +121,7 @@ jobs:
       run_id: ${{ github.run_id }}
       target: ${{ inputs.target }}
   send-slack-notification:
-    if: failure()
+    if: failure() && github.event_name != 'workflow_dispatch'
     needs: [create-report]
     uses: ./.github/workflows/send-slack-notification.yml
     with:

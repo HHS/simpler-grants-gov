@@ -1,10 +1,10 @@
 import logging
 from enum import StrEnum
 
-import grants_shared.adapters.db as db
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+import src.adapters.db as db
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import (

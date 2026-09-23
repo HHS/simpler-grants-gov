@@ -6,13 +6,11 @@ import uuid
 from datetime import date
 from enum import StrEnum
 
-from grants_shared.adapters import db
-from grants_shared.adapters.aws import S3Config
-from grants_shared.adapters.db import flask_db
-from grants_shared.task.ecs_background_task import ecs_background_task
-from grants_shared.util import datetime_util, file_util
 from sqlalchemy import select
 
+from src.adapters import db
+from src.adapters.aws import S3Config
+from src.adapters.db import flask_db
 from src.constants.lookup_constants import (
     ApplicantType,
     CompetitionOpenToApplicant,
@@ -54,8 +52,10 @@ from src.form_schema.forms import (
     get_active_forms,
 )
 from src.services.opportunity_attachments.attachment_util import get_s3_attachment_path
+from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
+from src.util import datetime_util, file_util
 
 logger = logging.getLogger(__name__)
 

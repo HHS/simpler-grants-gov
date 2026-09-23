@@ -15,10 +15,10 @@ from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
-from grants_shared.auth.auth_handler import AbstractAuthHandler
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from src.auth.auth_handler_base import AbstractAuthHandler
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.user_models import (
     LinkExternalUser,

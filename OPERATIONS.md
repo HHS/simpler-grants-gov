@@ -336,6 +336,33 @@ To sign the JWTs the API uses to track authentication with requests from the FE 
 2. Set them in the /api/<env>/api-jwt-private-key and /api/<env>/api-jwt-public-key parameters in the Parameter Store.
 3. Force redeploy the API Service to pick up the new values.
 
+## API Key Pepper
+
+User API keys are stored as an HMAC-SHA256 hash rather than plaintext. The key for that HMAC (the pepper) is held in Parameter Store, outside the database, so that read access to the database alone isn't enough to brute force the stored hashes.
+
+This is the one secret we deliberately never rotate. Changing a pepper invalidates every hash already stored in that environment, and those hashes cannot be re-derived because the plaintext key is no longer kept anywhere. Treat `/api/<env>/api-key-pepper` as write-once per environment.
+
+To provision it in a new environment:
+
+1. Generate a value: `openssl rand -hex 32`.
+2. Store it as a `SecureString`: `aws ssm put-parameter --name "/api/<env>/api-key-pepper" --type SecureString --value "<value>"`.
+3. Force redeploy the API Service to pick up the value.
+
+Because the parameter is referenced with `manage_method = "manual"`, Terraform reads it through a `data` source — `terraform apply` fails outright in any environment where the parameter does not yet exist, so create it before the next API deploy. The ten environments that are stood up today each need one:
+
+| AWS account | Environments |
+| --- | --- |
+| `simpler-grants-gov` | `dev`, `staging`, `prod`, `training`, `grantee1`, `grantee2`, `grantor1` |
+| dev (`061664787759`) | `infra-dev` |
+| staging (`317380566348`) | `infra-staging` |
+| training (`049145893907`) | `infra-training` |
+
+`infra-grantee1`, `infra-grantee2`, and `infra-grantor1` are configured in `infra/api/app-config/` but not serving traffic, so they are skipped here. Whoever stands one up provisions the whole `secrets` block for it, this parameter included.
+
+`grantee1`, `grantee2`, and `grantor1` must be set to staging's pepper, not their own. Those environments restore their database from the staging snapshot, so a distinct pepper would leave every restored key hash unresolvable. `.github/scripts/copy-ssm-params.sh` keeps them in sync on each run (`api-key-pepper` is intentionally not in its `SKIP_PARAMS` list), but that sync happens after the API deploy in the team-environment flow, so the parameter still has to pre-exist.
+
+Locally and in tests the pepper comes from `API_KEY_PEPPER` in `api/local.env`, which is a fixed placeholder, not a real secret.
+
 ## New Relic
 
 There are three ways to interact with New Relic: UI, CLI, or API. Most interactions will be done via the UI.

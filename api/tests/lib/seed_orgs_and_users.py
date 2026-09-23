@@ -2,11 +2,10 @@ import logging
 import uuid
 import zipfile
 
-import grants_shared.adapters.db as db
 from faker import Faker
-from grants_shared.util import file_util
 from sqlalchemy import select
 
+import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import (
     ApplicationStatus,
@@ -39,6 +38,7 @@ from src.services.applications.application_validation import (
     validate_application_form,
 )
 from src.services.applications.create_application import create_application
+from src.util import file_util
 from tests.lib.legacy_user_test_utils import create_legacy_user_with_status
 from tests.lib.seed_data_utils import CompetitionContainer, UserBuilder
 

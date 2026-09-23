@@ -2,12 +2,12 @@ import logging
 import uuid
 from collections.abc import Sequence
 
-import grants_shared.adapters.db as db
-from grants_shared.api.response import ValidationErrorDetail
-from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+import src.adapters.db as db
+from src.api.response import ValidationErrorDetail
+from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import AwardRecommendationAuditEvent, Privilege
 from src.db.models.award_recommendation_models import (
