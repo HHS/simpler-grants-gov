@@ -1,13 +1,13 @@
 name: Release Deploy
-run-name: Release Deploy ${{ inputs.version || github.ref_name }} to ${{ github.event_name == 'release' && 'prod + training' || inputs.environment }}
+run-name: Release Deploy ${{ inputs.version || github.ref_name }} to ${{ github.event_name == 'release' && 'prod + infra-training' || inputs.environment }}
 
 # This workflow orchestrates deployments across all services in a specific order:
 # API first, then FE and Analytics after API.
 # Skip NOFOs (at least for now).
 #
-# For releases (prod + training), all prod services deploy first, then all
-# training services. This ensures prod is fully deployed and verified before
-# training begins.
+# For releases (prod + infra-training), all prod services deploy first, then all
+# infra-training services. This ensures prod is fully deployed and verified
+# before infra-training begins.
 #
 # The git ref that is built and deployed is determined as follows:
 #   - release event: the published release's tag (github.ref)
@@ -167,17 +167,17 @@ jobs:
       version: ${{ inputs.version || github.ref }}
 
   # =====================================================
-  # PHASE 3: Deploy to training (release only)
+  # PHASE 3: Deploy to infra-training (release only)
   #
   # Only runs for release events. Waits for ALL prod deploys to complete
   # before starting. Same order: API first, then Frontend + Analytics.
-  # If any prod deploy fails, training deploys are skipped.
+  # If any prod deploy fails, infra-training deploys are skipped.
   # =====================================================
 
-  # 4. Deploy API to training after all prod deploys complete
+  # 4. Deploy API to infra-training after all prod deploys complete
   deploy-api-training:
     if: ${{ github.event_name == 'release' }}
-    name: Deploy API (training)
+    name: Deploy API (infra-training)
     needs:
       [
         api-checks,
@@ -189,30 +189,30 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "api"
-      environment: "training"
+      environment: "infra-training"
       version: ${{ inputs.version || github.ref }}
 
-  # 5. Deploy Frontend to training after training API completes
+  # 5. Deploy Frontend to infra-training after infra-training API completes
   deploy-frontend-training:
     if: ${{ github.event_name == 'release' }}
-    name: Deploy Frontend (training)
+    name: Deploy Frontend (infra-training)
     needs: [frontend-checks, frontend-vulnerability-scans, deploy-api-training]
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "frontend"
-      environment: "training"
+      environment: "infra-training"
       version: ${{ inputs.version || github.ref }}
 
-  # 6. Deploy Analytics to training after training API completes
+  # 6. Deploy Analytics to infra-training after infra-training API completes
   deploy-analytics-training:
     if: ${{ github.event_name == 'release' }}
-    name: Deploy Analytics (training)
+    name: Deploy Analytics (infra-training)
     needs:
       [analytics-checks, analytics-vulnerability-scans, deploy-api-training]
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "analytics"
-      environment: "training"
+      environment: "infra-training"
       version: ${{ inputs.version || github.ref }}
 
   # =====================================================
