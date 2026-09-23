@@ -2,8 +2,6 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING
 
-from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from grants_shared.db.models.base import TimestampMixin
 from sqlalchemy import BigInteger, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -19,6 +17,8 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.agency_models import Agency
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.base import TimestampMixin
+from src.db.models.lookup.lookup_column import LookupColumn
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,

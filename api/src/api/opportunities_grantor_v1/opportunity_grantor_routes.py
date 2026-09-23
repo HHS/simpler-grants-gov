@@ -1,16 +1,15 @@
 import logging
 from uuid import UUID
 
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
-import grants_shared.api.response as response
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
 import src.api.opportunities_grantor_v1.opportunity_grantor_schemas as opportunity_grantor_schemas
+import src.api.response as response
 from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
     opportunity_grantor_blueprint,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_grantor_v1.competition_creation import create_competition
 from src.services.opportunities_grantor_v1.competition_instruction_upload import (
     delete_competition_instruction,

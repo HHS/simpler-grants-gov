@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 import pytest
-from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
@@ -16,6 +15,7 @@ from src.task.notifications.closing_date_notification import ClosingDateNotifica
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
+from src.util import datetime_util
 from tests.lib.db_testing import cascade_delete_from_db_table
 
 

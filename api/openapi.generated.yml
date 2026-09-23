@@ -15053,6 +15053,10 @@ components:
       - message
       - status_code
   securitySchemes:
+    ApiUserKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
     InternalApiJwtAuth:
       type: apiKey
       in: header
@@ -15061,8 +15065,4 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-    ApiUserKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
 

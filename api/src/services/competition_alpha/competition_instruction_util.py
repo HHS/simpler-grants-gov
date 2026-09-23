@@ -1,9 +1,8 @@
 import uuid
 
-from grants_shared.adapters.aws import S3Config
-from grants_shared.util import file_util
-
+from src.adapters.aws import S3Config
 from src.db.models.competition_models import Competition
+from src.util import file_util
 
 
 def get_s3_competition_instruction_path(

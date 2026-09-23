@@ -2,13 +2,13 @@ import logging
 import uuid
 
 import alembic.command as command
-import grants_shared.adapters.db as db
 import pytest
 import sqlalchemy
 from alembic.script import ScriptDirectory
 from alembic.script.revision import MultipleHeads
 from alembic.util.exc import CommandError
 
+import src.adapters.db as db
 from src.db.migrations.run import (
     alembic_cfg,
     enable_query_error_logging,

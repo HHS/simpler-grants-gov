@@ -3,8 +3,7 @@ import logging
 import time
 from typing import Any
 
-import grants_shared.adapters.db as db
-
+import src.adapters.db as db
 from src.task.task import Task
 
 logger = logging.getLogger(__name__)

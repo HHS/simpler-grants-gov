@@ -5,19 +5,19 @@ import string
 from collections.abc import Sequence
 from datetime import date
 
-import grants_shared.adapters.db as db
-from grants_shared.adapters.db import flask_db
-from grants_shared.task.ecs_background_task import ecs_background_task
-from grants_shared.util import datetime_util
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+import src.adapters.db as db
+from src.adapters.db import flask_db
 from src.constants.lookup_constants import AgencySubmissionNotificationSetting, JobType
 from src.constants.static_role_values import OPPORTUNITY_PUBLISHER
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import AgencyUser, AgencyUserRole, Role, User, UserType
+from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
+from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 
