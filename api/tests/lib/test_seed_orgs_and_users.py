@@ -3,34 +3,36 @@ from unittest.mock import patch
 
 from sqlalchemy import select
 
-from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
+from src.constants.lookup_constants import (
+    ApplicationAuditEvent,
+    ApplicationFormStatus,
+    ApplicationStatus,
+)
 from src.constants.static_role_values import APPLICATION_OWNER
 from src.db.models.competition_models import ApplicationSubmission
 from src.db.models.user_models import ApplicationUser
-from src.services.applications.application_validation import ApplicationAction
 from tests.lib.seed_orgs_and_users import _add_application
 from tests.src.db.models.factories import CompetitionFactory, OrganizationFactory, UserFactory
 
 
-def test_application_created_audit_event_when_add_application_is_called(
+def test_static_application_id_is_assigned_when_add_application_is_called(
     db_session, enable_factory_create, caplog
 ):
     app_owner = UserFactory.create()
     competition = CompetitionFactory.create()
+    static_id = uuid.uuid4()
     application = _add_application(
         db_session,
         competition,
         "XYZ",
         app_owner,
+        static_application_id=static_id,
         application_status=ApplicationStatus.IN_PROGRESS,
     )
-    assert len(application.application_audits) == 2
-    events = [x.application_audit_event for x in application.application_audits]
-    assert ApplicationAuditEvent.APPLICATION_CREATED in events
-    assert application.application_status == ApplicationStatus.IN_PROGRESS
+    assert application.application_id == static_id
 
 
-def test_user_added_audit_event_when_user_is_added_as_owner_to_application_when_add_application_called(
+def test_audit_events_and_ownership_when_user_adds_application(
     db_session, enable_factory_create, caplog
 ):
     app_owner = UserFactory.create()
@@ -85,19 +87,15 @@ def test_application_status_can_be_set_to_submitted_when_add_application_called(
     organization = OrganizationFactory.create()
     app_owner = organization
     competition = CompetitionFactory.create()
-    # If the application is in SUBMITTED status then the forms will be validated
-    with patch("tests.lib.seed_orgs_and_users.validate_application_form") as mock_validate_form:
-        application = _add_application(
-            db_session,
-            competition,
-            "XYZ",
-            app_owner=app_owner,
-            application_status=ApplicationStatus.SUBMITTED,
-        )
-    assert len(application.application_forms) == 1
-    mock_validate_form.assert_called_once_with(
-        application.application_forms[0], ApplicationAction.SUBMIT
+    application = _add_application(
+        db_session,
+        competition,
+        "XYZ",
+        app_owner=app_owner,
+        application_status=ApplicationStatus.SUBMITTED,
     )
+    application_form = application.application_forms[0]
+    assert application_form.application_form_status == ApplicationFormStatus.IN_PROGRESS
     assert application.application_status == ApplicationStatus.SUBMITTED
 
 
