@@ -37,14 +37,14 @@ import {
   toggleFilterDrawer,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/utils/search/searchSpecUtil";
- 
+
 const { SMOKE, GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
- 
+
 const { baseUrl, targetEnv } = playwrightEnv;
 const GOTO_TIMEOUT = targetEnv !== "local" ? 300000 : 60000;
 
 const sortValue = "awardCeilingDesc";
- 
+
 test.describe("Saved search - restores state on reopen", () => {
   test(
     "reopening a saved search resets pagination to page 1",
@@ -53,7 +53,7 @@ test.describe("Saved search - restores state on reopen", () => {
       test.setTimeout(300_000);
       const isMobile = !!testInfo.project.name.match(/[Mm]obile/);
       const savedSearchName = `E2E Save Search Restore Pagination ${Date.now()}`;
- 
+
       /**
        * @background
        * Given I am logged in
@@ -68,24 +68,24 @@ test.describe("Saved search - restores state on reopen", () => {
       });
       await waitForSearchResultsInitialLoad(page);
 
-       // On mobile, sort is accessed via the filter drawer, so open it first
+      // On mobile, sort is accessed via the filter drawer, so open it first
       if (isMobile) {
         await ensureFilterDrawerOpen(page);
       }
- 
+
       // Apply a sort order
       await selectSortBy(page, sortValue, isMobile, testInfo.project.name);
       await waitForURLContainsQueryParamValue(page, "sortby", sortValue);
- 
+
       // Close the drawer on mobile so it stops intercepting clicks on the results below it
       if (isMobile) {
         await toggleFilterDrawer(page);
       }
- 
+
       // Capture the result count to verify the saved search returns matching results.
       const expectedResultCount =
         await getNumberOfOpportunitySearchResults(page);
- 
+
       // Start on page 2 to verify pagination resets when the saved search is reopened.
       const wentToPage2 = await clickPaginationPageIfPresent(
         page,
@@ -99,31 +99,31 @@ test.describe("Saved search - restores state on reopen", () => {
           "failing, the local/CI/staging seed data no longer has enough " +
           "posted/forecasted opportunities - see file header comment.",
       ).toBe(true);
- 
+
       // On mobile, scroll to top of page to ensure save button is accessible
       if (isMobile) {
         await page.evaluate(() => window.scrollTo(0, 0));
         await page.waitForTimeout(300);
       }
- 
+
       // Save the search and get the confirmation modal's Workspace link.
       const workspaceLink = await saveCurrentSearch(page, savedSearchName);
- 
+
       /**
        * @when I reopen the saved search
        */
       await navigateToSavedSearches(page, workspaceLink);
- 
+
       // Verify the saved search is listed in the workspace.
       const savedSearchListLink = page.getByRole("link", {
         name: savedSearchName,
         exact: true,
       });
       await expect(savedSearchListLink).toBeVisible();
- 
+
       // Reopen the saved search - the list item's name link is the "Run" affordance
       await runSavedSearch(page, savedSearchName);
- 
+
       /**
        * And pagination should reset to page 1
        */
@@ -138,7 +138,7 @@ test.describe("Saved search - restores state on reopen", () => {
           /page 1/i,
         );
       }
- 
+
       /**
        * And the results should match the search that was saved
        */
@@ -281,4 +281,3 @@ test.describe("Saved search - restores state on reopen", () => {
     },
   );
 });
-
