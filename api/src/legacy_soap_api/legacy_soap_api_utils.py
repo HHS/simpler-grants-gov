@@ -8,15 +8,13 @@ from enum import StrEnum
 from typing import Any
 
 import flask
-import grants_shared.adapters.db as db
 import requests
 from defusedxml import minidom
-from grants_shared.adapters.aws import S3Config
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-from grants_shared.util import file_util
 from lxml import etree
 from sqlalchemy import exists, select
 
+import src.adapters.db as db
+from src.adapters.aws import S3Config
 from src.db.models.competition_models import (
     ApplicationSubmission,
     ApplicationSubmissionRetrieved,
@@ -27,6 +25,8 @@ from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.soap_payload_handler import extract_soap_xml
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 

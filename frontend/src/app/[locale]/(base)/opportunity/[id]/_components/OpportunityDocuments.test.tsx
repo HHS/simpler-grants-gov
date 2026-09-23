@@ -37,4 +37,24 @@ describe("OpportunityDocuments", () => {
     expect(otherLink).toBeInTheDocument();
     expect(otherLink).toHaveAttribute("href", "https://example.com");
   });
+
+  it("renders the filename as plain text, not a link, when download_path is unavailable", () => {
+    render(
+      <OpportunityDocuments
+        opportunityId="63588df8-f2d1-44ed-a201-5804abba696a"
+        documents={[
+          {
+            file_name: "Unavailable.pdf",
+            download_path: null,
+            updated_at: "2021-10-01T00:00:00Z",
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("Unavailable.pdf")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Unavailable.pdf" }),
+    ).not.toBeInTheDocument();
+  });
 });

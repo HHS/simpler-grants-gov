@@ -1,11 +1,3 @@
-from grants_shared.db.models.base import TimestampMixin
-from grants_shared.db.models.lookup import (
-    Lookup,
-    LookupConfig,
-    LookupRegistry,
-    LookupStr,
-    LookupTable,
-)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.constants.lookup_constants import (
@@ -46,6 +38,8 @@ from src.constants.lookup_constants import (
     WorkflowType,
 )
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.base import TimestampMixin
+from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
 
 OPPORTUNITY_STATUS_CONFIG: LookupConfig[OpportunityStatus] = LookupConfig(
     [

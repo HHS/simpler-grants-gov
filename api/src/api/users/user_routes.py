@@ -2,20 +2,16 @@ import logging
 from uuid import UUID
 
 import flask
-from grants_shared.adapters import db
-from grants_shared.adapters.db import flask_db
-from grants_shared.api import response
-from grants_shared.api.route_utils import raise_flask_error
-from grants_shared.auth.api_jwt_auth import refresh_token_expiration
-from grants_shared.auth.login_gov_jwt_auth import (
+
+import src.adapters.search.flask_opensearch as flask_opensearch
+from src.adapters import db, search
+from src.adapters.db import flask_db
+from src.adapters.oauth.login_gov.login_gov_jwt import (
     get_final_logout_redirect_uri,
     get_final_redirect_uri,
 )
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-from grants_shared.util.dict_util import flatten_dict
-
-import src.adapters.search.flask_opensearch as flask_opensearch
-from src.adapters import search
+from src.api import response
+from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
@@ -63,12 +59,14 @@ from src.auth.auth_utils import (
     with_login_redirect_error_handler,
     with_logout_redirect_error_handler,
 )
+from src.auth.jwt import refresh_token_expiration
 from src.auth.login_gov_jwt_auth import (
     get_login_gov_logout_redirect_uri,
     get_login_gov_redirect_uri,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.db.models.user_models import UserTokenSession
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.users.create_api_key import create_api_key
 from src.services.users.create_saved_opportunity import create_saved_opportunity
 from src.services.users.create_saved_search import create_saved_search
@@ -100,6 +98,7 @@ from src.services.users.set_saved_opportunity_notification_settings import (
 from src.services.users.update_saved_searches import update_saved_search
 from src.services.users.update_user_profile import update_user_profile
 from src.services.users.user_can_access import check_user_can_access
+from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 

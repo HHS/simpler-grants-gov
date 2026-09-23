@@ -18,14 +18,13 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from grants_shared.adapters import db
-from grants_shared.adapters.db import flask_db
-from grants_shared.task.ecs_background_task import ecs_background_task
-
+from src.adapters import db
+from src.adapters.db import flask_db
 from src.constants.lookup_constants import JobType
 from src.form_schema.forms import init_form_registry
 from src.services.xml_generation.config import _build_xml_form_xsd_url_map
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
+from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
 from src.task.xsd_drift.config import XsdDriftConfig, get_xsd_drift_config

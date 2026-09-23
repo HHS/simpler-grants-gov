@@ -3,9 +3,10 @@ from typing import Any
 
 import boto3
 import botocore.client
-from grants_shared.adapters.aws import get_aws_config, get_boto_session
-from grants_shared.util.env_config import PydanticBaseEnvConfig
 from pydantic import BaseModel, Field
+
+from src.adapters.aws import get_aws_config, get_boto_session
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,9 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
 from pydantic import Field
 
+import src.adapters.db as db
 from src.constants.static_role_values import (
     E2E_TEST_USER_MANAGER_ROLE,
     OPPORTUNITY_PUBLISHER,

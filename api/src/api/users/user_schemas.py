@@ -1,10 +1,6 @@
 from enum import StrEnum
 from typing import Any
 
-from grants_shared.api.schemas.extension import Schema, fields, validators
-from grants_shared.api.schemas.response_schema import AbstractResponseSchema
-from grants_shared.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
-from grants_shared.pagination.pagination_schema import generate_pagination_schema
 from marshmallow import pre_dump
 
 from src.api.opportunities_v1.opportunity_schemas import (
@@ -12,6 +8,9 @@ from src.api.opportunities_v1.opportunity_schemas import (
     SavedOpportunityResponseV1Schema,
 )
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
+from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicationStatus,
     ExternalUserType,
@@ -26,6 +25,7 @@ from src.db.models.user_models import (
     LinkExternalUser,
     OrganizationUserRole,
 )
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class ResourceSchema(StrEnum):

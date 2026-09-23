@@ -3,25 +3,26 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from grants_shared.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
-from grants_shared.adapters.oauth.oauth_client_models import OauthTokenRequest
-from grants_shared.api.route_utils import raise_flask_error
-from grants_shared.auth.api_jwt_auth import JwtAuth
-from grants_shared.auth.auth_errors import JwtValidationError
-from grants_shared.auth.auth_handler import AbstractAuthHandler
-from grants_shared.auth.login_gov_jwt_auth import (
+from pydantic import BaseModel
+
+from src.adapters.oauth.login_gov.login_gov_jwt import (
     LoginGovUser,
     get_login_gov_client_assertion,
     validate_token,
 )
-from grants_shared.db.models.auth_base_models import (
+from src.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
+from src.adapters.oauth.oauth_client_models import OauthTokenRequest
+from src.api.route_utils import raise_flask_error
+from src.auth.auth_errors import JwtValidationError
+from src.auth.auth_handler_base import AbstractAuthHandler
+from src.auth.jwt import JwtAuth
+from src.db.models.auth_base_models import (
     BaseLinkExternalUser,
     BaseLoginGovState,
     BaseUser,
     BaseUserTokenSession,
 )
-from grants_shared.util.string_utils import is_valid_uuid
-from pydantic import BaseModel
+from src.util.string_utils import is_valid_uuid
 
 logger = logging.getLogger(__name__)
 
