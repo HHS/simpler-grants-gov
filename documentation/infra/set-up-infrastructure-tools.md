@@ -65,10 +65,10 @@ active before you run any AWS CLI, Terraform, or `bin/` command.
 
 | Environment | Account name | Profile |
 | --- | --- | --- |
-| `infra-dev`, `infra-grantee1`, `infra-grantee2`, `infra-grantor1` | `dev` | `dev` |
+| `infra-dev`, `infra-grantee1`, `infra-grantee2`, `infra-sgg1` | `dev` | `dev` |
 | `infra-staging` | `staging` | `staging` |
 | `infra-training` | `training` | `training` |
-| `prod`, `shared`, `grantee1`, `grantee2`, `grantor1` | `simpler-grants-gov` | `prod` |
+| `prod`, `shared`, `grantee1`, `grantee2`, `sgg1` | `simpler-grants-gov` | `prod` |
 
 The source of truth for this mapping is `account_names_by_environment` in
 [`infra/api/app-config/main.tf`](../../infra/api/app-config/main.tf).

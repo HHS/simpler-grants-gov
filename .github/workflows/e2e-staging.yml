@@ -15,7 +15,7 @@ on:
           - staging
           - grantee1
           - grantee2
-          - grantor1
+          - sgg1
           - grantor2
       playwright_tags:
         description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
@@ -81,7 +81,7 @@ jobs:
           fi
       - name: Check target environment
         run: |
-          if [[ "${{ env.defaulted_target }}" != "staging" && "${{ env.defaulted_target }}" != "grantee1" && "${{ env.defaulted_target }}" != "grantee2" && "${{ env.defaulted_target }}" != "grantor1" && "${{ env.defaulted_target }}" != "grantor2" ]]; then
+          if [[ "${{ env.defaulted_target }}" != "staging" && "${{ env.defaulted_target }}" != "grantee1" && "${{ env.defaulted_target }}" != "grantee2" && "${{ env.defaulted_target }}" != "sgg1" && "${{ env.defaulted_target }}" != "grantor2" ]]; then
             echo "Unsupported target environment"
             exit 1
           fi

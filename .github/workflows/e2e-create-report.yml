@@ -64,7 +64,7 @@ jobs:
           fi
       - name: Check target environment
         run: |
-          if [[ "${{ env.defaulted_target }}" != "local" && "${{ env.defaulted_target }}" != "staging" && "${{ env.defaulted_target }}" != "grantee1" && "${{ env.defaulted_target }}" != "grantee2" && "${{ env.defaulted_target }}" != "grantor1" && "${{ env.defaulted_target }}" != "grantor2" ]]; then
+          if [[ "${{ env.defaulted_target }}" != "local" && "${{ env.defaulted_target }}" != "staging" && "${{ env.defaulted_target }}" != "grantee1" && "${{ env.defaulted_target }}" != "grantee2" && "${{ env.defaulted_target }}" != "sgg1" && "${{ env.defaulted_target }}" != "grantor2" ]]; then
             echo "Unsupported target environment"
             exit 1
           fi

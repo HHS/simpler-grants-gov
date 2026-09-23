@@ -1,26 +1,26 @@
-module "grantor1_config" {
+module "sgg1_config" {
   source                            = "./env-config"
   project_name                      = local.project_name
   app_name                          = local.app_name
   default_region                    = module.project_config.default_region
-  environment                       = "grantor1"
-  network_name                      = "grantor1"
-  domain_name                       = "api.grantor1.teams.simpler.grants.gov"
-  secondary_domain_names            = ["alb.grantor1.teams.simpler.grants.gov"]
-  s3_cdn_domain_name                = "files.grantor1.teams.simpler.grants.gov"
-  mtls_domain_name                  = "soap.grantor1.teams.simpler.grants.gov"
+  environment                       = "sgg1"
+  network_name                      = "sgg1"
+  domain_name                       = "api.sgg1.teams.simpler.grants.gov"
+  secondary_domain_names            = ["alb.sgg1.teams.simpler.grants.gov"]
+  s3_cdn_domain_name                = "files.sgg1.teams.simpler.grants.gov"
+  mtls_domain_name                  = "soap.sgg1.teams.simpler.grants.gov"
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
   database_engine_version           = "17.7"
-  database_newrelic_entity_guid     = "" # Populate once the New Relic entity for the grantor1 RDS cluster exists
+  database_newrelic_entity_guid     = "" # Populate once the New Relic entity for the sgg1 RDS cluster exists
   database_deletion_protection      = false
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
   enable_notifications              = local.enable_notifications
-  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the grantor1 primary ALB exists
-  service_newrelic_mtls_entity_guid = "" # Populate once the New Relic entity for the grantor1 mTLS ALB exists
-  api_host_newrelic_entity_guid     = "" # Populate once the New Relic entity for the grantor1 ECS service host exists
+  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the sgg1 primary ALB exists
+  service_newrelic_mtls_entity_guid = "" # Populate once the New Relic entity for the sgg1 mTLS ALB exists
+  api_host_newrelic_entity_guid     = "" # Populate once the New Relic entity for the sgg1 ECS service host exists
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1
@@ -59,7 +59,7 @@ module "grantor1_config" {
     RESET_EMAILS_WITHOUT_SENDING = "true"
 
     # PDF Generation - Staging overrides
-    FRONTEND_URL             = "https://grantor1.teams.simpler.grants.gov"
+    FRONTEND_URL             = "https://sgg1.teams.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
 

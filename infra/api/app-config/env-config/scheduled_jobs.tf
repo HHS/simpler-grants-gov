@@ -102,7 +102,7 @@ locals {
       "--set-current",
       "--store-version"
     ],
-    grantor1 = [
+    sgg1 = [
       "flask",
       "data-migration",
       "load-transform",
@@ -111,8 +111,8 @@ locals {
       "--set-current",
       "--store-version"
     ],
-    # Mirrors grantor1.
-    "infra-grantor1" = [
+    # Mirrors sgg1.
+    "infra-sgg1" = [
       "flask",
       "data-migration",
       "load-transform",
@@ -169,8 +169,8 @@ locals {
     "infra-grantee1" = ["flask", "task", "sam-extracts"]
     grantee2         = ["flask", "task", "sam-extracts"]
     "infra-grantee2" = ["flask", "task", "sam-extracts"]
-    grantor1         = ["flask", "task", "sam-extracts"]
-    "infra-grantor1" = ["flask", "task", "sam-extracts"]
+    sgg1             = ["flask", "task", "sam-extracts"]
+    "infra-sgg1"     = ["flask", "task", "sam-extracts"]
     prod             = ["flask", "task", "sam-extracts"]
   }
   setup-lower-env-agencies-state = {
@@ -184,8 +184,8 @@ locals {
     "infra-grantee1" = "DISABLED"
     grantee2         = "DISABLED"
     "infra-grantee2" = "DISABLED"
-    grantor1         = "DISABLED"
-    "infra-grantor1" = "DISABLED"
+    sgg1             = "DISABLED"
+    "infra-sgg1"     = "DISABLED"
     prod             = "DISABLED"
   }
   build-automatic-opportunities-state = {
@@ -199,8 +199,8 @@ locals {
     "infra-grantee1" = "DISABLED"
     grantee2         = "DISABLED"
     "infra-grantee2" = "DISABLED"
-    grantor1         = "DISABLED"
-    "infra-grantor1" = "DISABLED"
+    sgg1             = "DISABLED"
+    "infra-sgg1"     = "DISABLED"
     prod             = "DISABLED"
   }
   load-transform-state = {
@@ -214,8 +214,8 @@ locals {
     "infra-grantee1" = "ENABLED"
     grantee2         = "ENABLED"
     "infra-grantee2" = "ENABLED"
-    grantor1         = "ENABLED"
-    "infra-grantor1" = "ENABLED"
+    sgg1             = "ENABLED"
+    "infra-sgg1"     = "ENABLED"
     prod             = "ENABLED"
   }
   sam-extracts-state = {
@@ -229,8 +229,8 @@ locals {
     "infra-grantee1" = "ENABLED"
     grantee2         = "ENABLED"
     "infra-grantee2" = "ENABLED"
-    grantor1         = "ENABLED"
-    "infra-grantor1" = "ENABLED"
+    sgg1             = "ENABLED"
+    "infra-sgg1"     = "ENABLED"
     prod             = "ENABLED"
   }
   create-analytics-db-csvs-state = {
@@ -244,8 +244,8 @@ locals {
     "infra-grantee1" = "ENABLED"
     grantee2         = "ENABLED"
     "infra-grantee2" = "ENABLED"
-    grantor1         = "ENABLED"
-    "infra-grantor1" = "ENABLED"
+    sgg1             = "ENABLED"
+    "infra-sgg1"     = "ENABLED"
     prod             = "ENABLED"
   }
   email-notification-opportunity-state = {
@@ -259,8 +259,8 @@ locals {
     "infra-grantee1" = "DISABLED"
     grantee2         = "DISABLED"
     "infra-grantee2" = "DISABLED"
-    grantor1         = "DISABLED"
-    "infra-grantor1" = "DISABLED"
+    sgg1             = "DISABLED"
+    "infra-sgg1"     = "DISABLED"
     prod             = "ENABLED"
   }
   scheduled_jobs = {

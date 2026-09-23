@@ -93,7 +93,7 @@ runs:
       env:
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
       run: |
-        if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" && $PLAYWRIGHT_TARGET_ENV != "grantor1" && $PLAYWRIGHT_TARGET_ENV != "grantor2" && $PLAYWRIGHT_TARGET_ENV != "grantee1" && $PLAYWRIGHT_TARGET_ENV != "grantee2" ]]; then echo "invalid e2e test target provided" && exit 1; fi
+        if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" && $PLAYWRIGHT_TARGET_ENV != "sgg1" && $PLAYWRIGHT_TARGET_ENV != "grantor2" && $PLAYWRIGHT_TARGET_ENV != "grantee1" && $PLAYWRIGHT_TARGET_ENV != "grantee2" ]]; then echo "invalid e2e test target provided" && exit 1; fi
 
     - name: Check out code
       uses: actions/checkout@v6
@@ -146,9 +146,9 @@ runs:
         if [[ ${{ inputs.target }} = "staging" ]]; then
           echo "base_url=https://staging.simpler.grants.gov" >> "$GITHUB_ENV"
           echo "api_url=https://api.staging.simpler.grants.gov" >> "$GITHUB_ENV"
-        elif [[ ${{ inputs.target }} = "grantor1" ]]; then
-          echo "base_url=https://grantor1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
-          echo "api_url=https://api.grantor1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+        elif [[ ${{ inputs.target }} = "sgg1" ]]; then
+          echo "base_url=https://sgg1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
+          echo "api_url=https://api.sgg1.teams.simpler.grants.gov" >> "$GITHUB_ENV"
         elif [[ ${{ inputs.target }} = "grantor2" ]]; then
           echo "base_url=https://grantor2.teams.simpler.grants.gov" >> "$GITHUB_ENV"
           echo "api_url=https://api.grantor2.teams.simpler.grants.gov" >> "$GITHUB_ENV"

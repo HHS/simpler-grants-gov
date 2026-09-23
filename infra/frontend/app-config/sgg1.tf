@@ -1,11 +1,11 @@
-module "grantor1_config" {
+module "sgg1_config" {
   source                          = "./env-config"
   project_name                    = local.project_name
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
-  environment                     = "grantor1"
-  network_name                    = "grantor1"
-  domain_name                     = "grantor1.teams.simpler.grants.gov"
+  environment                     = "sgg1"
+  network_name                    = "sgg1"
+  domain_name                     = "sgg1.teams.simpler.grants.gov"
   enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
@@ -25,8 +25,8 @@ module "grantor1_config" {
   instance_cpu    = 1024
   instance_memory = 2048
 
-  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the grantor1 frontend ALB exists
-  service_host_newrelic_entity_guid = "" # Populate once the New Relic browser entity for the grantor1 frontend exists
+  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the sgg1 frontend ALB exists
+  service_host_newrelic_entity_guid = "" # Populate once the New Relic browser entity for the sgg1 frontend exists
 
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.

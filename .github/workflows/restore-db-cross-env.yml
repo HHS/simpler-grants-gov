@@ -8,13 +8,13 @@ run-name: Seed ${{ inputs.target_environment }} DB from ${{ inputs.source_enviro
 # which stays as-is until cutover. The two cover different topologies:
 #
 #   restore-db-from-snapshot.yml  (existing, unchanged)
-#     api-staging -> grantee1 / grantee2 / grantor1
+#     api-staging -> grantee1 / grantee2 / sgg1
 #     All in account 315341936575. Same account, so it authenticates ONCE and
 #     restores an automated snapshot directly.
 #
 #   restore-db-cross-env.yml      (this file)
 #     api-infra-staging (317380566348)
-#       -> infra-grantee1 / infra-grantee2 / infra-grantor1 / infra-dev
+#       -> infra-grantee1 / infra-grantee2 / infra-sgg1 / infra-dev
 #          (all in 061664787759)
 #     Different accounts, so an automated snapshot cannot be used at all and
 #     two sets of credentials are required.
@@ -51,7 +51,7 @@ on:
         options:
           - infra-grantee1
           - infra-grantee2
-          - infra-grantor1
+          - infra-sgg1
           - infra-dev
       source_environment:
         description: Environment whose data is copied FROM
