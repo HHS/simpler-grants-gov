@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 from pathlib import Path
@@ -7,9 +8,12 @@ from urllib.parse import urlparse
 import botocore.client
 import smart_open
 from botocore.config import Config
-from grants_shared.adapters.aws import S3Config, get_boto_session, get_s3_client
-from grants_shared.util.env_config import PydanticBaseEnvConfig
 from werkzeug.utils import secure_filename
+
+from src.adapters.aws import S3Config, get_boto_session, get_s3_client
+from src.util.env_config import PydanticBaseEnvConfig
+
+logger = logging.getLogger(__name__)
 
 ##################################
 # Configs
@@ -312,7 +316,17 @@ def convert_public_s3_to_cdn_url(file_path: str, cdn_url: str, s3_config: S3Conf
     if not is_s3_path(file_path):
         raise ValueError(f"Expected s3:// path, got: {file_path}")
 
-    return file_path.replace(s3_config.public_files_bucket_path, cdn_url)
+    bucket_path = s3_config.public_files_bucket_path.rstrip("/")
+    if not file_path.startswith(f"{bucket_path}/"):
+        # e.g. after an S3 bucket rename/migration, file_path's bucket no longer
+        # matches what's configured. Checking the full prefix (not just a substring)
+        # avoids a similarly-named bucket silently matching.
+        raise ValueError(
+            f"file_path {file_path!r} does not match the configured "
+            f"public bucket {s3_config.public_files_bucket_path!r}"
+        )
+
+    return f"{cdn_url.rstrip('/')}{file_path[len(bucket_path):]}"
 
 
 def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None = None) -> str:
@@ -326,3 +340,25 @@ def presign_or_s3_cdnify_url(file_path: str, s3_config: S3Config | None = None) 
         return convert_public_s3_to_cdn_url(file_path, s3_config.cdn_url, s3_config)
     else:
         return pre_sign_file_location(file_path, s3_config)
+
+
+def safe_presign_or_s3_cdnify_url(file_location: str, **log_context: object) -> str | None:
+    """
+    Resolve a download URL for file_location, never exposing a raw s3:// URI.
+
+    convert_public_s3_to_cdn_url raises ValueError when file_location's bucket
+    doesn't match the configured PUBLIC_FILES_BUCKET, e.g. after an S3 bucket
+    rename/migration. Treat that failure mode as "unavailable" instead of
+    letting it bubble up as a 500.
+
+    log_context: identifying fields (e.g. attachment_id) from the caller, added
+    to the error log so a broken record can be found without parsing file_location.
+    """
+    try:
+        return presign_or_s3_cdnify_url(file_location)
+    except ValueError:
+        logger.error(
+            "download path could not be resolved to a CDN or presigned URL",
+            extra={"file_location": file_location, **log_context},
+        )
+        return None

@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Any
 
-from grants_shared.util.dict_util import get_nested_value
+from src.util.dict_util import get_nested_value
 
 logger = logging.getLogger(__name__)
 

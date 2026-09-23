@@ -1,8 +1,10 @@
 from typing import Any
 
-from grants_shared.db.models.lookup import LookupRegistry, LookupTable
 from sqlalchemy import Integer
 from sqlalchemy.types import TypeDecorator
+
+from src.db.models.lookup.lookup_registry import LookupRegistry
+from src.db.models.lookup.lookup_table import LookupTable
 
 
 class LookupColumn(TypeDecorator):

@@ -1,12 +1,11 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-from grants_shared.adapters.aws import S3Config
-from grants_shared.api.route_utils import raise_flask_error
-from grants_shared.util import file_util
 from sqlalchemy import select
 
+import src.adapters.db as db
+from src.adapters.aws import S3Config
+from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import CompetitionInstruction
@@ -23,6 +22,7 @@ from src.services.opportunities_grantor_v1.get_opportunity import get_opportunit
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
 )
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 

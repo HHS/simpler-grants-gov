@@ -114,4 +114,19 @@ describe("attachments-download export GET requests", () => {
     });
     expect(response.status).toEqual(404);
   });
+
+  it("returns an error response instead of a partial zip when an attachment can't be resolved", async () => {
+    mockAttachmentsToZipEntries.mockImplementation(() => {
+      throw new Error(
+        'Attachment "broken.pdf" has no resolvable download_path',
+      );
+    });
+    const response = await getAttachmentsDownload(fakeRequestForOpportunity(), {
+      params: Promise.resolve({
+        opportunityId: "43",
+      }),
+    });
+    expect(response.status).toEqual(500);
+    expect(response.headers.get("Content-Disposition")).toBeNull();
+  });
 });

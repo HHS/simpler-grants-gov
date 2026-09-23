@@ -6,9 +6,6 @@ from unittest.mock import patch
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from grants_shared.pagination.pagination_models import SortDirection
-from grants_shared.util import datetime_util
-from grants_shared.util.dict_util import flatten_dict
 
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
@@ -18,6 +15,9 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models.opportunity_models import Opportunity
+from src.pagination.pagination_models import SortDirection
+from src.util import datetime_util
+from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
