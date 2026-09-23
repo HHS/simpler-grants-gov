@@ -46,15 +46,25 @@ locals {
   # nothing to undo, so retrying is safe regardless of whether the job itself
   # is idempotent.
   #
-  # States.TaskFailed is deliberately excluded: Step Functions raises it when
-  # the container exits non-zero, which means the job's own logic failed.
-  # Retrying that would re-run a broken job and delay the alert.
+  # Only that error is retried. Two exclusions are deliberate:
+  #
+  #   - States.TaskFailed is raised when the container exits non-zero, meaning
+  #     the job's own logic failed. Retrying re-runs a broken job and delays
+  #     the alert.
+  #   - ECS.ServerException can be raised by the .sync integration while
+  #     polling DescribeTasks, which is after RunTask already launched the
+  #     task. Retrying then starts a second copy of a job that may already be
+  #     writing, which is the same double-write hazard as States.TaskFailed.
+  #
+  # MaxDelaySeconds caps the backoff so a retried job cannot drift into the
+  # next run of an hourly schedule.
   ecs_run_task_retry = [
     {
-      "ErrorEquals" : ["ECS.AmazonECSException", "ECS.ServerException"],
+      "ErrorEquals" : ["ECS.AmazonECSException"],
       "IntervalSeconds" : 60,
       "MaxAttempts" : 3,
       "BackoffRate" : 2.0,
+      "MaxDelaySeconds" : 120,
       "JitterStrategy" : "FULL"
     }
   ]
@@ -66,6 +76,12 @@ locals {
       "Next" : "JobFailed"
     }
   ]
+
+  # The caught error is passed to States.Format as arguments rather than
+  # interpolated into the template, so a quote or brace in the underlying
+  # cause cannot break the intrinsic. Job identity is safe to interpolate:
+  # it comes from config and is constrained to names and dashes.
+  job_failed_cause_suffix = "Underlying error: {} - {}', $.error.Error, $.error.Cause)"
 }
 
 resource "aws_sfn_state_machine" "scheduled_jobs" {
@@ -123,7 +139,13 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
       "JobFailed" : {
         "Type" : "Fail",
         "Error" : "ScheduledJobFailed",
-        "CausePath" : "States.Format('Scheduled job {} ({}) failed in {}. Command: {}. Underlying error: {} - {}', '${each.key}', '${var.service_name}', '${var.environment_name}', '${join(" ", each.value.task_command)}', $.error.Error, $.error.Cause)"
+        # The job identity is baked into the template (it comes from config and
+        # contains no quotes), but the caught error is passed as arguments so a
+        # quote or brace in the underlying cause cannot break the intrinsic.
+        # The command is intentionally not included: it can contain characters
+        # that are unsafe to interpolate into an ASL single-quoted literal, and
+        # it is already visible in the execution input.
+        "CausePath" : "States.Format('Scheduled job ${each.key} (${var.service_name}) failed in ${var.environment_name}. ${local.job_failed_cause_suffix}"
       }
     }
   })

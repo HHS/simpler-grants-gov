@@ -128,7 +128,12 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
       "JobFailed" : {
         "Type" : "Fail",
         "Error" : "FileUploadJobFailed",
-        "CausePath" : "States.Format('File upload job {} ({}) failed in {}. Command: {}. Underlying error: {} - {}', '${each.key}', '${var.service_name}', '${var.environment_name}', States.JsonToString($.task_command), $.error.Error, $.error.Cause)"
+        # See scheduled_jobs.tf: the caught error is passed as arguments rather
+        # than interpolated. task_command is not read off the input here either
+        # -- States.JsonToString raises States.Runtime if the key is absent
+        # (e.g. a console re-run with a trimmed payload), which would discard
+        # the very error this state exists to report.
+        "CausePath" : "States.Format('File upload job ${each.key} (${var.service_name}) failed in ${var.environment_name}. ${local.job_failed_cause_suffix}"
       }
     }
   })

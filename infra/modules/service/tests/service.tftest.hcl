@@ -159,15 +159,13 @@ run "ecs_run_task_retries_capacity_errors_but_not_task_failures" {
   command = plan
 
   assert {
-    condition     = contains(local.ecs_run_task_retry[0].ErrorEquals, "ECS.AmazonECSException")
-    error_message = "Must retry ECS.AmazonECSException so transient Fargate capacity errors do not fail the run"
+    condition     = local.ecs_run_task_retry[0].ErrorEquals == ["ECS.AmazonECSException"]
+    error_message = "Retry must cover ECS.AmazonECSException and nothing else: States.TaskFailed and ECS.ServerException can both fire after the container started, where a retry would double-run the job"
   }
 
-  # States.TaskFailed means the container exited non-zero, i.e. the job's own
-  # logic failed. Retrying it would re-run a broken job and delay the alert.
   assert {
-    condition     = !contains(local.ecs_run_task_retry[0].ErrorEquals, "States.TaskFailed")
-    error_message = "Must not retry States.TaskFailed (application errors)"
+    condition     = local.ecs_run_task_retry[0].MaxDelaySeconds <= 120
+    error_message = "Backoff must stay capped so a retried job cannot drift into the next run of an hourly schedule"
   }
 
   assert {
@@ -178,5 +176,26 @@ run "ecs_run_task_retries_capacity_errors_but_not_task_failures" {
   assert {
     condition     = local.ecs_run_task_catch[0].ResultPath == "$.error"
     error_message = "Caught error must be placed at $.error so JobFailed can format it into the cause"
+  }
+}
+
+# The rendered state machine definitions embed cluster and task-definition
+# ARNs, so they are unknown at plan time and cannot be asserted on here.
+# Instead both files build their CausePath from this one shared local, so a
+# change in either file goes through an assertion.
+run "job_failed_cause_passes_the_error_as_arguments" {
+  command = plan
+
+  # A quote or brace reaching the ASL template would break the intrinsic at
+  # apply time or runtime, so the caught error must arrive as an argument.
+  assert {
+    condition     = endswith(local.job_failed_cause_suffix, "$.error.Error, $.error.Cause)")
+    error_message = "JobFailed must pass the caught error as States.Format arguments, not interpolate it into the template"
+  }
+
+  # Two placeholders, matching the two arguments.
+  assert {
+    condition     = length(regexall("\\{\\}", local.job_failed_cause_suffix)) == 2
+    error_message = "States.Format placeholder count must match the number of arguments passed"
   }
 }
