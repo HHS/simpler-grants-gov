@@ -11,8 +11,8 @@ import json
 import logging
 from datetime import datetime
 
-import grants_shared.logs.decodelog as decodelog
-from grants_shared.util.json_util import json_encoder
+import src.logs.decodelog as decodelog
+from src.util.json_util import json_encoder
 
 
 class JsonFormatter(logging.Formatter):

@@ -266,12 +266,17 @@ start-mailpit:
 # Testing
 ##################################################
 
-test: ## Run all tests
-	$(PY_RUN_CMD) pytest $(args)
+test: ## Run all tests except the audit logging ones, which need their own process
+	$(PY_RUN_CMD) pytest -m "not audit" $(args)
+
+test-audit: ## Run the audit logging tests, which install a process-wide audit hook
+	$(PY_RUN_CMD) pytest -m "audit" $(args)
 
 
 test-coverage: ## Run tests and generate coverage report
-	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest $(args)
+	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit" $(args)
+	$(PY_RUN_CMD) coverage run --data-file=.coverage.audit --branch --source=src -m pytest -m "audit" $(args)
+	$(PY_RUN_CMD) coverage combine --data-file=.coverage --append
 	$(PY_RUN_CMD) coverage report
 
 test-coverage-report: ## Open HTML test coverage report

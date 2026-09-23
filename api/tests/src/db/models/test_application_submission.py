@@ -1,7 +1,6 @@
 import uuid
 
-import grants_shared.util.file_util as file_util
-
+import src.util.file_util as file_util
 from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     ApplicationSubmissionNoteFactory,

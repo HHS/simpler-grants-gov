@@ -8,9 +8,10 @@ from urllib.parse import urlparse
 import botocore.client
 import smart_open
 from botocore.config import Config
-from grants_shared.adapters.aws import S3Config, get_boto_session, get_s3_client
-from grants_shared.util.env_config import PydanticBaseEnvConfig
 from werkzeug.utils import secure_filename
+
+from src.adapters.aws import S3Config, get_boto_session, get_s3_client
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 

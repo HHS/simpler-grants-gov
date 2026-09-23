@@ -2,16 +2,6 @@ import uuid
 from datetime import date, datetime
 from typing import Any
 
-from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from grants_shared.db.models.auth_base_models import (
-    BaseLinkExternalUser,
-    BaseLoginGovState,
-    BaseUser,
-    BaseUserApiKey,
-    BaseUserTokenSession,
-)
-from grants_shared.db.models.base import TimestampMixin
-from grants_shared.util import datetime_util
 from sqlalchemy import ForeignKey, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -21,10 +11,20 @@ from sqlalchemy.sql.functions import now as sqlnow
 from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType, UserType
 from src.db.models.agency_models import Agency
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.auth_base_models import (
+    BaseLinkExternalUser,
+    BaseLoginGovState,
+    BaseUser,
+    BaseUserApiKey,
+    BaseUserTokenSession,
+)
+from src.db.models.base import TimestampMixin
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
+from src.db.models.lookup.lookup_column import LookupColumn
 from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType, LkUserType
 from src.db.models.opportunity_models import Opportunity
+from src.util import datetime_util
 
 
 class User(BaseUser, ApiSchemaTable, TimestampMixin):

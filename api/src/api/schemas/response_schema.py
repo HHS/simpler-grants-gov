@@ -1,5 +1,5 @@
-from grants_shared.api.schemas.extension import Schema, fields
-from grants_shared.pagination.pagination_schema import PaginationInfoSchema
+from src.api.schemas.extension import Schema, fields
+from src.pagination.pagination_schema import PaginationInfoSchema
 
 
 class ValidationIssueSchema(Schema):
