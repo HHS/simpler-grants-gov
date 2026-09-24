@@ -28,7 +28,7 @@ on:
           - grantee1
           - grantee2
           - grantor1
-          - infra-grantee1
+          - infra-sgg2
           - infra-grantee2
           - infra-grantor1
           - prod
