@@ -107,6 +107,16 @@ output "workflow_service_config" {
   }
 }
 
+output "processor_service_config" {
+  value = {
+    enable        = var.enable_processor_service
+    cpu           = var.processor_service_cpu
+    memory        = var.processor_service_memory
+    desired_count = var.processor_service_desired_count
+    command       = var.processor_service_command
+  }
+}
+
 output "file_scan_cache_config" {
   value = local.file_scan_cache_config
 }

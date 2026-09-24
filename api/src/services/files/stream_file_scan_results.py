@@ -5,18 +5,18 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Any
 
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
-import grants_shared.util.file_util as file_util
-from grants_shared.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
-from grants_shared.api.route_utils import raise_flask_error
-from grants_shared.db.models.auth_base_models import BaseUser
-from grants_shared.util import datetime_util
 from pydantic import Field
 from sqlalchemy import select
 
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
+import src.util.file_util as file_util
+from src.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
+from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import FileScanStatus
+from src.db.models.auth_base_models import BaseUser
 from src.db.models.file_upload_models import PendingFile
+from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)

@@ -1,8 +1,8 @@
 import uuid
 
-import grants_shared.util.file_util as file_util
 from sqlalchemy import select
 
+import src.util.file_util as file_util
 from src.constants.lookup_constants import ApplicationAuditEvent
 from src.db.models.competition_models import ApplicationAudit
 from src.services.applications.process_application_attachment_changes import (

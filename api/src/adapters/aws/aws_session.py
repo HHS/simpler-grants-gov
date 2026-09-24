@@ -1,6 +1,7 @@
 import boto3
-from grants_shared.util.env_config import PydanticBaseEnvConfig
 from pydantic import Field
+
+from src.util.env_config import PydanticBaseEnvConfig
 
 
 class AwsConfig(PydanticBaseEnvConfig):

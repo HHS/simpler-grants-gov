@@ -2,8 +2,8 @@ import logging
 import typing
 
 import jsonschema
-from grants_shared.api.response import ValidationErrorDetail
 
+from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 

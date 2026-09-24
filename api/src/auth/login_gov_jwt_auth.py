@@ -3,14 +3,14 @@ import urllib
 import uuid
 
 import flask
-from grants_shared.adapters import db
-from grants_shared.auth.login_gov_jwt_auth import (
+
+from src.adapters import db
+from src.adapters.oauth.login_gov.login_gov_jwt import (
     LOGIN_GOV_PIV_REQUIRED,
     LoginGovConfig,
     RedirectParams,
     get_config,
 )
-
 from src.auth.auth_handler import AuthHandler
 
 logger = logging.getLogger(__name__)

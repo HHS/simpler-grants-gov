@@ -4,9 +4,9 @@ import re
 from pathlib import Path
 
 import click
-from grants_shared.util.local import error_if_not_local
 
 from src.task.task_blueprint import task_blueprint
+from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
