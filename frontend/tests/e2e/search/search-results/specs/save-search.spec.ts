@@ -1,10 +1,8 @@
 /**
  * @feature Save Search Button - Search Results Table
  * @scenario Saved search restores query, filters, sort order, and resets pagination
- *
- * Split into two tests because no single criteria set reliably supports both
- * pagination reset (>25 results) and consistent query/filter/sort restoration
- * across all environments.
+ *    Test 1: pagination resets to page 1 on reopen.
+ *    Test 2: query, filters, and sort order are restored on reopen.
  */
 
 import { expect, test } from "@playwright/test";
@@ -61,7 +59,7 @@ test.describe("Saved search - restores state on reopen", () => {
       await authenticateE2eUser(page, context, isMobile);
 
       /**
-       * @given I have saved a search with keywords, filters, and sort order
+       * @given I have saved a search with a sort order, on page 2 of results
        */
       await gotoWithRetry(page, `${baseUrl}/search`, {
         timeout: GOTO_TIMEOUT,
@@ -97,7 +95,7 @@ test.describe("Saved search - restores state on reopen", () => {
         "Expected more than one page of results in the default catalog, " +
           "to actually exercise pagination-reset-on-reopen. If this starts " +
           "failing, the local/CI/staging seed data no longer has enough " +
-          "posted/forecasted opportunities - see file header comment.",
+          "posted/forecasted opportunities",
       ).toBe(true);
 
       // On mobile, scroll to top of page to ensure save button is accessible
@@ -214,7 +212,7 @@ test.describe("Saved search - restores state on reopen", () => {
         expectedResultCount,
         `Expected at least one result for searchTerm="${searchTerm}" - if ` +
           "this starts failing, the seed data no longer includes matching " +
-          "opportunities, see file header comment.",
+          "opportunities",
       ).toBeGreaterThan(0);
 
       // On mobile, scroll to top of page to ensure save button is accessible
