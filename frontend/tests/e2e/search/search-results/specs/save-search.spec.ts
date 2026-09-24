@@ -124,6 +124,10 @@ test.describe("Saved search - restores state on reopen", () => {
 
       /**
        * And pagination should reset to page 1
+       * Note: We verified earlier (line ~100) that multiple pages exist before saving.
+       * If pagination controls are not visible here, it would indicate the result count
+       * changed unexpectedly - which is caught by the result count assertion below.
+       * This conditional is defensive: we only assert the page 1 button if controls exist.
        */
       const currentUrl = new URL(page.url());
       expect(currentUrl.searchParams.get("page")).toBeNull();

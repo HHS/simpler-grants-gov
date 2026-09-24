@@ -30,23 +30,23 @@ export async function saveCurrentSearch(
   });
   await page.waitForTimeout(500);
 
-  // Close any open overlays or drawers that might be blocking
-  const allOverlays = page.locator(".usa-modal-overlay");
-  const overlayCount = await allOverlays.count();
-  if (overlayCount > 0) {
-    for (let i = 0; i < overlayCount; i++) {
-      const overlay = allOverlays.nth(i);
-      if (await overlay.isVisible().catch(() => false)) {
-        const closeButton = overlay
-          .locator('button[aria-label="Close"]')
-          .first();
-        if (await closeButton.isVisible().catch(() => false)) {
-          await closeButton.click().catch(() => {
-            // Ignore if close fails
-          });
-          await page.waitForTimeout(200);
-        }
-      }
+  // Close any open overlays or drawers that might be blocking button access.
+  // Expected overlays in typical test flow:
+  // - Search filter drawer overlay (aria-controls="search-filter-drawer")
+  // - Any other modals that might have been opened during test execution
+  // We target these explicitly rather than iterating all overlays since we expect a small count.
+  const filterDrawerOverlay = page.locator(
+    '.usa-modal-overlay[aria-controls="search-filter-drawer"]',
+  );
+  if (await filterDrawerOverlay.isVisible().catch(() => false)) {
+    const closeButton = filterDrawerOverlay
+      .locator('button[aria-label="Close"]')
+      .first();
+    if (await closeButton.isVisible().catch(() => false)) {
+      await closeButton.click().catch(() => {
+        // Ignore if close fails
+      });
+      await page.waitForTimeout(200);
     }
   }
 
