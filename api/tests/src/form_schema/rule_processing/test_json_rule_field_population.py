@@ -70,6 +70,26 @@ from tests.src.form_schema.rule_processing.conftest import setup_context
             },
             "My program title",
         ),
+        # Competition is linked to a listing AND the opportunity has an extra listing -
+        # the linked one should win regardless of what else is on the opportunity.
+        (
+            {"rule": "assistance_listing_number"},
+            {
+                "has_assistance_listing_number": True,
+                "assistance_listing_number": "00.123",
+                "extra_opportunity_assistance_listing_count": 1,
+            },
+            "00.123",
+        ),
+        (
+            {"rule": "assistance_listing_program_title"},
+            {
+                "has_assistance_listing_number": True,
+                "assistance_listing_program_title": "My program title",
+                "extra_opportunity_assistance_listing_count": 1,
+            },
+            "My program title",
+        ),
         ({"rule": "public_competition_id"}, {"public_competition_id": "ABC123456"}, "ABC123456"),
         (
             {"rule": "competition_title"},
