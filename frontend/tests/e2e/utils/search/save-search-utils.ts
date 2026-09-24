@@ -22,6 +22,8 @@ export async function saveCurrentSearch(
     '[data-testid="open-save-search-modal-button"]',
   );
 
+  await expect(openSaveModalButton).toBeVisible({ timeout: 15000 });
+
   // Wait for page to be fully loaded and stable
   await page.waitForLoadState("networkidle").catch(() => {
     // Continue even if network idle times out
@@ -52,20 +54,20 @@ export async function saveCurrentSearch(
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(300);
 
-  // Use JavaScript to ensure button is visible and not hidden by CSS
+  // Use JavaScript to ensure the save search modal button is visible and not hidden by CSS
   await page.evaluate(() => {
-    const button = document.querySelector(
+    const saveSearchModalButton = document.querySelector(
       '[data-testid="open-save-search-modal-button"]',
     ) as HTMLElement;
-    if (button) {
+    if (saveSearchModalButton) {
       // Ensure button is not hidden
-      button.style.display = "";
-      button.style.visibility = "";
-      button.style.opacity = "";
-      button.scrollIntoView({ behavior: "instant", block: "center" });
+      saveSearchModalButton.style.display = "";
+      saveSearchModalButton.style.visibility = "";
+      saveSearchModalButton.style.opacity = "";
+      saveSearchModalButton.scrollIntoView({ behavior: "instant", block: "center" });
 
       // Also ensure parent elements are visible
-      let parent = button.parentElement;
+      let parent = saveSearchModalButton.parentElement;
       while (parent && parent !== document.body) {
         parent.style.display = "";
         parent.style.visibility = "";
@@ -84,11 +86,11 @@ export async function saveCurrentSearch(
     try {
       // Try clicking the button element directly via JavaScript
       await page.evaluate(() => {
-        const button = document.querySelector(
+        const saveSearchModalButton = document.querySelector(
           '[data-testid="open-save-search-modal-button"]',
         ) as HTMLButtonElement;
-        if (button) {
-          button.click();
+        if (saveSearchModalButton) {
+          saveSearchModalButton.click();
         }
       });
     } catch (_e2) {
