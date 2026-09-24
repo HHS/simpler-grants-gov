@@ -38,6 +38,50 @@ locals {
       aws_iam_role.app_service.arn
     )
   }
+
+  # Fargate occasionally has no capacity in the availability zone ECS selects,
+  # which surfaces as ECS.AmazonECSException before the container starts. AWS
+  # labels these retriable ("Please try again later or in a different
+  # availability zone"), and because no application code has run yet there is
+  # nothing to undo, so retrying is safe regardless of whether the job itself
+  # is idempotent.
+  #
+  # Only that error is retried. Two exclusions are deliberate:
+  #
+  #   - States.TaskFailed is raised when the container exits non-zero, meaning
+  #     the job's own logic failed. Retrying re-runs a broken job and delays
+  #     the alert.
+  #   - ECS.ServerException can be raised by the .sync integration while
+  #     polling DescribeTasks, which is after RunTask already launched the
+  #     task. Retrying then starts a second copy of a job that may already be
+  #     writing, which is the same double-write hazard as States.TaskFailed.
+  #
+  # MaxDelaySeconds caps the backoff so a retried job cannot drift into the
+  # next run of an hourly schedule.
+  ecs_run_task_retry = [
+    {
+      "ErrorEquals" : ["ECS.AmazonECSException"],
+      "IntervalSeconds" : 60,
+      "MaxAttempts" : 3,
+      "BackoffRate" : 2.0,
+      "MaxDelaySeconds" : 120,
+      "JitterStrategy" : "FULL"
+    }
+  ]
+
+  ecs_run_task_catch = [
+    {
+      "ErrorEquals" : ["States.ALL"],
+      "ResultPath" : "$.error",
+      "Next" : "JobFailed"
+    }
+  ]
+
+  # The caught error is passed to States.Format as arguments rather than
+  # interpolated into the template, so a quote or brace in the underlying
+  # cause cannot break the intrinsic. Job identity is safe to interpolate:
+  # it comes from config and is constrained to names and dashes.
+  job_failed_cause_suffix = "Underlying error: {} - {}', $.error.Error, $.error.Cause)"
 }
 
 resource "aws_sfn_state_machine" "scheduled_jobs" {
@@ -84,7 +128,24 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
             ]
           }
         },
+        "Retry" : local.ecs_run_task_retry,
+        "Catch" : local.ecs_run_task_catch,
         "End" : true
+      },
+      # Terminal failure state. Its only purpose is to put the job identity and
+      # the underlying ECS error into the execution's failure Cause, so the
+      # alert names what went wrong instead of requiring someone to pull the
+      # execution history by hand.
+      "JobFailed" : {
+        "Type" : "Fail",
+        "Error" : "ScheduledJobFailed",
+        # The job identity is baked into the template (it comes from config and
+        # contains no quotes), but the caught error is passed as arguments so a
+        # quote or brace in the underlying cause cannot break the intrinsic.
+        # The command is intentionally not included: it can contain characters
+        # that are unsafe to interpolate into an ASL single-quoted literal, and
+        # it is already visible in the execution input.
+        "CausePath" : "States.Format('Scheduled job ${each.key} (${var.service_name}) failed in ${var.environment_name}. ${local.job_failed_cause_suffix}"
       }
     }
   })
