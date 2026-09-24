@@ -8,7 +8,13 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
 
-from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType, UserType
+from src.constants.lookup_constants import (
+    ExternalUserType,
+    NotificationType,
+    Privilege,
+    RoleType,
+    UserType,
+)
 from src.db.models.agency_models import Agency
 from src.db.models.api_schema_table import ApiSchemaTable
 from src.db.models.auth_base_models import (
@@ -22,7 +28,13 @@ from src.db.models.base import TimestampMixin
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
 from src.db.models.lookup.lookup_column import LookupColumn
-from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType, LkUserType
+from src.db.models.lookup_models import (
+    LkExternalUserType,
+    LkNotificationType,
+    LkPrivilege,
+    LkRoleType,
+    LkUserType,
+)
 from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
 
@@ -89,6 +101,12 @@ class User(BaseUser, ApiSchemaTable, TimestampMixin):
         LookupColumn(LkUserType),
         ForeignKey(LkUserType.user_type_id),
         default=UserType.STANDARD,
+    )
+
+    notification_preferences: Mapped[list[UserNotificationPreference]] = relationship(
+        "UserNotificationPreference",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
 
     @property
@@ -531,3 +549,27 @@ class LegacyCertificate(ApiSchemaTable, TimestampMixin):
         UUID, ForeignKey(Organization.organization_id)
     )
     organization: Mapped[Organization | None] = relationship(Organization)
+
+
+class UserNotificationPreference(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "user_notification_preference"
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "notification_type_id"),
+        ApiSchemaTable.__table_args__,
+    )
+
+    user_notification_preference_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    is_enabled: Mapped[bool] = mapped_column(nullable=False)
+
+    notification_type: Mapped[NotificationType] = mapped_column(
+        "notification_type_id",
+        LookupColumn(LkNotificationType),
+        ForeignKey(LkNotificationType.notification_type_id),
+        nullable=False,
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
+    user: Mapped[User] = relationship(User, back_populates="notification_preferences")

@@ -25,6 +25,7 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     JobStatus,
     JobType,
+    NotificationType,
     OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityStatus,
@@ -474,6 +475,12 @@ JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
         LookupStr(JobType.LOAD_AGENCY_DATA_OPENSEARCH, 16),
         LookupStr(JobType.EXPORT_OPPORTUNITY_DATA, 17),
         LookupStr(JobType.CHECK_XSD_DRIFT, 18),
+    ]
+)
+
+NOTIFICATION_TYPE_CONFIG: LookupConfig[NotificationType] = LookupConfig(
+    [
+        LookupStr(NotificationType.ALL_NEW_OPPORTUNITIES, 1),
     ]
 )
 
@@ -967,4 +974,18 @@ class LkOpportunityAuditEvent(ApiLookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> LkOpportunityAuditEvent:
         return LkOpportunityAuditEvent(
             opportunity_audit_event_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(NOTIFICATION_TYPE_CONFIG)
+class LkNotificationType(ApiLookupTable, TimestampMixin):
+    __tablename__ = "lk_notification_type"
+
+    notification_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkNotificationType:
+        return LkNotificationType(
+            notification_type_id=lookup.lookup_val, description=lookup.get_description()
         )
