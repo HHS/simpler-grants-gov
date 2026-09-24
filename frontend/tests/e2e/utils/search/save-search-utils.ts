@@ -64,7 +64,10 @@ export async function saveCurrentSearch(
       saveSearchModalButton.style.display = "";
       saveSearchModalButton.style.visibility = "";
       saveSearchModalButton.style.opacity = "";
-      saveSearchModalButton.scrollIntoView({ behavior: "instant", block: "center" });
+      saveSearchModalButton.scrollIntoView({
+        behavior: "instant",
+        block: "center",
+      });
 
       // Also ensure parent elements are visible
       let parent = saveSearchModalButton.parentElement;
