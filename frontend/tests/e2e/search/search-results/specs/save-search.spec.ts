@@ -1,10 +1,11 @@
 /**
  * @feature Save Search Button - Search Results Table
  * @scenario Saved search restores query, filters, sort order, and resets pagination
+ *    Test 1: pagination resets to page 1 on reopen.
+ *    Test 2: query, filters, and sort order are restored on reopen.
  *
- * Split into two tests because no single criteria set reliably supports both
- * pagination reset (>25 results) and consistent query/filter/sort restoration
- * across all environments.
+ * @scenario Empty state when no saved searches exist
+ *    Test 3: saved search - empty state
  */
 
 import { expect, test } from "@playwright/test";
@@ -19,6 +20,7 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { gotoWithRetry } from "tests/e2e/utils/common/lifecycle-utils";
 import {
+  deleteAllSavedSearches,
   navigateToSavedSearches,
   runSavedSearch,
   saveCurrentSearch,
@@ -61,7 +63,7 @@ test.describe("Saved search - restores state on reopen", () => {
       await authenticateE2eUser(page, context, isMobile);
 
       /**
-       * @given I have saved a search with keywords, filters, and sort order
+       * @given I have saved a search with a sort order, on page 2 of results
        */
       await gotoWithRetry(page, `${baseUrl}/search`, {
         timeout: GOTO_TIMEOUT,
@@ -147,6 +149,7 @@ test.describe("Saved search - restores state on reopen", () => {
       expect(resultCountAfterReopen).toEqual(expectedResultCount);
     },
   );
+
   test(
     "reopening a saved search restores query, filters, and sort order",
     { tag: [SMOKE, GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
@@ -154,7 +157,9 @@ test.describe("Saved search - restores state on reopen", () => {
       test.setTimeout(300_000);
       const isMobile = !!testInfo.project.name.match(/[Mm]obile/);
 
-      // "SGG" provides a small, stable, non-zero result set for verifying restoration.
+      // "SGG" provides a small, stable, non-zero result set for verifying
+      // restoration (agency code SGG - see seed_local_db.py's
+      // isolated_form_competitions).
       const searchTerm = "SGG";
       const statusFilter = { "status-closed": "closed" };
       const savedSearchName = `E2E Save Search Restore Criteria ${Date.now()}`;
@@ -213,8 +218,9 @@ test.describe("Saved search - restores state on reopen", () => {
       expect(
         expectedResultCount,
         `Expected at least one result for searchTerm="${searchTerm}" - if ` +
-          "this starts failing, the seed data no longer includes matching " +
-          "opportunities, see file header comment.",
+          "this starts failing, the seed data no longer includes a " +
+          "matching opportunity with agency code SGG (see " +
+          "seed_local_db.py's isolated_form_competitions).",
       ).toBeGreaterThan(0);
 
       // On mobile, scroll to top of page to ensure save button is accessible
@@ -278,6 +284,60 @@ test.describe("Saved search - restores state on reopen", () => {
       const resultCountAfterReopen =
         await getNumberOfOpportunitySearchResults(page);
       expect(resultCountAfterReopen).toEqual(expectedResultCount);
+    },
+  );
+});
+
+test.describe("Saved search - empty state", () => {
+  test(
+    "visiting Saved Searches with no saved searches shows the empty state and a CTA",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    async ({ page, context }, testInfo) => {
+      const isMobile = !!testInfo.project.name.match(/[Mm]obile/);
+
+      /**
+       * @given a user with no saved searches
+       *
+       * Uses "noAgencyUser" rather than "primaryOrgAdmin" (used above)
+       */
+      await authenticateE2eUser(page, context, isMobile, "noAgencyUser");
+      await deleteAllSavedSearches(page);
+
+      /**
+       * @when I visit the Saved Searches workspace
+       */
+      await gotoWithRetry(page, `${baseUrl}/workspace/saved-search-queries`, {
+        timeout: GOTO_TIMEOUT,
+      });
+
+      /**
+       * @then I should see the empty state message and a CTA to start a new search
+       */
+      await expect(
+        page.getByText("You don't have any saved queries yet."),
+      ).toBeVisible();
+      await expect(
+        page.getByText(
+          "As you search for opportunities, save your preferred combinations",
+          { exact: false },
+        ),
+      ).toBeVisible();
+
+      const startSearchCta = page.getByRole("link", {
+        name: "Start a new search",
+      });
+      await expect(startSearchCta).toBeVisible();
+      await expect(startSearchCta).toHaveAttribute("href", "/search");
+
+      /**
+       * @then no errors should occur
+       */
+      await expect(
+        page.getByText(
+          "We encountered an issue while loading your saved search queries",
+          { exact: false },
+        ),
+      ).not.toBeVisible();
     },
   );
 });
