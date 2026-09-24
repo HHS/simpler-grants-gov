@@ -54,7 +54,7 @@ export async function saveCurrentSearch(
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(300);
 
-  // Use JavaScript to ensure button is visible and not hidden by CSS
+  // Use JavaScript to ensure the save search modal button is visible and not hidden by CSS
   await page.evaluate(() => {
     const saveSearchModalButton = document.querySelector(
       '[data-testid="open-save-search-modal-saveSearchModalButton"]',
