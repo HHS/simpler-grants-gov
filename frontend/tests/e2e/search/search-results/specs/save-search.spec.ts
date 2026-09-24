@@ -99,7 +99,7 @@ test.describe("Saved search - restores state on reopen", () => {
         "Expected more than one page of results in the default catalog, " +
           "to actually exercise pagination-reset-on-reopen. If this starts " +
           "failing, the local/CI/staging seed data no longer has enough " +
-          "posted/forecasted opportunities - see file header comment.",
+          "posted/forecasted opportunities",
       ).toBe(true);
 
       // On mobile, scroll to top of page to ensure save button is accessible
