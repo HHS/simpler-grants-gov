@@ -60,7 +60,7 @@ export async function saveCurrentSearch(
       '[data-testid="open-save-search-modal-button"]',
     ) as HTMLElement;
     if (saveSearchModalButton) {
-      // Ensure button is not hidden
+      // Ensure saveSearchModalButton is not hidden
       saveSearchModalButton.style.display = "";
       saveSearchModalButton.style.visibility = "";
       saveSearchModalButton.style.opacity = "";
