@@ -57,17 +57,14 @@ export async function saveCurrentSearch(
   // Use JavaScript to ensure the save search modal button is visible and not hidden by CSS
   await page.evaluate(() => {
     const saveSearchModalButton = document.querySelector(
-      '[data-testid="open-save-search-modal-saveSearchModalButton"]',
+      '[data-testid="open-save-search-modal-button"]',
     ) as HTMLElement;
     if (saveSearchModalButton) {
       // Ensure saveSearchModalButton is not hidden
       saveSearchModalButton.style.display = "";
       saveSearchModalButton.style.visibility = "";
       saveSearchModalButton.style.opacity = "";
-      saveSearchModalButton.scrollIntoView({
-        behavior: "instant",
-        block: "center",
-      });
+      saveSearchModalButton.scrollIntoView({ behavior: "instant", block: "center" });
 
       // Also ensure parent elements are visible
       let parent = saveSearchModalButton.parentElement;
