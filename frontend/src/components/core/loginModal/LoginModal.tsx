@@ -2,7 +2,6 @@
 
 import { RefObject } from "react";
 import {
-  ButtonGroup,
   ModalFooter,
   ModalRef,
   ModalToggleButton,
@@ -74,24 +73,28 @@ export const LoginModalBody = ({
         {descriptionText}
       </p>
       <ModalFooter>
-        <ButtonGroup>
-          <LoginLink className="usa-button">
-            {buttonText}
-            <USWDSIcon
-              className="usa-icon margin-right-05 margin-left-neg-05"
-              name="launch"
-              key="login-gov-link-icon"
-            />
-          </LoginLink>
-          <ModalToggleButton
-            modalRef={modalRef}
-            closer
-            unstyled
-            className="padding-105 text-center"
-          >
-            {closeText}
-          </ModalToggleButton>
-        </ButtonGroup>
+        <div className="usa-button-group">
+          <div className="usa-button-group__item">
+            <LoginLink className="usa-button">
+              {buttonText}
+              <USWDSIcon
+                className="usa-icon margin-right-05 margin-left-neg-05"
+                name="launch"
+                key="login-gov-link-icon"
+              />
+            </LoginLink>
+          </div>
+          <div className="usa-button-group__item">
+            <ModalToggleButton
+              modalRef={modalRef}
+              closer
+              unstyled
+              className="padding-105 text-center"
+            >
+              {closeText}
+            </ModalToggleButton>
+          </div>
+        </div>
       </ModalFooter>
     </>
   );
