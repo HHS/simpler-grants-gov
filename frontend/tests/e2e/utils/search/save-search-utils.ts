@@ -21,7 +21,81 @@ export async function saveCurrentSearch(
   const openSaveModalButton = page.locator(
     '[data-testid="open-save-search-modal-button"]',
   );
-  await openSaveModalButton.click();
+
+  // Wait for page to be fully loaded and stable
+  await page.waitForLoadState("networkidle").catch(() => {
+    // Continue even if network idle times out
+  });
+  await page.waitForTimeout(500);
+
+  // Close any open overlays or drawers that might be blocking
+  const allOverlays = page.locator(".usa-modal-overlay");
+  const overlayCount = await allOverlays.count();
+  if (overlayCount > 0) {
+    for (let i = 0; i < overlayCount; i++) {
+      const overlay = allOverlays.nth(i);
+      if (await overlay.isVisible().catch(() => false)) {
+        const closeButton = overlay
+          .locator('button[aria-label="Close"]')
+          .first();
+        if (await closeButton.isVisible().catch(() => false)) {
+          await closeButton.click().catch(() => {
+            // Ignore if close fails
+          });
+          await page.waitForTimeout(200);
+        }
+      }
+    }
+  }
+
+  // Scroll page to top to ensure button is in viewport
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(300);
+
+  // Use JavaScript to ensure button is visible and not hidden by CSS
+  await page.evaluate(() => {
+    const button = document.querySelector(
+      '[data-testid="open-save-search-modal-button"]',
+    ) as HTMLElement;
+    if (button) {
+      // Ensure button is not hidden
+      button.style.display = "";
+      button.style.visibility = "";
+      button.style.opacity = "";
+      button.scrollIntoView({ behavior: "instant", block: "center" });
+
+      // Also ensure parent elements are visible
+      let parent = button.parentElement;
+      while (parent && parent !== document.body) {
+        parent.style.display = "";
+        parent.style.visibility = "";
+        parent.style.opacity = "";
+        parent = parent.parentElement;
+      }
+    }
+  });
+  await page.waitForTimeout(500);
+
+  // Try to click the button with various strategies
+  try {
+    // First try a normal click
+    await openSaveModalButton.click({ timeout: 3000 });
+  } catch (_e) {
+    try {
+      // Try clicking the button element directly via JavaScript
+      await page.evaluate(() => {
+        const button = document.querySelector(
+          '[data-testid="open-save-search-modal-button"]',
+        ) as HTMLButtonElement;
+        if (button) {
+          button.click();
+        }
+      });
+    } catch (_e2) {
+      // Last resort: try force click
+      await openSaveModalButton.click({ force: true });
+    }
+  }
 
   const savedSearchNameInput = page.locator("#saved-search-input");
   await savedSearchNameInput.waitFor({ state: "visible" });

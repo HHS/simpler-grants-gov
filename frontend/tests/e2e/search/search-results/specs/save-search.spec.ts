@@ -157,9 +157,7 @@ test.describe("Saved search - restores state on reopen", () => {
       test.setTimeout(300_000);
       const isMobile = !!testInfo.project.name.match(/[Mm]obile/);
 
-      // "SGG" provides a small, stable, non-zero result set for verifying
-      // restoration (agency code SGG - see seed_local_db.py's
-      // isolated_form_competitions).
+      // "SGG" provides a small, stable, non-zero result set for verifying restoration.
       const searchTerm = "SGG";
       const statusFilter = { "status-closed": "closed" };
       const savedSearchName = `E2E Save Search Restore Criteria ${Date.now()}`;
@@ -218,9 +216,8 @@ test.describe("Saved search - restores state on reopen", () => {
       expect(
         expectedResultCount,
         `Expected at least one result for searchTerm="${searchTerm}" - if ` +
-          "this starts failing, the seed data no longer includes a " +
-          "matching opportunity with agency code SGG (see " +
-          "seed_local_db.py's isolated_form_competitions).",
+          "this starts failing, the seed data no longer includes matching " +
+          "opportunities",
       ).toBeGreaterThan(0);
 
       // On mobile, scroll to top of page to ensure save button is accessible
