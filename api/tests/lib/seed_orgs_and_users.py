@@ -349,6 +349,7 @@ def _build_organizations_and_users(
             competition=competition_container.competition_with_all_forms,
             app_owner=org3,
             application_name="All forms",
+            actor=many_app_user,
         )
 
         # An application for each competition that has a form
@@ -358,6 +359,7 @@ def _build_organizations_and_users(
                 competition=competition,
                 app_owner=org2,
                 application_name=f"App for {form.short_form_name}",
+                actor=many_app_user,
             )
 
         # Very long application names
@@ -378,6 +380,7 @@ def _build_organizations_and_users(
             competition=competition_container.get_comp_for_form(SF424_v4_0),
             app_owner=org3,
             application_name="My quite long organization application name that'll take up almost as much space",
+            actor=many_app_user,
         )
 
         # Applications in other statuses
@@ -394,6 +397,7 @@ def _build_organizations_and_users(
             app_owner=org2,
             application_status=ApplicationStatus.SUBMITTED,
             application_name="Submitted org app",
+            actor=many_app_user,
         )
 
         _add_application(
@@ -409,6 +413,7 @@ def _build_organizations_and_users(
             app_owner=org2,
             application_status=ApplicationStatus.ACCEPTED,
             application_name="Accepted org app",
+            actor=many_app_user,
         )
 
     ###############################
@@ -523,16 +528,14 @@ def _add_application(
     app_owner: User | Organization,
     application_status: ApplicationStatus = ApplicationStatus.IN_PROGRESS,
     static_application_id: uuid.UUID | None = None,
+    actor: User | None = None,
 ) -> Application:
     app_params: dict = {
-        "competition": competition,
-        "application_status": application_status,
         "application_name": application_name,
         "competition_id": competition.competition_id,
     }
 
     if isinstance(app_owner, Organization):
-        app_params["organization"] = app_owner
         app_type = "organization"
         app_params["organization_id"] = app_owner.organization_id
     else:
@@ -560,6 +563,8 @@ def _add_application(
 
     if isinstance(app_owner, User):
         user = app_owner
+    elif actor is not None:
+        user = actor
     else:
         user = factories.InternalUserRoleFactory(
             role=factories.RoleFactory.create(privileges=[Privilege.START_APPLICATION])
