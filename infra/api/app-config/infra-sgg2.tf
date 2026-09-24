@@ -58,7 +58,7 @@ module "infra_sgg2_config" {
   database_max_capacity   = 4
   database_instance_count = 2
 
-  has_search            = false # TEMPORARY - bootstrap only, restore to true before staging
+  has_search            = true
   search_engine_version = "OpenSearch_2.15"
   # The "dev" AWS account has its own IAM Identity Center reserved-SSO suffix,
   # different from the shared account default in env-config.
