@@ -170,7 +170,15 @@ export async function runSavedSearch(
   page: Page,
   searchName: string,
 ): Promise<void> {
-  await page.getByRole("link", { name: searchName, exact: true }).click();
+  const searchLink = page.getByRole("link", { name: searchName, exact: true });
+
+  // Wait for the search link to be visible in the list
+  await searchLink.waitFor({ state: "visible", timeout: 30000 });
+
+  // Click the link to open the saved search
+  await searchLink.click();
+
+  // Wait for search results page to load
   await page.waitForURL(/\/search\?/, { timeout: GOTO_TIMEOUT });
   await waitForSearchResultsInitialLoad(page);
 }
