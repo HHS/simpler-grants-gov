@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-sgg2", "infra-grantee2", "infra-grantor1"]
+  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-sgg2", "infra-sgg3", "infra-grantor1"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -70,7 +70,7 @@ locals {
     # Team environments in the "dev" AWS account; all deploy only api + frontend. The
     # infra-grantee/grantor ones mirror the shared account, infra-sgg2 has no counterpart.
     infra-sgg2     = module.infra_sgg2_config
-    infra-grantee2 = module.infra_grantee2_config
+    infra-sgg3     = module.infra_sgg3_config
     infra-grantor1 = module.infra_grantor1_config
   }
   # Map from environment name to the account name for the AWS account that
@@ -114,7 +114,7 @@ locals {
     infra-staging  = "staging"  # infra-staging environment lives in AWS account 317380566348
     infra-training = "training" # infra-training environment lives in AWS account 049145893907
     infra-sgg2     = "dev"      # infra-sgg2 environment lives in AWS account 061664787759, alongside infra-dev
-    infra-grantee2 = "dev"      # infra-grantee2 environment lives in AWS account 061664787759, alongside infra-dev
+    infra-sgg3     = "dev"      # infra-sgg3 environment lives in AWS account 061664787759, alongside infra-dev
     infra-grantor1 = "dev"      # infra-grantor1 environment lives in AWS account 061664787759, alongside infra-dev
   }
 
