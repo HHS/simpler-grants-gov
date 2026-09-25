@@ -86,11 +86,7 @@ def _validate_applicant_type(competition: Competition, organization_id: UUID | N
             )
 
 
-def create_application(
-    db_session: db.Session,
-    user: User,
-    json_data: dict,
-) -> Application:
+def create_application(db_session: db.Session, user: User, json_data: dict) -> Application:
     """
     Create a new application for a competition.
     """
@@ -99,6 +95,7 @@ def create_application(
     application_name = json_data.get("application_name")
     organization_id = json_data.get("organization_id")
     intends_to_add_organization = json_data.get("intends_to_add_organization")
+    application_id = json_data.get("application_id")
 
     # Validate that organization_id and intends_to_add_organization are not both set
     if organization_id is not None and intends_to_add_organization is True:
@@ -167,7 +164,7 @@ def create_application(
 
     # Create a new application
     application = Application(
-        application_id=uuid.uuid4(),
+        application_id=application_id or uuid.uuid4(),
         competition=competition,
         application_name=application_name,
         application_status=ApplicationStatus.IN_PROGRESS,
