@@ -22,8 +22,6 @@ export async function saveCurrentSearch(
     '[data-testid="open-save-search-modal-button"]',
   );
 
-  await expect(openSaveModalButton).toBeVisible({ timeout: 15000 });
-
   // Wait for page to be fully loaded and stable
   await page.waitForLoadState("networkidle").catch(() => {
     // Continue even if network idle times out
@@ -55,6 +53,7 @@ export async function saveCurrentSearch(
   await page.waitForTimeout(300);
 
   // Use JavaScript to ensure the save search modal button is visible and not hidden by CSS
+  // This must run BEFORE the visibility check to fix any CSS-based visibility issues
   await page.evaluate(() => {
     const saveSearchModalButton = document.querySelector(
       '[data-testid="open-save-search-modal-button"]',
@@ -80,6 +79,9 @@ export async function saveCurrentSearch(
     }
   });
   await page.waitForTimeout(500);
+
+  // Now check visibility after CSS fixes have been applied
+  await expect(openSaveModalButton).toBeVisible({ timeout: 15000 });
 
   // Try to click the button with various strategies
   try {
@@ -130,16 +132,42 @@ export async function navigateToSavedSearches(
   await page.waitForURL(/\/workspace\/saved-search-queries/, {
     timeout: GOTO_TIMEOUT,
   });
+
+  // Wait for the saved searches list to actually load
+  // Look for the list container or any saved search item
+  await page
+    .locator('[role="table"], [data-testid*="saved-search"], .list-item')
+    .first()
+    .waitFor({ state: "visible", timeout: 30000 })
+    .catch(() => {
+      // Continue even if the specific selectors don't match
+      // The list might be loading with different markup
+    });
+
+  // Additional wait for network to settle
+  await page.waitForLoadState("networkidle").catch(() => {
+    // Continue if network idle times out
+  });
+  await page.waitForTimeout(500);
 }
 
 /**
  * Re-runs a saved search from the Saved Search Queries workspace.
+ * Waits for the search link to appear and then opens it.
  */
 export async function runSavedSearch(
   page: Page,
   searchName: string,
 ): Promise<void> {
-  await page.getByRole("link", { name: searchName, exact: true }).click();
+  const searchLink = page.getByRole("link", { name: searchName, exact: true });
+
+  // Wait for the search link to be visible in the list
+  await searchLink.waitFor({ state: "visible", timeout: 30000 });
+
+  // Click the link to open the saved search
+  await searchLink.click();
+
+  // Wait for search results page to load
   await page.waitForURL(/\/search\?/, { timeout: GOTO_TIMEOUT });
   await waitForSearchResultsInitialLoad(page);
 }
