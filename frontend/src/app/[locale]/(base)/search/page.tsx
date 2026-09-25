@@ -121,7 +121,7 @@ function Search({ searchParams, params }: SearchPageProps) {
                   openText={t("drawer.toggleButton")}
                   headingText={<SearchDrawerHeading />}
                   iconName="filter_list"
-                  buttonClass="tablet:margin-x-auto"
+                  buttonClass="tablet:margin-x-auto search-filter-drawer-toggle"
                 >
                   <Suspense
                     fallback={<Loading message={t("drawer.loading")} />}
