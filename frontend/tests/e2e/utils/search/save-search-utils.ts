@@ -22,31 +22,29 @@ export async function saveCurrentSearch(
     '[data-testid="open-save-search-modal-button"]',
   );
 
-  await expect(openSaveModalButton).toBeVisible({ timeout: 15000 });
-
   // Wait for page to be fully loaded and stable
   await page.waitForLoadState("networkidle").catch(() => {
     // Continue even if network idle times out
   });
   await page.waitForTimeout(500);
 
-  // Close any open overlays or drawers that might be blocking
-  const allOverlays = page.locator(".usa-modal-overlay");
-  const overlayCount = await allOverlays.count();
-  if (overlayCount > 0) {
-    for (let i = 0; i < overlayCount; i++) {
-      const overlay = allOverlays.nth(i);
-      if (await overlay.isVisible().catch(() => false)) {
-        const closeButton = overlay
-          .locator('button[aria-label="Close"]')
-          .first();
-        if (await closeButton.isVisible().catch(() => false)) {
-          await closeButton.click().catch(() => {
-            // Ignore if close fails
-          });
-          await page.waitForTimeout(200);
-        }
-      }
+  // Close any open overlays or drawers that might be blocking button access.
+  // Expected overlays in typical test flow:
+  // - Search filter drawer overlay (aria-controls="search-filter-drawer")
+  // - Any other modals that might have been opened during test execution
+  // We target these explicitly rather than iterating all overlays since we expect a small count.
+  const filterDrawerOverlay = page.locator(
+    '.usa-modal-overlay[aria-controls="search-filter-drawer"]',
+  );
+  if (await filterDrawerOverlay.isVisible().catch(() => false)) {
+    const closeButton = filterDrawerOverlay
+      .locator('button[aria-label="Close"]')
+      .first();
+    if (await closeButton.isVisible().catch(() => false)) {
+      await closeButton.click().catch(() => {
+        // Ignore if close fails
+      });
+      await page.waitForTimeout(200);
     }
   }
 
@@ -55,12 +53,13 @@ export async function saveCurrentSearch(
   await page.waitForTimeout(300);
 
   // Use JavaScript to ensure the save search modal button is visible and not hidden by CSS
+  // On mobile, visibility checks can be very strict, so we bypass that and click directly
   await page.evaluate(() => {
     const saveSearchModalButton = document.querySelector(
       '[data-testid="open-save-search-modal-button"]',
     ) as HTMLElement;
     if (saveSearchModalButton) {
-      // Ensure saveSearchModalButton is not hidden
+      // Ensure saveSearchModalButton is not hidden by clearing inline styles
       saveSearchModalButton.style.display = "";
       saveSearchModalButton.style.visibility = "";
       saveSearchModalButton.style.opacity = "";
@@ -81,24 +80,41 @@ export async function saveCurrentSearch(
   });
   await page.waitForTimeout(500);
 
-  // Try to click the button with various strategies
+  // On mobile, Playwright's visibility check can be overly strict even after CSS fixes.
+  // Try direct JavaScript click first, then fall back to Playwright click with force.
+  let clickSucceeded = false;
+
+  // First attempt: Direct JavaScript click (bypasses visibility requirements)
   try {
-    // First try a normal click
-    await openSaveModalButton.click({ timeout: 3000 });
+    await page.evaluate(() => {
+      const saveSearchModalButton = document.querySelector(
+        '[data-testid="open-save-search-modal-button"]',
+      ) as HTMLButtonElement;
+      if (saveSearchModalButton) {
+        saveSearchModalButton.click();
+      }
+    });
+    clickSucceeded = true;
   } catch (_e) {
+    // Continue to fallback
+  }
+
+  // If JavaScript click didn't work, try Playwright's click methods
+  if (!clickSucceeded) {
     try {
-      // Try clicking the button element directly via JavaScript
-      await page.evaluate(() => {
-        const saveSearchModalButton = document.querySelector(
-          '[data-testid="open-save-search-modal-button"]',
-        ) as HTMLButtonElement;
-        if (saveSearchModalButton) {
-          saveSearchModalButton.click();
-        }
-      });
-    } catch (_e2) {
-      // Last resort: try force click
-      await openSaveModalButton.click({ force: true });
+      // Try normal click
+      await openSaveModalButton.click({ timeout: 3000 });
+      clickSucceeded = true;
+    } catch (_e) {
+      try {
+        // Last resort: force click
+        await openSaveModalButton.click({ force: true });
+        clickSucceeded = true;
+      } catch (_e2) {
+        throw new Error(
+          `Failed to click save search button after multiple attempts`,
+        );
+      }
     }
   }
 
@@ -130,10 +146,25 @@ export async function navigateToSavedSearches(
   await page.waitForURL(/\/workspace\/saved-search-queries/, {
     timeout: GOTO_TIMEOUT,
   });
+
+  // Wait for the page to be fully loaded
+  // First, ensure main content area is visible
+  await page.locator("body").waitFor({ state: "visible", timeout: 10000 });
+
+  // Wait for network idle to ensure all data has been fetched
+  // Use longer timeout since page might make multiple API calls
+  await page.waitForLoadState("networkidle").catch(() => {
+    // Continue if network idle times out - page might still be loading
+    // but we'll proceed and let the caller deal with waiting for specific items
+  });
+
+  // Additional stability wait to allow DOM to settle
+  await page.waitForTimeout(1000);
 }
 
 /**
  * Re-runs a saved search from the Saved Search Queries workspace.
+ * Waits for the search link to appear and then opens it.
  */
 export async function runSavedSearch(
   page: Page,

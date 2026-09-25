@@ -74,7 +74,8 @@ locals {
       "--store-version"
     ],
     # Mirrors grantee1.
-    "infra-grantee1" = [
+    # Mirrors grantee1.
+    "infra-sgg2" = [
       "flask",
       "data-migration",
       "load-transform",
@@ -166,7 +167,7 @@ locals {
     training         = ["flask", "task", "sam-extracts"]
     "infra-training" = ["flask", "task", "sam-extracts"]
     grantee1         = ["flask", "task", "sam-extracts"]
-    "infra-grantee1" = ["flask", "task", "sam-extracts"]
+    "infra-sgg2"     = ["flask", "task", "sam-extracts"]
     grantee2         = ["flask", "task", "sam-extracts"]
     "infra-grantee2" = ["flask", "task", "sam-extracts"]
     grantor1         = ["flask", "task", "sam-extracts"]
@@ -181,7 +182,7 @@ locals {
     training         = "DISABLED"
     "infra-training" = "DISABLED"
     grantee1         = "DISABLED"
-    "infra-grantee1" = "DISABLED"
+    "infra-sgg2"     = "DISABLED"
     grantee2         = "DISABLED"
     "infra-grantee2" = "DISABLED"
     grantor1         = "DISABLED"
@@ -196,7 +197,7 @@ locals {
     training         = "ENABLED"
     "infra-training" = "ENABLED"
     grantee1         = "DISABLED"
-    "infra-grantee1" = "DISABLED"
+    "infra-sgg2"     = "DISABLED"
     grantee2         = "DISABLED"
     "infra-grantee2" = "DISABLED"
     grantor1         = "DISABLED"
@@ -211,7 +212,7 @@ locals {
     training         = "ENABLED"
     "infra-training" = "ENABLED"
     grantee1         = "ENABLED"
-    "infra-grantee1" = "ENABLED"
+    "infra-sgg2"     = "ENABLED"
     grantee2         = "ENABLED"
     "infra-grantee2" = "ENABLED"
     grantor1         = "ENABLED"
@@ -226,7 +227,7 @@ locals {
     training         = "ENABLED"
     "infra-training" = "ENABLED"
     grantee1         = "ENABLED"
-    "infra-grantee1" = "ENABLED"
+    "infra-sgg2"     = "ENABLED"
     grantee2         = "ENABLED"
     "infra-grantee2" = "ENABLED"
     grantor1         = "ENABLED"
@@ -241,7 +242,7 @@ locals {
     training         = "ENABLED"
     "infra-training" = "ENABLED"
     grantee1         = "ENABLED"
-    "infra-grantee1" = "ENABLED"
+    "infra-sgg2"     = "ENABLED"
     grantee2         = "ENABLED"
     "infra-grantee2" = "ENABLED"
     grantor1         = "ENABLED"
@@ -256,7 +257,7 @@ locals {
     training         = "ENABLED"
     "infra-training" = "ENABLED"
     grantee1         = "DISABLED"
-    "infra-grantee1" = "DISABLED"
+    "infra-sgg2"     = "DISABLED"
     grantee2         = "DISABLED"
     "infra-grantee2" = "DISABLED"
     grantor1         = "DISABLED"

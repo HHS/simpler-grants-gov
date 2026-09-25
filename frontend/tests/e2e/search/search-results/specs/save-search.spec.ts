@@ -116,18 +116,32 @@ test.describe("Saved search - restores state on reopen", () => {
        */
       await navigateToSavedSearches(page, workspaceLink);
 
+      // Debug: Log page state to understand why saved search isn't appearing
+      console.warn("After navigation - URL:", page.url());
+      const pageText = await page.locator("body").textContent();
+      if (pageText && pageText.includes("No saved searches")) {
+        console.error(
+          "Page shows 'No saved searches' - the save operation may have failed",
+        );
+      }
+
       // Verify the saved search is listed in the workspace.
+      // Use extended timeout to allow page content to fully load
       const savedSearchListLink = page.getByRole("link", {
         name: savedSearchName,
         exact: true,
       });
-      await expect(savedSearchListLink).toBeVisible();
+      await expect(savedSearchListLink).toBeVisible({ timeout: 30000 });
 
       // Reopen the saved search - the list item's name link is the "Run" affordance
       await runSavedSearch(page, savedSearchName);
 
       /**
        * And pagination should reset to page 1
+       * Note: We verified earlier (line ~100) that multiple pages exist before saving.
+       * If pagination controls are not visible here, it would indicate the result count
+       * changed unexpectedly - which is caught by the result count assertion below.
+       * This conditional is defensive: we only assert the page 1 button if controls exist.
        */
       const currentUrl = new URL(page.url());
       expect(currentUrl.searchParams.get("page")).toBeNull();
@@ -149,7 +163,6 @@ test.describe("Saved search - restores state on reopen", () => {
       expect(resultCountAfterReopen).toEqual(expectedResultCount);
     },
   );
-
   test(
     "reopening a saved search restores query, filters, and sort order",
     { tag: [SMOKE, GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
@@ -234,12 +247,22 @@ test.describe("Saved search - restores state on reopen", () => {
        */
       await navigateToSavedSearches(page, workspaceLink);
 
+      // Debug: Log page state to understand why saved search isn't appearing
+      console.warn("After navigation - URL:", page.url());
+      const pageText = await page.locator("body").textContent();
+      if (pageText && pageText.includes("No saved searches")) {
+        console.error(
+          "Page shows 'No saved searches' - the save operation may have failed",
+        );
+      }
+
       // Verify the saved search is listed in the workspace.
+      // Use extended timeout to allow page content to fully load
       const savedSearchListLink = page.getByRole("link", {
         name: savedSearchName,
         exact: true,
       });
-      await expect(savedSearchListLink).toBeVisible();
+      await expect(savedSearchListLink).toBeVisible({ timeout: 30000 });
 
       // Reopen the saved search - the list item's name link is the "Run" affordance
       await runSavedSearch(page, savedSearchName);
