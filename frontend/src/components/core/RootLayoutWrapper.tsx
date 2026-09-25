@@ -13,6 +13,7 @@ import "src/styles/styles.scss";
 
 import { getCorrelationId } from "src/services/correlationId/correlationId";
 import { LayoutProps } from "src/types/generalTypes";
+import { buildNewRelicBrowserScript } from "src/utils/newRelicBrowserScript";
 
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
@@ -55,6 +56,15 @@ export default async function RootLayoutWrapper({
 
   const correlationId = await getCorrelationId();
 
+  // correlation_id is set inside the NR browser script itself so it is
+  // attached before the first PageView is harvested .
+  // CorrelationIdTracker below still keeps the attribute in sync if the id
+  // changes without a full page load (e.g. router.refresh() after logout).
+  const newRelicBrowserScript = buildNewRelicBrowserScript(
+    browserTimingHeader,
+    correlationId,
+  );
+
   // note that if we need to conditionally include third party scripts on the page, a component was implemented
   // to do that in commit 46566b4c0ad but later removed. We can bring it back if it is ever useful. - DWS
   return (
@@ -84,7 +94,7 @@ export default async function RootLayoutWrapper({
               // Come back to this to see if we can find a solution later on
               // strategy="beforeInteractive"
 
-              dangerouslySetInnerHTML={{ __html: browserTimingHeader }}
+              dangerouslySetInnerHTML={{ __html: newRelicBrowserScript }}
             />
           </>
         )}
