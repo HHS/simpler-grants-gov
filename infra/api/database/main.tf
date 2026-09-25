@@ -56,7 +56,7 @@ locals {
   # every one of them. The list is written out per environment anyway, so the
   # intent stays readable if any of them later moves to its own account.
   snapshot_restore_targets = {
-    "infra-staging" = ["infra-grantee1", "infra-grantee2", "infra-grantor1", "infra-dev"]
+    "infra-staging" = ["infra-sgg2", "infra-grantee2", "infra-grantor1", "infra-dev"]
   }
 
   # distinct() because several target environments can share one AWS account

@@ -357,7 +357,7 @@ Because the parameter is referenced with `manage_method = "manual"`, Terraform r
 | staging (`317380566348`) | `infra-staging` |
 | training (`049145893907`) | `infra-training` |
 
-`infra-grantee1`, `infra-grantee2`, and `infra-grantor1` are configured in `infra/api/app-config/` but not serving traffic, so they are skipped here. Whoever stands one up provisions the whole `secrets` block for it, this parameter included.
+`infra-sgg2`, `infra-grantee2`, and `infra-grantor1` are configured in `infra/api/app-config/` but not serving traffic, so they are skipped here. Whoever stands one up provisions the whole `secrets` block for it, this parameter included.
 
 `grantee1`, `grantee2`, and `grantor1` must be set to staging's pepper, not their own. Those environments restore their database from the staging snapshot, so a distinct pepper would leave every restored key hash unresolvable. `.github/scripts/copy-ssm-params.sh` keeps them in sync on each run (`api-key-pepper` is intentionally not in its `SKIP_PARAMS` list), but that sync happens after the API deploy in the team-environment flow, so the parameter still has to pre-exist.
 
