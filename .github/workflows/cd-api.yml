@@ -29,7 +29,7 @@ on:
           - grantee2
           - grantor1
           - infra-sgg2
-          - infra-grantee2
+          - infra-sgg3
           - infra-grantor1
           - prod
       version:

@@ -20,7 +20,7 @@ on:
           - staging
           - grantee1
           - infra-sgg2
-          - infra-grantee2
+          - infra-sgg3
           - infra-grantor1
       value:
         description: Feature flag value

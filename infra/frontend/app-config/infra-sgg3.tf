@@ -1,23 +1,23 @@
-# frontend service for the infra-grantee2 environment (AWS account 061664787759, network_name "infra-grantee2").
+# frontend service for the infra-sgg3 environment (AWS account 061664787759, network_name "infra-sgg3").
 #
-# Mirrors infra/frontend/app-config/grantee2.tf 1:1. HTTPS/custom domain is
+# Replaced the former infra-grantee2 frontend. HTTPS/custom domain is
 # deferred until an ACM cert + Route53 hosted zone exist in the "dev" account;
 # the intended domain is shown in a comment below.
-module "infra_grantee2_config" {
+module "infra_sgg3_config" {
   source                          = "./env-config"
   project_name                    = local.project_name
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
-  environment                     = "infra-grantee2"
-  network_name                    = "infra-grantee2"
-  domain_name                     = null # "infra-grantee2.teams.simpler.grants.gov" once DNS + certs exist
+  environment                     = "infra-sgg3"
+  network_name                    = "infra-sgg3"
+  domain_name                     = null # "sgg3.teams.simpler.grants.gov" once DNS + certs exist
   enable_https                    = false
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider
   enable_notifications            = local.enable_notifications
 
-  # Sizing mirrors grantee2.
+  # Sizing carried over from infra-grantee2.
   instance_desired_instance_count = 4
   instance_scaling_min_capacity   = 4
   instance_scaling_max_capacity   = 20
@@ -25,8 +25,8 @@ module "infra_grantee2_config" {
   instance_cpu    = 1024
   instance_memory = 2048
 
-  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the infra-grantee2 frontend ALB exists
-  service_host_newrelic_entity_guid = "" # Populate once the New Relic browser entity for the infra-grantee2 frontend exists
+  service_newrelic_entity_guid      = "" # Populate once the New Relic entity for the infra-sgg3 frontend ALB exists
+  service_host_newrelic_entity_guid = "" # Populate once the New Relic browser entity for the infra-sgg3 frontend exists
 
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.

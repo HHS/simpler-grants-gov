@@ -14,7 +14,7 @@ run-name: Seed ${{ inputs.target_environment }} DB from ${{ inputs.source_enviro
 #
 #   restore-db-cross-env.yml      (this file)
 #     api-infra-staging (317380566348)
-#       -> infra-sgg2 / infra-grantee2 / infra-grantor1 / infra-dev
+#       -> infra-sgg2 / infra-sgg3 / infra-grantor1 / infra-dev
 #          (all in 061664787759)
 #     Different accounts, so an automated snapshot cannot be used at all and
 #     two sets of credentials are required.
@@ -50,7 +50,7 @@ on:
         type: choice
         options:
           - infra-sgg2
-          - infra-grantee2
+          - infra-sgg3
           - infra-grantor1
           - infra-dev
       source_environment:
