@@ -13,12 +13,14 @@ type SubmissionSetUpProps = {
   publicCompetitionId?: string | null;
   competitionTitle?: string | null;
   openToApplicants?: ApplicantTypes[];
+  readOnly?: boolean;
 };
 
 export function SubmissionSetUp({
   publicCompetitionId,
   competitionTitle,
   openToApplicants = [],
+  readOnly = false,
 }: SubmissionSetUpProps) {
   const t = useTranslations("OpportunityCompetition.sectionSubmissionSetUp");
   const applicantSelection =
@@ -45,6 +47,7 @@ export function SubmissionSetUp({
         <div className="tablet:grid-col">
           <CommonTextInput
             fieldId="public_competition_id"
+            disabled={readOnly}
             labelText={t("publicCompetitionId")}
             description={t("publicCompetitionIdHint")}
             isRequired={false}
@@ -56,6 +59,7 @@ export function SubmissionSetUp({
         <div className="tablet:grid-col">
           <CommonTextInput
             fieldId="competition_title"
+            disabled={readOnly}
             labelText={t("competitionTitle")}
             description={t("competitionTitleHint")}
             isRequired={true}
@@ -67,6 +71,7 @@ export function SubmissionSetUp({
       </div>
       <CommonSelectInput
         fieldId="open_to_applicants"
+        disabled={readOnly}
         labelText={t("whoCanApply")}
         description={t("whoCanApplyHint")}
         isRequired={true}
