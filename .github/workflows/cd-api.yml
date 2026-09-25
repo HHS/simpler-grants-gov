@@ -30,7 +30,7 @@ on:
           - grantor1
           - infra-grantee1
           - infra-grantee2
-          - infra-grantor1
+          - infra-sgg1
           - prod
       version:
         required: true

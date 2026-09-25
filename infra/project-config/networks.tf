@@ -198,13 +198,14 @@ locals {
     }
 
     # ---------------------------------------------------------------------------
-    # infra-grantee1 / infra-grantee2 / infra-grantor1
+    # infra-grantee1 / infra-grantee2 / infra-sgg1
     #
     # Team environments in the "dev" AWS account (061664787759) -- the same account
     # that hosts infra-dev. Each mirrors its counterpart in the shared account 1:1:
     #   grantee1 -> infra-grantee1
     #   grantee2 -> infra-grantee2
-    #   grantor1 -> infra-grantor1
+    #
+    # infra-sgg1 has no shared-account counterpart; it replaced the former infra-grantor1.
     #
     # ---------------------------------------------------------------------------
     infra-grantee1 = {
@@ -235,10 +236,10 @@ locals {
         certificate_configs = {}
       }
     }
-    infra-grantor1 = {
+    infra-sgg1 = {
       account_name                 = "dev" # AWS account 061664787759 (see infra/accounts/dev.061664787759.s3.tfbackend)
-      database_subnet_group_name   = "infra-grantor1"
-      vpc_name                     = "infra-grantor1"
+      database_subnet_group_name   = "infra-sgg1"
+      vpc_name                     = "infra-sgg1"
       second_octet                 = 35              # The second octet of the VPC CIDR block (10.35.0.0/20)
       grants_gov_oracle_cidr_block = "10.207.0.0/16" # Unused while enable_dms = false, but still read by the api/database layer
       enable_dms                   = false           # does not peer with the Grants.gov Oracle DMS network
