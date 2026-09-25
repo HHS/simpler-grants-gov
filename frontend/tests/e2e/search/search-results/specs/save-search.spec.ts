@@ -113,7 +113,7 @@ test.describe("Saved search - restores state on reopen", () => {
       await navigateToSavedSearches(page, workspaceLink);
 
       // Debug: Log page state to understand why saved search isn't appearing
-      console.log("After navigation - URL:", page.url());
+      console.warn("After navigation - URL:", page.url());
       const pageText = await page.locator("body").textContent();
       if (pageText && pageText.includes("No saved searches")) {
         console.error(
@@ -244,7 +244,7 @@ test.describe("Saved search - restores state on reopen", () => {
       await navigateToSavedSearches(page, workspaceLink);
 
       // Debug: Log page state to understand why saved search isn't appearing
-      console.log("After navigation - URL:", page.url());
+      console.warn("After navigation - URL:", page.url());
       const pageText = await page.locator("body").textContent();
       if (pageText && pageText.includes("No saved searches")) {
         console.error(
