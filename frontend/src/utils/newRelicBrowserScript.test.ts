@@ -61,4 +61,9 @@ describe("buildNewRelicBrowserScript", () => {
 
     expect(() => runScript(script)).not.toThrow();
   });
+  it("does not throw when window.newrelic exists without setCustomAttribute", () => {
+    const script = buildNewRelicBrowserScript("window.newrelic={};", VALID_ID);
+
+    expect(() => runScript(script)).not.toThrow();
+  });
 });
