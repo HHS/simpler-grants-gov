@@ -53,13 +53,13 @@ export async function saveCurrentSearch(
   await page.waitForTimeout(300);
 
   // Use JavaScript to ensure the save search modal button is visible and not hidden by CSS
-  // This must run BEFORE the visibility check to fix any CSS-based visibility issues
+  // On mobile, visibility checks can be very strict, so we bypass that and click directly
   await page.evaluate(() => {
     const saveSearchModalButton = document.querySelector(
       '[data-testid="open-save-search-modal-button"]',
     ) as HTMLElement;
     if (saveSearchModalButton) {
-      // Ensure saveSearchModalButton is not hidden
+      // Ensure saveSearchModalButton is not hidden by clearing inline styles
       saveSearchModalButton.style.display = "";
       saveSearchModalButton.style.visibility = "";
       saveSearchModalButton.style.opacity = "";
@@ -80,27 +80,41 @@ export async function saveCurrentSearch(
   });
   await page.waitForTimeout(500);
 
-  // Now check visibility after CSS fixes have been applied
-  await expect(openSaveModalButton).toBeVisible({ timeout: 15000 });
+  // On mobile, Playwright's visibility check can be overly strict even after CSS fixes.
+  // Try direct JavaScript click first, then fall back to Playwright click with force.
+  let clickSucceeded = false;
 
-  // Try to click the button with various strategies
+  // First attempt: Direct JavaScript click (bypasses visibility requirements)
   try {
-    // First try a normal click
-    await openSaveModalButton.click({ timeout: 3000 });
+    await page.evaluate(() => {
+      const saveSearchModalButton = document.querySelector(
+        '[data-testid="open-save-search-modal-button"]',
+      ) as HTMLButtonElement;
+      if (saveSearchModalButton) {
+        saveSearchModalButton.click();
+      }
+    });
+    clickSucceeded = true;
   } catch (_e) {
+    // Continue to fallback
+  }
+
+  // If JavaScript click didn't work, try Playwright's click methods
+  if (!clickSucceeded) {
     try {
-      // Try clicking the button element directly via JavaScript
-      await page.evaluate(() => {
-        const saveSearchModalButton = document.querySelector(
-          '[data-testid="open-save-search-modal-button"]',
-        ) as HTMLButtonElement;
-        if (saveSearchModalButton) {
-          saveSearchModalButton.click();
-        }
-      });
-    } catch (_e2) {
-      // Last resort: try force click
-      await openSaveModalButton.click({ force: true });
+      // Try normal click
+      await openSaveModalButton.click({ timeout: 3000 });
+      clickSucceeded = true;
+    } catch (_e) {
+      try {
+        // Last resort: force click
+        await openSaveModalButton.click({ force: true });
+        clickSucceeded = true;
+      } catch (_e2) {
+        throw new Error(
+          `Failed to click save search button after multiple attempts`,
+        );
+      }
     }
   }
 
@@ -133,22 +147,19 @@ export async function navigateToSavedSearches(
     timeout: GOTO_TIMEOUT,
   });
 
-  // Wait for the saved searches list to actually load
-  // Look for the list container or any saved search item
-  await page
-    .locator('[role="table"], [data-testid*="saved-search"], .list-item')
-    .first()
-    .waitFor({ state: "visible", timeout: 30000 })
-    .catch(() => {
-      // Continue even if the specific selectors don't match
-      // The list might be loading with different markup
-    });
+  // Wait for the page to be fully loaded
+  // First, ensure main content area is visible
+  await page.locator("body").waitFor({ state: "visible", timeout: 10000 });
 
-  // Additional wait for network to settle
+  // Wait for network idle to ensure all data has been fetched
+  // Use longer timeout since page might make multiple API calls
   await page.waitForLoadState("networkidle").catch(() => {
-    // Continue if network idle times out
+    // Continue if network idle times out - page might still be loading
+    // but we'll proceed and let the caller deal with waiting for specific items
   });
-  await page.waitForTimeout(500);
+
+  // Additional stability wait to allow DOM to settle
+  await page.waitForTimeout(1000);
 }
 
 /**

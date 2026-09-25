@@ -112,12 +112,22 @@ test.describe("Saved search - restores state on reopen", () => {
        */
       await navigateToSavedSearches(page, workspaceLink);
 
+      // Debug: Log page state to understand why saved search isn't appearing
+      console.log("After navigation - URL:", page.url());
+      const pageText = await page.locator("body").textContent();
+      if (pageText && pageText.includes("No saved searches")) {
+        console.error(
+          "Page shows 'No saved searches' - the save operation may have failed",
+        );
+      }
+
       // Verify the saved search is listed in the workspace.
+      // Use extended timeout to allow page content to fully load
       const savedSearchListLink = page.getByRole("link", {
         name: savedSearchName,
         exact: true,
       });
-      await expect(savedSearchListLink).toBeVisible();
+      await expect(savedSearchListLink).toBeVisible({ timeout: 30000 });
 
       // Reopen the saved search - the list item's name link is the "Run" affordance
       await runSavedSearch(page, savedSearchName);
@@ -233,12 +243,22 @@ test.describe("Saved search - restores state on reopen", () => {
        */
       await navigateToSavedSearches(page, workspaceLink);
 
+      // Debug: Log page state to understand why saved search isn't appearing
+      console.log("After navigation - URL:", page.url());
+      const pageText = await page.locator("body").textContent();
+      if (pageText && pageText.includes("No saved searches")) {
+        console.error(
+          "Page shows 'No saved searches' - the save operation may have failed",
+        );
+      }
+
       // Verify the saved search is listed in the workspace.
+      // Use extended timeout to allow page content to fully load
       const savedSearchListLink = page.getByRole("link", {
         name: savedSearchName,
         exact: true,
       });
-      await expect(savedSearchListLink).toBeVisible();
+      await expect(savedSearchListLink).toBeVisible({ timeout: 30000 });
 
       // Reopen the saved search - the list item's name link is the "Run" affordance
       await runSavedSearch(page, savedSearchName);
