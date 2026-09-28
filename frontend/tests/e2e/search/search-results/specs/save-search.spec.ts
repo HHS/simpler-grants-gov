@@ -61,6 +61,7 @@ test.describe("Saved search - restores state on reopen", () => {
        * Given I am logged in
        */
       await authenticateE2eUser(page, context, isMobile);
+      await deleteAllSavedSearches(page);
 
       /**
        * @given I have saved a search with a sort order, on page 2 of results
@@ -116,14 +117,17 @@ test.describe("Saved search - restores state on reopen", () => {
        */
       await navigateToSavedSearches(page, workspaceLink);
 
-      // Debug: Log page state to understand why saved search isn't appearing
-      console.warn("After navigation - URL:", page.url());
-      const pageText = await page.locator("body").textContent();
-      if (pageText && pageText.includes("No saved searches")) {
-        console.error(
-          "Page shows 'No saved searches' - the save operation may have failed",
-        );
-      }
+      // Capture workspace state for diagnostics if the saved search is not found.
+      const hasNoSavedSearchesMessage = await page
+        .getByText("No saved searches", { exact: false })
+        .isVisible()
+        .catch(() => false);
+      
+      console.warn("Saved search workspace state after navigation:", {
+        url: page.url(),
+        savedSearchName,
+        hasNoSavedSearchesMessage,
+      });
 
       // Verify the saved search is listed in the workspace.
       // Use extended timeout to allow page content to fully load
@@ -180,6 +184,7 @@ test.describe("Saved search - restores state on reopen", () => {
        * Given I am logged in
        */
       await authenticateE2eUser(page, context, isMobile);
+      await deleteAllSavedSearches(page);
 
       /**
        * @given I have saved a search with keywords, filters, and sort order
@@ -247,14 +252,17 @@ test.describe("Saved search - restores state on reopen", () => {
        */
       await navigateToSavedSearches(page, workspaceLink);
 
-      // Debug: Log page state to understand why saved search isn't appearing
-      console.warn("After navigation - URL:", page.url());
-      const pageText = await page.locator("body").textContent();
-      if (pageText && pageText.includes("No saved searches")) {
-        console.error(
-          "Page shows 'No saved searches' - the save operation may have failed",
-        );
-      }
+      // Capture workspace state for diagnostics if the saved search is not found.
+      const hasNoSavedSearchesMessage = await page
+        .getByText("No saved searches", { exact: false })
+        .isVisible()
+        .catch(() => false);
+      
+      console.warn("Saved search workspace state after navigation:", {
+        url: page.url(),
+        savedSearchName,
+        hasNoSavedSearchesMessage,
+      });
 
       // Verify the saved search is listed in the workspace.
       // Use extended timeout to allow page content to fully load
