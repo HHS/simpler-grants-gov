@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from uuid import UUID
 
+from src.constants.lookup_constants import NotificationType
 from src.db.models.opportunity_models import OpportunityVersion
 
 
@@ -55,3 +56,8 @@ class UserOpportunityUpdateContent:
     subject: str
     message: str
     updated_opportunity_ids: list
+
+
+NOTIFICATION_TYPE_DEFAULTS: dict[NotificationType, bool] = {
+    NotificationType.ALL_NEW_OPPORTUNITIES: False,
+}

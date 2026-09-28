@@ -60,6 +60,7 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     JobStatus,
     JobType,
+    NotificationType,
     OpportunityAuditEvent,
     OpportunityCategory,
     OpportunityCategoryLegacy,
@@ -3614,3 +3615,16 @@ class SharedUserApiKeyFactory(BaseFactory):
     last_used = factory.Faker("date_time_between", start_date="-30d", end_date="now")
 
     is_active = True
+
+
+class UserNotificationPreferenceFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserNotificationPreference
+
+    user_notification_preference_id = Generators.UuidObj
+    is_enabled = False
+
+    notification_type = factory.fuzzy.FuzzyChoice(NotificationType)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda u: u.user.user_id)

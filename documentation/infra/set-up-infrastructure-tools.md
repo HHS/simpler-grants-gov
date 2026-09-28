@@ -65,7 +65,7 @@ active before you run any AWS CLI, Terraform, or `bin/` command.
 
 | Environment | Account name | Profile |
 | --- | --- | --- |
-| `infra-dev`, `infra-sgg2`, `infra-grantee2`, `infra-grantor1` | `dev` | `dev` |
+| `infra-dev`, `infra-sgg2`, `infra-sgg3`, `infra-grantor1` | `dev` | `dev` |
 | `infra-staging` | `staging` | `staging` |
 | `infra-training` | `training` | `training` |
 | `prod`, `shared`, `grantee1`, `grantee2`, `grantor1` | `simpler-grants-gov` | `prod` |
