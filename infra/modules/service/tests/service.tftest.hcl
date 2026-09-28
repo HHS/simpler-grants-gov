@@ -154,3 +154,48 @@ run "task_definition_family_matches_service_name" {
     error_message = "Task definition family must match service_name"
   }
 }
+
+run "ecs_run_task_retries_capacity_errors_but_not_task_failures" {
+  command = plan
+
+  assert {
+    condition     = local.ecs_run_task_retry[0].ErrorEquals == ["ECS.AmazonECSException"]
+    error_message = "Retry must cover ECS.AmazonECSException and nothing else: States.TaskFailed and ECS.ServerException can both fire after the container started, where a retry would double-run the job"
+  }
+
+  assert {
+    condition     = local.ecs_run_task_retry[0].MaxDelaySeconds <= 120
+    error_message = "Backoff must stay capped so a retried job cannot drift into the next run of an hourly schedule"
+  }
+
+  assert {
+    condition     = local.ecs_run_task_catch[0].Next == "JobFailed"
+    error_message = "Failures must be caught and routed to the JobFailed state"
+  }
+
+  assert {
+    condition     = local.ecs_run_task_catch[0].ResultPath == "$.error"
+    error_message = "Caught error must be placed at $.error so JobFailed can format it into the cause"
+  }
+}
+
+# The rendered state machine definitions embed cluster and task-definition
+# ARNs, so they are unknown at plan time and cannot be asserted on here.
+# Instead both files build their CausePath from this one shared local, so a
+# change in either file goes through an assertion.
+run "job_failed_cause_passes_the_error_as_arguments" {
+  command = plan
+
+  # A quote or brace reaching the ASL template would break the intrinsic at
+  # apply time or runtime, so the caught error must arrive as an argument.
+  assert {
+    condition     = endswith(local.job_failed_cause_suffix, "$.error.Error, $.error.Cause)")
+    error_message = "JobFailed must pass the caught error as States.Format arguments, not interpolate it into the template"
+  }
+
+  # Two placeholders, matching the two arguments.
+  assert {
+    condition     = length(regexall("\\{\\}", local.job_failed_cause_suffix)) == 2
+    error_message = "States.Format placeholder count must match the number of arguments passed"
+  }
+}
