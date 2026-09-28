@@ -338,6 +338,10 @@ def test_sf424_v4_0_min_length(sf424_v4_0, valid_json_v4_0, data):
         },
         {"assistance_listing_number": "1234567890.123456789"},
         {"federal_estimated_funding": "12345678901234567890"},
+        # Aligned with the XSD (RevisionOtherSpecify 21, DivisionNameDataType 30, EmailDataType 60)
+        {"revision_other_specify": "x" * 22},
+        {"division_name": "x" * 31},
+        {"authorized_representative_email": "a" * 52 + "@test.org"},
     ],
 )
 def test_sf424_v4_0_max_length(sf424_v4_0, valid_json_v4_0, data):
