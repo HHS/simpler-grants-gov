@@ -122,7 +122,7 @@ test.describe("Saved search - restores state on reopen", () => {
         .getByText("No saved searches", { exact: false })
         .isVisible()
         .catch(() => false);
-      
+
       console.warn("Saved search workspace state after navigation:", {
         url: page.url(),
         savedSearchName,
@@ -257,7 +257,7 @@ test.describe("Saved search - restores state on reopen", () => {
         .getByText("No saved searches", { exact: false })
         .isVisible()
         .catch(() => false);
-      
+
       console.warn("Saved search workspace state after navigation:", {
         url: page.url(),
         savedSearchName,
