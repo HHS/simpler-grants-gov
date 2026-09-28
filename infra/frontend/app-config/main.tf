@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-grantee1", "infra-grantee2", "infra-sgg1"]
+  environments = ["dev", "staging", "prod", "training", "grantee1", "grantee2", "grantor1", "infra-dev", "infra-staging", "infra-training", "infra-sgg2", "infra-sgg3", "infra-sgg1"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -68,10 +68,10 @@ locals {
     infra-training = module.infra_training_config
 
     # Team environments in the "dev" AWS account; all deploy only api + frontend. The
-    # infra-grantee ones mirror the shared account, infra-sgg1 has no counterpart.
-    infra-grantee1 = module.infra_grantee1_config
-    infra-grantee2 = module.infra_grantee2_config
-    infra-sgg1     = module.infra_sgg1_config
+    # infra-grantee/grantor ones mirror the shared account, infra-sgg2 has no counterpart.
+    infra-sgg2 = module.infra_sgg2_config
+    infra-sgg3 = module.infra_sgg3_config
+    infra-sgg1 = module.infra_sgg1_config
   }
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
@@ -113,8 +113,8 @@ locals {
     infra-dev      = "dev"      # infra-dev environment lives in AWS account 061664787759
     infra-staging  = "staging"  # infra-staging environment lives in AWS account 317380566348
     infra-training = "training" # infra-training environment lives in AWS account 049145893907
-    infra-grantee1 = "dev"      # infra-grantee1 environment lives in AWS account 061664787759, alongside infra-dev
-    infra-grantee2 = "dev"      # infra-grantee2 environment lives in AWS account 061664787759, alongside infra-dev
+    infra-sgg2     = "dev"      # infra-sgg2 environment lives in AWS account 061664787759, alongside infra-dev
+    infra-sgg3     = "dev"      # infra-sgg3 environment lives in AWS account 061664787759, alongside infra-dev
     infra-sgg1     = "dev"      # infra-sgg1 environment lives in AWS account 061664787759, alongside infra-dev
   }
 
