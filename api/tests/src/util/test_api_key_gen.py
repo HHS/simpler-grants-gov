@@ -1,7 +1,7 @@
 import string
 from unittest.mock import patch
 
-from src.util.api_key_gen import generate_api_key_id
+from src.util.api_key_gen import generate_api_key_id, hash_api_key_id
 
 
 class TestGenerateApiKeyId:
@@ -86,3 +86,30 @@ class TestGenerateApiKeyId:
         assert not any(c in special_chars for c in key_id)
 
         assert " " not in key_id
+
+
+class TestHashApiKeyId:
+    def test_hash_api_key_id_matches_known_digest(self):
+        """Test hash_api_key_id produces the expected HMAC-SHA256 hex digest."""
+        digest = hash_api_key_id("test-api-key", "test-pepper")
+        assert digest == "2d3178bd49ac2a9a0d0969279ba7bf82907408ab7521266be983aed42f7429b6"
+
+    def test_hash_api_key_id_is_deterministic(self):
+        """Test hash_api_key_id returns the same digest for the same key and pepper."""
+        raw_key = generate_api_key_id()
+        assert hash_api_key_id(raw_key, "pepper") == hash_api_key_id(raw_key, "pepper")
+
+    def test_hash_api_key_id_different_pepper(self):
+        """Test hash_api_key_id returns a different digest when the pepper changes."""
+        raw_key = generate_api_key_id()
+        assert hash_api_key_id(raw_key, "pepper-one") != hash_api_key_id(raw_key, "pepper-two")
+
+    def test_hash_api_key_id_different_key(self):
+        """Test hash_api_key_id returns a different digest when the key changes."""
+        assert hash_api_key_id("key-one", "pepper") != hash_api_key_id("key-two", "pepper")
+
+    def test_hash_api_key_id_is_hex_sha256(self):
+        """Test hash_api_key_id returns a 64 character lowercase hex string."""
+        digest = hash_api_key_id(generate_api_key_id(), "pepper")
+        assert len(digest) == 64
+        assert all(c in string.hexdigits.lower() for c in digest)

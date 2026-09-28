@@ -3,7 +3,7 @@
 # infra-grantor1 is the "dev" account's copy of the shared account's grantor1
 # environment. Config values below mirror infra/api/app-config/grantor1.tf 1:1,
 # except for the settings that cannot be carried over to a different account.
-# See infra/api/app-config/infra-grantee1.tf for the full rationale.
+# See infra/api/app-config/infra-sgg2.tf for the full rationale.
 module "infra_grantor1_config" {
   source         = "./env-config"
   project_name   = local.project_name
@@ -13,7 +13,7 @@ module "infra_grantor1_config" {
   network_name   = "infra-grantor1"
 
   # Reuses grantor1's hostnames. domain_name cannot be null -- see the comment in
-  # infra/api/app-config/infra-grantee1.tf for why the plan fails without it.
+  # infra/api/app-config/infra-sgg2.tf for why the plan fails without it.
   domain_name            = "api.grantor1.teams.simpler.grants.gov"
   secondary_domain_names = ["alb.grantor1.teams.simpler.grants.gov"]
   # Off until ACM certificates are imported into the "dev" account.

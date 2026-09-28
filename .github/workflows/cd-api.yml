@@ -28,8 +28,8 @@ on:
           - grantee1
           - grantee2
           - grantor1
-          - infra-grantee1
-          - infra-grantee2
+          - infra-sgg2
+          - infra-sgg3
           - infra-grantor1
           - prod
       version:

@@ -7,7 +7,12 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
-from src.constants.lookup_constants import ApplicationStatus, LegacyUserStatus, OpportunityStatus
+from src.constants.lookup_constants import (
+    ApplicationStatus,
+    LegacyUserStatus,
+    OpportunityStatus,
+    Privilege,
+)
 from src.constants.static_role_values import (
     INTERNAL_S3_SCANNER_ROLE,
     INTERNAL_WORKFLOW_USER_ROLE,
@@ -32,6 +37,7 @@ from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
 )
+from src.services.applications.create_application import create_application
 from src.util import file_util
 from tests.lib.legacy_user_test_utils import create_legacy_user_with_status
 from tests.lib.seed_data_utils import CompetitionContainer, UserBuilder
@@ -343,6 +349,7 @@ def _build_organizations_and_users(
             competition=competition_container.competition_with_all_forms,
             app_owner=org3,
             application_name="All forms",
+            actor=many_app_user,
         )
 
         # An application for each competition that has a form
@@ -352,6 +359,7 @@ def _build_organizations_and_users(
                 competition=competition,
                 app_owner=org2,
                 application_name=f"App for {form.short_form_name}",
+                actor=many_app_user,
             )
 
         # Very long application names
@@ -372,6 +380,7 @@ def _build_organizations_and_users(
             competition=competition_container.get_comp_for_form(SF424_v4_0),
             app_owner=org3,
             application_name="My quite long organization application name that'll take up almost as much space",
+            actor=many_app_user,
         )
 
         # Applications in other statuses
@@ -388,6 +397,7 @@ def _build_organizations_and_users(
             app_owner=org2,
             application_status=ApplicationStatus.SUBMITTED,
             application_name="Submitted org app",
+            actor=many_app_user,
         )
 
         _add_application(
@@ -403,6 +413,7 @@ def _build_organizations_and_users(
             app_owner=org2,
             application_status=ApplicationStatus.ACCEPTED,
             application_name="Accepted org app",
+            actor=many_app_user,
         )
 
     ###############################
@@ -517,16 +528,16 @@ def _add_application(
     app_owner: User | Organization,
     application_status: ApplicationStatus = ApplicationStatus.IN_PROGRESS,
     static_application_id: uuid.UUID | None = None,
+    actor: User | None = None,
 ) -> Application:
     app_params: dict = {
-        "competition": competition,
-        "application_status": application_status,
         "application_name": application_name,
+        "competition_id": competition.competition_id,
     }
 
     if isinstance(app_owner, Organization):
-        app_params["organization"] = app_owner
         app_type = "organization"
+        app_params["organization_id"] = app_owner.organization_id
     else:
         app_type = "individual"
 
@@ -546,27 +557,21 @@ def _add_application(
             )
             handle_static_application_forms(existing_static_app, competition)
             return existing_static_app
-
-        # App doesn't exist
         app_params["application_id"] = static_application_id
 
     logger.info(f"Creating an {app_type} application '{application_name}'")
-    application = factories.ApplicationFactory.create(**app_params)
 
-    # To mimic how start-application behaves, only add an application
-    # owner user if it's not an organization. In the future we can
-    # make this function also let you add users to the app, but not using that much yet.
     if isinstance(app_owner, User):
-        factories.ApplicationUserFactory(application=application, user=app_owner, as_owner=True)
-
-    # This bit is mostly copied from the start application endpoint
-    # and at least sets up the application forms with prepopulation run
-    for competition_form in competition.competition_forms:
-        application_form = factories.ApplicationFormFactory.create(
-            application=application, competition_form=competition_form, application_response={}
-        )
-
-        validate_application_form(application_form, ApplicationAction.START)
+        user = app_owner
+    elif actor is not None:
+        user = actor
+    else:
+        user = factories.InternalUserRoleFactory(
+            role=factories.RoleFactory.create(privileges=[Privilege.START_APPLICATION])
+        ).user
+    application = create_application(db_session, user, json_data=app_params)
+    application.application_status = application_status
+    db_session.add(application)
 
     # If submitted, also at least fill out the post-population values
     if application_status in (ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED):
