@@ -6,6 +6,7 @@ import pytest
 
 from src.adapters.aws.api_gateway_adapter import (
     ApiGatewayConfig,
+    ApiKeyImportError,
     ApiKeyImportResponse,
     _clear_mock_import_responses,
     _get_mock_import_responses,
@@ -226,7 +227,7 @@ class TestImportApiKeyFunction:
 
     @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
     @patch("src.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
-    def test_real_aws_import_enabled_mismatch(self, mock_get_client, mock_is_local):
+    def test_real_aws_import_enabled_mismatch(self, mock_get_client, mock_is_local, caplog):
         """Test that an error is raised if the imported key's enabled state doesn't match."""
         mock_is_local.return_value = False
 
@@ -241,9 +242,20 @@ class TestImportApiKeyFunction:
         }
 
         with pytest.raises(
-            Exception, match="API key imported to AWS API Gateway with disabled state"
+            ApiKeyImportError, match="API key imported to AWS API Gateway with disabled state"
         ):
             import_api_key(api_key="test-key-12345", name="Test API Key", enabled=True)
+
+        error_records = [
+            record
+            for record in caplog.records
+            if record.message == "API key imported to AWS API Gateway with disabled state"
+        ]
+        assert len(error_records) == 1
+        assert error_records[0].levelname == "ERROR"
+        assert error_records[0].gateway_key_id == "api-key-123"
+        assert error_records[0].expected_enabled is True
+        assert error_records[0].actual_enabled is False
 
     @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
     @patch("src.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
@@ -295,7 +307,9 @@ class TestImportApiKeyFunction:
         # Mock response with no IDs
         mock_boto_client.import_api_keys.return_value = {"ids": [], "warnings": []}
 
-        with pytest.raises(Exception, match="No API key IDs returned from import operation"):
+        with pytest.raises(
+            ApiKeyImportError, match="No API key IDs returned from import operation"
+        ):
             import_api_key(api_key="test-key-12345", name="Test API Key", enabled=True)
 
     def test_csv_format_generation(self):

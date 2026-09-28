@@ -15,6 +15,12 @@ from src.util.env_config import PydanticBaseEnvConfig
 logger = logging.getLogger(__name__)
 
 
+class ApiKeyImportError(Exception):
+    """Raised when an API key import to AWS API Gateway doesn't produce the expected key."""
+
+    pass
+
+
 class ApiKeyImportResponse(BaseModel):
     id: str = Field(alias="id")
     name: str = Field(alias="name")
@@ -90,7 +96,7 @@ def import_api_key(
 
     imported_key_ids = response.get("ids", [])
     if not imported_key_ids:
-        raise Exception("No API key IDs returned from import operation")
+        raise ApiKeyImportError("No API key IDs returned from import operation")
 
     key_id = imported_key_ids[0]
 
@@ -119,7 +125,7 @@ def import_api_key(
                 "actual_enabled": api_key_response.enabled,
             },
         )
-        raise Exception("API key imported to AWS API Gateway with disabled state")
+        raise ApiKeyImportError("API key imported to AWS API Gateway with disabled state")
 
     if usage_plan_id:
         logger.info(
