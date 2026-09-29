@@ -4,8 +4,7 @@
 # was torn down rather than renamed: a rename replaces the DB subnet group, the ECS services
 # and every bucket anyway, and the account was at its 5-VPC quota. Its database was seeded
 # from the api-infra-grantee1-seed-sgg2 snapshot. Settings that are environment-specific:
-#   - HTTPS: no ACM certificate or Route53 hosted zone in this account yet, so
-#     enable_https is false (see the domain block below).
+#   - HTTPS: ACM certificates are imported into this account; DNS is managed externally.
 #   - Notifications: no SES domain identity yet.
 #   - New Relic entity GUIDs: create the infra-sgg2 entities, then fill these in.
 #   - search_sso_admin_role_name: the reserved-SSO role suffix is generated per
@@ -26,14 +25,11 @@ module "infra_sgg2_config" {
   # at infra/api/service/main.tf:256. A null fails the plan before anything is created.
   domain_name            = "api.sgg2.teams.simpler.grants.gov"
   secondary_domain_names = ["alb.sgg2.teams.simpler.grants.gov"]
-  # Off until ACM certificates are imported into the "dev" account. While false, the
-  # aws_acm_certificate lookups for domain_name and secondary_domain_names are count = 0.
-  enable_https = false
-  # s3_cdn_domain_name and mtls_domain_name must stay unset: their certificate lookups are
-  # gated on the domain being non-null, NOT on enable_https, so setting them now would
-  # fail the plan. Uncomment once the certs exist.
-  # s3_cdn_domain_name = "files.sgg2.teams.simpler.grants.gov"
-  # mtls_domain_name   = "soap.sgg2.teams.simpler.grants.gov"
+  enable_https           = true
+
+  s3_cdn_domain_name = "files.sgg2.teams.simpler.grants.gov"
+
+  mtls_domain_name = "soap.sgg2.teams.simpler.grants.gov"
 
   has_database                  = local.has_database
   database_enable_http_endpoint = true
