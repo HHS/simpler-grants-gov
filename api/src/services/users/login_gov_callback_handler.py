@@ -1,17 +1,16 @@
 import logging
 
-import grants_shared.adapters.db as db
-from grants_shared.api.route_utils import raise_flask_error
-from grants_shared.auth.api_jwt_auth import JwtAuth
-from grants_shared.auth.login_gov_jwt_auth import LoginGovUser, get_config
-from grants_shared.services.users.login_gov_callback_handler import (
+import src.adapters.db as db
+from src.adapters.oauth.login_gov.login_gov_jwt import LoginGovUser, get_config
+from src.api.route_utils import raise_flask_error
+from src.auth.auth_handler import AuthHandler
+from src.auth.jwt import JwtAuth
+from src.db.models.user_models import LinkExternalUser, LoginGovState, User, UserTokenSession
+from src.services.users.login_gov_callback_handler_base import (
     AbstractLoginGovCallbackHandler,
     LoginGovCallbackResponse,
     LoginGovDataContainer,
 )
-
-from src.auth.auth_handler import AuthHandler
-from src.db.models.user_models import LinkExternalUser, LoginGovState, User, UserTokenSession
 from src.services.users.organization_from_ebiz_poc import handle_ebiz_poc_organization_during_login
 
 logger = logging.getLogger(__name__)

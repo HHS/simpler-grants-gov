@@ -1,15 +1,15 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-import grants_shared.util.file_util as file_util
-from grants_shared.util.dict_util import get_nested_value
 from sqlalchemy import select
 
+import src.adapters.db as db
+import src.util.file_util as file_util
 from src.constants.lookup_constants import ApplicationAuditEvent
 from src.db.models.competition_models import Application, ApplicationAttachment, Form
 from src.db.models.user_models import User
 from src.services.applications.application_audit import add_audit_event
+from src.util.dict_util import get_nested_value
 
 logger = logging.getLogger(__name__)
 

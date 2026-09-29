@@ -1,11 +1,6 @@
 import logging
 from collections.abc import Sequence
 
-from grants_shared.pagination.pagination_models import (
-    PaginationInfo,
-    PaginationParams,
-    SortDirection,
-)
 from pydantic import BaseModel, Field
 
 from src.adapters import search
@@ -13,6 +8,7 @@ from src.adapters.search.opensearch_response import SearchResponse
 from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.api.opportunities_v1.opportunity_schemas import SearchQueryOperator
 from src.constants.lookup_constants import OpportunityStatus
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import BoolSearchFilter, StrSearchFilter
 from src.services.agencies_v1.experimental_constant import DEFAULT

@@ -1,17 +1,16 @@
 import logging
 from uuid import UUID
 
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
-from grants_shared.api import response
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
+from src.api import response
 from src.api.application_v1.application_blueprint import application_v1_blueprint
 from src.api.application_v1.application_schemas import (
     ApplicationAttachmentCreateRequestSchema,
     ApplicationAttachmentCreateResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth
+from src.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application_attachment_from_pending_file import (
     create_application_attachment_from_pending_file,
 )

@@ -4,12 +4,12 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from grants_shared.adapters import db
-from grants_shared.adapters.aws.api_gateway_adapter import ApiGatewayConfig, import_api_key
-from grants_shared.api.route_utils import raise_flask_error
-from grants_shared.auth.auth_handler import AbstractAuthHandler
-from grants_shared.db.models.auth_base_models import BaseUserApiKey
-from grants_shared.util.api_key_gen import generate_api_key_id
+from src.adapters import db
+from src.adapters.aws.api_gateway_adapter import ApiGatewayConfig, import_api_key
+from src.api.route_utils import raise_flask_error
+from src.auth.auth_handler_base import AbstractAuthHandler
+from src.db.models.auth_base_models import BaseUserApiKey
+from src.util.api_key_gen import generate_api_key_id
 
 logger = logging.getLogger(__name__)
 

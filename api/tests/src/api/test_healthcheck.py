@@ -1,8 +1,9 @@
 from datetime import datetime
 
-import grants_shared.adapters.db as db
 import pytest
-from grants_shared.api.maintenance_mode import get_maintenance_mode_config
+
+import src.adapters.db as db
+from src.api.maintenance_mode import get_maintenance_mode_config
 
 
 @pytest.fixture

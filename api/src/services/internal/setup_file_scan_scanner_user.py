@@ -22,15 +22,15 @@ for the same scanner user.
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-from grants_shared.util.api_key_gen import generate_api_key_id
 from sqlalchemy import select
 
+import src.adapters.db as db
 from src.auth.auth_handler import AuthHandler
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege, UserType
 from src.constants.static_role_values import INTERNAL_S3_SCANNER_ROLE_ID
 from src.db.models.user_models import InternalUserRole, User, UserApiKey
+from src.util.api_key_gen import generate_api_key_id
 
 logger = logging.getLogger(__name__)
 

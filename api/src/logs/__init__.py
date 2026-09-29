@@ -3,15 +3,15 @@
 There are two formatters for the log messages: human-readable and JSON.
 The formatter that is used is determined by the environment variable
 LOG_FORMAT. If the environment variable is not set, the JSON formatter
-is used by default. See grants_shared.logs.formatters for more information.
+is used by default. See src.logs.formatters for more information.
 
 The logger also adds a PII mask filter to the root logger. See
-grants_shared.logs.pii for more information.
+src.logs.pii for more information.
 
 Usage:
-    import grants_shared.logs
+    import src.logs
 
-    with grants_shared.logs.init("program name"):
+    with src.logs.init("program name"):
         ...
 
 Once the module has been initialized, the standard logging module can be
@@ -24,7 +24,7 @@ Example:
     logger.info("message")
 """
 
-import grants_shared.logs.config as config
+import src.logs.config as config
 
 
 def init(program_name: str) -> config.LoggingContext:

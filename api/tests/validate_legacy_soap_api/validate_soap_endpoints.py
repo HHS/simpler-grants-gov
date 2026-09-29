@@ -12,29 +12,29 @@ from pathlib import Path
 from urllib.parse import quote
 
 import click
-import grants_shared.adapters.db as db
-import grants_shared.logs
-import grants_shared.util.datetime_util as datetime_util
 import requests
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
-from grants_shared.adapters.db import PostgresDBClient
-from grants_shared.util import file_util
-from grants_shared.util.local import error_if_not_local
 from lxml import etree
 from pydantic import Field
 from sqlalchemy import select
 
+import src.adapters.db as db
+import src.logs
+import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
+from src.adapters.db import PostgresDBClient
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models import staging
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import ApplicationSubmission
 from src.db.models.user_models import LegacyCertificate
+from src.util import file_util
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 PRIVILEGES = {
@@ -543,7 +543,7 @@ VALIDATIONS = [
 @click.command()
 def validate_simpler_endpoints() -> None:
     with ExitStack() as stack:
-        stack.enter_context(grants_shared.logs.init("validate_simpler_endpoints"))
+        stack.enter_context(src.logs.init("validate_simpler_endpoints"))
         logger.info("Running validation for SOAP endpoints")
 
         error_if_not_local()

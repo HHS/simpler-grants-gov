@@ -15,8 +15,8 @@ from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
-from grants_shared.adapters import db
-from grants_shared.db.models.auth_base_models import (
+from src.adapters import db
+from src.db.models.auth_base_models import (
     BaseLinkExternalUser,
     BaseLoginGovState,
     BaseUser,

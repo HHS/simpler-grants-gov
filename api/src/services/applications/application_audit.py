@@ -1,8 +1,7 @@
 import logging
 import uuid
 
-from grants_shared.adapters import db
-
+from src.adapters import db
 from src.constants.lookup_constants import ApplicationAuditEvent
 from src.db.models.competition_models import (
     Application,

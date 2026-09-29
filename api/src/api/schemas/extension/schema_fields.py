@@ -3,11 +3,12 @@ import enum
 import typing
 
 from apiflask import fields as original_fields  # ruff: ignore[banned-api]
-from grants_shared.api.schemas.extension.field_validators import URL as CustomURL
-from grants_shared.api.schemas.extension.field_validators import Range
-from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
 from marshmallow import ValidationError
+
+from src.api.schemas.extension.field_validators import URL as CustomURL
+from src.api.schemas.extension.field_validators import Range
+from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from src.api.schemas.extension.schema_validation_error import SchemaValidationError
 
 
 class MixinField(original_fields.Field):

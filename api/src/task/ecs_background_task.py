@@ -9,8 +9,9 @@ from typing import ParamSpec, TypeVar, cast
 
 import newrelic.agent
 import requests
-from grants_shared.api.maintenance_mode import MaintenanceModeLogEvent, is_maintenance_mode_enabled
-from grants_shared.logs.flask_logger import add_extra_data_to_global_logs
+
+from src.api.maintenance_mode import MaintenanceModeLogEvent, is_maintenance_mode_enabled
+from src.logs.flask_logger import add_extra_data_to_global_logs
 
 logger = logging.getLogger(__name__)
 

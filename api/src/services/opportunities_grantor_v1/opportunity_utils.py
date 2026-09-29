@@ -1,5 +1,4 @@
-from grants_shared.api.route_utils import raise_flask_error
-
+from src.api.route_utils import raise_flask_error
 from src.db.models.opportunity_models import Opportunity
 
 

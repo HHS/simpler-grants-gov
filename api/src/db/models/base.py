@@ -5,12 +5,13 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from grants_shared.util import datetime_util
 from sqlalchemy import TIMESTAMP, MetaData, Text, inspect
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import DeclarativeBase, Mapped, declarative_mixin, mapped_column
 from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.functions import now as sqlnow
+
+from src.util import datetime_util
 
 # Override the default naming of constraints
 # to use suffixes instead:

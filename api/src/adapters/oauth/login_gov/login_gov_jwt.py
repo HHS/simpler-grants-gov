@@ -5,10 +5,11 @@ import uuid
 from datetime import timedelta
 
 import jwt
-from grants_shared.auth.auth_errors import JwtValidationError
-from grants_shared.util import datetime_util
-from grants_shared.util.env_config import PydanticBaseEnvConfig
 from pydantic import BaseModel, Field
+
+from src.auth.auth_errors import JwtValidationError
+from src.util import datetime_util
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 # This ACR value forces login.gov to require PIV/CAC authentication. Documentation: https://developers.login.gov/oidc/authorization/

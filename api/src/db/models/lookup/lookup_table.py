@@ -1,7 +1,7 @@
 from typing import TypeVar
 
-from grants_shared.db.models.base import Base
-from grants_shared.db.models.lookup import Lookup
+from src.db.models.base import Base
+from src.db.models.lookup import Lookup
 
 L = TypeVar("L", bound="LookupTable")
 

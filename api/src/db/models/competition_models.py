@@ -4,10 +4,6 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from grants_shared.db.models.base import TimestampMixin
-from grants_shared.util.datetime_util import get_now_us_eastern_date
-from grants_shared.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -22,7 +18,9 @@ from src.constants.lookup_constants import (
     FormType,
 )
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.base import TimestampMixin
 from src.db.models.entity_models import Organization
+from src.db.models.lookup.lookup_column import LookupColumn
 from src.db.models.lookup_models import (
     LkApplicationAuditEvent,
     LkApplicationStatus,
@@ -30,6 +28,8 @@ from src.db.models.lookup_models import (
     LkFormFamily,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+from src.util.datetime_util import get_now_us_eastern_date
+from src.util.file_util import pre_sign_file_location, safe_presign_or_s3_cdnify_url
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
@@ -168,8 +168,8 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     legacy_competition_id: Mapped[int | None] = mapped_column(index=True)
 
     @property
-    def download_path(self) -> str:
-        return presign_or_s3_cdnify_url(self.file_location)
+    def download_path(self) -> str | None:
+        return safe_presign_or_s3_cdnify_url(self.file_location)
 
 
 class FormInstruction(ApiSchemaTable, TimestampMixin):
@@ -182,8 +182,8 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
     file_name: Mapped[str]
 
     @property
-    def download_path(self) -> str:
-        return presign_or_s3_cdnify_url(self.file_location)
+    def download_path(self) -> str | None:
+        return safe_presign_or_s3_cdnify_url(self.file_location)
 
 
 @dataclasses.dataclass

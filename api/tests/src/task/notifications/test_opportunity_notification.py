@@ -3,9 +3,9 @@ from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
 import pytest
-from grants_shared.adapters import db
 
 import tests.src.db.models.factories as factories
+from src.adapters import db
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,

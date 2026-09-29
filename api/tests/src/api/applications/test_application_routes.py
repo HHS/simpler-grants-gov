@@ -2,12 +2,10 @@
 import uuid
 from datetime import date, timedelta
 
-import grants_shared.util.file_util as file_util
 import pytest
-from grants_shared.util import datetime_util
-from grants_shared.util.datetime_util import get_now_us_eastern_date
 from sqlalchemy import select
 
+import src.util.file_util as file_util
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.constants.lookup_constants import (
@@ -18,6 +16,8 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
+from src.util import datetime_util
+from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.lib.application_test_utils import create_user_in_app
 from tests.lib.organization_test_utils import create_user_in_org

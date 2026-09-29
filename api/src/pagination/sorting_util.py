@@ -1,10 +1,11 @@
 """Utility functions for applying sorting to SQLAlchemy queries."""
 
-from grants_shared.db.models.base import Base
-from grants_shared.pagination.pagination_models import SortDirection, SortOrderParams
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.sql.selectable import Select
+
+from src.db.models.base import Base
+from src.pagination.pagination_models import SortDirection, SortOrderParams
 
 
 def _resolve_column(

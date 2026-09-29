@@ -1,9 +1,10 @@
 from typing import Any, cast
 
 import apiflask
-from grants_shared.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
 from marshmallow import EXCLUDE
+
+from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from src.api.schemas.extension.schema_validation_error import SchemaValidationError
 
 
 class Schema(apiflask.Schema):  # ruff: ignore[banned-api]

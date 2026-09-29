@@ -2,9 +2,10 @@ import re
 import typing
 from datetime import datetime
 
-import grants_shared.util.datetime_util as datetime_util
-from grants_shared.util.env_config import PydanticBaseEnvConfig
 from pydantic_settings import SettingsConfigDict
+
+import src.util.datetime_util as datetime_util
+from src.util.env_config import PydanticBaseEnvConfig
 
 # We expect release notes to be formatted as:
 # YYYY-MM-DD-#

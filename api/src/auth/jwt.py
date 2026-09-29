@@ -3,13 +3,14 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any
 
-import grants_shared.util.datetime_util as datetime_util
 import jwt
-from grants_shared.auth.auth_errors import JwtValidationError
-from grants_shared.auth.auth_handler import AbstractAuthHandler
-from grants_shared.db.models.auth_base_models import BaseUser, BaseUserTokenSession
-from grants_shared.util.env_config import PydanticBaseEnvConfig
 from pydantic import Field
+
+import src.util.datetime_util as datetime_util
+from src.auth.auth_errors import JwtValidationError
+from src.auth.auth_handler_base import AbstractAuthHandler
+from src.db.models.auth_base_models import BaseUser, BaseUserTokenSession
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 

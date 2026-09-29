@@ -1,16 +1,16 @@
 import logging
 
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
 import sqlalchemy
-from grants_shared.task.ecs_background_task import ecs_background_task
 from pydantic import Field
 
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
 import src.db.models.foreign
 import src.db.models.foreign.dialect
 from src.constants.lookup_constants import JobType
 from src.constants.schema import Schemas
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
+from src.task.ecs_background_task import ecs_background_task
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)

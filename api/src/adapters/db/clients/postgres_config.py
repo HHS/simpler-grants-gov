@@ -1,7 +1,8 @@
 import logging
 
-from grants_shared.util.env_config import PydanticBaseEnvConfig
 from pydantic import Field
+
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 

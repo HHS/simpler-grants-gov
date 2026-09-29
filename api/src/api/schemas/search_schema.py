@@ -3,14 +3,10 @@ from enum import StrEnum
 from re import Pattern
 from typing import Any
 
-from grants_shared.api.schemas.extension import (
-    MarshmallowErrorContainer,
-    Schema,
-    fields,
-    validators,
-)
-from grants_shared.api.schemas.extension.schema_validation_error import SchemaValidationError
 from marshmallow import ValidationError, validates_schema
+
+from src.api.schemas.extension import MarshmallowErrorContainer, Schema, fields, validators
+from src.api.schemas.extension.schema_validation_error import SchemaValidationError
 
 
 class BaseSearchSchema(Schema):

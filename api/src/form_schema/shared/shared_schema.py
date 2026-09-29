@@ -1,8 +1,7 @@
 import dataclasses
 from typing import Any
 
-import grants_shared.util.file_util as file_util
-
+import src.util.file_util as file_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 

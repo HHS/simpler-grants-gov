@@ -279,6 +279,8 @@ module "service" {
   hosted_zone           = local.network_config.domain_config.hosted_zone
   ses_configuration_set = local.ses_configuration_set
 
+  enable_processor_service = local.enable_processor_service
+
   extra_environment_variables = merge(
     {
       BUCKET_NAME = local.storage_config.bucket_name

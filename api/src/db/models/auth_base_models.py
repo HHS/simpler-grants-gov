@@ -12,8 +12,9 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from grants_shared.db.models.base import Base
 from sqlalchemy.orm import Mapped, mapped_column
+
+from src.db.models.base import Base
 
 
 class BaseUser(Base):

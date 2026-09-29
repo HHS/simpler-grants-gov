@@ -3,8 +3,9 @@ import math
 from enum import StrEnum
 from typing import Self
 
-from grants_shared.pagination.paginator import Paginator
 from pydantic import BaseModel, Field
+
+from src.pagination.paginator import Paginator
 
 
 class SortDirection(StrEnum):

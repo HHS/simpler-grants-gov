@@ -33,11 +33,12 @@ const DocumentTable = ({
         {documents.map((document, index) => (
           <tr key={index}>
             <td data-label={t("tableColFileName")}>
-              <Link
-                target="_blank"
-                href={document.download_path}
-                id={`opportunity-document-link-${opportunityId}-${document.file_name}`}
-                onClick={() =>
+              {document.download_path ? (
+                <Link
+                  target="_blank"
+                  href={document.download_path}
+                  id={`opportunity-document-link-${opportunityId}-${document.file_name}`}
+                  onClick={() =>
                   postUserEvent({
                     name: "click_download_opportunity_document",
                     properties: {
@@ -46,9 +47,12 @@ const DocumentTable = ({
                     },
                   })
                 }
-              >
-                {document.file_name}
-              </Link>
+                >
+                  {document.file_name}
+                </Link>
+              ) : (
+                document.file_name
+              )}
             </td>
             <td data-label={t("tableColDescription")}>
               <div>{document.file_description}</div>
