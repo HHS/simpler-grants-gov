@@ -546,6 +546,30 @@ h6 {
   }
 }
 
+// default outline mint-50 fails contrast on the bg-base-lightest search header
+.search-filter-drawer-toggle.usa-button--outline {
+  &,
+  &:visited {
+    box-shadow: inset 0 0 0 2px color("mint-60");
+    color: color("mint-60");
+    border-bottom-color: color("mint-60");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    box-shadow: inset 0 0 0 2px color("mint-70");
+    color: color("mint-70");
+    border-bottom-color: color("mint-70");
+  }
+
+  &:active,
+  &.usa-button--active {
+    box-shadow: inset 0 0 0 2px color("mint-80");
+    color: color("mint-80");
+    border-bottom-color: color("mint-80");
+  }
+}
+
 // make modal close "X" use normal style rather than simpler button styline
 .usa-modal__close {
   background-color: color("transparent");
