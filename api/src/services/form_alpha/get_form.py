@@ -15,7 +15,7 @@ def get_form(db_session: db.Session, form_id: uuid.UUID) -> Form:
     try:
         form = form_template_registry.get_by_id_and_major_version(FormTemplateKey(form_id, 1))
     except ValueError:
-        raise raise_flask_error(404, message=f"Could not find Form with ID {form_id}")
+        raise_flask_error(404, message=f"Could not find Form with ID {form_id}")
 
     if form.form_instruction_id is not None:
         form.form_instruction = db_session.get(FormInstruction, form.form_instruction_id)

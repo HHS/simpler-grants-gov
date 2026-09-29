@@ -38,15 +38,15 @@ const DocumentTable = ({
                   target="_blank"
                   href={document.download_path}
                   id={`opportunity-document-link-${opportunityId}-${document.file_name}`}
-                  onClick={() =>
-                  postUserEvent({
-                    name: "click_download_opportunity_document",
-                    properties: {
-                      opportunityId,
-                      fileName: document.file_name,
-                    },
-                  })
-                }
+                  onClick={() => {
+                    postUserEvent({
+                      name: "click_download_opportunity_document",
+                      properties: {
+                        opportunityId,
+                        fileName: document.file_name,
+                      },
+                    });
+                  }}
                 >
                   {document.file_name}
                 </Link>
