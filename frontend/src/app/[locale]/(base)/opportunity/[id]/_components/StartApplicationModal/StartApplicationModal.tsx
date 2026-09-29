@@ -97,7 +97,7 @@ export const StartApplicationModal = ({
       organizationToSend = selectedOrganization; // Organization applications
     }
 
-    clientFetch("/api/applications/start", {
+    void clientFetch("/api/applications/start", {
       method: "POST",
       body: JSON.stringify({
         applicationName: savedApplicationName,
@@ -107,7 +107,7 @@ export const StartApplicationModal = ({
     })
       .then((data) => {
         const { applicationId } = data;
-        router.push(`/workspace/applications/${applicationId}`);
+        return router.push(`/workspace/applications/${applicationId}`);
       })
       .catch((error) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
