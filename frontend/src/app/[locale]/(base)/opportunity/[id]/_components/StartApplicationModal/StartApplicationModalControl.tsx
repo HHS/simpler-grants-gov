@@ -68,6 +68,7 @@ export const StartApplicationModalControl = ({
         } else {
           console.error("Unable to find competition applicant designation");
         }
+        return;
       })
       .catch((e) => {
         console.error("Error fetching competition", e);
@@ -87,12 +88,13 @@ export const StartApplicationModalControl = ({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOrganizationsLoading(true);
     setOrganizationsError(false);
-    fetchUserOrganizations("/api/user/organizations", {
+    void fetchUserOrganizations("/api/user/organizations", {
       cache: "no-store",
     })
       .then((organizations) => {
         setUserOrganizations(organizations);
         setOrganizationsError(false);
+        return;
       })
       .catch((e) => {
         console.error("Error fetching user organizations", e);
