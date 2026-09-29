@@ -2,7 +2,6 @@ from collections.abc import Iterator, Sequence
 
 from sqlalchemy import Select, select
 from sqlalchemy.orm import selectinload
-from sqlalchemy.sql.base import ExecutableOption
 
 import src.adapters.db as db
 from src.db.models.agency_models import Agency

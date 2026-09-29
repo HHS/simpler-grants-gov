@@ -1,6 +1,6 @@
 import logging
 import uuid
-from collections.abc import Iterator, Sequence
+from collections.abc import Sequence
 from enum import StrEnum
 
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
