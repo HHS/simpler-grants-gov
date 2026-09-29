@@ -1,6 +1,5 @@
 /**
  * @feature Opportunity page
- * @featureFile e2e/opportunity/features/opportunity.feature
  * @scenario Show the page title
  * @scenario Show key page content
  * @scenario Expand and collapse the opportunity description
