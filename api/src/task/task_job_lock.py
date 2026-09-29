@@ -68,6 +68,7 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
             "job_type": self.job_type,
             "internal_lock_id": self.internal_lock_id,
             "job_lock_enabled": self.config.enable_job_lock,
+            "lock_duration_minutes": self.lock_duration_minutes,
         }
         self.lock_acquired_at: datetime | None = None
 

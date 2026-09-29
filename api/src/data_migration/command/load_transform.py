@@ -25,6 +25,8 @@ from ..transformation.transform_oracle_data_task import TransformOracleDataTask
 
 logger = logging.getLogger(__name__)
 
+LOAD_TRANSFORM_JOB_LOCK_MINUTES = 20
+
 
 @data_migration_blueprint.cli.command(
     "load-transform", help="Load and transform data from the legacy database into our database"
@@ -65,7 +67,11 @@ def load_transform(
     foreign_tables = {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
     staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
 
-    with TaskJobLock(db_session, job_type=JobType.LOAD_TRANSFORM, lock_duration_minutes=90):
+    with TaskJobLock(
+        db_session,
+        job_type=JobType.LOAD_TRANSFORM,
+        lock_duration_minutes=LOAD_TRANSFORM_JOB_LOCK_MINUTES,
+    ):
         if load:
             LoadOracleDataTask(
                 db_session, foreign_tables, staging_tables, tables_to_load, insert_chunk_size
