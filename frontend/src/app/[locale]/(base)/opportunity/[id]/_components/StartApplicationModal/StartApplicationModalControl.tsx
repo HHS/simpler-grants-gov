@@ -61,12 +61,13 @@ export const StartApplicationModalControl = ({
     // TODO #9633
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCompetitionLoading(true);
-    fetchCompetition(`/api/competitions/${competitionId}`)
+    void fetchCompetition(`/api/competitions/${competitionId}`)
       .then((competition) => {
         if (competition.open_to_applicants) {
-          return setCompetitionApplicantTypes(competition.open_to_applicants);
+          setCompetitionApplicantTypes(competition.open_to_applicants);
+        } else {
+          console.error("Unable to find competition applicant designation");
         }
-        console.error("Unable to find competition applicant designation");
       })
       .catch((e) => {
         console.error("Error fetching competition", e);
