@@ -36,9 +36,16 @@ on:
         description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         required: false
         type: string
+      send_slack_notification:
+        description: "Whether this workflow should send a Slack notification on failure"
+        required: false
+        default: true
+        type: boolean
+
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.target || 'staging' }}-${{ inputs.version || github.ref }}
   cancel-in-progress: true
+
 jobs:
   e2e-tests-deployed:
     name: E2E ${{ matrix.projects }} ${{ matrix.shard }}/${{ matrix.total_shards }}
@@ -121,7 +128,7 @@ jobs:
       run_id: ${{ github.run_id }}
       target: ${{ inputs.target }}
   send-slack-notification:
-    if: failure() && github.event_name != 'workflow_dispatch'
+    if: failure() && inputs.send_slack_notification && github.event_name != 'workflow_dispatch'
     needs: [create-report]
     uses: ./.github/workflows/send-slack-notification.yml
     with:
