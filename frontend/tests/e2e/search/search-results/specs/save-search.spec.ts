@@ -119,7 +119,7 @@ test.describe("Saved search - restores state on reopen", () => {
 
       // Capture workspace state for diagnostics if the saved search is not found.
       const hasNoSavedSearchesMessage = await page
-        .getByText("No saved searches", { exact: false })
+        .getByText("You don't have any saved queries yet.", { exact: false })
         .isVisible()
         .catch(() => false);
 
@@ -254,7 +254,7 @@ test.describe("Saved search - restores state on reopen", () => {
 
       // Capture workspace state for diagnostics if the saved search is not found.
       const hasNoSavedSearchesMessage = await page
-        .getByText("No saved searches", { exact: false })
+        .getByText("You don't have any saved queries yet.", { exact: false })
         .isVisible()
         .catch(() => false);
 
