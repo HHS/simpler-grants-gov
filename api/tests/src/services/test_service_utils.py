@@ -1,12 +1,12 @@
 from datetime import date
 
-from grants_shared.pagination.pagination_models import SortDirection, SortOrderParams
-from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel
 from sqlalchemy import select
 
 from src.adapters import search
 from src.db.models.user_models import User
+from src.pagination.pagination_models import SortDirection, SortOrderParams
+from src.pagination.sorting_util import apply_sorting
 from src.search.search_models import (
     BoolSearchFilter,
     DateSearchFilter,
