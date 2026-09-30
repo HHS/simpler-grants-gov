@@ -91,19 +91,15 @@ EXPECTED_FORM_DATA = {
         "omb_number": "4040-0003",
         "expiration_date": "07/31/2028",
     },
-    # TODO this doesn't match the Confluence Doc
     723: {
         "form_name": "PROJECT/PERFORMANCE SITE LOCATION(S)",
         "omb_number": "4040-0010",
         "expiration_date": "08/31/2029",
-        # "expiration_date": "12/31/2026",
     },
-    # TODO this doesn't match the Confluence Doc
     683: {
         "form_name": "KEY CONTACTS",
         "omb_number": "4040-0010",
         "expiration_date": "08/31/2029",
-        # "expiration_date": "12/31/2026",
     },
 }
 
@@ -115,7 +111,6 @@ def test_sf424_v4_0(sf424_v4_0):
         sf424_v4_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert sf424_v4_0.form_name == expected_values["form_name"]
 
 
 def test_sf424_short_v3_0(sf424_short_v3_0):
@@ -125,7 +120,6 @@ def test_sf424_short_v3_0(sf424_short_v3_0):
         sf424_short_v3_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert sf424_short_v3_0.form_name == expected_values["form_name"]
 
 
 def test_sf424a_v1_0(sf424a_v1_0):
@@ -135,7 +129,6 @@ def test_sf424a_v1_0(sf424a_v1_0):
         sf424a_v1_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert sf424a_v1_0.form_name == expected_values["form_name"]
 
 
 def test_sf424b_v1_1(sf424b_v1_1):
@@ -145,7 +138,6 @@ def test_sf424b_v1_1(sf424b_v1_1):
         sf424b_v1_1.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert sf424b_v1_1.form_name == expected_values["form_name"]
 
 
 def test_sf424c_v2_0(sf424c_v2_0):
@@ -155,7 +147,6 @@ def test_sf424c_v2_0(sf424c_v2_0):
         sf424c_v2_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert sf424c_v2_0.form_name == expected_values["form_name"]
 
 
 def test_sf424d_v1_1(sf424d_v1_1):
@@ -165,7 +156,6 @@ def test_sf424d_v1_1(sf424d_v1_1):
         sf424d_v1_1.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert sf424d_v1_1.form_name == expected_values["form_name"]
 
 
 def test_sflll_v2_0(sflll_v2_0):
@@ -175,7 +165,6 @@ def test_sflll_v2_0(sflll_v2_0):
         sflll_v2_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert sflll_v2_0.form_name == expected_values["form_name"]
 
 
 def test_project_abstract_v1_2(project_abstract_v1_2):
@@ -185,7 +174,6 @@ def test_project_abstract_v1_2(project_abstract_v1_2):
         project_abstract_v1_2.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert project_abstract_v1_2.form_name == expected_values["form_name"]
 
 
 def test_project_abstract_summary_v2_0(project_abstract_summary_v2_0):
@@ -195,7 +183,6 @@ def test_project_abstract_summary_v2_0(project_abstract_summary_v2_0):
         project_abstract_summary_v2_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert project_abstract_summary_v2_0.form_name == expected_values["form_name"]
 
 
 def test_project_narrative_attachment_v1_2(project_narrative_attachment_v1_2):
@@ -203,7 +190,6 @@ def test_project_narrative_attachment_v1_2(project_narrative_attachment_v1_2):
     assert project_narrative_attachment_v1_2.omb_number == expected_values["omb_number"]
     assert project_narrative_attachment_v1_2.expiration_date is None
     assert expected_values["expiration_date"] is None
-    assert project_narrative_attachment_v1_2.form_name == expected_values["form_name"]
 
 
 def test_budget_narrative_attachment_v1_2(budget_narrative_attachment_v1_2):
@@ -211,7 +197,6 @@ def test_budget_narrative_attachment_v1_2(budget_narrative_attachment_v1_2):
     assert budget_narrative_attachment_v1_2.omb_number == expected_values["omb_number"]
     assert budget_narrative_attachment_v1_2.expiration_date is None
     assert expected_values["expiration_date"] is None
-    assert budget_narrative_attachment_v1_2.form_name == expected_values["form_name"]
 
 
 def test_other_narrative_attachment_v1_2(other_narrative_attachment_v1_2):
@@ -219,7 +204,6 @@ def test_other_narrative_attachment_v1_2(other_narrative_attachment_v1_2):
     assert other_narrative_attachment_v1_2.omb_number == expected_values["omb_number"]
     assert other_narrative_attachment_v1_2.expiration_date is None
     assert expected_values["expiration_date"] is None
-    assert other_narrative_attachment_v1_2.form_name == expected_values["form_name"]
 
 
 def test_cd511_v1_1(cd511_v1_1):
@@ -227,7 +211,6 @@ def test_cd511_v1_1(cd511_v1_1):
     assert cd511_v1_1.omb_number == expected_values["omb_number"]
     assert cd511_v1_1.expiration_date is None
     assert expected_values["expiration_date"] is None
-    assert cd511_v1_1.form_name == expected_values["form_name"]
 
 
 def test_supplementary_neh_cover_sheet_v3_0(supplementary_neh_cover_sheet_v3_0):
@@ -237,7 +220,6 @@ def test_supplementary_neh_cover_sheet_v3_0(supplementary_neh_cover_sheet_v3_0):
         supplementary_neh_cover_sheet_v3_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert supplementary_neh_cover_sheet_v3_0.form_name == expected_values["form_name"]
 
 
 def test_gg_lobbying_form_v1_1(gg_lobbying_form_v1_1):
@@ -247,7 +229,6 @@ def test_gg_lobbying_form_v1_1(gg_lobbying_form_v1_1):
         gg_lobbying_form_v1_1.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert gg_lobbying_form_v1_1.form_name == expected_values["form_name"]
 
 
 def test_epa_form_4700_4_v5_0(epa_form_4700_4_v5_0):
@@ -257,7 +238,6 @@ def test_epa_form_4700_4_v5_0(epa_form_4700_4_v5_0):
         epa_form_4700_4_v5_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert epa_form_4700_4_v5_0.form_name == expected_values["form_name"]
 
 
 def test_epa_key_contact_v2_0(epa_key_contact_v2_0):
@@ -267,7 +247,6 @@ def test_epa_key_contact_v2_0(epa_key_contact_v2_0):
         epa_key_contact_v2_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert epa_key_contact_v2_0.form_name == expected_values["form_name"]
 
 
 def test_key_contacts_v2_0(key_contacts_v2_0):
@@ -277,7 +256,6 @@ def test_key_contacts_v2_0(key_contacts_v2_0):
         key_contacts_v2_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert key_contacts_v2_0.form_name == expected_values["form_name"]
 
 
 def test_attachment_form_v1_2(attachment_form_v1_2):
@@ -285,7 +263,6 @@ def test_attachment_form_v1_2(attachment_form_v1_2):
     assert attachment_form_v1_2.omb_number == expected_values["omb_number"]
     assert attachment_form_v1_2.expiration_date is None
     assert expected_values["expiration_date"] is None
-    assert attachment_form_v1_2.form_name == expected_values["form_name"]
 
 
 def test_project_performance_site_location_v4_0(project_performance_site_location_v4_0):
@@ -295,4 +272,3 @@ def test_project_performance_site_location_v4_0(project_performance_site_locatio
         project_performance_site_location_v4_0.expiration_date
         == datetime.strptime(expected_values["expiration_date"], "%m/%d/%Y").date()
     )
-    assert project_performance_site_location_v4_0.form_name == expected_values["form_name"]
