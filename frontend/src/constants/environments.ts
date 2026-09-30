@@ -38,9 +38,9 @@ const legacyHost = (): string => {
   switch (ENVIRONMENT) {
     case "prod":
       return "https://www.grants.gov";
-    case "training":
+    case "infra-training":
       return "https://training.grants.gov";
-    case "staging":
+    case "infra-staging":
       return "https://test.grants.gov";
     case "test":
       return "https://test.grants.gov";

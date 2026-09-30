@@ -6,6 +6,7 @@ import {
   RefObject,
   useCallback,
   useEffect,
+  useRef,
 } from "react";
 import { Modal, ModalHeading, ModalRef } from "@trussworks/react-uswds";
 
@@ -38,6 +39,13 @@ import "react-dom";
     Because the overlay is rendered via a portal, overlay clicks do not
     flow through the Modal's own `onClick` handler. To detect them, we
     listen at the window level and check for clicks on the overlay element.
+
+  - Provide an `onOpen` callback:
+    The underlying Modal manages its open/closed state internally and only
+    exposes it imperatively via `modalRef`, so there is no render-time prop
+    to react to. Truss toggles an `is-visible` class on the dialog element
+    (id `modalId`) when it opens, so a MutationObserver on that element is
+    used to detect the transition and fire `onOpen` once per open.
 */
 
 export function SimplerModal({
@@ -49,6 +57,7 @@ export function SimplerModal({
   children,
   onKeyDown,
   onClose,
+  onOpen,
 }: {
   modalRef: RefObject<ModalRef | null>;
   titleText?: string;
@@ -63,6 +72,7 @@ export function SimplerModal({
   children: ReactNode;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
   onClose?: () => void;
+  onOpen?: () => void;
 }) {
   // Detect SSR so we can control whether the modal renders into a portal.
   const isSSR = useIsSSR();
@@ -112,6 +122,43 @@ export function SimplerModal({
       window.removeEventListener("click", handleWindowClick);
     };
   }, [handleWindowClick, onClose]);
+
+  /*
+    Detect when the modal transitions to visible.
+
+    `wasVisible` tracks the last observed state so `onOpen` fires once per
+    open rather than on every subsequent class mutation while visible.
+
+    `isSSR` is a dependency (not just a guard) because the dialog element
+    is re-created when rendering switches from inline to the portal - the
+    element observed on first mount is torn down, so the observer must be
+    re-attached to the new one once that switch happens.
+  */
+  const wasVisible = useRef(false);
+
+  useEffect(() => {
+    if (!onOpen) return;
+    if (typeof window === "undefined") return;
+
+    const modalElement = document.getElementById(modalId);
+    if (!modalElement) return;
+
+    const notifyIfOpened = () => {
+      const isVisible = modalElement.classList.contains("is-visible");
+      if (isVisible && !wasVisible.current) {
+        onOpen();
+      }
+      wasVisible.current = isVisible;
+    };
+
+    const observer = new MutationObserver(notifyIfOpened);
+    observer.observe(modalElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, [modalId, onOpen, isSSR]);
 
   return (
     <Modal
