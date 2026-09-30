@@ -70,6 +70,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     purpose_statement: Mapped[str | None]
 
     is_draft: Mapped[bool] = mapped_column(index=True)
+    is_deleted: Mapped[bool] = mapped_column(default=False, index=True)
 
     revision_number: Mapped[int | None]
     modified_comments: Mapped[str | None]
