@@ -111,6 +111,8 @@ module "eks" {
   vpc_id     = data.aws_vpc.network.id
   subnet_ids = data.aws_subnets.private.ids
 
+  enable_karpenter = var.enable_karpenter
+
   endpoint_public_access = var.endpoint_public_access
   public_access_cidrs    = var.public_access_cidrs
 
