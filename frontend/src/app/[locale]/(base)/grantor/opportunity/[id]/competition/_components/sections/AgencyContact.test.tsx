@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { axe } from "jest-axe";
 import { AgencyContact } from "src/app/[locale]/(base)/grantor/opportunity/[id]/competition/_components/sections/AgencyContact";
 
 jest.mock("next/navigation", () => ({
@@ -36,6 +37,21 @@ describe("AgencyContact", () => {
       expect(screen.getByText("personTitle")).toBeInTheDocument();
       expect(screen.getByText("emailAddress")).toBeInTheDocument();
       expect(screen.getByText("phoneNumber")).toBeInTheDocument();
+    });
+
+    it("disables all form fields when readOnly is true", () => {
+      render(<AgencyContact readOnly />);
+
+      expect(screen.getByRole("textbox", { name: /fullname/i })).toBeDisabled();
+      expect(
+        screen.getByRole("textbox", { name: /persontitle/i }),
+      ).toBeDisabled();
+      expect(
+        screen.getByRole("textbox", { name: /emailaddress/i }),
+      ).toBeDisabled();
+      expect(
+        screen.getByRole("textbox", { name: /phonenumber/i }),
+      ).toBeDisabled();
     });
 
     it("populates form fields from contactInfo", () => {
@@ -259,6 +275,15 @@ describe("AgencyContact", () => {
         // fireEvent returns true if preventDefault() was NOT called
         expect(event).toBe(true);
       });
+    });
+  });
+
+  describe("accessibility", () => {
+    it("passes accessibility scan when rendered", async () => {
+      const { container } = render(<AgencyContact />);
+
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
     });
   });
 });
