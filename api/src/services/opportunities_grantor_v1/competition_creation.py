@@ -1,8 +1,7 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-
+import src.adapters.db as db
 from src.api.opportunities_grantor_v1.opportunity_grantor_schemas import (
     CompetitionRequestBaseSchema,
 )

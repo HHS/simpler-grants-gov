@@ -1,16 +1,15 @@
 import urllib
 from datetime import datetime
 
-from grants_shared.api.route_utils import raise_flask_error
-from grants_shared.auth import login_gov_jwt_auth
-from grants_shared.auth.api_jwt_auth import JwtAuth
-
+from src.adapters.oauth.login_gov import login_gov_jwt
+from src.api.route_utils import raise_flask_error
 from src.auth.api_jwt_auth import create_jwt_for_user
+from src.auth.jwt import JwtAuth
 from tests.src.db.models.factories import LinkExternalUserFactory
 
 
 def validate_redirects_occurred(resp):
-    login_gov_config = login_gov_jwt_auth.get_config()
+    login_gov_config = login_gov_jwt.get_config()
     # History contains each redirect, we redirected 3 times
     assert len(resp.history) == 3
 

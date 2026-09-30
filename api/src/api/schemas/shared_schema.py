@@ -1,5 +1,4 @@
-from grants_shared.api.schemas.extension import Schema, fields, validators
-
+from src.api.schemas.extension import Schema, fields, validators
 from src.constants.lookup_constants import Privilege
 
 

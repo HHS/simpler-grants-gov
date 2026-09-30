@@ -3,14 +3,11 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
-import grants_shared.adapters.db as db
-from grants_shared.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
-from grants_shared.pagination.paginator import Paginator
-from grants_shared.pagination.sorting_util import apply_sorting
 from pydantic import BaseModel, Field
 from sqlalchemy import Select, func, select
 from sqlalchemy.orm import selectinload
 
+import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
@@ -21,6 +18,9 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.db.models.user_models import AgencyUser, AgencyUserRole, LinkRolePrivilege, Role, User
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
+from src.pagination.paginator import Paginator
+from src.pagination.sorting_util import apply_sorting
 from src.search.search_models import BoolSearchFilter
 from src.services.opportunities_grantor_v1.get_agency import get_agency
 

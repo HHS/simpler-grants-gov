@@ -1,12 +1,11 @@
 import logging
 from uuid import UUID
 
-from grants_shared.adapters import db
-from grants_shared.api.route_utils import raise_flask_error
-
+from src.adapters import db
 from src.api.opportunities_grantor_v1.opportunity_grantor_schemas import (
     OpportunitySummaryDetailSchema,
 )
+from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import OpportunityAuditEvent, Privilege
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary

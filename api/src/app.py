@@ -3,25 +3,20 @@ import logging
 import os
 from typing import Any
 
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
-import grants_shared.logs
-import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
 from flask import Response
 from flask_cors import CORS
-from grants_shared.api.maintenance_mode import register_maintenance_mode_handler
-from grants_shared.api.response import restructure_error_response
-from grants_shared.api.schemas import response_schema
-from grants_shared.auth.api_jwt_auth import initialize_jwt_auth
-from grants_shared.auth.login_gov_jwt_auth import initialize_login_gov_config
-from grants_shared.util.local import error_if_not_local
 from pydantic import Field
 
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
+import src.logs
+import src.logs.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
+from src.adapters.oauth.login_gov.login_gov_jwt import initialize_login_gov_config
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
 from src.api.application_v1 import application_v1_blueprint
@@ -35,15 +30,19 @@ from src.api.form_v1 import form_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
+from src.api.maintenance_mode import register_maintenance_mode_handler
 from src.api.opportunities_grantor_v1 import (
     opportunity_grantor_blueprint as opportunities_grantor_v1_blueprint,
 )
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
+from src.api.response import restructure_error_response
+from src.api.schemas import response_schema
 from src.api.users.user_blueprint import user_blueprint
 from src.api.workflows import workflow_blueprint
 from src.app_config import AppConfig
 from src.auth.auth_utils import get_app_security_scheme
+from src.auth.jwt import initialize_jwt_auth
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.form_schema.forms import init_form_registry
 from src.legacy_soap_api import init_app as init_legacy_soap_api
@@ -51,6 +50,7 @@ from src.search.backend.load_search_data_blueprint import load_search_data_bluep
 from src.services.files.local_file_scanner import setup_local_file_scanner
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
@@ -136,7 +136,7 @@ def create_app() -> APIFlask:
 
 
 def setup_logging(app: APIFlask) -> None:
-    grants_shared.logs.init(__package__)
+    src.logs.init(__package__)
     flask_logger.init_app(logging.root, app, "simpler-grants")
 
 

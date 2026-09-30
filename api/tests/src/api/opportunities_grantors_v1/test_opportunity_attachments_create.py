@@ -1,11 +1,11 @@
 import uuid
 
 import pytest
-from grants_shared.util import file_util
 from sqlalchemy import select
 
 from src.constants.lookup_constants import FileScanStatus, Privilege
 from src.db.models import opportunity_models
+from src.util import file_util
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import OpportunityFactory, PendingFileFactory, UserFactory
 

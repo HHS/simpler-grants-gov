@@ -14,8 +14,8 @@ module "infra_training_config" {
   # "${app_name}-${environment}" (see analytics/app-config/env-config/database.tf).
   analytics_database_cluster_name = "analytics-infra-training"
 
-  domain_name  = null
-  enable_https = false
+  domain_name  = "data.training.simpler.grants.gov"
+  enable_https = true
 
   # Same as the existing training environment
   service_cpu    = 1024

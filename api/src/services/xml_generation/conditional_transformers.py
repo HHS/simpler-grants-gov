@@ -7,7 +7,7 @@ including if/then/else rules, field dependencies, and computed fields.
 import logging
 from typing import Any
 
-from grants_shared.util.dict_util import get_nested_value
+from src.util.dict_util import get_nested_value
 
 from .value_transformers import apply_value_transformation
 

@@ -6,16 +6,16 @@ import os
 
 import alembic.command as command
 import alembic.script as script
-import grants_shared.logs
 import sqlalchemy
 from alembic.config import Config
 from alembic.runtime import migration
-from grants_shared.logs.flask_logger import init_general_logging
 
+import src.logs
 from src.constants.lookup_constants import JobType
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
+from src.logs.flask_logger import init_general_logging
 
-from grants_shared.task.ecs_background_task import ecs_background_task  # isort:skip
+from src.task.ecs_background_task import ecs_background_task  # isort:skip
 
 logger = logging.getLogger(__name__)
 alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "./alembic.ini"))
@@ -26,7 +26,7 @@ alembic_cfg.set_main_option("script_location", os.path.dirname(__file__))
 # Initialize the logging - in most scripts
 # this would be done when we initialize flask
 # but we don't run the Alembic commands via Flask
-grants_shared.logs.init("migrations")
+src.logs.init("migrations")
 init_general_logging(logging.root, "migrations", "simpler-grants")
 
 

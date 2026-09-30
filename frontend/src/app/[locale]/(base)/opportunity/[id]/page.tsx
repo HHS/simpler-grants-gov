@@ -154,6 +154,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
             {opportunityData.competitions &&
               opportunityData.opportunity_title && (
                 <OpportunityCompetitionStart
+                  opportunityId={opportunityData.opportunity_id}
                   opportunityTitle={opportunityData.opportunity_title}
                   competitions={opportunityData.competitions}
                 />

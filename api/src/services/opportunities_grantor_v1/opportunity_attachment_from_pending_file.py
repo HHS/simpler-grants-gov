@@ -1,10 +1,8 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-from grants_shared.adapters.aws import S3Config
-from grants_shared.util import file_util
-
+import src.adapters.db as db
+from src.adapters.aws import S3Config
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.opportunity_models import OpportunityAttachment
@@ -18,6 +16,7 @@ from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
 )
 from src.services.opportunity_attachments.attachment_util import get_s3_attachment_path
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 

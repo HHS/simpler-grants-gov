@@ -7,8 +7,8 @@ module "infra_training_config" {
   default_region                  = module.project_config.default_region
   environment                     = "infra-training"
   network_name                    = "infra-training"
-  domain_name                     = null  # "nofos.training.simpler.grants.gov" once DNS + certs exist in the training account
-  enable_https                    = false # No ACM cert / hosted zone in the infra-training account yet
+  domain_name                     = "nofos.training.simpler.grants.gov"
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_notifications            = local.enable_notifications

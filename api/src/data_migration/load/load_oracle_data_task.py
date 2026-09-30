@@ -7,10 +7,10 @@ import time
 from dataclasses import dataclass
 
 import sqlalchemy
-from grants_shared.adapters import db
-from grants_shared.util import datetime_util
 
 import src.task.task
+from src.adapters import db
+from src.util import datetime_util
 
 from . import sql
 

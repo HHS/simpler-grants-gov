@@ -2,10 +2,10 @@ import smtplib
 from email.message import EmailMessage
 from email.utils import formatdate, make_msgid
 
-from grants_shared.adapters.aws.aws_session import is_local_aws
-from grants_shared.adapters.aws.ses_adapter import send_email as send_ses_email
 from pydantic import Field
 
+from src.adapters.aws.aws_session import is_local_aws
+from src.adapters.aws.ses_adapter import send_email as send_ses_email
 from src.util.env_config import PydanticBaseEnvConfig
 
 

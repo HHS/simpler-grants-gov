@@ -5,7 +5,7 @@ import time
 from enum import StrEnum
 from typing import Any
 
-import grants_shared.adapters.db as db
+import src.adapters.db as db
 
 logger = logging.getLogger(__name__)
 

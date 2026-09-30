@@ -5,11 +5,12 @@ from typing import Any, ParamSpec
 
 import flask
 from apiflask.exceptions import HTTPError
-from grants_shared.api import response
-from grants_shared.auth.login_gov_jwt_auth import (
+
+from src.adapters.oauth.login_gov.login_gov_jwt import (
     get_final_logout_redirect_uri,
     get_final_redirect_uri,
 )
+from src.api import response
 
 logger = logging.getLogger(__name__)
 

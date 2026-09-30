@@ -84,6 +84,8 @@ module "infra_dev_config" {
 
   enable_workflow_service = true
 
+  enable_processor_service = true
+
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.

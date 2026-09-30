@@ -1,8 +1,7 @@
 import logging
 from typing import Any
 
-import grants_shared.adapters.db as db
-
+import src.adapters.db as db
 from src.db.models.task_models import JobLog, JobStatus
 from src.task.base_task import BaseTask
 

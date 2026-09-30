@@ -1,14 +1,14 @@
 import click
-import grants_shared.adapters.db as db
-from grants_shared.adapters.db import flask_db
-from grants_shared.task.ecs_background_task import ecs_background_task
 
+import src.adapters.db as db
 import src.adapters.search as search
+from src.adapters.db import flask_db
 from src.adapters.search import flask_opensearch
 from src.constants.lookup_constants import JobType
 from src.search.backend.load_agencies_to_index import LoadAgenciesToIndex
 from src.search.backend.load_opportunities_to_index import LoadOpportunitiesToIndex
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
+from src.task.ecs_background_task import ecs_background_task
 
 
 @load_search_data_blueprint.cli.command(

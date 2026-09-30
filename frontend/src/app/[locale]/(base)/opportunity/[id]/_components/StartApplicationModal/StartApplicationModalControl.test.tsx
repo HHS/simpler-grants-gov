@@ -48,10 +48,57 @@ describe("StartApplicationModalControl", () => {
     jest.resetAllMocks();
   });
 
+  it("sends a click_start_application user event beacon when opened", async () => {
+    const sendBeaconMock = jest.fn();
+    Object.defineProperty(navigator, "sendBeacon", {
+      value: sendBeaconMock,
+      writable: true,
+    });
+
+    render(
+      <StartApplicationModalControl
+        competitionId="1"
+        opportunityId="opp-1"
+        opportunityTitle="blessed opportunity"
+      />,
+    );
+
+    const toggle = await screen.findByTestId(
+      "open-start-application-modal-button",
+    );
+    await userEvent.click(toggle);
+
+    // Clicking the opener both fires click_start_application directly and
+    // opens the modal, which separately fires view_start_application_modal
+    // (see StartApplicationModal.test.tsx) - so at least one beacon here
+    // carries the click event.
+    await waitFor(() => {
+      expect(sendBeaconMock).toHaveBeenCalled();
+    });
+    const readBlobAsText = (blob: Blob) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("failed to read blob"));
+        reader.readAsText(blob);
+      });
+    const events = await Promise.all(
+      sendBeaconMock.mock.calls.map(async ([url, blob]: [string, Blob]) => {
+        expect(url).toBe("/api/events");
+        return JSON.parse(await readBlobAsText(blob)) as unknown;
+      }),
+    );
+    expect(events).toContainEqual({
+      name: "click_start_application",
+      properties: { competitionId: "1", opportunityId: "opp-1" },
+    });
+  });
+
   it("modal can be opened and closed as expected", async () => {
     const { rerender } = render(
       <StartApplicationModalControl
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
       />,
     );
@@ -69,6 +116,7 @@ describe("StartApplicationModalControl", () => {
     rerender(
       <StartApplicationModalControl
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
       />,
     );
@@ -84,6 +132,7 @@ describe("StartApplicationModalControl", () => {
     rerender(
       <StartApplicationModalControl
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
       />,
     );
@@ -96,6 +145,7 @@ describe("StartApplicationModalControl", () => {
     const { rerender } = render(
       <StartApplicationModalControl
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
       />,
     );
@@ -108,6 +158,7 @@ describe("StartApplicationModalControl", () => {
     rerender(
       <StartApplicationModalControl
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
       />,
     );
@@ -121,6 +172,7 @@ describe("StartApplicationModalControl", () => {
     const { rerender } = render(
       <StartApplicationModalControl
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
       />,
     );
@@ -134,6 +186,7 @@ describe("StartApplicationModalControl", () => {
     rerender(
       <StartApplicationModalControl
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
       />,
     );
@@ -156,6 +209,7 @@ describe("StartApplicationModalControl", () => {
     render(
       <StartApplicationModalControl
         competitionId="1"
+        opportunityId="opp-1"
         opportunityTitle="blessed opportunity"
       />,
     );

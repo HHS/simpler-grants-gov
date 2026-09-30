@@ -317,6 +317,36 @@ variable "workflow_service_desired_count" {
   default     = 1
 }
 
+variable "enable_processor_service" {
+  description = "Enable the always-on notification queue processor service"
+  type        = bool
+  default     = false
+}
+
+variable "processor_service_cpu" {
+  description = "CPU units for the processor ECS task"
+  type        = number
+  default     = 1024
+}
+
+variable "processor_service_memory" {
+  description = "Memory in MiB for the processor ECS task"
+  type        = number
+  default     = 2048
+}
+
+variable "processor_service_desired_count" {
+  description = "Number of processor tasks to keep running"
+  type        = number
+  default     = 1
+}
+
+variable "processor_service_command" {
+  description = "Container command the processor service runs"
+  type        = list(string)
+  default     = ["flask", "task", "process-notification-queue"]
+}
+
 variable "scanner_provisioned_concurrency" {
   description = "Number of execution environments to keep warm for the ClamAV scanner Lambda via provisioned concurrency."
   type        = number

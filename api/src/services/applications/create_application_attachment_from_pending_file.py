@@ -1,12 +1,12 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-import grants_shared.util.file_util as file_util
-from grants_shared.adapters.aws import S3Config
-from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import func, select
 
+import src.adapters.db as db
+import src.util.file_util as file_util
+from src.adapters.aws import S3Config
+from src.api.route_utils import raise_flask_error
 from src.app_config import AppConfig
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege, SubmissionIssue

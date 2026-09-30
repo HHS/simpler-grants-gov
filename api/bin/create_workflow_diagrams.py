@@ -1,10 +1,10 @@
 import logging
 import pathlib
 
-import grants_shared.logs
-from grants_shared.util.local import error_if_not_local
 from statemachine.contrib.diagram import DotGraphMachine
 
+import src.logs
+from src.util.local import error_if_not_local
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 
 # We import the state_machine directory so the module is loaded
@@ -40,5 +40,5 @@ def create_workflow_diagrams() -> None:
 
 
 def main() -> None:
-    with grants_shared.logs.init(__package__):
+    with src.logs.init(__package__):
         create_workflow_diagrams()

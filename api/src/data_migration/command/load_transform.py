@@ -5,16 +5,16 @@
 import logging
 
 import click
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
-from grants_shared.task.ecs_background_task import ecs_background_task
 
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.db.models.foreign
 import src.db.models.staging
 from src.adapters.search import flask_opensearch
 from src.constants.lookup_constants import JobType
 from src.search.backend.load_opportunities_to_index import LoadOpportunitiesToIndex
+from src.task.ecs_background_task import ecs_background_task
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
 from src.task.task_job_lock import TaskJobLock
 
@@ -24,6 +24,8 @@ from ..load.load_oracle_data_task import LoadOracleDataTask
 from ..transformation.transform_oracle_data_task import TransformOracleDataTask
 
 logger = logging.getLogger(__name__)
+
+LOAD_TRANSFORM_JOB_LOCK_MINUTES = 20
 
 
 @data_migration_blueprint.cli.command(
@@ -65,7 +67,11 @@ def load_transform(
     foreign_tables = {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
     staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
 
-    with TaskJobLock(db_session, job_type=JobType.LOAD_TRANSFORM, lock_duration_minutes=90):
+    with TaskJobLock(
+        db_session,
+        job_type=JobType.LOAD_TRANSFORM,
+        lock_duration_minutes=LOAD_TRANSFORM_JOB_LOCK_MINUTES,
+    ):
         if load:
             LoadOracleDataTask(
                 db_session, foreign_tables, staging_tables, tables_to_load, insert_chunk_size

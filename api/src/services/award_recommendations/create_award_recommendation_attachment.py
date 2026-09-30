@@ -1,10 +1,9 @@
 import logging
 import uuid
 
-import grants_shared.adapters.db as db
-import grants_shared.util.file_util as file_util
-from grants_shared.adapters.aws import S3Config
-
+import src.adapters.db as db
+import src.util.file_util as file_util
+from src.adapters.aws import S3Config
 from src.constants.lookup_constants import (
     AwardRecommendationAttachmentType,
     AwardRecommendationAuditEvent,

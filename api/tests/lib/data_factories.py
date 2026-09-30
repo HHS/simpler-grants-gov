@@ -9,12 +9,12 @@ import uuid
 from datetime import timedelta
 from urllib import parse
 
-import grants_shared.util.datetime_util as datetime_util
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 
+import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import ApplicationForm, Form
@@ -69,6 +69,8 @@ def setup_application_for_form_validation(
     has_assistance_listing_number: bool = True,
     assistance_listing_number: str | None = None,
     assistance_listing_program_title: str | None = None,
+    link_assistance_listing_to_competition: bool = True,
+    extra_opportunity_assistance_listing_count: int = 0,
     public_competition_id: str | None = None,
     competition_title: str | None = None,
 ) -> ApplicationForm:
@@ -87,7 +89,7 @@ def setup_application_for_form_validation(
     if opportunity_title is not DEFAULT_VALUE:
         opp_params["opportunity_title"] = opportunity_title
 
-    opportunity = OpportunityFactory.create(**opp_params)
+    opportunity = OpportunityFactory.create(opportunity_assistance_listings=[], **opp_params)
 
     opportunity_assistance_listing = None
     if has_assistance_listing_number:
@@ -97,13 +99,17 @@ def setup_application_for_form_validation(
             "program_title": assistance_listing_program_title,
         }
         opportunity_assistance_listing = OpportunityAssistanceListingFactory.create(**params)
+        for _ in range(extra_opportunity_assistance_listing_count):
+            OpportunityAssistanceListingFactory.create(opportunity=opportunity)
 
     competition_params = {
         "opportunity": opportunity,
         "competition_forms": [],
         "competition_title": competition_title,
         "public_competition_id": public_competition_id,
-        "opportunity_assistance_listing": opportunity_assistance_listing,
+        "opportunity_assistance_listing": (
+            opportunity_assistance_listing if link_assistance_listing_to_competition else None
+        ),
     }
 
     competition = CompetitionFactory.create(**competition_params)

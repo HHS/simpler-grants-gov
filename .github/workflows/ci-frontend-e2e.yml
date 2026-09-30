@@ -405,19 +405,6 @@ jobs:
             api/src/form_schema/shared/**
             api/src/form_schema/rule_processing/**
 
-      - name: Get list of changed opportunity management files
-        id: changed-opportunity-management-files
-        uses: tj-actions/changed-files@v47.0.6
-        with:
-          files: |
-            frontend/src/app/**/grantor/opportunities/**
-            frontend/src/app/**/grantor/opportunity/*/edit/**
-            frontend/src/app/**/grantor/opportunity/*/overview/**
-            frontend/src/components/grantor-opportunities/**
-            frontend/src/services/fetch/fetchers/grantorOpportunitiesFetcher.ts
-            api/src/api/opportunities_grantor_v1/**
-            api/src/services/opportunities_grantor_v1/**
-
       - name: Get list of changed core e2e files
         id: changed-e2e-utils
         uses: tj-actions/changed-files@v47.0.6
@@ -439,13 +426,11 @@ jobs:
         shell: bash
         env:
           APPLY_FORMS_CHANGED: ${{ steps.changed-apply-form-files.outputs.any_changed }}
-          OPPORTUNITY_MANAGEMENT_CHANGED: ${{ steps.changed-opportunity-management-files.outputs.any_changed }}
           E2E_SPECS_CHANGED: ${{ steps.changed-e2e-spec-files.outputs.any_changed }}
           E2E_UTILS_CHANGED: ${{ steps.changed-e2e-utils.outputs.any_changed }}
 
         run: |
           echo "Any apply form files changed? $APPLY_FORMS_CHANGED"
-          echo "Any opportunity management files changed? $OPPORTUNITY_MANAGEMENT_CHANGED"
           echo "Any e2e spec files changed? $E2E_SPECS_CHANGED"
           echo "Any e2e util files changed? $E2E_UTILS_CHANGED"
 
@@ -453,9 +438,6 @@ jobs:
             test_group_tags="@smoke"
             if [[ $APPLY_FORMS_CHANGED = "true" ]]; then
               test_group_tags="$test_group_tags|@apply-forms"
-            fi
-            if [[ $OPPORTUNITY_MANAGEMENT_CHANGED = "true" ]]; then
-              test_group_tags="$test_group_tags|@opportunity-management"
             fi
             echo "test_group_tags=$test_group_tags" >> "$GITHUB_ENV"
           elif [[ $GITHUB_EVENT_NAME = "push" ]]; then

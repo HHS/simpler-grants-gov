@@ -2,6 +2,7 @@
 
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
+import { postUserEvent } from "src/services/event/postUserEvent";
 import {
   ApplicantTypes,
   Competition,
@@ -19,11 +20,13 @@ import { StartApplicationModal } from "./StartApplicationModal";
 
 type StartApplicationModalControlProps = {
   competitionId: string;
+  opportunityId: string;
   opportunityTitle: string;
 };
 
 export const StartApplicationModalControl = ({
   competitionId,
+  opportunityId,
   opportunityTitle,
 }: StartApplicationModalControlProps) => {
   const modalRef = useRef<ModalRef>(null);
@@ -58,12 +61,14 @@ export const StartApplicationModalControl = ({
     // TODO #9633
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCompetitionLoading(true);
-    fetchCompetition(`/api/competitions/${competitionId}`)
+    void fetchCompetition(`/api/competitions/${competitionId}`)
       .then((competition) => {
         if (competition.open_to_applicants) {
-          return setCompetitionApplicantTypes(competition.open_to_applicants);
+          setCompetitionApplicantTypes(competition.open_to_applicants);
+        } else {
+          console.error("Unable to find competition applicant designation");
         }
-        console.error("Unable to find competition applicant designation");
+        return;
       })
       .catch((e) => {
         console.error("Error fetching competition", e);
@@ -83,12 +88,13 @@ export const StartApplicationModalControl = ({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOrganizationsLoading(true);
     setOrganizationsError(false);
-    fetchUserOrganizations("/api/user/organizations", {
+    void fetchUserOrganizations("/api/user/organizations", {
       cache: "no-store",
     })
       .then((organizations) => {
         setUserOrganizations(organizations);
         setOrganizationsError(false);
+        return;
       })
       .catch((e) => {
         console.error("Error fetching user organizations", e);
@@ -107,6 +113,12 @@ export const StartApplicationModalControl = ({
         opener
         disabled={organizationsLoading || competitionsLoading}
         className="usa-button"
+        onClick={() =>
+          postUserEvent({
+            name: "click_start_application",
+            properties: { competitionId, opportunityId },
+          })
+        }
       >
         {organizationsLoading || competitionsLoading ? (
           <>
@@ -122,6 +134,7 @@ export const StartApplicationModalControl = ({
       {token ? (
         <StartApplicationModal
           token={token}
+          opportunityId={opportunityId}
           opportunityTitle={opportunityTitle}
           modalRef={modalRef}
           applicantTypes={competitionApplicantTypes}

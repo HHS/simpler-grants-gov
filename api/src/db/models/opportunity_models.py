@@ -2,9 +2,6 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING
 
-from grants_shared.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from grants_shared.db.models.base import TimestampMixin
-from grants_shared.util.file_util import presign_or_s3_cdnify_url
 from sqlalchemy import BigInteger, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -20,6 +17,8 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.agency_models import Agency
 from src.db.models.api_schema_table import ApiSchemaTable
+from src.db.models.base import TimestampMixin
+from src.db.models.lookup.lookup_column import LookupColumn
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
@@ -28,6 +27,7 @@ from src.db.models.lookup_models import (
     LkOpportunityCategory,
     LkOpportunityStatus,
 )
+from src.util.file_util import safe_presign_or_s3_cdnify_url
 
 if TYPE_CHECKING:
     from src.db.models.award_recommendation_models import AwardRecommendation
@@ -511,7 +511,7 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     @property
     def download_path(self) -> str | None:
         if self.file_location:
-            return presign_or_s3_cdnify_url(self.file_location)
+            return safe_presign_or_s3_cdnify_url(self.file_location)
         return None
 
 

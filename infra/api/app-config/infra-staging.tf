@@ -36,7 +36,8 @@ module "infra_staging_config" {
   service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMzgzNjIwODA5MTQ5MzcxNTc5OA"
   api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058OTc2Mzk2OTQ1"
 
-  # Sizing mirrors staging.
+  # 1 vCPU saturates during E2E runs
+  instance_cpu                    = 2048
   instance_memory                 = 4096
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2

@@ -338,6 +338,35 @@ export async function clickLastPaginationPage(page: Page) {
   }
 }
 
+/**
+ * Clicks the specified pagination page when available; otherwise no-ops.
+ */
+export async function clickPaginationPageIfPresent(
+  page: Page,
+  pageNumber: number,
+  callerLabel?: string,
+): Promise<boolean> {
+  const paginationButton = page.locator(
+    `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
+  );
+  const isPresent = await paginationButton
+    .first()
+    .isVisible()
+    .catch(() => false);
+
+  if (isPresent) {
+    await clickPaginationPageNumber(page, pageNumber);
+    return true;
+  }
+
+  // eslint-disable-next-line no-console
+  console.warn(
+    `${callerLabel ?? "clickPaginationPageIfPresent"}: only one page of results ` +
+      `for this criteria set; skipping navigation to page ${pageNumber}`,
+  );
+  return false;
+}
+
 export async function getFirstSearchResultTitle(page: Page) {
   const firstResultSelector = page.locator(
     ".simpler-responsive-table tr:first-child a",

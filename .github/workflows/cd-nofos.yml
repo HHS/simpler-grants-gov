@@ -47,6 +47,6 @@ jobs:
     needs: [checks, vulnerability-scans]
     uses: ./.github/workflows/deploy-nofos.yml
     with:
-      # Selecting dev or staging deploys the infra-dev / infra-staging environment
-      environment: ${{ inputs.environment == 'staging' && 'infra-staging' || (inputs.environment || 'dev') == 'dev' && 'infra-dev' || inputs.environment }}
+      # Selecting dev, staging or training deploys the infra-dev / infra-staging / infra-training environment
+      environment: ${{ inputs.environment == 'staging' && 'infra-staging' || inputs.environment == 'training' && 'infra-training' || (inputs.environment || 'dev') == 'dev' && 'infra-dev' || inputs.environment }}
       version: ${{ inputs.version || github.ref || 'main' }}

@@ -2,7 +2,6 @@ import logging
 from enum import StrEnum
 from typing import Any, cast
 
-from grants_shared.util.datetime_util import get_now_us_eastern_date
 from opensearchpy import ConnectionTimeout, TransportError
 from sqlalchemy import select
 from statemachine import Event
@@ -21,6 +20,7 @@ from src.services.current_opportunity.determine_current_opportunity_summary impo
     is_opportunity_changed,
 )
 from src.services.opportunities_v1.opportunity_version import save_opportunity_version
+from src.util.datetime_util import get_now_us_eastern_date
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.registry.workflow_client_registry import get_workflow_client_registry

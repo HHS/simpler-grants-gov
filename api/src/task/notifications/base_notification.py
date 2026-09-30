@@ -2,8 +2,7 @@ import logging
 import uuid
 from abc import abstractmethod
 
-from grants_shared.adapters import db
-
+from src.adapters import db
 from src.adapters.aws.local_email_adapter import send_email_to_address
 from src.db.models.user_models import UserNotificationLog
 from src.task.notifications import constants
