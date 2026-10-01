@@ -1,8 +1,8 @@
 /**
  * @feature Apply - Submission zip content verification
- * @scenario Open a pre-submitted application with SF-424B, check for the
- * submission zip to become available, then verify the GrantApplication.xml
- * in that contains the expected SF424B form data.
+ * @scenario Open a pre-submitted application with SF-424B, download the
+ * submission zip, then verify the SF424B.pdf and GrantApplication.xml
+ * contain the expected form data.
  */
 
 import {
@@ -12,10 +12,15 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import { SF424B_ZIP_ALL_FIELDS_DATA } from "tests/e2e/apply/fixtures/sf424b-data";
+import {
+  fieldDefinitionsSF424B,
+  SF424B_FORM_MATCHER,
+} from "tests/e2e/apply/fixtures/sf424b-field-definitions";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/auth/authenticate-e2e-user-utils";
 import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-staging-utils";
 import {
+  assertPdfContainsText,
   assertXmlContainsFields,
   downloadAndUnzipSubmission,
 } from "tests/e2e/utils/submission/submission-zip-utils";
@@ -24,6 +29,19 @@ const { APPLY, CORE_REGRESSION, GRANTEE } = VALID_TAGS;
 
 const APPLICATION_URL =
   "https://staging.simpler.grants.gov/workspace/applications/aa9da806-3764-4e98-8dd7-8e5a72b20bd8";
+
+const SF424B_PDF_NAME = "SF424B.pdf";
+
+const { title, applicant_organization, representative_name } =
+  SF424B_ZIP_ALL_FIELDS_DATA;
+
+const SF424B_PDF_EXPECTED_TEXT = [
+  SF424B_FORM_MATCHER,
+  fieldDefinitionsSF424B.signature.field,
+  representative_name.value,
+  `${fieldDefinitionsSF424B.title.field}* ${title.value}`,
+  `${fieldDefinitionsSF424B.applicant_organization.field}* ${applicant_organization.value}`,
+];
 
 test.beforeEach(({ page: _ }, testInfo) => {
   test.skip(
@@ -34,7 +52,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 test(
-  "Downloaded Submission ZIP contains XML with expected SF424B form data",
+  "Downloaded Submission ZIP contains expected SF424B XML and PDF data",
   { tag: [APPLY, GRANTEE, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
@@ -43,17 +61,19 @@ test(
     const isMobile = testInfo.project.name.match(/[Mm]obile/);
     await authenticateE2eUser(page, context, !!isMobile);
 
-    // --- Open the pre-submitted application ---
     await page.goto(APPLICATION_URL);
     await page.waitForLoadState("domcontentloaded");
 
-    // --- Check if the zip is downloadable, then download and unzip it ---
     const contents = await downloadAndUnzipSubmission(page);
 
-    // --- Verify GrantApplication.xml contains the entered field values ---
-    // SF424B element names and namespace prefix are based on the form's _xml_config.
-    //   title                  -> SF424B:RepresentativeTitle (via authorized_representative_wrapper)
-    //   applicant_organization -> SF424B:ApplicantOrganizationName
+    // Verify GrantApplication.xml contains the expected SF424B field values - PR #12348
     assertXmlContainsFields(contents, SF424B_ZIP_ALL_FIELDS_DATA);
+
+    // Verify SF424B.pdf contains the expected form title and field values.
+    await assertPdfContainsText(
+      contents,
+      SF424B_PDF_NAME,
+      SF424B_PDF_EXPECTED_TEXT,
+    );
   },
 );

@@ -3,9 +3,9 @@
  * application submission zip file in Playwright e2e tests.
  *
  * The submission zip produced by CreateApplicationSubmissionTask contains:
- *   - <ShortFormName>.pdf  - one per included form (e.g. "SF424B.pdf")
+ *   - <ShortFormName>.pdf - one per included form (e.g. "SF424B.pdf")
  *   - GrantApplication.xml - full submission XML (if XML generation is enabled)
- *   - manifest.txt         - human-readable manifest listing every file
+ *   - manifest.txt - human-readable manifest listing every file
  *
  * Uses @zip.js/zip.js (an existing project dependency, already used for zip
  * handling in src/utils/opportunity/zipUtils.ts) rather than adding a new
@@ -23,35 +23,21 @@ import { extractText, getDocumentProxy } from "unpdf";
 // (Playwright test) process - run inline instead.
 zip.configure({ useWebWorkers: false });
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export interface ZipContents {
   /** Raw bytes keyed by file name (e.g. "SF424B.pdf", "GrantApplication.xml") */
   files: Map<string, Uint8Array>;
 }
 
-// ---------------------------------------------------------------------------
-// Waiting for the zip to become available
-// ---------------------------------------------------------------------------
-
 /**
- * Waits for the application submission zip to become downloadable.
- *
- * Reloads the application page at a regular interval until the submission
- * download button is available or the timeout is reached.
+ * Waits for the application submission download button to become enabled.
  *
  * @param page Playwright Page object, already on the application page
  */
 export async function waitForSubmissionZipReady(page: Page): Promise<void> {
   const downloadButton = page.getByTestId("application-submission-download");
+
   await expect(downloadButton).toBeEnabled({ timeout: 10_000 });
 }
-
-// ---------------------------------------------------------------------------
-// Download & unzip
-// ---------------------------------------------------------------------------
 
 /**
  * Waits for the submission zip to be ready, clicks the download button,
@@ -72,47 +58,49 @@ export async function downloadAndUnzipSubmission(
   await downloadButton.click();
   const download = await downloadPromise;
 
-  const tmpPath = path.join(os.tmpdir(), `submission-${Date.now()}.zip`);
-  await download.saveAs(tmpPath);
+  const tmpPath = path.join(
+    os.tmpdir(),
+    `submission-${Date.now()}-${process.pid}.zip`,
+  );
 
-  const zipBytes = new Uint8Array(fs.readFileSync(tmpPath));
-  const files = new Map<string, Uint8Array>();
-
-  const zipReader = new zip.ZipReader(new zip.Uint8ArrayReader(zipBytes));
   try {
-    const entries = await zipReader.getEntries();
-    for (const entry of entries) {
-      // Skip directory entries
-      if (entry.directory || !entry.getData) continue;
-      const fileName = path.basename(entry.filename);
-      const data = await entry.getData(new zip.Uint8ArrayWriter());
-      files.set(fileName, data);
+    await download.saveAs(tmpPath);
+
+    const zipBytes = new Uint8Array(await fs.promises.readFile(tmpPath));
+    const files = new Map<string, Uint8Array>();
+
+    const zipReader = new zip.ZipReader(new zip.Uint8ArrayReader(zipBytes));
+
+    try {
+      const entries = await zipReader.getEntries();
+
+      for (const entry of entries) {
+        // Skip directory entries.
+        if (entry.directory || !entry.getData) continue;
+
+        const fileName = path.basename(entry.filename);
+        const data = await entry.getData(new zip.Uint8ArrayWriter());
+
+        files.set(fileName, data);
+      }
+    } finally {
+      await zipReader.close();
     }
+
+    return { files };
   } finally {
-    await zipReader.close();
+    await fs.promises.unlink(tmpPath).catch(() => {
+      // Non-fatal cleanup failure.
+    });
   }
-
-  // Clean up tmp file
-  try {
-    fs.unlinkSync(tmpPath);
-  } catch {
-    // non-fatal
-  }
-
-  return { files };
 }
-
-// ---------------------------------------------------------------------------
-// XML helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Asserts that GrantApplication.xml exists in the zip and that its raw text
- * contains each of the provided expected strings (simple text search - no
- * full XML parsing needed for field value assertions).
+ * contains each of the provided expected element/value pairs.
  *
  * @param contents ZipContents returned by downloadAndUnzipSubmission
- * @param expectedStrings Strings that must appear in the XML text
+ * @param expectedFields Expected XML element/value pairs
  */
 export function assertXmlContainsFields(
   contents: ZipContents,
@@ -122,6 +110,7 @@ export function assertXmlContainsFields(
 
   if (!xmlBytes) {
     const available = [...contents.files.keys()].join(", ");
+
     throw new Error(
       `GrantApplication.xml not found in zip. Available files: ${available}`,
     );
@@ -137,13 +126,10 @@ export function assertXmlContainsFields(
   }
 }
 
-// ---------------------------------------------------------------------------
-// PDF helpers
-// ---------------------------------------------------------------------------
-
 /**
- * Extracts the text of a PDF in the zip, all pages merged into one string.
- * Whitespace is collapsed so assertions don't depend on PDF line breaks.
+ * Extracts the text of a PDF in the zip, with all pages merged into one
+ * string. Whitespace is collapsed so assertions don't depend on PDF
+ * line breaks.
  *
  * @param contents ZipContents returned by downloadAndUnzipSubmission
  * @param pdfFileName Entry name in the zip, e.g. "SF424B.pdf"
@@ -156,6 +142,7 @@ export async function readPdfText(
 
   if (!pdfBytes) {
     const available = [...contents.files.keys()].join(", ");
+
     throw new Error(
       `${pdfFileName} not found in zip. Available files: ${available}`,
     );
@@ -163,16 +150,17 @@ export async function readPdfText(
 
   const pdf = await getDocumentProxy(new Uint8Array(pdfBytes));
   const { text } = await extractText(pdf, { mergePages: true });
+
   return text.replace(/\s+/g, " ").trim();
 }
 
 /**
- * Asserts that the named PDF in the zip exists, has text, and contains each
- * expected string.
+ * Asserts that the named PDF in the zip exists, has extractable text,
+ * and contains each expected string or pattern.
  *
  * @param contents ZipContents returned by downloadAndUnzipSubmission
  * @param pdfFileName Entry name in the zip, e.g. "SF424B.pdf"
- * @param expectedStrings Strings or patterns that must appear in the PDF text
+ * @param expected Strings or patterns that must appear in the PDF text
  */
 export async function assertPdfContainsText(
   contents: ZipContents,
