@@ -22,7 +22,6 @@ import { skipNonChromeOnStaging } from "tests/e2e/utils/auth/skip-non-chrome-sta
 import {
   assertPdfContainsText,
   downloadAndUnzipSubmission,
-  readPdfText,
 } from "tests/e2e/utils/submission/submission-zip-utils";
 
 const { APPLY, CORE_REGRESSION, GRANTEE } = VALID_TAGS;
