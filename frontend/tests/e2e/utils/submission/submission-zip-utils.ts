@@ -20,6 +20,7 @@ import * as os from "os";
 import * as path from "path";
 import { expect, type Page } from "@playwright/test";
 import * as zip from "@zip.js/zip.js";
+import { extractText, getDocumentProxy } from "unpdf";
 
 // zip.js defaults to Web Workers, which aren't available in a plain Node
 // (Playwright test) process - run inline instead.
@@ -136,5 +137,65 @@ export function assertXmlContainsFields(
       xmlText,
       `Expected GrantApplication.xml to contain <${element}>${value}</${element}>`,
     ).toContain(`<${element}>${value}</${element}>`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// PDF helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Extracts the text of a PDF in the zip, all pages merged into one string.
+ * Whitespace is collapsed so assertions don't depend on PDF line breaks.
+ *
+ * @param contents ZipContents returned by downloadAndUnzipSubmission
+ * @param pdfFileName Entry name in the zip, e.g. "SF424B.pdf"
+ */
+export async function readPdfText(
+  contents: ZipContents,
+  pdfFileName: string,
+): Promise<string> {
+  const pdfBytes = contents.files.get(pdfFileName);
+
+  if (!pdfBytes) {
+    const available = [...contents.files.keys()].join(", ");
+    throw new Error(
+      `${pdfFileName} not found in zip. Available files: ${available}`,
+    );
+  }
+
+  const pdf = await getDocumentProxy(new Uint8Array(pdfBytes));
+  const { text } = await extractText(pdf, { mergePages: true });
+  return text.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Asserts that the named PDF in the zip exists, has text, and contains each
+ * expected string.
+ *
+ * @param contents ZipContents returned by downloadAndUnzipSubmission
+ * @param pdfFileName Entry name in the zip, e.g. "SF424B.pdf"
+ * @param expectedStrings Strings that must appear in the PDF text
+ */
+export async function assertPdfContainsText(
+  contents: ZipContents,
+  pdfFileName: string,
+  expected: (string | RegExp)[],
+): Promise<void> {
+  const pdfText = await readPdfText(contents, pdfFileName);
+
+  expect(
+    pdfText.length,
+    `${pdfFileName} has no extractable text`,
+  ).toBeGreaterThan(0);
+
+  for (const item of expected) {
+    if (typeof item === "string") {
+      expect(pdfText, `Expected ${pdfFileName} to contain "${item}"`).toContain(
+        item,
+      );
+    } else {
+      expect(pdfText, `Expected ${pdfFileName} to match ${item}`).toMatch(item);
+    }
   }
 }

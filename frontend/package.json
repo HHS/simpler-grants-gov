@@ -110,6 +110,7 @@
     "storybook": "^10.4.6",
     "style-loader": "^3.3.2",
     "typescript": "5.9.3",
+    "unpdf": "^1.8.1",
     "vite": "^7.0.0"
   },
   "overrides": {
